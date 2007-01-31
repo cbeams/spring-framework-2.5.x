@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,11 @@ import org.hibernate.UnresolvableObjectException;
 import org.hibernate.WrongClassException;
 import org.hibernate.classic.Session;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.DataException;
+import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
+import org.hibernate.exception.SQLGrammarException;
 
 import org.springframework.beans.TestBean;
 import org.springframework.dao.CannotAcquireLockException;
@@ -58,6 +61,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -2239,18 +2243,33 @@ public class HibernateTemplateTests extends TestCase {
 			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 
-		final ConstraintViolationException cvex = new ConstraintViolationException("mymsg", sqlEx, "myconstraint");
+		final SQLGrammarException sgex = new SQLGrammarException("mymsg", sqlEx);
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
-					throw cvex;
+					throw sgex;
 				}
 			});
-			fail("Should have thrown DataIntegrityViolationException");
+			fail("Should have thrown InvalidDataAccessResourceUsageException");
 		}
-		catch (DataIntegrityViolationException ex) {
+		catch (InvalidDataAccessResourceUsageException ex) {
 			// expected
-			assertEquals(cvex, ex.getCause());
+			assertEquals(sgex, ex.getCause());
+			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
+		}
+
+		final DataException dex = new DataException("mymsg", sqlEx);
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw dex;
+				}
+			});
+			fail("Should have thrown InvalidDataAccessResourceUsageException");
+		}
+		catch (InvalidDataAccessResourceUsageException ex) {
+			// expected
+			assertEquals(dex, ex.getCause());
 			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 
@@ -2266,6 +2285,21 @@ public class HibernateTemplateTests extends TestCase {
 		catch (CannotAcquireLockException ex) {
 			// expected
 			assertEquals(laex, ex.getCause());
+			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
+		}
+
+		final ConstraintViolationException cvex = new ConstraintViolationException("mymsg", sqlEx, "myconstraint");
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw cvex;
+				}
+			});
+			fail("Should have thrown DataIntegrityViolationException");
+		}
+		catch (DataIntegrityViolationException ex) {
+			// expected
+			assertEquals(cvex, ex.getCause());
 			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 
@@ -2460,6 +2494,25 @@ public class HibernateTemplateTests extends TestCase {
 		catch (HibernateSystemException ex) {
 			// expected
 			assertEquals(hex, ex.getCause());
+		}
+	}
+
+	public void testFallbackExceptionTranslation() throws HibernateException {
+		SQLException sqlEx = new SQLException("argh", "27");
+
+		final GenericJDBCException gjex = new GenericJDBCException("mymsg", sqlEx);
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw gjex;
+				}
+			});
+			fail("Should have thrown DataIntegrityViolationException");
+		}
+		catch (DataIntegrityViolationException ex) {
+			// expected
+			assertEquals(sqlEx, ex.getCause());
+			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 	}
 

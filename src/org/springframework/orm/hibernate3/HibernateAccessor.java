@@ -26,6 +26,7 @@ import org.hibernate.Interceptor;
 import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.exception.GenericJDBCException;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -36,8 +37,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
- * Base class for HibernateTemplate and HibernateInterceptor, defining common
- * properties such as SessionFactory and flushing behavior.
+ * Base class for {@link HibernateTemplate} and {@link HibernateInterceptor},
+ * defining common properties such as SessionFactory and flushing behavior.
  *
  * <p>Not intended to be used directly.
  * See {@link HibernateTemplate} and {@link HibernateInterceptor}.
@@ -127,6 +128,8 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	private Object entityInterceptor;
 
 	private SQLExceptionTranslator jdbcExceptionTranslator;
+
+	private SQLExceptionTranslator defaultJdbcExceptionTranslator;
 
 	private int flushMode = FLUSH_AUTO;
 
@@ -308,7 +311,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 
 	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
-			throw new IllegalArgumentException("sessionFactory is required");
+			throw new IllegalArgumentException("Property 'sessionFactory' is required");
 		}
 	}
 
@@ -388,9 +391,10 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 		}
 	}
 
+
 	/**
-	 * Convert the given HibernateException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy.
+	 * Convert the given HibernateException to an appropriate exception
+	 * from the <code>org.springframework.dao</code> hierarchy.
 	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
 	 * Hibernate JDBCException, else rely on Hibernate's default translation.
 	 * @param ex HibernateException that occured
@@ -400,11 +404,24 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 */
 	public DataAccessException convertHibernateAccessException(HibernateException ex) {
 		if (getJdbcExceptionTranslator() != null && ex instanceof JDBCException) {
-			JDBCException jdbcEx = (JDBCException) ex;
-			return getJdbcExceptionTranslator().translate(
-					"Hibernate operation: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
+			return convertJdbcAccessException((JDBCException) ex, getJdbcExceptionTranslator());
+		}
+		else if (GenericJDBCException.class.equals(ex.getClass())) {
+			return convertJdbcAccessException((GenericJDBCException) ex, getDefaultJdbcExceptionTranslator());
 		}
 		return SessionFactoryUtils.convertHibernateAccessException(ex);
+	}
+
+	/**
+	 * Convert the given Hibernate JDBCException to an appropriate exception
+	 * from the <code>org.springframework.dao</code> hierarchy, using the
+	 * given SQLExceptionTranslator.
+	 * @param ex Hibernate JDBCException that occured
+	 * @param translator the SQLExceptionTranslator to use
+	 * @return a corresponding DataAccessException
+	 */
+	protected DataAccessException convertJdbcAccessException(JDBCException ex, SQLExceptionTranslator translator) {
+		return translator.translate("Hibernate operation: " + ex.getMessage(), ex.getSQL(), ex.getSQLException());
 	}
 
 	/**
@@ -420,10 +437,24 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	protected DataAccessException convertJdbcAccessException(SQLException ex) {
 		SQLExceptionTranslator translator = getJdbcExceptionTranslator();
 		if (translator == null) {
-			translator = SessionFactoryUtils.newJdbcExceptionTranslator(getSessionFactory());
+			translator = getDefaultJdbcExceptionTranslator();
 		}
 		return translator.translate("Hibernate-related JDBC operation", null, ex);
 	}
+
+	/**
+	 * Obtain a default SQLExceptionTranslator, lazily creating it if necessary.
+	 * <p>Creates a default
+	 * {@link org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator}
+	 * for the SessionFactory's underlying DataSource.
+	 */
+	protected synchronized SQLExceptionTranslator getDefaultJdbcExceptionTranslator() {
+		if (this.defaultJdbcExceptionTranslator == null) {
+			this.defaultJdbcExceptionTranslator = SessionFactoryUtils.newJdbcExceptionTranslator(getSessionFactory());
+		}
+		return this.defaultJdbcExceptionTranslator;
+	}
+
 
 	/**
 	 * Enable the specified filters on the given Session.

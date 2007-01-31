@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,10 @@ import org.hibernate.WrongClassException;
 import org.hibernate.connection.ConnectionProvider;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.DataException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
+import org.hibernate.exception.SQLGrammarException;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.dao.CannotAcquireLockException;
@@ -59,6 +61,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
@@ -626,11 +629,17 @@ public abstract class SessionFactoryUtils {
 		if (ex instanceof JDBCConnectionException) {
 			return new DataAccessResourceFailureException(ex.getMessage(), ex);
 		}
-		if (ex instanceof ConstraintViolationException) {
-			return new DataIntegrityViolationException(ex.getMessage(), ex);
+		if (ex instanceof SQLGrammarException) {
+			return new InvalidDataAccessResourceUsageException(ex.getMessage(), ex);
+		}
+		if (ex instanceof DataException) {
+			return new InvalidDataAccessResourceUsageException(ex.getMessage(), ex);
 		}
 		if (ex instanceof LockAcquisitionException) {
 			return new CannotAcquireLockException(ex.getMessage(), ex);
+		}
+		if (ex instanceof ConstraintViolationException) {
+			return new DataIntegrityViolationException(ex.getMessage(), ex);
 		}
 		if (ex instanceof JDBCException) {
 			return new HibernateJdbcException((JDBCException) ex);

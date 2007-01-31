@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.classic.Session;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.GenericJDBCException;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.JdkVersion;
@@ -1053,6 +1054,14 @@ public class HibernateTransactionManagerTests extends TestCase {
 	}
 
 	public void testTransactionCommitWithFlushFailure() throws Exception {
+		doTestTransactionCommitWithFlushFailure(false);
+	}
+
+	public void testTransactionCommitWithFlushFailureAndFallbackTranslation() throws Exception {
+		doTestTransactionCommitWithFlushFailure(true);
+	}
+
+	private void doTestTransactionCommitWithFlushFailure(boolean fallbackTranslation) throws Exception {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
@@ -1070,8 +1079,17 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(true, 1);
 		tx.commit();
 		SQLException sqlEx = new SQLException("argh", "27");
-		ConstraintViolationException jdbcEx = new ConstraintViolationException("mymsg", sqlEx, null);
-		txControl.setThrowable(jdbcEx, 1);
+		Exception rootCause = null;
+		if (fallbackTranslation) {
+			GenericJDBCException jdbcEx = new GenericJDBCException("mymsg", sqlEx);
+			txControl.setThrowable(jdbcEx, 1);
+			rootCause = sqlEx;
+		}
+		else {
+			ConstraintViolationException jdbcEx = new ConstraintViolationException("mymsg", sqlEx, null);
+			txControl.setThrowable(jdbcEx, 1);
+			rootCause = jdbcEx;
+		}
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.rollback();
@@ -1111,7 +1129,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		}
 		catch (DataIntegrityViolationException ex) {
 			// expected
-			assertEquals(jdbcEx, ex.getCause());
+			assertEquals(rootCause, ex.getCause());
 			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 
