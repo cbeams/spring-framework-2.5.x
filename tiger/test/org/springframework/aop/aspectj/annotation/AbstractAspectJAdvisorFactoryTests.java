@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,11 +50,10 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
 /**
- * Abstract tests for AspectJAdvisorFactory. See subclasses
- * for tests of concrete factories.
- * 
+ * Abstract tests for AspectJAdvisorFactory.
+ * See subclasses for tests of concrete factories.
+ *
  * @author Rod Johnson
- * @since 2.0
  */
 public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	
@@ -737,7 +736,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 
 		@Around(value="org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.Library.integerArgOperation(x)", argNames="x")
 		public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
-			pjp.proceed(new Object[]{x*2});
+			pjp.proceed(new Object[] {x*2});
 		}
 	}
 
@@ -759,7 +758,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 
 		@Around(value="org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.Library.integerArgOperation(x)", argNames="x")
 		public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
-			pjp.proceed(new Object[]{x*2});
+			pjp.proceed(new Object[] {x*2});
 		}
 	}
 
@@ -771,10 +770,10 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		public void setAge(int a) {}
 
 		@Around(value="setAge(age)",argNames="age")
-		//		@ArgNames({"age"})   // AMC needs more work here? ignoring pjp arg... ok??
-		//		                       // argNames should be suported in Around as it is in Pointcut
+		// @ArgNames({"age"})  // AMC needs more work here? ignoring pjp arg... ok??
+		//                     // argNames should be suported in Around as it is in Pointcut
 		public void changeReturnType(ProceedingJoinPoint pjp, int age) throws Throwable {
-			pjp.proceed(new Object[]{age*2});
+			pjp.proceed(new Object[] {age*2});
 		}
 	}
 

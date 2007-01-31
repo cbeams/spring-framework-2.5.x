@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.core.io;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.SystemPropertyUtils;
-import org.springframework.util.Assert;
 
 /**
  * {@link java.beans.PropertyEditor Editor} for {@link Resource}
@@ -50,7 +50,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * Creates a new instance of the {@link ResourceEditor} class
+	 * Create a new instance of the {@link ResourceEditor} class
 	 * using a {@link DefaultResourceLoader}.
 	 */
 	public ResourceEditor() {
@@ -58,13 +58,12 @@ public class ResourceEditor extends PropertyEditorSupport {
 	}
 
 	/**
-	 * Creates a new instance of the {@link ResourceEditor} class
+	 * Create a new instance of the {@link ResourceEditor} class
 	 * using the given {@link ResourceLoader}.
 	 * @param resourceLoader the <code>ResourceLoader</code> to use
-	 * @throws IllegalArgumentException if the supplied <code>ResourceLoader</code> is <code>null</code> 
 	 */
 	public ResourceEditor(ResourceLoader resourceLoader) {
-		Assert.notNull(resourceLoader, "The 'resourceLoader' parameter cannot be null.");
+		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
 	}
 
