@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,42 +38,48 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * PlatformTransactionManager implementation for a single JDO PersistenceManagerFactory.
- * Binds a JDO PersistenceManager from the specified factory to the thread, potentially
- * allowing for one thread PersistenceManager per factory. PersistenceManagerFactoryUtils
- * and JdoTemplate are aware of thread-bound persistence managers and participate in such
- * transactions automatically. Using either of those or going through a
- * TransactionAwarePersistenceManagerFactoryProxy is required for JDO access code
- * supporting this transaction management mechanism.
+ * {@link org.springframework.transaction.PlatformTransactionManager} implementation
+ * for a single JDO {@link javax.jdo.PersistenceManagerFactory}. Binds a JDO
+ * PersistenceManager from the specified factory to the thread, potentially allowing
+ * for one threaded PersistenceManager per factory. {@link PersistenceManagerFactoryUtils}
+ * and {@link JdoTemplate} are aware of thread-bound persistence managers and
+ * participate in such transactions automatically. Using either of those (or going
+ * through a {@link TransactionAwarePersistenceManagerFactoryProxy} is required for
+ * JDO access code supporting this transaction management mechanism.
  *
- * <p>This implementation is appropriate for applications that solely use JDO for
- * transactional data access. JTA (usually through JtaTransactionManager) is necessary for
- * accessing multiple transactional resources. Note that you need to configure your JDO
- * provider accordingly to make it participate in JTA transactions.
+ * <p>This transaction manager is appropriate for applications that use a single
+ * JDO PersistenceManagerFactory for transactional data access. JTA (usually through
+ * {@link org.springframework.transaction.jta.JtaTransactionManager}) is necessary
+ * for accessing multiple transactional resources within the same transaction.
+ * Note that you need to configure your JDO provider accordingly in order to make
+ * it participate in JTA transactions.
  *
- * <p>With a JdoDialect specified, this implementation also supports direct DataSource
- * access within a transaction (i.e. plain JDBC code working with the same DataSource).
- * This allows for mixing services that access JDO (including transactional caching)
- * and services that use plain JDBC (without being aware of JDO)!
- * Application code needs to stick to the same simple Connection lookup pattern as
- * with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>
- * or going through a TransactionAwareDataSourceProxy).
+ * <p>This transaction manager also supports direct DataSource access within a
+ * transaction (i.e. plain JDBC code working with the same DataSource).
+ * This allows for mixing services which access JDO and services which use plain
+ * JDBC (without being aware of JDO)! Application code needs to stick to the
+ * same simple Connection lookup pattern as with
+ * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
+ * (i.e. {@link org.springframework.jdbc.datasource.DataSourceUtils#getConnection}
+ * or going through a
+ * {@link org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy}).
  *
  * <p>Note that to be able to register a DataSource's Connection for plain JDBC code,
- * this instance needs to be aware of the DataSource (see "dataSource" property).
+ * this instance needs to be aware of the DataSource ({@link #setDataSource}).
  * The given DataSource should obviously match the one used by the given
  * PersistenceManagerFactory. This transaction manager will autodetect the DataSource
  * that acts as "connectionFactory" of the PersistenceManagerFactory, so you usually
  * don't need to explicitly specify the "dataSource" property.
  *
- * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
- * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to "false", though,
- * as nested transactions will just apply to the JDBC Connection, not to the JDO
- * PersistenceManager and its cached objects. You can manually set the flag to "true"
- * if you want to use nested transactions for JDBC access code that participates
- * in JDO transactions (provided that your JDBC driver supports Savepoints).
- * <i>Note that JDO itself does not support nested transactions! Hence,
- * do not expect JDO access code to participate in a nested transaction.</i>
+ * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC 3.0
+ * Savepoints. The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"}
+ * flag defaults to "false", though, as nested transactions will just apply to the
+ * JDBC Connection, not to the JDO PersistenceManager and its cached objects.
+ * You can manually set the flag to "true" if you want to use nested transactions
+ * for JDBC access code which participates in JDO transactions (provided that your
+ * JDBC driver supports Savepoints). <i>Note that JDO itself does not support
+ * nested transactions! Hence, do not expect JDO access code to semantically
+ * participate in a nested transaction.</i>
  *
  * @author Juergen Hoeller
  * @since 03.06.2003
@@ -489,8 +495,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 * JDO transaction object, representing a PersistenceManagerHolder.
 	 * Used as transaction object by JdoTransactionManager.
 	 *
-	 * <p>Derives from JdbcTransactionObjectSupport to inherit the capability
-	 * to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
+	 * <p>Derives from JdbcTransactionObjectSupport in order to inherit the
+	 * capability to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
 	 *
 	 * @see PersistenceManagerHolder
 	 */
@@ -559,7 +565,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Holder for suspended resources.
-	 * Used internally by doSuspend and doResume.
+	 * Used internally by <code>doSuspend</code> and <code>doResume</code>.
 	 */
 	private static class SuspendedResourcesHolder {
 
@@ -573,11 +579,11 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 
 		private PersistenceManagerHolder getPersistenceManagerHolder() {
-			return persistenceManagerHolder;
+			return this.persistenceManagerHolder;
 		}
 
 		private ConnectionHolder getConnectionHolder() {
-			return connectionHolder;
+			return this.connectionHolder;
 		}
 	}
 

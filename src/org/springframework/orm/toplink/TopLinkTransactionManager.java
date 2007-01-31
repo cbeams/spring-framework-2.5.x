@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,41 +40,45 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * <p>PlatformTransactionManager implementation for a single TopLink SessionFactory.
- * Binds a TopLink Session from the specified factory to the thread, potentially
- * allowing for one thread Session per factory. SessionFactoryUtils and TopLinkTemplate
- * are aware of thread-bound Sessions and participate in such transactions automatically.
+ * {@link org.springframework.transaction.PlatformTransactionManager} implementation
+ * for a single TopLink {@link SessionFactory}. Binds a TopLink Session from the
+ * specified factory to the thread, potentially allowing for one threaded Session
+ * per factory. {@link SessionFactoryUtils} and {@link TopLinkTemplate} are aware
+ * of thread-bound Sessions and participate in such transactions automatically.
  * Using either of those or going through <code>Session.getActiveUnitOfWork()</code> is
- * required for TopLink access code that needs to support this transaction handling mechanism.
+ * required for TopLink access code supporting this transaction handling mechanism.
  *
- * <p>This implementation is appropriate for applications that solely use TopLink for
- * transactional data access. JTA (usually through JtaTransactionManager) is necessary for
- * accessing multiple transactional resources. Note that you need to configure TopLink with
- * an appropriate external transaction controller, to make it participate in JTA transactions.
- * In contrast to Hibernate, this cannot be transparently provided by the Spring transaction
- * manager implementation.
+ * <p>This transaction manager is appropriate for applications that use a single
+ * TopLink SessionFactory for transactional data access. JTA (usually through
+ * {@link org.springframework.transaction.jta.JtaTransactionManager}) is necessary
+ * for accessing multiple transactional resources within the same transaction.
+ * Note that you need to configure TopLink with an appropriate external transaction
+ * controller in order to make it participate in JTA transactions.
  *
- * <p>This implementation also supports direct DataSource access within a transaction
- * (i.e. plain JDBC code working with the same DataSource), but only for transactions that
- * are <i>not</i> marked as read-only. This allows for mixing services that access TopLink
- * (including transactional caching) and services that use plain JDBC (without being aware
- * of TopLink)! Application code needs to stick to the same simple Connection lookup pattern
- * with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>
- * or going through a TransactionAwareDataSourceProxy).
+ * <p>This transaction manager also supports direct DataSource access within a transaction
+ * (i.e. plain JDBC code working with the same DataSource), but only for transactions
+ * that are <i>not</i> marked as read-only. This allows for mixing services which
+ * access TopLink and services which use plain JDBC (without being aware of TopLink)!
+ * Application code needs to stick to the same simple Connection lookup pattern as
+ * with {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
+ * (i.e. {@link org.springframework.jdbc.datasource.DataSourceUtils#getConnection}
+ * or going through a
+ * {@link org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy}).
  *
- * <p>Note that to be able to register a DataSource's Connection for plain JDBC code,
- * this instance needs to be aware of the DataSource (see "dataSource" property).
+ * <p>Note: To be able to register a DataSource's Connection for plain JDBC code,
+ * this instance needs to be aware of the DataSource ({@link #setDataSource}).
  * The given DataSource should obviously match the one used by the given TopLink
  * SessionFactory.
  *
- * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
- * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to "false", though,
- * as nested transactions will just apply to the JDBC Connection, not to the
- * TopLink Session and its cached objects. You can manually set the flag to "true"
- * if you want to use nested transactions for JDBC access code that participates
- * in TopLink transactions (provided that your JDBC driver supports Savepoints).
- * <i>Note that TopLink itself does not support nested transactions! Hence,
- * do not expect TopLink access code to participate in a nested transaction.</i>
+ * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC 3.0
+ * Savepoints. The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"}
+ * flag defaults to "false", though, as nested transactions will just apply to the
+ * JDBC Connection, not to the TopLink PersistenceManager and its cached objects.
+ * You can manually set the flag to "true" if you want to use nested transactions
+ * for JDBC access code which participates in TopLink transactions (provided that
+ * your JDBC driver supports Savepoints). <i>Note that TopLink itself does not
+ * support nested transactions! Hence, do not expect TopLink access code to
+ * semantically participate in a nested transaction.</i>
  *
  * <p>Thanks to Slavik Markovich for implementing the initial TopLink support prototype!
  *
@@ -461,6 +465,9 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	/**
 	 * TopLink transaction object, representing a SessionHolder.
 	 * Used as transaction object by TopLinkTransactionManager.
+	 *
+	 * <p>Derives from JdbcTransactionObjectSupport in order to inherit the
+	 * capability to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
 	 */
 	private static class TopLinkTransactionObject extends JdbcTransactionObjectSupport {
 
@@ -471,7 +478,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 		}
 
 		public SessionHolder getSessionHolder() {
-			return sessionHolder;
+			return this.sessionHolder;
 		}
 
 		public boolean isRollbackOnly() {
