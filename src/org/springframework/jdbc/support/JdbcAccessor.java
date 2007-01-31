@@ -24,8 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Base class for JdbcTemplate and other JDBC-accessing DAO helpers,
- * defining common properties such as DataSource and exception translator.
+ * Base class for {@link org.springframework.jdbc.core.JdbcTemplate} and
+ * other JDBC-accessing DAO helpers, defining common properties such as
+ * DataSource and exception translator.
  *
  * <p>Not intended to be used directly.
  * See {@link org.springframework.jdbc.core.JdbcTemplate}.
@@ -87,10 +88,11 @@ public abstract class JdbcAccessor implements InitializingBean {
 	/**
 	 * Return the exception translator for this instance.
 	 * <p>Creates a default {@link SQLErrorCodeSQLExceptionTranslator}
-	 * for the specified DataSource if none set.
+	 * for the specified DataSource if none set, or a
+	 * {@link SQLStateSQLExceptionTranslator} in case of no DataSource.
 	 * @see #getDataSource()
 	 */
-	public SQLExceptionTranslator getExceptionTranslator() {
+	public synchronized SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
 			DataSource dataSource = getDataSource();
 			if (dataSource != null) {
@@ -129,11 +131,11 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 */
 	public void afterPropertiesSet() {
 		if (getDataSource() == null) {
-			throw new IllegalArgumentException("dataSource is required");
+			throw new IllegalArgumentException("Property 'dataSource' is required");
 		}
 		if (!isLazyInit()) {
 			getExceptionTranslator();
 		}
 	}
-	
+
 }

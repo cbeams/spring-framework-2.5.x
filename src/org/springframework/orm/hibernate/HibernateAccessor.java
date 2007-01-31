@@ -36,8 +36,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
- * Base class for HibernateTemplate and HibernateInterceptor, defining common
- * properties such as SessionFactory and flushing behavior.
+ * Base class for {@link HibernateTemplate} and {@link HibernateInterceptor},
+ * defining common properties such as SessionFactory and flushing behavior.
  *
  * <p>Not intended to be used directly.
  * See {@link HibernateTemplate} and {@link HibernateInterceptor}.
@@ -220,7 +220,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * <p>Creates a default SQLErrorCodeSQLExceptionTranslator or SQLStateSQLExceptionTranslator
 	 * for the specified SessionFactory, if no exception translator explicitly specified.
 	 */
-	public SQLExceptionTranslator getJdbcExceptionTranslator() {
+	public synchronized SQLExceptionTranslator getJdbcExceptionTranslator() {
 		if (this.jdbcExceptionTranslator == null) {
 			this.jdbcExceptionTranslator = SessionFactoryUtils.newJdbcExceptionTranslator(getSessionFactory());
 		}
@@ -266,7 +266,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 
 	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
-			throw new IllegalArgumentException("sessionFactory is required");
+			throw new IllegalArgumentException("Property 'sessionFactory' is required");
 		}
 	}
 
@@ -333,6 +333,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 			session.flush();
 		}
 	}
+
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception from the

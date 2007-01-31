@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,18 +47,19 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * PlatformTransactionManager implementation for a single Hibernate SessionFactory.
+ * {@link org.springframework.transaction.PlatformTransactionManager}
+ * implementation for a single Hibernate {@link net.sf.hibernate.SessionFactory}.
  * Binds a Hibernate Session from the specified factory to the thread, potentially
- * allowing for one thread Session per factory. SessionFactoryUtils and
- * HibernateTemplate are aware of thread-bound Sessions and participate in such
- * transactions automatically. Using either of those is required for Hibernate
- * access code that needs to support this transaction handling mechanism.
+ * allowing for one thread Session per factory. {@link SessionFactoryUtils} and
+ * {@link HibernateTemplate} are aware of thread-bound Sessions and participate
+ * in such transactions automatically. Using either of those is required for
+ * Hibernate access code that needs to support this transaction handling mechanism.
  *
  * <p>Supports custom isolation levels, and timeouts that get applied as appropriate
  * Hibernate query timeouts. To support the latter, application code must either use
- * <code>HibernateTemplate</code> (which by default applies the timeouts) or call
- * <code>SessionFactoryUtils.applyTransactionTimeout</code> for each created
- * Hibernate Query object.
+ * {@link HibernateTemplate} (which by default applies the timeouts) or call
+ * {@link SessionFactoryUtils#applyTransactionTimeout} for each created
+ * Hibernate {@link net.sf.hibernate.Query} object.
  *
  * <p>This implementation is appropriate for applications that solely use Hibernate
  * for transactional data access, but it also supports direct data source access
@@ -66,39 +67,44 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * This allows for mixing services that access Hibernate (including transactional
  * caching) and services that use plain JDBC (without being aware of Hibernate)!
  * Application code needs to stick to the same simple Connection lookup pattern as
- * with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>
- * or going through a TransactionAwareDataSourceProxy).
+ * with {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
+ * (i.e. {@link org.springframework.jdbc.datasource.DataSourceUtils#getConnection}
+ * or going through a
+ * {@link org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy}).
  *
  * <p>Note that to be able to register a DataSource's Connection for plain JDBC
- * code, this instance needs to be aware of the DataSource (see setDataSource).
+ * code, this instance needs to be aware of the DataSource ({@link #setDataSource}).
  * The given DataSource should obviously match the one used by the given
  * SessionFactory. To achieve this, configure both to the same JNDI DataSource,
- * or preferably create the SessionFactory with LocalSessionFactoryBean and
+ * or preferably create the SessionFactory with {@link LocalSessionFactoryBean} and
  * a local DataSource (which will be autodetected by this transaction manager).
  *
- * <p>JTA (usually through JtaTransactionManager) is necessary for accessing multiple
- * transactional resources. The DataSource that Hibernate uses needs to be JTA-enabled
- * then (see container setup), alternatively the Hibernate JCA connector can be used
- * for direct container integration. Normally, JTA setup for Hibernate is somewhat
- * container-specific due to the JTA TransactionManager lookup, required for proper
- * transactional handling of the SessionFactory-level read-write cache.
+ * <p>JTA (usually through {@link org.springframework.transaction.jta.JtaTransactionManager})
+ * is necessary for accessing multiple transactional resources within the same
+ * transaction. The DataSource that Hibernate uses needs to be JTA-enabled in
+ * such a scenario (see container setup). Normally, JTA setup for Hibernate is
+ * somewhat container-specific due to the JTA TransactionManager lookup, required
+ * for proper transactional handling of the SessionFactory-level read-write cache.
  *
- * <p>Fortunately, there is an easier way with Spring: SessionFactoryUtils (and thus
- * HibernateTemplate) registers synchronizations with TransactionSynchronizationManager
- * (as used by JtaTransactionManager), for proper afterCompletion callbacks. Therefore,
- * as long as Spring's JtaTransactionManager drives the JTA transactions, Hibernate
- * does not require any special configuration for proper JTA participation.
- * Note that there are special cases with EJB CMT and restrictive JTA subsystems:
- * See JtaTransactionManager's javadoc for details.
+ * <p>Fortunately, there is an easier way with Spring: {@link SessionFactoryUtils}
+ * (and thus {@link HibernateTemplate}) registers synchronizations with Spring's
+ * {@link org.springframework.transaction.support.TransactionSynchronizationManager}
+ * (as used by {@link org.springframework.transaction.jta.JtaTransactionManager}),
+ * for proper after-completion callbacks. Therefore, as long as Spring's
+ * JtaTransactionManager drives the JTA transactions, Hibernate does not require
+ * any special configuration for proper JTA participation. Note that there are
+ * special restrictions with EJB CMT and restrictive JTA subsystems: See
+ * {@link org.springframework.transaction.jta.JtaTransactionManager}'s javadoc for details.
  *
- * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
- * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to "false", though,
- * as nested transactions will just apply to the JDBC Connection, not to the
- * Hibernate Session and its cached objects. You can manually set the flag to "true"
- * if you want to use nested transactions for JDBC access code that participates
- * in Hibernate transactions (provided that your JDBC driver supports Savepoints).
- * <i>Note that Hibernate itself does not support nested transactions! Hence,
- * do not expect Hibernate access code to participate in a nested transaction.</i>
+ * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC 3.0
+ * Savepoints. The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"}
+ * flag defaults to "false", though, as nested transactions will just apply to the
+ * JDBC Connection, not to the Hibernate Session and its cached objects. You can
+ * manually set the flag to "true" if you want to use nested transactions for
+ * JDBC access code which participates in Hibernate transactions (provided that
+ * your JDBC driver supports Savepoints). <i>Note that Hibernate itself does not
+ * support nested transactions! Hence, do not expect Hibernate access code to
+ * semantically participate in a nested transaction.</i>
  *
  * <p>Note: Spring's Hibernate support in this package requires Hibernate 2.1.
  * Dedicated Hibernate3 support can be found in a separate package:
@@ -310,7 +316,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * for the specified SessionFactory, if no exception translator explicitly specified.
 	 * @see #setJdbcExceptionTranslator
 	 */
-	public SQLExceptionTranslator getJdbcExceptionTranslator() {
+	public synchronized SQLExceptionTranslator getJdbcExceptionTranslator() {
 		if (this.jdbcExceptionTranslator == null) {
 			if (getDataSource() != null) {
 				this.jdbcExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(getDataSource());
@@ -578,6 +584,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		txObject.getSessionHolder().clear();
 	}
 
+
 	/**
 	 * Convert the given HibernateException to an appropriate exception from
 	 * the org.springframework.dao hierarchy. Can be overridden in subclasses.
@@ -610,8 +617,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Hibernate transaction object, representing a SessionHolder.
 	 * Used as transaction object by HibernateTransactionManager.
 	 *
-	 * <p>Derives from JdbcTransactionObjectSupport to inherit the capability
-	 * to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
+	 * <p>Derives from JdbcTransactionObjectSupport in order to inherit the
+	 * capability to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
 	 *
 	 * @see SessionHolder
 	 */
@@ -627,11 +634,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		public SessionHolder getSessionHolder() {
-			return sessionHolder;
+			return this.sessionHolder;
 		}
 
 		public boolean isNewSessionHolder() {
-			return newSessionHolder;
+			return this.newSessionHolder;
 		}
 
 		public boolean hasTransaction() {
@@ -654,7 +661,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Holder for suspended resources.
-	 * Used internally by doSuspend and doResume.
+	 * Used internally by <code>doSuspend</code> and <code>doResume</code>.
 	 */
 	private static class SuspendedResourcesHolder {
 
@@ -668,11 +675,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		private SessionHolder getSessionHolder() {
-			return sessionHolder;
+			return this.sessionHolder;
 		}
 
 		private ConnectionHolder getConnectionHolder() {
-			return connectionHolder;
+			return this.connectionHolder;
 		}
 	}
 
