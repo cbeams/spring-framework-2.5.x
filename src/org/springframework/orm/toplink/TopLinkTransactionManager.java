@@ -42,7 +42,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
  * for a single TopLink {@link SessionFactory}. Binds a TopLink Session from the
- * specified factory to the thread, potentially allowing for one threaded Session
+ * specified factory to the thread, potentially allowing for one thread-bound Session
  * per factory. {@link SessionFactoryUtils} and {@link TopLinkTemplate} are aware
  * of thread-bound Sessions and participate in such transactions automatically.
  * Using either of those or going through <code>Session.getActiveUnitOfWork()</code> is

@@ -56,20 +56,21 @@ import org.springframework.util.ClassUtils;
  * {@link org.springframework.transaction.PlatformTransactionManager}
  * implementation for a single Hibernate {@link org.hibernate.SessionFactory}.
  * Binds a Hibernate Session from the specified factory to the thread, potentially
- * allowing for one thread Session per factory. {@link SessionFactoryUtils} and
- * {@link HibernateTemplate} are aware of thread-bound Sessions and participate
+ * allowing for one thread-bound Session per factory. {@link SessionFactoryUtils}
+ * and {@link HibernateTemplate} are aware of thread-bound Sessions and participate
  * in such transactions automatically. Using either of those or going through
  * <code>SessionFactory.getCurrentSession()</code> is required for Hibernate
  * access code that needs to support this transaction handling mechanism.
  *
  * <p>Supports custom isolation levels, and timeouts that get applied as
- * Hibernate transaction timeouts..
+ * Hibernate transaction timeouts (on Hibernate 3.1+) or as appropriate
+ * query timeouts (on Hibernate 3.0, when using {@link HibernateTemplate}).
  *
- * <p>This implementation is appropriate for applications that solely use Hibernate
- * for transactional data access, but it also supports direct data source access
- * within a transaction (i.e. plain JDBC code working with the same DataSource).
- * This allows for mixing services that access Hibernate (including transactional
- * caching) and services that use plain JDBC (without being aware of Hibernate)!
+ * <p>This transaction manager is appropriate for applications that use a single
+ * Hibernate SessionFactory for transactional data access, but it also supports
+ * direct DataSource access within a transaction (i.e. plain JDBC code working
+ * with the same DataSource). This allows for mixing services which access Hibernate
+ * and services which use plain JDBC (without being aware of Hibernate)!
  * Application code needs to stick to the same simple Connection lookup pattern as
  * with {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
  * (i.e. {@link org.springframework.jdbc.datasource.DataSourceUtils#getConnection}
