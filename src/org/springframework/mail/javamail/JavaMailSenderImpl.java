@@ -304,7 +304,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	//---------------------------------------------------------------------
 
 	/**
-	 * This implementation creates a {@link SmartMimeMessage}, holding the specified
+	 * This implementation creates a SmartMimeMessage, holding the specified
 	 * default encoding and default FileTypeMap. This special defaults-carrying
 	 * message will be autodetected by {@link MimeMessageHelper}, which will use
 	 * the carried encoding and FileTypeMap unless explicitly overridden.
