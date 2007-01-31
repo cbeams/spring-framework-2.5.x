@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.aspectj.weaver.BCException;
 import org.aspectj.weaver.tools.JoinPointMatch;
 import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutParameter;
@@ -72,6 +75,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_TARGET);
 	}
 
+
+	private static final Log logger = LogFactory.getLog(AspectJExpressionPointcut.class);
 
 	private final Map shadowMapCache = new HashMap();
 
@@ -158,9 +163,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(
 					this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
 		}
-		this.pointcutExpression =
-			this.pointcutParser.parsePointcutExpression(
-					replaceBooleanOperators(getExpression()), this.pointcutDeclarationScope, pointcutParameters);
+		this.pointcutExpression = this.pointcutParser.parsePointcutExpression(
+				replaceBooleanOperators(getExpression()), this.pointcutDeclarationScope, pointcutParameters);
 	}
 
 	/**
@@ -184,7 +188,13 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	public boolean matches(Class targetClass) {
 		checkReadyToMatch();
-		return this.pointcutExpression.couldMatchJoinPointsInType(targetClass);
+		try {
+			return this.pointcutExpression.couldMatchJoinPointsInType(targetClass);
+		}
+		catch (BCException ex) {
+			logger.debug("PointcutExpression matching rejected target class", ex);
+			return false;
+		}
 	}
 
 	public boolean matches(Method method, Class targetClass) {
@@ -211,12 +221,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 		else {
 		  // the maybe case
-		  if (!beanHasIntroductions) {
-			  return matchesIgnoringSubtypes(shadowMatch);
-		  }
-		  else {
-			  return true;
-		  }
+		  return (beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch));
 		}
 	}
 
@@ -266,24 +271,22 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 		// Bind Spring AOP proxy to AspectJ "this" and Spring AOP target to AspectJ target,
 		// consistent with return of MethodInvocationProceedingJoinPoint
-		ProxyMethodInvocation pmi;
-		Object targetObject;
-		Object thisObject;
+		ProxyMethodInvocation pmi = null;
+		Object targetObject = null;
+		Object thisObject = null;
 		try {
 			MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
+			targetObject = mi.getThis();
 			if (!(mi instanceof ProxyMethodInvocation)) {
 				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 			}
 			pmi = (ProxyMethodInvocation) mi;
-			targetObject = pmi.getThis();
 			thisObject = pmi.getProxy();
 		}
 		catch (IllegalStateException ex) {
-			// No current invocation
-			// TODO do we want to allow this?
-			targetObject = null;
-			thisObject = null;
-			pmi = null;
+			// No current invocation...
+			// TODO: Should we really proceed here?
+			logger.debug("Couldn't access current invocation - matching with limited context: " + ex);
 		}
 
 		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(thisObject, targetObject, args);

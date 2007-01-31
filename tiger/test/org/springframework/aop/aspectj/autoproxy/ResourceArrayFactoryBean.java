@@ -16,33 +16,26 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.core.io.Resource;
 
 /**
- * @author Adrian Colyer
- * @since 2.0
+ * @author Juergen Hoeller
  */
-@Transactional
-public class AnnotatedTestBeanImpl implements AnnotatedTestBean {
+public class ResourceArrayFactoryBean implements FactoryBean {
 
-	@TestAnnotation("this value")
-	public String doThis() {
-		return "doThis";
+	@TestAnnotation("some value")
+	public Object getObject() throws Exception {
+		return new Resource[0];
 	}
 
-	@TestAnnotation("that value")
-	public String doThat() {
-		return "doThat";
+	@TestAnnotation("some value")
+	public Class getObjectType() {
+		return Resource[].class;
 	}
 
-	@TestAnnotation("array value")
-	public String[] doArray() {
-		return new String[] {"doThis", "doThat"};
-	}
-
-	// not annotated
-	public String doTheOther() {
-		return "doTheOther";
+	public boolean isSingleton() {
+		return true;
 	}
 
 }
