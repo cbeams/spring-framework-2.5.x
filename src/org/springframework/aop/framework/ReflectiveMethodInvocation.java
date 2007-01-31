@@ -174,20 +174,35 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 
 	/**
-	 * This implementation returns a shallow copy, except for the argument array,
-	 * which is deep-copied to allow for independent modification. We want a shallow
-	 * copy in this case: We want to use the same interceptor chain and other object
-	 * references, but we want an independent value for the current interceptor index.
+	 * This implementation returns a shallow copy of this invocation object,
+	 * including an independent copy of the original arguments array.
+	 * <p>We want a shallow copy in this case: We want to use the same interceptor
+	 * chain and other object references, but we want an independent value for the
+	 * current interceptor index.
 	 * @see java.lang.Object#clone()
 	 */
 	public MethodInvocation invocableClone() {
+		Object[] cloneArguments = null;
+		if (this.arguments != null) {
+			// Build an independent copy of the arguments array.
+			cloneArguments = new Object[this.arguments.length];
+			System.arraycopy(this.arguments, 0, cloneArguments, 0, this.arguments.length);
+		}
+		return invocableClone(cloneArguments);
+	}
+
+	/**
+	 * This implementation returns a shallow copy of this invocation object,
+	 * using the given arguments array for the clone.
+	 * <p>We want a shallow copy in this case: We want to use the same interceptor
+	 * chain and other object references, but we want an independent value for the
+	 * current interceptor index.
+	 * @see java.lang.Object#clone()
+	 */
+	public MethodInvocation invocableClone(Object[] arguments) {
 		try {
 			ReflectiveMethodInvocation clone = (ReflectiveMethodInvocation) clone();
-			// Build deep copy of argument array.
-			if (this.arguments != null) {
-				clone.arguments = new Object[this.arguments.length];
-				System.arraycopy(this.arguments, 0, clone.arguments, 0, this.arguments.length);
-			}
+			clone.arguments = arguments;
 			return clone;
 		}
 		catch (CloneNotSupportedException ex) {

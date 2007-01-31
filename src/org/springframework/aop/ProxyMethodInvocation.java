@@ -47,6 +47,17 @@ public interface ProxyMethodInvocation extends MethodInvocation {
 	MethodInvocation invocableClone();
 
 	/**
+	 * Create a clone of this object. If cloning is done before <code>proceed()</code>
+	 * is invoked on this object, <code>proceed()</code> can be invoked once per clone
+	 * to invoke the joinpoint (and the rest of the advice chain) more than once.
+	 * @param arguments the arguments that the cloned invocation is supposed to use,
+	 * overriding the original arguments
+	 * @return an invocable clone of this invocation.
+	 * <code>proceed()</code> can be called once per clone.
+	 */
+	MethodInvocation invocableClone(Object[] arguments);
+
+	/**
 	 * Add the specified user attribute with the given value to this invocation.
 	 * <p>Such attributes are not used within the AOP framework itself. They are
 	 * just kept as part of the invocation object, for use in special interceptors.

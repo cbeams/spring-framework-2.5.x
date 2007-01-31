@@ -76,12 +76,8 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		return this.methodInvocation.invocableClone().proceed();
 	}
 
-	public Object proceed(Object[] args) throws Throwable {
-		Object[] oldArgs = this.methodInvocation.getArguments();
-		for (int i = 0; i < oldArgs.length; i++) {
-			oldArgs[i] = args[i];
-		}
-		return this.methodInvocation.proceed();
+	public Object proceed(Object[] arguments) throws Throwable {
+		return this.methodInvocation.invocableClone(arguments).proceed();
 	}
 
 	/**
