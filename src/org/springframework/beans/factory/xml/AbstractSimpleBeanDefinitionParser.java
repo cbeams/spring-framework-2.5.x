@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Convenience base class for when there exists a one-to-one mapping
+ * Convenient base class for when there exists a one-to-one mapping
  * between attribute names on the element that is to be parsed and
  * the property names on the {@link Class} being configured.
  *
@@ -101,6 +101,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Juergen Hoeller
  * @since 2.0
  * @see Conventions#attributeNameToPropertyName(String)
  */
@@ -127,27 +128,40 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 		for (int x = 0; x < attributes.getLength(); x++) {
 			Attr attribute = (Attr) attributes.item(x);
 			String name = attribute.getLocalName();
-			if (ID_ATTRIBUTE.equals(name)) {
-				continue;
+			if (isEligibleAttribute(name)) {
+				String propertyName = extractPropertyName(name);
+				Assert.state(StringUtils.hasText(propertyName),
+						"Illegal property name returned from 'extractPropertyName(String)': cannot be null or empty.");
+				builder.addPropertyValue(propertyName, attribute.getValue());
 			}
-			String propertyName = extractPropertyName(name);
-			Assert.state(StringUtils.hasText(propertyName),
-					"Illegal property name returned from 'extractPropertyName(String)': cannot be null or empty.");
-			builder.addPropertyValue(propertyName, attribute.getValue());
 		}
 		postProcess(builder, element);
 	}
 
 	/**
+	 * Determine whether the given attribute is eligible for being
+	 * turned into a corresponding bean property value.
+	 * <p>The default implementation considers any attribute as eligible,
+	 * except for the "id" attribute.
+	 * @param attributeName the attribute name taken straight from the
+	 * XML element being parsed (never <code>null</code>)
+	 */
+	protected boolean isEligibleAttribute(String attributeName) {
+		return !ID_ATTRIBUTE.equals(attributeName);
+	}
+
+	/**
 	 * Extract a JavaBean property name from the supplied attribute name.
-	 * <p>The default implementation uses the {@link Conventions#attributeNameToPropertyName(String)}
+	 * <p>The default implementation uses the
+	 * {@link Conventions#attributeNameToPropertyName(String)}
 	 * method to perform the extraction.
 	 * <p>The name returned must obey the standard JavaBean property name
 	 * conventions. For example for a class with a setter method
 	 * '<code>setBingoHallFavourite(String)</code>', the name returned had
 	 * better be '<code>bingoHallFavourite</code>' (with that exact casing).
-	 * @param attributeName the attribute name taken straight from the XML element being parsed; will never be <code>null</code> 
-	 * @return the extracted JavaBean property name; must never be <code>null</code> 
+	 * @param attributeName the attribute name taken straight from the
+	 * XML element being parsed (never <code>null</code>)
+	 * @return the extracted JavaBean property name (must never be <code>null</code>)
 	 */
 	protected String extractPropertyName(String attributeName) {
 		return Conventions.attributeNameToPropertyName(attributeName);
