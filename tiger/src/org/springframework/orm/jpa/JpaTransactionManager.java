@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,41 +45,48 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.CollectionUtils;
 
 /**
- * PlatformTransactionManager implementation for a single JPA EntityManagerFactory.
- * Binds a JPA EntityManager from the specified factory to the thread, potentially
- * allowing for one thread EntityManager per factory. SharedEntityManagerCreator
- * and JpaTemplate are aware of thread-bound entity managers and participate in such
- * transactions automatically. Using either is required for JPA access code supporting
- * this transaction management mechanism.
+ * {@link org.springframework.transaction.PlatformTransactionManager} implementation
+ * for a single JPA {@link javax.persistence.EntityManagerFactory}. Binds a JPA
+ * EntityManager from the specified factory to the thread, potentially allowing for
+ * one thread-bound EntityManager per factory. {@link SharedEntityManagerCreator}
+ * and {@link JpaTemplate} are aware of thread-bound entity managers and participate
+ * in such transactions automatically. Using either is required for JPA access code
+ * supporting this transaction management mechanism.
  *
- * <p>This implementation is appropriate for applications that solely use JPA for
- * transactional data access. JTA (usually through JtaTransactionManager) is necessary for
- * accessing multiple transactional resources. Note that you need to configure your JPA
- * provider accordingly to make it participate in JTA transactions.
+ * <p>This transaction manager is appropriate for applications that use a single
+ * JPA EntityManagerFactory for  transactional data access. JTA (usually through
+ * {@link org.springframework.transaction.jta.JtaTransactionManager}) is necessary
+ * for accessing multiple transactional resources within the same transaction.
+ * Note that you need to configure your JPA provider accordingly in order to make
+ * it participate in JTA transactions.
  *
- * <p>With a JpaDialect specified, this implementation also supports direct DataSource
- * access within a transaction (i.e. plain JDBC code working with the same DataSource).
- * This allows for mixing services that access JPA (including transactional caching)
- * and services that use plain JDBC (without being aware of JPA)!
- * Application code needs to stick to the same simple Connection lookup pattern as
- * with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>
- * or going through a TransactionAwareDataSourceProxy).
+ * <p>This transaction manager also supports direct DataSource access within a
+ * transaction (i.e. plain JDBC code working with the same DataSource).
+ * This allows for mixing services which access JPA and services which use plain
+ * JDBC (without being aware of JPA)! Application code needs to stick to the
+ * same simple Connection lookup pattern as with
+ * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
+ * (i.e. {@link org.springframework.jdbc.datasource.DataSourceUtils#getConnection}
+ * or going through a
+ * {@link org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy}).
+ * Note that this requires a vendor-specific {@link JpaDialect} to be configured.
  *
- * <p>Note that to be able to register a DataSource's Connection for plain JDBC code,
- * this instance needs to be aware of the DataSource (see "dataSource" property).
+ * <p>Note: To be able to register a DataSource's Connection for plain JDBC code,
+ * this instance needs to be aware of the DataSource ({@link #setDataSource}).
  * The given DataSource should obviously match the one used by the given
  * EntityManagerFactory. This transaction manager will autodetect the DataSource
  * used as known connection factory of the EntityManagerFactory, so you usually
  * don't need to explicitly specify the "dataSource" property.
  *
- * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
- * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to "false", though,
- * as nested transactions will just apply to the JDBC Connection, not to the JPA
- * EntityManager and its cached objects. You can manually set the flag to "true"
- * if you want to use nested transactions for JDBC access code that participates
- * in JPA transactions (provided that your JDBC driver supports Savepoints).
- * <i>Note that JPA itself does not support nested transactions! Hence,
- * do not expect JPA access code to participate in a nested transaction.</i>
+ * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC 3.0
+ * Savepoints. The {@link #setNestedTransactionAllowed} "nestedTransactionAllowed"}
+ * flag defaults to "false", though, as nested transactions will just apply to the
+ * JDBC Connection, not to the JPA EntityManager and its cached objects.
+ * You can manually set the flag to "true" if you want to use nested transactions
+ * for JDBC access code which participates in JPA transactions (provided that your
+ * JDBC driver supports Savepoints). <i>Note that JPA itself does not support
+ * nested transactions! Hence, do not expect JPA access code to semantically
+ * participate in a nested transaction.</i>
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -504,8 +511,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	 * JPA transaction object, representing a EntityManagerHolder.
 	 * Used as transaction object by JpaTransactionManager.
 	 *
-	 * <p>Derives from JdbcTransactionObjectSupport to inherit the capability
-	 * to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
+	 * <p>Derives from JdbcTransactionObjectSupport in order to inherit the
+	 * capability to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
 	 *
 	 * @see EntityManagerHolder
 	 */
@@ -524,11 +531,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 
 		public EntityManagerHolder getEntityManagerHolder() {
-			return entityManagerHolder;
+			return this.entityManagerHolder;
 		}
 
 		public boolean isNewEntityManagerHolder() {
-			return newEntityManagerHolder;
+			return this.newEntityManagerHolder;
 		}
 
 		public boolean hasTransaction() {
@@ -542,7 +549,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 
 		public Object getTransactionData() {
-			return transactionData;
+			return this.transactionData;
 		}
 
 		public void setRollbackOnly() {
@@ -564,7 +571,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Holder for suspended resources.
-	 * Used internally by doSuspend and doResume.
+	 * Used internally by <code>doSuspend</code> and <code>doResume</code>.
 	 */
 	private static class SuspendedResourcesHolder {
 
@@ -578,11 +585,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 
 		private EntityManagerHolder getEntityManagerHolder() {
-			return entityManagerHolder;
+			return this.entityManagerHolder;
 		}
 
 		private ConnectionHolder getConnectionHolder() {
-			return connectionHolder;
+			return this.connectionHolder;
 		}
 	}
 
