@@ -53,11 +53,10 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Adrian Colyer
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFactory {
-	
-	private static final String AJC_MAGIC = "ajc$";
 	
 	protected static final ParameterNameDiscoverer ASPECTJ_ANNOTATION_PARAMETER_NAME_DISCOVERER =
 			new AspectJAnnotationParameterNameDiscoverer();
@@ -84,7 +83,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 		return null;
 	}
-	
+
 	private static <A extends Annotation> AspectJAnnotation<A> findAnnotation(Method method, Class<A> toLookFor) {
 		A result = AnnotationUtils.findAnnotation(method, toLookFor);
 		if (result != null) {
@@ -109,32 +108,15 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	}
 
 	public boolean isAspect(Class<?> clazz) {
-		boolean couldBeAtAspectJAspect = AjTypeSystem.getAjType(clazz).isAspect();
-		if (!couldBeAtAspectJAspect) {
-			return false;
-		} 
-		else {
-			// we know it's an aspect, but we don't know whether it is an 
-			// @AspectJ aspect or a code style aspect.
-			// This is an *unclean* test whilst waiting for AspectJ to provide
-			// us with something better
-			Method[] methods = clazz.getDeclaredMethods();
-			for(Method m : methods) {
-				if (m.getName().startsWith(AJC_MAGIC)) {
-					// must be a code style aspect
-					return false;
-				}
-			}
-			return true;
-		}
+		return (AjTypeSystem.getAjType(clazz).isAspect() && clazz.getAnnotation(Aspect.class) != null);
 	}
 
 	public void validate(Class<?> aspectClass) throws AopConfigException {
 		// If the parent has the annotation and isn't abstract it's an error
 		if (aspectClass.getSuperclass().getAnnotation(Aspect.class) != null &&
 				!Modifier.isAbstract(aspectClass.getSuperclass().getModifiers())) {
-			throw new AopConfigException(aspectClass.getName() + " cannot extend concrete aspect " + 
-					aspectClass.getSuperclass().getName());
+			throw new AopConfigException("[" + aspectClass.getName() + "] cannot extend concrete aspect [" +
+					aspectClass.getSuperclass().getName() + "]");
 		}
 
 		AjType<?> ajType = AjTypeSystem.getAjType(aspectClass);
@@ -143,11 +125,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 		if (ajType.getPerClause().getKind() == PerClauseKind.PERCFLOW) {
 			throw new AopConfigException(aspectClass.getName() + " uses percflow instantiation model: " +
-					"This is not supported in Spring AOP");
+					"This is not supported in Spring AOP.");
 		}
 		if (ajType.getPerClause().getKind() == PerClauseKind.PERCFLOWBELOW) {
 			throw new AopConfigException(aspectClass.getName() + " uses percflowbelow instantiation model: " +
-					"This is not supported in Spring AOP");
+					"This is not supported in Spring AOP.");
 		}	
 	}
 
@@ -180,13 +162,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		Class<?>[] ret = new Class<?>[argNames.length];
 		Class<?>[] paramTypes = adviceMethod.getParameterTypes();
 		if (argNames.length > paramTypes.length) {
-			// TODO Spring logging here??
-			throw new IllegalStateException("Expecting at least " + argNames.length + 
-					     " arguments in the advice declaration, but only found " +
-					     paramTypes.length);
+			throw new IllegalStateException("Expecting at least " + argNames.length +
+					" arguments in the advice declaration, but only found " + paramTypes.length);
 		}
-		// make the simplifying assumption for now that all of the JoinPoint based arguments
-		// come first in the advice declaration
+		// Make the simplifying assumption for now that all of the JoinPoint based arguments
+		// come first in the advice declaration.
 		int typeOffset = paramTypes.length - argNames.length;
 		for (int i = 0; i < ret.length; i++) {
 			ret[i] = paramTypes[i+typeOffset];			
