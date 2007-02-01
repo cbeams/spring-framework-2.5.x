@@ -309,6 +309,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * for every transaction. This is only necessary for application servers
 	 * that return a new UserTransaction for every transaction, keeping state
 	 * tied to the UserTransaction object itself rather than the current thread.
+	 * @see #setUserTransactionName
 	 */
 	public void setCacheUserTransaction(boolean cacheUserTransaction) {
 		this.cacheUserTransaction = cacheUserTransaction;
@@ -320,7 +321,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>A TransactionManager is necessary for suspending and resuming transactions,
 	 * as this not supported by the UserTransaction interface.
 	 * <p>Note that the TransactionManager will be autodetected if the JTA
-	 * UserTransaction object implements the JTA TransactionManager interface too.
+	 * UserTransaction object implements the JTA TransactionManager interface too,
+	 * as well as autodetected at various well-known fallback JNDI locations.
 	 * @see #setTransactionManagerName
 	 * @see #setAutodetectTransactionManager
 	 */
@@ -340,8 +342,10 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>A TransactionManager is necessary for suspending and resuming transactions,
 	 * as this not supported by the UserTransaction interface.
 	 * <p>Note that the TransactionManager will be autodetected if the JTA
-	 * UserTransaction object implements the JTA TransactionManager interface too.
+	 * UserTransaction object implements the JTA TransactionManager interface too,
+	 * as well as autodetected at various well-known fallback JNDI locations.
 	 * @see #setTransactionManager
+	 * @see #setAutodetectTransactionManager
 	 */
 	public void setTransactionManagerName(String transactionManagerName) {
 		this.transactionManagerName = transactionManagerName;
@@ -353,7 +357,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * TransactionManager is "java:comp/UserTransaction", same as for the UserTransaction).
 	 * Also checks the fallback JNDI locations "java:comp/TransactionManager" and
 	 * "java:/TransactionManager". Will proceed without TransactionManager if none found.
-	 * <p>Default is "true". Can be turned off to deliberately ignore an available
+	 * <p>Default is "true", autodetecting the TransactionManager unless it has been
+	 * specified explicitly. Can be turned off to deliberately ignore an available
 	 * TransactionManager, for example when there are known issues with suspend/resume
 	 * and any attempt to use REQUIRES_NEW or NOT_SUPPORTED should fail fast.
 	 * @see #FALLBACK_TRANSACTION_MANAGER_NAMES
@@ -409,7 +414,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		else {
 			throw new IllegalArgumentException(
 					"Either 'userTransaction' or 'userTransactionName' or 'transactionManager' " +
-					"or 'transactionManagerName' must be set");
+					"or 'transactionManagerName' must be specified");
 		}
 
 		// For transaction suspension, the JTA TransactionManager is necessary too.
@@ -638,7 +643,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
-	 * Apply the given transaction isolation level. Default implementation
+	 * Apply the given transaction isolation level. The default implementation
 	 * will throw an exception for any level other than ISOLATION_DEFAULT.
 	 * <p>To be overridden in subclasses for specific JTA implementations,
 	 * as alternative to overriding the full <code>doJtaBegin</code> method.
@@ -661,7 +666,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
-	 * Apply the given transaction timeout. Default implementation will call
+	 * Apply the given transaction timeout. The default implementation will call
 	 * <code>setTransactionTimeout</code> for a non-default timeout value.
 	 * @param txObject the JtaTransactionObject containing the UserTransaction
 	 * @param timeout timeout value taken from transaction definition
