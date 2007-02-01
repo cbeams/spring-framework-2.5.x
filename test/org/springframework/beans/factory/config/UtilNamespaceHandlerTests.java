@@ -48,12 +48,6 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.listener);
 		reader.loadBeanDefinitions(new ClassPathResource("testUtilNamespace.xml", getClass()));
-		assertEquals(18, this.beanFactory.getBeanDefinitionCount());
-	}
-
-	public void testLoadProperties() throws Exception {
-		Properties props = (Properties) this.beanFactory.getBean("myProperties");
-		assertEquals("Incorrect property value", "bar", props.get("foo"));
 	}
 
 	public void testConstant() throws Exception {
@@ -227,6 +221,24 @@ public class UtilNamespaceHandlerTests extends TestCase {
 	public void testNestedInConstructor() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("constructedTestBean");
 		assertEquals("Rob Harrop", bean.getName());
+	}
+
+	public void testLoadProperties() throws Exception {
+		Properties props = (Properties) this.beanFactory.getBean("myProperties");
+		assertEquals("Incorrect property value", "bar", props.get("foo"));
+		assertEquals("Incorrect property value", null, props.get("foo2"));
+	}
+
+	public void testLocalProperties() throws Exception {
+		Properties props = (Properties) this.beanFactory.getBean("myLocalProperties");
+		assertEquals("Incorrect property value", null, props.get("foo"));
+		assertEquals("Incorrect property value", "bar2", props.get("foo2"));
+	}
+
+	public void testMergedProperties() throws Exception {
+		Properties props = (Properties) this.beanFactory.getBean("myMergedProperties");
+		assertEquals("Incorrect property value", "bar", props.get("foo"));
+		assertEquals("Incorrect property value", "bar2", props.get("foo2"));
 	}
 
 }

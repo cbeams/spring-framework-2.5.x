@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.springframework.org/schema/util"
-						xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-						xmlns:beans="http://www.springframework.org/schema/beans"
-						xmlns:tool="http://www.springframework.org/schema/tool"
-						targetNamespace="http://www.springframework.org/schema/util"
-						elementFormDefault="qualified"
-						attributeFormDefault="unqualified">
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:beans="http://www.springframework.org/schema/beans"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		targetNamespace="http://www.springframework.org/schema/util"
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
@@ -141,8 +141,9 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:complexContent>
-				<xsd:extension base="beans:identifiedType">
-					<xsd:attribute name="location" type="xsd:string" use="required">
+				<xsd:extension base="beans:propsType">
+					<xsd:attribute name="id" type="xsd:ID"/>
+					<xsd:attribute name="location" type="xsd:string">
 						<xsd:annotation>
 							<xsd:appinfo>
 								<tool:annotation>

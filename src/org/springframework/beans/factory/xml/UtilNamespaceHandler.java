@@ -18,6 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.w3c.dom.Element;
@@ -154,6 +155,12 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 		protected Class getBeanClass(Element element) {
 			return PropertiesFactoryBean.class;
+		}
+
+		protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+			super.doParse(element, parserContext, builder);
+			Properties parsedProps = parserContext.getDelegate().parsePropsElement(element);
+			builder.addPropertyValue("properties", parsedProps);
 		}
 	}
 
