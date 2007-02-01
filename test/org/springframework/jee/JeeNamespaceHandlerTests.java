@@ -20,6 +20,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean;
@@ -29,7 +30,6 @@ import org.springframework.jndi.JndiObjectFactoryBean;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @since 2.0
  */
 public class JeeNamespaceHandlerTests extends TestCase {
 
@@ -61,6 +61,12 @@ public class JeeNamespaceHandlerTests extends TestCase {
 	public void testWithEnvironment() throws Exception {
 		RootBeanDefinition beanDefinition = (RootBeanDefinition) this.beanFactory.getBeanDefinition("withEnvironment");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
+	}
+
+	public void testWithReferencedEnvironment() throws Exception {
+		RootBeanDefinition beanDefinition = (RootBeanDefinition) this.beanFactory.getBeanDefinition("withReferencedEnvironment");
+		assertPropertyValue(beanDefinition, "jndiEnvironment", new RuntimeBeanReference("myEnvironment"));
+		assertFalse(beanDefinition.getPropertyValues().contains("environmentRef"));
 	}
 
 	public void testSimpleLocalSlsb() throws Exception {

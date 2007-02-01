@@ -17,11 +17,11 @@
 package org.springframework.ejb.config;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
@@ -37,14 +37,26 @@ abstract class AbstractJndiLocatingBeanDefinitionParser extends AbstractSimpleBe
 
 	public static final String ENVIRONMENT = "environment";
 
+	public static final String ENVIRONMENT_REF = "environment-ref";
+
 	public static final String JNDI_ENVIRONMENT = "jndiEnvironment";
 
+
+	protected boolean isEligibleAttribute(String attributeName) {
+		return (super.isEligibleAttribute(attributeName) && !ENVIRONMENT_REF.equals(attributeName));
+	}
+
 	protected void postProcess(BeanDefinitionBuilder definitionBuilder, Element element) {
-		NodeList childNodes = element.getChildNodes();
-		for (int i = 0; i < childNodes.getLength(); i++) {
-			Node node = childNodes.item(i);
-			if (ENVIRONMENT.equals(node.getLocalName())) {
-				definitionBuilder.addPropertyValue(JNDI_ENVIRONMENT, DomUtils.getTextValue((Element) node));
+		Object envValue = DomUtils.getChildElementValueByTagName(element, ENVIRONMENT);
+		if (envValue != null) {
+			// Specific environment settings defined, overriding any shared properties.
+			definitionBuilder.addPropertyValue(JNDI_ENVIRONMENT, envValue);
+		}
+		else {
+			// Check whether there is a reference to shared environment properties...
+			String envRef = element.getAttribute(ENVIRONMENT_REF);
+			if (StringUtils.hasLength(envRef)) {
+				definitionBuilder.addPropertyValue(JNDI_ENVIRONMENT, new RuntimeBeanReference(envRef));
 			}
 		}
 	}
