@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,25 @@
 
 package org.springframework.beans.factory.xml;
 
+import junit.framework.TestCase;
+
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.beans.ITestBean;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Tests lookup methods wrapped by a CGLIB proxy (see SPR-391).
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
-public class LookupMethodWrappedByCglibProxyTests extends AbstractDependencyInjectionSpringContextTests {
+public class LookupMethodWrappedByCglibProxyTests extends TestCase {
 
-	protected String[] getConfigLocations() {
-		return new String[] {"/org/springframework/beans/factory/xml/overloadOverrides.xml"};
-	}
+	private ApplicationContext applicationContext;
 
-	protected void onSetUp() {
+	protected void setUp() {
+		this.applicationContext = new ClassPathXmlApplicationContext("overloadOverrides.xml", getClass());
 		resetInterceptor();
 	}
 
