@@ -573,10 +573,11 @@ public abstract class ClassUtils {
 	 * class's package name as a pathname, i.e., all dots ('.') are replaced by
 	 * slashes ('/'). Neither a leading nor trailing slash is added. The result
 	 * could be concatenated with a slash and the name of a resource, and fed
-	 * directly to ClassLoader.getResource(). For it to be fed to Class.getResource,
-	 * a leading slash would also have to be prepended to the return value.
-	 * @param clazz the input class. A null value or the default (empty) package
-	 * will result in an empty string ("") being returned.
+	 * directly to <code>ClassLoader.getResource()</code>. For it to be fed to
+	 * <code>Class.getResource</code> instead, a leading slash would also have
+	 * to be prepended to the returned value.
+	 * @param clazz the input class. A <code>null</code> value or the default
+	 * (empty) package will result in an empty string ("") being returned.
 	 * @return a path which represents the package name
 	 * @see ClassLoader#getResource
 	 * @see Class#getResource
