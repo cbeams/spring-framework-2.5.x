@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.9 (22.1.2007)
-------------------------------------
+Changes in version 1.2.9 (2.2.2007)
+-----------------------------------
 
 General
 * many javadoc refinements and clarifications
@@ -86,6 +86,7 @@ Package org.springframework.orm
 * Hibernate3 LocalSessionFactoryBean only sets connection release mode "on_close" if not given a "jtaTransactionManager"
 * Hibernate3 LocalSessionFactoryBean exposes configured DataSource for schema update (required on Hibernate 3.2.1+)
 * Hibernate3 LocalSessionFactoryBean registers filter definitions before loading any mapping files
+* added "flushMode" init parameter to Hibernate3 OpenSessionInViewFilter (supporting "AUTO" etc as value)
 * fixed Hibernate JTA transaction synchronization to properly mark a rollback on WebSphereExtendedJTATransactionLookup
 * removed special Session reconnection check for Hibernate 3.1 RC1
 
