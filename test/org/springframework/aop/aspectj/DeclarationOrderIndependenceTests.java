@@ -1,20 +1,19 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Created on 15 Nov 2006 by Adrian Colyer
  */
+
 package org.springframework.aop.aspectj;
 
 import java.io.Serializable;
@@ -24,32 +23,30 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
  * @author Adrian Colyer
- * @since 2.0
  */
-public class DeclarationOrderIndependenceTests extends
-		AbstractDependencyInjectionSpringContextTests {
+public class DeclarationOrderIndependenceTests extends AbstractDependencyInjectionSpringContextTests {
 
 	private TopsyTurvyAspect aspect;
+
 	private TopsyTurvyTarget target;
 	
+
 	public DeclarationOrderIndependenceTests() {
 		setAutowireMode(AUTOWIRE_BY_NAME);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.springframework.test.AbstractSingleSpringContextTests#getConfigLocations()
-	 */
-	protected String[] getConfigLocations() {
-		return new String[] {"org/springframework/aop/aspectj/topsy-turvy-aspect.xml"};
 	}
 	
 	public void setTopsyTurvyAspect(TopsyTurvyAspect aspect) {
 		this.aspect = aspect;
 	}
-	
+
 	public void setTopsyTurvyTarget(TopsyTurvyTarget target) {
 		this.target = target;
 	}
+
+	protected String getConfigPath() {
+		return "topsy-turvy-aspect.xml";
+	}
+	
 
 	public void testTargetIsSerializable() {
 		assertTrue("target bean is serializable",this.target instanceof Serializable);

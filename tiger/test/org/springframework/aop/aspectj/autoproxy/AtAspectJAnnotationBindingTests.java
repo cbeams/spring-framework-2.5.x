@@ -26,14 +26,16 @@ public class AtAspectJAnnotationBindingTests extends AbstractDependencyInjection
 
 	private AnnotatedTestBean testBean;
 
-	@Override
-	protected String[] getConfigLocations() {
-		return new String[] {"org/springframework/aop/aspectj/autoproxy/ataspectj-around-advice-tests.xml"};
-	}
 
 	public void setTestBean(AnnotatedTestBean testBean) {
 		this.testBean = testBean;
 	}
+
+	@Override
+	protected String getConfigPath() {
+		return "ataspectj-around-advice-tests.xml";
+	}
+
 
 	public void testAnnotationBindingInAroundAdvice() {
 		assertEquals("this value doThis", testBean.doThis());

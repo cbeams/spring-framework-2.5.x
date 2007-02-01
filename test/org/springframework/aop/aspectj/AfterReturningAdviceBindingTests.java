@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,30 +16,47 @@
 
 package org.springframework.aop.aspectj;
 
+import org.easymock.MockControl;
+
 import org.springframework.aop.aspectj.AfterReturningAdviceBindingTestAspect.AfterReturningAdviceBindingCollaborator;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
-import org.easymock.MockControl;
 
 /**
- * Tests for various parameter binding scenarios with before advice
+ * Tests for various parameter binding scenarios with before advice.
+ *
  * @author Adrian Colyer
  * @author Rod Johnson
  */
-public class AfterReturningAdviceBindingTests extends
-		AbstractDependencyInjectionSpringContextTests {
+public class AfterReturningAdviceBindingTests extends AbstractDependencyInjectionSpringContextTests {
 
 	private AfterReturningAdviceBindingTestAspect afterAdviceAspect;
+
 	private ITestBean testBeanProxy;
+
 	private TestBean testBeanTarget;
+
 	private MockControl mockControl;
+
 	private AfterReturningAdviceBindingCollaborator mockCollaborator;
 	
-	protected String[] getConfigLocations() {
-		return new String[] {"org/springframework/aop/aspectj/afterReturning-advice-tests.xml"};
+
+	public void setAfterReturningAdviceAspect(AfterReturningAdviceBindingTestAspect anAspect) {
+		this.afterAdviceAspect = anAspect;
+	}
+
+	public void setTestBean(ITestBean aBean) throws Exception {
+		assertTrue(AopUtils.isAopProxy(aBean));
+		this.testBeanProxy = aBean;
+		// we need the real target too, not just the proxy...
+		this.testBeanTarget = (TestBean) ((Advised)aBean).getTargetSource().getTarget();
+	}
+
+	protected String getConfigPath() {
+		return "afterReturning-advice-tests.xml";
 	}
 	
 	protected void onSetUp() throws Exception {
@@ -48,17 +65,7 @@ public class AfterReturningAdviceBindingTests extends
 		mockCollaborator = (AfterReturningAdviceBindingCollaborator) mockControl.getMock();
 		afterAdviceAspect.setCollaborator(mockCollaborator);
 	}
-	
-	public void setAfterReturningAdviceAspect(AfterReturningAdviceBindingTestAspect anAspect) {
-		this.afterAdviceAspect = anAspect;
-	}
-	
-	public void setTestBean(ITestBean aBean) throws Exception {
-		assertTrue(AopUtils.isAopProxy(aBean));
-		this.testBeanProxy = aBean;
-		// we need the real target too, not just the proxy...
-		this.testBeanTarget = (TestBean) ((Advised)aBean).getTargetSource().getTarget();
-	}
+
 
 	// simple test to ensure all is well with the xml file
 	// note that this implicitly tests that the arg-names binding is working

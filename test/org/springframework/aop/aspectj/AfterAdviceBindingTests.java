@@ -35,12 +35,12 @@ public class AfterAdviceBindingTests extends AbstractAdviceBindingTests {
 	private AdviceBindingCollaborator mockCollaborator;
 
 
-	protected String[] getConfigLocations() {
-		return new String[] {"org/springframework/aop/aspectj/after-advice-tests.xml"};
-	}
-
 	public void setAfterAdviceAspect(AdviceBindingTestAspect anAspect) {
 		this.afterAdviceAspect = anAspect;
+	}
+
+	protected String getConfigPath() {
+		return "after-advice-tests.xml";
 	}
 
 	protected void onSetUp() throws Exception {

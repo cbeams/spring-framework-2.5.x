@@ -30,8 +30,8 @@ public class AspectJAutoProxyCreatorAndLazyInitTargetSourceTests extends Abstrac
 	}
 
 	@Override
-	protected String[] getConfigLocations() {
-		return new String[] {"org/springframework/aop/aspectj/autoproxy/lazy.xml"};
+	protected String getConfigPath() {
+		return "lazy.xml";
 	}
 
 	public void testAdrian() {

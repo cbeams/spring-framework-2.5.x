@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
  * @author Adrian Colyer
- * @since 2.0
  */
 public class AspectAndAdvicePrecedenceTests extends AbstractDependencyInjectionSpringContextTests {
 
@@ -34,10 +33,6 @@ public class AspectAndAdvicePrecedenceTests extends AbstractDependencyInjectionS
 
 	public AspectAndAdvicePrecedenceTests() {
 		setAutowireMode(AUTOWIRE_BY_NAME);
-	}
-
-	protected String[] getConfigLocations() {
-		return new String[] {"org/springframework/aop/aspectj/advice-precedence-tests.xml"};
 	}
 
 	public void setHighPrecedenceAspect(PrecedenceTestAspect highPrecedenceAspect) {
@@ -58,6 +53,10 @@ public class AspectAndAdvicePrecedenceTests extends AbstractDependencyInjectionS
 	
 	public void setTestBean(ITestBean testBean) {
 		this.testBean = testBean;
+	}
+
+	protected String getConfigPath() {
+		return "advice-precedence-tests.xml";
 	}
 
 

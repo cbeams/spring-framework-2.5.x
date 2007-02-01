@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,18 @@ import org.springframework.aop.aspectj.AroundAdviceBindingTestAspect.AroundAdvic
 public class AroundAdviceBindingTests extends AbstractAdviceBindingTests {
 
 	private MockControl mockControl;
+
 	private AroundAdviceBindingCollaborator mockCollaborator;
 	
 	private AroundAdviceBindingTestAspect aroundAdviceAspect;
 	
-	protected String[] getConfigLocations() {
-		return new String[] {"org/springframework/aop/aspectj/around-advice-tests.xml"};
+
+	public void setAroundAdviceAspect(AroundAdviceBindingTestAspect anAspect) {
+		this.aroundAdviceAspect = anAspect;
+	}
+
+	protected String getConfigPath() {
+		return "around-advice-tests.xml";
 	}
 	
 	protected void onSetUp() throws Exception {
@@ -43,10 +49,7 @@ public class AroundAdviceBindingTests extends AbstractAdviceBindingTests {
 		aroundAdviceAspect.setCollaborator(mockCollaborator);
 	}
 	
-	public void setAroundAdviceAspect(AroundAdviceBindingTestAspect anAspect) {
-		this.aroundAdviceAspect = anAspect;
-	}
-	
+
 	public void testOneIntArg() {
 		mockCollaborator.oneIntArg(5);
 		mockControl.replay();

@@ -18,6 +18,8 @@ package org.springframework.test;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -153,7 +155,36 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * Subclasses must implement this method to return the locations of their
+	 * Load an ApplicationContext from the given config locations.
+	 * @param locations the config locations (as Spring resource locations,
+	 * e.g. full classpath locations or any kind of URL)
+	 * @return the corresponding ApplicationContext instance (potentially cached)
+	 */
+	protected ConfigurableApplicationContext loadContextLocations(String[] locations) throws Exception {
+		++this.loadCount;
+		if (logger.isInfoEnabled()) {
+			logger.info("Loading context for locations: " + StringUtils.arrayToCommaDelimitedString(locations));
+		}
+		return new ClassPathXmlApplicationContext(locations);
+	}
+
+	/**
+	 * Load an ApplicationContext from the given config locations.
+	 * @param paths the config paths (relative to the concrete test class,
+	 * loading classpath resources from the same package)
+	 * @return the corresponding ApplicationContext instance (potentially cached)
+	 */
+	protected ConfigurableApplicationContext loadContextPaths(String[] paths) throws Exception {
+		++this.loadCount;
+		if (logger.isInfoEnabled()) {
+			logger.info("Loading context for paths: " + StringUtils.arrayToCommaDelimitedString(paths));
+		}
+		return new ClassPathXmlApplicationContext(paths, getClass());
+	}
+
+
+	/**
+	 * Subclasses can override this method to return the locations of their
 	 * config files, unless they override {@link #contextKey()} and
 	 * {@link #loadContext(Object)} instead.
 	 * <p>A plain path will be treated as class path location, e.g.:
@@ -162,25 +193,62 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * path prefixed with "classpath:" with behave the same as a plain path, but a
 	 * config location such as "file:/some/path/path/location/appContext.xml" will
 	 * be treated as a filesystem location.
-	 * <p>The default implementation returns an empty array.
+	 * <p>The default implementation builds config locations for the config paths
+	 * specified through {@link #getConfigPaths()}.
 	 * @return an array of config locations
+	 * @see #getConfigPaths()
+	 * @see org.springframework.core.io.ResourceLoader#getResource(String)
 	 */
 	protected String[] getConfigLocations() {
-		return new String[0];
+		String[] paths = getConfigPaths();
+		String[] locations = new String[paths.length];
+		for (int i = 0; i < paths.length; i++) {
+			String path = paths[i];
+			if (path.startsWith("/")) {
+				locations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
+			}
+			else {
+				locations[i] = ResourceUtils.CLASSPATH_URL_PREFIX +
+						StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(getClass()) + "/" + path);
+			}
+		}
+		return locations;
 	}
 
 	/**
-	 * Load an ApplicationContext from the given config locations.
-	 * @param locations the config locations
-	 * @return the corresponding ApplicationContext instance (potentially cached)
+	 * Subclasses can override this method to return paths to their
+	 * config files, relative to the concrete test class.
+	 * <p>A plain path, e.g. "context.xml", will be loaded as classpath resource
+	 * from the same package that the concrete test class is defined in.
+	 * A path starting with a slash is treated as fully qualified class path
+	 * location, e.g.: "/org/springframework/whatever/foo.xml".
+	 * <p>The default implementation builds an array for the config path
+	 * specified through {@link #getConfigPath()}.
+	 * @return an array of config locations
+	 * @see #getConfigPath()
+	 * @see java.lang.Class#getResource(String)
 	 */
-	protected ConfigurableApplicationContext loadContextLocations(String[] locations) throws Exception {
-		++this.loadCount;
-		if (logger.isInfoEnabled()) {
-			logger.info("Loading context for: " + StringUtils.arrayToCommaDelimitedString(locations));
-		}
-		return new ClassPathXmlApplicationContext(locations);
+	protected String[] getConfigPaths() {
+		String path = getConfigPath();
+		return (path != null ? new String[] {path} : new String[0]);
 	}
+
+	/**
+	 * Subclasses can override this method to return a single path to a
+	 * config file, relative to the concrete test class.
+	 * <p>A plain path, e.g. "context.xml", will be loaded as classpath resource
+	 * from the same package that the concrete test class is defined in.
+	 * A path starting with a slash is treated as fully qualified class path
+	 * location, e.g.: "/org/springframework/whatever/foo.xml".
+	 * <p>The default implementation simply returns <code>null</code>.
+	 * @return an array of config locations
+	 * @see #getConfigPath()
+	 * @see java.lang.Class#getResource(String)
+	 */
+	protected String getConfigPath() {
+		return null;
+	}
+
 
 	/**
 	 * Return the ApplicationContext that this base class manages.

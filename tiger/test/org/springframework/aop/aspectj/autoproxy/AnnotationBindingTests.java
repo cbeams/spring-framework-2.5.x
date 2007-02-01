@@ -20,15 +20,14 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
  * @author Adrian Colyer
- * @since 2.0
  */
 public class AnnotationBindingTests extends AbstractDependencyInjectionSpringContextTests {
 
 	private AnnotatedTestBean testBean;
-	
+
 	@Override
-	protected String[] getConfigLocations() {
-		return new String[] {"org/springframework/aop/aspectj/autoproxy/around-advice-tests.xml"};
+	protected String getConfigPath() {
+		return "around-advice-tests.xml";
 	}
 
 	public void setTestBean(AnnotatedTestBean testBean) {
@@ -39,7 +38,7 @@ public class AnnotationBindingTests extends AbstractDependencyInjectionSpringCon
 		assertEquals("this value", testBean.doThis());
 		assertEquals("that value", testBean.doThat());
 	}
-	
+
 	public void testNoMatchingWithoutAnnotationPresent() {
 		assertEquals("doTheOther", testBean.doTheOther());
 	}
