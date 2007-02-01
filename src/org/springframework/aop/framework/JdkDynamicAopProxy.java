@@ -158,12 +158,11 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			// Advised AOP configuration interface.
 
 			if (!this.equalsDefined && AopUtils.isEqualsMethod(method)) {
-				// What if equals throws exception!?
-				// This class implements the equals(Object) method itself.
-				return equals(args[0]) ? Boolean.TRUE : Boolean.FALSE;
+				// The target does not implement the equals(Object) method itself.
+				return (equals(args[0]) ? Boolean.TRUE : Boolean.FALSE);
 			}
 			if (!this.hashCodeDefined && AopUtils.isHashCodeMethod(method)) {
-				// This class implements the hashCode() method itself.
+				// The target does not implement the hashCode() method itself.
 				return new Integer(hashCode());
 			}
 			if (!this.advised.opaque && method.getDeclaringClass().isInterface() &&
