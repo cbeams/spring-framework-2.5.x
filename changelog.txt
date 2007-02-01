@@ -3,23 +3,29 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.3 (5.2.2007)
+Changes in version 2.0.3 (9.2.2007)
 -----------------------------------
 
 General
 * all checks for library presence are explicitly performed with Spring's own ClassLoader (not the application's)
+* overall startup/shutdown logging at info level is less verbose (activate debug log level for more config details)
 
 Package org.springframework.aop
-* introduced TargetClassAware interface, extended by Advised, and corresponding "AopUtils.getTargetClass" method
+* introduced AfterAdvice marker, as super-interface of AfterReturningAdvice and ThrowsAdvice, for reduced coupling
+* exposed "invocableClone()" and "setUserAttribute"/"getUserAttribute" on ProxyMethodInvocation, for reduced coupling
+* introduced TargetClassAware interface, extended by Advised, and framework-decoupled "AopUtils.getTargetClass" method
 * added overloaded ProxyFactory constructors for single-interceptor and TargetSource-only proxies
 * AbstractSingletonProxyFactoryBean and AbstractAutoProxyCreator use the bean ClassLoader for generating proxies
 * reworked AdvisorAdapter and AdvisorAdapterRegistry to expose a MethodInterceptor right away
-* added "forClass" factory method to EmptyTargetSource, allowing to indicate a specific target class
+* AspectJPointcutExpression ignores target classes not accepted by PointcutExpression matching (such as arrays)
 * AspectJAdviceParameterNameDiscoverer properly considers reference pointcuts as potential source of parameter binding
+* AbstractAspectJAdvisorFactory detects @AspectJ aspects through the presence of the @Aspect annotation
+* MethodInvocationProceedingJoinPoint allows for multiple "proceed(arguments)" calls, cloning the underlying invocation
 * PrototypeAspectInstanceFactory enforces that the target bean is a prototype; it does not accept scoped objects
 * PrototypeTargetSource enforces that the target bean is a prototype; it does not accept scoped objects
 * PrototypeTargetSource destroys bean instances on release (honors DisposableBean and/or destroy-method)
 * ThreadLocalTargetSource destroys bean instances via ConfigurableBeanFactory's "destroyBean" (if possible)
+* added "forClass" factory method to EmptyTargetSource, allowing to indicate a specific target class
 * added SimpleBeanTargetSource, performing a fresh getBean lookup on every request, for any kind of bean
 * ScopedProxyFactoryBean uses the BeanFactory's bean ClassLoader for generating scoped proxies
 * auto-proxying ignores objects exposed by ScopedProxyFactoryBeans; only their target beans are eligible
@@ -39,6 +45,8 @@ Package org.springframework.beans
 * added deprecated "findXxx" signatures back to NamespaceHandlerSupport, for full compatibility with Spring 2.0 final
 * indexed constructor arguments support collection merging (driven by merge="true", analogous to property values)
 * collection merging accepts a null parent value as well, simply using the child collection as-is in this case
+* AbstractSingleBeanDefinitionParser applies a document's default-lazy-init="true" to its generated bean definitions
+* added copy constructor to ChildBeanDefinition
 
 Package org.springframework.context
 * AbstractRefreshableApplicationContext allows BeanFactory access during the destruction phase of a "refresh()" call
@@ -52,6 +60,9 @@ Package org.springframework.core
 
 Package org.springframework.ejb
 * AbstractEnterpriseBean uses the EJB instance as WeakReferenceMonitor handle, instead of a BeanFactoryReference proxy
+
+Package org.springframework.instrument
+* ShadowingClassLoader excludes "com.sun." package by default (for using Sun's Xerces version through JAXP)
 
 Package org.springframework.jdbc
 * added overloaded ConnectionHolder constructor with a given Connection plus "transactionActive" flag as arguments
@@ -77,6 +88,8 @@ Package org.springframework.mock
 
 Package org.springframework.orm
 * added "flushMode" init parameter to Hibernate3 OpenSessionInViewFilter (supporting "AUTO" etc as value)
+* Hibernate3 SessionFactoryUtils translates SQLGrammar/DataException into InvalidDataAccessResourceUsageException
+* Hibernate3 HibernateAccessor/TransactionManager translates GenericJDBCException using a default SQLExceptionTranslator
 
 Package org.springframework.remoting
 * all remoting ProxyFactoryBeans use the bean ClassLoader for generating service proxies
@@ -84,6 +97,7 @@ Package org.springframework.remoting
 * added public "getHost()" and "getPort()" accessors to RmiRegistryFactoryBean
 * added "alwaysCreate" flag to RmiRegistryFactoryBean, for avoiding the overhead of locating an existing registry
 * added "alwaysCreateRegistry" flag to RmiServiceExporter, for avoiding the overhead of locating an existing registry
+* added "rebind()" method to JndiRmiServiceExporter, for recovering in case of the target registry having been restarted
 * CodebaseAwareObjectInputStream uses "Class.forName", to be able to resolve array classes with any ClassLoader
 * added "getTargetInterfaceName()" method to RmiInvocationHandler, for client-side introspection
 
@@ -91,6 +105,7 @@ Package org.springframework.scripting
 * Bsh/JRuby/GroovyScriptFactory uses the bean ClassLoader for generating script objects
 * BshScriptUtils and BshScriptFactory support BeanShell scripts that declare an actual class or instance
 * JRubyScriptUtils passes the declared return type to JRuby, for proper conversion of number types
+* BshObjectInvocationHandler/JRubyObjectInvocationHandler implement "equals"/"hashCode/"toString" based on script object
 * ScriptFactoryPostProcessor uses the bean ClassLoader for generating refreshable script proxies
 * LangNamespaceHandler always registers all BeanDefinitionParsers, failing with NoClassDefFoundError for actual script
 
@@ -105,8 +120,11 @@ Package org.springframework.util
 * ResourceUtils's "extractJarFileURL" only prepends a slash in front of a file path if it doesn't already have a slash
 
 Package org.springframework.web
+* ConfigurableWebApplicationContext and ConfigurablePortletApplicationContext expose config state through getters
 * RequestContextListener works correctly even in case of the "requestDestroyed" callback coming from a different thread
 * added "rootHandler" bean property to AbstractUrlHandlerMapping, kicking in for the "/" path
+* added "warnLogCategory" property to SimpleMappingExceptionResolver, allowing to log the exception to warn level
+* added protected "determineStatusCode" method to Servlet SimpleMappingExceptionResolver, for custom status codes
 * OptionsTag accepts no or empty items specified, simply not rendering any option tags in such a case
 * added "messageArgs" and "messageArgsText" macros to the "spring.ftl" FreeMarker macro template
 
