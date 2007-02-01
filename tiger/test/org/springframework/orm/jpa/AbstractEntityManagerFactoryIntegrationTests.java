@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,16 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 
 	public static final String[] TOPLINK_CONFIG_LOCATIONS = new String[] {
 			"/org/springframework/orm/jpa/toplink/toplink-manager.xml", "/org/springframework/orm/jpa/memdb.xml",
-			"/org/springframework/orm/jpa/inject.xml" };
+			"/org/springframework/orm/jpa/inject.xml"};
 
 	public static final String[] HIBERNATE_CONFIG_LOCATIONS = new String[] {
 			"/org/springframework/orm/jpa/hibernate/hibernate-manager.xml", "/org/springframework/orm/jpa/memdb.xml",
-			"/org/springframework/orm/jpa/inject.xml" };
+			"/org/springframework/orm/jpa/inject.xml"};
 
 	public static final String[] OPENJPA_CONFIG_LOCATIONS = new String[] {
 			"/org/springframework/orm/jpa/openjpa/openjpa-manager.xml", "/org/springframework/orm/jpa/memdb.xml",
-			"/org/springframework/orm/jpa/inject.xml" };
+			"/org/springframework/orm/jpa/inject.xml"};
+
 
 	public static Provider getProvider() {
 		String provider = System.getProperty("org.springframework.orm.jpa.provider");
@@ -46,6 +47,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 		}
 		return Provider.TOPLINK;
 	}
+
 
 	@Override
 	protected String getActualOrmXmlLocation() {
@@ -66,6 +68,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 			throw new IllegalStateException("Unknown provider: " + provider);
 		}
 	}
+
 
 	public enum Provider {
 		TOPLINK, HIBERNATE, OPENJPA
