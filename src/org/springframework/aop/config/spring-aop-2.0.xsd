@@ -13,8 +13,8 @@
 
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[
-	Defines the configuration elements used in the Spring Framework's
-	AOP technology.
+	Defines the configuration elements for the Spring Framework's
+	AOP support.
 		]]></xsd:documentation>
 	</xsd:annotation>
 
@@ -176,7 +176,6 @@
 				</xsd:annotation>
 			</xsd:element>
 	 </xsd:choice>
-		<!-- Rick : ID type written explicitly as opposed to being imported (c.f. [SPR-2290] -->
 		<xsd:attribute name="id" type="xsd:ID">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
@@ -221,7 +220,6 @@
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
-		<!-- Rick : ID type written explicitly as opposed to being imported (c.f. [SPR-2290] -->
 		<xsd:attribute name="id" type="xsd:ID">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
@@ -308,8 +306,6 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<!-- there is a case to make this next one an element with one sub-element for each
-			argument name, but that is a lot more verbose that a comma-delimited list of arg names -->
 		<xsd:attribute name="arg-names" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
@@ -396,7 +392,6 @@
 		</xsd:attribute>
 	</xsd:complexType>
 
-	<!-- Base Types -->
 	<xsd:simpleType name="pointcutRefType">
 		<xsd:annotation>
 			<xsd:appinfo>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Helper class that simplifies JNDI operations. It provides methods to lookup
- * and bind objects, and allows implementations of the JndiCallback interface
+ * Helper class that simplifies JNDI operations. It provides methods to lookup and
+ * bind objects, and allows implementations of the {@link JndiCallback} interface
  * to perform any operation they like with a JNDI naming context provided.
- *
- * <p>This is the central class in this package. It performs all JNDI context handling.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -58,6 +56,7 @@ public class JndiTemplate {
 		this.environment = environment;
 	}
 
+
 	/**
 	 * Set the environment for the JNDI InitialContext.
 	 */
@@ -66,10 +65,10 @@ public class JndiTemplate {
 	}
 
 	/**
-	 * Return the environment for the JNDI InitialContext.
+	 * Return the environment for the JNDI InitialContext, if any.
 	 */
 	public Properties getEnvironment() {
-		return environment;
+		return this.environment;
 	}
 
 
@@ -90,7 +89,7 @@ public class JndiTemplate {
 				ctx.close();
 			}
 			catch (NamingException ex) {
-				logger.warn("Could not close JNDI InitialContext", ex);
+				logger.debug("Could not close JNDI InitialContext", ex);
 			}
 		}
 	}
