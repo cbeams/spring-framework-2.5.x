@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,18 +57,18 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		this.beanWithAnnotatedPrivateMethod = aBean;
 	}
 
-	public TransactionAspectSupport getTransactionAspect() {
-		return transactionAspect;
-	}
-
 	public void setTransactionAspect(TransactionAspectSupport transactionAspect) {
 		this.transactionAspect = transactionAspect;
 		this.txManager = (CallCountingTransactionManager) transactionAspect.getTransactionManager();
 	}
 
+	public TransactionAspectSupport getTransactionAspect() {
+		return this.transactionAspect;
+	}
+
 	@Override
-	protected String[] getConfigLocations() {
-		return new String[] { "classpath:org/springframework/transaction/aspectj/txtests.xml" };
+	protected String getConfigPath() {
+		return "txtests.xml";
 	}
 
 
