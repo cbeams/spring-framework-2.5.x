@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class ToStringCreator {
 
 
 	/**
-	 * Create a ToStringBuilder for this object.
+	 * Create a ToStringCreator for the given object.
 	 * @param obj the object to be stringified
 	 */
 	public ToStringCreator(Object obj) {
@@ -54,7 +54,7 @@ public class ToStringCreator {
 	}
 
 	/**
-	 * Create a ToStringBuilder for this object with the provided style.
+	 * Create a ToStringCreator for the given object, using the provided style.
 	 * @param obj the object to be stringified
 	 * @param styler the ValueStyler encapsulating pretty-print instructions
 	 */
@@ -63,12 +63,12 @@ public class ToStringCreator {
 	}
 
 	/**
-	 * Create a ToStringBuilder for this object with the provided style.
+	 * Create a ToStringCreator for the given object, using the provided style.
 	 * @param obj the object to be stringified
 	 * @param styler the ToStringStyler encapsulating pretty-print instructions
 	 */
 	public ToStringCreator(Object obj, ToStringStyler styler) {
-		Assert.notNull(obj, "The object to be styled is required");
+		Assert.notNull(obj, "The object to be styled must not be null");
 		this.object = obj;
 		this.styler = (styler != null ? styler : DEFAULT_TO_STRING_STYLER);
 		this.styler.styleStart(this.buffer, this.object);
