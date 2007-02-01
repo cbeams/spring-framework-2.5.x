@@ -33,8 +33,6 @@ import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 
 /**
- * Unit and integration tests for the BshScriptFactory class.
- *
  * @author Rob Harrop
  * @author Rick Evans
  * @author Juergen Hoeller
@@ -49,6 +47,12 @@ public class BshScriptFactoryTests extends TestCase {
 
 		assertFalse("Scripted object should not be instance of Refreshable", calc instanceof Refreshable);
 		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+
+		assertEquals(calc, calc);
+		assertEquals(messenger, messenger);
+		assertTrue(!messenger.equals(calc));
+		assertTrue(messenger.hashCode() != calc.hashCode());
+		assertTrue(!messenger.toString().equals(calc.toString()));
 
 		assertEquals(5, calc.add(2, 3));
 

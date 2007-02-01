@@ -161,6 +161,12 @@ public abstract class JRubyScriptUtils {
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			if (AopUtils.isEqualsMethod(method)) {
+				return (isProxyForSameRubyObject(args[0]) ? Boolean.TRUE : Boolean.FALSE);
+			}
+			if (AopUtils.isHashCodeMethod(method)) {
+				return new Integer(this.rubyObject.hashCode());
+			}
 			if (AopUtils.isToStringMethod(method)) {
 				return "JRuby object [" + this.rubyObject + "]";
 			}
@@ -173,6 +179,15 @@ public abstract class JRubyScriptUtils {
 			catch (RaiseException ex) {
 				throw new JRubyExecutionException(ex);
 			}
+		}
+
+		private boolean isProxyForSameRubyObject(Object other) {
+			if (!Proxy.isProxyClass(other.getClass())) {
+				return false;
+			}
+			InvocationHandler ih = Proxy.getInvocationHandler(other);
+			return (ih instanceof RubyObjectInvocationHandler &&
+					this.rubyObject.equals(((RubyObjectInvocationHandler) ih).rubyObject));
 		}
 
 		private IRubyObject[] convertToRuby(Object[] javaArgs) {

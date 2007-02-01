@@ -25,6 +25,7 @@ import bsh.Interpreter;
 import bsh.Primitive;
 import bsh.XThis;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -159,6 +160,15 @@ public abstract class BshScriptUtils {
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			if (AopUtils.isEqualsMethod(method)) {
+				return (isProxyForSameBshObject(args[0]) ? Boolean.TRUE : Boolean.FALSE);
+			}
+			if (AopUtils.isHashCodeMethod(method)) {
+				return new Integer(this.xt.hashCode());
+			}
+			if (AopUtils.isToStringMethod(method)) {
+				return "BeanShell object [" + this.xt + "]";
+			}
 			try {
 				Object result = this.xt.invokeMethod(method.getName(), args);
 				if (result == Primitive.NULL || result == Primitive.VOID) {
@@ -172,6 +182,15 @@ public abstract class BshScriptUtils {
 			catch (EvalError ex) {
 				throw new BshExecutionException(ex);
 			}
+		}
+
+		private boolean isProxyForSameBshObject(Object other) {
+			if (!Proxy.isProxyClass(other.getClass())) {
+				return false;
+			}
+			InvocationHandler ih = Proxy.getInvocationHandler(other);
+			return (ih instanceof BshObjectInvocationHandler &&
+					this.xt.equals(((BshObjectInvocationHandler) ih).xt));
 		}
 	}
 

@@ -17,6 +17,7 @@
 package org.springframework.scripting.jruby;
 
 import junit.framework.TestCase;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.context.ApplicationContext;
@@ -30,6 +31,7 @@ import org.springframework.scripting.ScriptCompilationException;
 /**
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public class JRubyScriptFactoryTests extends TestCase {
 
@@ -52,6 +54,12 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 		assertFalse("Scripted object should not be instance of Refreshable", calc instanceof Refreshable);
 		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+
+		assertEquals(calc, calc);
+		assertEquals(messenger, messenger);
+		assertTrue(!messenger.equals(calc));
+		assertTrue(messenger.hashCode() != calc.hashCode());
+		assertTrue(!messenger.toString().equals(calc.toString()));
 
 		String desiredMessage = "Hello World!";
 		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());

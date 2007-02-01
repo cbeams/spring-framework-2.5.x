@@ -42,6 +42,7 @@ import org.springframework.test.AssertThrows;
  * @author Rob Harrop
  * @author Rick Evans
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class GroovyScriptFactoryTests extends TestCase {
 
@@ -60,6 +61,12 @@ public class GroovyScriptFactoryTests extends TestCase {
 
 		assertFalse("Scripted object should not be instance of Refreshable", calc instanceof Refreshable);
 		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+
+		assertEquals(calc, calc);
+		assertEquals(messenger, messenger);
+		assertTrue(!messenger.equals(calc));
+		assertTrue(messenger.hashCode() != calc.hashCode());
+		assertTrue(!messenger.toString().equals(calc.toString()));
 
 		String desiredMessage = "Hello World!";
 		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
