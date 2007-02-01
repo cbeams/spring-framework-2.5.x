@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.springframework.org/schema/jee"
-			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-			xmlns:beans="http://www.springframework.org/schema/beans"
-			xmlns:tool="http://www.springframework.org/schema/tool"
-			targetNamespace="http://www.springframework.org/schema/jee"
-			elementFormDefault="qualified"
-			attributeFormDefault="unqualified">
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:beans="http://www.springframework.org/schema/beans"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		targetNamespace="http://www.springframework.org/schema/jee"
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
-	
+
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[
-	Defines the elements used to configure various JEE (J2EE) related
+	Defines the elements used to configure various Java EE (J2EE) related
 	technologies such as JNDI lookups and EJBs.
 		]]></xsd:documentation>
 	</xsd:annotation>
@@ -26,7 +26,7 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:complexContent>
-				<xsd:extension base="jndiLocatedType">
+				<xsd:extension base="jndiLocatingType">
 					<xsd:attribute name="cache" type="xsd:boolean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
@@ -117,10 +117,8 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="entity-manager-factory" type="entityManagerFactoryType"/>
-
 	<!-- base types -->
-	<xsd:complexType name="jndiLocatedType" abstract="true">
+	<xsd:complexType name="jndiLocatingType" abstract="true">
 		<xsd:complexContent>
 			<xsd:annotation>
 				<xsd:appinfo>
@@ -165,7 +163,7 @@
 
 	<xsd:complexType name="ejbType">
 		<xsd:complexContent>
-			<xsd:extension base="jndiLocatedType">
+			<xsd:extension base="jndiLocatingType">
 				<xsd:attribute name="lookup-home-on-startup" type="xsd:boolean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
@@ -189,53 +187,6 @@
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-			</xsd:extension>
-		</xsd:complexContent>
-	</xsd:complexType>
-
-	<xsd:complexType name="entityManagerFactoryType">
-		<xsd:annotation>
-			<xsd:appinfo>
-				<tool:annotation>
-					<tool:exports type="javax.persistence.EntityManagerFactory"/>
-				</tool:annotation>
-			</xsd:appinfo>
-		</xsd:annotation>
-		<xsd:complexContent>
-			<xsd:extension base="beans:identifiedType">
-				<xsd:attribute name="persistence-unit-name" type="xsd:string"/>
-				<xsd:attribute name="inject" type="xsd:boolean"/>
-				<xsd:attribute name="translate" type="xsd:boolean"/>
-				<xsd:attribute name="provider">
-					<xsd:simpleType>
-						<xsd:restriction base="xsd:string">
-							<xsd:enumeration value="toplink"/>
-							<xsd:enumeration value="kodo"/>
-							<xsd:enumeration value="hibernate"/>
-						</xsd:restriction>
-					</xsd:simpleType>
-				</xsd:attribute>
-				<xsd:attribute name="provider-class" type="xsd:string">
-					<xsd:annotation>
-						<xsd:appinfo>
-							<tool:annotation>
-								<tool:expected-type type="java.lang.Class"/>
-								<!-- TODO: Is there a base type for all providers such that we can add a constraint here? -->
-							</tool:annotation>
-						</xsd:appinfo>
-					</xsd:annotation>
-				</xsd:attribute>
-				<xsd:attribute name="data-source-ref" type="xsd:string">
-					<xsd:annotation>
-						<xsd:appinfo>
-							<tool:annotation kind="ref">
-								<tool:expected-type type="javax.sql.DataSource"/>
-							</tool:annotation>
-						</xsd:appinfo>
-					</xsd:annotation>
-				</xsd:attribute>
-				<xsd:attribute name="show-sql" type="xsd:boolean"/>
-				<xsd:attribute name="generate-ddl" type="xsd:boolean"/>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
