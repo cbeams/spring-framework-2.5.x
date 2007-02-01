@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,24 @@
 
 package org.springframework.ejb.config;
 
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
-import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
+import org.springframework.util.xml.DomUtils;
+
 /**
+ * Abstract base class for BeanDefinitionParsers which build
+ * JNDI-locating beans, supporting an optional "jndiEnvironment"
+ * bean property, populated from an "environment" XML sub-element.
+ *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
-abstract class AbstractJndiLocatedBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
+abstract class AbstractJndiLocatingBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
 	public static final String ENVIRONMENT = "environment";
 
@@ -42,5 +48,5 @@ abstract class AbstractJndiLocatedBeanDefinitionParser extends AbstractSimpleBea
 			}
 		}
 	}
-}
 
+}

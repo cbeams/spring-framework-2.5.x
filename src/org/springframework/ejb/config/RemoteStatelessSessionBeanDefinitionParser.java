@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package org.springframework.ejb.config;
 
-import org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean;
 import org.w3c.dom.Element;
+
+import org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean;
 
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-class RemoteStatelessSessionBeanDefinitionParser extends AbstractJndiLocatedBeanDefinitionParser {
+class RemoteStatelessSessionBeanDefinitionParser extends AbstractJndiLocatingBeanDefinitionParser {
 
 	protected Class getBeanClass(Element element) {
 		return SimpleRemoteStatelessSessionProxyFactoryBean.class;
