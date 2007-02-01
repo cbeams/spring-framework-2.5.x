@@ -72,8 +72,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * or going through a
  * {@link org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy}).
  *
- * <p>Note that to be able to register a DataSource's Connection for plain JDBC
- * code, this instance needs to be aware of the DataSource ({@link #setDataSource}).
+ * <p>Note: To be able to register a DataSource's Connection for plain JDBC code,
+ * this instance needs to be aware of the DataSource ({@link #setDataSource}).
  * The given DataSource should obviously match the one used by the given
  * SessionFactory. To achieve this, configure both to the same JNDI DataSource,
  * or preferably create the SessionFactory with {@link LocalSessionFactoryBean} and

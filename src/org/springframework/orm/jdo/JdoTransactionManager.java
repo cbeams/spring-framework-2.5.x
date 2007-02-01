@@ -64,7 +64,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * or going through a
  * {@link org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy}).
  *
- * <p>Note that to be able to register a DataSource's Connection for plain JDBC code,
+ * <p>Note: To be able to register a DataSource's Connection for plain JDBC code,
  * this instance needs to be aware of the DataSource ({@link #setDataSource}).
  * The given DataSource should obviously match the one used by the given
  * PersistenceManagerFactory. This transaction manager will autodetect the DataSource
