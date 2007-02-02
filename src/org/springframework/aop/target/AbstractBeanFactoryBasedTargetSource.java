@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,17 +27,19 @@ import org.springframework.aop.TargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.util.ClassUtils;
 
 /**
- * Base class for TargetSource implementations that are based on a
- * Spring BeanFactory, delegating to Spring-managed bean instances.
+ * Base class for {@link org.springframework.aop.TargetSource} implementations
+ * that are based on a Spring {@link org.springframework.beans.factory.BeanFactory},
+ * delegating to Spring-managed bean instances.
  *
  * <p>Subclasses can create prototype instances or lazily access a
- * singleton target, for example. See LazyInitTargetSource and
- * AbstractPrototypeBasedTargetSource's subclasses for concrete strategies.
+ * singleton target, for example. See {@link LazyInitTargetSource} and
+ * {@link AbstractPrototypeBasedTargetSource}'s subclasses for concrete strategies.
  *
- * <p>BeanFactoryBasedTargetSources are serializable. This involves
- * disconnecting the current target and turning into a SingletonTargetSource.
+ * <p>BeanFactory-based TargetSources are serializable. This involves
+ * disconnecting the current target and turning into a {@link SingletonTargetSource}.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -50,6 +52,10 @@ import org.springframework.beans.factory.BeanFactoryAware;
  */
 public abstract class AbstractBeanFactoryBasedTargetSource
 		implements TargetSource, BeanFactoryAware, Serializable {
+
+	/** use serialVersionUID from Spring 1.2.7 for interoperability */
+	private static final long serialVersionUID = -4721607536018568393L;
+
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -68,9 +74,10 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 
 
 	/**
-	 * Set the name of the target bean in the factory. This bean should be a
-	 * prototype, or the same instance will always be obtained from the
-	 * factory, resulting in the same behavior as the SingletonTargetSource.
+	 * Set the name of the target bean in the factory.
+	 * <p>The target bean should not be a singleton, else the same instance will
+	 * always be obtained from the factory, resulting in the same behavior as
+	 * provided by {@link SingletonTargetSource}.
 	 * @param targetBeanName name of the target bean in the BeanFactory
 	 * that owns this interceptor
 	 * @see SingletonTargetSource
@@ -111,7 +118,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	 * Return the owning BeanFactory.
 	 */
 	public BeanFactory getBeanFactory() {
-		return beanFactory;
+		return this.beanFactory;
 	}
 
 
@@ -121,7 +128,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 			this.targetClass = this.beanFactory.getType(this.targetBeanName);
 			if (this.targetClass == null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Getting bean with name '" + this.targetBeanName + "' to determine type");
+					logger.debug("Getting bean with name '" + this.targetBeanName + "' in order to determine type");
 				}
 				this.targetClass = this.beanFactory.getBean(this.targetBeanName).getClass();
 			}
@@ -134,7 +141,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	}
 
 	public void releaseTarget(Object target) throws Exception {
-		// do nothing
+		// Nothing to do here.
 	}
 
 
@@ -152,7 +159,8 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	/**
 	 * Replaces this object with a SingletonTargetSource on serialization.
 	 * Protected as otherwise it won't be invoked for subclasses.
-	 * (The writeReplace() method must be visible to the class being serialized.)
+	 * (The <code>writeReplace()</code> method must be visible to the class
+	 * being serialized.)
 	 * <p>With this implementation of this method, there is no need to mark
 	 * non-serializable fields in this class or subclasses as transient.
 	 */
@@ -167,8 +175,18 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 		catch (Exception ex) {
 			logger.error("Cannot get target for disconnecting TargetSource [" + this + "]", ex);
 			throw new NotSerializableException(
-					"Cannot get target for disconnecting TargetSource [" + this + "]: " + ex.getMessage());
+					"Cannot get target for disconnecting TargetSource [" + this + "]: " + ex);
 		}
+	}
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(ClassUtils.getShortName(getClass()));
+		sb.append(" for target bean '").append(this.targetBeanName).append("'");
+		if (this.targetClass != null) {
+			sb.append(" of type [").append(this.targetClass.getName()).append("]");
+		}
+		return sb.toString();
 	}
 
 }
