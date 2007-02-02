@@ -15,7 +15,7 @@ import org.springframework.samples.jpetstore.domain.Product;
 
 /**
  * JPetStore's business layer facade.
- * 
+ *
  * <p>This object makes use of five DAO objects, decoupling it from the
  * details of working with persistence APIs. Therefore, although this
  * application uses iBATIS for data access, a different persistence
@@ -45,9 +45,9 @@ import org.springframework.samples.jpetstore.domain.Product;
  * <p>This class defines a default transaction attribute for all methods.
  * Note that this attribute definition is only necessary if using Commons
  * Attributes auto-proxying (see the "attributes" directory under the root of
- * JPetStore). No attributes are required with a TransactionFactoryProxyBean,
- * as in the default <code>applicationContext.xml</code> in the
- * <code>war/WEB-INF</code> directory.
+ * JPetStore). No attributes are required with a TransactionFactoryProxyBean;
+ * see the default <code>applicationContext.xml</code> config file in the
+ * <code>war/WEB-INF</code> directory for an example.
  *
  * <p>The following attribute definition uses Commons Attributes attribute syntax.
  * @@org.springframework.transaction.interceptor.DefaultTransactionAttribute()
