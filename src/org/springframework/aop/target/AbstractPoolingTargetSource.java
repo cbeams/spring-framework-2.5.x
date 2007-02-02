@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,33 +24,34 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.DisposableBean;
 
 /**
- * Abstract superclass for pooling TargetSources that maintains a pool of
- * target instances, acquiring and releasing a target object from the pool
- * for each method invocation. This class is independent of pooling technology.
+ * Abstract base class for pooling {@link org.springframework.aop.TargetSource}
+ * implementations which maintain a pool of target instances, acquiring and
+ * releasing a target object from the pool for each method invocation.
+ * This class is independent of concrete pooling technology.
  *
- * <p>Subclasses must implement the <code>getTarget()</code> and
- * <code>releaseTarget()</code> methods to work with their chosen pool.
- * The <code>newPrototypeInstance()</code> method inherited from
- * AbstractPrototypeBasedTargetSource can be used to create objects to put
- * in the pool.
+ * <p>Subclasses must implement the {@link #getTarget} and
+ * {@link #releaseTarget} methods based on their chosen object pool.
+ * The {@link #newPrototypeInstance()} method inherited from
+ * {@link AbstractPrototypeBasedTargetSource} can be used to create objects
+ * in order to put them into the pool.
  *
- * <p>Subclasses must also implement some of the monitoring methods from
- * the PoolingConfig interface.
+ * <p>Subclasses must also implement some of the monitoring methods from the
+ * {@link PoolingConfig} interface. The {@link #getPoolingConfigMixin()} method
+ * makes these stats available on proxied objects through an IntroductionAdvisor.
  *
- * <p>This class provides the <code>getPoolingConfigMixin()</code> method to
- * return an IntroductionAdvisor making these stats available on proxied objects.
- *
- * <p>This class implements DisposableBean to force subclasses to implement
- * a <code>destroy()</code> method to close down their pool.
+ * <p>This class implements the {@link org.springframework.beans.factory.DisposableBean}
+ * interface in order to force subclasses to implement a {@link #destroy()}
+ * method, closíng down their object pool.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see #getTarget
  * @see #releaseTarget
  * @see #destroy
  */
 public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBasedTargetSource
 		implements PoolingConfig, DisposableBean {
-	
+
 	/** The maximum size of the pool */
 	private int maxSize = -1;
 
