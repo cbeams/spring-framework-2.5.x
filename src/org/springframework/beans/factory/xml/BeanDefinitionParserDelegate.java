@@ -389,7 +389,7 @@ public class BeanDefinitionParserDelegate {
 
 		String className = null;
 		if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
-			className = ele.getAttribute(CLASS_ATTRIBUTE);
+			className = ele.getAttribute(CLASS_ATTRIBUTE).trim();
 		}
 		String parent = null;
 		if (ele.hasAttribute(PARENT_ATTRIBUTE)) {

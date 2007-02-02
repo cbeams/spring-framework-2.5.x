@@ -12,7 +12,7 @@
 	<!--
 		Check automatic creation of alias, to allow for names that are illegal as XML ids.
 	-->
-	<bean id="aliased" class="org.springframework.beans.TestBean" name="myalias">
+	<bean id="aliased" class="  org.springframework.beans.TestBean  " name="myalias">
 		<property name="name"><value>aliased</value></property>
 	</bean>
 
