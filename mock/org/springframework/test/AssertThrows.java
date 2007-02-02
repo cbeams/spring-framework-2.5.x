@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test;
 
 import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
 
 /**
  * Simple method object encapsulation of the 'test-for-Exception'
@@ -84,8 +85,11 @@ import junit.framework.Assert;
  * 
  * <p>You might want to compare this class with the
  * {@link junit.extensions.ExceptionTestCase} class.
- * 
+ *
+ * <p>Note: This class requires JDK 1.4 or higher.
+ *
  * @author Rick Evans
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract class AssertThrows {
@@ -95,19 +99,19 @@ public abstract class AssertThrows {
 	private String failureMessage;
 
 
-    /**
-	 * Creates a new instance of the {@link AssertThrows} class. 
+	/**
+	 * Create a new instance of the {@link AssertThrows} class.
 	 * @param expectedException the {@link java.lang.Exception} expected to be
-		 * thrown during the execution of the surrounding test
+	 * thrown during the execution of the surrounding test
 	 * @throws IllegalArgumentException if the supplied <code>expectedException</code> is
-		 * <code>null</code>; or if said argument is not an {@link java.lang.Exception}-derived class
+	 * <code>null</code>; or if said argument is not an {@link java.lang.Exception}-derived class
 	 */
 	public AssertThrows(Class expectedException) {
 		this(expectedException, null);
 	}
 
 	/**
-	 * Creates a new instance of the {@link AssertThrows} class. 
+	 * Create a new instance of the {@link AssertThrows} class.
 	 * @param expectedException the {@link java.lang.Exception} expected to be
 	 * thrown during the execution of the surrounding test
 	 * @param failureMessage the extra, contextual failure message that will be
@@ -116,11 +120,12 @@ public abstract class AssertThrows {
 	 * <code>null</code>; or if said argument is not an {@link java.lang.Exception}-derived class
 	 */
 	public AssertThrows(Class expectedException, String failureMessage) {
-		if(expectedException == null) {
-			throw new IllegalArgumentException("The 'expectedException' argument is required.");
+		if (expectedException == null) {
+			throw new IllegalArgumentException("The 'expectedException' argument is required");
 		}
-		if(!Exception.class.isAssignableFrom(expectedException)) {
-			throw new IllegalArgumentException("The 'expectedException' argument is not an Exception type (it obviously must be).");
+		if (!Exception.class.isAssignableFrom(expectedException)) {
+			throw new IllegalArgumentException(
+					"The 'expectedException' argument is not an Exception type (it obviously must be)");
 		}
 		this.expectedException = expectedException;
 		this.failureMessage = failureMessage;
@@ -132,7 +137,7 @@ public abstract class AssertThrows {
 	 * the execution of the surrounding test.
 	 */
 	protected Class getExpectedException() {
-		return expectedException;
+		return this.expectedException;
 	}
 
 	/**
@@ -148,7 +153,7 @@ public abstract class AssertThrows {
 	 * in the failure text if the text fails.
 	 */
 	protected String getFailureMessage() {
-		return failureMessage;
+		return this.failureMessage;
 	}
 
 
@@ -158,6 +163,7 @@ public abstract class AssertThrows {
 	 * @throws Exception if an error occurs during the execution of the aformentioned test logic
 	 */
 	public abstract void test() throws Exception;
+
 
 	/**
 	 * The main template method that drives the running of the
@@ -199,13 +205,12 @@ public abstract class AssertThrows {
 	 * @see #getFailureMessage()
 	 */
 	protected String createMessageForNoExceptionThrown() {
-		StringBuffer buffer = new StringBuffer("Must have thrown a [")
-				.append(this.getExpectedException())
-				.append("]");
-		if (this.getFailureMessage() != null) {
-			buffer.append(" : ").append(this.getFailureMessage()).append(".");
+		StringBuffer sb = new StringBuffer();
+		sb.append("Should have thrown a [").append(this.getExpectedException()).append("]");
+		if (getFailureMessage() != null) {
+			sb.append(": ").append(getFailureMessage());
 		}
-		return buffer.toString();
+		return sb.toString();
 	}
 
 	/**
@@ -215,29 +220,28 @@ public abstract class AssertThrows {
 	 * instance of a subclass).
 	 * <p>If you want to customise the failure message, consider overriding
 	 * {@link #createMessageForWrongThrownExceptionType(Exception)}.
-	 * @param actualException the {@link java.lang.Exception} that has been thrown in the body of a test method (will never be <code>null</code>)
+	 * @param actualException the {@link java.lang.Exception} that has been thrown
+	 * in the body of a test method (will never be <code>null</code>)
 	 */
 	protected void checkExceptionExpectations(Exception actualException) {
-		Class actualExceptionType = actualException.getClass();
-		Assert.assertTrue(
-				createMessageForWrongThrownExceptionType(actualException),
-				this.getExpectedException().isAssignableFrom(actualExceptionType));
+		if (!getExpectedException().isAssignableFrom(actualException.getClass())) {
+			AssertionFailedError error =
+					new AssertionFailedError(createMessageForWrongThrownExceptionType(actualException));
+			error.initCause(actualException);
+			throw error;
+		}
 	}
 
 	/**
 	 * Creates the failure message used if the wrong type
 	 * of {@link java.lang.Exception} is thrown in the body of the test.
-	 * @return the failure message used if the wrong type
-	 * of {@link java.lang.Exception} is thrown in the body of the test.
 	 */
 	protected String createMessageForWrongThrownExceptionType(Exception actualException) {
-		StringBuffer buffer = new StringBuffer()
-				.append("Was expecting a [")
-				.append(this.getExpectedException())
-				.append("] to be thrown, but instead a [")
-				.append(actualException.getClass())
-				.append("] was thrown.");
-		return buffer.toString();
+		StringBuffer sb = new StringBuffer();
+		sb.append("Was expecting a [").append(getExpectedException().getName());
+		sb.append("] to be thrown, but instead a [").append(actualException.getClass().getName());
+		sb.append("] was thrown.");
+		return sb.toString();
 	}
 
 }
