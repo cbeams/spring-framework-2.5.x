@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,14 @@ import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 
 /**
- * Utility methods for use by AdviceChainFactory implementations.
+ * Utility methods for use by {@link AdvisorChainFactory} implementations.
  *
  * <p>The {@link #calculateInterceptorsAndDynamicInterceptionAdvice} method
  * is the definitive way of working out an advice chain for a Method,
  * given an {@link Advised} object.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see AdvisorChainFactory
  */
 public abstract class AdvisorChainFactoryUtils {
@@ -64,8 +65,13 @@ public abstract class AdvisorChainFactoryUtils {
 	/**
 	 * Return the static interceptors and dynamic interception advice that may apply
 	 * to this method invocation.
-	 * @return list of MethodInterceptor and InterceptionAdvice (if there's a dynamic
-	 * method matcher that needs evaluation at runtime)
+	 * @param config the AOP configuration in the form of an Advised obkect
+	 * @param proxy the proxy object
+	 * @param method the proxied method
+	 * @param targetClass the target class
+	 * @return list of {@link org.aopalliance.intercept.MethodInterceptor} and
+	 * {@link InterceptorAndDynamicMethodMatcher} elements (using the latter
+	 * if there is a dynamic method matcher that needs evaluation at runtime)
 	 */
 	public static List calculateInterceptorsAndDynamicInterceptionAdvice(
 			Advised config, Object proxy, Method method, Class targetClass) {
