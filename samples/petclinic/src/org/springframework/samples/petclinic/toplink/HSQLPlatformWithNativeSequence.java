@@ -1,11 +1,10 @@
-/*
- * Created on Nov 25, 2004
- *
- */
-
 package org.springframework.samples.petclinic.toplink;
 
-import oracle.toplink.internal.databaseaccess.HSQLPlatform;
+import java.io.IOException;
+import java.io.Writer;
+
+import oracle.toplink.exceptions.ValidationException;
+import oracle.toplink.platform.database.HSQLPlatform;
 import oracle.toplink.queryframework.ValueReadQuery;
 
 /**
@@ -23,10 +22,6 @@ import oracle.toplink.queryframework.ValueReadQuery;
  */
 public class HSQLPlatformWithNativeSequence extends HSQLPlatform {
 
-	public HSQLPlatformWithNativeSequence() {
-		setUsesNativeSequencing(true);
-	}
-
 	public boolean supportsNativeSequenceNumbers() {
 		return true;
 	}
@@ -35,8 +30,21 @@ public class HSQLPlatformWithNativeSequence extends HSQLPlatform {
 		return true;
 	}
 
+	public boolean shouldUseJDBCOuterJoinSyntax() {
+		return false;
+	}
+
 	public ValueReadQuery buildSelectQueryForNativeSequence() {
 		return new ValueReadQuery("CALL IDENTITY()");
+	}
+
+	public void printFieldIdentityClause(Writer writer) throws ValidationException {
+		try {
+			writer.write(" IDENTITY");
+		}
+		catch (IOException ioException) {
+			throw new ValidationException();
+		}
 	}
 
 }
