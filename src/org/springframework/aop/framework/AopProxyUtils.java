@@ -63,6 +63,13 @@ public abstract class AopProxyUtils {
 	 */
 	public static Class[] completeProxiedInterfaces(AdvisedSupport advised) {
 		Class[] specifiedInterfaces = advised.getProxiedInterfaces();
+		if (specifiedInterfaces.length == 0) {
+			// No user-specified interfaces: check whether target class is an interface.
+			Class targetClass = advised.getTargetClass();
+			if (targetClass != null && targetClass.isInterface()) {
+				specifiedInterfaces = new Class[] {targetClass};
+			}
+		}
 		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);
 		boolean addAdvised = !advised.isOpaque() && !advised.isInterfaceProxied(Advised.class);
 		int nonUserIfcCount = 0;

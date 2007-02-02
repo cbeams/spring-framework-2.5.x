@@ -22,6 +22,7 @@ import org.aopalliance.aop.Advice;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.IOther;
@@ -33,6 +34,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  * Also tests AdvisedSupport superclass.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 14.05.2003
  */
 public class ProxyFactoryTests extends TestCase {
@@ -273,6 +275,24 @@ public class ProxyFactoryTests extends TestCase {
 		it.getSpouse();
 		// not invoked again
 		assertTrue(debugInterceptor.getCount() == 1);
+	}
+
+	public void testProxyTargetClassWithInterfaceAsTarget() {
+		ProxyFactory pf = new ProxyFactory();
+		pf.setTargetClass(ITestBean.class);
+
+		Object proxy = pf.getProxy();
+		assertTrue("Proxy is a JDK proxy", AopUtils.isJdkDynamicProxy(proxy));
+		assertTrue(proxy instanceof ITestBean);
+	}
+
+	public void testProxyTargetClassWithConcreteClassAsTarget() {
+		ProxyFactory pf = new ProxyFactory();
+		pf.setTargetClass(TestBean.class);
+
+		Object proxy = pf.getProxy();
+		assertTrue("Proxy is a CGLIB proxy", AopUtils.isCglibProxy(proxy));
+		assertTrue(proxy instanceof TestBean);
 	}
 
 }

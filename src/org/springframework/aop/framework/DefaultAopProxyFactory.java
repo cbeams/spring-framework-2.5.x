@@ -65,18 +65,25 @@ public class DefaultAopProxyFactory implements AopProxyFactory {
 	}
 
 
-	public AopProxy createAopProxy(AdvisedSupport advisedSupport) throws AopConfigException {
-		if (advisedSupport.isOptimize() || advisedSupport.isProxyTargetClass() ||
-				hasNoUserSuppliedProxyInterfaces(advisedSupport)) {
+	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
+		if (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config)) {
+			Class targetClass = config.getTargetClass();
+			if (targetClass == null) {
+				throw new AopConfigException("TargetSource cannot determine target class: " +
+						"Either an interface or a target is required for proxy creation.");
+			}
+			if (targetClass.isInterface()) {
+				return new JdkDynamicAopProxy(config);
+			}
 			if (!cglibAvailable) {
 				throw new AopConfigException(
 						"Cannot proxy target class because CGLIB2 is not available. " +
 						"Add CGLIB to the class path or specify proxy interfaces.");
 			}
-			return CglibProxyFactory.createCglibProxy(advisedSupport);
+			return CglibProxyFactory.createCglibProxy(config);
 		}
 		else {
-			return new JdkDynamicAopProxy(advisedSupport);
+			return new JdkDynamicAopProxy(config);
 		}
 	}
 
@@ -85,8 +92,8 @@ public class DefaultAopProxyFactory implements AopProxyFactory {
 	 * {@link org.springframework.aop.SpringProxy} interface specified
 	 * (or no proxy interfaces specified at all).
 	 */
-	private boolean hasNoUserSuppliedProxyInterfaces(AdvisedSupport advisedSupport) {
-		Class[] interfaces = advisedSupport.getProxiedInterfaces();
+	private boolean hasNoUserSuppliedProxyInterfaces(AdvisedSupport config) {
+		Class[] interfaces = config.getProxiedInterfaces();
 		return (interfaces.length == 0 || (interfaces.length == 1 && SpringProxy.class.equals(interfaces[0])));
 	}
 

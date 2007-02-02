@@ -57,8 +57,16 @@ public class ProxyConfig implements Serializable {
 
 
 	/**
-	 * Set whether to proxy the target class directly as well as any interfaces.
-	 * We can set this to true to force CGLIB proxying. Default is "false".
+	 * Set whether to proxy the target class directly, instead of just proxying
+	 * specific interfaces. Default is "false".
+	 * <p>Set this to "true" to force proxying for the TargetSource's exposed
+	 * target class. If that target class is an interface, a JDK proxy will be
+	 * created for the given interface. If that target class is any other class,
+	 * a CGLIB proxy will be created for the given class.
+	 * <p>Note: Depending on the configuration of the concrete proxy factory,
+	 * the proxy-target-class behavior will also be applied if no interfaces
+	 * have been specified (and no interface autodetection is activated).
+	 * @see org.springframework.aop.TargetSource#getTargetClass()
 	 */
 	public void setProxyTargetClass(boolean proxyTargetClass) {
 		this.proxyTargetClass = proxyTargetClass;
@@ -81,14 +89,6 @@ public class ProxyConfig implements Serializable {
 	 * is disabled by default. An optimize value of "true" may be ignored
 	 * if other settings preclude optimization: for example, if "exposeProxy"
 	 * is set to "true" and that's not compatible with the optimization.
-	 * <p>For example, CGLIB-enhanced proxies may optimize out.
-	 * overriding methods with no advice chain. This can produce 2.5x
-	 * performance improvement for methods with no advice.
-	 * <p><b>Warning:</b> Setting this to "true" can produce large performance
-	 * gains when using CGLIB (also set "proxyTargetClass" to "true"), so it's
-	 * a good setting for performance-critical proxies. However, enabling this
-	 * will mean that advice cannot be changed after a proxy has been obtained
-	 * from this factory.
 	 */
 	public void setOptimize(boolean optimize) {
 		this.optimize = optimize;
@@ -190,10 +190,9 @@ public class ProxyConfig implements Serializable {
 		StringBuffer sb = new StringBuffer();
 		sb.append("proxyTargetClass=").append(this.proxyTargetClass).append("; ");
 		sb.append("optimize=").append(this.optimize).append("; ");
-		sb.append("exposeProxy=").append(this.exposeProxy).append("; ");
 		sb.append("opaque=").append(this.opaque).append("; ");
-		sb.append("frozen=").append(this.frozen).append("; ");
-		sb.append("aopProxyFactory [").append(this.aopProxyFactory).append("]");
+		sb.append("exposeProxy=").append(this.exposeProxy).append("; ");
+		sb.append("frozen=").append(this.frozen);
 		return sb.toString();
 	}
 

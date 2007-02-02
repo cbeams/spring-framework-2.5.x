@@ -61,15 +61,14 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	public static final TargetSource EMPTY_TARGET_SOURCE = EmptyTargetSource.INSTANCE;
 
 
-	/** List of AdvisedSupportListener */
-	private transient List listeners = new LinkedList();
-
-	/**
-	 * Package-protected to allow direct access for efficiency
-	 */
+	/** Package-protected to allow direct access for efficiency */
 	TargetSource targetSource = EMPTY_TARGET_SOURCE;
 
+	/** The AdvisorChainFactory to use */
 	transient AdvisorChainFactory advisorChainFactory;
+
+	/** List of AdvisedSupportListener */
+	private transient List listeners = new LinkedList();
 
 	/**
 	 * List of Advice. If an Interceptor is added, it will be wrapped
@@ -120,14 +119,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 
-	public void addListener(AdvisedSupportListener listener) {
-		this.listeners.add(listener);
-	}
-
-	public void removeListener(AdvisedSupportListener listener) {
-		this.listeners.remove(listener);
-	}
-
 	/**
 	 * Set the given object as target.
 	 * Will create a SingletonTargetSource for the object.
@@ -149,17 +140,63 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		return this.targetSource;
 	}
 
+	/**
+	 * Set a target class to be proxied, indicating that the proxy
+	 * should be castable to the given class.
+	 * <p>Internally, an {@link org.springframework.aop.target.EmptyTargetSource}
+	 * for the given target class will be used. The kind of proxy needed
+	 * will be determined on actual creation of the proxy.
+	 * <p>This is a replacement for setting a "targetSource" or "target",
+	 * for the case where we want a proxy based on a target class
+	 * (which can be an interface or a concrete class) without having
+	 * a fully capable TargetSource available.
+	 * @see #setTargetSource
+	 * @see #setTarget
+	 */
+	public void setTargetClass(Class targetClass) {
+		this.targetSource = EmptyTargetSource.forClass(targetClass);
+	}
+
 	public Class getTargetClass() {
 		return this.targetSource.getTargetClass();
 	}
 
+	/**
+	 * Set the advisor chain factory to use.
+	 * <p>Default is a {@link HashMapCachingAdvisorChainFactory}.
+	 */
 	public void setAdvisorChainFactory(AdvisorChainFactory advisorChainFactory) {
+		Assert.notNull(advisorChainFactory, "AdvisorChainFactory must not be null");
+		if (this.advisorChainFactory != null) {
+			removeListener(this.advisorChainFactory);
+		}
 		this.advisorChainFactory = advisorChainFactory;
 		addListener(advisorChainFactory);
 	}
 
+	/**
+	 * Return the advisor chain factory to use (never <code>null</code>).
+	 */
 	public AdvisorChainFactory getAdvisorChainFactory() {
 		return this.advisorChainFactory;
+	}
+
+	/**
+	 * Add the given AdvisedSupportListener to this proxy configuration.
+	 * @param listener the listener to register
+	 */
+	public void addListener(AdvisedSupportListener listener) {
+		Assert.notNull(listener, "AdvisedSupportListener must not be null");
+		this.listeners.add(listener);
+	}
+
+	/**
+	 * Remove the given AdvisedSupportListener from this proxy configuration.
+	 * @param listener the listener to deregister
+	 */
+	public void removeListener(AdvisedSupportListener listener) {
+		Assert.notNull(listener, "AdvisedSupportListener must not be null");
+		this.listeners.remove(listener);
 	}
 
 
@@ -384,6 +421,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		addAdvisor(pos, advisor);
 	}
 
+	/**
+	 * Add all of the given advisors to this proxy configuration.
+	 * @param advisors the advisors to register
+	 */
 	public void addAllAdvisors(Advisor[] advisors) {
 		for (int i = 0; i < advisors.length; i++) {
 			Advisor advisor = advisors[i];
@@ -561,8 +602,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		sb.append(this.advisors.size()).append(" advisors ");
 		sb.append(this.advisors).append("; ");
 		sb.append("targetSource [").append(this.targetSource).append("]; ");
-		sb.append("advisorChainFactory [").append(this.advisorChainFactory);
-		sb.append("]; ").append(super.toString());
+		sb.append(super.toString());
 		return sb.toString();
 	}
 
