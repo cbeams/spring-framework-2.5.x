@@ -35,14 +35,38 @@ import org.springframework.aop.TargetSource;
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {
-	
+
+	/**
+	 * Return whether the Advised configuration is frozen,
+	 * in which case no advice changes can be made.
+	 */
+	boolean isFrozen();
+
+	/**
+	 * Are we proxying the full target class instead of specified interfaces?
+	 */
+	boolean isProxyTargetClass();
+
+	/**
+	 * Return the interfaces proxied by the AOP proxy. Will not
+	 * include the target class, which may also be proxied.
+	 */
+	Class[] getProxiedInterfaces();
+
+	/**
+	 * Determine whether the given interface is proxied.
+	 * @param intf the interface to check
+	 */
+	boolean isInterfaceProxied(Class intf);
+
+
 	/**
 	 * Change the TargetSource used by this Advised object.
 	 * Only works if the configuration isn't frozen.
 	 * @param targetSource new TargetSource to use
 	 */
 	void setTargetSource(TargetSource targetSource);
-	
+
 	/**
 	 * Return the TargetSource used by this Advised object.
 	 */
@@ -56,7 +80,7 @@ public interface Advised {
 	 * <p>Default is "false", for optimal performance.
 	 */
 	void setExposeProxy(boolean exposeProxy);
-	
+
 	/**
 	 * Return whether the factory should expose the proxy as a ThreadLocal.
 	 * This can be necessary if a target object needs to invoke a method on itself
@@ -66,36 +90,10 @@ public interface Advised {
 	 */
 	boolean isExposeProxy();
 
-	/**
-	 * Return whether the Advised configuration is frozen,
-	 * in which case no advice changes can be made.
-	 */
-	boolean isFrozen();
 
 	/**
-	 * Should we proxy the target class as well as any interfaces?
-	 * Can use this to force CGLIB proxying.
-	 */
-	boolean isProxyTargetClass();
-
-	/**
-	 * Return the interfaces proxied by the AOP proxy. Will not
-	 * include the target class, which may also be proxied.
-	 * @return the interfaces proxied by the AOP proxy
-	 */
-	Class[] getProxiedInterfaces();
-	
-	/**
-	 * Return whether this interface is proxied.
-	 * @param intf interface to test
-	 */
-	boolean isInterfaceProxied(Class intf);
-
-
-	/**
-	 * Return the Advisors applying to this proxy.
-	 * @return a list of Advisors applying to this proxy.
-	 * Cannot return null, but may return the empty array.
+	 * Return the advisors applying to this proxy.
+	 * @return a list of Advisors applying to this proxy (never <code>null</code>)
 	 */
 	Advisor[] getAdvisors();
 
@@ -154,6 +152,7 @@ public interface Advised {
 	 * @throws AopConfigException in case of invalid advice
 	 */
 	boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException;
+
 
 	/**
 	 * Add the given AOP Alliance advice to the tail of the advice (interceptor) chain.
