@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import junit.framework.TestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.BeansException;
@@ -59,6 +61,8 @@ import org.springframework.util.StopWatch;
  * @author Rick Evans
  */
 public class DefaultListableBeanFactoryTests extends TestCase {
+
+	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
 	public void testUnreferencedSingletonWasInstantiated() {
 		KnowsIfInstantiated.clearInstantiationRecord();
@@ -922,6 +926,10 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	}
 
 	public void testPrototypeCreationIsFastEnough() {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class, false);
 		lbf.registerBeanDefinition("test", rbd);
@@ -936,6 +944,10 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	}
 
 	public void testPrototypeCreationWithPropertiesIsFastEnough() {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class, false);
 		rbd.getPropertyValues().addPropertyValue("name", "juergen");
@@ -952,6 +964,10 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	}
 
 	public void testPrototypeCreationWithDependencyCheckIsFastEnough() {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(LifecycleBean.class, false);
 		rbd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);

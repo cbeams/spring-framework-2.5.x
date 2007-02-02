@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,10 @@ import junit.framework.TestCase;
 public class RefreshableTargetSourceTests extends TestCase {
 
 	/**
-	 * Test what happens when checking for refresh but not refreshing object
+	 * Test what happens when checking for refresh but not refreshing object.
 	 */
 	public void testRefreshCheckWithNonRefresh() throws Exception {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource();
-
 		ts.setRefreshCheckDelay(0);
 
 		Object a = ts.getTarget();
@@ -47,7 +46,7 @@ public class RefreshableTargetSourceTests extends TestCase {
 		ts.setRefreshCheckDelay(0);
 
 		Object a = ts.getTarget();
-		Thread.sleep(1000);
+		Thread.sleep(100);
 		Object b = ts.getTarget();
 
 		assertEquals("Should have called freshTarget twice", 2, ts.getCallCount());
@@ -70,18 +69,18 @@ public class RefreshableTargetSourceTests extends TestCase {
 
 	public void testRefreshOverTime() throws Exception {
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
-		ts.setRefreshCheckDelay(1000);
+		ts.setRefreshCheckDelay(100);
 
 		Object a = ts.getTarget();
 		Object b = ts.getTarget();
 		assertEquals("Objects should be same", a, b);
 
-		Thread.sleep(500);
+		Thread.sleep(50);
 
 		Object c = ts.getTarget();
 		assertEquals("A and C should be same", a, c);
 
-		Thread.sleep(600);
+		Thread.sleep(60);
 
 		Object d = ts.getTarget();
 		assertNotNull("D should not be null", d);
@@ -90,7 +89,7 @@ public class RefreshableTargetSourceTests extends TestCase {
 		Object e = ts.getTarget();
 		assertEquals("D and E should be equal", d, e);
 
-		Thread.sleep(1100);
+		Thread.sleep(110);
 
 		Object f = ts.getTarget();
 		assertFalse("E and F should be different", e.equals(f));
@@ -111,12 +110,12 @@ public class RefreshableTargetSourceTests extends TestCase {
 		}
 
 		protected Object freshTarget() {
-			callCount++;
+			this.callCount++;
 			return new Object();
 		}
 
 		public int getCallCount() {
-			return callCount;
+			return this.callCount;
 		}
 
 		protected boolean requiresRefresh() {
