@@ -11,8 +11,8 @@ import org.springframework.samples.petclinic.AbstractClinicTests;
  */
 public class TopLinkClinicTests extends AbstractClinicTests {
 
-	protected String[] getConfigLocations() {
-		return new String[] { "/org/springframework/samples/petclinic/toplink/applicationContext-toplink.xml" };
+	protected String getConfigPath() {
+		return "applicationContext-toplink.xml";
 	}
 
 }

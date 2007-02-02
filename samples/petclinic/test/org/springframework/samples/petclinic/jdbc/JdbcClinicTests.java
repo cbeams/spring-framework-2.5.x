@@ -10,8 +10,8 @@ import org.springframework.samples.petclinic.AbstractClinicTests;
  */
 public class JdbcClinicTests extends AbstractClinicTests {
 
-	protected String[] getConfigLocations() {
-		return new String[] { "/org/springframework/samples/petclinic/jdbc/applicationContext-jdbc.xml" };
+	protected String getConfigPath() {
+		return "applicationContext-jdbc.xml";
 	}
 
 }
