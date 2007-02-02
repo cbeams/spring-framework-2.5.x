@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,19 @@ import junit.framework.TestCase;
 import oracle.toplink.exceptions.ValidationException;
 import oracle.toplink.publicinterface.UnitOfWork;
 import oracle.toplink.sessionbroker.SessionBroker;
-import oracle.toplink.sessions.Project;
 import oracle.toplink.sessions.Session;
 
+/**
+ * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
+ * @uthor Juergen Hoeller
+ */
 public class SessionBrokerFactoryTests extends TestCase {
 
 	/*
 	 * When acquiring ClientSessionBrokers, the SessionBroker can throw RuntimeExceptions indicating
 	 * that this SessionBroker is not capable of creating "client" Sessions. We need to handle
 	 * these differently depending on how the SessionFactory is being used. If we are creating a
-	 * plain Session than we can return the original SessionBroker.
+	 * plain Session then we can return the original SessionBroker.
 	 */
 	public void testSessionBrokerThrowingValidationException() {
 		SessionBroker broker = new MockSingleSessionBroker();
@@ -45,24 +48,24 @@ public class SessionBrokerFactoryTests extends TestCase {
 		}
 	}
 
+	/**
+	 * Ensure that the managed TopLink Session proxy is behaving correctly
+	 * when it has been initialized with a SessionBroker.
+	 */
 	public void testManagedSessionBroker() {
 		SessionBroker client = new MockClientSessionBroker();
 		SessionBroker broker = new MockServerSessionBroker(client);
 		SessionBrokerSessionFactory factory = new SessionBrokerSessionFactory(broker);
-
 		assertEquals(client, factory.createSession());
 
 		Session session = factory.createManagedClientSession();
 		assertEquals(client, session.getActiveSession());
+		assertNotNull(session.getActiveUnitOfWork());
 		assertEquals(session.getActiveUnitOfWork(), session.getActiveUnitOfWork());
 	}
 
 
 	private class MockSingleSessionBroker extends SessionBroker {
-
-		public MockSingleSessionBroker() {
-			super(new Project());
-		}
 
 		public SessionBroker acquireClientSessionBroker() {
 			throw new ValidationException();
@@ -75,7 +78,6 @@ public class SessionBrokerFactoryTests extends TestCase {
 		private SessionBroker client;
 
 		public MockServerSessionBroker(SessionBroker client) {
-			super(new Project());
 			this.client = client;
 		}
 
@@ -88,11 +90,10 @@ public class SessionBrokerFactoryTests extends TestCase {
 	private class MockClientSessionBroker extends SessionBroker {
 
 		public MockClientSessionBroker() {
-			super(new Project());
 		}
 
 		public UnitOfWork acquireUnitOfWork() {
-			return new UnitOfWork();
+			return new UnitOfWork(this);
 		}
 	}
 
