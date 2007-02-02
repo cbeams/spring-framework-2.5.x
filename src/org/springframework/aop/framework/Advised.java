@@ -31,10 +31,35 @@ import org.springframework.aop.TargetSource;
  * allow manipulation of its AOP advice.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 13.03.2003
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised extends TargetClassAware {
+
+	/**
+	 * Return whether the Advised configuration is frozen,
+	 * in which case no advice changes can be made.
+	 */
+	boolean isFrozen();
+
+	/**
+	 * Are we proxying the full target class instead of specified interfaces?
+	 */
+	boolean isProxyTargetClass();
+
+	/**
+	 * Return the interfaces proxied by the AOP proxy. Will not
+	 * include the target class, which may also be proxied.
+	 */
+	Class[] getProxiedInterfaces();
+
+	/**
+	 * Determine whether the given interface is proxied.
+	 * @param intf the interface to check
+	 */
+	boolean isInterfaceProxied(Class intf);
+
 
 	/**
 	 * Change the TargetSource used by this Advised object.
@@ -66,90 +91,38 @@ public interface Advised extends TargetClassAware {
 	 */
 	boolean isExposeProxy();
 
-	/**
-	 * Should we proxy the target class as well as any interfaces?
-	 * Can use this to force CGLIB proxying.
-	 */
-	boolean isProxyTargetClass();
 
 	/**
-	 * Return the Advisors applying to this proxy.
-	 * @return a list of Advisors applying to this proxy.
-	 * Cannot return <code>null</code>, but may return the empty array.
+	 * Return the advisors applying to this proxy.
+	 * @return a list of Advisors applying to this proxy (never <code>null</code>)
 	 */
 	Advisor[] getAdvisors();
 
 	/**
-	 * Return the interfaces proxied by the AOP proxy. Will not
-	 * include the target class, which may also be proxied.
-	 * @return the interfaces proxied by the AOP proxy
-	 */
-	Class[] getProxiedInterfaces();
-
-	/**
-	 * Return whether this interface is proxied.
-	 * @param intf the interface to test
-	 */
-	boolean isInterfaceProxied(Class intf);
-
-	/**
-	 * Add the given AOP Alliance advice to the tail of the advice (interceptor) chain.
-	 * <p>This will be wrapped in a DefaultPointcutAdvisor with a pointcut that always
-	 * applies, and returned from the <code>getAdvisors()</code> method in this wrapped form.
-	 * <p>Note that the given advice will apply to all invocations on the proxy,
-	 * even to the <code>toString()</code> method! Use appropriate advice implementations
-	 * or specify appropriate pointcuts to apply to a narrower set of methods.
-	 * @param advice advice to add to the tail of the chain
-	 * @see #addAdvice(int, Advice)
-	 * @see org.springframework.aop.support.DefaultPointcutAdvisor
-	 */
-	void addAdvice(Advice advice) throws AopConfigException;
-
-	/**
-	 * Add the given AOP Alliance Advice at the specified position in the advice chain.
-	 * <p>This will be wrapped in a DefaultPointcutAdvisor with a pointcut that always
-	 * applies, and returned from the <code>getAdvisors()</code> method in this wrapped form.
-	 * <p>Note that the given advice will apply to all invocations on the proxy,
-	 * even to the <code>toString()</code> method! Use appropriate advice implementations
-	 * or specify appropriate pointcuts to apply to a narrower set of methods.
-	 * @param pos index from 0 (head)
-	 * @param advice advice to add at the specified position in the advice chain
-	 */
-	void addAdvice(int pos, Advice advice) throws AopConfigException;
-
-	/**
-	 * Add an Advisor at the end of the advisor chain.
-	 * <p>The Advisor may be an IntroductionAdvisor, in which new interfaces
-	 * will be available when a proxy is next obtained from the relevant factory.
-	 * @param advisor Advisor to add to the end of the chain
+	 * Add an advisor at the end of the advisor chain.
+	 * <p>The Advisor may be an {@link org.springframework.aop.IntroductionAdvisor},
+	 * in which new interfaces will be available when a proxy is next obtained
+	 * from the relevant factory.
+	 * @param advisor the advisor to add to the end of the chain
+	 * @throws AopConfigException in case of invalid advice
 	 */
 	void addAdvisor(Advisor advisor) throws AopConfigException;
 
 	/** 
 	 * Add an Advisor at the specified position in the chain.
-	 * @param advisor advisor to add at the specified position in the chain
+	 * @param advisor the advisor to add at the specified position in the chain
 	 * @param pos position in chain (0 is head). Must be valid.
+	 * @throws AopConfigException in case of invalid advice
 	 */
 	void addAdvisor(int pos, Advisor advisor) throws AopConfigException;
 
 	/**
-	 * Return the index (from 0) of the given advisor, or -1 if no such
-	 * advisor applies to this proxy.
-	 * <p>The return value of this method can be used to index into
-	 * the Advisors array.
-	 * @param advisor advisor to search for
-	 * @return index from 0 of this advisor, or -1 if there's
-	 * no such advisor.
-	 */
-	int indexOf(Advisor advisor);
-
-	/**
 	 * Remove the given advisor.
-	 * @param advisor advisor to remove
-	 * @return true if the advisor was removed; false if the
-	 * advisor was not found and hence could not be removed
+	 * @param advisor the advisor to remove
+	 * @return <code>true</code> if the advisor was removed; <code>false</code>
+	 * if the advisor was not found and hence could not be removed
 	 */
-	boolean removeAdvisor(Advisor advisor) throws AopConfigException;
+	boolean removeAdvisor(Advisor advisor);
 
 	/**
 	 * Remove the advisor at the given index.
@@ -159,31 +132,75 @@ public interface Advised extends TargetClassAware {
 	void removeAdvisor(int index) throws AopConfigException;
 
 	/**
-	 * Remove the Advisor containing the given advice.
-	 * @param advice advice to remove
-	 * @return whether the Advice was found and removed
-	 * (false if there was no such advice)
+	 * Return the index (from 0) of the given advisor,
+	 * or -1 if no such advisor applies to this proxy.
+	 * <p>The return value of this method can be used to index into the advisors array.
+	 * @param advisor the advisor to search for
+	 * @return index from 0 of this advisor, or -1 if there's no such advisor
 	 */
-	boolean removeAdvice(Advice advice) throws AopConfigException;
+	int indexOf(Advisor advisor);
 
 	/**
 	 * Replace the given advisor.
-	 * <p><b>NB:</b>If the advisor is an IntroductionAdvisor
-	 * and the replacement is not or implements different interfaces,
-	 * the proxy will need to be re-obtained or the old interfaces
-	 * won't be supported and the new interface won't be implemented.
-	 * @param a advisor to replace
-	 * @param b advisor to replace it with
+	 * <p><b>Note:</b> If the advisor is an {@link org.springframework.aop.IntroductionAdvisor}
+	 * and the replacement is not or implements different interfaces, the proxy will need
+	 * to be re-obtained or the old interfaces won't be supported and the new interface
+	 * won't be implemented.
+	 * @param a the advisor to replace
+	 * @param b the advisor to replace it with
 	 * @return whether it was replaced. If the advisor wasn't found in the
-	 * list of advisors, this method returns false and does nothing.
+	 * list of advisors, this method returns <code>false</code> and does nothing.
+	 * @throws AopConfigException in case of invalid advice
 	 */
 	boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException;
 
+
 	/**
-	 * Return whether the Advised configuration is frozen, and no
-	 * advice changes can be made.
+	 * Add the given AOP Alliance advice to the tail of the advice (interceptor) chain.
+	 * <p>This will be wrapped in a DefaultPointcutAdvisor with a pointcut that always
+	 * applies, and returned from the <code>getAdvisors()</code> method in this wrapped form.
+	 * <p>Note that the given advice will apply to all invocations on the proxy,
+	 * even to the <code>toString()</code> method! Use appropriate advice implementations
+	 * or specify appropriate pointcuts to apply to a narrower set of methods.
+	 * @param advice advice to add to the tail of the chain
+	 * @throws AopConfigException in case of invalid advice
+	 * @see #addAdvice(int, Advice)
+	 * @see org.springframework.aop.support.DefaultPointcutAdvisor
 	 */
-	boolean isFrozen();
+	void addAdvice(Advice advice) throws AopConfigException;
+
+	/**
+	 * Add the given AOP Alliance Advice at the specified position in the advice chain.
+	 * <p>This will be wrapped in a {@link org.springframework.aop.support.DefaultPointcutAdvisor}
+	 * with a pointcut that always applies, and returned from the {@link #getAdvisors()}
+	 * method in this wrapped form.
+	 * <p>Note: The given advice will apply to all invocations on the proxy,
+	 * even to the <code>toString()</code> method! Use appropriate advice implementations
+	 * or specify appropriate pointcuts to apply to a narrower set of methods.
+	 * @param pos index from 0 (head)
+	 * @param advice advice to add at the specified position in the advice chain
+	 * @throws AopConfigException in case of invalid advice
+	 */
+	void addAdvice(int pos, Advice advice) throws AopConfigException;
+
+	/**
+	 * Remove the Advisor containing the given advice.
+	 * @param advice the advice to remove
+	 * @return <code>true</code> of the advice was found and removed;
+	 * <code>false</code> if there was no such advice
+	 */
+	boolean removeAdvice(Advice advice);
+
+	/**
+	 * Return the index (from 0) of the given AOP Alliance Advice,
+	 * or -1 if no such advice is an advice for this proxy.
+	 * <p>The return value of this method can be used to index into
+	 * the advisors array.
+	 * @param advice AOP Alliance advice to search for
+	 * @return index from 0 of this advice, or -1 if there's no such advice
+	 */
+	int indexOf(Advice advice);
+
 
 	/**
 	 * As <code>toString()</code> will normally be delegated to the target,
