@@ -20,6 +20,7 @@ import java.io.Serializable;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Implementation of the {@link org.springframework.aop.TargetSource} interface
@@ -36,7 +37,11 @@ import org.springframework.util.Assert;
  */
 public class SingletonTargetSource implements TargetSource, Serializable {
 
-	/** Target cached and invoked using reflection */	
+	/** use serialVersionUID from Spring 1.2 for interoperability */
+	private static final long serialVersionUID = 9031246629662423738L;
+
+
+	/** Target cached and invoked using reflection */
 	private final Object target;
 
 
@@ -68,13 +73,6 @@ public class SingletonTargetSource implements TargetSource, Serializable {
 
 
 	/**
-	 * SingletonTargetSource uses the hash code of the target object.
-	 */
-	public int hashCode() {
-		return this.target.hashCode();
-	}
-
-	/**
 	 * Two invoker interceptors are equal if they have the same target or if the
 	 * targets or the targets are equal.
 	 */
@@ -89,8 +87,15 @@ public class SingletonTargetSource implements TargetSource, Serializable {
 		return this.target.equals(otherTargetSource.target);
 	}
 
+	/**
+	 * SingletonTargetSource uses the hash code of the target object.
+	 */
+	public int hashCode() {
+		return this.target.hashCode();
+	}
+
 	public String toString() {
-		return "SingletonTargetSource for target: " + this.target;
+		return "SingletonTargetSource for target object [" + ObjectUtils.identityToString(this.target) + "]";
 	}
 
 }

@@ -27,6 +27,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.util.ClassUtils;
 
 /**
  * Base class for {@link org.springframework.aop.TargetSource} implementations
@@ -51,6 +52,10 @@ import org.springframework.beans.factory.BeanFactoryAware;
  */
 public abstract class AbstractBeanFactoryBasedTargetSource
 		implements TargetSource, BeanFactoryAware, Serializable {
+
+	/** use serialVersionUID from Spring 1.2.7 for interoperability */
+	private static final long serialVersionUID = -4721607536018568393L;
+
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -104,7 +109,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (this.targetBeanName == null) {
-			throw new IllegalStateException("'targetBeanName' is required");
+			throw new IllegalStateException("Property'targetBeanName' is required");
 		}
 		this.beanFactory = beanFactory;
 	}
@@ -123,7 +128,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 			this.targetClass = this.beanFactory.getType(this.targetBeanName);
 			if (this.targetClass == null) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Getting bean with name '" + this.targetBeanName + "' to determine type");
+					logger.trace("Getting bean with name '" + this.targetBeanName + "' in order to determine type");
 				}
 				this.targetClass = this.beanFactory.getBean(this.targetBeanName).getClass();
 			}
@@ -164,14 +169,24 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 			logger.debug("Disconnecting TargetSource [" + this + "]");
 		}
 		try {
-			TargetSource disconnectedTargetSource = new SingletonTargetSource(getTarget());
-			return disconnectedTargetSource;
+			// Create disconnected SingletonTargetSource.
+			return new SingletonTargetSource(getTarget());
 		}
 		catch (Exception ex) {
 			logger.error("Cannot get target for disconnecting TargetSource [" + this + "]", ex);
 			throw new NotSerializableException(
 					"Cannot get target for disconnecting TargetSource [" + this + "]: " + ex);
 		}
+	}
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(ClassUtils.getShortName(getClass()));
+		sb.append(" for target bean '").append(this.targetBeanName).append("'");
+		if (this.targetClass != null) {
+			sb.append(" of type [").append(this.targetClass.getName()).append("]");
+		}
+		return sb.toString();
 	}
 
 }
