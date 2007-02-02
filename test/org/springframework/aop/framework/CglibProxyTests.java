@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,10 +61,9 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 	public void testNullConfig() {
 		try {
 			AopProxy aop = new Cglib2AopProxy(null);
-			aop.getProxy();
 			fail("Shouldn't allow null interceptors");
 		}
-		catch (AopConfigException ex) {
+		catch (IllegalArgumentException ex) {
 			// Ok
 		}
 	}
@@ -100,7 +99,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
 		mockTargetSource.setTarget(raw);
-		AdvisedSupport pc = new AdvisedSupport(new Class[]{});
+		AdvisedSupport pc = new AdvisedSupport();
 		pc.setTargetSource(mockTargetSource);
 		AopProxy aop = new Cglib2AopProxy(pc);
 

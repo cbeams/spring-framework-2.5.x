@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,10 +47,9 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 	public void testNullConfig() {
 		try {
 			JdkDynamicAopProxy aop = new JdkDynamicAopProxy(null);
-			aop.getProxy();
 			fail("Shouldn't allow null interceptors");
 		} 
-		catch (AopConfigException ex) {
+		catch (IllegalArgumentException ex) {
 			// Ok
 		}
 	}
@@ -130,12 +129,10 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
 	public void testProxyNotWrappedIfIncompatible() {
 		FooBar bean = new FooBar();
-
 		AdvisedSupport as = new AdvisedSupport(new Class[]{Foo.class});
 		as.setTarget(bean);
 
 		Foo proxy = (Foo)createProxy(as);
-
 		assertSame("Target should be returned when return types are incompatible", bean, proxy.getBarThis());
 		assertSame("Proxy should be returned when return types are compatible", proxy, proxy.getFooThis());
 
@@ -149,17 +146,21 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 		Named named = new Person();
 		assertEquals("equals() returned false", proxy, named);
 		assertEquals("hashCode() not equal", proxy.hashCode(), named.hashCode());
-
 	}
+
 
 	public static interface Foo {
+
 		Bar getBarThis();
+
 		Foo getFooThis();
 	}
+
 
 	public static interface Bar {
 
 	}
+
 
 	public static class FooBar implements Foo, Bar {
 
@@ -172,6 +173,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 		}
 	}
 
+
 	public static interface Named {
 
 		String getName();
@@ -180,6 +182,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
 		int hashCode();
 	}
+
 
 	public static class Person implements Named {
 
@@ -204,4 +207,5 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 			return name.hashCode();
 		}
 	}
+
 }

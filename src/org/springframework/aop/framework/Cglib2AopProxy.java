@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -104,21 +105,14 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 
 
 	/**
-	 * Create a new Cglib2AopProxy for the given config.
+	 * Create a new Cglib2AopProxy for the given AOP configuration.
 	 * @throws AopConfigException if the config is invalid. We try to throw an informative
 	 * exception in this case, rather than let a mysterious failure happen later.
 	 */
 	public Cglib2AopProxy(AdvisedSupport config) throws AopConfigException {
-		if (config == null) {
-			throw new AopConfigException("Cannot create AopProxy with null ProxyConfig");
-		}
+		Assert.notNull(config, "AdvisedSupport must not be null");
 		if (config.getAdvisors().length == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE) {
-			throw new AopConfigException("Cannot create AopProxy with no advisors and no target source");
-		}
-		//DK - is this check really necessary?
-		//should this 'config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE' be enough?
-		if (config.getTargetClass() == null) {
-			throw new AopConfigException("Either an interface or a target is required for proxy creation");
+			throw new AopConfigException("No advisors and no TargetSource specified");
 		}
 		this.advised = config;
 	}
@@ -128,13 +122,13 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 	 * @param constructorArgs the constructor argument values
 	 * @param constructorArgTypes the constructor argument types
 	 */
-	protected void setConstructorArguments(Object[] constructorArgs, Class[] constructorArgTypes) {
+	public void setConstructorArguments(Object[] constructorArgs, Class[] constructorArgTypes) {
 		if (constructorArgs == null || constructorArgTypes == null) {
-			throw new IllegalArgumentException("Both constructorArgs and constructorArgTypes need to be specified");
+			throw new IllegalArgumentException("Both 'constructorArgs' and 'constructorArgTypes' need to be specified");
 		}
 		if (constructorArgs.length != constructorArgTypes.length) {
-			throw new IllegalArgumentException("Number of constructorArgs (" + constructorArgs.length +
-					") must match number of constructorArgTypes (" + constructorArgTypes.length + ")");
+			throw new IllegalArgumentException("Number of 'constructorArgs' (" + constructorArgs.length +
+					") must match number of 'constructorArgTypes' (" + constructorArgTypes.length + ")");
 		}
 		this.constructorArgs = constructorArgs;
 		this.constructorArgTypes = constructorArgTypes;
@@ -147,20 +141,18 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 
 	public Object getProxy(ClassLoader classLoader) {
 		if (logger.isDebugEnabled()) {
-			Class targetClass = this.advised.getTargetClass();
-			logger.debug("Creating CGLIB2 proxy" +
-					(targetClass != null ? " for [" + targetClass.getName() + "]" : ""));
+			logger.debug("Creating CGLIB2 proxy: target source is " + this.advised.getTargetSource());
 		}
 
 		Enhancer enhancer = createEnhancer();
 		try {
-			Class rootClass = this.advised.getTargetClass();
-
 			// Create proxy in specific ClassLoader, if given.
 			if (classLoader != null) {
 				enhancer.setClassLoader(classLoader);
 			}
 
+			Class rootClass = this.advised.getTargetClass();
+			Assert.state(rootClass != null, "Target class must be available for creating a CGLIB proxy");
 			Class proxySuperClass = rootClass;
 
 			if (AopUtils.isCglibProxyClass(rootClass)) {

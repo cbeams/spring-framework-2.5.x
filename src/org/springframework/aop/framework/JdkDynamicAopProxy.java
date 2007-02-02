@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -44,7 +45,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Proxies created using this class will be thread-safe if the
  * underlying (target) class is thread-safe.
- * 
+ *
  * <p>Proxies are serializable so long as all Advisors (including Advices
  * and Pointcuts) and the TargetSource are serializable.
  *
@@ -56,6 +57,10 @@ import org.springframework.util.ClassUtils;
  * @see ProxyFactory
  */
 final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializable {
+
+	/** use serialVersionUID from Spring 1.2 for interoperability */
+	private static final long serialVersionUID = 5531744639992436476L;
+
 
 	/*
 	 * NOTE: We could avoid the code duplication between this class and the CGLIB
@@ -84,21 +89,18 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 
 	/**
-	 * Construct a new JDK proxy.
-	 * @throws AopConfigException if the config is invalid.
-	 * We try to throw an informative exception in this case,
-	 * rather than let a mysterious failure happen later.
+	 * Construct a new JdkDynamicAopProxy for the given AOP configuration.
+	 * @throws AopConfigException if the config is invalid. We try to throw an informative
+	 * exception in this case, rather than let a mysterious failure happen later.
 	 */
 	public JdkDynamicAopProxy(AdvisedSupport config) throws AopConfigException {
-		if (config == null) {
-			throw new AopConfigException("Cannot create AopProxy with null ProxyConfig");
-		}
+		Assert.notNull(config, "AdvisedSupport must not be null");
 		if (config.getAdvisors().length == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE) {
-			throw new AopConfigException("Cannot create AopProxy with no advisors and no target source");
+			throw new AopConfigException("No advisors and no TargetSource specified");
 		}
 		this.advised = config;
 	}
-	
+
 
 	public Object getProxy() {
 		return getProxy(ClassUtils.getDefaultClassLoader());
@@ -106,9 +108,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 	public Object getProxy(ClassLoader classLoader) {
 		if (logger.isDebugEnabled()) {
-			Class targetClass = this.advised.getTargetClass();
-			logger.debug("Creating JDK dynamic proxy" +
-					(targetClass != null ? " for [" + targetClass.getName() + "]" : ""));
+			logger.debug("Creating JDK dynamic proxy: target source is " + this.advised.getTargetSource());
 		}
 		Class[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised);
 		findDefinedEqualsAndHashCodeMethods(proxiedInterfaces);
@@ -118,6 +118,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	/**
 	 * Finds any {@link #equals} or {@link #hashCode} method that may be defined
 	 * on the supplied set of interfaces.
+	 * @param proxiedInterfaces the interfaces to introspect
 	 */
 	private void findDefinedEqualsAndHashCodeMethods(Class[] proxiedInterfaces) {
 		for (int i = 0; i < proxiedInterfaces.length; i++) {
