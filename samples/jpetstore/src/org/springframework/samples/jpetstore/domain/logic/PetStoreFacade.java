@@ -9,7 +9,7 @@ import org.springframework.samples.jpetstore.domain.Order;
 import org.springframework.samples.jpetstore.domain.Product;
 
 /**
- * JPetStore primary business interface.
+ * JPetStore's central business interface.
  *
  * @author Juergen Hoeller
  * @since 30.11.2003

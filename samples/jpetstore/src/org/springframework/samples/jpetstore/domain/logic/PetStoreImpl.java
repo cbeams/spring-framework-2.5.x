@@ -14,33 +14,31 @@ import org.springframework.samples.jpetstore.domain.Order;
 import org.springframework.samples.jpetstore.domain.Product;
 
 /**
- * JPetStore primary business object.
+ * JPetStore's business layer facade.
  * 
- * <p>This object makes use of five DAO objects, decoupling it
- * from the details of working with persistence APIs. Thus
- * although this application uses iBATIS for data access,
- * another persistence tool could be dropped in without
- * breaking this class.
+ * <p>This object makes use of five DAO objects, decoupling it from the
+ * details of working with persistence APIs. Therefore, although this
+ * application uses iBATIS for data access, a different persistence
+ * strategy could be incorporated without breaking this class.
  *
  * <p>The DAOs are made available to the instance of this object
  * using Dependency Injection. (The DAOs are in turn configured
  * using Dependency Injection.) We use Setter Injection here,
  * exposing JavaBean setter methods for each DAO. This means there is
  * a JavaBean "property" for each DAO. In this case the properties
- * are write-only: there is no getter method to accompany the
- * setter methods. Getter methods are optional: implement them
- * only if you want to expose access to the properties in your
- * business object.
+ * are write-only: there is no getter method to accompany the setter
+ * methods. Getter methods are optional: implement them only if you
+ * want to expose access to the properties in your business object.
  *
  * <p>There is one instance of this class in the JPetStore application.
- * In Spring terminology, it is a "singleton". This means a
- * per-Application Context singleton. The factory creates a single
- * instance; there is no need for a private constructor, static
- * factory method etc as in the traditional implementation of
- * the Singleton Design Pattern. 
+ * In Spring terminology, it is a "singleton". This means a singleton
+ * per Spring Application Context instance. The factory creates a
+ * single instance; there is no need for a private constructor,
+ * static factory method etc as in the traditional implementation
+ * of the Singleton Design Pattern.
  *
  * <p>This is a POJO. It does not depend on any Spring APIs.
- * It's usable outside a Spring container, and can be instantiated
+ * It is usable outside a Spring container, and can be instantiated
  * using new in a JUnit test. However, we can still apply declarative
  * transaction management to it using Spring AOP.
  *
@@ -48,7 +46,8 @@ import org.springframework.samples.jpetstore.domain.Product;
  * Note that this attribute definition is only necessary if using Commons
  * Attributes auto-proxying (see the "attributes" directory under the root of
  * JPetStore). No attributes are required with a TransactionFactoryProxyBean,
- * as in the default applicationContext.xml in the war/WEB-INF directory.
+ * as in the default <code>applicationContext.xml</code> in the
+ * <code>war/WEB-INF</code> directory.
  *
  * <p>The following attribute definition uses Commons Attributes attribute syntax.
  * @@org.springframework.transaction.interceptor.DefaultTransactionAttribute()
