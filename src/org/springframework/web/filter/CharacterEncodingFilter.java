@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,8 @@ import javax.servlet.http.HttpServletResponse;
  * This is useful because current browsers typically do not set a character
  * encoding even if specified in the HTML page or form.
  *
- * <p>One can either just apply this filter's encoding if the request does not
- * already specify an encoding, or force the application of this filter's
- * encoding in any case.
+ * <p>This filter can either apply its encoding if the request does not already
+ * specify an encoding, or enforce this filter's encoding in any case.
  *
  * @author Juergen Hoeller
  * @since 15.03.2004
@@ -45,8 +44,8 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 
 
 	/**
-	 * Set the encoding to use for requests. This encoding will be
-	 * passed into a ServletRequest.setCharacterEncoding call.
+	 * Set the encoding to use for requests. This encoding will be passed
+	 * into a <code>ServletRequest.setCharacterEncoding</code> call.
 	 * <p>Whether this encoding will override existing request
 	 * encodings depends on the "forceEncoding" flag.
 	 * @see #setForceEncoding
@@ -58,8 +57,8 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 
 	/**
 	 * Set whether the encoding of this filter should override existing
-	 * request encodings. Default is "false", i.e. do not modify encoding
-	 * if ServletRequest.getCharacterEncoding returns a non-null value.
+	 * request encodings. Default is "false", i.e. do not modify encoding if
+	 * <code>ServletRequest.getCharacterEncoding</code> returns a non-null value.
 	 * @see #setEncoding
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding
 	 */
@@ -71,8 +70,8 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		
-		if (this.forceEncoding || request.getCharacterEncoding() == null) {
+
+		if (this.encoding != null && (this.forceEncoding || request.getCharacterEncoding() == null)) {
 			request.setCharacterEncoding(this.encoding);
 		}
 		filterChain.doFilter(request, response);
