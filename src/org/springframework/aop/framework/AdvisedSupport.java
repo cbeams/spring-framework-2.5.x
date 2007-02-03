@@ -229,32 +229,35 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/**
 	 * Add a new proxied interface.
-	 * @param newInterface additional interface to proxy
+	 * @param intf the additional interface to proxy
 	 */
-	public void addInterface(Class newInterface) {
-		Assert.notNull(newInterface, "Interface must not be null");
-		if (!newInterface.isInterface()) {
-			throw new IllegalArgumentException("[" + newInterface.getName() + "] is not an interface");
+	public void addInterface(Class intf) {
+		Assert.notNull(intf, "Interface must not be null");
+		if (!intf.isInterface()) {
+			throw new IllegalArgumentException("[" + intf.getName() + "] is not an interface");
 		}
-		if (!this.interfaces.contains(newInterface)) {
-			this.interfaces.add(newInterface);
+		if (!this.interfaces.contains(intf)) {
+			this.interfaces.add(intf);
 			adviceChanged();
 			if (logger.isDebugEnabled()) {
-				logger.debug("Added new aspect interface: " + newInterface.getName());
+				logger.debug("Added new aspect interface: " + intf.getName());
 			}
 		}
-	}
-
-	public Class[] getProxiedInterfaces() {
-		return (Class[]) this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
 	/**
 	 * Remove a proxied interface.
 	 * <p>Does nothing if the given interface isn't proxied.
+	 * @param intf the interface to remove from the proxy
+	 * @return <code>true</code> if the interface was removed; <code>false</code>
+	 * if the interface was not found and hence could not be removed
 	 */
 	public boolean removeInterface(Class intf) {
 		return this.interfaces.remove(intf);
+	}
+
+	public Class[] getProxiedInterfaces() {
+		return (Class[]) this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
 	public boolean isInterfaceProxied(Class intf) {
@@ -324,6 +327,26 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		return this.advisors.indexOf(advisor);
 	}
 
+	public boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException {
+		int index = indexOf(a);
+		if (index == -1 || b == null) {
+			return false;
+		}
+		removeAdvisor(index);
+		addAdvisor(index, b);
+		return true;
+	}
+
+	public void addAdvisor(int pos, IntroductionAdvisor advisor) throws AopConfigException {
+		advisor.validateInterfaces();
+
+		// If the advisor passed validation, we can make the change.
+		for (int i = 0; i < advisor.getInterfaces().length; i++) {
+			addInterface(advisor.getInterfaces()[i]);
+		}
+		addAdvisorInternal(pos, advisor);
+	}
+
 	private void addAdvisorInternal(int pos, Advisor advice) throws AopConfigException {
 		if (isFrozen()) {
 			throw new AopConfigException("Cannot add advisor: Configuration is frozen.");
@@ -337,16 +360,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		adviceChanged();
 	}
 
-	public void addAdvisor(int pos, IntroductionAdvisor advisor) throws AopConfigException {
-		advisor.validateInterfaces();
-
-		// If the advisor passed validation, we can make the change.
-		for (int i = 0; i < advisor.getInterfaces().length; i++) {
-			addInterface(advisor.getInterfaces()[i]);
-		}
-		addAdvisorInternal(pos, advisor);
-	}
-
 	/**
 	 * Bring the array up to date with the list.
 	 */
@@ -354,15 +367,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		this.advisorArray = (Advisor[]) this.advisors.toArray(new Advisor[this.advisors.size()]);
 	}
 
-	public boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException {
-		int index = indexOf(a);
-		if (index == -1 || b == null) {
-			return false;
-		}
-		removeAdvisor(index);
-		addAdvisor(index, b);
-		return true;
-	}
+
 
 	public void addAdvice(Advice advice) throws AopConfigException {
 		int pos = (this.advisors != null) ? this.advisors.size() : 0;
@@ -413,14 +418,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Is this advice included in any advisor?
-	 * @param advice advice to check inclusion of
-	 * @return whether this advice instance could be run in an invocation
+	 * Is the given advice included in any advisor within this proxy configuration?
+	 * @param advice the advice to check inclusion of
+	 * @return whether this advice instance is included
 	 */
 	public boolean adviceIncluded(Advice advice) {
-		if (this.advisors.isEmpty()) {
-			return false;
-		}
 		for (int i = 0; i < this.advisors.size(); i++) {
 			Advisor advisor = (Advisor) this.advisors.get(i);
 			if (advisor.getAdvice() == advice) {
@@ -450,6 +452,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 		return count;
 	}
+
 
 	/**
 	 * Invoked when advice has changed.

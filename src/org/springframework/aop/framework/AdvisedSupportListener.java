@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,19 +17,20 @@
 package org.springframework.aop.framework;
 
 /**
- * Listener to be registered on AdvisedSupport objects.
- * Allows to receive callbacks on activation and change of advice.
+ * Listener to be registered on {@link AdvisedSupport} objects.
+ * Allows for receiving callbacks on activation and change of advice.
  *
  * @author Rod Johnson
+ * @see AdvisedSupport#addListener
  */
 public interface AdvisedSupportListener {
-	
+
 	/**
-	 * Invoked when first proxy is created.
+	 * Invoked when the first proxy is created.
 	 * @param advisedSupport the AdvisedSupport object
 	 */
 	void activated(AdvisedSupport advisedSupport);
-	
+
 	/**
 	 * Invoked when advice is changed after a proxy is created.
 	 * @param advisedSupport the AdvisedSupport object
