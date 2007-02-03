@@ -471,9 +471,9 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Is this advice included in any advisor?
-	 * @param advice advice to check inclusion of
-	 * @return whether this advice instance could be run in an invocation
+	 * Is the given advice included in any advisor within this proxy configuration?
+	 * @param advice the advice to check inclusion of
+	 * @return whether this advice instance is included
 	 */
 	public boolean adviceIncluded(Advice advice) {
 		for (int i = 0; i < this.advisors.size(); i++) {
