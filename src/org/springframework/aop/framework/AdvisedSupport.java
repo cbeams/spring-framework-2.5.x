@@ -22,7 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.aopalliance.aop.Advice;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.DynamicIntroductionAdvice;
@@ -54,6 +53,10 @@ import org.springframework.util.ClassUtils;
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
 
+	/** use serialVersionUID from Spring 2.0 for interoperability */
+	private static final long serialVersionUID = 2651364800145442165L;
+
+
 	/**
 	 * Canonical TargetSource when there's no target, and behavior is
 	 * supplied by the advisors.
@@ -64,6 +67,9 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/** Package-protected to allow direct access for efficiency */
 	TargetSource targetSource = EMPTY_TARGET_SOURCE;
 
+	/** The AopProxyFactory to use */
+	private transient AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
+
 	/** The AdvisorChainFactory to use */
 	transient AdvisorChainFactory advisorChainFactory;
 
@@ -71,8 +77,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private transient List listeners = new LinkedList();
 
 	/**
-	 * List of Advice. If an Interceptor is added, it will be wrapped
-	 * in an Advice before being added to this List.
+	 * List of Advisors. If an Advice is added, it will be wrapped
+	 * in an Advisor before being added to this List.
 	 */
 	private List advisors = new LinkedList();
 
@@ -162,6 +168,24 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
+	 * Customize the AopProxyFactory, allowing different strategies
+	 * to be dropped in without changing the core framework.
+	 * <p>Default is {@link DefaultAopProxyFactory}, using dynamic JDK
+	 * proxies or CGLIB proxies based on the requirements.
+	 */
+	public void setAopProxyFactory(AopProxyFactory aopProxyFactory) {
+		Assert.notNull(aopProxyFactory, "AopProxyFactory must not be null");
+		this.aopProxyFactory = aopProxyFactory;
+	}
+
+	/**
+	 * Return the AopProxyFactory that this ProxyConfig uses.
+	 */
+	public AopProxyFactory getAopProxyFactory() {
+		return this.aopProxyFactory;
+	}
+
+	/**
 	 * Set the advisor chain factory to use.
 	 * <p>Default is a {@link HashMapCachingAdvisorChainFactory}.
 	 */
@@ -221,6 +245,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	protected void copyConfigurationFrom(AdvisedSupport other, TargetSource ts, List pAdvisors) {
 		copyFrom(other);
 		this.targetSource = ts;
+		this.aopProxyFactory = other.aopProxyFactory;
 		setInterfaces((Class[]) other.interfaces.toArray(new Class[other.interfaces.size()]));
 		this.advisors = new LinkedList();
 		for (int i = 0; i < pAdvisors.size(); i++) {
@@ -228,6 +253,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			addAdvisor(advice);
 		}
 	}
+
 
 	/**
 	 * Set the interfaces to be proxied.
@@ -242,37 +268,32 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/**
 	 * Add a new proxied interface.
-	 * @param newInterface additional interface to proxy
+	 * @param intf the additional interface to proxy
 	 */
-	public void addInterface(Class newInterface) {
-		Assert.notNull(newInterface, "Interface must not be null");
-		if (!newInterface.isInterface()) {
-			throw new IllegalArgumentException("[" + newInterface.getName() + "] is not an interface");
+	public void addInterface(Class intf) {
+		Assert.notNull(intf, "Interface must not be null");
+		if (!intf.isInterface()) {
+			throw new IllegalArgumentException("[" + intf.getName() + "] is not an interface");
 		}
-		if (!this.interfaces.contains(newInterface)) {
-			this.interfaces.add(newInterface);
+		if (!this.interfaces.contains(intf)) {
+			this.interfaces.add(intf);
 			adviceChanged();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Added new aspect interface: " + newInterface.getName());
-			}
 		}
-	}
-
-	public Class[] getProxiedInterfaces() {
-		return (Class[]) this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
 	/**
 	 * Remove a proxied interface.
 	 * <p>Does nothing if the given interface isn't proxied.
+	 * @param intf the interface to remove from the proxy
+	 * @return <code>true</code> if the interface was removed; <code>false</code>
+	 * if the interface was not found and hence could not be removed
 	 */
 	public boolean removeInterface(Class intf) {
 		return this.interfaces.remove(intf);
 	}
 
-	public void addAdvice(Advice advice) throws AopConfigException {
-		int pos = (this.advisors != null) ? this.advisors.size() : 0;
-		addAdvice(pos, advice);
+	public Class[] getProxiedInterfaces() {
+		return (Class[]) this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
 	public boolean isInterfaceProxied(Class intf) {
@@ -285,72 +306,26 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		return false;
 	}
 
-	/**
-	 * Cannot add introductions this way unless the advice implements IntroductionInfo.
-	 */
-	public void addAdvice(int pos, Advice advice) throws AopConfigException {
-		if (advice instanceof IntroductionInfo) {
-			// We don't need an IntroductionAdvisor for this kind of introduction:
-			// it's fully self-describing
-			addAdvisor(pos, new DefaultIntroductionAdvisor(advice, (IntroductionInfo) advice));
-		}
-		else if (advice instanceof DynamicIntroductionAdvice) {
-			// We need an IntroductionAdvisor for this kind of introduction
-			throw new AopConfigException("DynamicIntroductionAdvice may only be added as part of IntroductionAdvisor");
+
+	public final Advisor[] getAdvisors() {
+		return this.advisorArray;
+	}
+
+	public void addAdvisor(Advisor advisor) {
+		int pos = this.advisors.size();
+		addAdvisor(pos, advisor);
+	}
+
+	public void addAdvisor(int pos, Advisor advisor) throws AopConfigException {
+		if (advisor instanceof IntroductionAdvisor) {
+			addAdvisor(pos, (IntroductionAdvisor) advisor);
 		}
 		else {
-			addAdvisor(pos, new DefaultPointcutAdvisor(advice));
+			addAdvisorInternal(pos, advisor);
 		}
 	}
 
-	/**
-	 * Remove the Advisor containing the given advice.
-	 * @param advice advice to remove
-	 * @return whether the Advice was found and removed
-	 * (<code>false</code> if there was no such advice)
-	 */
-	public final boolean removeAdvice(Advice advice) throws AopConfigException {
-		int index = indexOf(advice);
-		if (index == -1) {
-			return false;
-		}
-		else {
-			removeAdvisor(index);
-			return true;
-		}
-	}
-
-	/**
-	 * Return the index (from 0) of the given AOP Alliance Advice,
-	 * or -1 if no such advice is an advice for this proxy.
-	 * <p>The return value of this method can be used to index into
-	 * the advisors array.
-	 * @param advice AOP Alliance advice to search for
-	 * @return index from 0 of this advice, or -1 if there's no such advice
-	 */
-	public int indexOf(Advice advice) {
-		for (int i = 0; i < this.advisors.size(); i++) {
-			Advisor advisor = (Advisor) this.advisors.get(i);
-			if (advisor.getAdvice() == advice) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	/**
-	 * Return the index (from 0) of the given advisor,
-	 * or -1 if no such advisor applies to this proxy.
-	 * <p>The return value of this method can be used to index
-	 * into the advisors array.
-	 * @param advisor advisor to search for
-	 * @return index from 0 of this advisor, or -1 if there's no such advisor
-	 */
-	public int indexOf(Advisor advisor) {
-		return this.advisors.indexOf(advisor);
-	}
-
-	public final boolean removeAdvisor(Advisor advisor) {
+	public boolean removeAdvisor(Advisor advisor) {
 		int index = indexOf(advisor);
 		if (index == -1) {
 			return false;
@@ -384,41 +359,18 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		adviceChanged();
 	}
 
-	private void addAdvisorInternal(int pos, Advisor advice) throws AopConfigException {
-		if (isFrozen()) {
-			throw new AopConfigException("Cannot add advisor: Configuration is frozen.");
-		}
-		if (pos > this.advisors.size()) {
-			throw new IllegalArgumentException(
-					"Illegal position " + pos + " in advisor list with size " + this.advisors.size());
-		}
-		this.advisors.add(pos, advice);
-		updateAdvisorArray();
-		adviceChanged();
+	public int indexOf(Advisor advisor) {
+		return this.advisors.indexOf(advisor);
 	}
 
-	public void addAdvisor(int pos, IntroductionAdvisor advisor) throws AopConfigException {
-		advisor.validateInterfaces();
-
-		// If the advisor passed validation, we can make the change.
-		for (int i = 0; i < advisor.getInterfaces().length; i++) {
-			addInterface(advisor.getInterfaces()[i]);
+	public boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException {
+		int index = indexOf(a);
+		if (index == -1 || b == null) {
+			return false;
 		}
-		addAdvisorInternal(pos, advisor);
-	}
-
-	public void addAdvisor(int pos, Advisor advisor) throws AopConfigException {
-		if (advisor instanceof IntroductionAdvisor) {
-			addAdvisor(pos, (IntroductionAdvisor) advisor);
-		}
-		else {
-			addAdvisorInternal(pos, advisor);
-		}
-	}
-
-	public void addAdvisor(Advisor advisor) {
-		int pos = this.advisors.size();
-		addAdvisor(pos, advisor);
+		removeAdvisor(index);
+		addAdvisor(index, b);
+		return true;
 	}
 
 	/**
@@ -434,15 +386,34 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		adviceChanged();
 	}
 
+	public void addAdvisor(int pos, IntroductionAdvisor advisor) throws AopConfigException {
+		advisor.validateInterfaces();
+
+		// If the advisor passed validation, we can make the change.
+		for (int i = 0; i < advisor.getInterfaces().length; i++) {
+			addInterface(advisor.getInterfaces()[i]);
+		}
+		addAdvisorInternal(pos, advisor);
+	}
+
+	private void addAdvisorInternal(int pos, Advisor advice) throws AopConfigException {
+		if (isFrozen()) {
+			throw new AopConfigException("Cannot add advisor: Configuration is frozen.");
+		}
+		if (pos > this.advisors.size()) {
+			throw new IllegalArgumentException(
+					"Illegal position " + pos + " in advisor list with size " + this.advisors.size());
+		}
+		this.advisors.add(pos, advice);
+		updateAdvisorArray();
+		adviceChanged();
+	}
+
 	/**
 	 * Bring the array up to date with the list.
 	 */
 	protected final void updateAdvisorArray() {
 		this.advisorArray = (Advisor[]) this.advisors.toArray(new Advisor[this.advisors.size()]);
-	}
-
-	public final Advisor[] getAdvisors() {
-		return this.advisorArray;
 	}
 
 	/**
@@ -454,25 +425,49 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		return this.advisors;
 	}
 
+
+	public void addAdvice(Advice advice) throws AopConfigException {
+		int pos = (this.advisors != null) ? this.advisors.size() : 0;
+		addAdvice(pos, advice);
+	}
+
 	/**
-	 * Replace the given advisor.
-	 * <p><b>NB:</b> If the advisor is an IntroductionAdvisor
-	 * and the replacement is not or implements different interfaces,
-	 * the proxy will need to be re-obtained or the old interfaces
-	 * won't be supported and the new interface won't be implemented.
-	 * @param a advisor to replace
-	 * @param b advisor to replace it with
-	 * @return whether it was replaced. If the advisor wasn't found in the
-	 * list of advisors, this method returns false and does nothing.
+	 * Cannot add introductions this way unless the advice implements IntroductionInfo.
 	 */
-	public final boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException {
-		int index = indexOf(a);
-		if (index == -1 || b == null) {
+	public void addAdvice(int pos, Advice advice) throws AopConfigException {
+		if (advice instanceof IntroductionInfo) {
+			// We don't need an IntroductionAdvisor for this kind of introduction:
+			// it's fully self-describing
+			addAdvisor(pos, new DefaultIntroductionAdvisor(advice, (IntroductionInfo) advice));
+		}
+		else if (advice instanceof DynamicIntroductionAdvice) {
+			// We need an IntroductionAdvisor for this kind of introduction
+			throw new AopConfigException("DynamicIntroductionAdvice may only be added as part of IntroductionAdvisor");
+		}
+		else {
+			addAdvisor(pos, new DefaultPointcutAdvisor(advice));
+		}
+	}
+
+	public boolean removeAdvice(Advice advice) throws AopConfigException {
+		int index = indexOf(advice);
+		if (index == -1) {
 			return false;
 		}
-		removeAdvisor(index);
-		addAdvisor(index, b);
-		return true;
+		else {
+			removeAdvisor(index);
+			return true;
+		}
+	}
+
+	public int indexOf(Advice advice) {
+		for (int i = 0; i < this.advisors.size(); i++) {
+			Advisor advisor = (Advisor) this.advisors.get(i);
+			if (advisor.getAdvice() == advice) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	/**
@@ -480,10 +475,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param advice advice to check inclusion of
 	 * @return whether this advice instance could be run in an invocation
 	 */
-	public final boolean adviceIncluded(Advice advice) {
-		if (this.advisors.size() == 0) {
-			return false;
-		}
+	public boolean adviceIncluded(Advice advice) {
 		for (int i = 0; i < this.advisors.size(); i++) {
 			Advisor advisor = (Advisor) this.advisors.get(i);
 			if (advisor.getAdvice() == advice) {
@@ -498,7 +490,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param adviceClass the advice class to check
 	 * @return the count of the interceptors of this class or subclasses
 	 */
-	public final int countAdvicesOfType(Class adviceClass) {
+	public int countAdvicesOfType(Class adviceClass) {
 		Assert.notNull(adviceClass, "Advice class must not be null");
 		if (this.advisors.size() == 0) {
 			return 0;
@@ -513,6 +505,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 		return count;
 	}
+
 
 	/**
 	 * Invoked when advice has changed.
@@ -533,36 +526,32 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Subclasses should call this to get a new AOP proxy. They should <b>not</b>
-	 * create an AOP proxy with this as an argument.
-	 */
-	protected synchronized AopProxy createAopProxy() {
-		if (!this.active) {
-			activate();
-		}
-		return getAopProxyFactory().createAopProxy(this);
-	}
-	
-	/**
 	 * Subclasses can call this to check whether any AOP proxies have been created yet.
 	 */
 	protected final boolean isActive() {
 		return this.active;
 	}
-	
+
+	/**
+	 * Subclasses should call this to get a new AOP proxy. They should <b>not</b>
+	 * create an AOP proxy with this as an argument.
+	 */
+	protected final synchronized AopProxy createAopProxy() {
+		if (!this.active) {
+			activate();
+		}
+		return getAopProxyFactory().createAopProxy(this);
+	}
+
 
 	//---------------------------------------------------------------------
 	// Serialization support
 	//---------------------------------------------------------------------
-	
+
 	/**
 	 * Serializes a copy of the state of this class, ignoring subclass state.
 	 */
 	protected Object writeReplace() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Disconnecting " + this);
-		}
-
 		// Copy state to avoid dependencies on BeanFactory etc that subclasses may have.
 		AdvisedSupport copy = this;
 
@@ -575,19 +564,18 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		// May return this.
 		return copy;
 	}
-	 
+
 	/**
 	 * Initializes transient fields.
 	 */
 	private Object readResolve() {
-		this.logger = LogFactory.getLog(getClass());
 		this.active = true;
 		this.listeners = new LinkedList();
 		initDefaultAdvisorChainFactory();
 		return this;
 	}
-	
-	
+
+
 	public String toProxyConfigString() {
 		return toString();
 	}

@@ -25,6 +25,8 @@ import java.util.Map;
 
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
@@ -86,42 +88,16 @@ import org.springframework.util.ObjectUtils;
 public class ProxyFactoryBean extends AdvisedSupport
     implements FactoryBean, BeanClassLoaderAware, BeanFactoryAware, AdvisedSupportListener {
 
-	/*
-	 * Implementation notes. There are two cases of usage of this class:
-	 * usage as a singleton, when only one object will be created, and usage as a
-	 * prototype, when the <code>FactoryBean.getObject()</code> method must return an
-	 * independent proxy on each invocation. In the latter case, a distinct instance of
-	 * any non-singleton Advisors or Advices must be used, as well as a distinct
-	 * target/TargetSource instance if the target is a prototype and is specified in the
-	 * interceptorNames list, rather than using the target or targetSource property. 
-	 * 
-	 * If this factory is used as a singleton, the advice chain in this class is used
-	 * and all Advisors/Advices are materialized when the singleton instance is created.
-	 * If it's a prototype, new AdvisedSupport instances are created with
-	 * a copy of the advice chain to create each proxy and support independent
-	 * manipulation of advice. Any advisor/advice bean names that that are prototypes
-	 * are replaced by placeholders in the advisor chain held in this class and
-	 * an independent advisor chain is materialized when each prototype instance
-	 * is created.
-	 * 
-	 * Revision as of September 20, 2004 partly based on patch provided by Chris Eldredge.
-	 */
-
 	/**
 	 * This suffix in a value in an interceptor list indicates to expand globals.
 	 */
 	public static final String GLOBAL_SUFFIX = "*";
 
-	/**
-	 * Names of Advisor and Advice beans in the factory.
-	 * Default is for globals expansion only.
-	 */
+
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private String[] interceptorNames;
 	
-	/**
-	 * Name of the target or TargetSource bean. Null if the TargetSource is not specified in
-	 * the interceptorNames list.
-	 */
 	private String targetName;
 
 	private boolean autodetectInterfaces = true;

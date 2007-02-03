@@ -18,30 +18,19 @@ package org.springframework.aop.framework;
 
 import java.io.Serializable;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * Convenience superclass for configuration used in creating proxies,
  * to ensure that all proxy creators have consistent properties.
  *
- * <p>Note that it is no longer possible to configure subclasses to expose
- * the MethodInvocation. Interceptors should normally manage their own
- * ThreadLocals if they need to make resources available to advised objects.
- * If it's absolutely necessary to expose the MethodInvocation, use an
- * interceptor to do so.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see AdvisedSupport
  */
 public class ProxyConfig implements Serializable {
-	
+
 	/** use serialVersionUID from Spring 1.2 for interoperability */
-	private static final long serialVersionUID = -8409359707199703185L;;
+	private static final long serialVersionUID = -8409359707199703185L;
 
-
-	/** Transient to optimize serialization: AdvisedSupport resets it */
-	protected transient Log logger = LogFactory.getLog(getClass());
 
 	private boolean proxyTargetClass = false;
 
@@ -52,8 +41,6 @@ public class ProxyConfig implements Serializable {
 	protected boolean exposeProxy = false;
 
 	private boolean frozen = false;
-
-	private transient AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
 
 
 	/**
@@ -155,23 +142,6 @@ public class ProxyConfig implements Serializable {
 		return this.frozen;
 	}
 
-	/**
-	 * Customize the AopProxyFactory, allowing different strategies
-	 * to be dropped in without changing the core framework.
-	 * <p>Default is {@link DefaultAopProxyFactory}, using dynamic JDK
-	 * proxies or CGLIB proxies based on the requirements.
-	 */
-	public void setAopProxyFactory(AopProxyFactory apf) {
-		this.aopProxyFactory = apf;
-	}
-
-	/**
-	 * Return the AopProxyFactory that this ProxyConfig uses.
-	 */
-	public AopProxyFactory getAopProxyFactory() {
-		return this.aopProxyFactory;
-	}
-
 
 	/**
 	 * Copy configuration from the other config object.
@@ -183,7 +153,6 @@ public class ProxyConfig implements Serializable {
 		this.exposeProxy = other.exposeProxy;
 		this.frozen = other.frozen;
 		this.opaque = other.opaque;
-		this.aopProxyFactory = other.aopProxyFactory;
 	}
 
 	public String toString() {

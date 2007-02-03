@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.aopalliance.aop.Advice;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
@@ -103,6 +105,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	protected static final Object[] PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS = new Object[0];
 
 
+	/** Logger available to subclasses */
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	/** Default value is same as non-ordered */
 	private int order = Integer.MAX_VALUE;
 
@@ -115,11 +120,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 */
 	private boolean freezeProxy = false;
 
-	/**
-	 * Names of common interceptors. We must use bean name rather than object references
-	 * to handle prototype advisors/interceptors.
-	 * Default is the empty array: no common interceptors.
-	 */
+	/** Default is no common interceptors */
 	private String[] interceptorNames = new String[0];
 
 	private boolean applyCommonInterceptorsFirst = true;
@@ -195,9 +196,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	/**
 	 * Set the common interceptors. These must be bean names in the current factory.
-	 * They can be of any advice or advisor type Spring supports. If this property
-	 * isn't set, there will be zero common interceptors. This is perfectly valid,
-	 * if "specific" interceptors such as matching Advisors are all we want.
+	 * They can be of any advice or advisor type Spring supports.
+	 * <p>If this property isn't set, there will be zero common interceptors.
+	 * This is perfectly valid, if "specific" interceptors such as matching
+	 * Advisors are all we want.
 	 */
 	public void setInterceptorNames(String[] interceptorNames) {
 		this.interceptorNames = interceptorNames;
