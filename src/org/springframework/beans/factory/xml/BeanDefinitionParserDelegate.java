@@ -214,9 +214,6 @@ public class BeanDefinitionParserDelegate {
 	public static final String DEFAULT_MERGE_ATTRIBUTE = "default-merge";
 
 
-    /**
-	 * {@link Log} instance for this class.
-	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final XmlReaderContext readerContext;
@@ -232,7 +229,7 @@ public class BeanDefinitionParserDelegate {
 
 
 	/**
-	 * Create a new <code>XmlBeanDefinitionParserHelper</code> associated with the
+	 * Create a new BeanDefinitionParserDelegate associated with the
 	 * supplied {@link XmlReaderContext}.
 	 */
 	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
@@ -345,7 +342,7 @@ public class BeanDefinitionParserDelegate {
 			if (!StringUtils.hasText(beanName)) {
 				try {
 					beanName = BeanDefinitionReaderUtils.generateBeanName(
-							beanDefinition, this.readerContext.getReader().getBeanFactory(), (containingBean != null));
+							beanDefinition, this.readerContext.getRegistry(), (containingBean != null));
 					if (logger.isDebugEnabled()) {
 						logger.debug("Neither XML 'id' nor 'name' specified - " +
 								"using generated bean name [" + beanName + "]");
