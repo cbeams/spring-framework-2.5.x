@@ -18,6 +18,8 @@ package org.springframework.aop.framework;
 
 import java.io.Serializable;
 
+import org.springframework.util.Assert;
+
 /**
  * Convenience superclass for configuration used in creating proxies,
  * to ensure that all proxy creators have consistent properties.
@@ -36,9 +38,9 @@ public class ProxyConfig implements Serializable {
 
 	private boolean optimize = false;
 
-	protected boolean opaque = false;
+	boolean opaque = false;
 
-	protected boolean exposeProxy = false;
+	boolean exposeProxy = false;
 
 	private boolean frozen = false;
 
@@ -148,6 +150,7 @@ public class ProxyConfig implements Serializable {
 	 * @param other object to copy configuration from
 	 */
 	public void copyFrom(ProxyConfig other) {
+		Assert.notNull(other, "Other ProxyConfig object must not be null");
 		this.proxyTargetClass = other.proxyTargetClass;
 		this.optimize = other.optimize;
 		this.exposeProxy = other.exposeProxy;
