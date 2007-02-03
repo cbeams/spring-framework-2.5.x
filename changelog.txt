@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.9 (2.2.2007)
+Changes in version 1.2.9 (5.2.2007)
 -----------------------------------
 
 General
@@ -14,6 +14,9 @@ Package org.springframework.aop
 * reworked JdkDynamicAopProxy's "Method.setAccessible" handling to avoid unnecessary calls
 * Cglib2AopProxy throws AopConfigException instead of AspectException, for better root cause handling
 * HashMapCachingAdvisorChainFactory uses synchronized access to its method cache Map
+* exposed "indexOf(Advice)" method on Advised interface
+* revised ProxyConfig/AdvisedSupport's "toString()" output
+* revised SingletonTargetSource's and AbstractBeanFactoryBasedTargetSource's "toString()" output
 * AbstractAutoProxyCreator considers all Advices (not just MethodInterceptors) as infrastructure classes to ignore
 
 Package org.springframework.beans
@@ -30,6 +33,7 @@ Package org.springframework.beans
 * fixed method overrides check to accept methods declared on interfaces as well
 * fixed PropertyPlaceholderConfigurer to throw a BeanDefinitionStoreException in case of any circular reference
 * ResourceEntityResolver catches any kind of Exception in system root URL check (in particular AccessControlException)
+* DefaultXmlBeanDefinitionParser trims whitespace from "class" attributes in XML bean definitions
 * removed default for "abstract"/"singleton" attributes in "spring-beans.dtd", for 2.0-style inheritance for inner beans
 
 Package org.springframework.context
@@ -94,6 +98,9 @@ Package org.springframework.remoting
 * Burlap/Hessian/Rmi/JndiRmiClientInterceptor consistently throw RemoteProxyFailureException instead of AspectException
 * RmiServiceExporter logs description of actual registry instead of port (to properly handle passed-in "registry")
 * added public "getHost()" and "getPort()" accessors to RmiRegistryFactoryBean
+
+Package org.springframework.samples
+* updated PetClinic's HSQLPlatformWithNativeSequence for TopLink 10.1.3 GA (requires 10.1.3 GA or later now)
 
 Package org.springframework.scheduling
 * Quartz SchedulerFactoryBean uses given "nonTransactionalDataSource" as default DataSource if no "dataSource" specified
