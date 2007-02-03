@@ -85,8 +85,8 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.aop.Advisor
  * @see Advised
  */
-public class ProxyFactoryBean extends AdvisedSupport
-    implements FactoryBean, BeanClassLoaderAware, BeanFactoryAware, AdvisedSupportListener {
+public class ProxyFactoryBean extends ProxyCreatorSupport
+		implements FactoryBean, BeanClassLoaderAware, BeanFactoryAware {
 
 	/**
 	 * This suffix in a value in an interceptor list indicates to expand globals.
@@ -242,18 +242,18 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * @see org.springframework.aop.TargetSource#getTargetClass
 	 */
 	public Class getObjectType() {
-		if (this.singletonInstance != null) {
-			return this.singletonInstance.getClass();
+		synchronized (this) {
+			if (this.singletonInstance != null) {
+				return this.singletonInstance.getClass();
+			}
 		}
-		else if (getProxiedInterfaces().length == 1) {
+		if (getProxiedInterfaces().length == 1) {
 			return getProxiedInterfaces()[0];
 		}
-		else if (this.targetName != null && this.beanFactory != null) {
+		if (this.targetName != null && this.beanFactory != null) {
 			return this.beanFactory.getType(this.targetName);
 		}
-		else {
-			return getTargetClass();
-		}
+		return getTargetClass();
 	}
 
 	public boolean isSingleton() {
@@ -276,9 +276,6 @@ public class ProxyFactoryBean extends AdvisedSupport
 			// Initialize the shared singleton instance.
 			super.setFrozen(this.freezeProxy);
 			this.singletonInstance = getProxy(createAopProxy());
-			// We must listen to superclass advice change events to recache the singleton
-			// instance if necessary.
-			addListener(this);
 		}
 		return this.singletonInstance;
 	}
@@ -297,7 +294,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 			logger.trace("Creating copy of prototype ProxyFactoryBean config: " + this);
 		}
 
-		AdvisedSupport copy = new AdvisedSupport();
+		ProxyCreatorSupport copy = new ProxyCreatorSupport(getAopProxyFactory());
 		// The copy needs a fresh advisor chain, and a fresh TargetSource.
 		TargetSource targetSource = freshTargetSource();
 		copy.copyConfigurationFrom(this, targetSource, freshAdvisorChain());
@@ -308,7 +305,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 		copy.setFrozen(this.freezeProxy);
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Using AdvisedSupport copy: " + copy);
+			logger.trace("Using ProxyCreatorSupport copy: " + copy);
 		}
 		return getProxy(copy.createAopProxy());
 	}
@@ -440,7 +437,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 				if (logger.isDebugEnabled()) {
 					logger.debug("Refreshing bean named '" + pa.getBeanName() + "'");
 				}
-				// Replace the placeholder with a fresh protoype instance resulting
+				// Replace the placeholder with a fresh prototype instance resulting
 				// from a getBean() lookup
 				Object bean = this.beanFactory.getBean(pa.getBeanName());
 				Advisor refreshedAdvisor = namedBeanToAdvisor(bean);
@@ -544,22 +541,16 @@ public class ProxyFactoryBean extends AdvisedSupport
 		}
 	}
 
-
-	/**
-	 * @see org.springframework.aop.framework.AdvisedSupportListener#activated
-	 */
-	public void activated(AdvisedSupport advisedSupport) {
-		// Nothing to do.
-	}
-
 	/**
 	 * Blow away and recache singleton on an advice change.
-	 * @see org.springframework.aop.framework.AdvisedSupportListener#adviceChanged
 	 */
-	public void adviceChanged(AdvisedSupport advisedSupport) {
+	protected void adviceChanged() {
+		super.adviceChanged();
 		if (this.singleton) {
 			logger.debug("Advice has changed; recaching singleton instance");
-			this.singletonInstance = null;
+			synchronized (this) {
+				this.singletonInstance = null;
+			}
 		}
 	}
 

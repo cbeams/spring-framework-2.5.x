@@ -32,7 +32,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 14.03.2003
  */
-public class ProxyFactory extends AdvisedSupport implements AopProxy {
+public class ProxyFactory extends ProxyCreatorSupport implements AopProxy {
 
 	/**
 	 * Create a new ProxyFactory.
@@ -42,8 +42,8 @@ public class ProxyFactory extends AdvisedSupport implements AopProxy {
 
 	/**
 	 * Create a new ProxyFactory.
-	 * <p>Will proxy all interfaces of the given target.
-	 * @param target the target object that is to be proxied
+	 * <p>Will proxy all interfaces that the given target implements.
+	 * @param target the target object to be proxied
 	 */
 	public ProxyFactory(Object target) {
 		Assert.notNull(target, "Target object must not be null");
@@ -84,7 +84,7 @@ public class ProxyFactory extends AdvisedSupport implements AopProxy {
 
 	/**
 	 * Create a new proxy according to the settings in this factory.
-	 * Can be called repeatedly. Effect will vary if we've added
+	 * <p>Can be called repeatedly. Effect will vary if we've added
 	 * or removed interfaces. Can add and remove interceptors.
 	 * <p>Uses a default class loader: Usually, the thread context class loader
 	 * (if necessary for proxy creation).
@@ -96,7 +96,7 @@ public class ProxyFactory extends AdvisedSupport implements AopProxy {
 
 	/**
 	 * Create a new proxy according to the settings in this factory.
-	 * Can be called repeatedly. Effect will vary if we've added
+	 * <p>Can be called repeatedly. Effect will vary if we've added
 	 * or removed interfaces. Can add and remove interceptors.
 	 * <p>Uses the given class loader (if necessary for proxy creation).
 	 * @param classLoader the class loader to create the proxy with

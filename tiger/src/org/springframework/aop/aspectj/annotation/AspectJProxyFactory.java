@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@ import org.aspectj.lang.reflect.PerClauseKind;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJProxyUtils;
-import org.springframework.aop.framework.AdvisedSupport;
-import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.framework.ProxyCreatorSupport;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -33,34 +32,40 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
+ * AspectJ-based proxy factory, allowing for programmatic building
+ * of proxies which include AspectJ aspects (code style as well
+ * Java 5 annotation style).
+ *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
+ * @see #addAspect(Object)
+ * @see #addAspect(Class)
+ * @see #getProxy()
+ * @see #getProxy(ClassLoader)
+ * @see org.springframework.aop.framework.ProxyFactory
  */
-public class AspectJProxyFactory extends AdvisedSupport {
+public class AspectJProxyFactory extends ProxyCreatorSupport {
 
-	/**
-	 * The {@link AspectJAdvisorFactory} used by this instance.
-	 */
-	private final AspectJAdvisorFactory aspectFactory = new ReflectiveAspectJAdvisorFactory();
-
-	/**
-	 * Caches singleton aspect instances.
-	 */
+	/** Cache for singleton aspect instances */
 	private static final Map aspectCache = new HashMap();
 
+	private final AspectJAdvisorFactory aspectFactory = new ReflectiveAspectJAdvisorFactory();
+
 
 	/**
-	 * Create a new <code>AspectJProxyFactory</code>.
+	 * Create a new AspectJProxyFactory.
 	 */
 	public AspectJProxyFactory() {
 	}
 
 	/**
-	 * Create a new <code>AspectJProxyFactory</code>.
-	 * Proxy all interfaces of the given target.
+	 * Create a new AspectJProxyFactory.
+	 * <p>Will proxy all interfaces that the given target implements.
+	 * @param target the target object to be proxied
 	 */
-	public AspectJProxyFactory(Object target) throws AopConfigException {
-		Assert.notNull(target, "'target' cannot be null.");
+	public AspectJProxyFactory(Object target) {
+		Assert.notNull(target, "Target object must not be null");
 		setInterfaces(ClassUtils.getAllInterfaces(target));
 		setTarget(target);
 	}
@@ -75,31 +80,7 @@ public class AspectJProxyFactory extends AdvisedSupport {
 
 
 	/**
-	 * Create a new proxy according to the settings in this factory.
-	 * Can be called repeatedly. Effect will vary if we've added
-	 * or removed interfaces. Can add and remove interceptors.
-	 * <p>Uses a default class loader: Usually, the thread context class loader
-	 * (if necessary for proxy creation).
-	 * @return the new proxy
-	 */
-	public <T> T getProxy() {
-		return (T) createAopProxy().getProxy();
-	}
-
-	/**
-	 * Create a new proxy according to the settings in this factory.
-	 * Can be called repeatedly. Effect will vary if we've added
-	 * or removed interfaces. Can add and remove interceptors.
-	 * <p>Uses the given class loader (if necessary for proxy creation).
-	 * @param classLoader the class loader to create the proxy with
-	 * @return the new proxy
-	 */
-	public <T> T getProxy(ClassLoader classLoader) {
-		return (T) createAopProxy().getProxy(classLoader);
-	}
-
-	/**
-	 * Adds the supplied aspect instance to the chain. The type of the aspect instance
+	 * Add the supplied aspect instance to the chain. The type of the aspect instance
 	 * supplied must be a singleton aspect. True singleton lifecycle is not honoured when
 	 * using this method - the caller is responsible for managing the lifecycle of any
 	 * aspects added in this way.
@@ -111,12 +92,13 @@ public class AspectJProxyFactory extends AdvisedSupport {
 		if (am.getAjType().getPerClause().getKind() != PerClauseKind.SINGLETON) {
 			throw new IllegalArgumentException("Aspect type '" + aspectType.getName() + "' is not a singleton aspect.");
 		}
-		MetadataAwareAspectInstanceFactory instanceFactory = new SingletonMetadataAwareAspectInstanceFactory(aspect, beanName);
+		MetadataAwareAspectInstanceFactory instanceFactory =
+				new SingletonMetadataAwareAspectInstanceFactory(aspect, beanName);
 		addAdvisorsFromAspectInstanceFactory(instanceFactory);
 	}
 
 	/**
-	 * Adds an aspect of the supplied type to the end of the advice chain.
+	 * Add an aspect of the supplied type to the end of the advice chain.
 	 */
 	public void addAspect(Class aspectType) {
 		String beanName = aspectType.getName();
@@ -126,39 +108,34 @@ public class AspectJProxyFactory extends AdvisedSupport {
 	}
 
 	/**
-	 * Adds all {@link Advisor Advisors} from the supplied {@link MetadataAwareAspectInstanceFactory} to
-	 * the curren chain. Exposes any special purpose {@link Advisor Advisors} if needed.
+	 * Add all {@link Advisor Advisors} from the supplied {@link MetadataAwareAspectInstanceFactory}
+	 * to the current chain. Exposes any special purpose {@link Advisor Advisors} if needed.
 	 * @see #makeAdvisorChainAspectJCapableIfNecessary()
 	 */
 	private void addAdvisorsFromAspectInstanceFactory(MetadataAwareAspectInstanceFactory instanceFactory) {
 		List advisors = this.aspectFactory.getAdvisors(instanceFactory);
 		this.addAllAdvisors((Advisor[]) advisors.toArray(new Advisor[advisors.size()]));
-
 		makeAdvisorChainAspectJCapableIfNecessary();
 	}
 
 	/**
-	 * Creates an {@link AspectMetadata} instance for the supplied aspect type.
-	 * @throws IllegalArgumentException if the supplied {@link Class} is not a valid aspect type.
+	 * Create an {@link AspectMetadata} instance for the supplied aspect type.
 	 */
 	private AspectMetadata createAspectMetadata(Class aspectType, String beanName) {
 		AspectMetadata am = new AspectMetadata(aspectType, beanName);
-
 		if (!am.getAjType().isAspect()) {
-			throw new IllegalArgumentException("Class '" + aspectType.getName() + "' is not a valid aspect type.");
+			throw new IllegalArgumentException("Class [" + aspectType.getName() + "] is not a valid aspect type");
 		}
-
 		return am;
 	}
 
 	/**
-	 * Creates a {@link MetadataAwareAspectInstanceFactory} for the supplied aspect type. If the aspect type
+	 * Create a {@link MetadataAwareAspectInstanceFactory} for the supplied aspect type. If the aspect type
 	 * has no per clause, then a {@link SingletonMetadataAwareAspectInstanceFactory} is returned, otherwise
 	 * a {@link PrototypeAspectInstanceFactory} is returned.
 	 */
 	private MetadataAwareAspectInstanceFactory createAspectInstanceFactory(AspectMetadata am, Class aspectType, String beanName) {
 		MetadataAwareAspectInstanceFactory instanceFactory = null;
-
 		if (am.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
 			Object instance = getSingletonAspectInstance(aspectType);
 			instanceFactory = new SingletonMetadataAwareAspectInstanceFactory(instance, beanName);
@@ -172,19 +149,19 @@ public class AspectJProxyFactory extends AdvisedSupport {
 	}
 
 	/**
-	 * Adds any special-purpose {@link Advisor Advisors} needed for AspectJ support
-	 * to the chain. {@link #updateAdvisorArray() Updates} the {@link Advisor} array and
-	 * fires {@link #adviceChanged events}.
+	 * Add any special-purpose {@link Advisor Advisors} needed for AspectJ support
+	 * to the chain. {@link #updateAdvisorArray() Updates} the {@link Advisor} array
+	 * and fires {@link #adviceChanged events}.
 	 */
 	private void makeAdvisorChainAspectJCapableIfNecessary() {
 		if (AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(getAdvisorsInternal())) {
-			this.updateAdvisorArray();
-			this.adviceChanged();
+			updateAdvisorArray();
+			adviceChanged();
 		}
 	}
 
 	/**
-	 * Creates a {@link DefaultListableBeanFactory} used to create prototype instances
+	 * Create a {@link DefaultListableBeanFactory} used to create prototype instances
 	 * of the supplied aspect type.
 	 */
 	private DefaultListableBeanFactory getPrototypeAspectBeanFactory(Class aspectType, String beanName) {
@@ -196,7 +173,7 @@ public class AspectJProxyFactory extends AdvisedSupport {
 	}
 
 	/**
-	 * Gets the singleton aspect instance for the supplied aspect type. An instance
+	 * Get the singleton aspect instance for the supplied aspect type. An instance
 	 * is created if one cannot be found in the instance cache.
 	 */
 	private Object getSingletonAspectInstance(Class aspectType) {
@@ -209,6 +186,31 @@ public class AspectJProxyFactory extends AdvisedSupport {
 			aspectCache.put(aspectType, instance);
 			return instance;
 		}
+	}
+
+
+	/**
+	 * Create a new proxy according to the settings in this factory.
+	 * <p>Can be called repeatedly. Effect will vary if we've added
+	 * or removed interfaces. Can add and remove interceptors.
+	 * <p>Uses a default class loader: Usually, the thread context class loader
+	 * (if necessary for proxy creation).
+	 * @return the new proxy
+	 */
+	public <T> T getProxy() {
+		return (T) createAopProxy().getProxy();
+	}
+
+	/**
+	 * Create a new proxy according to the settings in this factory.
+	 * <p>Can be called repeatedly. Effect will vary if we've added
+	 * or removed interfaces. Can add and remove interceptors.
+	 * <p>Uses the given class loader (if necessary for proxy creation).
+	 * @param classLoader the class loader to create the proxy with
+	 * @return the new proxy
+	 */
+	public <T> T getProxy(ClassLoader classLoader) {
+		return (T) createAopProxy().getProxy(classLoader);
 	}
 
 }

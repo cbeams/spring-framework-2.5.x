@@ -17,20 +17,7 @@
 package org.springframework.aop.framework;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import org.aopalliance.intercept.Interceptor;
-import org.aopalliance.intercept.MethodInterceptor;
-
-import org.springframework.aop.Advisor;
-import org.springframework.aop.IntroductionAdvisor;
-import org.springframework.aop.IntroductionAwareMethodMatcher;
-import org.springframework.aop.MethodMatcher;
-import org.springframework.aop.PointcutAdvisor;
-import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
-import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 
 /**
  * Utility methods for use by {@link AdvisorChainFactory} implementations.
@@ -40,34 +27,22 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
  * given an {@link Advised} object.
  *
  * @author Rod Johnson
- * @author Adrian Colyer
  * @author Juergen Hoeller
- * @see AdvisorChainFactory
+ * @deprecated as of Spring 2.0.3, in favor of {@link DefaultAdvisorChainFactory}.
+ * This utility class will be removed in Spring 2.1.
  */
 public abstract class AdvisorChainFactoryUtils {
 
 	/**
-	 * Canonical instance of a simple AdvisorChainFactory implementation that
-	 * delegates to the {@link #calculateInterceptorsAndDynamicInterceptionAdvice}
-	 * method.
+	 * Canonical instance of a simple AdvisorChainFactory implementation.
 	 */
-	public static final AdvisorChainFactory SIMPLE_ADVISOR_CHAIN_FACTORY =
-			new AdvisorChainFactory() {
-				public List getInterceptorsAndDynamicInterceptionAdvice(
-						Advised config, Object proxy, Method method, Class targetClass) {
-					return calculateInterceptorsAndDynamicInterceptionAdvice(config, proxy, method, targetClass);
-				}
-				public void activated(AdvisedSupport advisedSupport) {
-				}
-				public void adviceChanged(AdvisedSupport advisedSupport) {
-				}
-			};
+	public static final AdvisorChainFactory SIMPLE_ADVISOR_CHAIN_FACTORY = new DefaultAdvisorChainFactory();
 
 
 	/**
 	 * Return the static interceptors and dynamic interception advice that may apply
 	 * to this method invocation.
-	 * @param config the AOP configuration in the form of an Advised obkect
+	 * @param config the AOP configuration in the form of an Advised object
 	 * @param proxy the proxy object
 	 * @param method the proxied method
 	 * @param targetClass the target class
@@ -78,72 +53,8 @@ public abstract class AdvisorChainFactoryUtils {
 	public static List calculateInterceptorsAndDynamicInterceptionAdvice(
 			Advised config, Object proxy, Method method, Class targetClass) {
 
-		// This is somewhat tricky... we have to process introductions first,
-		// but we need to preserve order in the ultimate list.
-		List interceptorList = new ArrayList(config.getAdvisors().length);
-		boolean hasIntroductions = hasMatchingIntroductions(config,targetClass);
-		AdvisorAdapterRegistry registry = GlobalAdvisorAdapterRegistry.getInstance();
-		Advisor[] advisors = config.getAdvisors();
-		for (int i = 0; i < advisors.length; i++) {
-			Advisor advisor = advisors[i];
-			if (advisor instanceof PointcutAdvisor) {
-				// Add it conditionally.
-				PointcutAdvisor pointcutAdvisor = (PointcutAdvisor) advisor;
-				if (pointcutAdvisor.getPointcut().getClassFilter().matches(targetClass)) {
-					MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
-					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
-					if (methodMatches(mm, method, targetClass, hasIntroductions)) {
-						if (mm.isRuntime()) {
-							// Creating a new object instance in the getInterceptors() method
-							// isn't a problem as we normally cache created chains.
-							for (int j = 0; j < interceptors.length; j++) {
-								interceptorList.add(new InterceptorAndDynamicMethodMatcher(interceptors[j], mm));
-							}
-						}
-						else {
-							interceptorList.addAll(Arrays.asList(interceptors));
-						}
-					}
-				}
-			}
-			else if (advisor instanceof IntroductionAdvisor) {
-				IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
-				if (ia.getClassFilter().matches(targetClass)) {
-					Interceptor[] interceptors = registry.getInterceptors(advisor);
-					interceptorList.addAll(Arrays.asList(interceptors));
-				}
-			}
-		}
-		return interceptorList;
-	}
-
-	/**
-	 * Determine whether the Advisors contain matching introductions.
-	 */
-	private static boolean hasMatchingIntroductions(Advised config, Class targetClass) {
-		for (int i = 0; i < config.getAdvisors().length; i++) {
-			Advisor advisor = config.getAdvisors()[i];
-			if (advisor instanceof IntroductionAdvisor) {
-				IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
-				if (ia.getClassFilter().matches(targetClass)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private static boolean methodMatches(
-			MethodMatcher matcher, Method method, Class targetClass, boolean hasIntroductions) {
-
-		if (matcher instanceof IntroductionAwareMethodMatcher) {
-			IntroductionAwareMethodMatcher introductionAwareMatcher = 
-				(IntroductionAwareMethodMatcher) matcher;
-			return introductionAwareMatcher.matches(method, targetClass,hasIntroductions);
-		}
-		else {
-			return matcher.matches(method, targetClass);
-		}
+		return SIMPLE_ADVISOR_CHAIN_FACTORY.getInterceptorsAndDynamicInterceptionAdvice(
+				config, proxy, method, targetClass);
 	}
 
 }

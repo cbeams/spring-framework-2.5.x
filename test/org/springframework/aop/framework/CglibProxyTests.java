@@ -42,7 +42,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class CglibProxyTests extends AbstractAopProxyTests {
 
-	protected Object createProxy(AdvisedSupport as) {
+	protected Object createProxy(ProxyCreatorSupport as) {
 		as.setProxyTargetClass(true);
 		Object proxy = as.createAopProxy().getProxy();
 		assertTrue(AopUtils.isCglibProxy(proxy));

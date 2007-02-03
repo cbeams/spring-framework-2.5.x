@@ -33,7 +33,7 @@ import org.springframework.beans.TestBean;
  */
 public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
-	protected Object createProxy(AdvisedSupport as) {
+	protected Object createProxy(ProxyCreatorSupport as) {
 		assertFalse("Not forcible CGLIB", as.isProxyTargetClass());
 		Object proxy = as.createAopProxy().getProxy();
 		assertTrue("Should be a JDK proxy: " + proxy.getClass(), AopUtils.isJdkDynamicProxy(proxy));
@@ -129,10 +129,11 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
 	public void testProxyNotWrappedIfIncompatible() {
 		FooBar bean = new FooBar();
-		AdvisedSupport as = new AdvisedSupport(new Class[]{Foo.class});
+		ProxyCreatorSupport as = new ProxyCreatorSupport();
+		as.setInterfaces(new Class[] {Foo.class});
 		as.setTarget(bean);
 
-		Foo proxy = (Foo)createProxy(as);
+		Foo proxy = (Foo) createProxy(as);
 		assertSame("Target should be returned when return types are incompatible", bean, proxy.getBarThis());
 		assertSame("Proxy should be returned when return types are compatible", proxy, proxy.getFooThis());
 

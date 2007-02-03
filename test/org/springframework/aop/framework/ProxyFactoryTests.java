@@ -17,7 +17,6 @@
 package org.springframework.aop.framework;
 
 import junit.framework.TestCase;
-import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.interceptor.DebugInterceptor;
@@ -31,7 +30,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 /**
- * Also tests AdvisedSupport superclass.
+ * Also tests AdvisedSupport and ProxyCreatorSupport superclasses.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -48,10 +47,8 @@ public class ProxyFactoryTests extends TestCase {
 		// Can use advised and ProxyFactory interchangeably
 		advised.addAdvice(nop);
 		pf.addAdvisor(advisor);
-		assertEquals(-1, pf.indexOf((Advice) null));
 		assertEquals(-1, pf.indexOf(new NopInterceptor()));
 		assertEquals(0, pf.indexOf(nop));
-		assertEquals(-1, advised.indexOf((Advisor) null));
 		assertEquals(1, pf.indexOf(advisor));
 		assertEquals(-1, advised.indexOf(new DefaultPointcutAdvisor(null)));
 	}
@@ -68,14 +65,12 @@ public class ProxyFactoryTests extends TestCase {
 		proxied.setAge(5);
 		assertEquals(1, cba.getCalls());
 		assertEquals(1, nop.getCount());
-		assertFalse(pf.removeAdvisor(null));
 		assertTrue(pf.removeAdvisor(advisor));
 		assertEquals(5, proxied.getAge());
 		assertEquals(1, cba.getCalls());
 		assertEquals(2, nop.getCount());
 		assertFalse(pf.removeAdvisor(new DefaultPointcutAdvisor(null)));
 	}
-	
 	
 	public void testRemoveAdvisorByIndex() {
 		TestBean target = new TestBean();
@@ -123,8 +118,7 @@ public class ProxyFactoryTests extends TestCase {
 		assertEquals(5, proxied.getAge());
 		assertEquals(4, nop2.getCount());
 	}
-	
-	
+
 	public void testReplaceAdvisor() {
 		TestBean target = new TestBean();
 		ProxyFactory pf = new ProxyFactory(target);
@@ -143,9 +137,7 @@ public class ProxyFactoryTests extends TestCase {
 		assertEquals(1, cba1.getCalls());
 		assertEquals(0, cba2.getCalls());
 		assertEquals(1, nop.getCount());
-		assertFalse(advised.replaceAdvisor(null, null));
-		assertFalse(advised.replaceAdvisor(null, advisor2));
-		assertFalse(advised.replaceAdvisor(advisor1, null));
+		assertFalse(advised.replaceAdvisor(new DefaultPointcutAdvisor(new NopInterceptor()), advisor2));
 		assertTrue(advised.replaceAdvisor(advisor1, advisor2));
 		assertEquals(advisor2, pf.getAdvisors()[0]);
 		assertEquals(5, proxied.getAge());
@@ -153,11 +145,6 @@ public class ProxyFactoryTests extends TestCase {
 		assertEquals(2, nop.getCount());
 		assertEquals(1, cba2.getCalls());
 		assertFalse(pf.replaceAdvisor(new DefaultPointcutAdvisor(null), advisor1));
-	}
-
-	public static class Concrete {
-		public void foo() {
-		}
 	}
 
 	public void testAddRepeatedInterface() {
@@ -293,6 +280,13 @@ public class ProxyFactoryTests extends TestCase {
 		Object proxy = pf.getProxy();
 		assertTrue("Proxy is a CGLIB proxy", AopUtils.isCglibProxy(proxy));
 		assertTrue(proxy instanceof TestBean);
+	}
+
+
+	public static class Concrete {
+
+		public void foo() {
+		}
 	}
 
 }

@@ -188,8 +188,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			}
 
 			// Get the interception chain for this method.
-			List chain = this.advised.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
-					this.advised, proxy, method, targetClass);
+			List chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 
 			// Check whether we have any advice. If we don't, we can fallback on direct
 			// reflective invocation of the target, and avoid creating a MethodInvocation.

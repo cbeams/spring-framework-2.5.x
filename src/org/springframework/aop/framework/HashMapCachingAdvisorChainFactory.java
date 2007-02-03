@@ -16,51 +16,15 @@
 
 package org.springframework.aop.framework;
 
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.core.CollectionFactory;
-
 /**
- * {@link AdvisorChainFactory} implementation that caches by method.
- *
- <p>Uses IdentityHashMap on JDK 1.4+ or Commons Collections 3.x IdentityMap
- * (if available), which skip expensive <code>Method.hashCode()</code> calls.
- * Falls back to standard HashMap on plain JDK 1.3.
+ * {@link AdvisorChainFactory} implementation that used to cache by method.
+ * As of Spring 2.0.3, this is a dummy subclass of {@link DefaultAdvisorChainFactory}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see org.springframework.core.CollectionFactory#createIdentityMapIfPossible
- * @see java.lang.reflect.Method#hashCode()
+ * @deprecated as of Spring 2.0.3, in favor of {@link AdvisedSupport}'s
+ * built-in caching. This class will be removed in Spring 2.1.
  */
-public class HashMapCachingAdvisorChainFactory implements AdvisorChainFactory {
-
-	/** Cache with Method key and List value */
-	private final Map methodCache = CollectionFactory.createIdentityMapIfPossible(32);
-
-
-	public List getInterceptorsAndDynamicInterceptionAdvice(
-			Advised config, Object proxy, Method method, Class targetClass) {
-
-		synchronized (this.methodCache) {
-			List cached = (List) this.methodCache.get(method);
-			if (cached == null) {
-				cached = AdvisorChainFactoryUtils.calculateInterceptorsAndDynamicInterceptionAdvice(
-						config, proxy, method, targetClass);
-				this.methodCache.put(method, cached);
-			}
-			return cached;
-		}
-	}
-
-	public void activated(AdvisedSupport advisedSupport) {
-	}
-
-	public void adviceChanged(AdvisedSupport advisedSupport) {
-		synchronized (this.methodCache) {
-			this.methodCache.clear();
-		}
-	}
+public class HashMapCachingAdvisorChainFactory extends DefaultAdvisorChainFactory {
 
 }

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -88,7 +88,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	/**
 	 * Set in CGLIB or JDK mode.
 	 */
-	protected abstract Object createProxy(AdvisedSupport as);
+	protected abstract Object createProxy(ProxyCreatorSupport as);
 
 	protected abstract AopProxy createAopProxy(AdvisedSupport as);
 
@@ -414,7 +414,8 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		// Test return value
 		TestBean raw = new OwnSpouse();
 
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		ProxyCreatorSupport pc = new ProxyCreatorSupport();
+		pc.setInterfaces(new Class[] {ITestBean.class});
 		pc.setTarget(raw);
 
 		ITestBean tb = (ITestBean) createProxy(pc);
@@ -970,7 +971,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		pc.addListener(l);
 		RefreshCountingAdvisorChainFactory acf = new RefreshCountingAdvisorChainFactory();
 		// Should be automatically added as a listener
-		pc.setAdvisorChainFactory(acf);
+		pc.addListener(acf);
 		assertFalse(pc.isActive());
 		assertEquals(0, l.activates);
 		assertEquals(0, acf.refreshes);
@@ -1052,31 +1053,27 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			this.expectedSource = expectedSource;
 		}
 
-		public void adviceChanged(AdvisedSupport as) {
-			assertEquals(expectedSource, as);
-			++adviceChanges;
+		public void activated(AdvisedSupport advised) {
+			assertEquals(expectedSource, advised);
+			++activates;
 		}
 
-		public void activated(AdvisedSupport as) {
-			assertEquals(expectedSource, as);
-			++activates;
+		public void adviceChanged(AdvisedSupport advised) {
+			assertEquals(expectedSource, advised);
+			++adviceChanges;
 		}
 	}
 
 
-	public static class RefreshCountingAdvisorChainFactory implements AdvisorChainFactory {
+	public static class RefreshCountingAdvisorChainFactory implements AdvisedSupportListener {
 
 		public int refreshes;
 
-		public void adviceChanged(AdvisedSupport pc) {
+		public void activated(AdvisedSupport advised) {
 			++refreshes;
 		}
 
-		public List getInterceptorsAndDynamicInterceptionAdvice(Advised pc, Object proxy, Method method, Class targetClass) {
-			return AdvisorChainFactoryUtils.calculateInterceptorsAndDynamicInterceptionAdvice(pc, proxy, method, targetClass);
-		}
-
-		public void activated(AdvisedSupport as) {
+		public void adviceChanged(AdvisedSupport advised) {
 			++refreshes;
 		}
 	}

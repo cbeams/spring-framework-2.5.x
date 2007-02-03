@@ -25,17 +25,16 @@ import java.util.List;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public interface AdvisorChainFactory extends AdvisedSupportListener {
+public interface AdvisorChainFactory {
 
 	/**
-	 * Determine a list of {@link org.aopalliance.intercept.MethodInterceptor} and
-	 * {@link InterceptorAndDynamicMethodMatcher} elements (using the latter
-	 * if there is a dynamic method matcher that needs evaluation at runtime)
-	 * @param config the AOP configuration in the form of an Advised obkect
-	 * @param proxy the proxy object
+	 * Determine a list of {@link org.aopalliance.intercept.MethodInterceptor} objects.
+	 * @param config the AOP configuration in the form of an Advised object
+	 * @param proxy the proxy object (currently always <code>null</code>;
+	 * this argument will be removed in Spring 2.1!)
 	 * @param method the proxied method
 	 * @param targetClass the target class
-	 * @see AdvisorChainFactoryUtils#calculateInterceptorsAndDynamicInterceptionAdvice
+	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
 	List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass);
 
