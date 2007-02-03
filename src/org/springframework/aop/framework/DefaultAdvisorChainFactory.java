@@ -44,17 +44,6 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
  */
 public class DefaultAdvisorChainFactory implements AdvisorChainFactory {
 
-	/**
-	 * Return the static interceptors and dynamic interception advice
-	 * that may apply to this method invocation.
-	 * @param config the AOP configuration in the form of an Advised obkect
-	 * @param proxy the proxy object
-	 * @param method the proxied method
-	 * @param targetClass the target class
-	 * @return list of {@link org.aopalliance.intercept.MethodInterceptor} and
-	 * {@link InterceptorAndDynamicMethodMatcher} elements (using the latter
-	 * if there is a dynamic method matcher that needs evaluation at runtime)
-	 */
 	public List getInterceptorsAndDynamicInterceptionAdvice(
 			Advised config, Object proxy, Method method, Class targetClass) {
 

@@ -46,9 +46,8 @@ public abstract class AdvisorChainFactoryUtils {
 	 * @param proxy the proxy object
 	 * @param method the proxied method
 	 * @param targetClass the target class
-	 * @return list of {@link org.aopalliance.intercept.MethodInterceptor} and
-	 * {@link InterceptorAndDynamicMethodMatcher} elements (using the latter
-	 * if there is a dynamic method matcher that needs evaluation at runtime)
+	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
+	 * @see AdvisorChainFactory
 	 */
 	public static List calculateInterceptorsAndDynamicInterceptionAdvice(
 			Advised config, Object proxy, Method method, Class targetClass) {
