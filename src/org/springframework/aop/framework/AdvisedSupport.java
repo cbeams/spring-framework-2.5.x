@@ -427,9 +427,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	public int countAdvicesOfType(Class adviceClass) {
 		Assert.notNull(adviceClass, "Advice class must not be null");
-		if (this.advisors.size() == 0) {
-			return 0;
-		}
 		int count = 0;
 		for (int i = 0; i < this.advisors.size(); i++) {
 			Advisor advisor = (Advisor) this.advisors.get(i);
@@ -484,13 +481,14 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * but allow substitution of a fresh TargetSource and a given interceptor chain.
 	 * @param other the AdvisedSupport object to take proxy configuration from
 	 * @param targetSource the new TargetSource
-	 * @param advisorChain the new Advisor chain
+	 * @param advisors the Advisors for the chain
 	 */
-	protected void copyConfigurationFrom(AdvisedSupport other, TargetSource targetSource, List advisorChain) {
+	protected void copyConfigurationFrom(AdvisedSupport other, TargetSource targetSource, List advisors) {
 		copyFrom(other);
 		this.targetSource = targetSource;
+		this.advisorChainFactory = other.advisorChainFactory;
 		this.interfaces = new ArrayList(other.interfaces);
-		for (Iterator it = advisorChain.iterator(); it.hasNext();) {
+		for (Iterator it = advisors.iterator(); it.hasNext();) {
 			Advisor advisor = (Advisor) it.next();
 			if (advisor instanceof IntroductionAdvisor) {
 				validateIntroductionAdvisor((IntroductionAdvisor) advisor);
