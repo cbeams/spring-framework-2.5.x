@@ -106,13 +106,21 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 		return getAopProxyFactory().createAopProxy(this);
 	}
 
-	protected final synchronized void activate() {
+	/**
+	 * Activate this proxy configuration.
+	 * @see AdvisedSupportListener#activated
+	 */
+	private void activate() {
 		this.active = true;
 		for (int i = 0; i < this.listeners.size(); i++) {
 			((AdvisedSupportListener) this.listeners.get(i)).activated(this);
 		}
 	}
 
+	/**
+	 * Propagate advice change event to all AdvisedSupportListeners.
+	 * @see AdvisedSupportListener#adviceChanged
+	 */
 	protected void adviceChanged() {
 		super.adviceChanged();
 		synchronized (this) {
@@ -127,7 +135,7 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 	/**
 	 * Subclasses can call this to check whether any AOP proxies have been created yet.
 	 */
-	protected final boolean isActive() {
+	protected final synchronized boolean isActive() {
 		return this.active;
 	}
 
