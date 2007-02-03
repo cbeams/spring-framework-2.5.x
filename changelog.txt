@@ -14,6 +14,14 @@ Package org.springframework.aop
 * introduced AfterAdvice marker, as super-interface of AfterReturningAdvice and ThrowsAdvice, for reduced coupling
 * exposed "invocableClone()" and "setUserAttribute"/"getUserAttribute" on ProxyMethodInvocation, for reduced coupling
 * introduced TargetClassAware interface, extended by Advised, and framework-decoupled "AopUtils.getTargetClass" method
+* redefined target-class proxying to create a JDK proxy in case of the target class being an interface
+* introduced stricter null checks for Advised/AdvisedSupport
+* exposed "indexOf(Advice)" method on Advised interface
+* revised ProxyConfig/AdvisedSupport's "toString()" output
+* added "setTargetClass" method to AdvisedSupport, building an EmptyTargetSource for the specified class
+* moved "aopProxyFactory" bean property and AdvisedSupportListener management down to new ProxyCreatorSupport base class
+* AdvisorChainFactory is not forced to implement the AdvisedSupportListener interface anymore
+* deprecated AdvisorChainFactoryUtils and HashMapCachingAdvisorChainFactory in favor of SimpleAdvisorChainFactory
 * added overloaded ProxyFactory constructors for single-interceptor and TargetSource-only proxies
 * AbstractSingletonProxyFactoryBean and AbstractAutoProxyCreator use the bean ClassLoader for generating proxies
 * reworked AdvisorAdapter and AdvisorAdapterRegistry to expose a MethodInterceptor right away
@@ -42,11 +50,14 @@ Package org.springframework.beans
 * added extended SmartFactoryBean interface, including an "isPrototype()" method that checks for an independent instance
 * AbstractBeanFactory throws BeanCreationException will full context info if "postProcessObjectFromFactoryBean" fails
 * turned visibility of AbstractAutowireCapableBeanFactory's "applyPropertyValues" method from private to protected
-* added deprecated "findXxx" signatures back to NamespaceHandlerSupport, for full compatibility with Spring 2.0 final
-* indexed constructor arguments support collection merging (driven by merge="true", analogous to property values)
+* added copy constructor to ChildBeanDefinition, for custom use in programmatic bean registration code
+* BeanDefinitionParseDelegate trims whitespace from "class" attributes in XML bean definitions
 * collection merging accepts a null parent value as well, simply using the child collection as-is in this case
+* indexed constructor arguments support collection merging (driven by merge="true", analogous to property values)
+* added deprecated "findXxx" signatures back to NamespaceHandlerSupport, for full compatibility with Spring 2.0 final
 * AbstractSingleBeanDefinitionParser applies a document's default-lazy-init="true" to its generated bean definitions
-* added copy constructor to ChildBeanDefinition
+* added "isEligibleAttribute" template method to AbstractSimpleBeanDefinitionParser, for excluding specific attributes
+* "util:properties" tag supports nested "prop" elements for local entries, analogous to the standard "props" tag
 
 Package org.springframework.context
 * AbstractRefreshableApplicationContext allows BeanFactory access during the destruction phase of a "refresh()" call
@@ -60,6 +71,7 @@ Package org.springframework.core
 
 Package org.springframework.ejb
 * AbstractEnterpriseBean uses the EJB instance as WeakReferenceMonitor handle, instead of a BeanFactoryReference proxy
+* all "jee:*" tags support an "environment-ref" attribute, pointing to a shared bean of type "java.util.Properties"
 
 Package org.springframework.instrument
 * ShadowingClassLoader excludes "com.sun." package by default (for using Sun's Xerces version through JAXP)
@@ -108,6 +120,11 @@ Package org.springframework.scripting
 * BshObjectInvocationHandler/JRubyObjectInvocationHandler implement "equals"/"hashCode/"toString" based on script object
 * ScriptFactoryPostProcessor uses the bean ClassLoader for generating refreshable script proxies
 * LangNamespaceHandler always registers all BeanDefinitionParsers, failing with NoClassDefFoundError for actual script
+
+Package org.springframework.test
+* AbstractSingleSpringContextTests supports "getConfigPaths()" method, specifying config files relative to test class
+* AbstractSingleSpringContextTests supports "getConfigPath()" method, specifying a single file relative to test class
+* AssertThrows preserves an unexpected exception as root cause in the "wrong exception thrown" AssertionFailedError
 
 Package org.springframework.transaction
 * AbstractPlatformTransactionManager exposes "actualTransactionActive" flag for a newly synchronized existing tx as well
