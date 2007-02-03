@@ -181,38 +181,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param listener the listener to deregister
 	 */
 	public void removeListener(AdvisedSupportListener listener) {
-		Assert.notNull(listener, "AdvisedSupportListener must not be null");
 		this.listeners.remove(listener);
-	}
-
-
-	/**
-	 * Call this method on a new instance created by the no-arg constructor
-	 * to create an independent copy of the configuration from the other.
-	 * @param other AdvisedSupport to copy configuration from
-	 */
-	protected void copyConfigurationFrom(AdvisedSupport other) {
-		copyConfigurationFrom(other, other.targetSource, other.advisors);
-	}
-
-	/**
-	 * Take interfaces and ProxyConfig configuration from the
-	 * other AdvisedSupport, but allow substitution of a fresh
-	 * TargetSource and interceptor chain
-	 * @param other other AdvisedSupport object to take
-	 * interfaces and ProxyConfig superclass configuration from
-	 * @param ts new TargetSource
-	 * @param pAdvisors new Advisor chain
-	 */
-	protected void copyConfigurationFrom(AdvisedSupport other, TargetSource ts, List pAdvisors) {
-		copyFrom(other);
-		this.targetSource = ts;
-		setInterfaces((Class[]) other.interfaces.toArray(new Class[other.interfaces.size()]));
-		this.advisors = new LinkedList();
-		for (int i = 0; i < pAdvisors.size(); i++) {
-			Advisor advice = (Advisor) pAdvisors.get(i);
-			addAdvisor(advice);
-		}
 	}
 
 
@@ -370,7 +339,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 
 	public void addAdvice(Advice advice) throws AopConfigException {
-		int pos = (this.advisors != null) ? this.advisors.size() : 0;
+		int pos = this.advisors.size();
 		addAdvice(pos, advice);
 	}
 
@@ -384,11 +353,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 		if (advice instanceof IntroductionInfo) {
 			// We don't need an IntroductionAdvisor for this kind of introduction:
-			// it's fully self-describing
+			// It's fully self-describing.
 			addAdvisor(pos, new DefaultIntroductionAdvisor(advice, (IntroductionInfo) advice));
 		}
 		else if (advice instanceof DynamicIntroductionAdvice) {
-			// We need an IntroductionAdvisor for this kind of introduction
+			// We need an IntroductionAdvisor for this kind of introduction.
 			throw new AopConfigException("DynamicIntroductionAdvice may only be added as part of IntroductionAdvisor");
 		}
 		else {
@@ -439,9 +408,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	public int countAdvicesOfType(Class adviceClass) {
 		Assert.notNull(adviceClass, "Advice class must not be null");
-		if (this.advisors.size() == 0) {
-			return 0;
-		}
 		int count = 0;
 		for (int i = 0; i < this.advisors.size(); i++) {
 			Advisor advisor = (Advisor) this.advisors.get(i);
@@ -455,20 +421,29 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 
 	/**
-	 * Invoked when advice has changed.
+	 * Call this method on a new instance created by the no-arg constructor
+	 * to create an independent copy of the configuration from the given object.
+	 * @param other the AdvisedSupport object to copy configuration from
 	 */
-	private synchronized void adviceChanged() {
-		if (this.active) {
-			for (int i = 0; i < this.listeners.size(); i++) {
-				((AdvisedSupportListener) this.listeners.get(i)).adviceChanged(this);
-			}
-		}
+	protected void copyConfigurationFrom(AdvisedSupport other) {
+		copyConfigurationFrom(other, other.targetSource, other.advisors);
 	}
 
-	private void activate() {
-		this.active = true;
-		for (int i = 0; i < this.listeners.size(); i++) {
-			((AdvisedSupportListener) this.listeners.get(i)).activated(this);
+	/**
+	 * Copy the AOP configuration from the given AdvisedSupport object,
+	 * but allow substitution of a fresh TargetSource and a given interceptor chain.
+	 * @param other the AdvisedSupport object to take proxy configuration from
+	 * @param targetSource the new TargetSource
+	 * @param advisors the Advisors for the chain
+	 */
+	protected void copyConfigurationFrom(AdvisedSupport other, TargetSource targetSource, List advisors) {
+		copyFrom(other);
+		this.targetSource = targetSource;
+		setInterfaces((Class[]) other.interfaces.toArray(new Class[other.interfaces.size()]));
+		this.advisors = new LinkedList();
+		for (Iterator it = advisors.iterator(); it.hasNext();) {
+			Advisor advisor = (Advisor) it.next();
+			addAdvisor(advisor);
 		}
 	}
 
@@ -484,9 +459,32 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
+	 * Activate this proxy configuration.
+	 * @see AdvisedSupportListener#activated
+	 */
+	private void activate() {
+		this.active = true;
+		for (int i = 0; i < this.listeners.size(); i++) {
+			((AdvisedSupportListener) this.listeners.get(i)).activated(this);
+		}
+	}
+
+	/**
+	 * Propagate advice change event to all AdvisedSupportListeners.
+	 * @see AdvisedSupportListener#adviceChanged
+	 */
+	private synchronized void adviceChanged() {
+		if (this.active) {
+			for (int i = 0; i < this.listeners.size(); i++) {
+				((AdvisedSupportListener) this.listeners.get(i)).adviceChanged(this);
+			}
+		}
+	}
+
+	/**
 	 * Subclasses can call this to check whether any AOP proxies have been created yet.
 	 */
-	protected final boolean isActive() {
+	protected final synchronized boolean isActive() {
 		return this.active;
 	}
 
