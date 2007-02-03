@@ -21,6 +21,7 @@ import java.beans.PropertyEditor;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.core.Conventions;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -45,6 +46,19 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * The '<code>id</code>' attribute of the rendered HTML tag.
 	 */
 	public static final String ID_ATTRIBUTE = "id";
+
+	/**
+	 * The name of the '<code>commandName</code>' attribute.
+	 */
+	public static final String COMMAND_NAME_ATTRIBUTE = "commandName";
+
+	/**
+	 * The name of the {@link javax.servlet.jsp.PageContext} attribute under which the
+	 * command object name is exposed.
+	 */
+	public static final String COMMAND_NAME_VARIABLE_NAME =
+			Conventions.getQualifiedAttributeName(AbstractFormTag.class, COMMAND_NAME_ATTRIBUTE);
+
 
 	/**
 	 * The {@link BindStatus} of this tag.
@@ -211,7 +225,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	}
 
 	private String getCommandName() {
-		return (String) this.pageContext.getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+		return (String) this.pageContext.getAttribute(COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 	}
 
 	/**

@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
-import org.springframework.core.Conventions;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -60,18 +59,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * The default command object name: "command".
 	 */
 	public static final String DEFAULT_COMMAND_NAME = "command";
-
-	/**
-	 * The name of the '<code>commandName</code>' attribute.
-	 */
-	public static final String COMMAND_NAME_ATTRIBUTE = "commandName";
-
-	/**
-	 * The name of the {@link javax.servlet.jsp.PageContext} attribute under which the
-	 * command object name is exposed.
-	 */
-	public static final String COMMAND_NAME_VARIABLE_NAME =
-			Conventions.getQualifiedAttributeName(FormTag.class, COMMAND_NAME_ATTRIBUTE);
 
 	/**
 	 * The name of the '<code>name</code>' attribute.
