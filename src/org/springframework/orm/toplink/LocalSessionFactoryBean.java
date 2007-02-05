@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import oracle.toplink.exceptions.DatabaseException;
 import oracle.toplink.exceptions.TopLinkException;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -29,25 +30,29 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
- * Factory bean that configures a TopLink SessionFactory and provides it as bean
- * reference. This is the usual way to define a TopLink SessionFactory in a Spring
- * application context, allowing to pass it to TopLink DAOs as bean reference.
+ * {@link org.springframework.beans.factory.FactoryBean} that creates a
+ * TopLink {@link SessionFactory}. This is the usual way to set up a shared
+ * TopLink SessionFactory in a Spring application context; the SessionFactory
+ * can then be passed to TopLink-based DAOs via dependency injection.
  *
- * <p>See the base class LocalSessionFactory for configuration details.
+ * <p>See the base class {@link LocalSessionFactory} for configuration details.
  *
- * <p>This class also implements the PersistenceExceptionTranslator interface,
- * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor,
+ * <p>This class also implements the
+ * {@link org.springframework.dao.support.PersistenceExceptionTranslator}
+ * interface, as autodetected by Spring's
+ * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor},
  * for AOP-based translation of native exceptions to Spring DataAccessExceptions.
  * Hence, the presence of a LocalSessionFactoryBean automatically enables a
  * PersistenceExceptionTranslationPostProcessor to translate TopLink exceptions.
  *
  * <p>If your DAOs expect to receive a raw TopLink Session, consider defining a
- * TransactionAwareSessionAdapter in front of this bean. This adapter will provide
- * a TopLink Session rather than a SessionFactory as bean reference. Your DAOs can
- * then, for example, access the currently active Session and UnitOfWork via
+ * {@link org.springframework.orm.toplink.support.TransactionAwareSessionAdapter}
+ * in front of this bean. This adapter will provide a TopLink Session rather
+ * than a SessionFactory as bean reference. Your DAOs can then, for example,
+ * access the currently active Session and UnitOfWork via
  * <code>Session.getActiveSession()</code> and <code>Session.getActiveUnitOfWork()</code>,
- * respectively. Note that you can still access the SessionFactory too, by defining
- * a bean reference that points directly at the LocalSessionFactoryBean.
+ * respectively. Note that you can still access the SessionFactory as well, by
+ * defining a bean reference that points directly at the LocalSessionFactoryBean.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -56,7 +61,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
  * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  */
 public class LocalSessionFactoryBean extends LocalSessionFactory
-		implements FactoryBean, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
+		implements FactoryBean, BeanClassLoaderAware, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
 
 	private SessionFactory sessionFactory;
 
@@ -68,7 +73,6 @@ public class LocalSessionFactoryBean extends LocalSessionFactory
 	 * <p>Applied to any SQLException root cause of a TopLink DatabaseException,
 	 * within Spring's PersistenceExceptionTranslator mechanism.
 	 * The default is to rely on TopLink's native exception translation.
-	 * @param jdbcExceptionTranslator the exception translator
 	 * @see oracle.toplink.exceptions.DatabaseException
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
 	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
@@ -84,6 +88,13 @@ public class LocalSessionFactoryBean extends LocalSessionFactory
 		return this.jdbcExceptionTranslator;
 	}
 
+	/**
+	 * Sets the given bean ClassLoader as TopLink Session ClassLoader.
+	 * @see #setSessionClassLoader
+	 */
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		setSessionClassLoader(classLoader);
+	}
 
 	public void afterPropertiesSet() throws TopLinkException {
 		this.sessionFactory = createSessionFactory();
