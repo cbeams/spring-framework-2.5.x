@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,17 +36,20 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
- * Abstract FactoryBean that exposes a Hibernate SessionFactory.
- * Supports building a transaction-aware SessionFactory proxy that
- * exposes a Spring-managed transaction Session as "current Session".
+ * Abstract {@link org.springframework.beans.factory.FactoryBean} that creates
+ * a Hibernate {@link org.hibernate.SessionFactory} within a Spring application
+ * context. Supports building a transaction-aware SessionFactory proxy that
+ * exposes a Spring-managed transactional Session as "current Session".
  *
- * <p>This class also implements the PersistenceExceptionTranslator interface,
- * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor,
+ * <p>This class also implements the
+ * {@link org.springframework.dao.support.PersistenceExceptionTranslator}
+ * interface, as autodetected by Spring's
+ * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor},
  * for AOP-based translation of native exceptions to Spring DataAccessExceptions.
- * Hence, the presence of a Hibernate SessionFactoryBean automatically enables a
- * PersistenceExceptionTranslationPostProcessor to translate Hibernate exceptions.
+ * Hence, the presence of e.g. LocalSessionFactoryBean automatically enables
+ * a PersistenceExceptionTranslationPostProcessor to translate Hibernate exceptions.
  *
- * <p>This class mainly serves as common base class for LocalSessionFactoryBean.
+ * <p>This class mainly serves as common base class for {@link LocalSessionFactoryBean}.
  * For details on typical SessionFactory setup, see the LocalSessionFactoryBean javadoc.
  *
  * @author Juergen Hoeller

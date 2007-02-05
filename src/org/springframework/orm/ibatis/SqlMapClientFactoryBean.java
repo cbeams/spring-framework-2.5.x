@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,17 +38,24 @@ import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.ClassUtils;
 
 /**
- * FactoryBean that creates an iBATIS {@link com.ibatis.sqlmap.client.SqlMapClient}
- * as singleton in the current bean factory, possibly for use with Spring's
- * {@link SqlMapClientTemplate} data access helper.
+ * {@link org.springframework.beans.factory.FactoryBean} that creates an
+ * iBATIS {@link com.ibatis.sqlmap.client.SqlMapClient}. This is the usual
+ * way to set up a shared iBATIS SqlMapClient in a Spring application context;
+ * the SqlMapClient can then be passed to iBATIS-based DAOs via dependency
+ * injection.
  *
- * <p>Allows to specify a DataSource at the SqlMapClient level. This is preferable
- * to per-DAO DataSource references, as it allows for lazy loading and avoids
- * repeated DataSource references in every DAO.
+ * <p>Either {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
+ * or {@link org.springframework.transaction.jta.JtaTransactionManager} can be
+ * used for transaction demarcation in combination with a SqlMapClient,
+ * with JTA only necessary for transactions which span multiple databases.
+ *
+ * <p>Allows for specifying a DataSource at the SqlMapClient level. This
+ * is preferable to per-DAO DataSource references, as it allows for lazy
+ * loading and avoids repeated DataSource references in every DAO.
  *
  * <p>Note: As of Spring 2.0.2, this class explicitly supports iBATIS 2.3.
- * Backwards compatibility with iBATIS 2.1 and 2.2 is preserved for the time being,
- * through corresponding reflective checks.
+ * Backwards compatibility with iBATIS 2.1 and 2.2 is preserved for the
+ * time being, through corresponding reflective checks.
  *
  * @author Juergen Hoeller
  * @since 24.02.2004

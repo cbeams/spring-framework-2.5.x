@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,15 +47,24 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Abstract base class for a FactoryBean that creates a local JPA
- * <code>EntityManagerFactory</code> instance with a Spring application context.
+ * Abstract {@link org.springframework.beans.factory.FactoryBean} that
+ * creates a local JPA {@link javax.persistence.EntityManagerFactory}
+ * instance within a Spring application context.
  *
  * <p>Encapsulates the common functionality between the different JPA
  * bootstrap contracts (standalone as well as container).
  *
  * <p>Implements support for standard JPA configuration as well as
- * Spring's <code>JpaVendorAdapter</code> abstraction, and controls
- * the <code>EntityManagerFactory</code>'s lifecycle.
+ * Spring's {@link JpaVendorAdapter} abstraction, and controls the
+ * EntityManagerFactory's lifecycle.
+ *
+ * <p>This class also implements the
+ * {@link org.springframework.dao.support.PersistenceExceptionTranslator}
+ * interface, as autodetected by Spring's
+ * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor},
+ * for AOP-based translation of native exceptions to Spring DataAccessExceptions.
+ * Hence, the presence of e.g. LocalEntityManagerFactoryBean automatically enables
+ * a PersistenceExceptionTranslationPostProcessor to translate JPA exceptions.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson

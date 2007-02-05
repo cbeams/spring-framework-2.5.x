@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,13 +56,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * FactoryBean that creates a local Hibernate SessionFactory instance.
- * Behaves like a SessionFactory instance when used as bean reference,
- * e.g. for HibernateTemplate's "sessionFactory" property.
- *
- * <p>The typical usage will be to register this as singleton factory
- * (for a certain underlying JDBC DataSource) in an application context,
- * and give bean references to application services that need it.
+ * {@link org.springframework.beans.factory.FactoryBean} that creates a
+ * Hibernate {@link org.hibernate.SessionFactory}. This is the usual way to
+ * set up a shared Hibernate SessionFactory in a Spring application context;
+ * the SessionFactory can then be passed to Hibernate-based DAOs via
+ * dependency injection.
  *
  * <p>Configuration settings can either be read from a Hibernate XML file,
  * specified as "configLocation", or completely via this class. A typical
@@ -74,9 +72,10 @@ import org.springframework.util.StringUtils;
  *
  * <p>This SessionFactory handling strategy is appropriate for most types of
  * applications, from Hibernate-only single database apps to ones that need
- * distributed transactions. Either HibernateTransactionManager or
- * JtaTransactionManager can be used for transaction demarcation, the latter
- * only being necessary for transactions that span multiple databases.
+ * distributed transactions. Either {@link HibernateTransactionManager} or
+ * {@link org.springframework.transaction.jta.JtaTransactionManager} can be
+ * used for transaction demarcation, with the latter only necessary for
+ * transactions which span multiple databases.
  *
  * <p>This factory bean will by default expose a transaction-aware SessionFactory
  * proxy, letting data access code work with the plain Hibernate SessionFactory
@@ -85,7 +84,9 @@ import org.springframework.util.StringUtils;
  * management strategy, either local or JTA / EJB CMT, and any transaction
  * synchronization mechanism, either Spring or JTA. Furthermore,
  * <code>getCurrentSession()</code> will also seamlessly work with
- * a request-scoped Session managed by OpenSessionInViewFilter/Interceptor.
+ * a request-scoped Session managed by
+ * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter} /
+ * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
  *
  * <p>Requires Hibernate 3.0.3 or later. Note that this factory will use
  * "on_close" as default Hibernate connection release mode, unless in the

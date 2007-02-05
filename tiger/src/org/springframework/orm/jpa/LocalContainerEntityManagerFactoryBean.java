@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,25 +34,35 @@ import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 import org.springframework.util.ClassUtils;
 
 /**
- * Powerful FactoryBean that creates a fully Spring-configured EntityManagerFactory
- * according to the container contract for JPA bootstrapping
+ * {@link org.springframework.beans.factory.FactoryBean} that creates a JPA
+ * {@link javax.persistence.EntityManagerFactory} according to JPA's standard
+ * <i>container</i> bootstrap contract. This is the most powerful way to set
+ * up a shared JPA EntityManagerFactory in a Spring application context;
+ * the EntityManagerFactory can then be passed to JPA-based DAOs via
+ * dependency injection. Note that switching to a JNDI lookup or to a
+ * {@link org.springframework.orm.jpa.LocalEntityManagerFactoryBean}
+ * definition is just a matter of configuration!
  *
- * <p>As with LocalEntityManagerFactoryBean, configuration settings are usually read in
- * from a <code>META-INF/persistence.xml</code> config file, residing in the class path,
- * according to the general JPA configuration contract. However, this FactoryBean is
- * more flexible in that you can override the location of the <code>persistence.xml</code>
- * file, specify the JDBC DataSources to link to, etc. Furthermore, it allows for
- * pluggable class instrumentation through the Spring LoadTimeWeaver abstraction,
+ * <p>As with {@link LocalEntityManagerFactoryBean}, configuration settings
+ * are usually read in from a <code>META-INF/persistence.xml</code> config file,
+ * residing in the class path, according to the general JPA configuration contract.
+ * However, this FactoryBean is more flexible in that you can override the location
+ * of the <code>persistence.xml</code> file, specify the JDBC DataSources to link to,
+ * etc. Furthermore, it allows for pluggable class instrumentation through Spring's
+ * {@link org.springframework.instrument.classloading.LoadTimeWeaver} abstraction,
  * instead of being tied to a special VM agent specified on JVM startup.
  *
- * <p>Internally, this FactoryBean parses the <code>persistence.xml</code> file itself
- * and creates a corresponding PersistenceUnitInfo object (with further configuration
- * merged in, such as JDBC DataSources and the LoadTimeWeaver), to be passed to the
- * JPA PersistenceProvider. This corresponds to full-fledged local JPA container.
+ * <p>Internally, this FactoryBean parses the <code>persistence.xml</code> file
+ * itself and creates a corresponding {@link javax.persistence.spi.PersistenceUnitInfo}
+ * object (with further configuration merged in, such as JDBC DataSources and the
+ * Spring LoadTimeWeaver), to be passed to the chosen JPA
+ * {@link javax.persistence.spi.PersistenceProvider}. This corresponds to a
+ * local JPA container with full support for the standard JPA container contract.
  *
  * <p>The exposed EntityManagerFactory object will implement all the interfaces of
  * the underlying native EntityManagerFactory returned by the PersistenceProvider,
- * plus the EntityManagerFactoryInfo interface which exposes additional metadata.
+ * plus the {@link EntityManagerFactoryInfo} interface which exposes additional
+ * metadata as assembled by this FactoryBean.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson

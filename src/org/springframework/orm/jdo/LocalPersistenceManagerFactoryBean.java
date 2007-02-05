@@ -39,24 +39,21 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * FactoryBean that creates a local JDO EntityManagerFactory instance.
- * Behaves like a PersistenceManagerFactory instance when used as bean
- * reference, e.g. for JdoTemplate's "persistenceManagerFactory" property.
- * Note that switching to a JndiObjectFactoryBean or a bean-style
+ * {@link org.springframework.beans.factory.FactoryBean} that creates a
+ * JDO {@link javax.jdo.PersistenceManagerFactory}. This is the usual way to
+ * set up a shared JDO PersistenceManagerFactory in a Spring application context;
+ * the PersistenceManagerFactory can then be passed to JDO-based DAOs via
+ * dependency injection. Note that switching to a JNDI lookup or to a bean-style
  * PersistenceManagerFactory instance is just a matter of configuration!
- *
- * <p>The typical usage will be to register this as singleton factory
- * (for a certain underlying data source) in an application context,
- * and give bean references to application services that need it.
  *
  * <p>Configuration settings can either be read from a properties file,
  * specified as "configLocation", or completely via this class. Properties
  * specified as "jdoProperties" here will override any settings in a file.
  *
  * <p>This PersistenceManager handling strategy is most appropriate for
- * applications that solely use JDO for data access. In this case,
- * JdoTransactionManager is much more convenient than setting up your
- * JDO provider for JTA transactions (which might involve JCA).
+ * applications which solely use JDO for data access. In this case,
+ * {@link JdoTransactionManager} is more convenient than setting up your
+ * JDO provider for JTA transactions (which might involve a JCA connector).
  *
  * <p><b>NOTE:</b> This class is compatible with both JDO 1.0 and JDO 2.0,
  * as far as possible. It uses reflection to adapt to the actual API present
@@ -65,11 +62,15 @@ import org.springframework.util.ReflectionUtils;
  * Make sure that the JDO API jar on your class path matches the one that
  * your JDO provider has been compiled against!
  *
- * <p>This class also implements the PersistenceExceptionTranslator interface,
- * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor,
+ * <p>This class also implements the
+ * {@link org.springframework.dao.support.PersistenceExceptionTranslator}
+ * interface, as autodetected by Spring's
+ * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor},
  * for AOP-based translation of native exceptions to Spring DataAccessExceptions.
  * Hence, the presence of a LocalPersistenceManagerFactoryBean automatically enables
  * a PersistenceExceptionTranslationPostProcessor to translate JDO exceptions.
+ *
+ * <p><b>Alternative: Configuration of a PersistenceManagerFactory provider bean</b>
  *
  * <p>As alternative to the properties-driven approach that this FactoryBean offers
  * (which is analogous to using the standard JDOHelper class with a Properties
@@ -98,8 +99,8 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>The <code>close()</code> method is standardized as of JDO 1.0.1; don't forget to
  * specify it as "destroy-method" for any PersistenceManagerFactory instance.
- * Note that this FactoryBean will automatically invoke <code>close</code> for
- * the PersistenceManagerFactory it creates, without any special configuration.
+ * Note that this FactoryBean will automatically invoke <code>close()</code> for
+ * the PersistenceManagerFactory that it creates, without any special configuration.
  *
  * @author Juergen Hoeller
  * @since 03.06.2003
