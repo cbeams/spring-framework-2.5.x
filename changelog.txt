@@ -137,6 +137,7 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * clarified MultipartFile constract details
+* CharacterEncodingFilter only applies its encoding if actually specified (non-null)
 * WebDataBinder explicitly suppresses field marker prefix values in case of "ignoreUnknownFields" switched off
 * reworked the 'default value for missing parameter' check in RequestUtils to be as efficient as possible
 * HttpServletBean overrides "getServletName"/"getServletContext" to return null when no config set yet
