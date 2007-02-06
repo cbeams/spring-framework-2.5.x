@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.springframework.core.task;
 
 import junit.framework.TestCase;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrencyThrottleSupport;
 
 /**
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public final class SimpleAsyncTaskExecutorTests extends TestCase {
 
@@ -38,7 +40,7 @@ public final class SimpleAsyncTaskExecutorTests extends TestCase {
 
 	public void testThrottleIsNotActiveByDefault() throws Exception {
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
-		assertFalse("Concurrency throttle must not default to being active (on).", executor.isThrottleActive());
+		assertFalse("Concurrency throttle must not default to being active (on)", executor.isThrottleActive());
 	}
 
 	public void testThreadNameGetsSetCorrectly() throws Exception {
@@ -55,7 +57,7 @@ public final class SimpleAsyncTaskExecutorTests extends TestCase {
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(null);
 		ThreadNameHarvester task = new ThreadNameHarvester(monitor);
 		executeAndWait(executor, task, monitor);
-		assertTrue(task.getThreadName().startsWith(SimpleAsyncTaskExecutor.DEFAULT_THREAD_NAME_PREFIX));
+		assertTrue(task.getThreadName().startsWith(ClassUtils.getShortName(SimpleAsyncTaskExecutor.class) + "-"));
 	}
 
 	public void testThrowsExceptionWhenSuppliedWithNullRunnable() throws Exception {
@@ -67,8 +69,7 @@ public final class SimpleAsyncTaskExecutorTests extends TestCase {
 		}
 	}
 
-
-	private static void executeAndWait(SimpleAsyncTaskExecutor executor, Runnable task, Object monitor) {
+	private void executeAndWait(SimpleAsyncTaskExecutor executor, Runnable task, Object monitor) {
 		synchronized (monitor) {
 			executor.execute(task);
 			try {
@@ -86,6 +87,7 @@ public final class SimpleAsyncTaskExecutorTests extends TestCase {
 			// no-op
 		}
 	}
+
 
 	private static abstract class AbstractNotifyingRunnable implements Runnable {
 
@@ -108,6 +110,7 @@ public final class SimpleAsyncTaskExecutorTests extends TestCase {
 
 		protected abstract void doRun();
 	}
+
 
 	private static final class ThreadNameHarvester extends AbstractNotifyingRunnable {
 
