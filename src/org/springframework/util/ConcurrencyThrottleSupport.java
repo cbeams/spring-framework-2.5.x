@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,14 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Support class for throttling concurrent access to a specific resource.
  *
- * <p>Designed for use as a base class, with the subclass invoking the
- * <code>beforeAccess</code> and <code>afterAccess</code> methods at
+ * <p>Designed for use as a base class, with the subclass invoking
+ * the {@link #beforeAccess()} and {@link #afterAccess()} methods at
  * appropriate points of its workflow. Note that <code>afterAccess</code>
- * should usually be called in a finally block!.
+ * should usually be called in a finally block!
  *
- * <p>The default concurrency limit of this support class is -1.
- * Subclasses may override this default; check the concrete class' javadoc.
- *
- * <p>This class is designed for serializability, to allow for serializing
- * interceptors that derive from it. Note that the subclass needs to explicitly
- * implement the Serializable marker interface if it is actually serializable.
+ * <p>The default concurrency limit of this support class is -1
+ * ("unbounded concurrency"). Subclasses may override this default;
+ * check the javadoc of the concrete class that you're using.
  *
  * @author Juergen Hoeller
  * @since 1.2.5
@@ -70,31 +67,29 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 
 	/**
-	 * Set the maximum number of parallel accesses allowed.
-	 * -1 indicates no concurrency limit at all.
+	 * Set the maximum number of concurrent access attempts allowed.
+	 * -1 indicates unbounded concurrency.
 	 * <p>In principle, this limit can be changed at runtime,
 	 * although it is generally designed as a config time setting.
-	 * NOTE: Do not switch between -1 and any concrete limit at runtime,
+	 * <p>NOTE: Do not switch between -1 and any concrete limit at runtime,
 	 * as this will lead to inconsistent concurrency counts: A limit
 	 * of -1 effectively turns off concurrency counting completely.
-	 * @see #UNBOUNDED_CONCURRENCY
 	 */
 	public void setConcurrencyLimit(int concurrencyLimit) {
 		this.concurrencyLimit = concurrencyLimit;
 	}
 
 	/**
-	 * Return the maximum number of parallel accesses allowed.
+	 * Return the maximum number of concurrent access attempts allowed.
 	 */
 	public int getConcurrencyLimit() {
-		return concurrencyLimit;
+		return this.concurrencyLimit;
 	}
 
 	/**
 	 * Return whether this throttle is currently active.
 	 * @return <code>true</code> if the concurrency limit for this instance is active
 	 * @see #getConcurrencyLimit()
-	 * @see #setConcurrencyLimit
 	 */
 	public boolean isThrottleActive() {
 		return (this.concurrencyLimit > 0);

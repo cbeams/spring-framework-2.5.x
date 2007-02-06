@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
- * Helper class that allows to specify a method to invoke in a
- * declarative fashion, be it static or non-static.
+ * Helper class that allows for specifying a method to invoke in a declarative
+ * fashion, be it static or non-static.
  *
- * <p>Usage: Specify targetClass/targetMethod respectively
- * targetObject/targetMethod, optionally specify arguments,
- * prepare the invoker. Afterwards, you can invoke the method
- * any number of times.
+ * <p>Usage: Specify "targetClass"/"targetMethod" or "targetObject"/"targetMethod",
+ * optionally specify arguments, prepare the invoker. Afterwards, you may
+ * invoke the method any number of times, obtaining the invocation result.
  *
  * <p>Typically not used directly but via its subclasses
- * MethodInvokingFactoryBean and MethodInvokingJobDetailFactoryBean.
+ * {@link org.springframework.beans.factory.config.MethodInvokingFactoryBean} and
+ * {@link org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean}.
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
