@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * <pre class="code">JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
  * RowMapper rowMapper = new UserRowMapper();  // reusable object
  *
- * List allUsers = jdbcTemplate.query(
+ * List allUsers = (List) jdbcTemplate.query(
  *     "select * from user",
  *     new RowMapperResultSetExtractor(rowMapper, 10));
  *
