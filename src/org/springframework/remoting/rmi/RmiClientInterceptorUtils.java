@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,10 @@ import org.springframework.remoting.RemoteProxyFailureException;
  */
 public abstract class RmiClientInterceptorUtils {
 
+	private static final String ORACLE_CONNECTION_EXCEPTION = "com.evermind.server.rmi.RMIConnectionException";
+
 	private static final Log logger = LogFactory.getLog(RmiClientInterceptorUtils.class);
+
 
 	/**
 	 * Apply the given method invocation to the given RMI stub.
@@ -184,9 +187,11 @@ public abstract class RmiClientInterceptorUtils {
 
 	/**
 	 * Determine whether the given RMI exception indicates a connect failure.
-	 * Treats ConnectException, ConnectIOException, UnknownHostException,
+	 * <p>Treats RMI's ConnectException, ConnectIOException, UnknownHostException,
 	 * NoSuchObjectException, StubNotFoundException, MarshalException and
-	 * UnmarshalException as connect failure.
+	 * UnmarshalException as connect failure, as well as Oracle's OC4J
+	 * <code>com.evermind.server.rmi.RMIConnectionException</code>
+	 * (which doesn't derive from from any well-known RMI connect exception).
 	 * @param ex the RMI exception to check
 	 * @return whether the exception should be treated as connect failure
 	 * @see java.rmi.ConnectException
@@ -201,7 +206,8 @@ public abstract class RmiClientInterceptorUtils {
 		return (ex instanceof ConnectException || ex instanceof ConnectIOException ||
 				ex instanceof UnknownHostException ||
 				ex instanceof NoSuchObjectException || ex instanceof StubNotFoundException ||
-				ex instanceof MarshalException || ex instanceof UnmarshalException);
+				ex instanceof MarshalException || ex instanceof UnmarshalException ||
+				ORACLE_CONNECTION_EXCEPTION.equals(ex.getClass().getName()));
 	}
 
 }
