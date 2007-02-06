@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ import org.springframework.util.Assert;
  * JavaBean that allows for configuring a JDK 1.5 {@link java.util.concurrent.ThreadPoolExecutor}
  * in bean style (through its "corePoolSize", "maxPoolSize", "keepAliveSeconds", "queueCapacity"
  * properties), exposing it as a Spring {@link org.springframework.core.task.TaskExecutor}.
- * This is an alternative to configuring a ThreadPoolExecutor instance directly using constructor
- * injection, with a separate {@link ConcurrentTaskExecutor} adapter wrapping it.
+ * This is an alternative to configuring a ThreadPoolExecutor instance directly using
+ * constructor injection, with a separate {@link ConcurrentTaskExecutor} adapter wrapping it.
  *
  * <p>For any custom needs, in particular for defining a
  * {@link java.util.concurrent.ScheduledThreadPoolExecutor}, it is recommended to

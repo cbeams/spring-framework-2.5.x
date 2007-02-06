@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * {@link FactoryBean} that sets up a JDK 1.5 {@link ScheduledExecutorService}
- * (by default: {@link ScheduledThreadPoolExecutor} as implementation)
- * and exposes it for bean references.
+ * {@link org.springframework.beans.factory.FactoryBean} that sets up
+ * a JDK 1.5 {@link java.util.concurrent.ScheduledExecutorService}
+ * (by default: {@link java.util.concurrent.ScheduledThreadPoolExecutor}
+ * as implementation) and exposes it for bean references.
  *
  * <p>Allows for registration of {@link ScheduledExecutorTask ScheduledExecutorTasks},
  * automatically starting the {@link ScheduledExecutorService} on initialization and
@@ -43,11 +44,12 @@ import org.springframework.util.ObjectUtils;
  * registration of tasks at startup, there is no need to access the
  * {@link ScheduledExecutorService} instance itself in application code.
  *
- * <p>Note that {@link ScheduledExecutorService} uses a {@link Runnable} instance
- * that is shared between repeated executions, in contrast to Quartz which
- * instantiates a new Job for each execution.
+ * <p>Note that {@link java.util.concurrent.ScheduledExecutorService}
+ * uses a {@link Runnable} instance that is shared between repeated executions,
+ * in contrast to Quartz which instantiates a new Job for each execution.
  *
- * <p>This class is analogous to the {@link org.springframework.scheduling.timer.TimerFactoryBean}
+ * <p>This class is analogous to the
+ * {@link org.springframework.scheduling.timer.TimerFactoryBean}
  * class for the JDK 1.3 {@link java.util.Timer} facility.
  *
  * @author Juergen Hoeller
