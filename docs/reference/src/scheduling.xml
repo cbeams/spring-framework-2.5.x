@@ -430,7 +430,7 @@ public class ExampleJob extends QuartzJobBean {
 					<para>
 						This implementation uses the CommonJ WorkManager
 						as its backing implementation and is the central
-						convience class for setting up a CommonJ
+						convenience class for setting up a CommonJ
 						WorkManager reference in a Spring context.
 						Similar to the
 						<link linkend="simpleThreadPoolTaskExecutor"><classname>SimpleThreadPoolTaskExecutor</classname></link>,
