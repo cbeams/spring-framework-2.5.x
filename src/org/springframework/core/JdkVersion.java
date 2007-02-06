@@ -17,9 +17,11 @@
 package org.springframework.core;
 
 /**
- * Internal helper class used to find the current Java/JDK version.
+ * Internal helper class used to find the Java/JDK version
+ * that Spring is operating on, to allow for automatically
+ * adapting to the present platform's capabilities.
  *
- * <p>Note that Spring does not support 1.2 JVMs.
+ * <p>Note that Spring does not support 1.2 or earlier JVMs.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -27,7 +29,7 @@ package org.springframework.core;
 public class JdkVersion {
 
 	/**
-	 * Constants identifying the 1.3.x JVM (JDK 1.3).
+	 * Constant identifying the 1.3.x JVM (JDK 1.3).
 	 */
 	public static final int JAVA_13 = 0;
 
