@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 import junit.framework.TestCase;
@@ -36,6 +37,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * @author Adrian Colyer
  * @author Rod Johnson
+ * @author Ramnivas Laddad
  */
 public class BeanConfigurerTests extends TestCase {
 
@@ -103,17 +105,47 @@ public class BeanConfigurerTests extends TestCase {
 	public void testInjectionOnDeserialization() throws Exception {
 		ShouldBeConfiguredBySpring domainObject = new ShouldBeConfiguredBySpring();
 		domainObject.setName("Anonymous");
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(baos);
-		oos.writeObject(domainObject);
-		oos.close();
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		ObjectInputStream ois = new ObjectInputStream(bais);
 		ShouldBeConfiguredBySpring deserializedDomainObject =
-				(ShouldBeConfiguredBySpring) ois.readObject();
+				serializeAndDeserialize(domainObject);
 		assertEquals("Dependency injected on deserialization","Rod",deserializedDomainObject.getName());
 	}
 	
+	public void testInjectionOnDeserializationForClassesThatContainsPublicReadResolve() throws Exception {
+		ShouldBeConfiguredBySpringContainsPublicReadResolve domainObject = new ShouldBeConfiguredBySpringContainsPublicReadResolve();
+		domainObject.setName("Anonymous");
+		ShouldBeConfiguredBySpringContainsPublicReadResolve deserializedDomainObject =
+				serializeAndDeserialize(domainObject);
+		assertEquals("Dependency injected on deserialization","Rod",deserializedDomainObject.getName());
+		assertEquals("User readResolve should take precedence", 1, deserializedDomainObject.readResolveInvocationCount);
+	}
+
+	// See ShouldBeConfiguredBySpringContainsPrivateReadResolve
+//	public void testInjectionOnDeserializationForClassesThatContainsPrivateReadResolve() throws Exception {
+//		ShouldBeConfiguredBySpringContainsPrivateReadResolve domainObject = new ShouldBeConfiguredBySpringContainsPrivateReadResolve();
+//		domainObject.setName("Anonymous");
+//		ShouldBeConfiguredBySpringContainsPrivateReadResolve deserializedDomainObject =
+//				serializeAndDeserialize(domainObject);
+//		assertEquals("Dependency injected on deserialization","Rod",deserializedDomainObject.getName());
+//	}
+	
+	public void testNonInjectionOnDeserializationForSerializedButNotConfigured() throws Exception {
+		SerializableThatShouldNotBeConfiguredBySpring domainObject = new SerializableThatShouldNotBeConfiguredBySpring();
+		domainObject.setName("Anonymous");
+		SerializableThatShouldNotBeConfiguredBySpring deserializedDomainObject =
+				serializeAndDeserialize(domainObject);
+		assertEquals("Dependency injected on deserialization","Anonymous",deserializedDomainObject.getName());
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T> T serializeAndDeserialize(T serializable) throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(baos);
+		oos.writeObject(serializable);
+		oos.close();
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		ObjectInputStream ois = new ObjectInputStream(bais);
+		return (T)ois.readObject();
+	}
 	
 	@Configurable("beanOne")
 	private static class ShouldBeConfiguredBySpring implements Serializable {
@@ -127,12 +159,47 @@ public class BeanConfigurerTests extends TestCase {
 		public String getName() {
 			return this.name;
 		}
+	}
+
+	@Configurable("beanOne")
+	private static class ShouldBeConfiguredBySpringContainsPublicReadResolve implements Serializable {
+
+		private String name;
 		
-		private void readObject(java.io.ObjectInputStream in) throws IOException,ClassNotFoundException {
-			in.defaultReadObject();
+		private int readResolveInvocationCount = 0;
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+		
+		public Object readResolve() throws ObjectStreamException {
+			readResolveInvocationCount++;
+			return this;
 		}
 	}
 
+// 	Won't work until we use hasmethod() experimental pointcut in AspectJ.
+//	@Configurable("beanOne")
+//	private static class ShouldBeConfiguredBySpringContainsPrivateReadResolve implements Serializable {
+//
+//		private String name;
+//
+//		public void setName(String name) {
+//			this.name = name;
+//		}
+//
+//		public String getName() {
+//			return this.name;
+//		}
+//		
+//		private Object readResolve() throws ObjectStreamException {
+//			return this;
+//		}
+//	}
 
 	private static class ShouldNotBeConfiguredBySpring {
 
@@ -147,6 +214,18 @@ public class BeanConfigurerTests extends TestCase {
 		}
 	}
 
+	private static class SerializableThatShouldNotBeConfiguredBySpring implements Serializable {
+
+		private String name;
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+	}
 
 	@Configurable
 	private static class ShouldBeConfiguredBySpringUsingTypeNameAsBeanName {
@@ -234,15 +313,6 @@ public class BeanConfigurerTests extends TestCase {
 		@Pointcut("initialization(ClassThatWillNotActuallyBeWired.new(..)) && this(beanInstance)")
 		protected void beanCreation(Object beanInstance){
 		}
-	}
-
-	@Aspect
-	private static class DIOnDeserialization extends AbstractBeanConfigurerAspect {
-		
-		@Pointcut("execution(void java.io.Serializable+.readObject(java.io.ObjectInputStream)) && this(beanInstance) && @this(org.springframework.beans.factory.annotation.Configurable)")
-		protected void beanCreation(Object beanInstance) {	
-		}
-		
 	}
 
 	private static class ClassThatWillNotActuallyBeWired {

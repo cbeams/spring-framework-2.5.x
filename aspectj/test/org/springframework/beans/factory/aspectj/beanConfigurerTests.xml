@@ -9,13 +9,7 @@
 
 	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$WireArbitraryExistingPojo"
 	      factory-method="aspectOf"/>
-
-	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$DIOnDeserialization" factory-method="aspectOf">
-		<property name="beanWiringInfoResolver">
-			<bean class="org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver"/>
-		</property>
-	</bean>	
-
+	      
 	<bean id="beanOne" class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$ShouldBeConfiguredBySpring"
 			lazy-init="true">
 		<property name="name" value="Rod"/>
