@@ -43,14 +43,15 @@ import org.springframework.util.ClassUtils;
  * It supports the RemoteInvocationFactory mechanism, like RMI invoker,
  * allowing to include additional invocation attributes (for example,
  * a security context). Furthermore, it allows to customize request
- * execution via the HttpInvokerRequestExecutor strategy.
+ * execution via the {@link HttpInvokerRequestExecutor} strategy.
  *
- * <p>Can use the JDK's RMIClassLoader to load classes from a given codebase,
- * performing on-demand dynamic code download from a remote location.
- * The codebase can consist of multiple URLs, separated by spaces.
- * Note that RMIClassLoader requires a SecurityManager to be set, like when
- * using dynamic class download with standard RMI! (See the RMI documentation
- * for details.)
+ * <p>Can use the JDK's {@link java.rmi.server.RMIClassLoader} to load
+ * classes from a given {@link #setCodebaseUrl codebase}, performing
+ * on-demand dynamic code download from a remote location. The codebase
+ * can consist of multiple URLs, separated by spaces. Note that
+ * RMIClassLoader requires a SecurityManager to be set, analogous to
+ * when using dynamic class download with standard RMI!
+ * (See the RMI documentation for details.)
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -98,8 +99,9 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	/**
 	 * Set the HttpInvokerRequestExecutor implementation to use for executing
 	 * remote invocations.
-	 * <p>Default is SimpleHttpInvokerRequestExecutor. Alternatively, consider
-	 * CommonsHttpInvokerRequestExecutor for more sophisticated needs.
+	 * <p>Default is {@link SimpleHttpInvokerRequestExecutor}. Alternatively,
+	 * consider using {@link CommonsHttpInvokerRequestExecutor} for more
+	 * sophisticated needs.
 	 * @see SimpleHttpInvokerRequestExecutor
 	 * @see CommonsHttpInvokerRequestExecutor
 	 */
@@ -109,8 +111,15 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 
 	/**
 	 * Return the HttpInvokerRequestExecutor used by this remote accessor.
+	 * <p>Creates a default SimpleHttpInvokerRequestExecutor if no executor
+	 * has been initialized already.
 	 */
 	public HttpInvokerRequestExecutor getHttpInvokerRequestExecutor() {
+		if (this.httpInvokerRequestExecutor == null) {
+			SimpleHttpInvokerRequestExecutor executor = new SimpleHttpInvokerRequestExecutor();
+			executor.setBeanClassLoader(this.beanClassLoader);
+			this.httpInvokerRequestExecutor = executor;
+		}
 		return this.httpInvokerRequestExecutor;
 	}
 
@@ -129,11 +138,8 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 
-		if (this.httpInvokerRequestExecutor == null) {
-			SimpleHttpInvokerRequestExecutor executor = new SimpleHttpInvokerRequestExecutor();
-			executor.setBeanClassLoader(this.beanClassLoader);
-			this.httpInvokerRequestExecutor = executor;
-		}
+		// Eagerly initialize the default HttpInvokerRequestExecutor, if needed.
+		getHttpInvokerRequestExecutor();
 	}
 
 
