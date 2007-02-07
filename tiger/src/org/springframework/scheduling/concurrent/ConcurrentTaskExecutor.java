@@ -70,12 +70,21 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor 
 		setConcurrentExecutor(concurrentExecutor);
 	}
 
+
 	/**
 	 * Specify the JDK 1.5 concurrent executor to delegate to.
 	 */
 	public void setConcurrentExecutor(Executor concurrentExecutor) {
 		this.concurrentExecutor =
 				(concurrentExecutor != null ? concurrentExecutor : Executors.newSingleThreadExecutor());
+	}
+
+	/**
+	 * Return the JDK 1.5 concurrent executor that this adapter
+	 * delegates to.
+	 */
+	public Executor getConcurrentExecutor() {
+		return this.concurrentExecutor;
 	}
 
 
