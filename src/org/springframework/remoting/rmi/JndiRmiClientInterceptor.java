@@ -181,9 +181,20 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	public void prepare() throws NamingException, RemoteLookupFailureException {
 		// Cache RMI stub on initialization?
 		if (this.lookupStubOnStartup) {
-			Remote stub = lookupStub();
+			Remote remoteObj = lookupStub();
+			if (logger.isDebugEnabled()) {
+				if (remoteObj instanceof RmiInvocationHandler) {
+					logger.debug("JNDI RMI object [" + getJndiName() + "] is an RMI invoker");
+				}
+				else if (getServiceInterface() != null) {
+					boolean isImpl = getServiceInterface().isInstance(remoteObj);
+					logger.debug("Using service interface [" + getServiceInterface().getName() +
+					    "] for JNDI RMI object [" + getJndiName() + "] - " +
+					    (!isImpl ? "not " : "") + "directly implemented");
+				}
+			}
 			if (this.cacheStub) {
-				this.cachedStub = stub;
+				this.cachedStub = remoteObj;
 			}
 		}
 	}
@@ -290,6 +301,15 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 		return RmiClientInterceptorUtils.isConnectFailure(ex);
 	}
 
+	/**
+	 * Refresh the stub and retry the remote invocation if necessary.
+	 * <p>If not configured to refresh on connect failure, this method
+	 * simply rethrows the original exception.
+	 * @param invocation the invocation that failed
+	 * @param ex the exception raised on remote invocation
+	 * @return the result value of the new invocation, if succeeded
+	 * @throws Throwable an exception raised by the new invocation, if failed too.
+	 */
 	private Object handleRemoteConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {
 		if (this.refreshStubOnConnectFailure) {
 			if (logger.isDebugEnabled()) {
