@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 
 /**
- * Factory for locally defined JAX-RPC Service references.
- * Uses a JAX-RPC ServiceFactory underneath.
+ * Factory for locally defined JAX-RPC {@link javax.xml.rpc.Service} references.
+ * Uses a JAX-RPC {@link javax.xml.rpc.ServiceFactory} underneath.
  *
- * <p>Serves as base class for LocalJaxRpcServiceFactoryBean as well
- * as JaxRpcPortClientInterceptor and JaxRpcPortProxyFactoryBean.
+ * <p>Serves as base class for {@link LocalJaxRpcServiceFactoryBean} as well as
+ * {@link JaxRpcPortClientInterceptor} and {@link JaxRpcPortProxyFactoryBean}.
  *
  * @author Juergen Hoeller
  * @since 15.12.2003
@@ -48,6 +48,8 @@ public class LocalJaxRpcServiceFactory {
 
 	/** Logger that is available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	private ServiceFactory serviceFactory;
 
 	private Class serviceFactoryClass;
 
@@ -65,6 +67,23 @@ public class LocalJaxRpcServiceFactory {
 
 
 	/**
+	 * Set the ServiceFactory instance to use.
+	 * <p>This is an alternative to the common "serviceFactoryClass" property,
+	 * allowing for a pre-initialized ServiceFactory instance to be specified.
+	 * @see #setServiceFactoryClass
+	 */
+	public void setServiceFactory(ServiceFactory serviceFactory) {
+		this.serviceFactory = serviceFactory;
+	}
+
+	/**
+	 * Return the specified ServiceFactory instance, if any.
+	 */
+	public ServiceFactory getServiceFactory() {
+		return this.serviceFactory;
+	}
+
+	/**
 	 * Set the ServiceFactory class to use, for example
 	 * "org.apache.axis.client.ServiceFactory".
 	 * <p>Does not need to be set if the JAX-RPC implementation has registered
@@ -73,7 +92,7 @@ public class LocalJaxRpcServiceFactory {
 	 */
 	public void setServiceFactoryClass(Class serviceFactoryClass) {
 		if (serviceFactoryClass != null && !ServiceFactory.class.isAssignableFrom(serviceFactoryClass)) {
-			throw new IllegalArgumentException("serviceFactoryClass must implement [javax.xml.rpc.ServiceFactory]");
+			throw new IllegalArgumentException("'serviceFactoryClass' must implement [javax.xml.rpc.ServiceFactory]");
 		}
 		this.serviceFactoryClass = serviceFactoryClass;
 	}
@@ -82,7 +101,7 @@ public class LocalJaxRpcServiceFactory {
 	 * Return the ServiceFactory class to use, or <code>null</code> if default.
 	 */
 	public Class getServiceFactoryClass() {
-		return serviceFactoryClass;
+		return this.serviceFactoryClass;
 	}
 
 	/**
@@ -96,7 +115,7 @@ public class LocalJaxRpcServiceFactory {
 	 * Return the URL of the WSDL document that describes the service.
 	 */
 	public URL getWsdlDocumentUrl() {
-		return wsdlDocumentUrl;
+		return this.wsdlDocumentUrl;
 	}
 
 	/**
@@ -111,7 +130,7 @@ public class LocalJaxRpcServiceFactory {
 	 * Return the namespace URI of the service.
 	 */
 	public String getNamespaceUri() {
-		return namespaceUri;
+		return this.namespaceUri;
 	}
 
 	/**
@@ -129,7 +148,7 @@ public class LocalJaxRpcServiceFactory {
 	 * Return the name of the service.
 	 */
 	public String getServiceName() {
-		return serviceName;
+		return this.serviceName;
 	}
 
 	/**
@@ -152,7 +171,7 @@ public class LocalJaxRpcServiceFactory {
 	 * Return the JAX-RPC service interface to use for looking up the service.
 	 */
 	public Class getJaxRpcServiceInterface() {
-		return jaxRpcServiceInterface;
+		return this.jaxRpcServiceInterface;
 	}
 
 	/**
@@ -169,7 +188,7 @@ public class LocalJaxRpcServiceFactory {
 	 * Return JAX-RPC service properties to be passed to the ServiceFactory, if any.
 	 */
 	public Properties getJaxRpcServiceProperties() {
-		return jaxRpcServiceProperties;
+		return this.jaxRpcServiceProperties;
 	}
 
 	/**
@@ -192,7 +211,7 @@ public class LocalJaxRpcServiceFactory {
 	 * instances created by this factory.
 	 */
 	public JaxRpcServicePostProcessor[] getServicePostProcessors() {
-		return servicePostProcessors;
+		return this.servicePostProcessors;
 	}
 
 
@@ -203,7 +222,10 @@ public class LocalJaxRpcServiceFactory {
 	 * @see #postProcessJaxRpcService
 	 */
 	public Service createJaxRpcService() throws ServiceException {
-		ServiceFactory serviceFactory = createServiceFactory();
+		ServiceFactory serviceFactory = getServiceFactory();
+		if (serviceFactory == null) {
+			serviceFactory = createServiceFactory();
+		}
 
 		// Create service based on this factory's settings.
 		Service service = createService(serviceFactory);
@@ -250,7 +272,7 @@ public class LocalJaxRpcServiceFactory {
 	 */
 	protected Service createService(ServiceFactory serviceFactory) throws ServiceException {
 		if (getServiceName() == null && getJaxRpcServiceInterface() == null) {
-			throw new IllegalArgumentException("serviceName or jaxRpcServiceInterface is required");
+			throw new IllegalArgumentException("Either 'serviceName' or 'jaxRpcServiceInterface' is required");
 		}
 
 		if (getJaxRpcServiceInterface() != null) {
@@ -276,17 +298,16 @@ public class LocalJaxRpcServiceFactory {
 	}
 
 	/**
-	 * Post-process the given JAX-RPC Service.
-	 * Called by <code>createJaxRpcService</code>.
+	 * Post-process the given JAX-RPC Service. Called by {@link #createJaxRpcService}.
 	 * Useful, for example, to register custom type mappings.
-	 * <p>Default implementation delegates to all registered JaxRpcServicePostProcessors.
-	 * It is usually preferable to implement custom type mappings etc there rather than
-	 * in a subclass of this factory, to be able to reuse the post-processors.
+	 * <p>The default implementation delegates to all registered
+	 * {@link JaxRpcServicePostProcessor JaxRpcServicePostProcessors}.
+	 * It is usually preferable to implement custom type mappings etc there rather
+	 * than in a subclass of this factory, to allow for reuse of the post-processors.
 	 * @param service the current JAX-RPC Service
 	 * (can be cast to an implementation-specific class if necessary)
-	 * @see #createJaxRpcService
 	 * @see #setServicePostProcessors
-	 * @see javax.xml.rpc.Service#getTypeMappingRegistry
+	 * @see javax.xml.rpc.Service#getTypeMappingRegistry()
 	 */
 	protected void postProcessJaxRpcService(Service service) {
 		JaxRpcServicePostProcessor[] postProcessors = getServicePostProcessors();
