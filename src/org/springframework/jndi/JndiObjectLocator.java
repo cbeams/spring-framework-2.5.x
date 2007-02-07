@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	 * Return the JNDI name to look up.
 	 */
 	public String getJndiName() {
-		return jndiName;
+		return this.jndiName;
 	}
 
 	/**
@@ -79,23 +79,23 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	 * to be assignable to, if any.
 	 */
 	public Class getExpectedType() {
-		return expectedType;
+		return this.expectedType;
 	}
 
 	public void afterPropertiesSet() throws IllegalArgumentException, NamingException {
 		if (!StringUtils.hasLength(getJndiName())) {
-			throw new IllegalArgumentException("jndiName is required");
+			throw new IllegalArgumentException("Property 'jndiName' is required");
 		}
 	}
 
 
 	/**
 	 * Perform the actual JNDI lookup via the JndiTemplate.
-	 * Invokes the <code>located</code> method after successful lookup.
 	 * @throws NamingException if the JNDI lookup failed or if the
 	 * located JNDI object is not assigable to the expected type
 	 * @see #setJndiName
 	 * @see #setExpectedType
+	 * @see #lookup(String, Class)
 	 */
 	protected Object lookup() throws NamingException {
 		return lookup(getJndiName(), getExpectedType());
