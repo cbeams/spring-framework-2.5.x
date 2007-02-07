@@ -143,13 +143,13 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 		// Cache RMI stub on initialization?
 		if (this.lookupStubOnStartup) {
 			Remote remoteObj = lookupStub();
-			if (logger.isInfoEnabled()) {
+			if (logger.isDebugEnabled()) {
 				if (remoteObj instanceof RmiInvocationHandler) {
-					logger.info("RMI stub [" + getServiceUrl() + "] is an RMI invoker");
+					logger.debug("RMI stub [" + getServiceUrl() + "] is an RMI invoker");
 				}
 				else if (getServiceInterface() != null) {
 					boolean isImpl = getServiceInterface().isInstance(remoteObj);
-					logger.info("Using service interface [" + getServiceInterface().getName() +
+					logger.debug("Using service interface [" + getServiceInterface().getName() +
 					    "] for RMI stub [" + getServiceUrl() + "] - " +
 					    (!isImpl ? "not " : "") + "directly implemented");
 				}
@@ -244,7 +244,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	/**
 	 * Fetches an RMI stub and delegates to <code>doInvoke</code>.
 	 * If configured to refresh on connect failure, it will call
-	 * <code>refreshAndRetry</code> on corresponding RMI exceptions.
+	 * {@link #refreshAndRetry} on corresponding RMI exceptions.
 	 * @see #getStub
 	 * @see #doInvoke(MethodInvocation, Remote)
 	 * @see #refreshAndRetry
@@ -316,14 +316,9 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
 		Remote freshStub = null;
 		synchronized (this.stubMonitor) {
-			try {
-				freshStub = lookupStub();
-				if (this.cacheStub) {
-					this.cachedStub = freshStub;
-				}
-			}
-			catch (Throwable ex) {
-				throw new RemoteLookupFailureException("RMI lookup for service [" + getServiceUrl() + "] failed", ex);
+			freshStub = lookupStub();
+			if (this.cacheStub) {
+				this.cachedStub = freshStub;
 			}
 		}
 		return doInvoke(invocation, freshStub);
