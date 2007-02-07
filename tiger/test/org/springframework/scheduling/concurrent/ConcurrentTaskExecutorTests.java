@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,30 +18,30 @@ package org.springframework.scheduling.concurrent;
 
 import junit.framework.TestCase;
 
+import org.springframework.core.task.NoOpRunnable;
+
 /**
- * Unit tests for the {@link ConcurrentTaskExecutor} class.
- *
  * @author Rick Evans
  */
-public final class ConcurrentTaskExecutorTests extends TestCase {
+public class ConcurrentTaskExecutorTests extends TestCase {
 
-    public void testZeroArgCtorResultsInDefaultTaskExecutorBeingUsed() throws Exception {
-        ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
-        // must not throw a NullPointerException
-        executor.execute(new NoOpRunnable());
-    }
+	public void testZeroArgCtorResultsInDefaultTaskExecutorBeingUsed() throws Exception {
+		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
+		// must not throw a NullPointerException
+		executor.execute(new NoOpRunnable());
+	}
 
-    public void testPassingNullExecutorToCtorResultsInDefaultTaskExecutorBeingUsed() throws Exception {
-        ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor(null);
-        // must not throw a NullPointerException
-        executor.execute(new NoOpRunnable());
-    }
+	public void testPassingNullExecutorToCtorResultsInDefaultTaskExecutorBeingUsed() throws Exception {
+		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor(null);
+		// must not throw a NullPointerException
+		executor.execute(new NoOpRunnable());
+	}
 
-    public void testPassingNullExecutorToSetterResultsInDefaultTaskExecutorBeingUsed() throws Exception {
-        ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
-        executor.setConcurrentExecutor(null);
-        // must not throw a NullPointerException
-        executor.execute(new NoOpRunnable());
-    }
+	public void testPassingNullExecutorToSetterResultsInDefaultTaskExecutorBeingUsed() throws Exception {
+		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
+		executor.setConcurrentExecutor(null);
+		// must not throw a NullPointerException
+		executor.execute(new NoOpRunnable());
+	}
 
 }

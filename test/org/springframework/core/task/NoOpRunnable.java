@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.scheduling.concurrent;
+package org.springframework.core.task;
 
 /**
- * A no-op {@link Runnable} implementation.
- * 
+ * A no-op Runnable implementation.
+ *
  * @author Rick Evans
  */
-final class NoOpRunnable implements Runnable {
+public class NoOpRunnable implements Runnable {
 
-    public void run() {
-        // explicit no-op
-    }
+	public void run() {
+		// explicit no-op
+	}
+
 }

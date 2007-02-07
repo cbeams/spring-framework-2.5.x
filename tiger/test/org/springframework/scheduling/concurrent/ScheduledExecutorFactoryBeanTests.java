@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,12 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.core.task.NoOpRunnable;
+
 /**
  * @author Rick Evans
  */
-public final class ScheduledExecutorFactoryBeanTests extends TestCase {
+public class ScheduledExecutorFactoryBeanTests extends TestCase {
 
 	public void testThrowsExceptionIfPoolSizeIsLessThanZero() throws Exception {
 		try {
