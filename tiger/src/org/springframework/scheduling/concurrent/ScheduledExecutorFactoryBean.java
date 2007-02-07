@@ -91,7 +91,7 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 	 * Default is 1.
 	 */
 	public void setPoolSize(int poolSize) {
-		Assert.isTrue(poolSize > 0, "poolSize must be 1 or higher");
+		Assert.isTrue(poolSize > 0, "'poolSize' must be 1 or higher");
 		this.poolSize = poolSize;
 	}
 
@@ -175,7 +175,7 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 	}
 
 	public Class getObjectType() {
-		return ScheduledExecutorService.class;
+		return (this.executor != null ? this.executor.getClass() : ScheduledExecutorService.class);
 	}
 
 	public boolean isSingleton() {
