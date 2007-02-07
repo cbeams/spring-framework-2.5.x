@@ -70,6 +70,8 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private final Object poolSizeMonitor = new Object();
+
 	private int corePoolSize = 1;
 
 	private int maxPoolSize = Integer.MAX_VALUE;
@@ -82,31 +84,76 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 
 	private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.AbortPolicy();
 
-	private ThreadPoolExecutor executorService;
+	private ThreadPoolExecutor threadPoolExecutor;
 
 
 	/**
 	 * Set the ThreadPoolExecutor's core pool size.
 	 * Default is 1.
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setCorePoolSize(int corePoolSize) {
-		this.corePoolSize = corePoolSize;
+		synchronized (this.poolSizeMonitor) {
+			this.corePoolSize = corePoolSize;
+			if (this.threadPoolExecutor != null) {
+				this.threadPoolExecutor.setCorePoolSize(corePoolSize);
+			}
+		}
+	}
+
+	/**
+	 * Return the ThreadPoolExecutor's core pool size.
+	 */
+	public int getCorePoolSize() {
+		synchronized (this.poolSizeMonitor) {
+			return this.corePoolSize;
+		}
 	}
 
 	/**
 	 * Set the ThreadPoolExecutor's maximum pool size.
 	 * Default is <code>Integer.MAX_VALUE</code>.
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setMaxPoolSize(int maxPoolSize) {
-		this.maxPoolSize = maxPoolSize;
+		synchronized (this.poolSizeMonitor) {
+			this.maxPoolSize = maxPoolSize;
+			if (this.threadPoolExecutor != null) {
+				this.threadPoolExecutor.setMaximumPoolSize(maxPoolSize);
+			}
+		}
 	}
 
 	/**
-	 * Set the ThreadPoolExecutor's keep alive seconds.
+	 * Return the ThreadPoolExecutor's maximum pool size.
+	 */
+	public int getMaxPoolSize() {
+		synchronized (this.poolSizeMonitor) {
+			return this.maxPoolSize;
+		}
+	}
+
+	/**
+	 * Set the ThreadPoolExecutor's keep-alive seconds.
 	 * Default is 60.
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setKeepAliveSeconds(int keepAliveSeconds) {
-		this.keepAliveSeconds = keepAliveSeconds;
+		synchronized (this.poolSizeMonitor) {
+			this.keepAliveSeconds = keepAliveSeconds;
+			if (this.threadPoolExecutor != null) {
+				this.threadPoolExecutor.setKeepAliveTime(keepAliveSeconds, TimeUnit.SECONDS);
+			}
+		}
+	}
+
+	/**
+	 * Return the ThreadPoolExecutor's keep-alive seconds.
+	 */
+	public int getKeepAliveSeconds() {
+		synchronized (this.poolSizeMonitor) {
+			return this.keepAliveSeconds;
+		}
 	}
 
 	/**
@@ -156,7 +203,7 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 	public void initialize() {
 		logger.info("Creating ThreadPoolExecutor");
 		BlockingQueue queue = createQueue(this.queueCapacity);
-		this.executorService = new ThreadPoolExecutor(
+		this.threadPoolExecutor = new ThreadPoolExecutor(
 				this.corePoolSize, this.maxPoolSize, this.keepAliveSeconds, TimeUnit.SECONDS,
 				queue, this.threadFactory, this.rejectedExecutionHandler);
 	}
@@ -179,22 +226,30 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 		}
 	}
 
+	/**
+	 * Return the underlying ThreadPoolExecutor for native access.
+	 * @return the underlying ThreadPoolExecutor (never <code>null</code>)
+	 * @throws IllegalStateException if the ThreadPoolTaskExecutor hasn't been initialized yet
+	 */
+	public ThreadPoolExecutor getThreadPoolExecutor() throws IllegalStateException {
+		Assert.state(this.threadPoolExecutor != null, "ThreadPoolTaskExecutor not initialized");
+		return this.threadPoolExecutor;
+	}
+
 
 	/**
-	 * Implementation of both the JDK 1.5 Executor interface
-	 * and the Spring TaskExecutor interface, delegating to
-	 * the ThreadPoolExecutor instance.
+	 * Implementation of both the JDK 1.5 Executor interface and the Spring
+	 * TaskExecutor interface, delegating to the ThreadPoolExecutor instance.
 	 * @see java.util.concurrent.Executor#execute(Runnable)
 	 * @see org.springframework.core.task.TaskExecutor#execute(Runnable)
 	 */
 	public void execute(Runnable task) {
-		Assert.notNull(this.executorService, "ThreadPoolTaskExecutor not initialized");
+		Executor executor = getThreadPoolExecutor();
 		try {
-			this.executorService.execute(task);
+			executor.execute(task);
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(
-					"Executor [" + this.executorService + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
 		}
 	}
 
@@ -203,6 +258,23 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 	 */
 	public boolean prefersShortLivedTasks() {
 		return true;
+	}
+
+
+	/**
+	 * Return the current pool size.
+	 * @see java.util.concurrent.ThreadPoolExecutor#getPoolSize()
+	 */
+	public int getPoolSize() {
+		return getThreadPoolExecutor().getPoolSize();
+	}
+
+	/**
+	 * Return the number of currently active threads.
+	 * @see java.util.concurrent.ThreadPoolExecutor#getActiveCount()
+	 */
+	public int getActiveCount() {
+		return getThreadPoolExecutor().getActiveCount();
 	}
 
 
@@ -221,7 +293,7 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 	 */
 	public void shutdown() {
 		logger.info("Shutting down ThreadPoolExecutor");
-		this.executorService.shutdown();
+		this.threadPoolExecutor.shutdown();
 	}
 
 }
