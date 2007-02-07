@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,14 +162,13 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 
 	/**
 	 * Create the RMI stub, typically by looking it up.
-	 * Called on interceptor initialization if cacheStub is true;
-	 * else called for each invocation by getStub().
-	 * <p>Default implementation looks up the service URL via java.rmi.Naming.
-	 * Can be overridden in subclasses.
+	 * <p>Called on interceptor initialization if "cacheStub" is "true";
+	 * else called for each invocation by {@link #getStub()}.
+	 * <p>The default implementation looks up the service URL via
+	 * <code>java.rmi.Naming</code>. This can be overridden in subclasses.
 	 * @return the RMI stub to store in this interceptor
 	 * @throws RemoteLookupFailureException if RMI stub creation failed
 	 * @see #setCacheStub
-	 * @see #getStub()
 	 * @see java.rmi.Naming#lookup
 	 */
 	protected Remote lookupStub() throws RemoteLookupFailureException {
@@ -273,10 +272,10 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 
 	/**
 	 * Determine whether the given RMI exception indicates a connect failure.
-	 * Default implementation delegates to RmiClientInterceptorUtils.
+	 * <p>The default implementation delegates to
+	 * {@link RmiClientInterceptorUtils#isConnectFailure}.
 	 * @param ex the RMI exception to check
 	 * @return whether the exception should be treated as connect failure
-	 * @see org.springframework.remoting.rmi.RmiClientInterceptorUtils#isConnectFailure
 	 */
 	protected boolean isConnectFailure(RemoteException ex) {
 		return RmiClientInterceptorUtils.isConnectFailure(ex);
@@ -284,8 +283,8 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 
 	/**
 	 * Refresh the stub and retry the remote invocation if necessary.
-	 * If not configured to refresh on connect failure, simply rethrows
-	 * the original exception.
+	 * <p>If not configured to refresh on connect failure, this method
+	 * simply rethrows the original exception.
 	 * @param invocation the invocation that failed
 	 * @param ex the exception raised on remote invocation
 	 * @return the result value of the new invocation, if succeeded
@@ -377,14 +376,12 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 	/**
-	 * Apply the given AOP method invocation to the given RmiInvocationHandler.
-	 * The default implementation calls invoke with a plain RemoteInvocation.
-	 * <p>Can be overridden in subclasses to provide custom RemoteInvocation
-	 * subclasses, containing additional invocation parameters like user
-	 * credentials. Can also process the returned result object.
+	 * Apply the given AOP method invocation to the given {@link RmiInvocationHandler}.
+	 * <p>The default implementation delegates to {@link #createRemoteInvocation}.
 	 * @param methodInvocation the current AOP method invocation
 	 * @param invocationHandler the RmiInvocationHandler to apply the invocation to
 	 * @return the invocation result
+	 * @throws RemoteException in case of communication errors
 	 * @throws NoSuchMethodException if the method name could not be resolved
 	 * @throws IllegalAccessException if the method could not be accessed
 	 * @throws InvocationTargetException if the method invocation resulted in an exception

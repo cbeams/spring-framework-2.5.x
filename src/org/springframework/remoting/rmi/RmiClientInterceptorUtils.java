@@ -59,8 +59,8 @@ public abstract class RmiClientInterceptorUtils {
 	 * implemented the invoked method. This typically happens when a non-RMI service
 	 * interface is used for an RMI service. The methods of such a service interface
 	 * have to match the RMI stub methods, but they typically don't declare
-	 * java.rmi.RemoteException: A RemoteException thrown by the RMI stub will
-	 * be automatically converted to Spring's RemoteAccessException.
+	 * <code>java.rmi.RemoteException</code>: A RemoteException thrown by the RMI stub
+	 * will be automatically converted to Spring's RemoteAccessException.
 	 * @param invocation the AOP MethodInvocation
 	 * @param stub the RMI stub
 	 * @param serviceName the name of the service (for debugging purposes)

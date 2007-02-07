@@ -37,6 +37,7 @@ public interface RmiInvocationHandler extends Remote {
 	/**
 	 * Return the name of the target interface that this invoker operates on.
 	 * @return the name of the target interface, or <code>null</code> if none
+	 * @throws RemoteException in case of communication errors
 	 * @see RmiServiceExporter#getServiceInterface()
 	 */
 	public String getTargetInterfaceName() throws RemoteException;
