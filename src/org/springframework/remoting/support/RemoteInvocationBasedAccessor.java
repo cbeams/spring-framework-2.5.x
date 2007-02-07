@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package org.springframework.remoting.support;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * Abstract base class for remote service accessors that are based on
- * serialization of RemoteInvocation objects. Provides a "remoteInvocationFactory"
- * property, with a DefaultRemoteInvocationFactory as default.
+ * Abstract base class for remote service accessors that are based on serialization
+ * of {@link RemoteInvocation} objects. Provides a "remoteInvocationFactory" property,
+ * with a {@link DefaultRemoteInvocationFactory} as default.
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see #setRemoteInvocationFactory
+ * @see RemoteInvocation
  * @see RemoteInvocationFactory
  * @see DefaultRemoteInvocationFactory
  */
@@ -35,28 +37,30 @@ public abstract class RemoteInvocationBasedAccessor extends UrlBasedRemoteAccess
 
 	/**
 	 * Set the RemoteInvocationFactory to use for this accessor.
-	 * Default is a DefaultRemoteInvocationFactory.
+	 * Default is a {@link DefaultRemoteInvocationFactory}.
 	 * <p>A custom invocation factory can add further context information
 	 * to the invocation, for example user credentials.
 	 */
 	public void setRemoteInvocationFactory(RemoteInvocationFactory remoteInvocationFactory) {
-		this.remoteInvocationFactory = remoteInvocationFactory;
+		this.remoteInvocationFactory =
+				(remoteInvocationFactory != null ? remoteInvocationFactory : new DefaultRemoteInvocationFactory());
 	}
 
 	/**
 	 * Return the RemoteInvocationFactory used by this accessor.
 	 */
 	public RemoteInvocationFactory getRemoteInvocationFactory() {
-		return remoteInvocationFactory;
+		return this.remoteInvocationFactory;
 	}
 
 	/**
 	 * Create a new RemoteInvocation object for the given AOP method invocation.
-	 * The default implementation delegates to the RemoteInvocationFactory.
-	 * <p>Can be overridden in subclasses to provide custom RemoteInvocation
-	 * subclasses, containing additional invocation parameters like user credentials.
-	 * Note that it is preferable to use a custom RemoteInvocationFactory which
-	 * is a reusable strategy.
+	 * <p>The default implementation delegates to the configured
+	 * {@link #setRemoteInvocationFactory RemoteInvocationFactory}.
+	 * This can be overridden in subclasses in order to provide custom RemoteInvocation
+	 * subclasses, containing additional invocation parameters (e.g. user credentials).
+	 * <p>Note that it is preferable to build a custom RemoteInvocationFactory
+	 * as a reusable strategy, instead of overriding this method.
 	 * @param methodInvocation the current AOP method invocation
 	 * @return the RemoteInvocation object
 	 * @see RemoteInvocationFactory#createRemoteInvocation
@@ -66,14 +70,14 @@ public abstract class RemoteInvocationBasedAccessor extends UrlBasedRemoteAccess
 	}
 
 	/**
-	 * Recreate the invocation result contained in the given RemoteInvocationResult
-	 * object. The default implementation calls the default recreate method.
-	 * <p>Can be overridden in subclass to provide custom recreation, potentially
+	 * Recreate the invocation result contained in the given RemoteInvocationResult object.
+	 * <p>The default implementation calls the default <code>recreate()</code> method.
+	 * This can be overridden in subclass to provide custom recreation, potentially
 	 * processing the returned result object.
 	 * @param result the RemoteInvocationResult to recreate
 	 * @return a return value if the invocation result is a successful return
 	 * @throws Throwable if the invocation result is an exception
-	 * @see org.springframework.remoting.support.RemoteInvocationResult#recreate
+	 * @see RemoteInvocationResult#recreate()
 	 */
 	protected Object recreateRemoteInvocationResult(RemoteInvocationResult result) throws Throwable {
 		return result.recreate();
