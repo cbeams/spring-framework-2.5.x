@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jms.support.destination;
 
 import java.util.Collections;
@@ -25,20 +26,23 @@ import javax.jms.Session;
 import javax.naming.NamingException;
 
 import org.springframework.jndi.JndiLocatorSupport;
+import org.springframework.util.Assert;
 
 /**
- * Implementation of the DestinationResolver interface which interprets
- * destination names as JNDI locations, falling back to dynamic destinations else.
+ * {@link DestinationResolver} implementation which interprets destination names
+ * as JNDI locations (with a configurable fallback strategy).
  *
- * <p>Allows for customizing the JNDI environment if necessary,
- * for example specifying appropriate JNDI environment properties.
+ * <p>Allows for customizing the JNDI environment if necessary, for example
+ * specifying appropriate JNDI environment properties.
  *
- * <p>Dynamic queues and topics get cached by destination name.
- * Thus, use unique destination names across both queues and topics.
- * Caching can be turned off by specifying "cache" as "false", if desired.
+ * <p>Dynamic queues and topics get cached by destination name. As a consequence,
+ * you need to use unique destination names across both queues and topics.
+ * Caching can be turned off through the {@link #setCache "cache"} flag.
  *
- * <b>Automatic creation of dynamic destinations is turned off by default.
- * Specify "fallbackToDynamicDestination" as "true" to enable this functionality.
+ * <p>Note that the fallback to resolution of dynamic destinations
+ * is turned <i>off</i> by default. Switch the
+ * {@link #setFallbackToDynamicDestination "fallbackToDynamicDestination"}
+ * flag on to enable this functionality.
  *
  * @author Mark Pollack
  * @author Juergen Hoeller
@@ -61,25 +65,31 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Desti
 
 	/**
 	 * Set whether to cache resolved destinations. Default is "true".
-	 * <p>Can be turned off to re-lookup a destination for each operation,
-	 * which allows for hot restarting of destinations. This is mainly
-	 * useful during development.
+	 * <p>This flag can be turned off to re-lookup a destination for each operation,
+	 * which allows for hot restarting of destinations. This is mainly useful
+	 * during development.
+	 * <p>Note that dynamic queues and topics get cached by destination name.
+	 * As a consequence, you need to use unique destination names across both
+	 * queues and topics.
 	 */
 	public void setCache(boolean cache) {
 		this.cache = cache;
 	}
 
 	/**
-	 * Set the ability of JmsTemplate to create dynamic destinations
+	 * Set whether this resolver is supposed to create dynamic destinations
 	 * if the destination name is not found in JNDI. Default is "false".
+	 * <p>Turn this flag on to enable transparent fallback to dynamic destinations.
+	 * @see #setDynamicDestinationResolver
 	 */
 	public void setFallbackToDynamicDestination(boolean fallbackToDynamicDestination) {
 		this.fallbackToDynamicDestination = fallbackToDynamicDestination;
 	}
 
 	/**
-	 * Set the DestinationResolver to use when falling back to dynamic destinations.
-	 * Default is a DynamicDestinationResolver.
+	 * Set the {@link DestinationResolver} to use when falling back to dynamic
+	 * destinations.
+	 * <p>The default is Spring's standard {@link DynamicDestinationResolver}.
 	 * @see #setFallbackToDynamicDestination
 	 * @see DynamicDestinationResolver
 	 */
@@ -91,6 +101,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Desti
 	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
 
+		Assert.notNull(destinationName, "Destination name must not be null");
 		Destination dest = (Destination) this.destinationCache.get(destinationName);
 		if (dest == null) {
 			try {
