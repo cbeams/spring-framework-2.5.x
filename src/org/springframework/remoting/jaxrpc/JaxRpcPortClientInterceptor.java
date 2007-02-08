@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.remoting.jaxrpc;
 
+import java.lang.reflect.InvocationTargetException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.util.Properties;
 
 import javax.xml.namespace.QName;
 import javax.xml.rpc.Call;
+import javax.xml.rpc.JAXRPCException;
 import javax.xml.rpc.Service;
 import javax.xml.rpc.ServiceException;
 import javax.xml.rpc.Stub;
@@ -34,14 +36,16 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.remoting.RemoteLookupFailureException;
+import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
  * Interceptor for accessing a specific port of a JAX-RPC service.
- * Uses either LocalJaxRpcServiceFactory's facilities underneath,
+ * Uses either {@link LocalJaxRpcServiceFactory}'s facilities underneath,
  * or takes an explicit reference to an existing JAX-RPC Service instance
- * (for example looked up via JndiObjectFactoryBean).
+ * (e.g. obtained via {@link org.springframework.jndi.JndiObjectFactoryBean}).
  *
  * <p>Allows to set JAX-RPC's standard stub properties directly, via the
  * "username", "password", "endpointAddress" and "maintainSession" properties.
@@ -57,7 +61,7 @@ import org.springframework.util.CollectionUtils;
  * use JAX-RPC "dynamic invocations" via the Call API in this case, no matter whether
  * the specified interface is an RMI or non-RMI interface. Alternatively, a corresponding
  * JAX-RPC port interface can be specified as "portInterface", which will turn this
- * invoker into "static invocation" mode - operating on a standard JAX-RPC port stub.
+ * invoker into "static invocation" mode (operating on a standard JAX-RPC port stub).
  *
  * @author Juergen Hoeller
  * @since 15.12.2003
@@ -73,6 +77,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		implements MethodInterceptor, InitializingBean {
 
 	private Service jaxRpcService;
+
+	private Service serviceToUse;
 
 	private String portName;
 
@@ -93,6 +99,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	private boolean lookupServiceOnStartup = true;
 
+	private boolean refreshServiceAfterConnectFailure = false;
+
 	private QName portQName;
 
 	private Remote portStub;
@@ -102,7 +110,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	/**
 	 * Set a reference to an existing JAX-RPC Service instance,
-	 * for example looked up via JndiObjectFactoryBean.
+	 * for example obtained via {@link org.springframework.jndi.JndiObjectFactoryBean}.
 	 * If not set, LocalJaxRpcServiceFactory's properties have to be specified.
 	 * @see #setServiceFactoryClass
 	 * @see #setWsdlDocumentUrl
@@ -118,7 +126,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Return a reference to an existing JAX-RPC Service instance, if any.
 	 */
 	public Service getJaxRpcService() {
-		return jaxRpcService;
+		return this.jaxRpcService;
 	}
 
 	/**
@@ -133,7 +141,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Return the name of the port.
 	 */
 	public String getPortName() {
-		return portName;
+		return this.portName;
 	}
 
 	/**
@@ -149,7 +157,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Return the username to specify on the stub or call.
 	 */
 	public String getUsername() {
-		return username;
+		return this.username;
 	}
 
 	/**
@@ -165,7 +173,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Return the password to specify on the stub or call.
 	 */
 	public String getPassword() {
-		return password;
+		return this.password;
 	}
 
 	/**
@@ -181,7 +189,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Return the endpoint address to specify on the stub or call.
 	 */
 	public String getEndpointAddress() {
-		return endpointAddress;
+		return this.endpointAddress;
 	}
 
 	/**
@@ -197,7 +205,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Return the maintain session flag to specify on the stub or call.
 	 */
 	public boolean isMaintainSession() {
-		return maintainSession;
+		return this.maintainSession;
 	}
 
 	/**
@@ -279,7 +287,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Return the interface of the service that this factory should create a proxy for.
 	 */
 	public Class getServiceInterface() {
-		return serviceInterface;
+		return this.serviceInterface;
 	}
 
 	/**
@@ -309,16 +317,29 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Return the JAX-RPC port interface to use.
 	 */
 	public Class getPortInterface() {
-		return portInterface;
+		return this.portInterface;
 	}
 
 	/**
-	 * Set whether to look up the JAX-RPC service on startup. Default is "true".
-	 * <p>Can be turned off to allow for late start of the target server.
-	 * In this case, the JAX-RPC service will be fetched on first access.
+	 * Set whether to look up the JAX-RPC service on startup.
+	 * <p>Default is "true". Turn this flag off to allow for late start
+	 * of the target server. In this case, the JAX-RPC service will be
+	 * lazily fetched on first access.
 	 */
 	public void setLookupServiceOnStartup(boolean lookupServiceOnStartup) {
 		this.lookupServiceOnStartup = lookupServiceOnStartup;
+	}
+
+	/**
+	 * Set whether to refresh the JAX-RPC service on connect failure,
+	 * that is, whenever a JAX-RPC invocation throws a RemoteException.
+	 * <p>Default is "false", keeping a reference to the JAX-RPC service
+	 * in any case, retrying the next invocation on the same service
+	 * even in case of failure. Turn this flag on to reinitialize the
+	 * entire service in case of connect failures.
+	 */
+	public void setRefreshServiceAfterConnectFailure(boolean refreshServiceAfterConnectFailure) {
+		this.refreshServiceAfterConnectFailure = refreshServiceAfterConnectFailure;
 	}
 
 
@@ -340,46 +361,55 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * <p><code>postProcessJaxRpcService</code> and <code>postProcessPortStub</code>
 	 * hooks are available for customization in subclasses. When using dynamic calls,
 	 * each can be post-processed via <code>postProcessJaxRpcCall</code>.
+	 * <p>Note: As of Spring 2.1, this method will always throw
+	 * RemoteLookupFailureException and not declare ServiceException anymore.
+	 * @throws ServiceException in case of service initialization failure
+	 * @throws RemoteLookupFailureException if port stub creation failed
 	 * @see #alwaysUseJaxRpcCall
 	 * @see #postProcessJaxRpcService
 	 * @see #postProcessPortStub
 	 * @see #postProcessJaxRpcCall
 	 */
-	public void prepare() throws ServiceException {
-		if (this.portName == null) {
-			throw new IllegalArgumentException("portName is required");
+	public void prepare() throws ServiceException, RemoteLookupFailureException {
+		if (getPortName() == null) {
+			throw new IllegalArgumentException("Property 'portName' is required");
 		}
 
 		synchronized (this.preparationMonitor) {
-			// Cache the QName for the port.
-			this.portQName = getQName(this.portName);
+			this.serviceToUse = null;
 
-			if (this.jaxRpcService == null) {
-				this.jaxRpcService = createJaxRpcService();
+			// Cache the QName for the port.
+			this.portQName = getQName(getPortName());
+
+			Service service = getJaxRpcService();
+			if (service == null) {
+				service = createJaxRpcService();
 			}
 			else {
-				postProcessJaxRpcService(this.jaxRpcService);
+				postProcessJaxRpcService(service);
 			}
 
-			if (this.portInterface != null && !alwaysUseJaxRpcCall()) {
+			Class portInterface = getPortInterface();
+			if (portInterface != null && !alwaysUseJaxRpcCall()) {
 				// JAX-RPC-compliant port interface -> using JAX-RPC stub for port.
 
-				if (logger.isInfoEnabled()) {
-					logger.info("Creating JAX-RPC proxy for JAX-RPC port [" + this.portQName +
-							"], using port interface [" + this.portInterface.getName() + "]");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Creating JAX-RPC proxy for JAX-RPC port [" + this.portQName +
+							"], using port interface [" + portInterface.getName() + "]");
 				}
-				Remote remoteObj = this.jaxRpcService.getPort(this.portQName, this.portInterface);
+				Remote remoteObj = service.getPort(this.portQName, portInterface);
 
-				if (logger.isInfoEnabled()) {
-					if (this.serviceInterface != null) {
-						boolean isImpl = this.serviceInterface.isInstance(remoteObj);
-						logger.info("Using service interface [" + this.serviceInterface.getName() + "] for JAX-RPC port [" +
+				if (logger.isDebugEnabled()) {
+					Class serviceInterface = getServiceInterface();
+					if (serviceInterface != null) {
+						boolean isImpl = serviceInterface.isInstance(remoteObj);
+						logger.debug("Using service interface [" + serviceInterface.getName() + "] for JAX-RPC port [" +
 								this.portQName + "] - " + (!isImpl ? "not" : "") + " directly implemented");
 					}
 				}
 
 				if (!(remoteObj instanceof Stub)) {
-					throw new ServiceException("Port stub of class [" + remoteObj.getClass().getName() +
+					throw new RemoteLookupFailureException("Port stub of class [" + remoteObj.getClass().getName() +
 							"] is not a valid JAX-RPC stub: it does not implement interface [javax.xml.rpc.Stub]");
 				}
 				Stub stub = (Stub) remoteObj;
@@ -395,30 +425,13 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 			else {
 				// No JAX-RPC-compliant port interface -> using JAX-RPC dynamic calls.
-				if (logger.isInfoEnabled()) {
-					logger.info("Using JAX-RPC dynamic calls for JAX-RPC port [" + this.portQName + "]");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Using JAX-RPC dynamic calls for JAX-RPC port [" + this.portQName + "]");
 				}
 			}
-		}
-	}
 
-	/**
-	 * Return whether this client interceptor has already been prepared,
-	 * i.e. has already looked up the JAX-RPC service and port.
-	 */
-	protected boolean isPrepared() {
-		synchronized (this.preparationMonitor) {
-			return (this.portQName != null);
+			this.serviceToUse = service;
 		}
-	}
-
-	/**
-	 * Return the prepared QName for the port.
-	 * @see #setPortName
-	 * @see #getQName
-	 */
-	protected QName getPortQName() {
-		return portQName;
 	}
 
 	/**
@@ -435,6 +448,35 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 */
 	protected boolean alwaysUseJaxRpcCall() {
 		return false;
+	}
+
+	/**
+	 * Reset the prepared service of this interceptor,
+	 * allowing for reinitialization on next access.
+	 */
+	protected void reset() {
+		synchronized (this.preparationMonitor) {
+			this.serviceToUse = null;
+		}
+	}
+
+	/**
+	 * Return whether this client interceptor has already been prepared,
+	 * i.e. has already looked up the JAX-RPC service and port.
+	 */
+	protected boolean isPrepared() {
+		synchronized (this.preparationMonitor) {
+			return (this.serviceToUse != null);
+		}
+	}
+
+	/**
+	 * Return the prepared QName for the port.
+	 * @see #setPortName
+	 * @see #getQName
+	 */
+	protected QName getPortQName() {
+		return this.portQName;
 	}
 
 
@@ -455,16 +497,19 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @see #prepareJaxRpcCall
 	 */
 	protected void preparePortStub(Stub stub) {
-		if (this.username != null) {
-			stub._setProperty(Stub.USERNAME_PROPERTY, this.username);
+		String username = getUsername();
+		if (username != null) {
+			stub._setProperty(Stub.USERNAME_PROPERTY, username);
 		}
-		if (this.password != null) {
-			stub._setProperty(Stub.PASSWORD_PROPERTY, this.password);
+		String password = getPassword();
+		if (password != null) {
+			stub._setProperty(Stub.PASSWORD_PROPERTY, password);
 		}
-		if (this.endpointAddress != null) {
-			stub._setProperty(Stub.ENDPOINT_ADDRESS_PROPERTY, this.endpointAddress);
+		String endpointAddress = getEndpointAddress();
+		if (endpointAddress != null) {
+			stub._setProperty(Stub.ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
 		}
-		if (this.maintainSession) {
+		if (isMaintainSession()) {
 			stub._setProperty(Stub.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 		}
 		if (this.customPropertyMap != null) {
@@ -495,17 +540,16 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * for each method invocation on the proxy.
 	 */
 	protected Remote getPortStub() {
-		return portStub;
+		return this.portStub;
 	}
 
 
 	/**
 	 * Translates the method invocation into a JAX-RPC service invocation.
-	 * Uses traditional RMI stub invocation if a JAX-RPC port stub is available;
-	 * falls back to JAX-RPC dynamic calls else.
-	 * @see #getPortStub()
-	 * @see org.springframework.remoting.rmi.RmiClientInterceptorUtils
-	 * @see #performJaxRpcCall
+	 * <p>Prepares the service on the fly, if necessary, in case of lazy
+	 * lookup or a connect failure having happened.
+	 * @see #prepare()
+	 * @see #doInvoke
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (AopUtils.isToStringMethod(invocation.getMethod())) {
@@ -513,15 +557,14 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		}
 
 		// Lazily prepare service and stub if appropriate.
-		if (!this.lookupServiceOnStartup) {
+		if (!this.lookupServiceOnStartup || this.refreshServiceAfterConnectFailure) {
 			synchronized (this.preparationMonitor) {
 				if (!isPrepared()) {
 					try {
 						prepare();
 					}
 					catch (ServiceException ex) {
-						throw RmiClientInterceptorUtils.convertRmiAccessException(
-								invocation.getMethod(), ex, this.portName);
+						throw new RemoteLookupFailureException("Preparation of JAX-RPC service failed", ex);
 					}
 				}
 			}
@@ -533,26 +576,80 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			}
 		}
 
+		return doInvoke(invocation);
+	}
+
+	/**
+	 * Perform a JAX-RPC service invocation based on the given method invocation.
+	 * <p>Uses traditional RMI stub invocation if a JAX-RPC port stub is available;
+	 * falls back to JAX-RPC dynamic calls else.
+	 * @param invocation the AOP method invocation
+	 * @return the invocation result, if any
+	 * @throws Throwable in case of invocation failure
+	 * @see #getPortStub()
+	 * @see #doInvoke(org.aopalliance.intercept.MethodInvocation, java.rmi.Remote)
+	 * @see #performJaxRpcCall(org.aopalliance.intercept.MethodInvocation, javax.xml.rpc.Service)
+	 */
+	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
 		Remote stub = getPortStub();
 		if (stub != null) {
 			// JAX-RPC port stub available -> traditional RMI stub invocation.
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking operation '" + invocation.getMethod().getName() +
-						"' on JAX-RPC port stub");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Invoking operation '" + invocation.getMethod().getName() + "' on JAX-RPC port stub");
 			}
-			return RmiClientInterceptorUtils.invoke(invocation, stub, getPortQName().toString());
+			return doInvoke(invocation, stub);
 		}
-
 		else {
 			// No JAX-RPC stub -> using JAX-RPC dynamic calls.
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking operation '" + invocation.getMethod().getName() +
-						"' as JAX-RPC dynamic call");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Invoking operation '" + invocation.getMethod().getName() + "' as JAX-RPC dynamic call");
 			}
 			return performJaxRpcCall(invocation);
 		}
 	}
 
+	/**
+	 * Perform a JAX-RPC service invocation based on the given port stub.
+	 * @param invocation the AOP method invocation
+	 * @param portStub the RMI port stub to invoke
+	 * @return the invocation result, if any
+	 * @throws Throwable in case of invocation failure
+	 * @see #getPortStub()
+	 * @see #doInvoke(org.aopalliance.intercept.MethodInvocation, java.rmi.Remote)
+	 * @see #performJaxRpcCall
+	 */
+	protected Object doInvoke(MethodInvocation invocation, Remote portStub) throws Throwable {
+		try {
+			return RmiClientInterceptorUtils.doInvoke(invocation, portStub);
+		}
+		catch (InvocationTargetException ex) {
+			Throwable targetEx = ex.getTargetException();
+			if (targetEx instanceof RemoteException) {
+				RemoteException rex = (RemoteException) targetEx;
+				boolean isConnectFailure = isConnectFailure(rex);
+				if (isConnectFailure && this.refreshServiceAfterConnectFailure) {
+					reset();
+				}
+				throw RmiClientInterceptorUtils.convertRmiAccessException(
+						invocation.getMethod(), rex, isConnectFailure, portQName.toString());
+			}
+			else if (targetEx instanceof JAXRPCException) {
+				throw new RemoteProxyFailureException("Invalid call on JAX-RPC port stub", targetEx);
+			}
+			else {
+				throw targetEx;
+			}
+		}
+	}
+
+	/**
+	 * @deprecated as of Spring 2.0.3, in favor of the <code>performJaxRpcCall</code>
+	 * variant with an explicit Service argument
+	 * @see #performJaxRpcCall(org.aopalliance.intercept.MethodInvocation, javax.xml.rpc.Service)
+	 */
+	protected Object performJaxRpcCall(MethodInvocation invocation) throws Throwable {
+		return performJaxRpcCall(invocation, this.serviceToUse);
+	}
 
 	/**
 	 * Perform a JAX-RPC dynamic call for the given AOP method invocation.
@@ -565,13 +662,11 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * be converted to a JAX-RPC call
 	 * @return the return value of the invocation, if any
 	 * @throws Throwable the exception thrown by the invocation, if any
-	 * @see #getJaxRpcService
 	 * @see #getPortQName
 	 * @see #prepareJaxRpcCall
 	 * @see #postProcessJaxRpcCall
 	 */
-	protected Object performJaxRpcCall(MethodInvocation invocation) throws Throwable {
-		Service service = getJaxRpcService();
+	protected Object performJaxRpcCall(MethodInvocation invocation, Service service) throws Throwable {
 		QName portQName = getPortQName();
 
 		// Create JAX-RPC call object, using the method name as operation name.
@@ -592,8 +687,15 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			return call.invoke(invocation.getArguments());
 		}
 		catch (RemoteException ex) {
+			boolean isConnectFailure = isConnectFailure(ex);
+			if (isConnectFailure && this.refreshServiceAfterConnectFailure) {
+				reset();
+			}
 			throw RmiClientInterceptorUtils.convertRmiAccessException(
-					invocation.getMethod(), ex, portQName.toString());
+					invocation.getMethod(), ex, isConnectFailure, portQName.toString());
+		}
+		catch (JAXRPCException ex) {
+			throw new RemoteProxyFailureException("Invalid JAX-RPC call configuration", ex);
 		}
 	}
 
@@ -614,16 +716,19 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @see #preparePortStub
 	 */
 	protected void prepareJaxRpcCall(Call call) {
-		if (this.username != null) {
-			call.setProperty(Call.USERNAME_PROPERTY, this.username);
+		String username = getUsername();
+		if (username != null) {
+			call.setProperty(Call.USERNAME_PROPERTY, username);
 		}
-		if (this.password != null) {
-			call.setProperty(Call.PASSWORD_PROPERTY, this.password);
+		String password = getPassword();
+		if (password != null) {
+			call.setProperty(Call.PASSWORD_PROPERTY, password);
 		}
-		if (this.endpointAddress != null) {
-			call.setTargetEndpointAddress(this.endpointAddress);
+		String endpointAddress = getEndpointAddress();
+		if (endpointAddress != null) {
+			call.setTargetEndpointAddress(endpointAddress);
 		}
-		if (this.maintainSession) {
+		if (isMaintainSession()) {
 			call.setProperty(Call.SESSION_MAINTAIN_PROPERTY, Boolean.TRUE);
 		}
 		if (this.customPropertyMap != null) {
@@ -650,6 +755,19 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @see #postProcessPortStub
 	 */
 	protected void postProcessJaxRpcCall(Call call, MethodInvocation invocation) {
+	}
+
+	/**
+	 * Determine whether the given RMI exception indicates a connect failure.
+	 * <p>The default implementation always returns <code>true</code>,
+	 * assuming that the JAX-RPC provider only throws RemoteException
+	 * in case of connect failures.
+	 * @param ex the RMI exception to check
+	 * @return whether the exception should be treated as connect failure
+	 * @see org.springframework.remoting.rmi.RmiClientInterceptorUtils#isConnectFailure
+	 */
+	protected boolean isConnectFailure(RemoteException ex) {
+		return true;
 	}
 
 }
