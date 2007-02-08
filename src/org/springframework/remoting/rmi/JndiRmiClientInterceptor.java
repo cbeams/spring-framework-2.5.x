@@ -49,8 +49,8 @@ import org.springframework.remoting.support.RemoteInvocationFactory;
  * RemoteExceptions thrown by the RMI stub will automatically get converted to
  * Spring's unchecked RemoteAccessException.
  *
- * <p>The JNDI environment can be specified as jndiEnvironment property,
- * or be configured in a jndi.properties file or as system properties.
+ * <p>The JNDI environment can be specified as "jndiEnvironment" property,
+ * or be configured in a <code>jndi.properties</code> file or as system properties.
  * For example:
  *
  * <pre class="code">&lt;property name="jndiEnvironment"&gt;
@@ -231,11 +231,11 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 
 	/**
 	 * Return the RMI stub to use. Called for each invocation.
-	 * <p>Default implementation returns the stub created on initialization, if any;
-	 * else, it invokes {@link #lookupStub} to get a new stub for each invocation.
-	 * This can be overridden in subclasses, for example to cache a stub for
-	 * a given amount of time before recreating it, or to test the stub
-	 * whether it is still alive.
+	 * <p>The default implementation returns the stub created on initialization,
+	 * if any. Else, it invokes {@link #lookupStub} to get a new stub for
+	 * each invocation. This can be overridden in subclasses, for example in
+	 * order to cache a stub for a given amount of time before recreating it,
+	 * or to test the stub whether it is still alive.
 	 * @return the RMI stub to use for an invocation
 	 * @throws NamingException if stub creation failed
 	 * @throws RemoteLookupFailureException if RMI stub creation failed
