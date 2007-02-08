@@ -130,7 +130,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	private static final int STEP_RETURNING_BINDING = 4;
 	private static final int STEP_PRIMITIVE_ARGS_BINDING = 5;
 	private static final int STEP_THIS_TARGET_ARGS_BINDING = 6;
-	private static final int STEP_REFERERCE_PCUT_BINDING = 7;
+	private static final int STEP_REFERENCE_PCUT_BINDING = 7;
 	private static final int STEP_FINISHED = 8;
 
 	private static final Set singleValuedAnnotationPcds = new HashSet();
@@ -278,7 +278,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 					case STEP_THIS_TARGET_ARGS_BINDING:
 						maybeBindThisOrTargetOrArgsFromPointcutExpression();
 						break;
-					case STEP_REFERERCE_PCUT_BINDING:
+					case STEP_REFERENCE_PCUT_BINDING:
 						maybeBindReferencePointcutParameter();
 						break;
 					default:
