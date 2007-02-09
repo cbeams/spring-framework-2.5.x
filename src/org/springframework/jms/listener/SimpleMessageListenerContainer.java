@@ -136,15 +136,11 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		this.taskExecutor = taskExecutor;
 	}
 
-
-	/**
-	 * Validates this instance's configuration.
-	 */
-	public void afterPropertiesSet() {
+	protected void validateConfiguration() {
+		super.validateConfiguration();
 		if (isSubscriptionDurable() && this.concurrentConsumers != 1) {
 			throw new IllegalArgumentException("Only 1 concurrent consumer supported for durable subscription");
 		}
-		super.afterPropertiesSet();
 	}
 
 
@@ -164,7 +160,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * in the form of a JMS Session plus associated MessageConsumer.
 	 * @see #createListenerConsumer
 	 */
-	protected void registerListener() throws JMSException {
+	protected void doInitialize() throws JMSException {
 		this.sessions = new HashSet(this.concurrentConsumers);
 		this.consumers = new HashSet(this.concurrentConsumers);
 		for (int i = 0; i < this.concurrentConsumers; i++) {
@@ -213,7 +209,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	/**
 	 * Destroy the registered JMS Sessions and associated MessageConsumers.
 	 */
-	protected void destroyListener() throws JMSException {
+	protected void doShutdown() throws JMSException {
 		logger.debug("Closing JMS MessageConsumers");
 		for (Iterator it = this.consumers.iterator(); it.hasNext();) {
 			MessageConsumer consumer = (MessageConsumer) it.next();

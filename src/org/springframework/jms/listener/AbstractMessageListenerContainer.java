@@ -16,10 +16,6 @@
 
 package org.springframework.jms.listener;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
@@ -30,18 +26,12 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.Topic;
 
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.context.Lifecycle;
-import org.springframework.jms.JmsException;
-import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.support.JmsUtils;
-import org.springframework.jms.support.destination.JmsDestinationAccessor;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Abstract base class for message listener containers. Can either host
- * a standard JMS {@link MessageListener} or a Spring-specific
+ * a standard JMS {@link javax.jms.MessageListener} or a Spring-specific
  * {@link SessionAwareMessageListener}.
  *
  * <p>Usually holds a single JMS {@link Connection} that all listeners are
@@ -124,10 +114,7 @@ import org.springframework.util.ClassUtils;
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
  */
-public abstract class AbstractMessageListenerContainer extends JmsDestinationAccessor
-		implements DisposableBean, Lifecycle {
-
-	private String clientId;
+public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer {
 
 	private Object destination;
 
@@ -143,43 +130,8 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	private boolean exposeListenerSession = true;
 
-	private boolean autoStartup = true;
-
 	private boolean acceptMessagesWhileStopping = false;
 
-	private Connection sharedConnection;
-
-	private final Object sharedConnectionMonitor = new Object();
-
-	private boolean active = false;
-
-	private boolean running = false;
-
-	private final List pausedTasks = new LinkedList();
-
-	private final Object lifecycleMonitor = new Object();
-
-
-	/**
-	 * Specify the JMS client id for a shared Connection created and used
-	 * by this messager listener container.
-	 * <p>Note that client ids need to be unique among all active Connections
-	 * of the underlying JMS provider. Furthermore, a client id can only be
-	 * assigned if the original ConnectionFactory hasn't already assigned one.
-	 * @see javax.jms.Connection#setClientID
-	 * @see #setConnectionFactory
-	 */
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
-
-	/**
-	 * Return the JMS client ID for the shared Connection created and used
-	 * by this messager listener container, if any.
-	 */
-	protected String getClientId() {
-		return this.clientId;
-	}
 
 	/**
 	 * Set the destination to receive messages from.
@@ -188,7 +140,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see #setDestinationName(String)
 	 */
 	public void setDestination(Destination destination) {
-		Assert.notNull(destination, "destination must not be null");
+		Assert.notNull(destination, "'destination' must not be null");
 		this.destination = destination;
 		if (destination instanceof Topic && !(destination instanceof Queue)) {
 			// Clearly a Topic: let's se the "pubSubDomain" flag.
@@ -214,7 +166,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see #setDestination(javax.jms.Destination)
 	 */
 	public void setDestinationName(String destinationName) {
-		Assert.notNull(destinationName, "destinationName must not be null");
+		Assert.notNull(destinationName, "'destinationName' must not be null");
 		this.destination = destinationName;
 	}
 
@@ -322,7 +274,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see #setMessageListener
 	 */
 	public void setDurableSubscriptionName(String durableSubscriptionName) {
-		Assert.notNull(durableSubscriptionName, "durableSubscriptionName must not be null");
+		Assert.notNull(durableSubscriptionName, "'durableSubscriptionName' must not be null");
 		this.durableSubscriptionName = durableSubscriptionName;
 	}
 
@@ -371,14 +323,6 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	}
 
 	/**
-	 * Set whether to automatically start the listener after initialization.
-	 * <p>Default is "true"; set this to "false" to allow for manual startup.
-	 */
-	public void setAutoStartup(boolean autoStartup) {
-		this.autoStartup = autoStartup;
-	}
-
-	/**
 	 * Set whether to accept received messages while the listener container
 	 * in the process of stopping.
 	 * <p>Default is "false", rejecting such messages through aborting the
@@ -396,368 +340,16 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		this.acceptMessagesWhileStopping = acceptMessagesWhileStopping;
 	}
 
-
-	/**
-	 * Validate configuration and call {@link #initialize()}.
-	 * @see #initialize()
-	 */
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-
+	protected void validateConfiguration() {
 		if (this.destination == null) {
-			throw new IllegalArgumentException("destination or destinationName is required");
+			throw new IllegalArgumentException("Property 'destination' or 'destinationName' is required");
 		}
 		if (this.messageListener == null) {
-			throw new IllegalArgumentException("messageListener is required");
+			throw new IllegalArgumentException("Property 'messageListener' is required");
 		}
 		if (isSubscriptionDurable() && !isPubSubDomain()) {
 			throw new IllegalArgumentException("A durable subscription requires a topic (pub-sub domain)");
 		}
-
-		initialize();
-	}
-
-	/**
-	 * Initialize this message listener container.
-	 * <p>Creates a JMS Connection, registers the
-	 * {@link #setMessageListener(Object) given listener object},
-	 * and starts the {@link Connection}
-	 * (if {@link #setAutoStartup(boolean) "autoStartup"} hasn't been turned off).
-	 * @throws JmsException if startup failed
-	 */
-	public void initialize() throws JmsException {
-		try {
-			synchronized (this.lifecycleMonitor) {
-				this.active = true;
-				this.lifecycleMonitor.notifyAll();
-			}
-
-			if (sharedConnectionEnabled()) {
-				establishSharedConnection();
-			}
-
-			if (this.autoStartup) {
-				doStart();
-			}
-
-			registerListener();
-		}
-		catch (JMSException ex) {
-			synchronized (this.sharedConnectionMonitor) {
-				ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), this.autoStartup);
-			}
-			throw convertJmsAccessException(ex);
-		}
-	}
-
-
-	/**
-	 * Establish a shared Connection for this message listener container.
-	 * <p>The default implementation delegates to <code>refreshSharedConnection</code>,
-	 * which does one immediate attempt and throws an exception if it fails.
-	 * Can be overridden to have a recovery proces in place, retrying
-	 * until a Connection can be successfully established.
-	 * @throws JMSException if thrown by JMS API methods
-	 * @see #refreshSharedConnection()
-	 */
-	protected void establishSharedConnection() throws JMSException {
-		refreshSharedConnection();
-	}
-
-	/**
-	 * Refresh the shared Connection that this listener container holds.
-	 * <p>Called on startup and also after an infrastructure exception
-	 * that occured during listener setup and/or execution.
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected final void refreshSharedConnection() throws JMSException {
-		boolean running = isRunning();
-		synchronized (this.sharedConnectionMonitor) {
-			ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), running);
-			this.sharedConnection = null;
-			Connection con = createConnection();
-			try {
-				prepareSharedConnection(con);
-			}
-			catch (JMSException ex) {
-				JmsUtils.closeConnection(con);
-				throw ex;
-			}
-			this.sharedConnection = con;
-		}
-	}
-
-	/**
-	 * Prepare the given Connection, which is about to be registered
-	 * as shared Connection for this message listener container.
-	 * <p>The default implementation sets the specified client id, if any.
-	 * Subclasses can override this to apply further settings.
-	 * @param connection the Connection to prepare
-	 * @throws JMSException if the preparation efforts failed
-	 * @see #setClientId
-	 */
-	protected void prepareSharedConnection(Connection connection) throws JMSException {
-		if (getClientId() != null) {
-			connection.setClientID(getClientId());
-		}
-	}
-
-	/**
-	 * Return the shared JMS Connection maintained by this message listener container.
-	 * Available after initialization.
-	 * @throws IllegalStateException if this listener container does not maintain a
-	 * shared Connection, or if the Connection hasn't been initialized yet
-	 * @see #sharedConnectionEnabled()
-	 */
-	protected final Connection getSharedConnection() {
-		if (!sharedConnectionEnabled()) {
-			throw new IllegalStateException(
-					"This message listener container does not maintain a shared Connection");
-		}
-		synchronized (this.sharedConnectionMonitor) {
-			if (this.sharedConnection == null) {
-				throw new SharedConnectionNotInitializedException(
-						"This message listener container's shared Connection has not been initialized yet");
-			}
-			return this.sharedConnection;
-		}
-	}
-
-
-	/**
-	 * Calls <code>shutdown</code> when the BeanFactory destroys
-	 * the message listener container instance.
-	 * @see #shutdown()
-	 */
-	public void destroy() {
-		shutdown();
-	}
-
-	/**
-	 * Shut down the registered listeners and close this
-	 * listener container.
-	 * @throws JmsException if shutdown failed
-	 * @see #destroyListener()
-	 */
-	public void shutdown() throws JmsException {
-		logger.debug("Shutting down message listener container");
-		boolean wasRunning = false;
-		synchronized (this.lifecycleMonitor) {
-			wasRunning = this.running;
-			this.running = false;
-			this.active = false;
-			this.lifecycleMonitor.notifyAll();
-		}
-
-		// Stop shared Connection early, if necessary.
-		if (wasRunning && sharedConnectionEnabled()) {
-			try {
-				stopSharedConnection();
-			}
-			catch (Throwable ex) {
-				logger.debug("Could not stop JMS Connection on shutdown", ex);
-			}
-		}
-
-		// Shut down the actual listener setup.
-		try {
-			destroyListener();
-		}
-		catch (JMSException ex) {
-			throw convertJmsAccessException(ex);
-		}
-		finally {
-			if (sharedConnectionEnabled()) {
-				synchronized (this.sharedConnectionMonitor) {
-					ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), false);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Return whether this listener container is currently active,
-	 * that is, whether it has been set up but not shut down yet.
-	 */
-	public final boolean isActive() {
-		synchronized (this.lifecycleMonitor) {
-			return this.active;
-		}
-	}
-
-
-	//-------------------------------------------------------------------------
-	// Lifecycle methods for dynamically starting and stopping the listener
-	//-------------------------------------------------------------------------
-
-	/**
-	 * Start this listener container.
-	 * @throws JmsException if starting failed
-	 * @see #doStart
-	 */
-	public void start() throws JmsException {
-		try {
-			doStart();
-		}
-		catch (JMSException ex) {
-			throw convertJmsAccessException(ex);
-		}
-	}
-
-	/**
-	 * Start the shared Connection, if any, and notify all listener tasks.
-	 * @throws JMSException if thrown by JMS API methods
-	 * @see #startSharedConnection
-	 */
-	protected void doStart() throws JMSException {
-		synchronized (this.lifecycleMonitor) {
-			this.running = true;
-			this.lifecycleMonitor.notifyAll();
-			for (Iterator it = this.pausedTasks.iterator(); it.hasNext();) {
-				doRescheduleTask(it.next());
-				it.remove();
-			}
-		}
-
-		if (sharedConnectionEnabled()) {
-			startSharedConnection();
-		}
-	}
-
-	/**
-	 * Start the shared Connection.
-	 * @throws JMSException if thrown by JMS API methods
-	 * @see javax.jms.Connection#start()
-	 */
-	protected void startSharedConnection() throws JMSException {
-		synchronized (this.sharedConnectionMonitor) {
-			if (this.sharedConnection != null) {
-				try {
-					this.sharedConnection.start();
-				}
-				catch (javax.jms.IllegalStateException ex) {
-					logger.debug("Ignoring Connection start exception - assuming already started", ex);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Stop this listener container.
-	 * @throws JmsException if stopping failed
-	 * @see #doStop
-	 */
-	public void stop() throws JmsException {
-		try {
-			doStop();
-		}
-		catch (JMSException ex) {
-			throw convertJmsAccessException(ex);
-		}
-	}
-
-	/**
-	 * Notify all listener tasks and stop the shared Connection, if any.
-	 * @throws JMSException if thrown by JMS API methods
-	 * @see #stopSharedConnection
-	 */
-	protected void doStop() throws JMSException {
-		synchronized (this.lifecycleMonitor) {
-			this.running = false;
-			this.lifecycleMonitor.notifyAll();
-		}
-
-		if (sharedConnectionEnabled()) {
-			stopSharedConnection();
-		}
-	}
-
-	/**
-	 * Stop the shared Connection.
-	 * @throws JMSException if thrown by JMS API methods
-	 * @see javax.jms.Connection#start()
-	 */
-	protected void stopSharedConnection() throws JMSException {
-		synchronized (this.sharedConnectionMonitor) {
-			if (this.sharedConnection != null) {
-				try {
-					this.sharedConnection.stop();
-				}
-				catch (javax.jms.IllegalStateException ex) {
-					logger.debug("Ignoring Connection stop exception - assuming already stopped", ex);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Return whether this listener container is currently running,
-	 * that is, whether it has been started and not stopped yet.
-	 */
-	public final boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
-	}
-
-	/**
-	 * Wait while this listener container is not running.
-	 * <p>To be called by asynchronous tasks that want to block
-	 * while the listener container is in stopped state.
-	 */
-	protected final void waitWhileNotRunning() {
-		synchronized (this.lifecycleMonitor) {
-			while (this.active && !this.running) {
-				try {
-					this.lifecycleMonitor.wait();
-				}
-				catch (InterruptedException ex) {
-					// Re-interrupt current thread, to allow other threads to react.
-					Thread.currentThread().interrupt();
-				}
-			}
-		}
-	}
-
-	/**
-	 * Take the given task object and reschedule it,
-	 * either immediately if this listener container is currently running,
-	 * or later once this listener container has been restarted.
-	 * <p>If this listener container has already been shut down,
-	 * the task will not get rescheduled at all.
-	 * @param task the task object to reschedule
-	 * @return whether the task has been rescheduled
-	 * (either immediately or for a restart of this container)
-	 * @see #doRescheduleTask
-	 */
-	protected final boolean rescheduleTaskIfNecessary(Object task) {
-		Assert.notNull(task, "Task object must not be null");
-		synchronized (this.lifecycleMonitor) {
-			if (this.running) {
-				doRescheduleTask(task);
-				return true;
-			}
-			else if (this.active) {
-				this.pausedTasks.add(task);
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-	}
-
-	/**
-	 * Reschedule the given task object immediately.
-	 * <p>To be implemented by subclasses if they ever call
-	 * <code>rescheduleTaskIfNecessary</code>.
-	 * This implementation throws an UnsupportedOperationException.
-	 * @param task the task object to reschedule
-	 * @see #rescheduleTaskIfNecessary
-	 */
-	protected void doRescheduleTask(Object task) {
-		throw new UnsupportedOperationException(
-				ClassUtils.getShortName(getClass()) + " does not support rescheduling of tasks");
 	}
 
 
@@ -988,90 +580,6 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		ExceptionListener exceptionListener = getExceptionListener();
 		if (exceptionListener != null) {
 			exceptionListener.onException(ex);
-		}
-	}
-
-
-	//-------------------------------------------------------------------------
-	// Template methods to be implemented by subclasses
-	//-------------------------------------------------------------------------
-
-	/**
-	 * Return whether a shared JMS Connection should be maintained
-	 * by this listener container base class.
-	 * @see #getSharedConnection()
-	 */
-	protected abstract boolean sharedConnectionEnabled();
-
-	/**
-	 * Register the specified listener.
-	 * <p>Subclasses need to implement this method for their specific
-	 * listener management process.
-	 * <p>A shared JMS Connection, if any, will already have been
-	 * started at this point.
-	 * @throws JMSException if registration failed
-	 * @see #getMessageListener()
-	 * @see #getSharedConnection()
-	 */
-	protected abstract void registerListener() throws JMSException;
-
-	/**
-	 * Destroy the registered listener.
-	 * <p>Subclasses need to implement this method for their specific
-	 * listener management process.
-	 * <p>A shared JMS Connection, if any, will automatically be closed
-	 * <i>afterwards</i>.
-	 * @throws JMSException if destruction failed
-	 * @see #shutdown()
-	 */
-	protected abstract void destroyListener() throws JMSException;
-
-
-	//-------------------------------------------------------------------------
-	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
-	//-------------------------------------------------------------------------
-
-	/**
-	 * Create a JMS Connection via this template's ConnectionFactory.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @return the new JMS Connection
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
-	 */
-	protected Connection createConnection() throws JMSException {
-		return getConnectionFactory().createConnection();
-	}
-
-	/**
-	 * Create a JMS Session for the given Connection.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param con the JMS Connection to create a Session for
-	 * @return the new JMS Session
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
-	 */
-	protected Session createSession(Connection con) throws JMSException {
-		return con.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
-	}
-
-	/**
-	 * Return whether the Session is in client acknowledge mode.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param session the JMS Session to check
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
-	 */
-	protected boolean isClientAcknowledge(Session session) throws JMSException {
-		return (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
-	}
-
-
-	/**
-	 * Exception that indicates that the initial setup of this listener container's
-	 * shared JMS Connection failed. This is indicating to invokers that they need
-	 * to establish the shared Connection themselves on first access.
-	 */
-	protected static class SharedConnectionNotInitializedException extends RuntimeException {
-
-		public SharedConnectionNotInitializedException(String msg) {
-			super(msg);
 		}
 	}
 

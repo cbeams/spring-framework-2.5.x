@@ -21,27 +21,19 @@ import java.util.Iterator;
 import java.util.Set;
 
 import javax.jms.Connection;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
-import javax.jms.Topic;
 
-import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.core.Constants;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.jms.connection.ConnectionFactoryUtils;
-import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.CachingDestinationResolver;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -103,7 +95,9 @@ import org.springframework.util.ClassUtils;
  * consumer, else you'd receive the same message multiple times on the same node.
  *
  * <p>See the {@link AbstractMessageListenerContainer} javadoc for details
- * on acknowledge modes and native transaction options.
+ * on acknowledge modes and native transaction options, and the
+ * {@link AbstractPollingMessageListenerContainer} javadoc for details
+ * on configuring an external transaction manager.
  *
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
  * domain-independent API. <b>Use the {@link DefaultMessageListenerContainer102}
@@ -120,18 +114,13 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
  * @see DefaultMessageListenerContainer102
  */
-public class DefaultMessageListenerContainer extends AbstractMessageListenerContainer implements BeanNameAware {
+public class DefaultMessageListenerContainer extends AbstractPollingMessageListenerContainer {
 
 	/**
 	 * Default thread name prefix: "DefaultMessageListenerContainer-".
 	 */
 	public static final String DEFAULT_THREAD_NAME_PREFIX =
 			ClassUtils.getShortName(DefaultMessageListenerContainer.class) + "-";
-
-	/**
-	 * The default receive timeout: 1000 ms = 1 second.
-	 */
-	public static final long DEFAULT_RECEIVE_TIMEOUT = 1000;
 
 	/**
 	 * The default recovery interval: 5000 ms = 5 seconds.
@@ -169,19 +158,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 	private static final Constants constants = new Constants(DefaultMessageListenerContainer.class);
 
-	private final MessageListenerContainerResourceFactory transactionalResourceFactory =
-			new MessageListenerContainerResourceFactory();
-
-
-	private boolean pubSubNoLocal = false;
 
 	private TaskExecutor taskExecutor;
-
-	private PlatformTransactionManager transactionManager;
-
-	private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-
-	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 
 	private long recoveryInterval = DEFAULT_RECOVERY_INTERVAL;
 
@@ -195,8 +173,6 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 	private int idleTaskExecutionLimit = 1;
 
-	private String beanName;
-
 	private final Set scheduledInvokers = new HashSet();
 
 	private int activeInvokerCount = 0;
@@ -207,22 +183,6 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 	private final Object recoveryMonitor = new Object();
 
-
-	/**
-	 * Set whether to inhibit the delivery of messages published by its own connection.
-	 * Default is "false".
-	 * @see javax.jms.TopicSession#createSubscriber(javax.jms.Topic, String, boolean)
-	 */
-	public void setPubSubNoLocal(boolean pubSubNoLocal) {
-		this.pubSubNoLocal = pubSubNoLocal;
-	}
-
-	/**
-	 * Return whether to inhibit the delivery of messages published by its own connection.
-	 */
-	protected boolean isPubSubNoLocal() {
-		return this.pubSubNoLocal;
-	}
 
 	/**
 	 * Set the Spring TaskExecutor to use for running the listener threads.
@@ -239,52 +199,6 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 */
 	public void setTaskExecutor(TaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
-	}
-
-	/**
-	 * Specify the Spring PlatformTransactionManager to use for transactional
-	 * wrapping of message reception plus listener execution.
-	 * Default is none, not performing any transactional wrapping.
-	 * <p>If specified, this will usually be a Spring JtaTransactionManager,
-	 * in combination with a JTA-aware ConnectionFactory that this message
-	 * listener container fetches its Connections from.
-	 */
-	public void setTransactionManager(PlatformTransactionManager transactionManager) {
-		this.transactionManager = transactionManager;
-	}
-
-	/**
-	 * Specify the transaction name to use for transactional wrapping.
-	 * Default is the bean name of this listener container, if any.
-	 * @see org.springframework.transaction.TransactionDefinition#getName()
-	 */
-	public void setTransactionName(String transactionName) {
-		this.transactionDefinition.setName(transactionName);
-	}
-
-	/**
-	 * Specify the transaction timeout to use for transactional wrapping, in <b>seconds</b>.
-	 * Default is none, using the transaction manager's default timeout.
-	 * @see org.springframework.transaction.TransactionDefinition#getTimeout()
-	 * @see #setReceiveTimeout
-	 */
-	public void setTransactionTimeout(int transactionTimeout) {
-		this.transactionDefinition.setTimeout(transactionTimeout);
-	}
-
-	/**
-	 * Set the timeout to use for receive calls, in <b>milliseconds</b>.
-	 * The default is 1000 ms, that is, 1 second.
-	 * <p><b>NOTE:</b> This value needs to be smaller than the transaction
-	 * timeout used by the transaction manager (in the appropriate unit,
-	 * of course). -1 indicates no timeout at all; however, this is only
-	 * feasible if not running within a transaction manager.
-	 * @see javax.jms.MessageConsumer#receive(long)
-	 * @see javax.jms.MessageConsumer#receive
-	 * @see #setTransactionTimeout
-	 */
-	public void setReceiveTimeout(long receiveTimeout) {
-		this.receiveTimeout = receiveTimeout;
 	}
 
 	/**
@@ -490,21 +404,13 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		}
 	}
 
-
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-	}
-
-	/**
-	 * Validates this instance's configuration.
-	 */
-	public void afterPropertiesSet() {
+	protected void validateConfiguration() {
+		super.validateConfiguration();
 		synchronized (this.activeInvokerMonitor) {
 			if (isSubscriptionDurable() && this.concurrentConsumers != 1) {
 				throw new IllegalArgumentException("Only 1 concurrent consumer supported for durable subscription");
 			}
 		}
-		super.afterPropertiesSet();
 	}
 
 
@@ -514,7 +420,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 	public void initialize() {
 		// Adapt default cache level.
-		if (this.transactionManager != null) {
+		if (getTransactionManager() != null) {
 			if (this.cacheLevel == null) {
 				this.cacheLevel = new Integer(CACHE_NONE);
 			}
@@ -523,11 +429,6 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			if (this.cacheLevel == null) {
 				this.cacheLevel = new Integer(CACHE_CONSUMER);
 			}
-		}
-
-		// Use bean name as default transaction name.
-		if (this.transactionDefinition.getName() == null) {
-			this.transactionDefinition.setName(this.beanName);
 		}
 
 		// Prepare taskExecutor and maxMessagesPerTask.
@@ -556,7 +457,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor#SimpleAsyncTaskExecutor(String)
 	 */
 	protected TaskExecutor createDefaultTaskExecutor() {
-		String threadNamePrefix = (this.beanName != null ? this.beanName + "-" : DEFAULT_THREAD_NAME_PREFIX);
+		String beanName = getBeanName();
+		String threadNamePrefix = (beanName != null ? beanName + "-" : DEFAULT_THREAD_NAME_PREFIX);
 		return new SimpleAsyncTaskExecutor(threadNamePrefix);
 	}
 
@@ -576,7 +478,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * @see #scheduleNewInvoker
 	 * @see #setTaskExecutor
 	 */
-	protected void registerListener() throws JMSException {
+	protected void doInitialize() throws JMSException {
 		synchronized (this.activeInvokerMonitor) {
 			for (int i = 0; i < this.concurrentConsumers; i++) {
 				scheduleNewInvoker();
@@ -590,6 +492,10 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 */
 	protected void doRescheduleTask(Object task) {
 		this.taskExecutor.execute((Runnable) task);
+	}
+
+	protected void messageReceived(Message message, Session session) {
+		scheduleNewInvokerIfAppropriate();
 	}
 
 	/**
@@ -682,169 +588,6 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		synchronized (this.activeInvokerMonitor) {
 			return this.activeInvokerCount;
 		}
-	}
-
-
-	/**
-	 * Create a MessageConsumer for the given JMS Session,
-	 * registering a MessageListener for the specified listener.
-	 * @param session the JMS Session to work on
-	 * @return the MessageConsumer
-	 * @throws JMSException if thrown by JMS methods
-	 * @see #receiveAndExecute
-	 */
-	protected MessageConsumer createListenerConsumer(Session session) throws JMSException {
-		Destination destination = getDestination();
-		if (destination == null) {
-			destination = resolveDestinationName(session, getDestinationName());
-		}
-		return createConsumer(session, destination);
-	}
-
-	/**
-	 * Execute the listener for a message received from the given consumer,
-	 * wrapping the entire operation in an external transaction if demanded.
-	 * @param session the JMS Session to work on
-	 * @param consumer the MessageConsumer to work on
-	 * @throws JMSException if thrown by JMS methods
-	 * @see #doReceiveAndExecute
-	 */
-	protected boolean receiveAndExecute(Session session, MessageConsumer consumer) throws JMSException {
-		if (this.transactionManager != null) {
-			// Execute receive within transaction.
-			TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
-			boolean messageReceived = true;
-			try {
-				messageReceived = doReceiveAndExecute(session, consumer, status);
-			}
-			catch (JMSException ex) {
-				rollbackOnException(status, ex);
-				throw ex;
-			}
-			catch (RuntimeException ex) {
-				rollbackOnException(status, ex);
-				throw ex;
-			}
-			catch (Error err) {
-				rollbackOnException(status, err);
-				throw err;
-			}
-			this.transactionManager.commit(status);
-			return messageReceived;
-		}
-
-		else {
-			// Execute receive outside of transaction.
-			return doReceiveAndExecute(session, consumer, null);
-		}
-	}
-
-	/**
-	 * Actually execute the listener for a message received from the given consumer,
-	 * fetching all requires resources and invoking the listener.
-	 * @param session the JMS Session to work on
-	 * @param consumer the MessageConsumer to work on
-	 * @param status the TransactionStatus (may be <code>null</code>)
-	 * @throws JMSException if thrown by JMS methods
-	 * @see #doExecuteListener(javax.jms.Session, javax.jms.Message)
-	 */
-	protected boolean doReceiveAndExecute(Session session, MessageConsumer consumer, TransactionStatus status)
-			throws JMSException {
-
-		Connection conToClose = null;
-		Session sessionToClose = null;
-		MessageConsumer consumerToClose = null;
-		try {
-			Session sessionToUse = session;
-			boolean transactional = false;
-			if (sessionToUse == null) {
-				sessionToUse = ConnectionFactoryUtils.doGetTransactionalSession(
-						getConnectionFactory(), this.transactionalResourceFactory);
-				transactional = (sessionToUse != null);
-			}
-			if (sessionToUse == null) {
-				Connection conToUse = null;
-				if (sharedConnectionEnabled()) {
-					conToUse = getSharedConnection();
-				}
-				else {
-					conToUse = createConnection();
-					conToClose = conToUse;
-					conToUse.start();
-				}
-				sessionToUse = createSession(conToUse);
-				sessionToClose = sessionToUse;
-			}
-			MessageConsumer consumerToUse = consumer;
-			if (consumerToUse == null) {
-				consumerToUse = createListenerConsumer(sessionToUse);
-				consumerToClose = consumerToUse;
-			}
-			Message message = receiveMessage(consumerToUse);
-			if (message != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Received message of type [" + message.getClass() + "] from consumer [" +
-							consumerToUse + "] of " + (transactional ? "transactional " : "") + "session [" +
-							sessionToUse + "]");
-				}
-				scheduleNewInvokerIfAppropriate();
-				try {
-					doExecuteListener(sessionToUse, message);
-				}
-				catch (Throwable ex) {
-					if (status != null) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Rolling back transaction because of listener exception thrown: " + ex);
-						}
-						status.setRollbackOnly();
-					}
-					handleListenerException(ex);
-				}
-				return true;
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Consumer [" + consumerToUse + "] of " + (transactional ? "transactional " : "") +
-							"session [" + sessionToUse + "] did not receive a message");
-				}
-				return false;
-			}
-		}
-		finally {
-			JmsUtils.closeMessageConsumer(consumerToClose);
-			JmsUtils.closeSession(sessionToClose);
-			ConnectionFactoryUtils.releaseConnection(conToClose, getConnectionFactory(), true);
-		}
-	}
-
-	/**
-	 * Perform a rollback, handling rollback exceptions properly.
-	 * @param status object representing the transaction
-	 * @param ex the thrown application exception or error
-	 */
-	private void rollbackOnException(TransactionStatus status, Throwable ex) {
-		logger.debug("Initiating transaction rollback on application exception", ex);
-		try {
-			this.transactionManager.rollback(status);
-		}
-		catch (RuntimeException ex2) {
-			logger.error("Application exception overridden by rollback exception", ex);
-			throw ex2;
-		}
-		catch (Error err) {
-			logger.error("Application exception overridden by rollback error", ex);
-			throw err;
-		}
-	}
-
-	/**
-	 * Receive a message from the given consumer.
-	 * @param consumer the MessageConsumer to use
-	 * @return the Message, or <code>null</code> if none
-	 * @throws JMSException if thrown by JMS methods
-	 */
-	protected Message receiveMessage(MessageConsumer consumer) throws JMSException {
-		return (this.receiveTimeout < 0 ? consumer.receive() : consumer.receive(this.receiveTimeout));
 	}
 
 
@@ -1012,7 +755,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	/**
 	 * Destroy the registered JMS Sessions and associated MessageConsumers.
 	 */
-	protected void destroyListener() throws JMSException {
+	protected void doShutdown() throws JMSException {
 		logger.debug("Waiting for shutdown of message listener invokers");
 		synchronized (this.activeInvokerMonitor) {
 			while (this.activeInvokerCount > 0) {
@@ -1028,59 +771,6 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 					Thread.currentThread().interrupt();
 				}
 			}
-		}
-	}
-
-
-	//-------------------------------------------------------------------------
-	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
-	//-------------------------------------------------------------------------
-
-	/**
-	 * Fetch an appropriate Connection from the given JmsResourceHolder.
-	 * <p>This implementation accepts any JMS 1.1 Connection.
-	 * @param holder the JmsResourceHolder
-	 * @return an appropriate Connection fetched from the holder,
-	 * or <code>null</code> if none found
-	 */
-	protected Connection getConnection(JmsResourceHolder holder) {
-		return holder.getConnection();
-	}
-
-	/**
-	 * Fetch an appropriate Session from the given JmsResourceHolder.
-	 * <p>This implementation accepts any JMS 1.1 Session.
-	 * @param holder the JmsResourceHolder
-	 * @return an appropriate Session fetched from the holder,
-	 * or <code>null</code> if none found
-	 */
-	protected Session getSession(JmsResourceHolder holder) {
-		return holder.getSession();
-	}
-
-	/**
-	 * Create a JMS MessageConsumer for the given Session and Destination.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param session the JMS Session to create a MessageConsumer for
-	 * @param destination the JMS Destination to create a MessageConsumer for
-	 * @return the new JMS MessageConsumer
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
-	 */
-	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
-		// Only pass in the NoLocal flag in case of a Topic:
-		// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
-		// in case of the NoLocal flag being specified for a Queue.
-		if (isPubSubDomain()) {
-			if (isSubscriptionDurable() && destination instanceof Topic) {
-				return session.createDurableSubscriber(
-						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
-			}
-			else {
-				return session.createConsumer(destination, getMessageSelector(), isPubSubNoLocal());
-			}
-		}
-		else {
-			return session.createConsumer(destination, getMessageSelector());
 		}
 	}
 
@@ -1217,38 +907,6 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		public boolean isIdle() {
 			return this.idle;
-		}
-	}
-
-
-	/**
-	 * ResourceFactory implementation that delegates to this listener container's protected callback methods.
-	 */
-	private class MessageListenerContainerResourceFactory implements ConnectionFactoryUtils.ResourceFactory {
-
-		public Connection getConnection(JmsResourceHolder holder) {
-			return DefaultMessageListenerContainer.this.getConnection(holder);
-		}
-
-		public Session getSession(JmsResourceHolder holder) {
-			return DefaultMessageListenerContainer.this.getSession(holder);
-		}
-
-		public Connection createConnection() throws JMSException {
-			if (DefaultMessageListenerContainer.this.sharedConnectionEnabled()) {
-				return DefaultMessageListenerContainer.this.getSharedConnection();
-			}
-			else {
-				return DefaultMessageListenerContainer.this.createConnection();
-			}
-		}
-
-		public Session createSession(Connection con) throws JMSException {
-			return DefaultMessageListenerContainer.this.createSession(con);
-		}
-
-		public boolean isSynchedLocalTransactionAllowed() {
-			return DefaultMessageListenerContainer.this.isSessionTransacted();
 		}
 	}
 

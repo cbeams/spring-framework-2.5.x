@@ -125,7 +125,7 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	 * @see #createServerSessionPool
 	 * @see #createConsumer
 	 */
-	protected void registerListener() throws JMSException {
+	protected void doInitialize() throws JMSException {
 		Connection con = getSharedConnection();
 		Destination destination = getDestination();
 		if (destination == null) {
@@ -175,7 +175,7 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	 * @see #setServerSessionFactory
 	 * @see ServerSessionFactory#getServerSession(ListenerSessionManager)
 	 */
-	protected void destroyListener() throws JMSException {
+	protected void doShutdown() throws JMSException {
 		logger.debug("Closing ServerSessionFactory");
 		getServerSessionFactory().close(this);
 		logger.debug("Closing JMS ConnectionConsumer");
