@@ -28,14 +28,15 @@ import org.springframework.util.Assert;
  * JMS-accessing gateway helpers, adding destination-related properties to
  * {@link JmsAccessor JmsAccessor's} common properties.
  *
- * <p>Not intended to be used directly. See {@link org.springframework.jms.core.JmsTemplate}.
+ * <p>Not intended to be used directly.
+ * See {@link org.springframework.jms.core.JmsTemplate}.
  *
  * @author Juergen Hoeller
  * @since 1.2.5
  * @see org.springframework.jms.support.JmsAccessor
  * @see org.springframework.jms.core.JmsTemplate
  */
-public class JmsDestinationAccessor extends JmsAccessor {
+public abstract class JmsDestinationAccessor extends JmsAccessor {
 
 	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
 
@@ -43,15 +44,15 @@ public class JmsDestinationAccessor extends JmsAccessor {
 
 
 	/**
-	 * Set the DestinationResolver that is to be used to resolve
-	 * Destination references for this accessor.
+	 * Set the {@link DestinationResolver} that is to be used to resolve
+	 * {@link javax.jms.Destination} references for this accessor.
 	 * <p>The default resolver is a DynamicDestinationResolver. Specify a
 	 * JndiDestinationResolver for resolving destination names as JNDI locations.
 	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
 	 * @see org.springframework.jms.support.destination.JndiDestinationResolver
 	 */
 	public void setDestinationResolver(DestinationResolver destinationResolver) {
-		Assert.notNull(destinationResolver, "DestinationResolver must not be null");
+		Assert.notNull(destinationResolver, "'destinationResolver' must not be null");
 		this.destinationResolver = destinationResolver;
 	}
 
