@@ -21,14 +21,13 @@ import java.util.Arrays;
 import org.springframework.aop.SpringProxy;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Miscellaneous utilities for AOP proxy users and AOP proxy implementations.
  * Mainly for internal use within the framework.
  *
  * <p>See {@link org.springframework.aop.support.AopUtils} for a collection of
- * generic AOP utility methods which do not depend on the AOP framework itself.
+ * generic AOP utility methods which do not depend on AOP framework internals.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -119,11 +118,8 @@ public abstract class AopProxyUtils {
 	 * rather, equality of interfaces, advisors and target sources.
 	 */
 	public static boolean equalsInProxy(AdvisedSupport a, AdvisedSupport b) {
-		if (a == b) {
-			return true;
-		}
-		return equalsProxiedInterfaces(a, b) && equalsAdvisors(a, b) &&
-				ObjectUtils.nullSafeEquals(a.getTargetSource(), b.getTargetSource());
+		return (a == b ||
+				(equalsProxiedInterfaces(a, b) && equalsAdvisors(a, b) && a.getTargetSource().equals(b.getTargetSource())));
 	}
 
 	/**
@@ -132,7 +128,7 @@ public abstract class AopProxyUtils {
 	public static boolean equalsProxiedInterfaces(AdvisedSupport a, AdvisedSupport b) {
 		return Arrays.equals(a.getProxiedInterfaces(), b.getProxiedInterfaces());
 	}
-	
+
 	/**
 	 * Check equality of the advisors behind the given AdvisedSupport objects.
 	 */
