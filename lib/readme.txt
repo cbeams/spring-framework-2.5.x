@@ -60,6 +60,11 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's CommonJ support
 
+* concurrent/backport-util-concurrent.jar
+- Dawid Kurzyniec's JSR-166 backport, version 3.0 (http://dcl.mathcs.emory.edu/util/backport-util-concurrent)
+- required for building the framework
+- required at runtime when using Spring's backport-concurrent support
+
 * cos/cos.jar
 - Jason Hunter's COS 05Nov02 (http://www.servlets.com/cos)
 - required for building the framework
