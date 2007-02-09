@@ -604,11 +604,13 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * @see #getMaxConcurrentConsumers()
 	 */
 	protected void scheduleNewInvokerIfAppropriate() {
-		synchronized (this.activeInvokerMonitor) {
-			if (this.scheduledInvokers.size() < this.maxConcurrentConsumers && !hasIdleInvokers()) {
-				scheduleNewInvoker();
-				if (logger.isDebugEnabled()) {
-					logger.debug("Raised scheduled invoker count: " + scheduledInvokers.size());
+		if (isRunning()) {
+			synchronized (this.activeInvokerMonitor) {
+				if (this.scheduledInvokers.size() < this.maxConcurrentConsumers && !hasIdleInvokers()) {
+					scheduleNewInvoker();
+					if (logger.isDebugEnabled()) {
+						logger.debug("Raised scheduled invoker count: " + scheduledInvokers.size());
+					}
 				}
 			}
 		}
