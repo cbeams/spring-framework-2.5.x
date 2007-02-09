@@ -218,8 +218,8 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 	 * @see java.util.concurrent.SynchronousQueue
 	 */
 	protected BlockingQueue createQueue(int queueCapacity) {
-		if (this.queueCapacity > 0) {
-			return new LinkedBlockingQueue(this.queueCapacity);
+		if (queueCapacity > 0) {
+			return new LinkedBlockingQueue(queueCapacity);
 		}
 		else {
 			return new SynchronousQueue();
