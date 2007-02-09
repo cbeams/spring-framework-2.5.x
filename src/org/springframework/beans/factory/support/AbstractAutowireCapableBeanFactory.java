@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -789,7 +789,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				catch (TypeMismatchException ex) {
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
-							"Could not convert " + methodType + " argument value [" + valueHolder.getValue() +
+							"Could not convert " + methodType + " argument value of type [" +
+							(valueHolder.getValue() != null ? valueHolder.getValue().getClass().getName() : "null") +
 							"] to required type [" + argTypes[j].getName() + "]: " + ex.getMessage());
 				}
 			}
@@ -807,7 +808,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					int matchingBeansCount = (matchingBeans != null ? matchingBeans.size() : 0);
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
-							"There are " + matchingBeans.size() + " beans of type [" + argTypes[j].getName() +
+							"There are " + matchingBeansCount + " beans of type [" + argTypes[j].getName() +
 							"] available for autowiring: " + matchingBeans.keySet() +
 							". There should have been exactly 1 to be able to autowire " +
 							methodType + " of bean '" + beanName + "'.");
