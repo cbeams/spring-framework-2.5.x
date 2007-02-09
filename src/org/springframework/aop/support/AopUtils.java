@@ -39,8 +39,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Utility methods used by the AOP framework and by AOP proxy factories.
- * Mainly for internal use within the framework.
+ * Utility methods for AOP support code.
+ * Mainly for internal use within Spring's AOP support.
  *
  * <p>See {@link org.springframework.aop.framework.AopProxyUtils} for a
  * collection of framework-specific AOP utility methods which depend
@@ -90,7 +90,8 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Return the target class of the given bean instance.
+	 * Determine the target class of the given bean instance,
+	 * which might be an AOP proxy.
 	 * <p>Returns the target class for an AOP proxy and the plain class else.
 	 * @param candidate the instance to check (might be an AOP proxy)
 	 * @return the target class (or the plain class of the given object as fallback)
@@ -282,7 +283,7 @@ public abstract class AopUtils {
 
 
 	/**
-	 * Invoke the target directly via reflection.
+	 * Invoke the given target via reflection, as part of an AOP method invocation.
 	 * @param target the target object
 	 * @param method the method to invoke
 	 * @param args the arguments for the method
@@ -310,7 +311,7 @@ public abstract class AopUtils {
 					method + "] on target [" + target + "]", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new AopInvocationException("Couldn't access method [" + method + "]", ex);
+			throw new AopInvocationException("Could not access method [" + method + "]", ex);
 		}
 	}
 
