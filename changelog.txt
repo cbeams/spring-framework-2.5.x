@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.9 (5.2.2007)
------------------------------------
+Changes in version 1.2.9 (12.2.2007)
+------------------------------------
 
 General
 * many javadoc refinements and clarifications
@@ -13,6 +13,7 @@ General
 Package org.springframework.aop
 * reworked JdkDynamicAopProxy's "Method.setAccessible" handling to avoid unnecessary calls
 * Cglib2AopProxy throws AopConfigException instead of AspectException, for better root cause handling
+* CGLIB proxies handle "hashCode" calls according to their "equals" behavior, analogous to JDK dynamic proxies
 * HashMapCachingAdvisorChainFactory uses synchronized access to its method cache Map
 * exposed "indexOf(Advice)" method on Advised interface
 * revised ProxyConfig/AdvisedSupport's "toString()" output
@@ -30,6 +31,7 @@ Package org.springframework.beans
 * AbstractBeanFactory supports alias chaining, with an alias registered for a bean name that is itself an alias
 * fixed AbstractBeanFactory to accept re-registration of alias for same bean name (-> bean definition overriding)
 * AbstractAutowireCapableBeanFactory creates "depends-on" beans even before "postProcessBeforeInstantiation"
+* AbstractAutowireCapableBeanFactory does not trigger "toString()" call on argument for UnsatisfiedDependencyException
 * fixed method overrides check to accept methods declared on interfaces as well
 * fixed PropertyPlaceholderConfigurer to throw a BeanDefinitionStoreException in case of any circular reference
 * ResourceEntityResolver catches any kind of Exception in system root URL check (in particular AccessControlException)
@@ -40,6 +42,7 @@ Package org.springframework.context
 * synchronized AbstractApplicationContext's "refresh()" method, for hot refreshing in concurrent environments
 
 Package org.springframework.core
+* fixed JdkVersion to properly detect JDK 1.6/1.7 (Java 6/7) as higher than 1.5 (Java 5)
 * fixed SpringVersion to return null if the package is not determinable because of ClassLoader restrictions
 * fixed PathMatchingResourcePatternResolver to prevent eternal recursion in case of invalid prefix with pattern symbols
 * PathMatchingResourcePatternResolver ignores classpath roots that cannot be resolved as jar or in file system
@@ -52,6 +55,7 @@ Package org.springframework.dao
 Package org.springframework.ejb
 * fixed AbstractSlsbInvokerInterceptor to reobtain createMethod in case of cacheHome="false"/lookupHomeOnStartup="true"
 * LocalSlsbInvokerInterceptor throws AspectException with proper exception message in case of EJB CreateException
+* OC4J's "com.evermind.server.rmi.RMIConnectionException" gets detected as Remote EJB (RMI) connect failure as well
 
 Package org.springframework.jca
 * SingleConnectionFactory's Connection proxy implements "equals" and "hashCode" based on proxy equality
