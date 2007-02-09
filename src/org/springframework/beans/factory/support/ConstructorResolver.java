@@ -33,6 +33,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.core.MethodParameter;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -366,7 +367,8 @@ abstract class ConstructorResolver {
 				catch (TypeMismatchException ex) {
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, index, paramTypes[index],
-							"Could not convert " + methodType + " argument value [" + valueHolder.getValue() +
+							"Could not convert " + methodType + " argument value of type [" +
+							ObjectUtils.nullSafeClassName(valueHolder.getValue()) +
 							"] to required type [" + paramTypes[index].getName() + "]: " + ex.getMessage());
 				}
 			}
