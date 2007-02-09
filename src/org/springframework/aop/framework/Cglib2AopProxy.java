@@ -80,6 +80,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 	private static final int DISPATCH_TARGET = 3;
 	private static final int DISPATCH_ADVISED = 4;
 	private static final int INVOKE_EQUALS = 5;
+	private static final int INVOKE_HASHCODE = 6;
 
 
 	/** Logger available to subclasses; static to optimize serialization */
@@ -284,7 +285,8 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			targetInterceptor, // invoke target without considering advice, if optimized
 			new SerializableNoOp(), // no override for methods mapped to this
 			targetDispatcher, this.advisedDispatcher,
-			new EqualsInterceptor(this.advised)
+			new EqualsInterceptor(this.advised),
+			new HashCodeInterceptor(this.advised)
 		};
 
 		Callback[] callbacks;
@@ -498,8 +500,8 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 
 
 	/**
-	 * Dispatcher for the equals() method. Ensures that the method call is
-	 * always handled by this class.
+	 * Dispatcher for the <code>equals</code> method.
+	 * Ensures that the method call is always handled by this class.
 	 */
 	private static class EqualsInterceptor implements MethodInterceptor, Serializable {
 
@@ -530,6 +532,24 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 				return Boolean.FALSE;
 			}
 			return (AopProxyUtils.equalsInProxy(this.advised, otherAdvised) ? Boolean.TRUE : Boolean.FALSE);
+		}
+	}
+
+
+	/**
+	 * Dispatcher for the <code>hashCode</code> method.
+	 * Ensures that the method call is always handled by this class.
+	 */
+	private static class HashCodeInterceptor implements MethodInterceptor, Serializable {
+
+		private final AdvisedSupport advised;
+
+		public HashCodeInterceptor(AdvisedSupport advised) {
+			this.advised = advised;
+		}
+
+		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+			return new Integer(this.advised.getTargetSource().hashCode());
 		}
 	}
 
@@ -731,6 +751,11 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			if (AopUtils.isEqualsMethod(method)) {
 				logger.debug("Found 'equals' method: " + method);
 				return INVOKE_EQUALS;
+			}
+			// We must always calculate hashCode based on the proxy.
+			if (AopUtils.isHashCodeMethod(method)) {
+				logger.debug("Found 'hashCode' method: " + method);
+				return INVOKE_HASHCODE;
 			}
 			Class targetClass = this.advised.getTargetClass();
 			// Proxy is not yet available, but that shouldn't matter.
