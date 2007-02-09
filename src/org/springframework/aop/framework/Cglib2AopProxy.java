@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	private static final int DISPATCH_TARGET = 3;
 	private static final int DISPATCH_ADVISED = 4;
 	private static final int INVOKE_EQUALS = 5;
+	private static final int INVOKE_HASHCODE = 6;
 
 
 	/** Logger available to subclasses; static to optimize serialization */
@@ -101,7 +102,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 
 	/**
-	 * Create a new Cglib2AopProxy for the given config.
+	 * Create a new Cglib2AopProxy for the given AOP configuration.
 	 * @throws AopConfigException if the config is invalid. We try to throw an informative
 	 * exception in this case, rather than let a mysterious failure happen later.
 	 */
@@ -144,9 +145,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 	public Object getProxy(ClassLoader classLoader) {
 		if (logger.isDebugEnabled()) {
-			Class targetClass = this.advised.getTargetSource().getTargetClass();
-			logger.debug("Creating CGLIB2 proxy" +
-					(targetClass != null ? " for [" + targetClass.getName() + "]" : ""));
+			logger.debug("Creating CGLIB2 proxy: target source is " + this.advised.getTargetSource());
 		}
 
 		Enhancer enhancer = createEnhancer();
@@ -249,7 +248,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	}
 
 	private Callback[] getCallbacks(Class rootClass) throws Exception {
-		// parameters used for optimisation choices
+		// Parameters used for optimisation choices...
 		boolean exposeProxy = this.advised.isExposeProxy();
 		boolean isFrozen = this.advised.isFrozen();
 		boolean isStatic = this.advised.getTargetSource().isStatic();
@@ -282,7 +281,8 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			targetInterceptor, // invoke target without considering advice, if optimized
 			new SerializableNoOp(), // no override for methods mapped to this
 			targetDispatcher, this.advisedDispatcher,
-			new EqualsInterceptor(this.advised)
+			new EqualsInterceptor(this.advised),
+			new HashCodeInterceptor(this.advised)
 		};
 
 		Callback[] callbacks;
@@ -497,8 +497,8 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 
 
 	/**
-	 * Dispatcher for the equals() method. Ensures that the method call is
-	 * always handled by this class.
+	 * Dispatcher for the <code>equals</code> method.
+	 * Ensures that the method call is always handled by this class.
 	 */
 	private static class EqualsInterceptor implements MethodInterceptor, Serializable {
 
@@ -529,6 +529,24 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 				return Boolean.FALSE;
 			}
 			return (AopProxyUtils.equalsInProxy(this.advised, otherAdvised) ? Boolean.TRUE : Boolean.FALSE);
+		}
+	}
+
+
+	/**
+	 * Dispatcher for the <code>hashCode</code> method.
+	 * Ensures that the method call is always handled by this class.
+	 */
+	private static class HashCodeInterceptor implements MethodInterceptor, Serializable {
+
+		private final AdvisedSupport advised;
+
+		public HashCodeInterceptor(AdvisedSupport advised) {
+			this.advised = advised;
+		}
+
+		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+			return new Integer(this.advised.getTargetSource().hashCode());
 		}
 	}
 
@@ -717,22 +735,27 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		 */
 		public int accept(Method method) {
 			if (method.getDeclaringClass() == Object.class && method.getName().equals("finalize")) {
-				logger.debug("Object.finalize () method found - using NO_OVERRIDE");
+				logger.debug("Found finalize() method - using NO_OVERRIDE");
 				return NO_OVERRIDE;
 			}
 			if (method.getDeclaringClass() == Advised.class) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Method " + method + " is declared on Advised - using DISPATCH_ADVISED");
+					logger.debug("Method is declared on Advised interface: " + method);
 				}
 				return DISPATCH_ADVISED;
 			}
 			// We must always proxy equals, to direct calls to this
 			if (AopUtils.isEqualsMethod(method)) {
-				logger.debug("Found equals() method - using INVOKE_EQUALS");
+				logger.debug("Found 'equals' method: " + method);
 				return INVOKE_EQUALS;
 			}
+			// We must always calculate hashCode based on the proxy.
+			if (AopUtils.isHashCodeMethod(method)) {
+				logger.debug("Found 'hashCode' method: " + method);
+				return INVOKE_HASHCODE;
+			}
 			Class targetClass = this.advised.getTargetSource().getTargetClass();
-			// Proxy is not yet available, but that shouldn't matter
+			// Proxy is not yet available, but that shouldn't matter.
 			List chain = this.advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(
 					this.advised, null, method, targetClass);
 			boolean haveAdvice = !chain.isEmpty();
@@ -743,7 +766,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 				// If exposing the proxy, then AOP_PROXY must be used.
 				if (exposeProxy) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Must expose proxy on advised method " + method + " - using AOP_PROXY");
+						logger.debug("Must expose proxy on advised method: " + method);
 					}
 					return AOP_PROXY;
 				}
@@ -752,8 +775,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 				// Else use the AOP_PROXY.
 				if (isStatic && isFrozen && fixedInterceptorMap.containsKey(key)) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Method " + method + " has Advice and optimisations are enabled - " +
-								"using specific FixedChainStaticTargetInterceptor");
+						logger.debug("Method has advice and optimisations are enabled: " + method);
 					}
 					// We know that we are optimising so we can use the
 					// FixedStaticChainInterceptors.
@@ -762,8 +784,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Unable to apply any optimisations to advised method " + method +
-								" - using AOP_PROXY");
+						logger.debug("Unable to apply any optimisations to advised method: " + method);
 					}
 					return AOP_PROXY;
 				}

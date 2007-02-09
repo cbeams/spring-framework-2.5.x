@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,11 +29,11 @@ import javax.servlet.ServletException;
 import javax.transaction.TransactionRequiredException;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.DynamicIntroductionAdvice;
@@ -598,7 +598,8 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		try {
 			ExposeInvocationInterceptor.currentInvocation();
 			fail("Expected no invocation context");
-		} catch (AspectException ex) {
+		}
+		catch (AspectException ex) {
 			// ok
 		}
 	}
@@ -1345,11 +1346,10 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		IOther proxyB = (IOther) createProxy(pfb);
 
 		assertEquals(pfa.getAdvisors().length, pfb.getAdvisors().length);
-
 		assertTrue(a.equals(b));
 		assertTrue(i1.equals(i2));
 		assertTrue(proxyA.equals(proxyB));
-		//assertTrue(a.equals(proxyA));
+		assertEquals(proxyA.hashCode(), proxyB.hashCode());
 		assertFalse(proxyA.equals(a));
 
 		// Equality checks were handled by the proxy
@@ -1797,8 +1797,12 @@ public abstract class AbstractAopProxyTests extends TestCase {
 
 	public static class AllInstancesAreEqual implements IOther {
 
-		public boolean equals(Object o) {
-			return o instanceof AllInstancesAreEqual;
+		public boolean equals(Object other) {
+			return (other instanceof AllInstancesAreEqual);
+		}
+
+		public int hashCode() {
+			return getClass().hashCode();
 		}
 
 		public void absquatulate() {
