@@ -852,10 +852,12 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 
         <aop:pointcut id="defaultServiceOperation"
                     expression="]]><lineannotation>execution(* x.y.service.*Service.*(..))</lineannotation><![CDATA["/>
-        <aop:advisor pointcut-ref="defaultServiceOperation" advice-ref="defaultTxAdvice"/>
-        
+
         <aop:pointcut id="noTxServiceOperation"
                     expression="]]><lineannotation>execution(* x.y.service.ddl.DefaultDdlManager.*(..))</lineannotation><![CDATA["/>
+
+        <aop:advisor pointcut-ref="defaultServiceOperation" advice-ref="defaultTxAdvice"/>
+
         <aop:advisor pointcut-ref="noTxServiceOperation" advice-ref="noTxAdvice"/>
 
     </aop:config>
