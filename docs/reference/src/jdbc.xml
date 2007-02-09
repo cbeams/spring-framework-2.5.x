@@ -107,8 +107,8 @@
 				defined in the <literal>org.springframework.dao</literal> package.
 			</para>
 			<para>
-				Code using this class only need to implement callback interfaces,
-				giving them a clearly defined contract. The
+				Code using the <classname>JdbcTemplate</classname> only need to implement
+				callback interfaces, giving them a clearly defined contract. The
 				<interfacename>PreparedStatementCreator</interfacename> callback
 				interface creates a	prepared statement given a
 				<interfacename>Connection</interfacename> provided by this class,
@@ -119,23 +119,69 @@
 				values from each row of a <interfacename>ResultSet</interfacename>.
 			</para>
 			<para>
-				This class can be used within a service implementation via direct
-				instantiation with a <interfacename>DataSource</interfacename> reference,
-				or get prepared in an application context and given to services as a
+				The <classname>JdbcTemplate</classname> can be used within a service
+				implementation via direct instantiation with a <interfacename>DataSource</interfacename>
+				reference, or get prepared in an application context and given to services as a
 				bean reference. Note: the <interfacename>DataSource</interfacename> should
 				always be configured as a bean in the application context, in the first
 				case given to the service directly, in the second case to the prepared
 				template. Because this class is parameterizable by the callback interfaces
 				and the <interfacename>SQLExceptionTranslator</interfacename> interface, it
-				isn't necessary to subclass it.
+				is not necessary to subclass it.
 			</para>
 			<para>
-				Finally, please be aware that all of the SQL issued by this class is logged
-				at the <literal>'DEBUG'</literal> level under the category corresponding
+				Finally, all of the SQL issued by this class is logged at the
+				<literal>'DEBUG'</literal> level under the category corresponding
 				to the fully qualified class name of the template instance (typically
 				<classname>JdbcTemplate</classname>, but it may be different if a custom
 				subclass of the <classname>JdbcTemplate</classname> class is being used).
 			</para>
+			<section id="jdbc-JdbcTemplate-idioms">
+				<title><classname>JdbcTemplate</classname> idioms (best practices)</title>
+				<para>Instances of the <classname>JdbcTemplate</classname> class are
+				<emphasis>threadsafe once configured</emphasis>. This is important because it
+				means that you can configure a single instance of a <classname>JdbcTemplate</classname>
+				and then safely inject this <emphasis>shared</emphasis> reference into multiple
+				DAOs (or repositories). To be clear, the <classname>JdbcTemplate</classname>
+				is stateful, in that it maintains a reference to a <interfacename>DataSource</interfacename>,
+				but this state is <emphasis>not</emphasis> conversational state.</para>
+				<para>A common idiom when using the <classname>JdbcTemplate</classname> class
+				(and the associated <link linkend="jdbc-SimpleJdbcTemplate"><classname>SimpleJdbcTemplate</classname></link>
+				and <link linkend="jdbc-NamedParameterJdbcTemplate"><classname>NamedParameterJdbcTemplate</classname></link> classes)
+				is to create a singleton <classname>JdbcTemplate</classname> bean in your Spring
+				configuration file, and then dependency inject that shared template bean into the
+				various DAO classes that need access to it.</para>
+				<para>Another idiom when using the various <classname>xxxTemplate</classname> classes
+				is to configure a <interfacename>DataSource</interfacename> in your Spring configuration file,
+				and then dependency inject that shared <interfacename>DataSource</interfacename> bean
+				into your DAO classes; the <classname>JdbcTemplate</classname> is created in the setter
+				for the <interfacename>DataSource</interfacename>. This leads to DAOs that look
+				in part like this:</para>
+				<programlisting><![CDATA[public class JdbcCorporateEventDao implements CorporateEventDao {
+
+    private JdbcTemplate jdbcTemplate;
+
+    public void setDataSource(DataSource dataSource) {
+        ]]><emphasis role="bold">this.jdbcTemplate = new JdbcTemplate(dataSource);</emphasis><![CDATA[
+    }
+
+    ]]><lineannotation>// JDBC-backed implementations of the methods on the <interfacename>CorporateEventDao</interfacename> follow...</lineannotation><![CDATA[
+}]]></programlisting>
+				<para>If you are using Spring's <classname>JdbcDaoSupport</classname> class, and
+				your various JDBC-backed DAO classes extend from it, then you inherit a
+				<methodname>setDataSource(..)</methodname> method for free from said superclass. It is 100%
+				up to you as to whether or not you inherit from said class, you certainly are not forced to.
+				If you look at the source for the <classname>JdbcDaoSupport</classname> class you will see
+				that there is not a whole lot to it... it is provided as a convenience only.</para>
+				<para>Regardless of which of the above template initialization styles you choose
+				to use (or not), there is (almost) certainly no need to create a brand new
+				instance of a <classname>JdbcTemplate</classname> class each and every time you wish
+				to execute some SQL... remember, once configured, a <classname>JdbcTemplate</classname>
+				instance is threadsafe. A reason for wanting multiple <classname>JdbcTemplate</classname>
+				instances would be when you have an application that accesses multiple databases, which
+				requires multiple <interfacename>DataSources</interfacename>, and subsequently
+				multiple differently configured <classname>JdbcTemplates</classname>.</para>
+			</section>
 		</section>
 		<section id="jdbc-NamedParameterJdbcTemplate">
 			<title><classname>NamedParameterJdbcTemplate</classname></title>
@@ -158,14 +204,19 @@
 				points will be addressed immediately thereafter).
 			</para>
 			<programlisting><lineannotation>// some JDBC-backed DAO class...</lineannotation><![CDATA[
+private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+public void setDataSource(DataSource dataSource) {
+    this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+}
+
 public int countOfActorsByFirstName(String firstName) {
 
     String sql = "select count(0) from T_ACTOR where first_name = :first_name";
 
-    NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.getDataSource());
     SqlParameterSource namedParameters = new MapSqlParameterSource("first_name", firstName);
 
-    return template.queryForInt(sql, namedParameters);
+    return namedParameterJdbcTemplate.queryForInt(sql, namedParameters);
 }]]></programlisting>
 			<para>
 				Notice the use of the named parameter notation in the value assigned
@@ -183,15 +234,19 @@ public int countOfActorsByFirstName(String firstName) {
 				follow a similar pattern and will not be covered here.)
 			</para>
 <programlisting><lineannotation>// some JDBC-backed DAO class...</lineannotation><![CDATA[
+private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+public void setDataSource(DataSource dataSource) {
+    this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+}
+
 public int countOfActorsByFirstName(String firstName) {
 
     String sql = "select count(0) from T_ACTOR where first_name = :first_name";
 
-    NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.getDataSource());
-    Map namedParameters = new HashMap();
-    namedParameters.put("first_name", firstName);
+    Map namedParameters = Collections.singletonMap("first_name", firstName);
 
-    return template.queryForInt(sql, namedParameters);
+    return this.namedParameterJdbcTemplate.queryForInt(sql, namedParameters);
 }]]></programlisting>
 			<para>
 				Another nice feature related to the <classname>NamedParameterJdbcTemplate</classname>
@@ -238,15 +293,20 @@ public class Actor {
 
 }]]></programlisting>
 			<programlisting><lineannotation>// some JDBC-backed DAO class...</lineannotation><![CDATA[
+private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+public void setDataSource(DataSource dataSource) {
+    this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+}
+
 public int countOfActors(Actor exampleActor) {
 
-	]]><lineannotation>// notice how the named parameters match the properties of the above 'Actor' class</lineannotation><![CDATA[
+    ]]><lineannotation>// notice how the named parameters match the properties of the above 'Actor' class</lineannotation><![CDATA[
     String sql = "select count(0) from T_ACTOR where first_name = :firstName and last_name = :lastName";
 
-    NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.getDataSource());
     SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(exampleActor);
 
-    return template.queryForInt(sql, namedParameters);
+    return this.namedParameterJdbcTemplate.queryForInt(sql, namedParameters);
 }]]></programlisting>
 			<para>
 				Remember that the <classname>NamedParameterJdbcTemplate</classname> class
@@ -297,6 +357,12 @@ public int countOfActors(Actor exampleActor) {
 				<classname>SimpleJdbcTemplate</classname>.
 			</para>
 			<programlisting><lineannotation>// classic <classname>JdbcTemplate</classname>-style...</lineannotation><![CDATA[
+private JdbcTemplate jdbcTemplate;
+
+public void setDataSource(DataSource dataSource) {
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+}
+
 public Actor findActor(long id) {
     String sql = "select id, first_name, last_name from T_ACTOR where id = ?";
     
@@ -311,16 +377,18 @@ public Actor findActor(long id) {
         }
     };
     
-    ]]><lineannotation>// normally this would be dependency injected of course...</lineannotation><![CDATA[
-    JdbcTemplate jdbcTemplate = new JdbcTemplate(this.getDataSource());
-    
-    ]]><lineannotation>// notice the cast, and the wrapping up of the 'id' argument
+    ]]><lineannotation>// notice the cast, the wrapping up of the 'id' argument
     // in an array, and the boxing of the 'id' argument as a reference type</lineannotation><![CDATA[
     return (Actor) jdbcTemplate.queryForObject(sql, mapper, new Object[] {Long.valueOf(id)});
 }]]></programlisting>
 			<para>Here is the same method, only this time using the	<classname>SimpleJdbcTemplate</classname>;
 			notice how much 'cleaner'the code is.</para>
 			<programlisting><lineannotation>// <classname>SimpleJdbcTemplate</classname>-style...</lineannotation><![CDATA[
+private SimpleJdbcTemplate simpleJdbcTemplate;
+
+public void setDataSource(DataSource dataSource) {
+    this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+}
 public Actor findActor(long id) {
     String sql = "select id, first_name, last_name from T_ACTOR where id = ?";
 
@@ -336,10 +404,7 @@ public Actor findActor(long id) {
         }
     };
 
-    ]]><lineannotation>// again, normally this would be dependency injected of course...</lineannotation><![CDATA[
-    SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(this.getDataSource());
-
-    return simpleJdbcTemplate.queryForObject(sql, mapper, id);
+    return this.simpleJdbcTemplate.queryForObject(sql, mapper, id);
 }]]></programlisting>
 		</section>
 		<section id="jdbc-datasource">
@@ -352,7 +417,7 @@ public Actor findActor(long id) {
 				of the JDBC specification and can be seen as a generalized connection
 				factory. It allows a container or a framework to hide connection pooling
 				and transaction management issues from the application code. As a
-				developer, you don't need to know any details about how to connect to
+				developer, you don not need to know any details about how to connect to
 				the database, that is the responsibility for the administrator that sets
 				up the datasource. You will most likely have to fulfill both roles while
 				you are developing and testing you code though, but you will not
@@ -417,7 +482,7 @@ dataSource.setPassword("");]]></programlisting>
 						<para>
 							Try custom translation implemented by any subclass. Note
 							that this class is concrete and is typically used itself, in which
-							case this rule doesn't apply.
+							case this rule does not apply.
 						</para>
 					</listitem>
 					<listitem>
@@ -440,6 +505,7 @@ dataSource.setPassword("");]]></programlisting>
 				<classname>SQLErrorCodeSQLExceptionTranslator</classname> can be extended the following way:
 			</para>
 			<programlisting><![CDATA[public class MySQLErrorCodesTranslator extends SQLErrorCodeSQLExceptionTranslator {
+
     protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
         if (sqlex.getErrorCode() == -12345) {
             return new DeadlockLoserDataAccessException(task, sqlex);
@@ -492,16 +558,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public class ExecuteAStatement {
 
-    private JdbcTemplate jt;
-    private DataSource dataSource;
-
-    public void doExecute() {
-        jt = new JdbcTemplate(dataSource);
-        jt.execute("create table mytable (id integer, name varchar(100))"); 
-    }
+    private JdbcTemplate jdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    public void doExecute() {
+        this.jdbcTemplate.execute("create table mytable (id integer, name varchar(100))");
     }
 }]]></programlisting>
 		</section>
@@ -525,19 +589,18 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public class RunAQuery {
 
-    private JdbcTemplate jt;
-    private DataSource dataSource;
+    private JdbcTemplate jdbcTemplate;
+
+    public void setDataSource(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
   
     public int getCount() {
-        jt = new JdbcTemplate(dataSource);
-        int count = jt.queryForInt("select count(*) from mytable");
-        return count;
+        return this.jdbcTemplate.queryForInt("select count(*) from mytable");
     }
 
     public String getName() {
-        jt = new JdbcTemplate(dataSource);
-        String name = (String) jt.queryForObject("select name from mytable", String.class);
-        return name;
+        return (String) this.jdbcTemplate.queryForObject("select name from mytable", String.class);
     }
 
     public void setDataSource(DataSource dataSource) {
@@ -553,8 +616,14 @@ public class RunAQuery {
 				column value for that row. If we add a method to the above example to
 				retrieve a list of all the rows, it would look like this:
 			</para>
-			<programlisting><![CDATA[public List getList() {
-    jt = new JdbcTemplate(dataSource);
+			<programlisting><![CDATA[
+private JdbcTemplate jdbcTemplate;
+
+public void setDataSource(DataSource dataSource) {
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+}
+
+public List getList() {
     List rows = jt.queryForList("select * from mytable");
     return rows;
 }]]></programlisting>
@@ -577,14 +646,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public class ExecuteAnUpdate {
 
-    private JdbcTemplate template;
-
-    public void setName(int id, String name) {
-        template.update("update mytable set name = ? where id = ?", new Object[] {name, new Integer(id)});
-    }
+    private JdbcTemplate jdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
-        this.template = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    public void setName(int id, String name) {
+        this.jdbcTemplate.update("update mytable set name = ? where id = ?", new Object[] {name, new Integer(id)});
     }
 }]]></programlisting>
 			<para> 
