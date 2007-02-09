@@ -145,11 +145,13 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	private boolean autoStartup = true;
 
+	private boolean acceptMessagesWhileStopping = false;
+
 	private Connection sharedConnection;
 
 	private final Object sharedConnectionMonitor = new Object();
 
-	private volatile boolean active = false;
+	private boolean active = false;
 
 	private boolean running = false;
 
@@ -376,6 +378,24 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		this.autoStartup = autoStartup;
 	}
 
+	/**
+	 * Set whether to accept received messages while the listener container
+	 * in the process of stopping.
+	 * <p>Default is "false", rejecting such messages through aborting the
+	 * receive attempt. Switch this flag on to fully process such messages
+	 * even in the stopping phase, with the drawback that even newly sent
+	 * messages might still get processed (if coming in before all receive
+	 * timeouts have expired).
+	 * <p><b>NOTE:</b> Aborting receive attempts for such incoming messages
+	 * might lead to the provider's retry count decreasing for the affected
+	 * messages. If you have a high number of concurrent consumers, make sure
+	 * that the number of retries is higher than the number of consumers,
+	 * to be on the safe side for all potential stopping scenarios.
+	 */
+	public void setAcceptMessagesWhileStopping(boolean acceptMessagesWhileStopping) {
+		this.acceptMessagesWhileStopping = acceptMessagesWhileStopping;
+	}
+
 
 	/**
 	 * Validate configuration and call {@link #initialize()}.
@@ -528,6 +548,18 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 			this.active = false;
 			this.lifecycleMonitor.notifyAll();
 		}
+
+		// Stop shared Connection early, if necessary.
+		if (wasRunning && sharedConnectionEnabled()) {
+			try {
+				stopSharedConnection();
+			}
+			catch (Throwable ex) {
+				logger.debug("Could not stop JMS Connection on shutdown", ex);
+			}
+		}
+
+		// Shut down the actual listener setup.
 		try {
 			destroyListener();
 		}
@@ -535,8 +567,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 			throw convertJmsAccessException(ex);
 		}
 		finally {
-			synchronized (this.sharedConnectionMonitor) {
-				ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), wasRunning);
+			if (sharedConnectionEnabled()) {
+				synchronized (this.sharedConnectionMonitor) {
+					ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), false);
+				}
 			}
 		}
 	}
@@ -762,6 +796,17 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see #convertJmsAccessException
 	 */
 	protected void doExecuteListener(Session session, Message message) throws JMSException {
+		if (!this.acceptMessagesWhileStopping && !isRunning()) {
+			if (session.getTransacted() && isSessionTransacted()) {
+				// Transacted session created by this container -> rollback.
+				if (logger.isWarnEnabled()) {
+					logger.warn("Initiating transaction rollback for received message because of the " +
+							"listener container having been stopped in the meantime: " + message);
+				}
+				JmsUtils.rollbackIfNecessary(session);
+			}
+			return;
+		}
 		try {
 			invokeListener(session, message);
 		}
@@ -959,9 +1004,11 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	protected abstract boolean sharedConnectionEnabled();
 
 	/**
-	 * Register the specified listener on the underlying JMS Connection.
+	 * Register the specified listener.
 	 * <p>Subclasses need to implement this method for their specific
 	 * listener management process.
+	 * <p>A shared JMS Connection, if any, will already have been
+	 * started at this point.
 	 * @throws JMSException if registration failed
 	 * @see #getMessageListener()
 	 * @see #getSharedConnection()
@@ -970,10 +1017,12 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Destroy the registered listener.
-	 * The JMS Connection will automatically be closed <i>afterwards</i>
 	 * <p>Subclasses need to implement this method for their specific
 	 * listener management process.
+	 * <p>A shared JMS Connection, if any, will automatically be closed
+	 * <i>afterwards</i>.
 	 * @throws JMSException if destruction failed
+	 * @see #shutdown()
 	 */
 	protected abstract void destroyListener() throws JMSException;
 
