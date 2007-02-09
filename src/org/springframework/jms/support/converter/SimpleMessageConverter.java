@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,30 +30,29 @@ import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import org.springframework.util.ObjectUtils;
+
 /**
- * A simple message converter that can handle TextMessages, BytesMessages,
- * MapMessages, and ObjectMessages. Used as default by JmsTemplate, for
+ * A simple message converter which is able to handle TextMessages, BytesMessages,
+ * MapMessages, and ObjectMessages. Used as default conversion strategy
+ * by {@link org.springframework.jms.core.JmsTemplate}, for
  * <code>convertAndSend</code> and <code>receiveAndConvert</code> operations.
  *
- * <p>Converts a String to a JMS TextMessage, a byte array to a JMS BytesMessage,
- * a Map to a JMS MapMessage, and a Serializable object to a JMS ObjectMessage
- * (or vice versa).
+ * <p>Converts a String to a {@link javax.jms.TextMessage}, a byte array to a
+ * {@link javax.jms.BytesMessage}, a Map to a {@link javax.jms.MapMessage}, and
+ * a Serializable object to a {@link javax.jms.ObjectMessage} (or vice versa).
  *
  * <p>This converter implementation works for both JMS 1.1 and JMS 1.0.2,
  * except when extracting a byte array from a BytesMessage. So for converting
- * BytesMessages with a JMS 1.0.2 provider, use SimpleMessageConverter102.
- * (JmsTemplate102 uses SimpleMessageConverter102 as default.)
+ * BytesMessages with a JMS 1.0.2 provider, use {@link SimpleMessageConverter102}.
+ * (As you would expect, {@link org.springframework.jms.core.JmsTemplate102}
+ * uses SimpleMessageConverter102 as default.)
  *
  * @author Juergen Hoeller
  * @since 1.1
  * @see org.springframework.jms.core.JmsTemplate#convertAndSend
  * @see org.springframework.jms.core.JmsTemplate#receiveAndConvert
- * @see org.springframework.jms.core.JmsTemplate102
  * @see SimpleMessageConverter102
- * @see javax.jms.TextMessage
- * @see javax.jms.BytesMessage
- * @see javax.jms.MapMessage
- * @see javax.jms.ObjectMessage
  */
 public class SimpleMessageConverter implements MessageConverter {
 
@@ -155,10 +154,8 @@ public class SimpleMessageConverter implements MessageConverter {
 		for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			if (!(entry.getKey() instanceof String)) {
-				throw new MessageConversionException(
-						"Cannot convert non-String key of type [" +
-						(entry.getKey() != null ? entry.getKey().getClass().getName() : null) +
-						"] to MapMessage entry");
+				throw new MessageConversionException("Cannot convert non-String key of type [" +
+						ObjectUtils.nullSafeClassName(entry.getKey()) + "] to JMS MapMessage entry");
 			}
 			message.setObject((String) entry.getKey(), entry.getValue());
 		}

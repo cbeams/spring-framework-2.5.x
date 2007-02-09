@@ -455,9 +455,9 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Return a content-based String representation if <code>obj</code> is
-	 * not <code>null</code>; otherwise returns an empty <code>String</code>.
-	 * <p>Differs from <code>nullSafeToString</code> in that it returns an
-	 * empty String rather than "null" for a <code>null</code> value.
+	 * not <code>null</code>; otherwise returns an empty String.
+	 * <p>Differs from {@link #nullSafeToString(Object) in that it returns
+	 * an empty String rather than "null" for a <code>null</code> value.
 	 * @see #nullSafeToString(Object)
 	 */
 	public static String getDisplayString(Object obj) {
@@ -468,9 +468,19 @@ public abstract class ObjectUtils {
 	}
 
 	/**
+	 * Determine the class name for the given object.
+	 * <p>Returns <code>"null"</code> if <code>obj</code> is <code>null</code>.
+	 * @param obj the object to introspect (may be <code>null</code>)
+	 * @return the corresponding class name
+	 */
+	public static String nullSafeClassName(Object obj) {
+		return (obj != null ? obj.getClass().getName() : NULL_STRING);
+	}
+
+	/**
 	 * Return a String representation of the specified Object.
-	 * <p>Returns {@link #NULL_STRING the String 'null'} if <code>obj</code> is
-	 * <code>null</code>.
+	 * <p>Builds a String representation of the contents in case of an array.
+	 * Returns <code>"null"</code> if <code>obj</code> is <code>null</code>.
 	 * @param obj the object whose String representation to return
 	 * @return a String representation of <code>obj</code>
 	 */
@@ -512,10 +522,10 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return a String representation of the contents of the specified array. The
-	 * String representation consists of a list of the array's elements, enclosed
-	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
-	 * the characters <code>", "</code> (a comma followed by a space). Returns
+	 * Return a String representation of the contents of the specified array.
+	 * <p>The String representation consists of a list of the array's elements,
+	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
+	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
 	 * @param array the array whose String representation to return
 	 * @return a String representation of <code>array</code>
@@ -543,10 +553,10 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return a String representation of the contents of the specified array. The
-	 * String representation consists of a list of the array's elements, enclosed
-	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
-	 * the characters <code>", "</code> (a comma followed by a space). Returns
+	 * Return a String representation of the contents of the specified array.
+	 * <p>The String representation consists of a list of the array's elements,
+	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
+	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
 	 * @param array the array whose String representation to return
 	 * @return a String representation of <code>array</code>
@@ -575,10 +585,10 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return a String representation of the contents of the specified array. The
-	 * String representation consists of a list of the array's elements, enclosed
-	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
-	 * the characters <code>", "</code> (a comma followed by a space). Returns
+	 * Return a String representation of the contents of the specified array.
+	 * <p>The String representation consists of a list of the array's elements,
+	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
+	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
 	 * @param array the array whose String representation to return
 	 * @return a String representation of <code>array</code>
@@ -606,10 +616,10 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return a String representation of the contents of the specified array. The
-	 * String representation consists of a list of the array's elements, enclosed
-	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
-	 * the characters <code>", "</code> (a comma followed by a space). Returns
+	 * Return a String representation of the contents of the specified array.
+	 * <p>The String representation consists of a list of the array's elements,
+	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
+	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
 	 * @param array the array whose String representation to return
 	 * @return a String representation of <code>array</code>
@@ -637,10 +647,10 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return a String representation of the contents of the specified array. The
-	 * String representation consists of a list of the array's elements, enclosed
-	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
-	 * the characters <code>", "</code> (a comma followed by a space). Returns
+	 * Return a String representation of the contents of the specified array.
+	 * <p>The String representation consists of a list of the array's elements,
+	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
+	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
 	 * @param array the array whose String representation to return
 	 * @return a String representation of <code>array</code>
@@ -669,10 +679,10 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return a String representation of the contents of the specified array. The
-	 * String representation consists of a list of the array's elements, enclosed
-	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
-	 * the characters <code>", "</code> (a comma followed by a space). Returns
+	 * Return a String representation of the contents of the specified array.
+	 * <p>The String representation consists of a list of the array's elements,
+	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
+	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
 	 * @param array the array whose String representation to return
 	 * @return a String representation of <code>array</code>
@@ -701,10 +711,10 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return a String representation of the contents of the specified array. The
-	 * String representation consists of a list of the array's elements, enclosed
-	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
-	 * the characters <code>", "</code> (a comma followed by a space). Returns
+	 * Return a String representation of the contents of the specified array.
+	 * <p>The String representation consists of a list of the array's elements,
+	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
+	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
 	 * @param array the array whose String representation to return
 	 * @return a String representation of <code>array</code>
@@ -732,10 +742,10 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return a String representation of the contents of the specified array. The
-	 * String representation consists of a list of the array's elements, enclosed
-	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
-	 * the characters <code>", "</code> (a comma followed by a space). Returns
+	 * Return a String representation of the contents of the specified array.
+	 * <p>The String representation consists of a list of the array's elements,
+	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
+	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
 	 * @param array the array whose String representation to return
 	 * @return a String representation of <code>array</code>
@@ -763,10 +773,10 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return a String representation of the contents of the specified array. The
-	 * String representation consists of a list of the array's elements, enclosed
-	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
-	 * the characters <code>", "</code> (a comma followed by a space). Returns
+	 * Return a String representation of the contents of the specified array.
+	 * <p>The String representation consists of a list of the array's elements,
+	 * enclosed in curly braces (<code>"{}"</code>). Adjacent elements are separated
+	 * by the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
 	 * @param array the array whose String representation to return
 	 * @return a String representation of <code>array</code>
