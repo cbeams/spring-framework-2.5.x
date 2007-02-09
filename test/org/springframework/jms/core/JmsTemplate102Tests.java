@@ -438,7 +438,7 @@ public class JmsTemplate102Tests extends TestCase {
 			fail("IllegalArgumentException not thrown. ConnectionFactory should be set");
 		}
 		catch (IllegalArgumentException ex) {
-			assertEquals("Exception message not matching", "connectionFactory is required", ex.getMessage());
+			// expected
 		}
 
 		// The default is for the JmsTemplate102 to send to queues.
