@@ -71,6 +71,8 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 
 	private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.AbortPolicy();
 
+	private boolean exposeUnconfigurableExecutor = false;
+
 	private ScheduledExecutorService executor;
 
 
@@ -114,15 +116,32 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 				(rejectedExecutionHandler != null ? rejectedExecutionHandler : new ThreadPoolExecutor.AbortPolicy());
 	}
 
+	/**
+	 * Specify whether this FactoryBean should expose an unconfigurable
+	 * decorator for the created executor.
+	 * <p>Default is "false", exposing the raw executor as bean reference.
+	 * Switch this flag to "true" to strictly prevent clients from
+	 * modifying the executor's configuration.
+	 * @see java.util.concurrent.Executors#unconfigurableScheduledExecutorService
+	 */
+	public void setExposeUnconfigurableExecutor(boolean exposeUnconfigurableExecutor) {
+		this.exposeUnconfigurableExecutor = exposeUnconfigurableExecutor;
+	}
+
 
 	public void afterPropertiesSet() {
 		logger.info("Initializing SchedulerExecutorService");
-		this.executor = createExecutor(this.poolSize, this.threadFactory, this.rejectedExecutionHandler);
+		ScheduledExecutorService executor =
+				createExecutor(this.poolSize, this.threadFactory, this.rejectedExecutionHandler);
 
 		// Register specified ScheduledExecutorTasks, if necessary.
 		if (!ObjectUtils.isEmpty(this.scheduledExecutorTasks)) {
-			registerTasks(this.scheduledExecutorTasks, this.executor);
+			registerTasks(this.scheduledExecutorTasks, executor);
 		}
+
+		// Wrap executor with an unconfigurable decorator.
+		this.executor = (this.exposeUnconfigurableExecutor ?
+				Executors.unconfigurableScheduledExecutorService(executor) : executor);
 	}
 
 	/**
@@ -136,7 +155,7 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 	 * @param rejectedExecutionHandler the RejectedExecutionHandler to use
 	 * @return a new ScheduledExecutorService instance
 	 * @see #afterPropertiesSet()
-	 * @see java.util.concurrent.ScheduledThreadPoolExecutor#ScheduledThreadPoolExecutor
+	 * @see java.util.concurrent.ScheduledThreadPoolExecutor
 	 */
 	protected ScheduledExecutorService createExecutor(
 			int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
