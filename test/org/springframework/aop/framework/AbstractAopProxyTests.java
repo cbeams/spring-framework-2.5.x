@@ -1342,11 +1342,10 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		IOther proxyB = (IOther) createProxy(pfb);
 
 		assertEquals(pfa.getAdvisors().length, pfb.getAdvisors().length);
-
 		assertTrue(a.equals(b));
 		assertTrue(i1.equals(i2));
 		assertTrue(proxyA.equals(proxyB));
-		//assertTrue(a.equals(proxyA));
+		assertEquals(proxyA.hashCode(), proxyB.hashCode());
 		assertFalse(proxyA.equals(a));
 
 		// Equality checks were handled by the proxy
@@ -1793,8 +1792,12 @@ public abstract class AbstractAopProxyTests extends TestCase {
 
 	public static class AllInstancesAreEqual implements IOther {
 
-		public boolean equals(Object o) {
-			return o instanceof AllInstancesAreEqual;
+		public boolean equals(Object other) {
+			return (other instanceof AllInstancesAreEqual);
+		}
+
+		public int hashCode() {
+			return getClass().hashCode();
 		}
 
 		public void absquatulate() {
