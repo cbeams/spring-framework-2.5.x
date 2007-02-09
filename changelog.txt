@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.3 (9.2.2007)
------------------------------------
+Changes in version 2.0.3 (16.2.2007)
+------------------------------------
 
 General
 * all checks for library presence are explicitly performed with Spring's own ClassLoader (not the application's)
@@ -15,6 +15,7 @@ Package org.springframework.aop
 * exposed "invocableClone()" and "setUserAttribute"/"getUserAttribute" on ProxyMethodInvocation, for reduced coupling
 * introduced TargetClassAware interface, extended by Advised, and framework-decoupled "AopUtils.getTargetClass" method
 * redefined target-class proxying to create a JDK proxy in case of the target class being an interface
+* CGLIB proxies handle "hashCode" calls according to their "equals" behavior, analogous to JDK dynamic proxies
 * introduced stricter null checks for Advised/AdvisedSupport
 * exposed "indexOf(Advice)" method on Advised interface
 * revised ProxyConfig/AdvisedSupport's "toString()" output
@@ -37,8 +38,10 @@ Package org.springframework.aop
 * added SimpleBeanTargetSource, performing a fresh getBean lookup on every request, for any kind of bean
 * ScopedProxyFactoryBean uses the BeanFactory's bean ClassLoader for generating scoped proxies
 * auto-proxying ignores objects exposed by ScopedProxyFactoryBeans; only their target beans are eligible
+* fixed "scoped-proxy" bean definition decorator to properly parse an inner bean with scoped-proxy marker
 * added "proxy-target-class" attribute to "scoped-proxy" XML tag, allowing to turn target class proxying off
 * reworked "scoped-proxy" XML tag to enforce a target class proxy selectively, for its specific target bean
+* @Configurable works for deserialized objects as well
 
 Package org.springframework.beans
 * added "getTypeConverter()" method to ConfigurableBeanFactory interface
@@ -49,6 +52,7 @@ Package org.springframework.beans
 * added "isPrototype(beanName)" method to BeanFactory interface, explicitly checking for an independent instance
 * added extended SmartFactoryBean interface, including an "isPrototype()" method that checks for an independent instance
 * AbstractBeanFactory throws BeanCreationException will full context info if "postProcessObjectFromFactoryBean" fails
+* AbstractAutowireCapableBeanFactory does not trigger "toString()" call on argument for UnsatisfiedDependencyException
 * turned visibility of AbstractAutowireCapableBeanFactory's "applyPropertyValues" method from private to protected
 * added copy constructor to ChildBeanDefinition, for custom use in programmatic bean registration code
 * BeanDefinitionParseDelegate trims whitespace from "class" attributes in XML bean definitions
@@ -68,10 +72,12 @@ Package org.springframework.dao
 Package org.springframework.core
 * fixed BridgeMethodResolver's "populateTypeMapFromParameterizedType" to properly handle nested generics
 * fixed BridgeMethodResolver to properly detect a generic interface even in a class hierarchy
+* refactored SimpleAsyncTaskExecutor to allow for reuse of the CustomizableThreadCreator class
 
 Package org.springframework.ejb
 * AbstractEnterpriseBean uses the EJB instance as WeakReferenceMonitor handle, instead of a BeanFactoryReference proxy
 * all "jee:*" tags support an "environment-ref" attribute, pointing to a shared bean of type "java.util.Properties"
+* OC4J's "com.evermind.server.rmi.RMIConnectionException" gets detected as Remote EJB (RMI) connect failure as well
 
 Package org.springframework.instrument
 * ShadowingClassLoader excludes "com.sun." package by default (for using Sun's Xerces version through JAXP)
@@ -83,7 +89,13 @@ Package org.springframework.jdbc
 * introduced WebSphereDataSourceAdapter, obtaining Connections through WebSphere's JDBCConnectionSpec facility
 
 Package org.springframework.jms
+* marked JmsDestinationAccessor as abstract
+* moved protected "createConnection" and "createSession" methods from JmsTemplate up to JmsAccessor
+* factored out AbstractJmsListeningContainer base class from AbstractMessageListenerContainer
 * AbstractMessageListenerContainer's "refreshSharedConnection" properly resets shared Connection in refresh failure case
+* AbstractMessageListenerContainer explicitly aborts messages which have been delivered after initiated shutdown
+* added "acceptMessagesWhileStopping" flag to AbstractMessageListenerContainer, for processing all delivered messages
+* factored out AbstractPollingMessageListenerContainer base class from DefaultMessageListenerContainer
 * added dynamic scaling up/down to DefaultMessageListenerContainer, configured through "maxConcurrentConsumers" property
 
 Package org.springframework.jmx
@@ -102,6 +114,7 @@ Package org.springframework.orm
 * added "flushMode" init parameter to Hibernate3 OpenSessionInViewFilter (supporting "AUTO" etc as value)
 * Hibernate3 SessionFactoryUtils translates SQLGrammar/DataException into InvalidDataAccessResourceUsageException
 * Hibernate3 HibernateAccessor/TransactionManager translates GenericJDBCException using a default SQLExceptionTranslator
+* TopLink LocalSessionFactoryBean uses the bean ClassLoader as TopLink Session ClassLoader
 
 Package org.springframework.remoting
 * all remoting ProxyFactoryBeans use the bean ClassLoader for generating service proxies
@@ -112,6 +125,19 @@ Package org.springframework.remoting
 * added "rebind()" method to JndiRmiServiceExporter, for recovering in case of the target registry having been restarted
 * CodebaseAwareObjectInputStream uses "Class.forName", to be able to resolve array classes with any ClassLoader
 * added "getTargetInterfaceName()" method to RmiInvocationHandler, for client-side introspection
+* HttpInvokerClientInterceptor does not require an "afterPropertiesSet()" call for initializing the request executor
+* added "serviceFactory" property to LocalJaxRpcServiceFactory, for passing in a pre-initialized ServiceFactory instance
+* fixed JaxRpcPortClientInterceptor to properly recover in case of a failed lazy "prepare()" attempt
+* JaxRpcPortClientInterceptor consistently throws RemoteLookupFailureException if a lazy "prepare()" attempt failed
+* added "refreshServiceAfterConnectFailure" bean property to JaxRpcPortClientInterceptor, allowing for service recovery
+
+Package org.springframework.scheduling
+* introduced the CustomizableThreadFactory class, implementing JDK 1.5's ThreadFactory SPI with bean-style configuration
+* ThreadPoolTaskExecutor's "corePoolSize" and "maxPoolSize" properties allow for runtime changes (e.g. through JMX)
+* added "getPoolSize()" and "getActiveCount()" methods to ThreadPoolTaskExecutor (intended for JMX exposure)
+* added "getThreadPoolExecutor()" accessor to ThreadPoolTaskExecutor, for native access to the underlying executor
+* added "exposeUnconfigurableExecutor" bean property to ScheduledExecutorFactoryBean
+* added support for the JSR-166 (java.util.concurrent) backport project, in the "scheduling.backportconcurrent" package
 
 Package org.springframework.scripting
 * Bsh/JRuby/GroovyScriptFactory uses the bean ClassLoader for generating script objects
@@ -135,8 +161,10 @@ Package org.springframework.transaction
 
 Package org.springframework.util
 * ResourceUtils's "extractJarFileURL" only prepends a slash in front of a file path if it doesn't already have a slash
+* added CustomizableThreadCreator class, serving as base class for ThreadFactory adapters
 
 Package org.springframework.web
+* CharacterEncodingFilter only applies its encoding if actually specified (non-null)
 * ConfigurableWebApplicationContext and ConfigurablePortletApplicationContext expose config state through getters
 * RequestContextListener works correctly even in case of the "requestDestroyed" callback coming from a different thread
 * added "rootHandler" bean property to AbstractUrlHandlerMapping, kicking in for the "/" path
