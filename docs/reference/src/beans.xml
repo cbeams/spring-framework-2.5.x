@@ -6,10 +6,8 @@
         <para>This chapter covers the Spring Framework's implementation of the
 		Inversion of Control (IoC)
 		<footnote><para>See the section entitled <xref linkend="background-ioc" /></para></footnote>
-		principle. IoC underpins a lot of the functionality provided by Spring, so it is
-		important to understand.</para>
+		principle.</para>
         <sidebar>
-			<!--<title>Which interface?</title>-->
 			<title><interfacename>BeanFactory</interfacename> or <interfacename>ApplicationContext</interfacename>?</title>
 			<para>Users are sometimes unsure whether a
 			<interfacename>BeanFactory</interfacename> or an
@@ -53,9 +51,9 @@
     <section id="beans-basics">
         <title>Basics - containers and beans</title>
 		<para>In Spring, those objects that form the backbone of your application and that
-		are managed by the Spring IoC container are referred to as <firstterm>beans</firstterm>.
-		A bean is simply an object that typically is instantiated, assembled and otherwise
-		managed by a Spring IoC <firstterm>container</firstterm>; other than that, there is
+		are managed by the Spring IoC <firstterm>container</firstterm> are referred to as
+		<firstterm>beans</firstterm>. A bean is simply an object that is instantiated,
+		assembled and otherwise managed by a Spring IoC container; other than that, there is
 		nothing special about a bean (it is in all other respects one of probably many objects
 		in your application). These beans, and the <firstterm>dependencies</firstterm> between
 		them, are reflected in the <firstterm>configuration metadata</firstterm> used by a
@@ -161,15 +159,18 @@
 			<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
   <bean id="..." class="...">
     ]]><lineannotation>&lt;!-- collaborators and configuration for this bean go here --&gt;</lineannotation><![CDATA[
   </bean>
+
   <bean id="..." class="...">
     ]]><lineannotation>&lt;!-- collaborators and configuration for this bean go here --&gt;</lineannotation><![CDATA[
   </bean>
+
   ]]><lineannotation>&lt;!-- more bean definitions go here... --&gt;</lineannotation><![CDATA[
+
 </beans>]]></programlisting>
 			<section id="beans-factory-instantiation">
 				<title>Instantiating a container</title>
@@ -2371,12 +2372,11 @@ public class ReplacementComputeValue implements MethodReplacer {
 			    main value-adds of the Spring IoC container is that it manages
                 not only the instantiation of your objects (beans), but also
 			    the wiring up of collaborators (or dependencies). If you want to inject
-			    a bean that, for the sake of argument is scoped at the HTTP request scope,
-			    into another bean, you will need to inject an AOP proxy in place of the
-			    scoped bean. That is to say, you need to inject a proxy object
-			    that exposes the same public interface as the scoped object, but that is
-			    smart enough to be able to retrieve the real, target object from
-			    the relevant scope (for example a HTTP request) and delegate
+			    a (for example) HTTP request scoped bean into another bean, you will need
+				to inject an AOP proxy in place of the scoped bean. That is, you need to
+				inject a proxy object that exposes the same public interface as the scoped
+				object, but that is smart enough to be able to retrieve the real, target
+				object from the relevant scope (for example a HTTP request) and delegate
 			    method calls onto the real object.</para>
 			    <note>
 			        <para>You <emphasis>do not</emphasis> need to use the
@@ -2384,7 +2384,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 			        beans that are scoped as <literal>singletons</literal> or
 			        <literal>prototypes</literal>. It is an error to try to create a
 			        scoped proxy for a singleton bean (and the resulting
-			        <classname>BeanCreationException</classname> will certainly set
+			        <exceptionname>BeanCreationException</exceptionname> will certainly set
 			        you straight in this regard).</para>
 			    </note>
                 <para>Let's look at the configuration that is required to effect this;
@@ -2415,18 +2415,17 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     </bean>
 </beans>
 ]]></programlisting>
-                <para>To create a proxy to a scoped bean using XML-based configuration, you need
-                only to insert a child <literal>&lt;aop:scoped-proxy/&gt;</literal> element into a
-                scoped bean definition (you may also need the CGLIB library on your classpath
-                so that the container can effect class-based proxying; you will also need to be
-				using XSD based configuration). The above XML configuration
-                demonstrated the <quote>how</quote>; now for the <quote>why</quote>. So, just why
-                do you need this <literal>&lt;aop:scoped-proxy/&gt;</literal> element in the
+                <para>To create such a proxy, you need only to insert a child
+				<literal>&lt;aop:scoped-proxy/&gt;</literal> element into a scoped bean definition
+				(you may also need the CGLIB library on your classpath so that the container can
+				effect class-based proxying; you will also need to be using <xref linkend="xsd-config"/>).
+				So, just why do you need this <literal>&lt;aop:scoped-proxy/&gt;</literal> element in the
                 definition of beans scoped at the <literal>request</literal>,
-                <literal>session</literal>, and <literal>globalSession</literal> level? The
-                reason is best explained by picking apart the following bean definition 
-								(please note that the following <literal>'userPreferences'</literal> bean 
-								definition as it stands is <emphasis>incomplete</emphasis>):</para>
+                <literal>session</literal>, <literal>globalSession</literal> and
+				'<emphasis>insert your custom scope here</emphasis>' level? The reason is best explained
+				by picking apart the following bean definition (please note that the following
+				<literal>'userPreferences'</literal> bean definition as it stands is
+				<emphasis>incomplete</emphasis>):</para>
                 <programlisting><![CDATA[<bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/>
 
 <bean id="userManager" class="com.foo.UserManager">
@@ -2438,15 +2437,16 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
                 The salient point here is that the <literal>'userManager'</literal> bean is a
                 singleton... it will be instantiated <emphasis>exactly once</emphasis> per container,
                 and its dependencies (in this case only one, the <literal>'userPreferences'</literal>
-                bean) will also only be injected once. This means that the
+                bean) will also only be injected (once!). This means that the
                 <literal>'userManager'</literal> will (conceptually) only ever operate on the exact
-                same <literal>'userPreferences'</literal> object, i.e. the one that it was originally
-                injected with. This is not what you want when you inject a HTTP
+                same <literal>'userPreferences'</literal> object, that is the one that it was originally
+                injected with. This is <emphasis>not</emphasis> what you want when you inject a HTTP
                 <interfacename>Session</interfacename>-scoped bean as a dependency into a
-                collaborating object. What we do want is a single <literal>'userManager'</literal> object,
-                and then, for the lifetime of a HTTP <interfacename>Session</interfacename>, we want to
-                see and use a <literal>'userPreferences'</literal> object that is specific to said
-                HTTP <interfacename>Session</interfacename>.</para>
+                collaborating object (typically). Rather, what we <emphasis>do</emphasis> want is a
+				single <literal>'userManager'</literal> object, and then, for the lifetime of a HTTP
+				<interfacename>Session</interfacename>, we want to see and use a
+				<literal>'userPreferences'</literal> object that is specific to said HTTP
+				<interfacename>Session</interfacename>.</para>
                 <para>Rather what you need then is to inject some sort of object that exposes the
                 exact same public interface as the <classname>UserPreferences</classname> class (ideally
                 an object that <emphasis>is a</emphasis> <classname>UserPreferences</classname> instance)
@@ -2472,6 +2472,37 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 <bean id="userManager" class="com.foo.UserManager">
     <property name="userPreferences" ref="userPreferences"/>
 </bean>]]></programlisting>
+				<section id="beans-factory-scopes-other-injection-proxies">
+					<title>Choosing the type of proxy created</title>
+					<para>By default, when the Spring container is creating a proxy for a bean
+					that is marked up with the <literal>&lt;aop:scoped-proxy/&gt;</literal>
+					element, <emphasis>a CGLib-based class proxy will be created</emphasis>.
+					This means that you will need to have the CGLib library on the classapth
+					for your application.
+					</para>
+					<para>You can choose to have the Spring container create 'standard'
+					JDK interface-based proxies for such scoped beans by specifying
+					'<literal>false</literal>' for the value of the '<literal>proxy-target-class</literal>'
+					attribute of the <literal>&lt;aop:scoped-proxy/&gt;</literal> element.
+					Using JDK interface-based proxies does mean that you don't need any additional
+					libraries on your application's classpath to effect such proxying, but it
+					does mean that the class of the scoped bean must implement at least one
+					interface, and <emphasis>all</emphasis> of the collaborators into which
+					the scoped bean is injected must be referencing the bean via one of its
+					interfaces.</para>
+                	<programlisting><lineannotation>&lt;!-- <classname>DefaultUserPreferences</classname> implements the <interfacename>UserPreferences</interfacename> interface --&gt;</lineannotation><![CDATA[
+<bean id="userPreferences" class="com.foo.DefaultUserPreferences" scope="session">
+    <aop:scoped-proxy proxy-target-class="false" ]]><emphasis role="bold">proxy-target-class="false"<literal></literal></emphasis>/&gt;<![CDATA[
+</bean>
+
+<bean id="userManager" class="com.foo.UserManager">
+    <property name="userPreferences" ref="userPreferences"/>
+</bean>]]></programlisting>
+					<para>The section entitled <xref linkend="aop-proxying"/>
+					may also be of some interest with regard to understanding the nuances
+					of choosing whether class-based or interface-based proxying is right
+					for you.</para>
+				</section>
 			</section>
 		</section>
 		<section id="beans-factory-scopes-custom">
