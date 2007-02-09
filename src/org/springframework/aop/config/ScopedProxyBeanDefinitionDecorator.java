@@ -29,7 +29,8 @@ import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
 import org.springframework.beans.factory.xml.ParserContext;
 
 /**
- * {@link BeanDefinitionDecorator} responsible for parsing the <code>&lt;aop:scope/&gt;</code> tag.
+ * {@link BeanDefinitionDecorator} responsible for parsing the
+ * <code>&lt;aop:scoped-proxy/&gt;</code> tag.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -37,7 +38,6 @@ import org.springframework.beans.factory.xml.ParserContext;
  */
 class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
-	/** The '<code>proxy-target-class</code>' attribute */
 	private static final String PROXY_TARGET_CLASS = "proxy-target-class";
 
 	private static final String TARGET_NAME_PREFIX = "scopedTarget.";
@@ -62,10 +62,12 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 			scopeFactoryDefinition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.FALSE);
 		}
 
-		// Register the scope factory.
-		registry.registerBeanDefinition(originalBeanName, scopeFactoryDefinition);
+		// Register the target bean as separate bean in the factory.
+		registry.registerBeanDefinition(targetBeanName, targetDefinition);
 
-		return new BeanDefinitionHolder(targetDefinition, targetBeanName);
+		// Return the scoped proxy definition as primary bean definition
+		// (potentially an inner bean).
+		return new BeanDefinitionHolder(scopeFactoryDefinition, originalBeanName);
 	}
 
 }
