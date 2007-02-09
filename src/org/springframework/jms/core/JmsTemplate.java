@@ -37,7 +37,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 /**
- * Helper class that simplifies JMS access code.
+ * Helper class that simplifies synchronous JMS access code.
  *
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
  * domain-independent API. <b>Use the {@link JmsTemplate102 JmsTemplate102}
@@ -52,23 +52,24 @@ import org.springframework.util.Assert;
  * As defined by the J2EE specification, the transaction and acknowledgement
  * parameters are ignored when a JMS Session is created inside an active
  * transaction, no matter if a JTA transaction or a Spring-managed transaction.
+ * To configure them for native JMS usage, specify appropriate values for
+ * the "sessionTransacted" and "sessionAcknowledgeMode" bean properties.
  *
- * <p>This template uses a DynamicDestinationResolver and a SimpleMessageConverter
+ * <p>This template uses a
+ * {@link org.springframework.jms.support.destination.DynamicDestinationResolver}
+ * and a {@link org.springframework.jms.support.converter.SimpleMessageConverter}
  * as default strategies for resolving a destination name or converting a message,
- * respectively.
+ * respectively. These defaults can be overridden through the "destinationResolver"
+ * and "messageConverter" bean properties.
  *
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @since 1.1
  * @see #setConnectionFactory
  * @see #setPubSubDomain
- * @see JmsTemplate102
  * @see #setDestinationResolver
  * @see #setMessageConverter
- * @see org.springframework.jms.support.destination.DynamicDestinationResolver
- * @see org.springframework.jms.support.converter.SimpleMessageConverter
- * @see javax.jms.Destination
- * @see javax.jms.Session
+ * @see JmsTemplate102
  * @see javax.jms.MessageProducer
  * @see javax.jms.MessageConsumer
  */
@@ -714,16 +715,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 	}
 
-	/**
-	 * Return whether the Session is in client acknowledge mode.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param session the JMS Session to check
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected boolean isClientAcknowledge(Session session) throws JMSException {
-		return (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
-	}
-
 
 	//-------------------------------------------------------------------------
 	// Convenience methods for receiving auto-converted messages
@@ -801,27 +792,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	protected Session getSession(JmsResourceHolder holder) {
 		return holder.getSession();
-	}
-
-	/**
-	 * Create a JMS Connection via this template's ConnectionFactory.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @return the new JMS Connection
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected Connection createConnection() throws JMSException {
-		return getConnectionFactory().createConnection();
-	}
-
-	/**
-	 * Create a JMS Session for the given Connection.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param con the JMS Connection to create a Session for
-	 * @return the new JMS Session
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	protected Session createSession(Connection con) throws JMSException {
-		return con.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
 	}
 
 	/**

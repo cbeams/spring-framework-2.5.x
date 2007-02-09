@@ -16,6 +16,7 @@
 
 package org.springframework.jms.support;
 
+import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -150,7 +151,7 @@ public abstract class JmsAccessor implements InitializingBean {
 
 	public void afterPropertiesSet() {
 		if (getConnectionFactory() == null) {
-			throw new IllegalArgumentException("connectionFactory is required");
+			throw new IllegalArgumentException("Property 'connectionFactory' is required");
 		}
 	}
 
@@ -159,7 +160,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * Convert the specified checked {@link javax.jms.JMSException JMSException} to
 	 * a Spring runtime {@link org.springframework.jms.JmsException JmsException}
 	 * equivalent.
-	 * <p>Default implementation delegates to the
+	 * <p>The default implementation delegates to the
 	 * {@link org.springframework.jms.support.JmsUtils#convertJmsAccessException} method.
 	 * @param ex the original checked {@link JMSException} to convert
 	 * @return the Spring runtime {@link JmsException} wrapping <code>ex</code>
@@ -167,6 +168,42 @@ public abstract class JmsAccessor implements InitializingBean {
 	 */
 	protected JmsException convertJmsAccessException(JMSException ex) {
 		return JmsUtils.convertJmsAccessException(ex);
+	}
+
+
+	//-------------------------------------------------------------------------
+	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Create a JMS Connection via this template's ConnectionFactory.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @return the new JMS Connection
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected Connection createConnection() throws JMSException {
+		return getConnectionFactory().createConnection();
+	}
+
+	/**
+	 * Create a JMS Session for the given Connection.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param con the JMS Connection to create a Session for
+	 * @return the new JMS Session
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected Session createSession(Connection con) throws JMSException {
+		return con.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
+	}
+
+	/**
+	 * Return whether the given Session is in client acknowledge mode.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param session the JMS Session to check
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 */
+	protected boolean isClientAcknowledge(Session session) throws JMSException {
+		return (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
 	}
 
 }
