@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,33 +58,32 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract superclass for BeanFactory implementations, implementing the
- * ConfigurableBeanFactory SPI interface. Does <i>not</i> assume a listable
- * bean factory: can therefore also be used as base class for bean factory
- * implementations which fetch bean definitions from a variety of backend
- * resources (where bean definition access is an expensive operation).
+ * Abstract base class for {@link org.springframework.beans.factory.BeanFactory}
+ * implementations, providing the full capabilities of the
+ * {@link org.springframework.beans.factory.config.ConfigurableBeanFactory} SPI.
+ * Does <i>not</i> assume a listable bean factory: can therefore also be used
+ * as base class for bean factory implementations which obtain bean definitions
+ * from some backend resource (where bean definition access is an expensive operation).
  *
  * <p>This class provides singleton/prototype determination, singleton cache,
- * aliases, FactoryBean handling, bean definition merging for child bean definitions,
- * and bean destruction (DisposableBean interface, custom destroy methods).
- * Furthermore, it can manage a bean factory hierarchy, through implementing the
- * HierarchicalBeanFactory interface (superinterface of ConfigurableBeanFactory).
+ * {@link org.springframework.beans.factory.FactoryBean} handling, aliases,
+ * bean definition merging for child bean definitions, and bean destruction
+ * ({@link org.springframework.beans.factory.DisposableBean} interface, custom
+ * destroy methods). Furthermore, it can manage a bean factory hierarchy
+ * (delegating to the parent in case of an unknown bean), through implementing
+ * the {@link org.springframework.beans.factory.HierarchicalBeanFactory} interface.
  *
  * <p>The main template methods to be implemented by subclasses are
- * <code>getBeanDefinition</code> and <code>createBean</code>, retrieving a
- * bean definition for a given bean name or creating a bean instance for a
- * given bean definition. Default implementations for those can be found in
- * DefaultListableBeanFactory or AbstractAutowireCapableBeanFactory, respectively.
+ * {@link #getBeanDefinition} and {@link #createBean}, retrieving a bean definition
+ * for a given bean name and creating a bean instance for a given bean definition,
+ * respectively. Default implementations of those operations can be found in
+ * {@link DefaultListableBeanFactory} and {@link AbstractAutowireCapableBeanFactory}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
  * @see #getBeanDefinition
  * @see #createBean
- * @see org.springframework.beans.factory.HierarchicalBeanFactory
- * @see org.springframework.beans.factory.DisposableBean
- * @see RootBeanDefinition
- * @see ChildBeanDefinition
  * @see AbstractAutowireCapableBeanFactory#createBean
  * @see DefaultListableBeanFactory#getBeanDefinition
  */
@@ -150,23 +149,25 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Return the bean with the given name,
-	 * checking the parent bean factory if not found.
+	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * @param name the name of the bean to retrieve
 	 * @param args arguments to use if creating a prototype using explicit arguments to a
 	 * static factory method. It is invalid to use a non-null args value in any other case.
+	 * @return an instance of the bean
+	 * @throws BeansException if the bean could not be created
 	 */
 	public Object getBean(String name, Object[] args) throws BeansException {
 		return getBean(name, null, args);
 	}
 
 	/**
-	 * Return the bean with the given name,
-	 * checking the parent bean factory if not found.
+	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * @param name the name of the bean to retrieve
 	 * @param requiredType the required type of the bean to retrieve
 	 * @param args arguments to use if creating a prototype using explicit arguments to a
 	 * static factory method. It is invalid to use a non-null args value in any other case.
+	 * @return an instance of the bean
+	 * @throws BeansException if the bean could not be created
 	 */
 	public Object getBean(String name, Class requiredType, Object[] args) throws BeansException {
 		String beanName = transformedBeanName(name);
@@ -429,7 +430,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * and PropertyEditors as values.
 	 */
 	public Map getCustomEditors() {
-		return customEditors;
+		return this.customEditors;
 	}
 
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
@@ -449,7 +450,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * to beans created with this factory.
 	 */
 	public List getBeanPostProcessors() {
-		return beanPostProcessors;
+		return this.beanPostProcessors;
 	}
 
 	/**
@@ -701,8 +702,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Return a RootBeanDefinition for the given bean name, by merging with the
-	 * parent if the given original bean definition is a child bean definition.
+	 * Return a RootBeanDefinition for the given top-level bean, by merging with
+	 * the parent if the given bean's definition is a child bean definition.
 	 * @param beanName the name of the bean definition
 	 * @param bd the original bean definition (Root/ChildBeanDefinition)
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
@@ -1127,8 +1128,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * just amounts to a local hash lookup: The operation is therefore part of the
 	 * public interface there. The same implementation can serve for both this
 	 * template method and the public interface method in that case.
-	 * @param beanName name of the bean to find a definition for
-	 * @return the BeanDefinition for this prototype name. Must never return null.
+	 * @param beanName the name of the bean to find a definition for
+	 * @return the BeanDefinition for this prototype name (never <code>null</code>)
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if the bean definition cannot be resolved
 	 * @throws BeansException in case of errors
@@ -1145,10 +1146,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * <p>All the other methods in this class invoke this method, although
 	 * beans may be cached after being instantiated by this method. All bean
 	 * instantiation within this class is performed by this method.
-	 * @param beanName name of the bean
+	 * @param beanName the name of the bean
 	 * @param mergedBeanDefinition the bean definition for the bean
-	 * @param args arguments to use if creating a prototype using explicit arguments
-	 * to a static factory method. This parameter must be <code>null</code> except in this case.
+	 * @param args arguments to use if creating a prototype using explicit arguments to a
+	 * static factory method. This parameter must be <code>null</code> except in this case.
 	 * @return a new instance of the bean
 	 * @throws BeanCreationException if the bean could not be created
 	 */
