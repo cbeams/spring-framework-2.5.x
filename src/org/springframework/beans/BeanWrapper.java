@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ import java.beans.PropertyDescriptor;
  * {@link org.springframework.beans.factory.BeanFactory} or a
  * {@link org.springframework.validation.DataBinder}.
  *
- * <p>Provides operations to analyze and manipulate standard Java Beans:
+ * <p>Provides operations to analyze and manipulate standard JavaBeans:
  * the ability to get and set property values (individually or in bulk),
  * get property descriptors, and query the readability/writability of properties.
  *
  * <p>This interface supports <b>nested properties</b> enabling the setting
  * of properties on subproperties to an unlimited depth.
  * A <code>BeanWrapper</code> instance can be used repeatedly, with its
- * {@link #setWrappedInstance(Object) target object} (the wrapped Java Bean
+ * {@link #setWrappedInstance(Object) target object} (the wrapped JavaBean
  * instance) changing as required.
  *
  * <p>A BeanWrapper's default for the "extractOldValueForEditor" setting
@@ -55,34 +55,38 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor, TypeConverter
 	/**
 	 * Change the wrapped object. Implementations are required
 	 * to allow the type of the wrapped object to change.
-	 * @param obj wrapped object that we are manipulating
+	 * @param obj the wrapped object that we are manipulating
 	 */
 	void setWrappedInstance(Object obj);
 
 	/**
-	 * Return the bean wrapped by this object (cannot be <code>null</code>).
-	 * @return the bean wrapped by this object
+	 * Return the bean instance wrapped by this object, if any.
+	 * @return the bean instance, or <code>null</code> if none set
 	 */
 	Object getWrappedInstance();
 
 	/**
-	 * Convenience method to return the class of the wrapped object.
-	 * @return the class of the wrapped object
+	 * Return the class of the wrapped object.
+	 * @return the class of the wrapped bean instance,
+	 * or <code>null</code> if no wrapped object has been set
 	 */
 	Class getWrappedClass();
 
 	/**
-	 * Get the PropertyDescriptors identified on this object
-	 * (standard JavaBeans introspection).
-	 * @return the PropertyDescriptors identified on this object
+	 * Obtain the PropertyDescriptors for the wrapped object
+	 * (as determined by standard JavaBeans introspection).
+	 * @return the PropertyDescriptors for the wrapped object
+	 * @throws BeansException if case of introspection failure
 	 */
 	PropertyDescriptor[] getPropertyDescriptors() throws BeansException;
 
 	/**
-	 * Get the property descriptor for a particular property.
-	 * @param propertyName property to check status for
+	 * Get the property descriptor for a particular property
+	 * of the wrapped object.
+	 * @param propertyName the property to obtain the descriptor for
 	 * @return the property descriptor for the particular property
 	 * @throws InvalidPropertyException if there is no such property
+	 * @throws BeansException if case of introspection failure
 	 */
 	PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException;
 
