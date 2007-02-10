@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.core;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.util.Assert;
 
@@ -26,13 +28,13 @@ import org.springframework.util.Assert;
  * that is, a Method or Constructor plus a parameter index.
  * Useful as a specification object to pass along.
  *
- * <p>Used by GenericCollectionTypeResolver, BeanWrapperImpl and AbstractBeanFactory.
+ * <p>Used by {@link GenericCollectionTypeResolver},
+ * {@link org.springframework.beans.BeanWrapperImpl} and
+ * {@link org.springframework.beans.factory.support.AbstractBeanFactory}.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see GenericCollectionTypeResolver
- * @see org.springframework.beans.BeanWrapperImpl
- * @see org.springframework.beans.factory.support.AbstractBeanFactory
  */
 public class MethodParameter {
 
@@ -43,6 +45,9 @@ public class MethodParameter {
 	private final int parameterIndex;
 
 	private int nestingLevel;
+
+	/** Map from Integer level to Integer type index */
+	private final Map typeIndexesPerLevel = new HashMap(4);
 
 
 	/**
@@ -126,14 +131,6 @@ public class MethodParameter {
 		return this.parameterIndex;
 	}
 
-	/**
-	 * Return the nesting level of the target type
-	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
-	 * nested List, whereas 2 would indicate the element of the nested List).
-	 */
-	public int getNestingLevel() {
-		return this.nestingLevel;
-	}
 
 	/**
 	 * Increase this parameter's nesting level.
@@ -148,7 +145,47 @@ public class MethodParameter {
 	 * @see #getNestingLevel()
 	 */
 	public void decreaseNestingLevel() {
+		this.typeIndexesPerLevel.remove(new Integer(this.nestingLevel));
 		this.nestingLevel--;
+	}
+
+	/**
+	 * Return the nesting level of the target type
+	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
+	 * nested List, whereas 2 would indicate the element of the nested List).
+	 */
+	public int getNestingLevel() {
+		return this.nestingLevel;
+	}
+
+	/**
+	 * Set the type index for the current nesting level.
+	 * @param typeIndex the corresponding type index
+	 * (or <code>null</code> for the default type index)
+	 * @see #getNestingLevel()
+	 */
+	public void setTypeIndexForCurrentLevel(int typeIndex) {
+		this.typeIndexesPerLevel.put(new Integer(this.nestingLevel), new Integer(typeIndex));
+	}
+
+	/**
+	 * Return the type index for the current nesting level.
+	 * @return the corresponding type index, or <code>null</code>
+	 * if none specified (indicating the default type index)
+	 * @see #getNestingLevel()
+	 */
+	public Integer getTypeIndexForCurrentLevel() {
+		return getTypeIndexForLevel(this.nestingLevel);
+	}
+
+	/**
+	 * Return the type index for the specified nesting level.
+	 * @param nestingLevel the nesting level to check
+	 * @return the corresponding type index, or <code>null</code>
+	 * if none specified (indicating the default type index)
+	 */
+	public Integer getTypeIndexForLevel(int nestingLevel) {
+		return (Integer) this.typeIndexesPerLevel.get(new Integer(nestingLevel));
 	}
 
 

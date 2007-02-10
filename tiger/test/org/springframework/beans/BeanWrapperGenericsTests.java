@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,6 +303,23 @@ public class BeanWrapperGenericsTests extends TestCase {
 		assertEquals(5, ((Integer) obj).intValue());
 	}
 
+	public void testComplexMap() {
+		TestBean tb = new TestBean();
+		Map inputMap = new HashMap();
+		List inputKey = new LinkedList();
+		inputKey.add("key");
+		List inputValue = new LinkedList();
+		inputValue.add(tb);
+		inputMap.put(inputKey, inputValue);
+
+		ComplexMapHolder holder = new ComplexMapHolder();
+		BeanWrapper bw = new BeanWrapperImpl(holder);
+		bw.setPropertyValue("map", inputMap);
+
+		assertEquals("key", holder.getMap().keySet().iterator().next().get(0));
+		assertEquals(tb, holder.getMap().values().iterator().next().get(0));
+	}
+
 
 	private static class NestedGenericCollectionBean {
 
@@ -334,6 +351,20 @@ public class BeanWrapperGenericsTests extends TestCase {
 
 		public void setListOfMapOfInteger(List<Map<String, Integer>> listOfMapOfInteger) {
 			this.listOfMapOfInteger = listOfMapOfInteger;
+		}
+	}
+
+
+	private class ComplexMapHolder {
+
+		private Map<List<String>, List<TestBean>> map;
+
+		public void setMap(Map<List<String>, List<TestBean>> map) {
+			this.map = map;
+		}
+
+		public Map<List<String>, List<TestBean>> getMap() {
+			return map;
 		}
 	}
 

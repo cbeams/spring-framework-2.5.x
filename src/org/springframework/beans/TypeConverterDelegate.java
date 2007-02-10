@@ -378,8 +378,12 @@ class TypeConverterDelegate {
 			String keyedPropertyName = buildKeyedPropertyName(propertyName, key);
 			if (methodParam != null) {
 				methodParam.increaseNestingLevel();
+				methodParam.setTypeIndexForCurrentLevel(0);
 			}
 			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType, null, methodParam);
+			if (methodParam != null) {
+				methodParam.setTypeIndexForCurrentLevel(1);
+			}
 			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType, null, methodParam);
 			if (methodParam != null) {
 				methodParam.decreaseNestingLevel();
