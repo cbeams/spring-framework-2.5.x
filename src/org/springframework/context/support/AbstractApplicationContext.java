@@ -437,21 +437,36 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Must be called before any instantiation of application beans.
 	 */
 	private void registerBeanPostProcessors() throws BeansException {
+		String[] processorNames = getBeanNamesForType(BeanPostProcessor.class, true, false);
+
 		// Register BeanPostProcessorChecker that logs an info message when
 		// a bean is created during BeanPostProcessor instantiation, i.e. when
 		// a bean is not eligible for getting processed by all BeanPostProcessors.
-		final int beanProcessorTargetCount = getBeanFactory().getBeanPostProcessorCount() + 1 +
-				getBeanNamesForType(BeanPostProcessor.class, true, false).length;
+		int beanProcessorTargetCount = getBeanFactory().getBeanPostProcessorCount() + 1 + processorNames.length;
 		getBeanFactory().addBeanPostProcessor(new BeanPostProcessorChecker(beanProcessorTargetCount));
 
-		// Actually fetch and register the BeanPostProcessor beans.
-		// Do not initialize FactoryBeans here: We need to leave all regular beans
-		// uninitialized to let the bean post-processors apply to them!
-		Map beanProcessorMap = getBeansOfType(BeanPostProcessor.class, true, false);
-		List beanProcessors = new ArrayList(beanProcessorMap.values());
-		Collections.sort(beanProcessors, new OrderComparator());
-		for (Iterator it = beanProcessors.iterator(); it.hasNext();) {
+		// Separate between BeanPostProcessor that implement the Ordered
+		// interface and those that do not.
+		List orderedProcessors = new ArrayList();
+		List nonOrderedProcessorNames = new ArrayList();
+		for (int i = 0; i < processorNames.length; i++) {
+			if (isTypeMatch(processorNames[i], Ordered.class)) {
+				orderedProcessors.add(getBean(processorNames[i]));
+			}
+			else {
+				nonOrderedProcessorNames.add(processorNames[i]);
+			}
+		}
+
+		// First, register the BeanPostProcessors that implement Ordered.
+		Collections.sort(orderedProcessors, new OrderComparator());
+		for (Iterator it = orderedProcessors.iterator(); it.hasNext();) {
 			getBeanFactory().addBeanPostProcessor((BeanPostProcessor) it.next());
+		}
+		// Second, register all other BeanPostProcessors, one by one.
+		for (Iterator it = nonOrderedProcessorNames.iterator(); it.hasNext();) {
+			String processorName = (String) it.next();
+			getBeanFactory().addBeanPostProcessor((BeanPostProcessor) getBean(processorName));
 		}
 	}
 
