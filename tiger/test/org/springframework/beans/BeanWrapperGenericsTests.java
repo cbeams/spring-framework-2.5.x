@@ -303,21 +303,84 @@ public class BeanWrapperGenericsTests extends TestCase {
 		assertEquals(5, ((Integer) obj).intValue());
 	}
 
-	public void testComplexMap() {
-		TestBean tb = new TestBean();
+	public void testComplexGenericMap() {
 		Map inputMap = new HashMap();
 		List inputKey = new LinkedList();
-		inputKey.add("key");
+		inputKey.add("1");
 		List inputValue = new LinkedList();
-		inputValue.add(tb);
+		inputValue.add("10");
 		inputMap.put(inputKey, inputValue);
 
 		ComplexMapHolder holder = new ComplexMapHolder();
 		BeanWrapper bw = new BeanWrapperImpl(holder);
-		bw.setPropertyValue("map", inputMap);
+		bw.setPropertyValue("genericMap", inputMap);
 
-		assertEquals("key", holder.getMap().keySet().iterator().next().get(0));
-		assertEquals(tb, holder.getMap().values().iterator().next().get(0));
+		assertEquals(new Integer(1), holder.getGenericMap().keySet().iterator().next().get(0));
+		assertEquals(new Long(10), holder.getGenericMap().values().iterator().next().get(0));
+	}
+
+	public void testComplexGenericMapWithCollectionConversion() {
+		Map inputMap = new HashMap();
+		Set inputKey = new HashSet();
+		inputKey.add("1");
+		Set inputValue = new HashSet();
+		inputValue.add("10");
+			inputMap.put(inputKey, inputValue);
+
+		ComplexMapHolder holder = new ComplexMapHolder();
+		BeanWrapper bw = new BeanWrapperImpl(holder);
+		bw.setPropertyValue("genericMap", inputMap);
+
+		assertEquals(new Integer(1), holder.getGenericMap().keySet().iterator().next().get(0));
+		assertEquals(new Long(10), holder.getGenericMap().values().iterator().next().get(0));
+	}
+
+	public void testComplexGenericIndexedMapEntry() {
+		List inputValue = new LinkedList();
+		inputValue.add("10");
+
+		ComplexMapHolder holder = new ComplexMapHolder();
+		BeanWrapper bw = new BeanWrapperImpl(holder);
+		bw.setPropertyValue("genericIndexedMap[1]", inputValue);
+
+		assertEquals(new Integer(1), holder.getGenericIndexedMap().keySet().iterator().next());
+		assertEquals(new Long(10), holder.getGenericIndexedMap().values().iterator().next().get(0));
+	}
+
+	public void testComplexGenericIndexedMapEntryWithCollectionConversion() {
+		Set inputValue = new HashSet();
+		inputValue.add("10");
+
+		ComplexMapHolder holder = new ComplexMapHolder();
+		BeanWrapper bw = new BeanWrapperImpl(holder);
+		bw.setPropertyValue("genericIndexedMap[1]", inputValue);
+
+		assertEquals(new Integer(1), holder.getGenericIndexedMap().keySet().iterator().next());
+		assertEquals(new Long(10), holder.getGenericIndexedMap().values().iterator().next().get(0));
+	}
+
+	public void testComplexDerivedIndexedMapEntry() {
+		List inputValue = new LinkedList();
+		inputValue.add("10");
+
+		ComplexMapHolder holder = new ComplexMapHolder();
+		BeanWrapper bw = new BeanWrapperImpl(holder);
+		bw.setPropertyValue("derivedIndexedMap[1]", inputValue);
+
+		assertEquals(new Integer(1), holder.getDerivedIndexedMap().keySet().iterator().next());
+		assertEquals(new Long(10), holder.getDerivedIndexedMap().values().iterator().next().get(0));
+	}
+
+	public void testComplexDerivedIndexedMapEntryWithCollectionConversion() {
+		Set inputValue = new HashSet();
+		inputValue.add("10");
+
+		ComplexMapHolder holder = new ComplexMapHolder();
+		BeanWrapper bw = new BeanWrapperImpl(holder);
+		bw.setPropertyValue("derivedIndexedMap[1]", inputValue);
+
+		assertEquals(new Integer(1), holder.getDerivedIndexedMap().keySet().iterator().next());
+		assertEquals(new Long(10), holder.getDerivedIndexedMap().values().iterator().next().get(0));
 	}
 
 
@@ -355,17 +418,42 @@ public class BeanWrapperGenericsTests extends TestCase {
 	}
 
 
-	private class ComplexMapHolder {
+	private static class ComplexMapHolder {
 
-		private Map<List<String>, List<TestBean>> map;
+		private Map<List<Integer>, List<Long>> genericMap;
 
-		public void setMap(Map<List<String>, List<TestBean>> map) {
-			this.map = map;
+		private Map<Integer, List<Long>> genericIndexedMap = new HashMap<Integer, List<Long>>();
+
+		private DerivedMap derivedIndexedMap = new DerivedMap();
+
+		public void setGenericMap(Map<List<Integer>, List<Long>> genericMap) {
+			this.genericMap = genericMap;
 		}
 
-		public Map<List<String>, List<TestBean>> getMap() {
-			return map;
+		public Map<List<Integer>, List<Long>> getGenericMap() {
+			return genericMap;
 		}
+
+		public void setGenericIndexedMap(Map<Integer, List<Long>> genericIndexedMap) {
+			this.genericIndexedMap = genericIndexedMap;
+		}
+
+		public Map<Integer, List<Long>> getGenericIndexedMap() {
+			return genericIndexedMap;
+		}
+
+		public void setDerivedIndexedMap(DerivedMap derivedIndexedMap) {
+			this.derivedIndexedMap = derivedIndexedMap;
+		}
+
+		public DerivedMap getDerivedIndexedMap() {
+			return derivedIndexedMap;
+		}
+	}
+
+
+	private static class DerivedMap extends HashMap<Integer, List<Long>> {
+
 	}
 
 }

@@ -51,7 +51,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @return the generic type, or <code>null</code> if none
 	 */
 	public static Class getCollectionType(Class collectionClass) {
-		return extractTypeFromClass(null, collectionClass, Collection.class, 0);
+		return extractTypeFromClass(collectionClass, Collection.class, 0);
 	}
 
 	/**
@@ -61,7 +61,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @return the generic type, or <code>null</code> if none
 	 */
 	public static Class getMapKeyType(Class mapClass) {
-		return extractTypeFromClass(null, mapClass, Map.class, 0);
+		return extractTypeFromClass(mapClass, Map.class, 0);
 	}
 
 	/**
@@ -71,7 +71,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @return the generic type, or <code>null</code> if none
 	 */
 	public static Class getMapValueType(Class mapClass) {
-		return extractTypeFromClass(null, mapClass, Map.class, 1);
+		return extractTypeFromClass(mapClass, Map.class, 1);
 	}
 
 	/**
@@ -177,14 +177,25 @@ public abstract class GenericCollectionTypeResolver {
 	 */
 	private static Class getGenericParameterType(MethodParameter methodParam, Class source, int typeIndex) {
 		Assert.notNull(methodParam, "MethodParameter must not be null");
-		int idx = methodParam.getParameterIndex();
+		return extractType(methodParam, getTargetType(methodParam), source, typeIndex, methodParam.getNestingLevel());
+	}
+
+	/**
+	 * Determine the target type for the given parameter specification.
+	 * @param methodParam the method parameter specification
+	 * @return the corresponding generic parameter or return type
+	 */
+	private static Type getTargetType(MethodParameter methodParam) {
 		if (methodParam.getConstructor() != null) {
-			return extractType(methodParam, methodParam.getConstructor().getGenericParameterTypes()[idx],
-					source, typeIndex, methodParam.getNestingLevel());
+			return methodParam.getConstructor().getGenericParameterTypes()[methodParam.getParameterIndex()];
 		}
 		else {
-			return extractType(methodParam, methodParam.getMethod().getGenericParameterTypes()[idx],
-					source, typeIndex, methodParam.getNestingLevel());
+			if (methodParam.getParameterIndex() >= 0) {
+				return methodParam.getMethod().getGenericParameterTypes()[methodParam.getParameterIndex()];
+			}
+			else {
+				return methodParam.getMethod().getGenericReturnType();
+			}
 		}
 	}
 
@@ -202,7 +213,6 @@ public abstract class GenericCollectionTypeResolver {
 		return extractType(null, method.getGenericReturnType(), source, typeIndex, nestingLevel);
 	}
 
-
 	/**
 	 * Extract the generic type from the given Type object.
 	 * @param methodParam the method parameter specification
@@ -212,19 +222,17 @@ public abstract class GenericCollectionTypeResolver {
 	 * @param nestingLevel the nesting level of the target type
 	 * @return the generic type as Class, or <code>null</code> if none
 	 */
-	private static Class extractType(MethodParameter methodParam, Type type, Class source, int typeIndex, int nestingLevel) {
+	private static Class extractType(
+			MethodParameter methodParam, Type type, Class source, int typeIndex, int nestingLevel) {
+
 		Assert.isTrue(typeIndex >= 0, "Type index must be >=1");
 		Assert.isTrue(nestingLevel >= 0, "Nesting level must be >=1");
 		if (type instanceof ParameterizedType) {
-			return extractTypeFromParameterizedType(methodParam, (ParameterizedType) type, source, typeIndex, nestingLevel);
+			return extractTypeFromParameterizedType(
+					methodParam, (ParameterizedType) type, source, typeIndex, nestingLevel);
 		}
 		if (type instanceof Class) {
-			if (nestingLevel > 1) {
-				return null;
-			}
-			else {
-				return extractTypeFromClass(methodParam, (Class) type, source, typeIndex);
-			}
+			return extractTypeFromClass(methodParam, (Class) type, source, typeIndex, nestingLevel);
 		}
 		return null;
 	}
@@ -247,7 +255,8 @@ public abstract class GenericCollectionTypeResolver {
 		Class rawType = (Class) ptype.getRawType();
 		Type[] paramTypes = ptype.getActualTypeArguments();
 		if (nestingLevel > 1) {
-			Integer currentTypeIndex = (methodParam != null ? methodParam.getTypeIndexForLevel(nestingLevel) : null);
+			Integer currentTypeIndex =
+					(methodParam != null ? methodParam.getTypeIndexForLevel(nestingLevel) : null);
 			// Default is last parameter type: Collection element or Map value.
 			int indexToUse = (currentTypeIndex != null ? currentTypeIndex.intValue() : paramTypes.length - 1);
 			Type paramType = paramTypes[indexToUse];
@@ -256,7 +265,8 @@ public abstract class GenericCollectionTypeResolver {
 		if (source != null && !source.isAssignableFrom(rawType)) {
 			return null;
 		}
-		Class fromSuperclassOrInterface = extractTypeFromClass(methodParam, rawType, source, typeIndex);
+		Class fromSuperclassOrInterface =
+				extractTypeFromClass(methodParam, rawType, source, typeIndex, nestingLevel);
 		if (fromSuperclassOrInterface != null) {
 			return fromSuperclassOrInterface;
 		}
@@ -289,15 +299,30 @@ public abstract class GenericCollectionTypeResolver {
 
 	/**
 	 * Extract the generic type from the given Class object.
-	 * @param methodParam the method parameter specification
 	 * @param clazz the Class to check
+	 * @param source the expected raw source type (can be <code>null</code>)
 	 * @param typeIndex the index of the actual type argument
 	 * @return the generic type as Class, or <code>null</code> if none
 	 */
-	private static Class extractTypeFromClass(MethodParameter methodParam, Class clazz, Class source, int typeIndex) {
+	private static Class extractTypeFromClass(Class clazz, Class source, int typeIndex) {
+		return extractTypeFromClass(null, clazz, source, typeIndex, 1);
+	}
+
+	/**
+	 * Extract the generic type from the given Class object.
+	 * @param methodParam the method parameter specification
+	 * @param clazz the Class to check
+	 * @param source the expected raw source type (can be <code>null</code>)
+	 * @param typeIndex the index of the actual type argument
+	 * @param nestingLevel the nesting level of the target type
+	 * @return the generic type as Class, or <code>null</code> if none
+	 */
+	private static Class extractTypeFromClass(
+			MethodParameter methodParam, Class clazz, Class source, int typeIndex, int nestingLevel) {
+
 		Assert.notNull(clazz, "Class must not be null");
-		if (clazz.getSuperclass() != null && source.isAssignableFrom(clazz.getSuperclass())) {
-			return extractType(methodParam, clazz.getGenericSuperclass(), source, typeIndex, 1);
+		if (clazz.getSuperclass() != null && isIntrospectionCandidate(clazz.getSuperclass())) {
+			return extractType(methodParam, clazz.getGenericSuperclass(), source, typeIndex, nestingLevel);
 		}
 		Type[] ifcs = clazz.getGenericInterfaces();
 		if (ifcs != null) {
@@ -307,12 +332,22 @@ public abstract class GenericCollectionTypeResolver {
 				if (ifc instanceof ParameterizedType) {
 					rawType = ((ParameterizedType) ifc).getRawType();
 				}
-				if (rawType instanceof Class && source.isAssignableFrom((Class) rawType)) {
-					return extractType(methodParam, ifc, source, typeIndex, 1);
+				if (rawType instanceof Class && isIntrospectionCandidate((Class) rawType)) {
+					return extractType(methodParam, ifc, source, typeIndex, nestingLevel);
 				}
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Determine whether the given class is a potential candidate
+	 * that defines generic collection or map types.
+	 * @param clazz the class to check
+	 * @return whethe the given class is assignable to Collection or Map
+	 */
+	private static boolean isIntrospectionCandidate(Class clazz) {
+		return (Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz));
 	}
 
 }

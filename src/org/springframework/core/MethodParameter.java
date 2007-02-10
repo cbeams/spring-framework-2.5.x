@@ -24,13 +24,17 @@ import java.util.Map;
 import org.springframework.util.Assert;
 
 /**
- * Helper class that encapsulates the specification of a method parameter,
- * that is, a Method or Constructor plus a parameter index.
- * Useful as a specification object to pass along.
+ * Helper class that encapsulates the specification of a method parameter, i.e.
+ * a Method or Constructor plus a parameter index and a nested type index for
+ * a declared generic type. Useful as a specification object to pass along.
  *
  * <p>Used by {@link GenericCollectionTypeResolver},
  * {@link org.springframework.beans.BeanWrapperImpl} and
  * {@link org.springframework.beans.factory.support.AbstractBeanFactory}.
+ *
+ * <p>Note that this class does not depend on JDK 1.5 API artifacts,
+ * to remain compatible with JDK 1.3/1.4. Concrete generic type resolution
+ * via JDK 1.5 API happens in {@link GenericCollectionTypeResolver} only.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -63,13 +67,15 @@ public class MethodParameter {
 	 * Create a new MethodParameter for the given method.
 	 * @param method the Method to specify a parameter for
 	 * @param parameterIndex the index of the parameter
+	 * (-1 for the method return type; 0 for the first method parameter,
+	 * 1 for the second method parameter, etc)
 	 * @param nestingLevel the nesting level of the target type
 	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
 	 * nested List, whereas 2 would indicate the element of the nested List)
 	 */
 	public MethodParameter(Method method, int parameterIndex, int nestingLevel) {
 		Assert.notNull(method, "Method must not be null");
-		Assert.isTrue(parameterIndex >= 0, "Parameter index must not be negative");
+		Assert.isTrue(parameterIndex >= -1, "Parameter index must not be -1 or higher");
 		Assert.isTrue(parameterIndex < method.getParameterTypes().length,
 				"Parameter index must not exceed " + (method.getParameterTypes().length - 1));
 		this.method = method;
@@ -195,6 +201,7 @@ public class MethodParameter {
 	 * Method or Constructor reference is treated in a generic fashion.
 	 * @param methodOrConstructor the Method or Constructor to specify a parameter for
 	 * @param parameterIndex the index of the parameter
+	 * @return the corresponding MethodParameter instance
 	 */
 	public static MethodParameter forMethodOrConstructor(Object methodOrConstructor, int parameterIndex) {
 		if (methodOrConstructor instanceof Method) {

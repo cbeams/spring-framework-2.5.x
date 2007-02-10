@@ -150,6 +150,7 @@ class TypeConverterDelegate {
 	 * @param newValue proposed change value
 	 * @param requiredType the type we must convert to
 	 * (or <code>null</code> if not known, for example in case of a collection element)
+	 * @param descriptor the JavaBeans descriptor for the property
 	 * @param methodParam the method parameter that is the target of the conversion
 	 * (may be <code>null</code>)
 	 * @return the new value, possibly the result of type conversion
@@ -320,8 +321,7 @@ class TypeConverterDelegate {
 		Collection convertedCopy = null;
 		Iterator it = null;
 		try {
-			convertedCopy =
-					CollectionFactory.createApproximateCollection(original, original.size());
+			convertedCopy = CollectionFactory.createApproximateCollection(original, original.size());
 			it = original.iterator();
 		}
 		catch (Throwable ex) {

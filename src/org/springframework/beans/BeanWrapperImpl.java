@@ -725,7 +725,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					// Pass full property name and old value in here, since we want full
 					// conversion ability for map values.
 					convertedMapValue = this.typeConverterDelegate.convertIfNecessary(
-							propertyName, oldValue, newValue, mapValueType);
+							propertyName, oldValue, newValue, mapValueType, null,
+							new MethodParameter(pd.getReadMethod(), -1, tokens.keys.length + 1));
 				}
 				catch (IllegalArgumentException ex) {
 					PropertyChangeEvent pce =
