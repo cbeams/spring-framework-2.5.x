@@ -36,6 +36,7 @@ import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -197,18 +198,18 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		setIntrospectionClass(object.getClass());
 	}
 
-	public Object getWrappedInstance() {
+	public final Object getWrappedInstance() {
 		return this.object;
 	}
 
-	public Class getWrappedClass() {
-		return this.object.getClass();
+	public final Class getWrappedClass() {
+		return (this.object != null ? this.object.getClass() : null);
 	}
 
 	/**
 	 * Return the nested path of the object wrapped by this BeanWrapper.
 	 */
-	public String getNestedPath() {
+	public final String getNestedPath() {
 		return this.nestedPath;
 	}
 
@@ -216,7 +217,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * Return the root object at the top of the path of this BeanWrapper.
 	 * @see #getNestedPath
 	 */
-	public Object getRootInstance() {
+	public final Object getRootInstance() {
 		return this.rootObject;
 	}
 
@@ -224,7 +225,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * Return the class of the root object at the top of the path of this BeanWrapper.
 	 * @see #getNestedPath
 	 */
-	public Class getRootClass() {
+	public final Class getRootClass() {
 		return (this.rootObject != null ? this.rootObject.getClass() : null);
 	}
 
@@ -815,8 +816,13 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer("BeanWrapperImpl: wrapping class [");
-		sb.append(getWrappedClass().getName()).append("]");
+		StringBuffer sb = new StringBuffer(getClass().getName());
+		if (this.object != null) {
+			sb.append(": wrapping object [").append(ObjectUtils.identityToString(this.object)).append("]");
+		}
+		else {
+			sb.append(": no wrapped object set");
+		}
 		return sb.toString();
 	}
 
