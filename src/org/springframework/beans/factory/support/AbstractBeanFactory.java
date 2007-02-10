@@ -168,23 +168,25 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	/**
-	 * Return the bean with the given name,
-	 * checking the parent bean factory if not found.
+	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * @param name the name of the bean to retrieve
 	 * @param args arguments to use if creating a prototype using explicit arguments to a
 	 * static factory method. It is invalid to use a non-null args value in any other case.
+	 * @return an instance of the bean
+	 * @throws BeansException if the bean could not be created
 	 */
 	public Object getBean(String name, Object[] args) throws BeansException {
 		return getBean(name, null, args);
 	}
 
 	/**
-	 * Return the bean with the given name,
-	 * checking the parent bean factory if not found.
+	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * @param name the name of the bean to retrieve
 	 * @param requiredType the required type of the bean to retrieve
 	 * @param args arguments to use if creating a prototype using explicit arguments to a
 	 * static factory method. It is invalid to use a non-null args value in any other case.
+	 * @return an instance of the bean
+	 * @throws BeansException if the bean could not be created
 	 */
 	public Object getBean(String name, Class requiredType, final Object[] args) throws BeansException {
 		final String beanName = transformedBeanName(name);
