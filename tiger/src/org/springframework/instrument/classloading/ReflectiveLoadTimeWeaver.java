@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,37 +21,38 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * LoadTimeWeaver that uses reflection to delegate to an underlying ClassLoader,
- * which needs to support the following weaving methods (as defined in the
- * LoadTimeWeaver interface):
+ * LoadTimeWeaver which uses reflection to delegate to an underlying ClassLoader
+ * with well-known transformation hooks. The underlying ClassLoader is expected to
+ * support the following weaving methods (as defined in the {@link LoadTimeWeaver}
+ * interface):
  * <ul>
  * <li><code>public void addTransformer(java.lang.instrument.ClassFileTransformer)</code>:
- * to register the given ClassFileTransformer for this ClassLoader
- * <li><code>public ClassLoader getThrowawayClassLoader()</code>: to obtain
- * a throwaway class loader for this ClassLoader (optional;
+ * for registering the given ClassFileTransformer on this ClassLoader
+ * <li><code>public ClassLoader getThrowawayClassLoader()</code>:
+ * for obtaining a throwaway class loader for this ClassLoader (optional;
  * ReflectiveLoadTimeWeaver will fall back to a SimpleThrowawayClassLoader if
  * that method isn't available)
  * </ul>
- * 
- * <p>
- * Please note that the above methods <i>must</i> reside in a class that is
- * publicly accessible.
- * 
- * <p>
- * The reflective nature of this LoadTimeWeaver is particularly useful when the
+ *
+ * <p>Please note that the above methods <i>must</i> reside in a class that is
+ * publicly accessible, although the class itself does not have to be visible
+ * to the application's class loader.
+ *
+ * <p>The reflective nature of this LoadTimeWeaver is particularly useful when the
  * underlying class loader implementation is loaded in a different class loader
  * (such as the application server's class loader which is not visible to the
- * web application).
- * 
- * <p>
- * This is the LoadTimeWeaver to use in combination with Spring's
+ * web application). There is no direct API dependency between this LoadTimeWeaver
+ * adapter and the underlying ClassLoader, just a 'loose' method contract.
+ *
+ * <p>This is the LoadTimeWeaver to use in combination with Spring's
  * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}.
- * 
+ *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 2.0
@@ -66,17 +67,15 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 
 	private static final String GET_THROWAWAY_CLASS_LOADER_METHOD_NAME = "getThrowawayClassLoader";
 
-	private static final Log log = LogFactory.getLog(ReflectiveLoadTimeWeaver.class);
-	
-	/**
-	 * Keep a loose reference - we cannot rely on seeing the implementation
-	 * class
-	 */
+	private static final Log logger = LogFactory.getLog(ReflectiveLoadTimeWeaver.class);
+
+
 	private final ClassLoader classLoader;
 
 	private final Method addTransformerMethod;
 
 	private final Method getThrowawayClassLoaderMethod;
+
 
 	/**
 	 * Create a new ReflectiveLoadTimeWeaver for the current context class
@@ -103,19 +102,25 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 				new Class [] {ClassFileTransformer.class});
 		if (this.addTransformerMethod == null) {
 			throw new IllegalStateException(
-					"ClassLoader [" + classLoader + "|" + classLoader.getClass() + "] does not have an addTransformer(ClassFileTransformer) method");
+					"ClassLoader [" + classLoader.getClass().getName() + "] does NOT provide an " +
+					"'addTransformer(ClassFileTransformer)' method.");
 		}
 		this.getThrowawayClassLoaderMethod = ClassUtils.getMethodIfAvailable(
 				this.classLoader.getClass(), GET_THROWAWAY_CLASS_LOADER_METHOD_NAME,
 				new Class[0]);
-		if (this.getThrowawayClassLoaderMethod == null)
-				log.warn("the current classloader " + classLoader + " does NOT have a getThrowawayClassLoader method; SimpleThrowawayClassLoader will be used instead"); 
 		// getThrowawayClassLoader method is optional
+		if (this.getThrowawayClassLoaderMethod == null) {
+			if (logger.isInfoEnabled()) {
+				logger.info("The ClassLoader [" + classLoader.getClass().getName() + "] does NOT provide a " +
+						"'getThrowawayClassLoader()' method; SimpleThrowawayClassLoader will be used instead.");
+			}
+		}
 	}
+
 
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
-		ReflectionUtils.invokeMethod(this.addTransformerMethod, this.classLoader, new Object[] { transformer });
+		ReflectionUtils.invokeMethod(this.addTransformerMethod, this.classLoader, new Object[] {transformer});
 	}
 
 	public ClassLoader getInstrumentableClassLoader() {

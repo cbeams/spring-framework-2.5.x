@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * LoadTimeWeaver that builds and exposes a SimpleInstrumentableClassLoader
- * for the current context class loader.
- *
- * <p>Mainly intended for use in simple environments, such as an IDE.
+ * LoadTimeWeaver that builds and exposes a {@link SimpleInstrumentableClassLoader}.
+ * Mainly intended for testing environments, where it is sufficient to perform
+ * all class transformation on a newly created ClassLoader instance.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #getInstrumentableClassLoader()
  * @see SimpleInstrumentableClassLoader
  * @see ReflectiveLoadTimeWeaver
  */
@@ -65,8 +65,7 @@ public class SimpleLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 	/**
-	 * This implementation always returns a SimpleThrowawayClassLoader.
-	 * @see SimpleThrowawayClassLoader
+	 * This implementation builds a {@link SimpleThrowawayClassLoader}.
 	 */
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
