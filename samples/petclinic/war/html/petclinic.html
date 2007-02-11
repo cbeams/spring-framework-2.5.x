@@ -9,7 +9,6 @@
 	</style>
 </head>
 
-
 <body>
 
 <h1 style="text-align: center;">The Spring PetClinic Application</h1>
@@ -26,7 +25,7 @@
 
 <h2>Introduction</h2>
 
-Spring is a collection of small, well-focused, loosely coupled Java
+The Spring Framework is a collection of small, well-focused, loosely coupled Java
 frameworks that can be used independently or collectively to build
 industrial strength applications of many different types. The PetClinic
 sample application is designed to show how the Spring
@@ -43,7 +42,7 @@ Inversion-Of-Control<br>
 
   <li>Model-View-Controller web Presentation Layer</li>
 
-  <li>Practical database access through JDBC, Hibernate, Toplink, Java Persistence API or Apache OJB</li>
+  <li>Practical database access through JDBC, Hibernate, Toplink,  or Java Persistence API</li>
   <li>Application monitoring based on JMX</li>
 
   <li>Declarative Transaction Management using AOP<br>
@@ -102,8 +101,7 @@ application container.<br>
 
 Since the purpose of the sample application is tutorial in nature, the
 implementation presented here will of course provide only a small
-subset
-of the functionality that would be needed by a real world version of a
+subset of the functionality that would be needed by a real world version of a
 PetClinic application.<br>
 
 <br>
@@ -391,9 +389,8 @@ configures the definition of <span style="font-weight: bold;">Log4j </span>logge
 <span style="font-weight: bold; text-decoration: underline;"> </span>The
 Business Layer consists of a number of basic JavaBean classes
 representing the application domain objects and associated validation
-objects that are used by the
-Presentation Layer.The&nbsp; validation objects used in PetClinic are
-all implementations of&nbsp; the <span style="font-weight: bold;">org.springframework.validation.Validator
+objects that are used by thePresentation Layer. The validation objects used in PetClinic are
+all implementations of the <span style="font-weight: bold;">org.springframework.validation.Validator
 </span>interface.
 <ul>
 
@@ -411,10 +408,8 @@ is an extension of <span style="font-weight: bold;"><span style="font-weight: bo
 is an extension of <span style="font-weight: bold;"><span style="font-weight: bold;">Named</span></span><span style="font-weight: bold;">Entity</span>.<span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold;"></span></span></span></li>
 
   <li><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold;">org.springframework.samples</span></span></span><span style="font-weight: bold; font-style: italic;">.petclinic.Person&nbsp;</span>is
-an extension of <span style="font-weight: bold;">Entity </span>that
-&nbsp;provides a superclass for all objects that implement the notion
-of
-a person.</li>
+an extension of <span style="font-weight: bold;">Entity </span>that provides a superclass for all objects that implement the notion
+of a person.</li>
 
   <li><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold;">org.springframework.samples.</span></span></span><span style="font-weight: bold; font-style: italic;">petclinic.Vet</span>&nbsp;is
 an extension of <span style="font-weight: bold;"></span><span style="font-weight: bold;">Person</span> that implements a
@@ -440,7 +435,7 @@ is a simple JavaBean&nbsp;that implements the notion of a clinic visit
 for a pet. </li>
 
   <li><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold;">org.springframework.samples</span></span></span><span style="font-weight: bold; font-style: italic;">.petclinic.util.Entity</span><span style="font-weight: bold;"></span><span style="font-weight: bold;">Utils
-    </span>provides utility methods for handling enitites.</li>
+    </span>provides utility methods for handling entites.</li>
 
 </ul>
 
@@ -480,12 +475,10 @@ Layer</span></h3>
 the PetClinic application is all about database access and there is
 very little business logic in the application outside of that, there is
 no separation of the primary Business and Persistence Layer API's.
-While
-this design technique should not be used for an application with more
+While this design technique should not be used for an application with more
 complex business logic, it is acceptable here because all of the
 non-persistence related business rules have been implemented in
-business
-objects and have not leaked into the Persistence Layer. The most
+business objects and have not leaked into the Persistence Layer. The most
 important facet of the design is that the Business and Persistence
 Layers are <span style="font-weight: bold;">COMPLETELY </span>independent
 of the Presentation Layer.<br>
@@ -502,13 +495,12 @@ infrastructure provided by Spring:<br>
   <li>Hibernate (2 and 3)</li>
   <li>Toplink</li>
   <li>Java Persistence API</li>
-  <li>Apache OJB</li>
 
 </ul>
 
 <span style="font-weight: bold;">NOTE:</span> Spring also provides
-infrastructure for using other <span style="font-weight: bold;">O</span>bject-<span style="font-weight: bold;">R</span>elational-<span style="font-weight: bold;">M</span>apping frameworks such as&nbsp; JDO
-and iBATIS SqlMaps but these are not demonstrated in PetClinic.<br>
+infrastructure for using other <span style="font-weight: bold;">O</span>bject-<span style="font-weight: bold;">R</span>elational-<span style="font-weight: bold;">M</span>apping frameworks such as JDO and iBATIS SqlMaps but these are not demonstrated in PetClinic. (See the 'jpetstore' sample application that ships
+with the full Spring Framework distribution for an example of using iBatis and Spring.)<br>
 
 <br>
 
@@ -522,7 +514,7 @@ is an abstract <span style="font-weight: bold;"><span style="font-weight: bold;"
 derivatives only need to be caught by application code to handle
 recoverable errors when it makes sense to do so. This greatly
 simplifies application code&nbsp; compared to, for example, code
-using&nbsp; JDBC directly where <span style="font-weight: bold;">SqlExceptions
+using JDBC directly where <span style="font-weight: bold;">SqlExceptions
 </span>must be caught and database specific error codes must be
 decoded. Examination of the PetClinic source code will show that the
 persistence-oriented code is completely focused on the relevant
@@ -537,7 +529,7 @@ DaoSupport classes for each of the persistence strategies. Each
 persistence strategy in PetClinic is a different implementation of the <span style="font-weight: bold;">Clinic </span>interface that extends the
 respective DaoSupport class. In each case, the <span style="font-weight: bold;">Clinic </span>implementation is fronted by
 a transactional proxy that also implements <span style="font-weight: bold;">Clinic</span>. These objects are standard
-Java dynamic proxies which are created by an instance of&nbsp; <span style="font-weight: bold;">org.springframework.transaction.interceptor.TransactionProxyFactoryBean</span>.
+Java dynamic proxies which are created by an instance of <span style="font-weight: bold;">org.springframework.transaction.interceptor.TransactionProxyFactoryBean</span>.
 These proxies are configured in the respective application context file
 and specify that all <span style="font-weight: bold;">Clinic </span>methods
 are run in a transactional context.The transaction managers used in
@@ -546,7 +538,7 @@ PetClinic are all implementations of&nbsp; the <span style="font-weight: bold;">
 to use a local <span style="font-weight: bold;">DataSource </span>that
 will work in any environment through the use of an instance of&nbsp; <span style="font-weight: bold;">org.springframework.jdbc.datasource.DriverManagerDataSource</span>.
 While this is appropriate for use in a demo or single user
-program,&nbsp; a connection pooling <span style="font-weight: bold;">DataSource</span>,
+program, a connection pooling <span style="font-weight: bold;">DataSource</span>,
 such as an instance of <span style="font-weight: bold;">org.apache.commons.dbcp.BasicDataSource</span>,
 is more appropriate for use in a multi-user application. Another
 alternative is to obtain one through the J2EE environment&nbsp;
@@ -704,20 +696,6 @@ For JPA there are two implementation of the <span style="font-weight: bold;">Cli
 </span>interface : <span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold;">org.springframework.samples</span></span></span><span style="font-weight: bold; font-style: italic;">.</span></span><span style="font-weight: bold; font-style: italic;"></span></span><span style="font-weight: bold; font-style: italic;">petclinic.jpa.JpaTemplateClinic</span> which is based on JpaTemplate and <span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold;">org.springframework.samples</span></span></span><span style="font-weight: bold; font-style: italic;">.</span></span><span style="font-weight: bold; font-style: italic;"></span></span><span style="font-weight: bold; font-style: italic;">petclinic.jpa.EntityManagerClinic</span> based on native JPA usage without any Spring API dependencies.
 To simplify JPA usage, Spring provides (among other classes) the <span style="font-weight: bold;">org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean</span>.
 The JPA configuration is provided by the <span style="font-style: italic;">src/META-INF/orm.xml </span>and<span style="font-style: italic;"> src/META-INF/persistence.xml.</span><br>
-<br>
-
-<br>
-
-<span style="font-weight: bold; text-decoration: underline;">Apache OJB
-Clinic Implementation</span><br>
-
-The Apache OJB implementation of the <span style="font-weight: bold;">Clinic
-</span>interface is <span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold; font-style: italic;"><span style="font-weight: bold;">org.springframework.samples</span></span></span><span style="font-weight: bold; font-style: italic;">.</span></span><span style="font-weight: bold; font-style: italic;"></span></span><span style="font-weight: bold; font-style: italic;">petclinic.ojb.PersistenceBrokerClinic</span>.
-To simplify using OJB, Spring provides the <span style="font-weight: bold;">org.springframework.orm.ojb.PersistenceBrokerTransactionManager</span>.
-The Apache OJB configuration is provided by the files&nbsp; <span style="font-style: italic;">src/OJB-repository.xml </span>and <span style="font-style: italic;">src/OJB</span>.<span style="font-style: italic;">properties</span>.
-<h3><br>
-
-<span style="font-weight: bold; text-decoration: underline;"><span style="font-weight: bold; text-decoration: underline;"></span></span></h3>
 
 <h3><span style="font-weight: bold; text-decoration: underline;"><span style="font-weight: bold; text-decoration: underline;">ApplicationContext</span></span></h3>
 
@@ -1483,7 +1461,7 @@ preferably version 4.1.18 or later</li>
   <li>Download and install <a href="http://www.mysql.com/">Mysql</a>,
 (optional)</li>
 
-  <li><a href="http://hsqldb.sourceforge.net/">Hypersonic SQL</a> , <a href="http://hibernate.org/">Hibernate</a>, and <a href="http://db.apache.org/ojb/">Apache OJB</a> are provided with the
+  <li><a href="http://hsqldb.sourceforge.net/">Hypersonic SQL</a> , and <a href="http://hibernate.org/">Hibernate</a> are provided with the
 application.</li>
 
   <li>PetClinic and Spring use the <a href="http://www.apache.org/">Apache</a>
