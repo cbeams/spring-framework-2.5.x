@@ -44,6 +44,8 @@ Package org.springframework.aop
 * @Configurable works for deserialized objects as well
 
 Package org.springframework.beans
+* fixed BeanWrapperImpl's "toString()" output in case of no wrapped object set
+* BeanWrapperImpl supports nested generic collections as map keys and as indexed map values
 * added "getTypeConverter()" method to ConfigurableBeanFactory interface
 * MethodInvokingFactoryBean obtains the TypeConverter from the BeanFactory that it runs in
 * List/Set/MapFactoryBean convert elements to the generic type expressed in a superclass/interface of the target class
@@ -58,12 +60,14 @@ Package org.springframework.beans
 * BeanDefinitionParseDelegate trims whitespace from "class" attributes in XML bean definitions
 * collection merging accepts a null parent value as well, simply using the child collection as-is in this case
 * indexed constructor arguments support collection merging (driven by merge="true", analogous to property values)
+* BeanDefinitions returned by nested custom XML elements receive a generated id, to avoid FactoryBean cache conflicts
 * added deprecated "findXxx" signatures back to NamespaceHandlerSupport, for full compatibility with Spring 2.0 final
 * AbstractSingleBeanDefinitionParser applies a document's default-lazy-init="true" to its generated bean definitions
 * added "isEligibleAttribute" template method to AbstractSimpleBeanDefinitionParser, for excluding specific attributes
 * "util:properties" tag supports nested "prop" elements for local entries, analogous to the standard "props" tag
 
 Package org.springframework.context
+* AbstractApplicationContext instantiates BeanPostProcessors which implemented Ordered before non-Ordered ones
 * AbstractRefreshableApplicationContext allows BeanFactory access during the destruction phase of a "refresh()" call
 
 Package org.springframework.dao
