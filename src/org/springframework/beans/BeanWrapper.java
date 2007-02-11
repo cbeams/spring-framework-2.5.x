@@ -81,7 +81,7 @@ public interface BeanWrapper extends ConfigurablePropertyAccessor, TypeConverter
 	PropertyDescriptor[] getPropertyDescriptors() throws BeansException;
 
 	/**
-	 * Get the property descriptor for a particular property
+	 * Obtain the property descriptor for a particular property
 	 * of the wrapped object.
 	 * @param propertyName the property to obtain the descriptor for
 	 * @return the property descriptor for the particular property
