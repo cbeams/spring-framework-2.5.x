@@ -34,19 +34,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Internal class to cache JavaBean PropertyDescriptor information for a Java class.
- * Not intended for direct use by application code.
+ * Internal class that caches JavaBeans {@link java.beans.PropertyDescriptor}
+ * information for a Java class. Not intended for direct use by application code.
  *
- * <p>Necessary as <code>Introspector.getBeanInfo()</code> in JDK 1.3 will return a
- * new deep copy of the BeanInfo every time we ask for it. We take the opportunity
- * to cache property descriptors by method name for fast lookup. Furthermore,
- * we do our own caching of descriptors here, rather than rely on the JDK's
- * system-wide BeanInfo cache (to avoid leaks on ClassLoader shutdown).
+ * <p>Necessary as {@link java.beans.Introspector#getBeanInfo()} in JDK 1.3 will
+ * return a new deep copy of the BeanInfo every time we ask for it. We take the
+ * opportunity to cache property descriptors by method name for fast lookup.
+ * Furthermore, we do our own caching of descriptors here, rather than rely on
+ * the JDK's system-wide BeanInfo cache (to avoid leaks on ClassLoader shutdown).
  *
  * <p>Information is cached statically, so we don't need to create new
  * objects of this class for every JavaBean we manipulate. Hence, this class
- * implements the factory design pattern, using a private constructor
- * and a static <code>forClass</code> method to obtain instances.
+ * implements the factory design pattern, using a private constructor and
+ * a static {@link #forClass(Class)} factory method to obtain instances.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -121,6 +121,8 @@ public class CachedIntrospectionResults {
 	 * <P>We don't want to use synchronization here. Object references are atomic,
 	 * so we can live with doing the occasional unnecessary lookup at startup only.
 	 * @param beanClass the bean class to analyze
+	 * @return the corresponding CachedIntrospectionResults
+	 * @throws BeansException in case of introspection failure
 	 */
 	static CachedIntrospectionResults forClass(Class beanClass) throws BeansException {
 		CachedIntrospectionResults results = null;
@@ -228,19 +230,21 @@ public class CachedIntrospectionResults {
 
 	/**
 	 * Create a new CachedIntrospectionResults instance for the given class.
+	 * @param beanClass the bean class to analyze
+	 * @throws BeansException in case of introspection failure
 	 */
-	private CachedIntrospectionResults(Class clazz) throws BeansException {
+	private CachedIntrospectionResults(Class beanClass) throws BeansException {
 		try {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Getting BeanInfo for class [" + clazz.getName() + "]");
+				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
-			this.beanInfo = Introspector.getBeanInfo(clazz);
+			this.beanInfo = Introspector.getBeanInfo(beanClass);
 
 			// Immediately remove class from Introspector cache, to allow for proper
 			// garbage collection on class loader shutdown - we cache it here anyway,
 			// in a GC-friendly manner. In contrast to CachedIntrospectionResults,
 			// Introspector does not use WeakReferences as values of its WeakHashMap!
-			Class classToFlush = clazz;
+			Class classToFlush = beanClass;
 			do {
 				Introspector.flushFromCaches(classToFlush);
 				classToFlush = classToFlush.getSuperclass();
@@ -248,7 +252,7 @@ public class CachedIntrospectionResults {
 			while (classToFlush != null);
 
 			if (logger.isTraceEnabled()) {
-				logger.trace("Caching PropertyDescriptors for class [" + clazz.getName() + "]");
+				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
 			}
 			this.propertyDescriptorCache = new HashMap();
 
@@ -267,7 +271,7 @@ public class CachedIntrospectionResults {
 			}
 		}
 		catch (IntrospectionException ex) {
-			throw new FatalBeanException("Cannot get BeanInfo for object of class [" + clazz.getName() + "]", ex);
+			throw new FatalBeanException("Cannot get BeanInfo for object of class [" + beanClass.getName() + "]", ex);
 		}
 	}
 
