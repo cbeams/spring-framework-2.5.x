@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * Common interface for classes that can access bean properties.
- * Serves as base interface for BeanWrapper.
+ * Serves as base interface for {@link BeanWrapper}.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -51,77 +51,91 @@ public interface PropertyAccessor {
 
 
 	/**
-	 * Get the value of a property.
+	 * Get the current value of the specified property.
 	 * @param propertyName name of the property to get the value of
 	 * @return the value of the property
-	 * @throws FatalBeanException if there is no such property, if the property
-	 * isn't readable, or if the property getter throws an exception.
+	 * @throws InvalidPropertyException if there is no such property or
+	 * if the property isn't readable
+	 * @throws PropertyAccessException if the property was valid but the
+	 * accessor method failed
 	 */
 	Object getPropertyValue(String propertyName) throws BeansException;
 
 	/**
-	 * Set a property value. This method is provided for convenience only.
-	 * The setPropertyValue(PropertyValue) method is more powerful.
+	 * Set the specified value as current property value.
 	 * @param propertyName name of the property to set value of
 	 * @param value the new value
-	 * @throws FatalBeanException if there is no such property, if the property
-	 * isn't writable, or if the property setter throws an exception.
+	 * @throws InvalidPropertyException if there is no such property or
+	 * if the property isn't writable
+	 * @throws PropertyAccessException if the property was valid but the
+	 * accessor method failed or a type mismatch occured
 	 */
 	void setPropertyValue(String propertyName, Object value) throws BeansException;
 
 	/**
-	 * Update a property value.
-	 * <b>This is the preferred way to update an individual property.</b>
-	 * @param pv object containing new property value
-	 * @throws FatalBeanException if there is no such property, if the property
-	 * isn't writable, or if the property setter throws an exception.
+	 * Set the specified value as current property value.
+	 * @param pv object containing the new property value
+	 * @throws InvalidPropertyException if there is no such property or
+	 * if the property isn't writable
+	 * @throws PropertyAccessException if the property was valid but the
+	 * accessor method failed or a type mismatch occured
 	 */
 	void setPropertyValue(PropertyValue pv) throws BeansException;
 
 	/**
-	 * Perform a bulk update from a Map.
+	 * Perform a batch update from a Map.
 	 * <p>Bulk updates from PropertyValues are more powerful: This method is
-	 * provided for convenience. Behaviour will be identical to that of
-	 * the setPropertyValues(PropertyValues) method.
+	 * provided for convenience. Behavior will be identical to that of
+	 * the {@link #setPropertyValues(PropertyValues)} method.
 	 * @param map Map to take properties from. Contains property value objects,
 	 * keyed by property name
-	 * @throws FatalBeanException if there is no such property, if the property
-	 * isn't writable, or if the property setter throws an exception.
+	 * @throws InvalidPropertyException if there is no such property or
+	 * if the property isn't writable
+	 * @throws PropertyAccessExceptionsException if one or more PropertyAccessExceptions
+	 * occured for specific properties during the batch update. This exception bundles
+	 * all individual PropertyAccessExceptions. All other properties will have been
+	 * successfully updated.
 	 */
 	void setPropertyValues(Map map) throws BeansException;
 
 	/**
-	 * The preferred way to perform a bulk update.
-	 * <p>Note that performing a bulk update differs from performing a single update,
+	 * The preferred way to perform a batch update.
+	 * <p>Note that performing a batch update differs from performing a single update,
 	 * in that an implementation of this class will continue to update properties
 	 * if a <b>recoverable</b> error (such as a type mismatch, but <b>not</b> an
 	 * invalid field name or the like) is encountered, throwing a
-	 * PropertyAccessExceptionsException containing all the individual errors.
+	 * {@link PropertyAccessExceptionsException} containing all the individual errors.
 	 * This exception can be examined later to see all binding errors.
-	 * Properties that were successfully updated stay changed.
-	 * <p>Does not allow unknown fields.
-	 * Equivalent to setPropertyValues(pvs, false).
+	 * Properties that were successfully updated remain changed.
+	 * <p>Does not allow unknown fields or invalid fields.
 	 * @param pvs PropertyValues to set on the target object
-	 * @throws FatalBeanException if there is no such property, if the property
-	 * isn't writable, or if the property setter throws an exception.
+	 * @throws InvalidPropertyException if there is no such property or
+	 * if the property isn't writable
+	 * @throws PropertyAccessExceptionsException if one or more PropertyAccessExceptions
+	 * occured for specific properties during the batch update. This exception bundles
+	 * all individual PropertyAccessExceptions. All other properties will have been
+	 * successfully updated.
 	 * @see #setPropertyValues(PropertyValues, boolean)
 	 */
 	void setPropertyValues(PropertyValues pvs) throws BeansException;
 
 	/**
-	 * Perform a bulk update with full control over behavior.
-	 * <p>Note that performing a bulk update differs from performing a single update,
+	 * Perform a batch update with full control over behavior.
+	 * <p>Note that performing a batch update differs from performing a single update,
 	 * in that an implementation of this class will continue to update properties
 	 * if a <b>recoverable</b> error (such as a type mismatch, but <b>not</b> an
 	 * invalid field name or the like) is encountered, throwing a
-	 * PropertyAccessExceptionsException containing all the individual errors.
+	 * {@link PropertyAccessExceptionsException} containing all the individual errors.
 	 * This exception can be examined later to see all binding errors.
-	 * Properties that were successfully updated stay changed.
-	 * <p>Does not allow unknown fields.
+	 * Properties that were successfully updated remain changed.
 	 * @param pvs PropertyValues to set on the target object
-	 * @param ignoreUnknown should we ignore unknown values (not found in the bean)
-	 * @throws FatalBeanException if there is no such property, if the property
-	 * isn't writable, or if the property setter throws an exception.
+	 * @param ignoreUnknown should we ignore unknown properties (not found in the bean)
+	 * @throws InvalidPropertyException if there is no such property or
+	 * if the property isn't writable
+	 * @throws PropertyAccessExceptionsException if one or more PropertyAccessExceptions
+	 * occured for specific properties during the batch update. This exception bundles
+	 * all individual PropertyAccessExceptions. All other properties will have been
+	 * successfully updated.
 	 */
 	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
 	    throws BeansException;
