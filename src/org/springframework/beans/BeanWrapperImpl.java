@@ -171,7 +171,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	/**
 	 * Switch the target object, replacing the cached introspection results only
 	 * if the class of the new object is different to that of the replaced object.
-	 * @param object new target
+	 * @param object the new target object
 	 */
 	public void setWrappedInstance(Object object) {
 		setWrappedInstance(object, "", null);
@@ -180,7 +180,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	/**
 	 * Switch the target object, replacing the cached introspection results only
 	 * if the class of the new object is different to that of the replaced object.
-	 * @param object new target
+	 * @param object the new target object
 	 * @param nestedPath the nested path of the object
 	 * @param rootObject the root object at the top of the path
 	 */
@@ -239,27 +239,30 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 
 	public PropertyDescriptor[] getPropertyDescriptors() {
+		Assert.state(this.cachedIntrospectionResults != null, "BeanWrapper does not hold a bean instance");
 		return this.cachedIntrospectionResults.getBeanInfo().getPropertyDescriptors();
 	}
 
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
-		Assert.notNull(propertyName, "Property name must not be null");
 		PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
-		if (pd != null) {
-			return pd;
-		}
-		else {
+		if (pd == null) {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"No property '" + propertyName + "' found");
 		}
+		return pd;
 	}
 
 	/**
-	 * Internal version of getPropertyDescriptor:
+	 * Internal version of {@link #getPropertyDescriptor}:
 	 * Returns <code>null</code> if not found rather than throwing an exception.
+	 * @param propertyName the property to obtain the descriptor for
+	 * @return the property descriptor for the specified property,
+	 * or <code>null</code> if not found
+	 * @throws BeansException in case of introspection failure
 	 */
 	protected PropertyDescriptor getPropertyDescriptorInternal(String propertyName) throws BeansException {
-		Assert.state(this.object != null, "BeanWrapper does not hold a bean instance");
+		Assert.state(this.cachedIntrospectionResults != null, "BeanWrapper does not hold a bean instance");
+		Assert.notNull(propertyName, "Property name must not be null");
 		BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
 		return nestedBw.cachedIntrospectionResults.getPropertyDescriptor(getFinalPath(nestedBw, propertyName));
 	}
@@ -291,7 +294,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 
 	public boolean isReadableProperty(String propertyName) {
-		Assert.notNull(propertyName, "Property name must not be null");
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 			if (pd != null) {
@@ -312,7 +314,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 
 	public boolean isWritableProperty(String propertyName) {
-		Assert.notNull(propertyName, "Property name must not be null");
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 			if (pd != null) {
@@ -382,7 +383,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * @param propertyPath property property path, which may be nested
 	 * @return a BeanWrapper for the target bean
 	 */
-	protected BeanWrapperImpl getBeanWrapperForPropertyPath(String propertyPath) throws BeansException {
+	protected BeanWrapperImpl getBeanWrapperForPropertyPath(String propertyPath) {
 		int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(propertyPath);
 		// handle nested properties recursively
 		if (pos > -1) {
@@ -404,7 +405,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * @param nestedProperty property to create the BeanWrapper for
 	 * @return the BeanWrapper instance, either cached or newly created
 	 */
-	private BeanWrapperImpl getNestedBeanWrapper(String nestedProperty) throws BeansException {
+	private BeanWrapperImpl getNestedBeanWrapper(String nestedProperty) {
 		if (this.nestedBeanWrappers == null) {
 			this.nestedBeanWrappers = new HashMap();
 		}
