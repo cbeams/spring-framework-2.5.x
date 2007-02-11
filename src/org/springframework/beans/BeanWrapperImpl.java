@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,26 +40,23 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the BeanWrapper interface that should be sufficient
+ * Default {@link BeanWrapper} implementation that should be sufficient
  * for all typical use cases. Caches introspection results for efficiency.
- *
- * <p>Note: This class never tries to load a class by name, as this can pose
- * class loading problems in J2EE applications with multiple deployment modules.
- * The caller is responsible for loading a target class.
  *
  * <p>Note: Auto-registers default property editors from the
  * <code>org.springframework.beans.propertyeditors</code> package, which apply
  * in addition to the JDK's standard PropertyEditors. Applications can call
- * the <code>registerCustomEditor</code> method to register an editor for a
- * particular instance (i.e. they're not shared across the application).
- * See the base class PropertyEditorRegistrySupport for details.
+ * the {@link #registerCustomEditor(Class, java.beans.PropertyEditor)} method
+ * to register an editor for a particular instance (i.e. they are not shared
+ * across the application). See the base class
+ * {@link PropertyEditorRegistrySupport} for details.
  *
- * <p>BeanWrapperImpl will convert collection and array values to the
- * corresponding target collections or arrays, if necessary. Custom property
- * editors that deal with collections or arrays can either be written via
- * PropertyEditor's <code>setValue</code>, or against a comma-delimited String
- * via <code>setAsText</code>, as String arrays are converted in such a format
- * if the array itself is not assignable.
+ * <p><code>BeanWrapperImpl</code> will convert collection and array values
+ * to the corresponding target collections or arrays, if necessary. Custom
+ * property editors that deal with collections or arrays can either be
+ * written via PropertyEditor's <code>setValue</code>, or against a
+ * comma-delimited String via <code>setAsText</code>, as String arrays are
+ * converted in such a format if the array itself is not assignable.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -273,6 +270,32 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 		return nestedBw.cachedIntrospectionResults.getPropertyDescriptor(getFinalPath(nestedBw, propertyName));
 	}
 
+	public Class getPropertyType(String propertyName) throws BeansException {
+		try {
+			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			if (pd != null) {
+				return pd.getPropertyType();
+			}
+			else {
+				// Maybe an indexed/mapped property...
+				Object value = getPropertyValue(propertyName);
+				if (value != null) {
+					return value.getClass();
+				}
+				// Check to see if there is a custom editor,
+				// which might give an indication on the desired target type.
+				Class editorType = guessPropertyTypeFromEditors(propertyName);
+				if (editorType != null) {
+					return editorType;
+				}
+			}
+		}
+		catch (InvalidPropertyException ex) {
+			// Consider as not determinable.
+		}
+		return null;
+	}
+
 	public boolean isReadableProperty(String propertyName) {
 		Assert.notNull(propertyName, "Property name must not be null");
 		try {
@@ -313,32 +336,6 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 			// Cannot be evaluated, so can't be writable.
 		}
 		return false;
-	}
-
-	public Class getPropertyType(String propertyName) throws BeansException {
-		try {
-			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
-			if (pd != null) {
-				return pd.getPropertyType();
-			}
-			else {
-				// Maybe an indexed/mapped property...
-				Object value = getPropertyValue(propertyName);
-				if (value != null) {
-					return value.getClass();
-				}
-				// Check to see if there is a custom editor,
-				// which might give an indication on the desired target type.
-				Class editorType = guessPropertyTypeFromEditors(propertyName);
-				if (editorType != null) {
-					return editorType;
-				}
-			}
-		}
-		catch (InvalidPropertyException ex) {
-			// Consider as not determinable.
-		}
-		return null;
 	}
 
 
@@ -511,7 +508,7 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 						value = list.get(Integer.parseInt(key));
 					}
 					else if (value instanceof Set) {
-						// apply index to Iterator in case of a Set
+						// Apply index to Iterator in case of a Set.
 						Set set = (Set) value;
 						int index = Integer.parseInt(key);
 						if (index < 0 || index >= set.size()) {
@@ -959,8 +956,13 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer("BeanWrapperImpl: wrapping class [");
-		sb.append(getWrappedClass().getName()).append("]");
+		StringBuffer sb = new StringBuffer(getClass().getName());
+		if (this.object != null) {
+			sb.append(": wrapping object of class [").append(this.object.getClass().getName()).append("]");
+		}
+		else {
+			sb.append(": no wrapped object set");
+		}
 		return sb.toString();
 	}
 
@@ -971,11 +973,11 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
 
 	private static class PropertyTokenHolder {
 
-		private String canonicalName;
+		public String canonicalName;
 
-		private String actualName;
+		public String actualName;
 
-		private String[] keys;
+		public String[] keys;
 	}
 
 }
