@@ -60,12 +60,16 @@
 		</property>
 		<property name="someSet">
 			<util:set>
-				<value>foo</value>
+				<value>bar</value>
 			</util:set>
 		</property>
 		<property name="someMap">
 			<util:map>
-				<entry key="foo" value="bar"/>
+				<entry key="foo">
+					<util:set>
+						<value>bar</value>
+					</util:set>
+				</entry>
 			</util:map>
 		</property>
 	</bean>

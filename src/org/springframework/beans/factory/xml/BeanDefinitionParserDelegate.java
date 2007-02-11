@@ -57,6 +57,7 @@ import org.springframework.core.AttributeAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
@@ -1075,18 +1076,18 @@ public class BeanDefinitionParserDelegate {
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 
-	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element element, BeanDefinitionHolder definitionHolder) {
+	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element ele, BeanDefinitionHolder definitionHolder) {
 		BeanDefinitionHolder finalDefinition = definitionHolder;
 
 		// Decorate based on custom attributes first.
-		NamedNodeMap attributes = element.getAttributes();
+		NamedNodeMap attributes = ele.getAttributes();
 		for (int i = 0; i < attributes.getLength(); i++) {
 			Node node = attributes.item(i);
 			finalDefinition = decorateIfRequired(node, finalDefinition);
 		}
 
 		// Decorate based on custom nested elements.
-		NodeList children = element.getChildNodes();
+		NodeList children = ele.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node node = children.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -1109,14 +1110,20 @@ public class BeanDefinitionParserDelegate {
 		return (!StringUtils.hasLength(namespaceUri) || BEANS_NAMESPACE_URI.equals(namespaceUri));
 	}
 
-	private Object parseNestedCustomElement(Element candidateEle, BeanDefinition containingBd) {
-		BeanDefinition innerDefinition = parseCustomElement(candidateEle, containingBd);
+	private BeanDefinitionHolder parseNestedCustomElement(Element ele, BeanDefinition containingBd) {
+		BeanDefinition innerDefinition = parseCustomElement(ele, containingBd);
 		if (innerDefinition == null) {
-			error("Incorrect usage of element '" + candidateEle.getNodeName() + "' in a nested manner. " +
-					"This tag cannot be used nested inside <property>.", candidateEle);
+			error("Incorrect usage of element '" + ele.getNodeName() + "' in a nested manner. " +
+					"This tag cannot be used nested inside <property>.", ele);
 			return null;
 		}
-		return innerDefinition;
+		String id = ele.getNodeName() + BeanDefinitionReaderUtils.GENERATED_BEAN_NAME_SEPARATOR +
+				ObjectUtils.getIdentityHexString(innerDefinition);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Using generated bean name [" + id +
+					"] for nested custom element '" + ele.getNodeName() + "'");
+		}
+		return new BeanDefinitionHolder(innerDefinition, id);
 	}
 
 	protected TypedStringValue buildTypedStringValue(String value, String targetTypeName)

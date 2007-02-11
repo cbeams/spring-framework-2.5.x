@@ -118,11 +118,14 @@ public class UtilNamespaceHandlerTests extends TestCase {
 
 		Set set = bean.getSomeSet();
 		assertEquals(1, set.size());
-		assertTrue(set.contains("foo"));
+		assertTrue(set.contains("bar"));
 
 		Map map = bean.getSomeMap();
 		assertEquals(1, map.size());
-		assertEquals("bar", map.get("foo"));
+		assertTrue(map.get("foo") instanceof Set);
+		Set innerSet = (Set) map.get("foo");
+		assertEquals(1, innerSet.size());
+		assertTrue(innerSet.contains("bar"));
 	}
 
 	public void testNestedInCollections() throws Exception {
