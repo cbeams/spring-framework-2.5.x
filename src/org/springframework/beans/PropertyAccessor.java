@@ -54,7 +54,8 @@ public interface PropertyAccessor {
 	/**
 	 * Determine whether the specified property is readable.
 	 * <p>Returns <code>false</code> if the property doesn't exist.
-	 * @param propertyName property to check status for
+	 * @param propertyName the property to check
+	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return whether the property is readable
 	 */
 	boolean isReadableProperty(String propertyName);
@@ -62,7 +63,8 @@ public interface PropertyAccessor {
 	/**
 	 * Determine whether the specified property is writable.
 	 * <p>Returns <code>false</code> if the property doesn't exist.
-	 * @param propertyName property to check status for
+	 * @param propertyName the property to check
+	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return whether the property is writable
 	 */
 	boolean isWritableProperty(String propertyName);
@@ -71,7 +73,8 @@ public interface PropertyAccessor {
 	 * Determine the property type for the specified property,
 	 * either checking the property descriptor or checking the value
 	 * in case of an indexed or mapped element.
-	 * @param propertyName property to check status for
+	 * @param propertyName the property to check
+	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,
 	 * or <code>null</code> if not determinable
 	 * @throws InvalidPropertyException if there is no such property or
@@ -83,7 +86,8 @@ public interface PropertyAccessor {
 
 	/**
 	 * Get the current value of the specified property.
-	 * @param propertyName name of the property to get the value of
+	 * @param propertyName the name of the property to get the value of
+	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the value of the property
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't readable
@@ -94,7 +98,8 @@ public interface PropertyAccessor {
 
 	/**
 	 * Set the specified value as current property value.
-	 * @param propertyName name of the property to set value of
+	 * @param propertyName the name of the property to set the value of
+	 * (may be a nested path and/or an indexed/mapped property)
 	 * @param value the new value
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
@@ -105,7 +110,7 @@ public interface PropertyAccessor {
 
 	/**
 	 * Set the specified value as current property value.
-	 * @param pv object containing the new property value
+	 * @param pv an object containing the new property value
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyAccessException if the property was valid but the
