@@ -36,12 +36,13 @@ import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.CollectionFactory;
 
 /**
- * Helper class for use by BeanFactory implementations,
- * resolving values contained in BeanDefinition objects
+ * Helper class for use in bean factory implementations,
+ * resolving values contained in bean definition objects
  * into the actual values applied to the target bean instance.
  *
- * <p>Works on an AbstractBeanFactory and a plain BeanDefinition object.
- * Used by AbstractAutowireCapableBeanFactory.
+ * <p>Operates on an {@link AbstractBeanFactory} and a plain
+ * {@link org.springframework.beans.factory.config.BeanDefinition} object.
+ * Used by {@link AbstractAutowireCapableBeanFactory}.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -216,7 +217,7 @@ class BeanDefinitionValueResolver {
 	private String adaptInnerBeanName(String innerBeanName) {
 		String actualInnerBeanName = innerBeanName;
 		int counter = 0;
-		while (this.beanFactory.isBeanNameUsed(actualInnerBeanName)) {
+		while (this.beanFactory.isBeanNameInUse(actualInnerBeanName)) {
 			counter++;
 			actualInnerBeanName = innerBeanName + GENERATED_BEAN_NAME_SEPARATOR + counter;
 		}

@@ -1305,12 +1305,12 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 
 	/**
-	 * Return whether the given bean name is already used within this factory,
+	 * Return whether the given bean name is already in use within this factory,
 	 * that is, whether there is a local bean registered under this name or
 	 * an inner bean created with this name.
 	 * @param beanName the name to check
 	 */
-	protected boolean isBeanNameUsed(String beanName) {
+	protected boolean isBeanNameInUse(String beanName) {
 		return containsLocalBean(beanName) || hasDependentBean(beanName);
 	}
 
