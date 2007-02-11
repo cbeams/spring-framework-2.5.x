@@ -311,7 +311,7 @@
 
 	</target>
 
-	<target name="warfile" depends="build" description="Build the web application archive">
+	<target name="warfile" depends="build, docs" description="Build the web application archive">
 
 		<mkdir dir="${dist.dir}"/>
 
