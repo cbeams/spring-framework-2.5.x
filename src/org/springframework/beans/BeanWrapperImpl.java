@@ -43,10 +43,6 @@ import org.springframework.util.StringUtils;
  * Default {@link BeanWrapper} implementation that should be sufficient
  * for all typical use cases. Caches introspection results for efficiency.
  *
- * <p>Note: This class never tries to load a class by name, as this can pose
- * class loading problems in J2EE applications with multiple deployment modules.
- * The caller is responsible for loading a target class.
- *
  * <p>Note: Auto-registers default property editors from the
  * <code>org.springframework.beans.propertyeditors</code> package, which apply
  * in addition to the JDK's standard PropertyEditors. Applications can call
@@ -268,6 +264,32 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return nestedBw.cachedIntrospectionResults.getPropertyDescriptor(getFinalPath(nestedBw, propertyName));
 	}
 
+	public Class getPropertyType(String propertyName) throws BeansException {
+		try {
+			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			if (pd != null) {
+				return pd.getPropertyType();
+			}
+			else {
+				// Maybe an indexed/mapped property...
+				Object value = getPropertyValue(propertyName);
+				if (value != null) {
+					return value.getClass();
+				}
+				// Check to see if there is a custom editor,
+				// which might give an indication on the desired target type.
+				Class editorType = guessPropertyTypeFromEditors(propertyName);
+				if (editorType != null) {
+					return editorType;
+				}
+			}
+		}
+		catch (InvalidPropertyException ex) {
+			// Consider as not determinable.
+		}
+		return null;
+	}
+
 	public boolean isReadableProperty(String propertyName) {
 		Assert.notNull(propertyName, "Property name must not be null");
 		try {
@@ -308,32 +330,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			// Cannot be evaluated, so can't be writable.
 		}
 		return false;
-	}
-
-	public Class getPropertyType(String propertyName) throws BeansException {
-		try {
-			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
-			if (pd != null) {
-				return pd.getPropertyType();
-			}
-			else {
-				// Maybe an indexed/mapped property...
-				Object value = getPropertyValue(propertyName);
-				if (value != null) {
-					return value.getClass();
-				}
-				// Check to see if there is a custom editor,
-				// which might give an indication on the desired target type.
-				Class editorType = guessPropertyTypeFromEditors(propertyName);
-				if (editorType != null) {
-					return editorType;
-				}
-			}
-		}
-		catch (InvalidPropertyException ex) {
-			// Consider as not determinable.
-		}
-		return null;
 	}
 
 
