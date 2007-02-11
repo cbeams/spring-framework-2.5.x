@@ -222,9 +222,10 @@ public class CachedIntrospectionResults {
 	}
 
 
+	/** The BeanInfo object for the introspected bean class */
 	private final BeanInfo beanInfo;
 
-	/** Property descriptors keyed by property name */
+	/** PropertyDescriptor objects keyed by property name String */
 	private final Map propertyDescriptorCache;
 
 
