@@ -52,7 +52,8 @@ public interface PropertyAccessor {
 
 	/**
 	 * Get the current value of the specified property.
-	 * @param propertyName name of the property to get the value of
+	 * @param propertyName the name of the property to get the value of
+	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the value of the property
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't readable
@@ -63,7 +64,8 @@ public interface PropertyAccessor {
 
 	/**
 	 * Set the specified value as current property value.
-	 * @param propertyName name of the property to set value of
+	 * @param propertyName the name of the property to set the value of
+	 * (may be a nested path and/or an indexed/mapped property)
 	 * @param value the new value
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
@@ -74,7 +76,7 @@ public interface PropertyAccessor {
 
 	/**
 	 * Set the specified value as current property value.
-	 * @param pv object containing the new property value
+	 * @param pv an object containing the new property value
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyAccessException if the property was valid but the

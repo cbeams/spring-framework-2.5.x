@@ -51,9 +51,8 @@ import java.beans.PropertyDescriptor;
 public interface BeanWrapper extends PropertyAccessor, PropertyEditorRegistry {
 
 	/**
-	 * Change the wrapped object. Implementations are required
-	 * to allow the type of the wrapped object to change.
-	 * @param obj the wrapped object that we are manipulating
+	 * Change the wrapped JavaBean object.
+	 * @param obj the bean instance to wrap
 	 */
 	void setWrappedInstance(Object obj);
 
@@ -64,8 +63,8 @@ public interface BeanWrapper extends PropertyAccessor, PropertyEditorRegistry {
 	Object getWrappedInstance();
 
 	/**
-	 * Return the class of the wrapped object.
-	 * @return the class of the wrapped bean instance,
+	 * Return the type of the wrapped JavaBean object.
+	 * @return the type of the wrapped bean instance,
 	 * or <code>null</code> if no wrapped object has been set
 	 */
 	Class getWrappedClass();
@@ -89,17 +88,16 @@ public interface BeanWrapper extends PropertyAccessor, PropertyEditorRegistry {
 	 * Obtain the PropertyDescriptors for the wrapped object
 	 * (as determined by standard JavaBeans introspection).
 	 * @return the PropertyDescriptors for the wrapped object
-	 * @throws BeansException if case of introspection failure
 	 */
-	PropertyDescriptor[] getPropertyDescriptors() throws BeansException;
+	PropertyDescriptor[] getPropertyDescriptors();
 
 	/**
-	 * Obtain the property descriptor for a particular property
+	 * Obtain the property descriptor for a specific property
 	 * of the wrapped object.
 	 * @param propertyName the property to obtain the descriptor for
-	 * @return the property descriptor for the particular property
+	 * (may be a nested path, but no indexed/mapped property)
+	 * @return the property descriptor for the specified property
 	 * @throws InvalidPropertyException if there is no such property
-	 * @throws BeansException if case of introspection failure
 	 */
 	PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException;
 
@@ -108,6 +106,7 @@ public interface BeanWrapper extends PropertyAccessor, PropertyEditorRegistry {
 	 * either checking the property descriptor or checking the value
 	 * in case of an indexed or mapped element.
 	 * @param propertyName property to check status for
+	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,
 	 * or <code>null</code> if not determinable
 	 * @throws InvalidPropertyException if there is no such property or
@@ -119,6 +118,7 @@ public interface BeanWrapper extends PropertyAccessor, PropertyEditorRegistry {
 	 * Determine whether the specified property is readable.
 	 * <p>Returns <code>false</code> if the property doesn't exist.
 	 * @param propertyName property to check status for
+	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return whether the property is readable
 	 */
 	boolean isReadableProperty(String propertyName);
@@ -127,6 +127,7 @@ public interface BeanWrapper extends PropertyAccessor, PropertyEditorRegistry {
 	 * Determine whether the specified property is writable.
 	 * <p>Returns <code>false</code> if the property doesn't exist.
 	 * @param propertyName property to check status for
+	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return whether the property is writable
 	 */
 	boolean isWritableProperty(String propertyName);
