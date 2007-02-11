@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,19 +31,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Class to cache PropertyDescriptor information for a Java class.
- * Package-visible; not for use by application code.
+ * Internal class that caches JavaBeans {@link java.beans.PropertyDescriptor}
+ * information for a Java class. Not intended for direct use by application code.
  *
- * <p>Necessary as <code>Introspector.getBeanInfo()</code> in JDK 1.3 will return a
- * new deep copy of the BeanInfo every time we ask for it. We take the opportunity
- * to cache property descriptors by method name for fast lookup. Furthermore,
- * we do our own caching of descriptors here, rather than rely on the JDK's
- * system-wide BeanInfo cache (to avoid leaks on class loader shutdown).
+ * <p>Necessary as {@link java.beans.Introspector#getBeanInfo()} in JDK 1.3 will
+ * return a new deep copy of the BeanInfo every time we ask for it. We take the
+ * opportunity to cache property descriptors by method name for fast lookup.
+ * Furthermore, we do our own caching of descriptors here, rather than rely on
+ * the JDK's system-wide BeanInfo cache (to avoid leaks on ClassLoader shutdown).
  *
  * <p>Information is cached statically, so we don't need to create new
  * objects of this class for every JavaBean we manipulate. Hence, this class
- * implements the factory design pattern, using a private constructor
- * and a static <code>forClass</code> method to obtain instances.
+ * implements the factory design pattern, using a private constructor and
+ * a static {@link #forClass(Class)} factory method to obtain instances.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -51,10 +51,6 @@ import org.apache.commons.logging.LogFactory;
  * @see #forClass(Class)
  */
 final class CachedIntrospectionResults {
-
-	//---------------------------------------------------------------------
-	// Static section
-	//---------------------------------------------------------------------
 
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
@@ -71,6 +67,8 @@ final class CachedIntrospectionResults {
 	 * <P>We don't want to use synchronization here. Object references are atomic,
 	 * so we can live with doing the occasional unnecessary lookup at startup only.
 	 * @param beanClass the bean class to analyze
+	 * @return the corresponding CachedIntrospectionResults
+	 * @throws BeansException in case of introspection failure
 	 */
 	public static CachedIntrospectionResults forClass(Class beanClass) throws BeansException {
 		CachedIntrospectionResults results = null;
@@ -111,12 +109,14 @@ final class CachedIntrospectionResults {
 	 * <p>Many thanks to Guillaume Poirier for pointing out the
 	 * garbage collection issues and for suggesting this solution.
 	 * @param clazz the class to analyze
-	 * @return whether the given class is thread-safe
 	 */
 	private static boolean isCacheSafe(Class clazz) {
-		ClassLoader cur = CachedIntrospectionResults.class.getClassLoader();
 		ClassLoader target = clazz.getClassLoader();
-		if (target == null || cur == target) {
+		if (target == null) {
+			return false;
+		}
+		ClassLoader cur = CachedIntrospectionResults.class.getClassLoader();
+		if (cur == target) {
 			return true;
 		}
 		while (cur != null) {
@@ -129,31 +129,30 @@ final class CachedIntrospectionResults {
 	}
 
 
-	//---------------------------------------------------------------------
-	// Instance section
-	//---------------------------------------------------------------------
-
+	/** The BeanInfo object for the introspected bean class */
 	private final BeanInfo beanInfo;
 
-	/** Property descriptors keyed by property name */
+	/** PropertyDescriptor objects keyed by property name String */
 	private final Map propertyDescriptorCache;
 
 
 	/**
 	 * Create a new CachedIntrospectionResults instance for the given class.
+	 * @param beanClass the bean class to analyze
+	 * @throws BeansException in case of introspection failure
 	 */
-	private CachedIntrospectionResults(Class clazz) throws BeansException {
+	private CachedIntrospectionResults(Class beanClass) throws BeansException {
 		try {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Getting BeanInfo for class [" + clazz.getName() + "]");
+				logger.debug("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
-			this.beanInfo = Introspector.getBeanInfo(clazz);
+			this.beanInfo = Introspector.getBeanInfo(beanClass);
 
 			// Immediately remove class from Introspector cache, to allow for proper
 			// garbage collection on class loader shutdown - we cache it here anyway,
 			// in a GC-friendly manner. In contrast to CachedIntrospectionResults,
 			// Introspector does not use WeakReferences as values of its WeakHashMap!
-			Class classToFlush = clazz;
+			Class classToFlush = beanClass;
 			do {
 				Introspector.flushFromCaches(classToFlush);
 				classToFlush = classToFlush.getSuperclass();
@@ -161,26 +160,26 @@ final class CachedIntrospectionResults {
 			while (classToFlush != null);
 
 			if (logger.isDebugEnabled()) {
-				logger.debug("Caching PropertyDescriptors for class [" + clazz.getName() + "]");
+				logger.debug("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
 			}
 			this.propertyDescriptorCache = new HashMap();
 
 			// This call is slow so we do it once.
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (int i = 0; i < pds.length; i++) {
+				PropertyDescriptor pd = pds[i];
 				if (logger.isDebugEnabled()) {
-					logger.debug("Found property '" + pds[i].getName() + "'" +
-							(pds[i].getPropertyType() != null ?
-							" of type [" + pds[i].getPropertyType().getName() + "]" : "") +
-							(pds[i].getPropertyEditorClass() != null ?
-							"; editor [" + pds[i].getPropertyEditorClass().getName() + "]" : ""));
+					logger.debug("Found bean property '" + pd.getName() + "'" +
+							(pd.getPropertyType() != null ?
+							" of type [" + pd.getPropertyType().getName() + "]" : "") +
+							(pd.getPropertyEditorClass() != null ?
+							"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
-
-				this.propertyDescriptorCache.put(pds[i].getName(), pds[i]);
+				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
 		}
 		catch (IntrospectionException ex) {
-			throw new FatalBeanException("Cannot get BeanInfo for object of class [" + clazz.getName() + "]", ex);
+			throw new FatalBeanException("Cannot get BeanInfo for object of class [" + beanClass.getName() + "]", ex);
 		}
 	}
 
