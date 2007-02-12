@@ -33,7 +33,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * JDK-based {@link AopProxy} implementation for the Spring AOP framework,
- * based on JDK 1.3+ dynamic proxies.
+ * based on JDK 1.3+ {@link java.lang.reflect.Proxy dynamic proxies}.
  *
  * <p>Creates a dynamic proxy, implementing the interfaces exposed by
  * the AopProxy. Dynamic proxies <i>cannot</i> be used to proxy methods
@@ -155,9 +155,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		Object target = null;
 
 		try {
-			// Try special rules for equals() method and implementation of the
-			// Advised AOP configuration interface.
-
 			if (!this.equalsDefined && AopUtils.isEqualsMethod(method)) {
 				// The target does not implement the equals(Object) method itself.
 				return (equals(args[0]) ? Boolean.TRUE : Boolean.FALSE);
@@ -233,11 +230,11 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * or a dynamic proxy wrapping a JdkDynamicAopProxy instance.
 	 */
 	public boolean equals(Object other) {
-		if (other == null) {
-			return false;
-		}
 		if (other == this) {
 			return true;
+		}
+		if (other == null) {
+			return false;
 		}
 
 		JdkDynamicAopProxy otherProxy = null;
@@ -264,7 +261,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * Proxy uses the hash code of the TargetSource.
 	 */
 	public int hashCode() {
-		return this.advised.getTargetSource().hashCode();
+		return JdkDynamicAopProxy.class.hashCode() * 13 + this.advised.getTargetSource().hashCode();
 	}
 
 }
