@@ -73,7 +73,8 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 	}
 
 	/**
-	 * Returns the lazy-initialized target object, creating it if it doesn't exist.
+	 * Returns the lazy-initialized target object,
+	 * creating it on-the-fly if it doesn't exist already.
 	 * @see #createObject()
 	 */
 	public synchronized Object getTarget() throws Exception {
@@ -84,11 +85,8 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 		return this.lazyTarget;
 	}
 
-	/**
-	 * No need to release target - no op.
-	 */
 	public void releaseTarget(Object target) throws Exception {
-		// no-op
+		// nothing to do
 	}
 
 

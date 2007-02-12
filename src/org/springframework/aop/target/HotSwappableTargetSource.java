@@ -22,12 +22,13 @@ import org.springframework.aop.TargetSource;
 import org.springframework.util.Assert;
 
 /**
- * TargetSource implementation that caches a local target object,
- * but allows the target to be swapped while the application is running.
+ * {@link org.springframework.aop.TargetSource} implementation that
+ * caches a local target object, but allows the target to be swapped
+ * while the application is running.
  *
  * <p>If configuring an object of this class in a Spring IoC container,
  * use constructor injection.
- * 
+ *
  * <p>This TargetSource is serializable if the target is at the time
  * of serialization.
  *
@@ -40,7 +41,7 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 	private static final long serialVersionUID = 7497929212653839187L;
 
 
-	/** Target cached and invoked using reflection */
+	/** The current target object */
 	private Object target;
 
 
@@ -54,6 +55,10 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 	}
 
 
+	/**
+	 * Return the type of the current target object.
+	 * <p>The returned type should usually be constant across all target objects.
+	 */
 	public synchronized Class getTargetClass() {
 		return this.target.getClass();
 	}
