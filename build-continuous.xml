@@ -69,7 +69,7 @@
     
     <target name="email-success" depends="guard.smtp.host">
     	<mail mailhost="${smtp.host}" subject="Spring ${label} SUCCEEDED" tolist="springframework-developer@lists.sourceforge.net" from="build@interface21.com">
-    		<message>Snapshot has been uploaded to http://www.springframework.org/snaphots
+    		<message>Snapshot has been uploaded to http://www.springframework.org/snapshots
     			
 The list of modifications for this build can be found in the build log (http://static.springframework.org/spring/build/index.html).    			
 			</message>
