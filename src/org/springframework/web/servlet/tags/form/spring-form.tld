@@ -1712,6 +1712,13 @@
 			<description>HTML Event Attribute</description>
 		</attribute>
 
+		<attribute>
+			<name>element</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Specifies the HTML element that is used to render the enclosing errors.</description>
+		</attribute>
+
 	</tag>
 
 	<!-- <form:label/> -->

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,8 +108,8 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
-		assertSpanTagOpened(output);
-		assertSpanTagClosed(output);
+		assertElementTagOpened(output);
+		assertElementTagClosed(output);
 
 		assertContainsAttribute(output, "id", "name.errors");
 		assertBlockTagContains(output, "Default Message");
@@ -133,8 +133,8 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
-		assertSpanTagOpened(output);
-		assertSpanTagClosed(output);
+		assertElementTagOpened(output);
+		assertElementTagClosed(output);
 
 		assertContainsAttribute(output, "id", "name.errors");
 		assertBlockTagContains(output, "Default Message");
@@ -157,8 +157,35 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
-		assertSpanTagOpened(output);
-		assertSpanTagClosed(output);
+		assertElementTagOpened(output);
+		assertElementTagClosed(output);
+
+		assertContainsAttribute(output, "id", "name.errors");
+		assertBlockTagContains(output, "<br/>");
+		assertBlockTagContains(output, "Default Message");
+		assertBlockTagContains(output, "Too Short");
+	}
+
+	public void testWithErrorsAndCustomElement() throws Exception {
+		// construct an errors instance of the tag
+		TestBean target = new TestBean();
+		target.setName("Rob Harrop");
+		Errors errors = new BindException(target, COMMAND_NAME);
+		errors.rejectValue("name", "some.code", "Default Message");
+		errors.rejectValue("name", "too.short", "Too Short");
+
+		exposeBindingResult(errors);
+
+		this.tag.setElement("div");
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertElementTagOpened(output);
+		assertElementTagClosed(output);
 
 		assertContainsAttribute(output, "id", "name.errors");
 		assertBlockTagContains(output, "<br/>");
@@ -299,12 +326,12 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 	}
 
 
-	private static void assertSpanTagOpened(String output) {
-		assertTrue(output.startsWith("<span "));
+	private void assertElementTagOpened(String output) {
+		assertTrue(output.startsWith("<" + this.tag.getElement() + " "));
 	}
 
-	private static void assertSpanTagClosed(String output) {
-		assertTrue(output.endsWith("</span>"));
+	private void assertElementTagClosed(String output) {
+		assertTrue(output.endsWith("</" + this.tag.getElement() + ">"));
 	}
 
 }

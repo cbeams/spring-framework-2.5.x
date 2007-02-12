@@ -25,10 +25,11 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyTag;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.Assert;
 
 /**
  * Form tag for displaying errors for a particular field or object.
- * 
+ *
  * <p>This tag supports three main usage patterns:
  *
  * <ol>
@@ -39,6 +40,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 2.0
  */
 public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
@@ -55,15 +57,35 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	public static final String SPAN_TAG = "span";
 
 
+	private String element = SPAN_TAG;
+
 	private String delimiter = "<br/>";
 
 	/**
 	 * Stores any value that existed in the 'errors messages' before the tag was started.
 	 */
 	private Object oldMessages;
-	
+
 	private boolean errorMessagesWereExposed;
 
+
+	/**
+	 * Get the HTML element must be used to render the error messages.
+	 * @return said element
+	 */
+	public String getElement() {
+		return this.element;
+	}
+
+	/**
+	 * Set the HTML element must be used to render the error messages.
+	 * <p>Defaults to an HTML '<code>&lt;span/&gt;</code>' tag.
+	 * @param element said element
+	 */
+	public void setElement(String element) {
+		Assert.hasText(element, "'element' cannot be null or blank.");
+		this.element = element;
+	}
 
 	/**
 	 * Set what delimiter must be used between error messages.
@@ -105,7 +127,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
-		tagWriter.startTag(SPAN_TAG);
+		tagWriter.startTag(this.element);
 		writeDefaultAttributes(tagWriter);
 		String delimiter = ObjectUtils.getDisplayString(evaluate("delimiter", this.delimiter));
 		String[] errorMessages = getBindStatus().getErrorMessages();
