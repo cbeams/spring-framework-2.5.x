@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of TargetSource interface that caches a local target object,
+ * TargetSource implementation that caches a local target object,
  * but allows the target to be swapped while the application is running.
  *
  * <p>If configuring an object of this class in a Spring IoC container,
@@ -32,8 +32,13 @@ import org.springframework.util.Assert;
  * of serialization.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class HotSwappableTargetSource implements TargetSource, Serializable {
+
+	/** use serialVersionUID from Spring 1.2 for interoperability */
+	private static final long serialVersionUID = 7497929212653839187L;
+
 
 	/** Target cached and invoked using reflection */
 	private Object target;
@@ -44,43 +49,36 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 	 * @param initialTarget the initial target object
 	 */
 	public HotSwappableTargetSource(Object initialTarget) {
-		Assert.notNull(initialTarget, "initialTarget is required");
+		Assert.notNull(initialTarget, "Target object must not be null");
 		this.target = initialTarget;
 	}
 
 
-	public Class getTargetClass() {
+	public synchronized Class getTargetClass() {
 		return this.target.getClass();
 	}
 
-	/**
-	 * Not static.
-	 */
 	public final boolean isStatic() {
 		return false;
 	}
 
 	public synchronized Object getTarget() {
-		// Synchronization around something that takes so little time is fine.
 		return this.target;
 	}
 
-	/**
-	 * No need to release target.
-	 */
 	public void releaseTarget(Object target) {
+		// nothing to do
 	}
 
 
 	/**
-	 * Swap the target, returning the old target.
+	 * Swap the target, returning the old target object.
 	 * @param newTarget the new target object
 	 * @return the old target object
 	 * @throws IllegalArgumentException if the new target is invalid
 	 */
 	public synchronized Object swap(Object newTarget) throws IllegalArgumentException {
-		Assert.notNull(newTarget, "New target must not be null");
-		// TODO type checks
+		Assert.notNull(newTarget, "Target object must not be null");
 		Object old = this.target;
 		this.target = newTarget;
 		return old;
@@ -88,18 +86,16 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 
 
 	/**
-	 * Two HotSwappableTargetSources are equal if the targets are equal.
+	 * Two HotSwappableTargetSources are equal if the current target
+	 * objects are equal.
 	 */
 	public boolean equals(Object other) {
-		if (!(other instanceof HotSwappableTargetSource)) {
-			return false;
-		}
-		HotSwappableTargetSource otherTargetSource = (HotSwappableTargetSource) other;
-		return this.target.equals(otherTargetSource.target);
+		return (this == other || (other instanceof HotSwappableTargetSource &&
+				this.target.equals(((HotSwappableTargetSource) other).target)));
 	}
 
 	public int hashCode() {
-		return this.target.hashCode();
+		return HotSwappableTargetSource.class.hashCode();
 	}
 
 	public String toString() {
