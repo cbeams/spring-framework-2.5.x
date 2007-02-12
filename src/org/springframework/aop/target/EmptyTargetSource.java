@@ -19,6 +19,7 @@ package org.springframework.aop.target;
 import java.io.Serializable;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Canonical <code>TargetSource</code> when there is no target
@@ -99,17 +100,26 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	}
 
 
-	public String toString() {
-		return "EmptyTargetSource: " +
-				(this.targetClass != null ? "target class [" + this.targetClass + "]" : "no target");
-	}
-
 	/**
 	 * Returns the canonical instance on deserialization in case
 	 * of no target class, thus protecting the Singleton pattern.
 	 */
 	private Object readResolve() {
 		return (this.targetClass == null ? INSTANCE : this);
+	}
+
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof EmptyTargetSource &&
+				ObjectUtils.nullSafeEquals(this.targetClass, ((EmptyTargetSource) other).targetClass)));
+	}
+
+	public int hashCode() {
+		return EmptyTargetSource.class.hashCode() * 13 + ObjectUtils.nullSafeHashCode(this.targetClass);
+	}
+
+	public String toString() {
+		return "EmptyTargetSource: " +
+				(this.targetClass != null ? "target class [" + this.targetClass + "]" : "no target class");
 	}
 
 }

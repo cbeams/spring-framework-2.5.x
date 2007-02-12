@@ -28,6 +28,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Base class for {@link org.springframework.aop.TargetSource} implementations
@@ -177,6 +178,26 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 			throw new NotSerializableException(
 					"Cannot get target for disconnecting TargetSource [" + this + "]: " + ex);
 		}
+	}
+
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (other == null || !getClass().equals(other.getClass())) {
+			return false;
+		}
+		AbstractBeanFactoryBasedTargetSource otherTargetSource = (AbstractBeanFactoryBasedTargetSource) other;
+		return (ObjectUtils.nullSafeEquals(this.beanFactory, otherTargetSource.beanFactory) &&
+				ObjectUtils.nullSafeEquals(this.targetBeanName, otherTargetSource.targetBeanName));
+	}
+
+	public int hashCode() {
+		int hashCode = getClass().hashCode();
+		hashCode = 13 * hashCode + ObjectUtils.nullSafeHashCode(this.beanFactory);
+		hashCode = 13 * hashCode + ObjectUtils.nullSafeHashCode(this.targetBeanName);
+		return hashCode;
 	}
 
 	public String toString() {
