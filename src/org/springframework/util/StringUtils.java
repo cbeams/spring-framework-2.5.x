@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -646,8 +646,8 @@ public abstract class StringUtils {
 	 * Copy the given Collection into a String array.
 	 * The Collection must contain String elements only.
 	 * @param collection the Collection to copy
-	 * @return the String array (<code>null</code> if the Collection
-	 * was <code>null</code> as well)
+	 * @return the String array (<code>null</code> if the passed-in
+	 * Collection was <code>null</code>)
 	 */
 	public static String[] toStringArray(Collection collection) {
 		if (collection == null) {
@@ -777,7 +777,8 @@ public abstract class StringUtils {
 	 * @param ignoreEmptyTokens omit empty tokens from the result array
 	 * (only applies to tokens that are empty after trimming; StringTokenizer
 	 * will not consider subsequent delimiters as token in the first place).
-	 * @return an array of the tokens
+	 * @return an array of the tokens (<code>null</code> if the input String
+	 * was <code>null</code>)
 	 * @see java.util.StringTokenizer
 	 * @see java.lang.String#trim()
 	 * @see #delimitedListToStringArray
@@ -785,6 +786,9 @@ public abstract class StringUtils {
 	public static String[] tokenizeToStringArray(
 			String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
 
+		if (str == null) {
+			return null;
+		}
 		StringTokenizer st = new StringTokenizer(str, delimiters);
 		List tokens = new ArrayList();
 		while (st.hasMoreTokens()) {
