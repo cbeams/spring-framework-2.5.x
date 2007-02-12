@@ -107,7 +107,7 @@ distribution/website before using any of them in your own applications.
 
 * j2ee/connector.jar
 - J2EE Connector Architecture 1.0 (http://java.sun.com/j2ee/connector)
-- required at runtime when using Hibernate's JCA Connector
+- required for building the framework
 
 * j2ee/ejb.jar
 - Enterprise JavaBeans API 2.0 (http://java.sun.com/products/ejb)
