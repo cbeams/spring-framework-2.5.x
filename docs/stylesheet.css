@@ -18,91 +18,31 @@ body {
 	font-size: 10pt;
 }
 
-td { font-size: 10pt; font-family: Arial }
+td { font-size: 10pt; font-family: Arial }/* Javadoc style sheet */
 
-.TableHeadingColor     { background: #F4F4F4 }
-.TableSubHeadingColor  { background: #F4F4F4 }
-.TableRowColor         { background: #FFFFFF }
+/* Define colors, fonts and other style attributes here to override the defaults */
+
+/* Page background color */
+body { background-color: #FFFFFF }
+
+/* Headings */
+h1 { font-size: 145% }
+
+/* Table colors */
+.TableHeadingColor     { background: #CCCCFF } /* Dark mauve */
+.TableSubHeadingColor  { background: #EEEEFF } /* Light mauve */
+.TableRowColor         { background: #FFFFFF } /* White */
 
 /* Font used in left-hand frame lists */
-.FrameTitleFont   { font-size: 11pt; font-family: Arial }
-.FrameHeadingFont { font-size: normal; font-family: Arial }
-.FrameItemFont    { font-size: normal; font-family: Arial }
+.FrameTitleFont   { font-size: 100%; font-family: Helvetica, Arial, sans-serif }
+.FrameHeadingFont { font-size:  90%; font-family: Helvetica, Arial, sans-serif }
+.FrameItemFont    { font-size:  90%; font-family: Helvetica, Arial, sans-serif }
 
 /* Navigation bar fonts and colors */
-.NavBarCell1    { background-color:#F4F4F4;}
-.NavBarCell1Rev { background-color:silver;}
-
+.NavBarCell1    { background-color:#EEEEFF;} /* Light mauve */
+.NavBarCell1Rev { background-color:#00008B;} /* Dark Blue */
 .NavBarFont1    { font-family: Arial, Helvetica, sans-serif; color:#000000;}
 .NavBarFont1Rev { font-family: Arial, Helvetica, sans-serif; color:#FFFFFF;}
 
 .NavBarCell2    { font-family: Arial, Helvetica, sans-serif; background-color:#FFFFFF;}
 .NavBarCell3    { font-family: Arial, Helvetica, sans-serif; background-color:#FFFFFF;}
-
-A {
-    color: #003399;
-}
-
-A:active {
-    color: #003399;
-}
-
-A:visited {
-    color: #888888;
-}
-
-P, OL, UL, LI, DL, DT, DD, BLOCKQUOTE {
-    color: #000000;
-}
-
-TD, TH, SPAN {
-    color: #000000;
-}
-
-BLOCKQUOTE {
-    margin-right: 0px;
-}
-
-TT {
-font-size: 90%;
-    font-family: "Courier New", Courier, monospace;
-    color: #000000;
-}
-
-PRE {
-font-size: 90%;
-    padding: 5px;
-    border-style: solid;
-    border-width: 1px;
-    border-color: #CCCCCC;
-    background-color: #F4F4F4;
-}
-
-UL, OL, LI {
-    list-style: disc;
-}
-
-HR  {
-    width: 100%;
-    height: 1px;
-    background-color: #CCCCCC;
-    border-width: 0px;
-    padding: 0px;
-    color: #CCCCCC;
-}
-
-.variablelist { 
-    padding-top: 10; 
-    padding-bottom:10; 
-    margin:0;
-}
-
-.itemizedlist, UL { 
-    padding-top: 0; 
-    padding-bottom:0; 
-    margin:0; 
-}
-
-.term { 
-    font-weight:bold;
-}
