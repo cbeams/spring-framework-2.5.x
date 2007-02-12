@@ -341,32 +341,13 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	}
 
 
-	public int hashCode() {
-		return 0;
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof Cglib2AopProxy &&
+				AopProxyUtils.equalsInProxy(this.advised, ((Cglib2AopProxy) other).advised)));
 	}
 
-	/**
-	 * Checks to see if this CallbackFilter is the same CallbackFilter used for
-	 * another proxy.
-	 */
-	public boolean equals(Object other) {
-		if (other == null) {
-			return false;
-		}
-		if (other == this) {
-			return true;
-		}
-
-		Cglib2AopProxy otherCglibProxy = null;
-		if (other instanceof Cglib2AopProxy) {
-			otherCglibProxy = (Cglib2AopProxy) other;
-		}
-		else {
-			// not a valid comparison
-			return false;
-		}
-
-		return AopProxyUtils.equalsInProxy(advised, otherCglibProxy.advised);
+	public int hashCode() {
+		return Cglib2AopProxy.class.hashCode();
 	}
 
 
@@ -393,8 +374,8 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-			Object retVal = methodProxy.invoke(target, args);
-			return massageReturnTypeIfNecessary(proxy, target, retVal);
+			Object retVal = methodProxy.invoke(this.target, args);
+			return massageReturnTypeIfNecessary(proxy, this.target, retVal);
 		}
 	}
 
@@ -415,8 +396,8 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			Object oldProxy = null;
 			try {
 				oldProxy = AopContext.setCurrentProxy(proxy);
-				Object retVal = methodProxy.invoke(target, args);
-				return massageReturnTypeIfNecessary(proxy, target, retVal);
+				Object retVal = methodProxy.invoke(this.target, args);
+				return massageReturnTypeIfNecessary(proxy, this.target, retVal);
 			}
 			finally {
 				AopContext.setCurrentProxy(oldProxy);
@@ -480,7 +461,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 
 		public Object loadObject() {
-			return target;
+			return this.target;
 		}
 	}
 
@@ -508,12 +489,9 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			this.advised = advised;
 		}
 
-		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) {
 			Object other = args[0];
-			if (other == null) {
-				return Boolean.FALSE;
-			}
-			if (other == proxy) {
+			if (proxy == other) {
 				return Boolean.TRUE;
 			}
 			AdvisedSupport otherAdvised = null;
@@ -525,7 +503,6 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 				otherAdvised = ((EqualsInterceptor) callback).advised;
 			}
 			else {
-				// not a valid comparison
 				return Boolean.FALSE;
 			}
 			return (AopProxyUtils.equalsInProxy(this.advised, otherAdvised) ? Boolean.TRUE : Boolean.FALSE);
@@ -545,8 +522,8 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			this.advised = advised;
 		}
 
-		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-			return new Integer(this.advised.getTargetSource().hashCode());
+		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) {
+			return new Integer(Cglib2AopProxy.class.hashCode());
 		}
 	}
 
@@ -590,7 +567,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			MethodInvocation invocation = null;
 			Object oldProxy = null;
 			boolean setProxyContext = false;
-			Class targetClass = null; //targetSource.getTargetClass();
+			Class targetClass = null;
 			Object target = null;
 			try {
 				Object retVal = null;
@@ -632,7 +609,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 					releaseTarget(target);
 				}
 				if (setProxyContext) {
-					// Restore old proxy
+					// Restore old proxy.
 					AopContext.setCurrentProxy(oldProxy);
 				}
 			}
@@ -825,25 +802,14 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			}
 		}
 
-		public int hashCode() {
-			return 0;
-		}
-
 		public boolean equals(Object other) {
-			if (other == null) {
-				return false;
-			}
 			if (other == this) {
 				return true;
 			}
-			ProxyCallbackFilter otherCallbackFilter = null;
-			if (other instanceof ProxyCallbackFilter) {
-				otherCallbackFilter = (ProxyCallbackFilter) other;
-			}
-			else {
-				// not a valid comparison
+			if (!(other instanceof ProxyCallbackFilter)) {
 				return false;
 			}
+			ProxyCallbackFilter otherCallbackFilter = (ProxyCallbackFilter) other;
 			if (this.advised.isFrozen() != otherCallbackFilter.advised.isFrozen()) {
 				return false;
 			}
@@ -856,6 +822,10 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			}
 			return (AopProxyUtils.equalsProxiedInterfaces(this.advised, otherCallbackFilter.advised) &&
 					AopProxyUtils.equalsAdvisors(advised, otherCallbackFilter.advised));
+		}
+
+		public int hashCode() {
+			return ProxyCallbackFilter.class.hashCode();
 		}
 	}
 
