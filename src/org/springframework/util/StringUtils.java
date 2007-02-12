@@ -757,7 +757,7 @@ public abstract class StringUtils {
 	 * (each of those characters is individually considered as delimiter).
 	 * @return an array of the tokens
 	 * @see java.util.StringTokenizer
-	 * @see java.lang.String#trim
+	 * @see java.lang.String#trim()
 	 * @see #delimitedListToStringArray
 	 */
 	public static String[] tokenizeToStringArray(String str, String delimiters) {
@@ -780,7 +780,7 @@ public abstract class StringUtils {
 	 * @return an array of the tokens (<code>null</code> if the input String
 	 * was <code>null</code>)
 	 * @see java.util.StringTokenizer
-	 * @see java.lang.String#trim
+	 * @see java.lang.String#trim()
 	 * @see #delimitedListToStringArray
 	 */
 	public static String[] tokenizeToStringArray(
@@ -844,8 +844,8 @@ public abstract class StringUtils {
 
 	/**
 	 * Convert a CSV list into an array of Strings.
-	 * @param str CSV list
-	 * @return an array of Strings, or the empty array if s is null
+	 * @param str the input String
+	 * @return an array of Strings, or the empty array in case of empty input
 	 */
 	public static String[] commaDelimitedListToStringArray(String str) {
 		return delimitedListToStringArray(str, ",");
@@ -854,7 +854,7 @@ public abstract class StringUtils {
 	/**
 	 * Convenience method to convert a CSV string list to a set.
 	 * Note that this will suppress duplicates.
-	 * @param str CSV String
+	 * @param str the input String
 	 * @return a Set of String entries in the list
 	 */
 	public static Set commaDelimitedListToSet(String str) {
@@ -869,10 +869,10 @@ public abstract class StringUtils {
 	/**
 	 * Convenience method to return a Collection as a delimited (e.g. CSV)
 	 * String. E.g. useful for <code>toString()</code> implementations.
-	 * @param coll Collection to display
-	 * @param delim delimiter to use (probably a ",")
-	 * @param prefix string to start each element with
-	 * @param suffix string to end each element with
+	 * @param coll the Collection to display
+	 * @param delim the delimiter to use (probably a ",")
+	 * @param prefix the String to start each element with
+	 * @param suffix the String to end each element with
 	 */
 	public static String collectionToDelimitedString(Collection coll, String delim, String prefix, String suffix) {
 		if (CollectionUtils.isEmpty(coll)) {
@@ -892,8 +892,8 @@ public abstract class StringUtils {
 	/**
 	 * Convenience method to return a Collection as a delimited (e.g. CSV)
 	 * String. E.g. useful for <code>toString()</code> implementations.
-	 * @param coll Collection to display
-	 * @param delim delimiter to use (probably a ",")
+	 * @param coll the Collection to display
+	 * @param delim the delimiter to use (probably a ",")
 	 */
 	public static String collectionToDelimitedString(Collection coll, String delim) {
 		return collectionToDelimitedString(coll, delim, "", "");
@@ -902,7 +902,7 @@ public abstract class StringUtils {
 	/**
 	 * Convenience method to return a Collection as a CSV String.
 	 * E.g. useful for <code>toString()</code> implementations.
-	 * @param coll Collection to display
+	 * @param coll the Collection to display
 	 */
 	public static String collectionToCommaDelimitedString(Collection coll) {
 		return collectionToDelimitedString(coll, ",");
@@ -911,9 +911,8 @@ public abstract class StringUtils {
 	/**
 	 * Convenience method to return a String array as a delimited (e.g. CSV)
 	 * String. E.g. useful for <code>toString()</code> implementations.
-	 * @param arr array to display. Elements may be of any type (toString
-	 * will be called on each element).
-	 * @param delim delimiter to use (probably a ",")
+	 * @param arr the array to display
+	 * @param delim the delimiter to use (probably a ",")
 	 */
 	public static String arrayToDelimitedString(Object[] arr, String delim) {
 		if (ObjectUtils.isEmpty(arr)) {
@@ -932,8 +931,7 @@ public abstract class StringUtils {
 	/**
 	 * Convenience method to return a String array as a CSV String.
 	 * E.g. useful for <code>toString()</code> implementations.
-	 * @param arr array to display. Elements may be of any type (toString
-	 * will be called on each element).
+	 * @param arr the array to display
 	 */
 	public static String arrayToCommaDelimitedString(Object[] arr) {
 		return arrayToDelimitedString(arr, ",");
