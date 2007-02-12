@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,59 +22,31 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.TargetSource;
 
 /**
- * <code>TargetSource</code> that will lazily create a user-managed object.
+ * {@link org.springframework.aop.TargetSource} implementation that will
+ * lazily create a user-managed object.
  *
- * <p>Creation of the lazy target object is controlled by the user by implementing the
- * {@link #createObject()} method. This <code>TargetSource</code> will invoke this
- * method the first time the proxy is accessed.
+ * <p>Creation of the lazy target object is controlled by the user by implementing
+ * the {@link #createObject()} method. This <code>TargetSource</code> will invoke
+ * this method the first time the proxy is accessed.
  *
- * <p>Useful when you need to pass a reference to some dependency to an object but you
- * don't actually want the dependency to be created until it is first used. A typical
- * scenario for this is a connection to a remote resource
+ * <p>Useful when you need to pass a reference to some dependency to an object
+ * but you don't actually want the dependency to be created until it is first used.
+ * A typical scenario for this is a connection to a remote resource.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2.4
+ * @see #isInitialized()
  * @see #createObject()
  */
 public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 
-	/**
-	 * <code>Log</code> instance for this class and sub-classes
-	 */
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * Stores the lazily initialized target
-	 */
+	/** The lazily initialized target object */
 	private Object lazyTarget;
 
-
-	/**
-	 * Default implementation returns <code>null</code> if the target is <code>null</code>
-	 * (it is hasn't yet been initialized) or the target class if the target has already
-	 * been initialized. Subclasses may wish to override this method to provide more
-	 * meaningful values when the target is still <code>null</code>.
-	 */
-	public Class getTargetClass() {
-		return (this.lazyTarget != null ? this.lazyTarget.getClass() : null);
-	}
-
-	public boolean isStatic() {
-		return false;
-	}
-
-	/**
-	 * Returns the lazy-initialized target object, creating it if it doesn't exist.
-	 * @see #createObject()
-	 */
-	public synchronized Object getTarget() throws Exception {
-		if (this.lazyTarget == null) {
-			logger.debug("Initializing lazy target object");
-			this.lazyTarget = createObject();
-		}
-		return this.lazyTarget;
-	}
 
 	/**
 	 * Return whether the lazy target object of this TargetSource
@@ -85,16 +57,43 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 	}
 
 	/**
-	 * No need to release target - no op.
+	 * This default implementation returns <code>null</code> if the
+	 * target is <code>null</code> (it is hasn't yet been initialized),
+	 * or the target class if the target has already been initialized.
+	 * <p>Subclasses may wish to override this method in order to provide
+	 * a meaningful value when the target is still <code>null</code>.
+	 * @see #isInitialized()
 	 */
+	public synchronized Class getTargetClass() {
+		return (this.lazyTarget != null ? this.lazyTarget.getClass() : null);
+	}
+
+	public boolean isStatic() {
+		return false;
+	}
+
+	/**
+	 * Returns the lazy-initialized target object,
+	 * creating it on-the-fly if it doesn't exist already.
+	 * @see #createObject()
+	 */
+	public synchronized Object getTarget() throws Exception {
+		if (this.lazyTarget == null) {
+			logger.debug("Initializing lazy target object");
+			this.lazyTarget = createObject();
+		}
+		return this.lazyTarget;
+	}
+
 	public void releaseTarget(Object target) throws Exception {
-		// no-op
+		// nothing to do
 	}
 
 
 	/**
-	 * Sub-classes should implement this method to return the lazy initialized object.
+	 * Subclasses should implement this method to return the lazy initialized object.
 	 * Called the first time the proxy is invoked.
+	 * @return the created object
 	 * @throws Exception if creation failed
 	 */
 	protected abstract Object createObject() throws Exception;
