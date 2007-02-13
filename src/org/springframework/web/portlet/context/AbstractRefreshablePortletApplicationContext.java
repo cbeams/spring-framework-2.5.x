@@ -141,9 +141,10 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	}
 
 	/**
-	 * Return the default config locations to use, for the case where no explicit
-	 * config locations have been specified.
-	 * <p>Default implementation returns null, requiring explicit config locations.
+	 * Return the default config locations to use, for the case where no
+	 * explicit config locations have been specified.
+	 * <p>The default implementation returns <code>null</code>,
+	 * requiring explicit config locations.
 	 * @see #setConfigLocations
 	 */
 	protected String[] getDefaultConfigLocations() {

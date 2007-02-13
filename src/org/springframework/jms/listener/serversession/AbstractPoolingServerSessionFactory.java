@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.support.JmsUtils;
-import org.springframework.jms.listener.serversession.ListenerSessionManager;
 import org.springframework.scheduling.timer.TimerTaskExecutor;
 
 /**
@@ -54,11 +53,11 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 	/**
 	 * Specify the TaskExecutor to use for executing ServerSessions
 	 * (and consequently, the underlying MessageListener).
-	 * <p>Default is a TimerTaskExecutor for each pooled ServerSession,
-	 * using one Thread per pooled JMS Session. Alternatives are a shared
-	 * TimerTaskExecutor, sharing a single Thread for the execution of all
-	 * ServerSessions, or a TaskExecutor implementation backed by a thread pool.
-	 * @see org.springframework.scheduling.timer.TimerTaskExecutor
+	 * <p>Default is a {@link org.springframework.scheduling.timer.TimerTaskExecutor}
+	 * for each pooled ServerSession, using one Thread per pooled JMS Session.
+	 * Alternatives are a shared TimerTaskExecutor, sharing a single Thread
+	 * for the execution of all ServerSessions, or a TaskExecutor
+	 * implementation backed by a thread pool.
 	 */
 	public void setTaskExecutor(TaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
@@ -68,7 +67,7 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 	 * Return the TaskExecutor to use for executing ServerSessions.
 	 */
 	protected TaskExecutor getTaskExecutor() {
-		return taskExecutor;
+		return this.taskExecutor;
 	}
 
 	/**
@@ -151,7 +150,7 @@ public abstract class AbstractPoolingServerSessionFactory implements ServerSessi
 		}
 
 		public Session getSession() {
-			return session;
+			return this.session;
 		}
 
 		public void start() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@ import javax.jms.Message;
 import javax.jms.Session;
 
 /**
- * Variant of the standard JMS MessageListener interface,
+ * Variant of the standard JMS {@link javax.jms.MessageListener} interface,
  * offering not only the received Message but also the underlying
  * JMS Session object. The latter can be used to send reply messages,
  * without the need to access an external Connection/Session,
  * i.e. without the need to access the underlying ConnectionFactory.
  *
- * <p>Supported by Spring's DefaultMessageListenerContainer,
- * SimpleMessageListenerContainer and ServerSessionMessageListenerContainer,
+ * <p>Supported by Spring's {@link DefaultMessageListenerContainer},
+ * {@link SimpleMessageListenerContainer} and
+ * {@link org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer},
  * as direct alternative to the standard JMS MessageListener interface.
  * Typically <i>not</i> supported by JCA-based listener containers:
  * For maximum compatibility, implement a standard JMS MessageListener instead.
@@ -47,8 +48,8 @@ public interface SessionAwareMessageListener {
 	 * Callback for processing a received JMS message.
 	 * <p>Implementors are supposed to process the given Message,
 	 * typically sending reply messages through the given Session.
-	 * @param message the received JMS message
-	 * @param session the underlying JMS Session
+	 * @param message the received JMS message (never <code>null</code>)
+	 * @param session the underlying JMS Session (never <code>null</code>)
 	 * @throws JMSException if thrown by JMS methods
 	 */
 	void onMessage(Message message, Session session) throws JMSException;
