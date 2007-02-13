@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,12 +23,14 @@ import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
+import org.springframework.util.Assert;
 
 /**
- * Convenient superclass for Advisors that are also static pointcuts.
+ * Convenient base class for Advisors that are also static pointcuts.
  * Serializable if Advice and subclass are.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMatcherPointcut
 		implements PointcutAdvisor, Ordered, Serializable {
@@ -38,10 +40,20 @@ public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMat
 	private Advice advice;
 
 
+	/**
+	 * Create a new StaticMethodMatcherPointcutAdvisor,
+	 * expecting bean-style configuration.
+	 * @see #setAdvice
+	 */
 	public StaticMethodMatcherPointcutAdvisor() {
 	}
 
+	/**
+	 * Create a new StaticMethodMatcherPointcutAdvisor for the given advice.
+	 * @param advice the Advice to use
+	 */
 	public StaticMethodMatcherPointcutAdvisor(Advice advice) {
+		Assert.notNull(advice, "Advice must not be null");
 		this.advice = advice;
 	}
 
@@ -51,7 +63,7 @@ public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMat
 	}
 
 	public int getOrder() {
-		return order;
+		return this.order;
 	}
 
 	public void setAdvice(Advice advice) {
@@ -59,16 +71,15 @@ public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMat
 	}
 
 	public Advice getAdvice() {
-		return advice;
-	}
-
-
-	public Pointcut getPointcut() {
-		return this;
+		return this.advice;
 	}
 
 	public boolean isPerInstance() {
-		throw new UnsupportedOperationException("perInstance property of Advisor is not yet supported in Spring");
+		return true;
+	}
+
+	public Pointcut getPointcut() {
+		return this;
 	}
 
 }

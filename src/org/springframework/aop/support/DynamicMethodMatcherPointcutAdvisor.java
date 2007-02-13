@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
+import org.springframework.util.Assert;
 
 /**
  * Convenient superclass for Advisors that are also dynamic pointcuts.
@@ -30,8 +31,8 @@ import org.springframework.core.Ordered;
  *
  * @author Rod Johnson
  * @author Rob Harrop
- * @deprecated since 2.0, in favor of using {@link DefaultPointcutAdvisor} with a
- * runtime {@link DynamicMethodMatcherPointcut}
+ * @deprecated since 2.0, in favor of using {@link DefaultPointcutAdvisor}
+ * with a runtime {@link DynamicMethodMatcherPointcut}
  */
 public abstract class DynamicMethodMatcherPointcutAdvisor extends DynamicMethodMatcherPointcut
     implements PointcutAdvisor, Ordered, Serializable {
@@ -41,10 +42,20 @@ public abstract class DynamicMethodMatcherPointcutAdvisor extends DynamicMethodM
 	private Advice advice;
 
 
+	/**
+	 * Create a new DynamicMethodMatcherPointcutAdvisor,
+	 * expecting bean-style configuration.
+	 * @see #setAdvice
+	 */
 	protected DynamicMethodMatcherPointcutAdvisor() {
 	}
 
+	/**
+	 * Create a new DynamicMethodMatcherPointcutAdvisor for the given advice.
+	 * @param advice the Advice to use
+	 */
 	protected DynamicMethodMatcherPointcutAdvisor(Advice advice) {
+		Assert.notNull(advice, "Advice must not be null");
 		this.advice = advice;
 	}
 
@@ -54,24 +65,23 @@ public abstract class DynamicMethodMatcherPointcutAdvisor extends DynamicMethodM
 	}
 
 	public int getOrder() {
-		return order;
+		return this.order;
 	}
 
 	public void setAdvice(Advice advice) {
 		this.advice = advice;
 	}
-	
+
 	public Advice getAdvice() {
-		return advice;
+		return this.advice;
 	}
 
+	public boolean isPerInstance() {
+		return true;
+	}
 
 	public final Pointcut getPointcut() {
 		return this;
-	}
-	
-	public boolean isPerInstance() {
-		throw new UnsupportedOperationException("perInstance property of Advisor is not yet supported in Spring");
 	}
 
 }

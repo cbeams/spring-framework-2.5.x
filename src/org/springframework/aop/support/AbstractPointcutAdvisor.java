@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.springframework.core.Ordered;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Abstract base class for PointcutAdvisor implementations.
- * Can be subclassed for returning a specific pointcut/advice
+ * Abstract base class for {@link org.springframework.aop.PointcutAdvisor}
+ * implementations. Can be subclassed for returning a specific pointcut/advice
  * or a freely configurable pointcut/advice.
  *
  * @author Rod Johnson
@@ -42,7 +42,7 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 	}
 
 	public int getOrder() {
-		return order;
+		return this.order;
 	}
 
 	public boolean isPerInstance() {
@@ -63,7 +63,7 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 	}
 
 	public int hashCode() {
-		return AbstractPointcutAdvisor.class.hashCode();
+		return PointcutAdvisor.class.hashCode();
 	}
 
 }
