@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -325,11 +325,30 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	public void onMessage(Message message, Session session) throws JMSException {
 		Object convertedMessage = extractMessage(message);
 		String methodName = getListenerMethodName(message, convertedMessage);
+
 		if (methodName == null) {
+			Object delegate = getDelegate();
+			if (delegate != this) {
+				if (delegate instanceof SessionAwareMessageListener) {
+					if (session != null) {
+						((SessionAwareMessageListener) delegate).onMessage(message, session);
+						return;
+					}
+					else if (!(delegate instanceof MessageListener)) {
+						throw new javax.jms.IllegalStateException("MessageListenerAdapter cannot handle a " +
+								"SessionAwareMessageListener delegate if it hasn't been invoked with a Session itself");
+					}
+				}
+				if (delegate instanceof MessageListener) {
+					((MessageListener) delegate).onMessage(message);
+					return;
+				}
+			}
 			throw new javax.jms.IllegalStateException("No default listener method specified: " +
 					"Either specify a non-null value for the 'defaultListenerMethod' property or " +
 					"override the 'getListenerMethodName' method.");
 		}
+
 		Object[] listenerArguments = buildListenerArguments(convertedMessage);
 		Object result = invokeListenerMethod(methodName, listenerArguments);
 		if (result != null) {
