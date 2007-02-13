@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,34 +19,41 @@ package org.springframework.jdbc.core;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/** 
- * An interface used by JdbcTemplate for mapping returned result sets.
- * Implementations of this interface perform the actual work of mapping
- * rows, but don't need to worry about exception handling. SQLExceptions
- * will be caught and handled correctly by the JdbcTemplate class.
+/**
+ * An interface used by {@link JdbcTemplate} for mapping rows of a
+ * {@link java.sql.ResultSet} on a per-row basis. Implementations of this
+ * interface perform the actual work of mapping each row to a result object,
+ * but don't need to worry about exception handling.
+ * {@link java.sql.SQLException SQLExceptions} will be caught and handled
+ * by the calling JdbcTemplate.
  *
- * <p>Typically used either for JdbcTemplate's query methods (with
- * RowMapperResultReader adapters) or for out parameters of stored procedures.
- * RowMapper objects are typically stateless and thus reusable; they are
- * ideal choices for implementing row-mapping logic in a single place.
+ * <p>Typically used either for {@link JdbcTemplate}'s query methods
+ * or for out parameters of stored procedures. RowMapper objects are
+ * typically stateless and thus reusable; they are an ideal choice for
+ * implementing row-mapping logic in a single place.
  *
- * <p>Alternatively, consider subclassing MappingSqlQuery from the jdbc.object
- * package: Instead of working with separate JdbcTemplate and RowMapper objects,
- * you can have executable query objects (containing row-mapping logic) there.
+ * <p>Alternatively, consider subclassing
+ * {@link org.springframework.jdbc.object.MappingSqlQuery} from the
+ * <code>jdbc.object</code> package: Instead of working with separate
+ * JdbcTemplate and RowMapper objects, you can build executable query
+ * objects (containing row-mapping logic) in that style.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @see JdbcTemplate
- * @see RowMapperResultReader
+ * @see RowCallbackHandler
+ * @see ResultSetExtractor
  * @see org.springframework.jdbc.object.MappingSqlQuery
  */
 public interface RowMapper {
-	
-	/** 
+
+	/**
 	 * Implementations must implement this method to map each row of data
-	 * in the ResultSet. This method should not call next() on the ResultSet,
-	 * but extract the current values. 
-	 * @param rs the ResultSet to map
-	 * @param rowNum The number of the current row
+	 * in the ResultSet. This method should not call <code>next()</code> on
+	 * the ResultSet; it is only supposed to map values of the current row.
+	 * @param rs the ResultSet to map (pre-initialized for the current row)
+	 * @param rowNum the number of the current row
+	 * @return the result object for the current row
 	 * @throws SQLException if a SQLException is encountered getting
 	 * column values (that is, there's no need to catch SQLException)
 	 */
