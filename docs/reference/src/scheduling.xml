@@ -169,18 +169,16 @@ public class ExampleJob extends QuartzJobBean {
 	<section id="scheduling-jdk-timer">
 		<title>Using JDK Timer support</title>
 		<para>
-  			The other way to schedule jobs in Spring is to use JDK Timer objects.
-  			More information about the <classname>Timer</classname> class itself can be found at
-  			<ulink url="http://java.sun.com/docs/books/tutorial/essential/threads/timer.html" />.
-  			The concepts discussed above also apply to the <classname>Timer</classname> support.
-  			You can create custom timers or use the timer that invokes methods. Wiring timers is
-  			done by using the <classname>TimerFactoryBean</classname>.
+  			The other way to schedule jobs in Spring is to use JDK
+			<classname>Timer</classname> objects. You can create custom timers or
+			use the timer that invokes methods. Wiring timers is done using the
+			<classname>TimerFactoryBean</classname>.
   		</para>
 		<section id="scheduling-jdk-timer-creating">
 			<title>Creating custom timers</title>
 			<para>
-  				Using the <classname>TimerTask</classname> you can create customer timer
-  				tasks, similar to Quartz jobs:
+  				Using the <classname>TimerTask</classname> you can create customer
+				timer tasks, similar to Quartz jobs:
 			</para>
   			<programlisting><![CDATA[public class CheckEmailAddresses extends TimerTask {
 
