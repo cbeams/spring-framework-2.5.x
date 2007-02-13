@@ -308,11 +308,13 @@
 		<jar jarfile="${dist.dir}/modules/spring-context.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/context/**"/>
-				<!-- exclude content of spring-agent.jar and spring-tomcat-weaver.jar -->
+				<!-- exclude content of spring-tomcat-weaver.jar -->
 				<include name="org/springframework/instrument/classloading/**"/>
 				<exclude name="org/springframework/instrument/classloading/oc4j/**"/>
 				<exclude name="org/springframework/instrument/classloading/tomcat/**"/>
 				<include name="org/springframework/jndi/**"/>
+				<include name="org/springframework/scheduling/**"/>
+				<exclude name="org/springframework/scheduling/quartz/**"/>
 				<include name="org/springframework/stereotype/**"/>
 				<include name="org/springframework/ui/**"/>
 				<exclude name="org/springframework/ui/velocity/**"/>
@@ -364,7 +366,7 @@
 				<include name="org/springframework/cache/**"/>
 				<include name="org/springframework/instrument/classloading/oc4j/**"/>
 				<include name="org/springframework/mail/**"/>
-				<include name="org/springframework/scheduling/**"/>
+				<include name="org/springframework/scheduling/quartz/**"/>
 				<include name="org/springframework/scripting/**"/>
 				<include name="org/springframework/ui/velocity/**"/>
 				<include name="org/springframework/ui/freemarker/**"/>
