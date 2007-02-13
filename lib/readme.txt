@@ -142,8 +142,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's JavaMailSender
 
 * j2ee/connector.jar
-- J2EE Connector Architecture 1.0 (http://java.sun.com/j2ee/connector)
-- required at runtime when using Hibernate's JCA Connector
+- J2EE Connector Architecture 1.5 (http://java.sun.com/j2ee/connector)
+- required for building the framework
 
 * j2ee/ejb.jar
 - Enterprise JavaBeans API 2.0 (http://java.sun.com/products/ejb)
