@@ -254,29 +254,29 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 	}
 
 	private void assertOneMessageSourceOnly(ClassPathXmlApplicationContext ctx, Object myMessageSource) {
-		String[] beanNamesForType = ctx.getBeanNamesForType(MessageSource.class);
+		String[] beanNamesForType = ctx.getBeanNamesForType(StaticMessageSource.class);
 		assertEquals(1, beanNamesForType.length);
 		assertEquals("myMessageSource", beanNamesForType[0]);
-		beanNamesForType = ctx.getBeanNamesForType(MessageSource.class, true, true);
+		beanNamesForType = ctx.getBeanNamesForType(StaticMessageSource.class, true, true);
 		assertEquals(1, beanNamesForType.length);
 		assertEquals("myMessageSource", beanNamesForType[0]);
-		beanNamesForType = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(ctx, MessageSource.class);
+		beanNamesForType = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(ctx, StaticMessageSource.class);
 		assertEquals(1, beanNamesForType.length);
 		assertEquals("myMessageSource", beanNamesForType[0]);
-		beanNamesForType = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(ctx, MessageSource.class, true, true);
+		beanNamesForType = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(ctx, StaticMessageSource.class, true, true);
 		assertEquals(1, beanNamesForType.length);
 		assertEquals("myMessageSource", beanNamesForType[0]);
 
-		Map beansOfType = ctx.getBeansOfType(MessageSource.class);
+		Map beansOfType = ctx.getBeansOfType(StaticMessageSource.class);
 		assertEquals(1, beansOfType.size());
 		assertSame(myMessageSource, beansOfType.values().iterator().next());
-		beansOfType = ctx.getBeansOfType(MessageSource.class, true, true);
+		beansOfType = ctx.getBeansOfType(StaticMessageSource.class, true, true);
 		assertEquals(1, beansOfType.size());
 		assertSame(myMessageSource, beansOfType.values().iterator().next());
-		beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, MessageSource.class);
+		beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, StaticMessageSource.class);
 		assertEquals(1, beansOfType.size());
 		assertSame(myMessageSource, beansOfType.values().iterator().next());
-		beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, MessageSource.class, true, true);
+		beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, StaticMessageSource.class, true, true);
 		assertEquals(1, beansOfType.size());
 		assertSame(myMessageSource, beansOfType.values().iterator().next());
 	}

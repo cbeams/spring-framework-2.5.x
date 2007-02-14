@@ -100,14 +100,9 @@ import org.springframework.util.ObjectUtils;
  * @see #getBeanFactory
  * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
  * @see org.springframework.beans.factory.config.BeanPostProcessor
- * @see org.springframework.context.ApplicationListener
- * @see #MESSAGE_SOURCE_BEAN_NAME
- * @see org.springframework.context.MessageSource
- * @see DelegatingMessageSource
- * @see #APPLICATION_EVENT_MULTICASTER_BEAN_NAME
  * @see org.springframework.context.event.ApplicationEventMulticaster
- * @see org.springframework.context.event.SimpleApplicationEventMulticaster
- * @see #getResourceByPath(String)
+ * @see org.springframework.context.ApplicationListener
+ * @see org.springframework.context.MessageSource
  */
 public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		implements ConfigurableApplicationContext, DisposableBean {
@@ -841,9 +836,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Return a Collection of all singleton beans that implement the
 	 * Lifecycle interface in this context.
+	 * @return Collection of Lifecycle beans
 	 */
 	protected Collection getLifecycleBeans() {
-		return getBeanFactory().getBeansOfType(Lifecycle.class, false, false).values();
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		String[] beanNames = beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
+		Collection beans = new ArrayList(beanNames.length);
+		for (int i = 0; i < beanNames.length; i++) {
+			Object bean = beanFactory.getSingleton(beanNames[i]);
+			if (bean != null) {
+				beans.add(bean);
+			}
+		}
+		return beans;
 	}
 
 
@@ -853,22 +858,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Subclasses must implement this method to perform the actual configuration load.
-	 * The method is invoked by <code>refresh()</code> before any other initialization work.
+	 * The method is invoked by {@link #refresh()} before any other initialization work.
 	 * <p>A subclass will either create a new bean factory and hold a reference to it,
 	 * or return a single BeanFactory instance that it holds. In the latter case, it will
 	 * usually throw an IllegalStateException if refreshing the context more than once.
 	 * @throws BeansException if initialization of the bean factory failed
 	 * @throws IllegalStateException if already initialized and multiple refresh
 	 * attempts are not supported
-	 * @see #refresh()
 	 */
 	protected abstract void refreshBeanFactory() throws BeansException, IllegalStateException;
 
 	/**
 	 * Subclasses must implement this method to release their internal bean factory.
-	 * The method is invoked by <code>close()</code> after all other shutdown work.
+	 * This method gets invoked by {@link #close()} after all other shutdown work.
 	 * <p>Should never throw an exception but rather log shutdown failures.
-	 * @see #refresh()
 	 */
 	protected abstract void closeBeanFactory();
 
@@ -880,9 +883,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * considered unavailable once the context has been closed.
 	 * @return this application context's internal bean factory (never <code>null</code>)
 	 * @throws IllegalStateException if the context does not hold an internal bean factory yet
-	 * (usually if <code>refresh</code> has never been called) or if the context has been
+	 * (usually if {@link #refresh()} has never been called) or if the context has been
 	 * closed already
-	 * @see #refresh()
+	 * @see #refreshBeanFactory()
+	 * @see #closeBeanFactory()
 	 */
 	public abstract ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
 
