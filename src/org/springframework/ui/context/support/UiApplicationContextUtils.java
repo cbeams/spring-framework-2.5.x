@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@ import org.springframework.ui.context.HierarchicalThemeSource;
 import org.springframework.ui.context.ThemeSource;
 
 /**
- * Utilities common to all UI application context implementations.
+ * Utility class for UI application context implementations.
+ * Provides support for a special bean named "themeSource",
+ * of type {@link org.springframework.ui.context.ThemeSource}.
  *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
@@ -63,8 +65,8 @@ public abstract class UiApplicationContextUtils {
 					hts.setParentThemeSource((ThemeSource) context.getParent());
 				}
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Using ThemeSource [" + themeSource + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using ThemeSource [" + themeSource + "]");
 			}
 			return themeSource;
 		}
@@ -79,8 +81,8 @@ public abstract class UiApplicationContextUtils {
 			else {
 				themeSource = new ResourceBundleThemeSource();
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate ThemeSource with name '" + THEME_SOURCE_BEAN_NAME +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate ThemeSource with name '" + THEME_SOURCE_BEAN_NAME +
 						"': using default [" + themeSource + "]");
 			}
 			return themeSource;

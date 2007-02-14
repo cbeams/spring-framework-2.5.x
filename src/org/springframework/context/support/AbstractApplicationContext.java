@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,26 +63,32 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.Assert;
 
 /**
- * Abstract implementation of the ApplicationContext interface.
- * Doesn't mandate the type of storage used for configuration, but implements
- * common context functionality. Uses the Template Method design pattern,
+ * Abstract implementation of the {@link org.springframework.context.ApplicationContext}
+ * interface. Doesn't mandate the type of storage used for configuration; simply
+ * implements common context functionality. Uses the Template Method design pattern,
  * requiring concrete subclasses to implement abstract methods.
  *
- * <p>In contrast to a plain BeanFactory, an ApplicationContext is supposed to
- * detect special beans defined in its internal bean factory: Therefore, this
- * class automatically registers BeanFactoryPostProcessors, BeanPostProcessors
- * and ApplicationListeners that are defined as beans in the context.
+ * <p>In contrast to a plain BeanFactory, an ApplicationContext is supposed
+ * to detect special beans defined in its internal bean factory:
+ * Therefore, this class automatically registers
+ * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor BeanFactoryPostProcessors},
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor BeanPostProcessors}
+ * and {@link org.springframework.context.ApplicationListener ApplicationListeners}
+ * which are defined as beans in the context.
  *
- * <p>A MessageSource may also be supplied as a bean in the context, with
- * the name "messageSource"; else, message resolution is delegated to the
- * parent context. Furthermore, a multicaster for application events can
- * be supplied as "applicationEventMulticaster" bean in the context; else,
- * a SimpleApplicationEventMulticaster is used.
+ * <p>A {@link org.springframework.context.MessageSource} may also be supplied
+ * as a bean in the context, with the name "messageSource"; else, message
+ * resolution is delegated to the parent context. Furthermore, a multicaster
+ * for application events can be supplied as "applicationEventMulticaster" bean
+ * of type {@link org.springframework.context.event.ApplicationEventMulticaster}
+ * in the context; else, a default multicaster of type
+ * {@link org.springframework.context.event.SimpleApplicationEventMulticaster} will be used.
  *
- * <p>Implements resource loading through extending DefaultResourceLoader.
- * Consequently, treats non-URL resource paths as class path resources
+ * <p>Implements resource loading through extending
+ * {@link org.springframework.core.io.DefaultResourceLoader}.
+ * Consequently treats non-URL resource paths as class path resources
  * (supporting full class path resource names that include the package path,
- * e.g. "mypackage/myresource.dat"), unless the <code>getResourceByPath</code>
+ * e.g. "mypackage/myresource.dat"), unless the {@link #getResourceByPath}
  * method is overwritten in a subclass.
  *
  * @author Rod Johnson
@@ -92,14 +98,9 @@ import org.springframework.util.Assert;
  * @see #getBeanFactory
  * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
  * @see org.springframework.beans.factory.config.BeanPostProcessor
- * @see org.springframework.context.ApplicationListener
- * @see #MESSAGE_SOURCE_BEAN_NAME
- * @see org.springframework.context.MessageSource
- * @see DelegatingMessageSource
- * @see #APPLICATION_EVENT_MULTICASTER_BEAN_NAME
  * @see org.springframework.context.event.ApplicationEventMulticaster
- * @see org.springframework.context.event.SimpleApplicationEventMulticaster
- * @see #getResourceByPath(String)
+ * @see org.springframework.context.ApplicationListener
+ * @see org.springframework.context.MessageSource
  */
 public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		implements ConfigurableApplicationContext, DisposableBean {
@@ -181,7 +182,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * (that is, this context is the root of the context hierarchy).
 	 */
 	public ApplicationContext getParent() {
-		return parent;
+		return this.parent;
 	}
 
 	/**
@@ -196,14 +197,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Return a friendly name for this context.
 	 */
 	public String getDisplayName() {
-		return displayName;
+		return this.displayName;
 	}
 
 	/**
 	 * Return the timestamp (ms) when this context was first loaded.
 	 */
 	public long getStartupDate() {
-		return startupTime;
+		return this.startupTime;
 	}
 
 	/**
@@ -257,7 +258,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
 	 */
 	public List getBeanFactoryPostProcessors() {
-		return beanFactoryPostProcessors;
+		return this.beanFactoryPostProcessors;
 	}
 
 
@@ -427,8 +428,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 					hms.setParentMessageSource(getInternalParentMessageSource());
 				}
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Using MessageSource [" + this.messageSource + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using MessageSource [" + this.messageSource + "]");
 			}
 		}
 		else {
@@ -436,8 +437,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			DelegatingMessageSource dms = new DelegatingMessageSource();
 			dms.setParentMessageSource(getInternalParentMessageSource());
 			this.messageSource = dms;
-			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
 						"': using default [" + this.messageSource + "]");
 			}
 		}
@@ -452,14 +453,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster = (ApplicationEventMulticaster)
 					getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
 			}
 		}
 		else {
 			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster();
-			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate ApplicationEventMulticaster with name '" +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate ApplicationEventMulticaster with name '" +
 						APPLICATION_EVENT_MULTICASTER_BEAN_NAME +
 						"': using default [" + this.applicationEventMulticaster + "]");
 			}
@@ -682,14 +683,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Subclasses must implement this method to perform the actual configuration load.
-	 * The method is invoked by <code>refresh()</code> before any other initialization work.
+	 * The method is invoked by {@link #refresh()} before any other initialization work.
 	 * <p>A subclass will either create a new bean factory and hold a reference to it,
 	 * or return a single BeanFactory instance that it holds. In the latter case, it will
 	 * usually throw an IllegalStateException if refreshing the context more than once.
 	 * @throws BeansException if initialization of the bean factory failed
 	 * @throws IllegalStateException if already initialized and multiple refresh
 	 * attempts are not supported
-	 * @see #refresh()
 	 */
 	protected abstract void refreshBeanFactory() throws BeansException, IllegalStateException;
 
@@ -701,9 +701,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * considered unavailable once the context has been closed.
 	 * @return this application context's internal bean factory (never <code>null</code>)
 	 * @throws IllegalStateException if the context does not hold an internal bean factory yet
-	 * (usually if <code>refresh</code> has never been called) or if the context has been
+	 * (usually if {@link #refresh()} has never been called) or if the context has been
 	 * closed already
-	 * @see #refresh()
+	 * @see #refreshBeanFactory()
 	 */
 	public abstract ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
 
