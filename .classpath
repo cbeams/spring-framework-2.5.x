@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry output="target/classes" kind="src" path="src"/>
+	<classpathentry kind="src" output="target/classes" path="src"/>
 	<classpathentry kind="src" path="tiger/src"/>
-	<classpathentry output="target/test-classes" kind="src" path="test"/>
-	<classpathentry output="target/load-classes" kind="src" path="load"/>
-	<classpathentry output="target/mock-classes" kind="src" path="mock"/>
-	<classpathentry output="target/sandbox/classes" kind="src" path="sandbox/src"/>
-	<classpathentry output="target/sandbox/test-classes" kind="src" path="sandbox/test"/>
+	<classpathentry kind="src" output="target/test-classes" path="test"/>
+	<classpathentry kind="src" output="target/load-classes" path="load"/>
+	<classpathentry kind="src" output="target/mock-classes" path="mock"/>
+	<classpathentry kind="src" output="target/sandbox/classes" path="sandbox/src"/>
+	<classpathentry kind="src" output="target/sandbox/test-classes" path="sandbox/test"/>
 	<classpathentry kind="src" path="samples/countries/src"/>
 	<classpathentry kind="src" path="samples/imagedb/src"/>
 	<classpathentry kind="src" path="samples/jasperdemo/src/java"/>
 	<classpathentry kind="src" path="samples/jca-1.0/src"/>
 	<classpathentry kind="src" path="samples/jpetstore/src"/>
 	<classpathentry kind="src" path="samples/jpetstore/annotation/src"/>
-	<classpathentry output="samples/petclinic/.classes" kind="src" path="samples/petclinic/src"/>
+	<classpathentry kind="src" output="samples/petclinic/.classes" path="samples/petclinic/src"/>
 	<classpathentry kind="src" path="samples/petportal/src"/>
 	<classpathentry kind="src" path="samples/tiles-example/src"/>
 	<classpathentry kind="src" path="samples/webapp-minimal/src"/>
-	<classpathentry output="target/autobuilds/classes" kind="src" path="autobuilds/src"/>
+	<classpathentry kind="src" output="target/autobuilds/classes" path="autobuilds/src"/>
 	<classpathentry kind="src" path="benchmark/cmt/src"/>
 	<classpathentry kind="src" path="benchmark/cmt/test"/>
 	<classpathentry kind="src" path="tiger/mock"/>
@@ -124,5 +124,6 @@
 	<classpathentry kind="lib" path="lib/openjpa/openjpa-all-0.9.6-incubating.jar"/>
 	<classpathentry kind="lib" path="lib/serp/serp-1.12.1.jar"/>
 	<classpathentry kind="lib" path="lib/groovy/groovy-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/concurrent/backport-util-concurrent.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
