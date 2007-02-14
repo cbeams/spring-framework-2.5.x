@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,17 +22,19 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
  * Configuration interface to be implemented by most listable bean factories.
- * In addition to ConfigurableBeanFactory, it provides facilities to analyze
- * and modify bean definitions, and to pre-instantiate singletons.
+ * In addition to {@link ConfigurableBeanFactory}, it provides facilities to
+ * analyze and modify bean definitions, and to pre-instantiate singletons.
  *
- * <p>This subinterface of BeanFactory is not meant to be used in normal
- * application code: Stick to BeanFactory or ListableBeanFactory for typical
+ * <p>This subinterface of {@link org.springframework.beans.factory.BeanFactory}
+ * is not meant to be used in normal application code: Stick to
+ * {@link org.springframework.beans.factory.BeanFactory} or
+ * {@link org.springframework.beans.factory.ListableBeanFactory} for typical
  * use cases. This interface is just meant to allow for framework-internal
  * plug'n'play even when needing access to bean factory configuration methods.
  *
  * @author Juergen Hoeller
  * @since 03.11.2003
- * @see org.springframework.context.support.AbstractApplicationContext#getBeanFactory
+ * @see org.springframework.context.support.AbstractApplicationContext#getBeanFactory()
  */
 public interface ConfigurableListableBeanFactory
 		extends ListableBeanFactory, AutowireCapableBeanFactory, ConfigurableBeanFactory {
@@ -40,6 +42,7 @@ public interface ConfigurableListableBeanFactory
 	/**
 	 * Ignore the given dependency type for autowiring:
 	 * for example, String. Default is none.
+	 * @param type the dependency type to ignore
 	 */
 	void ignoreDependencyType(Class type);
 
@@ -50,6 +53,7 @@ public interface ConfigurableListableBeanFactory
 	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
 	 * <p>By default, only the BeanFactoryAware interface is ignored.
 	 * For further types to ignore, invoke this method for each type.
+	 * @param ifc the dependency interface to ignore
 	 * @see org.springframework.beans.factory.BeanFactoryAware
 	 * @see org.springframework.context.ApplicationContextAware
 	 */
@@ -70,10 +74,11 @@ public interface ConfigurableListableBeanFactory
 
 	/**
 	 * Ensure that all non-lazy-init singletons are instantiated, also considering
-	 * FactoryBeans. Typically invoked at the end of factory setup, if desired.
+	 * {@link org.springframework.beans.factory.FactoryBean FactoryBeans}.
+	 * Typically invoked at the end of factory setup, if desired.
 	 * @throws BeansException if one of the singleton beans could not be created.
 	 * Note: This may have left the factory with some beans already initialized!
-	 * Call <code>destroySingletons()</code> for full cleanup in this case.
+	 * Call {@link #destroySingletons()} for full cleanup in this case.
 	 * @see #destroySingletons()
 	 */
 	void preInstantiateSingletons() throws BeansException;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@ package org.springframework.beans.factory.config;
 
 /**
  * Interface that defines a registry for shared bean instances.
- * Can be implemented by BeanFactory implementations to expose
- * their singleton management facility in a uniform manner.
+ * Can be implemented by {@link org.springframework.beans.factory.BeanFactory}
+ * implementations in order to expose their singleton management facility
+ * in a uniform manner.
  *
- * <p>The ConfigurableBeanFactory interface extends this interface.
+ * <p>The {@link ConfigurableBeanFactory} interface extends this interface.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -46,8 +47,8 @@ public interface SingletonBeanRegistry {
 	 * for runtime registration of singletons. As a consequence, a registry
 	 * implementation should synchronize singleton access; it will have to do
 	 * this anyway if it supports a BeanFactory's lazy initialization of singletons.
-	 * @param beanName name of the bean
-	 * @param singletonObject the existing object
+	 * @param beanName the name of the bean
+	 * @param singletonObject the existing singleton object
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 * @see org.springframework.beans.factory.DisposableBean#destroy
 	 * @see org.springframework.beans.factory.support.BeanDefinitionRegistry#registerBeanDefinition
@@ -56,23 +57,23 @@ public interface SingletonBeanRegistry {
 
 	/**
 	 * Return the (raw) singleton object registered under the given name.
-	 * Only checks already instantiated singletons; does not return an Object
-	 * for singleton bean definitions that have not been instantiated yet.
+	 * <p>Only checks already instantiated singletons; does not return an Object
+	 * for singleton bean definitions which have not been instantiated yet.
 	 * <p>The main purpose of this method is to access manually registered singletons
-	 * (see <code>registerSingleton</code>). Can also be used to access a singleton
+	 * (see {@link #registerSingleton}). Can also be used to access a singleton
 	 * defined by a bean definition that already been created, in a raw fashion.
-	 * @param beanName the name of the bean
-	 * @return the registered singleton object, or <code>null</code> if none
-	 * @see org.springframework.beans.factory.support.BeanDefinitionRegistry#getBeanDefinition
+	 * @param beanName the name of the bean to look for
+	 * @return the registered singleton object, or <code>null</code> if none found
+	 * @see ConfigurableListableBeanFactory#getBeanDefinition
 	 */
 	Object getSingleton(String beanName);
 
 	/**
 	 * Check if this registry contains a singleton instance with the given name.
-	 * Only checks already instantiated singletons; does not return <code>true</code>
-	 * for singleton bean definitions that have not been instantiated yet.
+	 * <p>Only checks already instantiated singletons; does not return <code>true</code>
+	 * for singleton bean definitions which have not been instantiated yet.
 	 * <p>The main purpose of this method is to check manually registered singletons
-	 * (see <code>registerSingleton</code>). Can also be used to check whether a
+	 * (see {@link #registerSingleton}). Can also be used to check whether a
 	 * singleton defined by a bean definition has already been created.
 	 * <p>To check whether a bean factory contains a bean definition with a given name,
 	 * use ListableBeanFactory's <code>containsBeanDefinition</code>. Calling both
@@ -84,7 +85,6 @@ public interface SingletonBeanRegistry {
 	 * @param beanName the name of the bean to look for
 	 * @return if this bean factory contains a singleton instance with the given name
 	 * @see #registerSingleton
-	 * @see org.springframework.beans.factory.support.BeanDefinitionRegistry#containsBeanDefinition
 	 * @see org.springframework.beans.factory.ListableBeanFactory#containsBeanDefinition
 	 * @see org.springframework.beans.factory.BeanFactory#containsBean
 	 */
@@ -92,11 +92,12 @@ public interface SingletonBeanRegistry {
 
 	/**
 	 * Return the names of singleton beans registered in this registry.
-	 * Only checks already instantiated singletons; does not return names
-	 * for singleton bean definitions that have not been instantiated yet.
+	 * <p>Only checks already instantiated singletons; does not return names
+	 * for singleton bean definitions which have not been instantiated yet.
 	 * <p>The main purpose of this method is to check manually registered singletons
-	 * (see <code>registerSingleton</code>). Can also be used to check which
+	 * (see {@link #registerSingleton}). Can also be used to check which
 	 * singletons defined by a bean definition have already been created.
+	 * @return the list of names as String array (never <code>null</code>)
 	 * @see #registerSingleton
 	 * @see org.springframework.beans.factory.support.BeanDefinitionRegistry#getBeanDefinitionNames
 	 * @see org.springframework.beans.factory.ListableBeanFactory#getBeanDefinitionNames
@@ -105,11 +106,12 @@ public interface SingletonBeanRegistry {
 
 	/**
 	 * Return the number of singleton beans registered in this registry.
-	 * Only checks already instantiated singletons; does not count
-	 * singleton bean definitions that have not been instantiated yet.
+	 * <p>Only checks already instantiated singletons; does not count
+	 * singleton bean definitions which have not been instantiated yet.
 	 * <p>The main purpose of this method is to check manually registered singletons
-	 * (see <code>registerSingleton</code>). Can also be used to count the number
-	 * of singletons defined by a bean definition that have already been created.
+	 * (see {@link #registerSingleton}). Can also be used to count the number of
+	 * singletons defined by a bean definition that have already been created.
+	 * @return the number of singleton beans
 	 * @see #registerSingleton
 	 * @see org.springframework.beans.factory.support.BeanDefinitionRegistry#getBeanDefinitionCount
 	 * @see org.springframework.beans.factory.ListableBeanFactory#getBeanDefinitionCount

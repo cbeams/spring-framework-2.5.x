@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,15 @@ import org.springframework.core.io.support.ResourceArrayPropertyEditor;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
- * PropertyEditorRegistrar implementation that populates a given PropertyEditorRegistry
- * (typically a BeanWrapper used for bean creation within an ApplicationContext)
- * with resource editors. Used by AbstractApplicationContext.
+ * PropertyEditorRegistrar implementation that populates a given
+ * {@link org.springframework.beans.PropertyEditorRegistry}
+ * (typically a {@link org.springframework.beans.BeanWrapper} used for bean
+ * creation within an {@link org.springframework.context.ApplicationContext})
+ * with resource editors. Used by
+ * {@link org.springframework.context.support.AbstractApplicationContext}.
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.context.support.AbstractApplicationContext#refresh()
  */
 public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 
@@ -63,13 +65,16 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 
 	/**
 	 * Populate the given bean factory with the following resource editors:
-	 * ResourceEditor, URLEditor, FileEditor, InputStreamEditor.
-	 * In case of a DefaultResourceLoader, a ClassEditor will be registered as well;
-	 * in case of a ResourcePatternResolver, a ResourceArrayPropertyEditor will be registered.
+	 * ResourceEditor, InputStreamEditor, FileEditor, URLEditor, ClassEditor, URIEditor.
+	 * <p>In case of a {@link org.springframework.core.io.support.ResourcePatternResolver},
+	 * a ResourceArrayPropertyEditor will be registered as well.
 	 * @see org.springframework.core.io.ResourceEditor
-	 * @see org.springframework.beans.propertyeditors.URLEditor
 	 * @see org.springframework.beans.propertyeditors.InputStreamEditor
-	 * @see org.springframework.context.ApplicationContext
+	 * @see org.springframework.beans.propertyeditors.FileEditor
+	 * @see org.springframework.beans.propertyeditors.URLEditor
+	 * @see org.springframework.beans.propertyeditors.ClassEditor
+	 * @see org.springframework.beans.propertyeditors.URIEditor
+	 * @see org.springframework.core.io.support.ResourceArrayPropertyEditor
 	 */
 	public void registerCustomEditors(PropertyEditorRegistry registry) {
 		ResourceEditor baseEditor = new ResourceEditor(this.resourceLoader);
