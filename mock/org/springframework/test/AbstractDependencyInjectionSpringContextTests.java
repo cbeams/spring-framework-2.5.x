@@ -109,7 +109,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * Return whether to populate protected variables of this test case.
 	 */
 	public final boolean isPopulateProtectedVariables() {
-		return populateProtectedVariables;
+		return this.populateProtectedVariables;
 	}
 
 	/**
@@ -128,7 +128,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * Return the autowire mode for test properties set by Dependency Injection.
 	 */
 	public final int getAutowireMode() {
-		return autowireMode;
+		return this.autowireMode;
 	}
 
 	/**
@@ -146,7 +146,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * for test properties set by Dependency Injection.
 	 */
 	public final boolean isDependencyCheck() {
-		return dependencyCheck;
+		return this.dependencyCheck;
 	}
 
 
@@ -163,12 +163,12 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * <p>The default implementation populates protected variables if the
 	 * {@link #populateProtectedVariables() appropriate flag is set}, else
 	 * uses autowiring if autowiring is switched on (which it is by default).
-	 * <p>You can certainly override this method if you want to totally control
-	 * how dependencies are injected into 'this' instance.
-	 * @throws Exception in the case of any errors
+	 * <p>Override this method if you need full control over how
+	 * dependencies are injected into the test instance.
+	 * @throws Exception in case of dependency injection failure
 	 * @see #populateProtectedVariables() 
 	 */
-	private void injectDependencies() throws Exception {
+	protected void injectDependencies() throws Exception {
 		if (isPopulateProtectedVariables()) {
 			if (this.managedVariableNames == null) {
 				initManagedVariableNames();
