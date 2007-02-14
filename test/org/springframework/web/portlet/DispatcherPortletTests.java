@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,7 +164,7 @@ public class DispatcherPortletTests extends TestCase {
 		TestBean testBean = new TestBean();
 		testBean.setAge(40);
 		SimplePortletApplicationContext ac =
-			(SimplePortletApplicationContext)simpleDispatcherPortlet.getPortletApplicationContext();
+				(SimplePortletApplicationContext)simpleDispatcherPortlet.getPortletApplicationContext();
 		String formAttribute = ac.getFormSessionAttributeName();
 		PortletSession session = new MockPortletSession();
 		session.setAttribute(formAttribute, testBean);
@@ -189,7 +189,7 @@ public class DispatcherPortletTests extends TestCase {
 		renderRequest.setParameter("age", "30");
 		renderRequest.setSession(actionRequest.getPortletSession());
 		simpleDispatcherPortlet.doDispatch(renderRequest, renderResponse);
-		assertEquals("42", renderResponse.getContentAsString());
+		assertEquals("finished42", renderResponse.getContentAsString());
 	}
 
 	public void testSimpleRequiredSessionFormWithoutSession() throws Exception {
@@ -208,16 +208,33 @@ public class DispatcherPortletTests extends TestCase {
 	public void testSimpleFormSubmission() throws Exception {
 		MockActionRequest actionRequest = new MockActionRequest();
 		MockActionResponse actionResponse = new MockActionResponse();
-		MockRenderRequest renderRequest = new MockRenderRequest();
-		MockRenderResponse renderResponse = new MockRenderResponse();
 		actionRequest.setParameter("action", "form");
 		actionRequest.setParameter("age", "29");
 		simpleDispatcherPortlet.processAction(actionRequest, actionResponse);
+
+		MockRenderRequest renderRequest = new MockRenderRequest();
+		MockRenderResponse renderResponse = new MockRenderResponse();
 		renderRequest.setSession(actionRequest.getPortletSession());
 		renderRequest.setParameters(actionResponse.getRenderParameterMap());
 		renderRequest.setParameter("action", "form");
 		simpleDispatcherPortlet.doDispatch(renderRequest, renderResponse);
-		assertEquals("44", renderResponse.getContentAsString());
+		assertEquals("finished44", renderResponse.getContentAsString());
+	}
+
+	public void testSimpleFormSubmissionWithValidationError() throws Exception {
+		MockActionRequest actionRequest = new MockActionRequest();
+		MockActionResponse actionResponse = new MockActionResponse();
+		actionRequest.setParameter("action", "form");
+		actionRequest.setParameter("age", "XX");
+		simpleDispatcherPortlet.processAction(actionRequest, actionResponse);
+
+		MockRenderRequest renderRequest = new MockRenderRequest();
+		MockRenderResponse renderResponse = new MockRenderResponse();
+		renderRequest.setSession(actionRequest.getPortletSession());
+		renderRequest.setParameters(actionResponse.getRenderParameterMap());
+		renderRequest.setParameter("action", "form");
+		simpleDispatcherPortlet.doDispatch(renderRequest, renderResponse);
+		assertEquals("5", renderResponse.getContentAsString());
 	}
 
 	public void testSimpleInvalidRenderRequest() throws Exception {

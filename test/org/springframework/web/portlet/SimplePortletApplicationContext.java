@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,8 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 
 	private String renderCommandSessionAttributeName;
 	private String formSessionAttributeName;
-	
-	public void refresh() throws BeansException {
 
+	public void refresh() throws BeansException {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		registerSingleton("controller1", TestFormController.class, pvs);
 		
@@ -72,57 +71,58 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 		registerSingleton("handlerMapping", ParameterHandlerMapping.class, pvs);
 
 		super.refresh();
-		
+
 		TestFormController controller1 = (TestFormController) getBean("controller1");
 		this.renderCommandSessionAttributeName = controller1.getRenderCommandName();
 		this.formSessionAttributeName = controller1.getFormSessionName();
 	}
-	
+
 	public String getRenderCommandSessionAttributeName() {
 		return this.renderCommandSessionAttributeName;
 	}
-	
+
 	public String getFormSessionAttributeName() {
 		return this.formSessionAttributeName;
 	}
-	
+
+
 	public static class TestFormController extends SimpleFormController {
-		
+
 		TestFormController() {
 			super();
 			this.setCommandClass(TestBean.class);
 			this.setCommandName("testBean");
 			this.setFormView("form");
 		}
-		
+
 		public void doSubmitAction(Object command) {
-			TestBean testBean = (TestBean)command;
+			TestBean testBean = (TestBean) command;
 			testBean.setAge(testBean.getAge() + 10);
 		}
-		
+
 		public ModelAndView showForm(RenderRequest request, RenderResponse response, BindException errors) throws Exception {
 			TestBean testBean = (TestBean) errors.getModel().get(getCommandName());
-			this.writeResponse(response, testBean);
+			this.writeResponse(response, testBean, false);
 			return null;
 		}
-		
-		public ModelAndView onSubmitRender(RenderRequest request, RenderResponse response, Object command, BindException errors) 
-			throws IOException {
-			TestBean testBean = (TestBean)command;
-			this.writeResponse(response, testBean);
+
+		public ModelAndView onSubmitRender(RenderRequest request, RenderResponse response, Object command, BindException errors)
+				throws IOException {
+			TestBean testBean = (TestBean) command;
+			this.writeResponse(response, testBean, true);
 			return null;
 		}
-		
+
 		private String getRenderCommandName() {
 			return this.getRenderCommandSessionAttributeName();
 		}
-		
+
 		private String getFormSessionName() {
 			return this.getFormSessionAttributeName();
 		}
-		
-		private void writeResponse(RenderResponse response, TestBean testBean) throws IOException {
-			response.getWriter().write("" + (testBean.getAge() + 5));
+
+		private void writeResponse(RenderResponse response, TestBean testBean, boolean finished) throws IOException {
+			response.getWriter().write((finished ? "finished" : "") + (testBean.getAge() + 5));
 		}
 	}
 
