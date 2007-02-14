@@ -90,7 +90,8 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	/**
 	 * Prepare this test instance, for example populating its fields.
 	 * The context has already been loaded at the time of this callback.
-	 * <p>This implementation does nothing.
+	 * <p>The default implementation does nothing.
+	 * @throws Exception in case of preparation failure
 	 */
 	protected void prepareTestInstance() throws Exception {
 	}
@@ -136,6 +137,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * <p>If you override this method, you will typically have to override
 	 * {@link #loadContext(Object)} as well, being able to handle the key type
 	 * that this method returns.
+	 * @return the context key
 	 * @see #getConfigLocations()
 	 */
 	protected Object contextKey() {
@@ -159,6 +161,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * @param locations the config locations (as Spring resource locations,
 	 * e.g. full classpath locations or any kind of URL)
 	 * @return the corresponding ApplicationContext instance (potentially cached)
+	 * @throws Exception if context loading failed
 	 */
 	protected ConfigurableApplicationContext loadContextLocations(String[] locations) throws Exception {
 		++this.loadCount;
@@ -173,6 +176,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * @param paths the config paths (relative to the concrete test class,
 	 * loading classpath resources from the same package)
 	 * @return the corresponding ApplicationContext instance (potentially cached)
+	 * @throws Exception if context loading failed
 	 */
 	protected ConfigurableApplicationContext loadContextPaths(String[] paths) throws Exception {
 		++this.loadCount;
