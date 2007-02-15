@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1441,8 +1441,14 @@ public class HibernateJtaTransactionTests extends TestCase {
 
 		Synchronization synchronization = transaction.getSynchronization();
 		assertTrue("JTA synchronization registered", synchronization != null);
-		synchronization.beforeCompletion();
-		synchronization.afterCompletion(Status.STATUS_COMMITTED);
+		try {
+			synchronization.beforeCompletion();
+			fail("Should have thrown HibernateSystemException");
+		}
+		catch (HibernateSystemException ex) {
+			assertSame(flushEx, ex.getCause());
+		}
+		synchronization.afterCompletion(Status.STATUS_ROLLEDBACK);
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -945,9 +945,8 @@ public abstract class SessionFactoryUtils {
 		}
 
 		/**
-		 * JTA beforeCompletion callback: just invoked on commit.
+		 * JTA <code>beforeCompletion</code> callback: just invoked on commit.
 		 * <p>In case of an exception, the JTA transaction gets set to rollback-only.
-		 * (Synchronization.beforeCompletion is not supposed to throw an exception.)
 		 * @see SpringSessionSynchronization#beforeCommit
 		 */
 		public void beforeCompletion() {
@@ -955,30 +954,46 @@ public abstract class SessionFactoryUtils {
 				boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
 				this.springSessionSynchronization.beforeCommit(readOnly);
 			}
-			catch (Throwable ex) {
-				logger.error("beforeCommit callback threw exception", ex);
-				try {
-					this.jtaTransactionManager.setRollbackOnly();
-				}
-				catch (UnsupportedOperationException ex2) {
-					// Probably Hibernate's WebSphereExtendedJTATransactionLookup pseudo JTA stuff...
-					logger.debug("JTA transaction handle does not support setRollbackOnly method - " +
-							"relying on JTA provider to mark the transaction as rollback-only based on " +
-							"the exception thrown from beforeCompletion", ex);
-				}
-				catch (Exception ex2) {
-					logger.error("Could not set JTA transaction rollback-only", ex2);
-				}
+			catch (RuntimeException ex) {
+				setRollbackOnlyIfPossible();
+				throw ex;
 			}
-			// Unbind the SessionHolder from the thread early, to avoid issues
-			// with strict JTA implementations that issue warnings when doing JDBC
-			// operations after transaction completion (e.g. Connection.getWarnings).
-			this.beforeCompletionCalled = true;
-			this.springSessionSynchronization.beforeCompletion();
+			catch (Error err) {
+				setRollbackOnlyIfPossible();
+				throw err;
+			}
+			finally {
+				// Unbind the SessionHolder from the thread early, to avoid issues
+				// with strict JTA implementations that issue warnings when doing JDBC
+				// operations after transaction completion (e.g. Connection.getWarnings).
+				this.beforeCompletionCalled = true;
+				this.springSessionSynchronization.beforeCompletion();
+			}
 		}
 
 		/**
-		 * JTA afterCompletion callback: invoked after commit/rollback.
+		 * Set the underlying JTA transaction to rollback-only.
+		 * <p>Note that this adapter will never perform a rollback-only call on WebLogic,
+		 * since WebLogic Server is known to automatically mark the transaction as
+		 * rollback-only in case of a <code>beforeCompletion</code> exception..
+		 */
+		private void setRollbackOnlyIfPossible() {
+			if (!this.jtaTransactionManager.getClass().getName().startsWith("weblogic.")) {
+				try {
+					this.jtaTransactionManager.setRollbackOnly();
+				}
+				catch (UnsupportedOperationException ex) {
+					// Probably Hibernate's WebSphereExtendedJTATransactionLookup pseudo JTA stuff...
+					logger.debug("JTA transaction handle does not support setRollbackOnly method", ex);
+				}
+				catch (Throwable ex) {
+					logger.error("Could not set JTA transaction rollback-only", ex);
+				}
+			}
+		}
+
+		/**
+		 * JTA <code>afterCompletion</code> callback: invoked after commit/rollback.
 		 * <p>Needs to invoke SpringSessionSynchronization's beforeCompletion
 		 * at this late stage, as there's no corresponding callback with JTA.
 		 * @see SpringSessionSynchronization#beforeCompletion
