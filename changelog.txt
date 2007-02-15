@@ -3,12 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.9 (12.2.2007)
+Changes in version 1.2.9 (15.2.2007)
 ------------------------------------
 
 General
 * many javadoc refinements and clarifications
 * declared all internal ThreadLocal variables as final (to avoid class reloading issues)
+* overall startup/shutdown logging at info level is less verbose (activate debug log level for more config details)
 
 Package org.springframework.aop
 * reworked JdkDynamicAopProxy's "Method.setAccessible" handling to avoid unnecessary calls
@@ -18,9 +19,11 @@ Package org.springframework.aop
 * exposed "indexOf(Advice)" method on Advised interface
 * revised ProxyConfig/AdvisedSupport's "toString()" output
 * revised SingletonTargetSource's and AbstractBeanFactoryBasedTargetSource's "toString()" output
+* HotSwappableTargetSource's "hashCode" implementation returns a constant value even if the target object changes
 * AbstractAutoProxyCreator considers all Advices (not just MethodInterceptors) as infrastructure classes to ignore
 
 Package org.springframework.beans
+* fixed BeanWrapperImpl's "toString()" output in case of no wrapped object set
 * Number objects (as property or argument values) are automatically coerced into the target Number type (if necessary)
 * refined PropertyAccessExceptionsException to show nested details even when wrapped in a standard JDK exception
 * deprecated BeanUtils's "canonicalName" in favor of PropertyAccessorUtils's "canonicalPropertyName"
@@ -95,6 +98,8 @@ Package org.springframework.orm
 * Hibernate3 LocalSessionFactoryBean exposes configured DataSource for schema update (required on Hibernate 3.2.1+)
 * Hibernate3 LocalSessionFactoryBean registers filter definitions before loading any mapping files
 * added "flushMode" init parameter to Hibernate3 OpenSessionInViewFilter (supporting "AUTO" etc as value)
+* reworked Hibernate JTA transaction synchronization to expose "beforeCompletion" exceptions to the caller
+* Hibernate JTA transaction synchronization does not call "setRollbackOnly" on WebLogic, to preserve the root cause
 * fixed Hibernate JTA transaction synchronization to properly mark a rollback on WebSphereExtendedJTATransactionLookup
 * removed special Session reconnection check for Hibernate 3.1 RC1
 
