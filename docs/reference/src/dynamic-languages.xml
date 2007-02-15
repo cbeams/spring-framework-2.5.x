@@ -103,7 +103,7 @@ import org.springframework.scripting.Messenger
 ]]><lineannotation>// define the implementation in Groovy</lineannotation><![CDATA[
 class GroovyMessenger implements Messenger {
 
-    @Property String message;
+    String message
 }]]></programlisting>
 		<para>
             Finally, here are the bean definitions that will effect the injection of the
@@ -404,7 +404,7 @@ import org.springframework.scripting.Messenger
 
 class GroovyMessenger implements Messenger {
 
-    @Property String message;
+    String message
 }
     </lang:inline-script>
     <lang:property name="message" value="I Can Do The Frug" />
@@ -482,9 +482,9 @@ class GroovyMessenger implements Messenger {
         this.message = message;
     }
 
-    @Property String message;
+    String message
 
-    @Property String anotherMessage
+    String anotherMessage
 }]]></programlisting>
 				<programlisting><![CDATA[<lang:groovy id="badMessenger"
     script-source="classpath:Messenger.groovy">
@@ -642,7 +642,7 @@ RubyMessenger.new]]></programlisting>
 			    </para>
 			    <itemizedlist>
                     <listitem>
-                        <para><filename>groovy-1.0-jsr-04.jar</filename></para>
+                        <para><filename>groovy-1.0.jar</filename></para>
                     </listitem>
                     <listitem>
                         <para><filename>asm-2.2.2.jar</filename></para>
@@ -923,21 +923,21 @@ void setMessage(String aMessage) {
 	            of the Spring distribution.
 			</para>
 			<programlisting><lineannotation>&lt;!-- from the file '/WEB-INF/groovy/FortuneController.groovy' --&gt;</lineannotation><![CDATA[
-package org.springframework.showcase.fortune.web;
+package org.springframework.showcase.fortune.web
 
-import org.springframework.showcase.fortune.service.FortuneService;
-import org.springframework.showcase.fortune.domain.Fortune;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.showcase.fortune.service.FortuneService
+import org.springframework.showcase.fortune.domain.Fortune
+import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.servlet.mvc.Controller
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
-public class FortuneController implements Controller {
+class FortuneController implements Controller {
 
-    @Property FortuneService fortuneService
+    FortuneService fortuneService
 
-    public ModelAndView handleRequest(
+    ModelAndView handleRequest(
             HttpServletRequest request, HttpServletResponse httpServletResponse) {
 
         return new ModelAndView("tell", "fortune", this.fortuneService.tellFortune())
@@ -987,18 +987,20 @@ public class FortuneController implements Controller {
 import org.springframework.validation.Errors
 import org.springframework.beans.TestBean
 
-public class TestBeanValidator implements Validator {
+class TestBeanValidator implements Validator {
 
     boolean supports(Class clazz) {
-        return TestBean.isAssignableFrom(clazz)
+        return TestBean.class.isAssignableFrom(clazz)
     }
     
     void validate(Object bean, Errors errors) {
-        String name = bean.getName()
-        if(name == null || name.trim().length == 0) {
-            errors.reject("whitespace", "Cannot be composed wholly of whitespace")
+        def name = bean.name
+        if(name?.trim()?.size() > 0) {
+            return
         }
+	errors.reject("whitespace", "Cannot be composed wholly of whitespace")
     }
+}
 }]]></programlisting>
 		</section>
 	</section>
