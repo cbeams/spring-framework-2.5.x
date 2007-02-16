@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,8 +62,8 @@ public interface RequestAttributes {
 	Object getAttribute(String name, int scope);
 
 	/**
-	 * Set the value for the scoped attribute of the given name.
-	 * Replaces an existing value, if any.
+	 * Set the value for the scoped attribute of the given name,
+	 * replacing an existing value (if any).
 	 * @param name the name of the attribute
 	 * @param scope the scope identifier
 	 * @param value the value for the attribute
@@ -72,25 +72,29 @@ public interface RequestAttributes {
 
 	/**
 	 * Remove the scoped attribute of the given name, if it exists.
+	 * <p>Note that an implementation should also remove a registered destruction
+	 * callback for the specified attribute, if any. It does, however, <i>not</i>
+	 * need to <i>execute</i> a registered destruction callback in this case,
+	 * since the object will be destroyed by the caller (if appropriate).
 	 * @param name the name of the attribute
 	 * @param scope the scope identifier
 	 */
 	void removeAttribute(String name, int scope);
 
 	/**
-	 * Register a callback to be executed at destruction of the
+	 * Register a callback to be executed on destruction of the
 	 * specified attribute in the given scope.
 	 * <p>Implementations should do their best to execute the callback
 	 * at the appropriate time: that is, at request completion or session
-	 * termination, respectively. If such a callback is not supported
-	 * by the underlying runtime environment, the callback must be
-	 * ignored and a corresponding warning should be logged.
-	 * <p>Note that destruction usually corresponds to destruction of the
-	 * entire scope, not to the individual attribute having been removed.
-	 * If an attribute gets removed via this facade's
-	 * {@link #removeAttribute(String, int)} method, any registered
-	 * destruction callback should be disabled as well (assuming that the
-	 * removed object will be reused or manually destroyed).
+	 * termination, respectively. If such a callback is not supported by the
+	 * underlying runtime environment, the callback <i>must be ignored</i>
+	 * and a corresponding warning should be logged.
+	 * <p>Note that 'destruction' usually corresponds to destruction of the
+	 * entire scope, not to the individual attribute having been explicitly
+	 * removed by the application. If an attribute gets removed via this
+	 * facade's {@link #removeAttribute(String, int)} method, any registered
+	 * destruction callback should be disabled as well, assuming that the
+	 * removed object will be reused or manually destroyed.
 	 * @param name the name of the attribute to register the callback for
 	 * @param callback the destruction callback to be executed
 	 * @param scope the scope identifier
@@ -99,12 +103,14 @@ public interface RequestAttributes {
 
 	/**
 	 * Return an id for the current underlying session.
+	 * @return the session id as String (never <code>null</code>
 	 */
 	String getSessionId();
 
 	/**
 	 * Expose the best available mutex for the underlying session:
 	 * that is, an object to synchronize on for the underlying session.
+	 * @return the session mutex to use (never <code>null</code>
 	 */
 	Object getSessionMutex();
 

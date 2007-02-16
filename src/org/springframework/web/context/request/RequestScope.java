@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.web.context.request;
 /**
  * Request-backed {@link org.springframework.beans.factory.config.Scope}
  * implementation.
- * 
+ *
  * <p>Relies on a thread-bound {@link RequestAttributes} instance, which
  * can be exported through {@link RequestContextListener},
  * {@link org.springframework.web.filter.RequestContextFilter} or
@@ -27,15 +27,16 @@ package org.springframework.web.context.request;
  *
  * <p>This <code>Scope</code> will also work for Portlet environments,
  * through an alternate <code>RequestAttributes</code> implementation
- * (as exposed out-of-the-box by Spring's <code>DispatcherPortlet</code>).
+ * (as exposed out-of-the-box by Spring's
+ * {@link org.springframework.web.portlet.DispatcherPortlet}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 2.0
- * @see org.springframework.web.context.request.RequestContextHolder#currentRequestAttributes()
+ * @see RequestContextHolder#currentRequestAttributes()
  * @see RequestAttributes#SCOPE_REQUEST
- * @see org.springframework.web.context.request.RequestContextListener
+ * @see RequestContextListener
  * @see org.springframework.web.filter.RequestContextFilter
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.portlet.DispatcherPortlet
@@ -46,11 +47,9 @@ public class RequestScope extends AbstractRequestAttributesScope {
 		return RequestAttributes.SCOPE_REQUEST;
 	}
 
-
 	/**
 	 * There is no conversation id concept for a request, so this method
 	 * returns <code>null</code>.
-	 * @return <code>null</code> 
 	 */
 	public String getConversationId() {
 		return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,52 +20,51 @@ import org.springframework.beans.factory.ObjectFactory;
 
 /**
  * Strategy interface used by a {@link ConfigurableBeanFactory},
- * representing a target scope to hold beans in.
+ * representing a target scope to hold bean instances in.
+ * This allows for extending the BeanFactory's standard scopes
+ * {@link ConfigurableBeanFactory#SCOPE_SINGLETON "singleton"} and
+ * {@link ConfigurableBeanFactory#SCOPE_PROTOTYPE "prototype"}
+ * with custom further scopes, registered for a
+ * {@link ConfigurableBeanFactory#registerScope(String, Scope) specific key}.
  *
- * <p>Provides the ability to get and put objects from whatever underlying
- * storage mechanism, such as HTTP session or request. The name passed into
- * this class's <code>get</code> and <code>put</code> methods will identify
- * the target attribute in the scope.
+ * <p>{@link org.springframework.context.ApplicationContext} implementations
+ * such as a {@link org.springframework.web.context.WebApplicationContext}
+ * may register additional standard scopes specific to their environment,
+ * e.g. {@link org.springframework.web.context.WebApplicationContext#SCOPE_REQUEST "request"}
+ * and {@link org.springframework.web.context.WebApplicationContext#SCOPE_SESSION "session"},
+ * based on this Scope SPI.
+ *
+ * <p>Even if its primary use is for extended scopes in a web environment,
+ * this SPI is completely generic: It provides the ability to get and put
+ * objects from any underlying storage mechanism, such as an HTTP session
+ * or a custom conversation mechanism. The name passed into this class's
+ * <code>get</code> and <code>remove</code> methods will identify the
+ * target object in the current scope.
  *
  * <p><code>Scope</code> implementations are expected to be thread-safe.
- * One <code>Scope</code> can be used with multiple bean factories, if desired.
- *
- * <p>An example of a possible underlying storage mechanism would be a session
- * API such as the Servlet API's {@link javax.servlet.http.HttpSession} interface.
+ * One <code>Scope</code> instance can be used with multiple bean factories
+ * at the same time, if desired, with any number of threads accessing
+ * the <code>Scope</code> concurrently from any number of factories.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 2.0
  * @see ConfigurableBeanFactory#registerScope
- * @see org.springframework.aop.scope.ScopedProxyFactoryBean
  * @see CustomScopeConfigurer
+ * @see org.springframework.aop.scope.ScopedProxyFactoryBean
+ * @see org.springframework.web.context.request.RequestScope
+ * @see org.springframework.web.context.request.SessionScope
  */
 public interface Scope {
-
-	/**
-	 * Return the conversation id for the current underlying scope, if any.
-	 * <p>The exact value of the converation id is totally dependent on the
-	 * underlying storage mechanism (of course). In the case of session scoped
-	 * beans a good conversation id probably would be the
-	 * {@link javax.servlet.http.HttpSession#getId() session id}; in the case
-	 * of a JCache scope a good conversation id probably would be the name of
-	 * the associated cache.
-	 * <p>It is perfectly valid to return <code>null</code> in an
-	 * implementation of this method if the underlying storage mechanism has
-	 * no obvious good candidate for a conversation id.
-	 * @return the conversation id, or <code>null</code> if there is no
-	 * conversation id for this scope
-	 */
-	String getConversationId();
 
 	/**
 	 * Return the object with the given name from the underlying scope,
 	 * {@link org.springframework.beans.factory.ObjectFactory#getObject() creating it}
 	 * if not found in the underlying storage mechanism.
 	 * @param name the name of the object to retrieve
-	 * @param objectFactory the {@link ObjectFactory} to use to create the scoped object if it is not present in the
-	 * underlying storage mechanism
-	 * @return the desired object
+	 * @param objectFactory the {@link ObjectFactory} to use to create the scoped
+	 * object if it is not present in the underlying storage mechanism
+	 * @return the desired object (never <code>null</code>)
 	 */
 	Object get(String name, ObjectFactory objectFactory);
 
@@ -73,22 +72,50 @@ public interface Scope {
 	 * Remove the object with the given <code>name</code> from the underlying scope.
 	 * <p>Returns <code>null</code> if no object was found; otherwise
 	 * returns the removed <code>Object</code>.
+	 * <p>Note that an implementation should also remove a registered destruction
+	 * callback for the specified object, if any. It does, however, <i>not</i>
+	 * need to <i>execute</i> a registered destruction callback in this case,
+	 * since the object will be destroyed by the caller (if appropriate).
 	 * @param name the name of the object to remove
-	 * @return the removed object, if any
+	 * @return the removed object, or <code>null</code> if no object was present
+	 * @see #registerDestructionCallback
 	 */
 	Object remove(String name);
 
 	/**
-	 * Register a callback to be executed at destruction of the specified
-	 * object (or at destruction of the entire scope, if the scope does not
-	 * destroy individual objects but rather only terminate in its entirety).
+	 * Register a callback to be executed on destruction of the specified
+	 * object in the scope (or at destruction of the entire scope, if the
+	 * scope does not destroy individual objects but rather only terminates
+	 * in its entirety).
 	 * <p>Implementations should do their best to execute the callback
 	 * at the appropriate time. If such a callback is not supported
 	 * by the underlying runtime environment, the callback <i>must be
 	 * ignored</i> and a corresponding warning should be logged.
+	 * <p>Note that 'destruction' refers to to automatic destruction of
+	 * the object as part of the scope's own lifecycle, not to the individual
+	 * scoped object having been explicitly removed by the application.
+	 * If a scoped object gets removed via this facade's {@link #remove(String)}
+	 * method, any registered destruction callback should be removed as well,
+	 * assuming that the removed object will be reused or manually destroyed.
 	 * @param name the name of the object to execute the destruction callback for
 	 * @param callback the destruction callback to be executed
 	 */
 	void registerDestructionCallback(String name, Runnable callback);
+
+	/**
+	 * Return the conversation id for the current underlying scope, if any.
+	 * <p>The exact meaning of the converation id depends on the underlying
+	 * storage mechanism. In the case of session-scoped objects, the
+	 * conversation id would typically be equal to (or derived from) the
+	 * {@link javax.servlet.http.HttpSession#getId() session id}; in the
+	 * case of a custom conversation that sits within the overall session,
+	 * the specific id for the current conversation would be appropriate.
+	 * <p>It is perfectly valid to return <code>null</code> in an
+	 * implementation of this method if the underlying storage mechanism
+	 * has no obvious candidate for a conversation id.
+	 * @return the conversation id, or <code>null</code> if there is no
+	 * conversation id for the current scope
+	 */
+	String getConversationId();
 
 }

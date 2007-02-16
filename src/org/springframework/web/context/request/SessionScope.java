@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,18 @@ package org.springframework.web.context.request;
 import org.springframework.beans.factory.ObjectFactory;
 
 /**
- * Session-backed Scope implementation. Relies on a thread-bound
- * RequestAttributes instance, which can be exported through
- * RequestContextListener, RequestContextFilter or DispatcherServlet.
+ * Session-backed {@link org.springframework.beans.factory.config.Scope}
+ * implementation.
  *
- * <p>This Scope will also work for Portlet environments,
- * through an alternate RequestAttributes implementation
- * (as exposed out-of-the-box by Spring's DispatcherPortlet).
+ * <p>Relies on a thread-bound {@link RequestAttributes} instance, which
+ * can be exported through {@link RequestContextListener},
+ * {@link org.springframework.web.filter.RequestContextFilter} or
+ * {@link org.springframework.web.servlet.DispatcherServlet}.
+ *
+ * <p>This <code>Scope</code> will also work for Portlet environments,
+ * through an alternate <code>RequestAttributes</code> implementation
+ * (as exposed out-of-the-box by Spring's
+ * {@link org.springframework.web.portlet.DispatcherPortlet}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -34,7 +39,7 @@ import org.springframework.beans.factory.ObjectFactory;
  * @see RequestContextHolder#currentRequestAttributes()
  * @see RequestAttributes#SCOPE_SESSION
  * @see RequestAttributes#SCOPE_GLOBAL_SESSION
- * @see org.springframework.web.context.request.RequestContextListener
+ * @see RequestContextListener
  * @see org.springframework.web.filter.RequestContextFilter
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.portlet.DispatcherPortlet
@@ -46,7 +51,8 @@ public class SessionScope extends AbstractRequestAttributesScope {
 
 	/**
 	 * Create a new SessionScope, storing attributes in a locally
-	 * isolated session.
+	 * isolated session (or default session, if there is no distinction
+	 * between a global session and a component-specific session).
 	 */
 	public SessionScope() {
 		this.scope = RequestAttributes.SCOPE_SESSION;
@@ -60,6 +66,8 @@ public class SessionScope extends AbstractRequestAttributesScope {
 	 * If this flag is on, objects will be put into the "application scope" session;
 	 * else they will end up in the "portlet scope" session (the typical default).
 	 * <p>In a Servlet environment, this flag is effectively ignored.
+	 * @param globalSession <code>true</code> in case of the global session as target;
+	 * <code>false</code> in case of a component-specific session as target
 	 * @see org.springframework.web.portlet.context.PortletRequestAttributes
 	 * @see org.springframework.web.context.request.ServletRequestAttributes
 	 */
