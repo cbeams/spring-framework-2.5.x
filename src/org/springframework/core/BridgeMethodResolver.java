@@ -16,12 +16,12 @@
 
 package org.springframework.core;
 
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +44,8 @@ import org.springframework.util.ReflectionUtils;
  * <p>See <a href="http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#15.12.4.5">
  * The Java Language Specification</a> for more details on the use of bridge methods.
  *
- * <p>Only usable on Java 5. Use an appropriate {@link JdkVersion} check
- * before calling this class, if a fallback for JDK 1.3/1.4 is desirable.
+ * <p>Only usable on JDK 1.5 and higher. Use an appropriate {@link JdkVersion}
+ * check before calling this class, if a fallback for JDK 1.3/1.4 is desirable.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -173,21 +173,44 @@ public abstract class BridgeMethodResolver {
 	 */
 	private static boolean isResolvedTypeMatch(Method genericMethod, Method candidateMethod, Map typeVariableMap) {
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
-		Class[] resolvedTypes = new Class[genericParameters.length];
+		Class[] candidateParameters = candidateMethod.getParameterTypes();
+		if (genericParameters.length != candidateParameters.length) {
+			return false;
+		}
 		for (int i = 0; i < genericParameters.length; i++) {
 			Type genericParameter = genericParameters[i];
-			if (genericParameter instanceof TypeVariable) {
-				TypeVariable tv = (TypeVariable) genericParameter;
-				resolvedTypes[i] = (Class) typeVariableMap.get(tv.getName());
-			}
-			else if (genericParameter instanceof ParameterizedType) {
-				resolvedTypes[i] = (Class) (((ParameterizedType) genericParameter).getRawType());
+			Class candidateParameter = candidateParameters[i];
+			if (genericParameter instanceof GenericArrayType && candidateParameter.isArray()) {
+				// An array type: compare the component type.
+				if (!candidateParameter.getComponentType().equals(
+						getRawType(((GenericArrayType) genericParameter).getGenericComponentType(), typeVariableMap))) {
+					return false;
+				}
 			}
 			else {
-				resolvedTypes[i] = (Class) genericParameter;
+				// A non-array type: compare the type itself.
+				if (!candidateParameter.equals(getRawType(genericParameter, typeVariableMap))) {
+					return false;
+				}
 			}
 		}
-		return Arrays.equals(resolvedTypes, candidateMethod.getParameterTypes());
+		return true;
+	}
+
+	/**
+	 * Determine the raw type for the given generic parameter type.
+	 */
+	private static Type getRawType(Type genericType, Map typeVariableMap) {
+		if (genericType instanceof TypeVariable) {
+			TypeVariable tv = (TypeVariable) genericType;
+			return (Type) typeVariableMap.get(tv.getName());
+		}
+		else if (genericType instanceof ParameterizedType) {
+			return ((ParameterizedType) genericType).getRawType();
+		}
+		else {
+			return genericType;
+		}
 	}
 
 	/**
@@ -215,8 +238,8 @@ public abstract class BridgeMethodResolver {
 		Class type = cls.getSuperclass();
 		while (!Object.class.equals(type)) {
 			if (genericType instanceof ParameterizedType) {
-				ParameterizedType pt1 = (ParameterizedType) genericType;
-				populateTypeMapFromParameterizedType(typeVariableMap, pt1);
+				ParameterizedType pt = (ParameterizedType) genericType;
+				populateTypeMapFromParameterizedType(typeVariableMap, pt);
 			}
 			extractTypeVariablesFromGenericInterfaces(type.getGenericInterfaces(), typeVariableMap);
 			genericType = type.getGenericSuperclass();

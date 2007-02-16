@@ -27,7 +27,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
 
 import junit.framework.TestCase;
 
@@ -45,6 +44,16 @@ public class BridgeMethodResolverTests extends TestCase {
 	public void testFindBridgedMethod() throws Exception {
 		Method unbridged = MyFoo.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method bridged = MyFoo.class.getDeclaredMethod("someMethod", Serializable.class, Object.class);
+		assertFalse(unbridged.isBridge());
+		assertTrue(bridged.isBridge());
+
+		assertEquals("Unbridged method not returned directly", unbridged, BridgeMethodResolver.findBridgedMethod(unbridged));
+		assertEquals("Incorrect bridged method returned", unbridged, BridgeMethodResolver.findBridgedMethod(bridged));
+	}
+
+	public void testFindBridgedVarargMethod() throws Exception {
+		Method unbridged = MyFoo.class.getDeclaredMethod("someVarargMethod", String.class, Object[].class);
+		Method bridged = MyFoo.class.getDeclaredMethod("someVarargMethod", Serializable.class, Object[].class);
 		assertFalse(unbridged.isBridge());
 		assertTrue(bridged.isBridge());
 
@@ -233,6 +242,16 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	public void testSPR3173() throws Exception {
+		Method bridgedMethod = UserDaoImpl.class.getDeclaredMethod("saveVararg", User.class, Object[].class);
+		assertFalse(bridgedMethod.isBridge());
+
+		Method bridgeMethod = UserDaoImpl.class.getDeclaredMethod("saveVararg", Object.class, Object[].class);
+		assertTrue(bridgeMethod.isBridge());
+
+		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+	}
+
 	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
 		Method[] methods = targetType.getMethods();
 		for (Method m : methods) {
@@ -247,6 +266,8 @@ public class BridgeMethodResolverTests extends TestCase {
 	public static interface Foo<T extends Serializable> {
 
 		void someMethod(T theArg, Object otherArg);
+
+		void someVarargMethod(T theArg, Object... otherArg);
 	}
 
 
@@ -256,6 +277,9 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 
 		public void someMethod(String theArg, Object otherArg) {
+		}
+
+		public void someVarargMethod(String theArg, Object... otherArgs) {
 		}
 	}
 
@@ -414,16 +438,6 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
-	private static class MyDelayed implements Delayed {
-
-		public long getDelay(TimeUnit unit) {
-			throw new UnsupportedOperationException();
-		}
-
-		public int compareTo(Delayed o) {
-			throw new UnsupportedOperationException();
-		}
-	}
 
 	private static interface Bounded<E> {
 
@@ -592,10 +606,6 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	public interface UserInitiatedEvent {
 
-		/**
-		 * returns the user who initiator this event
-		 * @return
-		 */
 		//public Session getInitiatorSession();
 	}
 
@@ -935,12 +945,18 @@ public class BridgeMethodResolverTests extends TestCase {
 
 		public void save(T t) {
 		}
+
+		public void saveVararg(T t, Object... args) {
+		}
 	}
 
 
 	public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 
 		public void save(Permission perm) {
+		}
+
+		public void saveVararg(User user, Object... args) {
 		}
 	}
 
@@ -962,4 +978,5 @@ public class BridgeMethodResolverTests extends TestCase {
     public void save(Business<?> business) {
     }
 	}
+
 }
