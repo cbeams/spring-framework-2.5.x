@@ -16,7 +16,9 @@
 
 package org.springframework.mock.web;
 
+import java.io.Serializable;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -190,6 +192,43 @@ public class MockHttpSession implements HttpSession {
 
 	public boolean isNew() {
 		return this.isNew;
+	}
+
+
+	/**
+	 * Serialize the attributes of this session into an object that can
+	 * be turned into a byte array with standard Java serialization.
+	 * @return a representation of this session's serialized state
+	 */
+	public Serializable serializeState() {
+		HashMap state = new HashMap();
+		for (Iterator it = this.attributes.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			String name = (String) entry.getKey();
+			Object value = entry.getValue();
+			it.remove();
+			if (value instanceof Serializable) {
+				state.put(name, value);
+			}
+			else {
+				// Not serializable... Servlet containers usually automatically
+				// unbind the attribute in this case.
+				if (value instanceof HttpSessionBindingListener) {
+					((HttpSessionBindingListener) value).valueUnbound(new HttpSessionBindingEvent(this, name, value));
+				}
+			}
+		}
+		return state;
+	}
+
+	/**
+	 * Deserialize the attributes of this session from a state object
+	 * created by {@link #serializeState()}.
+	 * @param state a representation of this session's serialized state
+	 */
+	public void deserializeState(Serializable state) {
+		Assert.isTrue(state instanceof Map, "Serialized state needs to be of type [java.util.Map]");
+		this.attributes.putAll((Map) state);
 	}
 
 }
