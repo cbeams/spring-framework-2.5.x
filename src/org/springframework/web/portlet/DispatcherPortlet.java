@@ -72,35 +72,45 @@ import org.springframework.web.servlet.ViewResolver;
  * <ul>
  * <li>It is based around a JavaBeans configuration mechanism.
  *
- * <li>It can use any HandlerMapping implementation - whether standard, or provided
+ * <li>It can use any {@link HandlerMapping} implementation - pre-built or provided
  * as part of an application - to control the routing of requests to handler objects.
- * Default is PortletModeHandlerMapping. HandlerMapping objects can be define as beans
- * in the portlet's application context that implement the HandlerMapping interface.
- * HandlerMappings can be given any bean name (they are tested by type).
+ * Default is {@link org.springframework.web.portlet.handler.PortletModeHandlerMapping}.
+ * HandlerMapping objects can be defined as beans in the portlet's application context,
+ * implementing the HandlerMapping interface, overriding the default HandlerMapping
+ * if present. HandlerMappings can be given any bean name (they are tested by type).
  *
- * <li>It can use any HandlerAdapter; this allows to use any handler interface.
- * Default is SimpleControllerHandlerAdapter, for Spring's Controller interface.
- * Additional HandlerAdapter objects can be added through the application context.
- * Like HandlerMappings, HandlerAdapters can be given any bean name (tested by type).
+ * <li>It can use any {@link HandlerAdapter}; this allows to use any handler interface.
+ * The default adapter is {@link org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter}
+ * for Spring's {@link org.springframework.web.portlet.mvc.Controller} interface.
+ * HandlerAdapter objects can be added as beans in the application context,
+ * overriding the default HandlerAdapter. Like HandlerMappings, HandlerAdapters
+ * can be given any bean name (they are tested by type).
  *
- * <li>Its exception resolution strategy can be specified via a HandlerExceptionResolver,
- * for example mapping certain exceptions to error pages. Default is none.
- * Additional HandlerExceptionResolvers can be added through the application context.
- * HandlerExceptionResolver can be given any bean name (tested by type).
+ * <li>The dispatcher's exception resolution strategy can be specified via a
+ * {@link HandlerExceptionResolver}, for example mapping certain exceptions to
+ * error pages. Default is none. Additional HandlerExceptionResolvers can be added
+ * through the application context. HandlerExceptionResolver can be given any
+ * bean name (they are tested by type).
  *
- * <li>Its view resolution strategy can be specified via a ViewResolver implementation,
- * resolving symbolic view names into View objects. Default is InternalResourceViewResolver.
- * Additional ViewResolver objects can be added through the application context.
- * ViewResolvers can be given any bean name (tested by type).
+ * <li>Its view resolution strategy can be specified via a {@link ViewResolver}
+ * implementation, resolving symbolic view names into View objects. Default is
+ * {@link org.springframework.web.servlet.view.InternalResourceViewResolver}.
+ * ViewResolver objects can be added as beans in the application context,
+ * overriding the default ViewResolver. ViewResolvers can be given any bean name
+ * (they are tested by type).
  *
- * <li>Its strategy for resolving multipart requests is determined by a
- * PortletMultipartResolver implementation. An implementation for Jakarta Commons
- * FileUpload is included. The MultipartResolver bean name is "portletMultipartResolver";
- * default is none.
+ * <li>The dispatcher's strategy for resolving multipart requests is determined by a
+ * {@link org.springframework.web.portlet.multipart.PortletMultipartResolver} implementation.
+ * An implementations for Jakarta Commons FileUpload is included:
+ * {@link org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver}.
+ * The MultipartResolver bean name is "portletMultipartResolver"; default is none.
  * </ul>
  *
- * <p><b>A web application can use any number of DispatcherPortlets.</b> Each portlet
- * will operate in its own namespace. Only the root application context will be shared.
+ * <p><b>A web application can define any number of DispatcherPortlets.</b>
+ * Each portlet will operate in its own namespace, loading its own application
+ * context with mappings, handlers, etc. Only the root application context
+ * as loaded by {@link org.springframework.web.context.ContextLoaderListener},
+ * if any, will be shared.
  *
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
@@ -108,17 +118,9 @@ import org.springframework.web.servlet.ViewResolver;
  * @author Nick Lothian
  * @author Rainer Schmitz
  * @since 2.0
- * @see org.springframework.web.context.ContextLoaderListener
- * @see HandlerMapping
- * @see org.springframework.web.portlet.handler.PortletModeHandlerMapping
- * @see HandlerAdapter
- * @see org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter
  * @see org.springframework.web.portlet.mvc.Controller
- * @see HandlerExceptionResolver
- * @see org.springframework.web.portlet.handler.SimpleMappingExceptionResolver
- * @see org.springframework.web.servlet.ViewResolver
- * @see org.springframework.web.servlet.view.InternalResourceViewResolver
  * @see org.springframework.web.servlet.ViewRendererServlet
+ * @see org.springframework.web.context.ContextLoaderListener
  */
 public class DispatcherPortlet extends FrameworkPortlet {
 
@@ -343,10 +345,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 	/**
 	 * Initialize the PortletMultipartResolver used by this class.
-	 * If no valid bean is defined with the given name in the BeanFactory
+	 * <p>If no valid bean is defined with the given name in the BeanFactory
 	 * for this namespace, no multipart handling is provided.
 	 */
-	private void initMultipartResolver() throws BeansException {
+	private void initMultipartResolver() {
 		try {
 			this.multipartResolver = (PortletMultipartResolver)
 					getPortletApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME, PortletMultipartResolver.class);
@@ -366,10 +368,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 	/**
 	 * Initialize the HandlerMappings used by this class.
-	 * If no HandlerMapping beans are defined in the BeanFactory
+	 * <p>If no HandlerMapping beans are defined in the BeanFactory
 	 * for this namespace, we default to PortletModeHandlerMapping.
 	 */
-	private void initHandlerMappings() throws BeansException {
+	private void initHandlerMappings() {
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext,
 			// including ancestor contexts.
@@ -403,10 +405,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 	/**
 	 * Initialize the HandlerAdapters used by this class.
-	 * If no HandlerAdapter beans are defined in the BeanFactory
+	 * <p>If no HandlerAdapter beans are defined in the BeanFactory
 	 * for this namespace, we default to SimpleControllerHandlerAdapter.
 	 */
-	private void initHandlerAdapters() throws BeansException {
+	private void initHandlerAdapters() {
 		if (this.detectAllHandlerAdapters) {
 			// Find all HandlerAdapters in the ApplicationContext,
 			// including ancestor contexts.
@@ -440,10 +442,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 	/**
 	 * Initialize the HandlerExceptionResolver used by this class.
-	 * If no bean is defined with the given name in the BeanFactory
+	 * <p>If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to no exception resolver.
 	 */
-	private void initHandlerExceptionResolvers() throws BeansException {
+	private void initHandlerExceptionResolvers() {
 		if (this.detectAllHandlerExceptionResolvers) {
 			// Find all HandlerExceptionResolvers in the ApplicationContext,
 			// including ancestor contexts.
@@ -468,10 +470,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 	/**
 	 * Initialize the ViewResolvers used by this class.
-	 * If no ViewResolver beans are defined in the BeanFactory
+	 * <p>If no ViewResolver beans are defined in the BeanFactory
 	 * for this namespace, we default to InternalResourceViewResolver.
 	 */
-	private void initViewResolvers() throws BeansException {
+	private void initViewResolvers() {
 		if (this.detectAllViewResolvers) {
 			// Find all ViewResolvers in the ApplicationContext,
 			// including ancestor contexts.
@@ -506,7 +508,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 	/**
 	 * Return the default strategy object for the given strategy interface.
-	 * <p>Default implementation delegates to <code>getDefaultStrategies</code>,
+	 * <p>The default implementation delegates to {@link #getDefaultStrategies},
 	 * expecting a single object in the list.
 	 * @param strategyInterface the strategy interface
 	 * @return the corresponding strategy object
@@ -566,13 +568,13 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 	/**
 	 * Create a default strategy.
-	 * Default implementation uses <code>ApplicationContext.createBean</code>.
+	 * <p>The default implementation uses
+	 * {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean}.
 	 * @param clazz the strategy implementation class to instantiate
 	 * @return the fully configured strategy instance
 	 * @throws BeansException if initialization failed
 	 * @see #getPortletApplicationContext()
 	 * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
-	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean
 	 */
 	protected Object createDefaultStrategy(Class clazz) throws BeansException {
 		return getPortletApplicationContext().getAutowireCapableBeanFactory().createBean(
@@ -581,7 +583,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 
 	/**
-	 * Process the actual dispatching to the handler for action requests.
+	 * Processes the actual dispatching to the handler for action requests.
 	 * <p>The handler will be obtained by applying the portlet's HandlerMappings in order.
 	 * The HandlerAdapter will be obtained by querying the portlet's installed
 	 * HandlerAdapters to find the first that supports the handler class.
@@ -677,7 +679,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	}
 
 	/**
-	 * Process the actual dispatching to the handler for render requests.
+	 * Processes the actual dispatching to the handler for render requests.
 	 * <p>The handler will be obtained by applying the portlet's HandlerMappings in order.
 	 * The HandlerAdapter will be obtained by querying the portlet's installed
 	 * HandlerAdapters to find the first that supports the handler class.

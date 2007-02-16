@@ -60,9 +60,10 @@ import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Central dispatcher for use within the web MVC framework,
+ * Central dispatcher for HTTP request handlers/controllers,
  * e.g. for web UI controllers or HTTP-based remote service exporters.
- * Dispatches to registered handlers for processing a web request.
+ * Dispatches to registered handlers for processing a web request,
+ * providing convenient mapping and exception handling facilities.
  *
  * <p>This servlet is very flexible: It can be used with just about any workflow,
  * with the installation of the appropriate adapter classes. It offers the
@@ -72,75 +73,72 @@ import org.springframework.web.util.WebUtils;
  * <ul>
  * <li>It is based around a JavaBeans configuration mechanism.
  *
- * <li>It can use any HandlerMapping implementation - whether standard, or provided
+ * <li>It can use any {@link HandlerMapping} implementation - pre-built or provided
  * as part of an application - to control the routing of requests to handler objects.
- * Default is BeanNameUrlHandlerMapping. HandlerMapping objects can be defined as beans
- * in the servlet's application context that implement the HandlerMapping interface.
- * HandlerMappings can be given any bean name (they are tested by type).
+ * Default is {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping}.
+ * HandlerMapping objects can be defined as beans in the servlet's application context,
+ * implementing the HandlerMapping interface, overriding the default HandlerMapping
+ * if present. HandlerMappings can be given any bean name (they are tested by type).
  *
- * <li>It can use any HandlerAdapter; this allows to use any handler interface.
- * Default is SimpleControllerHandlerAdapter, for Spring's Controller interface.
- * Additional HandlerAdapter objects can be added through the application context.
- * Like HandlerMappings, HandlerAdapters can be given any bean name (tested by type).
+ * <li>It can use any {@link HandlerAdapter}; this allows to use any handler interface.
+ * Default adapters are {@link org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter},
+ * {@link org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter} and
+ * {@link org.springframework.web.servlet.mvc.throwaway.ThrowawayControllerHandlerAdapter},
+ * for Spring's {@link org.springframework.web.HttpRequestHandler},
+ * {@link org.springframework.web.servlet.mvc.Controller} and
+ * {@link org.springframework.web.servlet.mvc.throwaway.ThrowawayController} interfaces,
+ * respectively. HandlerAdapter objects can be added as beans in the application context,
+ * overriding the default HandlerAdapters. Like HandlerMappings, HandlerAdapters
+ * can be given any bean name (they are tested by type).
  *
- * <li>Its exception resolution strategy can be specified via a HandlerExceptionResolver,
- * for example mapping certain exceptions to error pages. Default is none.
- * Additional HandlerExceptionResolvers can be added through the application context.
- * HandlerExceptionResolver can be given any bean name (tested by type).
+ * <li>The dispatcher's exception resolution strategy can be specified via a
+ * {@link HandlerExceptionResolver}, for example mapping certain exceptions to
+ * error pages. Default is none. Additional HandlerExceptionResolvers can be added
+ * through the application context. HandlerExceptionResolver can be given any
+ * bean name (they are tested by type).
  *
- * <li>Its view resolution strategy can be specified via a ViewResolver implementation,
- * resolving symbolic view names into View objects. Default is InternalResourceViewResolver.
- * Additional ViewResolver objects can be added through the application context.
- * ViewResolvers can be given any bean name (tested by type).
+ * <li>Its view resolution strategy can be specified via a {@link ViewResolver}
+ * implementation, resolving symbolic view names into View objects. Default is
+ * {@link org.springframework.web.servlet.view.InternalResourceViewResolver}.
+ * ViewResolver objects can be added as beans in the application context,
+ * overriding the default ViewResolver. ViewResolvers can be given any bean name
+ * (they are tested by type).
  *
  * <li>If a {@link View} or view name is not supplied by the user, then the configured
- * RequestToViewNameTranslator will translate the current {@link HttpServletRequest}
- * into a view name. The default implementation is
+ * {@link RequestToViewNameTranslator} will translate the current request into a
+ * view name. The corresponding bean name is "viewNameTranslator"; the default is
  * {@link org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator}.
  *
- * <li>Its strategy for resolving multipart requests is determined by a MultipartResolver
- * implementation. Implementations for Jakarta Commons FileUpload and Jason Hunter's COS
- * are included. The MultipartResolver bean name is "multipartResolver"; default is none.
+ * <li>The dispatcher's strategy for resolving multipart requests is determined by
+ * a {@link org.springframework.web.multipart.MultipartResolver} implementation.
+ * Implementations for Jakarta Commons FileUpload and Jason Hunter's COS are
+ * included; the typical choise is
+ * {@link org.springframework.web.multipart.commons.CommonsMultipartResolver}.
+ * The MultipartResolver bean name is "multipartResolver"; default is none.
  *
- * <li>Its locale resolution strategy is determined by a LocaleResolver implementation.
+ * <li>Its locale resolution strategy is determined by a {@link LocaleResolver}.
  * Out-of-the-box implementations work via HTTP accept header, cookie, or session.
- * The LocaleResolver bean name is "localeResolver"; default is AcceptHeaderLocaleResolver.
+ * The LocaleResolver bean name is "localeResolver"; default is
+ * {@link org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver}.
  *
- * <li>Its theme resolution strategy is determined by a ThemeResolver implementation.
+ * <li>Its theme resolution strategy is determined by a {@link ThemeResolver}.
  * Implementations for a fixed theme and for cookie and session storage are included.
- * The ThemeResolver bean name is "themeResolver"; default is FixedThemeResolver.
+ * The ThemeResolver bean name is "themeResolver"; default is
+ * {@link org.springframework.web.servlet.theme.FixedThemeResolver}.
  * </ul>
  *
- * <p><b>A web application can use any number of DispatcherServlets.</b> Each servlet
- * will operate in its own namespace. Only the root application context will be shared.
- *
- * <p>This class and the MVC approach it delivers is discussed in Chapter 12 of
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
- * by Rod Johnson (Wrox, 2002). Note that it is called <i>ControllerServlet</i> there;
- * it has been renamed since to emphasize its dispatching role and avoid confusion
- * with Controller objects that the DispatcherServlet will dispatch to.
+ * <p><b>A web application can define any number of DispatcherServlets.</b>
+ * Each servlet will operate in its own namespace, loading its own application
+ * context with mappings, handlers, etc. Only the root application context
+ * as loaded by {@link org.springframework.web.context.ContextLoaderListener},
+ * if any, will be shared.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @see org.springframework.web.context.ContextLoaderListener
- * @see HandlerMapping
- * @see org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
- * @see HandlerAdapter
- * @see org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter
+ * @see org.springframework.web.HttpRequestHandler
  * @see org.springframework.web.servlet.mvc.Controller
- * @see HandlerExceptionResolver
- * @see org.springframework.web.servlet.handler.SimpleMappingExceptionResolver
- * @see ViewResolver
- * @see org.springframework.web.servlet.view.InternalResourceViewResolver
- * @see RequestToViewNameTranslator
- * @see org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator
- * @see MultipartResolver
- * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
- * @see LocaleResolver
- * @see org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver
- * @see ThemeResolver
- * @see org.springframework.web.servlet.theme.FixedThemeResolver
+ * @see org.springframework.web.context.ContextLoaderListener
  */
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -181,7 +179,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String HANDLER_EXCEPTION_RESOLVER_BEAN_NAME = "handlerExceptionResolver";
 
 	/**
-	 * Well-known name for the RequestToViewNameTranslator object in the bean factory for this namespace.
+	 * Well-known name for the RequestToViewNameTranslator object in the bean factory for
+	 * this namespace.
 	 */
 	public static final String REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME = "viewNameTranslator";
 
@@ -398,10 +397,10 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Initialize the MultipartResolver used by this class.
-	 * If no bean is defined with the given name in the BeanFactory
+	 * <p>If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, no multipart handling is provided.
 	 */
-	private void initMultipartResolver() throws BeansException {
+	private void initMultipartResolver() {
 		try {
 			this.multipartResolver = (MultipartResolver)
 					getWebApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME, MultipartResolver.class);
@@ -421,10 +420,10 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Initialize the LocaleResolver used by this class.
-	 * If no bean is defined with the given name in the BeanFactory
+	 * <p>If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to AcceptHeaderLocaleResolver.
 	 */
-	private void initLocaleResolver() throws BeansException {
+	private void initLocaleResolver() {
 		try {
 			this.localeResolver = (LocaleResolver)
 					getWebApplicationContext().getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
@@ -444,10 +443,10 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Initialize the ThemeResolver used by this class.
-	 * If no bean is defined with the given name in the BeanFactory
+	 * <p>If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to a FixedThemeResolver.
 	 */
-	private void initThemeResolver() throws BeansException {
+	private void initThemeResolver() {
 		try {
 			this.themeResolver = (ThemeResolver)
 					getWebApplicationContext().getBean(THEME_RESOLVER_BEAN_NAME, ThemeResolver.class);
@@ -467,10 +466,10 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Initialize the HandlerMappings used by this class.
-	 * If no HandlerMapping beans are defined in the BeanFactory
+	 * <p>If no HandlerMapping beans are defined in the BeanFactory
 	 * for this namespace, we default to BeanNameUrlHandlerMapping.
 	 */
-	private void initHandlerMappings() throws BeansException {
+	private void initHandlerMappings() {
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext,
 			// including ancestor contexts.
@@ -504,10 +503,10 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Initialize the HandlerAdapters used by this class.
-	 * If no HandlerAdapter beans are defined in the BeanFactory
+	 * <p>If no HandlerAdapter beans are defined in the BeanFactory
 	 * for this namespace, we default to SimpleControllerHandlerAdapter.
 	 */
-	private void initHandlerAdapters() throws BeansException {
+	private void initHandlerAdapters() {
 		if (this.detectAllHandlerAdapters) {
 			// Find all HandlerAdapters in the ApplicationContext,
 			// including ancestor contexts.
@@ -541,10 +540,10 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Initialize the HandlerExceptionResolver used by this class.
-	 * If no bean is defined with the given name in the BeanFactory
+	 * <p>If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to no exception resolver.
 	 */
-	private void initHandlerExceptionResolvers() throws BeansException {
+	private void initHandlerExceptionResolvers() {
 		if (this.detectAllHandlerExceptionResolvers) {
 			// Find all HandlerExceptionResolvers in the ApplicationContext,
 			// including ancestor contexts.
@@ -593,10 +592,10 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Initialize the ViewResolvers used by this class.
-	 * If no ViewResolver beans are defined in the BeanFactory
+	 * <p>If no ViewResolver beans are defined in the BeanFactory
 	 * for this namespace, we default to InternalResourceViewResolver.
 	 */
-	private void initViewResolvers() throws BeansException {
+	private void initViewResolvers() {
 		if (this.detectAllViewResolvers) {
 			// Find all ViewResolvers in the ApplicationContext,
 			// including ancestor contexts.
@@ -646,7 +645,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Return the default strategy object for the given strategy interface.
-	 * <p>Default implementation delegates to <code>getDefaultStrategies</code>,
+	 * <p>The default implementation delegates to {@link #getDefaultStrategies},
 	 * expecting a single object in the list.
 	 * @param strategyInterface the strategy interface
 	 * @return the corresponding strategy object
@@ -705,7 +704,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Create a default strategy.
-	 * Default implementation uses <code>AutowireCapableBeanFactory.createBean</code>.
+	 * <p>The default implementation uses
+	 * {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean}.
 	 * @param clazz the strategy implementation class to instantiate
 	 * @throws BeansException if initialization failed
 	 * @return the fully configured strategy instance
@@ -720,9 +720,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 
 	/**
-	 * Expose the DispatcherServlet-specific request attributes and
-	 * delegate to <code>doDispatch</code> for the actual dispatching.
-	 * @see #doDispatch
+	 * Exposes the DispatcherServlet-specific request attributes and
+	 * delegates to {@link #doDispatch} for the actual dispatching.
 	 */
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (logger.isDebugEnabled()) {
