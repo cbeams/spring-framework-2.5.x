@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,15 +24,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Bootstrap servlet to start up Spring's root WebApplicationContext.
- * Simply delegates to ContextLoader.
+ * Bootstrap servlet to start up Spring's root {@link WebApplicationContext}.
+ * Simply delegates to {@link ContextLoader}.
  *
  * <p>This servlet should have a lower <code>load-on-startup</code> value
  * in <code>web.xml</code> than any servlets that access the root web
  * application context.
  *
  * <p><i>Note that this class has been deprecated for containers implementing
- * Servlet API 2.4 or higher, in favor of ContextLoaderListener.</i><br>
+ * Servlet API 2.4 or higher, in favor of {@link ContextLoaderListener}.</i><br>
  * According to Servlet 2.4, listeners must be initialized before load-on-startup
  * servlets. Many Servlet 2.3 containers already enforce this behavior. If you
  * use such a container, this servlet can be replaced with ContextLoaderListener.
@@ -66,7 +66,6 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Juergen Hoeller
  * @author Darren Davison
- * @see ContextLoader
  * @see ContextLoaderListener
  * @see org.springframework.web.util.Log4jConfigServlet
  */
@@ -93,9 +92,10 @@ public class ContextLoaderServlet extends HttpServlet {
 
 	/**
 	 * Return the ContextLoader used by this servlet. 
+	 * @return the current ContextLoader
 	 */
 	public ContextLoader getContextLoader() {
-		return contextLoader;
+		return this.contextLoader;
 	}
 
 

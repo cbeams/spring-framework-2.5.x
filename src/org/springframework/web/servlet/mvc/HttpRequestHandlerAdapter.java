@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,18 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Adapter to use the plain HttpRequestHandler interface with the generic
- * DispatcherServlet. Supports handlers that implement the LastModified interface.
+ * Adapter to use the plain {@link org.springframework.web.HttpRequestHandler}
+ * interface with the generic {@link org.springframework.web.servlet.DispatcherServlet}.
+ * Supports handlers that implement the {@link LastModified} interface.
  *
  * <p>This is an SPI class, not used directly by application code.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.web.servlet.DispatcherServlet
- * @see HttpRequestHandler
+ * @see org.springframework.web.HttpRequestHandler
  * @see LastModified
+ * @see SimpleControllerHandlerAdapter
  */
 public class HttpRequestHandlerAdapter implements HandlerAdapter {
 
