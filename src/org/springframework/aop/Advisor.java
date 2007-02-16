@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,18 +33,7 @@ import org.aopalliance.aop.Advice;
  * @author Rod Johnson
  */
 public interface Advisor {
-	
-	/**
-	 * Return whether this advice is associated with a particular instance
-	 * (for example, creating a mixin) or shared with all instances of
-	 * the advised class obtained from the same Spring bean factory.
-	 * <p><b>Note that this method is not currently used by the framework.</b>
-	 * Typical Advisor implementations always return <code>true</code>.
-	 * Use singleton/prototype bean definitions or appropriate programmatic
-	 * proxy creation to ensure that Advisors have the correct lifecycle model. 
-	 */
-	boolean isPerInstance();
-	
+
 	/**
 	 * Return the advice part of this aspect. An advice may be an
 	 * interceptor, a before advice, a throws advice, etc.
@@ -55,5 +44,17 @@ public interface Advisor {
 	 * @see AfterReturningAdvice
 	 */
 	Advice getAdvice();
+
+	/**
+	 * Return whether this advice is associated with a particular instance
+	 * (for example, creating a mixin) or shared with all instances of
+	 * the advised class obtained from the same Spring bean factory.
+	 * <p><b>Note that this method is not currently used by the framework.</b>
+	 * Typical Advisor implementations always return <code>true</code>.
+	 * Use singleton/prototype bean definitions or appropriate programmatic
+	 * proxy creation to ensure that Advisors have the correct lifecycle model.
+	 * @return whether this advice is associated with a particular target instance
+	 */
+	boolean isPerInstance();
 
 }
