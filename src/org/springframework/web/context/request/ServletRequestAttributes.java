@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.request;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -234,7 +235,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * Adapter that implements the Servlet 2.3 HttpSessionBindingListener
 	 * interface, wrapping a request destruction callback.
 	 */
-	private static class DestructionCallbackBindingListener implements HttpSessionBindingListener {
+	private static class DestructionCallbackBindingListener implements HttpSessionBindingListener, Serializable {
 
 		private final Runnable destructionCallback;
 
