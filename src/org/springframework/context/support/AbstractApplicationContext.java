@@ -193,7 +193,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * (that is, this context is the root of the context hierarchy).
 	 */
 	public ApplicationContext getParent() {
-		return parent;
+		return this.parent;
 	}
 
 	/**
@@ -278,7 +278,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
 	 */
 	public List getBeanFactoryPostProcessors() {
-		return beanFactoryPostProcessors;
+		return this.beanFactoryPostProcessors;
 	}
 
 
@@ -365,13 +365,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return the ResourcePatternResolver to use for resolving location patterns
-	 * into Resource instances. Default is PathMatchingResourcePatternResolver,
+	 * into Resource instances. Default is a
+	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver},
 	 * supporting Ant-style location patterns.
 	 * <p>Can be overridden in subclasses, for extended resolution strategies,
 	 * for example in a web environment.
 	 * <p><b>Do not call this when needing to resolve a location pattern.</b>
 	 * Call the context's <code>getResources</code> method instead, which
 	 * will delegate to the ResourcePatternResolver.
+	 * @return the ResourcePatternResolver for this context
 	 * @see #getResources
 	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
 	 */
@@ -395,7 +397,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * respecting explicit order if given.
 	 * Must be called before singleton instantiation.
 	 */
-	private void invokeBeanFactoryPostProcessors() throws BeansException {
+	private void invokeBeanFactoryPostProcessors() {
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let the bean factory post-processors apply to them!
 		String[] factoryProcessorNames = getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
@@ -431,7 +433,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * respecting explicit order if given.
 	 * <p>Must be called before any instantiation of application beans.
 	 */
-	private void registerBeanPostProcessors() throws BeansException {
+	private void registerBeanPostProcessors() {
 		String[] processorNames = getBeanNamesForType(BeanPostProcessor.class, true, false);
 
 		// Register BeanPostProcessorChecker that logs an info message when
@@ -469,7 +471,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Initialize the MessageSource.
 	 * Use parent's if none defined in this context.
 	 */
-	private void initMessageSource() throws BeansException {
+	private void initMessageSource() {
 		if (containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
 			this.messageSource = (MessageSource) getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
 			// Make MessageSource aware of parent MessageSource.
@@ -502,7 +504,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Uses SimpleApplicationEventMulticaster if none defined in the context.
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
-	private void initApplicationEventMulticaster() throws BeansException {
+	private void initApplicationEventMulticaster() {
 		if (containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster = (ApplicationEventMulticaster)
 					getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
@@ -534,7 +536,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Add beans that implement ApplicationListener as listeners.
 	 * Doesn't affect other listeners, which can be added without being beans.
 	 */
-	private void registerListeners() throws BeansException {
+	private void registerListeners() {
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
 		Collection listeners = getBeansOfType(ApplicationListener.class, true, false).values();
