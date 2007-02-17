@@ -239,8 +239,15 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private void parseAspect(Element aspectElement, ParserContext parserContext) {
-		String aspectName = aspectElement.getAttribute(REF);
 		String aspectId = aspectElement.getAttribute(ID);
+		String aspectName = aspectElement.getAttribute(REF);
+
+		if (!StringUtils.hasText(aspectName)) {
+			parserContext.getReaderContext().error(
+					"<aspect> tag needs aspect bean reference via 'ref' attribute.",
+					aspectElement, this.parseState.snapshot());
+			return;
+		}
 
 		try {
 			this.parseState.push(new AspectEntry(aspectId, aspectName));
@@ -266,7 +273,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 				}
 			}
 
-			AspectComponentDefinition aspectComponentDefinition = createAspectComponentDefinition(aspectElement, aspectId, beanDefinitions, beanReferences, parserContext);
+			AspectComponentDefinition aspectComponentDefinition = createAspectComponentDefinition(
+					aspectElement, aspectId, beanDefinitions, beanReferences, parserContext);
 			parserContext.pushContainingComponent(aspectComponentDefinition);
 
 			List pointcuts = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT);
@@ -473,7 +481,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private String parsePointcutProperty(Element element, ParserContext parserContext) {
 		if (element.hasAttribute(POINTCUT) && element.hasAttribute(POINTCUT_REF)) {
 			parserContext.getReaderContext().error(
-					"Cannot define both 'pointcut' and 'pointcut-ref' on 'advisor' tag.",
+					"Cannot define both 'pointcut' and 'pointcut-ref' on <advisor> tag.",
 					element, this.parseState.snapshot());
 			return null;
 		}
@@ -505,7 +513,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		else {
 			parserContext.getReaderContext().error(
-					"Must define one of 'pointcut' or 'pointcut-ref' on 'advisor'.",
+					"Must define one of 'pointcut' or 'pointcut-ref' on <advisor> tag.",
 					element, this.parseState.snapshot());
 			return null;
 		}
