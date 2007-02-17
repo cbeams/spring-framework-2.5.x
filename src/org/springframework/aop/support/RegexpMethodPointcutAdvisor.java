@@ -26,7 +26,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Convenient class for regexp method pointcuts that hold an Advice,
- * making them an Advisor.
+ * making them an {@link org.springframework.aop.Advisor}.
  *
  * <p>Configure this class using the "pattern" and "patterns"
  * pass-through properties. These are analogous to the pattern
@@ -141,8 +141,9 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 		this.perl5 = perl5;
 	}
 
+
 	/**
-	 * Initialize the singleton pointcut held within this advisor.
+	 * Initialize the singleton Pointcut held within this Advisor.
 	 */
 	public Pointcut getPointcut() {
 		synchronized (this.pointcutMonitor) {
@@ -155,10 +156,10 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 	}
 
 	/**
-	 * Create the actual pointcut: by default, a Perl5RegexpMethodPointcut
+	 * Create the actual pointcut: By default, a {@link Perl5RegexpMethodPointcut}
 	 * will be created if Perl5 syntax is enforced or when running on JDK 1.3.
-	 * Else, a JdkRegexpMethodPointcut (JDK 1.4+) will be used.
-	 * @return the pointcut instance (never <code>null</code>)
+	 * Else, a {@link JdkRegexpMethodPointcut} (JDK 1.4+) will be used.
+	 * @return the Pointcut instance (never <code>null</code>)
 	 * @see #setPerl5
 	 * @see Perl5RegexpMethodPointcut
 	 * @see JdkRegexpMethodPointcut
