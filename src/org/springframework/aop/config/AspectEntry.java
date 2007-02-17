@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link ParseState} entry representing an aspect.
- * 
+ *
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class AspectEntry implements ParseState.Entry {
@@ -33,7 +34,7 @@ public class AspectEntry implements ParseState.Entry {
 
 
 	/**
-	 * Creates a new instance of the {@link AspectEntry} class.
+	 * Create a new AspectEntry.
 	 * @param id the id of the aspect element
 	 * @param ref the bean name referenced by this aspect element
 	 */
@@ -43,9 +44,7 @@ public class AspectEntry implements ParseState.Entry {
 	}
 
 	public String toString() {
-		return "Aspect: " + (StringUtils.hasText(this.id) ? 
-						"id='" + id + "'" : 
-						"ref='" + ref + "'");
+		return "Aspect: " + (StringUtils.hasLength(this.id) ? "id='" + this.id + "'" : "ref='" + this.ref + "'");
 	}
 
 }
