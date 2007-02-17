@@ -16,14 +16,11 @@
 
 package org.springframework.aop.framework;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.SpringProxy;
 import org.springframework.util.ClassUtils;
 
 /**
- * Simple {@link AopProxyFactory} implementation,
+ * Default {@link AopProxyFactory} implementation,
  * creating either a CGLIB proxy or a JDK dynamic proxy.
  *
  * <p>Creates a CGLIB proxy if one the following is true
@@ -49,20 +46,9 @@ import org.springframework.util.ClassUtils;
  */
 public class DefaultAopProxyFactory implements AopProxyFactory {
 
-	private static final Log logger = LogFactory.getLog(DefaultAopProxyFactory.class);
-
+	/** Whether the CGLIB2 library is present on the classpath */
 	private static final boolean cglibAvailable =
 			ClassUtils.isPresent("net.sf.cglib.proxy.Enhancer", DefaultAopProxyFactory.class.getClassLoader());
-
-
-	static {
-		if (cglibAvailable) {
-			logger.info("CGLIB2 available: proxyTargetClass feature enabled");
-		}
-		else {
-			logger.info("CGLIB2 not available: proxyTargetClass feature disabled");
-		}
-	}
 
 
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
@@ -99,12 +85,12 @@ public class DefaultAopProxyFactory implements AopProxyFactory {
 
 
 	/**
-	 * Inner class to just introduce a CGLIB2 dependency
+	 * Inner factory class used to just introduce a CGLIB2 dependency
 	 * when actually creating a CGLIB proxy.
 	 */
 	private static class CglibProxyFactory {
 
-		private static AopProxy createCglibProxy(AdvisedSupport advisedSupport) {
+		public static AopProxy createCglibProxy(AdvisedSupport advisedSupport) {
 			return new Cglib2AopProxy(advisedSupport);
 		}
 	}

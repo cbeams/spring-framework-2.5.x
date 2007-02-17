@@ -34,12 +34,16 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Convenience methods for easy access to the JSP 2.0 ExpressionEvaluator or
- * the ExpressionEvaluatorManager of Jakarta's JSTL implementation.
+ * Convenience methods for transparent access to JSP 2.0's built-in
+ * {@link javax.servlet.jsp.el.ExpressionEvaluator} or the standalone
+ * {@link org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager}
+ * of Jakarta's JSTL implementation.
  *
  * <p>Automatically detects JSP 2.0 or Jakarta JSTL, preferring the JSP 2.0
- * mechanism if available. Falls back to throwing an exception on actual EL
- * expressions if none of the two is available.
+ * mechanism if available. Also detects the JSP 2.0 API being present but
+ * the runtime JSP engine not actually supporting JSP 2.0, falling back to
+ * the Jakarta JSTL in this case. Throws an exception when encountering actual
+ * EL expressions if neither JSP 2.0 nor the Jakarta JSTL is available.
  *
  * <p>In the case of JSP 2.0, this class will by default use standard
  * <code>evaluate</code> calls. If your application server happens to be
@@ -47,13 +51,14 @@ import org.springframework.util.ClassUtils;
  * context-param in <code>web.xml</code> to "true", which will use
  * <code>parseExpression</code> calls with cached Expression objects instead.
  *
- * <p>The evaluation methods check if the value contains "${"
- * before invoking the EL evaluator, treating the value as "normal"
- * expression (that is, a conventional String) else.
+ * <p>The evaluation methods check if the value contains "${" before
+ * invoking the EL evaluator, treating the value as "normal" expression
+ * (i.e. a literal String value) else.
  *
  * <p>Note: The evaluation methods do not have a runtime dependency on
- * JSP 2.0 or on Jakarta's JSTL implementation, as long as they don't
- * receive actual EL expressions.
+ * JSP 2.0 or on Jakarta's JSTL implementation, as long as they are not
+ * asked to process actual EL expressions. This allows for using EL-aware
+ * tags with Java-based JSP expressions instead, for example.
  *
  * @author Juergen Hoeller
  * @author Alef Arendsen
@@ -96,9 +101,9 @@ public abstract class ExpressionEvaluationUtils {
 	static {
 		ClassLoader cl = ExpressionEvaluationUtils.class.getClassLoader();
 		if (ClassUtils.isPresent(JSP_20_CLASS_NAME, cl)) {
-			logger.info("Found JSP 2.0 ExpressionEvaluator");
+			logger.debug("Found JSP 2.0 ExpressionEvaluator");
 			if (ClassUtils.isPresent(JAKARTA_JSTL_CLASS_NAME, cl)) {
-				logger.info("Found Jakarta JSTL ExpressionEvaluatorManager");
+				logger.debug("Found Jakarta JSTL ExpressionEvaluatorManager");
 				helper = new Jsp20ExpressionEvaluationHelper(new JakartaExpressionEvaluationHelper());
 			}
 			else {
@@ -106,11 +111,11 @@ public abstract class ExpressionEvaluationUtils {
 			}
 		}
 		else if (ClassUtils.isPresent(JAKARTA_JSTL_CLASS_NAME, cl)) {
-			logger.info("Found Jakarta JSTL ExpressionEvaluatorManager");
+			logger.debug("Found Jakarta JSTL ExpressionEvaluatorManager");
 			helper = new JakartaExpressionEvaluationHelper();
 		}
 		else {
-			logger.info("JSP expression evaluation not available");
+			logger.debug("JSP expression evaluation not available");
 			helper = new NoExpressionEvaluationHelper();
 		}
 	}

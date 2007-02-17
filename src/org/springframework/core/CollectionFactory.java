@@ -62,21 +62,10 @@ public abstract class CollectionFactory {
 
 	private static final Log logger = LogFactory.getLog(CollectionFactory.class);
 
+	/** Whether the Commons Collections 3.x library is present on the classpath */
 	private static final boolean commonsCollections3Available =
 			ClassUtils.isPresent(
 					"org.apache.commons.collections.map.LinkedMap", CollectionFactory.class.getClassLoader());
-
-
-	static {
-		// Check whether JDK 1.4+ collections and/or
-		// Commons Collections 3.x are available.
-		if (JdkVersion.isAtLeastJava14()) {
-			logger.info("JDK 1.4+ collections available");
-		}
-		if (commonsCollections3Available) {
-			logger.info("Commons Collections 3.x available");
-		}
-	}
 
 
 	/**
@@ -98,7 +87,7 @@ public abstract class CollectionFactory {
 			return CommonsCollectionFactory.createListOrderedSet(initialCapacity);
 		}
 		else {
-			logger.trace("Falling back to [java.util.HashSet] for linked set");
+			logger.debug("Falling back to plain [java.util.HashSet] for linked set");
 			return new HashSet(initialCapacity);
 		}
 	}
@@ -122,7 +111,7 @@ public abstract class CollectionFactory {
 			return CommonsCollectionFactory.createLinkedMap(initialCapacity);
 		}
 		else {
-			logger.trace("Falling back to [java.util.HashMap] for linked map");
+			logger.debug("Falling back to plain[java.util.HashMap] for linked map");
 			return new HashMap(initialCapacity);
 		}
 	}
@@ -142,11 +131,11 @@ public abstract class CollectionFactory {
 			return CommonsCollectionFactory.createListOrderedCaseInsensitiveMap(initialCapacity);
 		}
 		else if (JdkVersion.isAtLeastJava14()) {
-			logger.trace("Falling back to [java.util.LinkedHashMap] for linked case-insensitive map");
+			logger.debug("Falling back to [java.util.LinkedHashMap] for linked case-insensitive map");
 			return Jdk14CollectionFactory.createLinkedHashMap(initialCapacity);
 		}
 		else {
-			logger.trace("Falling back to [java.util.HashMap] for linked case-insensitive map");
+			logger.debug("Falling back to plain [java.util.HashMap] for linked case-insensitive map");
 			return new HashMap(initialCapacity);
 		}
 	}
@@ -170,7 +159,7 @@ public abstract class CollectionFactory {
 			return CommonsCollectionFactory.createIdentityMap(initialCapacity);
 		}
 		else {
-			logger.trace("Falling back to [java.util.HashMap] for identity map");
+			logger.debug("Falling back to plain [java.util.HashMap] for identity map");
 			return new HashMap(initialCapacity);
 		}
 	}
