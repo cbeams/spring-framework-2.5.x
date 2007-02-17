@@ -36,15 +36,15 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.util.NestedServletException;
 
 /**
- * Web controller that exports the specified service bean as Hessian service
- * endpoint, accessible via a Hessian proxy.
+ * HTTP request handler that exports the specified service bean as
+ * Hessian service endpoint, accessible via a Hessian proxy.
  *
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>
  *
  * <p>This exporter will work with both Hessian 2.x and 3.x (respectively
- * Resin 2.x and 3.x), auto-detecting the corresponding skeleton class.
+ * Resin 2.x and 3.x), autodetecting the corresponding skeleton class.
  * As of Spring 2.0, it is also compatible with the new Hessian 2 protocol
  * (a.k.a. Hessian 3.0.20+), while remaining compatible with older versions.
  *
@@ -131,7 +131,7 @@ public class HessianServiceExporter extends RemoteExporter
 
 
 	/**
-	 * Process the incoming Hessian request and create a Hessian response.
+	 * Processes the incoming Hessian request and creates a Hessian response.
 	 */
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {

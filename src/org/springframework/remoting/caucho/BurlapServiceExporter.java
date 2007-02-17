@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,20 +31,20 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.util.Assert;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.util.NestedServletException;
 
 /**
- * Web controller that exports the specified service bean as Burlap service
- * endpoint, accessible via a Burlap proxy.
+ * HTTP request handler that exports the specified service bean as
+ * Burlap service endpoint, accessible via a Burlap proxy.
  *
  * <p>Burlap is a slim, XML-based RPC protocol.
  * For information on Burlap, see the
  * <a href="http://www.caucho.com/burlap">Burlap website</a>
  *
  * <p>This exporter will work with both Burlap 2.x and 3.x (respectively
- * Resin 2.x and 3.x), auto-detecting the corresponding skeleton class.
+ * Resin 2.x and 3.x), autodetecting the corresponding skeleton class.
  *
  * <p>Note: Burlap services exported with this class can be accessed by
  * any Burlap client, as there isn't any special handling involved.
@@ -93,7 +93,7 @@ public class BurlapServiceExporter extends RemoteExporter
 
 
 	/**
-	 * Process the incoming Burlap request and create a Burlap response.
+	 * Processes the incoming Burlap request and creates a Burlap response.
 	 */
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
