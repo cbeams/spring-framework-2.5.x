@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,10 @@ import java.util.Map;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.mock.easymock.AbstractScalarMockTemplate;
 import org.springframework.test.AssertThrows;
 
 /**
- * Unit tests for the {@link CustomScopeConfigurer} class.
- * 
  * @author Rick Evans
  */
 public final class CustomScopeConfigurerTests extends TestCase {
@@ -110,25 +107,6 @@ public final class CustomScopeConfigurerTests extends TestCase {
 				}.runTest();
 			}
 		}.test();
-	}
-
-
-	private static final class NoOpScope implements Scope {
-
-		public String getConversationId() {
-			return null;
-		}
-
-		public Object get(String name, ObjectFactory objectFactory) {
-			throw new UnsupportedOperationException();
-		}
-
-		public Object remove(String name) {
-			throw new UnsupportedOperationException();
-		}
-
-		public void registerDestructionCallback(String name, Runnable callback) {
-		}
 	}
 
 

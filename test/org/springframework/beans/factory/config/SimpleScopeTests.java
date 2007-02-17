@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,29 +38,17 @@ public class SimpleScopeTests extends TestCase {
 	
 	protected void setUp() {
 		applicationContext = new GenericApplicationContext();
-
-		Scope scope = new Scope() {
+		Scope scope = new NoOpScope() {
 			private int index;
 			private List objects = new LinkedList(); {
 				objects.add(new TestBean());
 				objects.add(new TestBean());
-			}
-			public String getConversationId() {
-				return null;
 			}
 			public Object get(String name, ObjectFactory objectFactory) {
 				if (index >= objects.size()) {
 					index = 0;
 				}
 				return objects.get(index++);
-			}
-			public void put(String name, Object value) {
-				throw new UnsupportedOperationException();
-			}
-			public Object remove(String name) {
-				throw new UnsupportedOperationException();
-			}
-			public void registerDestructionCallback(String name, Runnable callback) {
 			}
 		};
 

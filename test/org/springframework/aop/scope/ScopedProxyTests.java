@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,68 +23,41 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
-import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.config.Scope;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.factory.config.NoOpScope;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @since 2.0
  */
 public class ScopedProxyTests extends TestCase {
 
-	private DefaultListableBeanFactory beanFactory;
-
-	protected void setUp() throws Exception {
-		this.beanFactory = new DefaultListableBeanFactory();
-	}
-
 	/* SPR-2108 */
 	public void testProxyAssignable() throws Exception {
-		loadBeans("scopedMap.xml");
-		Object baseMap = this.beanFactory.getBean("singletonMap");
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedMap.xml", getClass()));
+		Object baseMap = bf.getBean("singletonMap");
 		assertTrue(baseMap instanceof Map);
 	}
 
 	public void testSimpleProxy() throws Exception {
-		loadBeans("scopedMap.xml");
-		Object simpleMap = this.beanFactory.getBean("simpleMap");
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedMap.xml", getClass()));
+		Object simpleMap = bf.getBean("simpleMap");
 		assertTrue(simpleMap instanceof Map);
 		assertTrue(simpleMap instanceof HashMap);
 	}
 
 	public void testCreateJdkScopedProxy() throws Exception {
-		loadBeans("scopedTestBean.xml");
-		ITestBean bean = (ITestBean) this.beanFactory.getBean("testBean");
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedTestBean.xml", getClass()));
+		ITestBean bean = (ITestBean) bf.getBean("testBean");
 		assertNotNull(bean);
 		assertTrue(AopUtils.isJdkDynamicProxy(bean));
 	}
 
 	public void testScopedList() {
-		loadBeans("scopedList.xml");
-		this.beanFactory.registerScope("request", new Scope() {
-			public String getConversationId() {
-				throw new UnsupportedOperationException();
-			}
-			public Object get(String name, ObjectFactory objectFactory) {
-				throw new UnsupportedOperationException();
-			}
-			public Object remove(String name) {
-				throw new UnsupportedOperationException();
-			}
-			public void registerDestructionCallback(String name, Runnable callback) {
-				throw new UnsupportedOperationException();
-			}
-		});
-		this.beanFactory.getBean("testBean");
-	}
-
-	private void loadBeans(String path) {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
-		reader.loadBeanDefinitions(new ClassPathResource(path, getClass()));
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedList.xml", getClass()));
+		bf.registerScope("request", new NoOpScope());
+		bf.getBean("testBean");
 	}
 
 }
