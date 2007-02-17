@@ -98,7 +98,11 @@ public interface Scope {
 	 * method, any registered destruction callback should be removed as well,
 	 * assuming that the removed object will be reused or manually destroyed.
 	 * @param name the name of the object to execute the destruction callback for
-	 * @param callback the destruction callback to be executed
+	 * @param callback the destruction callback to be executed.
+	 * Note that the passed-in Runnable will never throw an exception,
+	 * so it can safely be executed without an enclosing try-catch block.
+	 * Furthermore, the Runnable will usually be serializable, provided
+	 * that its target object is serializable as well.
 	 */
 	void registerDestructionCallback(String name, Runnable callback);
 
