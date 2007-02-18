@@ -83,6 +83,7 @@ public abstract class ObjectUtils {
 	 * Return whether the given array is empty: that is, <code>null</code>
 	 * or of zero length.
 	 * @param array the array to check
+	 * @return whether the given array is empty
 	 */
 	public static boolean isEmpty(Object[] array) {
 		return (array == null || array.length == 0);
@@ -118,7 +119,7 @@ public abstract class ObjectUtils {
 	 * <p>A <code>null</code> source value will be converted to an
 	 * empty Object array.
 	 * @param source the (potentially primitive) array
-	 * @return the corresponding object array
+	 * @return the corresponding object array (never <code>null</code>)
 	 * @throws IllegalArgumentException if the parameter is not an array
 	 */
 	public static Object[] toObjectArray(Object source) {
