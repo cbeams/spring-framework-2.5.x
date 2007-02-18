@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.util.NestedServletException;
 
 /**
- * Web controller that exports the specified service bean as HTTP invoker
+ * HTTP request handler that exports the specified service bean as HTTP invoker
  * service endpoint, accessible via an HTTP invoker proxy.
  *
  * <p>Deserializes remote invocation objects and serializes remote invocation
@@ -76,7 +76,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * <p>Default is "application/x-java-serialized-object".
 	 */
 	public void setContentType(String contentType) {
-		Assert.notNull(contentType, "contentType must not be null");
+		Assert.notNull(contentType, "'contentType' must not be null");
 		this.contentType = contentType;
 	}
 
@@ -84,7 +84,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * Return the content type to use for sending HTTP invoker responses.
 	 */
 	public String getContentType() {
-		return contentType;
+		return this.contentType;
 	}
 
 
@@ -101,10 +101,10 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 
 	/**
-	 * Read a remote invocation from the request, execute it,
-	 * and write the remote invocation result to the response.
+	 * Reads a remote invocation from the request, executes it,
+	 * and writes the remote invocation result to the response.
 	 * @see #readRemoteInvocation(HttpServletRequest)
-	 * @see #invokeAndCreateResult
+	 * @see #invokeAndCreateResult(org.springframework.remoting.support.RemoteInvocation, Object)
 	 * @see #writeRemoteInvocationResult(HttpServletRequest, HttpServletResponse, RemoteInvocationResult)
 	 */
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
@@ -125,14 +125,14 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 	/**
 	 * Read a RemoteInvocation from the given HTTP request.
-	 * Delegates to <code>readRemoteInvocation(InputStream)</code>
-	 * with the servlet request's input stream.
+	 * <p>Delegates to
+	 * {@link #readRemoteInvocation(javax.servlet.http.HttpServletRequest, java.io.InputStream)}
+	 * with the
+	 * {@link javax.servlet.ServletRequest#getInputStream() servlet request's input stream}.
 	 * @param request current HTTP request
 	 * @return the RemoteInvocation object
-	 * @throws IOException if thrown by operations on the request
+	 * @throws IOException in case of I/O failure
 	 * @throws ClassNotFoundException if thrown by deserialization
-	 * @see #readRemoteInvocation(HttpServletRequest, java.io.InputStream)
-	 * @see javax.servlet.ServletRequest#getInputStream
 	 */
 	protected RemoteInvocation readRemoteInvocation(HttpServletRequest request)
 			throws IOException, ClassNotFoundException {
@@ -142,18 +142,16 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 	/**
 	 * Deserialize a RemoteInvocation object from the given InputStream.
-	 * <p>Gives <code>decorateInputStream</code> a chance to decorate the stream
+	 * <p>Gives {@link #decorateInputStream} a chance to decorate the stream
 	 * first (for example, for custom encryption or compression). Creates a
-	 * <code>CodebaseAwareObjectInputStream</code> and calls
-	 * <code>doReadRemoteInvocation</code> to actually read the object.
+	 * {@link org.springframework.remoting.rmi.CodebaseAwareObjectInputStream}
+	 * and calls {@link #doReadRemoteInvocation} to actually read the object.
 	 * <p>Can be overridden for custom serialization of the invocation.
 	 * @param request current HTTP request
 	 * @param is the InputStream to read from
 	 * @return the RemoteInvocation object
-	 * @throws IOException if thrown by I/O methods
+	 * @throws IOException in case of I/O failure
 	 * @throws ClassNotFoundException if thrown during deserialization
-	 * @see #decorateInputStream
-	 * @see #doReadRemoteInvocation
 	 */
 	protected RemoteInvocation readRemoteInvocation(HttpServletRequest request, InputStream is)
 			throws IOException, ClassNotFoundException {
@@ -175,6 +173,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * @param request current HTTP request
 	 * @param is the original InputStream
 	 * @return the potentially decorated InputStream
+	 * @throws IOException in case of I/O failure
 	 */
 	protected InputStream decorateInputStream(HttpServletRequest request, InputStream is) throws IOException {
 		return is;
@@ -182,14 +181,14 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 	/**
 	 * Create an ObjectInputStream for the given InputStream.
-	 * The default implementation creates a CodebaseAwareObjectInputStream.
+	 * <p>The default implementation creates a Spring
+	 * {@link org.springframework.remoting.rmi.CodebaseAwareObjectInputStream}.
 	 * <p>Spring's CodebaseAwareObjectInputStream is used to explicitly resolve
 	 * primitive class names. This is done by the standard ObjectInputStream
 	 * on JDK 1.4+, but needs to be done explicitly on JDK 1.3.
 	 * @param is the InputStream to read from
 	 * @return the new ObjectInputStream instance to use
 	 * @throws IOException if creation of the ObjectInputStream failed
-	 * @see org.springframework.remoting.rmi.CodebaseAwareObjectInputStream
 	 */
 	protected ObjectInputStream createObjectInputStream(InputStream is) throws IOException {
 		return new CodebaseAwareObjectInputStream(is, null);
@@ -198,13 +197,15 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 	/**
 	 * Perform the actual reading of an invocation result object from the
 	 * given ObjectInputStream.
-	 * <p>The default implementation simply calls <code>readObject</code>.
+	 * <p>The default implementation simply calls
+	 * {@link java.io.ObjectInputStream#readObject()}.
 	 * Can be overridden for deserialization of a custom wrapper object rather
 	 * than the plain invocation, for example an encryption-aware holder.
 	 * @param ois the ObjectInputStream to read from
 	 * @return the RemoteInvocationResult object
-	 * @throws IOException if thrown by I/O methods
-	 * @see java.io.ObjectOutputStream#writeObject
+	 * @throws IOException in case of I/O failure
+	 * @throws ClassNotFoundException if case of a transferred class not
+	 * being found in the local ClassLoader
 	 */
 	protected RemoteInvocation doReadRemoteInvocation(ObjectInputStream ois)
 			throws IOException, ClassNotFoundException {
@@ -223,7 +224,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param result the RemoteInvocationResult object
-	 * @throws IOException if thrown by operations on the response
+	 * @throws IOException in case of I/O failure
 	 */
 	protected void writeRemoteInvocationResult(
 			HttpServletRequest request, HttpServletResponse response, RemoteInvocationResult result)
@@ -235,16 +236,16 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 	/**
 	 * Serialize the given RemoteInvocation to the given OutputStream.
-	 * <p>The default implementation gives <code>decorateOutputStream</code> a chance
+	 * <p>The default implementation gives {@link #decorateOutputStream} a chance
 	 * to decorate the stream first (for example, for custom encryption or compression).
-	 * Creates an <code>ObjectOutputStream</code> for the final stream and calls
-	 * <code>doWriteRemoteInvocationResult</code> to actually write the object.
+	 * Creates an {@link java.io.ObjectOutputStream} for the final stream and calls
+	 * {@link #doWriteRemoteInvocationResult} to actually write the object.
 	 * <p>Can be overridden for custom serialization of the invocation.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param result the RemoteInvocationResult object
 	 * @param os the OutputStream to write to
-	 * @throws IOException if thrown by I/O methods
+	 * @throws IOException in case of I/O failure
 	 * @see #decorateOutputStream
 	 * @see #doWriteRemoteInvocationResult
 	 */
@@ -271,6 +272,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * @param response current HTTP response
 	 * @param os the original OutputStream
 	 * @return the potentially decorated OutputStream
+	 * @throws IOException in case of I/O failure
 	 */
 	protected OutputStream decorateOutputStream(
 			HttpServletRequest request, HttpServletResponse response, OutputStream os) throws IOException {
@@ -280,7 +282,8 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 
 	/**
 	 * Create an ObjectOutputStream for the given OutputStream.
-	 * The default implementation creates a plain ObjectOutputStream.
+	 * <p>The default implementation creates a plain
+	 * {@link java.io.ObjectOutputStream}.
 	 * @param os the OutputStream to write to
 	 * @return the new ObjectOutputStream instance to use
 	 * @throws IOException if creation of the ObjectOutputStream failed
@@ -290,15 +293,15 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 	}
 
 	/**
-	 * Perform the actual writing of the given invocation result object to the
-	 * given ObjectOutputStream.
-	 * <p>The default implementation simply calls <code>writeObject</code>.
+	 * Perform the actual writing of the given invocation result object
+	 * to the given ObjectOutputStream.
+	 * <p>The default implementation simply calls
+	 * {@link java.io.ObjectOutputStream#writeObject}.
 	 * Can be overridden for serialization of a custom wrapper object rather
 	 * than the plain invocation, for example an encryption-aware holder.
 	 * @param result the RemoteInvocationResult object
 	 * @param oos the ObjectOutputStream to write to
 	 * @throws IOException if thrown by I/O methods
-	 * @see java.io.ObjectOutputStream#writeObject
 	 */
 	protected void doWriteRemoteInvocationResult(RemoteInvocationResult result, ObjectOutputStream oos)
 			throws IOException {
