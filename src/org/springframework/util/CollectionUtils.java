@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ public abstract class CollectionUtils {
 	 * Return <code>true</code> if the supplied Collection is <code>null</code>
 	 * or empty. Otherwise, return <code>false</code>.
 	 * @param collection the Collection to check
+	 * @return whether the given Collection is empty
 	 */
 	public static boolean isEmpty(Collection collection) {
 		return (collection == null || collection.isEmpty());
@@ -47,30 +48,60 @@ public abstract class CollectionUtils {
 	 * Return <code>true</code> if the supplied Map is <code>null</code>
 	 * or empty. Otherwise, return <code>false</code>.
 	 * @param map the Map to check
+	 * @return whether the given Map is empty
 	 */
 	public static boolean isEmpty(Map map) {
 		return (map == null || map.isEmpty());
 	}
 
 	/**
-	 * Check whether the given Collection contains the given element instance.
-	 * <p>Enforces the given instance to be present, rather than returning
-	 * <code>true</code> for an equal element as well.
-	 * @param collection the Collection to check
-	 * @param element the element to look for
-	 * @return <code>true</code> if found, <code>false</code> else
+	 * Convert the supplied array into a List. A primitive array gets
+	 * converted into a List of the appropriate wrapper type.
+	 * <p>A <code>null</code> source value will be converted to an
+	 * empty List.
+	 * @param source the (potentially primitive) array
+	 * @return the converted List result
+	 * @see ObjectUtils#toObjectArray(Object)
 	 */
-	public static boolean containsInstance(Collection collection, Object element) {
-		if (collection != null) {
-			for (Iterator it = collection.iterator(); it.hasNext();) {
-				Object candidate = it.next();
-				if (candidate == element) {
-					return true;
-				}
+	public static List arrayToList(Object source) {
+		return Arrays.asList(ObjectUtils.toObjectArray(source));
+	}
+
+	/**
+	 * Merge the given array into the given Collection.
+	 * @param array the array to merge (may be <code>null</code>)
+	 * @param collection the target Collection to merge the array into
+	 */
+	public static void mergeArrayIntoCollection(Object array, Collection collection) {
+		if (collection == null) {
+			throw new IllegalArgumentException("Collection must not be null");
+		}
+		Object[] arr = ObjectUtils.toObjectArray(array);
+		for (int i = 0; i < arr.length; i++) {
+			collection.add(arr[i]);
+		}
+	}
+
+	/**
+	 * Merge the given Properties instance into the given Map,
+	 * copying all properties (key-value pairs) over.
+	 * <p>Uses <code>Properties.propertyNames()</code> to even catch
+	 * default properties linked into the original Properties instance.
+	 * @param props the Properties instance to merge (may be <code>null</code>)
+	 * @param map the target Map to merge the properties into
+	 */
+	public static void mergePropertiesIntoMap(Properties props, Map map) {
+		if (map == null) {
+			throw new IllegalArgumentException("Map must not be null");
+		}
+		if (props != null) {
+			for (Enumeration en = props.propertyNames(); en.hasMoreElements();) {
+				String key = (String) en.nextElement();
+				map.put(key, props.getProperty(key));
 			}
 		}
-		return false;
 	}
+
 
 	/**
 	 * Check whether the given Iterator contains the given element.
@@ -109,28 +140,64 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Determine whether the given Collection only contains a single unique object.
+	 * Check whether the given Collection contains the given element instance.
+	 * <p>Enforces the given instance to be present, rather than returning
+	 * <code>true</code> for an equal element as well.
 	 * @param collection the Collection to check
-	 * @return <code>true</code> if the collection contains a single reference or
-	 * multiple references to the same instance, <code>false</code> else
+	 * @param element the element to look for
+	 * @return <code>true</code> if found, <code>false</code> else
 	 */
-	public static boolean hasUniqueObject(Collection collection) {
-		if (isEmpty(collection)) {
+	public static boolean containsInstance(Collection collection, Object element) {
+		if (collection != null) {
+			for (Iterator it = collection.iterator(); it.hasNext();) {
+				Object candidate = it.next();
+				if (candidate == element) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Return <code>true</code> if any element in '<code>candidates</code>' is
+	 * contained in '<code>source</code>'; otherwise returns <code>false</code>.
+	 * @param source the source Collection
+	 * @param candidates the candidates to search for
+	 * @return whether any of the candidates has been found
+	 */
+	public static boolean containsAny(Collection source, Collection candidates) {
+		if (isEmpty(source) || isEmpty(candidates)) {
 			return false;
 		}
-		boolean hasCandidate = false;
-		Object candidate = null;
-		for (Iterator it = collection.iterator(); it.hasNext();) {
-			Object elem = it.next();
-			if (!hasCandidate) {
-				hasCandidate = true;
-				candidate = elem;
-			}
-			else if (candidate != elem) {
-				return false;
+		for (Iterator it = candidates.iterator(); it.hasNext();) {
+			if (source.contains(it.next())) {
+				return true;
 			}
 		}
-		return true;
+		return false;
+	}
+
+	/**
+	 * Return the first element in '<code>candidates</code>' that is contained in
+	 * '<code>source</code>'. If no element in '<code>candidates</code>' is present in
+	 * '<code>source</code>' returns <code>null</code>. Iteration order is
+	 * {@link Collection} implementation specific.
+	 * @param source the source Collection
+	 * @param candidates the candidates to search for
+	 * @return the first present object, or <code>null</code> if not found
+	 */
+	public static Object findFirstMatch(Collection source, Collection candidates) {
+		if (isEmpty(source) || isEmpty(candidates)) {
+			return null;
+		}
+		for (Iterator it = candidates.iterator(); it.hasNext();) {
+			Object candidate = it.next();
+			if (source.contains(candidate)) {
+				return candidate;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -181,71 +248,28 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Convert the supplied array into a List. A primitive array gets
-	 * converted into a List of the appropriate wrapper type.
-	 * <p>A <code>null</code> source value will be converted to an
-	 * empty List.
-	 * @param source the (potentially primitive) array
-	 * @return the converted List result
-	 * @see ObjectUtils#toObjectArray(Object)
+	 * Determine whether the given Collection only contains a single unique object.
+	 * @param collection the Collection to check
+	 * @return <code>true</code> if the collection contains a single reference or
+	 * multiple references to the same instance, <code>false</code> else
 	 */
-	public static List arrayToList(Object source) {
-		return Arrays.asList(ObjectUtils.toObjectArray(source));
-	}
-
-	/**
-	 * Merge the given Properties instance into the given Map,
-	 * copying all properties (key-value pairs) over.
-	 * <p>Uses <code>Properties.propertyNames()</code> to even catch
-	 * default properties linked into the original Properties instance.
-	 * @param props the Properties instance to merge (may be <code>null</code>)
-	 * @param map the target Map to merge the properties into
-	 */
-	public static void mergePropertiesIntoMap(Properties props, Map map) {
-		if (map == null) {
-			throw new IllegalArgumentException("Map must not be null");
-		}
-		if (props != null) {
-			for (Enumeration en = props.propertyNames(); en.hasMoreElements();) {
-				String key = (String) en.nextElement();
-				map.put(key, props.getProperty(key));
-			}
-		}
-	}
-
-	/**
-	 * Return <code>true</code> if any element in '<code>candidates</code>' is
-	 * contained in '<code>source</code>'; otherwise returns <code>false</code>.
-	 */
-	public static boolean containsAny(Collection source, Collection candidates) {
-		if (isEmpty(source) || isEmpty(candidates)) {
+	public static boolean hasUniqueObject(Collection collection) {
+		if (isEmpty(collection)) {
 			return false;
 		}
-		for (Iterator it = candidates.iterator(); it.hasNext();) {
-			if (source.contains(it.next())) {
-				return true;
+		boolean hasCandidate = false;
+		Object candidate = null;
+		for (Iterator it = collection.iterator(); it.hasNext();) {
+			Object elem = it.next();
+			if (!hasCandidate) {
+				hasCandidate = true;
+				candidate = elem;
+			}
+			else if (candidate != elem) {
+				return false;
 			}
 		}
-		return false;
-	}
-
-	/**
-	 * Return the first element in '<code>candidates</code>' that is contained in
-	 * '<code>source</code>'. If no element in '<code>candidates</code>' is present in
-	 * '<code>source</code>' returns <code>null</code>. Iteration order is
-	 * {@link Collection} implementation specific.
-	 */
-	public static Object findFirstMatch(Collection source, Collection candidates) {
-		if (isEmpty(source) || isEmpty(candidates)) {
-			return null;
-		}
-		for (Iterator it = candidates.iterator(); it.hasNext();) {
-			Object candidate = it.next();
-			if (source.contains(candidate)) {
-				return candidate;
-			}
-		}
-		return null;
+		return true;
 	}
 
 }

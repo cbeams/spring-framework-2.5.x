@@ -43,7 +43,6 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest}
@@ -584,7 +583,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			header.addValues((Collection) value);
 		}
 		else if (value.getClass().isArray()) {
-			header.addValues(CollectionUtils.arrayToList(value));
+			header.addValueArray(value);
 		}
 		else {
 			header.addValue(value);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -51,6 +52,43 @@ public class CollectionUtilsTests extends TestCase {
 		assertFalse(CollectionUtils.isEmpty(map));
 	}
 
+	public void testMergeArrayIntoCollection() {
+		Object[] arr = new Object[] {"value1", "value2"};
+		List list = new LinkedList();
+		list.add("value3");
+
+		CollectionUtils.mergeArrayIntoCollection(arr, list);
+		assertEquals("value3", list.get(0));
+		assertEquals("value1", list.get(1));
+		assertEquals("value2", list.get(2));
+	}
+
+	public void testMergePrimitiveArrayIntoCollection() {
+		int[] arr = new int[] {1, 2};
+		List list = new LinkedList();
+		list.add(new Integer(3));
+
+		CollectionUtils.mergeArrayIntoCollection(arr, list);
+		assertEquals(new Integer(3), list.get(0));
+		assertEquals(new Integer(1), list.get(1));
+		assertEquals(new Integer(2), list.get(2));
+	}
+
+	public void testMergePropertiesIntoMap() {
+		Properties defaults = new Properties();
+		defaults.setProperty("prop1", "value1");
+		Properties props = new Properties(defaults);
+		props.setProperty("prop2", "value2");
+
+		Map map = new HashMap();
+		map.put("prop3", "value3");
+
+		CollectionUtils.mergePropertiesIntoMap(props, map);
+		assertEquals("value1", map.get("prop1"));
+		assertEquals("value2", map.get("prop2"));
+		assertEquals("value3", map.get("prop3"));
+	}
+
 	public void testContains() {
 		assertFalse(CollectionUtils.contains((Iterator) null, "myElement"));
 		assertFalse(CollectionUtils.contains((Enumeration) null, "myElement"));
@@ -64,53 +102,6 @@ public class CollectionUtilsTests extends TestCase {
 		Hashtable ht = new Hashtable();
 		ht.put("myElement", "myValue");
 		assertTrue(CollectionUtils.contains(ht.keys(), "myElement"));
-	}
-
-	public void testHasUniqueObject() {
-		List list = new LinkedList();
-		list.add("myElement");
-		list.add("myOtherElement");
-		assertFalse(CollectionUtils.hasUniqueObject(list));
-
-		list = new LinkedList();
-		list.add("myElement");
-		assertTrue(CollectionUtils.hasUniqueObject(list));
-
-		list = new LinkedList();
-		list.add("myElement");
-		list.add(null);
-		assertFalse(CollectionUtils.hasUniqueObject(list));
-
-		list = new LinkedList();
-		list.add(null);
-		list.add("myElement");
-		assertFalse(CollectionUtils.hasUniqueObject(list));
-
-		list = new LinkedList();
-		list.add(null);
-		list.add(null);
-		assertTrue(CollectionUtils.hasUniqueObject(list));
-
-		list = new LinkedList();
-		list.add(null);
-		assertTrue(CollectionUtils.hasUniqueObject(list));
-
-		list = new LinkedList();
-		assertFalse(CollectionUtils.hasUniqueObject(list));
-	}
-
-	public void testFindFirstMatch() throws Exception {
-		List source = new ArrayList();
-		source.add("abc");
-		source.add("def");
-		source.add("ghi");
-
-		List candidates = new ArrayList();
-		candidates.add("xyz");
-		candidates.add("def");
-		candidates.add("abc");
-
-		assertEquals("def", CollectionUtils.findFirstMatch(source, candidates));
 	}
 
 	public void testContainsAny() throws Exception {
@@ -158,6 +149,53 @@ public class CollectionUtilsTests extends TestCase {
 		list.add(new Instance("fiona"));
 		assertFalse("Must return false if null instance is supplied",
 				CollectionUtils.containsInstance(list, null));
+	}
+
+	public void testFindFirstMatch() throws Exception {
+		List source = new ArrayList();
+		source.add("abc");
+		source.add("def");
+		source.add("ghi");
+
+		List candidates = new ArrayList();
+		candidates.add("xyz");
+		candidates.add("def");
+		candidates.add("abc");
+
+		assertEquals("def", CollectionUtils.findFirstMatch(source, candidates));
+	}
+
+	public void testHasUniqueObject() {
+		List list = new LinkedList();
+		list.add("myElement");
+		list.add("myOtherElement");
+		assertFalse(CollectionUtils.hasUniqueObject(list));
+
+		list = new LinkedList();
+		list.add("myElement");
+		assertTrue(CollectionUtils.hasUniqueObject(list));
+
+		list = new LinkedList();
+		list.add("myElement");
+		list.add(null);
+		assertFalse(CollectionUtils.hasUniqueObject(list));
+
+		list = new LinkedList();
+		list.add(null);
+		list.add("myElement");
+		assertFalse(CollectionUtils.hasUniqueObject(list));
+
+		list = new LinkedList();
+		list.add(null);
+		list.add(null);
+		assertTrue(CollectionUtils.hasUniqueObject(list));
+
+		list = new LinkedList();
+		list.add(null);
+		assertTrue(CollectionUtils.hasUniqueObject(list));
+
+		list = new LinkedList();
+		assertFalse(CollectionUtils.hasUniqueObject(list));
 	}
 
 
