@@ -43,7 +43,8 @@ import org.springframework.beans.factory.ObjectFactory;
  *
  * <p><code>Scope</code> implementations are expected to be thread-safe.
  * One <code>Scope</code> instance can be used with multiple bean factories
- * at the same time, if desired, with any number of threads accessing
+ * at the same time, if desired (unless it explicitly wants to be aware of
+ * the containing BeanFactory), with any number of threads accessing
  * the <code>Scope</code> concurrently from any number of factories.
  *
  * @author Juergen Hoeller
@@ -61,6 +62,8 @@ public interface Scope {
 	 * Return the object with the given name from the underlying scope,
 	 * {@link org.springframework.beans.factory.ObjectFactory#getObject() creating it}
 	 * if not found in the underlying storage mechanism.
+	 * <p>This is the central operation of a Scope, and the only operation
+	 * that is absolutely required.
 	 * @param name the name of the object to retrieve
 	 * @param objectFactory the {@link ObjectFactory} to use to create the scoped
 	 * object if it is not present in the underlying storage mechanism
@@ -76,6 +79,9 @@ public interface Scope {
 	 * callback for the specified object, if any. It does, however, <i>not</i>
 	 * need to <i>execute</i> a registered destruction callback in this case,
 	 * since the object will be destroyed by the caller (if appropriate).
+	 * <p><b>Note: This is an optional operation.</b> Implementations may throw
+	 * {@link UnsupportedOperationException} if they do not support explicitly
+	 * removing an object.
 	 * @param name the name of the object to remove
 	 * @return the removed object, or <code>null</code> if no object was present
 	 * @see #registerDestructionCallback
@@ -87,10 +93,13 @@ public interface Scope {
 	 * object in the scope (or at destruction of the entire scope, if the
 	 * scope does not destroy individual objects but rather only terminates
 	 * in its entirety).
-	 * <p>Implementations should do their best to execute the callback
-	 * at the appropriate time. If such a callback is not supported
-	 * by the underlying runtime environment, the callback <i>must be
-	 * ignored</i> and a corresponding warning should be logged.
+	 * <p><b>Note: This is an optional operation.</b> This method will only
+	 * be called for scoped beans with actual destruction configuration
+	 * (DisposableBean, destroy-method, DestructionAwareBeanPostProcessor).
+	 * Implementations should do their best to execute a given callback
+	 * at the appropriate time. If such a callback is not supported by the
+	 * underlying runtime environment at all, the callback <i>must be
+	 * ignored and a corresponding warning should be logged</i>.
 	 * <p>Note that 'destruction' refers to to automatic destruction of
 	 * the object as part of the scope's own lifecycle, not to the individual
 	 * scoped object having been explicitly removed by the application.
@@ -103,6 +112,9 @@ public interface Scope {
 	 * so it can safely be executed without an enclosing try-catch block.
 	 * Furthermore, the Runnable will usually be serializable, provided
 	 * that its target object is serializable as well.
+	 * @see org.springframework.beans.factory.DisposableBean
+	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getDestroyMethodName()
+	 * @see DestructionAwareBeanPostProcessor
 	 */
 	void registerDestructionCallback(String name, Runnable callback);
 
@@ -114,9 +126,9 @@ public interface Scope {
 	 * {@link javax.servlet.http.HttpSession#getId() session id}; in the
 	 * case of a custom conversation that sits within the overall session,
 	 * the specific id for the current conversation would be appropriate.
-	 * <p>It is perfectly valid to return <code>null</code> in an
-	 * implementation of this method if the underlying storage mechanism
-	 * has no obvious candidate for a conversation id.
+	 * <p><b>Note: This is an optional operation.</b> It is perfectly valid to
+	 * return <code>null</code> in an implementation of this method if the
+	 * underlying storage mechanism has no obvious candidate for such an id.
 	 * @return the conversation id, or <code>null</code> if there is no
 	 * conversation id for the current scope
 	 */
