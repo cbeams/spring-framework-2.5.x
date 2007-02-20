@@ -1446,62 +1446,152 @@ support=support@somecompany.co.uk]]></programlisting>
                 <para>The above configuration is equivalent to the following Java code:
                 <methodname>exampleBean.setEmail(null)</methodname>.</para>
             </section>
-            <section id="beans-value-ref-shortcuts">
-                <title>XML-based configuration metadata shortcuts</title>
-                <para>There exist some shortcut forms which are less verbose than using the full
-                <literal>&lt;value/&gt;</literal> and <literal>&lt;ref/&gt;</literal> elements. The
-                <literal>&lt;property/&gt;</literal>, <literal>&lt;constructor-arg/&gt;</literal>, and
-                <literal>&lt;entry/&gt;</literal> elements all support a <literal>'value'</literal>
-                attribute which may be used instead of embedding a full <literal>&lt;value/&gt;</literal>
-                element. Therefore, the following:</para>
-                <programlisting><![CDATA[<property name="myProperty">
+            <section id="xml-config-shortcuts">
+            	<title>Shortcuts and other convenience options for XML-based configuration metadata</title>
+            	<para>
+            		The configuration metadata that you saw above in some places is a little verbose. That's why there
+            		are several options available for you to limit the amount of XML you have to write to configure your
+            		components a little bit. The first is a shortcut to define values and references to other beans
+            		as part of a &lt;property/&gt; definition. The second is slightly different format of specifying properties
+            		all together.
+            	</para>
+            
+	            <section id="beans-value-ref-shortcuts">
+	                <title>XML-based configuration metadata shortcuts</title>
+	                <para>There exist some shortcut forms which are less verbose than using the full
+	                <literal>&lt;value/&gt;</literal> and <literal>&lt;ref/&gt;</literal> elements. The
+	                <literal>&lt;property/&gt;</literal>, <literal>&lt;constructor-arg/&gt;</literal>, and
+	                <literal>&lt;entry/&gt;</literal> elements all support a <literal>'value'</literal>
+	                attribute which may be used instead of embedding a full <literal>&lt;value/&gt;</literal>
+	                element. Therefore, the following:</para>
+	                <programlisting><![CDATA[<property name="myProperty">
   <value>hello</value>
 </property>]]></programlisting>
-                <programlisting><![CDATA[<constructor-arg>
+                	<programlisting><![CDATA[<constructor-arg>
   <value>hello</value>
 </constructor-arg>]]></programlisting>
-                <programlisting><![CDATA[<entry key="myKey">
+	                <programlisting><![CDATA[<entry key="myKey">
   <value>hello</value>
 </entry>]]></programlisting>
-                <para>are equivalent to:</para>
-                <programlisting><![CDATA[<property name="myProperty" value="hello"/>]]></programlisting>
-                <programlisting><![CDATA[<constructor-arg value="hello"/>]]></programlisting>
-                <programlisting><![CDATA[<entry key="myKey" value="hello"/>]]></programlisting>
-                <para>In general, when typing definitions by hand, you will probably prefer to
-                use the less verbose shortcut form (the Spring team certainly does).</para>
-                <para>The <literal>&lt;property/&gt;</literal> and
-                <literal>&lt;constructor-arg/&gt;</literal> elements support a similar
-                shortcut <literal>'ref'</literal> attribute which may be used instead
-                of a full nested <literal>&lt;ref/&gt;</literal> element. Therefore,
-                the following:</para>
-                <programlisting><![CDATA[<property name="myProperty">
+	                <para>are equivalent to:</para>
+	                <programlisting><![CDATA[<property name="myProperty" value="hello"/>]]></programlisting>
+	                <programlisting><![CDATA[<constructor-arg value="hello"/>]]></programlisting>
+	                <programlisting><![CDATA[<entry key="myKey" value="hello"/>]]></programlisting>
+	                <para>In general, when typing definitions by hand, you will probably prefer to
+	                use the less verbose shortcut form (the Spring team certainly does).</para>
+	                <para>The <literal>&lt;property/&gt;</literal> and
+	                <literal>&lt;constructor-arg/&gt;</literal> elements support a similar
+	                shortcut <literal>'ref'</literal> attribute which may be used instead
+	                of a full nested <literal>&lt;ref/&gt;</literal> element. Therefore,
+	                the following:</para>
+	                <programlisting><![CDATA[<property name="myProperty">
   <ref bean="myBean">
 </property>]]></programlisting>
-                <programlisting><![CDATA[<constructor-arg>
+        	        <programlisting><![CDATA[<constructor-arg>
   <ref bean="myBean">
 </constructor-arg>]]></programlisting>
-                <para>... are equivalent to:</para>
-                <programlisting><![CDATA[<property name="myProperty" ref="myBean"/>]]></programlisting>
-                <programlisting><![CDATA[<constructor-arg ref="myBean"/>]]></programlisting>
-                <para>Note however that the shortcut form is equivalent to a
-                <literal>&lt;ref bean="xxx"&gt;</literal> element; there is no
-                shortcut for <literal>&lt;ref local="xxx"</literal>&gt;. To enforce a
-                strict local reference, you must use the long form.</para>
-                <para>Finally, the entry element allows a shortcut form to specify the
-                key and/or value of the map, in the form of the <literal>'key'</literal>
-                / <literal>'key-ref'</literal> and <literal>'value'</literal> /
-                <literal>'value-ref'</literal> attributes. Therefore, the following:</para>
-                <programlisting><![CDATA[<entry>
+	                <para>... are equivalent to:</para>
+	                <programlisting><![CDATA[<property name="myProperty" ref="myBean"/>]]></programlisting>
+	                <programlisting><![CDATA[<constructor-arg ref="myBean"/>]]></programlisting>
+	                <para>Note however that the shortcut form is equivalent to a
+	                <literal>&lt;ref bean="xxx"&gt;</literal> element; there is no
+	                shortcut for <literal>&lt;ref local="xxx"</literal>&gt;. To enforce a
+	                strict local reference, you must use the long form.</para>
+	                <para>Finally, the entry element allows a shortcut form to specify the
+	                key and/or value of the map, in the form of the <literal>'key'</literal>
+	                / <literal>'key-ref'</literal> and <literal>'value'</literal> /
+	                <literal>'value-ref'</literal> attributes. Therefore, the following:</para>
+	                <programlisting><![CDATA[<entry>
   <key>
     <ref bean="myKeyBean" />
   </key>
   <ref bean="myValueBean" />
 </entry>]]></programlisting>
-                <para>is equivalent to:</para>
-                <programlisting><![CDATA[<entry key-ref="myKeyBean" value-ref="myValueBean"/>]]></programlisting>
-                <para>Again, the shortcut form is equivalent to a
-                <literal>&lt;ref bean="xxx"&gt;</literal> element; there is no shortcut for
-                <literal>&lt;ref local="xxx"</literal>&gt;.</para>
+	                <para>is equivalent to:</para>
+	                <programlisting><![CDATA[<entry key-ref="myKeyBean" value-ref="myValueBean"/>]]></programlisting>
+	                <para>Again, the shortcut form is equivalent to a
+	                <literal>&lt;ref bean="xxx"&gt;</literal> element; there is no shortcut for
+	                <literal>&lt;ref local="xxx"</literal>&gt;.</para>
+	            </section>
+	            <section id="beans-p-namespace">
+	            	<title>The p-namespace and how to use it to configure properties</title>
+	            	<para>
+	            		The second option you have to limit the amount of XML you have to write to configure your components
+	            		is to use the so-called p-namespace. As you might know, Spring 2.0 and later features support for extensible configuration
+	            		formats using namespaces. Those namespaces (such as <literal>util</literal> and <literal>jee</literal>) are
+	            		all based on an XML Schema definition. In fact, the <literal>beans</literal> configuration format that you've been
+	            		reading about is just as much defined in an XML Schema document.</para>
+	            	<para>
+	            		One namespace however is not defined in an XSD file and only exists in the core of Spring itself. The so-called
+	            		p-namespace doesn't need a schema definition and is a powerful way of configuring your properties differently
+	            		than the way you've seen so far. Instead of using <emphasis role="bold">nested</emphasis> <literal>property</literal>
+	            		elements, using the p-namespace you can use attributes (in the p-namespace) as part of the <literal>bean</literal> element that
+	            		describe your property values. The values of the attributes will be taken as values for your properties.
+	            	</para>
+	            	<para>
+	            		Let's review an example. The following two XML snippets are (in terms of Spring configuration declaratives)
+	            		entirely the same, except for the fact that the first is using the format you're familiar with (the
+	            		<literal>property</literal> elements) whereas the second example is using the p-namespace</para>
+	            		
+	            	<para><programlisting><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+    
+    <bean name="classic" class="com.mycompany.ExampleBean">
+        <property name="email" value="foo@bar.com/>
+    </bean>
+    
+    <bean name="p-namespace" 
+        class="com.mycompany.ExampleBean"
+        p:email="foo@bar.com"/>
+</beans>]]></programlisting></para>
+
+					<para>
+						As you can see, we're including a attribute from the p-namespace called email in the bean definition. This is telling
+						Spring that it should include a property declaration. As previously mentioned, the p-namespace doesn't have a schema
+						definition, so the name of the attribute can be set to whatever name your property has.
+					</para>
+					<para>
+						The second exampe (see below) included two more bean definitions that both have a reference to another bean:
+					</para>
+					<para><programlisting><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+    
+    <bean name="john-classic" class="com.mycompany.Person">
+        <property name="name" value="John Doe"/>
+        <property name="spouse" ref="jane"/>
+    </bean>
+    
+	<bean name="john-modern" 
+		class="com.mycompany.Person"
+		p:name="John Doe"
+		p:spouse-ref="jane"/>
+
+    <bean name="jane" class="com.mycompany.Person">
+        <property name="name" value="Jane Doe"/>
+    </bean>
+</beans>]]></programlisting></para>
+					<para>
+						As you can see, this example doesn't only include a property value using the p-namespace, but also uses a special
+						format to declare property references. Whereas the first bean definition uses <literal>&lt;property name="spouse" ref="jane"/&gt;</literal>
+						to create a reference from bean john to bean jane, the second bean definition uses
+						<literal>op:spouse-ref="jane"</literal> as an attribute to do the exact same thing. In this case <emphasis role="bold">spouse</emphasis>
+						is the property name whereas the <literal>-ref</literal> part tells Spring this is not a value but a bean reference.
+					</para>
+					<note>
+						<para>Note that we recommend you to choose carefully which approach you are going to use in your project.
+						You should also communicate this to your team members so you won't end up with XML documents using all
+						three approaches at the same time. All this adds to the consistency of your codebase and will prevent
+						people from not understanding the application because of different ways of configurating it.
+						Also not that this functionality is only available as of Spring 2.0.
+					</para></note>
+					<para>
+						Using the p-namespace requires nothing else than simply adding it to your XML declaration as shown above.
+					</para>
+				</section>
             </section>
             <section id="beans-compound-property-names">
                 <title>Compound property names</title>
