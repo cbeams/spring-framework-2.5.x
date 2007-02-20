@@ -1100,7 +1100,61 @@ public class DefaultFooService implements FooService {
 			So please do take the Spring team's advice and only annotate concrete classes
 			(and the methods of concrete classes) with the
 			<interfacename>@Transactional</interfacename> annotation.</para>
-
+			
+			<para>
+                <table id="tx-annotation-drive-settings">
+                    <title><literal>&lt;tx:annotation-drive/&gt;</literal> settings</title>
+                    <tgroup cols="4">
+                        <thead>
+                            <row>
+                                <entry>Attribute</entry>
+                                <entry>Required?</entry>
+                                <entry>Default</entry>
+                                <entry>Description</entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry><literal>transaction-manager</literal></entry>
+                                <entry>No</entry>
+                                <entry>transactionManager</entry>
+                                <entry>
+                                    <para>The name of transaction manager to use. Only required
+                                    if the name of the transaction manager is not <literal>transactionManager</literal>,
+                                    as in the example above.</para>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry><literal>proxy-target-class</literal></entry>
+                                <entry>No</entry>
+                                <entry></entry>
+                                <entry>
+                                	<para>Controls
+									what type of transactional proxies are created for classes annotated
+									with the <interfacename>@Transactional</interfacename> annotation.
+									If "<literal>proxy-target-class</literal>" attribute is set to
+									"<literal>true</literal>", then class-based proxies will be created.
+					                If "<literal>proxy-target-class</literal>" is "<literal>false</literal>"
+									or if the attribute is omitted, then standard JDK interface-based proxies
+									will be created. (See the section entitled <xref linkend="aop-proxying"/>
+									for a detailed examination of the different proxy types.)</para></entry>
+                            </row>
+                            <row>
+                                <entry><literal>order</literal></entry>
+                                <entry>No</entry>
+                                <entry></entry>
+                                <entry><para>Defines the order of the transaction advice that will be applied to
+                                beans annotated with <code>@Transactional</code>. More on the rules related
+                                to ordering of AOP advice can be found in the AOP chapter (see section
+                                <xref linkend="aop-ataspectj-advice-ordering"/>). Note that not specifying
+                                order values with <emphasis role="bold">any</emphasis> will leave the decision
+                                as to what order the advices are run in to the AOP subsystem.</para></entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+            </para>
+            
 			<note>
                 <para>The "<literal>proxy-target-class</literal>" attribute on the
 				<literal>&lt;tx:annotation-driven/&gt;</literal> element controls
