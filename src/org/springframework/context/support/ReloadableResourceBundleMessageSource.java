@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,41 +33,47 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.Assert;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
 
 /**
- * MessageSource that accesses the ResourceBundles with the specified basenames.
- * This class uses <code>java.util.Properties</code> instances as its internal
- * data structure for messages, loading them via a PropertiesPersister strategy:
- * The default strategy can load properties files with a specific encoding.
+ * {@link org.springframework.context.MessageSource} implementation that
+ * accesses resource bundles using specified basenames. This class uses
+ * {@link java.util.Properties} instances as its custom data structure for
+ * messages, loading them via a {@link org.springframework.util.PropertiesPersister}
+ * strategy: The default strategy is capable of loading properties files
+ * with a specific character encoding, if desired.
  *
- * <p>In contrast to ResourceBundleMessageSource, this class supports reloading
- * of properties files through the "cacheSeconds" setting, and also through
- * programmatically clearing the properties cache. Since application servers do
- * typically cache all files loaded from the classpath, it is necessary to store
- * resources somewhere else (for example, in the "WEB-INF" directory of a web app).
- * Otherwise changes of files in the classpath are not reflected in the application.
+ * <p>In contrast to {@link ResourceBundleMessageSource}, this class supports
+ * reloading of properties files through the {@link #setCacheSeconds "cacheSeconds"}
+ * setting, and also through programmatically clearing the properties cache.
+ * Since application servers typically cache all files loaded from the classpath,
+ * it is necessary to store resources somewhere else (for example, in the
+ * "WEB-INF" directory of a web app). Otherwise changes of files in the
+ * classpath will <i>not</i> be reflected in the application.
  *
- * <p>Note that the base names set as the "basename" and "basenames" properties are
- * treated in a slightly different fashion than the "basename" property of 
- * ResourceBundleMessageSource. It follows the basic ResourceBundle rule of not
+ * <p>Note that the base names set as {@link #setBasenames "basenames"} property
+ * are treated in a slightly different fashion than the "basenames" property of
+ * {@link ResourceBundleMessageSource}. It follows the basic ResourceBundle rule of not
  * specifying file extension or language codes, but can refer to any Spring resource
  * location (instead of being restricted to classpath resources). With a "classpath:"
  * prefix, resources can still be loaded from the classpath, but "cacheSeconds" values
  * other than "-1" (caching forever) will not work in this case.
  *
  * <p>This MessageSource implementation is usually slightly faster than
- * ResourceBundleMessageSource, which builds on <code>java.util.ResourceBundle</code>
+ * {@link ResourceBundleMessageSource}, which builds on {@link java.util.ResourceBundle}
  * - in the default mode, i.e. when caching forever. With "cacheSeconds" set to 1,
  * message lookup takes about twice as long - with the benefit that changes in
  * individual properties files are detected with a maximum delay of 1 second.
- * Higher "cacheSeconds" values usually <i>don't</i> make a significant difference.
+ * Higher "cacheSeconds" values usually <i>do not</i> make a significant difference.
  *
- * <p>This MessageSource can easily be used outside an ApplicationContext: It uses
- * a DefaultResourceLoader as default, getting overridden with the ApplicationContext
- * if running in a context. It does not have any other specific dependencies.
+ * <p>This MessageSource can easily be used outside of an
+ * {@link org.springframework.context.ApplicationContext: It will use a
+ * {@link org.springframework.core.io.DefaultResourceLoader} as default,
+ * simply getting overridden with the ApplicationContext if running in a context.
+ * It does not have any other specific dependencies.
  *
  * <p>Thanks to Thomas Achleitner for providing the initial implementation of
  * this message source!
@@ -119,7 +125,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	/**
 	 * Set a single basename, following the basic ResourceBundle convention of
 	 * not specifying file extension or language codes, but in contrast to
-	 * ResourceBundleMessageSource referring to a Spring resource location:
+	 * {@link ResourceBundleMessageSource} referring to a Spring resource location:
 	 * e.g. "WEB-INF/messages" for "WEB-INF/messages.properties",
 	 * "WEB-INF/messages_en.properties", etc.
 	 * <p>As of Spring 1.2.2, XML properties files are also supported:
@@ -136,17 +142,35 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	}
 
 	/**
-	 * Set an array of basenames, each following the above-mentioned special
-	 * convention. The associated resource bundles will be checked sequentially
-	 * when resolving a message code.
-	 * <p>Note that message definitions in a <i>previous</i> resource bundle
-	 * will override ones in a later bundle, due to the sequential lookup.
+	 * Set an array of basenames, each following the basic ResourceBundle convention
+	 * of not specifying file extension or language codes, but in contrast to
+	 * {@link ResourceBundleMessageSource} referring to a Spring resource location:
+	 * e.g. "WEB-INF/messages" for "WEB-INF/messages.properties",
+	 * "WEB-INF/messages_en.properties", etc.
+	 * <p>As of Spring 1.2.2, XML properties files are also supported:
+	 * e.g. "WEB-INF/messages" will find and load "WEB-INF/messages.xml",
+	 * "WEB-INF/messages_en.xml", etc as well. Note that this will only
+	 * work on JDK 1.5+.
+	 * <p>The associated resource bundles will be checked sequentially
+	 * when resolving a message code. Note that message definitions in a
+	 * <i>previous</i> resource bundle will override ones in a later bundle,
+	 * due to the sequential lookup.
 	 * @param basenames an array of basenames
 	 * @see #setBasename
 	 * @see java.util.ResourceBundle
 	 */
 	public void setBasenames(String[] basenames) {
-		this.basenames = (basenames != null ? basenames : new String[0]);
+		if (basenames != null) {
+			this.basenames = new String[basenames.length];
+			for (int i = 0; i < basenames.length; i++) {
+				String basename = basenames[i];
+				Assert.hasText(basename, "Basename must not be empty");
+				this.basenames[i] = basename.trim();
+			}
+		}
+		else {
+			this.basenames = new String[0];
+		}
 	}
 
 	/**
@@ -155,6 +179,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * <p>Default is none, using the <code>java.util.Properties</code>
 	 * default encoding.
 	 * <p>Only applies to classic properties files, not to XML files.
+	 * @param defaultEncoding the default charset
 	 * @see #setFileEncodings
 	 * @see org.springframework.util.PropertiesPersister#load
 	 */

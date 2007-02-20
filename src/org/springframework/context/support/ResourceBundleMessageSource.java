@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,13 +23,17 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * MessageSource that accesses the resource bundles with the specified basenames.
- * This class relies on the underlying JDK's <code>java.util.ResourceBundle</code>
- * implementation, in combination with the standard message parsing provided by
- * <code>java.text.MessageFormat</code>.
+ * {@link org.springframework.context.MessageSource} implementation that
+ * accesses resource bundles using specified basenames. This class relies
+ * on the underlying JDK's {@link java.util.ResourceBundle} implementation,
+ * in combination with the JDK's standard message parsing provided by
+ * {@link java.text.MessageFormat}.
  *
  * <p>This MessageSource caches both the accessed ResourceBundle instances and
  * the generated MessageFormats for each message. It also implements rendering of
@@ -40,8 +44,8 @@ import org.springframework.util.StringUtils;
  * <p>Unfortunately, <code>java.util.ResourceBundle</code> caches loaded bundles
  * forever: Reloading a bundle during VM execution is <i>not</i> possible.
  * As this MessageSource relies on ResourceBundle, it faces the same limitation.
- * Consider ReloadableResourceBundleMessageSource for an alternative that is
- * capable of refreshing the underlying bundle files.
+ * Consider {@link ReloadableResourceBundleMessageSource} for an alternative
+ * that is capable of refreshing the underlying bundle files.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -50,11 +54,13 @@ import org.springframework.util.StringUtils;
  * @see java.util.ResourceBundle
  * @see java.text.MessageFormat
  */
-public class ResourceBundleMessageSource extends AbstractMessageSource {
+public class ResourceBundleMessageSource extends AbstractMessageSource implements BeanClassLoaderAware {
 
 	private String[] basenames = new String[0];
 
-	private ClassLoader bundleClassLoader = Thread.currentThread().getContextClassLoader();
+	private ClassLoader bundleClassLoader;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/**
 	 * Cache to hold loaded ResourceBundles.
@@ -77,12 +83,13 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 
 
 	/**
-	 * Set a single basename, following ResourceBundle conventions:
-	 * It is a fully-qualified classname. If it doesn't contain a package qualifier
-	 * (such as org.mypackage), it will be resolved from the classpath root.
-	 * <p>Messages will normally be held in the /lib or /classes directory of a WAR.
-	 * They can also be held in Jars on the class path. For example, a Jar in an
-	 * application's manifest classpath could contain messages for the application.
+	 * Set a single basename, following {@link java.util.ResourceBundle} conventions:
+	 * essentially, a fully-qualified classpath location. If it doesn't contain a
+	 * package qualifier (such as <code>org.mypackage</code>), it will be resolved
+	 * from the classpath root.
+	 * <p>Messages will normally be held in the "/lib" or "/classes" directory of
+	 * a web application's WAR structure. They can also be held in jar files on
+	 * the class path.
 	 * @param basename the single basename
 	 * @see #setBasenames
 	 * @see java.util.ResourceBundle
@@ -92,33 +99,55 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	}
 
 	/**
-	 * Set an array of basenames, each following ResourceBundle conventions.
-	 * The associated resource bundles will be checked sequentially when
-	 * resolving a message code.
-	 * <p>Note that message definitions in a <i>previous</i> resource bundle
-	 * will override ones in a later bundle, due to the sequential lookup.
+	 * Set an array of basenames, each following {@link java.util.ResourceBundle}
+	 * conventions: essentially, a fully-qualified classpath location. If it
+	 * doesn't contain a package qualifier (such as <code>org.mypackage</code>),
+	 * it will be resolved from the classpath root.
+	 * <p>The associated resource bundles will be checked sequentially
+	 * when resolving a message code. Note that message definitions in a
+	 * <i>previous</i> resource bundle will override ones in a later bundle,
+	 * due to the sequential lookup.
 	 * @param basenames an array of basenames
 	 * @see #setBasename
 	 * @see java.util.ResourceBundle
 	 */
 	public void setBasenames(String[] basenames)  {
-		this.basenames = (basenames != null ? basenames : new String[0]);
+		if (basenames != null) {
+			this.basenames = new String[basenames.length];
+			for (int i = 0; i < basenames.length; i++) {
+				String basename = basenames[i];
+				Assert.hasText(basename, "Basename must not be empty");
+				this.basenames[i] = basename.trim();
+			}
+		}
+		else {
+			this.basenames = new String[0];
+		}
 	}
 
 	/**
 	 * Set the ClassLoader to load resource bundles with.
-	 * Default is the thread context ClassLoader.
+	 * <p>Default is the containing BeanFactory's
+	 * {@link org.springframework.beans.factory.BeanClassLoaderAware bean ClassLoader},
+	 * or the default ClassLoader determined by
+	 * {@link org.springframework.util.ClassUtils#getDefaultClassLoader()}
+	 * if not running within a BeanFactory.
 	 */
 	public void setBundleClassLoader(ClassLoader classLoader) {
 		this.bundleClassLoader = classLoader;
 	}
 
 	/**
-	 * Return the ClassLoader to load resource bundles with. Default is the
-	 * specified bundle ClassLoader, usually the thread context ClassLoader.
+	 * Return the ClassLoader to load resource bundles with.
+	 * <p>Default is the containing BeanFactory's bean ClassLoader.
+	 * @see #setBundleClassLoader
 	 */
 	protected ClassLoader getBundleClassLoader() {
-		return bundleClassLoader;
+		return (this.bundleClassLoader != null ? this.bundleClassLoader : this.beanClassLoader);
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 
 
@@ -211,6 +240,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	 * @param locale the Locale to use to build the MessageFormat
 	 * @return the resulting MessageFormat, or <code>null</code> if no message
 	 * defined for the given code
+	 * @throws MissingResourceException if thrown by the ResourceBundle
 	 */
 	protected MessageFormat getMessageFormat(ResourceBundle bundle, String code, Locale locale)
 			throws MissingResourceException {
@@ -263,7 +293,8 @@ public class ResourceBundleMessageSource extends AbstractMessageSource {
 	 * Show the configuration of this MessageSource.
 	 */
 	public String toString() {
-		return getClass().getName() + ": basenames=[" + StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
+		return getClass().getName() + ": basenames=[" +
+				StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
 	}
 
 }

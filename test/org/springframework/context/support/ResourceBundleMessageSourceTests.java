@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -189,9 +189,23 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
 	}
 
+	public void testResourceBundleMessageSourceWithWhitespaceInBasename() {
+		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+		ms.setBasename("  org/springframework/context/support/messages  ");
+		assertEquals("message1", ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
+	}
+
 	public void testReloadableResourceBundleMessageSourceStandalone() {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 		ms.setBasename("org/springframework/context/support/messages");
+		assertEquals("message1", ms.getMessage("code1", null, Locale.ENGLISH));
+		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
+	}
+
+	public void testReloadableResourceBundleMessageSourceWithWhitespaceInBasename() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		ms.setBasename("  org/springframework/context/support/messages  ");
 		assertEquals("message1", ms.getMessage("code1", null, Locale.ENGLISH));
 		assertEquals("nachricht2", ms.getMessage("code2", null, Locale.GERMAN));
 	}
