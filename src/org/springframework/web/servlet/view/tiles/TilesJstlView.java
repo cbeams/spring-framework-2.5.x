@@ -22,8 +22,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.support.JstlUtils;
 
 /**
- * Specialization of TilesView for JSTL pages,
- * i.e. Tiles pages that use the JSP Standard Tag Library.
+ * Specialization of TilesView for JSTL pages; Tiles pages that 
+ * use the JSP Standard Tag Library.
  *
  * <p>Exposes JSTL-specific request attributes specifying locale
  * and resource bundle for JSTL's formatting and message tags,

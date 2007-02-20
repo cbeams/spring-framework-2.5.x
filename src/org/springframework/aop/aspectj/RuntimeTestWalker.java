@@ -34,8 +34,6 @@ import org.aspectj.weaver.reflect.ShadowMatchImpl;
 import org.aspectj.weaver.tools.ShadowMatch;
 
 /**
- * Here be dragons.
- *
  * <p>This class encapsulates some AspectJ internal knowledge that should be
  * pushed back into the AspectJ project in a future release. 
  *

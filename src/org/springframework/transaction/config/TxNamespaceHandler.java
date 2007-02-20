@@ -19,6 +19,18 @@ package org.springframework.transaction.config;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
+ * <code>NamespaceHandler</code> allowing for the configuration of
+ * declarative transaction management using either XML or using annotations.
+ * 
+ * This namespace handler is the central piece of functionality in the
+ * Spring 2 transaction management facilities and offers two appraoched
+ * to declaratively manage transactions.
+ * 
+ * One approach uses transaction semantics defined in XML using the
+ * <code>&lt;tx:advice&gt;</code> elements, the other uses annotations
+ * in combination with the <code>&lt;tx:annotation-driven&gt;</code> element.
+ * Both approached are detailed to great extent in the Spring reference manual.
+ * 
  * @author Rob Harrop
  * @since 2.0
  */

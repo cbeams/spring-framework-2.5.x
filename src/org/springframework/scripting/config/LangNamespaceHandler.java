@@ -22,6 +22,19 @@ import org.springframework.scripting.groovy.GroovyScriptFactory;
 import org.springframework.scripting.jruby.JRubyScriptFactory;
 
 /**
+ * <code>NamespaceHandler</code> that supports the wiring of
+ * objects backed by dynamic languages such as Groovy, JRuby and
+ * BeanShell. The following is an example (from the reference
+ * documentation) that details the wiring of a Groovy backed bean:
+ * 
+ * <pre class="code">
+ * &lt;lang:groovy id="messenger"
+ *     refresh-check-delay="5000"
+ *     script-source="classpath:Messenger.groovy"&gt;
+ * &lt;lang:property name="message" value="I Can Do The Frug" /&gt;
+ * &lt;/lang:groovy&gt;
+ * </pre>
+ * 
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0

@@ -25,6 +25,10 @@ import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTag;
 
 /**
+ * Convenient super class for many html tags that render content using the databinding
+ * features of the {@link AbstractHtmlElementTag AbstractHtmlElementTag}. The only thing sub tags
+ * need to do is override {@link #renderDefaultContent(TagWriter)}. 
+ * 
  * @author Rob Harrop
  * @since 2.0
  */
