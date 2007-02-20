@@ -1167,9 +1167,10 @@ doAfterTwo
         <para>When two pieces of advice defined in <emphasis>different</emphasis> aspects both need
         to run at the same join point, unless you specify otherwise the order of execution is 
         undefined. You can control the order of execution by specifying precedence. This is done in 
-        the normal Spring way by implementing the <interfacename>org.springframework.core.Ordered</interfacename>
-        interface in the aspect class. Given two aspects, the aspect returning the lower value from
-        <literal>Ordered.getValue()</literal> has the higher precedence.</para>
+        the normal Spring way by either implementing the <interfacename>org.springframework.core.Ordered</interfacename>
+        interface in the aspect class or annotating it with the <interfacename>Order</interfacename> annotation.
+        Given two aspects, the aspect returning the lower value from
+        <literal>Ordered.getValue()</literal> (or the annotation value) has the higher precedence.</para>
 
 	   </section>
 
@@ -1808,10 +1809,9 @@ ms     %     Task name
 
 	<para>When multiple advice needs to execute at the same join point (executing
 	method) the ordering rules are as described in <xref linkend="aop-ataspectj-advice-ordering"/>.
-	The precedence between aspects is determined by implementing the
-	<interfacename>Ordered</interfacename> interface on the
-	bean backing the aspect.
-	</para>
+	The precedence between aspects is determined by either adding the <interfacename>Order</interfacename>
+	annotation to the bean backing the aspect or by having the bean implement the
+	<interfacename>Ordered</interfacename> interface.</para>
 
 	</section>
 	
