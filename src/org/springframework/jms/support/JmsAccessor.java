@@ -30,12 +30,13 @@ import org.springframework.jms.JmsException;
 
 /**
  * Base class for {@link org.springframework.jms.core.JmsTemplate} and other
- * JMS-accessing gateway helpers, defining common properties like the
- * {@link ConnectionFactory}. The subclass
+ * JMS-accessing gateway helpers, defining common properties such as the
+ * JMS {@link ConnectionFactory} to operate on. The subclass
  * {@link org.springframework.jms.support.destination.JmsDestinationAccessor}
  * adds further, destination-related properties.
  *
- * <p>Not intended to be used directly. See {@link org.springframework.jms.core.JmsTemplate}.
+ * <p>Not intended to be used directly.
+ * See {@link org.springframework.jms.core.JmsTemplate}.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -59,14 +60,16 @@ public abstract class JmsAccessor implements InitializingBean {
 
 
 	/**
-	 * Set the ConnectionFactory to use for obtaining JMS Connections.
+	 * Set the ConnectionFactory to use for obtaining JMS
+	 * {@link Connection Connections}.
 	 */
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 
 	/**
-	 * Return the ConnectionFactory to use for obtaining JMS Connections.
+	 * Return the ConnectionFactory that this accessor uses for
+	 * obtaining JMS {@link Connection Connections}.
 	 */
 	public ConnectionFactory getConnectionFactory() {
 		return this.connectionFactory;
@@ -75,13 +78,12 @@ public abstract class JmsAccessor implements InitializingBean {
 	/**
 	 * Set the transaction mode that is used when creating a JMS {@link Session}.
 	 * Default is "false".
-	 * <p>Note that that within a JTA transaction, the parameters to
+	 * <p>Note that within a JTA transaction, the parameters passed to
 	 * <code>create(Queue/Topic)Session(boolean transacted, int acknowledgeMode)</code>
 	 * method are not taken into account. Depending on the J2EE transaction context,
-	 * the container makes its own decisions on these values. See section 17.3.5
-	 * of the EJB specification. Analogously, these parameters are not taken into
-	 * account within a locally managed transaction either, since the accessor
-	 * operates on an existing JMS Session in this case.
+	 * the container makes its own decisions on these values. Analogously, these
+	 * parameters are not taken into account within a locally managed transaction
+	 * either, since the accessor operates on an existing JMS Session in this case.
 	 * <p>Setting this flag to "true" will use a short local JMS transaction
 	 * when running outside of a managed transaction, and a synchronized local
 	 * JMS transaction in case of a managed transaction (other than an XA
@@ -99,8 +101,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	/**
 	 * Return whether the JMS {@link Session sessions} used by this
 	 * accessor are supposed to be transacted.
-	 * @return <code>true</code> if the JMS Sessions used
-	 * for sending a message are transacted
+	 * @return <code>true</code> if the JMS Sessions used are transacted
 	 * @see #setSessionTransacted(boolean)
 	 */
 	public boolean isSessionTransacted() {
@@ -144,6 +145,7 @@ public abstract class JmsAccessor implements InitializingBean {
 
 	/**
 	 * Return the acknowledgement mode for JMS {@link Session sessions}.
+	 * @return the acknowledgement mode applied by this accessor
 	 */
 	public int getSessionAcknowledgeMode() {
 		return this.sessionAcknowledgeMode;
@@ -180,6 +182,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * <p>This implementation uses JMS 1.1 API.
 	 * @return the new JMS Connection
 	 * @throws JMSException if thrown by JMS API methods
+	 * @see javax.jms.ConnectionFactory#createConnection()
 	 */
 	protected Connection createConnection() throws JMSException {
 		return getConnectionFactory().createConnection();
@@ -191,16 +194,20 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * @param con the JMS Connection to create a Session for
 	 * @return the new JMS Session
 	 * @throws JMSException if thrown by JMS API methods
+	 * @see javax.jms.Connection#createSession(boolean, int)
 	 */
 	protected Session createSession(Connection con) throws JMSException {
 		return con.createSession(isSessionTransacted(), getSessionAcknowledgeMode());
 	}
 
 	/**
-	 * Return whether the given Session is in client acknowledge mode.
+	 * Determine whether the given Session is in client acknowledge mode.
 	 * <p>This implementation uses JMS 1.1 API.
 	 * @param session the JMS Session to check
+	 * @return whether the given Session is in client acknowledge mode
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 * @see javax.jms.Session#getAcknowledgeMode()
+	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
 	 */
 	protected boolean isClientAcknowledge(Session session) throws JMSException {
 		return (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
