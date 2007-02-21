@@ -54,7 +54,7 @@ import org.springframework.util.ClassUtils;
 public abstract class AopUtils {
 	
 	/**
-	 * Return whether the given object is either a JDK dynamic proxy or a CGLIB proxy.
+	 * Check whether the given object is a JDK dynamic proxy or a CGLIB proxy.
 	 * @param object the object to check
 	 * @see #isJdkDynamicProxy
 	 * @see #isCglibProxy
@@ -65,7 +65,7 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Return whether the given object is a JDK dynamic proxy.
+	 * Check whether the given object is a JDK dynamic proxy.
 	 * @param object the object to check
 	 * @see java.lang.reflect.Proxy#isProxyClass
 	 */
@@ -74,7 +74,7 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Return whether the given object is a CGLIB proxy.
+	 * Check whether the given object is a CGLIB proxy.
 	 * @param object the object to check
 	 */
 	public static boolean isCglibProxy(Object object) {
@@ -82,7 +82,7 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Return whether the specified class is a CGLIB-generated class.
+	 * Check whether the specified class is a CGLIB-generated class.
 	 * @param clazz the class to check
 	 */
 	public static boolean isCglibProxyClass(Class clazz) {
@@ -109,7 +109,7 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Return whether the given method is an "equals" method.
+	 * Determine whether the given method is an "equals" method.
 	 * @see java.lang.Object#equals
 	 */
 	public static boolean isEqualsMethod(Method method) {
@@ -118,7 +118,7 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Return whether the given method is a "hashCode" method.
+	 * Determine whether the given method is a "hashCode" method.
 	 * @see java.lang.Object#hashCode
 	 */
 	public static boolean isHashCodeMethod(Method method) {
@@ -127,7 +127,7 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Return whether the given method is a "toString" method.
+	 * Determine whether the given method is a "toString" method.
 	 * @see java.lang.Object#toString()
 	 */
 	public static boolean isToStringMethod(Method method) {
@@ -136,16 +136,16 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Given a method, which may come from an interface, and a targetClass
-	 * used in the current AOP invocation, find the most specific method
-	 * if there is one. E.g. the method may be IFoo.bar() and the target
-	 * class may be DefaultFoo. In this case, the method may be
-	 * DefaultFoo.bar(). This enables attributes on that method to be found.
-	 * @param method method to be invoked, which may come from an interface
-	 * @param targetClass target class for the curren invocation. May
-	 * be <code>null</code> or may not even implement the method.
-	 * @return the more specific method, or the original method if the
-	 * targetClass doesn't specialize it or implement it or is null
+	 * Given a method, which may come from an interface, and a target class used
+	 * in the current AOP invocation, find the corresponding target method if there
+	 * is one. E.g. the method may be <code>IFoo.bar()</code> and the target class
+	 * may be <code>DefaultFoo</code>. In this case, the method may be
+	 * <code>DefaultFoo.bar()</code>. This enables attributes on that method to be found.
+	 * @param method the method to be invoked, which may come from an interface
+	 * @param targetClass the target class for the current invocation.
+	 * May be <code>null</code> or may not even implement the method.
+	 * @return the specific target method, or the original method if the
+	 * <code>targetClass</code> doesn't implement it or is <code>null</code>
 	 */
 	public static Method getMostSpecificMethod(Method method, Class targetClass) {
 		if (method != null && targetClass != null) {
@@ -163,10 +163,10 @@ public abstract class AopUtils {
 
 	/**
 	 * Can the given pointcut apply at all on the given class?
-	 * This is an important test as it can be used to optimize
+	 * <p>This is an important test as it can be used to optimize
 	 * out a pointcut for a class.
-	 * @param pc pc static or dynamic pointcut to check
-	 * @param targetClass class we're testing
+	 * @param pc the static or dynamic pointcut to check
+	 * @param targetClass the class to test
 	 * @return whether the pointcut can apply on any method
 	 */
 	public static boolean canApply(Pointcut pc, Class targetClass) {
@@ -175,12 +175,12 @@ public abstract class AopUtils {
 
 	/**
 	 * Can the given pointcut apply at all on the given class?
-	 * This is an important test as it can be used to optimize
+	 * <p>This is an important test as it can be used to optimize
 	 * out a pointcut for a class.
-	 * @param pc pc static or dynamic pointcut to check
-	 * @param targetClass class we're testing
-	 * @param hasIntroductions whether or not the advisor chain for this bean includes
-	 * any introductions
+	 * @param pc the static or dynamic pointcut to check
+	 * @param targetClass the class to test
+	 * @param hasIntroductions whether or not the advisor chain
+	 * for this bean includes any introductions
 	 * @return whether the pointcut can apply on any method
 	 */
 	public static boolean canApply(Pointcut pc, Class targetClass, boolean hasIntroductions) {
@@ -255,7 +255,7 @@ public abstract class AopUtils {
 	/**
 	 * Determine the sublist of the <code>candidateAdvisors</code> list
 	 * that is applicable to the given class.
-	 * @param candidateAdvisors Advisors to evaluate
+	 * @param candidateAdvisors the Advisors to evaluate
 	 * @param clazz the target class
 	 * @return sublist of Advisors that can apply to an object of the given class
 	 */

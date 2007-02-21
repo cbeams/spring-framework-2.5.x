@@ -312,6 +312,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Class from its name when called with the bean class already resolved.
 	 * @param classLoader the ClassLoader to use for resolving a (potential) class name
 	 * @return the resolved bean class
+	 * @throws ClassNotFoundException if the class name could be resolved
 	 */
 	public Class resolveBeanClass(ClassLoader classLoader) throws ClassNotFoundException {
 		if (this.beanClass == null) {
