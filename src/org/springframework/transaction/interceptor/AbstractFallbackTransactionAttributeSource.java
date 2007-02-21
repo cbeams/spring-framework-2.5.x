@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Abstract implementation of TransactionAttributeSource that caches attributes
- * for methods, and implements fallback policy of 1. most specific method; 
- * 2. target class attribute; 3. declaring method; 4. declaring class.
+ * Abstract implementation of {@link TransactionAttributeSource} that caches
+ * attributes for methods and implements a fallback policy: 1. specific target
+ * method; 2. target class; 3. declaring method; 4. declaring class/interface.
  *
  * <p>Defaults to using the target class's transaction attribute if none is
  * associated with the target method. Any transaction attribute associated with
@@ -43,7 +43,7 @@ import org.springframework.util.ObjectUtils;
  * has been called through (in case of a JDK proxy) will be checked.
  *
  * <p>This implementation caches attributes by method after they are first used.
- * If it's ever desirable to allow dynamic changing of transaction attributes
+ * If it is ever desirable to allow dynamic changing of transaction attributes
  * (which is very unlikely), caching could be made configurable. Caching is
  * desirable because of the cost of evaluating rollback rules.
  *
@@ -78,9 +78,10 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	/**
 	 * Return the transaction attribute for this method invocation.
 	 * <p>Defaults to the class's transaction attribute if no method attribute is found.
-	 * @param method method for the current invocation. Can't be <code>null</code>
-	 * @param targetClass target class for this invocation. May be <code>null</code>.
-	 * @return TransactionAttribute for this method, or <code>null</code> if the method is non-transactional
+	 * @param method the method for the current invocation (never <code>null</code>)
+	 * @param targetClass the target class for this invocation (may be <code>null</code>)
+	 * @return TransactionAttribute for this method, or <code>null</code> if the method
+	 * is not transactional
 	 */
 	public final TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
 		// First, see if we have a cached value.
@@ -126,8 +127,8 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	}
 
 	/**
-	 * Same signature as <code>getTransactionAttribute</code>, but doesn't cache the result.
-	 * <code>getTransactionAttribute</code> is effectively a caching decorator for this method.
+	 * Same signature as {@link #getTransactionAttribute}, but doesn't cache the result.
+	 * {@link #getTransactionAttribute} is effectively a caching decorator for this method.
 	 * @see #getTransactionAttribute
 	 */
 	private TransactionAttribute computeTransactionAttribute(Method method, Class targetClass) {
@@ -137,8 +138,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		}
 
 		// The method may be on an interface, but we need attributes from the target class.
-		// The AopUtils class provides a convenience method for this. If the target class
-		// is null, the method will be unchanged.
+		// If the target class is null, the method will be unchanged.
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
 		// First try is the method in the target class.
@@ -232,7 +232,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 	/**
 	 * Should only public methods be allowed to have transactional semantics?
-	 * Default implementation returns <code>false</code>.
+	 * <p>The default implementation returns <code>false</code>.
 	 */
 	protected boolean allowPublicMethodsOnly() {
 		return false;
