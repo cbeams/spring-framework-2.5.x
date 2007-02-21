@@ -105,12 +105,12 @@ class BeanDefinitionValueResolver {
 		if (value instanceof BeanDefinitionHolder) {
 			// Resolve BeanDefinitionHolder: contains BeanDefinition with name and aliases.
 			BeanDefinitionHolder bdHolder = (BeanDefinitionHolder) value;
-			return resolveInnerBeanDefinition(argName, bdHolder.getBeanName(), bdHolder.getBeanDefinition());
+			return resolveInnerBean(argName, bdHolder.getBeanName(), bdHolder.getBeanDefinition());
 		}
 		else if (value instanceof BeanDefinition) {
 			// Resolve plain BeanDefinition, without contained name: use dummy name.
 			BeanDefinition bd = (BeanDefinition) value;
-			return resolveInnerBeanDefinition(argName, "(inner bean)", bd);
+			return resolveInnerBean(argName, "(inner bean)", bd);
 		}
 		else if (value instanceof RuntimeBeanNameReference) {
 			String ref = ((RuntimeBeanNameReference) value).getBeanName();
@@ -179,38 +179,40 @@ class BeanDefinitionValueResolver {
 	/**
 	 * Resolve an inner bean definition.
 	 */
-	private Object resolveInnerBeanDefinition(
+	private Object resolveInnerBean(
 			String argName, String innerBeanName, BeanDefinition innerBd) throws BeansException {
 
 		if (this.beanFactory.logger.isTraceEnabled()) {
 			this.beanFactory.logger.trace(
 					"Resolving inner bean definition '" + innerBeanName + "' of bean '" + this.beanName + "'");
 		}
+		RootBeanDefinition mbd = null;
 		try {
-			RootBeanDefinition mergedInnerBd =
-					this.beanFactory.getMergedBeanDefinition(innerBeanName, innerBd, this.beanDefinition);
+			mbd = this.beanFactory.getMergedBeanDefinition(innerBeanName, innerBd, this.beanDefinition);
 			// Check given bean name whether it is unique. If not already unique,
 			// add counter - increasing the counter until the name is unique.
 			String actualInnerBeanName = innerBeanName;
-			if (mergedInnerBd.isSingleton()) {
+			if (mbd.isSingleton()) {
 				actualInnerBeanName = adaptInnerBeanName(innerBeanName);
 			}
-			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mergedInnerBd, null);
-			if (mergedInnerBd.isSingleton()) {
+			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mbd, null);
+			if (mbd.isSingleton()) {
 				this.beanFactory.registerDependentBean(actualInnerBeanName, this.beanName);
 			}
-			return this.beanFactory.getObjectForBeanInstance(innerBean, actualInnerBeanName, mergedInnerBd);
+			return this.beanFactory.getObjectForBeanInstance(innerBean, actualInnerBeanName, mbd);
 		}
 		catch (BeansException ex) {
 			throw new BeanCreationException(
 					this.beanDefinition.getResourceDescription(), this.beanName,
-					"Cannot create inner bean '" + innerBeanName + "' while setting " + argName, ex);
+					"Cannot create inner bean '" + innerBeanName + "' " +
+					(mbd != null && mbd.getBeanClassName() != null ? "of type [" + mbd.getBeanClassName() + "] " : "") +
+					"while setting " + argName, ex);
 		}
 	}
 
 	/**
-	 * Check given bean name whether it is unique. If not already unique,
-	 * add counter - increasing the counter until the name is unique.
+	 * Checks the given bean name whether it is unique. If not already unique,
+	 * a counter is added, increasing the counter until the name is unique.
 	 * @param innerBeanName the original name for the inner bean
 	 * @return the adapted name for the inner bean
 	 */
