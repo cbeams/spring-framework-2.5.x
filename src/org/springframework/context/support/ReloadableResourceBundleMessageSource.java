@@ -70,10 +70,10 @@ import org.springframework.util.StringUtils;
  * Higher "cacheSeconds" values usually <i>do not</i> make a significant difference.
  *
  * <p>This MessageSource can easily be used outside of an
- * {@link org.springframework.context.ApplicationContext: It will use a
+ * {@link org.springframework.context.ApplicationContext}: It will use a
  * {@link org.springframework.core.io.DefaultResourceLoader} as default,
- * simply getting overridden with the ApplicationContext if running in a context.
- * It does not have any other specific dependencies.
+ * simply getting overridden with the ApplicationContext's resource loader
+ * if running in a context. It does not have any other specific dependencies.
  *
  * <p>Thanks to Thomas Achleitner for providing the initial implementation of
  * this message source!
