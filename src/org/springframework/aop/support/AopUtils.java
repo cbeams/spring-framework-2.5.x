@@ -193,19 +193,16 @@ public abstract class AopUtils {
 		if (methodMatcher instanceof IntroductionAwareMethodMatcher) {
 			introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
 		}
-		
+
 		Set classes = new HashSet(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
 		classes.add(targetClass);
 		for (Iterator it = classes.iterator(); it.hasNext();) {
 			Class clazz = (Class) it.next();
 			Method[] methods = clazz.getMethods();
 			for (int j = 0; j < methods.length; j++) {
-				if (introductionAwareMethodMatcher != null) {
-					if (introductionAwareMethodMatcher.matches(methods[j], targetClass, hasIntroductions)) {
-						return true;
-					}
-				}
-				else if (methodMatcher.matches(methods[j], targetClass)) {
+				if ((introductionAwareMethodMatcher != null &&
+						introductionAwareMethodMatcher.matches(methods[j], targetClass, hasIntroductions)) ||
+						methodMatcher.matches(methods[j], targetClass)) {
 					return true;
 				}
 			}
