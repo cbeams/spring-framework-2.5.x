@@ -43,10 +43,11 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Spring pointcut implementation that uses the AspectJ weaver.
+ * Spring {@link org.springframework.aop.Pointcut} implementation
+ * that uses the AspectJ weaver to evaluate a pointcut expression.
  *
- * <p>The pointcut expression value is an AspectJ string. This can reference
- * other pointcuts and use composition and other operations.
+ * <p>The pointcut expression value is an AspectJ expression. This can
+ * reference other pointcuts and use composition and other operations.
  *
  * <p>Naturally, as this is to be processed by Spring AOP's proxy-based model,
  * only method execution pointcuts are supported.
@@ -168,10 +169,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	/**
-	 * If a pointcut expression has been specified in xml, the user can't 
-	 * write and as "&&" (though &amp;&amp; will work). We also allow
-	 * ' and ' between two pointcut sub-expressions. This method converts
-	 * and back to && for the AspectJ pointcut parser.
+	 * If a pointcut expression has been specified in XML, the user cannot
+	 * write <code>and</code> as "&&" (though &amp;&amp; will work).
+	 * We also allow <code>and</code> between two pointcut sub-expressions.
+	 * <p>This method converts back to <code>&&</code> for the AspectJ pointcut parser.
 	 */
 	private String replaceBooleanOperators(String pcExpr) {
 		pcExpr = StringUtils.replace(pcExpr," and "," && ");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.core.Ordered;
 
 /**
- * An AdvisorAutoProxyCreator that exposes AspectJ's invocation context
- * and understands AspectJ's rules for advice precedence when multiple
- * pieces of advice come from the same aspect.
+ * {@link org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator}
+ * subclass that exposes AspectJ's invocation context and understands AspectJ's rules
+ * for advice precedence when multiple pieces of advice come from the same aspect.
  *
  * @author Adrian Colyer
  * @author Juergen Hoeller
@@ -87,6 +87,7 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 		
 		return result;
 	}
+
 	/**
 	 * Adds an {@link ExposeInvocationInterceptor} to the beginning of the advice chain.
 	 * These additional advices are needed when using AspectJ expression pointcuts
@@ -95,7 +96,6 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 	protected void extendAdvisors(List candidateAdvisors) {
 		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(candidateAdvisors);
 	}
-
 
 
 	/**
