@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 
-	private AbstractAspectJAdvice advice;
+	private final AbstractAspectJAdvice advice;
+
+	private final Pointcut pointcut;
 
 	private Integer order;
 
@@ -46,6 +48,7 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 	public AspectJPointcutAdvisor(AbstractAspectJAdvice advice) {
 		Assert.notNull(advice, "Advice must not be null");
 		this.advice = advice;
+		this.pointcut = advice.buildSafePointcut();
 	}
 
 	public void setOrder(int order) {
@@ -62,7 +65,7 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 	}
 
 	public Pointcut getPointcut() {
-		return (this.advice != null ? this.advice.getPointcut() : null);
+		return this.pointcut;
 	}
 
 	public int getOrder() {

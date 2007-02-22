@@ -29,8 +29,13 @@ import org.aspectj.weaver.tools.JoinPointMatch;
 import org.aspectj.weaver.tools.PointcutParameter;
 
 import org.springframework.aop.AopInvocationException;
+import org.springframework.aop.MethodMatcher;
+import org.springframework.aop.Pointcut;
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
+import org.springframework.aop.support.ComposablePointcut;
+import org.springframework.aop.support.MethodMatchers;
+import org.springframework.aop.support.StaticMethodMatcher;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -79,9 +84,12 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 
 	protected final Method aspectJAdviceMethod;
-	
-	private final AspectJExpressionPointcut pointcutExpression;
-	
+
+	/** The total number of arguments we have to populate on advice dispatch */
+	private final int numAdviceInvocationArguments;
+
+	private final AspectJExpressionPointcut pointcut;
+
 	private final AspectInstanceFactory aspectInstanceFactory;
 
 	/**
@@ -90,70 +98,90 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * whether two pieces of advice come from the same aspect).
 	 */
 	private String aspectName;
-	
+
 	/**
 	 * The order of declaration of this advice within the aspect.
 	 */
 	private int declarationOrder;
-	
+
 	/**
 	 * This will be non-null if the creator of this advice object knows the argument names
 	 * and sets them explicitly
 	 */
 	private String[] argumentNames = null;
-	
-	/** non-null if after throwing advice binds the thrown value */
+
+	/** Non-null if after throwing advice binds the thrown value */
 	private String throwingName = null;
-	
-	/** non-null if after returning advice binds the return value */
+
+	/** Non-null if after returning advice binds the return value */
 	private String returningName = null;
-	
+
 	private Class discoveredReturningType = Object.class;
 
 	private Class discoveredThrowingType = Object.class;
-	
-	/** 
-	 * the total number of arguments we have to populate on
-	 * advice dispatch
-	 */
-	private final int numAdviceInvocationArguments;
-	
+
 	/**
-	 * index for thisJoinPoint argument (currently only
+	 * Index for thisJoinPoint argument (currently only
 	 * supported at index 0 if present at all)
 	 */
 	private int joinPointArgumentIndex = -1;
 
 	/**
-	 * index for thisJoinPointStaticPart argument (currently only
+	 * Index for thisJoinPointStaticPart argument (currently only
 	 * supported at index 0 if present at all)
 	 */
 	private int joinPointStaticPartArgumentIndex = -1;
-	
+
 	private final Map argumentBindings = new HashMap();
 
 
+	/**
+	 * Create a new AbstractAspectJAdvice for the given advice method.
+	 * @param aspectJAdviceMethod the AspectJ-style advice method
+	 * @param pointcut the AspectJ expression pointcut
+	 * @param aspectInstanceFactory the factory for aspect instances
+	 */
 	public AbstractAspectJAdvice(
-			Method aspectJAdviceMethod, AspectJExpressionPointcut pointcutExpression, AspectInstanceFactory aif) {
+			Method aspectJAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aspectInstanceFactory) {
 
 		this.aspectJAdviceMethod = aspectJAdviceMethod;
 		if (!aspectJAdviceMethod.isAccessible()) {
 			aspectJAdviceMethod.setAccessible(true);
 		}
 		this.numAdviceInvocationArguments = this.aspectJAdviceMethod.getParameterTypes().length;
-		this.pointcutExpression = pointcutExpression;
-		this.aspectInstanceFactory = aif;
+		this.pointcut = pointcut;
+		this.aspectInstanceFactory = aspectInstanceFactory;
 	}
 
 
+	/**
+	 * Return the AspectJ-style advice method.
+	 */
 	public final Method getAspectJAdviceMethod() {
 		return this.aspectJAdviceMethod;
 	}
 
+	/**
+	 * Return the AspectJ expression pointcut.
+	 */
 	public final AspectJExpressionPointcut getPointcut() {
-		return this.pointcutExpression;
+		return this.pointcut;
 	}
 
+	/**
+	 * Build a 'safe' pointcut that excludes the AspectJ advice method itself.
+	 * @return a composable pointcut that builds on the original AspectJ expression pointcut
+	 * @see #getPointcut()
+	 */
+	public final Pointcut buildSafePointcut() {
+		MethodMatcher safeMethodMatcher = MethodMatchers.intersection(
+				new AdviceExcludingMethodMatcher(this.aspectJAdviceMethod), this.pointcut.getMethodMatcher());
+		return new ComposablePointcut(this.pointcut.getClassFilter(), safeMethodMatcher);
+	}
+
+	/**
+	 * Return the factory for aspect instances.
+	 */
 	public final AspectInstanceFactory getAspectInstanceFactory() {
 		return this.aspectInstanceFactory;
 	}
@@ -371,7 +399,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		PrioritizedParameterNameDiscoverer discoverer = new PrioritizedParameterNameDiscoverer();
 		discoverer.addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		AspectJAdviceParameterNameDiscoverer adviceParameterNameDiscoverer =
-				new AspectJAdviceParameterNameDiscoverer(this.pointcutExpression.getExpression());
+				new AspectJAdviceParameterNameDiscoverer(this.pointcut.getExpression());
 		adviceParameterNameDiscoverer.setReturningName(this.returningName);
 		adviceParameterNameDiscoverer.setThrowingName(this.throwingName);
 		// Last in chain, so if we're called and we fail, that's bad...
@@ -453,8 +481,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			index++;
 		}
 		
-		this.pointcutExpression.setParameterNames(pointcutParameterNames);
-		this.pointcutExpression.setParameterTypes(pointcutParameterTypes);
+		this.pointcut.setParameterNames(pointcutParameterNames);
+		this.pointcut.setParameterTypes(pointcutParameterTypes);
 	}
 	
 	/**
@@ -516,39 +544,16 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 
-	// Overridden in around advice to return proceeding join point.
-	protected JoinPoint getJoinPoint() {
-		return currentJoinPoint();
-	}
-
-	// Get the current join point match at the join point we are being dispatched on.
-	protected JoinPointMatch getJoinPointMatch() {
-		MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
-		if (!(mi instanceof ProxyMethodInvocation)) {
-			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
-		}
-		return getJoinPointMatch((ProxyMethodInvocation) mi);
-	}
-
-	// Note: We can't use JoinPointMatch.getClass().getName() as the key, since
-	// Spring AOP does all the matching at a join point, and then all the invocations.
-	// Under this scenario, if we just use JoinPointMatch as the key, then
-	// 'last man wins' which is not what we want at all.
-	// Using the expression is guaranteed to be safe, since 2 identical expressions
-	// are guaranteed to bind in exactly the same way.
-	protected JoinPointMatch getJoinPointMatch(ProxyMethodInvocation rmi) {
-		JoinPointMatch jpm = (JoinPointMatch) rmi.getUserAttribute(this.pointcutExpression.getExpression());
-		return jpm;		
-	}
-
 	/**
 	 * Invoke the advice method.
 	 * @param jpMatch the JoinPointMatch that matched this execution join point
 	 * @param returnValue the return value from the method execution (may be null)
-	 * @param t the exception thrown by the method execution (may be null)
+	 * @param ex the exception thrown by the method execution (may be null)
+	 * @return the invocation result
+	 * @throws Throwable in case of invocation failure
 	 */
-	protected Object invokeAdviceMethod(JoinPointMatch jpMatch, Object returnValue, Throwable t) throws Throwable {
-		return invokeAdviceMethodWithGivenArgs(argBinding(getJoinPoint(), jpMatch, returnValue, t));
+	protected Object invokeAdviceMethod(JoinPointMatch jpMatch, Object returnValue, Throwable ex) throws Throwable {
+		return invokeAdviceMethodWithGivenArgs(argBinding(getJoinPoint(), jpMatch, returnValue, ex));
 	}
 
 	// As above, but in this case we are given the join point.
@@ -570,17 +575,63 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		catch (IllegalArgumentException ex) {
 			throw new AopInvocationException("Mismatch on arguments to advice method [" +
 					this.aspectJAdviceMethod + "]; pointcut expression [" +
-					this.pointcutExpression.getPointcutExpression() + "]", ex);
+					this.pointcut.getPointcutExpression() + "]", ex);
 		}
 		catch (InvocationTargetException ex) {
 			throw ex.getTargetException();
 		}
 	}
 
+	/**
+	 * Overridden in around advice to return proceeding join point.
+	 */
+	protected JoinPoint getJoinPoint() {
+		return currentJoinPoint();
+	}
+
+	/**
+	 * Get the current join point match at the join point we are being dispatched on.
+	 */
+	protected JoinPointMatch getJoinPointMatch() {
+		MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
+		if (!(mi instanceof ProxyMethodInvocation)) {
+			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
+		}
+		return getJoinPointMatch((ProxyMethodInvocation) mi);
+	}
+
+	// Note: We can't use JoinPointMatch.getClass().getName() as the key, since
+	// Spring AOP does all the matching at a join point, and then all the invocations.
+	// Under this scenario, if we just use JoinPointMatch as the key, then
+	// 'last man wins' which is not what we want at all.
+	// Using the expression is guaranteed to be safe, since 2 identical expressions
+	// are guaranteed to bind in exactly the same way.
+	protected JoinPointMatch getJoinPointMatch(ProxyMethodInvocation rmi) {
+		return (JoinPointMatch) rmi.getUserAttribute(this.pointcut.getExpression());
+	}
+
 
 	public String toString() {
 		return getClass().getName() + ": advice method [" + this.aspectJAdviceMethod + "]; " +
 				"aspect name '" + this.aspectName + "'";
+	}
+
+
+	/**
+	 * MethodMatcher that excludes the specified advice method.
+	 * @see AbstractAspectJAdvice#buildSafePointcut()
+	 */
+	private static class AdviceExcludingMethodMatcher extends StaticMethodMatcher {
+
+		private final Method adviceMethod;
+
+		public AdviceExcludingMethodMatcher(Method adviceMethod) {
+			this.adviceMethod = adviceMethod;
+		}
+
+		public boolean matches(Method method, Class targetClass) {
+			return !this.adviceMethod.equals(method);
+		}
 	}
 
 }
