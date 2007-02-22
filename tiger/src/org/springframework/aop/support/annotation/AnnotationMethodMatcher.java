@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,18 @@ package org.springframework.aop.support.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcher;
 import org.springframework.util.Assert;
 
 /**
  * Simple MethodMatcher that looks for a specific Java 5 annotation
- * being present on a method.
+ * being present on a method (checking both the method on the invoked
+ * interface, if any, and the corresponding method on the target class).
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see AnnotationMatchingPointcut
  */
 public class AnnotationMethodMatcher extends StaticMethodMatcher {
 
@@ -45,7 +48,12 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 
 
 	public boolean matches(Method method, Class targetClass) {
-		return method.isAnnotationPresent(this.annotationType);
+		if (method.isAnnotationPresent(this.annotationType)) {
+			return true;
+		}
+		// The method may be on an interface, so let's check on the target class as well.
+		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
+		return (specificMethod != method && specificMethod.isAnnotationPresent(this.annotationType));
 	}
 
 }
