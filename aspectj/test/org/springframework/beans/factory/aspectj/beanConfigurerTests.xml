@@ -20,6 +20,16 @@
 		<property name="name" value="Rob"/>
 	</bean>
 
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$SubBean"
+			lazy-init="true">
+		<property name="name" value="Ramnivas"/>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$SubSerializableBean"
+			lazy-init="true">
+		<property name="name" value="Ramnivas"/>
+	</bean>
+
 	<!-- Used as a target for autowiring by type -->
 	<bean id="ramnivas" class="org.springframework.beans.TestBean" >
 		<property name="name" value="Ramnivas"/>

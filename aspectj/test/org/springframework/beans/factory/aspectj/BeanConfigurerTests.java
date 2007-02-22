@@ -136,6 +136,21 @@ public class BeanConfigurerTests extends TestCase {
 		assertEquals("Dependency injected on deserialization","Anonymous",deserializedDomainObject.getName());
 	}
 	
+	
+	public void testSubBeanConfiguredOnlyOnce() throws Exception {
+		SubBean subBean = new SubBean();
+		assertEquals("Property injected more than once", 1, subBean.setterCount);
+	}
+
+	public void testSubSerializableBeanConfiguredOnlyOnce() throws Exception {
+		SubSerializableBean subBean = new SubSerializableBean();
+		assertEquals("Property injected more than once", 1, subBean.setterCount);
+		subBean.setterCount = 0;
+
+		SubSerializableBean deserializedSubBean = serializeAndDeserialize(subBean);
+		assertEquals("Property injected more than once", 1, deserializedSubBean.setterCount);
+	}
+	
 	@SuppressWarnings("unchecked")
 	private <T> T serializeAndDeserialize(T serializable) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -296,6 +311,36 @@ public class BeanConfigurerTests extends TestCase {
 		}
 	}
 
+
+	@Configurable
+	private static class BaseBean {
+		public int setterCount;
+
+		private String name;
+
+		public void setName(String name) {
+			this.name = name;
+			setterCount++;
+		}
+	}
+
+	private static class SubBean extends BaseBean {
+	} 
+	
+	@Configurable
+	private static class BaseSerializableBean implements Serializable {
+		public int setterCount;
+
+		private String name;
+
+		public void setName(String name) {
+			this.name = name;
+			setterCount++;
+		}
+	}
+
+	private static class SubSerializableBean extends BaseSerializableBean {
+	} 
 
 	@Aspect
 	private static class WireArbitraryExistingPojo extends AbstractBeanConfigurerAspect {
