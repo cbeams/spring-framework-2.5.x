@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,23 @@ package org.springframework.aop.aspectj.annotation;
 import org.springframework.aop.aspectj.AspectInstanceFactory;
 
 /**
- * Subinterface of AspectInstanceFactory that returns AspectMetadata
- * associated with AspectJ 5 annotated classes.
+ * Subinterface of {@link org.springframework.aop.aspectj.AspectInstanceFactory}
+ * that returns {@link AspectMetadata} associated with AspectJ-annotated classes.
  *
- * <p>Ideally, AspectInstanceFactory would include this method, but because
- * AspectMetadata uses Java-5-only AJType, we need to split out this interface.
+ * <p>Ideally, AspectInstanceFactory would include this method itself, but because
+ * AspectMetadata uses Java-5-only {@link org.aspectj.lang.reflect.AjType},
+ * we need to split out this subinterface.
  *
  * @author Rod Johnson
  * @since 2.0
+ * @see AspectMetadata
+ * @see org.aspectj.lang.reflect.AjType
  */
 public interface MetadataAwareAspectInstanceFactory extends AspectInstanceFactory {
 
 	/**
-	 * Return the AspectJ AspectMetadata for this factory.
+	 * Return the AspectJ AspectMetadata for this factory's aspect.
+	 * @return the aspect metadata
 	 */
 	AspectMetadata getAspectMetadata();
 
