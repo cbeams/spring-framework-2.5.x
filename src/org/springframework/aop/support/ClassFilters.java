@@ -37,15 +37,15 @@ public abstract class ClassFilters {
 
 	/**
 	 * Match all classes that <i>either</i> (or both) of the given ClassFilters matches.
-	 * @param a the first ClassFilter
-	 * @param b the second ClassFilter
+	 * @param cf1 the first ClassFilter
+	 * @param cf2 the second ClassFilter
 	 * @return a distinct ClassFilter that matches all classes that either
 	 * of the given ClassFilter matches
 	 */
-	public static ClassFilter union(ClassFilter a, ClassFilter b) {
-		Assert.notNull(a, "First ClassFilter must not be null");
-		Assert.notNull(b, "Second ClassFilter must not be null");
-		return new UnionClassFilter(new ClassFilter[] {a, b});
+	public static ClassFilter union(ClassFilter cf1, ClassFilter cf2) {
+		Assert.notNull(cf1, "First ClassFilter must not be null");
+		Assert.notNull(cf2, "Second ClassFilter must not be null");
+		return new UnionClassFilter(new ClassFilter[] {cf1, cf2});
 	}
 
 	/**
@@ -61,15 +61,15 @@ public abstract class ClassFilters {
 
 	/**
 	 * Match all classes that <i>both</i> of the given ClassFilters match.
-	 * @param a the first ClassFilter
-	 * @param b the second ClassFilter
+	 * @param cf1 the first ClassFilter
+	 * @param cf2 the second ClassFilter
 	 * @return a distinct ClassFilter that matches all classes that both
 	 * of the given ClassFilter match
 	 */
-	public static ClassFilter intersection(ClassFilter a, ClassFilter b) {
-		Assert.notNull(a, "First ClassFilter must not be null");
-		Assert.notNull(b, "Second ClassFilter must not be null");
-		return new IntersectionClassFilter(new ClassFilter[] {a, b});
+	public static ClassFilter intersection(ClassFilter cf1, ClassFilter cf2) {
+		Assert.notNull(cf1, "First ClassFilter must not be null");
+		Assert.notNull(cf2, "Second ClassFilter must not be null");
+		return new IntersectionClassFilter(new ClassFilter[] {cf1, cf2});
 	}
 
 	/**

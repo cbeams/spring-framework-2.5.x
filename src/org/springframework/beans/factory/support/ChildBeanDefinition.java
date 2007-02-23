@@ -152,10 +152,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 			return false;
 		}
 		ChildBeanDefinition that = (ChildBeanDefinition) other;
-		if (!ObjectUtils.nullSafeEquals(this.parentName, that.parentName)) {
-			return false;
-		}
-		return super.equals(other);
+		return (ObjectUtils.nullSafeEquals(this.parentName, that.parentName) && super.equals(other));
 	}
 
 	public int hashCode() {

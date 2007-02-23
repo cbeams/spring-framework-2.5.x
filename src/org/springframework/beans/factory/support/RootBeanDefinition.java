@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,13 +158,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 
 	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof RootBeanDefinition)) {
-			return false;
-		}
-		return super.equals(other);
+		return (this == other || (other instanceof RootBeanDefinition && super.equals(other)));
 	}
 
 	public String toString() {
