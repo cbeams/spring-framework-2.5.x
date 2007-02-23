@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,42 +17,87 @@
 package org.springframework.aop.support;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Static methods useful for composing ClassFilters.
+ * Static utility methods for composing
+ * {@link org.springframework.aop.ClassFilter ClassFilters}.
  *
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 11.11.2003
+ * @see MethodMatchers
+ * @see Pointcuts
  */
 public abstract class ClassFilters {
 
+	/**
+	 * Match all classes that <i>either</i> (or both) of the given ClassFilters matches.
+	 * @param a the first ClassFilter
+	 * @param b the second ClassFilter
+	 * @return a distinct ClassFilter that matches all classes that either
+	 * of the given ClassFilter matches
+	 */
 	public static ClassFilter union(ClassFilter a, ClassFilter b) {
-		return new UnionClassFilter(new ClassFilter[] { a, b } );
+		Assert.notNull(a, "First ClassFilter must not be null");
+		Assert.notNull(b, "Second ClassFilter must not be null");
+		return new UnionClassFilter(new ClassFilter[] {a, b});
 	}
 
+	/**
+	 * Match all classes that <i>either</i> (or all) of the given ClassFilters matches.
+	 * @param classFilters the ClassFilters to match
+	 * @return a distinct ClassFilter that matches all classes that either
+	 * of the given ClassFilter matches
+	 */
+	public static ClassFilter union(ClassFilter[] classFilters) {
+		Assert.notEmpty(classFilters, "ClassFilter array must not be empty");
+		return new UnionClassFilter(classFilters);
+	}
+
+	/**
+	 * Match all classes that <i>both</i> of the given ClassFilters match.
+	 * @param a the first ClassFilter
+	 * @param b the second ClassFilter
+	 * @return a distinct ClassFilter that matches all classes that both
+	 * of the given ClassFilter match
+	 */
 	public static ClassFilter intersection(ClassFilter a, ClassFilter b) {
-		return new IntersectionClassFilter(new ClassFilter[] { a, b } );
+		Assert.notNull(a, "First ClassFilter must not be null");
+		Assert.notNull(b, "Second ClassFilter must not be null");
+		return new IntersectionClassFilter(new ClassFilter[] {a, b});
+	}
+
+	/**
+	 * Match all classes that <i>all</i> of the given ClassFilters match.
+	 * @param classFilters the ClassFilters to match
+	 * @return a distinct ClassFilter that matches all classes that both
+	 * of the given ClassFilter match
+	 */
+	public static ClassFilter intersection(ClassFilter[] classFilters) {
+		Assert.notEmpty(classFilters, "ClassFilter array must not be empty");
+		return new IntersectionClassFilter(classFilters);
 	}
 
 
+	/**
+	 * ClassFilter implementation for a union of the given ClassFilters.
+	 */
 	private static class UnionClassFilter implements ClassFilter, Serializable {
 
 		private ClassFilter[] filters;
 
 		public UnionClassFilter(ClassFilter[] filters) {
-			Assert.notNull(filters, "'filters' cannot be null.");
 			this.filters = filters;
 		}
 
 		public boolean matches(Class clazz) {
-			for (int i = 0; i < filters.length; i++) {
-				if (filters[i].matches(clazz)) {
+			for (int i = 0; i < this.filters.length; i++) {
+				if (this.filters[i].matches(clazz)) {
 					return true;
 				}
 			}
@@ -60,31 +105,30 @@ public abstract class ClassFilters {
 		}
 
 		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			return (other instanceof UnionClassFilter &&
-					ObjectUtils.nullSafeEquals(this.filters, ((UnionClassFilter) other).filters));
+			return (this == other || (other instanceof UnionClassFilter &&
+					ObjectUtils.nullSafeEquals(this.filters, ((UnionClassFilter) other).filters)));
 		}
 
 		public int hashCode() {
-			return Arrays.hashCode(this.filters);
+			return ObjectUtils.nullSafeHashCode(this.filters);
 		}
 	}
 
 
+	/**
+	 * ClassFilter implementation for an intersection of the given ClassFilters.
+	 */
 	private static class IntersectionClassFilter implements ClassFilter, Serializable {
 
 		private ClassFilter[] filters;
 
 		public IntersectionClassFilter(ClassFilter[] filters) {
-			Assert.notNull(filters, "'filters' cannot be null.");
 			this.filters = filters;
 		}
 
 		public boolean matches(Class clazz) {
-			for (int i = 0; i < filters.length; i++) {
-				if (!filters[i].matches(clazz)) {
+			for (int i = 0; i < this.filters.length; i++) {
+				if (!this.filters[i].matches(clazz)) {
 					return false;
 				}
 			}
@@ -92,15 +136,12 @@ public abstract class ClassFilters {
 		}
 
 		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			return (other instanceof IntersectionClassFilter &&
-					ObjectUtils.nullSafeEquals(this.filters, ((IntersectionClassFilter) other).filters));
+			return (this == other || (other instanceof IntersectionClassFilter &&
+					ObjectUtils.nullSafeEquals(this.filters, ((IntersectionClassFilter) other).filters)));
 		}
 
 		public int hashCode() {
-			return Arrays.hashCode(this.filters);
+			return ObjectUtils.nullSafeHashCode(this.filters);
 		}
 	}
 
