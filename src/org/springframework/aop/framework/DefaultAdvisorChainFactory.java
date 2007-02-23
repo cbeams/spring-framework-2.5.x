@@ -26,11 +26,11 @@ import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.IntroductionAdvisor;
-import org.springframework.aop.IntroductionAwareMethodMatcher;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
+import org.springframework.aop.support.MethodMatchers;
 
 /**
  * A simple but definitive way of working out an advice chain for a Method,
@@ -61,7 +61,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory {
 				if (pointcutAdvisor.getPointcut().getClassFilter().matches(targetClass)) {
 					MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
 					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
-					if (methodMatches(mm, method, targetClass, hasIntroductions)) {
+					if (MethodMatchers.matches(mm, method, targetClass, hasIntroductions)) {
 						if (mm.isRuntime()) {
 							// Creating a new object instance in the getInterceptors() method
 							// isn't a problem as we normally cache created chains.
@@ -100,19 +100,6 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory {
 			}
 		}
 		return false;
-	}
-
-	private static boolean methodMatches(
-			MethodMatcher matcher, Method method, Class targetClass, boolean hasIntroductions) {
-
-		if (matcher instanceof IntroductionAwareMethodMatcher) {
-			IntroductionAwareMethodMatcher introductionAwareMatcher =
-				(IntroductionAwareMethodMatcher) matcher;
-			return introductionAwareMatcher.matches(method, targetClass,hasIntroductions);
-		}
-		else {
-			return matcher.matches(method, targetClass);
-		}
 	}
 
 }

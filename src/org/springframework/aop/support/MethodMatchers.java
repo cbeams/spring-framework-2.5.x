@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,30 +19,72 @@ package org.springframework.aop.support;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import org.springframework.aop.IntroductionAwareMethodMatcher;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.util.Assert;
 
 /**
- * Static methods useful for composing MethodMatchers. A MethodMatcher may be
- * evaluated statically (based on method and target class) or need further
- * evaluation dynamically (based on arguments at the time of method invocation).
+ * Static utility methods for composing
+ * {@link org.springframework.aop.MethodMatcher MethodMatchers}.
+ *
+ * <p>A MethodMatcher may be evaluated statically (based on method
+ * and target class) or need further evaluation dynamically
+ * (based on arguments at the time of method invocation).
  *
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 11.11.2003
+ * @see ClassFilters
+ * @see Pointcuts
  */
 public abstract class MethodMatchers {
 
+	/**
+	 * Match all methods that <i>either</i> (or both) of the given MethodMatchers matches.
+	 * @param a the first MethodMatcher
+	 * @param b the second MethodMatcher
+	 * @return a distinct MethodMatcher that matches all methods that either
+	 * of the given MethodMatchers matches
+	 */
 	public static MethodMatcher union(MethodMatcher a, MethodMatcher b) {
 		return new UnionMethodMatcher(a, b);
 	}
 
+	/**
+	 * Match all methods that <i>both</i> of the given MethodMatchers match.
+	 * @param a the first MethodMatcher
+	 * @param b the second MethodMatcher
+	 * @return a distinct MethodMatcher that matches all methods that both
+	 * of the given MethodMatchers matches
+	 */
 	public static MethodMatcher intersection(MethodMatcher a, MethodMatcher b) {
 		return new IntersectionMethodMatcher(a, b);
 	}
 
+	/**
+	 * Apply the given MethodMatcher to the given Method, supporting an
+	 * {@link org.springframework.aop.IntroductionAwareMethodMatcher}
+	 * (if applicable).
+	 * @param mm the MethodMatcher to apply
+	 * @param method the candidate method
+	 * @param targetClass the target class (may be <code>null</code>, in which case
+	 * the candidate class must be taken to be the method's declaring class)
+	 * @param hasIntroductions <code>true</code> if the object on whose behalf we are
+	 * asking is the subject on one or more introductions; <code>false</code> otherwise
+	 * @return whether or not this method matches statically
+	 */
+	public static boolean matches(MethodMatcher mm, Method method, Class targetClass, boolean hasIntroductions) {
+		return ((mm instanceof IntroductionAwareMethodMatcher &&
+				((IntroductionAwareMethodMatcher) mm).matches(method, targetClass, hasIntroductions)) ||
+				mm.matches(method, targetClass));
+	}
 
-	private static class UnionMethodMatcher implements MethodMatcher, Serializable {
+
+	/**
+	 * MethodMatcher implementation for a union of two given MethodMatchers.
+	 */
+	private static class UnionMethodMatcher implements IntroductionAwareMethodMatcher, Serializable {
 
 		private MethodMatcher a;
 		private MethodMatcher b;
@@ -54,41 +96,47 @@ public abstract class MethodMatchers {
 			this.b = b;
 		}
 
+		public boolean matches(Method method, Class targetClass, boolean hasIntroductions) {
+			return MethodMatchers.matches(this.a, method, targetClass, hasIntroductions) ||
+					MethodMatchers.matches(this.b, method, targetClass, hasIntroductions);
+		}
+
 		public boolean matches(Method method, Class targetClass) {
-			return a.matches(method, targetClass) || b.matches(method, targetClass);
+			return this.a.matches(method, targetClass) || this.b.matches(method, targetClass);
 		}
 
 		public boolean isRuntime() {
-			return a.isRuntime() || b.isRuntime();
+			return this.a.isRuntime() || this.b.isRuntime();
 		}
 
 		public boolean matches(Method method, Class targetClass, Object[] args) {
-			return a.matches(method, targetClass, args) || b.matches(method, targetClass, args);
+			return this.a.matches(method, targetClass, args) || this.b.matches(method, targetClass, args);
 		}
 
 		public boolean equals(Object obj) {
 			if (this == obj) {
 				return true;
 			}
-
 			if (!(obj instanceof UnionMethodMatcher)) {
 				return false;
 			}
-
 			UnionMethodMatcher that = (UnionMethodMatcher) obj;
 			return (this.a.equals(that.a) && this.b.equals(that.b));
 		}
 
 		public int hashCode() {
-			int code = 17;
-			code = 37 * code + this.a.hashCode();
-			code = 37 * code + this.b.hashCode();
-			return code;
+			int hashCode = 17;
+			hashCode = 37 * hashCode + this.a.hashCode();
+			hashCode = 37 * hashCode + this.b.hashCode();
+			return hashCode;
 		}
 	}
 
 
-	private static class IntersectionMethodMatcher implements MethodMatcher, Serializable {
+	/**
+	 * MethodMatcher implementation for an intersection of two given MethodMatchers.
+	 */
+	private static class IntersectionMethodMatcher implements IntroductionAwareMethodMatcher, Serializable {
 
 		private MethodMatcher a;
 		private MethodMatcher b;
@@ -98,6 +146,11 @@ public abstract class MethodMatchers {
 			Assert.notNull(b, "Second MethodMatcher must not be null");
 			this.a = a;
 			this.b = b;
+		}
+
+		public boolean matches(Method method, Class targetClass, boolean hasIntroductions) {
+			return MethodMatchers.matches(this.a, method, targetClass, hasIntroductions) &&
+					MethodMatchers.matches(this.b, method, targetClass, hasIntroductions);
 		}
 
 		public boolean matches(Method method, Class targetClass) {
@@ -131,10 +184,10 @@ public abstract class MethodMatchers {
 		}
 
 		public int hashCode() {
-			int code = 17;
-			code = 37 * code + this.a.hashCode();
-			code = 37 * code + this.b.hashCode();
-			return code;
+			int hashCode = 17;
+			hashCode = 37 * hashCode + this.a.hashCode();
+			hashCode = 37 * hashCode + this.b.hashCode();
+			return hashCode;
 		}
 	}
 
