@@ -9,8 +9,6 @@
 		<aop:scoped-proxy/>
 	</bean>
 
-	<bean id="testBean" class="org.springframework.beans.TestBean">
-		<property name="friends" ref="scopedList"/>
-	</bean>
+	<bean id="testBean" class="org.springframework.beans.TestBean" autowire="byType"/>
 
 </beans>

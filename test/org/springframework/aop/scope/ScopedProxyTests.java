@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.NoOpScope;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -57,7 +58,8 @@ public class ScopedProxyTests extends TestCase {
 	public void testScopedList() {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedList.xml", getClass()));
 		bf.registerScope("request", new NoOpScope());
-		bf.getBean("testBean");
+		TestBean tb = (TestBean) bf.getBean("testBean");
+		assertTrue(tb.getFriends() instanceof ScopedObject);
 	}
 
 }

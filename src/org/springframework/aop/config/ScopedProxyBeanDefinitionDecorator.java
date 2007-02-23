@@ -23,6 +23,7 @@ import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
@@ -48,9 +49,11 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 		BeanDefinition targetDefinition = definition.getBeanDefinition();
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
+		// Create a scoped proxy definition for the original bean name,
+		// "hiding" the target bean in an internal target definition.
 		String targetBeanName = TARGET_NAME_PREFIX + originalBeanName;
-		RootBeanDefinition scopeFactoryDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
-		scopeFactoryDefinition.getPropertyValues().addPropertyValue("targetBeanName", targetBeanName);
+		RootBeanDefinition scopedProxyDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
+		scopedProxyDefinition.getPropertyValues().addPropertyValue("targetBeanName", targetBeanName);
 
 		boolean proxyTargetClass = (!(node instanceof Element) ||
 				Boolean.valueOf(((Element) node).getAttribute(PROXY_TARGET_CLASS)).booleanValue());
@@ -59,7 +62,12 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 			// ScopedFactoryBean's "proxyTargetClass" default is TRUE, so we don't need to set it explicitly here.
 		}
 		else {
-			scopeFactoryDefinition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.FALSE);
+			scopedProxyDefinition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.FALSE);
+		}
+
+		// The target bean should be ignored in favor of the scoped proxy.
+		if (targetDefinition instanceof AbstractBeanDefinition) {
+			((AbstractBeanDefinition) targetDefinition).setAutowireCandidate(false);
 		}
 
 		// Register the target bean as separate bean in the factory.
@@ -67,7 +75,7 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
 		// Return the scoped proxy definition as primary bean definition
 		// (potentially an inner bean).
-		return new BeanDefinitionHolder(scopeFactoryDefinition, originalBeanName);
+		return new BeanDefinitionHolder(scopedProxyDefinition, originalBeanName);
 	}
 
 }
