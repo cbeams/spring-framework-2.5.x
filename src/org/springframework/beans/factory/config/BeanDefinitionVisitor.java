@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Visitor base class for traversing BeanDefinition objects and the
- * MutablePropertyValues and ConstructorArgumentValues contained in them.
+ * Visitor base class for traversing {@link BeanDefinition} objects, in particular
+ * the property values and constructor argument values contained in them.
  *
- * <p>The abstract <code>resolveStringValue</code> method has to be implemented
+ * <p>The abstract {@link #resolveStringValue} method has to be implemented
  * in concrete subclasses, following arbitrary resolution strategies.
  *
- * <p>Used by PropertyPlaceholderConfigurer to parse all String values
+ * <p>Used by {@link PropertyPlaceholderConfigurer} to parse all String values
  * contained in a BeanDefinition, resolving any placeholders found.
  *
  * @author Juergen Hoeller
@@ -54,9 +54,9 @@ public abstract class BeanDefinitionVisitor {
 	 * @see #resolveStringValue(String)
 	 */
 	public void visitBeanDefinition(BeanDefinition beanDefinition) {
-		MutablePropertyValues pvs = beanDefinition.getPropertyValues();
 		visitBeanClassName(beanDefinition);
-		visitPropertyValues(pvs);
+		visitScope(beanDefinition);
+		visitPropertyValues(beanDefinition.getPropertyValues());
 		ConstructorArgumentValues cas = beanDefinition.getConstructorArgumentValues();
 		visitIndexedArgumentValues(cas.getIndexedArgumentValues());
 		visitGenericArgumentValues(cas.getGenericArgumentValues());
@@ -68,6 +68,16 @@ public abstract class BeanDefinitionVisitor {
 			String resolvedName = resolveStringValue(beanClassName);
 			if (!beanClassName.equals(resolvedName)) {
 				beanDefinition.setBeanClassName(resolvedName);
+			}
+		}
+	}
+
+	protected void visitScope(BeanDefinition beanDefinition) {
+		String scope = beanDefinition.getScope();
+		if (scope != null) {
+			String resolvedScope = resolveStringValue(scope);
+			if (!scope.equals(resolvedScope)) {
+				beanDefinition.setScope(resolvedScope);
 			}
 		}
 	}

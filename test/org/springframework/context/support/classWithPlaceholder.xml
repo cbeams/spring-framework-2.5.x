@@ -7,10 +7,12 @@
 		<property name="properties">
 			<props>
 				<prop key="msClass">StaticMessageSource</prop>
+				<prop key="msScope">singleton</prop>
 			</props>
 		</property>
 	</bean>
 
-	<bean id="someMessageSource" class="org.springframework.context.support.${msClass}" lazy-init="true"/>
+	<bean id="someMessageSource" class="org.springframework.context.support.${msClass}"
+			scope="${msScope}" lazy-init="true"/>
 
 </beans>
