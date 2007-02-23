@@ -174,7 +174,7 @@ public class TimerManagerFactoryBean extends JndiLocatorSupport
 	}
 
 	public Class getObjectType() {
-		return TimerManager.class;
+		return (this.timerManager != null ? this.timerManager.getClass() : TimerManager.class);
 	}
 
 	public boolean isSingleton() {

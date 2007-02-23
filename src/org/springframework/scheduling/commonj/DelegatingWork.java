@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class DelegatingWork implements Work {
 	 * Return the wrapped Runnable implementation.
 	 */
 	public final Runnable getDelegate() {
-		return delegate;
+		return this.delegate;
 	}
 
 
@@ -62,15 +62,13 @@ public class DelegatingWork implements Work {
 	}
 
 	/**
-	 * This implementation delegates to <code>SchedulingAwareRunnable.isLongLived()</code>,
+	 * This implementation delegates to
+	 * {@link org.springframework.scheduling.SchedulingAwareRunnable#isLongLived()},
 	 * if available.
-	 * @see org.springframework.scheduling.SchedulingAwareRunnable#isLongLived()
 	 */
 	public boolean isDaemon() {
-		if (this.delegate instanceof SchedulingAwareRunnable) {
-			return ((SchedulingAwareRunnable) this.delegate).isLongLived();
-		}
-		return false;
+		return (this.delegate instanceof SchedulingAwareRunnable &&
+				((SchedulingAwareRunnable) this.delegate).isLongLived());
 	}
 
 	/**

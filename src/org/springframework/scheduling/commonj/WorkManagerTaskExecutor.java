@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,15 +36,16 @@ import org.springframework.util.Assert;
 
 /**
  * TaskExecutor implementation that delegates to a CommonJ WorkManager,
+ * implementing the {@link commonj.work.WorkManager} interface,
  * which either needs to be specified as reference or through the JNDI name.
  *
  * <p><b>This is the central convenience class for setting up a
  * CommonJ WorkManager in a Spring context.</b>
  *
- * <p>Also implements the WorkManager interface itself, delegating all calls
- * to the target WorkManager. Hence, a caller can choose whether it wants
- * to talk to this executor through the Spring TaskExecutor interface or
- * the CommonJ WorkManager interface.
+ * <p>Also implements the CommonJ WorkManager interface itself, delegating all
+ * calls to the target WorkManager. Hence, a caller can choose whether it wants
+ * to talk to this executor through the Spring TaskExecutor interface or the
+ * CommonJ WorkManager interface.
  *
  * <p>The CommonJ WorkManager will usually be retrieved from the application
  * server's JNDI environment, as defined in the server's management console.
@@ -59,8 +60,8 @@ import org.springframework.util.Assert;
  * "Asynch Beans". Its central interface is called WorkManager too and is
  * also obtained from JNDI, just like a standard CommonJ WorkManager.
  * However, this WorkManager variant is notably different: The central
- * execution method is called "doWork" instead of "schedule", and takes a
- * slightly different Work interface as parameter.
+ * execution method is called "startWork" instead of "schedule",
+ * and takes a slightly different Work interface as parameter.
  *
  * <p>Support for this WebSphere 5 variant can be built with this class
  * and its helper DelegatingWork as template: Call the WorkManager's
@@ -123,7 +124,7 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	//-------------------------------------------------------------------------
 
 	public void execute(Runnable task) {
-		Assert.notNull(this.workManager, "WorkManager is required");
+		Assert.state(this.workManager != null, "No WorkManager specified");
 		try {
 			this.workManager.schedule(new DelegatingWork(task));
 		}
