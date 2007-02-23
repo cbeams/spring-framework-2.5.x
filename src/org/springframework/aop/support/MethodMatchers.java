@@ -56,7 +56,7 @@ public abstract class MethodMatchers {
 	 * @param a the first MethodMatcher
 	 * @param b the second MethodMatcher
 	 * @return a distinct MethodMatcher that matches all methods that both
-	 * of the given MethodMatchers matches
+	 * of the given MethodMatchers match
 	 */
 	public static MethodMatcher intersection(MethodMatcher a, MethodMatcher b) {
 		return new IntersectionMethodMatcher(a, b);
@@ -66,7 +66,7 @@ public abstract class MethodMatchers {
 	 * Apply the given MethodMatcher to the given Method, supporting an
 	 * {@link org.springframework.aop.IntroductionAwareMethodMatcher}
 	 * (if applicable).
-	 * @param mm the MethodMatcher to apply
+	 * @param mm the MethodMatcher to apply (may be an IntroductionAwareMethodMatcher)
 	 * @param method the candidate method
 	 * @param targetClass the target class (may be <code>null</code>, in which case
 	 * the candidate class must be taken to be the method's declaring class)
@@ -75,6 +75,7 @@ public abstract class MethodMatchers {
 	 * @return whether or not this method matches statically
 	 */
 	public static boolean matches(MethodMatcher mm, Method method, Class targetClass, boolean hasIntroductions) {
+		Assert.notNull(mm, "MethodMatcher must not be null");
 		return ((mm instanceof IntroductionAwareMethodMatcher &&
 				((IntroductionAwareMethodMatcher) mm).matches(method, targetClass, hasIntroductions)) ||
 				mm.matches(method, targetClass));
