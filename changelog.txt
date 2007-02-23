@@ -3,10 +3,11 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.3 (16.2.2007)
+Changes in version 2.0.3 (26.2.2007)
 ------------------------------------
 
 General
+* basic scheduling support is included in "spring-context.jar", with only Quartz support added in "spring-support.jar"
 * all checks for library presence are explicitly performed with Spring's own ClassLoader (not the application's)
 * overall startup/shutdown logging at info level is less verbose (activate debug log level for more config details)
 
@@ -26,7 +27,13 @@ Package org.springframework.aop
 * added overloaded ProxyFactory constructors for single-interceptor and TargetSource-only proxies
 * AbstractSingletonProxyFactoryBean and AbstractAutoProxyCreator use the bean ClassLoader for generating proxies
 * reworked AdvisorAdapter and AdvisorAdapterRegistry to expose a MethodInterceptor right away
-* AspectJPointcutExpression ignores target classes not accepted by PointcutExpression matching (such as arrays)
+* fixed ClassFilters to provide JDK-1.3/1.4-compatible "hashCode()" implementations for unions and intersections
+* MethodMatchers supports IntroductionAwareMethodMatcher for unions and intersections
+* RegexpMethodPointcutAdvisor references ORO classes indirectly, to avoid eager loading of ORO on Solaris JDK 1.6
+* AnnotationMethodMatcher and AnnotationMatchingPointcut check for an annotation on the target method as well
+* added "forClassAnnotation" and "forMethodAnnotation" factory methods to AnnotationMatchingPointcut
+* AspectJExpressionPointcut ignores target classes not accepted by PointcutExpression matching (such as arrays)
+* revised AspectJPointcutAdvisor to never apply AspectJ advice methods to themselves (avoiding a stack overflow)
 * AspectJAdviceParameterNameDiscoverer properly considers reference pointcuts as potential source of parameter binding
 * AbstractAspectJAdvisorFactory detects @AspectJ aspects through the presence of the @Aspect annotation
 * MethodInvocationProceedingJoinPoint allows for multiple "proceed(arguments)" calls, cloning the underlying invocation
@@ -35,6 +42,8 @@ Package org.springframework.aop
 * PrototypeTargetSource destroys bean instances on release (honors DisposableBean and/or destroy-method)
 * ThreadLocalTargetSource destroys bean instances via ConfigurableBeanFactory's "destroyBean" (if possible)
 * added "forClass" factory method to EmptyTargetSource, allowing to indicate a specific target class
+* added "equals"/"hashCode" implementation to AbstractBeanFactoryBasedTargetSource
+* HotSwappableTargetSource's "hashCode" implementation returns a constant value even if the target object changes
 * added SimpleBeanTargetSource, performing a fresh getBean lookup on every request, for any kind of bean
 * ScopedProxyFactoryBean uses the BeanFactory's bean ClassLoader for generating scoped proxies
 * auto-proxying ignores objects exposed by ScopedProxyFactoryBeans; only their target beans are eligible
@@ -54,6 +63,7 @@ Package org.springframework.beans
 * added "isPrototype(beanName)" method to BeanFactory interface, explicitly checking for an independent instance
 * added extended SmartFactoryBean interface, including an "isPrototype()" method that checks for an independent instance
 * AbstractBeanFactory throws BeanCreationException will full context info if "postProcessObjectFromFactoryBean" fails
+* DisposableBeanAdapter (as passed into "Scope.registerDestructionCallback") is serializable, even for post-processors
 * AbstractAutowireCapableBeanFactory does not trigger "toString()" call on argument for UnsatisfiedDependencyException
 * turned visibility of AbstractAutowireCapableBeanFactory's "applyPropertyValues" method from private to protected
 * added copy constructor to ChildBeanDefinition, for custom use in programmatic bean registration code
@@ -68,15 +78,19 @@ Package org.springframework.beans
 
 Package org.springframework.context
 * AbstractApplicationContext instantiates BeanPostProcessors which implemented Ordered before non-Ordered ones
+* AbstractApplicationContext applies start/stop callbacks to existing Lifecycle instances only, particularly on shutdown
 * AbstractRefreshableApplicationContext allows BeanFactory access during the destruction phase of a "refresh()" call
-
-Package org.springframework.dao
-* PersistenceExceptionTranslationPostProcessor uses the bean ClassLoader for generating translation proxies
+* (Reloadable)ResourceBundleMessageSource trims whitespace from specified bundle basenames
+* ResourceBundleMessageSource by default uses the bean ClassLoader for loading bundles
 
 Package org.springframework.core
 * fixed BridgeMethodResolver's "populateTypeMapFromParameterizedType" to properly handle nested generics
 * fixed BridgeMethodResolver to properly detect a generic interface even in a class hierarchy
+* fixed BridgeMethodResolver to properly detect a generic array type as exposed by a vararg signature
 * refactored SimpleAsyncTaskExecutor to allow for reuse of the CustomizableThreadCreator class
+
+Package org.springframework.dao
+* PersistenceExceptionTranslationPostProcessor uses the bean ClassLoader for generating translation proxies
 
 Package org.springframework.ejb
 * AbstractEnterpriseBean uses the EJB instance as WeakReferenceMonitor handle, instead of a BeanFactoryReference proxy
@@ -86,11 +100,15 @@ Package org.springframework.ejb
 Package org.springframework.instrument
 * ShadowingClassLoader excludes "com.sun." package by default (for using Sun's Xerces version through JAXP)
 
+Package org.springframework.jca
+* added ResourceAdapterFactoryBean to "jca.support" package, for bootstrapping a JCA 1.5 ResourceAdapter locally
+
 Package org.springframework.jdbc
 * added overloaded ConnectionHolder constructor with a given Connection plus "transactionActive" flag as arguments
 * UserCredentialDataSourceAdapter delegates "getConnection(String, String)" to "doGetConnection", for unified handling
 * introduced IsolationLevelDataSourceAdapter, preparing Connections with isolation level (transaction's or fixed)
 * introduced WebSphereDataSourceAdapter, obtaining Connections through WebSphere's JDBCConnectionSpec facility
+* revised JdbcTemplate's prepared statement logging
 
 Package org.springframework.jms
 * marked JmsDestinationAccessor as abstract
@@ -101,6 +119,7 @@ Package org.springframework.jms
 * added "acceptMessagesWhileStopping" flag to AbstractMessageListenerContainer, for processing all delivered messages
 * factored out AbstractPollingMessageListenerContainer base class from DefaultMessageListenerContainer
 * added dynamic scaling up/down to DefaultMessageListenerContainer, configured through "maxConcurrentConsumers" property
+* MessageListenerAdapter can delegate to native target (SessionAware)MessageListener if no listener method specified
 
 Package org.springframework.jmx
 * MBeanExporter and MBeanServerConnectionFactoryBean use the bean ClassLoader for generating lazy-init proxies
@@ -112,6 +131,7 @@ Package org.springframework.jndi
 
 Package org.springframework.mock
 * added "clearAttributes()" method to MockHttpServletRequest and MockHttpSession
+* added "serializeState" and "deserializeState" methods to MockHttpSession, for testing attribute serialization
 * introduced MockFilterChain (recording the call) and PassThroughFilterChain (passing the call on to a Filter/Servlet)
 
 Package org.springframework.orm
@@ -154,6 +174,7 @@ Package org.springframework.scripting
 Package org.springframework.test
 * AbstractSingleSpringContextTests supports "getConfigPaths()" method, specifying config files relative to test class
 * AbstractSingleSpringContextTests supports "getConfigPath()" method, specifying a single file relative to test class
+* changed the visibility of AbstractDependencyInjectionSpringContextTests's "injectDependencies" method to protected
 * AssertThrows preserves an unexpected exception as root cause in the "wrong exception thrown" AssertionFailedError
 
 Package org.springframework.transaction
@@ -161,6 +182,7 @@ Package org.springframework.transaction
 * AbstractPlatformTransactionManager marks an existing transaction as rollback-only even in case of a commit exception
 * turned various AbstractPlatformTransactionManager methods from private to protected, for reuse in specific subclasses
 * JtaTransactionManager does not fail if default UserTransaction lookup fails: falls back on TransactionManager instead
+* SpringJtaSynchronizationAdapter does not explicitly call "setRollbackOnly" on WebLogic, to preserve the root cause
 * added "order" attribute to "tx:annotation-driven" tag, determining the order of the tx advisor in the advice chain
 
 Package org.springframework.util
@@ -171,6 +193,7 @@ Package org.springframework.web
 * CharacterEncodingFilter only applies its encoding if actually specified (non-null)
 * ConfigurableWebApplicationContext and ConfigurablePortletApplicationContext expose config state through getters
 * RequestContextListener works correctly even in case of the "requestDestroyed" callback coming from a different thread
+* ServletRequestAttributes's DestructionCallbackBindingListener is serializable, surviving web app restarts
 * added "rootHandler" bean property to AbstractUrlHandlerMapping, kicking in for the "/" path
 * added "warnLogCategory" property to SimpleMappingExceptionResolver, allowing to log the exception to warn level
 * added protected "determineStatusCode" method to Servlet SimpleMappingExceptionResolver, for custom status codes
