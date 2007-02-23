@@ -363,6 +363,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL statement [" + sql + "]");
 		}
+
 		class ExecuteStatementCallback implements StatementCallback, SqlProvider {
 			public Object doInStatement(Statement stmt) throws SQLException {
 				stmt.execute(sql);
@@ -376,12 +377,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public Object query(final String sql, final ResultSetExtractor rse) throws DataAccessException {
-		Assert.notNull(rse, "ResultSetExtractor must not be null");
 		Assert.notNull(sql, "SQL must not be null");
-
+		Assert.notNull(rse, "ResultSetExtractor must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL query [" + sql + "]");
 		}
+
 		class QueryStatementCallback implements StatementCallback, SqlProvider {
 			public Object doInStatement(Statement stmt) throws SQLException {
 				ResultSet rs = null;
@@ -452,6 +453,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL update [" + sql + "]");
 		}
+
 		class UpdateStatementCallback implements StatementCallback, SqlProvider {
 			public Object doInStatement(Statement stmt) throws SQLException {
 				int rows = stmt.executeUpdate(sql);
@@ -468,10 +470,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public int[] batchUpdate(final String[] sql) throws DataAccessException {
-		Assert.notNull(sql, "SQL must not be null");
+		Assert.notEmpty(sql, "SQL array must not be empty");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update of " + sql.length + " statements");
 		}
+
 		class BatchUpdateStatementCallback implements StatementCallback, SqlProvider {
 			private String currSql;
 			public Object doInStatement(Statement stmt) throws SQLException, DataAccessException {
@@ -513,7 +516,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 		Assert.notNull(psc, "PreparedStatementCreator must not be null");
 		Assert.notNull(action, "Callback object must not be null");
-
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(psc);
 			logger.debug("Executing prepared SQL statement" + (sql != null ? " [" + sql + "]" : ""));
@@ -807,6 +809,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update [" + sql + "]");
 		}
+
 		return (int[]) execute(sql, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				try {
@@ -854,7 +857,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 		Assert.notNull(csc, "CallableStatementCreator must not be null");
 		Assert.notNull(action, "Callback object must not be null");
-
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(csc);
 			logger.debug("Calling stored procedure" + (sql != null ? " [" + sql  + "]" : ""));
