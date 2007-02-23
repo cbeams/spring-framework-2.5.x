@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.util.Assert;
 
 /**
  * Pointcut constants for matching getters and setters,
@@ -29,62 +30,67 @@ import org.springframework.aop.Pointcut;
  * using the union and intersection methods.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public abstract class Pointcuts {
-	
+
+	/** Pointcut matching all bean property setters, in any class */
+	public static final Pointcut SETTERS = SetterPointcut.INSTANCE;
+
+	/** Pointcut matching all bean property getters, in any class */
+	public static final Pointcut GETTERS = GetterPointcut.INSTANCE;
+
+
 	/**
-	 * Pointcut matching all setters, in any class
+	 * Match all methods that <b>either</b> (or both) of the given pointcuts matches.
+	 * @param pc1 the first Pointcut
+	 * @param pc2 the second Pointcut
+	 * @return a distinct Pointcut that matches all methods that either
+	 * of the given Pointcuts matches
 	 */
-	public static final Pointcut SETTERS = SetterPointcut.INSTANCE; 
-	
-	/**
-	 * Pointcut matching all getters, in any class
-	 */
-	public static final Pointcut GETTERS = GetterPointcut.INSTANCE; 
-	
-	
-	/**
-	 * Match all methods that <b>either</b> (or both) of the given pointcuts matches
-	 * @param a input pointcut
-	 * @param b input pointput
-	 * @return a distinct Pointcut that matches all methods that either of the
-	 * given pointcuts matches
-	 */
-	public static Pointcut union(Pointcut a, Pointcut b) {
-		return new UnionPointcut(a, b);
+	public static Pointcut union(Pointcut pc1, Pointcut pc2) {
+		return new ComposablePointcut(pc1).union(pc2);
 	}
-	
+
 	/**
-	 * Match all methods that <b>both</b> the given pointcuts match
-	 * @param a input pointcut
-	 * @param b input pointput
-	 * @return a distinct Pointcut that matches all methods that both the
-	 * given pointcuts match
+	 * Match all methods that <b>both</b> the given pointcuts match.
+	 * @param pc1 the first Pointcut
+	 * @param pc2 the second Pointcut
+	 * @return a distinct Pointcut that matches all methods that both
+	 * of the given Pointcuts match
 	 */
-	public static Pointcut intersection(Pointcut a, Pointcut b) {
-		return new ComposablePointcut(a.getClassFilter(), a.getMethodMatcher()).intersection(b);
+	public static Pointcut intersection(Pointcut pc1, Pointcut pc2) {
+		return new ComposablePointcut(pc1).intersection(pc2);
 	}
-	
+
 	/**
-	 * Perform the least expensive check for a match.
+	 * Perform the least expensive check for a pointcut match.
+	 * @param pointcut the pointcut to match
+	 * @param method the candidate method
+	 * @param targetClass the target class
+	 * @param args arguments to the method
+	 * @return whether there's a runtime match
 	 */
-	public static boolean matches(Pointcut pc, Method method, Class targetClass, Object[] arguments) {
-		if (pc == Pointcut.TRUE) {
+	public static boolean matches(Pointcut pointcut, Method method, Class targetClass, Object[] args) {
+		Assert.notNull(pointcut, "Pointcut must not be null");
+		if (pointcut == Pointcut.TRUE) {
 			return true;
 		}
-			
-		if (pc.getClassFilter().matches(targetClass)) {
-			// Only check if it gets past first hurdle
-			MethodMatcher mm = pc.getMethodMatcher();
+		if (pointcut.getClassFilter().matches(targetClass)) {
+			// Only check if it gets past first hurdle.
+			MethodMatcher mm = pointcut.getMethodMatcher();
 			if (mm.matches(method, targetClass)) {
-				// We may need additional runtime (argument) check
-				return  mm.isRuntime() ? mm.matches(method, targetClass, arguments) : true;
+				// We may need additional runtime (argument) check.
+				return (!mm.isRuntime() || mm.matches(method, targetClass, args));
 			}
 		}
 		return false;
 	}
 
 
+	/**
+	 * Pointcut implementation that matches bean property setters.
+	 */
 	private static class SetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
 		public static SetterPointcut INSTANCE = new SetterPointcut();
@@ -101,6 +107,9 @@ public abstract class Pointcuts {
 	}
 
 
+	/**
+	 * Pointcut implementation that matches bean property getters.
+	 */
 	private static class GetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
 		public static GetterPointcut INSTANCE = new GetterPointcut();

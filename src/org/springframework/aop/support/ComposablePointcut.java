@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,11 @@ import org.springframework.util.ObjectUtils;
  * Pointcut pc = new ComposablePointcut().union(classFilter).intersection(methodMatcher).intersection(pointcut);
  * </code>
  *
- * <p>There is no <code>union(Pointcut, Pointcut)</code> method on this class.
- * Use the <code>Pointcuts.union</code> method for this.
- *
  * @author Rod Johnson
- * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 11.11.2003
- * @see Pointcuts#union(org.springframework.aop.Pointcut, org.springframework.aop.Pointcut)
+ * @see Pointcuts
  */
 public class ComposablePointcut implements Pointcut, Serializable {
 
@@ -58,6 +55,16 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	public ComposablePointcut() {
 		this.classFilter = ClassFilter.TRUE;
 		this.methodMatcher = MethodMatcher.TRUE;
+	}
+
+	/**
+	 * Create a ComposablePointcut based on the given Pointcut.
+	 * @param pointcut the original Pointcut
+	 */
+	public ComposablePointcut(Pointcut pointcut) {
+		Assert.notNull(pointcut, "Pointcut must not be null");
+		this.classFilter = pointcut.getClassFilter();
+		this.methodMatcher = pointcut.getMethodMatcher();
 	}
 
 	/**
@@ -95,26 +102,67 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	}
 
 
-	public ComposablePointcut union(ClassFilter filter) {
-		this.classFilter = ClassFilters.union(this.classFilter, filter);
+	/**
+	 * Apply a union with the given ClassFilter.
+	 * @param other the ClassFilter to apply a union with
+	 * @return this composable pointcut (for call chaining)
+	 */
+	public ComposablePointcut union(ClassFilter other) {
+		this.classFilter = ClassFilters.union(this.classFilter, other);
 		return this;
 	}
 
-	public ComposablePointcut intersection(ClassFilter filter) {
-		this.classFilter = ClassFilters.intersection(this.classFilter, filter);
+	/**
+	 * Apply an intersection with the given ClassFilter.
+	 * @param other the ClassFilter to apply an intersection with
+	 * @return this composable pointcut (for call chaining)
+	 */
+	public ComposablePointcut intersection(ClassFilter other) {
+		this.classFilter = ClassFilters.intersection(this.classFilter, other);
 		return this;
 	}
 
-	public ComposablePointcut union(MethodMatcher mm) {
-		this.methodMatcher = MethodMatchers.union(this.methodMatcher, mm);
+	/**
+	 * Apply a union with the given MethodMatcher.
+	 * @param other the MethodMatcher to apply a union with
+	 * @return this composable pointcut (for call chaining)
+	 */
+	public ComposablePointcut union(MethodMatcher other) {
+		this.methodMatcher = MethodMatchers.union(this.methodMatcher, other);
 		return this;
 	}
 
-	public ComposablePointcut intersection(MethodMatcher mm) {
-		this.methodMatcher = MethodMatchers.intersection(this.methodMatcher, mm);
+	/**
+	 * Apply an intersection with the given MethodMatcher.
+	 * @param other the MethodMatcher to apply an intersection with
+	 * @return this composable pointcut (for call chaining)
+	 */
+	public ComposablePointcut intersection(MethodMatcher other) {
+		this.methodMatcher = MethodMatchers.intersection(this.methodMatcher, other);
 		return this;
 	}
 
+	/**
+	 * Apply a union with the given Pointcut.
+	 * <p>Note that for a Pointcut union, methods will only match if their
+	 * original ClassFilter (from the originating Pointcut) matches as well.
+	 * MethodMatchers and ClassFilters from different Pointcuts will never
+	 * get interleaved with each other.
+	 * @param other the Pointcut to apply a union with
+	 * @return this composable pointcut (for call chaining)
+	 */
+	public ComposablePointcut union(Pointcut other) {
+		this.methodMatcher = MethodMatchers.union(
+				this.methodMatcher, this.classFilter, other.getMethodMatcher(), other.getClassFilter());
+		this.classFilter = ClassFilters.union(this.classFilter, other.getClassFilter());
+		return this;
+	}
+
+	/**
+	 * Apply an intersection with the given Pointcut.
+	 * @param other the Pointcut to apply an intersection with
+	 * @return this composable pointcut (for call chaining)
+	 */
 	public ComposablePointcut intersection(Pointcut other) {
 		this.classFilter = ClassFilters.intersection(this.classFilter, other.getClassFilter());
 		this.methodMatcher = MethodMatchers.intersection(this.methodMatcher, other.getMethodMatcher());
@@ -156,8 +204,8 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	}
 
 	public String toString() {
-		return "ComposablePointcut consisting of ClassFilter [" + this.classFilter +
-				"] and MethodMatcher [" + this.methodMatcher + "]";
+		return "ComposablePointcut: ClassFilter [" + this.classFilter +
+				"], MethodMatcher [" + this.methodMatcher + "]";
 	}
 
 }
