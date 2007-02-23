@@ -112,6 +112,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	/**
 	 * Create a new AspectJExpressionPointcut with the given settings.
+	 * @param declarationScope the declaration scope for the pointcut
+	 * @param paramNames the parameter names for the pointcut
+	 * @param paramTypes the parameter types for the pointcut
 	 */
 	public AspectJExpressionPointcut(Class declarationScope, String[] paramNames, Class[] paramTypes) {
 		this(DEFAULT_SUPPORTED_PRIMITIVES);
@@ -125,14 +128,23 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 
+	/**
+	 * Set the declaration scope for the pointcut.
+	 */
 	public void setPointcutDeclarationScope(Class pointcutDeclarationScope) {
 		this.pointcutDeclarationScope = pointcutDeclarationScope;
 	}
 
+	/**
+	 * Set the parameter names for the pointcut.
+	 */
 	public void setParameterNames(String[] names) {
 		this.pointcutParameterNames = names;
 	}
 
+	/**
+	 * Set the parameter types for the pointcut.
+	 */
 	public void setParameterTypes(Class[] types) {
 		this.pointcutParameterTypes = types;
 	}
@@ -149,22 +161,29 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 
+	/**
+	 * Check whether this pointcut is ready to match,
+	 * lazily building the underlying AspectJ pointcut expression.
+	 */
 	private void checkReadyToMatch() {
 		if (getExpression() == null) {
 			throw new IllegalStateException("Must set property 'expression' before attempting to match");
 		}
 		if (this.pointcutExpression == null) {
-			buildPointcutExpression();
+			this.pointcutExpression = buildPointcutExpression();
 		}
 	}
 
-	private void buildPointcutExpression() {
+	/**
+	 * Build the underlying AspectJ pointcut expression.
+	 */
+	private PointcutExpression buildPointcutExpression() {
 		PointcutParameter[] pointcutParameters = new PointcutParameter[this.pointcutParameterNames.length];
 		for (int i = 0; i < pointcutParameters.length; i++) {
 			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(
 					this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
 		}
-		this.pointcutExpression = this.pointcutParser.parsePointcutExpression(
+		return this.pointcutParser.parsePointcutExpression(
 				replaceBooleanOperators(getExpression()), this.pointcutDeclarationScope, pointcutParameters);
 	}
 
@@ -181,6 +200,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		return pcExpr;
 	}
 
+	/**
+	 * Return the underlying AspectJ pointcut expression.
+	 */
 	public PointcutExpression getPointcutExpression() {
 		checkReadyToMatch();
 		return this.pointcutExpression;
@@ -196,15 +218,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			logger.debug("PointcutExpression matching rejected target class", ex);
 			return false;
 		}
-	}
-
-	public boolean matches(Method method, Class targetClass) {
-		return matches(method, targetClass, false);
-	}
-
-	public boolean isRuntime() {
-		checkReadyToMatch();
-		return this.pointcutExpression.mayNeedDynamicTest();
 	}
 
 	public boolean matches(Method method, Class targetClass, boolean beanHasIntroductions) {
@@ -225,6 +238,48 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		  return (beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch));
 		}
 	}
+
+	public boolean matches(Method method, Class targetClass) {
+		return matches(method, targetClass, false);
+	}
+
+	public boolean isRuntime() {
+		checkReadyToMatch();
+		return this.pointcutExpression.mayNeedDynamicTest();
+	}
+
+	public boolean matches(Method method, Class targetClass, Object[] args) {
+		checkReadyToMatch();
+		Method methodToMatch = findMethodToMatchAgainst(method,targetClass);
+		ShadowMatch shadowMatch = getShadowMatch(methodToMatch);
+
+		// Bind Spring AOP proxy to AspectJ "this" and Spring AOP target to AspectJ target,
+		// consistent with return of MethodInvocationProceedingJoinPoint
+		ProxyMethodInvocation pmi = null;
+		Object targetObject = null;
+		Object thisObject = null;
+		try {
+			MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
+			targetObject = mi.getThis();
+			if (!(mi instanceof ProxyMethodInvocation)) {
+				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
+			}
+			pmi = (ProxyMethodInvocation) mi;
+			thisObject = pmi.getProxy();
+		}
+		catch (IllegalStateException ex) {
+			// No current invocation...
+			// TODO: Should we really proceed here?
+			logger.debug("Couldn't access current invocation - matching with limited context: " + ex);
+		}
+
+		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(thisObject, targetObject, args);
+		if (joinPointMatch.matches() && pmi != null) {
+			bindParameters(pmi, joinPointMatch);
+		}
+		return joinPointMatch.matches();
+	}
+
 
 	/**
 	 * If we are proxying an interface, the declaring type of the
@@ -258,43 +313,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	/**
 	 * A match test returned maybe - if there are any subtype sensitive variables
 	 * involved in the test (this, target, at_this, at_target, at_annotation) then
-	 * we say this is not a match as in Spring there will never be a different 
+	 * we say this is not a match as in Spring there will never be a different
 	 * runtime subtype.
 	 */
 	private boolean matchesIgnoringSubtypes(ShadowMatch shadowMatch) {
 		return !(new RuntimeTestWalker(shadowMatch).testsSubtypeSensitiveVars());
-	}
-
-	public boolean matches(Method method, Class targetClass, Object[] args) {
-		checkReadyToMatch();
-		Method methodToMatch = findMethodToMatchAgainst(method,targetClass);
-		ShadowMatch shadowMatch = getShadowMatch(methodToMatch);
-
-		// Bind Spring AOP proxy to AspectJ "this" and Spring AOP target to AspectJ target,
-		// consistent with return of MethodInvocationProceedingJoinPoint
-		ProxyMethodInvocation pmi = null;
-		Object targetObject = null;
-		Object thisObject = null;
-		try {
-			MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
-			targetObject = mi.getThis();
-			if (!(mi instanceof ProxyMethodInvocation)) {
-				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
-			}
-			pmi = (ProxyMethodInvocation) mi;
-			thisObject = pmi.getProxy();
-		}
-		catch (IllegalStateException ex) {
-			// No current invocation...
-			// TODO: Should we really proceed here?
-			logger.debug("Couldn't access current invocation - matching with limited context: " + ex);
-		}
-
-		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(thisObject, targetObject, args);
-		if (joinPointMatch.matches() && pmi != null) {
-			bindParameters(pmi, joinPointMatch);
-		}
-		return joinPointMatch.matches();
 	}
 
 	private void bindParameters(ProxyMethodInvocation invocation, JoinPointMatch jpm) {
