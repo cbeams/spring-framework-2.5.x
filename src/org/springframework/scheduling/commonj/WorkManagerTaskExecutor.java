@@ -86,6 +86,8 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 
 	private String workManagerName;
 
+	private WorkListener workListener;
+
 
 	/**
 	 * Specify the CommonJ WorkManager to delegate to.
@@ -109,6 +111,15 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		this.workManagerName = workManagerName;
 	}
 
+	/**
+	 * Specify a CommonJ WorkListener to apply, if any.
+	 * <p>This shared WorkListener instance will be passed on to the
+	 * WorkManager by all {@link #execute} calls on this TaskExecutor.
+	 */
+	public void setWorkListener(WorkListener workListener) {
+		this.workListener = workListener;
+	}
+
 	public void afterPropertiesSet() throws NamingException {
 		if (this.workManager == null) {
 			if (this.workManagerName == null) {
@@ -125,14 +136,20 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 
 	public void execute(Runnable task) {
 		Assert.state(this.workManager != null, "No WorkManager specified");
+		Work work = new DelegatingWork(task);
 		try {
-			this.workManager.schedule(new DelegatingWork(task));
+			if (this.workListener != null) {
+				this.workManager.schedule(work, this.workListener);
+			}
+			else {
+				this.workManager.schedule(work);
+			}
 		}
 		catch (WorkRejectedException ex) {
 			throw new TaskRejectedException("CommonJ WorkManager did not accept task: " + task, ex);
 		}
 		catch (WorkException ex) {
-			throw new SchedulingException("Could not schedule work on CommonJ WorkManager", ex);
+			throw new SchedulingException("Could not schedule task on CommonJ WorkManager", ex);
 		}
 	}
 
