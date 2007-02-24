@@ -9,6 +9,16 @@
 	<bean id="admin" class="org.springframework.web.servlet.mvc.mapping.AdminController"/>
 	<bean id="buy" class="org.springframework.web.servlet.mvc.mapping.BuyForm"/>
 	
-	<bean id="mapping" class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping"/>
+	<bean name="/myFile" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
+	<bean name="/myFile2" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
+
+	<bean id="mapping" class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping">
+		<!--
+		We have to revert the default exclude for "org.springframework.web.servlet.mvc",
+		since our test controllers sit in this package.
+		-->
+		<property name="excludedPackages"><list></list></property>
+		<property name="excludedClasses" value="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
+	</bean>
 
 </beans>

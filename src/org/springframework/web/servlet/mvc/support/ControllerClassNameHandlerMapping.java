@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.web.servlet.mvc.support;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.util.ClassUtils;
@@ -71,14 +74,40 @@ public class ControllerClassNameHandlerMapping extends AbstractUrlHandlerMapping
 	private static final String CONTROLLER_SUFFIX = "Controller";
 
 
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+	private Set excludedPackages = Collections.singleton("org.springframework.web.servlet.mvc");
+
+	private Set excludedClasses = Collections.EMPTY_SET;
 
 
 	/**
-	 * Calls the <code>detectControllers()</code> method in addition
-	 * to the superclass's initialization.
-	 * @see #detectControllers()
+	 * Specify Java packages that should be excluded from this mapping.
+	 * Any classes in such a package (or any of its subpackages) will be
+	 * ignored by this HandlerMapping.
+	 * <p>Default is to exclude the entire "org.springframework.web.servlet.mvc"
+	 * package, including its subpackages, since none of Spring's out-of-the-box
+	 * Controller implementations is a reasonable candidate for this mapping strategy.
+	 * Such controllers are typically handled by a separate HandlerMapping,
+	 * e.g. a {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping},
+	 * alongside this ControllerClassNameHandlerMapping for application controllers.
+	 */
+	public void setExcludedPackages(String[] excludedPackages) {
+		this.excludedPackages =
+				(excludedPackages != null ? new HashSet(Arrays.asList(excludedPackages)) : Collections.EMPTY_SET);
+	}
+
+	/**
+	 * Specify controller classes that should be excluded from this mapping.
+	 * Any such classes will simply be ignored by this HandlerMapping.
+	 */
+	public void setExcludedClasses(Class[] excludedClasses) {
+		this.excludedClasses =
+				(excludedClasses != null ? new HashSet(Arrays.asList(excludedClasses)) : Collections.EMPTY_SET);
+	}
+
+
+	/**
+	 * Calls the {@link #detectControllers()} method in addition to the
+	 * superclass's initialization.
 	 */
 	protected void initApplicationContext() {
 		super.initApplicationContext();
@@ -107,21 +136,62 @@ public class ControllerClassNameHandlerMapping extends AbstractUrlHandlerMapping
 	protected void registerControllers(Class controllerType) throws BeansException {
 		String[] beanNames = getApplicationContext().getBeanNamesForType(controllerType);
 		for (int i = 0; i < beanNames.length; i++) {
-			registerController(beanNames[i]);
+			String beanName = beanNames[i];
+			Class beanClass = getApplicationContext().getType(beanName);
+			if (isEligibleForMapping(beanName, beanClass)) {
+				registerController(beanName, beanClass);
+			}
 		}
+	}
+
+	/**
+	 * Determine whether the specified controller is excluded from this mapping.
+	 * @param beanName the name of the controller bean
+	 * @param beanClass the concrete class of the controller bean
+	 * @return whether the specified class is excluded
+	 * @see #setExcludedPackages
+	 * @see #setExcludedClasses
+	 */
+	protected boolean isEligibleForMapping(String beanName, Class beanClass) {
+		if (beanClass == null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Excluding controller bean '" + beanName + "' from class name mapping " +
+						"because its bean type could not be determined");
+			}
+			return false;
+		}
+		if (this.excludedClasses.contains(beanClass)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Excluding controller bean '" + beanName + "' from class name mapping " +
+						"because its bean class is explicitly excluded: " + beanClass.getName());
+			}
+			return false;
+		}
+		String beanClassName = beanClass.getName();
+		for (Iterator it = this.excludedPackages.iterator(); it.hasNext();) {
+			String packageName = (String) it.next();
+			if (beanClassName.startsWith(packageName)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Excluding controller bean '" + beanName + "' from class name mapping " +
+							"because its bean class is defined in an excluded package: " + beanClass.getName());
+				}
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
 	 * Register the controller with the given name, as defined
 	 * in the current application context.
 	 * @param beanName the name of the controller bean
+	 * @param beanClass the concrete class of the controller bean
 	 * @throws BeansException if the controller couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered
 	 * @see #getApplicationContext()
 	 */
-	protected void registerController(String beanName) throws BeansException, IllegalStateException {
-		Class controllerClass = getApplicationContext().getType(beanName);
-		String urlPath = generatePathMapping(controllerClass);
+	protected void registerController(String beanName, Class beanClass) throws BeansException, IllegalStateException {
+		String urlPath = generatePathMapping(beanClass);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Registering Controller '" + beanName + "' as handler for URL path [" + urlPath + "]");
 		}
@@ -129,16 +199,19 @@ public class ControllerClassNameHandlerMapping extends AbstractUrlHandlerMapping
 	}
 
 	/**
-	 * Generate the actual URL path for the given {@link Controller} class. Sub-classes
-	 * may choose to customize the paths that are generated by overriding this method.
+	 * Generate the actual URL path for the given controller class.
+	 * <p>Subclasses may choose to customize the paths that are generated
+	 * by overriding this method.
+	 * @param beanClass the controller bean class to generate a mapping for
+	 * @return the URL path mapping for the given controller
 	 */
-	protected String generatePathMapping(Class controllerClass) {
+	protected String generatePathMapping(Class beanClass) {
 		StringBuffer pathMapping = new StringBuffer("/");
-		String className = ClassUtils.getShortName(controllerClass.getName());
+		String className = ClassUtils.getShortName(beanClass.getName());
 		String path = (className.endsWith(CONTROLLER_SUFFIX) ?
 				className.substring(0, className.indexOf(CONTROLLER_SUFFIX)) : className);
 		pathMapping.append(path.toLowerCase());
-		if (MultiActionController.class.isAssignableFrom(controllerClass)) {
+		if (MultiActionController.class.isAssignableFrom(beanClass)) {
 			pathMapping.append("/*");
 		}
 		else {
