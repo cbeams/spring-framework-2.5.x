@@ -30,9 +30,9 @@ import org.springframework.util.CustomizableThreadCreator;
  * <p>Supports limiting concurrent threads through the "concurrencyLimit"
  * bean property. By default, the number of concurrent threads is unlimited.
  *
- * <p><b>NOTE:</b> Does not reuse threads! Consider a thread-pooling TaskExecutor
- * implementation instead, in particular for executing a large number of
- * short-lived tasks.
+ * <p><b>NOTE: This implementation does not reuse threads!</b> Consider a
+ * thread-pooling TaskExecutor implementation instead, in particular for
+ * executing a large number of short-lived tasks.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -42,7 +42,7 @@ import org.springframework.util.CustomizableThreadCreator;
  * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
  * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
  */
-public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implements TaskExecutor, Serializable {
+public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implements AsyncTaskExecutor, Serializable {
 
 	/**
 	 * Default thread name prefix: "SimpleAsyncTaskExecutor-".
@@ -122,9 +122,22 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	 * if configured (through the superclass's settings).
 	 * @see #doExecute(Runnable)
 	 */
-	public final void execute(Runnable task) {
+	public void execute(Runnable task) {
+		execute(task, TIMEOUT_INDEFINITE);
+	}
+
+	/**
+	 * Executes the given task, within a concurrency throttle
+	 * if configured (through the superclass's settings).
+	 * <p>Executes urgent tasks (with 'immediate' timeout) directly,
+	 * bypassing the concurrency throttle (if active). All other
+	 * tasks are subject to throttling.
+	 * @see #TIMEOUT_IMMEDIATE
+	 * @see #doExecute(Runnable)
+	 */
+	public void execute(Runnable task, long startTimeout) {
 		Assert.notNull(task, "Runnable must not be null");
-		if (isThrottleActive()) {
+		if (isThrottleActive() && startTimeout > TIMEOUT_IMMEDIATE) {
 			this.concurrencyThrottle.beforeAccess();
 			doExecute(new ConcurrencyThrottlingRunnable(task));
 		}
@@ -135,7 +148,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 
 	/**
 	 * Template method for the actual execution of a task.
-	 * <p>Default implementation creates a new Thread and starts it.
+	 * <p>The default implementation creates a new Thread and starts it.
 	 * @param task the Runnable to execute
 	 * @see #createThread
 	 * @see java.lang.Thread#start()
