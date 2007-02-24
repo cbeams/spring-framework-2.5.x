@@ -116,6 +116,17 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * {@link org.springframework.transaction.jta.JtaTransactionManager} or one
 	 * of its subclasses, in combination with a JTA-aware ConnectionFactory that
 	 * this message listener container obtains its Connections from.
+	 * <p><b>Note: Consider the use of local JMS transactions instead.</b>
+	 * Simply switch the {@link #setSessionTransacted "sessionTransacted"} flag
+	 * to "true" in order to use a locally transacted JMS Session for the entire
+	 * receive processing, including any Session operations performed by a
+	 * {@link SessionAwareMessageListener} (e.g. sending a response message).
+	 * Alternatively, a {@link org.springframework.jms.connection.JmsTransactionManager}
+	 * may be used for fully synchronized Spring transactions based on local JMS
+	 * transactions. Check {@link AbstractMessageListenerContainer}'s javadoc for
+	 * a discussion of transaction choices and message redelivery scenarios.
+	 * @see org.springframework.transaction.jta.JtaTransactionManager
+	 * @see org.springframework.jms.connection.JmsTransactionManager
 	 */
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;

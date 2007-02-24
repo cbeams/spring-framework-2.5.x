@@ -97,12 +97,23 @@ import org.springframework.util.Assert;
  * combined with custom duplicate message detection (if it is unacceptable
  * to ever process the same message twice).
  * <li>Alternatively, specify a
- * {@link org.springframework.transaction.jta.JtaTransactionManager} as "transactionManager"
- * for a full XA-aware JMS provider - typically when running on a J2EE server,
- * but also for other environments with a JTA transaction manager present.
- * This will give full "exactly-once" guarantees without custom duplicate
- * message checks, at the price of additional runtime processing overhead.
+ * {@link org.springframework.transaction.jta.JtaTransactionManager} as
+ * "transactionManager" for a fully XA-aware JMS provider - typically when
+ * running on a J2EE server, but also for other environments with a JTA
+ * transaction manager present. This will give full "exactly-once" guarantees
+ * without custom duplicate message checks, at the price of additional
+ * runtime processing overhead.
  * </ul>
+ *
+ * <p>Note that it is also possible to specify a
+ * {@link org.springframework.jms.connection.JmsTransactionManager} as external
+ * "transactionManager", providing fully synchronized Spring transactions based
+ * on local JMS transactions. The effect is similar to "sessionTransacted" set
+ * to "true", the difference being that this external transaction management
+ * will also affect independent JMS access code within the service layer
+ * (e.g. based on {@link org.springframework.jms.core.JmsTemplate} or
+ * {@link org.springframework.jms.connection.TransactionAwareConnectionFactoryProxy}),
+ * not just direct JMS Session usage in a {@link SessionAwareMessageListener}.
  *
  * @author Juergen Hoeller
  * @since 2.0

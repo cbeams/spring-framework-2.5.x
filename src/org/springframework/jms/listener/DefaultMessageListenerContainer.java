@@ -94,10 +94,12 @@ import org.springframework.util.ClassUtils;
  * place; for a topic, you will typically stick with the default number of 1
  * consumer, else you'd receive the same message multiple times on the same node.
  *
- * <p>See the {@link AbstractMessageListenerContainer} javadoc for details
- * on acknowledge modes and native transaction options, and the
- * {@link AbstractPollingMessageListenerContainer} javadoc for details
- * on configuring an external transaction manager.
+ * <p><b>It is strongly recommended to either set {@link #setSessionTransacted
+ * "sessionTransacted"} to "true" or specify an external {@link #setTransactionManager
+ * "transactionManager"}.</b> See the {@link AbstractMessageListenerContainer}
+ * javadoc for details on acknowledge modes and native transaction options,
+ * as well as the {@link AbstractPollingMessageListenerContainer} javadoc
+ * for details on configuring an external transaction manager.
  *
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
  * domain-independent API. <b>Use the {@link DefaultMessageListenerContainer102}
@@ -107,8 +109,6 @@ import org.springframework.util.ClassUtils;
  * @since 2.0
  * @see #setTransactionManager
  * @see #setCacheLevel
- * @see #setCacheLevelName
- * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see javax.jms.MessageConsumer#receive(long)
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
@@ -186,8 +186,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	/**
 	 * Set the Spring TaskExecutor to use for running the listener threads.
-	 * Default is SimpleAsyncTaskExecutor, starting up a number of new threads,
-	 * according to the specified number of concurrent consumers.
+	 * <p>Default is a {@link org.springframework.core.task.SimpleAsyncTaskExecutor},
+	 * starting up a number of new threads, according to the specified number
+	 * of concurrent consumers.
 	 * <p>Specify an alternative TaskExecutor for integration with an existing
 	 * thread pool. Note that this really only adds value if the threads are
 	 * managed in a specific fashion, for example within a J2EE environment.
@@ -240,6 +241,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #CACHE_CONNECTION
 	 * @see #CACHE_SESSION
 	 * @see #CACHE_CONSUMER
+	 * @see #setCacheLevelName
 	 * @see #setTransactionManager
 	 */
 	public void setCacheLevel(int cacheLevel) {
