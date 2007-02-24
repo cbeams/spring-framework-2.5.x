@@ -78,9 +78,17 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	}
 
 	/**
-	 * Resolve the ID for the supplied {@link BeanDefinition}. When using {@link #shouldGenerateId generation},
-	 * a name is generated automatically, otherwise the ID is extracted from the "id" attribute.
-	 * @throws BeanDefinitionStoreException if we failed to generate an id
+	 * Resolve the ID for the supplied {@link BeanDefinition}.
+	 * <p>When using {@link #shouldGenerateId generation}, a name is generated automatically.
+	 * Otherwise, the ID is extracted from the "id" attribute, potentially with a
+	 * {@link #shouldGenerateIdAsFallback() fallback} to a generated id.
+	 * @param element the element that the bean definition has been built from
+	 * @param definition the bean definition to be registered
+	 * @param parserContext the object encapsulating the current state of the parsing process;
+	 * provides access to a {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
+	 * @return the resolved id
+	 * @throws BeanDefinitionStoreException if no unique name could be generated
+	 * for the given bean definition
 	 */
 	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext)
 			throws BeanDefinitionStoreException {
@@ -90,7 +98,12 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 					definition, parserContext.getRegistry(), parserContext.isNested());
 		}
 		else {
-			return element.getAttribute(ID_ATTRIBUTE);
+			String id = element.getAttribute(ID_ATTRIBUTE);
+			if (!StringUtils.hasLength(id) && shouldGenerateIdAsFallback()) {
+				id = BeanDefinitionReaderUtils.generateBeanName(
+						definition, parserContext.getRegistry(), parserContext.isNested());
+			}
+			return id;
 		}
 	}
 
@@ -104,12 +117,12 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * with the supplied {@link BeanDefinitionRegistry registry} only if the <code>isNested</code>
 	 * parameter is <code>false</code>, because one typically does not want inner beans
 	 * to be registered as top level beans.
-	 * @param bean the bean to be registered
+	 * @param definition the bean definition to be registered
 	 * @param registry the registry that the bean is to be registered with 
 	 * @see BeanDefinitionReaderUtils#registerBeanDefinition(BeanDefinitionHolder, BeanDefinitionRegistry)
 	 */
-	protected void registerBeanDefinition(BeanDefinitionHolder bean, BeanDefinitionRegistry registry) {
-		BeanDefinitionReaderUtils.registerBeanDefinition(bean, registry);
+	protected void registerBeanDefinition(BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
+		BeanDefinitionReaderUtils.registerBeanDefinition(definition, registry);
 	}
 
 
@@ -126,10 +139,25 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	protected abstract AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext);
 
 	/**
-	 * Should an ID be generated instead of read for the passed in {@link Element}?
-	 * Disabled by default; subclasses can override this to enable ID generation.
+	 * Should an ID be generated instead of read from the passed in {@link Element}?
+	 * <p>Disabled by default; subclasses can override this to enable ID generation.
+	 * Note that this flag is about <i>always</i> generating an ID; the parser
+	 * won't even check for an "id" attribute in this case.
+	 * @return whether the parser should always generate an id
 	 */
 	protected boolean shouldGenerateId() {
+		return false;
+	}
+
+	/**
+	 * Should an ID be generated instead if the passed in {@link Element} does not
+	 * specify an "id" attribute explicitly?
+	 * <p>Disabled by default; subclasses can override this to enable ID generation
+	 * as fallback: The parser will first check for an "id" attribute in this case,
+	 * only falling back to a generated ID if no value was specified.
+	 * @return whether the parser should generate an id if no id was specified
+	 */
+	protected boolean shouldGenerateIdAsFallback() {
 		return false;
 	}
 
