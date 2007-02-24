@@ -237,16 +237,20 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * parameters that do not have corresponding fields in the target object.
 	 * <p>Default is "true". Turn this off to enforce that all bind parameters
 	 * must have a matching field in the target object.
+	 * <p>Note that this setting only applies to <i>binding</i> operations
+	 * on this DataBinder, not to <i>retrieving</i> values via its
+	 * {@link #getBindingResult() BindingResult}.
+	 * @see #bind
 	 */
 	public void setIgnoreUnknownFields(boolean ignoreUnknownFields) {
 		this.ignoreUnknownFields = ignoreUnknownFields;
 	}
 
 	/**
-	 * Return whether to ignore unknown fields.
+	 * Return whether to ignore unknown fields when binding.
 	 */
 	public boolean isIgnoreUnknownFields() {
-		return ignoreUnknownFields;
+		return this.ignoreUnknownFields;
 	}
 
 	/**
@@ -255,13 +259,17 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * not accessible (for example because of null values in the nested path).
 	 * <p>Default is "false". Turn this on to ignore bind parameters for
 	 * nested objects in non-existing parts of the target object graph.
+	 * <p>Note that this setting only applies to <i>binding</i> operations
+	 * on this DataBinder, not to <i>retrieving</i> values via its
+	 * {@link #getBindingResult() BindingResult}.
+	 * @see #bind
 	 */
 	public void setIgnoreInvalidFields(boolean ignoreInvalidFields) {
 		this.ignoreInvalidFields = ignoreInvalidFields;
 	}
 
 	/**
-	 * Return whether to ignore invalid fields.
+	 * Return whether to ignore invalid fields when binding.
 	 */
 	public boolean isIgnoreInvalidFields() {
 		return this.ignoreInvalidFields;
