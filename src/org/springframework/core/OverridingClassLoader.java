@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.util.FileCopyUtils;
 public class OverridingClassLoader extends ClassLoader {
 
 	private static final String CLASS_FILE_SUFFIX = ".class";
+
 
 	private final Set excludedPackages = Collections.synchronizedSet(new HashSet());
 
@@ -116,11 +117,11 @@ public class OverridingClassLoader extends ClassLoader {
 	}
 
 	/**
-	 * Determine whether the given class name is eligible for overriding
+	 * Determine whether the specified class is eligible for overriding
 	 * by this class loader.
-	 * <p>The default implementation excludes all specified packages
-	 * and classes.
+	 * <p>The default implementation checks against excluded packages and classes.
 	 * @param className the class name to check
+	 * @return whether the specified class is eligible
 	 * @see #excludePackage
 	 * @see #excludeClass
 	 */
@@ -141,10 +142,10 @@ public class OverridingClassLoader extends ClassLoader {
 	/**
 	 * Transformation hook to be implemented by subclasses.
 	 * <p>The default implementation simply returns the given bytes as-is.
-	 * @param name FQN of class being transformed
-	 * @param bytes class bytes
-	 * @return transformed bytes. Return same as input bytes if
-	 * the transformation produced no changes.
+	 * @param name the fully-qualified name of the class being transformed
+	 * @param bytes the raw bytes of the class
+	 * @return the transformed bytes (never <code>null</code>;
+	 * same as the input bytes if the transformation produced no changes)
 	 */
 	protected byte[] transformIfNecessary(String name, byte[] bytes) {
 		return bytes;
