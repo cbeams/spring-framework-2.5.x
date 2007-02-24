@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,7 +219,9 @@ public class DataBinder implements PropertyEditorRegistry {
 	/**
 	 * Return the Errors instance for this data binder.
 	 * @return the Errors instance, to be treated as Errors or as BindException
-	 * @deprecated in favor of <code>getBindingResult()</code>
+	 * @deprecated in favor of {@link #getBindingResult()}.
+	 * Use the {@link BindException#BindException(BindingResult)} constructor
+	 * to create a BindException instance if still needed.
 	 * @see #getBindingResult()
 	 */
 	public BindException getErrors() {
