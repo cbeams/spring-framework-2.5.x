@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,18 +81,19 @@ public class ParameterizableViewController extends AbstractController {
 	 * Return the name of the view to delegate to.
 	 */
 	public String getViewName() {
-		return viewName;
+		return this.viewName;
 	}
 
 	protected void initApplicationContext() {
 		if (this.viewName == null) {
-			throw new IllegalArgumentException("viewName is required");
+			throw new IllegalArgumentException("Property 'viewName' is required");
 		}
 	}
 
 
 	/**
 	 * Return a ModelAndView object with the specified view name.
+	 * @see #getViewName()
 	 */
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {

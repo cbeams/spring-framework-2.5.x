@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * @author Rob Harrop
- * @since 2.0
  */
 public class ControllerClassNameHandlerMappingTests extends TestCase {
 
@@ -42,21 +41,18 @@ public class ControllerClassNameHandlerMappingTests extends TestCase {
 		this.wac.setServletContext(sc);
 		this.wac.setConfigLocations(new String[] {LOCATION});
 		this.wac.refresh();
-
 		this.hm = (HandlerMapping) this.wac.getBean("mapping");
 	}
 
 	public void testIndexUri() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
-
 		assertEquals(this.wac.getBean("index"), chain.getHandler());
 	}
 
 	public void testMapSimpleUri() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
-
 		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
 	}
 
@@ -64,26 +60,22 @@ public class ControllerClassNameHandlerMappingTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/welcome");
 		request.setContextPath("/myapp");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
-
 		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
 	}
 
 	public void testWithMultiActionControllerMapping() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin/user");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
-
 		assertEquals(this.wac.getBean("admin"), chain.getHandler());
 
 		request = new MockHttpServletRequest("GET", "/admin/product");
 		chain = this.hm.getHandler(request);
-
 		assertEquals(this.wac.getBean("admin"), chain.getHandler());
 	}
 
 	public void testWithOutControllerSuffix() throws Exception {
 	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/buyform");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
-
 		assertEquals(this.wac.getBean("buy"), chain.getHandler());
 	}
 
