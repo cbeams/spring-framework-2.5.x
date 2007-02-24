@@ -99,7 +99,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 		}
 		else {
 			String id = element.getAttribute(ID_ATTRIBUTE);
-			if (!StringUtils.hasLength(id) && shouldGenerateIdAsFallback()) {
+			if (!StringUtils.hasText(id) && shouldGenerateIdAsFallback()) {
 				id = BeanDefinitionReaderUtils.generateBeanName(
 						definition, parserContext.getRegistry(), parserContext.isNested());
 			}
