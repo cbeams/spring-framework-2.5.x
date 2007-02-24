@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package org.springframework.scheduling;
 import org.springframework.core.task.TaskExecutor;
 
 /**
- * A <code>TaskExecutor</code> extension exposing scheduling characteristics
- * that are relevant to potential task submitters.
+ * A {@link org.springframework.core.task.TaskExecutor} extension exposing
+ * scheduling characteristics that are relevant to potential task submitters.
  *
  * <p>Scheduling clients are encouraged to submit
- * {@link Runnable Runnables} that match the exposed preferences of the
- * <code>TaskExecutor</code> implementation in use.
+ * {@link Runnable Runnables} that match the exposed preferences
+ * of the <code>TaskExecutor</code> implementation in use.
  *
  * @author Juergen Hoeller
  * @since 2.0
