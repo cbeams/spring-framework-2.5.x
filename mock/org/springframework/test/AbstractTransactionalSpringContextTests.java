@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
- * Convenient superclass for tests that should occur in a transaction, but normally
+ * Convenient base class for tests that should occur in a transaction, but normally
  * will roll the transaction back on the completion of each test.
  *
  * <p>This is useful in a range of circumstances, allowing the following benefits:
@@ -35,36 +35,38 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  *
  * <p>This class is typically very fast, compared to traditional setup/teardown scripts.
  *
- * <p>If data should be left in the database, call the <code>setComplete()</code>
- * method in each test. The "defaultRollback" property, which defaults to "true",
- * determines whether transactions will complete by default.
+ * <p>If data should be left in the database, call the {@link #setComplete()}
+ * method in each test. The {@link #setDefaultRollback "defaultRollback"} property,
+ * which defaults to "true", determines whether transactions will complete by default.
  *
  * <p>It is even possible to end the transaction early; for example, to verify lazy
  * loading behavior of an O/R mapping tool. (This is a valuable away to avoid
  * unexpected errors when testing a web UI, for example.)  Simply call the
- * <code>endTransaction()</code> method. Execution will then occur without a
+ * {@link #endTransaction()} method. Execution will then occur without a
  * transactional context.
  *
- * <p>The <code>startNewTransaction()</code> method may be called after a call to
- * <code>endTransaction()</code> if you wish to create a new transaction, quite
+ * <p>The {@link #startNewTransaction()} method may be called after a call to
+ * {@link #endTransaction()} if you wish to create a new transaction, quite
  * independent of the old transaction. The new transaction's default fate will be to
- * roll back, unless <code>setComplete()</code> is called again during the scope of the
+ * roll back, unless {@link #setComplete()} is called again during the scope of the
  * new transaction. Any number of transactions may be created and ended in this way.
  * The final transaction will automatically be rolled back when the test case is
  * torn down.
  *
  * <p>Transactional behavior requires a single bean in the context implementing the
- * PlatformTransactionManager interface. This will be set by the superclass's
- * Dependency Injection mechanism. If using the superclass's Field Injection mechanism,
- * the implementation should be named "transactionManager". This mechanism allows the
- * use of this superclass even when there's more than one transaction manager in the context.
- * 
- * <p><i>This superclass can also be used without transaction management, if no
- * PlatformTransactionManager bean is found in the context provided. Be careful about
- * using this mode, as it allows the potential to permanently modify data.
- * This mode is available only if dependency checking is turned off in
- * the AbstractDependencyInjectionSpringContextTests superclass. The non-transactional
- * capability is provided to enable use of the same subclass in different environments.</i>
+ * {@link org.springframework.transaction.PlatformTransactionManager} interface.
+ * This will be set by the superclass's Dependency Injection mechanism.
+ * If using the superclass's Field Injection mechanism, the implementation should
+ * be named "transactionManager". This mechanism allows the use of the
+ * {@link AbstractDependencyInjectionSpringContextTests} superclass even
+ * when there is more than one transaction manager in the context.
+ *
+ * <p><b>This base class can also be used without transaction management, if no
+ * PlatformTransactionManager bean is found in the context provided.</b>
+ * Be careful about using this mode, as it allows the potential to permanently modify
+ * data. This mode is available only if dependency checking is turned off in the
+ * {@link AbstractDependencyInjectionSpringContextTests} superclass. The non-transactional
+ * capability is provided to enable use of the same subclass in different environments.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -83,12 +85,12 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 	/** Number of transactions started */
 	private int transactionsStarted = 0;
-	
+
 	/**
-	 * Default transaction definition is used.
-	 * Subclasses can change this to cause different behaviour.
+	 * Transaction definition used by this test class: by default, a plain
+	 * DefaultTransactionDefinition. Subclasses can change this to cause different behavior.
 	 */
-	private TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
+	protected TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
 	/**
 	 * TransactionStatus for this test. Typical subclasses won't need to use it.
@@ -112,12 +114,12 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 	/**
 	 * Specify the transaction manager to use. No transaction management will be available
-	 * if this is not set. (This mode works only if dependency checking is turned off in
-	 * the AbstractDependencyInjectionSpringContextTests superclass.)
-	 * <p>Populated through dependency injection by the superclass.
+	 * if this is not set. Populated through dependency injection by the superclass.
+	 * <p>This mode works only if dependency checking is turned off in the
+	 * {@link #AbstractDependencyInjectionSpringContextTests} superclass.
 	 */
-	public void setTransactionManager(PlatformTransactionManager ptm) {
-		this.transactionManager = ptm;
+	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+		this.transactionManager = transactionManager;
 	}
 
 	/**
@@ -130,17 +132,18 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 
 	/**
-	 * Call in an overridden <code>runBare()</code> method to prevent transactional execution.
+	 * Call this method in an overridden {@link #runBare()} method to
+	 * prevent transactional execution.
 	 */
 	protected void preventTransaction() {
 		this.transactionDefinition = null;
 	}
 
 	/**
-	 * Override the transaction attributes that will be used.
-	 * Call in an overridden <code>runBare()</code> method so that
-	 * <code>setUp()</code> and <code>tearDown()</code> behavior is modified.
-	 * @param customDefinition custom definition to override with
+	 * Call this method in an overridden {@link #runBare()} method to
+	 * override the transaction attributes that will be used, so that
+	 * {@link #setUp()} and {@link #tearDown()} behavior is modified.
+	 * @param customDefinition the custom transaction definition
 	 */
 	protected void setTransactionDefinition(TransactionDefinition customDefinition) {
 		this.transactionDefinition = customDefinition;
@@ -149,10 +152,8 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 	/**
 	 * This implementation creates a transaction before test execution.
-	 * Override <code>onSetUpBeforeTransaction()</code> and/or
-	 * <code>onSetUpInTransaction()</code> to add custom set-up behavior.
-	 * @see #onSetUpBeforeTransaction()
-	 * @see #onSetUpInTransaction()
+	 * Override {@link #onSetUpBeforeTransaction()} and/or
+	 * {@link #onSetUpInTransaction()} to add custom set-up behavior.
 	 */
 	protected final void onSetUp() throws Exception {
 		this.complete = !this.defaultRollback;
@@ -180,10 +181,9 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * Subclasses can override this method to perform any setup operations,
 	 * such as populating a database table, <i>before</i> the transaction
 	 * created by this class. Only invoked if there <i>is</i> a transaction:
-	 * that is, if <code>preventTransaction()</code> has not been invoked in
-	 * an overridden <code>runTest()</code> method.
+	 * that is, if {@link #preventTransaction()} has not been invoked in
+	 * an overridden {@link #runTest()} method.
 	 * @throws Exception simply let any exception propagate
-	 * @see #preventTransaction()
 	 */
 	protected void onSetUpBeforeTransaction() throws Exception {
 	}
@@ -206,16 +206,13 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 	/**
 	 * This implementation ends the transaction after test execution.
-	 * Override <code>onTearDownInTransaction()</code> and/or
-	 * <code>onTearDownAfterTransaction()</code> to add custom tear-down behavior.
-	 * <p>Note that <code>onTearDownInTransaction()</code> will only be called
+	 * Override {@link #onTearDownInTransaction()} and/or
+	 * {@link #onTearDownAfterTransaction()} to add custom tear-down behavior.
+	 * <p>Note that {@link #onTearDownInTransaction()} will only be called
 	 * if a transaction is still active at the time of the test shutdown.
-	 * In particular, it will <code>not</code> be called if the transaction has
-	 * been completed with an explicit <code>endTransaction()</code> call before.
+	 * In particular, it will <i>not</i> be called if the transaction has
+	 * been completed with an explicit {@link #endTransaction()} call before.
 	 * @throws Exception simply let any exception propagate
-	 * @see #onTearDownInTransaction()
-	 * @see #onTearDownAfterTransaction()
-	 * @see #endTransaction()
 	 */
 	protected final void onTearDown() throws Exception {
 		// Call onTearDownInTransaction and end transaction if the transaction is still active.
@@ -261,7 +258,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * @throws IllegalStateException if the operation cannot be set to
 	 * complete as no transaction manager was provided
 	 */
-	protected void setComplete() throws UnsupportedOperationException {
+	protected void setComplete() {
 		if (this.transactionManager == null) {
 			throw new IllegalStateException("No transaction manager set");
 		}
@@ -295,11 +292,10 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	}
 
 	/**
-	 * Start a new transaction. Only call this method if <code>endTransaction()</code>
-	 * has been called. <code>setComplete()</code> can be used again in the new transaction.
+	 * Start a new transaction. Only call this method if {@link #endTransaction()}
+	 * has been called. {@link #setComplete()} can be used again in the new transaction.
 	 * The fate of the new transaction, by default, will be the usual rollback.
-	 * @see #endTransaction()
-	 * @see #setComplete()
+	 * @throws TransactionException if starting the transaction failed
 	 */
 	protected void startNewTransaction() throws TransactionException {
 		if (this.transactionStatus != null) {
