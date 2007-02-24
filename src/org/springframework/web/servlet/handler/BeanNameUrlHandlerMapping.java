@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,31 +24,36 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.util.StringUtils;
 
 /**
- * Implementation of the HandlerMapping interface to map from URLs to beans with names
- * that start with a slash ("/"), similar to how Struts maps URLs to action names.
- * This is the default implementation used by the DispatcherServlet, but somewhat naive.
- * A SimpleUrlHandlerMapping or a custom handler mapping should be used by preference.
+ * Implementation of the {@link org.springframework.web.servlet.HandlerMapping}
+ * interface that map from URLs to beans with names that start with a slash ("/"),
+ * similar to how Struts maps URLs to action names.
+ *
+ * <p>This is the default implementation used by the
+ * {@link org.springframework.web.servlet.DispatcherServlet}, but it is somewhat naive.
+ * A {@link SimpleUrlHandlerMapping} or a custom handler mapping should be used
+ * by preference.
  *
  * <p>The mapping is from URL to bean name. Thus an incoming URL "/foo" would map
  * to a handler named "/foo", or to "/foo /foo2" in case of multiple mappings to
  * a single handler. Note: In XML definitions, you'll need to use an alias
  * name="/foo" in the bean definition, as the XML id may not contain slashes.
  *
- * <p>Supports direct matches (given "/test" -> registered "/test") and "*" matches
- * (given "/test" -> registered "/t*"). Note that the default is to map within the
- * current servlet mapping if applicable; see alwaysUseFullPath property for details.
+ * <p>Supports direct matches (given "/test" -> registered "/test") and "*"
+ * matches (given "/test" -> registered "/t*"). Note that the default is
+ * to map within the current servlet mapping if applicable; see the
+ * {@link #setAlwaysUseFullPath "alwaysUseFullPath"} property for details.
+ * For details on the pattern options, see the
+ * {@link org.springframework.util.AntPathMatcher} javadoc.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see #setAlwaysUseFullPath
  * @see SimpleUrlHandlerMapping
  */
 public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	
 	/**
-	 * Calls the <code>detectHandlers()</code> method in addition
-	 * to the superclass's initialization.
-	 * @see #detectHandlers()
+	 * Calls the {@link #detectHandlers()} method in addition to the
+	 * superclass's initialization.
 	 */
 	public void initApplicationContext() throws ApplicationContextException {
 		super.initApplicationContext();

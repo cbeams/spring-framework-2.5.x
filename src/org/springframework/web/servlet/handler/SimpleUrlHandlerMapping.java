@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.Properties;
 import org.springframework.beans.BeansException;
 
 /**
- * Implementation of the {@link org.springframework.web.servlet.HandlerMapping HandlerMapping}
+ * Implementation of the {@link org.springframework.web.servlet.HandlerMapping}
  * interface to map from URLs to request handler beans. Supports both mapping to bean
  * instances and mapping to bean names; the latter is required for non-singleton handlers.
  *
@@ -40,17 +40,18 @@ import org.springframework.beans.BeansException;
  * The syntax is <code>PATH=HANDLER_BEAN_NAME</code>.
  * If the path doesn't begin with a slash, one is prepended.
  *
- * <p>Supports direct matches, e.g. a registered "/test" matches "/test", and
- * various Ant-style pattern matches, e.g. a registered "/t*" pattern matches
- * both "/test" and "/team", "/test/*" matches all paths in the "/test" directory,
- * "/test/**" matches all paths below "/test". For details, see the
- * {@link org.springframework.util.AntPathMatcher AntPathMatcher} javadoc.
- *
+ * <p>Supports direct matches (given "/test" -> registered "/test") and "*"
+ * matches (given "/test" -> registered "/t*"). Note that the default is
+ * to map within the current servlet mapping if applicable; see the
+ * {@link #setAlwaysUseFullPath "alwaysUseFullPath"} property for details.
+ * For details on the pattern options, see the
+ * {@link org.springframework.util.AntPathMatcher} javadoc.
+
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see org.springframework.web.servlet.DispatcherServlet
- * @see org.springframework.util.AntPathMatcher
- * @see java.util.Properties
+ * @see #setMappings
+ * @see #setUrlMap
+ * @see BeanNameUrlHandlerMapping
  */
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	
@@ -60,10 +61,10 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	/**
 	 * Map URL paths to handler bean names.
 	 * This is the typical way of configuring this HandlerMapping.
-	 * <p>Supports direct URL matches and Ant-style pattern matches.
-	 * For syntax details, see the AntPathMatcher class.
+	 * <p>Supports direct URL matches and Ant-style pattern matches. For syntax
+	 * details, see the {@link org.springframework.util.AntPathMatcher} javadoc.
 	 * @param mappings properties with URLs as keys and bean names as values
-	 * @see org.springframework.util.AntPathMatcher
+	 * @see #setUrlMap
 	 */
 	public void setMappings(Properties mappings) {
 		this.urlMap.putAll(mappings);
@@ -72,10 +73,10 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	/**
 	 * Set a Map with URL paths as keys and handler beans (or handler bean names)
 	 * as values. Convenient for population with bean references.
-	 * <p>Supports direct URL matches and Ant-style pattern matches.
-	 * For syntax details, see the AntPathMatcher class.
+	 * <p>Supports direct URL matches and Ant-style pattern matches. For syntax
+	 * details, see the {@link org.springframework.util.AntPathMatcher} javadoc.
 	 * @param urlMap map with URLs as keys and beans as values
-	 * @see org.springframework.util.AntPathMatcher
+	 * @see #setMappings
 	 */
 	public void setUrlMap(Map urlMap) {
 		this.urlMap.putAll(urlMap);
@@ -94,9 +95,8 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
 
 	/**
-	 * Calls the <code>registerHandlers</code> method in addition
-	 * to the superclass's initialization.
-	 * @see #registerHandlers
+	 * Calls the {@link #registerHandlers} method in addition to the
+	 * superclass's initialization.
 	 */
 	public void initApplicationContext() throws BeansException {
 		super.initApplicationContext();
