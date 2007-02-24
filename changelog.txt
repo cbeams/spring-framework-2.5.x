@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.3 (26.2.2007)
+Changes in version 2.0.3 (28.2.2007)
 ------------------------------------
 
 General
@@ -15,6 +15,12 @@ Package org.springframework.aop
 * introduced AfterAdvice marker, as super-interface of AfterReturningAdvice and ThrowsAdvice, for reduced coupling
 * exposed "invocableClone()" and "setUserAttribute"/"getUserAttribute" on ProxyMethodInvocation, for reduced coupling
 * introduced TargetClassAware interface, extended by Advised, and framework-decoupled "AopUtils.getTargetClass" method
+* fixed ClassFilters to provide JDK-1.3/1.4-compatible "hashCode()" implementations for unions and intersections
+* MethodMatchers and Pointcuts support IntroductionAwareMethodMatcher for unions and intersections
+* added pointcut union operation to ComposablePointcut, reused by the "Pointcuts.union" convenience operation
+* RegexpMethodPointcutAdvisor references ORO classes indirectly, to avoid eager loading of ORO on Solaris JDK 1.6
+* AnnotationMethodMatcher and AnnotationMatchingPointcut check for an annotation on the target method as well
+* added "forClassAnnotation" and "forMethodAnnotation" factory methods to AnnotationMatchingPointcut
 * redefined target-class proxying to create a JDK proxy in case of the target class being an interface
 * CGLIB proxies handle "hashCode" calls according to their "equals" behavior, analogous to JDK dynamic proxies
 * introduced stricter null checks for Advised/AdvisedSupport
@@ -27,11 +33,6 @@ Package org.springframework.aop
 * added overloaded ProxyFactory constructors for single-interceptor and TargetSource-only proxies
 * AbstractSingletonProxyFactoryBean and AbstractAutoProxyCreator use the bean ClassLoader for generating proxies
 * reworked AdvisorAdapter and AdvisorAdapterRegistry to expose a MethodInterceptor right away
-* fixed ClassFilters to provide JDK-1.3/1.4-compatible "hashCode()" implementations for unions and intersections
-* MethodMatchers supports IntroductionAwareMethodMatcher for unions and intersections
-* RegexpMethodPointcutAdvisor references ORO classes indirectly, to avoid eager loading of ORO on Solaris JDK 1.6
-* AnnotationMethodMatcher and AnnotationMatchingPointcut check for an annotation on the target method as well
-* added "forClassAnnotation" and "forMethodAnnotation" factory methods to AnnotationMatchingPointcut
 * AspectJExpressionPointcut ignores target classes not accepted by PointcutExpression matching (such as arrays)
 * revised AspectJPointcutAdvisor to never apply AspectJ advice methods to themselves (avoiding a stack overflow)
 * AspectJAdviceParameterNameDiscoverer properly considers reference pointcuts as potential source of parameter binding
@@ -50,6 +51,7 @@ Package org.springframework.aop
 * fixed "scoped-proxy" bean definition decorator to properly parse an inner bean with scoped-proxy marker
 * added "proxy-target-class" attribute to "scoped-proxy" XML tag, allowing to turn target class proxying off
 * reworked "scoped-proxy" XML tag to enforce a target class proxy selectively, for its specific target bean
+* "scoped-proxy" marks its targets as autowireCandidate=false, to make autowiring by type only hit the scoped proxy
 * @Configurable works for deserialized objects as well
 
 Package org.springframework.beans
@@ -62,6 +64,7 @@ Package org.springframework.beans
 * PreferencesPlaceholderConfigurer resolves paths in placeholders ("myPath/myPlaceholderKey") as preference nodes
 * added "isPrototype(beanName)" method to BeanFactory interface, explicitly checking for an independent instance
 * added extended SmartFactoryBean interface, including an "isPrototype()" method that checks for an independent instance
+* PropertyPlaceholderConfigurer detects and processes placeholders in scope names as well
 * AbstractBeanFactory throws BeanCreationException will full context info if "postProcessObjectFromFactoryBean" fails
 * DisposableBeanAdapter (as passed into "Scope.registerDestructionCallback") is serializable, even for post-processors
 * AbstractAutowireCapableBeanFactory does not trigger "toString()" call on argument for UnsatisfiedDependencyException
@@ -87,7 +90,10 @@ Package org.springframework.core
 * fixed BridgeMethodResolver's "populateTypeMapFromParameterizedType" to properly handle nested generics
 * fixed BridgeMethodResolver to properly detect a generic interface even in a class hierarchy
 * fixed BridgeMethodResolver to properly detect a generic array type as exposed by a vararg signature
+* introduced AsyncTaskExecutor extension interface, defining an "execute" variant with start timeout
 * refactored SimpleAsyncTaskExecutor to allow for reuse of the CustomizableThreadCreator class
+* SimpleAsyncTaskExecutor executes tasks with timeout='immediate' directly, bypassing the concurrency throttle
+* introduced TaskTimeoutException, thrown by an AsyncTaskExecutor in case of a task rejected because of a timeout
 
 Package org.springframework.dao
 * PersistenceExceptionTranslationPostProcessor uses the bean ClassLoader for generating translation proxies
@@ -102,6 +108,7 @@ Package org.springframework.instrument
 
 Package org.springframework.jca
 * added ResourceAdapterFactoryBean to "jca.support" package, for bootstrapping a JCA 1.5 ResourceAdapter locally
+* added "jca.work" package, containing a JCA 1.5 WorkManagerTaskExecutor as well as a SimpleWorkManager implementation
 
 Package org.springframework.jdbc
 * added overloaded ConnectionHolder constructor with a given Connection plus "transactionActive" flag as arguments
@@ -156,6 +163,7 @@ Package org.springframework.remoting
 * added "refreshServiceAfterConnectFailure" bean property to JaxRpcPortClientInterceptor, allowing for service recovery
 
 Package org.springframework.scheduling
+* added "workListener" bean property to the CommonJ WorkManagerTaskExecutor
 * introduced the CustomizableThreadFactory class, implementing JDK 1.5's ThreadFactory SPI with bean-style configuration
 * ThreadPoolTaskExecutor's "corePoolSize" and "maxPoolSize" properties allow for runtime changes (e.g. through JMX)
 * added "getPoolSize()" and "getActiveCount()" methods to ThreadPoolTaskExecutor (intended for JMX exposure)
