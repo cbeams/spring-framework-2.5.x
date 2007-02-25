@@ -85,7 +85,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for running PetClinic (by Hibernate)
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3.8 (http://www.freemarker.org)
+- FreeMarker 2.3.9 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
@@ -382,7 +382,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - replaced with full toplink.jar at runtime when using Spring's TopLink support
 
 * toplink/toplink-essentials.jar
-- Oracle TopLink Essentials v2 b16 (http://www.oracle.com/technology/products/ias/toplink/jpa)
+- Oracle TopLink Essentials v2 b36 (http://www.oracle.com/technology/products/ias/toplink/jpa)
 - required for building the framework
 - required at runtime when using Spring's JPA support with TopLink as provider
 
