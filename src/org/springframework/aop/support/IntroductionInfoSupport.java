@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,39 +40,41 @@ import org.springframework.util.ClassUtils;
  * all introduced interfaces.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 
 	protected transient Log logger = LogFactory.getLog(getClass());
 
-	/** Set of Class */
+	/** Set of interface Classes */
 	protected Set publishedInterfaces = new HashSet();
-	
+
 	/** 
-	 * Methods we know we should implement here:
-	 * key is Method, value is Boolean.
+	 * Methods that we know we should implement here: key is Method, value is Boolean.
 	 **/
 	private transient Map rememberedMethods = createRememberedMethodMap();
 
 
 	/**
-	 * Suppress the specified interface, which will have been
-	 * autodetected due to its implementation by the delegate.
-	 * Does nothing if it's not implemented by the delegate.
-	 * @param intf interface to suppress
+	 * Suppress the specified interface, which may have been autodetected
+	 * due to the delegate implementing it. Call this method to exclude
+	 * internal interfaces from being visible at the proxy level.
+	 * <p>Does nothing if the interface is not implemented by the delegate.
+	 * @param intf the interface to suppress
 	 */
 	public void suppressInterface(Class intf) {
 		this.publishedInterfaces.remove(intf);
-	}
-
-	private Map createRememberedMethodMap() {
-		return CollectionFactory.createIdentityMapIfPossible(32);
 	}
 
 	public Class[] getInterfaces() {
 		return (Class[]) this.publishedInterfaces.toArray(new Class[this.publishedInterfaces.size()]);
 	}
 
+	/**
+	 * Check whether the specified interfaces is a published introduction interface.
+	 * @param intf the interface to check
+	 * @return whether the interface is part of this introduction
+	 */
 	public boolean implementsInterface(Class intf) {
 		for (Iterator it = this.publishedInterfaces.iterator(); it.hasNext();) {
 			Class pubIntf = (Class) it.next();
@@ -82,15 +84,23 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 		}
 		return false;
 	}
-	
+
+	/**
+	 * Publish all interfaces that the given delegate implements at the proxy level.
+	 * @param delegate the delegate object
+	 */
 	protected void implementInterfacesOnObject(Object delegate) {
 		this.publishedInterfaces.addAll(ClassUtils.getAllInterfacesAsSet(delegate));
 	}
 
+	private Map createRememberedMethodMap() {
+		return CollectionFactory.createIdentityMapIfPossible(32);
+	}
+
 	/**
 	 * Is this method on an introduced interface?
-	 * @param mi method invocation
-	 * @return whether the method is on an introduced interface
+	 * @param mi the method invocation
+	 * @return whether the invoked method is on an introduced interface
 	 */
 	protected final boolean isMethodOnIntroducedInterface(MethodInvocation mi) {
 		Boolean rememberedResult = (Boolean) this.rememberedMethods.get(mi.getMethod());
