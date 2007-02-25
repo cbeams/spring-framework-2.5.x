@@ -21,7 +21,7 @@ package org.springframework.context;
  * The typical use case for this is to control asynchronous processing.
  *
  * <p>Can be implemented by both components (typically a Spring bean defined in
- * a Spring {@link org.springframework.beans.factory.BeanFactory) and containers
+ * a Spring {@link org.springframework.beans.factory.BeanFactory}) and containers
  * (typically a Spring {@link ApplicationContext}). Containers will propagate
  * start/stop signals to all components that apply.
  *

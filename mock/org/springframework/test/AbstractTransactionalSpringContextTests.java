@@ -116,7 +116,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * Specify the transaction manager to use. No transaction management will be available
 	 * if this is not set. Populated through dependency injection by the superclass.
 	 * <p>This mode works only if dependency checking is turned off in the
-	 * {@link #AbstractDependencyInjectionSpringContextTests} superclass.
+	 * {@link AbstractDependencyInjectionSpringContextTests} superclass.
 	 */
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
