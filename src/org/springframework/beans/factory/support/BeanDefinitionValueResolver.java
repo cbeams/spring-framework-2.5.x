@@ -98,8 +98,11 @@ class BeanDefinitionValueResolver {
 	 * <li>A ManagedMap. In this case the value may be a RuntimeBeanReference
 	 * or Collection that will need to be resolved.
 	 * <li>An ordinary object or <code>null</code>, in which case it's left alone.
+	 * @param argName the name of the argument that the value is defined for
+	 * @param value the value object to resolve
+	 * @return the resolved object
 	 */
-	public Object resolveValueIfNecessary(String argName, Object value) throws BeansException {
+	public Object resolveValueIfNecessary(String argName, Object value) {
 		// We must check each value to see whether it requires a runtime reference
 		// to another bean to be resolved.
 		if (value instanceof BeanDefinitionHolder) {
@@ -137,8 +140,20 @@ class BeanDefinitionValueResolver {
 			return resolveManagedMap(argName, (Map) value);
 		}
 		else if (value instanceof ManagedProperties) {
+			Properties original = (Properties) value;
 			Properties copy = new Properties();
-			copy.putAll((Properties) value);
+			for (Iterator it = original.entrySet().iterator(); it.hasNext();) {
+				Map.Entry propEntry = (Map.Entry) it.next();
+				Object propKey = propEntry.getKey();
+				Object propValue = propEntry.getValue();
+				if (propKey instanceof TypedStringValue) {
+					propKey = ((TypedStringValue) propKey).getValue();
+				}
+				if (propValue instanceof TypedStringValue) {
+					propValue = ((TypedStringValue) propValue).getValue();
+				}
+				copy.put(propKey, propValue);
+			}
 			return copy;
 		}
 		else if (value instanceof TypedStringValue) {
@@ -184,10 +199,12 @@ class BeanDefinitionValueResolver {
 
 	/**
 	 * Resolve an inner bean definition.
+	 * @param argName the name of the argument that the inner bean is defined for
+	 * @param innerBeanName the name of the inner bean
+	 * @param innerBd the bean definition for the inner bean
+	 * @return the resolved inner bean instance
 	 */
-	private Object resolveInnerBean(
-			String argName, String innerBeanName, BeanDefinition innerBd) throws BeansException {
-
+	private Object resolveInnerBean(String argName, String innerBeanName, BeanDefinition innerBd) {
 		if (this.beanFactory.logger.isTraceEnabled()) {
 			this.beanFactory.logger.trace(
 					"Resolving inner bean definition '" + innerBeanName + "' of bean '" + this.beanName + "'");
@@ -235,7 +252,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * Resolve a reference to another bean in the factory.
 	 */
-	private Object resolveReference(String argName, RuntimeBeanReference ref) throws BeansException {
+	private Object resolveReference(String argName, RuntimeBeanReference ref) {
 		if (this.beanFactory.logger.isTraceEnabled()) {
 			this.beanFactory.logger.trace("Resolving reference from property " + argName + " in bean '" +
 					this.beanName + "' to bean '" + ref.getBeanName() + "'");
@@ -268,7 +285,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	private List resolveManagedList(String argName, List ml) throws BeansException {
+	private List resolveManagedList(String argName, List ml) {
 		List resolved = new ArrayList(ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			resolved.add(
@@ -282,7 +299,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	private Set resolveManagedSet(String argName, Set ms) throws BeansException {
+	private Set resolveManagedSet(String argName, Set ms) {
 		Set resolved = CollectionFactory.createLinkedSetIfPossible(ms.size());
 		int i = 0;
 		for (Iterator it = ms.iterator(); it.hasNext();) {
@@ -298,7 +315,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the ManagedMap, resolve reference if necessary.
 	 */
-	private Map resolveManagedMap(String argName, Map mm) throws BeansException {
+	private Map resolveManagedMap(String argName, Map mm) {
 		Map resolved = CollectionFactory.createLinkedMapIfPossible(mm.size());
 		Iterator it = mm.entrySet().iterator();
 		while (it.hasNext()) {

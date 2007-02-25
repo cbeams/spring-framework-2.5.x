@@ -830,9 +830,9 @@ public class BeanDefinitionParserDelegate {
 		else if (DomUtils.nodeNameEquals(ele, NULL_ELEMENT)) {
 			// It's a distinguished null value. Let's wrap it in a TypedStringValue
 			// object in order to preserve the source location.
-			TypedStringValue value = new TypedStringValue(null);
-			value.setSource(extractSource(ele));
-			return value;
+			TypedStringValue nullHolder = new TypedStringValue(null);
+			nullHolder.setSource(extractSource(ele));
+			return nullHolder;
 		}
 		else if (DomUtils.nodeNameEquals(ele, LIST_ELEMENT)) {
 			return parseListElement(ele, bd);
@@ -955,7 +955,7 @@ public class BeanDefinitionParserDelegate {
 			}
 			if (hasKeyAttribute) {
 				key = buildTypedStringValueForMap(
-						entryEle.getAttribute(KEY_ATTRIBUTE), defaultKeyTypeClassName, mapEle);
+						entryEle.getAttribute(KEY_ATTRIBUTE), defaultKeyTypeClassName, entryEle);
 			}
 			else if (hasKeyRefAttribute) {
 				String refName = entryEle.getAttribute(KEY_REF_ATTRIBUTE);
@@ -984,7 +984,7 @@ public class BeanDefinitionParserDelegate {
 			}
 			if (hasValueAttribute) {
 				value = buildTypedStringValueForMap(
-						entryEle.getAttribute(VALUE_ATTRIBUTE), defaultValueTypeClassName, mapEle);
+						entryEle.getAttribute(VALUE_ATTRIBUTE), defaultValueTypeClassName, entryEle);
 			}
 			else if (hasValueRefAttribute) {
 				String refName = entryEle.getAttribute(VALUE_REF_ATTRIBUTE);
@@ -1009,12 +1009,12 @@ public class BeanDefinitionParserDelegate {
 		return map;
 	}
 
-	private Object buildTypedStringValueForMap(String value, String defaultTypeClassName, Element mapElement) {
+	private Object buildTypedStringValueForMap(String value, String defaultTypeClassName, Element entryEle) {
 		try {
-			return buildTypedStringValue(value, defaultTypeClassName, mapElement);
+			return buildTypedStringValue(value, defaultTypeClassName, entryEle);
 		}
 		catch (ClassNotFoundException ex) {
-			error("Type class [" + defaultTypeClassName + "] not found for Map key/value type", mapElement, ex);
+			error("Type class [" + defaultTypeClassName + "] not found for Map key/value type", entryEle, ex);
 			return value;
 		}
 	}
@@ -1046,6 +1046,7 @@ public class BeanDefinitionParserDelegate {
 		ManagedProperties props = new ManagedProperties();
 		props.setSource(extractSource(propsEle));
 		props.setMergeEnabled(parseMergeAttribute(propsEle));
+
 		List propEles = DomUtils.getChildElementsByTagName(propsEle, PROP_ELEMENT);
 		for (Iterator it = propEles.iterator(); it.hasNext();) {
 			Element propEle = (Element) it.next();
@@ -1053,8 +1054,14 @@ public class BeanDefinitionParserDelegate {
 			// Trim the text value to avoid unwanted whitespace
 			// caused by typical XML formatting.
 			String value = DomUtils.getTextValue(propEle).trim();
-			props.setProperty(key, value);
+
+			TypedStringValue keyHolder = new TypedStringValue(key);
+			keyHolder.setSource(extractSource(propEle));
+			TypedStringValue valueHolder = new TypedStringValue(value);
+			valueHolder.setSource(extractSource(propEle));
+			props.put(keyHolder, valueHolder);
 		}
+
 		return props;
 	}
 
