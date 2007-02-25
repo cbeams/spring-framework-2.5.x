@@ -828,8 +828,11 @@ public class BeanDefinitionParserDelegate {
 			}
 		}
 		else if (DomUtils.nodeNameEquals(ele, NULL_ELEMENT)) {
-			// It's a distinguished null value.
-			return null;
+			// It's a distinguished null value. Let's wrap it in a TypedStringValue
+			// object in order to preserve the source location.
+			TypedStringValue value = new TypedStringValue(null);
+			value.setSource(extractSource(ele));
+			return value;
 		}
 		else if (DomUtils.nodeNameEquals(ele, LIST_ELEMENT)) {
 			return parseListElement(ele, bd);
