@@ -694,10 +694,11 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Initialize deferred close for the current thread and the given SessionFactory.
 	 * Sessions will not be actually closed on close calls then, but rather at a
-	 * processDeferredClose call at a finishing point (like request completion).
-	 * <p>Used by OpenSessionInViewFilter and OpenSessionInViewInterceptor
+	 * {@link #processDeferredClose} call at a finishing point (like request completion).
+	 * <p>Used by {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter}
+	 * and {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}
 	 * when not configured for a single session.
-	 * @param sessionFactory Hibernate SessionFactory
+	 * @param sessionFactory the Hibernate SessionFactory to initialize deferred close for
 	 * @see #processDeferredClose
 	 * @see #releaseSession
 	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter#setSingleSession
@@ -715,9 +716,9 @@ public abstract class SessionFactoryUtils {
 	}
 
 	/**
-	 * Process Sessions that have been registered for deferred close
+	 * Process all Hibernate Sessions that have been registered for deferred close
 	 * for the given SessionFactory.
-	 * @param sessionFactory Hibernate SessionFactory
+	 * @param sessionFactory the Hibernate SessionFactory to process deferred close for
 	 * @see #initDeferredClose
 	 * @see #releaseSession
 	 */
