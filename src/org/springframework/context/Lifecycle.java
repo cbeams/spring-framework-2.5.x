@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,25 +21,27 @@ package org.springframework.context;
  * The typical use case for this is to control asynchronous processing.
  *
  * <p>Can be implemented by both components (typically a Spring bean defined in
- * a Spring BeanFactory) and containers (typically a Spring ApplicationContext).
- * Containers will propagate start/stop signals to all components that apply.
+ * a Spring {@link org.springframework.beans.factory.BeanFactory) and containers
+ * (typically a Spring {@link ApplicationContext}). Containers will propagate
+ * start/stop signals to all components that apply.
  *
  * <p>Can be used for direct invocations or for management operations via JMX.
- * In the latter case, the MBeanExporter will typically be defined with an
- * InterfaceBasedMBeanInfoAssembler, restricting the visibility of
- * activity-controlled components to the Lifecycle interface.
+ * In the latter case, the {@link org.springframework.jmx.export.MBeanExporter}
+ * will typically be defined with an
+ * {@link org.springframework.jmx.export.assembler.InterfaceBasedMBeanInfoAssembler},
+ * restricting the visibility of activity-controlled components to the Lifecycle
+ * interface.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see ConfigurableApplicationContext
  * @see org.springframework.jms.listener.AbstractMessageListenerContainer
  * @see org.springframework.scheduling.quartz.SchedulerFactoryBean
- * @see org.springframework.jmx.export.MBeanExporter
  */
 public interface Lifecycle {
 
 	/**
-	 * Start the component.
+	 * Start this component.
 	 * Should not throw an exception if the component is already running.
 	 * <p>In the case of a container, this will propagate the start signal
 	 * to all components that apply.
@@ -47,7 +49,7 @@ public interface Lifecycle {
 	void start();
 
 	/**
-	 * Stop the component.
+	 * Stop this component.
 	 * Should not throw an exception if the component isn't started yet.
 	 * <p>In the case of a container, this will propagate the stop signal
 	 * to all components that apply.
@@ -55,9 +57,10 @@ public interface Lifecycle {
 	void stop();
 
 	/**
-	 * Return whether the component is running.
+	 * Check whether this component is currently running.
 	 * <p>In the case of a container, this will return <code>true</code>
-	 * only if <i>all</i> components that apply are running.
+	 * only if <i>all</i> components that apply are currently running.
+	 * @return whether the component is currently running
 	 */
 	boolean isRunning();
 
