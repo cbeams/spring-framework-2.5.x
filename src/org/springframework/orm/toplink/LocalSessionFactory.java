@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.springframework.orm.toplink;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
@@ -34,7 +37,9 @@ import oracle.toplink.tools.sessionmanagement.SessionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -121,6 +126,8 @@ public class LocalSessionFactory {
 
 	private DatabaseLogin databaseLogin;
 
+	private final Map loginPropertyMap = new HashMap();
+
 	private DataSource dataSource;
 
 	private DatabasePlatform databasePlatform;
@@ -175,14 +182,48 @@ public class LocalSessionFactory {
 	 * or hold a nested TopLink Connector instance, pointing to the connection pool to use.
 	 * DatabaseLogin also holds the TopLink DatabasePlatform instance that defines the
 	 * database product that TopLink is talking to (for example, HSQLPlatform).
-	 * @see oracle.toplink.sessions.DatabaseLogin#setDriverClassName(String)
-	 * @see oracle.toplink.sessions.DatabaseLogin#setDatabaseURL(String)
-	 * @see oracle.toplink.sessions.DatabaseLogin#setConnector(oracle.toplink.sessions.Connector)
-	 * @see oracle.toplink.sessions.DatabaseLogin#setUsesExternalConnectionPooling(boolean)
-	 * @see oracle.toplink.sessions.DatabaseLogin#usePlatform(oracle.toplink.internal.databaseaccess.DatabasePlatform)
+	 * <p><b>WARNING:</b> Overriding the Login instance has been reported to not
+	 * work on TopLink 10.1.3.0 and 10.1.3.1. Specify {@link #setLoginProperties
+	 * "loginProperties"} or {@link #getLoginPropertyMap "loginPropertyMap[...]"}
+	 * entries instead, if you prefer to have the login configuration defined
+	 * on the Spring LocalSessionFactory.
 	 */
 	public void setDatabaseLogin(DatabaseLogin databaseLogin) {
 		this.databaseLogin = databaseLogin;
+	}
+
+	/**
+	 * Specify TopLink login properties, to be passed to
+	 * the {@link oracle.toplink.sessions.DatabaseLogin} instance.
+	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
+	 * or a "props" element in XML bean definitions.
+	 * @see oracle.toplink.sessions.DatabaseLogin
+	 */
+	public void setLoginProperties(Properties loginProperties) {
+		CollectionUtils.mergePropertiesIntoMap(loginProperties, this.loginPropertyMap);
+	}
+
+	/**
+	 * Specify TopLink login properties as a Map, to be passed to
+	 * the {@link oracle.toplink.sessions.DatabaseLogin} instance.
+	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
+	 * @see oracle.toplink.sessions.DatabaseLogin
+	 */
+	public void setLoginPropertyMap(Map loginProperties) {
+		if (loginProperties != null) {
+			this.loginPropertyMap.putAll(loginProperties);
+		}
+	}
+
+	/**
+	 * Allow Map access to the TopLink login properties to be passed to the
+	 * DatabaseLogin instance, with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via
+	 * "loginPropertyMap[tableQualifier]".
+	 * @see oracle.toplink.sessions.DatabaseLogin
+	 */
+	public Map getLoginPropertyMap() {
+		return this.loginPropertyMap;
 	}
 
 	/**
@@ -258,25 +299,32 @@ public class LocalSessionFactory {
 		// It is possible for SessionManager to return a null Session!
 		if (session == null) {
 			throw new IllegalStateException(
-					"A session named " + this.sessionName + " could not be loaded from resource [" +
+					"A session named '" + this.sessionName + "' could not be loaded from resource [" +
 					this.configLocation + "] using ClassLoader [" + classLoader + "]. " +
 					"This is most likely a deployment issue: Can the class loader access the resource?");
 		}
 
-		// Override default DatabaseLogin instance with specified one, if any.
-		if (this.databaseLogin != null) {
-            this.reflectivelySetDatabaseLogin(session,this.databaseLogin);
+		DatabaseLogin login = (this.databaseLogin != null ? this.databaseLogin : session.getLogin());
+
+		// Apply specified login properties to the DatabaseLogin instance.
+		if (this.loginPropertyMap != null) {
+			new BeanWrapperImpl(login).setPropertyValues(this.loginPropertyMap);
 		}
 
 		// Override default connection pool with specified DataSource, if any.
 		if (this.dataSource != null) {
-			session.getLogin().setConnector(new JNDIConnector(this.dataSource));
-			session.getLogin().setUsesExternalConnectionPooling(true);
+			login.setConnector(new JNDIConnector(this.dataSource));
+			login.setUsesExternalConnectionPooling(true);
 		}
 
 		// Override default DatabasePlatform with specified one, if any.
 		if (this.databasePlatform != null) {
-			session.getLogin().usePlatform(this.databasePlatform);
+			login.usePlatform(this.databasePlatform);
+		}
+
+		// Override default DatabaseLogin instance with specified one, if any.
+		if (this.databaseLogin != null) {
+			setDatabaseLogin(session, this.databaseLogin);
 		}
 
 		// Override default SessionLog with specified one, if any.
@@ -298,7 +346,7 @@ public class LocalSessionFactory {
 	 * @param login the DatabaseLogin injected by Spring
 	 * @see oracle.toplink.sessions.DatabaseSession#setLogin
 	 */
-	protected void reflectivelySetDatabaseLogin(DatabaseSession session, DatabaseLogin login) {
+	protected void setDatabaseLogin(DatabaseSession session, DatabaseLogin login) {
 		Method setLoginMethod = null;
 		try {
 			// Search for the new 10.1.3 Login interface...
@@ -310,7 +358,7 @@ public class LocalSessionFactory {
 		}
 		catch (Exception ex) {
 			// TopLink 10.1.3 Login interface not found ->
-			// fall back to TopLink 9.0.4 setLogin(DatabaseLogin) api.
+			// fall back to TopLink 9.0.4's setLogin(DatabaseLogin)
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using TopLink 9.0.4 setLogin(DatabaseLogin) API");
 			}
@@ -318,14 +366,8 @@ public class LocalSessionFactory {
 			return;
 		}
 
-		// Invoke the 10.1.3 version of Session.setLogin.
-		try {
-			setLoginMethod.invoke(session, new Object[] {login});
-		}
-		catch (Exception ex) {
-			ReflectionUtils.handleReflectionException(ex);
-			throw new IllegalStateException("Should never get here");
-		}
+		// Invoke the 10.1.3 version: Session.setLogin(Login)
+		ReflectionUtils.invokeMethod(setLoginMethod, session, new Object[] {login});
 	}
 
 	/**
@@ -344,15 +386,17 @@ public class LocalSessionFactory {
 		SessionManager manager = getSessionManager();
 
 		// Try to find TopLink 10.1.3 XMLSessionConfigLoader.
-		Class loaderClass = null;
 		Method getSessionMethod = null;
+		Object loader = null;
 		try {
-			loaderClass = Class.forName("oracle.toplink.tools.sessionconfiguration.XMLSessionConfigLoader");
+			Class loaderClass = Class.forName("oracle.toplink.tools.sessionconfiguration.XMLSessionConfigLoader");
 			getSessionMethod = SessionManager.class.getMethod("getSession",
 					new Class[] {loaderClass, String.class, ClassLoader.class, boolean.class, boolean.class, boolean.class});
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using TopLink 10.1.3 XMLSessionConfigLoader");
 			}
+			Constructor ctor = loaderClass.getConstructor(new Class[] {String.class});
+			loader = ctor.newInstance(new Object[] {configLocation});
 		}
 		catch (Exception ex) {
 			// TopLink 10.1.3 XMLSessionConfigLoader not found ->
@@ -360,8 +404,8 @@ public class LocalSessionFactory {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using TopLink 9.0.4 XMLLoader");
 			}
-			XMLLoader loader = new XMLLoader(configLocation);
-			return (DatabaseSession) manager.getSession(loader, sessionName, sessionClassLoader, false, false);
+			XMLLoader xmlLoader = new XMLLoader(configLocation);
+			return (DatabaseSession) manager.getSession(xmlLoader, sessionName, sessionClassLoader, false, false);
 		}
 
 		// TopLink 10.1.3 XMLSessionConfigLoader found -> create loader instance
@@ -371,16 +415,8 @@ public class LocalSessionFactory {
 		// If the ClassLoaders are different, then this LocalSessionFactory is being
 		// re-loaded after a hot-deploy and the existing DatabaseSession will be logged
 		// out and re-built from scratch.
-		try {
-			Constructor ctor = loaderClass.getConstructor(new Class[] {String.class});
-			Object loader = ctor.newInstance(new Object[] {configLocation});
-			return (DatabaseSession) getSessionMethod.invoke(manager,
-					new Object[] {loader, sessionName, sessionClassLoader, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE});
-		}
-		catch (Exception ex) {
-			ReflectionUtils.handleReflectionException(ex);
-			throw new IllegalStateException("Should never get here");
-		}
+		return (DatabaseSession) ReflectionUtils.invokeMethod(getSessionMethod, manager,
+				new Object[] {loader, sessionName, sessionClassLoader, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE});
 	}
 
 	/**
@@ -388,6 +424,7 @@ public class LocalSessionFactory {
 	 * <p>The default implementation creates a new plain SessionManager instance,
 	 * leading to completely independent TopLink Session instances. Could be
 	 * overridden to return a shared or pre-configured SessionManager.
+	 * @return the TopLink SessionManager instance
 	 */
 	protected SessionManager getSessionManager() {
 		return new SessionManager();
