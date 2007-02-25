@@ -819,15 +819,13 @@ public class BeanDefinitionParserDelegate {
 			if (!StringUtils.hasText(typeClassName)) {
 				typeClassName = defaultTypeClassName;
 			}
-			if (StringUtils.hasText(typeClassName)) {
-				try {
-					return buildTypedStringValue(value, typeClassName);
-				}
-				catch (ClassNotFoundException ex) {
-					error("Type class [" + typeClassName + "] not found for <value> element", ele, ex);
-				}
+			try {
+				return buildTypedStringValue(value, typeClassName, ele);
 			}
-			return value;
+			catch (ClassNotFoundException ex) {
+				error("Type class [" + typeClassName + "] not found for <value> element", ele, ex);
+				return value;
+			}
 		}
 		else if (DomUtils.nodeNameEquals(ele, NULL_ELEMENT)) {
 			// It's a distinguished null value.
@@ -847,6 +845,25 @@ public class BeanDefinitionParserDelegate {
 		}
 		error("Unknown property sub-element: [" + ele.getTagName() + "]", ele);
 		return null;
+	}
+
+	private Object buildTypedStringValue(String value, String targetTypeName, Element ele)
+			throws ClassNotFoundException {
+
+		ClassLoader classLoader = this.readerContext.getReader().getBeanClassLoader();
+		TypedStringValue typedValue = null;
+		if (!StringUtils.hasText(targetTypeName)) {
+			typedValue = new TypedStringValue(value);
+		}
+		else if (classLoader != null) {
+			Class targetType = ClassUtils.forName(targetTypeName, classLoader);
+			typedValue = new TypedStringValue(value, targetType);
+		}
+		else {
+			typedValue = new TypedStringValue(value, targetTypeName);
+		}
+		typedValue.setSource(extractSource(ele));
+		return typedValue;
 	}
 
 	/**
@@ -934,8 +951,8 @@ public class BeanDefinitionParserDelegate {
 								"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", entryEle);
 			}
 			if (hasKeyAttribute) {
-				key = extractTypedStringValueIfNecessary(
-						mapEle, entryEle.getAttribute(KEY_ATTRIBUTE), defaultKeyTypeClassName);
+				key = buildTypedStringValueForMap(
+						entryEle.getAttribute(KEY_ATTRIBUTE), defaultKeyTypeClassName, mapEle);
 			}
 			else if (hasKeyRefAttribute) {
 				String refName = entryEle.getAttribute(KEY_REF_ATTRIBUTE);
@@ -963,8 +980,8 @@ public class BeanDefinitionParserDelegate {
 								"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
 			}
 			if (hasValueAttribute) {
-				value = extractTypedStringValueIfNecessary(
-						mapEle, entryEle.getAttribute(VALUE_ATTRIBUTE), defaultValueTypeClassName);
+				value = buildTypedStringValueForMap(
+						entryEle.getAttribute(VALUE_ATTRIBUTE), defaultValueTypeClassName, mapEle);
 			}
 			else if (hasValueRefAttribute) {
 				String refName = entryEle.getAttribute(VALUE_REF_ATTRIBUTE);
@@ -989,26 +1006,13 @@ public class BeanDefinitionParserDelegate {
 		return map;
 	}
 
-	/**
-	 * If the supplied <code>defaultTypeClassName</code> argument is <code>null</code>
-	 * or zero-length, then the value of the <code>attributeValue</code> is returned.
-	 * Otherwise, if the <code>Class</code> named by the <code>defaultTypeClassName</code>
-	 * can be loaded, a {@link TypedStringValue} instance wrapping this <code>Class</code>
-	 * and the <code>attributeValue</code> is returned. Otherwise, <code>null</code>
-	 * is returned.
-	 */
-	private Object extractTypedStringValueIfNecessary(
-			Element mapElement, String attributeValue, String defaultTypeClassName) {
-
-		if (!StringUtils.hasText(defaultTypeClassName)) {
-			return attributeValue;
-		}
+	private Object buildTypedStringValueForMap(String value, String defaultTypeClassName, Element mapElement) {
 		try {
-			return buildTypedStringValue(attributeValue, defaultTypeClassName);
+			return buildTypedStringValue(value, defaultTypeClassName, mapElement);
 		}
 		catch (ClassNotFoundException ex) {
-			error("Unable to load class '" + defaultTypeClassName + "' for Map key/value type", mapElement, ex);
-			return attributeValue;
+			error("Type class [" + defaultTypeClassName + "] not found for Map key/value type", mapElement, ex);
+			return value;
 		}
 	}
 
@@ -1124,17 +1128,6 @@ public class BeanDefinitionParserDelegate {
 					"] for nested custom element '" + ele.getNodeName() + "'");
 		}
 		return new BeanDefinitionHolder(innerDefinition, id);
-	}
-
-	protected TypedStringValue buildTypedStringValue(String value, String targetTypeName)
-			throws ClassNotFoundException {
-
-		ClassLoader classLoader = this.readerContext.getReader().getBeanClassLoader();
-		if (classLoader != null) {
-			Class targetType = ClassUtils.forName(targetTypeName, classLoader);
-			return new TypedStringValue(value, targetType);
-		}
-		return new TypedStringValue(value, targetTypeName);
 	}
 
 }

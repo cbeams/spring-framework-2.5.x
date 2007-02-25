@@ -11,17 +11,13 @@
 	<alias name="testBean" alias="testBeanAlias2"/>
 
 	<bean id="testBean" class="org.springframework.beans.TestBean">
-		<constructor-arg type="java.lang.String">
-			<value>Rob Harrop</value>
-		</constructor-arg>
+		<constructor-arg type="java.lang.String" value="Rob Harrop"/>
 		<property name="friends">
 			<ref bean="testBean2"/>
 		</property>
 		<property name="doctor">
 			<bean class="org.springframework.beans.NestedTestBean">
-				<constructor-arg type="java.lang.String">
-					<value>ACME</value>
-				</constructor-arg>
+				<constructor-arg type="java.lang.String" value="ACME"/>
 			</bean>
 		</property>
 	</bean>

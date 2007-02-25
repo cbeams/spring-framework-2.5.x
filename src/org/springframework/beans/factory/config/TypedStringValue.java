@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 
 package org.springframework.beans.factory.config;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Holder for a typed String value. Can be added to bean definitions
- * to explicitly specify a target type for a String value, for example
- * for collection elements.
+ * in order to explicitly specify a target type for a String value,
+ * for example for collection elements.
  *
  * <p>This holder will just store the String value and the target type.
  * The actual conversion will be performed by the bean factory.
@@ -32,16 +34,26 @@ import org.springframework.util.ClassUtils;
  * @see BeanDefinition#getPropertyValues
  * @see org.springframework.beans.MutablePropertyValues#addPropertyValue
  */
-public class TypedStringValue {
+public class TypedStringValue implements BeanMetadataElement {
 
 	private String value;
 
 	private Object targetType;
 
+	private Object source;
+
 
 	/**
-	 * Create a new {@link TypedStringValue} for the given String
-	 * value and target type.
+	 * Create a new {@link TypedStringValue} for the given String value.
+	 * @param value the String value
+	 */
+	public TypedStringValue(String value) {
+		setValue(value);
+	}
+
+	/**
+	 * Create a new {@link TypedStringValue} for the given String value
+	 * and target type.
 	 * @param value the String value
 	 * @param targetType the type to convert to
 	 */
@@ -51,8 +63,8 @@ public class TypedStringValue {
 	}
 
 	/**
-	 * Create a new {@link TypedStringValue} for the given String
-	 * value and target type.
+	 * Create a new {@link TypedStringValue} for the given String value
+	 * and target type.
 	 * @param value the String value
 	 * @param targetTypeName the type to convert to
 	 */
@@ -76,14 +88,7 @@ public class TypedStringValue {
 	 * Return the String value.
 	 */
 	public String getValue() {
-		return value;
-	}
-
-	/**
-	 * Return whether this typed String value carries a target type .
-	 */
-	public boolean hasTargetType() {
-		return (this.targetType instanceof Class);
+		return this.value;
 	}
 
 	/**
@@ -93,7 +98,7 @@ public class TypedStringValue {
 	 * @see PropertyPlaceholderConfigurer
 	 */
 	public void setTargetType(Class targetType) {
-		Assert.notNull(targetType, "targetType is required");
+		Assert.notNull(targetType, "'targetType' must not be null");
 		this.targetType = targetType;
 	}
 
@@ -111,7 +116,7 @@ public class TypedStringValue {
 	 * Specify the type to convert to.
 	 */
 	public void setTargetTypeName(String targetTypeName) {
-		Assert.notNull(targetTypeName, "targetTypeName is required");
+		Assert.notNull(targetTypeName, "'targetTypeName' must not be null");
 		this.targetType = targetTypeName;
 	}
 
@@ -125,6 +130,13 @@ public class TypedStringValue {
 		else {
 			return (String) this.targetType;
 		}
+	}
+
+	/**
+	 * Return whether this typed String value carries a target type .
+	 */
+	public boolean hasTargetType() {
+		return (this.targetType instanceof Class);
 	}
 
 	/**
@@ -142,6 +154,40 @@ public class TypedStringValue {
 		Class resolvedClass = ClassUtils.forName(getTargetTypeName(), classLoader);
 		this.targetType = resolvedClass;
 		return resolvedClass;
+	}
+
+
+	/**
+	 * Set the configuration source <code>Object</code> for this metadata element.
+	 * <p>The exact type of the object will depend on the configuration mechanism used.
+	 */
+	public void setSource(Object source) {
+		this.source = source;
+	}
+
+	public Object getSource() {
+		return this.source;
+	}
+
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof TypedStringValue)) {
+			return false;
+		}
+		TypedStringValue otherValue = (TypedStringValue) other;
+		return (ObjectUtils.nullSafeEquals(this.value, otherValue.value) &&
+				ObjectUtils.nullSafeEquals(this.targetType, otherValue.targetType));
+	}
+
+	public int hashCode() {
+		return ObjectUtils.nullSafeHashCode(this.value) * 29 + ObjectUtils.nullSafeHashCode(this.targetType);
+	}
+
+	public String toString() {
+		return "TypedStringValue: value [" + this.value + "], target type [" + this.targetType + "]";
 	}
 
 }
