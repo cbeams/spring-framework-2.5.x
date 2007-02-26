@@ -2612,6 +2612,23 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 			    in detail below. You may wish to look at the <interfacename>Scope</interfacename>
 			    implementations that are supplied with the Spring Framework itself for an idea of
 			    how to go about implementing your own.</para>
+			    <para>The <literal>Scope</literal> interface has four methods dealing with getting objects
+			    from the scope, removing them from the scope and allowing them to be 'destroyed' if needed.</para>
+			    <para>The first method should return the object from the underlying scope. The session scope
+			    implementation for example will return the session-scoped bean (and if it does not exist, return a 
+			    new instance of the bean, after having bound it to the session for future reference).</para>
+			    <programlisting><![CDATA[Object get(String name, ObjectFactory objectFactory)]]></programlisting>
+			    <para>The second method should remove the object from the underlying scope. The session scope implementation
+			    for example, removes the session-scoped bean from the underlying session. The object should be returned
+			    (you are allowed to return null if the object with the specified name wasn't found)</para>
+			    <programlisting><![CDATA[Object remove(String name)]]></programlisting>
+			    <para>The third method is used to register callbacks the scope should execute when it is destroyed or
+			    when the specified object in the scope is destroyed. Please refer to the JavaDoc or a Spring scope
+			    implementation for more information on destruction callbacks.</para>
+			    <programlisting><![CDATA[void registerDestructionCallback(String name, Runnable destructionCallback)]]></programlisting>
+			    <para>The last method deals with obtaining the conversation identifier for the underlying scope. This identifier is
+			    different for each scope. For a session for example, this can be the session identifier.</para>
+			    <programlisting><![CDATA[String getConversationId()]]></programlisting>
 			    <para><ulink url="http://opensource.atlassian.com/projects/spring/browse/SPR-2600">SPR-2600 - TODO</ulink></para>
 			</section>
 			<section id="beans-factory-scopes-custom-using">
