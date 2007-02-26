@@ -2611,7 +2611,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 			    to integrate your own custom scope(s) into the Spring container, and is described
 			    in detail below. You may wish to look at the <interfacename>Scope</interfacename>
 			    implementations that are supplied with the Spring Framework itself for an idea of
-			    how to go about implementing your own.</para>
+			    how to go about implementing your own. The <ulink href="http://www.springframework.org/docs/api/org/springframework/beans/factory/config/Scope.html">Scope JavaDoc</ulink>
+			    explains the main class to implement when you need your own scope in more detail too.</para>
 			    <para>The <literal>Scope</literal> interface has four methods dealing with getting objects
 			    from the scope, removing them from the scope and allowing them to be 'destroyed' if needed.</para>
 			    <para>The first method should return the object from the underlying scope. The session scope
