@@ -39,8 +39,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's BeanShell support
 
-* c3p0/c3p0-0.9.0.4.jar
-- C3P0 0.9.0.4 connection pool (http://sourceforge.net/projects/c3p0)
+* c3p0/c3p0-0.9.1.jar
+- C3P0 0.9.1 connection pool (http://sourceforge.net/projects/c3p0)
 - required for building the framework
 - required at runtime when using Spring's C3P0NativeJdbcExtractor
 - required for running Image Database
@@ -391,7 +391,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's VelocityView
 
-* velocity/velocity-tools-generic-1.2.jar, velocity/velocity-tools-view-1.2.jar
-- Velocity Tools 1.2 (http://jakarta.apache.org/velocity/tools)
+* velocity/velocity-tools-view-1.3.jar
+- Velocity Tools 1.3 (http://jakarta.apache.org/velocity/tools)
 - required for building the framework
 - required at runtime when using VelocityView's support for Velocity Tools
