@@ -70,11 +70,16 @@ Package org.springframework.beans
 * AbstractAutowireCapableBeanFactory does not trigger "toString()" call on argument for UnsatisfiedDependencyException
 * turned visibility of AbstractAutowireCapableBeanFactory's "applyPropertyValues" method from private to protected
 * added copy constructor to ChildBeanDefinition, for custom use in programmatic bean registration code
+* TypedStringValue overrides "equals", "hashCode" and "toString"
+* TypedStringValue implements the BeanMetadataElement interface and provides a "setSource" method
+* BeanDefinitionParseDelegate always builds TypedStringValue for "value" and "null" XML elements, preserving the source
+* BeanDefinitionParseDelegate builds TypedStringValue for "entry" and "prop" keys and values, preserving the source
 * BeanDefinitionParseDelegate trims whitespace from "class" attributes in XML bean definitions
 * collection merging accepts a null parent value as well, simply using the child collection as-is in this case
 * indexed constructor arguments support collection merging (driven by merge="true", analogous to property values)
 * BeanDefinitions returned by nested custom XML elements receive a generated id, to avoid FactoryBean cache conflicts
 * added deprecated "findXxx" signatures back to NamespaceHandlerSupport, for full compatibility with Spring 2.0 final
+* added protected "shouldGenerateIdAsFallback()" template method to AbstractBeanDefinitionParser
 * AbstractSingleBeanDefinitionParser applies a document's default-lazy-init="true" to its generated bean definitions
 * added "isEligibleAttribute" template method to AbstractSimpleBeanDefinitionParser, for excluding specific attributes
 * "util:properties" tag supports nested "prop" elements for local entries, analogous to the standard "props" tag
@@ -145,6 +150,7 @@ Package org.springframework.orm
 * added "flushMode" init parameter to Hibernate3 OpenSessionInViewFilter (supporting "AUTO" etc as value)
 * Hibernate3 SessionFactoryUtils translates SQLGrammar/DataException into InvalidDataAccessResourceUsageException
 * Hibernate3 HibernateAccessor/TransactionManager translates GenericJDBCException using a default SQLExceptionTranslator
+* TopLink LocalSessionFactory provides "loginProperties"/"loginPropertyMap" bean properties, for applying login settings
 * TopLink LocalSessionFactoryBean uses the bean ClassLoader as TopLink Session ClassLoader
 
 Package org.springframework.remoting
@@ -183,6 +189,7 @@ Package org.springframework.test
 * AbstractSingleSpringContextTests supports "getConfigPaths()" method, specifying config files relative to test class
 * AbstractSingleSpringContextTests supports "getConfigPath()" method, specifying a single file relative to test class
 * changed the visibility of AbstractDependencyInjectionSpringContextTests's "injectDependencies" method to protected
+* changed the visibility of AbstractTransactionalSpringContextTests's "transactionDefinition" field to protected
 * AssertThrows preserves an unexpected exception as root cause in the "wrong exception thrown" AssertionFailedError
 
 Package org.springframework.transaction
@@ -205,7 +212,10 @@ Package org.springframework.web
 * added "rootHandler" bean property to AbstractUrlHandlerMapping, kicking in for the "/" path
 * added "warnLogCategory" property to SimpleMappingExceptionResolver, allowing to log the exception to warn level
 * added protected "determineStatusCode" method to Servlet SimpleMappingExceptionResolver, for custom status codes
+* added "excludedPackages" and "excludedClasses" bean properties to ControllerClassNameHandlerMapping
+* ControllerClassNameHandlerMapping excludes all classes in the "org.springframework.web.servlet.mvc" package by default
 * OptionsTag accepts no or empty items specified, simply not rendering any option tags in such a case
+* revised VelocityToolboxView to support Velocity Tools 1.3's init methods (ViewTool callbacks are now deprecated)
 * added "messageArgs" and "messageArgsText" macros to the "spring.ftl" FreeMarker macro template
 
 
