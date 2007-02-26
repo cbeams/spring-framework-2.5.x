@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,33 +27,30 @@ import org.springframework.orm.hibernate.HibernateTemplate;
 import org.springframework.orm.hibernate.SessionFactoryUtils;
 
 /**
- * Convenient super class for Hibernate data access objects.
+ * Convenient super class for Hibernate-based data access objects.
  *
- * <p>Requires a SessionFactory to be set, providing a HibernateTemplate
- * based on it to subclasses. Can alternatively be initialized directly via
- * a HibernateTemplate, to reuse the latter's settings like SessionFactory,
+ * <p>Requires a {@link net.sf.hibernate.SessionFactory} to be set, providing a
+ * {@link org.springframework.orm.hibernate.HibernateTemplate} based on it to
+ * subclasses through the {@link #getHibernateTemplate()} method.
+ * Can alternatively be initialized directly with a HibernateTemplate,
+ * in order to reuse the latter's settings such as the SessionFactory,
  * exception translator, flush mode, etc.
  *
- * <p>This base class is mainly intended for HibernateTemplate usage
- * but can also be used when working with SessionFactoryUtils directly,
- * e.g. in combination with HibernateInterceptor-managed Sessions.
- * Convenience <code>getSession</code> and <code>releaseSession</code>
- * methods are provided for that usage style.
- * 
- * <p>This class will create its own HibernateTemplate if only a SessionFactory
- * is passed in. The allowCreate flag on that HibernateTemplate will be true by
- * default. A custom HibernateTemplate instance can be used through overriding
- * <code>createHibernateTemplate</code>.
+ * <p>This base class is mainly intended for HibernateTemplate usage but can
+ * also be used when working with a Hibernate Session directly, for example
+ * when relying on transactional Sessions. Convenience {@link #getSession}
+ * and {@link #releaseSession} methods are provided for that usage style.
+ *
+ * <p>This class will create its own HibernateTemplate instance if a SessionFactory
+ * is passed in. The "allowCreate" flag on that HibernateTemplate will be "true"
+ * by default. A custom HibernateTemplate instance can be used through overriding
+ * {@link #createHibernateTemplate}.
  *
  * @author Juergen Hoeller
  * @since 28.07.2003
  * @see #setSessionFactory
- * @see #setHibernateTemplate
- * @see #createHibernateTemplate
- * @see #getSession
- * @see #releaseSession
+ * @see #getHibernateTemplate
  * @see org.springframework.orm.hibernate.HibernateTemplate
- * @see org.springframework.orm.hibernate.HibernateInterceptor
  */
 public abstract class HibernateDaoSupport extends DaoSupport {
 
@@ -102,9 +99,15 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	/**
 	 * Return the HibernateTemplate for this DAO,
 	 * pre-initialized with the SessionFactory or set explicitly.
+	 * <p><b>Note: The returned HibernateTemplate is a shared instance.</b>
+	 * You may introspect its configuration, but not modify the configuration
+	 * (other than from within an {@link #initDao} implementation).
+	 * Consider creating a custom HibernateTemplate instance via
+	 * <code>new HibernateTemplate(getSessionFactory())</code>, in which
+	 * case you're allowed to customize the settings on the resulting instance.
 	 */
 	public final HibernateTemplate getHibernateTemplate() {
-	  return hibernateTemplate;
+	  return this.hibernateTemplate;
 	}
 
 	protected final void checkDaoConfig() {
@@ -115,25 +118,21 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 
 
 	/**
-	 * Get a Hibernate Session, either from the current transaction or a new one.
-	 * The latter is only allowed if the "allowCreate" setting of this bean's
-	 * HibernateTemplate is true.
+	 * Obtain a Hibernate Session, either from the current transaction or
+	 * a new one. The latter is only allowed if the
+	 * {@link org.springframework.orm.hibernate.HibernateTemplate#setAllowCreate "allowCreate"}
+	 * setting of this bean's {@link #setHibernateTemplate HibernateTemplate} is "true".
 	 * <p><b>Note that this is not meant to be invoked from HibernateTemplate code
 	 * but rather just in plain Hibernate code.</b> Either rely on a thread-bound
-	 * Session (via HibernateInterceptor), or use it in combination with
-	 * <code>releaseSession</code>.
+	 * Session or use it in combination with {@link #releaseSession}.
 	 * <p>In general, it is recommended to use HibernateTemplate, either with
 	 * the provided convenience operations or with a custom HibernateCallback
 	 * that provides you with a Session to work on. HibernateTemplate will care
 	 * for all resource management and for proper exception conversion.
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
-	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
-	 * @see #releaseSession
+	 * @throws IllegalStateException if no thread-bound Session found and allowCreate=false
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession(SessionFactory, boolean)
-	 * @see org.springframework.orm.hibernate.HibernateInterceptor
-	 * @see org.springframework.orm.hibernate.HibernateTemplate
-	 * @see org.springframework.orm.hibernate.HibernateCallback
 	 */
 	protected final Session getSession()
 			throws DataAccessResourceFailureException, IllegalStateException {
@@ -142,26 +141,23 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	}
 
 	/**
-	 * Get a Hibernate Session, either from the current transaction or
+	 * Obtain a Hibernate Session, either from the current transaction or
 	 * a new one. The latter is only allowed if "allowCreate" is true.
 	 * <p><b>Note that this is not meant to be invoked from HibernateTemplate code
 	 * but rather just in plain Hibernate code.</b> Either rely on a thread-bound
-	 * Session (via HibernateInterceptor), or use it in combination with
-	 * <code>releaseSession</code>.
-	 * <p>In general, it is recommended to use HibernateTemplate, either with
-	 * the provided convenience operations or with a custom HibernateCallback
-	 * that provides you with a Session to work on. HibernateTemplate will care
+	 * Session or use it in combination with {@link #releaseSession}.
+	 * <p>In general, it is recommended to use
+	 * {@see #getHibernateTemplate() HibernateTemplate}, either with
+	 * the provided convenience operations or with a custom
+	 * {@link org.springframework.orm.hibernate.HibernateCallback} that
+	 * provides you with a Session to work on. HibernateTemplate will care
 	 * for all resource management and for proper exception conversion.
 	 * @param allowCreate if a non-transactional Session should be created when no
 	 * transactional Session can be found for the current thread
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
-	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
-	 * @see #releaseSession
+	 * @throws IllegalStateException if no thread-bound Session found and allowCreate=false
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession(SessionFactory, boolean)
-	 * @see org.springframework.orm.hibernate.HibernateInterceptor
-	 * @see org.springframework.orm.hibernate.HibernateTemplate
-	 * @see org.springframework.orm.hibernate.HibernateCallback
 	 */
 	protected final Session getSession(boolean allowCreate)
 	    throws DataAccessResourceFailureException, IllegalStateException {
@@ -178,15 +174,13 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * Convert the given HibernateException to an appropriate exception from the
 	 * <code>org.springframework.dao</code> hierarchy. Will automatically detect
 	 * wrapped SQLExceptions and convert them accordingly.
-	 * <p>Delegates to the <code>convertHibernateAccessException</code>
+	 * <p>Delegates to the
+	 * {@link org.springframework.orm.hibernate.HibernateTemplate#convertHibernateAccessException}
 	 * method of this DAO's HibernateTemplate.
 	 * <p>Typically used in plain Hibernate code, in combination with
-	 * <code>getSession</code> and <code>releaseSession</code>.
+	 * {@link #getSession} and {@link #releaseSession}.
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
-	 * @see #setHibernateTemplate
-	 * @see #getSession
-	 * @see #releaseSession
 	 * @see org.springframework.orm.hibernate.HibernateTemplate#convertHibernateAccessException
 	 */
 	protected final DataAccessException convertHibernateAccessException(HibernateException ex) {
@@ -195,9 +189,8 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 
 	/**
 	 * Close the given Hibernate Session, created via this DAO's SessionFactory,
-	 * if it isn't bound to the thread.
-	 * @deprecated in favor of releaseSession
-	 * @see #releaseSession
+	 * if it isn't bound to the thread (i.e. isn't a transactional Session).
+	 * @deprecated in favor of {@link #releaseSession}
 	 */
 	protected final void closeSessionIfNecessary(Session session) {
 		releaseSession(session);
@@ -205,10 +198,10 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 
 	/**
 	 * Close the given Hibernate Session, created via this DAO's SessionFactory,
-	 * if it isn't bound to the thread.
+	 * if it isn't bound to the thread (i.e. isn't a transactional Session).
 	 * <p>Typically used in plain Hibernate code, in combination with
-	 * <code>getSession</code> and <code>convertHibernateAccessException</code>.
-	 * @param session Session to close
+	 * {@link #getSession} and {@link #convertHibernateAccessException}.
+	 * @param session the Session to close
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#releaseSession
 	 */
 	protected final void releaseSession(Session session) {
