@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.view.velocity;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,9 +29,12 @@ import org.apache.velocity.tools.view.context.ChainedContext;
 import org.apache.velocity.tools.view.servlet.ServletToolboxManager;
 import org.apache.velocity.tools.view.tools.ViewTool;
 
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
+
 /**
- * VelocityView subclass which adds support for Velocity Tools toolboxes
- * and Velocity Tools' ViewTool callbacks.
+ * {@link VelocityView} subclass which adds support for Velocity Tools toolboxes
+ * and Velocity Tools ViewTool callbacks / Velocity Tools 1.3 init methods.
  *
  * <p>Specify a "toolboxConfigLocation", for example "/WEB-INF/toolbox.xml",
  * to automatically load a Velocity Tools toolbox definition file and expose
@@ -41,22 +45,24 @@ import org.apache.velocity.tools.view.tools.ViewTool;
  * instance of the ChainedContext class which is part of the view package
  * of Velocity tools. This allows to use tools from the view package of
  * Velocity Tools, like LinkTool, which need to be initialized with a special
- * context that implements the ViewContext interface (that is, ChainedContext).
+ * context that implements the ViewContext interface (i.e. a ChainedContext).
  *
  * <p>This view also checks tools that are specified as "toolAttributes":
  * If they implement the ViewTool interface, they will get initialized with
  * the Velocity context. This allows tools from the view package of Velocity
- * Tools, like LinkTool, to be defined as "toolAttributes" on a VelocityView,
+ * Tools, such as LinkTool, to be defined as
+ * {@link #setToolAttributes "toolAttributes"} on a VelocityToolboxView,
  * instead of in a separate toolbox XML file.
  *
  * <p>This is a separate class mainly to avoid a required dependency on
- * the view package of Velocity Tools in VelocityView itself.
- * It requires Velocity Tools 1.2 as of Spring 2.0.
+ * the view package of Velocity Tools in {@link VelocityView} itself.
+ * As of Spring 2.0, this class requires Velocity Tools 1.2 or higher.
  *
  * @author Juergen Hoeller
  * @since 1.1.3
  * @see #setToolboxConfigLocation
  * @see #initTool
+ * @see org.apache.velocity.tools.view.context.ViewContext
  * @see org.apache.velocity.tools.view.context.ChainedContext
  * @see org.apache.velocity.tools.view.tools.ViewTool
  * @see org.apache.velocity.tools.view.tools.LinkTool
@@ -84,7 +90,7 @@ public class VelocityToolboxView extends VelocityView {
 	 * Return the Velocity Toolbox config location, if any.
 	 */
 	protected String getToolboxConfigLocation() {
-		return toolboxConfigLocation;
+		return this.toolboxConfigLocation;
 	}
 
 
@@ -115,9 +121,9 @@ public class VelocityToolboxView extends VelocityView {
 	/**
 	 * Overridden to check for the ViewContext interface which is part of the
 	 * view package of Velocity Tools. This requires a special Velocity context,
-	 * like ChainedContext as set up by <code>createVelocityContext</code>
-	 * in this class.
-	 * @see #createVelocityContext
+	 * like ChainedContext as set up by {@link #createVelocityContext} in this class.
+	 * @see org.apache.velocity.tools.view.tools.ViewTool#init(Object)
+	 * @see org.apache.velocity.tools.view.tools.LinkTool#init(Object)
 	 */
 	protected void initTool(Object tool, Context velocityContext) throws Exception {
 		// Initialize ViewTool instances with the Velocity context.
@@ -125,7 +131,16 @@ public class VelocityToolboxView extends VelocityView {
 		// implementations expect a ViewContext implementation as argument.
 		// ChainedContext implements the ViewContext interface.
 		if (tool instanceof ViewTool) {
+			// Velocity Tools 1.2: an actual ViewTool implementation.
 			((ViewTool) tool).init(velocityContext);
+		}
+		else {
+			// Velocity Tools 1.3: a class-level "init(Object)" method.
+			Method initMethod =
+					ClassUtils.getMethodIfAvailable(tool.getClass(), "init", new Class[] {Object.class});
+			if (initMethod != null) {
+				ReflectionUtils.invokeMethod(initMethod, tool, new Object[] {velocityContext});
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,8 +74,8 @@ import org.springframework.web.util.NestedServletException;
  * accessible in the current web application context, with any bean name.
  * Alternatively, you can set the VelocityEngine object as bean property.
  *
- * <p>Note: Spring's Velocity support requires Velocity 1.3 or higher, and optionally
- * Velocity Tools 1.0 or 1.1 (depending on the use of DateTool and/or NumberTool).
+ * <p>Note: Spring's VelocityView requires Velocity 1.3 or higher, and optionally
+ * Velocity Tools 1.0 or higher (depending on the use of DateTool and/or NumberTool).
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -204,7 +204,7 @@ public class VelocityView extends AbstractTemplateView {
 	 * Return the encoding for the Velocity template.
 	 */
 	protected String getEncoding() {
-		return encoding;
+		return this.encoding;
 	}
 
 	/**
@@ -222,7 +222,7 @@ public class VelocityView extends AbstractTemplateView {
 	 * Return whether the Velocity template should be cached.
 	 */
 	protected boolean isCacheTemplate() {
-		return cacheTemplate;
+		return this.cacheTemplate;
 	}
 
 	/**
@@ -239,7 +239,7 @@ public class VelocityView extends AbstractTemplateView {
 	 * Return the VelocityEngine used by this view.
 	 */
 	protected VelocityEngine getVelocityEngine() {
-		return velocityEngine;
+		return this.velocityEngine;
 	}
 
 
@@ -336,23 +336,21 @@ public class VelocityView extends AbstractTemplateView {
 	/**
 	 * Create a Velocity Context instance for the given model,
 	 * to be passed to the template for merging.
-	 * <p>Default implementation delegates to <code>createVelocityContext(model)</code>.
+	 * <p>The default implementation delegates to {@link #createVelocityContext(Map)}.
 	 * Can be overridden for a special context class, for example ChainedContext which
 	 * is part of the view package of Velocity Tools. ChainedContext is needed for
 	 * initialization of ViewTool instances.
-	 * <p>Have a look at VelocityToolboxView, which pre-implements such a ViewTool
-	 * check. This is not part of the standard VelocityView class to avoid a
-	 * required dependency on the view package of Velocity Tools.
-	 * @param model the model Map, containing the model attributes
-	 * to be exposed to the view
+	 * <p>Have a look at {@link VelocityToolboxView}, which pre-implements
+	 * ChainedContext support. This is not part of the standard VelocityView class
+	 * in order to avoid a required dependency on the view package of Velocity Tools.
+	 * @param model the model Map, containing the model attributes to be exposed to the view
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return the Velocity Context
 	 * @throws Exception if there's a fatal error while creating the context
 	 * @see #createVelocityContext(Map)
-	 * @see org.apache.velocity.tools.view.context.ChainedContext
-	 * @see org.apache.velocity.tools.view.tools.ViewTool
 	 * @see #initTool
+	 * @see org.apache.velocity.tools.view.context.ChainedContext
 	 * @see VelocityToolboxView
 	 */
 	protected Context createVelocityContext(
@@ -462,15 +460,15 @@ public class VelocityView extends AbstractTemplateView {
 	 * the ViewContext interface which is part of the view package of Velocity Tools.
 	 * In the particular case of ViewContext, you'll usually also need a special
 	 * Velocity context, like ChainedContext which is part of Velocity Tools too.
-	 * <p>Have a look at VelocityToolboxView, which pre-implements such a ViewTool
-	 * check. This is not part of the standard VelocityView class to avoid a
-	 * required dependency on the view package of Velocity Tools.
+	 * <p>Have a look at {@link VelocityToolboxView}, which pre-implements such a
+	 * ViewTool check. This is not part of the standard VelocityView class in order
+	 * to avoid a required dependency on the view package of Velocity Tools.
 	 * @param tool the tool instance to initialize
 	 * @param velocityContext the Velocity context
 	 * @throws Exception if initializion of the tool failed
-	 * @see org.apache.velocity.tools.view.tools.ViewTool
-	 * @see org.apache.velocity.tools.view.context.ChainedContext
 	 * @see #createVelocityContext
+	 * @see org.apache.velocity.tools.view.context.ViewContext
+	 * @see org.apache.velocity.tools.view.context.ChainedContext
 	 * @see VelocityToolboxView
 	 */
 	protected void initTool(Object tool, Context velocityContext) throws Exception {
