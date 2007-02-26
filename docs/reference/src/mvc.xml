@@ -40,6 +40,10 @@
                 <para><ulink url="http://www.objectmentor.com/resources/articles/ocp.pdf">Bob Martin, The Open-Closed Principle (PDF)</ulink></para>
             </listitem>
         </orderedlist>
+        <para>Note that you cannot add advice to final methods using Spring MVC. This means it won't
+        be possible to add advice to for example the <literal>AbstractController.handleRequest()</literal> method.
+        Refer to <xref linkend="aop-understanding-aop-proxies"/> for more information on AOP proxies and
+        why you cannot add advice to final methods.</para>
     </sidebar>
 
     <para>Spring Web MVC allows you to use any object as a command or form object -

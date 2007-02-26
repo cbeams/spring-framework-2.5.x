@@ -339,9 +339,10 @@ public class SimpleObject {
 			<listitem><para>Exposing services using JAX-RPC</para></listitem>
 			<listitem><para>Accessing web services</para></listitem>
 		</itemizedlist>
-        <para>In addition to the support listed above, you can also expose your web services using
-         <ulink url="http://xfire.codehaus.org">XFire</ulink>, a lightweight SOAP library, currently
-         in development at Codehaus.</para>
+        <para>In addition to stock support for JAX-RPC in Spring Core, the Spring portfolio also features
+        <ulink url="http://www.springframework.org/spring-ws">Spring Web Services</ulink>, a solution
+        for contract-first, document-driven web services. Last but not least, <ulink url="http://xfire.codehaus.org">XFire</ulink>
+        also allows you to export Spring-managed beans as a web service.</para>
 		<section id="remoting-web-services-jaxrpc">
 			<title>Exposing services using JAX-RPC</title>
 			<para>
