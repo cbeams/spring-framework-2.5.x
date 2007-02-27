@@ -2171,13 +2171,21 @@ public @interface Idempotent {
     
     <itemizedlist>
       <listitem>
-        <para><literal>Final</literal> methods cannot be advised, as they cannot
-        be overriden</para>
+        <para><literal>final</literal> methods cannot be advised, as they cannot
+        be overriden.</para>
       </listitem>
       <listitem>
         <para>You will need the CGLIB 2 binaries on your classpath, whereas
-        dynamic proxies are available with the JDK.
+        dynamic proxies are available with the JDK. Spring will automatically
+        warn you when it needs CGLIB but it isn't available on the classpath.
         </para>
+      </listitem>
+      <listitem>
+      	<para>The constructor of your proxied object will be called twice. This is a natural consequence of the CGLIB proxy model
+      	whereby a subclass is generated for each proxied object. For each proxied instance, two objects are created: the actual proxied
+      	object and an instance of the subclass that implements the advice. This behavior does not show when using JDK proxies.
+      	Usually, calling the constructor of the proxied type twice, is not a huge problem, as there are usually only assignments taking
+      	place and no real logic is (and probably should be) implemented in the constructor.</para>
       </listitem>
     </itemizedlist>
     
