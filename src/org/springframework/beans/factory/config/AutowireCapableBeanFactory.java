@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,33 +20,35 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
- * Extension of the BeanFactory interface to be implemented by bean
- * factories that are capable of autowiring, provided that they want
- * to expose this functionality for existing bean instances.
+ * Extension of the {@link org.springframework.beans.factory.BeanFactory}
+ * interface to be implemented by bean factories that are capable of
+ * autowiring, provided that they want to expose this functionality for
+ * existing bean instances.
  *
  * <p>This subinterface of BeanFactory is not meant to be used in normal
- * application code: stick to BeanFactory or ListableBeanFactory for
+ * application code: stick to {@link org.springframework.beans.factory.BeanFactory}
+ * or {@link org.springframework.beans.factory.ListableBeanFactory} for
  * typical use cases.
  *
  * <p>Integration code for other frameworks can leverage this interface to
  * wire and populate existing bean instances that Spring does not control
- * the lifecycle of. This is particularly useful for WebWork Actions or
+ * the lifecycle of. This is particularly useful for WebWork Actions and
  * Tapestry Page objects, for example.
  *
- * <p>Note that this interface is not implemented by ApplicationContext
- * facades, as it is hardly ever used by application code. It is available
- * on from an application context too, though, accessible through
- * ApplicationContext's <code>getAutowireCapableBeanFactory</code> method.
+ * <p>Note that this interface is not implemented by
+ * {@link org.springframework.context.ApplicationContext} facades,
+ * as it is hardly ever used by application code. That said, it is available
+ * from an application context too, accessible through ApplicationContext's
+ * {@link org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()}
+ * method.
  *
- * <p>To get access to an AutowireCapableBeanFactory, you can also
- * implement the BeanFactoryAware interface, which exposes the internal
- * BeanFactory even when running in an ApplicationContext. Simply cast
- * the passed-in BeanFactory to AutowireCapableBeanFactory.
+ * <p>You may also implement the {@link org.springframework.beans.factory.BeanFactoryAware}
+ * interface, which exposes the internal BeanFactory even when running in an
+ * ApplicationContext, to get access to an AutowireCapableBeanFactory:
+ * simply cast the passed-in BeanFactory to AutowireCapableBeanFactory.
  *
  * @author Juergen Hoeller
  * @since 04.12.2003
- * @see org.springframework.beans.factory.BeanFactory
- * @see org.springframework.beans.factory.ListableBeanFactory
  * @see org.springframework.beans.factory.BeanFactoryAware
  * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory
  * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
@@ -98,7 +100,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * Fully create a new bean instance of the given class with the specified
 	 * autowire strategy. All constants defined in this interface are supported here.
 	 * <p>Performs full initialization of the bean, including all applicable
-	 * BeanPostProcessors.
+	 * {@link BeanPostProcessor BeanPostProcessors}.
 	 * @param beanClass the class of the bean to create
 	 * @param autowireMode by name or type, using the constants in this interface
 	 * @param dependencyCheck whether to perform a dependency check for objects
@@ -117,9 +119,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	/**
 	 * Instantiate a new bean instance of the given class with the specified autowire
 	 * strategy. All constants defined in this interface are supported here.
-	 * <p>Does <i>not</i> apply any BeanPostProcessors or perform any further
-	 * initialization of the bean. This interface offers distinct, fine-grained
-	 * operations for those purposes, for example <code>initializeBean</code>.
+	 * <p>Does <i>not</i> apply any {@link BeanPostProcessor BeanPostProcessors} or
+	 * perform any further initialization of the bean. This interface offers distinct,
+	 * fine-grained operations for those purposes, for example {@link #initializeBean}.
 	 * @param beanClass the class of the bean to instantiate
 	 * @param autowireMode by name or type, using the constants in this interface
 	 * @param dependencyCheck whether to perform a dependency check for object
@@ -159,7 +161,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * property values meant to be used for existing bean instances.
 	 * <p>Note: This method does <i>not</i> autowire bean properties;
 	 * it just applies explicitly defined property values.
-	 * Use the <code>autowireBeanProperties</code> method to autowire
+	 * Use the {@link #autowireBeanProperties} method to autowire
 	 * an existing bean instance.
 	 * @param existingBean the existing bean instance
 	 * @param beanName the name of the bean definition in the bean factory
@@ -198,15 +200,15 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * for callbacks but not checked against the registered bean definitions.
 	 * @param existingBean the existing bean instance
 	 * @param beanName the name of the bean, to be passed to it if necessary
-	 * (only passed to BeanPostProcessors)
+	 * (only passed to {@link BeanPostProcessor BeanPostProcessors})
 	 * @return the bean instance to use, either the original or a wrapped one
 	 * @throws BeansException if the initialization failed
 	 */
 	Object initializeBean(Object existingBean, String beanName) throws BeansException;
 
 	/**
-	 * Apply BeanPostProcessors to the given existing bean instance,
-	 * invoking their <code>postProcessBeforeInitialization</code> methods.
+	 * Apply {@link BeanPostProcessor BeanPostProcessors} to the given existing bean
+	 * instance, invoking their <code>postProcessBeforeInitialization</code> methods.
 	 * The returned bean instance may be a wrapper around the original.
 	 * @param existingBean the new bean instance
 	 * @param beanName the name of the bean
@@ -218,8 +220,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 			throws BeansException;
 
 	/**
-	 * Apply BeanPostProcessors to the given existing bean instance,
-	 * invoking their <code>postProcessAfterInitialization</code> methods.
+	 * Apply {@link BeanPostProcessor BeanPostProcessors} to the given existing bean
+	 * instance, invoking their <code>postProcessAfterInitialization</code> methods.
 	 * The returned bean instance may be a wrapper around the original.
 	 * @param existingBean the new bean instance
 	 * @param beanName the name of the bean

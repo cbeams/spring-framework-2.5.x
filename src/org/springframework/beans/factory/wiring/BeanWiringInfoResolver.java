@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,26 @@ package org.springframework.beans.factory.wiring;
 /**
  * Strategy interface to be implemented by objects than can resolve bean name
  * information, given a newly instantiated bean object. Invocations to the
- * <code>resolve(Object)</code> method on this interface will be driven by
+ * {@link #resolveWiringInfo} method on this interface will be driven by
  * the AspectJ pointcut in the relevant concrete aspect.
  *
  * <p>Metadata resolution strategy can be pluggable. A good default is
- * ClassNameBeanWiringInfoResolver, which uses the fully-qualified class
- * name as bean name.
+ * {@link ClassNameBeanWiringInfoResolver}, which uses the fully-qualified
+ * class name as bean name.
  *
  * @author Rod Johnson
  * @since 2.0
+ * @see BeanWiringInfo
  * @see ClassNameBeanWiringInfoResolver
+ * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
  */
 public interface BeanWiringInfoResolver {
-	
+
 	/**
 	 * Resolve the BeanWiringInfo for the given bean instance.
 	 * @param beanInstance the bean instance to resolve info for
 	 * @return the BeanWiringInfo, or <code>null</code> if not found
 	 */
 	BeanWiringInfo resolveWiringInfo(Object beanInstance);
-	
+
 }
