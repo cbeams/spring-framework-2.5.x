@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
+import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilationFailedException;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -127,7 +128,13 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 				// Allow metaclass and other customization
 				this.groovyObjectCustomizer.customize(goo);
 			}
-			return goo;
+
+			if (goo instanceof Script) {
+				return ((Script) goo).run();
+			}
+			else {
+				return goo;
+			}
 		}
 		catch (CompilationFailedException ex) {
 			throw new ScriptCompilationException(

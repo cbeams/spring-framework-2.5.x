@@ -46,7 +46,7 @@ import org.springframework.test.AssertThrows;
  */
 public class GroovyScriptFactoryTests extends TestCase {
 
-	public void testStatic() throws Exception {
+	public void testStaticScript() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
@@ -72,7 +72,23 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
 	}
 
-	public void testNonStatic() throws Exception {
+	public void testStaticScriptWithInstance() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		ApplicationContext ctx =
+				new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyContext.xml");
+		Messenger messenger = (Messenger) ctx.getBean("messengerInstance");
+
+		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(messenger));
+		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+
+		String desiredMessage = "Hello World!";
+		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+	}
+
+	public void testNonStaticScript() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
