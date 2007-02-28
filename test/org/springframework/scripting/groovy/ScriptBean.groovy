@@ -4,17 +4,17 @@ import org.springframework.scripting.ContextScriptBean
 
 class GroovyScriptBean implements ContextScriptBean, ApplicationContextAware {
 
-    private int age
+	private int age
 
-    int getAge() {
-        return this.age
-    }
+	int getAge() {
+		return this.age
+	}
     
-    void setAge(int age) {
-        this.age = age
-    }
+	void setAge(int age) {
+		this.age = age
+	}
 
-    def String name
+	def String name
 
-    def ApplicationContext applicationContext
+	def ApplicationContext applicationContext
 }
