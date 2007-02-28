@@ -477,7 +477,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	/**
 	 * Subclasses may choose to implement this: for example,
 	 * to change the interfaces exposed.
-	 * <p>Default implementation is emty.
+	 * <p>The default implementation is empty.
 	 * @param proxyFactory ProxyFactory that is already configured with
 	 * TargetSource and interfaces and will be used to create the proxy
 	 * immediably after this method returns
@@ -491,14 +491,14 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * advices (e.g. AOP Alliance interceptors) and advisors to apply.
 	 * @param beanClass the class of the bean to advise
 	 * @param beanName the name of the bean
-	 * @param customTargetSource targetSource returned by getTargetSource() method:
-	 * may be ignored. Will be <code>null</code> unless a custom target source is in use.
+	 * @param customTargetSource the TargetSource returned by the
+	 * {@link #getCustomTargetSource} method: may be ignored.
+	 * Will be <code>null</code> if no custom target source is in use.
 	 * @return an array of additional interceptors for the particular bean;
 	 * or an empty array if no additional interceptors but just the common ones;
 	 * or <code>null</code> if no proxy at all, not even with the common interceptors.
 	 * See constants DO_NOT_PROXY and PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS.
 	 * @throws BeansException in case of errors
-	 * @see #postProcessAfterInitialization
 	 * @see #DO_NOT_PROXY
 	 * @see #PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
 	 */
