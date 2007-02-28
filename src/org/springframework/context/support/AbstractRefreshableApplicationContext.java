@@ -127,17 +127,34 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 
 	/**
 	 * Create an internal bean factory for this context.
-	 * Called for each refresh attempt.
-	 * <p>The default implementation creates a DefaultListableBeanFactory with the
-	 * internal bean factory of this context's parent as parent bean factory.
-	 * Can be overridden in subclasses.
+	 * Called for each {@link #refresh()} attempt.
+	 * <p>The default implementation creates a
+	 * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
+	 * with the {@link #getInternalParentBeanFactory() internal bean factory} of this
+	 * context's parent as parent bean factory. Can be overridden in subclasses,
+	 * for example to customize DefaultListableBeanFactory's settings.
 	 * @return the bean factory for this context
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
-	 * @see #refresh()
-	 * @see #getInternalParentBeanFactory
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowEagerClassLoading
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
 	 */
 	protected DefaultListableBeanFactory createBeanFactory() {
 		return new DefaultListableBeanFactory(getInternalParentBeanFactory());
+	}
+
+	/**
+	 * Customize the internal bean factory used by this context.
+	 * Called for each {@link #refresh()} attempt.
+	 * <p>The default implementation is empty. Can be overridden in subclasses
+	 * to customize DefaultListableBeanFactory's standard settings.
+	 * @param beanFactory the newly created bean factory for this context
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowEagerClassLoading
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
+	 */
+	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
 	}
 
 	/**

@@ -16,8 +16,10 @@
 
 package org.springframework.test;
 
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
@@ -157,33 +159,60 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * Load an ApplicationContext from the given config locations.
+	 * Load a Spring ApplicationContext from the given config locations.
+	 * <p>The default implementation creates a standard
+	 * {@link #createApplicationContext GenericApplicationContext},
+	 * allowing for customizing the internal bean factory through
+	 * {@link #customizeBeanFactory}.
 	 * @param locations the config locations (as Spring resource locations,
 	 * e.g. full classpath locations or any kind of URL)
 	 * @return the corresponding ApplicationContext instance (potentially cached)
 	 * @throws Exception if context loading failed
+	 * @see #createApplicationContext
+	 * @see #customizeBeanFactory
 	 */
 	protected ConfigurableApplicationContext loadContextLocations(String[] locations) throws Exception {
 		++this.loadCount;
 		if (logger.isInfoEnabled()) {
 			logger.info("Loading context for locations: " + StringUtils.arrayToCommaDelimitedString(locations));
 		}
-		return new ClassPathXmlApplicationContext(locations);
+		return createApplicationContext(locations);
 	}
 
 	/**
-	 * Load an ApplicationContext from the given config locations.
-	 * @param paths the config paths (relative to the concrete test class,
-	 * loading classpath resources from the same package)
-	 * @return the corresponding ApplicationContext instance (potentially cached)
-	 * @throws Exception if context loading failed
+	 * Create a Spring ApplicationContext for use by this test.
+	 * <p>The default implementation creates a standard GenericApplicationContext
+	 * instance, populates it from the specified config locations through a
+	 * {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader},
+	 * and calls {@link #customizeBeanFactory} to allow for customizing the
+	 * context's DefaultListableBeanFactory.
+	 * @param locations the config locations (as Spring resource locations,
+	 * e.g. full classpath locations or any kind of URL)
+	 * @return the GenericApplicationContext instance
+	 * @see #loadContextLocations
+	 * @see #customizeBeanFactory
 	 */
-	protected ConfigurableApplicationContext loadContextPaths(String[] paths) throws Exception {
-		++this.loadCount;
-		if (logger.isInfoEnabled()) {
-			logger.info("Loading context for paths: " + StringUtils.arrayToCommaDelimitedString(paths));
-		}
-		return new ClassPathXmlApplicationContext(paths, getClass());
+	protected ConfigurableApplicationContext createApplicationContext(String[] locations) {
+		GenericApplicationContext context = new GenericApplicationContext();
+		customizeBeanFactory(context.getDefaultListableBeanFactory());
+		new XmlBeanDefinitionReader(context).loadBeanDefinitions(locations);
+		context.refresh();
+		return context;
+	}
+
+	/**
+	 * Customize the internal bean factory of the ApplicationContext used by this test.
+	 * <p>The default implementation is empty. Can be overridden in subclasses
+	 * to customize DefaultListableBeanFactory's standard settings.
+	 * @param beanFactory the newly created bean factory for this context
+	 * @see #loadContextLocations
+	 * @see #createApplicationContext
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowEagerClassLoading
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
+	 */
+	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
 	}
 
 
