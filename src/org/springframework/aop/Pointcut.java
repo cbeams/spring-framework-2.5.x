@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,29 +18,31 @@ package org.springframework.aop;
 
 /**
  * Core Spring pointcut abstraction.
- * A pointcut is composed of a ClassFilter and a MethodMatcher. Both these
- * basic terms and a Pointcut itself can be combined to build up combinations.
+ *
+ * <p>A pointcut is composed of a {@link ClassFilter} and a {@link MethodMatcher}.
+ * Both these basic terms and a Pointcut itself can be combined to build up combinations
+ * (e.g. through {@link org.springframework.aop.support.ComposablePointcut}).
  *
  * @author Rod Johnson
  * @see ClassFilter
  * @see MethodMatcher
+ * @see org.springframework.aop.support.Pointcuts
  * @see org.springframework.aop.support.ClassFilters
  * @see org.springframework.aop.support.MethodMatchers
- * @see org.springframework.aop.support.ComposablePointcut
  */
 public interface Pointcut {
 
 	/**
 	 * Return the ClassFilter for this pointcut.
+	 * @return the ClassFilter (never <code>null</code>)
 	 */
 	ClassFilter getClassFilter();
 
 	/**
 	 * Return the MethodMatcher for this pointcut.
+	 * @return the MethodMatcher (never <code>null</code>)
 	 */
 	MethodMatcher getMethodMatcher();
-
-	// could add getFieldMatcher() without breaking most existing code
 
 
 	/**
