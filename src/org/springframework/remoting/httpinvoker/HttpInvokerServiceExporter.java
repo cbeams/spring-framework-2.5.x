@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,7 +166,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * @param ois the ObjectInputStream to read from
 	 * @return the RemoteInvocationResult object
 	 * @throws IOException if thrown by I/O methods
-	 * @see java.io.ObjectOutputStream#writeObject
+	 * @see java.io.ObjectInputStream#readObject
 	 */
 	protected RemoteInvocation doReadRemoteInvocation(ObjectInputStream ois)
 			throws IOException, ClassNotFoundException {
