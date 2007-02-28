@@ -34,17 +34,14 @@ import org.springframework.jmx.support.JmxUtils;
  * but delegates the creation of metadata to subclasses.
  *
  * <p>This class offers two flavors of Class extraction from a managed bean
- * instance: <code>getTargetClass</code>, extracting the target class behind
- * any kind of AOP proxy, and <code>getClassToExpose</code>, returning the
+ * instance: {@link #getTargetClass}, extracting the target class behind
+ * any kind of AOP proxy, and {@link #getClassToExpose}, returning the
  * class or interface that will be searched for annotations and exposed
  * to the JMX runtime.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
- * @see #getTargetClass(Object)
- * @see #getClassToExpose(Object)
- * @see #getClassToExpose(Class)
  */
 public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 
