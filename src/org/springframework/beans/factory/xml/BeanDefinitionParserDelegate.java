@@ -635,18 +635,20 @@ public class BeanDefinitionParserDelegate {
 				if (index < 0) {
 					error("'index' cannot be lower than 0", ele);
 				}
-				try {
-					this.parseState.push(new ConstructorArgumentEntry(index));
-					Object value = parsePropertyValue(ele, bd, null);
-					ConstructorArgumentValues.ValueHolder valueHolder = new ConstructorArgumentValues.ValueHolder(value);
-					if (StringUtils.hasLength(typeAttr)) {
-						valueHolder.setType(typeAttr);
+				else {
+					try {
+						this.parseState.push(new ConstructorArgumentEntry(index));
+						Object value = parsePropertyValue(ele, bd, null);
+						ConstructorArgumentValues.ValueHolder valueHolder = new ConstructorArgumentValues.ValueHolder(value);
+						if (StringUtils.hasLength(typeAttr)) {
+							valueHolder.setType(typeAttr);
+						}
+						valueHolder.setSource(extractSource(ele));
+						bd.getConstructorArgumentValues().addIndexedArgumentValue(index, valueHolder);
 					}
-					valueHolder.setSource(extractSource(ele));
-					bd.getConstructorArgumentValues().addIndexedArgumentValue(index, valueHolder);
-				}
-				finally {
-					this.parseState.pop();
+					finally {
+						this.parseState.pop();
+					}
 				}
 			}
 			catch (NumberFormatException ex) {
@@ -720,7 +722,9 @@ public class BeanDefinitionParserDelegate {
 					if (subElement != null && !META_ELEMENT.equals(subElement.getTagName())) {
 						error(elementName + " must not contain more than one sub-element", ele);
 					}
-					subElement = candidateEle;
+					else {
+						subElement = candidateEle;
+					}
 				}
 			}
 		}
@@ -732,6 +736,7 @@ public class BeanDefinitionParserDelegate {
 			error(elementName +
 					" is only allowed to contain either 'ref' attribute OR 'value' attribute OR sub-element", ele);
 		}
+
 		if (hasRefAttribute) {
 			String refName = ele.getAttribute(REF_ATTRIBUTE);
 			if (!StringUtils.hasText(refName)) {
@@ -744,13 +749,14 @@ public class BeanDefinitionParserDelegate {
 		else if (hasValueAttribute) {
 			return ele.getAttribute(VALUE_ATTRIBUTE);
 		}
-
-		if (subElement == null) {
+		else if (subElement != null) {
+			return parsePropertySubElement(subElement, bd);
+		}
+		else {
 			// Neither child element nor "ref" or "value" attribute found.
 			error(elementName + " must specify a ref or value", ele);
+			return null;
 		}
-
-		return parsePropertySubElement(subElement, bd);
 	}
 
 	public Object parsePropertySubElement(Element ele, BeanDefinition bd) {
@@ -788,11 +794,13 @@ public class BeanDefinitionParserDelegate {
 					toParent = true;
 					if (!StringUtils.hasLength(refName)) {
 						error("'bean', 'local' or 'parent' is required for <ref> element", ele);
+						return null;
 					}
 				}
 			}
 			if (!StringUtils.hasText(refName)) {
 				error("<ref> element contains empty target attribute", ele);
+				return null;
 			}
 			RuntimeBeanReference ref = new RuntimeBeanReference(refName, toParent);
 			ref.setSource(extractSource(ele));
@@ -800,15 +808,20 @@ public class BeanDefinitionParserDelegate {
 		}
 		else if (DomUtils.nodeNameEquals(ele, IDREF_ELEMENT)) {
 			// A generic reference to any name of any bean.
-			String beanRef = ele.getAttribute(BEAN_REF_ATTRIBUTE);
-			if (!StringUtils.hasLength(beanRef)) {
+			String refName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
+			if (!StringUtils.hasLength(refName)) {
 				// A reference to the id of another bean in the same XML file.
-				beanRef = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
-				if (!StringUtils.hasLength(beanRef)) {
+				refName = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
+				if (!StringUtils.hasLength(refName)) {
 					error("Either 'bean' or 'local' is required for <idref> element", ele);
+					return null;
 				}
 			}
-			RuntimeBeanNameReference ref = new RuntimeBeanNameReference(beanRef);
+			if (!StringUtils.hasText(refName)) {
+				error("<idref> element contains empty target attribute", ele);
+				return null;
+			}
+			RuntimeBeanNameReference ref = new RuntimeBeanNameReference(refName);
 			ref.setSource(extractSource(ele));
 			return ref;
 		}
@@ -932,14 +945,18 @@ public class BeanDefinitionParserDelegate {
 						if (keyEle != null) {
 							error("<entry> element is only allowed to contain one <key> sub-element", entryEle);
 						}
-						keyEle = candidateEle;
+						else {
+							keyEle = candidateEle;
+						}
 					}
 					else {
 						// Child element is what we're looking for.
 						if (valueEle != null) {
 							error("<entry> element must not contain more than one value sub-element", entryEle);
 						}
-						valueEle = candidateEle;
+						else {
+							valueEle = candidateEle;
+						}
 					}
 				}
 			}
@@ -1029,11 +1046,12 @@ public class BeanDefinitionParserDelegate {
 			if (nl.item(i) instanceof Element) {
 				Element candidateEle = (Element) nl.item(i);
 				// Child element is what we're looking for.
-
 				if (subElement != null) {
 					error("<key> element must not contain more than one value sub-element", keyEle);
 				}
-				subElement = candidateEle;
+				else {
+					subElement = candidateEle;
+				}
 			}
 		}
 		return parsePropertySubElement(subElement, bd, defaultKeyTypeClassName);
