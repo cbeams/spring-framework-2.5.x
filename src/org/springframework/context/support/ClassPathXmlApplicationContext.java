@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,34 +23,33 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 /**
- * Standalone XML application context, taking the context definition
- * files from the class path. Mainly useful for test harnesses,
- * but also for application contexts embedded within JARs.
+ * Standalone XML application context, taking the context definition files
+ * from the class path. Useful for test harnesses as well as for application
+ * contexts embedded within JARs.
  *
- * <p>Treats resource paths as class path resources, when using
- * <code>getResource</code>. Only supports full class path resource
- * names that include the package path, like "mypackage/myresource.dat".
+ * <p>Treats resource paths as class path resources, when using {@link #getResource}.
+ * Only supports full class path resource names that include the package path,
+ * like "mypackage/myresource.dat".
  *
- * <p>The config location defaults can be overridden via <code>getConfigLocations</code>,
+ * <p>The config location defaults can be overridden via {@link #getConfigLocations},
  * Config locations can either denote concrete files like "/myfiles/context.xml"
- * or Ant-style patterns like "/myfiles/*-context.xml" (see PathMatcher javadoc for
- * pattern details).
+ * or Ant-style patterns like "/myfiles/*-context.xml" (see the
+ * {@link org.springframework.util.AntPathMatcher} javadoc for pattern details).
  *
  * <p>Note: In case of multiple config locations, later bean definitions will
  * override ones defined in earlier loaded files. This can be leveraged to
  * deliberately override certain bean definitions via an extra XML file.
  *
  * <p><b>This is a simple, one-stop shop convenience ApplicationContext.
- * Consider using the GenericApplicationContext class in combination
- * with an XmlBeanDefinitionReader for more flexible context setup.</b>
+ * Consider using the {@link GenericApplicationContext} class in combination
+ * with an {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}
+ * for more flexible context setup.</b>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #getResource
  * @see #getResourceByPath
- * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
  * @see GenericApplicationContext
- * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  */
 public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
 
@@ -63,6 +62,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * Create a new ClassPathXmlApplicationContext, loading the definitions
 	 * from the given XML file and automatically refreshing the context.
 	 * @param configLocation resource location
+	 * @throws BeansException if context creation failed
 	 */
 	public ClassPathXmlApplicationContext(String configLocation) throws BeansException {
 		this(new String[] {configLocation});
@@ -72,6 +72,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * Create a new ClassPathXmlApplicationContext, loading the definitions
 	 * from the given XML files and automatically refreshing the context.
 	 * @param configLocations array of resource locations
+	 * @throws BeansException if context creation failed
 	 */
 	public ClassPathXmlApplicationContext(String[] configLocations) throws BeansException {
 		this(configLocations, (ApplicationContext) null);
@@ -83,6 +84,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * refreshing the context.
 	 * @param configLocations array of resource locations
 	 * @param parent the parent context
+	 * @throws BeansException if context creation failed
 	 */
 	public ClassPathXmlApplicationContext(String[] configLocations, ApplicationContext parent)
 			throws BeansException {
@@ -100,6 +102,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * @param refresh whether to automatically refresh the context,
 	 * loading all bean definitions and creating all singletons.
 	 * Alternatively, call refresh manually after further configuring the context.
+	 * @throws BeansException if context creation failed
 	 * @see #refresh()
 	 */
 	public ClassPathXmlApplicationContext(String[] configLocations, boolean refresh) throws BeansException {
@@ -114,6 +117,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * loading all bean definitions and creating all singletons.
 	 * Alternatively, call refresh manually after further configuring the context.
 	 * @param parent the parent context
+	 * @throws BeansException if context creation failed
 	 * @see #refresh()
 	 */
 	public ClassPathXmlApplicationContext(String[] configLocations, boolean refresh, ApplicationContext parent)
@@ -135,6 +139,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * with an XmlBeanDefinitionReader and a ClassPathResource argument.
 	 * @param path relative (or absolute) path within the class path
 	 * @param clazz the class to load resources with (basis for the given paths)
+	 * @throws BeansException if context creation failed
 	 * @see org.springframework.core.io.ClassPathResource#ClassPathResource(String, Class)
 	 * @see org.springframework.context.support.GenericApplicationContext
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
@@ -148,6 +153,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * from the given XML files and automatically refreshing the context.
 	 * @param paths array of relative (or absolute) paths within the class path
 	 * @param clazz the class to load resources with (basis for the given paths)
+	 * @throws BeansException if context creation failed
 	 * @see org.springframework.core.io.ClassPathResource#ClassPathResource(String, Class)
 	 * @see org.springframework.context.support.GenericApplicationContext
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
@@ -163,6 +169,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * @param paths array of relative (or absolute) paths within the class path
 	 * @param clazz the class to load resources with (basis for the given paths)
 	 * @param parent the parent context
+	 * @throws BeansException if context creation failed
 	 * @see org.springframework.core.io.ClassPathResource#ClassPathResource(String, Class)
 	 * @see org.springframework.context.support.GenericApplicationContext
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader

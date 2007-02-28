@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
  * SPI interface to be implemented by most if not all application contexts.
- * Provides facilities to configure an application context in addition to the
- * application context client methods in the ApplicationContext interface.
+ * Provides facilities to configure an application context in addition
+ * to the application context client methods in the
+ * {@link org.springframework.context.ApplicationContext} interface.
  *
  * <p>Configuration and lifecycle methods are encapsulated here to avoid
  * making them obvious to ApplicationContext client code. The present
@@ -85,8 +86,9 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	void close();
 
 	/**
-	 * Return whether this application context is active, that is,
-	 * whether it has been refreshed at least once and not closed yet.
+	 * Determine whether this application context is active, that is,
+	 * whether it has been refreshed at least once and has not been closed yet.
+	 * @return whether the context is still active
 	 * @see #refresh()
 	 * @see #close()
 	 * @see #getBeanFactory()
@@ -99,14 +101,15 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * <p>Note: Do not use this to post-process the bean factory; singletons
 	 * will already have been instantiated before. Use a BeanFactoryPostProcessor
 	 * to intercept the BeanFactory setup process before beans get touched.
-	 * <p>Generally, this internal factory will only be accessible while the
-	 * context is active, that is, inbetween <code>refresh()</code> and
-	 * <code>close()</code>. The <code>isActive</code> flag can be used to
-	 * check whether the context is in an appropriate state.
+	 * <p>Generally, this internal factory will only be accessible while the context
+	 * is active, that is, inbetween {@link #refresh()} and {@link #close()}.
+	 * The {@link #isActive()} flag can be used to check whether the context
+	 * is in an appropriate state.
+	 * @return the underlying bean factory
 	 * @throws IllegalStateException if the context does not hold an internal
-	 * bean factory yet (usually if <code>refresh()</code> has never been called
-	 * or if <code>close()</code> has already been called)
-	 * @see #isActive() ()
+	 * bean factory (usually if {@link #refresh()} hasn't been called yet or
+	 * if {@link #close()} has already been called)
+	 * @see #isActive()
 	 * @see #refresh()
 	 * @see #close()
 	 * @see #addBeanFactoryPostProcessor

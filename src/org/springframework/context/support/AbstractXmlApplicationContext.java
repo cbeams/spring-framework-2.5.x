@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,20 +26,20 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 
 /**
- * Convenient abstract superclass for ApplicationContext implementations,
- * drawing configuration from XML documents containing bean definitions
- * understood by an XmlBeanDefinitionReader.
+ * Convenient base class for {@link org.springframework.context.ApplicationContext}
+ * implementations, drawing configuration from XML documents containing bean definitions
+ * understood by an {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}.
  *
- * <p>Subclasses just have to implement the <code>getConfigLocations</code>
- * method. Furthermore, they might override the <code>getResourceByPath</code>
- * hook to interpret relative paths in an environment-specific fashion, and/or
- * <code>getResourcePatternResolver</code> for extended pattern resolution.
+ * <p>Subclasses just have to implement the {@link #getConfigResources} and/or
+ * the {@link #getConfigLocations} method. Furthermore, they might override
+ * the {@link #getResourceByPath} hook to interpret relative paths in an
+ * environment-specific fashion, and/or {@link #getResourcePatternResolver}
+ * for extended pattern resolution.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see #getConfigResources
  * @see #getConfigLocations
- * @see #getResourceByPath
- * @see #getResourcePatternResolver
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  */
 public abstract class AbstractXmlApplicationContext extends AbstractRefreshableApplicationContext  {
@@ -92,10 +92,9 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableA
 
 	/**
 	 * Load the bean definitions with the given XmlBeanDefinitionReader.
-	 * <p>The lifecycle of the bean factory is handled by the refreshBeanFactory method;
-	 * therefore this method is just supposed to load and/or register bean definitions.
-	 * <p>Delegates to a ResourcePatternResolver for resolving location patterns
-	 * into Resource instances.
+	 * <p>The lifecycle of the bean factory is handled by the {@link #refreshBeanFactory}
+	 * method; hence this method is just supposed to load and/or register bean definitions.
+	 * @param reader the XmlBeanDefinitionReader to use
 	 * @throws BeansException in case of bean registration errors
 	 * @throws IOException if the required XML document isn't found
 	 * @see #refreshBeanFactory
@@ -117,7 +116,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableA
 	/**
 	 * Return an array of Resource objects, referring to the XML bean definition
 	 * files that this context should be built with.
-	 * <p>Default implementation returns <code>null</code>. Subclasses can override
+	 * <p>The default implementation returns <code>null</code>. Subclasses can override
 	 * this to provide pre-built Resource objects rather than location Strings.
 	 * @return an array of Resource objects, or <code>null</code> if none
 	 * @see #getConfigLocations()
@@ -130,7 +129,7 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableA
 	 * Return an array of resource locations, referring to the XML bean definition
 	 * files that this context should be built with. Can also include location
 	 * patterns, which will get resolved via a ResourcePatternResolver.
-	 * <p>Default implementation returns <code>null</code>. Subclasses can override
+	 * <p>The default implementation returns <code>null</code>. Subclasses can override
 	 * this to provide a set of resource locations to load bean definitions from.
 	 * @return an array of resource locations, or <code>null</code> if none
 	 * @see #getResources

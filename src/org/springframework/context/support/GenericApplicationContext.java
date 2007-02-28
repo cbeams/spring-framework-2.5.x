@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,19 +31,23 @@ import org.springframework.util.Assert;
 
 /**
  * Generic ApplicationContext implementation that holds a single internal
- * DefaultListableBeanFactory instance and does not assume a specific bean
- * definition format. Implements the BeanDefinitionRegistry interface to
- * allow for applying any bean definition readers to it.
+ * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
+ * instance and does not assume a specific bean definition format. Implements
+ * the {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
+ * interface in order to allow for applying any bean definition readers to it.
  *
  * <p>Typical usage is to register a variety of bean definitions via the
- * BeanDefinitionRegistry interface and then call <code>refresh</code> to initialize
- * those beans with application context semantics (handling ApplicationContextAware,
- * auto-detecting BeanFactoryPostProcessors, etc).
+ * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
+ * interface and then call {@link #refresh()} to initialize those beans
+ * with application context semantics (handling
+ * {@link org.springframework.context.ApplicationContextAware}, auto-detecting
+ * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor BeanFactoryPostProcessors},
+ * etc).
  *
  * <p>In contrast to other ApplicationContext implementations that create a new
  * internal BeanFactory instance for each refresh, the internal BeanFactory of
  * this context is available right from the start, to be able to register bean
- * definitions on it. <code>refresh()</code> may only be called once.
+ * definitions on it. {@link #refresh()} may only be called once.
  *
  * <p>Usage example:
  *
@@ -58,30 +62,23 @@ import org.springframework.util.Assert;
  * MyBean myBean = (MyBean) ctx.getBean("myBean");
  * ...</pre>
  *
- * For the typical case of XML bean definitions, simply use ClassPathXmlApplicationContext
- * or FileSystemXmlApplicationContext, which are easier to set up - but less flexible,
- * as you can just use standard resource locations for XML bean definitions, rather than
- * mixing arbitrary bean definition formats. The equivalent in a web environment is
- * XmlWebApplicationContext, implementing the extended WebApplicationContext interface.
+ * For the typical case of XML bean definitions, simply use
+ * {@link ClassPathXmlApplicationContext} or {@link FileSystemXmlApplicationContext},
+ * which are easier to set up - but less flexible, since you can just use standard
+ * resource locations for XML bean definitions, rather than mixing arbitrary bean
+ * definition formats. The equivalent in a web environment is
+ * {@link org.springframework.web.context.support.XmlWebApplicationContext}.
  *
  * <p>For custom application context implementations that are supposed to read
  * special bean definition formats in a refreshable manner, consider deriving
- * from the AbstractRefreshableApplicationContext base class. For a corresponding
- * base class that pre-implements the extended WebApplicationContext interface,
- * consider AbstractRefreshableWebApplicationContext.
+ * from the {@link AbstractRefreshableApplicationContext} base class.
  *
  * @author Juergen Hoeller
  * @since 1.1.2
  * @see #registerBeanDefinition
  * @see #refresh()
- * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
- * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
- * @see AbstractRefreshableApplicationContext
- * @see ClassPathXmlApplicationContext
- * @see FileSystemXmlApplicationContext
- * @see org.springframework.web.context.WebApplicationContext
- * @see org.springframework.web.context.support.AbstractRefreshableWebApplicationContext
- * @see org.springframework.web.context.support.XmlWebApplicationContext
+ * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
+ * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
  */
 public class GenericApplicationContext extends AbstractApplicationContext implements BeanDefinitionRegistry {
 
@@ -220,7 +217,8 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 	/**
-	 * Return the single internal BeanFactory held by this context.
+	 * Return the single internal BeanFactory held by this context
+	 * (as ConfigurableListableBeanFactory).
 	 */
 	public final ConfigurableListableBeanFactory getBeanFactory() {
 		return this.beanFactory;
@@ -229,10 +227,10 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	/**
 	 * Return the underlying bean factory of this context,
 	 * available for registering bean definitions.
-	 * <p><b>NOTE:</b> You need to call <code>refresh()</code> to initialize the
+	 * <p><b>NOTE:</b> You need to call {@link #refresh()} to initialize the
 	 * bean factory and its contained beans with application context semantics
 	 * (autodetecting BeanFactoryPostProcessors, etc).
-	 * @see #refresh()
+	 * @return the internal bean factory (as DefaultListableBeanFactory)
 	 */
 	public final DefaultListableBeanFactory getDefaultListableBeanFactory() {
 		return this.beanFactory;

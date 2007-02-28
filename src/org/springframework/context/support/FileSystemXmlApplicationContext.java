@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,33 +23,32 @@ import org.springframework.core.io.Resource;
 
 /**
  * Standalone XML application context, taking the context definition files
- * from the file system or from URLs. Mainly useful for test harnesses,
- * but also for standalone environments.
+ * from the file system or from URLs. Useful for test harnesses as well as
+ * for standalone environments.
  *
- * <p>Treats resource paths as file system resources, when using
- * <code>getResource</code>. Resource paths are considered relative
- * to the current VM working directory, even if they start with a slash.
+ * <p>Treats resource paths as file system resources, when using {@link #getResource}.
+ * Resource paths are considered relative to the current VM working directory,
+ * even if they happen to start with a slash.
  *
- * <p>The config location defaults can be overridden via <code>getConfigLocations</code>,
+ * <p>The config location defaults can be overridden via {@link #getConfigLocations},
  * Config locations can either denote concrete files like "/myfiles/context.xml"
- * or Ant-style patterns like "/myfiles/*-context.xml" (see PathMatcher javadoc for
- * pattern details).
+ * or Ant-style patterns like "/myfiles/*-context.xml" (see the
+ * {@link org.springframework.util.AntPathMatcher} javadoc for pattern details).
  *
  * <p>Note: In case of multiple config locations, later bean definitions will
  * override ones defined in earlier loaded files. This can be leveraged to
  * deliberately override certain bean definitions via an extra XML file.
  *
  * <p><b>This is a simple, one-stop shop convenience ApplicationContext.
- * Consider using the GenericApplicationContext class in combination
- * with an XmlBeanDefinitionReader for more flexible context setup.</b>
+ * Consider using the {@link GenericApplicationContext} class in combination
+ * with an {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}
+ * for more flexible context setup.</b>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #getResource
  * @see #getResourceByPath
- * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
  * @see GenericApplicationContext
- * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  */
 public class FileSystemXmlApplicationContext extends AbstractXmlApplicationContext {
 
@@ -60,6 +59,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * Create a new FileSystemXmlApplicationContext, loading the definitions
 	 * from the given XML file and automatically refreshing the context.
 	 * @param configLocation file path
+	 * @throws BeansException if context creation failed
 	 */
 	public FileSystemXmlApplicationContext(String configLocation) throws BeansException {
 		this(new String[] {configLocation});
@@ -69,6 +69,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * Create a new FileSystemXmlApplicationContext, loading the definitions
 	 * from the given XML files and automatically refreshing the context.
 	 * @param configLocations array of file paths
+	 * @throws BeansException if context creation failed
 	 */
 	public FileSystemXmlApplicationContext(String[] configLocations) throws BeansException {
 		this(configLocations, null);
@@ -80,6 +81,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * refreshing the context.
 	 * @param configLocations array of file paths
 	 * @param parent the parent context
+	 * @throws BeansException if context creation failed
 	 */
 	public FileSystemXmlApplicationContext(String[] configLocations, ApplicationContext parent)
 			throws BeansException {
@@ -97,6 +99,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * @param refresh whether to automatically refresh the context,
 	 * loading all bean definitions and creating all singletons.
 	 * Alternatively, call refresh manually after further configuring the context.
+	 * @throws BeansException if context creation failed
 	 * @see #refresh()
 	 */
 	public FileSystemXmlApplicationContext(String[] configLocations, boolean refresh) throws BeansException {
@@ -111,6 +114,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * loading all bean definitions and creating all singletons.
 	 * Alternatively, call refresh manually after further configuring the context.
 	 * @param parent the parent context
+	 * @throws BeansException if context creation failed
 	 * @see #refresh()
 	 */
 	public FileSystemXmlApplicationContext(String[] configLocations, boolean refresh, ApplicationContext parent)
