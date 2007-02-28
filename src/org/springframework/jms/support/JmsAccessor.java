@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.jms.JmsException;
 
 /**
  * Base class for JmsTemplate and other JMS-accessing gateway helpers,
- * defining common properties like the ConnectionFactory. The subclass
+ * defining common properties such as the ConnectionFactory. The subclass
  * JmsDestinationAccessor adds further, destination-related properties.
  *
  * <p>Not intended to be used directly. See JmsTemplate.
@@ -55,26 +55,29 @@ public abstract class JmsAccessor implements InitializingBean {
 
 
 	/**
-	 * Set the connection factory used for obtaining JMS connections.
+	 * Set the ConnectionFactory used for obtaining JMS Connections.
 	 */
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 
 	/**
-	 * Return the connection factory used for obtaining JMS connections.
+	 * Return the ConnectionFactory that this accessor uses for
+	 * obtaining JMS Connections.
 	 */
 	public ConnectionFactory getConnectionFactory() {
-		return connectionFactory;
+		return this.connectionFactory;
 	}
 
 	/**
-	 * Set the transaction mode that is used when creating a JMS session to send a message.
+	 * Set the transaction mode that is used when creating a JMS Session.
 	 * Default is "false".
-	 * <p>Note that that within a JTA transaction, the parameters to
-	 * create(Queue/Topic)Session(boolean transacted, int acknowledgeMode) method are not
-	 * taken into account. Depending on the J2EE transaction context, the container
-	 * makes its own decisions on these values. See section 17.3.5 of the EJB Spec.
+	 * <p>Note that within a JTA transaction, the parameters passed to
+	 * <code>create(Queue/Topic)Session(boolean transacted, int acknowledgeMode)</code>
+	 * method are not taken into account. Depending on the J2EE transaction context,
+	 * the container makes its own decisions on these values. Analogously, these
+	 * parameters are not taken into account within a locally managed transaction
+	 * either, since the accessor operates on an existing JMS Session in this case.
 	 * @param sessionTransacted the transaction mode
 	 * @see javax.jms.Connection#createSession(boolean, int)
 	 */
@@ -83,10 +86,10 @@ public abstract class JmsAccessor implements InitializingBean {
 	}
 
 	/**
-	 * Return whether the JMS sessions used for sending a message are transacted.
+	 * Return whether the JMS Sessions used are transacted.
 	 */
 	public boolean isSessionTransacted() {
-		return sessionTransacted;
+		return this.sessionTransacted;
 	}
 
 	/**
@@ -103,8 +106,8 @@ public abstract class JmsAccessor implements InitializingBean {
 	}
 
 	/**
-	 * Set the JMS acknowledgement mode that is used when creating a JMS session to send
-	 * a message. Vendor extensions to the acknowledgment mode can be set here as well.
+	 * Set the JMS acknowledgement mode that is used when creating a JMS Session.
+	 * Vendor extensions to the acknowledgment mode can be set here as well.
 	 * Default is "AUTO_ACKNOWLEDGE".
 	 * <p>Note that that inside an EJB the parameters to
 	 * create(Queue/Topic)Session(boolean transacted, int acknowledgeMode) method are not
@@ -121,10 +124,10 @@ public abstract class JmsAccessor implements InitializingBean {
 	}
 
 	/**
-	 * Return the acknowledgement mode for JMS sessions.
+	 * Return the acknowledgement mode for JMS Sessions.
 	 */
 	public int getSessionAcknowledgeMode() {
-		return sessionAcknowledgeMode;
+		return this.sessionAcknowledgeMode;
 	}
 
 	public void afterPropertiesSet() {
