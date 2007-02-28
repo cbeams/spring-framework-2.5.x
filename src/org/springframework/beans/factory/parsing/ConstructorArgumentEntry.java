@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.util.Assert;
  * constructor argument.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class ConstructorArgumentEntry implements ParseState.Entry {
@@ -35,7 +36,7 @@ public class ConstructorArgumentEntry implements ParseState.Entry {
 	 * representing a constructor argument with a (currently) unknown index.
 	 */
 	public ConstructorArgumentEntry() {
-		index = Integer.MIN_VALUE;
+		this.index = -1;
 	}
 
 	/**
@@ -46,13 +47,13 @@ public class ConstructorArgumentEntry implements ParseState.Entry {
 	 * is less than zero
 	 */
 	public ConstructorArgumentEntry(int index) {
-		Assert.isTrue(index >= 0, "The constructor argument index must be greater than or equal to zero.");
+		Assert.isTrue(index >= 0, "Constructor argument index must be greater than or equal to zero");
 		this.index = index;
 	}
 
 
 	public String toString() {
-		return "Constructor-arg" + (this.index > Integer.MIN_VALUE ? ": #" + this.index : "");
+		return "Constructor-arg" + (this.index >= 0 ? " #" + this.index : "");
 	}
 
 }
