@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,51 +19,56 @@ package org.springframework.beans.factory.annotation;
 import org.springframework.beans.factory.wiring.BeanWiringInfo;
 import org.springframework.beans.factory.wiring.BeanWiringInfoResolver;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
- * BeanWiringInfoResolver that uses the Configurable annotation to identify
- * which classes need autowiring. The bean name to look up will be taken from
- * the Configurable annotation if specified; otherwise the default will be
- * the fully-qualified name of the class being configured.
+ * {@link org.springframework.beans.factory.wiring.BeanWiringInfoResolver} that
+ * uses the Configurable annotation to identify which classes need autowiring.
+ * The bean name to look up will be taken from the {@link Configurable} annotation
+ * if specified; otherwise the default will be the fully-qualified name of the
+ * class being configured.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  * @see Configurable
  * @see org.springframework.beans.factory.wiring.ClassNameBeanWiringInfoResolver
  */
 public class AnnotationBeanWiringInfoResolver implements BeanWiringInfoResolver {
 
-	private static final String CGLIB_MAGIC = "EnhancerByCGLIB";
-
 	public BeanWiringInfo resolveWiringInfo(Object beanInstance) {
 		Assert.notNull(beanInstance, "Bean instance must not be null");
-		Class<?> clazz = beanInstance.getClass();
-		Configurable configurableAnnotation = clazz.getAnnotation(Configurable.class);
-		if (configurableAnnotation != null) {
-			if (!Autowire.NO.equals(configurableAnnotation.autowire())) {
-				return new BeanWiringInfo(
-						configurableAnnotation.autowire().value(), configurableAnnotation.dependencyCheck());
-			}
-			else {
-				// Bean name may be explicit or defaulted to FQN.
-				String beanName =
-						("".equals(configurableAnnotation.value())) ? getUserClassName(clazz) : configurableAnnotation.value();
-				return new BeanWiringInfo(beanName);
-			}
-		}
-		return null;
+		Configurable annotation = beanInstance.getClass().getAnnotation(Configurable.class);
+		return (annotation != null ? buildWiringInfo(beanInstance, annotation) : null);
 	}
-	
+
 	/**
-	 * Copes with CGLIB generated subclasses and ensures that the user's class name
-	 * is returned instead.
+	 * Build the BeanWiringInfo for the given Configurable annotation.
+	 * @param beanInstance the bean instance
+	 * @param annotation the Configurable annotation found on the bean class
+	 * @return the resolved BeanWiringInfo
 	 */
-	private String getUserClassName(Class beanClass) {
-		String className = beanClass.getName();
-		if (className.indexOf(CGLIB_MAGIC) != -1) {
-			className = beanClass.getSuperclass().getName();
+	protected BeanWiringInfo buildWiringInfo(Object beanInstance, Configurable annotation) {
+		if (!Autowire.NO.equals(annotation.autowire())) {
+			return new BeanWiringInfo(annotation.autowire().value(), annotation.dependencyCheck());
 		}
-		return className;
+		else {
+			String beanName =
+					(!"".equals(annotation.value()) ? annotation.value() : getDefaultBeanName(beanInstance));
+			return new BeanWiringInfo(beanName);
+		}
+	}
+
+	/**
+	 * Determine the default bean name for the specified bean instance.
+	 * <p>The default implementation returns the superclass name for a CGLIB
+	 * proxy and the name of the plain bean class else.
+	 * @param beanInstance the bean instance to build a default name for
+	 * @return the default bean name to use
+	 * @see org.springframework.util.ClassUtils#getUserClass(Class)
+	 */
+	protected String getDefaultBeanName(Object beanInstance) {
+		return ClassUtils.getUserClass(beanInstance).getName();
 	}
 
 }

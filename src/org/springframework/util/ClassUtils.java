@@ -95,14 +95,15 @@ public abstract class ClassUtils {
 
 
 	/**
-	 * Return a default ClassLoader to use (never <code>null</code>).
-	 * Returns the thread context ClassLoader, if available.
-	 * The ClassLoader that loaded the ClassUtils class will be used as fallback.
+	 * Return the default ClassLoader to use: typically the thread context
+	 * ClassLoader, if available; the ClassLoader that loaded the ClassUtils
+	 * class will be used as fallback.
 	 * <p>Call this method if you intend to use the thread context ClassLoader
 	 * in a scenario where you absolutely need a non-null ClassLoader reference:
 	 * for example, for class path resource loading (but not necessarily for
 	 * <code>Class.forName</code>, which accepts a <code>null</code> ClassLoader
 	 * reference as well).
+	 * @return the default ClassLoader (never <code>null</code>)
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public static ClassLoader getDefaultClassLoader() {
@@ -125,6 +126,7 @@ public abstract class ClassUtils {
 	 * and can be loaded. Will return <code>false</code> if either the class or
 	 * one of its dependencies is not present or cannot be loaded.
 	 * @param className the name of the class to check
+	 * @return whether the specified class is present
 	 */
 	public static boolean isPresent(String className) {
 		return isPresent(className, getDefaultClassLoader());
@@ -137,6 +139,7 @@ public abstract class ClassUtils {
 	 * @param className the name of the class to check
 	 * @param classLoader the class loader to use
 	 * (may be <code>null</code>, which indicates the default class loader)
+	 * @return whether the specified class is present
 	 */
 	public static boolean isPresent(String className, ClassLoader classLoader) {
 		try {
@@ -241,6 +244,29 @@ public abstract class ClassUtils {
 		return result;
 	}
 
+	/**
+	 * Return the user-defined class for the given instance: usually simply
+	 * the class of the given instance, but the original class in case of a
+	 * CGLIB-generated subclass.
+	 * @param instance the instance to check
+	 * @return the user-defined class
+	 */
+	public static Class getUserClass(Object instance) {
+		Assert.notNull(instance, "Instance must not be null");
+		return getUserClass(instance.getClass());
+	}
+
+	/**
+	 * Return the user-defined class for the given class: usually simply the given
+	 * class, but the original class in case of a CGLIB-generated subclass.
+	 * @param clazz the class to check
+	 * @return the user-defined class
+	 */
+	public static Class getUserClass(Class clazz) {
+		return (clazz != null && clazz.getName().indexOf(CGLIB_CLASS_SEPARATOR) != -1 ?
+				clazz.getSuperclass() : clazz);
+	}
+
 
 	/**
 	 * Get the class name without the qualified package name.
@@ -342,6 +368,7 @@ public abstract class ClassUtils {
 	 * <p>Essentially translates <code>NoSuchMethodException</code> to "false".
 	 * @param clazz	the clazz to analyze
 	 * @param paramTypes the parameter types of the method
+	 * @return whether the class has a corresponding constructor
 	 * @see java.lang.Class#getMethod
 	 */
 	public static boolean hasConstructor(Class clazz, Class[] paramTypes) {
@@ -373,6 +400,7 @@ public abstract class ClassUtils {
 	 * @param clazz	the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
+	 * @return whether the class has a corresponding method
 	 * @see java.lang.Class#getMethod
 	 */
 	public static boolean hasMethod(Class clazz, String methodName, Class[] paramTypes) {
@@ -449,10 +477,8 @@ public abstract class ClassUtils {
 				return true;
 			}
 		}
-		if (clazz.getSuperclass() != null) {
-			return hasAtLeastOneMethodWithName(clazz.getSuperclass(), methodName);
-		}
-		return false;
+		return (clazz.getSuperclass() != null ?
+				hasAtLeastOneMethodWithName(clazz.getSuperclass(), methodName) : false);
 	}
 
 	/**
@@ -629,14 +655,14 @@ public abstract class ClassUtils {
 
 
 	/**
-	 * Return all interfaces that the given object implements as array,
+	 * Return all interfaces that the given instance implements as array,
 	 * including ones implemented by superclasses.
-	 * @param object the object to analyse for interfaces
-	 * @return all interfaces that the given object implements as array
+	 * @param instance the instance to analyse for interfaces
+	 * @return all interfaces that the given instance implements as array
 	 */
-	public static Class[] getAllInterfaces(Object object) {
-		Assert.notNull(object, "Object must not be null");
-		return getAllInterfacesForClass(object.getClass());
+	public static Class[] getAllInterfaces(Object instance) {
+		Assert.notNull(instance, "Instance must not be null");
+		return getAllInterfacesForClass(instance.getClass());
 	}
 
 	/**
@@ -665,14 +691,14 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Return all interfaces that the given object implements as List,
+	 * Return all interfaces that the given instance implements as Set,
 	 * including ones implemented by superclasses.
-	 * @param object the object to analyse for interfaces
-	 * @return all interfaces that the given object implements as List
+	 * @param instance the instance to analyse for interfaces
+	 * @return all interfaces that the given instance implements as Set
 	 */
-	public static Set getAllInterfacesAsSet(Object object) {
-		Assert.notNull(object, "Object must not be null");
-		return getAllInterfacesForClassAsSet(object.getClass());
+	public static Set getAllInterfacesAsSet(Object instance) {
+		Assert.notNull(instance, "Instance must not be null");
+		return getAllInterfacesForClassAsSet(instance.getClass());
 	}
 
 	/**

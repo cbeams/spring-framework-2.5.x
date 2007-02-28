@@ -32,7 +32,6 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.support.AopUtils;
 import org.springframework.core.JdkVersion;
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.util.ClassUtils;
@@ -121,6 +120,9 @@ public abstract class JmxUtils {
 	/**
 	 * Convert an array of <code>MBeanParameterInfo</code> into an array of
 	 * <code>Class</code> instances corresponding to the parameters.
+	 * @param paramInfo the JMX parameter info
+	 * @return the parameter types as classes
+	 * @throws ClassNotFoundException if a parameter type could not be resolved
 	 */
 	public static Class[] parameterInfoToTypes(MBeanParameterInfo[] paramInfo) throws ClassNotFoundException {
 		Class[] types = null;
@@ -134,9 +136,11 @@ public abstract class JmxUtils {
 	}
 
 	/**
-	 * Create a <code>String[]</code> representing the signature of a method.
-	 * Each element in the array is the fully qualified class name
+	 * Create a <code>String[]</code> representing the argument signature of a
+	 * method. Each element in the array is the fully qualified class name
 	 * of the corresponding argument in the methods signature.
+	 * @param method the method to build an argument signature for
+	 * @return the signature as array of argument types
 	 */
 	public static String[] getMethodSignature(Method method) {
 		Class[] types = method.getParameterTypes();
@@ -172,6 +176,7 @@ public abstract class JmxUtils {
 	 * classes as well as classes with corresponding "*MBean" interface
 	 * (Standard MBeans).
 	 * @param beanClass the bean class to analyze
+	 * @return whether the class qualifies as an MBean
 	 * @see org.springframework.jmx.export.MBeanExporter#isMBean(Class)
 	 */
 	public static boolean isMBean(Class beanClass) {
@@ -195,43 +200,36 @@ public abstract class JmxUtils {
 	 * Return the class or interface to expose for the given bean.
 	 * This is the class that will be searched for attributes and operations
 	 * (for example, checked for annotations).
-	 * <p>Default implementation returns the target class for a CGLIB proxy,
-	 * and the class of the given bean else (for a JDK proxy or a plain bean class).
+	 * <p>This implementation returns the superclass for a CGLIB proxy and
+	 * the class of the given bean else (for a JDK proxy or a plain bean class).
 	 * @param managedBean the bean instance (might be an AOP proxy)
 	 * @return the bean class to expose
-	 * @see org.springframework.aop.support.AopUtils#isCglibProxy(Object)
-	 * @see org.springframework.aop.framework.Advised#getTargetSource()
-	 * @see org.springframework.aop.TargetSource#getTargetClass()
+	 * @see org.springframework.util.ClassUtils#getUserClass(Object)
 	 */
 	public static Class getClassToExpose(Object managedBean) {
-		if (AopUtils.isCglibProxy(managedBean)) {
-			return managedBean.getClass().getSuperclass();
-		}
-		return managedBean.getClass();
+		return ClassUtils.getUserClass(managedBean);
 	}
 
 	/**
 	 * Return the class or interface to expose for the given bean class.
 	 * This is the class that will be searched for attributes and operations
 	 * (for example, checked for annotations).
-	 * <p>Default implementation returns the superclass for a CGLIB proxy,
-	 * and the given bean class else (for a JDK proxy or a plain bean class).
+	 * <p>This implementation returns the superclass for a CGLIB proxy and
+	 * the class of the given bean else (for a JDK proxy or a plain bean class).
 	 * @param beanClass the bean class (might be an AOP proxy class)
 	 * @return the bean class to expose
-	 * @see org.springframework.aop.support.AopUtils#isCglibProxyClass(Class)
+	 * @see org.springframework.util.ClassUtils#getUserClass(Class)
 	 */
 	public static Class getClassToExpose(Class beanClass) {
-		if (AopUtils.isCglibProxyClass(beanClass)) {
-			return beanClass.getSuperclass();
-		}
-		return beanClass;
+		return ClassUtils.getUserClass(beanClass);
 	}
 
 	/**
-	 * Return whether an MBean interface exists for the given class
-	 * (that is, an interface whose name matches the class name of
-	 * the given class but with suffix "MBean).
+	 * Return whether a Standard MBean interface exists for the given class
+	 * (that is, an interface whose name matches the class name of the
+	 * given class but with suffix "MBean).
 	 * @param clazz the class to check
+	 * @return whether there is a Standard MBean interface for the given class
 	 */
 	private static boolean hasMBeanInterface(Class clazz) {
 		Class[] implementedInterfaces = clazz.getInterfaces();
@@ -253,6 +251,11 @@ public abstract class JmxUtils {
 	 * class. Useful when generating {@link ObjectName ObjectNames} at runtime for a set of
 	 * managed resources based on the template value supplied by a
 	 * {@link org.springframework.jmx.export.naming.ObjectNamingStrategy}.
+	 * @param objectName the original JMX ObjectName
+	 * @param managedResource the MBean instance
+	 * @return an ObjectName with the MBean identity added
+	 * @throws MalformedObjectNameException in case of an invalid object name specification
+	 * @see org.springframework.util.ObjectUtils#getIdentityHexString(Object)
 	 */
 	public static ObjectName appendIdentityToObjectName(ObjectName objectName, Object managedResource)
 			throws MalformedObjectNameException {
