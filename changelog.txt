@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.9 (15.2.2007)
+Changes in version 1.2.9 (28.2.2007)
 ------------------------------------
 
 General
@@ -18,6 +18,7 @@ Package org.springframework.aop
 * HashMapCachingAdvisorChainFactory uses synchronized access to its method cache Map
 * exposed "indexOf(Advice)" method on Advised interface
 * revised ProxyConfig/AdvisedSupport's "toString()" output
+* RegexpMethodPointcutAdvisor references ORO classes indirectly, to avoid eager loading of ORO on Solaris JDK 1.6
 * revised SingletonTargetSource's and AbstractBeanFactoryBasedTargetSource's "toString()" output
 * HotSwappableTargetSource's "hashCode" implementation returns a constant value even if the target object changes
 * AbstractAutoProxyCreator considers all Advices (not just MethodInterceptors) as infrastructure classes to ignore
