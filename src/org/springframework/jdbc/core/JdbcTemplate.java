@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,10 +56,11 @@ import org.springframework.util.Assert;
  * <code>org.springframework.dao</code> package.
  *
  * <p>Code using this class need only implement callback interfaces, giving
- * them a clearly defined contract. The PreparedStatementCreator callback
- * interface creates a prepared statement given a Connection provided by this
- * class, providing SQL and any necessary parameters. The RowCallbackHandler
- * interface extracts values from each row of a ResultSet.
+ * them a clearly defined contract. The {@link PreparedStatementCreator} callback
+ * interface creates a prepared statement given a Connection, providing SQL and
+ * any necessary parameters. The {@link ResultSetExtractor} interface extracts
+ * values from a ResultSet. See also {@link PreparedStatementSetter} and
+ * {@link RowMapper} for two popular alternative callback interfaces.
  *
  * <p>Can be used within a service implementation via direct instantiation
  * with a DataSource reference, or get prepared in an application context
@@ -67,25 +68,30 @@ import org.springframework.util.Assert;
  * always be configured as a bean in the application context, in the first case
  * given to the service directly, in the second case to the prepared template.
  *
+ * <p>Because this class is parameterizable by the callback interfaces and
+ * the {@link org.springframework.jdbc.support.SQLExceptionTranslator}
+ * interface, there should be no need to subclass it.
+ *
+ * <p>All operations performed by this class are logged at debug level.
+ *
  * <p>The motivation and design of this class is discussed
  * in detail in
  * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
  * by Rod Johnson (Wrox, 2002).
  *
- * <p>Because this class is parameterizable by the callback interfaces and
- * the SQLExceptionTranslator interface, it isn't necessary to subclass it.
- * All operations performed by this class are logged at debug level.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Thomas Risberg
  * @since May 3, 2001
+ * @see PreparedStatementCreator
+ * @see PreparedStatementSetter
+ * @see CallableStatementCreator
+ * @see PreparedStatementCallback
+ * @see CallableStatementCallback
  * @see ResultSetExtractor
  * @see RowCallbackHandler
  * @see RowMapper
- * @see org.springframework.dao
- * @see org.springframework.jdbc.datasource
- * @see org.springframework.jdbc.object
+ * @see org.springframework.jdbc.support.SQLExceptionTranslator
  */
 public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
@@ -313,6 +319,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL statement [" + sql + "]");
 		}
+
 		class ExecuteStatementCallback implements StatementCallback, SqlProvider {
 			public Object doInStatement(Statement stmt) throws SQLException {
 				stmt.execute(sql);
@@ -326,12 +333,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public Object query(final String sql, final ResultSetExtractor rse) throws DataAccessException {
-		Assert.notNull(rse, "ResultSetExtractor must not be null");
 		Assert.notNull(sql, "SQL must not be null");
-
+		Assert.notNull(rse, "ResultSetExtractor must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL query [" + sql + "]");
 		}
+
 		class QueryStatementCallback implements StatementCallback, SqlProvider {
 			public Object doInStatement(Statement stmt) throws SQLException {
 				ResultSet rs = null;
@@ -402,6 +409,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL update [" + sql + "]");
 		}
+
 		class UpdateStatementCallback implements StatementCallback, SqlProvider {
 			public Object doInStatement(Statement stmt) throws SQLException {
 				int rows = stmt.executeUpdate(sql);
@@ -418,10 +426,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public int[] batchUpdate(final String[] sql) throws DataAccessException {
-		Assert.notNull(sql, "SQL must not be null");
+		Assert.notEmpty(sql, "SQL array must not be empty");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update of " + sql.length + " statements");
 		}
+
 		class BatchUpdateStatementCallback implements StatementCallback, SqlProvider {
 			private String currSql;
 			public Object doInStatement(Statement stmt) throws SQLException, DataAccessException {
@@ -526,11 +535,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			throws DataAccessException {
 
 		Assert.notNull(rse, "ResultSetExtractor must not be null");
-
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(psc);
 			logger.debug("Executing SQL query" + (sql != null ? " [" + sql  + "]" : ""));
 		}
+
 		return execute(psc, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				ResultSet rs = null;
@@ -690,6 +699,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			String sql = getSql(psc);
 			logger.debug("Executing SQL update" + (sql != null ? " [" + sql  + "]" : ""));
 		}
+
 		Integer result = (Integer) execute(psc, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				try {
@@ -719,10 +729,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public int update(final PreparedStatementCreator psc, final KeyHolder generatedKeyHolder)
 			throws DataAccessException {
 
+		Assert.notNull(generatedKeyHolder, "KeyHolder must not be null");
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(psc);
 			logger.debug("Executing SQL update and returning generated keys" + (sql != null ? " [" + sql  + "]" : ""));
 		}
+
 		Integer result = (Integer) execute(psc, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				int rows = ps.executeUpdate();
@@ -767,6 +779,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update [" + sql + "]");
 		}
+
 		return (int[]) execute(sql, new PreparedStatementCallback() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				try {
@@ -804,10 +817,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public Object execute(CallableStatementCreator csc, CallableStatementCallback action)
 			throws DataAccessException {
 
+		Assert.notNull(csc, "CallableStatementCreator must not be null");
+		Assert.notNull(action, "Callback object must not be null");
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(csc);
 			logger.debug("Calling stored procedure" + (sql != null ? " [" + sql  + "]" : ""));
 		}
+
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		CallableStatement cs = null;
 		try {
