@@ -22,6 +22,7 @@ import junit.framework.TestCase;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CollectingReaderEventListener;
@@ -68,13 +69,13 @@ public class EventPublicationTests extends TestCase {
 		assertTrue(componentDefinition1 instanceof BeanComponentDefinition);
 		assertEquals(1, componentDefinition1.getBeanDefinitions().length);
 		BeanDefinition beanDefinition1 = componentDefinition1.getBeanDefinitions()[0];
-		assertEquals("Rob Harrop",
+		assertEquals(new TypedStringValue("Rob Harrop"),
 				beanDefinition1.getConstructorArgumentValues().getGenericArgumentValue(String.class).getValue());
 		assertEquals(1, componentDefinition1.getBeanReferences().length);
 		assertEquals("testBean2", componentDefinition1.getBeanReferences()[0].getBeanName());
 		assertEquals(1, componentDefinition1.getInnerBeanDefinitions().length);
 		BeanDefinition innerBd1 = componentDefinition1.getInnerBeanDefinitions()[0];
-		assertEquals("ACME",
+		assertEquals(new TypedStringValue("ACME"),
 				innerBd1.getConstructorArgumentValues().getGenericArgumentValue(String.class).getValue());
 		assertTrue(componentDefinition1.getSource() instanceof Element);
 
@@ -82,11 +83,13 @@ public class EventPublicationTests extends TestCase {
 		assertTrue(componentDefinition2 instanceof BeanComponentDefinition);
 		assertEquals(1, componentDefinition1.getBeanDefinitions().length);
 		BeanDefinition beanDefinition2 = componentDefinition2.getBeanDefinitions()[0];
-		assertEquals("Juergen Hoeller", beanDefinition2.getPropertyValues().getPropertyValue("name").getValue());
+		assertEquals(new TypedStringValue("Juergen Hoeller"),
+				beanDefinition2.getPropertyValues().getPropertyValue("name").getValue());
 		assertEquals(0, componentDefinition2.getBeanReferences().length);
 		assertEquals(1, componentDefinition2.getInnerBeanDefinitions().length);
 		BeanDefinition innerBd2 = componentDefinition2.getInnerBeanDefinitions()[0];
-		assertEquals("Eva Schallmeiner", innerBd2.getPropertyValues().getPropertyValue("name").getValue());
+		assertEquals(new TypedStringValue("Eva Schallmeiner"),
+				innerBd2.getPropertyValues().getPropertyValue("name").getValue());
 		assertTrue(componentDefinition2.getSource() instanceof Element);
 	}
 

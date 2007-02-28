@@ -698,7 +698,6 @@ public class BeanDefinitionParserDelegate {
 		}
 	}
 
-
 	/**
 	 * Get the value of a property element. May be a list etc.
 	 * Also used for constructor arguments, "propertyName" being null in this case.
@@ -747,7 +746,9 @@ public class BeanDefinitionParserDelegate {
 			return ref;
 		}
 		else if (hasValueAttribute) {
-			return ele.getAttribute(VALUE_ATTRIBUTE);
+			TypedStringValue valueHolder = new TypedStringValue(ele.getAttribute(VALUE_ATTRIBUTE));
+			valueHolder.setSource(extractSource(ele));
+			return valueHolder;
 		}
 		else if (subElement != null) {
 			return parsePropertySubElement(subElement, bd);
