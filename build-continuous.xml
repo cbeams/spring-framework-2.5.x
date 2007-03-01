@@ -31,12 +31,12 @@
         <delete quiet="true" dir="${upload.tmp.dir}"/>
         <mkdir dir="${upload.tmp.dir}"/>
         <tstamp>
-            <format property="tstamp" pattern="yyyyMMdd"/>
+            <format property="tstamp" pattern="yyyy-MM-dd"/>
         </tstamp>
         <move file="${target.release.dir}/${release-with-dependencies.zip}" 
-        	tofile="${upload.tmp.dir}/spring-framework-${spring-version}-with-dependencies-${label}-${tstamp}.zip"/>
+        	tofile="${upload.tmp.dir}/spring-framework-${spring-version}-with-dependencies-${tstamp}-${build.number}.zip"/>
         <move file="${target.release.dir}/${release.zip}" 
-        	tofile="${upload.tmp.dir}/spring-framework-${spring-version}-${label}-${tstamp}.zip"/>
+        	tofile="${upload.tmp.dir}/spring-framework-${spring-version}-${tstamp}-${build.number}.zip"/>
     </target>
     
     <target name="upload" depends="upload-log, upload-binaries"/>
