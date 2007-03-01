@@ -61,12 +61,13 @@ public abstract class DataSourceUtils {
 
 
 	/**
-	 * Obtain a Connection from the given DataSource. Translates any SQL exception into
+	 * Obtain a Connection from the given DataSource. Translates any SQLException into
 	 * the Spring hierarchy of unchecked generic data access exceptions, simplifying
 	 * calling code and making any exception that is thrown more meaningful.
 	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
 	 * when using {@link DataSourceTransactionManager}. Will bind a Connection to the
-	 * thread if transaction synchronization is active (e.g. if in a JTA transaction).
+	 * thread if transaction synchronization is active, e.g. when running within a
+	 * {@link org.springframework.transaction.jta.JtaTransactionManager JTA} transaction).
 	 * @param dataSource DataSource to get Connection from
 	 * @return a JDBC Connection from the given DataSource
 	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
