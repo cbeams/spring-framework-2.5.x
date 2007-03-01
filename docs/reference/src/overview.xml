@@ -107,9 +107,10 @@
 		which provides a sophisticated implementation of the	factory pattern which removes
 		the need for programmatic singletons and allows you to decouple the configuration and
 		specification of dependencies from your actual program logic.</para>
-		<para>On top of the <link linkend="beans-introduction"><emphasis>Core</emphasis></link>
-		package sits the <link linkend="context-introduction"><emphasis>Context</emphasis></link>
-		package, which provides a way to access objects in a framework-style manner in a fashion
+		<para>The <link linkend="context-introduction"><emphasis>Context</emphasis></link>
+		package build on the solid base provided by the
+		<link linkend="beans-introduction"><emphasis>Core</emphasis></link> package:
+		it provides a way to access objects in a framework-style manner in a fashion
 		somewhat reminiscent of a JNDI-registry. The context package inherits its features from the
 		beans package and adds support for internationalization (I18N) (using for example
 		resource bundles), event-propagation, resource-loading, and the transparent creation
@@ -188,14 +189,15 @@
 				</caption>
 			</mediaobject>
 		</para>
-		<para>Sometimes the current circumstances do not allow you to	completely switch to a
-		different framework. Spring does <emphasis>not</emphasis> force
-		you to use everything within it; it's not an <emphasis>all-or-nothing</emphasis>
-		solution. Existing front-ends built using WebWork, Struts, Tapestry, or other UI frameworks
-		can be integrated perfectly well with a Spring-based middle-tier, allowing you to use
-		the transaction features that Spring offers. The only thing you need to do is wire up
-		your business logic using an <classname>ApplicationContext</classname> and
-		integrate your web layer using a <classname>WebApplicationContext</classname>.</para>
+		<para>Sometimes the current circumstances do not allow you to completely switch
+		to a different framework. The Spring Framework does <emphasis>not</emphasis> force
+		you to use everything within it; it is not an <emphasis>all-or-nothing</emphasis>
+		solution. Existing front-ends built using WebWork, Struts, Tapestry, or other UI
+		frameworks can be integrated perfectly well with a Spring-based middle-tier,
+		allowing you to use the transaction features that Spring offers. The only thing
+		you need to do is wire up your business logic using an
+		<classname>ApplicationContext</classname> and integrate your web layer using a
+		<classname>WebApplicationContext</classname>.</para>
 		<para>
 			<mediaobject>
 				<imageobject role="fo">
@@ -212,7 +214,7 @@
 		<para>When you need to access existing code via web services, you can use Spring's
 		<literal>Hessian-</literal>, <literal>Burlap-</literal>, <literal>Rmi-</literal>
 		or <classname>JaxRpcProxyFactory</classname> classes. Enabling remote access to
-		existing applications is suddenly not that hard anymore.</para>
+		existing applications suddenly is not that hard anymore.</para>
 		<para>
 			<mediaobject>
 				<imageobject role="fo">
@@ -226,9 +228,10 @@
 				</caption>
 			</mediaobject>
 		</para>
-		<para>Spring also provides an <link linkend="ejb">access- and abstraction- layer</link> for
-		Enterprise JavaBeans, enabling you to reuse your existing POJOs and wrap them in
-		Stateless Session Beans, for use in scalable, failsafe web applications that might need
-		declarative security.</para>
+		<para>The Spring Framework also provides an
+		<link linkend="ejb">access- and abstraction- layer</link> for Enterprise
+		JavaBeans, enabling you to reuse your existing POJOs and wrap them in
+		Stateless Session Beans, for use in scalable, failsafe web applications
+		that might need declarative security.</para>
 	</section>
 </chapter>

@@ -84,15 +84,14 @@
 			<title>Context management and caching</title>
 			<para>The <literal>org.springframework.test</literal> package provides
 			support for consistent loading of Spring contexts, and caching of loaded
-			contexts. Support for the the cahing of loaded contexts is important,
+			contexts. Support for the caching of loaded contexts is important,
 			because if you are working on a large project, startup time may become
 			an issue - not because of the overhead of Spring itself, but because the
 			objects instantiated by the Spring container will themselves take time
 			to instantiate. For example, a project with 50-100 Hibernate mapping
 			files might take 10-20 seconds to load the mapping files, and incurring
 			that cost before running every single test case in every single test
-			fixture leads to slower overall test runs that could (and probably will)
-			reduce productivity.</para>
+			fixture will lead to slower overall test runs that could reduce productivity.</para>
 			<para>To address this issue, the
 			<classname>AbstractDependencyInjectionSpringContextTests</classname> has an
 			<literal>abstract</literal> <literal>protected</literal> method that
@@ -124,8 +123,7 @@
 			will automatically locate the corresponding object in the set of
 			configuration files specified in the <methodname>getConfigLocations()</methodname>
 			method.</para>
-			<para>Let's look at a simple example of this quite powerful feature in
-			action. Consider the scenario where we have a class,
+			<para>Consider the scenario where we have a class,
 			<classname>HibernateTitleDao</classname>, that performs data access
 			logic for say, the <classname>Title</classname> domain object. We want
 			to write integration tests that test all of the following areas:</para>
@@ -136,14 +134,12 @@
 					<classname>HibernateTitleDao</classname> bean correct and present?</para>
 				</listitem>
 				<listitem>
-					<para>The Hibernate mapping file configuration; basically, is
-					everything mapped correctly and are the correct lazy-loading
-					settings in place?</para>
+					<para>The Hibernate mapping file configuration; is everything
+					mapped correctly and are the correct lazy-loading settings in place?</para>
 				</listitem>
 				<listitem>
 					<para>The logic of the <classname>HibernateTitleDao</classname>;
-					basically does the configured instance of this class perform as
-					anticipated?</para>
+					does the configured instance of this class perform as anticipated?</para>
 				</listitem>
 			</itemizedlist>
 			<para>Let's look at the test class itself (we will look at the
@@ -231,7 +227,7 @@
 
 }]]></programlisting>
 				<para>In the case of field injection, there is no autowiring going on:
-				the name of your <literal>protected</literal> instances variable (s
+				the name of your <literal>protected</literal> instances variable(s)
 				are used as the lookup bean name in the configured Spring container.</para>
 			</section>
 		</section>
@@ -241,11 +237,11 @@
 			affect on the state of the persistence store. Even when you're using
 			a development database, changes to the state may affect future tests.
 			Also, many operations - such as inserting to or modifying
-			persistent data - can't be done (or verified) outside a transaction. </para>
+			persistent data - cannot be done (or verified) outside a transaction.</para>
 			<para>The
 			<classname>org.springframework.test.AbstractTransactionalDataSourceSpringContextTests</classname>
 			superclass (and subclasses) exist to meet this need. By default, they
-			create and roll back a transaction for each test case. You simply write
+			create and roll back a transaction for each test. You simply write
 			code that can assume the existence of a transaction. If you call
 			transactionally proxied objects in your tests, they will behave
 			correctly, according to their transactional semantics. </para>
@@ -261,8 +257,8 @@
 			useful for convenient querying, and provides handy methods to delete the
 			contents of selected tables (remember that the transaction will roll
 			back by default, so this is safe to do).</para>
-			<para>If you want a transaction to commit - unusual, but useful if you
-			want a particular test to populate the database, for example - you can
+			<para>If you want a transaction to commit - unusual, but occasionally
+			useful when you want a particular test to populate the database - you can
 			call the <methodname>setComplete()</methodname> method inherited from
 			<classname>AbstractTransactionalSpringContextTests</classname>. This will
 			cause the transaction to commit instead of roll back.</para>
