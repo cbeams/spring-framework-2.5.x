@@ -72,45 +72,47 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	private final Map cache = new HashMap();
+	final Map attributeCache = new HashMap();
 
 
 	/**
-	 * Return the transaction attribute for this method invocation.
+	 * Determine the transaction attribute for this method invocation.
 	 * <p>Defaults to the class's transaction attribute if no method attribute is found.
 	 * @param method the method for the current invocation (never <code>null</code>)
 	 * @param targetClass the target class for this invocation (may be <code>null</code>)
 	 * @return TransactionAttribute for this method, or <code>null</code> if the method
 	 * is not transactional
 	 */
-	public final TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
+	public TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
 		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);
-		Object cached = this.cache.get(cacheKey);
-		if (cached != null) {
-			// Value will either be canonical value indicating there is no transaction attribute,
-			// or an actual transaction attribute.
-			if (cached == NULL_TRANSACTION_ATTRIBUTE) {
-				return null;
-			}
-			else {
-				return (TransactionAttribute) cached;
-			}
-		}
-		else {
-			// We need to work it out.
-			TransactionAttribute txAtt = computeTransactionAttribute(method, targetClass);
-			// Put it in the cache.
-			if (txAtt == null) {
-				this.cache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Adding transactional method [" + method.getName() + "] with attribute [" + txAtt + "]");
+		synchronized (this.attributeCache) {
+			Object cached = this.attributeCache.get(cacheKey);
+			if (cached != null) {
+				// Value will either be canonical value indicating there is no transaction attribute,
+				// or an actual transaction attribute.
+				if (cached == NULL_TRANSACTION_ATTRIBUTE) {
+					return null;
 				}
-				this.cache.put(cacheKey, txAtt);
+				else {
+					return (TransactionAttribute) cached;
+				}
 			}
-			return txAtt;
+			else {
+				// We need to work it out.
+				TransactionAttribute txAtt = computeTransactionAttribute(method, targetClass);
+				// Put it in the cache.
+				if (txAtt == null) {
+					this.attributeCache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
+				}
+				else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Adding transactional method [" + method.getName() + "] with attribute [" + txAtt + "]");
+					}
+					this.attributeCache.put(cacheKey, txAtt);
+				}
+				return txAtt;
+			}
 		}
 	}
 

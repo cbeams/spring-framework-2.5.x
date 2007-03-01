@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 
@@ -33,6 +31,7 @@ import org.springframework.transaction.TransactionDefinition;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class CommonsAttributesTransactionAttributeSourceTests extends TestCase {
 
@@ -183,23 +182,12 @@ public class CommonsAttributesTransactionAttributeSourceTests extends TestCase {
 	public void testUnboundedCacheSizeGrowth() throws Exception {
 		Attributes attributes = new CommonsAttributes();
 		AttributesTransactionAttributeSource attributeSource = new AttributesTransactionAttributeSource(attributes);
-
 		for (int i = 0; i < 100; i++) {
 			PrototypeBean bean = new PrototypeBean();
 			Method m = bean.getClass().getMethod("doNothing", new Class[0]);
 			attributeSource.getTransactionAttribute(m, bean.getClass());
-			Map cache = (Map) getPrivateField(attributeSource,
-					AbstractFallbackTransactionAttributeSource.class, "cache");
-			assertEquals("Cache size should not increase: i=" + i, 1, cache.size());
+			assertEquals("Cache size should not increase: i=" + i, 1, attributeSource.attributeCache.size());
 		}
-	}
-
-	private static Object getPrivateField(Object obj, Class clazz,
-			String fieldName) throws NoSuchFieldException,
-			IllegalAccessException {
-		Field field = clazz.getDeclaredField(fieldName);
-		field.setAccessible(true);
-		return field.get(obj);
 	}
 
 
