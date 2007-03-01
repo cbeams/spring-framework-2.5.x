@@ -36,9 +36,9 @@ import org.springframework.util.SystemPropertyUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * Default implementation of the BeanDefinitionDocumentReader interface.
- * Reads bean definitions according to the "spring-beans" DTD,
- * that is, Spring's default XML bean definition format.
+ * Default implementation of the {@link BeanDefinitionDocumentReader} interface.
+ * Reads bean definitions according to the "spring-beans" DTD and XSD format
+ * (Spring's default XML bean definition format).
  *
  * <p>The structure, elements and attribute names of the required XML document
  * are hard-coded in this class. (Of course a transform could be run if necessary
@@ -167,9 +167,15 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		location = SystemPropertyUtils.resolvePlaceholders(location);
 
 		if (ResourcePatternUtils.isUrl(location)) {
-			int importCount = getReaderContext().getReader().loadBeanDefinitions(location);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Imported " + importCount + " bean definitions from URL location [" + location + "]");
+			try {
+				int importCount = getReaderContext().getReader().loadBeanDefinitions(location);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Imported " + importCount + " bean definitions from URL location [" + location + "]");
+				}
+			}
+			catch (BeanDefinitionStoreException ex) {
+				getReaderContext().error(
+						"Failed to import bean definitions from URL location [" + location + "]", ele, ex);
 			}
 		}
 		else {
@@ -183,7 +189,11 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			}
 			catch (IOException ex) {
 				getReaderContext().error(
-						"Invalid relative resource location [" + location + "] to import bean definitions from", ele, null, ex);
+						"Invalid relative resource location [" + location + "] to import bean definitions from", ele, ex);
+			}
+			catch (BeanDefinitionStoreException ex) {
+				getReaderContext().error(
+						"Failed to import bean definitions from relative location [" + location + "]", ele, ex);
 			}
 		}
 
@@ -210,7 +220,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				getReaderContext().getRegistry().registerAlias(name, alias);
 			}
 			catch (BeanDefinitionStoreException ex) {
-				getReaderContext().error(ex.getMessage(), ele);
+				getReaderContext().error("Failed to register alias '" + alias +
+						"' for bean with name '" + name + "'", ele, ex);
 			}
 			getReaderContext().fireAliasRegistered(name, alias, extractSource(ele));
 		}
@@ -224,8 +235,14 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 		if (bdHolder != null) {
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
-			// Register the final decorated instance.
-			BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
+			try {
+				// Register the final decorated instance.
+				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
+			}
+			catch (BeanDefinitionStoreException ex) {
+				getReaderContext().error("Failed to register bean definition with name '" +
+						bdHolder.getBeanName() + "'", ele, ex);
+			}
 			// Send registration event.
 			getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
 		}
