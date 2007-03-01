@@ -16,6 +16,7 @@
 
 package org.springframework.scripting.jruby;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jruby.IRuby;
+import org.jruby.RubyArray;
 import org.jruby.RubyException;
 import org.jruby.RubyNil;
 import org.jruby.ast.ClassNode;
@@ -36,7 +38,6 @@ import org.jruby.runtime.builtin.IRubyObject;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -72,9 +73,7 @@ public abstract class JRubyScriptUtils {
 	 * @return the scripted Java object
 	 * @throws JumpException in case of JRuby parsing failure
 	 */
-	public static Object createJRubyObject(String scriptSource, Class[] interfaces, ClassLoader classLoader)
-			throws JumpException {
-
+	public static Object createJRubyObject(String scriptSource, Class[] interfaces, ClassLoader classLoader) {
 		IRuby ruby = initializeRuntime();
 
 		Node scriptRootNode = ruby.parse(scriptSource, "", null);
@@ -86,7 +85,7 @@ public abstract class JRubyScriptUtils {
 		}
 		// still null?
 		if (rubyObject instanceof RubyNil) {
-			throw new ScriptCompilationException("Compilation of JRuby script returned '" + rubyObject + "'.");
+			throw new IllegalStateException("Compilation of JRuby script returned RubyNil: " + rubyObject);
 		}
 
 		return Proxy.newProxyInstance(classLoader, interfaces, new RubyObjectInvocationHandler(rubyObject, ruby));
@@ -174,7 +173,7 @@ public abstract class JRubyScriptUtils {
 				IRubyObject[] rubyArgs = convertToRuby(args);
 				IRubyObject rubyResult =
 						this.rubyObject.callMethod(this.ruby.getCurrentContext(), method.getName(), rubyArgs);
-				return JavaEmbedUtils.rubyToJava(this.ruby, rubyResult, method.getReturnType());
+				return convertFromRuby(rubyResult, method.getReturnType());
 			}
 			catch (RaiseException ex) {
 				throw new JRubyExecutionException(ex);
@@ -200,6 +199,21 @@ public abstract class JRubyScriptUtils {
 			}
 			return rubyArgs;
 		}
+
+		private Object convertFromRuby(IRubyObject rubyResult, Class returnType) {
+			Object result = JavaEmbedUtils.rubyToJava(this.ruby, rubyResult, returnType);
+			if (result instanceof RubyArray && returnType.isArray()) {
+				IRubyObject[] rubyArray = ((RubyArray) result).toJavaArray();
+				Class targetType = returnType.getComponentType();
+				Object javaArray = Array.newInstance(targetType, rubyArray.length);
+				for (int i = 0; i < rubyArray.length; i++) {
+					IRubyObject rubyObject = (IRubyObject) rubyArray[i];
+					Array.set(javaArray, i, JavaEmbedUtils.rubyToJava(this.ruby, rubyObject, targetType));
+				}
+				result = javaArray;
+			}
+			return result;
+		}
 	}
 
 
@@ -215,14 +229,14 @@ public abstract class JRubyScriptUtils {
 		/**
 		 * Create a new <code>JRubyException</code>,
 		 * wrapping the given JRuby <code>RaiseException</code>.
-		 * @param exception the cause (must not be <code>null</code>)
+		 * @param ex the cause (must not be <code>null</code>)
 		 */
-		public JRubyExecutionException(RaiseException exception) {
-			super(buildMessage(exception), exception);
+		public JRubyExecutionException(RaiseException ex) {
+			super(buildMessage(ex), ex);
 		}
 
-		private static String buildMessage(RaiseException exception) {
-			RubyException rubyEx = exception.getException();
+		private static String buildMessage(RaiseException ex) {
+			RubyException rubyEx = ex.getException();
 			return (rubyEx != null && rubyEx.message != null) ? rubyEx.message.toString() : "Unexpected JRuby error";
 		}
 	}

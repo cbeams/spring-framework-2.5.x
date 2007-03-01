@@ -20,10 +20,10 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.JdkVersion;
-import org.springframework.core.NestedRuntimeException;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
@@ -42,7 +42,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 					"RubyBar.new";
 
 
-	public void testStatic() throws Exception {
+	public void testStaticScript() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
@@ -65,7 +65,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
 	}
 
-	public void testNonStatic() throws Exception {
+	public void testNonStaticScript() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
@@ -96,8 +96,8 @@ public class JRubyScriptFactoryTests extends TestCase {
 			new ClassPathXmlApplicationContext("org/springframework/scripting/jruby/jrubyBrokenContext.xml");
 			fail("Should throw exception for broken script file");
 		}
-		catch (NestedRuntimeException e) {
-			assertTrue(e.contains(ScriptCompilationException.class));
+		catch (BeanCreationException ex) {
+			assertTrue(ex.contains(ScriptCompilationException.class));
 		}
 	}
 
@@ -203,6 +203,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
+
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContext.xml", getClass());
 		Printer printer = (Printer) ctx.getBean("printer");
 		CountingPrintable printable = new CountingPrintable();
@@ -214,6 +215,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
+
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContextForPrimitives.xml", getClass());
 		PrimitiveAdder adder = (PrimitiveAdder) ctx.getBean("adder");
 		assertEquals(2, adder.addInts(1, 1));
@@ -230,6 +232,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
+
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContextForWrappers.xml", getClass());
 		WrapperAdder adder = (WrapperAdder) ctx.getBean("adder");
 		assertEquals(new Integer(2), adder.addInts(new Integer(1), new Integer(1)));
@@ -252,13 +255,12 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertEquals("12345", adder.concatArrayOfIntegerWrappers(numbers));
 		assertEquals(String.class, adder.concatArrayOfIntegerWrappers(numbers).getClass());
 
-		// arrays as return values are not converted correctly
-//		Short[] shorts = adder.populate(new Short((short) 1), new Short((short) 2));
-//		assertEquals(2, shorts.length);
-//		assertNotNull(shorts[0]);
-//		assertEquals(new Short((short) 1), shorts[0]);
-//		assertNotNull(shorts[1]);
-//		assertEquals(new Short((short) 2), shorts[1]);
+		Short[] shorts = adder.populate(new Short((short) 1), new Short((short) 2));
+		assertEquals(2, shorts.length);
+		assertNotNull(shorts[0]);
+		assertEquals(new Short((short) 1), shorts[0]);
+		assertNotNull(shorts[1]);
+		assertEquals(new Short((short) 2), shorts[1]);
 	}
 
 
