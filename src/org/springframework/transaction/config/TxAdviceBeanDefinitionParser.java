@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package org.springframework.transaction.config;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.w3c.dom.Element;
 
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -36,8 +36,12 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
+ * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
+ * for the <code>&lt;tx:advice&gt;</code> tag.
+ *
  * @author Rob Harrop
  * @author Adrian Colyer
+ * @author Juergen Hoeller
  * @since 2.0
  */
 class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
@@ -70,7 +74,8 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 		List txAttributes = DomUtils.getChildElementsByTagName(element, ATTRIBUTES);
 		if (txAttributes.size() > 1) {
-			throw new IllegalStateException("Element 'attributes' is allowed at most once inside element 'advice'");
+			parserContext.getReaderContext().error(
+					"Element <attributes> is allowed at most once inside element <advice>", element);
 		}
 		else if (txAttributes.size() == 1) {
 			// Using attributes source.
@@ -87,11 +92,15 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	private RootBeanDefinition parseAttributeSource(Element attributesElement, ParserContext parserContext) {
 		List methods = DomUtils.getChildElementsByTagName(attributesElement, "method");
-		Map transactionAttributeMap = new HashMap(methods.size());
+		ManagedMap transactionAttributeMap = new ManagedMap(methods.size());
+		transactionAttributeMap.setSource(parserContext.extractSource(attributesElement));
 
 		for (int i = 0; i < methods.size(); i++) {
 			Element methodElement = (Element) methods.get(i);
+
 			String name = methodElement.getAttribute("name");
+			TypedStringValue nameHolder = new TypedStringValue(name);
+			nameHolder.setSource(parserContext.extractSource(methodElement));
 
 			RuleBasedTransactionAttribute attribute = new RuleBasedTransactionAttribute();
 			attribute.setPropagationBehaviorName(
@@ -112,13 +121,12 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 			}
 			attribute.setRollbackRules(rollbackRules);
 
-			transactionAttributeMap.put(name, attribute);
+			transactionAttributeMap.put(nameHolder, attribute);
 		}
 
 		RootBeanDefinition attributeSourceDefinition = new RootBeanDefinition(NameMatchTransactionAttributeSource.class);
 		attributeSourceDefinition.setSource(parserContext.extractSource(attributesElement));
 		attributeSourceDefinition.getPropertyValues().addPropertyValue(NAME_MAP, transactionAttributeMap);
-
 		return attributeSourceDefinition;
 	}
 
