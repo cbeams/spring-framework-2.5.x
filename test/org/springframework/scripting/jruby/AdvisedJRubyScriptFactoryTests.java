@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.scripting.Messenger;
 
 /**
  * @author Rob Harrop
- * @since 2.0
  */
 public class AdvisedJRubyScriptFactoryTests extends TestCase {
 
@@ -39,9 +38,11 @@ public class AdvisedJRubyScriptFactoryTests extends TestCase {
 
 		ApplicationContext context =
 				new ClassPathXmlApplicationContext("advisedByProxyFactoryBean.xml", getClass());
+
 		Messenger bean = (Messenger) context.getBean("messenger");
 		assertTrue("Bean is not a proxy", AopUtils.isAopProxy(bean));
 		assertTrue("Bean is not an Advised object", bean instanceof Advised);
+
 		CountingBeforeAdvice advice = (CountingBeforeAdvice) context.getBean("advice");
 		assertEquals(0, advice.getCalls());
 		bean.getMessage();
@@ -55,9 +56,11 @@ public class AdvisedJRubyScriptFactoryTests extends TestCase {
 
 		ApplicationContext context =
 				new ClassPathXmlApplicationContext("advisedByBeanNameAutoProxyCreator.xml", getClass());
+
 		Messenger bean = (Messenger) context.getBean("messenger");
 		assertTrue("Bean is not a proxy", AopUtils.isAopProxy(bean));
 		assertTrue("Bean is not an Advised object", bean instanceof Advised);
+
 		CountingBeforeAdvice advice = (CountingBeforeAdvice) context.getBean("advice");
 		assertEquals(0, advice.getCalls());
 		bean.getMessage();
