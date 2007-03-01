@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package org.springframework.scripting.support;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.JdkVersion;
@@ -30,18 +30,20 @@ import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.groovy.GroovyScriptFactory;
 
-import java.lang.reflect.Field;
-
 /**
  * Unit and integration tests for the ScriptFactoryPostProcessor class.
  *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public final class ScriptFactoryPostProcessorTests extends TestCase {
 
 	private static final String MESSAGE_TEXT = "Bingo";
+
 	private static final String MESSENGER_BEAN_NAME = "messenger";
+
 	private static final String PROCESSOR_BEAN_NAME = "processor";
+
 	private static final String CHANGED_SCRIPT = "package org.springframework.scripting.groovy\n" +
 			"import org.springframework.scripting.Messenger\n" +
 			"class GroovyMessenger implements Messenger {\n" +
@@ -54,8 +56,11 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 			"    this.message = message\n" +
 			"  }\n" +
 			"}";
+
 	private static final String EXPECTED_CHANGED_MESSAGE_TEXT = "'" + MESSAGE_TEXT + "'";
+
 	private static final int DEFAULT_SECONDS_TO_PAUSE = 1;
+
 	private static final String DELEGATING_SCRIPT = "inline:package org.springframework.scripting;\n" +
 			"class DelegatingMessenger implements Messenger {\n" +
 			"  private Messenger wrappedMessenger;\n" +
@@ -255,13 +260,9 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 		assertNotSame(messenger1, messenger2);
 	}
 
-	// This is very brittle (depends on private implementation details of the ScriptFactoryPostProcessor class).
 	private static StaticScriptSource getScriptSource(GenericApplicationContext ctx) throws Exception {
 		ScriptFactoryPostProcessor processor = (ScriptFactoryPostProcessor) ctx.getBean(PROCESSOR_BEAN_NAME);
-		final Field factoryField = processor.getClass().getDeclaredField("scriptBeanFactory");
-		factoryField.setAccessible(true);
-		DefaultListableBeanFactory scriptFactory = (DefaultListableBeanFactory) factoryField.get(processor);
-		BeanDefinition bd = scriptFactory.getBeanDefinition("scriptedObject.messenger");
+		BeanDefinition bd = processor.scriptBeanFactory.getBeanDefinition("scriptedObject.messenger");
 		return (StaticScriptSource) bd.getConstructorArgumentValues().getIndexedArgumentValue(0, StaticScriptSource.class).getValue();
 	}
 
@@ -296,6 +297,7 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 		catch (InterruptedException ignored) {
 		}
 	}
+
 
 	public static final class DefaultMessengerService {
 

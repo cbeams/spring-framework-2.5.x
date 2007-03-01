@@ -87,7 +87,7 @@ import org.springframework.util.StringUtils;
  *   &lt;constructor-arg value="classpath:mypackage/Messenger.groovy"/&gt;
  *   &lt;property name="message" value="Hello World!"/&gt;
  * &lt;/bean&gt;</pre>
- * 
+ *
  * <p><b>NOTE:</b> Please note that the above excerpt from a Spring
  * XML bean definition file uses just the &lt;bean/&gt;-style syntax
  * (in an effort to illustrate using the {@link ScriptFactoryPostProcessor} itself).
@@ -96,27 +96,27 @@ import org.springframework.util.StringUtils;
  * tags from the <code>'lang'</code> namespace and simply create scripted
  * beans using the tags in that namespace... as part of doing so, a
  * {@link ScriptFactoryPostProcessor} will implicitly be created for you.
- * 
+ *
  * <p>The Spring reference documentation contains numerous examples of using
  * tags in the <code>'lang'</code> namespace; by way of an example, find below
  * a Groovy-backed bean defined using the <code>'lang:groovy'</code> tag.
- * 
+ *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
- *&lt;beans xmlns="http://www.springframework.org/schema/beans"
- *       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- *       xmlns:lang="http://www.springframework.org/schema/lang"&gt;
+ * &lt;beans xmlns="http://www.springframework.org/schema/beans"
+ *     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ *     xmlns:lang="http://www.springframework.org/schema/lang"&gt;
  *
- *    &lt;!-- this is the bean definition for the Groovy-backed Messenger implementation --&gt;
- *    &lt;lang:groovy id="messenger" script-source="classpath:Messenger.groovy"&gt;
- *        &lt;lang:property name="message" value="I Can Do The Frug" /&gt;
- *    &lt;/lang:groovy&gt;
+ *   &lt;!-- this is the bean definition for the Groovy-backed Messenger implementation --&gt;
+ *   &lt;lang:groovy id="messenger" script-source="classpath:Messenger.groovy"&gt;
+ *     &lt;lang:property name="message" value="I Can Do The Frug" /&gt;
+ *   &lt;/lang:groovy&gt;
  *
- *    &lt;!-- an otherwise normal bean that will be injected by the Groovy-backed Messenger --&gt;
- *    &lt;bean id="bookingService" class="x.y.DefaultBookingService"&gt;
- *        &lt;property name="messenger" ref="messenger" /&gt;
- *    &lt;/bean&gt;
+ *   &lt;!-- an otherwise normal bean that will be injected by the Groovy-backed Messenger --&gt;
+ *   &lt;bean id="bookingService" class="x.y.DefaultBookingService"&gt;
+ *     &lt;property name="messenger" ref="messenger" /&gt;
+ *   &lt;/bean&gt;
  *
- *&lt;/beans&gt;</pre>
+ * &lt;/beans&gt;</pre>
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -153,7 +153,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	private DefaultListableBeanFactory scriptBeanFactory = new DefaultListableBeanFactory();
+	final DefaultListableBeanFactory scriptBeanFactory = new DefaultListableBeanFactory();
 
 
 	/**
@@ -212,14 +212,15 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 					convertToScriptSource(scriptFactory.getScriptSourceLocator(), this.resourceLoader);
 			Class[] interfaces = scriptFactory.getScriptInterfaces();
 
+			Class[] scriptedInterfaces = interfaces;
 			if (scriptFactory.requiresConfigInterface() && !bd.getPropertyValues().isEmpty()) {
 				PropertyValue[] pvs = bd.getPropertyValues().getPropertyValues();
 				Class configInterface = createConfigInterface(pvs, interfaces);
-				interfaces = (Class[]) ObjectUtils.addObjectToArray(interfaces, configInterface);
+				scriptedInterfaces = (Class[]) ObjectUtils.addObjectToArray(interfaces, configInterface);
 			}
 
 			RootBeanDefinition objectBd = createScriptedObjectBeanDefinition(
-					bd, scriptFactoryBeanName, scriptSource, interfaces);
+					bd, scriptFactoryBeanName, scriptSource, scriptedInterfaces);
 
 			long refreshCheckDelay = resolveRefreshCheckDelay(bd);
 
@@ -234,7 +235,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 				ts.setRefreshCheckDelay(refreshCheckDelay);
 				return createRefreshableProxy(ts, interfaces);
 			}
-        }
+		}
 
 		return this.scriptBeanFactory.getBean(scriptedObjectBeanName);
 	}
@@ -246,11 +247,12 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * under the key {@link #REFRESH_CHECK_DELAY_ATTRIBUTE} which is a valid {@link Number}
 	 * type, then this value is used. Otherwise, the the {@link #defaultRefreshCheckDelay}
 	 * value is used.
+	 * @param beanDefinition the BeanDefinition to check
 	 * @return the refresh check delay
 	 */
-	protected long resolveRefreshCheckDelay(BeanDefinition bd) {
+	protected long resolveRefreshCheckDelay(BeanDefinition beanDefinition) {
 		long refreshCheckDelay = this.defaultRefreshCheckDelay;
-		Object attributeValue = bd.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
+		Object attributeValue = beanDefinition.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
 		if (attributeValue instanceof Number) {
 			refreshCheckDelay = ((Number) attributeValue).longValue();
 		}
