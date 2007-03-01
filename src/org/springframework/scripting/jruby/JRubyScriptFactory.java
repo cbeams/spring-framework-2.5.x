@@ -18,7 +18,9 @@ package org.springframework.scripting.jruby;
 
 import java.io.IOException;
 
+import org.jruby.RubyException;
 import org.jruby.exceptions.JumpException;
+import org.jruby.exceptions.RaiseException;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.scripting.ScriptCompilationException;
@@ -33,9 +35,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Typically used in combination with a
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
- * see the latter's
- * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor javadoc}
- * for a configuration example.
+ * see the latter's javadoc for a configuration example.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -82,7 +82,6 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 	/**
 	 * JRuby scripts do require a config interface.
-	 * @return <code>true</code> always
 	 */
 	public boolean requiresConfigInterface() {
 		return true;
@@ -98,8 +97,16 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 			return JRubyScriptUtils.createJRubyObject(
 					actualScriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
 		}
+		catch (RaiseException ex) {
+			RubyException rubyEx = ex.getException();
+			String msg = (rubyEx != null && rubyEx.message != null) ?
+					rubyEx.message.toString() : "Unexpected JRuby error";
+			throw new ScriptCompilationException(
+					"Could not compile JRuby script [" + actualScriptSource + "]: " + msg, ex);
+		}
 		catch (JumpException ex) {
-			throw new ScriptCompilationException("Could not compile JRuby script: " + actualScriptSource, ex);
+			throw new ScriptCompilationException(
+					"Could not compile JRuby script [" + actualScriptSource + "]", ex);
 		}
 	}
 
