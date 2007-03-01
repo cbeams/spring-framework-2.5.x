@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -169,10 +168,11 @@ public class BeanDefinitionReaderUtils {
 	 * Register the given bean definition with the given bean factory.
 	 * @param bdHolder the bean definition including name and aliases
 	 * @param beanFactory the bean factory to register with
-	 * @throws BeansException if registration failed
+	 * @throws BeanDefinitionStoreException if registration failed
 	 */
 	public static void registerBeanDefinition(
-			BeanDefinitionHolder bdHolder, BeanDefinitionRegistry beanFactory) throws BeansException {
+			BeanDefinitionHolder bdHolder, BeanDefinitionRegistry beanFactory)
+			throws BeanDefinitionStoreException {
 
 		// Register bean definition under primary name.
 		String beanName = bdHolder.getBeanName();
