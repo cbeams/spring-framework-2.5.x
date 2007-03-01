@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import org.springframework.util.Assert;
 /**
  * Static implementation of the
  * {@link org.springframework.scripting.ScriptSource} interface,
- * encapsulating a given String that contains the script
- * source text.
+ * encapsulating a given String that contains the script source text.
+ * Supports programmatic updates of the script String.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -51,24 +51,24 @@ public class StaticScriptSource implements ScriptSource {
 	 * @param script the script String
 	 * @throws IllegalArgumentException if the supplied <code>script</code> is <code>null</code>
 	 */
-	public void setScript(String script) {
-		Assert.hasText(script, "'script' must not be empty");
+	public synchronized void setScript(String script) {
+		Assert.hasText(script, "Script must not be empty");
 		this.modified = !script.equals(this.script);
 		this.script = script;
 	}
 
 
-	public String getScriptAsString() {
+	public synchronized String getScriptAsString() {
 		this.modified = false;
 		return this.script;
 	}
 
-	public boolean isModified() {
+	public synchronized boolean isModified() {
 		return this.modified;
 	}
 
 
-	public String toString() {
+	public synchronized String toString() {
 		return this.script;
 	}
 
