@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,25 @@
 
 package org.springframework.aop.config;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.Conventions;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link BeanDefinitionParser} implementation that for the '<code>aspectj-autoproxy</code>' tag
- * that enables the automatic application of @AspectJ-style aspects found in the
- * {@link org.springframework.beans.factory.BeanFactory}.
+ * {@link BeanDefinitionParser} for the <code>aspectj-autoproxy</code> tag,
+ * enabling the automatic application of @AspectJ-style aspects found in
+ * the {@link org.springframework.beans.factory.BeanFactory}.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
@@ -46,32 +45,34 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		BeanDefinitionRegistry registry = parserContext.getRegistry();
 		AopNamespaceUtils.registerAtAspectJAutoProxyCreatorIfNecessary(parserContext, element);
-		extendBeanDefinition(registry, element);
+		extendBeanDefinition(element, parserContext);
 		return null;
 	}
 
-	private void extendBeanDefinition(BeanDefinitionRegistry registry, Element element) {
-		BeanDefinition beanDef = registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+	private void extendBeanDefinition(Element element, ParserContext parserContext) {
+		BeanDefinition beanDef =
+				parserContext.getRegistry().getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		String proxyTargetClass = element.getAttribute(PROXY_TARGET_ATTRIBUTE);
 		if (StringUtils.hasText(proxyTargetClass)) {
 			beanDef.getPropertyValues().addPropertyValue(PROXY_TARGET_CLASS, proxyTargetClass);
 		}
 		if (element.hasChildNodes()) {
-			addIncludePatterns(element, beanDef);
+			addIncludePatterns(element, parserContext, beanDef);
 		}
 	}
 
-	private void addIncludePatterns(Element element, BeanDefinition beanDef) {
-		List includePatterns = new LinkedList();
+	private void addIncludePatterns(Element element, ParserContext parserContext, BeanDefinition beanDef) {
+		ManagedList includePatterns = new ManagedList();
+		includePatterns.setSource(parserContext.extractSource(element));
 		NodeList childNodes = element.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node node = childNodes.item(i);
 			if (node instanceof Element) {
-				Element include = (Element) node;
-				String patternText = include.getAttribute("name");
-				includePatterns.add(patternText);
+				Element includeElement = (Element) node;
+				TypedStringValue valueHolder = new TypedStringValue(includeElement.getAttribute("name"));
+				valueHolder.setSource(parserContext.extractSource(includeElement));
+				includePatterns.add(valueHolder);
 			}
 		}
 		beanDef.getPropertyValues().addPropertyValue("includePatterns", includePatterns);
