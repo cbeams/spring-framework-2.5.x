@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public abstract class WebUtils {
 	/** Name suffixes in case of image buttons */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
 
-	/* Key for the mutex session attribute */
+	/** Key for the mutex session attribute */
 	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
 
 
@@ -166,6 +166,7 @@ public abstract class WebUtils {
 	 * a resource (in contrast to ServletContext's <code>getRealPath</code>,
 	 * which returns null).
 	 * @param servletContext the servlet context of the web application
+	 * @param path the path within the web application
 	 * @return the corresponding real path
 	 * @throws FileNotFoundException if the path cannot be resolved to a resource
 	 * @see javax.servlet.ServletContext#getRealPath
@@ -236,6 +237,7 @@ public abstract class WebUtils {
 	 * Does not create a new session if not necessary!
 	 * @param request current HTTP request
 	 * @param name the name of the session attribute
+	 * @param value the value of the session attribute
 	 */
 	public static void setSessionAttribute(HttpServletRequest request, String name, Object value) {
 		Assert.notNull(request, "Request must not be null");
@@ -339,6 +341,7 @@ public abstract class WebUtils {
 	/**
 	 * Retrieve the first cookie with the given name. Note that multiple
 	 * cookies can have the same name but different paths or domains.
+	 * @param request current servlet request
 	 * @param name cookie name
 	 * @return the first cookie with the given name, or <code>null</code> if none is found
 	 */
