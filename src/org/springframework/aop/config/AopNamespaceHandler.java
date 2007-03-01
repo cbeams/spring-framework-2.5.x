@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,12 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  *
  * <pre class="code">
  * &lt;aop:advisor id=&quot;getAgeAdvisor&quot;
- *              pointcut=&quot;execution(* *..ITestBean.getAge(..))&quot;
- *              advice-ref=&quot;getAgeCounter&quot;/&gt;
+ *     pointcut=&quot;execution(* *..ITestBean.getAge(..))&quot;
+ *     advice-ref=&quot;getAgeCounter&quot;/&gt;
  *
  * &lt;aop:advisor id=&quot;getNameAdvisor&quot;
- *              pointcut-ref=&quot;getNameCalls&quot;
- *              advice-ref=&quot;getNameCounter&quot;/&gt;
- * </pre>
+ *     pointcut-ref=&quot;getNameCalls&quot;
+ *     advice-ref=&quot;getNameCounter&quot;/&gt;</pre>
  *
  * @author Rob Harrop
  * @author Adrian Colyer

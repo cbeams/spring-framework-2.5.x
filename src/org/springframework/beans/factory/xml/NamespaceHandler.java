@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,34 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 
 /**
  * Base interface used by the {@link DefaultBeanDefinitionDocumentReader} for
  * handling custom namespaces in a Spring XML configuration file.
- * 
+ *
  * <p>Implementations are expected to return implementations of the
  * {@link BeanDefinitionParser} interface for custom top-level tags and
  * implementations of the {@link BeanDefinitionDecorator} interface for
  * custom nested tags.
- * 
+ *
  * <p>The parser will call {@link #parse} when it encounters a custom tag
- * directly under the <code>&lt;beans&gt;</code> tags and {@link #decorate}
- * when it encounters a custom tag directly under a <code>&lt;bean&gt;</code>
- * tag.
- * 
+ * directly under the <code>&lt;beans&gt;</code> tags and {@link #decorate} when
+ * it encounters a custom tag directly under a <code>&lt;bean&gt;</code> tag.
+ *
  * <p>Developers writing their own custom element extensions typically will
  * not implement this interface drectly, but rather make use of the provided
  * {@link NamespaceHandlerSupport} class.
  *
  * @author Rob Harrop
  * @author Erik Wiersma
+ * @since 2.0
  * @see DefaultBeanDefinitionDocumentReader
  * @see NamespaceHandlerResolver
- * @since 2.0
  */
 public interface NamespaceHandler {
 
@@ -84,6 +84,7 @@ public interface NamespaceHandler {
 	 * @param source the source element or attribute that is to be parsed
 	 * @param definition the current bean definition
 	 * @param parserContext the object encapsulating the current state of the parsing process
+	 * @return the decorated definition (to be registered in the BeanFactory)
 	 */
 	BeanDefinitionHolder decorate(Node source, BeanDefinitionHolder definition, ParserContext parserContext);
 
