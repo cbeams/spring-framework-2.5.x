@@ -55,6 +55,10 @@ public class ReaderContext {
 		fatal(message, source, null, null);
 	}
 
+	public void fatal(String message, Object source, Throwable ex) {
+		fatal(message, source, null, ex);
+	}
+
 	public void fatal(String message, Object source, ParseState parseState) {
 		fatal(message, source, parseState, null);
 	}
@@ -68,6 +72,10 @@ public class ReaderContext {
 		error(message, source, null, null);
 	}
 
+	public void error(String message, Object source, Throwable ex) {
+		error(message, source, null, ex);
+	}
+
 	public void error(String message, Object source, ParseState parseState) {
 		error(message, source, parseState, null);
 	}
@@ -79,6 +87,10 @@ public class ReaderContext {
 
 	public void warning(String message, Object source) {
 		warning(message, source, null, null);
+	}
+
+	public void warning(String message, Object source, Throwable ex) {
+		warning(message, source, null, ex);
 	}
 
 	public void warning(String message, Object source, ParseState parseState) {
