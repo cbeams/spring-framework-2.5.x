@@ -20,6 +20,7 @@ import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
 
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
@@ -60,6 +61,17 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 
 	public void testRequestsWithSubPaths() throws Exception {
 		HandlerMapping hm = (HandlerMapping) wac.getBean("handlerMapping");
+		doTestRequestsWithSubPaths(hm);
+	}
+
+	public void testRequestsWithSubPathsInParentContext() throws Exception {
+		BeanNameUrlHandlerMapping hm = new BeanNameUrlHandlerMapping();
+		hm.setDetectHandlersInAncestorContexts(true);
+		hm.setApplicationContext(new StaticApplicationContext(wac));
+		doTestRequestsWithSubPaths(hm);
+	}
+
+	private void doTestRequestsWithSubPaths(HandlerMapping hm) throws Exception {
 		Object bean = wac.getBean("godCtrl");
 
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/mypath/welcome.html");

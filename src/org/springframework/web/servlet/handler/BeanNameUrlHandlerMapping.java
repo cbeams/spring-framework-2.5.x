@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.StringUtils;
 
@@ -50,7 +51,24 @@ import org.springframework.util.StringUtils;
  * @see SimpleUrlHandlerMapping
  */
 public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
-	
+
+	private boolean detectHandlersInAncestorContexts = false;
+
+
+	/**
+	 * Set whether to detect handler beans in ancestor ApplicationContexts.
+	 * <p>Default is "false": Only handler beans in the current
+	 * ApplicationContext will be detected, that is, only in the context
+	 * that this BeanNameUrlHandlerMapping itself is defined in (typically
+	 * the current DispatcherServlet's context).
+	 * <p>Switch this flag on to detect handler beans in ancestor contexts
+	 * (typically the Spring root WebApplicationContext) as well.
+	 */
+	public void setDetectHandlersInAncestorContexts(boolean detectHandlersInAncestorContexts) {
+		this.detectHandlersInAncestorContexts = detectHandlersInAncestorContexts;
+	}
+
+
 	/**
 	 * Calls the {@link #detectHandlers()} method in addition to the
 	 * superclass's initialization.
@@ -70,7 +88,9 @@ public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for URL mappings in application context: " + getApplicationContext());
 		}
-		String[] beanNames = getApplicationContext().getBeanDefinitionNames();
+		String[] beanNames = (this.detectHandlersInAncestorContexts ?
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(getApplicationContext(), Object.class) :
+				getApplicationContext().getBeanNamesForType(Object.class));
 
 		// Take any bean name or alias that begins with a slash.
 		for (int i = 0; i < beanNames.length; i++) {
