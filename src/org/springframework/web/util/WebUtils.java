@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,6 +183,7 @@ public abstract class WebUtils {
 	 * a resource (in contrast to ServletContext's <code>getRealPath</code>,
 	 * which returns null).
 	 * @param servletContext the servlet context of the web application
+	 * @param path the path within the web application
 	 * @return the corresponding real path
 	 * @throws FileNotFoundException if the path cannot be resolved to a resource
 	 * @see javax.servlet.ServletContext#getRealPath
@@ -253,6 +254,7 @@ public abstract class WebUtils {
 	 * Does not create a new session if not necessary!
 	 * @param request current HTTP request
 	 * @param name the name of the session attribute
+	 * @param value the value of the session attribute
 	 */
 	public static void setSessionAttribute(HttpServletRequest request, String name, Object value) {
 		Assert.notNull(request, "Request must not be null");
@@ -338,6 +340,7 @@ public abstract class WebUtils {
 	 * request attribute. Could check any request attribute that is only
 	 * present in an include request.
 	 * @param request current servlet request
+	 * @return whether the given request is an include request
 	 */
 	public static boolean isIncludeRequest(ServletRequest request) {
 		return (request.getAttribute(INCLUDE_REQUEST_URI_ATTRIBUTE) != null);
@@ -354,6 +357,7 @@ public abstract class WebUtils {
 	 * <code>javax.servlet.forward.query_string</code>.
 	 * <p>Does not override values if already present, to not cause conflicts
 	 * with the attributes exposed by Servlet 2.4+ containers themselves.
+	 * @param request current servlet request
 	 */
 	public static void exposeForwardRequestAttributes(HttpServletRequest request) {
 		if (request.getAttribute(FORWARD_REQUEST_URI_ATTRIBUTE) == null) {
@@ -398,6 +402,7 @@ public abstract class WebUtils {
 	/**
 	 * Retrieve the first cookie with the given name. Note that multiple
 	 * cookies can have the same name but different paths or domains.
+	 * @param request current servlet request
 	 * @param name cookie name
 	 * @return the first cookie with the given name, or <code>null</code> if none is found
 	 */
