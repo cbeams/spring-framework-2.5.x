@@ -1,8 +1,8 @@
 package org.springframework.scripting.groovy;
 
-import org.springframework.scripting.Messenger
+import org.springframework.scripting.ConfigurableMessenger
 
-class GroovyMessenger implements Messenger {
+class GroovyMessenger implements ConfigurableMessenger {
 
 	def String message;
 }

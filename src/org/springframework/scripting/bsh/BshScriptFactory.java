@@ -33,9 +33,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Typically used in combination with a
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
- * see the latter's
- * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor javadoc}
- * for a configuration example.
+ * see the latter's javadoc for a configuration example.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -50,6 +48,10 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	private final Class[] scriptInterfaces;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+
+	private Class scriptClass;
+
+	private final Object scriptClassMonitor = new Object();
 
 
 	/**
@@ -95,7 +97,6 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 	/**
 	 * BeanShell scripts do require a config interface.
-	 * @return <code>true</code> always
 	 */
 	public boolean requiresConfigInterface() {
 		return true;
@@ -107,9 +108,43 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 */
 	public Object getScriptedObject(ScriptSource actualScriptSource, Class[] actualInterfaces)
 			throws IOException, ScriptCompilationException {
+
 		try {
-			return BshScriptUtils.createBshObject(
-					actualScriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
+			Class clazz = null;
+			synchronized (this.scriptClassMonitor) {
+				if (actualScriptSource.isModified()) {
+					// New script content: Let's check whether it evaluates to a Class.
+					Object result = BshScriptUtils.evaluateBshScript(
+							actualScriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
+					if (result instanceof Class) {
+						// A Class: We'll cache the Class here and create an instance
+						// outside of the synchronized block.
+						this.scriptClass = (Class) result;
+					}
+					else {
+						// Not a Class: OK, we'll simply create BeanShell objects
+						// through evaluating the script for every call later on.
+						// For this first-time check, let's simply return the
+						// already evaluated object.
+						return result;
+					}
+				}
+				clazz = this.scriptClass;
+			}
+			if (clazz != null) {
+				// A Class: We need to create an instance for every call.
+				try {
+					return clazz.newInstance();
+				}
+				catch (Throwable ex) {
+					throw new ScriptCompilationException("Could not instantiate script class: " + clazz, ex);
+				}
+			}
+			else {
+				// Not a Class: We need to evaluate the script for every call.
+				return BshScriptUtils.createBshObject(
+						actualScriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
+			}
 		}
 		catch (EvalError ex) {
 			throw new ScriptCompilationException("Could not compile BeanShell script: " + actualScriptSource, ex);

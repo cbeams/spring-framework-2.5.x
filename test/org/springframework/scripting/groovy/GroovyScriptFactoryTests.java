@@ -31,6 +31,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.scripting.Calculator;
+import org.springframework.scripting.ConfigurableMessenger;
 import org.springframework.scripting.ContextScriptBean;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
@@ -51,8 +52,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 			return;
 		}
 
-		ApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyContext.xml");
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
 		Calculator calc = (Calculator) ctx.getBean("calculator");
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
@@ -72,13 +72,35 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
 	}
 
-	public void testStaticScriptWithInstance() throws Exception {
+	public void testStaticPrototypeScript() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
 
 		ApplicationContext ctx =
 				new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyContext.xml");
+		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+
+		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(messenger));
+		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+
+		assertNotSame(messenger, messenger2);
+		assertSame(messenger.getClass(), messenger2.getClass());
+		assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Hello World!", messenger2.getMessage());
+		messenger.setMessage("Bye World!");
+		messenger2.setMessage("Byebye World!");
+		assertEquals("Bye World!", messenger.getMessage());
+		assertEquals("Byebye World!", messenger2.getMessage());
+	}
+
+	public void testStaticScriptWithInstance() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messengerInstance");
 
 		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(messenger));
@@ -93,8 +115,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 			return;
 		}
 
-		ApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyRefreshableContext.xml");
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyRefreshableContext.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
 		assertTrue("Should be a proxy for refreshable scripts", AopUtils.isAopProxy(messenger));
@@ -107,6 +128,33 @@ public class GroovyScriptFactoryTests extends TestCase {
 		refreshable.refresh();
 
 		assertEquals("Message is incorrect after refresh.", desiredMessage, messenger.getMessage());
+		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
+	}
+
+	public void testNonStaticPrototypeScript() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyRefreshableContext.xml", getClass());
+		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+
+		assertTrue("Should be a proxy for refreshable scripts", AopUtils.isAopProxy(messenger));
+		assertTrue("Should be an instance of Refreshable", messenger instanceof Refreshable);
+
+		assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Hello World!", messenger2.getMessage());
+		messenger.setMessage("Bye World!");
+		messenger2.setMessage("Byebye World!");
+		assertEquals("Bye World!", messenger.getMessage());
+		assertEquals("Byebye World!", messenger2.getMessage());
+
+		Refreshable refreshable = (Refreshable) messenger;
+		refreshable.refresh();
+
+		assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Byebye World!", messenger2.getMessage());
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
 	}
 
@@ -173,8 +221,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 			return;
 		}
 
-		ApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/twoClassesCorrectOneFirst.xml");
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("twoClassesCorrectOneFirst.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 		assertNotNull(messenger);
 		assertEquals("Hello World!", messenger.getMessage());
@@ -189,8 +236,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 
 		try {
-			ApplicationContext ctx =
-					new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/twoClassesWrongOneFirst.xml");
+			ApplicationContext ctx = new ClassPathXmlApplicationContext("twoClassesWrongOneFirst.xml", getClass());
 			ctx.getBean("messenger", Messenger.class);
 			fail("Must have failed: two classes defined in GroovyScriptFactory source, non-Messenger class defined first.");
 		}
@@ -244,7 +290,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 
 		try {
-			new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/lwspBadGroovyContext.xml");
+			new ClassPathXmlApplicationContext("lwspBadGroovyContext.xml", getClass());
 			fail("Must have thrown a BeanCreationException ('inline:' prefix was preceded by whitespace");
 		}
 		catch (BeanCreationException expected) {

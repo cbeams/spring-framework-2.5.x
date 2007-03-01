@@ -36,9 +36,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Typically used in combination with a
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
- * see the latter's
- * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor javadoc}
- * for a configuration example.
+ * see the latter's javadoc} for a configuration example.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -53,7 +51,11 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 	
 	private final GroovyObjectCustomizer groovyObjectCustomizer;
 
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private GroovyClassLoader groovyClassLoader = new GroovyClassLoader(ClassUtils.getDefaultClassLoader());
+
+	private Class scriptClass;
+
+	private final Object scriptClassMonitor = new Object();
 
 
 	/**
@@ -75,7 +77,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 	 * a Groovy script defines its Java interfaces itself.
 	 * @param scriptSourceLocator a locator that points to the source of the script.
 	 * Interpreted by the post-processor that actually creates the script.
-	 * @param groovyObjectCustomizer customizer that can set a custom metaclass
+	 * @param groovyObjectCustomizer a customizer that can set a custom metaclass
 	 * or make other changes to the GroovyObject created by this factory
 	 * (may be <code>null</code>)
 	 */
@@ -86,7 +88,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 	}
 
 	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
+		this.groovyClassLoader = new GroovyClassLoader(classLoader);
 	}
 
 
@@ -106,7 +108,6 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 	/**
 	 * Groovy scripts do not need a config interface,
 	 * since they expose their setters as public methods.
-	 * @return <code>false</code> always
 	 */
 	public boolean requiresConfigInterface() {
 		return false;
@@ -119,20 +120,27 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 	public Object getScriptedObject(ScriptSource actualScriptSource, Class[] actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
-		GroovyClassLoader groovyClassLoader = new GroovyClassLoader(this.beanClassLoader);
 		try {
-			Class clazz = groovyClassLoader.parseClass(actualScriptSource.getScriptAsString());
+			Class clazz = null;
+			synchronized (this.scriptClassMonitor) {
+				if (this.scriptClass == null || actualScriptSource.isModified()) {
+					this.scriptClass = this.groovyClassLoader.parseClass(actualScriptSource.getScriptAsString());
+				}
+				clazz = this.scriptClass;
+			}
 			GroovyObject goo = (GroovyObject) clazz.newInstance();
-			
+
 			if (this.groovyObjectCustomizer != null) {
 				// Allow metaclass and other customization
 				this.groovyObjectCustomizer.customize(goo);
 			}
 
 			if (goo instanceof Script) {
+				// A Groovy script, probably creating an instance: let's execute it.
 				return ((Script) goo).run();
 			}
 			else {
+				// An instance of the scripted class: let's return it as-is.
 				return goo;
 			}
 		}

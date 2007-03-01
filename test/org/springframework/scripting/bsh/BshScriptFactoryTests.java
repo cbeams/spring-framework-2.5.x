@@ -39,9 +39,8 @@ import org.springframework.scripting.support.ScriptFactoryPostProcessor;
  */
 public class BshScriptFactoryTests extends TestCase {
 
-	public void testStatic() throws Exception {
-		ApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshContext.xml");
+	public void testStaticScript() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
 		Calculator calc = (Calculator) ctx.getBean("calculator");
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
@@ -60,36 +59,50 @@ public class BshScriptFactoryTests extends TestCase {
 		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
 	}
 
-	public void testStaticWithNullReturnValue() throws Exception {
-		ApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshContext.xml");
-		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messenger");
+	public void testStaticScriptWithNullReturnValue() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
+		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerWithConfig");
 
 		messenger.setMessage(null);
 		assertNull(messenger.getMessage());
 	}
 
-	public void testStaticWithScriptImplementingInterface() throws Exception {
-		ApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshContext.xml");
-		Messenger messenger = (Messenger) ctx.getBean("messengerImpl");
-
-		String desiredMessage = "Hello World!";
-		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
-	}
-
 	public void testStaticWithScriptReturningInstance() throws Exception {
-		ApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshContext.xml");
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messengerInstance");
 
 		String desiredMessage = "Hello World!";
 		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
 	}
 
-	public void testNonStatic() throws Exception {
-		ApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshRefreshableContext.xml");
+	public void testStaticScriptImplementingInterface() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
+		Messenger messenger = (Messenger) ctx.getBean("messengerImpl");
+
+		String desiredMessage = "Hello World!";
+		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+	}
+
+	public void testStaticPrototypeScript() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
+		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+
+		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(messenger));
+		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+
+		assertNotSame(messenger, messenger2);
+		assertSame(messenger.getClass(), messenger2.getClass());
+		assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Hello World!", messenger2.getMessage());
+		messenger.setMessage("Bye World!");
+		messenger2.setMessage("Byebye World!");
+		assertEquals("Bye World!", messenger.getMessage());
+		assertEquals("Byebye World!", messenger2.getMessage());
+	}
+
+	public void testNonStaticScript() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshRefreshableContext.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
 		assertTrue("Should be a proxy for refreshable scripts", AopUtils.isAopProxy(messenger));
@@ -102,7 +115,29 @@ public class BshScriptFactoryTests extends TestCase {
 		refreshable.refresh();
 
 		assertEquals("Message is incorrect after refresh", desiredMessage, messenger.getMessage());
+		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
+	}
 
+	public void testNonStaticPrototypeScript() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshRefreshableContext.xml", getClass());
+		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+
+		assertTrue("Should be a proxy for refreshable scripts", AopUtils.isAopProxy(messenger));
+		assertTrue("Should be an instance of Refreshable", messenger instanceof Refreshable);
+
+		assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Hello World!", messenger2.getMessage());
+		messenger.setMessage("Bye World!");
+		messenger2.setMessage("Byebye World!");
+		assertEquals("Bye World!", messenger.getMessage());
+		assertEquals("Byebye World!", messenger2.getMessage());
+
+		Refreshable refreshable = (Refreshable) messenger;
+		refreshable.refresh();
+
+		assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Byebye World!", messenger2.getMessage());
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
 	}
 
@@ -122,10 +157,12 @@ public class BshScriptFactoryTests extends TestCase {
 		script.getScriptAsString();
 		final String badScript = "String getMessage() { throw new IllegalArgumentException(); }";
 		mock.setReturnValue(badScript);
+		script.isModified();
+		mock.setReturnValue(true);
 		mock.replay();
 		BshScriptFactory factory = new BshScriptFactory(
 				ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript,
-				new Class[]{Messenger.class});
+				new Class[] {Messenger.class});
 		try {
 			Messenger messenger = (Messenger) factory.getScriptedObject(script, new Class[]{Messenger.class});
 			messenger.getMessage();
@@ -138,7 +175,7 @@ public class BshScriptFactoryTests extends TestCase {
 
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
 		try {
-			new BshScriptFactory(null, new Class[]{Messenger.class});
+			new BshScriptFactory(null, new Class[] {Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -147,7 +184,7 @@ public class BshScriptFactoryTests extends TestCase {
 
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
 		try {
-			new BshScriptFactory("", new Class[]{Messenger.class});
+			new BshScriptFactory("", new Class[] {Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -156,7 +193,7 @@ public class BshScriptFactoryTests extends TestCase {
 
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
 		try {
-			new BshScriptFactory("\n   ", new Class[]{Messenger.class});
+			new BshScriptFactory("\n   ", new Class[] {Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {

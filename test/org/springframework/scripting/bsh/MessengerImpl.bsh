@@ -1,6 +1,6 @@
-import org.springframework.scripting.Messenger;
+import org.springframework.scripting.ConfigurableMessenger;
 
-public class MyMessenger implements Messenger {
+public class MyMessenger implements ConfigurableMessenger {
 
 	private String message ;
 
