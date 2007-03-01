@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,21 @@
 
 package org.springframework.scripting.support;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-import org.springframework.core.io.Resource;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
+import junit.framework.TestCase;
+import org.easymock.MockControl;
+
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+
 /**
- * Unit and integration tests for the ResourceScriptSource class.
- *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class ResourceScriptSourceTests extends TestCase {
+public class ResourceScriptSourceTests extends TestCase {
 
 	public void testCtorWithNullResource() throws Exception {
 		try {
@@ -68,16 +69,10 @@ public final class ResourceScriptSourceTests extends TestCase {
 		Resource resource = (Resource) mock.getMock();
 		// underlying File is asked for so that the last modified time can be checked...
 		resource.getFile();
-		mock.setReturnValue(new TouchableFileStub(100));
-		// underlying File is asked for so that the contents can be read in...
-		resource.getFile();
-		mock.setReturnValue(new TouchableFileStub(100));
+		mock.setReturnValue(new TouchableFileStub(100), 2);
 		// does not support File-based reading; delegates to InputStream-style reading...
 		resource.getInputStream();
-		mock.setReturnValue(new ByteArrayInputStream("".getBytes()));
-		// Mock the file 'not' changing; i.e. the File says it has not been modified
-		resource.getFile();
-		mock.setReturnValue(new TouchableFileStub(100));
+		mock.setReturnValue(new ByteArrayInputStream(new byte[0]));
 		// And then mock the file changing; i.e. the File says it has been modified
 		resource.getFile();
 		mock.setReturnValue(new TouchableFileStub(200));
@@ -93,32 +88,13 @@ public final class ResourceScriptSourceTests extends TestCase {
 	}
 
 	public void testLastModifiedWorksWithResourceThatDoesNotSupportFileBasedAccessAtAll() throws Exception {
-		MockControl mock = MockControl.createControl(Resource.class);
-		Resource resource = (Resource) mock.getMock();
-		// underlying File is asked for so that the last modified time can be checked...
-		resource.getFile();
-		mock.setThrowable(new IOException("Does not support access as a File."));
-		// first time in, the script is always flagged as 'modified', so the underlying File is asked for so that the contents can be read in...
-		resource.getFile();
-		mock.setThrowable(new IOException("Does not support access as a File."));
-		// does not support File-based access; delegates to InputStream-style reading...
-		resource.getInputStream();
-		mock.setReturnValue(new ByteArrayInputStream("".getBytes()));
-		// ask for the file to check the modification date (will fail and return 0);
-		resource.getFile();
-		mock.setThrowable(new IOException("Does not support access as a File."));
-		// ask for the file to check the modification date (will fail and return 0);
-		resource.getFile();
-		mock.setThrowable(new IOException("Does not support access as a File."));
-		mock.replay();
-
+		Resource resource = new ByteArrayResource(new byte[0]);
 		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
 		assertTrue("ResourceScriptSource must start off in the 'isModified' state (it obviously isn't).", scriptSource.isModified());
 		scriptSource.getScriptAsString();
 		assertFalse("ResourceScriptSource must not report back as being modified if the underlying File resource is not reporting a changed lastModified time.", scriptSource.isModified());
 		// Must now continue to report back as not having been modified 'cos the Resource does not support access as a File (and so the lastModified date cannot be determined).
 		assertFalse("ResourceScriptSource must not report back as being modified if the underlying File resource is not reporting a changed lastModified time.", scriptSource.isModified());
-		mock.verify();
 	}
 
 
