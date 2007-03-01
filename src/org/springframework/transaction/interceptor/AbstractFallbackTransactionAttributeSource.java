@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -30,16 +31,18 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.support.AopUtils;
 
 /**
- * Abstract implementation of TransactionAttributeSource that caches attributes
- * for methods, and implements fallback policy of 1. most specific method; 
- * 2. target class attribute; 3. declaring method; 4. declaring class.
+ * Abstract implementation of {@link TransactionAttributeSource} that caches
+ * attributes for methods and implements a fallback policy: 1. specific target
+ * method; 2. target class; 3. declaring method; 4. declaring class/interface.
  *
  * <p>Defaults to using the target class's transaction attribute if none is
  * associated with the target method. Any transaction attribute associated with
  * the target method completely overrides a class transaction attribute.
+ * If none found on the target class, the interface that the invoked method
+ * has been called through (in case of a JDK proxy) will be checked.
  *
  * <p>This implementation caches attributes by method after they are first used.
- * If it's ever desirable to allow dynamic changing of transaction attributes
+ * If it is ever desirable to allow dynamic changing of transaction attributes
  * (which is very unlikely), caching could be made configurable. Caching is
  * desirable because of the cost of evaluating rollback rules.
  *
@@ -68,20 +71,21 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	private final Map cache = new HashMap();
+	final Map attributeCache = Collections.synchronizedMap(new HashMap());
 
 
 	/**
-	 * Return the transaction attribute for this method invocation.
+	 * Determine the transaction attribute for this method invocation.
 	 * <p>Defaults to the class's transaction attribute if no method attribute is found.
-	 * @param method method for the current invocation. Can't be <code>null</code>
-	 * @param targetClass target class for this invocation. May be <code>null</code>.
-	 * @return TransactionAttribute for this method, or <code>null</code> if the method is non-transactional
+	 * @param method the method for the current invocation (never <code>null</code>)
+	 * @param targetClass the target class for this invocation (may be <code>null</code>)
+	 * @return TransactionAttribute for this method, or <code>null</code> if the method
+	 * is not transactional
 	 */
-	public final TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
+	public TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
 		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);
-		Object cached = this.cache.get(cacheKey);
+		Object cached = this.attributeCache.get(cacheKey);
 		if (cached != null) {
 			// Value will either be canonical value indicating there is no transaction attribute,
 			// or an actual transaction attribute.
@@ -97,13 +101,13 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			TransactionAttribute txAtt = computeTransactionAttribute(method, targetClass);
 			// Put it in the cache.
 			if (txAtt == null) {
-				this.cache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
+				this.attributeCache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Adding transactional method [" + method.getName() + "] with attribute [" + txAtt + "]");
 				}
-				this.cache.put(cacheKey, txAtt);
+				this.attributeCache.put(cacheKey, txAtt);
 			}
 			return txAtt;
 		}
@@ -124,8 +128,8 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	}
 
 	/**
-	 * Same signature as <code>getTransactionAttribute</code>, but doesn't cache the result.
-	 * <code>getTransactionAttribute</code> is effectively a caching decorator for this method.
+	 * Same signature as {@link #getTransactionAttribute}, but doesn't cache the result.
+	 * {@link #getTransactionAttribute} is effectively a caching decorator for this method.
 	 * @see #getTransactionAttribute
 	 */
 	private TransactionAttribute computeTransactionAttribute(Method method, Class targetClass) {
@@ -146,7 +150,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			return txAtt;
 		}
 
-		if (specificMethod != method ) {
+		if (specificMethod != method) {
 			// Fallback is to look at the original method.
 			txAtt = findTransactionAttribute(findAllAttributes(method));
 			if (txAtt != null) {
