@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -26,7 +25,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Utility methods that are useful for bean definition readers implementations.
+ * Utility methods that are useful for bean definition reader implementations.
+ * Mainly intended for internal use.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -91,8 +91,8 @@ public class BeanDefinitionReaderUtils {
 	 * registered with (to check for existing bean names)
 	 * @param isInnerBean whether the given bean definition will be registered
 	 * as inner bean or as top-level bean (allowing for special name generation
-	 * for inner beans vs. top-level beans)
-	 * @return the bean name to use
+	 * for inner beans versus top-level beans)
+	 * @return the generated bean name
 	 * @throws BeanDefinitionStoreException if no unique name can be generated
 	 * for the given bean definition
 	 */
@@ -136,10 +136,10 @@ public class BeanDefinitionReaderUtils {
 	 * Register the given bean definition with the given bean factory.
 	 * @param bdHolder the bean definition including name and aliases
 	 * @param beanFactory the bean factory to register with
-	 * @throws BeansException if registration failed
+	 * @throws BeanDefinitionStoreException if registration failed
 	 */
 	public static void registerBeanDefinition(
-			BeanDefinitionHolder bdHolder, BeanDefinitionRegistry beanFactory) throws BeansException {
+			BeanDefinitionHolder bdHolder, BeanDefinitionRegistry beanFactory) throws BeanDefinitionStoreException {
 
 		// Register bean definition under primary name.
 		beanFactory.registerBeanDefinition(bdHolder.getBeanName(), bdHolder.getBeanDefinition());
