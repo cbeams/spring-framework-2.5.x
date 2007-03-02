@@ -669,18 +669,17 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 
 	/**
-	 * Set whether this bean definition is "synthetic", that is, not defined
-	 * by the application itself (for example, an infrastructure bean such as
-	 * helper beans for an auto-proxy creator created through
-	 * <code>&ltaop:config&gt;</code>).
+	 * Set whether this bean definition is 'synthetic', that is, not defined
+	 * by the application itself (for example, an infrastructure bean such
+	 * as a helper for auto-proxying, created through <code>&ltaop:config&gt;</code>).
 	 */
 	public void setSynthetic(boolean synthetic) {
 		this.synthetic = synthetic;
 	}
 
 	/**
-	 * Return whether this bean definition is "synthetic", that is, not defined
-	 * by the application itself.
+	 * Return whether this bean definition is 'synthetic', that is,
+	 * not defined by the application itself.
 	 */
 	public boolean isSynthetic() {
 		return this.synthetic;
