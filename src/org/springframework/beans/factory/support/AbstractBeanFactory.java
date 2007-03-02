@@ -667,6 +667,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			this.customEditors.putAll(otherAbstractFactory.customEditors);
 			this.propertyEditorRegistrars.addAll(otherAbstractFactory.propertyEditorRegistrars);
 			this.beanPostProcessors.addAll(otherAbstractFactory.beanPostProcessors);
+			this.hasInstantiationAwareBeanPostProcessors = this.hasInstantiationAwareBeanPostProcessors ||
+					otherAbstractFactory.hasInstantiationAwareBeanPostProcessors;
 			this.hasDestructionAwareBeanPostProcessors = this.hasDestructionAwareBeanPostProcessors ||
 					otherAbstractFactory.hasDestructionAwareBeanPostProcessors;
 			this.scopes.putAll(otherAbstractFactory.scopes);
