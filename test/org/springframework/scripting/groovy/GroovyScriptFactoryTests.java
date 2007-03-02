@@ -23,6 +23,7 @@ import groovy.lang.GroovyObject;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.factory.BeanCreationException;
@@ -336,8 +337,13 @@ public class GroovyScriptFactoryTests extends TestCase {
 
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
-		assertEquals("Hello World!", messenger.getMessage());
+		CountingBeforeAdvice countingAdvice = (CountingBeforeAdvice) ctx.getBean("getMessageAdvice");
+
+		assertTrue(AopUtils.isAopProxy(messenger));
 		assertFalse(messenger instanceof Refreshable);
+		assertEquals(0, countingAdvice.getCalls());
+		assertEquals("Hello World!", messenger.getMessage());
+		assertEquals(1, countingAdvice.getCalls());
 	}
 
 	public void testInlineScriptFromGroovyTag() throws Exception {
@@ -358,9 +364,13 @@ public class GroovyScriptFactoryTests extends TestCase {
 
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
+		CountingBeforeAdvice countingAdvice = (CountingBeforeAdvice) ctx.getBean("getMessageAdvice");
 
+		assertTrue(AopUtils.isAopProxy(messenger));
+		assertTrue(messenger instanceof Refreshable);
+		assertEquals(0, countingAdvice.getCalls());
 		assertEquals("Hello World!", messenger.getMessage());
-		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
+		assertEquals(1, countingAdvice.getCalls());
 	}
 
 	/**

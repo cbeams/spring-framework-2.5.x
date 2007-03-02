@@ -16,6 +16,8 @@
 
 package org.springframework.scripting.support;
 
+import java.util.Iterator;
+
 import net.sf.cglib.asm.Type;
 import net.sf.cglib.core.Signature;
 import net.sf.cglib.proxy.InterfaceMaker;
@@ -23,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeanUtils;
@@ -33,6 +36,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -184,6 +188,15 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 		// Required so that all BeanPostProcessors, Scopes, etc become available.
 		this.scriptBeanFactory.copyConfigurationFrom(this.beanFactory);
+
+		// Filter out BeanPostProcessors that are part of the AOP infrastructure,
+		// since those are only meant to apply to beans defined in the original factory.
+		for (Iterator it = this.scriptBeanFactory.getBeanPostProcessors().iterator(); it.hasNext();) {
+			BeanPostProcessor postProcessor = (BeanPostProcessor) it.next();
+			if (postProcessor instanceof AopInfrastructureBean) {
+				it.remove();
+			}
+		}
 	}
 
 	public void setResourceLoader(ResourceLoader resourceLoader) {
