@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
+ * @see #locateMBeanServer
  */
 public abstract class JmxUtils {
 
@@ -58,6 +59,7 @@ public abstract class JmxUtils {
 	 * Suffix used to identify an MBean interface
 	 */
 	private static final String MBEAN_SUFFIX = "MBean";
+
 
 	private static final Log logger = LogFactory.getLog(JmxUtils.class);
 
@@ -100,9 +102,16 @@ public abstract class JmxUtils {
 			}
 			server = (MBeanServer) servers.get(0);
 		}
-		else if (JdkVersion.isAtLeastJava15()) {
+
+		if (server == null && agentId == null && JdkVersion.isAtLeastJava15()) {
 			// Attempt to load the PlatformMBeanServer.
-			server = ManagementFactory.getPlatformMBeanServer();
+			try {
+				server = ManagementFactory.getPlatformMBeanServer();
+			}
+			catch (SecurityException ex) {
+				throw new MBeanServerNotFoundException("No specific MBeanServer found, " +
+						"and not allowed to obtain the Java platform MBeanServer", ex);
+			}
 		}
 
 		if (server == null) {
