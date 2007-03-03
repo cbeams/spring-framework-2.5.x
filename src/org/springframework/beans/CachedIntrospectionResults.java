@@ -102,16 +102,20 @@ public class CachedIntrospectionResults {
 		if (classLoader == null) {
 			return;
 		}
-		for (Iterator it = classCache.keySet().iterator(); it.hasNext();) {
-			Class beanClass = (Class) it.next();
-			if (isUnderneathClassLoader(beanClass.getClassLoader(), classLoader)) {
-				it.remove();
+		synchronized (classCache) {
+			for (Iterator it = classCache.keySet().iterator(); it.hasNext();) {
+				Class beanClass = (Class) it.next();
+				if (isUnderneathClassLoader(beanClass.getClassLoader(), classLoader)) {
+					it.remove();
+				}
 			}
 		}
-		for (Iterator it = acceptedClassLoaders.iterator(); it.hasNext();) {
-			ClassLoader registeredLoader = (ClassLoader) it.next();
-			if (isUnderneathClassLoader(registeredLoader, classLoader)) {
-				it.remove();
+		synchronized (acceptedClassLoaders) {
+			for (Iterator it = acceptedClassLoaders.iterator(); it.hasNext();) {
+				ClassLoader registeredLoader = (ClassLoader) it.next();
+				if (isUnderneathClassLoader(registeredLoader, classLoader)) {
+					it.remove();
+				}
 			}
 		}
 	}
@@ -163,8 +167,11 @@ public class CachedIntrospectionResults {
 	 * @see #acceptClassLoader
 	 */
 	private static boolean isClassLoaderAccepted(ClassLoader classLoader) {
-		for (Iterator it = acceptedClassLoaders.iterator(); it.hasNext();) {
-			ClassLoader registeredLoader = (ClassLoader) it.next();
+		// Iterate over array copy in order to avoid synchronization for the entire
+		// ClassLoader check (avoiding a synchronized acceptedClassLoaders Iterator).
+		Object[] acceptedLoaderArray = acceptedClassLoaders.toArray();
+		for (int i = 0; i < acceptedLoaderArray.length; i++) {
+			ClassLoader registeredLoader = (ClassLoader) acceptedLoaderArray[i];
 			if (isUnderneathClassLoader(classLoader, registeredLoader)) {
 				return true;
 			}
