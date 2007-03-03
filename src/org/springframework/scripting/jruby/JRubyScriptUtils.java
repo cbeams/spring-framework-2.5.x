@@ -203,16 +203,19 @@ public abstract class JRubyScriptUtils {
 		private Object convertFromRuby(IRubyObject rubyResult, Class returnType) {
 			Object result = JavaEmbedUtils.rubyToJava(this.ruby, rubyResult, returnType);
 			if (result instanceof RubyArray && returnType.isArray()) {
-				IRubyObject[] rubyArray = ((RubyArray) result).toJavaArray();
-				Class targetType = returnType.getComponentType();
-				Object javaArray = Array.newInstance(targetType, rubyArray.length);
-				for (int i = 0; i < rubyArray.length; i++) {
-					IRubyObject rubyObject = (IRubyObject) rubyArray[i];
-					Array.set(javaArray, i, JavaEmbedUtils.rubyToJava(this.ruby, rubyObject, targetType));
-				}
-				result = javaArray;
+				result = convertFromRubyArray(((RubyArray) result).toJavaArray(), returnType);
 			}
 			return result;
+		}
+
+		private Object convertFromRubyArray(IRubyObject[] rubyArray, Class returnType) {
+			Class targetType = returnType.getComponentType();
+			Object javaArray = Array.newInstance(targetType, rubyArray.length);
+			for (int i = 0; i < rubyArray.length; i++) {
+				IRubyObject rubyObject = rubyArray[i];
+				Array.set(javaArray, i, convertFromRuby(rubyObject, targetType));
+			}
+			return javaArray;
 		}
 	}
 

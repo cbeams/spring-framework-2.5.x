@@ -34,4 +34,5 @@ end
 		<constructor-arg value="classpath:org/springframework/scripting/jruby/Printer.rb"/>
 		<constructor-arg value="org.springframework.scripting.jruby.Printer"/>
 	</bean>
+
 </beans>

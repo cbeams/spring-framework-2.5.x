@@ -28,6 +28,8 @@ import org.springframework.scripting.Calculator;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 
+import java.util.Map;
+
 /**
  * @author Rob Harrop
  * @author Rick Evans
@@ -43,7 +45,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 
 	public void testStaticScript() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -66,7 +68,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testNonStaticScript() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -88,7 +90,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testScriptCompilationException() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -102,7 +104,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -115,7 +117,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -128,7 +130,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -141,7 +143,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithNullScriptInterfacesArray() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -154,7 +156,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithEmptyScriptInterfacesArray() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -167,7 +169,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testResourceScriptFromTag() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -178,7 +180,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testInlineScriptFromTag() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -189,7 +191,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testRefreshableFromTag() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -199,8 +201,22 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
 	}
 
+	public void testThatMultipleScriptInterfacesAreSupported() throws Exception {
+		if (isNotAtLeastJava_14()) {
+			return;
+		}
+
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
+		Messenger messenger = (Messenger) ctx.getBean("calculatingMessenger");
+		assertEquals("Hello World!", messenger.getMessage());
+
+		// cool, now check that the Calculator interface is also exposed
+		Calculator calc = (Calculator) messenger;
+		assertEquals(0, calc.add(2, -2));
+	}
+
 	public void testWithComplexArg() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -212,7 +228,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testWithPrimitiveArgsInReturnTypeAndParameters() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
@@ -229,12 +245,13 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testWithWrapperArgsInReturnTypeAndParameters() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (isNotAtLeastJava_14()) {
 			return;
 		}
 
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContextForWrappers.xml", getClass());
 		WrapperAdder adder = (WrapperAdder) ctx.getBean("adder");
+
 		assertEquals(new Integer(2), adder.addInts(new Integer(1), new Integer(1)));
 		assertEquals(Integer.class, adder.addInts(new Integer(1), new Integer(1)).getClass());
 		assertEquals(new Short((short) 4), adder.addShorts(new Short((short) 1), new Short((short) 3)));
@@ -261,6 +278,44 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertEquals(new Short((short) 1), shorts[0]);
 		assertNotNull(shorts[1]);
 		assertEquals(new Short((short) 2), shorts[1]);
+
+		String[][] lol = adder.createListOfLists("1", "2", "3");
+		assertNotNull(lol);
+		assertEquals(3, lol.length);
+		assertEquals("1", lol[0][0]);
+		assertEquals("2", lol[1][0]);
+		assertEquals("3", lol[2][0]);
+
+		Map singleValueMap = adder.toMap("key", "value");
+		assertNotNull(singleValueMap);
+		assertEquals(1, singleValueMap.size());
+		assertEquals("key", singleValueMap.keySet().iterator().next());
+		assertEquals("value", singleValueMap.values().iterator().next());
+
+		String[] expectedStrings = new String[]{"1", "2", "3"};
+		Map map = adder.toMap("key", expectedStrings);
+		assertNotNull(map);
+		assertEquals(1, map.size());
+		assertEquals("key", map.keySet().iterator().next());
+		String[] strings = (String[]) map.values().iterator().next();
+		for (int i = 0; i < expectedStrings.length; ++i) {
+			assertEquals(expectedStrings[i], strings[i]);
+		}
+	}
+
+	public void testAOP() throws Exception {
+		if (isNotAtLeastJava_14()) {
+			return;
+		}
+
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-aop.xml", getClass());
+		Messenger messenger = (Messenger) ctx.getBean("messenger");
+		assertEquals(new StringBuffer("Hello World!").reverse().toString(), messenger.getMessage());
+	}
+
+
+	private static boolean isNotAtLeastJava_14() {
+		return JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14;
 	}
 
 

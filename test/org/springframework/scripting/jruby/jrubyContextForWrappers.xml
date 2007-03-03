@@ -57,6 +57,15 @@ class RubyWrapperAdder < WrapperAdder
 	def populate(x, y)
 		[x, y]
 	end
+
+	def createListOfLists(x, y, z)
+		[[x], [y], [z]]
+	end
+
+	def toMap(key, value)
+		{key => value}
+	end
+
 end
 			]]></value>
 		</constructor-arg>

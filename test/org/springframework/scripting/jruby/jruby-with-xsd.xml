@@ -5,12 +5,14 @@
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
 http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd">
 
-	<lang:jruby id="messenger" script-interfaces="org.springframework.scripting.Messenger"
-							script-source="classpath:org/springframework/scripting/jruby/Messenger.rb">
-		  <lang:property name="message" value="Hello World!"/>
+	<lang:jruby id="messenger"
+				script-interfaces="org.springframework.scripting.Messenger"
+				script-source="classpath:org/springframework/scripting/jruby/Messenger.rb">
+		<lang:property name="message" value="Hello World!"/>
 	</lang:jruby>
 
-	<lang:jruby id="calculator" script-interfaces="org.springframework.scripting.Calculator">
+	<lang:jruby id="calculator"
+				script-interfaces="org.springframework.scripting.Calculator">
 		<lang:inline-script>
 			require 'java'
 
@@ -26,8 +28,35 @@ end
 		</lang:inline-script>
 	</lang:jruby>
 
-	<lang:jruby id="refreshableMessenger" script-interfaces="org.springframework.scripting.Messenger"
-							script-source="classpath:org/springframework/scripting/jruby/Messenger.rb" refresh-check-delay="5000">
-		  <lang:property name="message" value="Hello World!"/>
+	<lang:jruby id="refreshableMessenger"
+				script-interfaces="org.springframework.scripting.Messenger"
+				script-source="classpath:org/springframework/scripting/jruby/Messenger.rb"
+				refresh-check-delay="5000">
+		<lang:property name="message" value="Hello World!"/>
 	</lang:jruby>
+
+	<!-- just checking that multiple script interfaces are supported -->
+	<lang:jruby id="calculatingMessenger"
+				script-interfaces="org.springframework.scripting.Calculator, org.springframework.scripting.Messenger">
+		<lang:inline-script><![CDATA[require 'java'
+
+class RubyCalculatingMessenger
+
+ def add(x, y)
+	x + y
+ end
+ 
+ def setMessage(message)
+	@@message = message
+ end
+
+ def getMessage
+ 	@@message
+ end
+
+end
+		]]></lang:inline-script>
+		<lang:property name="message" value="Hello World!"/>
+	</lang:jruby>
+
 </beans>

@@ -16,6 +16,8 @@
 
 package org.springframework.scripting.jruby;
 
+import java.util.Map;
+
 /**
  * http://opensource.atlassian.com/projects/spring/browse/SPR-3038
  *
@@ -42,5 +44,9 @@ public interface WrapperAdder {
 	String concatArrayOfIntegerWrappers(Integer[] numbers);
 
 	Short[] populate(Short one, Short two);
+
+	String[][] createListOfLists(String one, String second, String third);
+
+	Map toMap(String key, Object value);
 
 }

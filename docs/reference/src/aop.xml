@@ -805,6 +805,9 @@ public class AfterReturningExample {
 	executions that return a value of the specified type (<classname>Object</classname>
 	in this case, which will match any return value).
 	</para>
+
+		   <para>Please note that it is <emphasis>not</emphasis> possible to
+		   return a totally different reference when using after-returning advice.</para>
 	
 	</section>
 	<section id="aop-advice-after-throwing">

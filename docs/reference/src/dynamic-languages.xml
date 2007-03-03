@@ -874,7 +874,7 @@ void setMessage(String aMessage) {
             describes two possible use cases for the dynamic language support in Spring.
         </para>
 		<para>
-            Please also note that the Spring distribution ships with a showcase project
+            Please note that the Spring distribution ships with a showcase project
             for this dynamic language support in the relevant section of the Spring distribution.
             (A showcase project is a small project that is limited in scope to covering
             one particular aspect of the Spring Framework.)
@@ -906,7 +906,7 @@ void setMessage(String aMessage) {
 			</para>
 			<note>
 				<para>
-		            Please note that in order to effect this automatic 'pickup' of any changes
+		            In order to effect this automatic 'pickup' of any changes
 		            to dynamic-language-backed beans, you will have had to enable the
 		            'refreshable beans' functionality. See the section entitle
 		             <xref linkend="dynamic-language-refreshable-beans"/> for a full treatment
@@ -1002,6 +1002,22 @@ class TestBeanValidator implements Validator {
     }
 }
 }]]></programlisting>
+		</section>
+		<section id="dynamic-language-scenarios-aop">
+			<title>AOP - advising scripted beans</title>
+			<para>
+				This last 'scenario' is not really a scenario... rather it is a final note
+				to inform you that it is possible to use the Spring AOP framework to advise
+				scripted beans. The Spring AOP framework actually is unaware of the fact
+				that a bean that is being advised might be a scripted bean, so all of the
+				AOP use cases and functionality that you may be using or aim to use will
+				work with scripted beans.
+			</para>
+			<para>
+				There is one (small) thing that you need to be aware of when advising scripted
+				beans... you cannot use class-based proxies, you must use
+				<link linkend="aop-proxying">interface-based proxies</link>.
+			</para>
 		</section>
 	</section>
 	<section id="dynamic-language-resources">
