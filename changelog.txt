@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.3 (28.2.2007)
-------------------------------------
+Changes in version 2.0.3 (6.3.2007)
+-----------------------------------
 
 General
 * basic scheduling support is included in "spring-context.jar", with only Quartz support added in "spring-support.jar"
@@ -34,6 +34,7 @@ Package org.springframework.aop
 * AbstractSingletonProxyFactoryBean and AbstractAutoProxyCreator use the bean ClassLoader for generating proxies
 * reworked AdvisorAdapter and AdvisorAdapterRegistry to expose a MethodInterceptor right away
 * AspectJExpressionPointcut ignores target classes not accepted by PointcutExpression matching (such as arrays)
+* AspectJExpressionPointcut falls back to the proxy method if the ShadowMatch failed for the target method
 * revised AspectJPointcutAdvisor to never apply AspectJ advice methods to themselves (avoiding a stack overflow)
 * AspectJAdviceParameterNameDiscoverer properly considers reference pointcuts as potential source of parameter binding
 * AbstractAspectJAdvisorFactory detects @AspectJ aspects through the presence of the @Aspect annotation
@@ -55,6 +56,7 @@ Package org.springframework.aop
 * @Configurable works for deserialized objects as well
 
 Package org.springframework.beans
+* CachedIntrospectionResults's "acceptedClassLoaders" facility uses thread-safe iteration
 * fixed BeanWrapperImpl's "toString()" output in case of no wrapped object set
 * BeanWrapperImpl supports nested generic collections as map keys and as indexed map values
 * added "getTypeConverter()" method to ConfigurableBeanFactory interface
@@ -87,7 +89,9 @@ Package org.springframework.beans
 Package org.springframework.context
 * AbstractApplicationContext instantiates BeanPostProcessors which implemented Ordered before non-Ordered ones
 * AbstractApplicationContext applies start/stop callbacks to existing Lifecycle instances only, particularly on shutdown
+* factored out protected "destroyBeans()" template method in AbstractApplicationContext, for custom bean destruction
 * AbstractRefreshableApplicationContext allows BeanFactory access during the destruction phase of a "refresh()" call
+* added "customizeBeanFactory(DefaultListableBeanFactory)" template method to AbstractRefreshableApplicationContext
 * (Reloadable)ResourceBundleMessageSource trims whitespace from specified bundle basenames
 * ResourceBundleMessageSource by default uses the bean ClassLoader for loading bundles
 
@@ -112,6 +116,8 @@ Package org.springframework.instrument
 * ShadowingClassLoader excludes "com.sun." package by default (for using Sun's Xerces version through JAXP)
 
 Package org.springframework.jca
+* TransactionAwareConnectionFactoryProxy throws JCA IllegalStateException in case of "getLocalTransaction()" access
+* CciLocalTransactionManager unwraps given TransactionAwareConnectionFactoryProxy to obtain its target ConnectionFactory
 * added ResourceAdapterFactoryBean to "jca.support" package, for bootstrapping a JCA 1.5 ResourceAdapter locally
 * added "jca.work" package, containing a JCA 1.5 WorkManagerTaskExecutor as well as a SimpleWorkManager implementation
 
@@ -125,6 +131,8 @@ Package org.springframework.jdbc
 Package org.springframework.jms
 * marked JmsDestinationAccessor as abstract
 * moved protected "createConnection" and "createSession" methods from JmsTemplate up to JmsAccessor
+* TransactionAwareConnectionFactoryProxy throws TransactionInProgressException in case of manual commit/rollback calls
+* JmsTransactionManager unwraps given TransactionAwareConnectionFactoryProxy to obtain its target ConnectionFactory
 * factored out AbstractJmsListeningContainer base class from AbstractMessageListenerContainer
 * AbstractMessageListenerContainer's "refreshSharedConnection" properly resets shared Connection in refresh failure case
 * AbstractMessageListenerContainer explicitly aborts messages which have been delivered after initiated shutdown
@@ -137,6 +145,8 @@ Package org.springframework.jmx
 * MBeanExporter and MBeanServerConnectionFactoryBean use the bean ClassLoader for generating lazy-init proxies
 * MBeanExporter supports lazy-init standard MBeans analogously to lazy-init Spring beans with ModelMBean wrapping
 * factored out protected "isMBean(Class") method in MBeanExporter, to allow for extending the default MBean check
+* MBeanServerFactoryBean only tries to obtain the JDK 1.5 platform MBeanServer in case of no agent id specified
+* MBeanServerFactoryBean tries to create a new MBeanServer if not allowed to access the JDK 1.5 platform MBeanServer
 
 Package org.springframework.jndi
 * JndiObjectFactoryBean uses the bean ClassLoader for generating lazy-init proxies
@@ -178,14 +188,21 @@ Package org.springframework.scheduling
 * added support for the JSR-166 (java.util.concurrent) backport project, in the "scheduling.backportconcurrent" package
 
 Package org.springframework.scripting
-* Bsh/JRuby/GroovyScriptFactory uses the bean ClassLoader for generating script objects
-* BshScriptUtils and BshScriptFactory support BeanShell scripts that declare an actual class or instance
-* JRubyScriptUtils passes the declared return type to JRuby, for proper conversion of number types
+* Bsh/Groovy/JRubyScriptFactory uses the bean ClassLoader for generating script objects
 * BshObjectInvocationHandler/JRubyObjectInvocationHandler implement "equals"/"hashCode/"toString" based on script object
+* BshScriptUtils and BshScriptFactory support BeanShell scripts that declare an actual class or instance
+* GroovyScriptFactory supports Groovy scripts that create an actual instance or explicitly return an object
+* Bsh/GroovyScriptFactory caches the script class as far as possible, building prototypes from the same class
+* JRubyScriptUtils passes the declared return type to JRuby, for proper conversion of number types
+* JRubyScriptUtils converts Ruby arrays back to declared Java arrays
 * ScriptFactoryPostProcessor uses the bean ClassLoader for generating refreshable script proxies
+* ScriptFactoryPostProcessor applies a config interface to the scripted target object only, not to a refreshable proxy
+* revised ScriptFactoryPostProcessor to support AOP auto-proxying for scripted objects
 * LangNamespaceHandler always registers all BeanDefinitionParsers, failing with NoClassDefFoundError for actual script
 
 Package org.springframework.test
+* AbstractSingleSpringContextTests uses GenericApplicationContext by default, created through "createApplicationContext"
+* added "customizeBeanFactory(DefaultListableBeanFactory)" template method to AbstractSingleSpringContextTests
 * AbstractSingleSpringContextTests supports "getConfigPaths()" method, specifying config files relative to test class
 * AbstractSingleSpringContextTests supports "getConfigPath()" method, specifying a single file relative to test class
 * changed the visibility of AbstractDependencyInjectionSpringContextTests's "injectDependencies" method to protected
@@ -198,6 +215,8 @@ Package org.springframework.transaction
 * turned various AbstractPlatformTransactionManager methods from private to protected, for reuse in specific subclasses
 * JtaTransactionManager does not fail if default UserTransaction lookup fails: falls back on TransactionManager instead
 * SpringJtaSynchronizationAdapter does not explicitly call "setRollbackOnly" on WebLogic, to preserve the root cause
+* added OC4JJtaTransactionManager for Oracle OC4J 10.1.3(.2), with support for transaction names and isolation levels
+* fixed AbstractFallbackTransactionAttributeSource to synchronize access to its attribute cache
 * added "order" attribute to "tx:annotation-driven" tag, determining the order of the tx advisor in the advice chain
 
 Package org.springframework.util
@@ -209,9 +228,10 @@ Package org.springframework.web
 * ConfigurableWebApplicationContext and ConfigurablePortletApplicationContext expose config state through getters
 * RequestContextListener works correctly even in case of the "requestDestroyed" callback coming from a different thread
 * ServletRequestAttributes's DestructionCallbackBindingListener is serializable, surviving web app restarts
-* added "rootHandler" bean property to AbstractUrlHandlerMapping, kicking in for the "/" path
 * added "warnLogCategory" property to SimpleMappingExceptionResolver, allowing to log the exception to warn level
 * added protected "determineStatusCode" method to Servlet SimpleMappingExceptionResolver, for custom status codes
+* added "rootHandler" bean property to AbstractUrlHandlerMapping, kicking in for the "/" path
+* added "detectHandlersInAncestorContexts" to BeanNameUrlHandlerMapping, for detecting handler beans in the root context
 * added "excludedPackages" and "excludedClasses" bean properties to ControllerClassNameHandlerMapping
 * ControllerClassNameHandlerMapping excludes all classes in the "org.springframework.web.servlet.mvc" package by default
 * OptionsTag accepts no or empty items specified, simply not rendering any option tags in such a case
