@@ -126,17 +126,13 @@ import org.springframework.util.Assert;
  * properly. Use Spring's {@link WebLogicJtaTransactionManager} to address this issue.
  *
  * <p><b>This standard JtaTransactionManager supports timeouts but not per-transaction
- * isolation levels.</b> Custom subclasses can override <code>doJtaBegin</code> for
- * specific JTA implementations to provide this functionality; Spring includes a
- * corresponding WebLogicJtaTransactionManager class, for example. Such adapters
- * for specific J2EE transaction coordinators can also expose transaction names
- * for monitoring; with standard JTA, transaction names will be ignored.
- *
- * <p><b>Consider using {@link WebLogicJtaTransactionManager} on BEA WebLogic, which
- * supports the full power of Spring transaction definitions on WebLogic's transaction
- * coordinator</b>, <i>beyond standard JTA</i>: transaction names, per-transaction
- * isolation levels, and proper resuming of transactions in all cases.
- * WebLogicJtaTransactionManager automatically adapts to WebLogic 7.0 or 8.1+.
+ * isolation levels.</b> Custom subclasses may override {@link #doJtaBegin} for
+ * specific JTA extensions in order to provide this functionality; Spring includes
+ * corresponding {@link WebLogicJtaTransactionManager} and {@link OC4JJtaTransactionManager}
+ * classes, for BEA's WebLogic Server and Oracle's OC4J, respectively. Such adapters
+ * for specific J2EE transaction coordinators may also expose transaction names for
+ * monitoring (both of the above do); with standard JTA, transaction names will simply
+ * be ignored.
  *
  * <p>This class is serializable. However, active synchronizations do not survive
  * serialization.
@@ -670,9 +666,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * This implementation returns false to cause a further invocation
 	 * of doBegin despite an already existing transaction.
 	 * <p>JTA implementations might support nested transactions via further
-	 * <code>UserTransaction.begin</code> invocations, but never support savepoints.
+	 * <code>UserTransaction.begin()</code> invocations, but never support savepoints.
 	 * @see #doBegin
-	 * @see javax.transaction.UserTransaction#begin
+	 * @see javax.transaction.UserTransaction#begin()
 	 */
 	protected boolean useSavepointForNestedTransaction() {
 		return false;
@@ -732,7 +728,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * Apply the given transaction isolation level. The default implementation
 	 * will throw an exception for any level other than ISOLATION_DEFAULT.
 	 * <p>To be overridden in subclasses for specific JTA implementations,
-	 * as alternative to overriding the full <code>doJtaBegin</code> method.
+	 * as alternative to overriding the full {@link #doJtaBegin} method.
 	 * @param txObject the JtaTransactionObject containing the UserTransaction
 	 * @param isolationLevel isolation level taken from transaction definition
 	 * @throws InvalidIsolationLevelException if the given isolation level
@@ -754,7 +750,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Apply the given transaction timeout. The default implementation will call
-	 * <code>setTransactionTimeout</code> for a non-default timeout value.
+	 * <code>UserTransaction.setTransactionTimeout</code> for a non-default timeout value.
 	 * @param txObject the JtaTransactionObject containing the UserTransaction
 	 * @param timeout timeout value taken from transaction definition
 	 * @throws SystemException if thrown by the JTA implementation
