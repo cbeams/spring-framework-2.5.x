@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,20 @@ import javax.jms.Session;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicSession;
+import javax.jms.TransactionInProgressException;
 
 import org.springframework.util.Assert;
 
 /**
- * Proxy for a target ConnectionFactory, adding awareness of Spring-managed transactions.
- * Similar to a transactional JNDI ConnectionFactory as provided by a J2EE server.
+ * Proxy for a target JMS {@link javax.jms.ConnectionFactory}, adding awareness of
+ * Spring-managed transactions. Similar to a transactional JNDI ConnectionFactory
+ * as provided by a J2EE server.
  *
  * <p>Messaging code that should remain unaware of Spring's JMS support can work
  * with this proxy to seamlessly participate in Spring-managed transactions.
- * Note that the transaction manager, for example JmsTransactionManager, still
- * needs to work with the underlying ConnectionFactory, <i>not</i> with this proxy.
+ * Note that the transaction manager, for example {@link JmsTransactionManager},
+ * still needs to work with the underlying ConnectionFactory, <i>not</i> with
+ * this proxy.
  *
  * <p><b>Make sure that TransactionAwareConnectionFactoryProxy is the outermost
  * ConnectionFactory of a chain of ConnectionFactory proxies/adapters.</b>
@@ -51,8 +54,8 @@ import org.springframework.util.Assert;
  * target factory or to some intermediary adapter like
  * {@link UserCredentialsConnectionFactoryAdapter}.
  *
- * <p>Delegates to ConnectionFactoryUtils for automatically participating in thread-bound
- * transactions, for example managed by {@link JmsTransactionManager} (or by another.
+ * <p>Delegates to {@link ConnectionFactoryUtils} for automatically participating
+ * in thread-bound transactions, for example managed by {@link JmsTransactionManager}.
  * <code>createSession</code> calls and <code>close</code> calls on returned Sessions
  * will behave properly within a transaction, that is, always work on the transactional
  * Session. If not within a transaction, normal ConnectionFactory behavior applies.
@@ -141,7 +144,7 @@ public class TransactionAwareConnectionFactoryProxy
 
 	public QueueConnection createQueueConnection() throws JMSException {
 		if (!(this.targetConnectionFactory instanceof QueueConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("targetConnectionFactory is no QueueConnectionFactory");
+			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
 		}
 		QueueConnection targetConnection =
 				((QueueConnectionFactory) this.targetConnectionFactory).createQueueConnection();
@@ -150,7 +153,7 @@ public class TransactionAwareConnectionFactoryProxy
 
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		if (!(this.targetConnectionFactory instanceof QueueConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("targetConnectionFactory is no QueueConnectionFactory");
+			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
 		}
 		QueueConnection targetConnection =
 				((QueueConnectionFactory) this.targetConnectionFactory).createQueueConnection(username, password);
@@ -159,7 +162,7 @@ public class TransactionAwareConnectionFactoryProxy
 
 	public TopicConnection createTopicConnection() throws JMSException {
 		if (!(this.targetConnectionFactory instanceof TopicConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("targetConnectionFactory is no TopicConnectionFactory");
+			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
 		}
 		TopicConnection targetConnection =
 				((TopicConnectionFactory) this.targetConnectionFactory).createTopicConnection();
@@ -168,7 +171,7 @@ public class TransactionAwareConnectionFactoryProxy
 
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		if (!(this.targetConnectionFactory instanceof TopicConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("targetConnectionFactory is no TopicConnectionFactory");
+			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
 		}
 		TopicConnection targetConnection =
 				((TopicConnectionFactory) this.targetConnectionFactory).createTopicConnection(username, password);
@@ -199,8 +202,7 @@ public class TransactionAwareConnectionFactoryProxy
 
 
 	/**
-	 * Invocation handler that delegates close calls on JDBC Connections
-	 * to DataSourceUtils for being aware of thread-bound transactions.
+	 * Invocation handler that exposes transactional Sessions for the underlying Connection.
 	 */
 	private class TransactionAwareConnectionInvocationHandler implements InvocationHandler {
 
@@ -272,8 +274,7 @@ public class TransactionAwareConnectionFactoryProxy
 
 
 	/**
-	 * Invocation handler that delegates close calls on JDBC Connections
-	 * to DataSourceUtils for being aware of thread-bound transactions.
+	 * Invocation handler that suppresses close calls for a transactional JMS Session.
 	 */
 	private static class CloseSuppressingSessionInvocationHandler implements InvocationHandler {
 
@@ -293,6 +294,12 @@ public class TransactionAwareConnectionFactoryProxy
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of Connection proxy.
 				return new Integer(hashCode());
+			}
+			else if (method.getName().equals("commit")) {
+				throw new TransactionInProgressException("Commit call not allowed within a managed transaction");
+			}
+			else if (method.getName().equals("rollback")) {
+				throw new TransactionInProgressException("Rollback call not allowed within a managed transaction");
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: not to be closed within a transaction.
