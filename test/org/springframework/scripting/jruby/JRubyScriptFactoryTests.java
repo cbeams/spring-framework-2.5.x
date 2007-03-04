@@ -301,8 +301,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 		}
 	}
 
-	// TODO: jruby-aop.xml not checked in yet
-	public void XtestAOP() throws Exception {
+	public void testAOP() throws Exception {
 		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
