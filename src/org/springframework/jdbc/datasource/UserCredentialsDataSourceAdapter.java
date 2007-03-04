@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * An adapter for a target {@link javax.sql.DataSource}, applying the specified
+ * An adapter for a target JDBC {@link javax.sql.DataSource}, applying the specified
  * user credentials to every standard <code>getConnection()</code> call, implicitly
  * invoking <code>getConnection(username, password)</code> on the target.
  * All other methods simply delegate to the corresponding methods of the
@@ -37,21 +37,22 @@ import org.springframework.util.StringUtils;
  * the preconfigured "myDataSource", implicitly accessing "myTargetDataSource"
  * with the specified user credentials.
  *
- * <pre class="code">&lt;bean id="myTargetDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
- *   &lt;property name="jndiName">&lt;value>java:comp/env/jdbc/myds&lt;/value>&lt;/property>
- * &lt;/bean>
+ * <pre class="code">
+ * &lt;bean id="myTargetDataSource" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+ *   &lt;property name="jndiName" value="java:comp/env/jdbc/myds"/&gt;
+ * &lt;/bean&gt;
  *
- * &lt;bean id="myDataSource" class="org.springframework.jdbc.datasource.UserCredentialsDataSourceAdapter">
- *   &lt;property name="targetDataSource">&lt;ref bean="myTargetDataSource"/>&lt;/property>
- *   &lt;property name="username">&lt;value>myusername&lt;/value>&lt;/property>
- *   &lt;property name="password">&lt;value>mypassword&lt;/value>&lt;/property>
+ * &lt;bean id="myDataSource" class="org.springframework.jdbc.datasource.UserCredentialsDataSourceAdapter"&gt;
+ *   &lt;property name="targetDataSource" ref="myTargetDataSource"/&gt;
+ *   &lt;property name="username" value="myusername"/&gt;
+ *   &lt;property name="password" value="mypassword"/&gt;
  * &lt;/bean></pre>
  *
  * <p>If the "username" is empty, this proxy will simply delegate to the
  * standard <code>getConnection()</code> method of the target DataSource.
  * This can be used to keep a UserCredentialsDataSourceAdapter bean definition
  * just for the <i>option</i> of implicitly passing in user credentials if
- * a particular target DataSource requires it.
+ * the particular target DataSource requires it.
  *
  * @author Juergen Hoeller
  * @since 1.0.2

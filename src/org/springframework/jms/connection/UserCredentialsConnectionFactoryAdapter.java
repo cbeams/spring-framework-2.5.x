@@ -29,36 +29,36 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * An adapter for a target ConnectionFactory, applying the given user credentials
- * to every standard <code>createConnection()</code> call, that is, implicitly
- * invoking <code>createConnection(username, password)</code> on the target.
- * All other methods simply delegate to the corresponding methods of the
- * target ConnectionFactory.
+ * An adapter for a target JMS {@link javax.jms.ConnectionFactory}, applying the
+ * given user credentials to every standard <code>createConnection()</code> call,
+ * that is, implicitly invoking <code>createConnection(username, password)</code>
+ * on the target. All other methods simply delegate to the corresponding methods
+ * of the target ConnectionFactory.
  *
  * <p>Can be used to proxy a target JNDI ConnectionFactory that does not have user
  * credentials configured. Client code can work with the ConnectionFactory without
  * passing in username and password on every <code>createConnection()</code> call.
  *
- * <p>In the following example, client code can simply transparently work with
- * the preconfigured "myConnectionFactory", implicitly accessing
+ * <p>In the following example, client code can simply transparently work
+ * with the preconfigured "myConnectionFactory", implicitly accessing
  * "myTargetConnectionFactory" with the specified user credentials.
  *
- * <pre>
- * &lt;bean id="myTargetConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean">
- *   &lt;property name="jndiName">&lt;value>java:comp/env/jms/mycf&lt;/value>&lt;/property>
- * &lt;/bean>
+ * <pre class="code">
+ * &lt;bean id="myTargetConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+ *   &lt;property name="jndiName" value="java:comp/env/jms/mycf"/&gt;
+ * &lt;/bean&gt;
  *
- * &lt;bean id="myConnectionFactory" class="org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapter">
- *   &lt;property name="targetConnectionFactory">&lt;ref bean="myTargetConnectionFactory"/>&lt;/property>
- *   &lt;property name="username">&lt;value>myusername&lt;/value>&lt;/property>
- *   &lt;property name="password">&lt;value>mypassword&lt;/value>&lt;/property>
+ * &lt;bean id="myConnectionFactory" class="org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapter"&gt;
+ *   &lt;property name="targetConnectionFactory" ref="myTargetConnectionFactory"/&gt;
+ *   &lt;property name="username" value="myusername"/&gt;
+ *   &lt;property name="password" value="mypassword"/&gt;
  * &lt;/bean></pre>
  *
  * <p>If the "username" is empty, this proxy will simply delegate to the standard
  * <code>createConnection()</code> method of the target ConnectionFactory.
  * This can be used to keep a UserCredentialsConnectionFactoryAdapter bean
  * definition just for the <i>option</i> of implicitly passing in user credentials
- * if  particular target ConnectionFactory requires it.
+ * if the particular target ConnectionFactory requires it.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -104,7 +104,7 @@ public class UserCredentialsConnectionFactoryAdapter
 
 	public void afterPropertiesSet() {
 		if (this.targetConnectionFactory == null) {
-			throw new IllegalArgumentException("'targetConnectionFactory' is required");
+			throw new IllegalArgumentException("Property 'targetConnectionFactory' is required");
 		}
 	}
 

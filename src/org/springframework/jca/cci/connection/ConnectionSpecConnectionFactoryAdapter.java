@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionSpec;
 
 /**
- * An adapter for a target ConnectionFacory, applying the given ConnectionSpec
- * to every standard <code>getConnection()</code> call, that is, implicitly
- * invoking <code>getConnection(ConnectionSpec)</code> on the target.
- * All other methods simply delegate to the corresponding methods of the
- * target ConnectionFactory.
+ * An adapter for a target CCI {@link javax.resource.cci.ConnectionFactory},
+ * applying the given ConnectionSpec to every standard <code>getConnection()</code>
+ * call, that is, implicitly invoking <code>getConnection(ConnectionSpec)</code>
+ * on the target. All other methods simply delegate to the corresponding methods
+ * of the target ConnectionFactory.
  *
  * <p>Can be used to proxy a target JNDI ConnectionFactory that does not have a
  * ConnectionSpec configured. Client code can work with the ConnectionFactory
@@ -35,25 +35,25 @@ import javax.resource.cci.ConnectionSpec;
  * the preconfigured "myConnectionFactory", implicitly accessing
  * "myTargetConnectionFactory" with the specified user credentials.
  *
- * <pre>
- * &lt;bean id="myTargetConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean">
- *   &lt;property name="jndiName">&lt;value>java:comp/env/cci/mycf&lt;/value>&lt;/property>
+ * <pre class="code">
+ * &lt;bean id="myTargetConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+ *   &lt;property name="jndiName" value="java:comp/env/cci/mycf"/&gt;
  * &lt;/bean>
  *
- * &lt;bean id="myConnectionFactory" class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter">
- *   &lt;property name="targetConnectionFactory">&lt;ref bean="myTargetConnectionFactory"/>&lt;/property>
- *   &lt;property name="connectionSpec">
- *     &lt;bean class="your.resource.adapter.ConnectionSpecImpl">
- *       &lt;property name="username">&lt;value>myusername&lt;/value>&lt;/property>
- *       &lt;property name="password">&lt;value>mypassword&lt;/value>&lt;/property>
- *     &lt;/bean>
- *   &lt;/property>
- * &lt;/bean></pre>
+ * &lt;bean id="myConnectionFactory" class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter"&gt;
+ *   &lt;property name="targetConnectionFactory" ref="myTargetConnectionFactory"/&gt;
+ *   &lt;property name="connectionSpec"&gt;
+ *     &lt;bean class="your.resource.adapter.ConnectionSpecImpl"&gt;
+ *       &lt;property name="username" value="myusername"/&gt;
+ *       &lt;property name="password" value="mypassword"/&gt;
+ *     &lt;/bean&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
  * <p>If the "connectionSpec" is empty, this proxy will simply delegate to the
  * standard <code>getConnection()</code> method of the target ConnectionFactory.
  * This can be used to keep a UserCredentialsConnectionFactoryAdapter bean definition
- * just for the <i>option</i> of implicitly passing in a ConnectionSpec if a
+ * just for the <i>option</i> of implicitly passing in a ConnectionSpec if the
  * particular target ConnectionFactory requires it.
  *
  * @author Juergen Hoeller
