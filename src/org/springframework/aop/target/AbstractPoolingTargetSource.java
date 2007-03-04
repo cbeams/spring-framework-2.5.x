@@ -27,7 +27,8 @@ import org.springframework.beans.factory.DisposableBean;
  * Abstract base class for pooling {@link org.springframework.aop.TargetSource}
  * implementations which maintain a pool of target instances, acquiring and
  * releasing a target object from the pool for each method invocation.
- * This class is independent of concrete pooling technology.
+ * This abstract base class is independent of concrete pooling technology;
+ * see the subclass {@link CommonsPoolTargetSource} for a concrete example.
  *
  * <p>Subclasses must implement the {@link #getTarget} and
  * {@link #releaseTarget} methods based on their chosen object pool.
@@ -41,7 +42,7 @@ import org.springframework.beans.factory.DisposableBean;
  *
  * <p>This class implements the {@link org.springframework.beans.factory.DisposableBean}
  * interface in order to force subclasses to implement a {@link #destroy()}
- * method, closíng down their object pool.
+ * method, closing down their object pool.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
