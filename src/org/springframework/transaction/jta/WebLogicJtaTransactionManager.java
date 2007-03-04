@@ -31,19 +31,19 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
 
 /**
- * Special JtaTransactionManager version for BEA WebLogic (7.0, 8.1 and higher).
+ * Special {@link JtaTransactionManager} variant for BEA WebLogic (7.0, 8.1 and higher).
  * Supports the full power of Spring's transaction definitions on WebLogic's
  * transaction coordinator, <i>beyond standard JTA</i>: transaction names,
  * per-transaction isolation levels, and proper resuming of transactions in all cases.
  *
  * <p>Uses WebLogic's special <code>begin(name)</code> method to start a JTA transaction,
- * to make <b>Spring-driven transactions visible in WebLogic's transaction monitor</b>.
- * In case of Spring's declarative transactions, the exposed name will (by default)
- * be the fully-qualified class name + "." + method name.
+ * in order to make <b>Spring-driven transactions visible in WebLogic's transaction
+ * monitor</b>. In case of Spring's declarative transactions, the exposed name will
+ * (by default) be the fully-qualified class name + "." + method name.
  *
  * <p>Supports a <b>per-transaction isolation level</b> through WebLogic's corresponding
  * JTA transaction property "ISOLATION LEVEL". This will apply the specified isolation
- * level (e.g. ISOLATION_SERIALIZABLE) to all JDBC connections that participate in the
+ * level (e.g. ISOLATION_SERIALIZABLE) to all JDBC Connections that participate in the
  * given transaction.
  *
  * <p>Invokes WebLogic's special <code>forceResume</code> method if standard JTA resume
@@ -64,8 +64,8 @@ import org.springframework.transaction.TransactionSystemException;
  * @author Juergen Hoeller
  * @since 1.1
  * @see org.springframework.transaction.TransactionDefinition#getName
- * @see weblogic.transaction.UserTransaction#begin(String)
  * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel
+ * @see weblogic.transaction.UserTransaction#begin(String)
  * @see weblogic.transaction.Transaction#setProperty
  * @see weblogic.transaction.TransactionManager#forceResume
  * @see weblogic.transaction.TransactionHelper
@@ -146,6 +146,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		}
 	}
 
+
 	private void loadWebLogicTransactionHelperClass() throws TransactionSystemException {
 		if (this.transactionHelperClass == null) {
 			try {
@@ -209,10 +210,9 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			this.weblogicTransactionManagerAvailable =
 					transactionManagerClass.isInstance(getTransactionManager());
 			if (this.weblogicTransactionManagerAvailable) {
+				Class transactionClass = getClass().getClassLoader().loadClass(TRANSACTION_CLASS_NAME);
 				this.forceResumeMethod =
 						transactionManagerClass.getMethod("forceResume", new Class[] {Transaction.class});
-				Class transactionClass =
-						getClass().getClassLoader().loadClass(TRANSACTION_CLASS_NAME);
 				this.setPropertyMethod =
 						transactionClass.getMethod("setProperty", new Class[] {String.class, Serializable.class});
 				logger.debug("Support for WebLogic forceResume available");
@@ -239,16 +239,16 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			try {
 				if (timeout > TransactionDefinition.TIMEOUT_DEFAULT) {
 					/*
-					weblogic.transaction.UserTransaction ut = (weblogic.transaction.UserTransaction) ut;
-					ut.begin(definition.getName(), timeout);
+					weblogic.transaction.UserTransaction wut = (weblogic.transaction.UserTransaction) ut;
+					wut.begin(definition.getName(), timeout);
 					*/
 					this.beginWithNameAndTimeoutMethod.invoke(txObject.getUserTransaction(),
 							new Object[] {definition.getName(), new Integer(timeout)});
 				}
 				else {
 					/*
-					weblogic.transaction.UserTransaction ut = (weblogic.transaction.UserTransaction) ut;
-					ut.begin(definition.getName());
+					weblogic.transaction.UserTransaction wut = (weblogic.transaction.UserTransaction) ut;
+					wut.begin(definition.getName());
 					*/
 					this.beginWithNameMethod.invoke(txObject.getUserTransaction(),
 							new Object[] {definition.getName()});
@@ -284,11 +284,11 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 				}
 				catch (InvocationTargetException ex) {
 					throw new TransactionSystemException(
-							"WebLogic's Transaction.setProperty() method failed", ex.getTargetException());
+							"WebLogic's Transaction.setProperty(String, Serializable) method failed", ex.getTargetException());
 				}
 				catch (Exception ex) {
 					throw new TransactionSystemException(
-							"Could not invoke WebLogic's Transaction.setProperty() method", ex);
+							"Could not invoke WebLogic's Transaction.setProperty(String, Serializable) method", ex);
 				}
 			}
 		}
@@ -322,11 +322,11 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			}
 			catch (InvocationTargetException ex2) {
 				throw new TransactionSystemException(
-						"WebLogic's TransactionManager.forceResume() method failed", ex2.getTargetException());
+						"WebLogic's TransactionManager.forceResume(Transaction) method failed", ex2.getTargetException());
 			}
 			catch (Exception ex2) {
 				throw new TransactionSystemException(
-						"Could not access WebLogic's TransactionManager.forceResume() method", ex2);
+						"Could not access WebLogic's TransactionManager.forceResume(Transaction) method", ex2);
 			}
 		}
 	}
