@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.transaction.Status;
 import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
@@ -55,7 +54,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
  */
 public class OpenSessionInViewTests extends TestCase {
 
-	public void testOpenSessionInViewInterceptorWithSingleSession() throws HibernateException {
+	public void testOpenSessionInViewInterceptorWithSingleSession() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -128,10 +127,8 @@ public class OpenSessionInViewTests extends TestCase {
 
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 2);
 		tm.getTransaction();
-		tmControl.setReturnValue(null, 1);
+		tmControl.setReturnValue(null, 2);
 
 		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
 		interceptor.setSessionFactory(sf);
@@ -197,7 +194,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testOpenSessionInViewInterceptorWithSingleSessionAndFlush() throws HibernateException {
+	public void testOpenSessionInViewInterceptorWithSingleSessionAndFlush() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
@@ -244,7 +241,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testOpenSessionInViewInterceptorAndDeferredClose() throws HibernateException {
+	public void testOpenSessionInViewInterceptorAndDeferredClose() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);

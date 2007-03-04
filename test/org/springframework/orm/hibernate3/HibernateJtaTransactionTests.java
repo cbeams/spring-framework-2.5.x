@@ -200,8 +200,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		MockJtaTransaction transaction = new MockJtaTransaction();
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction, 6);
 
@@ -495,8 +493,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		if (jtaTm) {
 			MockJtaTransaction transaction = new MockJtaTransaction();
-			tm.getStatus();
-			tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 			tm.getTransaction();
 			tmControl.setReturnValue(transaction, 1);
 		}
@@ -942,8 +938,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		utControl.setReturnValue(Status.STATUS_ACTIVE, 3);
 		ut.begin();
 		utControl.setVoidCallable(2);
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction1, 1);
 		tm.suspend();
@@ -1200,8 +1194,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		MockJtaTransaction transaction = new MockJtaTransaction();
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction, 6);
 
@@ -1258,8 +1250,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		MockJtaTransaction transaction = new MockJtaTransaction();
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction, 6);
 
@@ -1311,12 +1301,10 @@ public class HibernateJtaTransactionTests extends TestCase {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		MockJtaTransaction transaction = new MockJtaTransaction();
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 2);
 		tm.getTransaction();
-		tmControl.setReturnValue(transaction, 6);
+		tmControl.setReturnValue(transaction, 7);
+		tm.getStatus();
+		tmControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 
 		MockControl sfControl = MockControl.createControl(SessionFactoryImplementor.class);
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
@@ -1395,8 +1383,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		MockJtaTransaction transaction = new MockJtaTransaction();
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction, 6);
 		tm.setRollbackOnly();
@@ -1463,8 +1449,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		MockJtaTransaction transaction1 = new MockJtaTransaction();
 		MockJtaTransaction transaction2 = new MockJtaTransaction();
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_ACTIVE, 5);
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction1, 2);
 		tm.getTransaction();
@@ -1543,8 +1527,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		MockJtaTransaction transaction = new MockJtaTransaction();
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction, 6);
 
@@ -1609,8 +1591,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		MockJtaTransaction transaction = new MockJtaTransaction();
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction, 6);
 
@@ -1692,8 +1672,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		MockJtaTransaction transaction = new MockJtaTransaction();
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction, 6);
 
@@ -1782,8 +1760,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 			sfControl.reset();
 			sessionControl.reset();
 
-			tm.getStatus();
-			tmControl.setReturnValue(Status.STATUS_ACTIVE, 6);
 			tm.getTransaction();
 			tmControl.setReturnValue(transaction, 6);
 
@@ -1865,7 +1841,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 	 * Necessary for creating a mock that implements both interfaces.
 	 * Note: Hibernate 3.1's SessionImplementor interface does not extend Session anymore.
 	 */
-	private static interface ExtendedSession extends Session, SessionImplementor {
+	public static interface ExtendedSession extends Session, SessionImplementor {
 
 	}
 
