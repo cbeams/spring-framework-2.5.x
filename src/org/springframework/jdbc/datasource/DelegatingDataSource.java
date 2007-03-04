@@ -26,7 +26,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
- * {@link javax.sql.DataSource} implementation that delegates all calls
+ * JDBC {@link javax.sql.DataSource} implementation that delegates all calls
  * to a given target {@link javax.sql.DataSource}.
  *
  * <p>This class is meant to be subclassed, with subclasses overriding only
@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 1.1
- * @see #getConnection()
+ * @see #getConnection
  */
 public class DelegatingDataSource implements DataSource, InitializingBean {
 
@@ -75,7 +75,7 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 
 	public void afterPropertiesSet() {
 		if (getTargetDataSource() == null) {
-			throw new IllegalArgumentException("'targetDataSource' is required");
+			throw new IllegalArgumentException("Property 'targetDataSource' is required");
 		}
 	}
 

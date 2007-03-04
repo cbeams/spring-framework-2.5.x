@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import javax.resource.cci.ResourceAdapterMetaData;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * {@link ConnectionFactory} implementation that delegates all calls to a
- * given target {@link ConnectionFactory}.
+ * CCI {@link ConnectionFactory} implementation that delegates all calls
+ * to a given target {@link ConnectionFactory}.
  *
  * <p>This class is meant to be subclassed, with subclasses overriding only
  * those methods (such as {@link #getConnection()}) that should not simply
@@ -37,6 +37,7 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * @author Juergen Hoeller
  * @since 1.2
+ * @see #getConnection
  */
 public class DelegatingConnectionFactory implements ConnectionFactory, InitializingBean {
 
@@ -54,13 +55,13 @@ public class DelegatingConnectionFactory implements ConnectionFactory, Initializ
 	 * Return the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
 	public ConnectionFactory getTargetConnectionFactory() {
-		return targetConnectionFactory;
+		return this.targetConnectionFactory;
 	}
 
 
 	public void afterPropertiesSet() {
 		if (getTargetConnectionFactory() == null) {
-			throw new IllegalArgumentException("targetConnectionFactory is required");
+			throw new IllegalArgumentException("Property 'targetConnectionFactory' is required");
 		}
 	}
 
