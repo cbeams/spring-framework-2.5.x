@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,27 +32,24 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * PlatformTransactionManager implementation that performs local transactions
- * on a single CCI ConnectionFactory. Binds a CCI connection from the specified
- * ConnectionFactory to the thread, potentially allowing for one thread
- * Connection per ConnectionFactory.
+ * {@link org.springframework.transaction.PlatformTransactionManager} implementation
+ * that manages local transactions for a single CCI ConnectionFactory.
+ * Binds a CCI Connection from the specified ConnectionFactory to the thread,
+ * potentially allowing for one thread-bound Connection per ConnectionFactory.
  *
  * <p>Application code is required to retrieve the CCI Connection via
- * <code>ConnectionFactoryUtils.getConnection(ConnectionFactory)</code>
- * instead of J2EE's standard <code>ConnectionFactory.getConnection()</code>.
- * This is recommended anyway, as it throws unchecked <code>org.springframework.dao</code>
- * exceptions instead of the checked JCA ResourceException. All framework classes
- * like CciTemplate or MappingRecordQuery use this strategy implicitly. If not used
- * with this transaction manager, the lookup strategy behaves exactly like the
- * common one - it can thus be used in any case.
+ * {@link ConnectionFactoryUtils#getConnection(ConnectionFactory)} instead of a standard
+ * J2EE-style {@link ConnectionFactory#getConnection()} call. Spring classes such as
+ * {@link org.springframework.jca.cci.core.CciTemplate} use this strategy implicitly.
+ * If not used in combination with this transaction manager, the
+ * {@link ConnectionFactoryUtils} lookup strategy behaves exactly like the native
+ * DataSource lookup; it can thus be used in a portable fashion.
  *
- * <p>Alternatively, you can also allow application code to work with the standard
- * J2EE lookup pattern <code>ConnectionFactory.getConnection()</code>, for example
+ * <p>Alternatively, you can allow application code to work with the standard
+ * J2EE lookup pattern {@link ConnectionFactory#getConnection()}, for example
  * for legacy code that is not aware of Spring at all. In that case, define a
- * TransactionAwareConnectionFactoryProxy for your target ConnectionFactory, and pass
- * that proxy ConnectionFactory to your DAOs, which will automatically participate
- * in Spring-managed transactions through it. Note that CciLocalTransactionManager
- * still needs to be wired with the target ConnectionFactory, driving transactions for it.
+ * {@link TransactionAwareConnectionFactoryProxy} for your target ConnectionFactory,
+ * which will automatically participate in Spring-managed transactions.
  *
  * @author Thierry Templier
  * @author Juergen Hoeller
@@ -61,7 +58,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see ConnectionFactoryUtils#releaseConnection
  * @see TransactionAwareConnectionFactoryProxy
  * @see org.springframework.jca.cci.core.CciTemplate
- * @see org.springframework.jca.cci.object.MappingRecordOperation
  */
 public class CciLocalTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
@@ -81,16 +77,25 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	 * @param connectionFactory CCI ConnectionFactory to manage local transactions for
 	 */
 	public CciLocalTransactionManager(ConnectionFactory connectionFactory) {
-		this.connectionFactory = connectionFactory;
+		setConnectionFactory(connectionFactory);
 		afterPropertiesSet();
 	}
+
 
 	/**
 	 * Set the CCI ConnectionFactory that this instance should manage local
 	 * transactions for.
 	 */
-	public void setConnectionFactory(ConnectionFactory connectionFactory) {
-		this.connectionFactory = connectionFactory;
+	public void setConnectionFactory(ConnectionFactory cf) {
+		if (cf instanceof TransactionAwareConnectionFactoryProxy) {
+			// If we got a TransactionAwareConnectionFactoryProxy, we need to perform transactions
+			// for its underlying target ConnectionFactory, else JMS access code won't see
+			// properly exposed transactions (i.e. transactions for the target ConnectionFactory).
+			this.connectionFactory = ((TransactionAwareConnectionFactoryProxy) cf).getTargetConnectionFactory();
+		}
+		else {
+			this.connectionFactory = cf;
+		}
 	}
 
 	/**
@@ -98,12 +103,12 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	 * transactions for.
 	 */
 	public ConnectionFactory getConnectionFactory() {
-		return connectionFactory;
+		return this.connectionFactory;
 	}
 
 	public void afterPropertiesSet() {
 		if (this.connectionFactory == null) {
-			throw new IllegalArgumentException("connectionFactory is required");
+			throw new IllegalArgumentException("Property 'connectionFactory' is required");
 		}
 	}
 

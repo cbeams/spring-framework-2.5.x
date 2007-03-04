@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,32 +33,47 @@ import org.springframework.transaction.support.SmartTransactionObject;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * PlatformTransactionManager implementation for a single JMS ConnectionFactory.
- * Binds a JMS Connection/Session pair from the specified ConnectionFactory to
- * the thread, potentially allowing for one thread session per connection factory.
+ * {@link org.springframework.transaction.PlatformTransactionManager} implementation
+ * for a single JMS {@link javax.jms.ConnectionFactory}. Binds a JMS
+ * Connection/Session pair from the specified ConnectionFactory to the thread,
+ * potentially allowing for one thread-bound Session per ConnectionFactory.
  *
  * <p>This local strategy is an alternative to executing JMS operations within
  * JTA transactions. Its advantage is that it is able to work in any environment,
- * for example a standalone application or a test suite. It is <i>not</i> able to
- * provide XA transactions, for example to share transactions with data access.
+ * for example a standalone application or a test suite, with any message broker
+ * as target. However, this strategy is <i>not</i> able to provide XA transactions,
+ * for example in order to share transactions between messaging and database access.
+ * A full JTA/XA setup is required for XA transactions, typically using Spring's
+ * {@link org.springframework.transaction.jta.JtaTransactionManager} as strategy.
  *
- * <p>JmsTemplate will auto-detect such thread-bound connection/session pairs
- * and automatically participate in them. There is currently no support for
- * letting plain JMS code participate in such transactions.
+ * <p>Application code is required to retrieve the transactional JMS Session via
+ * {@link ConnectionFactoryUtils#getTransactionalSession} instead of a standard
+ * J2EE-style {@link ConnectionFactory#createConnection()} call with subsequent
+ * Session creation. Spring's {@link org.springframework.jms.core.JmsTemplate}
+ * will autodetect a thread-bound Session and automatically participate in it.
+ *
+ * <p>Alternatively, you can allow application code to work with the standard
+ * J2EE-style lookup pattern on a ConnectionFactory, for example for legacy code
+ * that is not aware of Spring at all. In that case, define a
+ * {@link TransactionAwareConnectionFactoryProxy} for your target ConnectionFactory,
+ * which will automatically participate in Spring-managed transactions.
  *
  * <p>This transaction strategy will typically be used in combination with
- * SingleConnectionFactory, which uses a single JMS connection for all JMS
- * access to save resources, typically in a standalone application. Each
- * transaction will then use the same JMS Connection but its own JMS Session.
+ * {@link SingleConnectionFactory}, which uses a single JMS Connection for all
+ * JMS access in order to avoid the overhead of repeated Connection creation,
+ * typically in a standalone application. Each transaction will then share the
+ * same JMS Connection, while still using its own individual JMS Session.
  *
- * <p>Turns off transaction synchronization by default, as this manager might
- * be used alongside a datastore-based Spring transaction manager like
- * DataSourceTransactionManager, which has stronger needs for synchronization.
+ * <p>Transaction synchronization is turned off by default, as this manager might
+ * be used alongside a datastore-based Spring transaction manager such as the
+ * JDBC {@link org.springframework.jdbc.datasource.DataSourceTransactionManager},
+ * which has stronger needs for synchronization.
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see ConnectionFactoryUtils#getTransactionalSession
+ * @see TransactionAwareConnectionFactoryProxy
  * @see org.springframework.jms.core.JmsTemplate
- * @see SingleConnectionFactory
  */
 public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 
@@ -87,22 +102,31 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 	 */
 	public JmsTransactionManager(ConnectionFactory connectionFactory) {
 		this();
-		this.connectionFactory = connectionFactory;
+		setConnectionFactory(connectionFactory);
 		afterPropertiesSet();
 	}
+
 
 	/**
 	 * Set the JMS ConnectionFactory that this instance should manage transactions for.
 	 */
-	public void setConnectionFactory(ConnectionFactory connectionFactory) {
-		this.connectionFactory = connectionFactory;
+	public void setConnectionFactory(ConnectionFactory cf) {
+		if (cf instanceof TransactionAwareConnectionFactoryProxy) {
+			// If we got a TransactionAwareConnectionFactoryProxy, we need to perform transactions
+			// for its underlying target ConnectionFactory, else JMS access code won't see
+			// properly exposed transactions (i.e. transactions for the target ConnectionFactory).
+			this.connectionFactory = ((TransactionAwareConnectionFactoryProxy) cf).getTargetConnectionFactory();
+		}
+		else {
+			this.connectionFactory = cf;
+		}
 	}
 
 	/**
 	 * Return the JMS ConnectionFactory that this instance should manage transactions for.
 	 */
 	public ConnectionFactory getConnectionFactory() {
-		return connectionFactory;
+		return this.connectionFactory;
 	}
 
 	/**
@@ -110,7 +134,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 	 */
 	public void afterPropertiesSet() {
 		if (this.connectionFactory == null) {
-			throw new IllegalArgumentException("connectionFactory is required");
+			throw new IllegalArgumentException("Property 'connectionFactory' is required");
 		}
 	}
 
