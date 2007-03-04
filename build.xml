@@ -940,7 +940,7 @@
 
 		<junit dir="${basedir}" forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
-			<jvmarg line="-Djava.awt.headless=true -Xmx128m -XX:MaxPermSize=128m"/>
+			<jvmarg line="-Djava.awt.headless=true -Xmx256m -XX:MaxPermSize=128m"/>
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
@@ -969,7 +969,7 @@
 
 		<junit dir="${basedir}" forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
-			<jvmarg line="-Djava.awt.headless=true -Xmx128m -XX:MaxPermSize=128m"/>
+			<jvmarg line="-Djava.awt.headless=true -Xmx256m -XX:MaxPermSize=128m"/>
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.tigertestclasses.dir}"/>
@@ -1123,7 +1123,7 @@
 
 		<junit dir="${basedir}" forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
-			<jvmarg line="-Djava.awt.headless=true -Xmx128m -XX:MaxPermSize=128m"/>
+			<jvmarg line="-Djava.awt.headless=true -Xmx256m -XX:MaxPermSize=128m"/>
 
 			<!-- Must go first to ensure the jndi.properties takes precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
