@@ -373,7 +373,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * @param ex the SQLException
 	 * @return the corresponding DataAccessException instance
 	 * @see #setJdbcExceptionTranslator
-	 * @see org.hibernate.Session#connection()
+	 * @see net.sf.hibernate.Session#connection()
 	 */
 	protected DataAccessException convertJdbcAccessException(SQLException ex) {
 		return getJdbcExceptionTranslator().translate("Hibernate operation", null, ex);

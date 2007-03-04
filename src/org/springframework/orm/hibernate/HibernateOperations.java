@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.dao.DataAccessException;
  * option to enhance testability, as it can easily be mocked or stubbed.
  *
  * <p>Defines <code>HibernateTemplate</code>'s data access methods that
- * mirror various {@link org.hibernate.Session} methods. Users are
+ * mirror various {@link net.sf.hibernate.Session} methods. Users are
  * strongly encouraged to read the Hibernate <code>Session</code> javadocs
  * for details on the semantics of those methods.
  *
