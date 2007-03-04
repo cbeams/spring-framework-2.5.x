@@ -36,8 +36,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
- * Base class for HibernateTemplate and HibernateInterceptor, defining common
- * properties such as SessionFactory and flushing behavior.
+ * Base class for {@link HibernateTemplate} and {@link HibernateInterceptor},
+ * defining common properties such as SessionFactory and flushing behavior.
  *
  * <p>Not intended to be used directly.
  * See {@link HibernateTemplate} and {@link HibernateInterceptor}.
@@ -334,6 +334,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 		}
 	}
 
+
 	/**
 	 * Convert the given HibernateException to an appropriate exception from the
 	 * <code>org.springframework.dao</code> hierarchy. Will automatically detect
@@ -372,7 +373,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * @param ex the SQLException
 	 * @return the corresponding DataAccessException instance
 	 * @see #setJdbcExceptionTranslator
-	 * @see org.hibernate.Session#connection()
+	 * @see net.sf.hibernate.Session#connection()
 	 */
 	protected DataAccessException convertJdbcAccessException(SQLException ex) {
 		return getJdbcExceptionTranslator().translate("Hibernate operation", null, ex);

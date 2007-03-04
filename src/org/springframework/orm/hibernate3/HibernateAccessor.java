@@ -36,8 +36,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
- * Base class for HibernateTemplate and HibernateInterceptor, defining common
- * properties such as SessionFactory and flushing behavior.
+ * Base class for {@link HibernateTemplate} and {@link HibernateInterceptor},
+ * defining common properties such as SessionFactory and flushing behavior.
  *
  * <p>Not intended to be used directly.
  * See {@link HibernateTemplate} and {@link HibernateInterceptor}.
