@@ -630,9 +630,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 			// Stop all Lifecycle beans, to avoid delays during individual destruction.
 			stop();
-			// Destroy all cached singletons in this context, invoking
-			// DisposableBean.destroy and/or the specified "destroy-method".
-			getBeanFactory().destroySingletons();
+			// Destroy all cached singletons in the context's BeanFactory.
+			destroyBeans();
+			// Close the state of this context itself.
 			closeBeanFactory();
 			onClose();
 			synchronized (this.activeMonitor) {
@@ -642,9 +642,27 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * Template method for destroying all beans that this context manages.
+	 * The default implementation destroy all cached singletons in this context,
+	 * invoking <code>DisposableBean.destroy()</code> and/or the specified
+	 * "destroy-method".
+	 * <p>Can be overridden to add context-specific bean destruction steps
+	 * right before or right after standard singleton destruction,
+	 * while the context's BeanFactory is still active.
+	 * @see #getBeanFactory()
+	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#destroySingletons()
+	 */
+	protected void destroyBeans() {
+		getBeanFactory().destroySingletons();
+	}
+
+	/**
 	 * Template method which can be overridden to add context-specific shutdown work.
-	 * Called at the end of <code>doClose</code>'s shutdown procedure.
-	 * @see #doClose
+	 * The default implementation is empty.
+	 * <p>Called at the end of {@link #doClose}'s shutdown procedure, after
+	 * this context's BeanFactory has been closed. If custom shutdown logic
+	 * needs to execute while the BeanFactory is still active, override
+	 * the {@link #destroyBeans()} method instead.
 	 */
 	protected void onClose() {
 		// For subclasses: do nothing by default.
