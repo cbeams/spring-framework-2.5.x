@@ -21,6 +21,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -722,6 +723,21 @@ public abstract class ClassUtils {
 			clazz = clazz.getSuperclass();
 		}
 		return interfaces;
+	}
+
+	/**
+	 * Create a composite interface Class for the given interfaces,
+	 * implementing the given interfaces in one single Class.
+	 * <p>This implementation builds a JDK proxy class for the given interfaces.
+	 * @param interfaces the interfaces to merge
+	 * @param classLoader the ClassLoader to create the composite Class in
+	 * @return the merged interface as Class
+	 * @see java.lang.reflect.Proxy#getProxyClass
+	 */
+	public static Class createCompositeInterface(Class[] interfaces, ClassLoader classLoader) {
+		Assert.notEmpty(interfaces, "Interfaces must not be empty");
+		Assert.notNull(classLoader, "ClassLoader must not be null");
+		return Proxy.getProxyClass(classLoader, interfaces);
 	}
 
 }
