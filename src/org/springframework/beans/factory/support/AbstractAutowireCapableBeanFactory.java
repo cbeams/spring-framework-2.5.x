@@ -367,7 +367,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			errorMessage = "BeanPostProcessor before instantiation of bean failed";
 
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-			if (beanClass != null && !mergedBeanDefinition.isSynthetic()) {
+			if (beanClass != null &&
+					!mergedBeanDefinition.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 				Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
 				if (bean != null) {
 					bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
@@ -409,7 +410,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// to support styles of field injection.
 			boolean continueWithPropertyPopulation = true;
 
-			if (!mergedBeanDefinition.isSynthetic()) {
+			if (!mergedBeanDefinition.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 				for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
 					BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 					if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
@@ -564,7 +565,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				beforeSingletonCreation(beanName);
 				// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
 				Class beanClass = resolveBeanClass(mbd, beanName);
-				if (beanClass != null && !mbd.isSynthetic()) {
+				if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 					Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
 					if (bean != null) {
 						instance = applyBeanPostProcessorsAfterInitialization(bean, beanName);
@@ -609,7 +610,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			beforePrototypeCreation(beanName);
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
 			Class beanClass = resolveBeanClass(mbd, beanName);
-			if (beanClass != null && !mbd.isSynthetic()) {
+			if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 				Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
 				if (bean != null) {
 					instance = applyBeanPostProcessorsAfterInitialization(bean, beanName);
