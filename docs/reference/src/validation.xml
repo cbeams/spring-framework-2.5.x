@@ -497,13 +497,6 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
               </row>
 
               <row>
-                <entry><classname>StringArrayPropertyEditor</classname></entry>
-
-                <entry>Capable of resolving a comma-delimited list of String
-                to a String-array and vice versa.</entry>
-              </row>
-
-              <row>
                 <entry><classname>StringTrimmerEditor</classname></entry>
 
                 <entry>Property editor that trims Strings. Optionally allows
