@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 
 import javax.sql.DataSource;
 
@@ -277,6 +278,18 @@ public abstract class JdbcUtils {
 			logger.debug("JDBC driver does not support JDBC 2.0 'supportsBatchUpdates' method", err);
 		}
 		return false;
+	}
+
+	/**
+	 * Check whether the given SQL type is numeric.
+	 * @param sqlType the SQL type to be checked
+	 * @return whether the type is numeric
+	 */
+	public static boolean isNumeric(int sqlType) {
+		return Types.BIT == sqlType || Types.BIGINT == sqlType || Types.DECIMAL == sqlType ||
+				Types.DOUBLE == sqlType || Types.FLOAT == sqlType || Types.INTEGER == sqlType ||
+				Types.NUMERIC == sqlType || Types.REAL == sqlType || Types.SMALLINT == sqlType ||
+				Types.TINYINT == sqlType;
 	}
 
 }
