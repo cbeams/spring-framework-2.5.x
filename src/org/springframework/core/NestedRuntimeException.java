@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,15 +32,9 @@ import java.io.PrintWriter;
  * information; <code>printStackTrace</code> and other like methods will
  * delegate to the wrapped exception, if any.
  *
- * <p>The similarity between this class and the <code>NestedCheckedException</code>
+ * <p>The similarity between this class and the {@link NestedCheckedException}
  * class is unavoidable, as Java forces these two classes to have different
  * superclasses (ah, the inflexibility of concrete inheritance!).
- *
- * <p>As discussed in
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>,
- * runtime exceptions are often a better alternative to checked exceptions.
- * However, all exceptions should preserve their stack trace, if caused by a
- * lower-level exception.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -81,8 +75,7 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	/**
 	 * Return the nested cause, or <code>null</code> if none.
 	 * <p>Note that this will only check one level of nesting.
-	 * Use <code>getRootCause()</code> to retrieve the innermost cause.
-	 * @see #getRootCause()
+	 * Use {@link #getRootCause()} to retrieve the innermost cause.
 	 */
 	public Throwable getCause() {
 		// Even if you cannot set the cause of this exception other than through
@@ -141,7 +134,8 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	public Throwable getRootCause() {
 		Throwable cause = getCause();
 		if (cause instanceof NestedRuntimeException) {
-			return ((NestedRuntimeException) cause).getRootCause();
+			Throwable rootCause = ((NestedRuntimeException) cause).getRootCause();
+			return (rootCause != null ? rootCause : cause);
 		}
 		else {
 			return cause;
@@ -149,26 +143,40 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	}
 
 	/**
-	 * Check whether this exception contains an exception of the given class:
+	 * Retrieve the most specific cause of this exception, that is,
+	 * either the innermost cause (root cause) or this exception itself.
+	 * <p>Differs from {@link #getRootCause()} in that it falls back
+	 * to the present exception if there is no root cause.
+	 * @return the most specific cause (never <code>null</code>)
+	 * @since 2.0.3
+	 */
+	public Throwable getMostSpecificCause() {
+		Throwable rootCause = getRootCause();
+		return (rootCause != null ? rootCause : this);
+	}
+
+	/**
+	 * Check whether this exception contains an exception of the given type:
 	 * either it is of the given class itself or it contains a nested cause
-	 * of the given class.
+	 * of the given type.
 	 * <p>Currently just traverses <code>NestedRuntimeException</code> causes.
 	 * Will use the JDK 1.4 exception cause mechanism once Spring requires JDK 1.4.
-	 * @param exClass the exception class to look for
+	 * @param exType the exception type to look for
+	 * @return whether there is a nested exception of the specified type
 	 */
-	public boolean contains(Class exClass) {
-		if (exClass == null) {
+	public boolean contains(Class exType) {
+		if (exType == null) {
 			return false;
 		}
-		if (exClass.isInstance(this)) {
+		if (exType.isInstance(this)) {
 			return true;
 		}
 		Throwable cause = getCause();
 		if (cause instanceof NestedRuntimeException) {
-			return ((NestedRuntimeException) cause).contains(exClass);
+			return ((NestedRuntimeException) cause).contains(exType);
 		}
 		else {
-			return (cause != null && exClass.isInstance(cause));
+			return (cause != null && exType.isInstance(cause));
 		}
 	}
 

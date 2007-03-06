@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,26 +20,21 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 /**
- * Handy class for wrapping checked Exceptions with a root cause.
+ * Handy class for wrapping checked <code>Exceptions</code> with a root cause.
  *
  * <p>This time-honored technique is no longer necessary in Java 1.4, which
  * finally provides built-in support for exception nesting. Thus exceptions in
  * applications written to use Java 1.4 need not extend this class. To ease
  * migration, this class mirrors Java 1.4's nested exceptions as closely as possible.
  *
- * <p>Abstract to force the programmer to extend the class. <code>getMessage</code>
- * will include nested exception information; <code>printStackTrace</code> etc will
+ * <p>This class is <code>abstract</code> to force the programmer to extend
+ * the class. <code>getMessage</code> will include nested exception
+ * information; <code>printStackTrace</code> and other like methods will
  * delegate to the wrapped exception, if any.
  *
- * <p>The similarity between this class and the NestedRuntimeException class is
- * unavoidable, as Java forces these two classes to have different superclasses
- * (ah, the inflexibility of concrete inheritance!).
- *
- * <p>As discussed in
- * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>,
- * runtime exceptions are often a better alternative to checked exceptions.
- * However, all exceptions should preserve their stack trace, if caused by a
- * lower-level exception.
+ * <p>The similarity between this class and the {@link NestedRuntimeException}
+ * class is unavoidable, as Java forces these two classes to have different
+ * superclasses (ah, the inflexibility of concrete inheritance!).
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -80,8 +75,7 @@ public abstract class NestedCheckedException extends Exception {
 	/**
 	 * Return the nested cause, or <code>null</code> if none.
 	 * <p>Note that this will only check one level of nesting.
-	 * Use <code>getRootCause()</code> to retrieve the innermost cause.
-	 * @see #getRootCause()
+	 * Use {@link #getRootCause()} to retrieve the innermost cause.
 	 */
 	public Throwable getCause() {
 		// Even if you cannot set the cause of this exception other than through
@@ -147,26 +141,40 @@ public abstract class NestedCheckedException extends Exception {
 	}
 
 	/**
-	 * Check whether this exception contains an exception of the given class:
-	 * either it is of the given class itself or it contains a nested cause
-	 * of the given class.
-	 * <p>Currently just traverses NestedCheckedException causes. Will use
-	 * the JDK 1.4 exception cause mechanism once Spring requires JDK 1.4.
-	 * @param exClass the exception class to look for
+	 * Retrieve the most specific cause of this exception, that is,
+	 * either the innermost cause (root cause) or this exception itself.
+	 * <p>Differs from {@link #getRootCause()} in that it falls back
+	 * to the present exception if there is no root cause.
+	 * @return the most specific cause (never <code>null</code>)
+	 * @since 2.0.3
 	 */
-	public boolean contains(Class exClass) {
-		if (exClass == null) {
+	public Throwable getMostSpecificCause() {
+		Throwable rootCause = getRootCause();
+		return (rootCause != null ? rootCause : this);
+	}
+
+	/**
+	 * Check whether this exception contains an exception of the given type:
+	 * either it is of the given class itself or it contains a nested cause
+	 * of the given type.
+	 * <p>Currently just traverses <code>NestedCheckedException</code> causes.
+	 * Will use the JDK 1.4 exception cause mechanism once Spring requires JDK 1.4.
+	 * @param exType the exception type to look for
+	 * @return whether there is a nested exception of the specified type
+	 */
+	public boolean contains(Class exType) {
+		if (exType == null) {
 			return false;
 		}
-		if (exClass.isInstance(this)) {
+		if (exType.isInstance(this)) {
 			return true;
 		}
 		Throwable cause = getCause();
 		if (cause instanceof NestedCheckedException) {
-			return ((NestedCheckedException) cause).contains(exClass);
+			return ((NestedCheckedException) cause).contains(exType);
 		}
 		else {
-			return (cause != null && exClass.isInstance(cause));
+			return (cause != null && exType.isInstance(cause));
 		}
 	}
 
