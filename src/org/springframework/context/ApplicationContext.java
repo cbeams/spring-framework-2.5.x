@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,34 +28,36 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  *
  * <p>An ApplicationContext provides:
  * <ul>
- * <li>Bean factory methods, inherited from ListableBeanFactory.
- * This avoids the need for applications to use singletons.
- * <li>The ability to resolve messages, supporting internationalization.
- * Inherited from the MessageSource interface.
+ * <li>Bean factory methods for accessing application components.
+ * Inherited from {@link org.springframework.beans.factory.ListableBeanFactory}.
  * <li>The ability to load file resources in a generic fashion.
- * Inherited from the ResourceLoader interface.
- * <li>The ability to publish events. Implementations must provide a means
- * of registering event listeners.
+ * Inherited from the {@link org.springframework.core.io.ResourceLoader} interface.
+ * <li>The ability to publish events to registered listeners.
+ * Inherited from the {@link ApplicationEventPublisher} interface.
+ * <li>The ability to resolve messages, supporting internationalization.
+ * Inherited from the {@link MessageSource} interface.
  * <li>Inheritance from a parent context. Definitions in a descendant context
  * will always take priority. This means, for example, that a single parent
  * context can be used by an entire web application, while each servlet has
  * its own child context that is independent of that of any other servlet.
  * </ul>
  *
- * <p>In addition to standard bean factory lifecycle capabilities,
- * ApplicationContext implementations need to detect ApplicationContextAware
- * beans and invoke the setApplicationContext method accordingly.
+ * <p>In addition to standard {@link org.springframework.beans.factory.BeanFactory}
+ * lifecycle capabilities, ApplicationContext implementations detect and invoke
+ * {@link ApplicationContextAware} beans as well as {@link ResourceLoaderAware},
+ * {@link ApplicationEventPublisherAware} and {@link MessageSourceAware} beans.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see ApplicationContextAware#setApplicationContext
  * @see ConfigurableApplicationContext
+ * @see org.springframework.beans.factory.BeanFactory
+ * @see org.springframework.core.io.ResourceLoader
  */
 public interface ApplicationContext extends ListableBeanFactory, HierarchicalBeanFactory,
 		MessageSource, ApplicationEventPublisher, ResourcePatternResolver {
 
 	/**
-	 * Return the parent context, or <code>null</code> if there is no parent,
+	 * Return the parent context, or <code>null</code> if there is no parent
 	 * and this is the root of the context hierarchy.
 	 * @return the parent context, or <code>null</code> if there is no parent
 	 */
@@ -67,10 +69,11 @@ public interface ApplicationContext extends ListableBeanFactory, HierarchicalBea
 	 * of initializing bean instances that live outside the application context,
 	 * applying the Spring bean lifecycle (fully or partly) to them.
 	 * <p>Alternatively, the internal BeanFactory exposed by the
-	 * ConfigurableApplicationContext interface offers access to the
+	 * {@link ConfigurableApplicationContext} interface offers access to the
 	 * AutowireCapableBeanFactory interface too. The present method mainly
 	 * serves as convenient, specific facility on the ApplicationContext
 	 * interface itself.
+	 * @return the AutowireCapableBeanFactory for this context
 	 * @throws IllegalStateException if the context does not support
 	 * the AutowireCapableBeanFactory interface or does not hold an autowire-capable
 	 * bean factory yet (usually if <code>refresh()</code> has never been called)
