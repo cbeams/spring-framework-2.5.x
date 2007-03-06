@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
@@ -135,11 +134,8 @@ public class FormTag extends AbstractHtmlElementTag {
 	/**
 	 * Set the name of the command object.
 	 * <p>May be a runtime expression.
-	 * @param commandName the name of the command object
-	 * @throws IllegalArgumentException if the supplied name is <code>null</code> 
 	 */
 	public void setCommandName(String commandName) {
-		Assert.notNull(commandName, "'commandName' must not be null");
 		this.commandName = commandName;
 	}
 
@@ -180,7 +176,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setMethod(String method) {
-		Assert.hasText(method, "'method' must not be empty");
 		this.method = method;
 	}
 
@@ -251,11 +246,11 @@ public class FormTag extends AbstractHtmlElementTag {
 		this.tagWriter = tagWriter;
 		this.tagWriter.startTag("form");
 		writeDefaultAttributes(tagWriter);
-		this.tagWriter.writeAttribute(METHOD_ATTRIBUTE, getDisplayString(evaluate(METHOD_ATTRIBUTE, this.method)));
+		this.tagWriter.writeAttribute(METHOD_ATTRIBUTE, getDisplayString(evaluate(METHOD_ATTRIBUTE, getMethod())));
 		this.tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
-		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, this.enctype);
-		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, this.onsubmit);
-		writeOptionalAttribute(tagWriter, ONRESET_ATTRIBUTE, this.onreset);
+		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, getEnctype());
+		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, getOnsubmit());
+		writeOptionalAttribute(tagWriter, ONRESET_ATTRIBUTE, getOnreset());
 
 		this.tagWriter.forceBlock();
 
@@ -265,8 +260,8 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Name is not a valid attribute for form on XHTML 1.0. However, it is sometimes needed for
-	 * backward compatibility.
+	 * Name is not a valid attribute for form on XHTML 1.0. However,
+	 * it is sometimes needed for backward compatibility.
 	 */
 	protected String getName() throws JspException {
 		return this.name;
@@ -280,6 +275,18 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
+	 * {@link #evaluate Resolves} and returns the name of the command object.
+	 * @throws IllegalArgumentException if the command object resolves to <code>null</code>
+	 */
+	protected String resolveCommandName() throws JspException {
+		Object resolvedCommmandName = evaluate(COMMAND_NAME_ATTRIBUTE, getCommandName());
+		if (resolvedCommmandName == null) {
+			throw new IllegalArgumentException("'commandName' must not be null");
+		}
+		return (String) resolvedCommmandName;
+	}
+
+	/**
 	 * Resolve the value of the '<code>action</code>' attribute.
 	 * <p>If the user configured an '<code>action</code>' value then
 	 * the result of evaluating this value is used. Otherwise, the
@@ -287,10 +294,12 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * is used.
 	 * @return the value that is to be used for the '<code>action</code>' attribute
 	 */
-	private String resolveAction() throws JspException {
-		if (StringUtils.hasText(this.action)) {
-			return ObjectUtils.getDisplayString(evaluate(ACTION_ATTRIBUTE, this.action));
-		} else {
+	protected String resolveAction() throws JspException {
+		String action = getAction();
+		if (StringUtils.hasText(action)) {
+			return ObjectUtils.getDisplayString(evaluate(ACTION_ATTRIBUTE, action));
+		}
+		else {
 			String requestUri = getRequestContext().getRequestUri();
 			ServletResponse response = this.pageContext.getResponse();
 			if (response instanceof HttpServletResponse) {
@@ -309,17 +318,6 @@ public class FormTag extends AbstractHtmlElementTag {
 		}
 	}
 
-	/**
-	 * {@link #evaluate Resolves} and returns the name of the command object.
-	 * @throws IllegalArgumentException if the command object resolves to <code>null</code>
-	 */
-	protected String resolveCommandName() throws JspException {
-		Object resolvedCommmandName = evaluate(COMMAND_NAME_ATTRIBUTE, this.commandName);
-		if (resolvedCommmandName == null) {
-			throw new IllegalArgumentException("'commandName' cannot be null");
-		}
-		return (String) resolvedCommmandName;
-	}
 
 	/**
 	 * Closes the '<code>form</code>' block tag and removes the command name
@@ -331,20 +329,20 @@ public class FormTag extends AbstractHtmlElementTag {
 		return EVAL_PAGE;
 	}
 
-
-	/**
-	 * Override resolve CSS class since error class is not supported.
-	 */
-	protected String resolveCssClass() throws JspException {
-		return ObjectUtils.getDisplayString(evaluate("class", getCssClass()));
-	}
-
 	/**
 	 * Clears the stored {@link TagWriter}.
 	 */
 	public void doFinally() {
 		super.doFinally();
 		this.tagWriter = null;
+	}
+
+
+	/**
+	 * Override resolve CSS class since error class is not supported.
+	 */
+	protected String resolveCssClass() throws JspException {
+		return ObjectUtils.getDisplayString(evaluate("class", getCssClass()));
 	}
 
 	/**
