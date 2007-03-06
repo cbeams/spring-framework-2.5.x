@@ -26,6 +26,8 @@ import java.io.IOException;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 2.0
+ * @see #getScriptSourceLocator
+ * @see #getScriptedObject
  */
 public interface ScriptFactory {
 
@@ -61,6 +63,9 @@ public interface ScriptFactory {
 
 	/**
 	 * Factory method for creating the scripted Java object.
+	 * <p>Implementations are encouraged to cache script metadata such as
+	 * a generated script class. Note that this method may be invoked
+	 * concurrently and must be implemented in a thread-safe fashion.
 	 * @param scriptSource the actual ScriptSource to retrieve
 	 * the script source text from (never <code>null</code>)
 	 * @param actualInterfaces the actual interfaces to expose,
@@ -75,12 +80,16 @@ public interface ScriptFactory {
 
 	/**
 	 * Determine the type of the scripted Java object.
+	 * <p>Implementations are encouraged to cache script metadata such as
+	 * a generated script class. Note that this method may be invoked
+	 * concurrently and must be implemented in a thread-safe fashion.
 	 * @param scriptSource the actual ScriptSource to retrieve
 	 * the script source text from (never <code>null</code>)
 	 * @return the type of the scripted Java object, or <code>null</code>
 	 * if none could be determined
 	 * @throws IOException if script retrieval failed
 	 * @throws ScriptCompilationException if script compilation failed
+	 * @since 2.0.3
 	 */
 	Class getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException;
