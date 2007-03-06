@@ -61,9 +61,9 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 
 
 	/**
-	 * The {@link BindStatus} of this tag.
+	 * The property path from the {@link FormTag#setCommandName command object}.
 	 */
-	private BindStatus bindStatus;
+	private String path;
 
 	/**
 	 * The value of the '<code>id</code>' attribute.
@@ -71,15 +71,14 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	private String id;
 
 	/**
-	 * The property path from the {@link FormTag#setCommandName command object}.
+	 * The {@link BindStatus} of this tag.
 	 */
-	private String path;
+	private BindStatus bindStatus;
 
 
 	/**
 	 * Set the property path from the {@link FormTag#setCommandName command object}.
 	 * May be a runtime expression. Required.
-	 * @throws IllegalArgumentException if the supplied path is <code>null</code> or composed wholly of whitespace 
 	 */
 	public void setPath(String path) {
 		Assert.hasText(path, "'path' must not be empty");
@@ -97,18 +96,15 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	/**
 	 * Set the value of the '<code>id</code>' attribute.
 	 * <p>Defaults to the value of {@link #getName}; may be a runtime expression.
-	 * <p>Note that the default value may not be valid for certain tags.
-	 * @param id the value of the '<code>id</code>' attribute
+	 * Note that the default value may not be valid for certain tags.
 	 */
 	public void setId(String id) {
-		Assert.notNull(id, "'id' must not be null");
 		this.id = id;
 	}
 
 	/**
 	 * Get the value of the '<code>id</code>' attribute.
 	 * <p>May be a runtime expression.
-	 * @return the value of the '<code>id</code>' attribute
 	 */
 	public String getId() {
 		return this.id;
@@ -136,8 +132,8 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	}
 
 	/**
-	 * Autogenerate the '<code>id</code>' attribute value for this tag. The default
-	 * implementation simply delegates to {@link #getName}.
+	 * Autogenerate the '<code>id</code>' attribute value for this tag.
+	 * <p>The default implementation simply delegates to {@link #getName}.
 	 */
 	protected String autogenerateId() throws JspException {
 		return getName();
@@ -146,11 +142,10 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	/**
 	 * Get the value for the HTML '<code>name</code>' attribute.
 	 * <p>The default implementation simply delegates to
-	 * {@link #getCompletePath} to use the property path as the name.
-	 * For the most part this is desirable as it links with the
-	 * server-side expectation for databinding. However, some
-	 * subclasses may wish to change the value of the '<code>name</code>'
-	 * attribute without changing the bind path.
+	 * {@link #getCompletePath()} to use the property path as the name.
+	 * For the most part this is desirable as it links with the server-side
+	 * expectation for databinding. However, some subclasses may wish to change
+	 * the value of the '<code>name</code>' attribute without changing the bind path.
 	 * @return the value for the HTML '<code>name</code>' attribute
 	 */
 	protected String getName() throws JspException {
@@ -179,9 +174,8 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 		if (this.bindStatus == null) {
 			String resolvedPropertyPath = getPath();
 			String bindPath = getBindPath(resolvedPropertyPath);
-			this.bindStatus = new BindStatus(getRequestContext(), bindPath,
-				// HTML-escaping in tags is performed by the ValueFormatter class
-				false);
+			// HTML escaping in tags is performed by the ValueFormatter class.
+			this.bindStatus = new BindStatus(getRequestContext(), bindPath, false);
 		}
 		return this.bindStatus;
 	}
