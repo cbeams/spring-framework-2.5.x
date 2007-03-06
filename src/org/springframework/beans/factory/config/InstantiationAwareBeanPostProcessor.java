@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 
 /**
- * Subinterface of BeanPostProcessor that adds a before-instantiation callback,
+ * Subinterface of {@link BeanPostProcessor} that adds a before-instantiation callback,
  * and a callback after instantiation but before explicit properties are set or
  * autowiring occurs.
  *
@@ -31,10 +31,15 @@ import org.springframework.beans.PropertyValues;
  * lazily initializing targets, etc), or to implement additional injection strategies
  * such as field injection.
  *
+ * <p><b>NOTE:</b> This interface is a special purpose interface, mainly for
+ * internal use within the framework. It is recommended to implement the plain
+ * {@link BeanPostProcessor} interface as far as possible, or to derive from
+ * {@link InstantiationAwareBeanPostProcessorAdapter} in order to be shielded
+ * from extensions to this interface.
+ *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 1.2
- * @see InstantiationAwareBeanPostProcessorAdapter
  * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#setCustomTargetSourceCreators
  * @see org.springframework.aop.framework.autoproxy.target.LazyInitTargetSourceCreator
  */
@@ -50,6 +55,9 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * {@link BeanPostProcessor BeanPostProcessors}.
 	 * <p>This callback will only be applied to bean definitions with a bean class.
 	 * In particular, it will not be applied to beans with a "factory-method".
+	 * <p>Post-processors may implement the extended
+	 * {@link SmartInstantiationAwareBeanPostProcessor} interface in order
+	 * to predict the type of the bean object that they are going to return here.
 	 * @param beanClass the class of the bean to be instantiated
 	 * @param beanName the name of the bean
 	 * @return the bean object to expose instead of a default instance of the target bean,
@@ -59,7 +67,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getFactoryMethodName
 	 */
 	Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException;
-	
+
 	/**
 	 * Perform operations after the bean has been instantiated, via a constructor or factory method,
 	 * but before Spring property population (from explicit properties or autowiring) occurs.
