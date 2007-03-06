@@ -117,14 +117,14 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 	 * Loads and parses the Groovy script via the GroovyClassLoader.
 	 * @see groovy.lang.GroovyClassLoader
 	 */
-	public Object getScriptedObject(ScriptSource actualScriptSource, Class[] actualInterfaces)
+	public Object getScriptedObject(ScriptSource scriptSource, Class[] actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
 		try {
 			Class clazz = null;
 			synchronized (this.scriptClassMonitor) {
-				if (this.scriptClass == null || actualScriptSource.isModified()) {
-					this.scriptClass = this.groovyClassLoader.parseClass(actualScriptSource.getScriptAsString());
+				if (this.scriptClass == null || scriptSource.isModified()) {
+					this.scriptClass = this.groovyClassLoader.parseClass(scriptSource.getScriptAsString());
 				}
 				clazz = this.scriptClass;
 			}
@@ -146,16 +146,32 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 		}
 		catch (CompilationFailedException ex) {
 			throw new ScriptCompilationException(
-					"Could not compile Groovy script: " + actualScriptSource, ex);
+					"Could not compile Groovy script: " + scriptSource, ex);
 		}
 		catch (InstantiationException ex) {
 			throw new ScriptCompilationException(
-					"Could not instantiate Groovy script class: " + actualScriptSource, ex);
+					"Could not instantiate Groovy script class: " + scriptSource, ex);
 		}
 		catch (IllegalAccessException ex) {
 			throw new ScriptCompilationException(
-					"Could not access Groovy script constructor: " + actualScriptSource, ex);
+					"Could not access Groovy script constructor: " + scriptSource, ex);
 		}
+	}
+
+	public Class getScriptedObjectType(ScriptSource scriptSource)
+			throws IOException, ScriptCompilationException {
+
+		synchronized (this.scriptClassMonitor) {
+			if (this.scriptClass == null || scriptSource.isModified()) {
+				this.scriptClass = this.groovyClassLoader.parseClass(scriptSource.getScriptAsString());
+			}
+			return this.scriptClass;
+		}
+	}
+
+
+	public String toString() {
+		return "GroovyScriptFactory: script source locator [" + this.scriptSourceLocator + "]";
 	}
 
 }

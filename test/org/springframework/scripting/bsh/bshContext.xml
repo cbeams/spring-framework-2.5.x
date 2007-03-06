@@ -28,6 +28,12 @@ int add(int x, int y) {
 		<property name="message" value="Hello World!"/>
 	</bean>
 
+	<bean id="messengerWithConfigExtra" class="org.springframework.scripting.bsh.BshScriptFactory">
+		<constructor-arg value="classpath:org/springframework/scripting/bsh/Messenger.bsh"/>
+		<constructor-arg value="org.springframework.scripting.Messenger,org.springframework.scripting.ConfigurableMessenger"/>
+		<property name="message" value="Hello World!"/>
+	</bean>
+
 	<bean id="messengerInstance" class="org.springframework.scripting.bsh.BshScriptFactory">
 		<constructor-arg value="classpath:org/springframework/scripting/bsh/MessengerInstance.bsh"/>
 		<property name="message" value="Hello World!"/>

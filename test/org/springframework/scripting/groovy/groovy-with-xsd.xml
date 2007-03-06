@@ -7,11 +7,12 @@
 				http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd">
 
 	<aop:config>
-		<aop:advisor advice-ref="getMessageAdvice"
-				pointcut="execution(* org.springframework.scripting.Messenger.*(..))"/>
+		<aop:aspect ref="getMessageAspect">
+			<aop:before method="before" pointcut="execution(* org.springframework.scripting.Messenger.*(..))"/>
+		</aop:aspect>
 	</aop:config>
 
-	<bean id="getMessageAdvice" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
+	<lang:groovy id="getMessageAspect" script-source="classpath:org/springframework/scripting/groovy/CallCounter.groovy"/>
 
 	<lang:groovy id="messenger" script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
 		<lang:property name="message" value="Hello World!"/>

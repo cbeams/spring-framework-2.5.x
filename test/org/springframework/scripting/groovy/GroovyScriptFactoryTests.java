@@ -17,13 +17,13 @@
 package org.springframework.scripting.groovy;
 
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 
 import groovy.lang.DelegatingMetaClass;
 import groovy.lang.GroovyObject;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.factory.BeanCreationException;
@@ -32,6 +32,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.scripting.Calculator;
+import org.springframework.scripting.CallCounter;
 import org.springframework.scripting.ConfigurableMessenger;
 import org.springframework.scripting.ContextScriptBean;
 import org.springframework.scripting.Messenger;
@@ -49,11 +50,15 @@ import org.springframework.test.AssertThrows;
 public class GroovyScriptFactoryTests extends TestCase {
 
 	public void testStaticScript() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
+
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Calculator.class)).contains("calculator"));
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messenger"));
+
 		Calculator calc = (Calculator) ctx.getBean("calculator");
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
@@ -71,10 +76,13 @@ public class GroovyScriptFactoryTests extends TestCase {
 
 		String desiredMessage = "Hello World!";
 		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+
+		assertTrue(ctx.getBeansOfType(Calculator.class).values().contains(calc));
+		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
 	}
 
 	public void testStaticPrototypeScript() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -97,7 +105,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testStaticScriptWithInstance() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -112,7 +120,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testNonStaticScript() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -133,7 +141,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testNonStaticPrototypeScript() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -160,7 +168,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testScriptCompilationException() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -174,7 +182,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testScriptedClassThatDoesNotHaveANoArgCtor() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -196,7 +204,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testScriptedClassThatHasNoPublicNoArgCtor() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -218,7 +226,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testWithTwoClassesDefinedInTheOneGroovyFile_CorrectClassFirst() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -232,7 +240,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testWithTwoClassesDefinedInTheOneGroovyFile_WrongClassFirst() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -247,7 +255,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -260,7 +268,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -273,7 +281,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -286,7 +294,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testWithInlineScriptWithLeadingWhitespace() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -300,7 +308,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testGetScriptedObjectDoesNotChokeOnNullInterfacesBeingPassedIn() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -317,7 +325,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testGetScriptedObjectDoesChokeOnNullScriptSourceBeingPassedIn() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -331,23 +339,23 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testResourceScriptFromGroovyTag() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
-		CountingBeforeAdvice countingAdvice = (CountingBeforeAdvice) ctx.getBean("getMessageAdvice");
+		CallCounter countingAspect = (CallCounter) ctx.getBean("getMessageAspect");
 
 		assertTrue(AopUtils.isAopProxy(messenger));
 		assertFalse(messenger instanceof Refreshable);
-		assertEquals(0, countingAdvice.getCalls());
+		assertEquals(0, countingAspect.getCalls());
 		assertEquals("Hello World!", messenger.getMessage());
-		assertEquals(1, countingAdvice.getCalls());
+		assertEquals(1, countingAspect.getCalls());
 	}
 
 	public void testInlineScriptFromGroovyTag() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -358,19 +366,23 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testRefreshableFromGroovyTag() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("refreshableMessenger"));
+
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
-		CountingBeforeAdvice countingAdvice = (CountingBeforeAdvice) ctx.getBean("getMessageAdvice");
+		CallCounter countingAspect = (CallCounter) ctx.getBean("getMessageAspect");
 
 		assertTrue(AopUtils.isAopProxy(messenger));
 		assertTrue(messenger instanceof Refreshable);
-		assertEquals(0, countingAdvice.getCalls());
+		assertEquals(0, countingAspect.getCalls());
 		assertEquals("Hello World!", messenger.getMessage());
-		assertEquals(1, countingAdvice.getCalls());
+		assertEquals(1, countingAspect.getCalls());
+
+		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
 	}
 
 	/**
@@ -378,7 +390,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	 * passed to a scripted bean :(
 	 */
 	public void testCanPassInMoreThanOneProperty() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 
@@ -398,7 +410,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 	
 	private void testMetaClass(final String xmlFile) {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
 

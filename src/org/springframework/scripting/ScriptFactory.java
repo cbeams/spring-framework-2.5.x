@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,21 +31,21 @@ public interface ScriptFactory {
 
 	/**
 	 * Return a locator that points to the source of the script.
-	 * Interpreted by the post-processor that actually creates
-	 * the script.
+	 * Interpreted by the post-processor that actually creates the script.
 	 * <p>Typical supported locators are Spring resource locations
 	 * (such as "file:C:/myScript.bsh" or "classpath:myPackage/myScript.bsh")
 	 * and inline scripts ("inline:myScriptText...").
+	 * @return the script source locator
 	 * @see org.springframework.scripting.support.ScriptFactoryPostProcessor#convertToScriptSource
 	 * @see org.springframework.core.io.ResourceLoader
 	 */
 	String getScriptSourceLocator();
 
 	/**
-	 * Return the business interfaces that the script is supposed
-	 * to implement.
+	 * Return the business interfaces that the script is supposed to implement.
 	 * <p>Can return <code>null</code> if the script itself determines
 	 * its Java interfaces (such as in the case of Groovy).
+	 * @return the interfaces for the script
 	 */
 	Class[] getScriptInterfaces();
 
@@ -54,22 +54,35 @@ public interface ScriptFactory {
 	 * generated for it. This is typically the case for scripts that
 	 * do not determine Java signatures themselves, with no appropriate
 	 * config interface specified in <code>getScriptInterfaces()</code>.
+	 * @return whether the script requires a generated config interface
 	 * @see #getScriptInterfaces()
 	 */
 	boolean requiresConfigInterface();
 
 	/**
-	 * Factory method for creating a scripted Java object.
-	 * @param actualScriptSource the actual ScriptSource to retrieve
+	 * Factory method for creating the scripted Java object.
+	 * @param scriptSource the actual ScriptSource to retrieve
 	 * the script source text from (never <code>null</code>)
 	 * @param actualInterfaces the actual interfaces to expose,
 	 * including script interfaces as well as a generated config interface
-	 * (if applicable, can be <code>null</code>)
+	 * (if applicable; may be <code>null</code>)
 	 * @return the scripted Java object
 	 * @throws IOException if script retrieval failed
 	 * @throws ScriptCompilationException if script compilation failed
 	 */
-	Object getScriptedObject(ScriptSource actualScriptSource, Class[] actualInterfaces)
+	Object getScriptedObject(ScriptSource scriptSource, Class[] actualInterfaces)
+			throws IOException, ScriptCompilationException;
+
+	/**
+	 * Determine the type of the scripted Java object.
+	 * @param scriptSource the actual ScriptSource to retrieve
+	 * the script source text from (never <code>null</code>)
+	 * @return the type of the scripted Java object, or <code>null</code>
+	 * if none could be determined
+	 * @throws IOException if script retrieval failed
+	 * @throws ScriptCompilationException if script compilation failed
+	 */
+	Class getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException;
 
 }

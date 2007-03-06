@@ -151,4 +151,26 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		}
 	}
 
+	public Class getScriptedObjectType(ScriptSource scriptSource)
+			throws IOException, ScriptCompilationException {
+
+		try {
+			synchronized (this.scriptClassMonitor) {
+				if (scriptSource.isModified()) {
+					// New script content: Let's check whether it evaluates to a Class.
+					this.scriptClass = BshScriptUtils.determineBshObjectType(scriptSource.getScriptAsString());
+				}
+				return this.scriptClass;
+			}
+		}
+		catch (EvalError ex) {
+			throw new ScriptCompilationException("Could not compile BeanShell script: " + scriptSource, ex);
+		}
+	}
+
+
+	public String toString() {
+		return "BshScriptFactory: script source locator [" + this.scriptSourceLocator + "]";
+	}
+
 }

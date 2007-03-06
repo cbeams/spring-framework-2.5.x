@@ -91,23 +91,34 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * Load and parse the JRuby script via JRubyScriptUtils.
 	 * @see JRubyScriptUtils#createJRubyObject(String, Class[], ClassLoader)
 	 */
-	public Object getScriptedObject(ScriptSource actualScriptSource, Class[] actualInterfaces)
+	public Object getScriptedObject(ScriptSource scriptSource, Class[] actualInterfaces)
 			throws IOException, ScriptCompilationException {
 		try {
 			return JRubyScriptUtils.createJRubyObject(
-					actualScriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
+					scriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
 		}
 		catch (RaiseException ex) {
 			RubyException rubyEx = ex.getException();
 			String msg = (rubyEx != null && rubyEx.message != null) ?
 					rubyEx.message.toString() : "Unexpected JRuby error";
 			throw new ScriptCompilationException(
-					"Could not compile JRuby script [" + actualScriptSource + "]: " + msg, ex);
+					"Could not compile JRuby script [" + scriptSource + "]: " + msg, ex);
 		}
 		catch (JumpException ex) {
 			throw new ScriptCompilationException(
-					"Could not compile JRuby script [" + actualScriptSource + "]", ex);
+					"Could not compile JRuby script [" + scriptSource + "]", ex);
 		}
+	}
+
+	public Class getScriptedObjectType(ScriptSource scriptSource)
+			throws IOException, ScriptCompilationException {
+
+		return null;
+	}
+
+
+	public String toString() {
+		return "JRubyScriptFactory: script source locator [" + this.scriptSourceLocator + "]";
 	}
 
 }
