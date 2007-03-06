@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,24 +16,30 @@
 
 package org.springframework.context.event;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
 import org.easymock.internal.AlwaysMatcher;
 import org.easymock.internal.EqualsMatcher;
+
 import org.springframework.beans.FatalBeanException;
-import org.springframework.context.AbstractApplicationContextTests.MyEvent;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.BeanThatBroadcasts;
+import org.springframework.context.BeanThatListens;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.test.AssertThrows;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Unit and integration tests for the ApplicationContextEvent support.
+ * Unit and integration tests for the ApplicationContext event support.
  *
  * @author Alef Arendsen
  * @author Rick Evans
@@ -107,12 +113,10 @@ public class ApplicationContextEventTests extends TestCase {
 	}
 
 	public void testSimpleApplicationEventMulticaster() {
-
 		MockControl ctrl = MockControl.createControl(ApplicationListener.class);
 		ApplicationListener listener = (ApplicationListener) ctrl.getMock();
 
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
-
 		listener.onApplicationEvent(evt);
 		ctrl.setMatcher(new EqualsMatcher());
 
@@ -127,7 +131,6 @@ public class ApplicationContextEventTests extends TestCase {
 	}
 
 	public void testEvenPublicationInterceptor() throws Throwable {
-
 		MockControl invCtrl = MockControl.createControl(MethodInvocation.class);
 		MethodInvocation invocation = (MethodInvocation) invCtrl.getMock();
 
@@ -155,6 +158,43 @@ public class ApplicationContextEventTests extends TestCase {
 
 		ctxCtrl.verify();
 		invCtrl.verify();
+	}
+
+	public void testListenerAndBroadcasterWithUnresolvableCircularReference() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.setDisplayName("listener context");
+		context.registerBeanDefinition("broadcaster", new RootBeanDefinition(BeanThatBroadcasts.class));
+		RootBeanDefinition listenerDef = new RootBeanDefinition(BeanThatListens.class);
+		listenerDef.getConstructorArgumentValues().addGenericArgumentValue(new RuntimeBeanReference("broadcaster"));
+		context.registerBeanDefinition("listener", listenerDef);
+		try {
+			context.refresh();
+			fail("Should have thrown BeanCreationException with nested BeanCurrentlyInCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.contains(BeanCurrentlyInCreationException.class));
+		}
+	}
+
+	public void testListenerAndBroadcasterWithResolvableCircularReference() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.registerBeanDefinition("broadcaster", new RootBeanDefinition(BeanThatBroadcasts.class));
+		RootBeanDefinition listenerDef = new RootBeanDefinition(BeanThatListens.class);
+		listenerDef.getConstructorArgumentValues().addGenericArgumentValue(new RuntimeBeanReference("broadcaster"));
+		context.registerBeanDefinition("listener", listenerDef);
+		context.refresh();
+
+		BeanThatBroadcasts broadcaster = (BeanThatBroadcasts) context.getBean("broadcaster");
+		context.publishEvent(new MyEvent(context));
+		assertEquals("The event was not received by the listener", 2, broadcaster.receivedCount);
+	}
+
+
+	public static class MyEvent extends ApplicationEvent {
+
+		public MyEvent(Object source) {
+			super(source);
+		}
 	}
 
 

@@ -17,25 +17,20 @@
 package org.springframework.context;
 
 /**
- * Listener that maintains a global count of events.
- *
- * @author Rod Johnson
- * @since January 21, 2001
+ * @author Juergen Hoeller
  */
-public class TestListener implements ApplicationListener {
-	
-	private int eventCount;
-	
-	public int getEventCount() {
-		return eventCount;
+public class BeanThatBroadcasts implements ApplicationContextAware {
+
+	public ApplicationContext applicationContext;
+
+	public int receivedCount;
+
+
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+		if (applicationContext.getDisplayName().indexOf("listener") != -1) {
+			applicationContext.getBean("listener");
+		}
 	}
-	
-	public void zeroCounter() {
-		eventCount = 0;
-	}
-	
-	public void onApplicationEvent(ApplicationEvent e) {
-		++eventCount;
-	}
-    
+
 }
