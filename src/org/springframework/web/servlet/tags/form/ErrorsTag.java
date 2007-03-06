@@ -24,8 +24,8 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyTag;
 
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Form tag for displaying errors for a particular field or object.
@@ -70,30 +70,34 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 
 	/**
+	 * Set the HTML element must be used to render the error messages.
+	 * <p>Defaults to an HTML '<code>&lt;span/&gt;</code>' tag.
+	 */
+	public void setElement(String element) {
+		Assert.hasText(element, "'element' cannot be null or blank");
+		this.element = element;
+	}
+
+	/**
 	 * Get the HTML element must be used to render the error messages.
-	 * @return said element
 	 */
 	public String getElement() {
 		return this.element;
 	}
 
 	/**
-	 * Set the HTML element must be used to render the error messages.
-	 * <p>Defaults to an HTML '<code>&lt;span/&gt;</code>' tag.
-	 * @param element said element
-	 */
-	public void setElement(String element) {
-		Assert.hasText(element, "'element' cannot be null or blank.");
-		this.element = element;
-	}
-
-	/**
-	 * Set what delimiter must be used between error messages.
+	 * Set the delimiter to be used between error messages.
 	 * <p>Defaults to an HTML '<code>&lt;br/&gt;</code>' tag.
-	 * @param delimiter said delimeter
 	 */
 	public void setDelimiter(String delimiter) {
 		this.delimiter = delimiter;
+	}
+
+	/**
+	 * Return the delimiter to be used between error messages.
+	 */
+	public String getDelimiter() {
+		return this.delimiter;
 	}
 
 
@@ -127,16 +131,16 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
-		tagWriter.startTag(this.element);
+		tagWriter.startTag(getElement());
 		writeDefaultAttributes(tagWriter);
-		String delimiter = ObjectUtils.getDisplayString(evaluate("delimiter", this.delimiter));
+		String delimiter = ObjectUtils.getDisplayString(evaluate("delimiter", getDelimiter()));
 		String[] errorMessages = getBindStatus().getErrorMessages();
 		for (int i = 0; i < errorMessages.length; i++) {
 			String errorMessage = errorMessages[i];
 			if (i > 0) {
 				tagWriter.appendValue(delimiter);
 			}
-			tagWriter.appendValue(errorMessage);
+			tagWriter.appendValue(getDisplayString(errorMessage));
 		}
 		tagWriter.endTag();
 	}
@@ -165,7 +169,8 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 			if (this.oldMessages != null) {
 				this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, this.oldMessages, PageContext.PAGE_SCOPE);
 				this.oldMessages = null;
-			} else {
+			}
+			else {
 				this.pageContext.removeAttribute(MESSAGES_ATTRIBUTE, PageContext.PAGE_SCOPE);
 			}
 		}

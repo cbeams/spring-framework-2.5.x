@@ -16,6 +16,16 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.BodyTag;
+import javax.servlet.jsp.tagext.Tag;
+
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockPageContext;
 import org.springframework.test.AssertThrows;
@@ -24,26 +34,14 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyTag;
-import javax.servlet.jsp.tagext.Tag;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
- * Unit tests for the {@link ErrorsTag} class.
- *
  * @author Rob Harrop
  * @author Rick Evans
- * @since 2.0
+ * @author Juergen Hoeller
  */
-public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
+public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 
 	private static final String COMMAND_NAME = "testBean";
-
 
 	private ErrorsTag tag;
 
@@ -61,7 +59,7 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 
 
 	public void testWithExplicitNonWhitespaceBodyContent() throws Exception {
-		final String mockContent = "This is some explicit body content";
+		String mockContent = "This is some explicit body content";
 		this.tag.setBodyContent(new MockBodyContent(mockContent, getWriter()));
 
 		// construct an errors instance of the tag
@@ -164,6 +162,34 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "<br/>");
 		assertBlockTagContains(output, "Default Message");
 		assertBlockTagContains(output, "Too Short");
+	}
+
+	public void testWithEscapedErrors() throws Exception {
+		this.tag.setHtmlEscape("true");
+
+		// construct an errors instance of the tag
+		TestBean target = new TestBean();
+		target.setName("Rob Harrop");
+		Errors errors = new BindException(target, COMMAND_NAME);
+		errors.rejectValue("name", "some.code", "Default <> Message");
+		errors.rejectValue("name", "too.short", "Too & Short");
+
+		exposeBindingResult(errors);
+
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertElementTagOpened(output);
+		assertElementTagClosed(output);
+
+		assertContainsAttribute(output, "id", "name.errors");
+		assertBlockTagContains(output, "<br/>");
+		assertBlockTagContains(output, "Default &lt;&gt; Message");
+		assertBlockTagContains(output, "Too &amp; Short");
 	}
 
 	public void testWithErrorsAndCustomElement() throws Exception {
