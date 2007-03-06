@@ -190,7 +190,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 */
 	protected void beforeSingletonCreation(String beanName) {
 		if (!this.singletonsCurrentlyInCreation.add(beanName)) {
-			throw new BeanCurrentlyInCreationException("Singleton '" + beanName + "' is already in creation");
+			throw new BeanCurrentlyInCreationException(beanName);
 		}
 	}
 
