@@ -244,16 +244,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				result.put(beanName, getBean(beanName));
 			}
 			catch (BeanCreationException ex) {
-				if (ex.contains(BeanCurrentlyInCreationException.class)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring match to currently created bean '" + beanName + "': " + ex.getMessage());
+				Throwable rootCause = ex.getMostSpecificCause();
+				if (rootCause instanceof BeanCurrentlyInCreationException) {
+					BeanCreationException bce = (BeanCreationException) rootCause;
+					if (isCurrentlyInCreation(bce.getBeanName())) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Ignoring match to currently created bean '" + beanName + "': " + ex.getMessage());
+						}
+						// Ignore: indicates a circular reference when autowiring constructors.
+						// We want to find matches other than the currently created bean itself.
+						continue;
 					}
-					// Ignore: indicates a circular reference when autowiring constructors.
-					// We want to find matches other than the currently created bean itself.
 				}
-				else {
-					throw ex;
-				}
+				throw ex;
 			}
 		}
 		return result;

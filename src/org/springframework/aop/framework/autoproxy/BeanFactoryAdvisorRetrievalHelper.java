@@ -73,16 +73,19 @@ public class BeanFactoryAdvisorRetrievalHelper {
 					advisors.add(this.beanFactory.getBean(name));
 				}
 				catch (BeanCreationException ex) {
-					if (ex.contains(BeanCurrentlyInCreationException.class)) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Ignoring currently created advisor '" + name + "': " + ex.getMessage());
+					Throwable rootCause = ex.getMostSpecificCause();
+					if (rootCause instanceof BeanCurrentlyInCreationException) {
+						BeanCreationException bce = (BeanCreationException) rootCause;
+						if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Ignoring currently created advisor '" + name + "': " + ex.getMessage());
+							}
+							// Ignore: indicates a reference back to the bean we're trying to advise.
+							// We want to find advisors other than the currently created bean itself.
+							continue;
 						}
-						// Ignore: indicates a reference back to the bean we're trying to advise.
-						// We want to find advisors other than the currently created bean itself.
 					}
-					else {
-						throw ex;
-					}
+					throw ex;
 				}
 			}
 		}
@@ -90,8 +93,10 @@ public class BeanFactoryAdvisorRetrievalHelper {
 	}
 
 	/**
-	 * Return whether the aspect bean with the given name is eligible.
+	 * Determine whether the aspect bean with the given name is eligible.
+	 * <p>The default implementation always returns <code>true</code>.
 	 * @param beanName the name of the aspect bean
+	 * @return whether the bean is eligible
 	 */
 	protected boolean isEligibleBean(String beanName) {
 		return true;
