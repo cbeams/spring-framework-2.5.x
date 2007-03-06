@@ -672,8 +672,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * Recover this listener container after a listener failed to set itself up,
 	 * for example reestablishing the underlying Connection.
 	 * <p>The default implementation delegates to DefaultMessageListenerContainer's
-	 * recovery-capable <code>refreshConnectionUntilSuccessful</code> method, which will try
-	 * to reestablish a Connection to the JMS provider both for the shared
+	 * recovery-capable {@link #refreshConnectionUntilSuccessful()} method, which will
+	 * try to re-establish a Connection to the JMS provider both for the shared
 	 * and the non-shared Connection case.
 	 * @see #refreshConnectionUntilSuccessful()
 	 * @see #refreshDestination()
@@ -709,7 +709,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				logger.info("Successfully refreshed JMS Connection");
 				break;
 			}
-			catch (JMSException ex) {
+			catch (Exception ex) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Could not refresh JMS Connection - retrying in " + this.recoveryInterval + " ms", ex);
 				}
