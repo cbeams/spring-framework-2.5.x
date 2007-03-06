@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,10 +120,10 @@ public abstract class JdbcUtils {
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @return the value object
+	 * @throws SQLException if thrown by the JDBC API
 	 * @see java.sql.Blob
 	 * @see java.sql.Clob
 	 * @see java.sql.Timestamp
-	 * @see oracle.sql.TIMESTAMP
 	 */
 	public static Object getResultSetValue(ResultSet rs, int index) throws SQLException {
 		Object obj = rs.getObject(index);
@@ -331,9 +331,9 @@ public abstract class JdbcUtils {
 	}
 
 	/**
-	 * Check that a SQL type is numeric.
+	 * Check whether the given SQL type is numeric.
 	 * @param sqlType the SQL type to be checked
-	 * @return if the type is numeric
+	 * @return whether the type is numeric
 	 */
 	public static boolean isNumeric(int sqlType) {
 		return Types.BIT == sqlType || Types.BIGINT == sqlType || Types.DECIMAL == sqlType ||
