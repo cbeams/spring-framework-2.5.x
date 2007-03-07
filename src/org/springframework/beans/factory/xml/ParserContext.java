@@ -59,24 +59,24 @@ public final class ParserContext {
 	}
 
 
-	public XmlReaderContext getReaderContext() {
+	public final XmlReaderContext getReaderContext() {
 		return this.readerContext;
 	}
 
-	public BeanDefinitionRegistry getRegistry() {
-		return getReaderContext().getRegistry();
+	public final BeanDefinitionRegistry getRegistry() {
+		return this.readerContext.getRegistry();
 	}
 
-	public BeanDefinitionParserDelegate getDelegate() {
+	public final BeanDefinitionParserDelegate getDelegate() {
 		return this.delegate;
 	}
 
-	public BeanDefinition getContainingBeanDefinition() {
+	public final BeanDefinition getContainingBeanDefinition() {
 		return this.containingBeanDefinition;
 	}
 
-	public boolean isNested() {
-		return (getContainingBeanDefinition() != null);
+	public final boolean isNested() {
+		return (this.containingBeanDefinition != null);
 	}
 
 	public boolean isDefaultLazyInit() {
@@ -84,7 +84,7 @@ public final class ParserContext {
 	}
 
 	public Object extractSource(Object sourceCandidate) {
-		return getReaderContext().extractSource(sourceCandidate);
+		return this.readerContext.extractSource(sourceCandidate);
 	}
 
 	public CompositeComponentDefinition getContainingComponent() {
@@ -110,7 +110,7 @@ public final class ParserContext {
 			containingComponent.addNestedComponent(component);
 		}
 		else {
-			getReaderContext().fireComponentRegistered(component);
+			this.readerContext.fireComponentRegistered(component);
 		}
 	}
 
