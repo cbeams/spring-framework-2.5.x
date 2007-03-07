@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public class BindStatus {
 		this.errors = requestContext.getErrors(beanName, false);
 
 		if (this.errors != null) {
-			// Usual case: An Errors instance is available as request attribute.
+			// Usual case: A BindingResult is available as request attribute.
 			// Can determine error codes and messages for the given expression.
 			// Can use a custom PropertyEditor, as registered by a form controller.
 
@@ -128,13 +128,13 @@ public class BindStatus {
 		}
 
 		else {
-			// No Errors instance available as request attribute:
+			// No BindingResult available as request attribute:
 			// Probably forwarded directly to a form view.
 			// Let's do the best we can: extract a plain target if appropriate.
 
 			Object target = requestContext.getModelObject(beanName);
 			if (target == null) {
-				throw new IllegalStateException("Neither Errors instance nor plain target object for bean name '" +
+				throw new IllegalStateException("Neither BindingResult nor plain target object for bean name '" +
 						beanName + "' available as request attribute");
 			}
 
@@ -199,7 +199,7 @@ public class BindStatus {
 	 * will be resolved (e.g. "customer.address.street").
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
@@ -210,7 +210,7 @@ public class BindStatus {
 	 * "customer.address.street", if bound to a "customer" bean.
 	 */
 	public String getExpression() {
-		return expression;
+		return this.expression;
 	}
 
 	/**
@@ -261,7 +261,7 @@ public class BindStatus {
 	 * Returns an empty array instead of null if none.
 	 */
 	public String[] getErrorCodes() {
-		return errorCodes;
+		return this.errorCodes;
 	}
 
 	/**
@@ -300,11 +300,13 @@ public class BindStatus {
 	}
 
 	/**
-	 * Return the Errors instance that this bind status is currently bound to.
+	 * Return the Errors instance (typically a BindingResult) that this
+	 * bind status is currently associated with.
 	 * @return the current Errors instance, or <code>null</code> if none
+	 * @see org.springframework.validation.BindingResult
 	 */
 	public Errors getErrors() {
-		return errors;
+		return this.errors;
 	}
 
 	/**
@@ -313,7 +315,7 @@ public class BindStatus {
 	 * @return the current PropertyEditor, or <code>null</code> if none
 	 */
 	public PropertyEditor getEditor() {
-		return editor;
+		return this.editor;
 	}
 
 
