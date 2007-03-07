@@ -342,8 +342,13 @@ public class BeanDefinitionParserDelegate {
 		if (beanDefinition != null) {
 			if (!StringUtils.hasText(beanName)) {
 				try {
-					beanName = BeanDefinitionReaderUtils.generateBeanName(
-							beanDefinition, this.readerContext.getRegistry(), (containingBean != null));
+					if (containingBean != null) {
+						beanName = BeanDefinitionReaderUtils.generateBeanName(
+								beanDefinition, this.readerContext.getRegistry(), true);
+					}
+					else {
+						beanName = this.readerContext.generateBeanName(beanDefinition);
+					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Neither XML 'id' nor 'name' specified - " +
 								"using generated bean name [" + beanName + "]");

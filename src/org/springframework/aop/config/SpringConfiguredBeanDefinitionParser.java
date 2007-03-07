@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.ClassUtils;
@@ -46,11 +45,9 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 			BeanDefinitionBuilder builder =
 					BeanDefinitionBuilder.rootBeanDefinition(getBeanConfigurerClass(), "aspectOf");
 			builder.setSource(parserContext.extractSource(element));
-			BeanDefinitionReaderUtils.registerWithGeneratedName(
-					builder.getBeanDefinition(), parserContext.getRegistry());
+			parserContext.getReaderContext().registerWithGeneratedName(builder.getBeanDefinition());
 			this.registered = true;
 		}
-
 		return null;
 	}
 

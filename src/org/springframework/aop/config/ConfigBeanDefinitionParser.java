@@ -42,7 +42,6 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.parsing.ParseState;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -177,18 +176,19 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 */
 	private void parseAdvisor(Element advisorElement, ParserContext parserContext) {
 		AbstractBeanDefinition advisorDef = createAdvisorBeanDefinition(advisorElement, parserContext);
-		BeanDefinitionRegistry registry = parserContext.getRegistry();
-
-		String advisorBeanName = advisorElement.getAttribute(ID);
-		if (!StringUtils.hasText(advisorBeanName)) {
-			advisorBeanName = BeanDefinitionReaderUtils.generateBeanName(advisorDef, registry);
-		}
+		String id = advisorElement.getAttribute(ID);
 
 		try {
-			this.parseState.push(new AdvisorEntry(advisorBeanName));
+			this.parseState.push(new AdvisorEntry(id));
 			String pointcutBeanName = parsePointcutProperty(advisorElement, parserContext);
 			advisorDef.getPropertyValues().addPropertyValue(POINTCUT, new RuntimeBeanReference(pointcutBeanName));
-			registry.registerBeanDefinition(advisorBeanName, advisorDef);
+			String advisorBeanName = id;
+			if (StringUtils.hasText(advisorBeanName)) {
+				parserContext.getRegistry().registerBeanDefinition(advisorBeanName, advisorDef);
+			}
+			else {
+				advisorBeanName = parserContext.getReaderContext().registerWithGeneratedName(advisorDef);
+			}
 			boolean pointcutRef = advisorElement.hasAttribute(POINTCUT_REF);
 			if (pointcutBeanName != null) {
 				// no errors so fire event
@@ -205,16 +205,16 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * advisor bean definition and fires it through the {@link ParserContext}.
 	 */
 	private void fireAdvisorEvent(
-			String advisorBeanName, String pointcutBeanName, AbstractBeanDefinition advisorDefinition,
+			String advisorBeanName, String pointcutBeanName, AbstractBeanDefinition advisorDef,
 			ParserContext parserContext, boolean pointcutRef) {
 
 		AdvisorComponentDefinition componentDefinition;
 		if (pointcutRef) {
-			componentDefinition = new AdvisorComponentDefinition(advisorBeanName, advisorDefinition);
+			componentDefinition = new AdvisorComponentDefinition(advisorBeanName, advisorDef);
 		}
 		else {
 			BeanDefinition pointcutDefinition = parserContext.getRegistry().getBeanDefinition(pointcutBeanName);
-			componentDefinition = new AdvisorComponentDefinition(advisorBeanName, advisorDefinition, pointcutDefinition);
+			componentDefinition = new AdvisorComponentDefinition(advisorBeanName, advisorDef, pointcutDefinition);
 		}
 		parserContext.registerComponent(componentDefinition);
 	}
@@ -327,8 +327,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		builder.addConstructorArg(declareParentsElement.getAttribute(DEFAULT_IMPL));
 		builder.setSource(parserContext.extractSource(declareParentsElement));
 		AbstractBeanDefinition definition = builder.getBeanDefinition();
-		String name = BeanDefinitionReaderUtils.generateBeanName(definition, parserContext.getRegistry());
-		parserContext.getRegistry().registerBeanDefinition(name, definition);
+		parserContext.getReaderContext().registerWithGeneratedName(definition);
 		return definition;
 	}
 
@@ -369,8 +368,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			}
 
 			// register the final advisor
-			BeanDefinitionRegistry registry = parserContext.getRegistry();
-			BeanDefinitionReaderUtils.registerWithGeneratedName(advisorDefinition, registry);
+			parserContext.getReaderContext().registerWithGeneratedName(advisorDefinition);
 
 			return advisorDefinition;
 		}
@@ -456,11 +454,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			pointcutDefinition = createPointcutDefinition(expression);
 			pointcutDefinition.setSource(parserContext.extractSource(pointcutElement));
 
-			BeanDefinitionRegistry registry = parserContext.getRegistry();
-			if (!StringUtils.hasText(id)) {
-				id = BeanDefinitionReaderUtils.generateBeanName(pointcutDefinition, registry);
+			if (StringUtils.hasText(id)) {
+				parserContext.getRegistry().registerBeanDefinition(id, pointcutDefinition);
 			}
-			registry.registerBeanDefinition(id, pointcutDefinition);
+			else {
+				parserContext.getReaderContext().registerWithGeneratedName(pointcutDefinition);
+			}
 
 			parserContext.registerComponent(
 					new PointcutComponentDefinition(id, pointcutDefinition, expression));
@@ -486,30 +485,14 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			return null;
 		}
 		else if (element.hasAttribute(POINTCUT)) {
-			BeanDefinitionRegistry registry = parserContext.getRegistry();
 			// Create a pointcut for the anonymous pc and register it.
 			Attr pointcutAttr = element.getAttributeNode(POINTCUT);
 			AbstractBeanDefinition pointcutDefinition = createPointcutDefinition(pointcutAttr.getValue());
 			pointcutDefinition.setSource(parserContext.extractSource(element));
-			String pointcutName = BeanDefinitionReaderUtils.generateBeanName(pointcutDefinition, registry);
-			try {
-				this.parseState.push(new PointcutEntry(pointcutName));
-				registry.registerBeanDefinition(pointcutName, pointcutDefinition);
-			}
-			finally {
-				this.parseState.pop();
-			}
-			return pointcutName;
+			return parserContext.getReaderContext().registerWithGeneratedName(pointcutDefinition);
 		}
 		else if (element.hasAttribute(POINTCUT_REF)) {
-			String pointcutRef = element.getAttribute(POINTCUT_REF);
-			try {
-				this.parseState.push(new PointcutEntry(pointcutRef));
-			}
-			finally {
-				this.parseState.pop();
-			}
-			return pointcutRef;
+			return element.getAttribute(POINTCUT_REF);
 		}
 		else {
 			parserContext.getReaderContext().error(

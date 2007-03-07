@@ -57,7 +57,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 		if (!parserContext.isNested()) {
 			try {
 				String id = resolveId(element, definition, parserContext);
-				if (!StringUtils.hasText(id) && !parserContext.isNested()) {
+				if (!StringUtils.hasText(id)) {
 					parserContext.getReaderContext().error(
 							"Id is required for element '" + element.getLocalName() + "' when used as a top-level tag", element);
 				}
@@ -94,14 +94,12 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 			throws BeanDefinitionStoreException {
 
 		if (shouldGenerateId()) {
-			return BeanDefinitionReaderUtils.generateBeanName(
-					definition, parserContext.getRegistry(), parserContext.isNested());
+			return parserContext.getReaderContext().generateBeanName(definition);
 		}
 		else {
 			String id = element.getAttribute(ID_ATTRIBUTE);
 			if (!StringUtils.hasText(id) && shouldGenerateIdAsFallback()) {
-				id = BeanDefinitionReaderUtils.generateBeanName(
-						definition, parserContext.getRegistry(), parserContext.isNested());
+				id = parserContext.getReaderContext().generateBeanName(definition);
 			}
 			return id;
 		}

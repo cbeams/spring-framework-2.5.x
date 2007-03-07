@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderContext;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
@@ -60,6 +61,17 @@ public class XmlReaderContext extends ReaderContext {
 
 	public final NamespaceHandlerResolver getNamespaceHandlerResolver() {
 		return this.namespaceHandlerResolver;
+	}
+
+
+	public String generateBeanName(BeanDefinition beanDefinition) {
+		return this.reader.getBeanNameGenerator().generateBeanName(beanDefinition, getRegistry());
+	}
+
+	public String registerWithGeneratedName(BeanDefinition beanDefinition) {
+		String generatedName = generateBeanName(beanDefinition);
+		getRegistry().registerBeanDefinition(generatedName, beanDefinition);
+		return generatedName;
 	}
 
 }

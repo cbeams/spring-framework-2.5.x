@@ -45,6 +45,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	private final BeanDefinitionRegistry beanFactory;
 
+	private BeanNameGenerator beanNameGenerator = new DefaultBeanNameGenerator();
+
 	private ResourceLoader resourceLoader;
 
 	private ClassLoader beanClassLoader;
@@ -77,6 +79,14 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	public BeanDefinitionRegistry getBeanFactory() {
 		return this.beanFactory;
+	}
+
+	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
+		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new DefaultBeanNameGenerator());
+	}
+
+	public BeanNameGenerator getBeanNameGenerator() {
+		return this.beanNameGenerator;
 	}
 
 	/**
