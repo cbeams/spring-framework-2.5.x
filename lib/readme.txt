@@ -221,7 +221,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for running JPetStore (by Axis)
 
 * jakarta-commons/commons-fileupload.jar
-- Commons FileUpload 1.1.1 (http://jakarta.apache.org/commons/fileupload)
+- Commons FileUpload 1.2 (http://jakarta.apache.org/commons/fileupload)
 - required for building the framework
 - required at runtime when using Spring's CommonsMultipartResolver
 
