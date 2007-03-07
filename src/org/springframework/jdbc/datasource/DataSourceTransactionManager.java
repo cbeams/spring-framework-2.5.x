@@ -39,21 +39,19 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Connection per DataSource.
  *
  * <p>Application code is required to retrieve the JDBC Connection via
- * {@link DataSourceUtils#getConnection(DataSource)} instead of the standard
- * J2EE-style {@link DataSource#getConnection()}. Spring classes such as
+ * {@link DataSourceUtils#getConnection(DataSource)} instead of a standard
+ * J2EE-style {@link DataSource#getConnection()} call. Spring classes such as
  * {@link org.springframework.jdbc.core.JdbcTemplate} use this strategy implicitly.
  * If not used in combination with this transaction manager, the
  * {@link DataSourceUtils} lookup strategy behaves exactly like the native
  * DataSource lookup; it can thus be used in a portable fashion.
  *
- * <p>Alternatively, you can also allow application code to work with the standard
+ * <p>Alternatively, you can allow application code to work with the standard
  * J2EE-style lookup pattern {@link DataSource#getConnection()}, for example for
  * legacy code that is not aware of Spring at all. In that case, define a
  * {@link TransactionAwareDataSourceProxy} for your target DataSource, and pass
  * that proxy DataSource to your DAOs, which will automatically participate in
- * Spring-managed transactions when accessing it. Note that the
- * DataSourceTransactionManager instance still needs be configured with the
- * specific DataSource that it is supposed to create transactions for.
+ * Spring-managed transactions when accessing it.
  *
  * <p>Supports custom isolation levels, and timeouts which get applied as
  * appropriate JDBC statement timeouts. To support the latter, application code
@@ -92,7 +90,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see TransactionAwareDataSourceProxy
  * @see LazyConnectionDataSourceProxy
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @see org.springframework.jdbc.object
  */
 public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
 
