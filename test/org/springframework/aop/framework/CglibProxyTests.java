@@ -212,8 +212,8 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		AdvisedSupport pc = new AdvisedSupport(new Class[]{});
 		pc.setTargetSource(mockTargetSource);
 		Cglib2AopProxy aop = new Cglib2AopProxy(pc);
-		aop.setConstructorArguments(new Object[]{"Rob Harrop", new Integer(22)},
-				new Class[]{String.class, int.class});
+		aop.setConstructorArguments(new Object[] {"Rob Harrop", new Integer(22)},
+				new Class[] {String.class, int.class});
 
 		NoArgCtorTestBean proxy = (NoArgCtorTestBean) aop.getProxy();
 		proxy = (NoArgCtorTestBean) aop.getProxy();
