@@ -61,14 +61,14 @@ public abstract class DataSourceUtils {
 
 
 	/**
-	 * Obtain a Connection from the given DataSource. Translates any SQLException into
+	 * Obtain a Connection from the given DataSource. Translates SQLExceptions into
 	 * the Spring hierarchy of unchecked generic data access exceptions, simplifying
 	 * calling code and making any exception that is thrown more meaningful.
 	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
 	 * when using {@link DataSourceTransactionManager}. Will bind a Connection to the
 	 * thread if transaction synchronization is active, e.g. when running within a
 	 * {@link org.springframework.transaction.jta.JtaTransactionManager JTA} transaction).
-	 * @param dataSource DataSource to get Connection from
+	 * @param dataSource the DataSource to obtain Connections from
 	 * @return a JDBC Connection from the given DataSource
 	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException
 	 * if the attempt to get a Connection failed
@@ -84,13 +84,13 @@ public abstract class DataSourceUtils {
 	}
 
 	/**
-	 * Actually obtain a JDBC Connection for the given DataSource.
+	 * Actually obtain a JDBC Connection from the given DataSource.
 	 * Same as {@link #getConnection}, but throwing the original SQLException.
 	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
 	 * when using {@link DataSourceTransactionManager}. Will bind a Connection to the thread
 	 * if transaction synchronization is active (e.g. if in a JTA transaction).
 	 * <p>Directly accessed by {@link TransactionAwareDataSourceProxy}.
-	 * @param dataSource DataSource to get Connection from
+	 * @param dataSource the DataSource to obtain Connections from
 	 * @return a JDBC Connection from the given DataSource
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #doReleaseConnection
@@ -210,10 +210,26 @@ public abstract class DataSourceUtils {
 	}
 
 	/**
+	 * Determine whether the given JDBC Connection is transactional, that is,
+	 * bound to the current thread by Spring's transaction facilities.
+	 * @param con the Connection to check
+	 * @param dataSource the DataSource that the Connection was obtained from
+	 * (may be <code>null</code>)
+	 * @return whether the Connection is transactional
+	 */
+	public static boolean isConnectionTransactional(Connection con, DataSource dataSource) {
+		if (dataSource == null) {
+			return false;
+		}
+		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
+		return (conHolder != null && connectionEquals(conHolder, con));
+	}
+
+	/**
 	 * Apply the current transaction timeout, if any,
 	 * to the given JDBC Statement object.
 	 * @param stmt the JDBC Statement object
-	 * @param dataSource DataSource that the Connection came from
+	 * @param dataSource the DataSource that the Connection was obtained from
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.Statement#setQueryTimeout
 	 */
@@ -225,7 +241,7 @@ public abstract class DataSourceUtils {
 	 * Apply the specified timeout - overridden by the current transaction timeout,
 	 * if any - to the given JDBC Statement object.
 	 * @param stmt the JDBC Statement object
-	 * @param dataSource DataSource that the Connection came from
+	 * @param dataSource the DataSource that the Connection was obtained from
 	 * @param timeout the timeout to apply (or 0 for no timeout outside of a transaction)
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.Statement#setQueryTimeout
@@ -245,14 +261,13 @@ public abstract class DataSourceUtils {
 	}
 
 	/**
-	 * Close the given Connection, created via the given DataSource,
+	 * Close the given Connection, obtained from the given DataSource,
 	 * if it is not managed externally (that is, not bound to the thread).
 	 * @param con the Connection to close if necessary
 	 * (if this is <code>null</code>, the call will be ignored)
 	 * @param dataSource the DataSource that the Connection was obtained from
 	 * (may be <code>null</code>)
 	 * @see #getConnection
-	 * @see SmartDataSource#shouldClose
 	 */
 	public static void releaseConnection(Connection con, DataSource dataSource) {
 		try {
@@ -267,16 +282,15 @@ public abstract class DataSourceUtils {
 	}
 
 	/**
-	 * Actually release a JDBC Connection for the given DataSource.
+	 * Actually close the given Connection, obtained from the given DataSource.
 	 * Same as {@link #releaseConnection}, but throwing the original SQLException.
-	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
+	 * <p>Directly accessed by {@link TransactionAwareDataSourceProxy}.
 	 * @param con the Connection to close if necessary
 	 * (if this is <code>null</code>, the call will be ignored)
 	 * @param dataSource the DataSource that the Connection was obtained from
 	 * (may be <code>null</code>)
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #doGetConnection
-	 * @see TransactionAwareDataSourceProxy
 	 */
 	public static void doReleaseConnection(Connection con, DataSource dataSource) throws SQLException {
 		if (con == null) {
@@ -285,7 +299,7 @@ public abstract class DataSourceUtils {
 
 		if (dataSource != null) {
 			ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
-			if (conHolder != null && conHolder.hasConnection() && connectionEquals(conHolder.getConnection(), con)) {
+			if (conHolder != null && connectionEquals(conHolder, con)) {
 				// It's the transactional Connection: Don't close it.
 				conHolder.released();
 				return;
@@ -304,13 +318,17 @@ public abstract class DataSourceUtils {
 	 * Determine whether the given two Connections are equal, asking the target
 	 * Connection in case of a proxy. Used to detect equality even if the
 	 * user passed in a raw target Connection while the held one is a proxy.
-	 * @param heldCon the held Connection (potentially a proxy)
+	 * @param conHolder the ConnectionHolder for the held Connection (potentially a proxy)
 	 * @param passedInCon the Connection passed-in by the user
 	 * (potentially a target Connection without proxy)
 	 * @return whether the given Connections are equal
 	 * @see #getTargetConnection
 	 */
-	private static boolean connectionEquals(Connection heldCon, Connection passedInCon) {
+	private static boolean connectionEquals(ConnectionHolder conHolder, Connection passedInCon) {
+		if (!conHolder.hasConnection()) {
+			return false;
+		}
+		Connection heldCon = conHolder.getConnection();
 		// Explicitly check for identity too: for Connection handles that do not implement
 		// "equals" properly, such as the ones Commons DBCP exposes).
 		return (heldCon == passedInCon || heldCon.equals(passedInCon) ||
