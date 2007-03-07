@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import javax.management.MBeanServer;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
-import org.springframework.util.ClassUtils;
 
 /**
  * FactoryBean that obtains a specified WebLogic {@link javax.management.MBeanServer}
@@ -38,7 +37,7 @@ import org.springframework.util.ClassUtils;
  * accessing the WebLogic <code>MBeanServer</code> instance through a WebLogic
  * <code>MBeanHome</code> obtained via a JNDI lookup, typical a local one.
  *
- * <p><b>NOTE: This class is only intended for use with WebLogic 8.1.</b>
+ * <p><b>NOTE: This class is only intended for use with WebLogic up to 8.1.</b>
  * On WebLogic 9.x, simply obtain the MBeanServer directly from the JNDI location
  * "java:comp/env/jmx/runtime", for example through the following configuration:
  *
@@ -114,14 +113,14 @@ public class WebLogicMBeanServerFactoryBean implements FactoryBean, Initializing
 			/*
 			 * MBeanHome mbeanHome = Helper.getMBeanHome(this.username, this.password, this.serverUrl, this.serverName);
 			 */
-			Class helperClass = ClassUtils.forName(WEBLOGIC_JMX_HELPER_CLASS);
+			Class helperClass = getClass().getClassLoader().loadClass(WEBLOGIC_JMX_HELPER_CLASS);
 			Class[] argTypes = new Class[] {String.class, String.class, String.class, String.class};
 			Object[] args = new Object[] {this.username, this.password, this.serverUrl, this.serverName};
 			Object mbeanHome = helperClass.getMethod(GET_MBEAN_HOME_METHOD, argTypes).invoke(null, args);
 
 			/*
-			* this.mbeanServer = mbeanHome.getMBeanServer();
-			*/
+			 * this.mbeanServer = mbeanHome.getMBeanServer();
+			 */
 			this.mbeanServer = (MBeanServer)
 					mbeanHome.getClass().getMethod(GET_MBEAN_SERVER_METHOD, null).invoke(mbeanHome, null);
 		}
