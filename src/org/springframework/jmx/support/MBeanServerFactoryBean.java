@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,7 +143,7 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, Di
 	/**
 	 * Attempt to locate an existing <code>MBeanServer</code>.
 	 * Called if <code>locateExistingServerIfPossible</code> is set to <code>true</code>.
-	 * <p>Default implementation attempts to find an <code>MBeanServer</code> using
+	 * <p>The default implementation attempts to find an <code>MBeanServer</code> using
 	 * a standard lookup. Subclasses may override to add additional location logic.
 	 * @param agentId the agent identifier of the MBeanServer to retrieve.
 	 * If this parameter is <code>null</code>, all registered MBeanServers are
