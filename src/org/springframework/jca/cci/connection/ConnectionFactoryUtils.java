@@ -29,10 +29,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
  
 /**
- * Helper class that provides static methods for obtaining CCI Connections from
- * a {@link javax.resource.cci.ConnectionFactory}. Has special support for
- * Spring-managed Connections, e.g. for use with {@link CciLocalTransactionManager}
- * or {@link org.springframework.transaction.jta.JtaTransactionManager}.
+ * Helper class that provides static methods for obtaining CCI Connections
+ * from a {@link javax.resource.cci.ConnectionFactory}. Includes special
+ * support for Spring-managed transactional Connections, e.g. managed
+ * by {@link CciLocalTransactionManager} or
+ * {@link org.springframework.transaction.jta.JtaTransactionManager}.
  *
  * <p>Used internally by {@link org.springframework.jca.cci.core.CciTemplate},
  * Spring's CCI operation objects and the {@link CciLocalTransactionManager}.
@@ -109,7 +110,7 @@ public abstract class ConnectionFactoryUtils {
 	}
 
 	/**
-	 * Return whether the given JCA CCI Connection is transactional, that is,
+	 * Determine whether the given JCA CCI Connection is transactional, that is,
 	 * bound to the current thread by Spring's transaction facilities.
 	 * @param con the Connection to check
 	 * @param cf the ConnectionFactory that the Connection was obtained from
