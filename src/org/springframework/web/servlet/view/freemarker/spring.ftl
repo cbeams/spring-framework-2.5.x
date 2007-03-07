@@ -74,7 +74,7 @@
         <#assign status = springMacroRequestContext.getBindStatus(path)>
     </#if>
     <#-- assign a temporary value, forcing a string representation for any
-    kind of variable.  This temp value is only used in this macro lib -->
+    kind of variable. This temp value is only used in this macro lib -->
     <#if status.value?exists && status.value?is_boolean>
         <#assign stringStatusValue=status.value?string>
     <#else>
@@ -91,7 +91,7 @@
 <#macro bindEscaped path, htmlEscape>
     <#assign status = springMacroRequestContext.getBindStatus(path, htmlEscape)>
     <#-- assign a temporary value, forcing a string representation for any
-    kind of variable.  This temp value is only used in this macro lib -->
+    kind of variable. This temp value is only used in this macro lib -->
     <#if status.value?exists && status.value?is_boolean>
         <#assign stringStatusValue=status.value?string>
     <#else>
@@ -119,9 +119,9 @@
  * formPasswordInput
  *
  * Display a form input field of type 'password' and bind it to an attribute
- * of a command or bean.  No value will ever be displayed.  This functionality
+ * of a command or bean. No value will ever be displayed. This functionality
  * can also be obtained by calling the formInput macro with a 'type' parameter
- * of 'password'
+ * of 'password'.
  *
  * @param path the name of the field to bind to
  * @param attributes any additional attributes for the element (such as class
@@ -135,8 +135,8 @@
  * formHiddenInput
  *
  * Generate a form input field of type 'hidden' and bind it to an attribute
- * of a command or bean.  This functionality can also be obtained by calling
- * the formInput macro with a 'type' parameter of 'hidden'
+ * of a command or bean. This functionality can also be obtained by calling
+ * the formInput macro with a 'type' parameter of 'hidden'.
  *
  * @param path the name of the field to bind to
  * @param attributes any additional attributes for the element (such as class
@@ -209,7 +209,7 @@
  * @param path the name of the field to bind to
  * @param options a map (value=label) of all the available options
  * @param separator the html tag or other character list that should be used to
- *    separate each option.  Typically '&nbsp;' or '<br>'
+ *    separate each option. Typically '&nbsp;' or '<br>'
  * @param attributes any additional attributes for the element (such as class
  *    or CSS styles or size
 -->
@@ -231,7 +231,7 @@
  * @param path the name of the field to bind to
  * @param options a map (value=label) of all the available options
  * @param separator the html tag or other character list that should be used to
- *    separate each option.  Typically '&nbsp;' or '<br>'
+ *    separate each option. Typically '&nbsp;' or '<br>'
  * @param attributes any additional attributes for the element (such as class
  *    or CSS styles or size
 -->
@@ -255,7 +255,7 @@
  * @param separator the html tag or other character list that should be used to
  *    separate each option. Typically '<br>'.
  * @param classOrStyle either the name of a CSS class element (which is defined in
- *    the template or an external CSS file) or an inline style.  If the value passed in here
+ *    the template or an external CSS file) or an inline style. If the value passed in here
  *    contains a colon (:) then a 'style=' attribute will be used, else a 'class=' attribute
  *    will be used.
 -->
