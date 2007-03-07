@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.2.9 (February 2007)
----------------------------------------------------
+THE SPRING FRAMEWORK, release 1.2.9 (March 2007)
+------------------------------------------------
 http://www.springframework.org
 
 
@@ -146,10 +146,6 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 * "spring-mock" (~45 KB)
 - Contents: JNDI mocks, Servlet API mocks, JUnit support
 - Dependencies: spring-core
-
-Note: The above lists of third-party libraries assume J2SE 1.4 as foundation. For J2SE 1.3, an XML parser like
-Xerces, the JDBC 2.0 standard extension interfaces, and JNDI have to be added when using XML bean definitions,
-JDBC DataSource setup, and JNDI lookups, respectively.
 
 Note: To use the JSP expression language for arguments of Spring's web MVC tags, JSP 2.0 is required.
 Alternatively, the Jakarta implementation of the JSTL (standard.jar) has to be available on the class path.
