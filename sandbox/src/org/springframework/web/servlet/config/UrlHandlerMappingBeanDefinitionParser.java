@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.w3c.dom.NodeList;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -36,13 +35,10 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 /**
  * Bean definition parser <code>&lt;url:urlmappings&gt;</code> tag,
  * resulting in a SimpleUrlHandlerMapping.
- * 
- * XML should adhere to the spring-web.xsd schema. 
- * 
+ *
  * @author Alef Arendsen
  */
-public class UrlHandlerMappingBeanDefinitionParser extends MvcBeanDefinitionParserSupport 
-	implements BeanDefinitionParser {
+public class UrlHandlerMappingBeanDefinitionParser implements BeanDefinitionParser {
 	
 	private static final String URLMAPPING = "url-mapping";
 	private static final String ALWAYS_USE_FULL_PATH = "always-use-full-path";
@@ -79,7 +75,7 @@ public class UrlHandlerMappingBeanDefinitionParser extends MvcBeanDefinitionPars
 				RootBeanDefinition handlerMappingDefinition = parseHandlerMappingDefinition(ele);
 				handlerMappingDefinition.setSource(parserContext.extractSource(element));
 				handlerMappingDefinition.getPropertyValues().addPropertyValue("order", new Integer(handlerCount++));
-				BeanDefinitionReaderUtils.registerWithGeneratedName(handlerMappingDefinition, registry);
+				parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDefinition);
 			}
 		}
 
@@ -129,6 +125,13 @@ public class UrlHandlerMappingBeanDefinitionParser extends MvcBeanDefinitionPars
 		}
 
 		return definition;
+	}
+
+	private void setPropertyIfAvailable(Element el, String attribute, String property, RootBeanDefinition definition) {
+		String propertyValue = el.getAttribute(attribute);
+		if (StringUtils.hasText(propertyValue)) {
+			definition.getPropertyValues().addPropertyValue(property, propertyValue);
+		}
 	}
 
 }

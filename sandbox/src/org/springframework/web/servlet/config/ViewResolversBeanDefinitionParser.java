@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.Ordered;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -40,11 +40,8 @@ import org.springframework.web.servlet.view.tiles.TilesView;
  * Spring MVC applications.
  *
  * @author Alef Arendsen
- * @see MvcNamespaceHandler
  */
-public class ViewResolversBeanDefinitionParser extends MvcBeanDefinitionParserSupport
-		implements BeanDefinitionParser {
-
+public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String INTERNAL_RESOURCE_VIEW_RESOLVER = "internal-resource-view-resolver";
 
@@ -84,7 +81,7 @@ public class ViewResolversBeanDefinitionParser extends MvcBeanDefinitionParserSu
 				}
 
 				viewResolverDefinition.setSource(parserContext.extractSource(viewResolverElement));
-				BeanDefinitionReaderUtils.registerWithGeneratedName(viewResolverDefinition, registry);
+				parserContext.getReaderContext().registerWithGeneratedName(viewResolverDefinition);
 			}
 		}
 
@@ -122,6 +119,13 @@ public class ViewResolversBeanDefinitionParser extends MvcBeanDefinitionParserSu
 
 	private RootBeanDefinition createBeanNameViewResolver() {
 		return new RootBeanDefinition(BeanNameViewResolver.class);
+	}
+
+	private void setPropertyIfAvailable(Element el, String attribute, String property, RootBeanDefinition definition) {
+		String propertyValue = el.getAttribute(attribute);
+		if (StringUtils.hasText(propertyValue)) {
+			definition.getPropertyValues().addPropertyValue(property, propertyValue);
+		}
 	}
 
 }
