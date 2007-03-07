@@ -87,78 +87,39 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Indicates that DTD validation should be used.
 	 */
 	public static final int VALIDATION_DTD = XmlValidationModeDetector.VALIDATION_DTD;
+
 	/**
 	 * Indicates that XSD validation should be used.
 	 */
 	public static final int VALIDATION_XSD = XmlValidationModeDetector.VALIDATION_XSD;
 
 
-	/**
-	 * {@link Constants} instance for this class.
-	 */
+	/** Constants instance for this class */
 	private static final Constants constants = new Constants(XmlBeanDefinitionReader.class);
 
-	/**
-	 * Are namespaces important?
-	 */
 	private boolean namespaceAware;
 
-	/**
-	 * The current validation mode. Defaults to {@link #VALIDATION_AUTO}.
-	 */
 	private int validationMode = VALIDATION_AUTO;
 
-	/**
-	 * The {@link ErrorHandler} to use when XML parsing errors occur.
-	 */
-	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);
-
-	/**
-	 * The {@link EntityResolver} implementation to use.
-	 */
-	private EntityResolver entityResolver;
-
-	/**
-	 * The {@link XmlBeanDefinitionParser} <code>Class</code> to use for reading.
-	 */
 	private Class parserClass;
 
-	/**
-	 * The {@link BeanDefinitionDocumentReader} <code>Class</code> to use for reading.
-	 */
 	private Class documentReaderClass = DefaultBeanDefinitionDocumentReader.class;
 
-	/**
-	 * The {@link ProblemReporter} used to report any errors or warnings during parsing.
-	 */
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
-	/**
-	 * The {@link ReaderEventListener} that all component registration events should be sent to.
-	 */
 	private ReaderEventListener eventListener = new EmptyReaderEventListener();
 
-	/**
-	 * The {@link SourceExtractor} to use when extracting
-	 * {@link org.springframework.beans.factory.config.BeanDefinition#getSource() source objects}
-	 * from the configuration data.
-	 */
 	private SourceExtractor sourceExtractor = new NullSourceExtractor();
 
-	/**
-	 * The {@link NamespaceHandlerResolver} implementation passed to the {@link BeanDefinitionDocumentReader}.
-	 */
 	private NamespaceHandlerResolver namespaceHandlerResolver;
 
-	/**
-	 * The {@link DocumentLoader} to use for loading DOM {@link Document Documents}.
-	 */
 	private DocumentLoader documentLoader = new DefaultDocumentLoader();
 
-	/**
-	 * The helper object to use for autodetection of validation mode
-	 */
-	private XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
+	private EntityResolver entityResolver;
+
+	private ErrorHandler errorHandler = new SimpleSaxErrorHandler(logger);
+
+	private final XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
 
 
 	/**
