@@ -187,7 +187,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Created JMS transaction on Session [" + session + "] from Connection [" + con + "]");
 			}
-			txObject.setResourceHolder(new JmsResourceHolder(con, session));
+			txObject.setResourceHolder(new JmsResourceHolder(getConnectionFactory(), con, session));
 			txObject.getResourceHolder().setSynchronizedWithTransaction(true);
 			int timeout = determineTimeout(definition);
 			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {

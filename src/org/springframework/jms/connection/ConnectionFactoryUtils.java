@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,16 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 /**
- * Helper class for obtaining transactional JMS resources
- * for a given ConnectionFactory.
+ * Helper class for managing a JMS {@link javax.jms.ConnectionFactory}, in particular
+ * for obtaining transactional JMS resources for a given ConnectionFactory.
+ *
+ * <p>Mainly for internal use within the framework. Used by
+ * {@link org.springframework.jms.core.JmsTemplate} as well as
+ * {@link org.springframework.jms.listener.DefaultMessageListenerContainer}.
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see SmartConnectionFactory
  */
 public abstract class ConnectionFactoryUtils {
 
@@ -192,21 +197,22 @@ public abstract class ConnectionFactoryUtils {
 
 	/**
 	 * Obtain a JMS Session that is synchronized with the current transaction, if any.
-	 * @param resourceKey the TransactionSynchronizationManager key to bind to
-	 * (usually the ConnectionFactory)
+	 * @param connectionFactory the JMS ConnectionFactory to bind for
+	 * (used as TransactionSynchronizationManager key)
 	 * @param resourceFactory the ResourceFactory to use for extracting or creating
 	 * JMS resources
 	 * @return the transactional Session, or <code>null</code> if none found
 	 * @throws JMSException in case of JMS failure
 	 */
-	public static Session doGetTransactionalSession(Object resourceKey, ResourceFactory resourceFactory)
+	public static Session doGetTransactionalSession(
+			ConnectionFactory connectionFactory, ResourceFactory resourceFactory)
 			throws JMSException {
 
-		Assert.notNull(resourceKey, "Resource key must not be null");
-		Assert.notNull(resourceKey, "ResourceFactory must not be null");
+		Assert.notNull(connectionFactory, "ConnectionFactory must not be null");
+		Assert.notNull(resourceFactory, "ResourceFactory must not be null");
 
 		JmsResourceHolder resourceHolder =
-				(JmsResourceHolder) TransactionSynchronizationManager.getResource(resourceKey);
+				(JmsResourceHolder) TransactionSynchronizationManager.getResource(connectionFactory);
 		if (resourceHolder != null) {
 			Session session = resourceFactory.getSession(resourceHolder);
 			if (session != null || resourceHolder.isFrozen()) {
@@ -218,7 +224,7 @@ public abstract class ConnectionFactoryUtils {
 		}
 		JmsResourceHolder conHolderToUse = resourceHolder;
 		if (conHolderToUse == null) {
-			conHolderToUse = new JmsResourceHolder();
+			conHolderToUse = new JmsResourceHolder(connectionFactory);
 		}
 		Connection con = resourceFactory.getConnection(conHolderToUse);
 		Session session = null;
@@ -256,9 +262,9 @@ public abstract class ConnectionFactoryUtils {
 		if (conHolderToUse != resourceHolder) {
 			TransactionSynchronizationManager.registerSynchronization(
 					new JmsResourceSynchronization(
-							resourceKey, conHolderToUse, resourceFactory.isSynchedLocalTransactionAllowed()));
+							connectionFactory, conHolderToUse, resourceFactory.isSynchedLocalTransactionAllowed()));
 			conHolderToUse.setSynchronizedWithTransaction(true);
-			TransactionSynchronizationManager.bindResource(resourceKey, conHolderToUse);
+			TransactionSynchronizationManager.bindResource(connectionFactory, conHolderToUse);
 		}
 		return session;
 	}
@@ -306,6 +312,7 @@ public abstract class ConnectionFactoryUtils {
 		 * a Spring-managed transaction (where the main transaction might be a JDBC-based
 		 * one for a specific DataSource, for example), with the JMS transaction
 		 * committing right after the main transaction.
+		 * @return whether to allow for synchronizing a local JMS transaction
 		 */
 		boolean isSynchedLocalTransactionAllowed();
 	}

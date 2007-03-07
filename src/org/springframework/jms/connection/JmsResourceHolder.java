@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.TransactionInProgressException;
@@ -50,7 +51,9 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	private static final Log logger = LogFactory.getLog(JmsResourceHolder.class);
 
-	private final boolean frozen;
+	private boolean frozen;
+
+	private final ConnectionFactory connectionFactory;
 
 	private final List connections = new LinkedList();
 
@@ -65,6 +68,16 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * @see #addSession
 	 */
 	public JmsResourceHolder() {
+		this(null);
+	}
+
+	/**
+	 * Create a new JmsResourceHolder that is open for resources to be added.
+	 * @param connectionFactory the JMS ConnectionFactory that this
+	 * resource holder is associated with (may be <code>null</code>)
+	 */
+	public JmsResourceHolder(ConnectionFactory connectionFactory) {
+		this.connectionFactory = connectionFactory;
 		this.frozen = false;
 	}
 
@@ -74,13 +87,26 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 * @param session the JMS Session
 	 */
 	public JmsResourceHolder(Connection connection, Session session) {
+		this(null, connection, session);
+	}
+
+	/**
+	 * Create a new JmsResourceHolder for the given JMS resources.
+	 * @param connectionFactory the JMS ConnectionFactory that this
+	 * resource holder is associated with (may be <code>null</code>)
+	 * @param connection the JMS Connection
+	 * @param session the JMS Session
+	 */
+	public JmsResourceHolder(ConnectionFactory connectionFactory, Connection connection, Session session) {
+		this.connectionFactory = connectionFactory;
 		addConnection(connection);
 		addSession(session, connection);
 		this.frozen = true;
 	}
 
+
 	public final boolean isFrozen() {
-		return frozen;
+		return this.frozen;
 	}
 
 	public final void addConnection(Connection connection) {
@@ -157,22 +183,12 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 				((Session) it.next()).close();
 			}
 			catch (Throwable ex) {
-				logger.debug("Could not close JMS Session after transaction", ex);
+				logger.debug("Could not close synchronized JMS Session after transaction", ex);
 			}
 		}
 		for (Iterator it = this.connections.iterator(); it.hasNext();) {
-			try {
-				Connection con = (Connection) it.next();
-				try {
-					con.stop();
-				}
-				finally {
-					con.close();
-				}
-			}
-			catch (Throwable ex) {
-				logger.debug("Could not close JMS Connection after transaction", ex);
-			}
+			Connection con = (Connection) it.next();
+			ConnectionFactoryUtils.releaseConnection(con, this.connectionFactory, true);
 		}
 	}
 
