@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import javax.management.JMException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
+import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -80,32 +81,16 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * The <code>MBeanServerConnection</code> hosting the MBean which calls are forwarded to.
-	 */
 	private MBeanServerConnection server;
 
-	/**
-	 * The <code>JMXServiceURL</code> of the remote <code>MBeanServer</code> to connect to.
-	 * Optional.
-	 * @see #setServiceUrl(String)
-	 */
 	private JMXServiceURL serviceUrl;
 
-	/**
-	 * Indicates whether the proxy should connect to the <code>MBeanServer</code> at startup.
-	 * @see #setConnectOnStartup(boolean)
-	 */
+	private String agentId;
+
 	private boolean connectOnStartup = true;
 
-	/**
-	 * The <code>ObjectName</code> of the MBean to forward calls to.
-	 */
 	private ObjectName objectName;
 
-	/**
-	 * Indicates whether or not strict casing is being used for attributes.
-	 */
 	private boolean useStrictCasing = true;
 
 
@@ -147,6 +132,17 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 */
 	public void setServiceUrl(String url) throws MalformedURLException {
 		this.serviceUrl = new JMXServiceURL(url);
+	}
+
+	/**
+	 * Set the agent id of the <code>MBeanServer</code> to locate.
+	 * <p>Default is none. If specified, this will result in an
+	 * attempt being made to locate the attendant MBeanServer, unless
+	 * the {@see #setServiceUrl "serviceUrl"} property has been set.
+	 * @see javax.management.MBeanServerFactory#findMBeanServer(String)
+	 */
+	public void setAgentId(String agentId) {
+		this.agentId = agentId;
 	}
 
 	/**
@@ -212,8 +208,26 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 		}
 		else {
 			logger.debug("Attempting to locate local MBeanServer");
-			this.server = JmxUtils.locateMBeanServer();
+			this.server = locateMBeanServer(this.agentId);
 		}
+	}
+
+	/**
+	 * Attempt to locate an existing <code>MBeanServer</code>.
+	 * Called if no {@link #setServiceUrl "serviceUrl"} was specified.
+	 * <p>The default implementation attempts to find an <code>MBeanServer</code> using
+	 * a standard lookup. Subclasses may override to add additional location logic.
+	 * @param agentId the agent identifier of the MBeanServer to retrieve.
+	 * If this parameter is <code>null</code>, all registered MBeanServers are
+	 * considered.
+	 * @return the <code>MBeanServer</code> if found
+	 * @throws org.springframework.jmx.MBeanServerNotFoundException
+	 * if no <code>MBeanServer</code> could be found
+	 * @see JmxUtils#locateMBeanServer(String)
+	 * @see javax.management.MBeanServerFactory#findMBeanServer(String)
+	 */
+	protected MBeanServer locateMBeanServer(String agentId) throws MBeanServerNotFoundException {
+		return JmxUtils.locateMBeanServer(agentId);
 	}
 
 	/**
