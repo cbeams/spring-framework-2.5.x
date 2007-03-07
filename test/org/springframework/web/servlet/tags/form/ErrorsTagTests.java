@@ -28,7 +28,6 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockPageContext;
-import org.springframework.test.AssertThrows;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.RequestContext;
@@ -76,16 +75,6 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 		assertEquals(mockContent, getWriter().toString());
-	}
-
-	public void testErrorsTagNotNestedWithinFormTag() throws Exception {
-		new AssertThrows(IllegalStateException.class,
-				"Must throw an IllegalStateException when not nested within a <form/> tag.") {
-			public void test() throws Exception {
-				tag.setParent(null);
-				tag.doStartTag();
-			}
-		}.runTest();
 	}
 
 	public void testWithExplicitWhitespaceBodyContent() throws Exception {
@@ -232,6 +221,17 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(0, output.length());
 	}
 
+	public void testWithoutErrorsInstance() throws Exception {
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertEquals(0, output.length());
+	}
+
 	public void testAsBodyTag() throws Exception {
 		Errors errors = new BindException(new TestBean(), "COMMAND_NAME");
 		errors.rejectValue("name", "some.code", "Default Message");
@@ -286,7 +286,8 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.doEndTag();
 		this.tag.doFinally();
 		assertEquals(bodyContent, getWriter().toString());
-		assertEquals(existingAttribute, getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, PageContext.APPLICATION_SCOPE));
+		assertEquals(existingAttribute,
+				getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, PageContext.APPLICATION_SCOPE));
 	}
 
 	/**
@@ -350,7 +351,6 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 	protected void extendPageContext(MockPageContext pageContext) {
 		pageContext.getRequest().setAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, COMMAND_NAME);
 	}
-
 
 	private void assertElementTagOpened(String output) {
 		assertTrue(output.startsWith("<" + this.tag.getElement() + " "));

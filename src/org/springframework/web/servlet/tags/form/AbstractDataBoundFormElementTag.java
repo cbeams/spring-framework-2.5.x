@@ -21,6 +21,7 @@ import java.beans.PropertyEditor;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.beans.PropertyAccessor;
 import org.springframework.core.Conventions;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -186,18 +187,20 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 */
 	private String getBindPath(String resolvedSubPath) {
 		StringBuffer sb = new StringBuffer();
-		sb.append(getCommandName());
-		String nestedPath = getNestedPath();
-		if (nestedPath != null) {
-			sb.append('.').append(nestedPath);
-		}
-		if (resolvedSubPath != null) {
-			if(sb.charAt(sb.length() - 1) != '.') {
-				sb.append('.');
-			}
-			sb.append(resolvedSubPath);
-		}
+		addBindPathElement(sb, getCommandName());
+		addBindPathElement(sb, getNestedPath());
+		addBindPathElement(sb, resolvedSubPath);
 		return sb.toString();
+	}
+
+	private void addBindPathElement(StringBuffer sb, String pathElement) {
+		if (StringUtils.hasLength(pathElement)) {
+			int length = sb.length();
+			if (length > 0 && sb.charAt(length - 1) != PropertyAccessor.NESTED_PROPERTY_SEPARATOR_CHAR) {
+				sb.append(PropertyAccessor.NESTED_PROPERTY_SEPARATOR_CHAR);
+			}
+			sb.append(pathElement);
+		}
 	}
 
 	/**

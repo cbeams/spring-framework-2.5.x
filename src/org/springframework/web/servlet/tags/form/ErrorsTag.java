@@ -127,7 +127,13 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 * @return <code>true</code> only when there are errors for the configured {@link #setPath path}
 	 */
 	protected boolean shouldRender() throws JspException {
-		return getBindStatus().isError();
+		try {
+			return getBindStatus().isError();
+		}
+		catch (IllegalStateException ex) {
+			// Neither BindingResult nor target object available.
+			return false;
+		}
 	}
 
 	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
