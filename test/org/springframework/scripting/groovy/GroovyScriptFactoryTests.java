@@ -110,6 +110,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerInstance"));
 		Messenger messenger = (Messenger) ctx.getBean("messengerInstance");
 
 		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(messenger));
@@ -117,6 +118,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 
 		String desiredMessage = "Hello World!";
 		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
 	}
 
 	public void testNonStaticScript() throws Exception {

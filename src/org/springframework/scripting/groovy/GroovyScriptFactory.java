@@ -55,6 +55,8 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 
 	private Class scriptClass;
 
+	private Class scriptResultClass;
+
 	private final Object scriptClassMonitor = new Object();
 
 
@@ -87,10 +89,10 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 		this.groovyObjectCustomizer = groovyObjectCustomizer;
 	}
 
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.groovyClassLoader = new GroovyClassLoader(classLoader);
 	}
-
 
 	public String getScriptSourceLocator() {
 		return this.scriptSourceLocator;
@@ -113,6 +115,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 		return false;
 	}
 
+
 	/**
 	 * Loads and parses the Groovy script via the GroovyClassLoader.
 	 * @see groovy.lang.GroovyClassLoader
@@ -121,17 +124,67 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 			throws IOException, ScriptCompilationException {
 
 		try {
-			Class clazz = null;
+			Class scriptClassToExecute = null;
+
 			synchronized (this.scriptClassMonitor) {
 				if (this.scriptClass == null || scriptSource.isModified()) {
 					this.scriptClass = this.groovyClassLoader.parseClass(scriptSource.getScriptAsString());
+
+					if (Script.class.isAssignableFrom(this.scriptClass)) {
+						// A Groovy script, probably creating an instance: let's execute it.
+						Object result = executeScript(this.scriptClass);
+						this.scriptResultClass = (result != null ? result.getClass() : null);
+						return result;
+					}
+					else {
+						this.scriptResultClass = this.scriptClass;
+					}
 				}
-				clazz = this.scriptClass;
+				scriptClassToExecute = this.scriptClass;
 			}
-			GroovyObject goo = (GroovyObject) clazz.newInstance();
+
+			// Process re-execution outside of the synchronized block.
+			return executeScript(scriptClassToExecute);
+		}
+		catch (CompilationFailedException ex) {
+			throw new ScriptCompilationException(
+					"Could not compile Groovy script: " + scriptSource, ex);
+		}
+	}
+
+	public Class getScriptedObjectType(ScriptSource scriptSource)
+			throws IOException, ScriptCompilationException {
+
+		synchronized (this.scriptClassMonitor) {
+			if (this.scriptClass == null || scriptSource.isModified()) {
+				this.scriptClass = this.groovyClassLoader.parseClass(scriptSource.getScriptAsString());
+
+				if (Script.class.isAssignableFrom(this.scriptClass)) {
+					// A Groovy script, probably creating an instance: let's execute it.
+					Object result = executeScript(this.scriptClass);
+					this.scriptResultClass = (result != null ? result.getClass() : null);
+				}
+				else {
+					this.scriptResultClass = this.scriptClass;
+				}
+			}
+			return this.scriptResultClass;
+		}
+	}
+
+	/**
+	 * Instantiate the given Groovy script class and run it if necessary.
+	 * @param scriptClass the Groovy script class
+	 * @return the result object (either an instance of the script class
+	 * or the result of running the script instance)
+	 * @throws ScriptCompilationException in case of instantiation failure
+	 */
+	protected Object executeScript(Class scriptClass) throws ScriptCompilationException {
+		try {
+			GroovyObject goo = (GroovyObject) scriptClass.newInstance();
 
 			if (this.groovyObjectCustomizer != null) {
-				// Allow metaclass and other customization
+				// Allow metaclass and other customization.
 				this.groovyObjectCustomizer.customize(goo);
 			}
 
@@ -144,28 +197,13 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 				return goo;
 			}
 		}
-		catch (CompilationFailedException ex) {
-			throw new ScriptCompilationException(
-					"Could not compile Groovy script: " + scriptSource, ex);
-		}
 		catch (InstantiationException ex) {
 			throw new ScriptCompilationException(
-					"Could not instantiate Groovy script class: " + scriptSource, ex);
+					"Could not instantiate Groovy script class: " + scriptClass.getName(), ex);
 		}
 		catch (IllegalAccessException ex) {
 			throw new ScriptCompilationException(
-					"Could not access Groovy script constructor: " + scriptSource, ex);
-		}
-	}
-
-	public Class getScriptedObjectType(ScriptSource scriptSource)
-			throws IOException, ScriptCompilationException {
-
-		synchronized (this.scriptClassMonitor) {
-			if (this.scriptClass == null || scriptSource.isModified()) {
-				this.scriptClass = this.groovyClassLoader.parseClass(scriptSource.getScriptAsString());
-			}
-			return this.scriptClass;
+					"Could not access Groovy script constructor: " + scriptClass.getName(), ex);
 		}
 	}
 
