@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,13 @@ import javax.sql.DataSource;
 import org.springframework.util.Assert;
 
 /**
- * Proxy for a target DataSource, adding awareness of Spring-managed transactions.
- * Similar to a transactional JNDI DataSource as provided by a J2EE server.
+ * Proxy for a target JDBC {@link javax.sql.DataSource}, adding awareness of
+ * Spring-managed transactions. Similar to a transactional JNDI DataSource
+ * as provided by a J2EE server.
  *
  * <p>Data access code that should remain unaware of Spring's data access support
  * can work with this proxy to seamlessly participate in Spring-managed transactions.
- * Note that the transaction manager, for example DataSourceTransactionManager,
+ * Note that the transaction manager, for example {@link DataSourceTransactionManager},
  * still needs to work with the underlying DataSource, <i>not</i> with this proxy.
  *
  * <p><b>Make sure that TransactionAwareDataSourceProxy is the outermost DataSource
@@ -43,10 +44,10 @@ import org.springframework.util.Assert;
  * intermediary proxy/adapter like {@link LazyConnectionDataSourceProxy} or
  * {@link UserCredentialsDataSourceAdapter}.
  *
- * <p>Delegates to DataSourceUtils for automatically participating in thread-bound
- * transactions, for example managed by {@link DataSourceTransactionManager}.
+ * <p>Delegates to {@link DataSourceUtils} for automatically participating in
+ * thread-bound transactions, for example managed by {@link DataSourceTransactionManager}.
  * <code>getConnection</code> calls and <code>close</code> calls on returned Connections
- * will behave properly within a transaction, that is, always work on the transactional
+ * will behave properly within a transaction, i.e. always operate on the transactional
  * Connection. If not within a transaction, normal DataSource behavior applies.
  *
  * <p>This proxy allows data access code to work with the plain JDBC API and still
@@ -60,10 +61,12 @@ import org.springframework.util.Assert;
  * that all operations performed through standard JDBC will automatically participate
  * in Spring-managed transaction timeouts.
  *
- * <p><b>NOTE:</b> This DataSource proxy needs to return wrapped Connections to
- * handle close calls on them properly. Therefore, the returned Connections cannot
- * be cast to a native JDBC Connection type like OracleConnection, or to a
- * connection pool implementation type. Use a corresponding NativeJdbcExtractor
+ * <p><b>NOTE:</b> This DataSource proxy needs to return wrapped Connections
+ * (which implement the {@link ConnectionProxy} interface) in order to handle
+ * close calls properly. Therefore, the returned Connections cannot be cast
+ * to a native JDBC Connection type like OracleConnection or to a connection
+ * pool implementation type. Use a corresponding
+ * {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor}
  * to retrieve the native JDBC Connection.
  *
  * @author Juergen Hoeller
@@ -71,10 +74,8 @@ import org.springframework.util.Assert;
  * @see javax.sql.DataSource#getConnection()
  * @see java.sql.Connection#close()
  * @see DataSourceUtils#doGetConnection
- * @see DataSourceUtils#doReleaseConnection
  * @see DataSourceUtils#applyTransactionTimeout
- * @see ConnectionProxy
- * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
+ * @see DataSourceUtils#doReleaseConnection
  */
 public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 
@@ -104,7 +105,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 * @see ConnectionProxy#getTargetConnection
 	 */
 	public Connection getConnection() throws SQLException {
-		Assert.state(getTargetDataSource() != null, "targetDataSource is required");
+		Assert.state(getTargetDataSource() != null, "'targetDataSource' is required");
 		Connection con = DataSourceUtils.doGetConnection(getTargetDataSource());
 		return getTransactionAwareConnectionProxy(con, getTargetDataSource());
 	}
@@ -149,7 +150,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 				return this.target;
 			}
 			else if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
+				// Only considered as equal when proxies are identical.
 				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
 			}
 			else if (method.getName().equals("hashCode")) {
