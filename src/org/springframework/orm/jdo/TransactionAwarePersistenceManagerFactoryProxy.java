@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,15 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.util.ClassUtils;
 
 /**
- * This FactoryBean exposes a proxy for a target JDO PersistenceManagerFactory,
+ * Proxy for a target JDO {@link javax.jdo.PersistenceManagerFactory},
  * returning the current thread-bound PersistenceManager (the Spring-managed
  * transactional PersistenceManager or a the single OpenPersistenceManagerInView
  * PersistenceManager) on <code>getPersistenceManager()</code>, if any.
  *
  * <p>Essentially, <code>getPersistenceManager()</code> calls get seamlessly
- * forwarded to <code>PersistenceManagerFactoryUtils.getPersistenceManager</code>.
+ * forwarded to {@link PersistenceManagerFactoryUtils#getPersistenceManager}.
  * Furthermore, <code>PersistenceManager.close</code> calls get forwarded to
- * <code>PersistenceManagerFactoryUtils.releasePersistenceManager</code>.
+ * {@link PersistenceManagerFactoryUtils#releasePersistenceManager}.
  *
  * <p>The main advantage of this proxy is that it allows DAOs to work with a
  * plain JDO PersistenceManagerFactory reference, while still participating in
@@ -51,10 +51,10 @@ import org.springframework.util.ClassUtils;
  * any Spring API dependencies in the DAO code!
  *
  * <p>It is usually preferable to write your JDO-based DAOs with Spring's
- * JdoTemplate, offering benefits such as consistent data access exceptions
- * instead of JDOExceptions at the DAO layer. However, Spring's resource and
- * transaction management (and Dependency	Injection) will work for DAOs
- * written against the plain JDO API too.
+ * {@link JdoTemplate}, offering benefits such as consistent data access
+ * exceptions instead of JDOExceptions at the DAO layer. However, Spring's
+ * resource and transaction management (and Dependency	Injection) will work
+ * for DAOs written against the plain JDO API as well.
  *
  * <p>Of course, you can still access the target PersistenceManagerFactory
  * even when your DAOs go through this proxy, by defining a bean reference
