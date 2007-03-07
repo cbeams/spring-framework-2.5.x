@@ -32,8 +32,9 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Exception resolver that allows for mapping exception class names to view names,
- * either for a list of given handlers or for all handlers in the DispatcherServlet.
+ * {@link org.springframework.web.servlet.HandlerExceptionResolver} implementation
+ * that allows for mapping exception class names to view names, either for a list
+ * of given handlers or for all handlers in the DispatcherServlet.
  *
  * <p>Error views are analogous to error page JSPs, but can be used with any
  * kind of exception including any checked one, with fine-granular mappings for
@@ -41,6 +42,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @since 22.11.2003
+ * @see org.springframework.web.servlet.DispatcherServlet
  */
 public class SimpleMappingExceptionResolver implements HandlerExceptionResolver, Ordered {
 
@@ -250,7 +252,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 	/**
-	 * Find a matching view name in the given exception mappings
+	 * Find a matching view name in the given exception mappings.
 	 * @param exceptionMappings mappings between exception class names and error view names
 	 * @param ex the exception that got thrown during handler execution
 	 * @return the view name, or <code>null</code> if none found
@@ -338,12 +340,11 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 
 	/**
 	 * Return a ModelAndView for the given request, view name and exception.
-	 * Default implementation delegates to <code>getModelAndView(viewName, ex)</code>.
+	 * <p>The default implementation delegates to {@link #getModelAndView(String, Exception)}.
 	 * @param viewName the name of the error view
 	 * @param ex the exception that got thrown during handler execution
 	 * @param request current HTTP request (useful for obtaining metadata)
 	 * @return the ModelAndView instance
-	 * @see #getModelAndView(String, Exception)
 	 */
 	protected ModelAndView getModelAndView(String viewName, Exception ex, HttpServletRequest request) {
 		return getModelAndView(viewName, ex);
@@ -351,7 +352,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 
 	/**
 	 * Return a ModelAndView for the given view name and exception.
-	 * Default implementation adds the specified exception attribute.
+	 * <p>The default implementation adds the specified exception attribute.
 	 * Can be overridden in subclasses.
 	 * @param viewName the name of the error view
 	 * @param ex the exception that got thrown during handler execution
