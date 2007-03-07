@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@ import javax.naming.NamingException;
 import org.springframework.aop.TargetSource;
 
 /**
- * TargetSource which performs a fresh JNDI lookup for each call.
+ * AOP {@link org.springframework.aop.TargetSource} that provides
+ * configurable JNDI lookups for <code>getTarget()</code> calls.
  *
- * <p>Can be used as alternative to JndiObjectFactoryBean, to allow for
+ * <p>Can be used as alternative to {@link JndiObjectFactoryBean}, to allow for
  * relocating a JNDI object lazily or for each operation (see "lookupOnStartup"
  * and "cache" properties). This is particularly useful during development, as it
  * allows for hot restarting of the JNDI server (for example, a remote JMS server).
@@ -32,20 +33,20 @@ import org.springframework.aop.TargetSource;
  *
  * <pre>
  * &lt;bean id="queueConnectionFactoryTarget" class="org.springframework.jndi.JndiObjectTargetSource"&gt;
- *   &lt;property name="jndiName"&gt;&lt;value&gt;JmsQueueConnectionFactory&lt;/value&gt;&lt;/property&gt;
- *   &lt;property name="lookupOnStartup"&gt;&lt;value&gt;false&lt;/value&gt;&lt;/property&gt;
+ *   &lt;property name="jndiName" value="JmsQueueConnectionFactory"/&gt;
+ *   &lt;property name="lookupOnStartup" value="false"/&gt;
  * &lt;/bean&gt;
  *
  * &lt;bean id="queueConnectionFactory" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
- *   &lt;property name="proxyInterfaces"&gt;&lt;value&gt;javax.jms.QueueConnectionFactory&lt;/value&gt;&lt;/property&gt;
- *   &lt;property name="targetSource"&gt;&lt;ref bean="queueConnectionFactoryTarget"/&gt;&lt;/property&gt;
+ *   &lt;property name="proxyInterfaces" value="javax.jms.QueueConnectionFactory"/&gt;
+ *   &lt;property name="targetSource" ref="queueConnectionFactoryTarget"/&gt;
  * &lt;/bean&gt;</pre>
  *
  * A <code>createQueueConnection</code> call on the "queueConnectionFactory" proxy will
  * cause a lazy JNDI lookup for "JmsQueueConnectionFactory" and a subsequent delegating
  * call to the retrieved QueueConnectionFactory's <code>createQueueConnection</code>.
  *
- * <p><b>Alternatively, use a JndiObjectFactoryBean with a "proxyInterface".</b>
+ * <p><b>Alternatively, use a {@link JndiObjectFactoryBean} with a "proxyInterface".</b>
  * "lookupOnStartup" and "cache" can then be specified on the JndiObjectFactoryBean,
  * creating a JndiObjectTargetSource underneath (instead of defining separate
  * ProxyFactoryBean and JndiObjectTargetSource beans).

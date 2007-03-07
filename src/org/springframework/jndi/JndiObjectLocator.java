@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,23 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.StringUtils;
 
 /**
- * Convenient superclass for JNDI-based service locators. Subclasses are
- * JavaBeans, exposing a "jndiName" property. This may or may not include
- * the "java:comp/env/" prefix expected by J2EE applications when accessing
- * a locally mapped (ENC - Environmental Naming Context) resource. If it
+ * Convenient superclass for JNDI-based service locators,
+ * providing configurable lookup of a specific JNDI resource.
+ *
+ * <p>Exposes a {@link #setJndiName "jndiName"} property. This may or may not
+ * include the "java:comp/env/" prefix expected by J2EE applications when
+ * accessing a locally mapped (Environmental Naming Context) resource. If it
  * doesn't, the "java:comp/env/" prefix will be prepended if the "resourceRef"
  * property is true (the default is <strong>false</strong>) and no other scheme
- * like "java:" is given.
+ * (e.g. "java:") is given.
  *
- * <p>Subclasses can invoke the lookup method whenever it is appropriate.
+ * <p>Subclasses may invoke the lookup method whenever it is appropriate.
  * Some classes might do this on initialization, while others might do it
  * on demand. The latter strategy is more flexible in that it allows for
  * initialization of the locator before the JNDI object is available.
  *
  * @author Juergen Hoeller
+ * @since 1.1
  * @see #setJndiName
  * @see #setJndiTemplate
  * @see #setJndiEnvironment
@@ -63,7 +66,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	 * Return the JNDI name to look up.
 	 */
 	public String getJndiName() {
-		return jndiName;
+		return this.jndiName;
 	}
 
 	/**
@@ -79,13 +82,10 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 	 * to be assignable to, if any.
 	 */
 	public Class getExpectedType() {
-		return expectedType;
+		return this.expectedType;
 	}
 
-	/**
-	 * Check the "jndiName" property.
-	 */
-	public void afterPropertiesSet() throws NamingException {
+	public void afterPropertiesSet() throws IllegalArgumentException, NamingException {
 		if (!StringUtils.hasLength(getJndiName())) {
 			throw new IllegalArgumentException("jndiName is required");
 		}
@@ -93,12 +93,13 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 
 
 	/**
-	 * Perform the actual JNDI lookup via the JndiTemplate.
-	 * Invokes the <code>located</code> method after successful lookup.
+	 * Perform the actual JNDI lookup for this locator's target resource.
+	 * @return the located target object
 	 * @throws NamingException if the JNDI lookup failed or if the
 	 * located JNDI object is not assigable to the expected type
 	 * @see #setJndiName
 	 * @see #setExpectedType
+	 * @see #lookup(String, Class)
 	 */
 	protected Object lookup() throws NamingException {
 		return lookup(getJndiName(), getExpectedType());

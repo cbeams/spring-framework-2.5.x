@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,28 +22,29 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * FactoryBean that looks up a JNDI object. Exposes the object found in JNDI
- * when used as bean reference, e.g. for JdbcTemplate's "dataSource" property
- * in case of a <code>javax.sql.DataSource</code>.
+ * {@link org.springframework.beans.factory.FactoryBean} that looks up a
+ * JNDI object. Exposes the object found in JNDI for bean references,
+ * e.g. for data access object's "dataSource" property in case of a
+ * {@link javax.sql.DataSource}.
  *
  * <p>The typical usage will be to register this as singleton factory
- * (e.g. for a certain JNDI DataSource) in an application context,
+ * (e.g. for a certain JNDI-bound DataSource) in an application context,
  * and give bean references to application services that need it.
  *
- * <p>The default behavior is to look up the JNDI object on startup and
- * cache it. This can be customized through the "lookupOnStartup" and
- * "cache" properties, using a JndiObjectTargetSource underneath.
- * Note that you need to specify a "proxyInterface" in such a scenario,
- * because the actual JNDI object type is not known in advance.
+ * <p>The default behavior is to look up the JNDI object on startup and cache it.
+ * This can be customized through the "lookupOnStartup" and "cache" properties,
+ * using a {@link JndiObjectTargetSource} underneath. Note that you need to specify
+ * a "proxyInterface" in such a scenario, since the actual JNDI object type is not
+ * known in advance.
  *
- * <p>Of course, service implementations can lookup e.g. a DataSource from
- * JNDI themselves, but this class enables central configuration of the
- * JNDI name, and easy switching to non-JNDI replacements. The latter can
- * be used for test setups, standalone clients, etc.
+ * <p>Of course, bean classes in a Spring environment may lookup e.g. a DataSource
+ * from JNDI themselves. This class simply enables central configuration of the
+ * JNDI name, and easy switching to non-JNDI alternatives. The latter is
+ * particularly convenient for test setups, reuse in standalone clients, etc.
  *
- * <p>Note that switching to e.g. DriverManagerDataSource is just a matter
- * of configuration: replace the definition of this FactoryBean with a
- * DriverManagerDataSource definition!
+ * <p>Note that switching to e.g. DriverManagerDataSource is just a matter of
+ * configuration: Simply replace the definition of this FactoryBean with a
+ * {@link org.springframework.jdbc.datasource.DriverManagerDataSource} definition!
  *
  * @author Juergen Hoeller
  * @since 22.05.2003
@@ -51,9 +52,6 @@ import org.springframework.beans.factory.FactoryBean;
  * @see #setLookupOnStartup
  * @see #setCache
  * @see JndiObjectTargetSource
- * @see javax.sql.DataSource
- * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
- * @see org.springframework.jdbc.datasource.DriverManagerDataSource
  */
 public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryBean {
 
@@ -130,7 +128,8 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 
 		if (this.proxyInterface != null) {
 			if (this.defaultObject != null) {
-				throw new IllegalArgumentException("'defaultObject' is not supported in combination with proxyInterface");
+				throw new IllegalArgumentException(
+						"'defaultObject' is not supported in combination with 'proxyInterface'");
 			}
 			// We need a proxy and a JndiObjectTargetSource.
 			this.jndiObject = JndiObjectProxyFactory.createJndiObjectProxy(this);
@@ -174,7 +173,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 					logger.debug("JNDI lookup failed - returning specified default object instead", ex);
 				}
 				else if (logger.isInfoEnabled()) {
-					logger.debug("JNDI lookup failed - returning specified default object instead: " + ex);
+					logger.info("JNDI lookup failed - returning specified default object instead: " + ex);
 				}
 				return this.defaultObject;
 			}
@@ -208,8 +207,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 
 
 	/**
-	 * Inner class to just introduce an AOP dependency
-	 * when actually creating a proxy.
+	 * Inner class to just introduce an AOP dependency when actually creating a proxy.
 	 */
 	private static class JndiObjectProxyFactory {
 
