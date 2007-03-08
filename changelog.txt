@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.3 (6.3.2007)
+Changes in version 2.0.3 (8.3.2007)
 -----------------------------------
 
 General
@@ -31,11 +31,13 @@ Package org.springframework.aop
 * AdvisorChainFactory is not forced to implement the AdvisedSupportListener interface anymore
 * deprecated AdvisorChainFactoryUtils and HashMapCachingAdvisorChainFactory in favor of SimpleAdvisorChainFactory
 * added overloaded ProxyFactory constructors for single-interceptor and TargetSource-only proxies
+* ProxyFactoryBean exposes a composite interface as object type in case of multiple proxy interfaces specified
 * AbstractSingletonProxyFactoryBean and AbstractAutoProxyCreator use the bean ClassLoader for generating proxies
 * reworked AdvisorAdapter and AdvisorAdapterRegistry to expose a MethodInterceptor right away
 * AspectJExpressionPointcut ignores target classes not accepted by PointcutExpression matching (such as arrays)
 * AspectJExpressionPointcut falls back to the proxy method if the ShadowMatch failed for the target method
 * revised AspectJPointcutAdvisor to never apply AspectJ advice methods to themselves (avoiding a stack overflow)
+* AbstractAspectJAdvice calls "setAccessible" on an advice method right before invocation and only if actually necessary
 * AspectJAdviceParameterNameDiscoverer properly considers reference pointcuts as potential source of parameter binding
 * AbstractAspectJAdvisorFactory detects @AspectJ aspects through the presence of the @Aspect annotation
 * MethodInvocationProceedingJoinPoint allows for multiple "proceed(arguments)" calls, cloning the underlying invocation
@@ -62,6 +64,7 @@ Package org.springframework.beans
 * added "getTypeConverter()" method to ConfigurableBeanFactory interface
 * MethodInvokingFactoryBean obtains the TypeConverter from the BeanFactory that it runs in
 * List/Set/MapFactoryBean convert elements to the generic type expressed in a superclass/interface of the target class
+* added SmartInstantiationAwareBeanPostProcessor interface, supporting type prediction (for scripted object types)
 * PropertyPlaceholderConfigurer does not log resolved (potentially decrypted) placeholder values at debug level anymore
 * PreferencesPlaceholderConfigurer resolves paths in placeholders ("myPath/myPlaceholderKey") as preference nodes
 * added "isPrototype(beanName)" method to BeanFactory interface, explicitly checking for an independent instance
@@ -71,9 +74,12 @@ Package org.springframework.beans
 * DisposableBeanAdapter (as passed into "Scope.registerDestructionCallback") is serializable, even for post-processors
 * AbstractAutowireCapableBeanFactory does not trigger "toString()" call on argument for UnsatisfiedDependencyException
 * turned visibility of AbstractAutowireCapableBeanFactory's "applyPropertyValues" method from private to protected
+* DefaultListableBeanFactory's "getBeansOfType" only ignores currently-in-creation for beans which are still in creation
 * added copy constructor to ChildBeanDefinition, for custom use in programmatic bean registration code
 * TypedStringValue overrides "equals", "hashCode" and "toString"
 * TypedStringValue implements the BeanMetadataElement interface and provides a "setSource" method
+* introduced BeanNameGenerator strategy interface, to be configured on an AbstractBeanDefinitionReader
+* added "generateBeanName/registerWithGeneratedName(BeanDefinition)" methods to XmlReaderContext
 * BeanDefinitionParseDelegate always builds TypedStringValue for "value" and "null" XML elements, preserving the source
 * BeanDefinitionParseDelegate builds TypedStringValue for "entry" and "prop" keys and values, preserving the source
 * BeanDefinitionParseDelegate trims whitespace from "class" attributes in XML bean definitions
@@ -89,6 +95,7 @@ Package org.springframework.beans
 Package org.springframework.context
 * AbstractApplicationContext instantiates BeanPostProcessors which implemented Ordered before non-Ordered ones
 * AbstractApplicationContext applies start/stop callbacks to existing Lifecycle instances only, particularly on shutdown
+* AbstractApplicationContext correctly detects listener creation failure (in case of currently-in-creation exception)
 * factored out protected "destroyBeans()" template method in AbstractApplicationContext, for custom bean destruction
 * AbstractRefreshableApplicationContext allows BeanFactory access during the destruction phase of a "refresh()" call
 * added "customizeBeanFactory(DefaultListableBeanFactory)" template method to AbstractRefreshableApplicationContext
@@ -96,6 +103,7 @@ Package org.springframework.context
 * ResourceBundleMessageSource by default uses the bean ClassLoader for loading bundles
 
 Package org.springframework.core
+* added "getMostSpecificCause()" method to NestedRuntime/CheckedException, retrieving the root cause or this exception
 * fixed BridgeMethodResolver's "populateTypeMapFromParameterizedType" to properly handle nested generics
 * fixed BridgeMethodResolver to properly detect a generic interface even in a class hierarchy
 * fixed BridgeMethodResolver to properly detect a generic array type as exposed by a vararg signature
@@ -119,13 +127,14 @@ Package org.springframework.jca
 * TransactionAwareConnectionFactoryProxy throws JCA IllegalStateException in case of "getLocalTransaction()" access
 * CciLocalTransactionManager unwraps given TransactionAwareConnectionFactoryProxy to obtain its target ConnectionFactory
 * added ResourceAdapterFactoryBean to "jca.support" package, for bootstrapping a JCA 1.5 ResourceAdapter locally
-* added "jca.work" package, containing a JCA 1.5 WorkManagerTaskExecutor as well as a SimpleWorkManager implementation
+* introduced "jca.work" package, containing a JCA 1.5 WorkManagerTaskExecutor and a SimpleTaskWorkManager implementation
 
 Package org.springframework.jdbc
 * added overloaded ConnectionHolder constructor with a given Connection plus "transactionActive" flag as arguments
 * UserCredentialDataSourceAdapter delegates "getConnection(String, String)" to "doGetConnection", for unified handling
 * introduced IsolationLevelDataSourceAdapter, preparing Connections with isolation level (transaction's or fixed)
 * introduced WebSphereDataSourceAdapter, obtaining Connections through WebSphere's JDBCConnectionSpec facility
+* re-added Spring 1.2's "JdbcUtils.isNumeric" convenience method, for use by applications (upgrading from Spring 1.2)
 * revised JdbcTemplate's prepared statement logging
 
 Package org.springframework.jms
@@ -133,12 +142,14 @@ Package org.springframework.jms
 * moved protected "createConnection" and "createSession" methods from JmsTemplate up to JmsAccessor
 * TransactionAwareConnectionFactoryProxy throws TransactionInProgressException in case of manual commit/rollback calls
 * JmsTransactionManager unwraps given TransactionAwareConnectionFactoryProxy to obtain its target ConnectionFactory
+* ConnectionFactoryUtils's JmsResourceHolder only stops Connections if a SmartConnectionFactory explicitly asks for it
 * factored out AbstractJmsListeningContainer base class from AbstractMessageListenerContainer
 * AbstractMessageListenerContainer's "refreshSharedConnection" properly resets shared Connection in refresh failure case
 * AbstractMessageListenerContainer explicitly aborts messages which have been delivered after initiated shutdown
 * added "acceptMessagesWhileStopping" flag to AbstractMessageListenerContainer, for processing all delivered messages
 * factored out AbstractPollingMessageListenerContainer base class from DefaultMessageListenerContainer
 * added dynamic scaling up/down to DefaultMessageListenerContainer, configured through "maxConcurrentConsumers" property
+* DefaultMessageListenerContainer's Connection recovery loop catches any Exception thrown from "createConnection"
 * MessageListenerAdapter can delegate to native target (SessionAware)MessageListener if no listener method specified
 
 Package org.springframework.jmx
@@ -147,9 +158,12 @@ Package org.springframework.jmx
 * factored out protected "isMBean(Class") method in MBeanExporter, to allow for extending the default MBean check
 * MBeanServerFactoryBean only tries to obtain the JDK 1.5 platform MBeanServer in case of no agent id specified
 * MBeanServerFactoryBean tries to create a new MBeanServer if not allowed to access the JDK 1.5 platform MBeanServer
+* added WebSphereMBeanServerFactoryBean, using WebSphere's proprietary AdminServiceFactory API for MBeanServer access
+* added "agentId" property to MBeanClientInterceptor/MBeanProxyFactoryBean, for locating a specific MBeanServer
 
 Package org.springframework.jndi
 * JndiObjectFactoryBean uses the bean ClassLoader for generating lazy-init proxies
+* JndiObjectTargetSource (as used by JndiObjectFactoryBean's "proxyInterface" support) throws JndiLookupException
 
 Package org.springframework.mock
 * added "clearAttributes()" method to MockHttpServletRequest and MockHttpSession
@@ -188,6 +202,7 @@ Package org.springframework.scheduling
 * added support for the JSR-166 (java.util.concurrent) backport project, in the "scheduling.backportconcurrent" package
 
 Package org.springframework.scripting
+* added "getScriptedObjectType" method to ScriptFactory interface
 * Bsh/Groovy/JRubyScriptFactory uses the bean ClassLoader for generating script objects
 * BshObjectInvocationHandler/JRubyObjectInvocationHandler implement "equals"/"hashCode/"toString" based on script object
 * BshScriptUtils and BshScriptFactory support BeanShell scripts that declare an actual class or instance
@@ -198,6 +213,7 @@ Package org.springframework.scripting
 * ScriptFactoryPostProcessor uses the bean ClassLoader for generating refreshable script proxies
 * ScriptFactoryPostProcessor applies a config interface to the scripted target object only, not to a refreshable proxy
 * revised ScriptFactoryPostProcessor to support AOP auto-proxying for scripted objects
+* revised ScriptFactoryPostProcessor to support type determination for scripted objects
 * LangNamespaceHandler always registers all BeanDefinitionParsers, failing with NoClassDefFoundError for actual script
 
 Package org.springframework.test
@@ -234,9 +250,13 @@ Package org.springframework.web
 * added "detectHandlersInAncestorContexts" to BeanNameUrlHandlerMapping, for detecting handler beans in the root context
 * added "excludedPackages" and "excludedClasses" bean properties to ControllerClassNameHandlerMapping
 * ControllerClassNameHandlerMapping excludes all classes in the "org.springframework.web.servlet.mvc" package by default
+* revised FormTag to be more extensible (through less assertions and consistent use of protected template methods)
 * OptionsTag accepts no or empty items specified, simply not rendering any option tags in such a case
+* ErrorsTag properly supports HTML escaping (participates in default HTML escaping and respects the "htmlEscape" flag)
+* ErrorsTag simply renders empty if neither a BindingResult nor a target object for its bind path is present
 * revised VelocityToolboxView to support Velocity Tools 1.3's init methods (ViewTool callbacks are now deprecated)
-* added "messageArgs" and "messageArgsText" macros to the "spring.ftl" FreeMarker macro template
+* FreeMarker "formTextarea" macro does not re-escape its value (escaping is up to "htmlEscape"/"defaultHtmlEscape")
+* added "messageArgs" and "messageArgsText" macros to the "spring.ftl" FreeMarker macro template library
 
 
 Changes in version 2.0.2 (8.1.2007)

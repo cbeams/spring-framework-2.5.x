@@ -1,4 +1,4 @@
-THE SPRING FRAMEWORK, release 2.0.3 (February 2007)
+THE SPRING FRAMEWORK, release 2.0.3 (March 2007)
 ---------------------------------------------------
 http://www.springframework.org
 
@@ -99,7 +99,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2590 KB)
+* "spring" (~2605 KB)
 - Convenient jar file combining all standard modules (except for Portlet and Hibernate2 support)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
@@ -114,7 +114,7 @@ MODULE JARS (dist/modules):
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~290 KB)
+* "spring-aop" (~295 KB)
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, (spring-beans, AOP Alliance, CGLIB, Commons Attributes)
 
@@ -130,7 +130,7 @@ MODULE JARS (dist/modules):
 - Contents: JDBC support
 - Dependencies: spring-beans, spring-dao
 
-* "spring-support" (~110 KB)
+* "spring-support" (~115 KB)
 - Contents: third-party scheduling support, UI template support, scripting, caching, mail support
 - Dependencies: spring-context, (spring-jdbc, Quartz, Velocity, FreeMarker, JasperReports, BSH, Groovy, JRuby, EHCache)
 
@@ -158,7 +158,7 @@ MODULE JARS (dist/modules):
 - Contents: JCA 1.0/1.5 support
 - Dependencies: spring-beans, spring-dao, JCA API, (spring-context)
 
-* "spring-jms" (~140 KB)
+* "spring-jms" (~135 KB)
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-beans, spring-dao, JMS API, (spring-remoting)
 
@@ -198,7 +198,7 @@ MOCK JAR (dist)
 
 ASPECTS JAR (dist)
 
-* "spring-aspects" (~10 KB)
+* "spring-aspects" (~15 KB)
 - Contents: AspectJ aspects, for explicitly linking aspects into an IDE (Eclipse AJDT)
 - Dependencies: spring-aop, AspectJ, (spring-dao)
 
