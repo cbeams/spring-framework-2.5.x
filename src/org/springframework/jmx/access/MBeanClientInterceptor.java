@@ -93,29 +93,12 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 
 	private boolean useStrictCasing = true;
 
-
-	/**
-	 * The <code>JMXConnector</code> used when connecting to a remote JMX server using an
-	 * internally configured connection.
-	 * @see #setServiceUrl(String)
-	 */
 	private JMXConnector connector;
 
-	/**
-	 * Caches the list of attributes exposed on the management interface of
-	 * the managed resouce.
-	 */
 	private Map allowedAttributes;
 
-	/**
-	 * Caches the list of operations exposed on the management interface of
-	 * the managed resouce.
-	 */
 	private Map allowedOperations;
 
-	/**
-	 * Caches method signatures for use during invocation.
-	 */
 	private final Map signatureCache = new HashMap();
 
 
@@ -138,7 +121,7 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 * Set the agent id of the <code>MBeanServer</code> to locate.
 	 * <p>Default is none. If specified, this will result in an
 	 * attempt being made to locate the attendant MBeanServer, unless
-	 * the {@see #setServiceUrl "serviceUrl"} property has been set.
+	 * the {@link #setServiceUrl "serviceUrl"} property has been set.
 	 * @see javax.management.MBeanServerFactory#findMBeanServer(String)
 	 */
 	public void setAgentId(String agentId) {
