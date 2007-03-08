@@ -36,18 +36,31 @@ import org.springframework.util.Assert;
 
 /**
  * Simple JCA 1.5 {@link javax.resource.spi.work.WorkManager} implementation that
- * delegates to a Spring {@link org.springframework.core.task.TaskExecutor} underneath.
+ * delegates to a Spring {@link org.springframework.core.task.TaskExecutor}.
+ * Provides simple task execution including start timeouts, but without support
+ * for a JCA ExecutionContext (i.e. without support for imported transactions).
  *
  * <p>Uses a {@link org.springframework.core.task.SyncTaskExecutor} for {@link #doWork}
  * calls and a {@link org.springframework.core.task.SimpleAsyncTaskExecutor}
  * for {@link #startWork} and {@link #scheduleWork} calls, by default.
+ * These default task executors can be overridden through configuration.
+ *
+ * <p><b>NOTE: This WorkManager does not provide thread pooling by default!</b>
+ * Specify a {@link org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor}
+ * (or any other thread-pooling TaskExecutor) as "asyncTaskExecutor" in order to
+ * achieve actual thread pooling.
+ *
+ * <p>This WorkManager automatically detects a specified
+ * {@link org.springframework.core.task.AsyncTaskExecutor} implementation
+ * and uses its extended timeout functionality where appropriate.
+ * JCA WorkListeners are fully supported in any case.
  *
  * @author Juergen Hoeller
  * @since 2.0.3
  * @see #setSyncTaskExecutor
  * @see #setAsyncTaskExecutor
  */
-public class SimpleWorkManager implements WorkManager {
+public class SimpleTaskWorkManager implements WorkManager {
 
 	private TaskExecutor syncTaskExecutor = new SyncTaskExecutor();
 
@@ -126,7 +139,7 @@ public class SimpleWorkManager implements WorkManager {
 			throws WorkException {
 
 		if (executionContext != null && executionContext.getXid() != null) {
-			throw new WorkException("SimpleWorkManager does not supported imported XIDs: " + executionContext.getXid());
+			throw new WorkException("SimpleTaskWorkManager does not supported imported XIDs: " + executionContext.getXid());
 		}
 		WorkListener workListenerToUse = workListener;
 		if (workListenerToUse == null) {

@@ -32,8 +32,9 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 
 /**
- * TaskExecutor implementation that delegates to a JCA 1.5 WorkManager,
- * implementing the {@link javax.resource.spi.work.WorkManager} interface.
+ * {@link org.springframework.core.task.TaskExecutor} implementation
+ * that delegates to a JCA 1.5 WorkManager, implementing the
+ * {@link javax.resource.spi.work.WorkManager} interface.
  *
  * <p>This is mainly intended for use within a JCA ResourceAdapter implementation,
  * but may also be used in a standalone environment, delegating to a locally
@@ -51,7 +52,7 @@ import org.springframework.util.Assert;
  */
 public class WorkManagerTaskExecutor implements SchedulingTaskExecutor, AsyncTaskExecutor, WorkManager {
 
-	private WorkManager workManager = new SimpleWorkManager();
+	private WorkManager workManager = new SimpleTaskWorkManager();
 
 	private boolean blockUntilStarted = false;
 
