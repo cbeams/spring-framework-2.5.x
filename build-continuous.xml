@@ -31,7 +31,7 @@
         <delete quiet="true" dir="${upload.tmp.dir}"/>
         <mkdir dir="${upload.tmp.dir}"/>
         <tstamp>
-            <format property="tstamp" pattern="yyyy-MM-dd"/>
+            <format property="tstamp" pattern="yyyyMMdd"/>
         </tstamp>
         <move file="${target.release.dir}/${release-with-dependencies.zip}" 
         	tofile="${upload.tmp.dir}/spring-framework-${spring-version}-with-dependencies-${tstamp}-${build.number}.zip"/>
