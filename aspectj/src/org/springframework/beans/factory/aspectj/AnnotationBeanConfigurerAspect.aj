@@ -63,6 +63,7 @@ import org.springframework.beans.factory.annotation.Configurable;
  *
  * @author Rod Johnson
  * @author Ramnivas Laddad
+ * @author Adrian Colyer
  * @since 2.0
  * @see org.springframework.beans.factory.annotation.Configurable
  * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
@@ -88,63 +89,27 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspec
 	 * See implementation detail in aspect's documentation
 	 */
 	protected pointcut beanCreation(Object beanInstance) :
-		beanConstructor(beanInstance)
-		&& if(((ConfigurableSupport)beanInstance).constructorDepth == 1);
+		 ( mostSpecificInitializer() ||
+		   configurableObjectResolution() )
+		 && this(beanInstance);
 
 	/**
-	 * Select execution of any constructor or deserialization of a bean. 
-	 * This selects any constructor of readResolve() method in the class
-	 * hierarchy of a &#64;Configurable object.
+	 * Matches the most-specific initialization join point 
+	 * (most concrete class) for the initialization of an instance
+	 * of an @Configurable type.
 	 */
-	private pointcut beanConstructor(ConfigurableSupport beanInstance) :
-		(initialization(ConfigurableSupport.new(..))
-		 || (execution(Object Serializable+.readResolve() throws ObjectStreamException)))
-		&& this(beanInstance);
-
+	private pointcut mostSpecificInitializer() :
+		initialization((@Configurable *)+.new(..)) && 
+		if(thisJoinPoint.getSignature().getDeclaringType() == thisJoinPoint.getThis().getClass());
 	
-	/*
-	 * Machinery to monitor constructor method depth so that the join point in the
-	 * most specific class of the bean may be selected
-	 */
 	/**
-	 * Monitor the depth of constructor call (along with the after counterpart) 
+	 * Matches the readResolve execution join point for a serializable
+	 * type that is also @Configurable.
 	 */
-	before(ConfigurableSupport beanInstance) : beanConstructor(beanInstance) {
-		beanInstance.constructorDepth++;
-	}
-	
-	/*
-	 * We could use 'after returning' to gain some efficiency without any harm
-	 * (configuration won't take place for any failed creation anyway). However, it
-	 * seems that efficiency gained isn't worth the confusion that might arise from
-	 * mismatched call depth. 
-	 */
-	after(ConfigurableSupport beanInstance)  : beanConstructor(beanInstance) {
-		beanInstance.constructorDepth--;
-	}
-
-	/**
-	 * Declare all &#64;Configurable to implement the nested interface to allow
-	 * monitoring contructor depth
-	 */
-	declare parents: @Configurable * implements ConfigurableSupport;
-
-	/**
-	 * Mixin to allow monitoring depth 
-	 */
-	private interface ConfigurableSupport {
-	}
-
-	/**
-	 * Introduce a <b>private</b> member to avoid conflict with any existing
-	 * member of any target class. Also ensure that the field is marked
-	 * <b>transient</b> to avoid issues with tools such as JPA. Further, in any
-	 * case, saving this state is useless at it is a temporary state used during
-	 * object construction.
-	 */
-	private transient int ConfigurableSupport.constructorDepth = 0;
-
-	
+	private pointcut configurableObjectResolution() :
+		execution(Object Serializable+.readResolve() throws ObjectStreamException) &&
+		@this(Configurable);
+		
 	/**
 	 * Declare any class implementing Serializable annotated with
 	 * @Configurable as also implementing ConfigurableDeserializationSupport. 

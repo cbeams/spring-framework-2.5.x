@@ -260,7 +260,7 @@ public class BeanConfigurerTests extends TestCase {
 	@Configurable(autowire=Autowire.BY_TYPE)
 	private static class ShouldBeConfiguredBySpringUsingAutowireByType {
 
-		private TestBean friend;
+		private TestBean friend = null;
 
 		public TestBean getFriend() {
 			return friend;
@@ -275,7 +275,7 @@ public class BeanConfigurerTests extends TestCase {
 	@Configurable(autowire=Autowire.BY_NAME)
 	private static class ValidAutowireByName {
 
-		private TestBean friend;
+		private TestBean friend = null;
 
 		public TestBean getRamnivas() {
 			return friend;
