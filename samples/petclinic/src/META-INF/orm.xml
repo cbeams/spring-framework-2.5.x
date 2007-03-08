@@ -89,7 +89,7 @@
 
 			<one-to-many name="petsInternal" target-entity="Pet" mapped-by="owner" fetch="EAGER">
 				<cascade>
-					<cascade-persist/>
+					<cascade-all/>
 				</cascade>
 			</one-to-many>
 
@@ -106,12 +106,12 @@
 			</basic>
 			<many-to-one name="owner" fetch="EAGER">
 				<cascade>
-					<cascade-persist/>
+					<cascade-all/>
 				</cascade>
 			</many-to-one>
 			<many-to-one name="type" fetch="EAGER">
 				<cascade>
-					<cascade-persist/>
+					<cascade-all/>
 				</cascade>
 			</many-to-one>
 			<one-to-many name="visitsInternal" target-entity="Visit" mapped-by="pet" fetch="EAGER">
@@ -137,7 +137,7 @@
 			</basic>
 			<many-to-one name="pet" fetch="EAGER">
 				<cascade>
-					<cascade-persist/>
+					<cascade-all/>
 				</cascade>
 			</many-to-one>
 		</attributes>
