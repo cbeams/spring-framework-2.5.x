@@ -3,13 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.3 (8.3.2007)
+Changes in version 2.0.3 (9.3.2007)
 -----------------------------------
 
 General
 * basic scheduling support is included in "spring-context.jar", with only Quartz support added in "spring-support.jar"
 * all checks for library presence are explicitly performed with Spring's own ClassLoader (not the application's)
 * overall startup/shutdown logging at info level is less verbose (activate debug log level for more config details)
+* included the "petportal" sample application in the "-with-dependencies" distribution
 
 Package org.springframework.aop
 * introduced AfterAdvice marker, as super-interface of AfterReturningAdvice and ThrowsAdvice, for reduced coupling
