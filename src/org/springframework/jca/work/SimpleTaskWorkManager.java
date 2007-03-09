@@ -198,8 +198,8 @@ public class SimpleTaskWorkManager implements WorkManager {
 
 
 	/**
-	 * Work adapter that supports start startTimeouts and WorkListener
-	 * callbacks for a given Work that it delegates to.
+	 * Work adapter that supports start timeouts and WorkListener callbacks
+	 * for a given Work that it delegates to.
 	 */
 	private static class DelegatingWorkAdapter implements Work {
 
