@@ -23,12 +23,14 @@ import org.springframework.core.io.Resource;
 
 /**
  * Standalone XML application context, taking the context definition files
- * from the file system or from URLs. Useful for test harnesses as well as
- * for standalone environments.
+ * from the file system or from URLs, interpreting plain paths as relative
+ * file system locations (e.g. "mydir/myfile.txt"). Useful for test harnesses
+ * as well as for standalone environments.
  *
- * <p>Treats resource paths as file system resources, when using {@link #getResource}.
- * Resource paths are considered relative to the current VM working directory,
- * even if they happen to start with a slash.
+ * <p><b>NOTE:</b> Plain paths will always be interpreted as relative
+ * to the current VM working directory, even if they start with a slash.
+ * (This is consistent with the semantics in a Servlet container.)
+ * <b>Use an explicit "file:" prefix to enforce an absolute file path.</b>
  *
  * <p>The config location defaults can be overridden via {@link #getConfigLocations},
  * Config locations can either denote concrete files like "/myfiles/context.xml"

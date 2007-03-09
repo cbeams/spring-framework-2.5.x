@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,16 +28,17 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.SystemPropertyUtils;
 
 /**
- * Editor for Resource descriptor arrays, to automatically convert String
- * location patterns (e.g. "file:C:/my*.txt" or "classpath*:myfile.txt")
- * to Resource array properties. Can also translate a collection or array
- * of location patterns into a merged Resource array.
+ * Editor for {@link org.springframework.core.io.Resource} arrays, to
+ * automatically convert <code>String</code> location patterns
+ * (e.g. <code>"file:C:/my*.txt"</code> or <code>"classpath*:myfile.txt"</code>)
+ * to <code>Resource</code> array properties. Can also translate a collection
+ * or array of location patterns into a merged Resource array.
  *
  * <p>The path may contain <code>${...}</code> placeholders, to be resolved
  * as system properties: e.g. <code>${user.dir}</code>.
  *
- * <p>Delegates to a ResourcePatternResolver, by default a
- * PathMatchingResourcePatternResolver.
+ * <p>Delegates to a {@link ResourcePatternResolver},
+ * by default using a {@link PathMatchingResourcePatternResolver}.
  *
  * @author Juergen Hoeller
  * @since 1.1.2

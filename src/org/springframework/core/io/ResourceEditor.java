@@ -25,8 +25,8 @@ import org.springframework.util.SystemPropertyUtils;
 
 /**
  * {@link java.beans.PropertyEditor Editor} for {@link Resource}
- * descriptors, to automatically convert <code>String</code> locations (e.g.
- * <code>"file:C:/myfile.txt"</code> or
+ * descriptors, to automatically convert <code>String</code> locations
+ * e.g. <code>"file:C:/myfile.txt"</code> or
  * <code>"classpath:myfile.txt"</code>) to <code>Resource</code>
  * properties instead of using a <code>String</code> location property.
  *
@@ -34,7 +34,7 @@ import org.springframework.util.SystemPropertyUtils;
  * as system properties: e.g. <code>${user.dir}</code>.
  *
  * <p>Delegates to a {@link ResourceLoader} to do the heavy lifting,
- * by default a {@link DefaultResourceLoader}.
+ * by default using a {@link DefaultResourceLoader}.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003

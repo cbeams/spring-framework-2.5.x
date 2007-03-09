@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,22 @@
 package org.springframework.core.io;
 
 /**
- * ResourceLoader implementation that resolves paths as file system resources
- * rather than as class path resources (DefaultResourceLoader's strategy).
+ * {@link ResourceLoader} implementation that resolves plain paths as
+ * file system resources rather than as class path resources
+ * (the latter is {@link DefaultResourceLoader}'s default strategy).
  *
- * <p>FileSystemXmlApplicationContext is a full-fledged ApplicationContext
- * implementation that provides the same resource path resolution strategy.
+ * <p><b>NOTE:</b> Plain paths will always be interpreted as relative
+ * to the current VM working directory, even if they start with a slash.
+ * (This is consistent with the semantics in a Servlet container.)
+ * <b>Use an explicit "file:" prefix to enforce an absolute file path.</b>
+ *
+ * <p>{@link org.springframework.context.support.FileSystemXmlApplicationContext}
+ * is a full-fledged ApplicationContext implementation that provides
+ * the same resource path resolution strategy.
  *
  * @author Juergen Hoeller
  * @since 1.1.3
+ * @see DefaultResourceLoader
  * @see org.springframework.context.support.FileSystemXmlApplicationContext
  */
 public class FileSystemResourceLoader extends DefaultResourceLoader {
@@ -33,7 +41,6 @@ public class FileSystemResourceLoader extends DefaultResourceLoader {
 	 * Resolve resource paths as file system paths.
 	 * <p>Note: Even if a given path starts with a slash, it will get
 	 * interpreted as relative to the current VM working directory.
-	 * This is consistent with the semantics in a Servlet container.
 	 * @param path path to the resource
 	 * @return Resource handle
 	 * @see FileSystemResource
