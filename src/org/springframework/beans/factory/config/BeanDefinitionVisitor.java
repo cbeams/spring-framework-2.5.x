@@ -140,8 +140,11 @@ public abstract class BeanDefinitionVisitor {
 		}
 		else if (value instanceof TypedStringValue) {
 			TypedStringValue typedStringValue = (TypedStringValue) value;
-			String visitdString = resolveStringValue(typedStringValue.getValue());
-			typedStringValue.setValue(visitdString);
+			String stringValue = typedStringValue.getValue();
+			if (stringValue != null) {
+				String visitedString = resolveStringValue(stringValue);
+				typedStringValue.setValue(visitedString);
+			}
 		}
 		else if (value instanceof String) {
 			return resolveStringValue((String) value);

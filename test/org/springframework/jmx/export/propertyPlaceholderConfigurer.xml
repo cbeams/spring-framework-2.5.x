@@ -29,6 +29,9 @@
 		<property name="age">
 			<value>${testBean.age}</value>
 		</property>
+		<property name="nickName">
+			<null/>
+		</property>
 	</bean>
 
 </beans>
