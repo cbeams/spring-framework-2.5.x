@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.0.3 (March 2007)
----------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0.4 (April 2007)
+------------------------------------------------
 http://www.springframework.org
 
 
