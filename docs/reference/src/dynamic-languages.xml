@@ -89,7 +89,7 @@ public class DefaultBookingService implements BookingService {
     }
 
     public void processBooking() {
-        // use the injected Messenger object...
+        ]]><lineannotation>// use the injected <interfacename>Messenger</interfacename> object...</lineannotation><![CDATA[
     }
 }]]></programlisting>
 		<para>Here is an implementation of the <interfacename>Messenger</interfacename> interface
@@ -226,8 +226,10 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
 					configured by the container, you use the <literal>&lt;lang:language/&gt;</literal>
 					element to define the dynamic language-backed bean.
 				</para>
-				<para>Each of the supported languages has a corresponding
-				<literal>&lt;lang:language/&gt;</literal> element:</para>
+				<para>
+					Each of the supported languages has a corresponding
+					<literal>&lt;lang:language/&gt;</literal> element:
+				</para>
 				<itemizedlist>
 					<listitem>
 						<para><literal>&lt;lang:jruby/&gt;</literal> (JRuby)</para>
@@ -1003,27 +1005,75 @@ class TestBeanValidator implements Validator {
 }
 }]]></programlisting>
 		</section>
-		<section id="dynamic-language-scenarios-aop">
+	</section>
+	<section id="dynamic-language-final-notes">
+		<title>Bits and bobs</title>
+		<para>
+			This last section contains some bits and bobs related to the dynamic language
+			support.
+		</para>
+		<section id="dynamic-language-final-notes-aop">
 			<title>AOP - advising scripted beans</title>
 			<para>
-				This last 'scenario' is not really a scenario... rather it is a final note
-				to inform you that it is possible to use the Spring AOP framework to advise
-				scripted beans. The Spring AOP framework actually is unaware of the fact
-				that a bean that is being advised might be a scripted bean, so all of the
-				AOP use cases and functionality that you may be using or aim to use will
-				work with scripted beans.
-			</para>
-			<para>
-				There is one (small) thing that you need to be aware of when advising scripted
+				It is possible to use the Spring AOP framework to advise scripted beans.
+				The Spring AOP framework actually is unaware that a bean that is being
+				advised might be a scripted bean, so all of the AOP use cases and functionality
+				that you may be using or aim to use will work with scripted beans. There is
+				just one (small) thing that you need to be aware of when advising scripted
 				beans... you cannot use class-based proxies, you must use
 				<link linkend="aop-proxying">interface-based proxies</link>.
+			</para>
+			<para>
+				You are of course not just limited to advising scripted beans... you can
+				also write aspects themselves in a supported dynamic language and use such
+				beans to advise other Spring beans. This really would be an advanced use of
+				the dynamic language support though.
+			</para>
+		</section>
+		<section id="dynamic-language-final-notes-scopes">
+			<title>Scoping</title>
+			<para>
+				In case it is not immediately obvious, scripted beans can of course be scoped
+				just like any other bean. The <literal>scope</literal> attribute on the
+				various <literal>&lt;lang:language/&gt;</literal> elements allows you to
+				control the scope of the underlying scripted bean, just as it does with a
+				regular bean. (The default scope is
+				<link linkend="beans-factory-scopes-singleton">singleton</link>, just as it
+				is with 'regular' beans.)
+			</para>
+			<para>
+				Find below an example of using the <literal>scope</literal> attribute
+				to define a Groovy bean scoped as a
+				<link linkend="beans-factory-scopes-prototype">prototype</link>.
+			</para>
+			<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:lang="http://www.springframework.org/schema/lang"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd">
+
+    <lang:groovy id="messenger" script-source="classpath:Messenger.groovy" ]]><lineannotation><emphasis role="bold">scope="prototype"</emphasis></lineannotation><![CDATA[>
+        <lang:property name="message" value="I Can Do The RoboCop" />
+    </lang:groovy>
+
+    <bean id="bookingService" class="x.y.DefaultBookingService">
+        <property name="messenger" ref="messenger" />
+    </bean>
+
+</beans>]]></programlisting>
+			<para>
+				See the section entitled <xref linkend="beans-factory-scopes"/> in <xref linkend="beans"/>
+				for a fuller discussion of the scoping support in the Spring Framework.
 			</para>
 		</section>
 	</section>
 	<section id="dynamic-language-resources">
 		<title>Further Resources</title>
-		<para>Find below links to further resources about the various dynamic languages described
-		in this chapter.</para>
+		<para>
+			Find below links to further resources about the various dynamic languages described
+			in this chapter.
+		</para>
 		<itemizedlist>
 			<listitem>
 				<para>The <ulink url="http://jruby.sourceforge.net/">JRuby</ulink> homepage</para>
@@ -1035,12 +1085,13 @@ class TestBeanValidator implements Validator {
 				<para>The <ulink url="http://www.beanshell.org/">BeanShell</ulink> homepage</para>
 			</listitem>
 		</itemizedlist>
-		<para>Some of the more active members of the Spring community have also added support for
-		a number of additional dynamic languages above and beyond the ones covered in this
-		chapter. While it is possible that such third party contributions may be added to the
-		list of languages supported by the main Spring distribution, your best bet for seeing
-		if your favourite scripting language is supported is the
-		<ulink url="https://springmodules.dev.java.net/">Spring Modules project</ulink>.
+		<para>
+			Some of the more active members of the Spring community have also added support for
+			a number of additional dynamic languages above and beyond the ones covered in this
+			chapter. While it is possible that such third party contributions may be added to the
+			list of languages supported by the main Spring distribution, your best bet for seeing
+			if your favourite scripting language is supported is the
+			<ulink url="https://springmodules.dev.java.net/">Spring Modules project</ulink>.
 		</para>
 	</section>
 </chapter>
