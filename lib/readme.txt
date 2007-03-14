@@ -16,8 +16,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - included in spring.jar and spring-aop.jar
 
-* asm/asm*-2.2.2.jar
-- ObjectWeb ASM 2.2.2 (http://asm.objectweb.org)
+* asm/asm*-2.2.3.jar
+- ObjectWeb ASM 2.2.3 (http://asm.objectweb.org)
 - required for building the framework
 - required at runtime when using parameter name discovery with AspectJ
 
@@ -31,7 +31,7 @@ It needs to be taken from the AspectJ distribution or from Spring CVS. Note that
 is only necessary if you want to rebuild the Spring jars including the AspectJ aspects.
 
 * axis/axis.jar, axis/saaj.jar, axis/wsdl4j.jar
-- Apache Axis 1.3 (http://ws.apache.org/axis)
+- Apache Axis 1.4 (http://ws.apache.org/axis)
 - required for running JPetStore
 
 * bsh/bsh-2.0b4.jar
@@ -231,7 +231,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
 
 * jakarta-commons/commons-io.jar
-- Commons IO 1.1 (http://jakarta.apache.org/commons/io)
+- Commons IO 1.3.1 (http://jakarta.apache.org/commons/io)
 - required at runtime when using Spring's CommonsMultipartResolver (by Commons FileUpload)
 
 * jakarta-commons/commons-javaflow.jar
@@ -310,7 +310,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's JPA support
 
 * jruby/jruby.jar
-- JRuby 0.9.2 (http://jruby.codehaus.org)
+- JRuby 0.9.8 (http://jruby.codehaus.org)
 - required for building the framework
 - required at runtime when using Spring's JRuby support
 
@@ -372,8 +372,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using the Struts support or TilesView
 - required for running JPetStore's Struts web tier
 
-* tomcat/catalina.jar
-- Apache Tomcat 5.5.17 (http://tomcat.apache.org)
+* tomcat/catalina.jar, tomcat/naming-resources.jar
+- Apache Tomcat 5.5.23 (http://tomcat.apache.org)
 - required for building the Tomcat-specific weaver
 
 * toplink/toplink-api.jar
