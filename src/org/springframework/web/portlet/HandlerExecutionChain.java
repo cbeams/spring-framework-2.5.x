@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,14 +17,12 @@
 package org.springframework.web.portlet;
 
 /**
- * Handler execution chain, consisting of handler object and any
- * preprocessing interceptors. Returned by HandlerMapping's
- * <code>getHandler</code> method.
+ * Handler execution chain, consisting of handler object and any handler interceptors.
+ * Returned by HandlerMapping's {@link HandlerMapping#getHandler} method.
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
  * @since 2.0
- * @see HandlerMapping#getHandler
  * @see HandlerInterceptor
  */
 public class HandlerExecutionChain {
@@ -35,7 +33,7 @@ public class HandlerExecutionChain {
 
 
 	/**
-	 * Create new HandlerExecutionChain.
+	 * Create a new HandlerExecutionChain.
 	 * @param handler the handler object to execute
 	 */
 	public HandlerExecutionChain(Object handler) {
@@ -43,7 +41,7 @@ public class HandlerExecutionChain {
 	}
 
 	/**
-	 * Create new HandlerExecutionChain.
+	 * Create a new HandlerExecutionChain.
 	 * @param handler the handler object to execute
 	 * @param interceptors the array of interceptors to apply
 	 * (in the given order) before the handler itself executes
@@ -56,19 +54,18 @@ public class HandlerExecutionChain {
 
 	/**
 	 * Return the handler object to execute.
-	 * @return the handler object (should not be <code>null</code>)
+	 * @return the handler object (never <code>null</code>)
 	 */
 	public Object getHandler() {
-		return handler;
+		return this.handler;
 	}
 
 	/**
-	 * Return the array of interceptors to apply (in the given order)
-	 * before the handler itself executes.
+	 * Return the array of interceptors to apply (in the given order).
 	 * @return the array of HandlerInterceptors instances (may be <code>null</code>)
 	 */
 	public HandlerInterceptor[] getInterceptors() {
-		return interceptors;
+		return this.interceptors;
 	}
 
 }
