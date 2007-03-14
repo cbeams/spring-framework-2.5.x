@@ -146,6 +146,7 @@ public class CustomizableThreadCreator {
 	public Thread createThread(Runnable runnable) {
 		Thread thread = new Thread(getThreadGroup(), runnable, nextThreadName());
 		thread.setPriority(getThreadPriority());
+		thread.setDaemon(isDaemon());
 		return thread;
 	}
 
