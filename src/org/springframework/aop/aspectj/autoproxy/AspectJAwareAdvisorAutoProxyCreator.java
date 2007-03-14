@@ -31,6 +31,7 @@ import org.springframework.aop.aspectj.AspectJProxyUtils;
 import org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.core.Ordered;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator}
@@ -128,7 +129,7 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			Advice advice = this.advisor.getAdvice();
-			sb.append(advice.getClass().getSimpleName());
+			sb.append(ClassUtils.getShortName(advice.getClass()));
 			sb.append(": ");
 			if (this.advisor instanceof Ordered) {
 				sb.append("order " + ((Ordered) this.advisor).getOrder() + ", ");
