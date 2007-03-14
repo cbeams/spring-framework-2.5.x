@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,12 +125,13 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 			}
 			catch (ClassNotFoundException ex) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Ignoring handler [" + className + "]: class not found", ex);
+					logger.debug("Ignoring namespace handler [" + className + "]: handler class not found", ex);
 				}
 			}
-			catch (LinkageError ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Ignoring handler [" + className + "]: problem with class file or dependent class", ex);
+			catch (LinkageError err) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Ignoring namespace handler [" + className +
+							"]: problem with handler class file or dependent class", err);
 				}
 			}
 		}
