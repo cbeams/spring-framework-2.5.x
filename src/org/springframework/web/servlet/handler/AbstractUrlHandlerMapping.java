@@ -120,6 +120,14 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
+	 * Return the root handler for this handler mapping (registered for "/"),
+	 * or <code>null</code> if none.
+	 */
+	public Object getRootHandler() {
+		return this.rootHandler;
+	}
+
+	/**
 	 * Set whether to lazily initialize handlers. Only applicable to
 	 * singleton handlers, as prototypes are always lazily initialized.
 	 * Default is "false", as eager initialization allows for more efficiency
@@ -149,7 +157,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			// We need to care for the default handler directly, since we need to
 			// expose the PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for it as well.
 			if ("/".equals(lookupPath)) {
-				handler = this.rootHandler;
+				handler = getRootHandler();
 			}
 			if (handler == null) {
 				handler = getDefaultHandler();
@@ -253,7 +261,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Root mapping to handler [" + handler + "]");
 			}
-			this.rootHandler = handler;
+			setRootHandler(handler);
 		}
 		else if (urlPath.equals("/*")) {
 			if (logger.isDebugEnabled()) {
