@@ -27,8 +27,8 @@ import org.springframework.web.portlet.HandlerInterceptor;
 import org.springframework.web.portlet.HandlerMapping;
 
 /**
- * Abstract base class for HandlerMapping implementations.
- * Supports ordering, a default handler, and handler interceptors.
+ * Abstract base class for {@link org.springframework.web.portlet.HandlerMapping}
+ * implementations. Supports ordering, a default handler, and handler interceptors.
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
@@ -63,18 +63,15 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 * This handler will be returned if no specific mapping was found.
 	 * <p>Default is <code>null</code>, indicating no default handler.
 	 */
-	public final void setDefaultHandler(Object defaultHandler) {
+	public void setDefaultHandler(Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
-		if (logger.isInfoEnabled()) {
-			logger.info("Default mapping to handler [" + this.defaultHandler + "]");
-		}
 	}
 
 	/**
 	 * Return the default handler for this handler mapping,
 	 * or <code>null</code> if none.
 	 */
-	protected final Object getDefaultHandler() {
+	public Object getDefaultHandler() {
 		return this.defaultHandler;
 	}
 
@@ -162,18 +159,26 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 		}
 	}
 
+	/**
+	 * Return the adapted interceptors as HandlerInterceptor array.
+	 * @return the array of HandlerInterceptors, or <code>null</code> if none
+	 */
+	protected final HandlerInterceptor[] getAdaptedInterceptors() {
+		return this.adaptedInterceptors;
+	}
+
 
 	/**
 	 * Look up a handler for the given request, falling back to the default
 	 * handler if no specific one is found.
-	 * @param request current HTTP request
+	 * @param request current portlet request
 	 * @return the corresponding handler instance, or the default handler
 	 * @see #getHandlerInternal
 	 */
 	public final HandlerExecutionChain getHandler(PortletRequest request) throws Exception {
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
-			handler = this.defaultHandler;
+			handler = getDefaultHandler();
 		}
 		if (handler == null) {
 			return null;
@@ -183,7 +188,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 			String handlerName = (String) handler;
 			handler = getApplicationContext().getBean(handlerName);
 		}
-		return new HandlerExecutionChain(handler, this.adaptedInterceptors);
+		return getHandlerExecutionChain(handler, request);
 	}
 
 	/**
@@ -196,5 +201,19 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 * @see #getHandler
 	 */
 	protected abstract Object getHandlerInternal(PortletRequest request) throws Exception;
+
+	/**
+	 * Build a HandlerExecutionChain for the given handler, including applicable interceptors.
+	 * <p>The default implementation simply builds a standard HandlerExecutionChain with
+	 * the given handler and this handler mapping's common interceptors. Subclasses may
+	 * override this in order to extend/rearrange the list of interceptors.
+	 * @param handler the resolved handler instance (never <code>null</code>)
+	 * @param request current portlet request
+	 * @return the HandlerExecutionChain (never <code>null</code>)
+	 * @see #getAdaptedInterceptors()
+	 */
+	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, PortletRequest request) {
+		return new HandlerExecutionChain(handler, getAdaptedInterceptors());
+	}
 
 }

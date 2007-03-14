@@ -27,13 +27,12 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Abstract base class for {@link HandlerMapping} implementations.
- * Supports ordering, a default handler, and handler interceptors.
+ * Abstract base class for {@link org.springframework.web.servlet.HandlerMapping}
+ * implementations. Supports ordering, a default handler, and handler interceptors.
  *
- * <p>Note: This base class does <i>not</i> support exposure
- * of the {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE}.
- * Support for this attribute is up to concrete subclasses,
- * typically based on request URL mappings.
+ * <p>Note: This base class does <i>not</i> support exposure of the
+ * {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE}. Support for this attribute
+ * is up to concrete subclasses, typically based on request URL mappings.
  *
  * @author Juergen Hoeller
  * @since 07.04.2003
@@ -67,7 +66,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * This handler will be returned if no specific mapping was found.
 	 * <p>Default is <code>null</code>, indicating no default handler.
 	 */
-	public final void setDefaultHandler(Object defaultHandler) {
+	public void setDefaultHandler(Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
 	}
 
@@ -75,7 +74,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Return the default handler for this handler mapping,
 	 * or <code>null</code> if none.
 	 */
-	public final Object getDefaultHandler() {
+	public Object getDefaultHandler() {
 		return this.defaultHandler;
 	}
 
@@ -140,6 +139,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		}
 	}
 
+	/**
+	 * Return the adapted interceptors as HandlerInterceptor array.
+	 * @return the array of HandlerInterceptors, or <code>null</code> if none
+	 */
+	protected final HandlerInterceptor[] getAdaptedInterceptors() {
+		return this.adaptedInterceptors;
+	}
+
 
 	/**
 	 * Look up a handler for the given request, falling back to the default
@@ -151,7 +158,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
-			handler = this.defaultHandler;
+			handler = getDefaultHandler();
 		}
 		if (handler == null) {
 			return null;
@@ -161,7 +168,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			String handlerName = (String) handler;
 			handler = getApplicationContext().getBean(handlerName);
 		}
-		return new HandlerExecutionChain(handler, this.adaptedInterceptors);
+		return getHandlerExecutionChain(handler, request);
 	}
 
 	/**
@@ -173,5 +180,19 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @throws Exception if there is an internal error
 	 */
 	protected abstract Object getHandlerInternal(HttpServletRequest request) throws Exception;
+
+	/**
+	 * Build a HandlerExecutionChain for the given handler, including applicable interceptors.
+	 * <p>The default implementation simply builds a standard HandlerExecutionChain with
+	 * the given handler and this handler mapping's common interceptors. Subclasses may
+	 * override this in order to extend/rearrange the list of interceptors.
+	 * @param handler the resolved handler instance (never <code>null</code>)
+	 * @param request current HTTP request
+	 * @return the HandlerExecutionChain (never <code>null</code>)
+	 * @see #getAdaptedInterceptors()
+	 */
+	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
+		return new HandlerExecutionChain(handler, getAdaptedInterceptors());
+	}
 
 }
