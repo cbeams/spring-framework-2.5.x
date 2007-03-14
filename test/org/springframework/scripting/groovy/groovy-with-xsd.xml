@@ -18,6 +18,10 @@
 		<lang:property name="message" value="Hello World!"/>
 	</lang:groovy>
 
+	<lang:groovy id="messengerPrototype" script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy" scope="prototype">
+		<lang:property name="message" value="Hello World!"/>
+	</lang:groovy>
+
 	<lang:groovy id="calculator">
 		 <lang:inline-script>
 			 package org.springframework.scripting.groovy;

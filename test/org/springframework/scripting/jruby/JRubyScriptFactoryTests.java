@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.JdkVersion;
 import org.springframework.scripting.Calculator;
+import org.springframework.scripting.ConfigurableMessenger;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 
@@ -175,6 +176,25 @@ public class JRubyScriptFactoryTests extends TestCase {
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 		assertEquals("Hello World!", messenger.getMessage());
 		assertFalse(messenger instanceof Refreshable);
+	}
+
+	public void testPrototypeScriptFromTag() throws Exception {
+		if (!JdkVersion.isAtLeastJava14()) {
+			return;
+		}
+
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
+		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+
+		assertNotSame(messenger, messenger2);
+		assertSame(messenger.getClass(), messenger2.getClass());
+		assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Hello World!", messenger2.getMessage());
+		messenger.setMessage("Bye World!");
+		messenger2.setMessage("Byebye World!");
+		assertEquals("Bye World!", messenger.getMessage());
+		assertEquals("Byebye World!", messenger2.getMessage());
 	}
 
 	public void testInlineScriptFromTag() throws Exception {

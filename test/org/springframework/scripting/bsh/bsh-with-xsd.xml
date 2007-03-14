@@ -7,8 +7,14 @@
 				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
 				http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd">
 
-	<lang:bsh id="messenger" script-interfaces="org.springframework.scripting.Messenger"
-			script-source="classpath:org/springframework/scripting/bsh/Messenger.bsh">
+	<lang:bsh id="messenger" script-source="classpath:org/springframework/scripting/bsh/Messenger.bsh"
+			script-interfaces="org.springframework.scripting.Messenger">
+		<lang:property name="message" value="Hello World!"/>
+	</lang:bsh>
+
+	<lang:bsh id="messengerPrototype" script-source="classpath:org/springframework/scripting/bsh/Messenger.bsh"
+			script-interfaces="org.springframework.scripting.ConfigurableMessenger"
+			scope="prototype">
 		<lang:property name="message" value="Hello World!"/>
 	</lang:bsh>
 

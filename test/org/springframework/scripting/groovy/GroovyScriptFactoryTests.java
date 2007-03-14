@@ -86,8 +86,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 			return;
 		}
 
-		ApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyContext.xml");
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 
@@ -340,7 +339,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 	}
 
-	public void testResourceScriptFromGroovyTag() throws Exception {
+	public void testResourceScriptFromTag() throws Exception {
 		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
@@ -356,7 +355,26 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertEquals(1, countingAspect.getCalls());
 	}
 
-	public void testInlineScriptFromGroovyTag() throws Exception {
+	public void testPrototypeScriptFromTag() throws Exception {
+		if (!JdkVersion.isAtLeastJava14()) {
+			return;
+		}
+
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
+		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+
+		assertNotSame(messenger, messenger2);
+		assertSame(messenger.getClass(), messenger2.getClass());
+		assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Hello World!", messenger2.getMessage());
+		messenger.setMessage("Bye World!");
+		messenger2.setMessage("Byebye World!");
+		assertEquals("Bye World!", messenger.getMessage());
+		assertEquals("Byebye World!", messenger2.getMessage());
+	}
+
+	public void testInlineScriptFromTag() throws Exception {
 		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
@@ -367,7 +385,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertFalse(calculator instanceof Refreshable);
 	}
 
-	public void testRefreshableFromGroovyTag() throws Exception {
+	public void testRefreshableFromTag() throws Exception {
 		if (!JdkVersion.isAtLeastJava14()) {
 			return;
 		}
