@@ -529,8 +529,7 @@ class GroovyMessenger implements Messenger {
 			</sidebar>
 			<para>From the JRuby homepage...</para>
 			<quote>
-				<emphasis>[JRuby is an] Effort to recreate the Ruby interpreter written
-				in Java, and a Ruby to Java bytecode compiler.</emphasis>
+				<emphasis>JRuby is an 100% pure-Java implementation of the Ruby programming language.</emphasis>
 			</quote>
 			<para>
 			    In keeping with the Spring philosophy of offering choice, Spring's
@@ -1076,7 +1075,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
 		</para>
 		<itemizedlist>
 			<listitem>
-				<para>The <ulink url="http://jruby.sourceforge.net/">JRuby</ulink> homepage</para>
+				<para>The <ulink url="http://jruby.codehaus.org/">JRuby</ulink> homepage</para>
 			</listitem>
 			<listitem>
 				<para>The <ulink url="http://groovy.codehaus.org/">Groovy</ulink> homepage</para>
