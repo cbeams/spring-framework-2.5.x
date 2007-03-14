@@ -23,7 +23,7 @@ import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.List;
 
-import org.jruby.IRuby;
+import org.jruby.Ruby;
 import org.jruby.RubyArray;
 import org.jruby.RubyException;
 import org.jruby.RubyNil;
@@ -43,7 +43,7 @@ import org.springframework.util.ClassUtils;
 /**
  * Utility methods for handling JRuby-scripted objects.
  *
- * <p>Note: As of Spring 2.0.2, this class requires JRuby 0.9.2 or higher.
+ * <p>Note: As of Spring 2.0.4, this class requires JRuby 0.9.8 or higher.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -74,7 +74,7 @@ public abstract class JRubyScriptUtils {
 	 * @throws JumpException in case of JRuby parsing failure
 	 */
 	public static Object createJRubyObject(String scriptSource, Class[] interfaces, ClassLoader classLoader) {
-		IRuby ruby = initializeRuntime();
+		Ruby ruby = initializeRuntime();
 
 		Node scriptRootNode = ruby.parse(scriptSource, "", null);
 		IRubyObject rubyObject = ruby.eval(scriptRootNode);
@@ -92,9 +92,9 @@ public abstract class JRubyScriptUtils {
 	}
 
 	/**
-	 * Initializes an instance of the {@link IRuby} runtime.
+	 * Initializes an instance of the {@link org.jruby.Ruby} runtime.
 	 */
-	private static IRuby initializeRuntime() {
+	private static Ruby initializeRuntime() {
 		return JavaEmbedUtils.initialize(Collections.EMPTY_LIST);
 	}
 
@@ -152,9 +152,9 @@ public abstract class JRubyScriptUtils {
 
 		private final IRubyObject rubyObject;
 
-		private final IRuby ruby;
+		private final Ruby ruby;
 
-		public RubyObjectInvocationHandler(IRubyObject rubyObject, IRuby ruby) {
+		public RubyObjectInvocationHandler(IRubyObject rubyObject, Ruby ruby) {
 			this.rubyObject = rubyObject;
 			this.ruby = ruby;
 		}
