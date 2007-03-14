@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.scripting.config;
 
 import java.util.List;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -26,12 +28,9 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlReaderContext;
-import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
 
 /**
  * BeanDefinitionParser implementation for the '<code>&lt;lang:groovy/&gt;</code>',
@@ -63,6 +62,8 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private static final String INLINE_SCRIPT_ELEMENT = "inline-script";
 
+	private static final String SCOPE_ATTRIBUTE = "scope";
+
 	private static final String SCRIPT_INTERFACES_ATTRIBUTE = "script-interfaces";
 
 	private static final String REFRESH_CHECK_DELAY_ATTRIBUTE = "refresh-check-delay";
@@ -74,16 +75,16 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 * The {@link org.springframework.scripting.ScriptFactory} class that this
 	 * parser instance will create bean definitions for.
 	 */
-	private final Class scriptFactoryClass;
+	private final String scriptFactoryClassName;
 
 
 	/**
-	 * Creates a new instance of this class that creates bean definitions
-	 * for the supplied {@link org.springframework.scripting.ScriptFactory} class.
+	 * Create a new instance of this parser, creating bean definitions for the
+	 * supplied {@link org.springframework.scripting.ScriptFactory} class.
+	 * @param scriptFactoryClassName the ScriptFactory class to operate on
 	 */
-	public ScriptBeanDefinitionParser(Class scriptFactoryClass) {
-		Assert.isAssignable(ScriptFactory.class, scriptFactoryClass);
-		this.scriptFactoryClass = scriptFactoryClass;
+	public ScriptBeanDefinitionParser(String scriptFactoryClassName) {
+		this.scriptFactoryClassName = scriptFactoryClassName;
 	}
 
 
@@ -100,11 +101,24 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 		// Set up infrastructure.
 		registerScriptFactoryPostProcessorIfNecessary(parserContext.getRegistry());
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(this.scriptFactoryClass);
+
+		// Create script factory bean definition.
+		RootBeanDefinition beanDefinition = new RootBeanDefinition();
+		beanDefinition.setBeanClassName(this.scriptFactoryClassName);
 		beanDefinition.setSource(parserContext.extractSource(element));
 
+		// Determine bean scope.
+		String scope = element.getAttribute(SCOPE_ATTRIBUTE);
+		if (StringUtils.hasLength(scope)) {
+			beanDefinition.setScope(scope);
+		}
+
 		// Attach any refresh metadata.
-		parseRefreshMetadata(element, beanDefinition);
+		String refreshCheckDelay = element.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
+		if (StringUtils.hasText(refreshCheckDelay)) {
+			beanDefinition.setAttribute(
+					ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE, new Long(refreshCheckDelay));
+		}
 
 		// Add constructor arguments.
 		ConstructorArgumentValues cav = beanDefinition.getConstructorArgumentValues();
@@ -124,19 +138,6 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		parserContext.getDelegate().parsePropertyElements(element, beanDefinition);
 
 		return beanDefinition;
-	}
-
-	/**
-	 * Parses the value of the '<code>refresh-check-delay</code>' attribute and
-	 * attaches it to the BeanDefinition metadata.
-	 * @see ScriptFactoryPostProcessor#REFRESH_CHECK_DELAY_ATTRIBUTE
-	 */
-	private void parseRefreshMetadata(Element element, RootBeanDefinition beanDefinition) {
-		String refreshCheckDelay = element.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
-		if (StringUtils.hasText(refreshCheckDelay)) {
-			beanDefinition.setAttribute(
-					ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE, new Long(refreshCheckDelay));
-		}
 	}
 
 	/**
