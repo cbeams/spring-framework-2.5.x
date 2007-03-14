@@ -17,9 +17,6 @@
 package org.springframework.scripting.config;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.scripting.bsh.BshScriptFactory;
-import org.springframework.scripting.groovy.GroovyScriptFactory;
-import org.springframework.scripting.jruby.JRubyScriptFactory;
 
 /**
  * <code>NamespaceHandler</code> that supports the wiring of
@@ -31,7 +28,7 @@ import org.springframework.scripting.jruby.JRubyScriptFactory;
  * &lt;lang:groovy id="messenger"
  *     refresh-check-delay="5000"
  *     script-source="classpath:Messenger.groovy"&gt;
- * &lt;lang:property name="message" value="I Can Do The Frug" /&gt;
+ * &lt;lang:property name="message" value="I Can Do The Frug"/&gt;
  * &lt;/lang:groovy&gt;
  * </pre>
  * 
@@ -42,13 +39,13 @@ import org.springframework.scripting.jruby.JRubyScriptFactory;
 public class LangNamespaceHandler extends NamespaceHandlerSupport {
 
 	public void init() {
-		registerScriptBeanDefinitionParser("groovy", GroovyScriptFactory.class);
-		registerScriptBeanDefinitionParser("jruby", JRubyScriptFactory.class);
-		registerScriptBeanDefinitionParser("bsh", BshScriptFactory.class);
+		registerScriptBeanDefinitionParser("groovy", "org.springframework.scripting.groovy.GroovyScriptFactory");
+		registerScriptBeanDefinitionParser("jruby", "org.springframework.scripting.jruby.JRubyScriptFactory");
+		registerScriptBeanDefinitionParser("bsh", "org.springframework.scripting.bsh.BshScriptFactory");
 	}
 
-	private void registerScriptBeanDefinitionParser(String key, Class scriptFactoryClass) {
-		registerBeanDefinitionParser(key, new ScriptBeanDefinitionParser(scriptFactoryClass));
+	private void registerScriptBeanDefinitionParser(String key, String scriptFactoryClassName) {
+		registerBeanDefinitionParser(key, new ScriptBeanDefinitionParser(scriptFactoryClassName));
 	}
 
 }
