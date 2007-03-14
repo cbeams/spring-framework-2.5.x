@@ -61,7 +61,7 @@ public abstract class AbstractFactoryBean
 
 	private boolean singleton = true;
 
-	private ConfigurableBeanFactory beanFactory;
+	private BeanFactory beanFactory;
 
 	private boolean initialized = false;
 
@@ -83,9 +83,14 @@ public abstract class AbstractFactoryBean
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ConfigurableBeanFactory) {
-			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
-		}
+		this.beanFactory = beanFactory;
+	}
+
+	/**
+	 * Return the BeanFactory that this bean runs in.
+	 */
+	protected BeanFactory getBeanFactory() {
+		return this.beanFactory;
 	}
 
 	/**
@@ -97,8 +102,9 @@ public abstract class AbstractFactoryBean
 	 * @see org.springframework.beans.SimpleTypeConverter
 	 */
 	protected TypeConverter getBeanTypeConverter() {
-		if (this.beanFactory != null) {
-			return this.beanFactory.getTypeConverter();
+		BeanFactory beanFactory = getBeanFactory();
+		if (beanFactory instanceof ConfigurableBeanFactory) {
+			return ((ConfigurableBeanFactory) beanFactory).getTypeConverter();
 		}
 		else {
 			return new SimpleTypeConverter();
