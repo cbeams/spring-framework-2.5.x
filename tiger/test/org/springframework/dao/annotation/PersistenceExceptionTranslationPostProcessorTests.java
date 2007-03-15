@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ import org.springframework.stereotype.Repository;
  * Just checks whether proxying occurs correctly, as a unit test should.
  *
  * @author Rod Johnson
- * @since 2.0
  */
 public class PersistenceExceptionTranslationPostProcessorTests extends TestCase {
 	
@@ -93,7 +92,6 @@ public class PersistenceExceptionTranslationPostProcessorTests extends TestCase 
 	protected void checkWillTranslateExceptions(Object o) {
 		assertTrue(o instanceof Advised);
 		Advised a = (Advised) o;
-		System.out.println(a.toProxyConfigString());
 		for (Advisor advisor : a.getAdvisors()) {
 			if (advisor instanceof PersistenceExceptionTranslationAdvisor) {
 				return;

@@ -17,8 +17,6 @@
 package org.springframework.dao.annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
@@ -30,8 +28,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
-import org.springframework.dao.support.ChainedPersistenceExceptionTranslator;
-import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -94,23 +90,11 @@ public class PersistenceExceptionTranslationPostProcessor
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (!(beanFactory instanceof ListableBeanFactory)) {
-			throw new IllegalArgumentException("Cannot use " + getClass().getSimpleName() + " without ListableBeanFactory");
+			throw new IllegalArgumentException(
+					"Cannot use PersistenceExceptionTranslator autodetection without ListableBeanFactory");
 		}
-		ListableBeanFactory lbf = (ListableBeanFactory) beanFactory;
-		
-		// Find all translators, being careful not to activate FactoryBeans
-		List<PersistenceExceptionTranslator> pets = new LinkedList<PersistenceExceptionTranslator>();
-		for (String petBeanName : lbf.getBeanNamesForType(PersistenceExceptionTranslator.class, false, false)) {
-			pets.add((PersistenceExceptionTranslator) lbf.getBean(petBeanName));
-		}
-		pets = validateAndFilter(pets);
-		ChainedPersistenceExceptionTranslator cpet = new ChainedPersistenceExceptionTranslator();
-		for (PersistenceExceptionTranslator pet : pets) {
-			cpet.addDelegate(pet);
-		}
-		
-		this.persistenceExceptionTranslationAdvisor =
-				new PersistenceExceptionTranslationAdvisor(cpet, this.repositoryAnnotationType);
+		this.persistenceExceptionTranslationAdvisor = new PersistenceExceptionTranslationAdvisor(
+				(ListableBeanFactory) beanFactory, this.repositoryAnnotationType);
 	}
 
 	public int getOrder() {
@@ -147,24 +131,6 @@ public class PersistenceExceptionTranslationPostProcessor
 			// This is not a repository.
 			return bean;
 		}
-	}
-
-	/**
-	 * Validate and filter the given PersistenceExceptionTranslators.
-	 */
-	protected List<PersistenceExceptionTranslator> validateAndFilter(List<PersistenceExceptionTranslator> allPets)
-			throws IllegalStateException {
-
-		List<PersistenceExceptionTranslator> filteredPets = new LinkedList<PersistenceExceptionTranslator>();
-		for (PersistenceExceptionTranslator pet : allPets) {
-			// TODO filter according to rules: one of each class etc.
-			filteredPets.add(pet);
-		}
-		if (filteredPets.isEmpty()) {
-			throw new IllegalStateException(
-					"No persistence exception translators found. Cannot translate. Remove this PostProcessor");
-		}
-		return filteredPets;
 	}
 
 }

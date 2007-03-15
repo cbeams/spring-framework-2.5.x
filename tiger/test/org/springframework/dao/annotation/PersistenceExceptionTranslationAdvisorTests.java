@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,45 +23,69 @@ import junit.framework.TestCase;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.dao.support.ChainedPersistenceExceptionTranslator;
 import org.springframework.dao.support.DataAccessUtilsTests.MapPersistenceExceptionTranslator;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
 
 /**
+ * Tests for PersistenceExceptionTranslationAdvisor's exception translation,
+ * as applied by PersistenceExceptionTranslationPostProcessor.
+ *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
-	
+
 	private RuntimeException doNotTranslate = new RuntimeException();
-	
+
 	private PersistenceException persistenceException1 = new PersistenceException();
-	
-	protected RepositoryInterface createProxy(RepositoryInterfaceImpl target, PersistenceExceptionTranslator pet) {
+
+	protected RepositoryInterface createProxy(RepositoryInterfaceImpl target) {
+		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
+		mpet.addTranslation(persistenceException1,
+				new InvalidDataAccessApiUsageException("", persistenceException1));
 		ProxyFactory pf = new ProxyFactory(target);
 		pf.addInterface(RepositoryInterface.class);
-		PersistenceExceptionTranslationAdvisor peta = new PersistenceExceptionTranslationAdvisor(pet, Repository.class);
-		pf.addAdvisor(peta);
+		addPersistenceExceptionTranslation(pf, mpet);
 		return (RepositoryInterface) pf.getProxy();
 	}
-	
+
+	protected void addPersistenceExceptionTranslation(ProxyFactory pf, PersistenceExceptionTranslator pet) {
+		pf.addAdvisor(new PersistenceExceptionTranslationAdvisor(pet, Repository.class));
+	}
+
 	public void testNoTranslationNeeded() {
 		RepositoryInterfaceImpl target = new RepositoryInterfaceImpl();
-		ChainedPersistenceExceptionTranslator emptyPet = new ChainedPersistenceExceptionTranslator();
-		RepositoryInterface ri = createProxy(target, emptyPet);
-		
+		RepositoryInterface ri = createProxy(target);
+
 		ri.noThrowsClause();
 		ri.throwsPersistenceException();		
+
+		target.setBehavior(persistenceException1);
+		try {
+			ri.noThrowsClause();
+			fail();
+		}
+		catch (RuntimeException ex) {
+			assertSame(persistenceException1, ex);
+		}
+		try {
+			ri.throwsPersistenceException();
+			fail();
+		}
+		catch (RuntimeException ex) {
+			assertSame(persistenceException1, ex);
+		}
 	}
-	
+
 	public void testTranslationNotNeededForTheseExceptions() {
 		RepositoryInterfaceImpl target = new StereotypedRepositoryInterfaceImpl();
-		ChainedPersistenceExceptionTranslator emptyPet = new ChainedPersistenceExceptionTranslator();
-		RepositoryInterface ri = createProxy(target, emptyPet);
-		
+		RepositoryInterface ri = createProxy(target);
+
 		ri.noThrowsClause();
 		ri.throwsPersistenceException();	
-		target.setBehaviour(doNotTranslate);
+
+		target.setBehavior(doNotTranslate);
 		try {
 			ri.noThrowsClause();
 			fail();
@@ -77,15 +101,12 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 			assertSame(doNotTranslate, ex);
 		}
 	}
-	
+
 	public void testTranslationNeededForTheseExceptions() {
 		RepositoryInterfaceImpl target = new StereotypedRepositoryInterfaceImpl();
-		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
-		mpet.addTranslation(persistenceException1, 
-				new InvalidDataAccessApiUsageException("", persistenceException1));
-		RepositoryInterface ri = createProxy(target, mpet);
-			
-		target.setBehaviour(persistenceException1);
+		RepositoryInterface ri = createProxy(target);
+
+		target.setBehavior(persistenceException1);
 		try {
 			ri.noThrowsClause();
 			fail();
@@ -106,33 +127,38 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 			assertSame(persistenceException1, ex);
 		}
 	}
-	
-	
+
+
 	public interface RepositoryInterface {
+
 		void noThrowsClause();
+
 		void throwsPersistenceException() throws PersistenceException;
 	}
-	
+
+
 	public static class RepositoryInterfaceImpl implements RepositoryInterface {
+
 		private RuntimeException runtimeException;
-				
-		public void setBehaviour(RuntimeException rex) {
+
+		public void setBehavior(RuntimeException rex) {
 			this.runtimeException = rex;
 		}
-		
+
 		public void noThrowsClause() {
 			if (runtimeException != null) {
 				throw runtimeException;
 			}
 		}
-		
+
 		public void throwsPersistenceException() throws PersistenceException {
 			if (runtimeException != null) {
 				throw runtimeException;
 			}
 		}
 	}
-	
+
+
 	@Repository
 	public static class StereotypedRepositoryInterfaceImpl extends RepositoryInterfaceImpl {
 		// Extends above class just to add repository annotation

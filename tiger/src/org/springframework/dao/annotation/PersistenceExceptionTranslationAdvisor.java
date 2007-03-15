@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.dao.support.PersistenceExceptionTranslationInterceptor;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 
@@ -39,9 +40,9 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
  */
 public class PersistenceExceptionTranslationAdvisor extends AbstractPointcutAdvisor {
 
-	private final AnnotationMatchingPointcut pointcut;
-
 	private final PersistenceExceptionTranslationInterceptor advice;
+
+	private final AnnotationMatchingPointcut pointcut;
 
 
 	/**
@@ -53,17 +54,30 @@ public class PersistenceExceptionTranslationAdvisor extends AbstractPointcutAdvi
 			PersistenceExceptionTranslator persistenceExceptionTranslator,
 			Class<? extends Annotation> repositoryAnnotationType) {
 
-		this.pointcut = new AnnotationMatchingPointcut(repositoryAnnotationType);
 		this.advice = new PersistenceExceptionTranslationInterceptor(persistenceExceptionTranslator);
+		this.pointcut = new AnnotationMatchingPointcut(repositoryAnnotationType);
 	}
 
+	/**
+	 * Create a new PersistenceExceptionTranslationAdvisor.
+	 * @param beanFactory the ListableBeanFactory to obtaining all
+	 * PersistenceExceptionTranslators from
+	 * @param repositoryAnnotationType the annotation type to check for
+	 */
+	PersistenceExceptionTranslationAdvisor(
+			ListableBeanFactory beanFactory, Class<? extends Annotation> repositoryAnnotationType) {
 
-	public Pointcut getPointcut() {
-		return this.pointcut;
+		this.advice = new PersistenceExceptionTranslationInterceptor(beanFactory);
+		this.pointcut = new AnnotationMatchingPointcut(repositoryAnnotationType);
 	}
+
 
 	public Advice getAdvice() {
 		return this.advice;
+	}
+
+	public Pointcut getPointcut() {
+		return this.pointcut;
 	}
 
 }
