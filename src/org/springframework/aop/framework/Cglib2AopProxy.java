@@ -107,6 +107,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 
 	/**
 	 * Create a new Cglib2AopProxy for the given AOP configuration.
+	 * @param config the AOP configuration as AdvisedSupport object
 	 * @throws AopConfigException if the config is invalid. We try to throw an informative
 	 * exception in this case, rather than let a mysterious failure happen later.
 	 */
@@ -298,8 +299,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		if (isStatic && isFrozen) {
 			Method[] methods = rootClass.getMethods();
 			Callback[] fixedCallbacks = new Callback[methods.length];
-
-			this.fixedInterceptorMap = new HashMap();
+			this.fixedInterceptorMap = new HashMap(methods.length);
 
 			// TODO: small memory optimisation here (can skip creation for
 			// methods with no advice)
@@ -551,7 +551,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 
 
 	/**
-	 * Interceptor used specifcally for advised methods on a frozen, static proxy.
+	 * Interceptor used specifically for advised methods on a frozen, static proxy.
 	 */
 	private static class FixedChainStaticTargetInterceptor implements MethodInterceptor, Serializable {
 

@@ -75,7 +75,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	private static Log logger = LogFactory.getLog(JdkDynamicAopProxy.class);
 
 	/** Config used to configure this proxy */
-	private AdvisedSupport advised;
+	private final AdvisedSupport advised;
 
 	/**
 	 * Is the {@link #equals} method defined on the proxied interfaces?
@@ -90,6 +90,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 	/**
 	 * Construct a new JdkDynamicAopProxy for the given AOP configuration.
+	 * @param config the AOP configuration as AdvisedSupport object
 	 * @throws AopConfigException if the config is invalid. We try to throw an informative
 	 * exception in this case, rather than let a mysterious failure happen later.
 	 */
