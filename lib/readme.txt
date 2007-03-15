@@ -234,10 +234,6 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Commons IO 1.3.1 (http://jakarta.apache.org/commons/io)
 - required at runtime when using Spring's CommonsMultipartResolver (by Commons FileUpload)
 
-* jakarta-commons/commons-javaflow.jar
-- Commons JavaFlow 20060411 (taken from JasperReports 1.2.8 distribution)
-- required at runtime when using Spring's JasperReports support (by JasperReports)
-
 * jakarta-commons/commons-lang.jar
 - Commons Lang 2.2 (http://jakarta.apache.org/commons/lang)
 - required at runtime when using Spring's OpenJPA support (by OpenJPA)
@@ -264,8 +260,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
-* jasperreports/jasperreports-1.2.8.jar
-- JasperReports 1.2.8 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-1.3.1.jar
+- JasperReports 1.3.1 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 

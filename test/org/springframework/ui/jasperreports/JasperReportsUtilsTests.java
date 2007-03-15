@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,16 @@
  */
 
 package org.springframework.ui.jasperreports;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 import junit.framework.TestCase;
 import net.sf.jasperreports.engine.JRDataSource;
@@ -35,17 +45,8 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.springframework.core.io.ClassPathResource;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
@@ -194,7 +195,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		HSSFSheet sheet = workbook.getSheetAt(0);
 		assertNotNull("Sheet should not be null", sheet);
 		HSSFRow row = sheet.getRow(3);
-		HSSFCell cell = row.getCell((short) 1);
+		HSSFCell cell = row.getCell((short) 0);
 		assertNotNull("Cell should not be null", cell);
 		assertEquals("Cell content should be Dear Lord!", "Dear Lord!", cell.getStringCellValue());
 	}
