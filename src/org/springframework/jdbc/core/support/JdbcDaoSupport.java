@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,19 +27,21 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
- * Convenient super class for JDBC data access objects.
- * Requires a DataSource to be set, providing a
- * JdbcTemplate based on it to subclasses.
+ * Convenient super class for JDBC-based data access objects.
  *
- * <p>This base class is mainly intended for JdbcTemplate usage
- * but can also be used when working with DataSourceUtils directly
- * or with org.springframework.jdbc.object classes.
+ * <p>Requires a {@link javax.sql.DataSource} to be set, providing a
+ * {@link org.springframework.jdbc.core.JdbcTemplate} based on it to
+ * subclasses through the {@link #getJdbcTemplate()} method.
+ *
+ * <p>This base class is mainly intended for JdbcTemplate usage but can
+ * also be used when working with a Connection directly or when using
+ * <code>org.springframework.jdbc.object</code> operation objects.
  *
  * @author Juergen Hoeller
  * @since 28.07.2003
  * @see #setDataSource
+ * @see #getJdbcTemplate
  * @see org.springframework.jdbc.core.JdbcTemplate
- * @see org.springframework.jdbc.datasource.DataSourceUtils
  */
 public abstract class JdbcDaoSupport extends DaoSupport {
 
@@ -88,7 +90,7 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 	 * pre-initialized with the DataSource or set explicitly.
 	 */
 	public final JdbcTemplate getJdbcTemplate() {
-	  return jdbcTemplate;
+	  return this.jdbcTemplate;
 	}
 
 	/**
@@ -104,28 +106,28 @@ public abstract class JdbcDaoSupport extends DaoSupport {
 
 	protected void checkDaoConfig() {
 		if (this.jdbcTemplate == null) {
-			throw new IllegalArgumentException("dataSource or jdbcTemplate is required");
+			throw new IllegalArgumentException("'dataSource' or 'jdbcTemplate' is required");
 		}
 	}
 
 
 	/**
+	 * Return the SQLExceptionTranslator of this DAO's JdbcTemplate,
+	 * for translating SQLExceptions in custom JDBC access code.
+	 * @see org.springframework.jdbc.core.JdbcTemplate#getExceptionTranslator()
+	 */
+	protected final SQLExceptionTranslator getExceptionTranslator() {
+		return getJdbcTemplate().getExceptionTranslator();
+	}
+
+	/**
 	 * Get a JDBC Connection, either from the current transaction or a new one.
 	 * @return the JDBC Connection
-	 * @throws org.springframework.jdbc.CannotGetJdbcConnectionException if the attempt to get a Connection failed
+	 * @throws CannotGetJdbcConnectionException if the attempt to get a Connection failed
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection(javax.sql.DataSource)
 	 */
 	protected final Connection getConnection() throws CannotGetJdbcConnectionException {
 		return DataSourceUtils.getConnection(getDataSource());
-	}
-
-	/**
-	 * Return the SQLExceptionTranslator of this DAO's JdbcTemplate,
-	 * for translating SQLExceptions in custom JDBC access code.
-	 * @see org.springframework.jdbc.core.JdbcTemplate#getExceptionTranslator
-	 */
-	protected final SQLExceptionTranslator getExceptionTranslator() {
-		return this.jdbcTemplate.getExceptionTranslator();
 	}
 
 	/**

@@ -124,9 +124,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Construct a new JdbcTemplate for bean usage.
-	 * Note: The DataSource has to be set before using the instance.
-	 * This constructor can be used to prepare a JdbcTemplate via a BeanFactory,
-	 * typically setting the DataSource via setDataSource.
+	 * <p>Note: The DataSource has to be set before using the instance.
 	 * @see #setDataSource
 	 */
 	public JdbcTemplate() {
