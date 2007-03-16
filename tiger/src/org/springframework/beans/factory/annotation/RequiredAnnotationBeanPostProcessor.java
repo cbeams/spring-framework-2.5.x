@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	 * @param requiredAnnotationType the desired annotation type
 	 */
 	public void setRequiredAnnotationType(Class<? extends Annotation> requiredAnnotationType) {
-		Assert.notNull(requiredAnnotationType, "requiredAnnotationType must not be null");
+		Assert.notNull(requiredAnnotationType, "'requiredAnnotationType' must not be null");
 		this.requiredAnnotationType = requiredAnnotationType;
 	}
 
@@ -76,7 +76,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	 * Return the 'required' annotation type.
 	 */
 	protected Class<? extends Annotation> getRequiredAnnotationType() {
-		return requiredAnnotationType;
+		return this.requiredAnnotationType;
 	}
 
 
@@ -117,8 +117,8 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	 * @return the exception message
 	 */
 	private String buildExceptionMessage(List<String> invalidProperties, String beanName) {
-		StringBuilder sb = new StringBuilder();
 		int size = invalidProperties.size();
+		StringBuilder sb = new StringBuilder();
 		sb.append(size == 1 ? "Property" : "Properties");
 		for (int i = 0; i < size; i++) {
 			String propertyName = invalidProperties.get(i);
@@ -130,14 +130,10 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 					sb.append(",");
 				}
 			}
-			sb.append(" '");
-			sb.append(propertyName);
-			sb.append('\'');
+			sb.append(" '").append(propertyName).append("'");
 		}
-		sb.append(size == 1 ? " is required" : " are required");
-		sb.append(" for bean '");
-		sb.append(beanName);
-		sb.append("'");
+		sb.append(size == 1 ? " is" : " are");
+		sb.append(" required for bean '").append(beanName).append("'");
 		return sb.toString();
 	}
 

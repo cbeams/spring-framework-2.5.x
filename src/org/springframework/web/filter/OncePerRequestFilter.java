@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,17 +27,15 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Filter base class that guarantees to be just executed once per request,
- * on any servlet container. It provides a <code>doFilterInternal</code>
+ * on any servlet container. It provides a {@link #doFilterInternal}
  * method with HttpServletRequest and HttpServletResponse arguments.
  *
- * <p>The <code>getAlreadyFilteredAttributeName</code> method determines how
+ * <p>The {@link #getAlreadyFilteredAttributeName} method determines how
  * to identify that a request is already filtered. The default implementation
  * is based on the configured name of the concrete filter instance.
  *
  * @author Juergen Hoeller
  * @since 06.12.2003
- * @see #doFilterInternal
- * @see #getAlreadyFilteredAttributeName
  */
 public abstract class OncePerRequestFilter extends GenericFilterBean {
 
@@ -109,9 +107,10 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 
 
 	/**
-	 * Same contract as for doFilter, but guaranteed to be just invoked once per
-	 * request. Provides HttpServletRequest and HttpServletResponse arguments
-	 * instead of the default ServletRequest and ServletResponse ones.
+	 * Same contract as for <code>doFilter</code>, but guaranteed to be
+	 * just invoked once per request. Provides HttpServletRequest and
+	 * HttpServletResponse arguments instead of the default ServletRequest
+	 * and ServletResponse ones.
 	 */
 	protected abstract void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

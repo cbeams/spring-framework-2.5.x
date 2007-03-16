@@ -198,7 +198,7 @@ public class SingleConnectionFactory
 	 */
 	public void afterPropertiesSet() {
 		if (this.connection == null && getTargetConnectionFactory() == null) {
-			throw new IllegalArgumentException("Connection or targetConnectionFactory is required");
+			throw new IllegalArgumentException("Connection or 'targetConnectionFactory' is required");
 		}
 	}
 
@@ -271,7 +271,8 @@ public class SingleConnectionFactory
 	 */
 	public void initConnection() throws JMSException {
 		if (getTargetConnectionFactory() == null) {
-			throw new IllegalStateException("targetConnectionFactory is required for lazily initializing a Connection");
+			throw new IllegalStateException(
+					"'targetConnectionFactory' is required for lazily initializing a Connection");
 		}
 		synchronized (this.connectionMonitor) {
 			if (this.target != null) {
