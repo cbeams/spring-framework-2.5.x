@@ -32,6 +32,9 @@
 <!ENTITY spring.tld         SYSTEM "spring.tld.xml">
 <!ENTITY spring-form.tld    SYSTEM "spring-form.tld.xml">
 <!ENTITY swf-sidebar        SYSTEM "swf-sidebar.xml">
+<!ENTITY showcases          SYSTEM "showcases.xml">
+<!ENTITY java5-dao          SYSTEM "../../../samples/showcases/java5-dao/doc.xml">
+<!ENTITY dynamvc          SYSTEM "../../../samples/showcases/dynamvc/doc.xml">
 ]>
 <book>
 	<bookinfo>
@@ -264,7 +267,7 @@
 		<title>Integration</title>
 		<partintro id="spring-integration-intro">
 			<para>
-				This final part of the reference documentation covers
+				This part of the reference documentation covers
 				the Spring Framework's integration with a number of J2EE
 				(and related) technologies.
 			</para>
@@ -307,6 +310,17 @@
 		&scheduling;
 		&dynamic-languages;
 		&metadata;
+	</part>
+	<part id="spring-samples">
+		<title>Sample applications</title>
+		<partintro id="spring-integration-intro">
+			<para>
+				This final part of the reference documentation covers
+				teh sample applications that come with the Spring Framework
+				distribution.
+			</para>
+		</partintro>
+		&showcases;
 	</part>
 	<!-- back matter -->
 	&xsd-configuration;

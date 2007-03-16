@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding="iso-8859-1" ?>
+<chapter id="showcases">
+	<title>Showcase applications</title>
+    <section id="showcases-introduction">
+		<title>Introduction</title>
+		<para>As of Spring 2.0 several showcase applications have been developed. These are small and comprehensive applications
+		meant to explain a small amount of features really well. The showcases are distributed with the
+		Spring distribution. You can find them in the <emphasis>samples</emphasis> directory [TODO expplain more]</para>
+	</section>
+	
+	&dynamvc;
+	
+	&java5-dao;
+
+</chapter>
