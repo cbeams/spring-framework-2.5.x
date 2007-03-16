@@ -34,7 +34,7 @@
 <!ENTITY swf-sidebar        SYSTEM "swf-sidebar.xml">
 <!ENTITY showcases          SYSTEM "showcases.xml">
 <!ENTITY java5-dao          SYSTEM "../../../samples/showcases/java5-dao/doc.xml">
-<!ENTITY dynamvc          SYSTEM "../../../samples/showcases/dynamvc/doc.xml">
+<!ENTITY dynamvc            SYSTEM "../../../samples/showcases/dynamvc/doc.xml">
 ]>
 <book>
 	<bookinfo>
@@ -313,10 +313,10 @@
 	</part>
 	<part id="spring-samples">
 		<title>Sample applications</title>
-		<partintro id="spring-integration-intro">
+		<partintro id="spring-samples-intro">
 			<para>
 				This final part of the reference documentation covers
-				teh sample applications that come with the Spring Framework
+				the sample applications that come with the Spring Framework
 				distribution.
 			</para>
 		</partintro>

@@ -418,28 +418,18 @@
     improved features of Spring 2.0, so do take the time to investigate them. The aforementioned
     sample applications can be found in the <filename class="directory">'samples'</filename>
     directory of the full Spring distribution
-    (<filename>'spring-with-dependencies.[zip|tar.gz]'</filename>).</para>
-
-    <para>The Spring Framework distribution also ships with a number of so-called
-    <emphasis>showcase</emphasis> applications. Each showcase application provides
-    fully working examples, focused on demonstrating exactly one new Spring 2.0 feature
-    at a time. The idea is that you can take the code in these showcases and experiment
-    with it, as opposed to having to create your own small project to test out each new
-    Spring 2.0 feature. Please be advised that the scope of these showcase applications is
-    deliberately limited; the domain model (if there even is one) consists of maybe one or
-    two classes, and typical enterprise concerns such as security and transactional integrity
-    are deliberately omitted.</para>
+    (<filename>'spring-with-dependencies.[zip|tar.gz]'</filename>), and are documented
+	(in part) in the chapter entitled <xref linkend="showcases"/>.</para>
   
   </section>
 
   <section id="new-in-2-other-documentation">
     <title>Improved documentation</title>
     <para>The Spring reference documentation has also substantially been updated to reflect
-    all of the above features new in Spring 2.0.</para>
-    <para>While every effort has been made to ensure that there are no errors in this
-    documentation, some errors may nevertheless have crept in. If you do spot any typos
-    or even more serious errors, and you can spare a few cycles during lunch, please do
-    bring the error to the attention of the Spring team by
+    all of the above features new in Spring 2.0. While every effort has been made to ensure
+	that there are no errors in this documentation, some errors may nevertheless have crept
+	in. If you do spot any typos or even more serious errors, and you can spare a few cycles
+	during lunch, please do bring the error to the attention of the Spring team by
     <ulink url="http://opensource.atlassian.com/projects/spring/">raising an issue</ulink>.</para>
     <para>Special thanks to Arthur Loder for his tireless proofreading of the Spring Framework
     reference documentation and Javadocs.</para>

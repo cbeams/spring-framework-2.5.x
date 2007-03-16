@@ -1,15 +1,20 @@
 <?xml version='1.0' encoding="iso-8859-1" ?>
 <chapter id="showcases">
 	<title>Showcase applications</title>
-    <section id="showcases-introduction">
+	<section id="showcases-introduction">
 		<title>Introduction</title>
-		<para>As of Spring 2.0 several showcase applications have been developed. These are small and comprehensive applications
-		meant to explain a small amount of features really well. The showcases are distributed with the
-		Spring distribution. You can find them in the <emphasis>samples</emphasis> directory [TODO expplain more]</para>
+		<para>
+			The Spring Framework distribution also ships with a number of so-called
+			<emphasis>showcase</emphasis> applications. Each showcase application provides
+			fully working examples, focused on demonstrating exactly one new Spring 2.0 feature
+			at a time. The idea is that you can take the code in these showcases and experiment
+			with it, as opposed to having to create your own small project to test out new Spring
+			2.0 features. The scope of these showcase applications is deliberately limited; the
+			domain model (if there even is one) consists of maybe one or two classes, and typical
+			enterprise concerns such as security, error-checking, and transactional integrity are
+			omitted deliberately.
+		</para>
 	</section>
-	
 	&dynamvc;
-	
 	&java5-dao;
-
 </chapter>
