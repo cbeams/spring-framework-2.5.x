@@ -40,8 +40,8 @@ import org.springframework.util.xml.DomUtils;
  * for the <code>&lt;tx:advice&gt;</code> tag.
  *
  * @author Rob Harrop
- * @author Adrian Colyer
  * @author Juergen Hoeller
+ * @author Adrian Colyer
  * @since 2.0
  */
 class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
@@ -90,33 +90,48 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 		}
 	}
 
-	private RootBeanDefinition parseAttributeSource(Element attributesElement, ParserContext parserContext) {
-		List methods = DomUtils.getChildElementsByTagName(attributesElement, "method");
+	private RootBeanDefinition parseAttributeSource(Element attrEle, ParserContext parserContext) {
+		List methods = DomUtils.getChildElementsByTagName(attrEle, "method");
 		ManagedMap transactionAttributeMap = new ManagedMap(methods.size());
-		transactionAttributeMap.setSource(parserContext.extractSource(attributesElement));
+		transactionAttributeMap.setSource(parserContext.extractSource(attrEle));
 
 		for (int i = 0; i < methods.size(); i++) {
-			Element methodElement = (Element) methods.get(i);
+			Element methodEle = (Element) methods.get(i);
 
-			String name = methodElement.getAttribute("name");
+			String name = methodEle.getAttribute("name");
 			TypedStringValue nameHolder = new TypedStringValue(name);
-			nameHolder.setSource(parserContext.extractSource(methodElement));
+			nameHolder.setSource(parserContext.extractSource(methodEle));
 
 			RuleBasedTransactionAttribute attribute = new RuleBasedTransactionAttribute();
-			attribute.setPropagationBehaviorName(
-					RuleBasedTransactionAttribute.PREFIX_PROPAGATION + methodElement.getAttribute(PROPAGATION));
-			attribute.setIsolationLevelName(
-					RuleBasedTransactionAttribute.PREFIX_ISOLATION + methodElement.getAttribute(ISOLATION));
-			attribute.setTimeout(Integer.parseInt(methodElement.getAttribute(TIMEOUT)));
-			attribute.setReadOnly(Boolean.valueOf(methodElement.getAttribute(READ_ONLY)).booleanValue());
+			String propagation = methodEle.getAttribute(PROPAGATION);
+			String isolation = methodEle.getAttribute(ISOLATION);
+			String timeout = methodEle.getAttribute(TIMEOUT);
+			String readOnly = methodEle.getAttribute(READ_ONLY);
+			if (StringUtils.hasText(propagation)) {
+				attribute.setPropagationBehaviorName(RuleBasedTransactionAttribute.PREFIX_PROPAGATION + propagation);
+			}
+			if (StringUtils.hasText(isolation)) {
+				attribute.setIsolationLevelName(RuleBasedTransactionAttribute.PREFIX_ISOLATION + isolation);
+			}
+			if (StringUtils.hasText(timeout)) {
+				try {
+					attribute.setTimeout(Integer.parseInt(timeout));
+				}
+				catch (NumberFormatException ex) {
+					parserContext.getReaderContext().error("Timeout must be an integer value: [" + timeout + "]", methodEle);
+				}
+			}
+			if (StringUtils.hasText(readOnly)) {
+				attribute.setReadOnly(Boolean.valueOf(methodEle.getAttribute(READ_ONLY)).booleanValue());
+			}
 
 			List rollbackRules = new LinkedList();
-			if (methodElement.hasAttribute(ROLLBACK_FOR)) {
-				String rollbackForValue = methodElement.getAttribute(ROLLBACK_FOR);
+			if (methodEle.hasAttribute(ROLLBACK_FOR)) {
+				String rollbackForValue = methodEle.getAttribute(ROLLBACK_FOR);
 				addRollbackRuleAttributesTo(rollbackRules,rollbackForValue);
 			}
-			if (methodElement.hasAttribute(NO_ROLLBACK_FOR)) {
-				String noRollbackForValue = methodElement.getAttribute(NO_ROLLBACK_FOR);
+			if (methodEle.hasAttribute(NO_ROLLBACK_FOR)) {
+				String noRollbackForValue = methodEle.getAttribute(NO_ROLLBACK_FOR);
 				addNoRollbackRuleAttributesTo(rollbackRules,noRollbackForValue);
 			}
 			attribute.setRollbackRules(rollbackRules);
@@ -125,7 +140,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 		}
 
 		RootBeanDefinition attributeSourceDefinition = new RootBeanDefinition(NameMatchTransactionAttributeSource.class);
-		attributeSourceDefinition.setSource(parserContext.extractSource(attributesElement));
+		attributeSourceDefinition.setSource(parserContext.extractSource(attrEle));
 		attributeSourceDefinition.getPropertyValues().addPropertyValue(NAME_MAP, transactionAttributeMap);
 		return attributeSourceDefinition;
 	}
