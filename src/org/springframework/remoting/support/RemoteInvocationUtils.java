@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package org.springframework.remoting.support;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.core.JdkVersion;
 
@@ -42,13 +45,15 @@ public abstract class RemoteInvocationUtils {
 	public static void fillInClientStackTraceIfPossible(Throwable ex) {
 		if (JdkVersion.isAtLeastJava14() && ex != null) {
 			StackTraceElement[] clientStack = new Throwable().getStackTrace();
+			Set visitedExceptions = new HashSet();
 			Throwable exToUpdate = ex;
-			while (exToUpdate != null) {
+			while (exToUpdate != null && !visitedExceptions.contains(exToUpdate)) {
 				StackTraceElement[] serverStack = exToUpdate.getStackTrace();
 				StackTraceElement[] combinedStack = new StackTraceElement[serverStack.length + clientStack.length];
 				System.arraycopy(serverStack, 0, combinedStack, 0, serverStack.length);
 				System.arraycopy(clientStack, 0, combinedStack, serverStack.length, clientStack.length);
 				exToUpdate.setStackTrace(combinedStack);
+				visitedExceptions.add(exToUpdate);
 				exToUpdate = exToUpdate.getCause();
 			}
 		}
