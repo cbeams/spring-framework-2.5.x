@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,7 @@ package org.springframework.jca.cci.core.support;
 
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
+import javax.resource.cci.ConnectionSpec;
 
 import org.springframework.dao.support.DaoSupport;
 import org.springframework.jca.cci.CannotGetCciConnectionException;
@@ -25,20 +26,22 @@ import org.springframework.jca.cci.connection.ConnectionFactoryUtils;
 import org.springframework.jca.cci.core.CciTemplate;
 
 /**
- * Convenient super class for CCI data access objects.
- * Requires a ConnectionFactory to be set, providing a
- * CciTemplate based on it to subclasses.
+ * Convenient super class for CCI-based data access objects.
  *
- * <p>This base class is mainly intended for CciTemplate usage
- * but can also be used when working with ConnectionFactoryUtils directly
- * or with org.springframework.cci.object classes.
+ * <p>Requires a {@link javax.resource.cci.ConnectionFactory} to be set,
+ * providing a {@link org.springframework.jca.cci.core.CciTemplate} based
+ * on it to subclasses through the {@link #getCciTemplate()} method.
+ *
+ * <p>This base class is mainly intended for CciTemplate usage but can
+ * also be used when working with a Connection directly or when using
+ * <code>org.springframework.jca.cci.object</code> classes.
  *
  * @author Thierry Templier
  * @author Juergen Hoeller
  * @since 1.2
  * @see #setConnectionFactory
+ * @see #getCciTemplate
  * @see org.springframework.jca.cci.core.CciTemplate
- * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils
  */
 public abstract class CciDaoSupport extends DaoSupport {
 
@@ -90,10 +93,23 @@ public abstract class CciDaoSupport extends DaoSupport {
 
 	protected final void checkDaoConfig() {
 		if (this.cciTemplate == null) {
-			throw new IllegalArgumentException("connectionFactory or cciTemplate is required");
+			throw new IllegalArgumentException("'connectionFactory' or 'cciTemplate' is required");
 		}
 	}
 
+
+	/**
+	 * Obtain a CciTemplate derived from the main template instance,
+	 * inheriting the ConnectionFactory and other settings but
+	 * overriding the ConnectionSpec used for obtaining Connections.
+	 * @param connectionSpec the CCI ConnectionSpec that the returned
+	 * template instance is supposed to obtain Connections for
+	 * @return the derived template instance
+	 * @see org.springframework.jca.cci.core.CciTemplate#getDerivedTemplate(javax.resource.cci.ConnectionSpec)
+	 */
+	protected final CciTemplate getCciTemplate(ConnectionSpec connectionSpec) {
+		return getCciTemplate().getDerivedTemplate(connectionSpec);
+	}
 
 	/**
 	 * Get a CCI Connection, either from the current transaction or a new one.

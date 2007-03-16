@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
+import javax.resource.cci.ConnectionSpec;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.InteractionSpec;
@@ -51,9 +52,9 @@ import org.springframework.util.Assert;
  * catching ResourceExceptions and translating them to the generic exception
  * hierarchy defined in the <code>org.springframework.dao</code> package.
  *
- * <p>Code using this class can pass in and receive CCI Record instances,
- * or alternatively implement callback interfaces for creating input Records
- * and extracting result objects from output Records (or CCI ResultSets).
+ * <p>Code using this class can pass in and receive {@link javax.resource.cci.Record}
+ * instances, or alternatively implement callback interfaces for creating input
+ * Records and extracting result objects from output Records (or CCI ResultSets).
  *
  * <p>Can be used within a service implementation via direct instantiation
  * with a ConnectionFactory reference, or get prepared in an application context
@@ -74,38 +75,47 @@ public class CciTemplate implements CciOperations {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * Used to obtain connections throughout the lifecycle of this object.
-	 * This enables this class to close connections if necessary.
-	 */
 	private ConnectionFactory connectionFactory;
+
+	private ConnectionSpec connectionSpec;
 
 	private RecordCreator outputRecordCreator;
 
 
 	/**
 	 * Construct a new CciTemplate for bean usage.
-	 * Note: The ConnectionFactory has to be set before using the instance.
-	 * This constructor can be used to prepare a CciTemplate via a BeanFactory,
-	 * typically setting the ConnectionFactory via setConnectionFactory.
+	 * <p>Note: The ConnectionFactory has to be set before using the instance.
 	 * @see #setConnectionFactory
 	 */
 	public CciTemplate() {
 	}
 
 	/**
-	 * Construct a new CciTemplate, given a ConnectionFactory to obtain connections from.
+	 * Construct a new CciTemplate, given a ConnectionFactory to obtain Connections from.
 	 * Note: This will trigger eager initialization of the exception translator.
-	 * @param connectionFactory JCA ConnectionFactory to obtain connections from
+	 * @param connectionFactory JCA ConnectionFactory to obtain Connections from
 	 */
 	public CciTemplate(ConnectionFactory connectionFactory) {
 		setConnectionFactory(connectionFactory);
 		afterPropertiesSet();
 	}
 
+	/**
+	 * Construct a new CciTemplate, given a ConnectionFactory to obtain Connections from.
+	 * Note: This will trigger eager initialization of the exception translator.
+	 * @param connectionFactory JCA ConnectionFactory to obtain Connections from
+	 * @param connectionSpec the CCI ConnectionSpec to obtain Connections for
+	 * (may be <code>null</code>)
+	 */
+	public CciTemplate(ConnectionFactory connectionFactory, ConnectionSpec connectionSpec) {
+		setConnectionFactory(connectionFactory);
+		setConnectionSpec(connectionSpec);
+		afterPropertiesSet();
+	}
+
 
 	/**
-	 * Set the CCI ConnectionFactory to obtain connections from.
+	 * Set the CCI ConnectionFactory to obtain Connections from.
 	 */
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
@@ -116,6 +126,21 @@ public class CciTemplate implements CciOperations {
 	 */
 	public ConnectionFactory getConnectionFactory() {
 		return this.connectionFactory;
+	}
+
+	/**
+	 * Set the CCI ConnectionSpec that this template instance is
+	 * supposed to obtain Connections for.
+	 */
+	public void setConnectionSpec(ConnectionSpec connectionSpec) {
+		this.connectionSpec = connectionSpec;
+	}
+
+	/**
+	 * Return the CCI ConnectionSpec used by this template, if any.
+	 */
+	public ConnectionSpec getConnectionSpec() {
+		return this.connectionSpec;
 	}
 
 	/**
@@ -141,23 +166,37 @@ public class CciTemplate implements CciOperations {
 		return this.outputRecordCreator;
 	}
 
-	/**
-	 * Eagerly initialize the exception translator,
-	 * creating a default one for the specified ConnectionFactory if none set.
-	 */
 	public void afterPropertiesSet() {
 		if (getConnectionFactory() == null) {
-			throw new IllegalArgumentException("connectionFactory is required");
+			throw new IllegalArgumentException("Property 'connectionFactory' is required");
 		}
+	}
+
+
+	/**
+	 * Create a template derived from this template instance,
+	 * inheriting the ConnectionFactory and other settings but
+	 * overriding the ConnectionSpec used for obtaining Connections.
+	 * @param connectionSpec the CCI ConnectionSpec that the derived template
+	 * instance is supposed to obtain Connections for
+	 * @return the derived template instance
+	 * @see #setConnectionSpec
+	 */
+	public CciTemplate getDerivedTemplate(ConnectionSpec connectionSpec) {
+		CciTemplate derived = new CciTemplate();
+		derived.setConnectionFactory(getConnectionFactory());
+		derived.setConnectionSpec(connectionSpec);
+		derived.setOutputRecordCreator(getOutputRecordCreator());
+		return derived;
 	}
 
 
 	public Object execute(ConnectionCallback action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
-		Connection connection = ConnectionFactoryUtils.getConnection(getConnectionFactory());
+		Connection con = ConnectionFactoryUtils.getConnection(getConnectionFactory(), getConnectionSpec());
 		try {
-			return action.doInConnection(connection, getConnectionFactory());
+			return action.doInConnection(con, getConnectionFactory());
 		}
 		catch (NotSupportedException ex) {
 			throw new CciOperationNotSupportedException("CCI operation not supported by connector", ex);
@@ -169,7 +208,7 @@ public class CciTemplate implements CciOperations {
 			throw new InvalidResultSetAccessException("Parsing of CCI ResultSet failed", ex);
 		}
 		finally {
-			ConnectionFactoryUtils.releaseConnection(connection, getConnectionFactory());
+			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory());
 		}
 	}
 

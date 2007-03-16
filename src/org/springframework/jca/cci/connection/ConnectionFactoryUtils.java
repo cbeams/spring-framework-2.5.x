@@ -19,6 +19,7 @@ package org.springframework.jca.cci.connection;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
+import javax.resource.cci.ConnectionSpec;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,11 +68,38 @@ public abstract class ConnectionFactoryUtils {
 	 * @see #releaseConnection
 	 */
 	public static Connection getConnection(ConnectionFactory cf) throws CannotGetCciConnectionException {
+		return getConnection(cf, null);
+	}
+
+	/**
+	 * Obtain a Connection from the given ConnectionFactory. Translates ResourceExceptions
+	 * into the Spring hierarchy of unchecked generic data access exceptions, simplifying
+	 * calling code and making any exception that is thrown more meaningful.
+	 * <p>Is aware of a corresponding Connection bound to the current thread, for example
+	 * when using {@link CciLocalTransactionManager}. Will bind a Connection to the thread
+	 * if transaction synchronization is active (e.g. if in a JTA transaction).
+	 * @param cf the ConnectionFactory to obtain Connection from
+	 * @param spec the ConnectionSpec for the desired Connection (may be <code>null</code>).
+	 * Note: If this is specified, a new Connection will be obtained for every call,
+	 * without participating in a shared transactional Connection.
+	 * @return a CCI Connection from the given ConnectionFactory
+	 * @throws org.springframework.jca.cci.CannotGetCciConnectionException
+	 * if the attempt to get a Connection failed
+	 * @see #releaseConnection
+	 */
+	public static Connection getConnection(ConnectionFactory cf, ConnectionSpec spec)
+			throws CannotGetCciConnectionException {
 		try {
-			return doGetConnection(cf);
+			if (spec != null) {
+				Assert.notNull(cf, "No ConnectionFactory specified");
+				return cf.getConnection(spec);
+			}
+			else {
+				return doGetConnection(cf);
+			}
 		}
 		catch (ResourceException ex) {
-			throw new CannotGetCciConnectionException("Could not get CCI connection", ex);
+			throw new CannotGetCciConnectionException("Could not get CCI Connection", ex);
 		}
 	}
 
