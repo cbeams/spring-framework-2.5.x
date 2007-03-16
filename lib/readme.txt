@@ -382,8 +382,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JPA support with TopLink as provider
 
-* velocity/velocity-1.4.jar
-- Velocity 1.4 (http://jakarta.apache.org/velocity)
+* velocity/velocity-1.5.jar
+- Velocity 1.5 (http://jakarta.apache.org/velocity)
 - required for building the framework
 - required at runtime when using Spring's VelocityView
 

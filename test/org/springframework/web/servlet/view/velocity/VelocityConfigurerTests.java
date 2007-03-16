@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.velocity;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -32,6 +33,7 @@ import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.UrlResource;
 import org.springframework.ui.velocity.VelocityEngineFactoryBean;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
@@ -86,10 +88,15 @@ public class VelocityConfigurerTests extends TestCase {
 		vefb.setResourceLoaderPath("file:/mydir");
 		vefb.setResourceLoader(new ResourceLoader() {
 			public Resource getResource(String location) {
-				if (!("file:/mydir".equals(location) || "file:/mydir/test".equals(location))) {
-					throw new IllegalArgumentException(location);
+				if (location.equals("file:/mydir") || location.equals("file:/mydir/test")) {
+					return new ByteArrayResource("test".getBytes(), "test");
 				}
-				return new ByteArrayResource("test".getBytes(), "test");
+				try {
+					return new UrlResource(location);
+				}
+				catch (MalformedURLException ex) {
+					throw new IllegalArgumentException(ex.toString());
+				}
 			}
 			public ClassLoader getClassLoader() {
 				return getClass().getClassLoader();
