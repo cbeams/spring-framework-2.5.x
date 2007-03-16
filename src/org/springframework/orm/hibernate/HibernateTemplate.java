@@ -161,6 +161,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		afterPropertiesSet();
 	}
 
+
 	/**
 	 * Set if a new Session should be created when no transactional Session
 	 * can be found for the current thread.
@@ -179,7 +180,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Return if a new Session should be created if no thread-bound found.
 	 */
 	public boolean isAllowCreate() {
-		return allowCreate;
+		return this.allowCreate;
 	}
 
 	/**
@@ -202,7 +203,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Return whether to always use a new Hibernate Session for this template.
 	 */
 	public boolean isAlwaysUseNewSession() {
-		return alwaysUseNewSession;
+		return this.alwaysUseNewSession;
 	}
 
 	/**
@@ -226,7 +227,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * code, or rather a Session proxy.
 	 */
 	public boolean isExposeNativeSession() {
-		return exposeNativeSession;
+		return this.exposeNativeSession;
 	}
 
 	/**
@@ -248,7 +249,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * mode in case of write operations (save/update/delete).
 	 */
 	public boolean isCheckWriteOperations() {
-		return checkWriteOperations;
+		return this.checkWriteOperations;
 	}
 
 	/**
@@ -270,7 +271,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Return whether to cache all queries executed by this template.
 	 */
 	public boolean isCacheQueries() {
-		return cacheQueries;
+		return this.cacheQueries;
 	}
 
 	/**
@@ -291,7 +292,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Return the name of the cache region for queries executed by this template.
 	 */
 	public String getQueryCacheRegion() {
-		return queryCacheRegion;
+		return this.queryCacheRegion;
 	}
 
 	/**
@@ -309,7 +310,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Return the fetch size specified for this HibernateTemplate.
 	 */
 	public int getFetchSize() {
-		return fetchSize;
+		return this.fetchSize;
 	}
 
 	/**
@@ -328,7 +329,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Return the maximum number of rows specified for this HibernateTemplate.
 	 */
 	public int getMaxResults() {
-		return maxResults;
+		return this.maxResults;
 	}
 
 

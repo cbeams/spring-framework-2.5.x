@@ -158,6 +158,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		afterPropertiesSet();
 	}
 
+
 	/**
 	 * Set if a new Session should be created when no transactional Session
 	 * can be found for the current thread.
@@ -176,7 +177,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Return if a new Session should be created if no thread-bound found.
 	 */
 	public boolean isAllowCreate() {
-		return allowCreate;
+		return this.allowCreate;
 	}
 
 	/**
@@ -199,14 +200,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Return whether to always use a new Hibernate Session for this template.
 	 */
 	public boolean isAlwaysUseNewSession() {
-		return alwaysUseNewSession;
+		return this.alwaysUseNewSession;
 	}
 
 	/**
-	 * Set whether to expose the native Hibernate Session to HibernateCallback
-	 * code. Default is "false": a Session proxy will be returned,
-	 * suppressing <code>close</code> calls and automatically applying
-	 * query cache settings and transaction timeouts.
+	 * Set whether to expose the native Hibernate Session to
+	 * HibernateCallback code.
+	 * <p>Default is "false": a Session proxy will be returned, suppressing
+	 * <code>close</code> calls and automatically applying query cache
+	 * settings and transaction timeouts.
 	 * @see HibernateCallback
 	 * @see org.hibernate.Session
 	 * @see #setCacheQueries
@@ -219,11 +221,11 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	/**
-	 * Return whether to expose the native Hibernate Session to HibernateCallback
-	 * code, or rather a Session proxy.
+	 * Return whether to expose the native Hibernate Session to
+	 * HibernateCallback code, or rather a Session proxy.
 	 */
 	public boolean isExposeNativeSession() {
-		return exposeNativeSession;
+		return this.exposeNativeSession;
 	}
 
 	/**
@@ -245,12 +247,12 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * mode in case of write operations (save/update/delete).
 	 */
 	public boolean isCheckWriteOperations() {
-		return checkWriteOperations;
+		return this.checkWriteOperations;
 	}
 
 	/**
 	 * Set whether to cache all queries executed by this template.
-	 * If this is true, all Query and Criteria objects created by
+	 * <p>If this is "true", all Query and Criteria objects created by
 	 * this template will be marked as cacheable (including all
 	 * queries through find methods).
 	 * <p>To specify the query region to be used for queries cached
@@ -267,12 +269,12 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Return whether to cache all queries executed by this template.
 	 */
 	public boolean isCacheQueries() {
-		return cacheQueries;
+		return this.cacheQueries;
 	}
 
 	/**
 	 * Set the name of the cache region for queries executed by this template.
-	 * If this is specified, it will be applied to all Query and Criteria objects
+	 * <p>If this is specified, it will be applied to all Query and Criteria objects
 	 * created by this template (including all queries through find methods).
 	 * <p>The cache region will not take effect unless queries created by this
 	 * template are configured to be cached via the "cacheQueries" property.
@@ -288,7 +290,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Return the name of the cache region for queries executed by this template.
 	 */
 	public String getQueryCacheRegion() {
-		return queryCacheRegion;
+		return this.queryCacheRegion;
 	}
 
 	/**
@@ -306,7 +308,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Return the fetch size specified for this HibernateTemplate.
 	 */
 	public int getFetchSize() {
-		return fetchSize;
+		return this.fetchSize;
 	}
 
 	/**
@@ -325,7 +327,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * Return the maximum number of rows specified for this HibernateTemplate.
 	 */
 	public int getMaxResults() {
-		return maxResults;
+		return this.maxResults;
 	}
 
 
