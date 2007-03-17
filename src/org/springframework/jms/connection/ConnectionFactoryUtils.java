@@ -84,6 +84,21 @@ public abstract class ConnectionFactoryUtils {
 		}
 	}
 
+	/**
+	 * Determine whether the given JMS Session is transactional, that is,
+	 * bound to the current thread by Spring's transaction facilities.
+	 * @param session the JMS Session to check
+	 * @param cf the JMS ConnectionFactory that the Session originated from
+	 * @return whether the Session is transactional
+	 */
+	public static boolean isSessionTransactional(Session session, ConnectionFactory cf) {
+		if (session == null || cf == null) {
+			return false;
+		}
+		JmsResourceHolder resourceHolder = (JmsResourceHolder) TransactionSynchronizationManager.getResource(cf);
+		return (resourceHolder != null && resourceHolder.containsSession(session));
+	}
+
 
 	/**
 	 * Obtain a JMS Session that is synchronized with the current transaction, if any.
@@ -222,20 +237,20 @@ public abstract class ConnectionFactoryUtils {
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
 			return null;
 		}
-		JmsResourceHolder conHolderToUse = resourceHolder;
-		if (conHolderToUse == null) {
-			conHolderToUse = new JmsResourceHolder(connectionFactory);
+		JmsResourceHolder resourceHolderToUse = resourceHolder;
+		if (resourceHolderToUse == null) {
+			resourceHolderToUse = new JmsResourceHolder(connectionFactory);
 		}
-		Connection con = resourceFactory.getConnection(conHolderToUse);
+		Connection con = resourceFactory.getConnection(resourceHolderToUse);
 		Session session = null;
 		try {
 			boolean isExistingCon = (con != null);
 			if (!isExistingCon) {
 				con = resourceFactory.createConnection();
-				conHolderToUse.addConnection(con);
+				resourceHolderToUse.addConnection(con);
 			}
 			session = resourceFactory.createSession(con);
-			conHolderToUse.addSession(session, con);
+			resourceHolderToUse.addSession(session, con);
 			if (!isExistingCon) {
 				con.start();
 			}
@@ -259,12 +274,12 @@ public abstract class ConnectionFactoryUtils {
 			}
 			throw ex;
 		}
-		if (conHolderToUse != resourceHolder) {
+		if (resourceHolderToUse != resourceHolder) {
 			TransactionSynchronizationManager.registerSynchronization(
 					new JmsResourceSynchronization(
-							connectionFactory, conHolderToUse, resourceFactory.isSynchedLocalTransactionAllowed()));
-			conHolderToUse.setSynchronizedWithTransaction(true);
-			TransactionSynchronizationManager.bindResource(connectionFactory, conHolderToUse);
+							connectionFactory, resourceHolderToUse, resourceFactory.isSynchedLocalTransactionAllowed()));
+			resourceHolderToUse.setSynchronizedWithTransaction(true);
+			TransactionSynchronizationManager.bindResource(connectionFactory, resourceHolderToUse);
 		}
 		return session;
 	}

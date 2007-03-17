@@ -137,6 +137,10 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 		}
 	}
 
+	public boolean containsSession(Session session) {
+		return this.sessions.contains(session);
+	}
+
 
 	public Connection getConnection() {
 		return (!this.connections.isEmpty() ? (Connection) this.connections.get(0) : null);
