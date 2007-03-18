@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,27 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 
 /**
- * Subinterface of Connection to be implemented by connection proxies.
- * Allows access to the target connection.
+ * Subinterface of {@link java.sql.Connection} to be implemented by
+ * Connection proxies. Allows access to the underlying target Connection.
  *
- * <p>Can be checked for when needing to cast to a native Connection
- * like OracleConnection. Spring's NativeJdbcExtractorAdapter automatically
- * detects such proxies before delegating to the actual unwrapping for a
- * specific connection pool.
+ * <p>This interface can be checked when there is a need to cast to a
+ * native JDBC Connection such as Oracle's OracleConnection. Spring's
+ * {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractorAdapter}
+ * automatically detects such proxies before delegating to the actual
+ * unwrapping for a specific connection pool.
  *
  * @author Juergen Hoeller
  * @since 1.1
- * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractorAdapter#getNativeConnection
+ * @see TransactionAwareDataSourceProxy
+ * @see LazyConnectionDataSourceProxy
  */
 public interface ConnectionProxy extends Connection {
 
 	/**
-	 * Return the target connection of this proxy.
-	 * <p>This will typically either be the native JDBC Connection
+	 * Return the target Connection of this proxy.
+	 * <p>This will typically be the native driver Connection
 	 * or a wrapper from a connection pool.
+	 * @return the underlying Connection (never <code>null</code>)
 	 */
 	Connection getTargetConnection();
 
