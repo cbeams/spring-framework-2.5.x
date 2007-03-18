@@ -147,7 +147,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * but rather just in plain Hibernate code.</b> Either rely on a thread-bound
 	 * Session or use it in combination with {@link #releaseSession}.
 	 * <p>In general, it is recommended to use
-	 * {@see #getHibernateTemplate() HibernateTemplate}, either with
+	 * {@link #getHibernateTemplate() HibernateTemplate}, either with
 	 * the provided convenience operations or with a custom
 	 * {@link org.springframework.orm.hibernate3.HibernateCallback} that
 	 * provides you with a Session to work on. HibernateTemplate will care
