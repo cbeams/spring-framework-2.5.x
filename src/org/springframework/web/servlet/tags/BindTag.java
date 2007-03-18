@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,26 +26,25 @@ import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**
- * <p>Bind tag, supporting evaluation of binding errors for a certain
- * bean or bean property. Exports a "status" variable of type BindStatus,
- * both to Java expressions and JSP EL expressions.
+ * Bind tag, supporting evaluation of binding errors for a certain
+ * bean or bean property. Exposes a "status" variable of type
+ * {@link org.springframework.web.servlet.support.BindStatus},
+ * to both Java expressions and JSP EL expressions.
  *
  * <p>Can be used to bind to any bean or bean property in the model.
  * The specified path determines whether the tag exposes the status of the
  * bean itself (showing object-level errors), a specific bean property
- * (showing field errors), or a matching set of bean properties (showing
- * all corresponding field errors).
+ * (showing field errors), or a matching set of bean properties
+ * (showing all corresponding field errors).
  *
- * <p>The Errors object that has been bound using this tag is exposed,
- * as well as the bean property that this errors object applies to.
- * Nested tags like the transform tag can access those exposed properties.
+ * <p>The {@link org.springframework.validation.Errors} object that has
+ * been bound using this tag is exposed to collaborating tags, as well
+ * as the bean property that this errors object applies to. Nested tags
+ * such as the {@link TransformTag} can access those exposed properties.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setPath
- * @see #getErrors
- * @see #getProperty
- * @see TransformTag
  */
 public class BindTag extends HtmlEscapingAwareTag {
 
@@ -61,7 +60,9 @@ public class BindTag extends HtmlEscapingAwareTag {
 
 	private BindStatus status;
 
-	private Object previousStatus;
+	private Object previousPageStatus;
+
+	private Object previousRequestStatus;
 
 
 	/**
@@ -81,7 +82,7 @@ public class BindTag extends HtmlEscapingAwareTag {
 	 * Return the path that this tag applies to.
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
@@ -96,7 +97,7 @@ public class BindTag extends HtmlEscapingAwareTag {
 	 * Return whether to ignore a nested path, if any.
 	 */
 	public boolean isIgnoreNestedPath() {
-	  return ignoreNestedPath;
+	  return this.ignoreNestedPath;
 	}
 
 
@@ -118,26 +119,29 @@ public class BindTag extends HtmlEscapingAwareTag {
 			throw new JspTagException(ex.getMessage());
 		}
 
-		// Save previous status value, for re-exposure at the end of this tag.
-		this.previousStatus = pageContext.getAttribute(STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+		// Save previous status values, for re-exposure at the end of this tag.
+		this.previousPageStatus = pageContext.getAttribute(STATUS_VARIABLE_NAME, PageContext.PAGE_SCOPE);
+		this.previousRequestStatus = pageContext.getAttribute(STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 
 		// Expose this tag's status object as PageContext attribute,
 		// making it available for JSP EL.
+		pageContext.removeAttribute(STATUS_VARIABLE_NAME, PageContext.PAGE_SCOPE);
 		pageContext.setAttribute(STATUS_VARIABLE_NAME, this.status, PageContext.REQUEST_SCOPE);
 
 		return EVAL_BODY_INCLUDE;
 	}
 
 	public int doEndTag() {
-		if (this.previousStatus != null) {
-			// Reset previous status value.
-			pageContext.setAttribute(STATUS_VARIABLE_NAME, this.previousStatus, PageContext.REQUEST_SCOPE);
+		// Reset previous status values.
+		if (this.previousPageStatus != null) {
+			pageContext.setAttribute(STATUS_VARIABLE_NAME, this.previousPageStatus, PageContext.PAGE_SCOPE);
+		}
+		if (this.previousRequestStatus != null) {
+			pageContext.setAttribute(STATUS_VARIABLE_NAME, this.previousRequestStatus, PageContext.REQUEST_SCOPE);
 		}
 		else {
-			// Remove exposed status value.
 			pageContext.removeAttribute(STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		}
-
 		return EVAL_PAGE;
 	}
 
@@ -175,7 +179,8 @@ public class BindTag extends HtmlEscapingAwareTag {
 	public void doFinally() {
 		super.doFinally();
 		this.status = null;
-		this.previousStatus = null;
+		this.previousPageStatus = null;
+		this.previousRequestStatus = null;
 	}
 
 }
