@@ -28,6 +28,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.ResourceTransactionManager;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager}
@@ -91,7 +92,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see LazyConnectionDataSourceProxy
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
-public class DataSourceTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
+public class DataSourceTransactionManager extends AbstractPlatformTransactionManager
+		implements ResourceTransactionManager, InitializingBean {
 
 	private DataSource dataSource;
 
@@ -150,11 +152,15 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	}
 
 	public void afterPropertiesSet() {
-		if (this.dataSource == null) {
+		if (getDataSource() == null) {
 			throw new IllegalArgumentException("Property 'dataSource' is required");
 		}
 	}
 
+
+	public Object getResourceFactory() {
+		return getDataSource();
+	}
 
 	protected Object doGetTransaction() {
 		DataSourceTransactionObject txObject = new DataSourceTransactionObject();

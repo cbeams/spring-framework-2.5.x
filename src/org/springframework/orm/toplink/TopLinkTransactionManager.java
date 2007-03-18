@@ -37,6 +37,7 @@ import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -99,7 +100,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
   * @see org.springframework.transaction.jta.JtaTransactionManager
  */
-public class TopLinkTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
+public class TopLinkTransactionManager extends AbstractPlatformTransactionManager
+		implements ResourceTransactionManager, InitializingBean {
 
 	private SessionFactory sessionFactory;
 
@@ -188,7 +190,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	 * Return the JDBC DataSource that this instance manages transactions for.
 	 */
 	public DataSource getDataSource() {
-		return dataSource;
+		return this.dataSource;
 	}
 
 	/**
@@ -213,7 +215,7 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	 * transaction.
 	 */
 	public boolean isLazyDatabaseTransaction() {
-		return lazyDatabaseTransaction;
+		return this.lazyDatabaseTransaction;
 	}
 
 	/**
@@ -239,11 +241,15 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	}
 
 	public void afterPropertiesSet() {
-		if (this.sessionFactory == null) {
-			throw new IllegalArgumentException("sessionFactory is required");
+		if (getSessionFactory() == null) {
+			throw new IllegalArgumentException("Property 'sessionFactory' is required");
 		}
 	}
 
+
+	public Object getResourceFactory() {
+		return getSessionFactory();
+	}
 
 	protected Object doGetTransaction() {
 		TopLinkTransactionObject txObject = new TopLinkTransactionObject();

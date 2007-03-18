@@ -30,6 +30,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.ResourceTransactionManager;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
@@ -59,7 +60,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see TransactionAwareConnectionFactoryProxy
  * @see org.springframework.jca.cci.core.CciTemplate
  */
-public class CciLocalTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
+public class CciLocalTransactionManager extends AbstractPlatformTransactionManager
+		implements ResourceTransactionManager, InitializingBean {
 
 	private ConnectionFactory connectionFactory;
 
@@ -107,11 +109,15 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	}
 
 	public void afterPropertiesSet() {
-		if (this.connectionFactory == null) {
+		if (getConnectionFactory() == null) {
 			throw new IllegalArgumentException("Property 'connectionFactory' is required");
 		}
 	}
 
+
+	public Object getResourceFactory() {
+		return getConnectionFactory();
+	}
 
 	protected Object doGetTransaction() {
 		CciLocalTransactionObject txObject = new CciLocalTransactionObject();

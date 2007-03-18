@@ -35,6 +35,7 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -97,7 +98,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
-public class JdoTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
+public class JdoTransactionManager extends AbstractPlatformTransactionManager
+		implements ResourceTransactionManager, InitializingBean {
 
 	private static boolean jdoSetRollbackOnlyAvailable;
 
@@ -157,7 +159,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 * Return the PersistenceManagerFactory that this instance should manage transactions for.
 	 */
 	public PersistenceManagerFactory getPersistenceManagerFactory() {
-		return persistenceManagerFactory;
+		return this.persistenceManagerFactory;
 	}
 
 	/**
@@ -201,7 +203,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 * Return the JDBC DataSource that this instance manages transactions for.
 	 */
 	public DataSource getDataSource() {
-		return dataSource;
+		return this.dataSource;
 	}
 
 	/**
@@ -244,7 +246,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 */
 	public void afterPropertiesSet() {
 		if (getPersistenceManagerFactory() == null) {
-			throw new IllegalArgumentException("persistenceManagerFactory is required");
+			throw new IllegalArgumentException("Property 'persistenceManagerFactory' is required");
 		}
 		// Build default JdoDialect if none explicitly specified.
 		if (this.jdoDialect == null) {
@@ -265,6 +267,10 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
+
+	public Object getResourceFactory() {
+		return getPersistenceManagerFactory();
+	}
 
 	protected Object doGetTransaction() {
 		JdoTransactionObject txObject = new JdoTransactionObject();

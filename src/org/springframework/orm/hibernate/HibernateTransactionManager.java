@@ -44,6 +44,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -127,7 +128,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
-		implements BeanFactoryAware, InitializingBean {
+		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
 	private SessionFactory sessionFactory;
 
@@ -174,7 +175,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Return the SessionFactory that this instance should manage transactions for.
 	 */
 	public SessionFactory getSessionFactory() {
-		return sessionFactory;
+		return this.sessionFactory;
 	}
 
 	/**
@@ -217,7 +218,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Return the JDBC DataSource that this instance manages transactions for.
 	 */
 	public DataSource getDataSource() {
-		return dataSource;
+		return this.dataSource;
 	}
 
 	/**
@@ -339,10 +340,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
-			throw new IllegalArgumentException("sessionFactory is required");
+			throw new IllegalArgumentException("Property 'sessionFactory' is required");
 		}
 		if (this.entityInterceptor instanceof String && this.beanFactory == null) {
-			throw new IllegalArgumentException("beanFactory is required for entityInterceptorBeanName");
+			throw new IllegalArgumentException("'beanFactory' is required for 'entityInterceptorBeanName'");
 		}
 
 		// Check for SessionFactory's DataSource.
@@ -359,6 +360,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
+
+	public Object getResourceFactory() {
+		return getSessionFactory();
+	}
 
 	protected Object doGetTransaction() {
 		HibernateTransactionObject txObject = new HibernateTransactionObject();

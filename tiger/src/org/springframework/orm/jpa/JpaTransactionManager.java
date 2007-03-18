@@ -42,6 +42,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -101,7 +102,8 @@ import org.springframework.util.CollectionUtils;
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
-public class JpaTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
+public class JpaTransactionManager extends AbstractPlatformTransactionManager
+		implements ResourceTransactionManager, InitializingBean {
 
 	private EntityManagerFactory entityManagerFactory;
 
@@ -262,6 +264,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
+
+	public Object getResourceFactory() {
+		return getEntityManagerFactory();
+	}
 
 	protected Object doGetTransaction() {
 		JpaTransactionObject txObject = new JpaTransactionObject();

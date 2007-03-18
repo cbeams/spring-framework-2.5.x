@@ -50,6 +50,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -135,7 +136,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
-		implements BeanFactoryAware, InitializingBean {
+		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
 	// Determine whether the Hibernate 3.1 Transaction.setTimeout(int) method
 	// is available, for use in this HibernateTransactionManager's doBegin.
@@ -192,7 +193,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Return the SessionFactory that this instance should manage transactions for.
 	 */
 	public SessionFactory getSessionFactory() {
-		return sessionFactory;
+		return this.sessionFactory;
 	}
 
 	/**
@@ -235,7 +236,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * Return the JDBC DataSource that this instance manages transactions for.
 	 */
 	public DataSource getDataSource() {
-		return dataSource;
+		return this.dataSource;
 	}
 
 	/**
@@ -386,6 +387,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 	}
 
+
+	public Object getResourceFactory() {
+		return getSessionFactory();
+	}
 
 	protected Object doGetTransaction() {
 		HibernateTransactionObject txObject = new HibernateTransactionObject();

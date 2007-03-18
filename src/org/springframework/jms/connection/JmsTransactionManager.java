@@ -31,6 +31,8 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.SmartTransactionObject;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.ResourceTransactionManager;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
@@ -75,7 +77,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see TransactionAwareConnectionFactoryProxy
  * @see org.springframework.jms.core.JmsTemplate
  */
-public class JmsTransactionManager extends AbstractPlatformTransactionManager {
+public class JmsTransactionManager extends AbstractPlatformTransactionManager
+		implements ResourceTransactionManager, InitializingBean {
 
 	private ConnectionFactory connectionFactory;
 
@@ -130,36 +133,18 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 	}
 
 	/**
-	 * Make sure the connection factory has been set.
+	 * Make sure the ConnectionFactory has been set.
 	 */
 	public void afterPropertiesSet() {
-		if (this.connectionFactory == null) {
+		if (getConnectionFactory() == null) {
 			throw new IllegalArgumentException("Property 'connectionFactory' is required");
 		}
 	}
 
 
-	/**
-	 * Create a JMS Connection via this template's ConnectionFactory.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @return the new JMS Connection
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
-	 */
-	protected Connection createConnection() throws JMSException {
-		return getConnectionFactory().createConnection();
+	public Object getResourceFactory() {
+		return getConnectionFactory();
 	}
-
-	/**
-	 * Create a JMS Session for the given Connection.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @param con the JMS Connection to create a Session for
-	 * @return the new JMS Session
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
-	 */
-	protected Session createSession(Connection con) throws JMSException {
-		return con.createSession(true, Session.AUTO_ACKNOWLEDGE);
-	}
-
 
 	protected Object doGetTransaction() {
 		JmsTransactionObject txObject = new JmsTransactionObject();
@@ -269,6 +254,32 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 		TransactionSynchronizationManager.unbindResource(getConnectionFactory());
 		txObject.getResourceHolder().closeAll();
 		txObject.getResourceHolder().clear();
+	}
+
+
+	//-------------------------------------------------------------------------
+	// JMS 1.1 factory methods, potentially overridden for JMS 1.0.2
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Create a JMS Connection via this template's ConnectionFactory.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @return the new JMS Connection
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 */
+	protected Connection createConnection() throws JMSException {
+		return getConnectionFactory().createConnection();
+	}
+
+	/**
+	 * Create a JMS Session for the given Connection.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @param con the JMS Connection to create a Session for
+	 * @return the new JMS Session
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 */
+	protected Session createSession(Connection con) throws JMSException {
+		return con.createSession(true, Session.AUTO_ACKNOWLEDGE);
 	}
 
 

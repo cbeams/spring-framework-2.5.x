@@ -100,8 +100,9 @@ public abstract class TransactionSynchronizationManager {
 	 * Return all resources that are bound to the current thread.
 	 * <p>Mainly for debugging purposes. Resource managers should always invoke
 	 * <code>hasResource</code> for a specific resource key that they are interested in.
-	 * @return Map with resource keys and resource objects,
-	 * or empty Map if currently none bound
+	 * @return a Map with resource keys (usually the resource factory) and resource
+	 * values (usually the active resource object), or an empty Map if there are
+	 * currently no resources bound
 	 * @see #hasResource
 	 */
 	public static Map getResourceMap() {
@@ -111,8 +112,9 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Check if there is a resource for the given key bound to the current thread.
-	 * @param key key to check
+	 * @param key the key to check (usually the resource factory)
 	 * @return if there is a value bound to the current thread
+	 * @see ResourceTransactionManager#getResourceFactory() 
 	 */
 	public static boolean hasResource(Object key) {
 		Assert.notNull(key, "Key must not be null");
@@ -122,8 +124,10 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Retrieve a resource for the given key that is bound to the current thread.
-	 * @param key key to check
-	 * @return a value bound to the current thread, or <code>null</code> if none
+	 * @param key the key to check (usually the resource factory)
+	 * @return a value bound to the current thread (usually the active
+	 * resource object), or <code>null</code> if none
+	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public static Object getResource(Object key) {
 		Assert.notNull(key, "Key must not be null");
@@ -141,9 +145,10 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Bind the given resource for the given key to the current thread.
-	 * @param key key to bind the value to
-	 * @param value value to bind
+	 * @param key the key to bind the value to (usually the resource factory)
+	 * @param value the value to bind (usually the active resource object)
 	 * @throws IllegalStateException if there is already a value bound to the thread
+	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public static void bindResource(Object key, Object value) throws IllegalStateException {
 		Assert.notNull(key, "Key must not be null");
@@ -167,9 +172,10 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Unbind a resource for the given key from the current thread.
-	 * @param key key to check
-	 * @return the previously bound value
+	 * @param key the key to unbind (usually the resource factory)
+	 * @return the previously bound value (usually the active resource object)
 	 * @throws IllegalStateException if there is no value bound to the thread
+	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public static Object unbindResource(Object key) throws IllegalStateException {
 		Assert.notNull(key, "Key must not be null");
