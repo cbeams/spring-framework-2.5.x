@@ -65,6 +65,12 @@ import org.springframework.util.Assert;
  * operate on the same JMS Connection handle - either through reusing the handle
  * or through configuring a {@link SingleConnectionFactory} underneath.
  *
+ * <p>Returned transactional Session proxies will implement the {@link SessionProxy}
+ * interface to allow for access to the underlying target Session. This is only
+ * intended for accessing vendor-specific Session API or for testing purposes
+ * (e.g. to perform manual transaction control). For typical application purposes,
+ * simply use the standard JMS Session interface.
+ *
  * @author Juergen Hoeller
  * @since 2.0
  * @see UserCredentialsConnectionFactoryAdapter
@@ -258,7 +264,7 @@ public class TransactionAwareConnectionFactoryProxy
 
 		private Session getCloseSuppressingSessionProxy(Session target) {
 			List classes = new ArrayList(3);
-			classes.add(Session.class);
+			classes.add(SessionProxy.class);
 			if (target instanceof QueueSession) {
 				classes.add(QueueSession.class);
 			}
@@ -266,7 +272,7 @@ public class TransactionAwareConnectionFactoryProxy
 				classes.add(TopicSession.class);
 			}
 			return (Session) Proxy.newProxyInstance(
-					getClass().getClassLoader(),
+					SessionProxy.class.getClassLoader(),
 					(Class[]) classes.toArray(new Class[classes.size()]),
 					new CloseSuppressingSessionInvocationHandler(target));
 		}
@@ -285,9 +291,13 @@ public class TransactionAwareConnectionFactoryProxy
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			// Invocation on ConnectionProxy interface coming in...
+			// Invocation on SessionProxy interface coming in...
 
-			if (method.getName().equals("equals")) {
+			if (method.getName().equals("getTargetSession")) {
+				// Handle getTargetSession method: return underlying Session.
+				return this.target;
+			}
+			else if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
 				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
 			}
@@ -306,7 +316,7 @@ public class TransactionAwareConnectionFactoryProxy
 				return null;
 			}
 
-			// Invoke method on target Connection.
+			// Invoke method on target Session.
 			try {
 				return method.invoke(this.target, args);
 			}
