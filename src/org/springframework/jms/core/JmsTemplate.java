@@ -206,7 +206,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Return the message converter for this template.
 	 */
 	public MessageConverter getMessageConverter() {
-		return messageConverter;
+		return this.messageConverter;
 	}
 
 
@@ -224,7 +224,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Return whether message IDs are enabled.
 	 */
 	public boolean isMessageIdEnabled() {
-		return messageIdEnabled;
+		return this.messageIdEnabled;
 	}
 
 	/**
@@ -241,7 +241,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Return whether message timestamps are enabled.
 	 */
 	public boolean isMessageTimestampEnabled() {
-		return messageTimestampEnabled;
+		return this.messageTimestampEnabled;
 	}
 
 	/**
@@ -257,14 +257,14 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Return whether to inhibit the delivery of messages published by its own connection.
 	 */
 	public boolean isPubSubNoLocal() {
-		return pubSubNoLocal;
+		return this.pubSubNoLocal;
 	}
 
 	/**
 	 * Set the timeout to use for receive calls.
 	 * The default is -1, which means no timeout.
 	 * @see javax.jms.MessageConsumer#receive(long)
-	 * @see javax.jms.MessageConsumer#receive
+	 * @see javax.jms.MessageConsumer#receive()
 	 */
 	public void setReceiveTimeout(long receiveTimeout) {
 		this.receiveTimeout = receiveTimeout;
@@ -274,7 +274,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Return the timeout to use for receive calls.
 	 */
 	public long getReceiveTimeout() {
-		return receiveTimeout;
+		return this.receiveTimeout;
 	}
 
 
@@ -300,7 +300,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @see #setTimeToLive
 	 */
 	public boolean isExplicitQosEnabled() {
-		return explicitQosEnabled;
+		return this.explicitQosEnabled;
 	}
 
 	/**
@@ -336,7 +336,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Return the delivery mode to use when sending a message.
 	 */
 	public int getDeliveryMode() {
-		return deliveryMode;
+		return this.deliveryMode;
 	}
 
 	/**
@@ -355,7 +355,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Return the priority of a message when sending.
 	 */
 	public int getPriority() {
-		return priority;
+		return this.priority;
 	}
 
 	/**
@@ -375,7 +375,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Return the time-to-live of the message when sending.
 	 */
 	public long getTimeToLive() {
-		return timeToLive;
+		return this.timeToLive;
 	}
 
 
@@ -510,8 +510,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			}
 			doSend(producer, message);
 			// Check commit - avoid commit call within a JTA transaction.
-			if (session.getTransacted() && isSessionTransacted() &&
-					!TransactionSynchronizationManager.hasResource(getConnectionFactory())) {
+			if (session.getTransacted() && isSessionLocallyTransacted(session)) {
 				// Transacted session created by this template -> commit.
 				JmsUtils.commitIfNecessary(session);
 			}
@@ -697,7 +696,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 					consumer.receive(timeout) : consumer.receive();
 			if (session.getTransacted()) {
 				// Commit necessary - but avoid commit call within a JTA transaction.
-				if (isSessionTransacted() && resourceHolder == null) {
+				if (isSessionLocallyTransacted(session)) {
 					// Transacted session created by this template -> commit.
 					JmsUtils.commitIfNecessary(session);
 				}
@@ -792,6 +791,23 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	protected Session getSession(JmsResourceHolder holder) {
 		return holder.getSession();
+	}
+
+	/**
+	 * Check whether the given Session is locally transacted, that is, whether
+	 * its transaction is managed by this listener container's Session handling
+	 * and not by an external transaction coordinator.
+	 * <p>Note: The Session's own transacted flag will already have been checked
+	 * before. This method is about finding out whether the Session's transaction
+	 * is local or externally coordinated.
+	 * @param session the Session to check
+	 * @return whether the given Session is locally transacted
+	 * @see #isSessionTransacted()
+	 * @see org.springframework.jms.connection.ConnectionFactoryUtils#isSessionTransactional
+	 */
+	protected boolean isSessionLocallyTransacted(Session session) {
+		return isSessionTransacted() &&
+				!ConnectionFactoryUtils.isSessionTransactional(session, getConnectionFactory());
 	}
 
 	/**
