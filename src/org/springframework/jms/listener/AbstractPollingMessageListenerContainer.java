@@ -31,6 +31,7 @@ import org.springframework.jms.support.JmsUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.ResourceTransactionManager;
 
 /**
  * Base class for listener container implementations which are based on polling.
@@ -83,6 +84,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	private final MessageListenerContainerResourceFactory transactionalResourceFactory =
 			new MessageListenerContainerResourceFactory();
 
+	private boolean sessionTransactedCalled = false;
+
 	private boolean pubSubNoLocal = false;
 
 	private PlatformTransactionManager transactionManager;
@@ -91,6 +94,11 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 
+
+	public void setSessionTransacted(boolean sessionTransacted) {
+		super.setSessionTransacted(sessionTransacted);
+		this.sessionTransactedCalled = true;
+	}
 
 	/**
 	 * Set whether to inhibit the delivery of messages published by its own connection.
@@ -167,7 +175,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * of course). -1 indicates no timeout at all; however, this is only
 	 * feasible if not running within a transaction manager.
 	 * @see javax.jms.MessageConsumer#receive(long)
-	 * @see javax.jms.MessageConsumer#receive
+	 * @see javax.jms.MessageConsumer#receive()
 	 * @see #setTransactionTimeout
 	 */
 	public void setReceiveTimeout(long receiveTimeout) {
@@ -176,6 +184,12 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 
 	public void initialize() {
+		// Set sessionTransacted=true in case of a non-JTA transaction manager.
+		if (!this.sessionTransactedCalled && this.transactionManager instanceof ResourceTransactionManager &&
+				((ResourceTransactionManager) this.transactionManager).getResourceFactory() != getConnectionFactory()) {
+			super.setSessionTransacted(true);
+		}
+
 		// Use bean name as default transaction name.
 		if (this.transactionDefinition.getName() == null) {
 			this.transactionDefinition.setName(getBeanName());
@@ -207,6 +221,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * wrapping the entire operation in an external transaction if demanded.
 	 * @param session the JMS Session to work on
 	 * @param consumer the MessageConsumer to work on
+	 * @return whether a message has been received
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #doReceiveAndExecute
 	 */
@@ -246,6 +261,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @param session the JMS Session to work on
 	 * @param consumer the MessageConsumer to work on
 	 * @param status the TransactionStatus (may be <code>null</code>)
+	 * @return whether a message has been received
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #doExecuteListener(javax.jms.Session, javax.jms.Message)
 	 */
@@ -316,6 +332,17 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			JmsUtils.closeSession(sessionToClose);
 			ConnectionFactoryUtils.releaseConnection(conToClose, getConnectionFactory(), true);
 		}
+	}
+
+	/**
+	 * This implementation checks whether the Session is externally synchronized.
+	 * In this case, the Session is not locally transacted, despite the listener
+	 * container's "sessionTransacted" flag being set to "true".
+	 * @see org.springframework.jms.connection.ConnectionFactoryUtils#isSessionTransactional
+	 */
+	protected boolean isSessionLocallyTransacted(Session session) {
+		return super.isSessionLocallyTransacted(session) &&
+				!ConnectionFactoryUtils.isSessionTransactional(session, getConnectionFactory());
 	}
 
 	/**

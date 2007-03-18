@@ -351,6 +351,14 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		this.acceptMessagesWhileStopping = acceptMessagesWhileStopping;
 	}
 
+	/**
+	 * Return whether to accept received messages while the listener container
+	 * in the process of stopping.
+	 */
+	protected boolean isAcceptMessagesWhileStopping() {
+		return this.acceptMessagesWhileStopping;
+	}
+
 	protected void validateConfiguration() {
 		if (this.destination == null) {
 			throw new IllegalArgumentException("Property 'destination' or 'destinationName' is required");
@@ -399,16 +407,13 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @see #convertJmsAccessException
 	 */
 	protected void doExecuteListener(Session session, Message message) throws JMSException {
-		if (!this.acceptMessagesWhileStopping && !isRunning()) {
-			if (session.getTransacted() && isSessionTransacted()) {
-				// Transacted session created by this container -> rollback.
-				if (logger.isWarnEnabled()) {
-					logger.warn("Initiating transaction rollback for received message because of the " +
-							"listener container having been stopped in the meantime: " + message);
-				}
-				JmsUtils.rollbackIfNecessary(session);
+		if (!isAcceptMessagesWhileStopping() && !isRunning()) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Rejecting received message because of the listener container " +
+						"having been stopped in the meantime: " + message);
 			}
-			return;
+			rollbackIfNecessary(session);
+			throw new MessageRejectedWhileStoppingException();
 		}
 		try {
 			invokeListener(session, message);
@@ -480,7 +485,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 			listener.onMessage(message, sessionToUse);
 			// Clean up specially exposed Session, if any.
 			if (sessionToUse != session) {
-				if (sessionToUse.getTransacted() && isSessionTransacted()) {
+				if (sessionToUse.getTransacted() && isSessionLocallyTransacted(sessionToUse)) {
 					// Transacted session created by this container -> commit.
 					JmsUtils.commitIfNecessary(sessionToUse);
 				}
@@ -515,13 +520,25 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		// Commit session or acknowledge message.
 		if (session.getTransacted()) {
 			// Commit necessary - but avoid commit call within a JTA transaction.
-			if (isSessionTransacted()) {
+			if (isSessionLocallyTransacted(session)) {
 				// Transacted session created by this container -> commit.
 				JmsUtils.commitIfNecessary(session);
 			}
 		}
 		else if (isClientAcknowledge(session)) {
 			message.acknowledge();
+		}
+	}
+
+	/**
+	 * Perform a rollback, if appropriate.
+	 * @param session the JMS Session to rollback
+	 * @throws javax.jms.JMSException in case of a rollback error
+	 */
+	protected void rollbackIfNecessary(Session session) throws JMSException {
+		if (session.getTransacted() && isSessionLocallyTransacted(session)) {
+			// Transacted session created by this container -> rollback.
+			JmsUtils.rollbackIfNecessary(session);
 		}
 	}
 
@@ -533,7 +550,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	protected void rollbackOnExceptionIfNecessary(Session session, Throwable ex) throws JMSException {
 		try {
-			if (session.getTransacted() && isSessionTransacted()) {
+			if (session.getTransacted() && isSessionLocallyTransacted(session)) {
 				// Transacted session created by this container -> rollback.
 				if (logger.isDebugEnabled()) {
 					logger.debug("Initiating transaction rollback on application exception", ex);
@@ -559,6 +576,22 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
+	 * Check whether the given Session is locally transacted, that is, whether
+	 * its transaction is managed by this listener container's Session handling
+	 * and not by an external transaction coordinator.
+	 * <p>Note: The Session's own transacted flag will already have been checked
+	 * before. This method is about finding out whether the Session's transaction
+	 * is local or externally coordinated.
+	 * @param session the Session to check
+	 * @return whether the given Session is locally transacted
+	 * @see #isSessionTransacted()
+	 * @see org.springframework.jms.connection.ConnectionFactoryUtils#isSessionTransactional
+	 */
+	protected boolean isSessionLocallyTransacted(Session session) {
+		return isSessionTransacted();
+	}
+
+	/**
 	 * Handle the given exception that arose during listener execution.
 	 * <p>The default implementation logs the exception at error level,
 	 * not propagating it to the JMS provider - assuming that all handling of
@@ -567,13 +600,17 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @param ex the exception to handle
 	 */
 	protected void handleListenerException(Throwable ex) {
+		if (ex instanceof MessageRejectedWhileStoppingException) {
+			// Internal exception - has been handled before.
+			return;
+		}
 		if (ex instanceof JMSException) {
 			invokeExceptionListener((JMSException) ex);
 		}
 		if (isActive()) {
 			// Regular case: failed while active.
 			// Log at error level.
-			logger.error("Execution of JMS message listener failed", ex);
+			logger.warn("Execution of JMS message listener failed", ex);
 		}
 		else {
 			// Rare case: listener thread failed after container shutdown.
@@ -592,6 +629,15 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		if (exceptionListener != null) {
 			exceptionListener.onException(ex);
 		}
+	}
+
+
+	/**
+	 * Internal exception class that indicates a rejected message on shutdown.
+	 * Used to trigger a rollback for an external transaction manager in that case.
+	 */
+	private static class MessageRejectedWhileStoppingException extends RuntimeException {
+
 	}
 
 }
