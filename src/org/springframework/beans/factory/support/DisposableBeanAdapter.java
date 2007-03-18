@@ -187,7 +187,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 						if (paramTypes.length == 1) {
 							args[0] = Boolean.TRUE;
 						}
-						if (!Modifier.isPublic(destroyMethod.getModifiers())) {
+						if (!Modifier.isPublic(destroyMethod.getModifiers()) ||
+								!Modifier.isPublic(destroyMethod.getDeclaringClass().getModifiers())) {
 							destroyMethod.setAccessible(true);
 						}
 
