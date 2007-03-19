@@ -12,22 +12,47 @@ Package org.springframework.aop
 Package org.springframework.beans
 * fixed PropertyPlaceholderConfigurer/BeanDefinitionVisitor to correctly handle TypedStringValue objects with null value
 * AbstractFactoryBean offers a protected "getBeanFactory()" method for accessing its BeanFactory reference
+* DefaultListableBeanFactory is able to invoke public init and destroy methods on package-protected classes
 * DefaultNamespaceHandlerResolver logs linkage error at warn level, in case of a handler class found but not loadable
+
+Package org.springframework.dao
+* PersistenceExceptionTranslationInterceptor supports PersistenceExceptionTranslator autodetection in standalone mode
+
+Package org.springframework.jca
+* added "setConnectionSpec" method and corresponding constructor to CciTemplate, for specifying a spec at template level
+* added "getDerivedTemplate(ConnectionSpec) method to CciTemplate, for obtaining a template with just different con spec
+* added "getCciTemplate(ConnectionSpec) method to CciDaoSupport, for obtaining a template with just different con spec
+
+Package org.springframework.jms
+* added "isSessionTransactional" method to ConnectionFactoryUtils
+* introduced SessionProxy interface for target Session access, exposed by TransactionAwareConnectionFactoryProxy
+* DefaultMessageListenerContainer switches "sessionTransacted" to "true" in case of a non-JTA ResourceTransactionManager
+* DefaultMessageListenerContainer rolls back an external transaction in case of a message rejected while stopping
+* DefaultMessageListenerContainer does not eagerly commit/rollback a in case of a synchronized transacted Session
 
 Package org.springframework.mail
 * added "setPriority" method to MimeMessageHelper, for populating the "X-Priority" mail header
+
+Package org.springframework.remoting
+* RemoteInvocationUtils detects cycles in exception causes when updating the stack trace (avoiding an infinite loop)
 
 Package org.springframework.scripting
 * LangNamespaceHandler references ScriptFactory classes by name, to avoid NoClassDefFoundErrors in all scenarios
 * added "scope" attribute to all script tags in the "lang" namespace, allowing for non-singleton script objects
 * updated JRuby support for JRuby 0.9.8 (requiring this version now due to incompatible JRuby API changes)
 
+Package org.springframework.transaction
+* introduced ResourceTransactionManager (i.e. non-JTA) interface, indicating the resource factory that it operates on
+* "tx:advice" expects that the XML parser might not expose the defaults defined in "spring-tx-2.0.xsd" (e.g. on Resin)
+
 Package org.springframework.util
+* ClassUtils's "classPackageAsResourcePath" parses the class name in order to detect the package name in all cases
 * fixed CustomizableThreadCreator to properly apply its "daemon" flag (inherited by SimpleAsyncTaskExecutor)
 
 Package org.springframework.web
 * factored out protected "getHandlerExecutionChain" template method in Servlet/Portlet AbstractHandlerMapping
 * added "getRootHandler()" method to AbstractUrlHandlerMapping, called on each access to the root handler
+* fixed JSP BindTag to correctly save and re-expose a page-scoped "status" attribute (not just a request-scoped one)
 
 
 Changes in version 2.0.3 (9.3.2007)
