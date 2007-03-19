@@ -478,8 +478,7 @@ public abstract class ClassUtils {
 				return true;
 			}
 		}
-		return (clazz.getSuperclass() != null ?
-				hasAtLeastOneMethodWithName(clazz.getSuperclass(), methodName) : false);
+		return (clazz.getSuperclass() != null && hasAtLeastOneMethodWithName(clazz.getSuperclass(), methodName));
 	}
 
 	/**
@@ -610,10 +609,16 @@ public abstract class ClassUtils {
 	 * @see Class#getResource
 	 */
 	public static String classPackageAsResourcePath(Class clazz) {
-		if (clazz == null || clazz.getPackage() == null) {
+		if (clazz == null) {
 			return "";
 		}
-		return clazz.getPackage().getName().replace('.', '/');
+		String className = clazz.getName();
+		int packageEndIndex = className.lastIndexOf('.');
+		if (packageEndIndex == -1) {
+			return "";
+		}
+		String packageName = className.substring(0, packageEndIndex);
+		return packageName.replace('.', '/');
 	}
 
 	/**
