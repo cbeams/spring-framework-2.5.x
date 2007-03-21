@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,15 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
  * Interface specifying a basic set of JDBC operations.
- * Implemented by JdbcTemplate. Not often used directly, but a useful option
- * to enhance testability, as it can easily be mocked or stubbed.
+ * Implemented by {@link JdbcTemplate}. Not often used directly, but a useful
+ * option to enhance testability, as it can easily be mocked or stubbed.
  *
  * <p>Alternatively, the standard JDBC infrastructure can be mocked.
  * However, mocking this interface constitutes significantly less work.
- * As an alternative to a mock objects approach to testing
- * data access code, consider the powerful integration
- * testing support provided in the org.springframework.test
- * package, shipped in spring-mock.jar.
+ * As an alternative to a mock objects approach to testing data access code,
+ * consider the powerful integration testing support provided in the
+ * <code>org.springframework.test</code> package, shipped in
+ * <code>spring-mock.jar</code>.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

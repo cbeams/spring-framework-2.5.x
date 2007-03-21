@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  * have its dependencies automatically injected by the Spring container using
  * setter injection. This is a core concept in Spring DI.
  *
- * <p>Available for use in annotation-based configurations, such as for the AspectJ
- * AnnotationBeanConfigurer aspect.
+ * <p>Available for use in annotation-based configurations, such as for the
+ * AspectJ AnnotationBeanConfigurer aspect.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -33,7 +33,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory
  */
 public enum Autowire {
-	
+
 	/**
 	 * Constant that indicates that autowiring information was not specified.
 	 * In some cases it may be necessary to specify autowiring status,
@@ -41,7 +41,7 @@ public enum Autowire {
 	 * container definition scope.
 	 */
 	INHERITED(-1),
-	
+
 	/**
 	 * Constant that indicates no autowiring at all.
 	 */
@@ -61,16 +61,21 @@ public enum Autowire {
 	private final int value;
 
 
-	Autowire(int value) { this.value = value; }
-	
-	public int value() { return value; }
-	
+	Autowire(int value) {
+		this.value = value;
+	}
+
+	public int value() {
+		return this.value;
+	}
+
 	/**
-	 * Return whether this is a specified autowiring value
-	 * @return was autowiring specified
+	 * Return whether this represents an actual autowiring value.
+	 * @return whether actual autowiring was specified
+	 * (either BY_NAME or BY_TYPE)
 	 */
 	public boolean isAutowire() {
-		return this == BY_NAME || this == BY_TYPE;
+		return (this == BY_NAME || this == BY_TYPE);
 	}
 
 }
