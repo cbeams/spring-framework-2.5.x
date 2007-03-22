@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.orm.jpa.persistenceunit;
 import javax.persistence.spi.PersistenceUnitInfo;
 
 /**
- * Interface that defines an abstraction for finding and managing JPA
- * PersistenceUnitInfos. Used by LocalContainerEntityManagerFactoryBean
- * to obtain a PersistenceUnitInfo for building an EntityManagerFactory.
+ * Interface that defines an abstraction for finding and managing
+ * JPA PersistenceUnitInfos. Used by
+ * {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}
+ * in order to obtain a {@link javax.persistence.spi.PersistenceUnitInfo}
+ * for building a concrete {@link javax.persistence.EntityManagerFactory}.
  *
  * <p>Obtaining a PersistenceUnitInfo instance is an exclusive process.
  * A PersistenceUnitInfo instance is not available for further calls
@@ -36,13 +38,16 @@ public interface PersistenceUnitManager {
 
 	/**
 	 * Obtain the default PersistenceUnitInfo from this manager.
+	 * @return the PersistenceUnitInfo (never <code>null</code>)
 	 * @throws IllegalStateException if there is no default PersistenceUnitInfo defined
 	 * or it has already been obtained
 	 */
 	PersistenceUnitInfo obtainDefaultPersistenceUnitInfo() throws IllegalStateException;
 
 	/**
-	 * Obtain the default PersistenceUnitInfo from this manager.
+	 * Obtain the specified PersistenceUnitInfo from this manager.
+	 * @param persistenceUnitName the name of the desired persistence unit
+	 * @return the PersistenceUnitInfo (never <code>null</code>)
 	 * @throws IllegalArgumentException if no PersistenceUnitInfo with the given
 	 * name is defined
 	 * @throws IllegalStateException if the PersistenceUnitInfo with the given
