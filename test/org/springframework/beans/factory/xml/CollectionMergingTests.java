@@ -31,22 +31,19 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * Unit and integration tests for the collection merging support.
- * 
+ *
  * @author Rob Harrop
  * @author Rick Evans
- * @since 2.0M2
  */
 public class CollectionMergingTests extends TestCase {
 
 	private DefaultListableBeanFactory beanFactory;
-
 
 	protected void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.loadBeanDefinitions(new ClassPathResource("collectionMerging.xml", getClass()));
 	}
-
 
 	public void testMergeList() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithList");
