@@ -20,11 +20,13 @@ import java.lang.reflect.Method;
 
 import org.springframework.aop.AfterAdvice;
 import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.util.ClassUtils;
 
 /**
  * Spring AOP advice wrapping an AspectJ after-returning advice method.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implements AfterReturningAdvice, AfterAdvice {
@@ -56,16 +58,12 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 	/**
 	 * Following AspectJ semantics, if a returning clause was specified, then the
 	 * advice is only invoked if the returned value is an instance of the given
-	 * returning type. Iff the returning type is object, the advice is *always* invoked.
+	 * returning type. If the returning type is Object, the advice is *always* invoked.
+	 * @param returnValue the return value of the target method
+	 * @return whether to invoke the advice method for the given return value
 	 */
 	private boolean shouldInvokeOnReturnValueOf(Object returnValue) {
-		Class returningType = getDiscoveredReturningType();
-		if (returningType.equals(Object.class) || returningType.isPrimitive()) {
-			return true;
-		}
-		else {
-			return returningType.isAssignableFrom(returnValue.getClass());
-		}
+		return ClassUtils.isAssignableValue(getDiscoveredReturningType(), returnValue);
 	}
 
 }
