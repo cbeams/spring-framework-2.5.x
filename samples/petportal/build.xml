@@ -81,23 +81,19 @@
 		<jar jarfile="${weblib.dir}/${name}.jar" compress="true" basedir="${build.dir}"/>
 
 		<copy todir="${weblib.dir}" preservelastmodified="true">
-			<fileset dir="${spring.root}/lib/jakarta-commons">
-				<include name="commons-logging.jar"/>
-			</fileset>
-			<fileset dir="${spring.root}/lib/log4j">
-				<include name="log4j-1.2.13.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
 				<include name="jstl.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/jakarta-commons">
+				<include name="commons-fileupload.jar"/>
+				<include name="commons-io.jar"/>
+				<include name="commons-logging.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/jakarta-commons">
-				<include name="commons-fileupload.jar"/>
-			</fileset>
-			<fileset dir="${spring.root}/lib/jakarta-commons">
-				<include name="commons-io.jar"/>
+			<fileset dir="${spring.root}/lib/log4j">
+				<include name="log4j-*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
@@ -157,7 +153,6 @@
 			<include name="WEB-INF/context/**"/>
 			<include name="WEB-INF/jsp/**"/>
 			<exclude name="**/.*"/>
-			<exclude name="${warfile.excludes}"/>
 		</war>
 
 	</target>
