@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,9 @@ import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Default implementation of the PersistenceUnitManager interface.
- * Used as internal default by LocalContainerEntityManagerFactoryBean.
+ * Default implementation of the {@link PersistenceUnitManager} interface.
+ * Used as internal default by
+ * {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}.
  *
  * <p>Supports standard JPA scanning for <code>persistence.xml</code> files,
  * with configurable file locations, JDBC DataSource lookup and load-time weaving.
@@ -57,7 +58,7 @@ import org.springframework.util.ObjectUtils;
  * @see #setPersistenceXmlLocations
  * @see #setDataSourceLookup
  * @see #setLoadTimeWeaver
- * @see org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
+ * @see org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean#setPersistenceUnitManager
  */
 public class DefaultPersistenceUnitManager implements PersistenceUnitManager, ResourceLoaderAware, InitializingBean {
 
@@ -91,7 +92,8 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 
 	private final Set<String> persistenceUnitInfoNames = new HashSet<String>();
 
-	private final Map<String, PersistenceUnitInfo> persistenceUnitInfos = new HashMap<String, PersistenceUnitInfo>();
+	private final Map<String, MutablePersistenceUnitInfo> persistenceUnitInfos =
+			new HashMap<String, MutablePersistenceUnitInfo>();
 
 
 	/**
@@ -156,7 +158,7 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 	 * against Spring-managed DataSource instances.
 	 */
 	public DataSourceLookup getDataSourceLookup() {
-		return dataSourceLookup;
+		return this.dataSourceLookup;
 	}
 
 	/**
@@ -178,7 +180,7 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 	 * <code>persistence.xml</code>.
 	 */
 	public DataSource getDefaultDataSource() {
-		return defaultDataSource;
+		return this.defaultDataSource;
 	}
 
 	/**
@@ -205,7 +207,7 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 	 * to the JPA class transformer contract.
 	 */
 	public LoadTimeWeaver getLoadTimeWeaver() {
-		return loadTimeWeaver;
+		return this.loadTimeWeaver;
 	}
 
 	/**
@@ -224,7 +226,7 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 	 * PersistenceUnitInfo that has been parsed by this manager.
 	 */
 	public PersistenceUnitPostProcessor[] getPersistenceUnitPostProcessors() {
-		return persistenceUnitPostProcessors;
+		return this.persistenceUnitPostProcessors;
 	}
 
 	public void setResourceLoader(ResourceLoader resourceLoader) {
@@ -296,6 +298,20 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 	}
 
 	/**
+	 * Return the specified PersistenceUnitInfo from this manager's cache
+	 * of processed persistence units, keeping it in the cache (i.e. not
+	 * 'obtaining' it for use but rather just accessing it for post-processing).
+	 * <p>This can be used in {@link #postProcessPersistenceUnitInfo} implementations,
+	 * detecting existing persistence units of the same name and potentially merging them.
+	 * @param persistenceUnitName the name of the desired persistence unit
+	 * @return the PersistenceUnitInfo in mutable form,
+	 * or <code>null</code> if not available
+	 */
+	protected final MutablePersistenceUnitInfo getPersistenceUnitInfo(String persistenceUnitName) {
+		return this.persistenceUnitInfos.get(persistenceUnitName);
+	}
+
+	/**
 	 * Hook method allowing subclasses to customize each PersistenceUnitInfo.
 	 * <p>Default implementation delegates to all registered PersistenceUnitPostProcessors.
 	 * It is usually preferable to register further entity classes, jar files etc there
@@ -327,7 +343,9 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 			throw new IllegalStateException("No single default persistence unit defined in " +
 					ObjectUtils.nullSafeToString(this.persistenceXmlLocations));
 		}
-		return this.persistenceUnitInfos.values().iterator().next();
+		PersistenceUnitInfo pui = this.persistenceUnitInfos.values().iterator().next();
+		this.persistenceUnitInfos.clear();
+		return pui;
 	}
 
 	public PersistenceUnitInfo obtainPersistenceUnitInfo(String persistenceUnitName) {
