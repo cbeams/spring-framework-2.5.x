@@ -34,6 +34,10 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
+	/** Package-visible field for caching the resolved constructor */
+	Object resolvedConstructorOrFactoryMethod;
+
+
 	/**
 	 * Create a new RootBeanDefinition, to be configured through its bean
 	 * properties and configuration methods.
