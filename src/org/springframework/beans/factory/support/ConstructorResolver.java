@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
+import java.util.HashMap;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -44,12 +46,15 @@ import org.springframework.util.ReflectionUtils;
  * Used by AbstractAutowireCapableBeanFactory.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 2.0
  * @see #autowireConstructor
  * @see #instantiateUsingFactoryMethod
  * @see AbstractAutowireCapableBeanFactory
  */
 abstract class ConstructorResolver {
+
+	private static final Map CONSTRUCTOR_CACHE = Collections.synchronizedMap(new HashMap());
 
 	private final AbstractBeanFactory beanFactory;
 
@@ -85,65 +90,77 @@ abstract class ConstructorResolver {
 		BeanWrapper bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
+
 		int minNrOfArgs = 0;
 		if (cargs != null) {
 			minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
 		}
 
-		Constructor[] candidates = mbd.getBeanClass().getDeclaredConstructors();
-		AutowireUtils.sortConstructors(candidates);
-
-		Constructor constructorToUse = null;
+		Constructor constructorToUse = (Constructor) CONSTRUCTOR_CACHE.get(mbd);
 		Object[] argsToUse = null;
-		int minTypeDiffWeight = Integer.MAX_VALUE;
+		
+		if (constructorToUse == null) {
 
-		for (int i = 0; i < candidates.length; i++) {
-			Constructor constructor = candidates[i];
 
-			if (constructorToUse != null &&
-					constructorToUse.getParameterTypes().length > constructor.getParameterTypes().length) {
-				// Already found greedy constructor that can be satisfied ->
-				// do not look any further, there are only less greedy constructors left.
-				break;
-			}
-			if (constructor.getParameterTypes().length < minNrOfArgs) {
-				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-						minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" +
-						beanName + "' " +
-						"(hint: specify index and/or type arguments for simple parameters to avoid type ambiguities)");
-			}
+			Constructor[] candidates = mbd.getBeanClass().getDeclaredConstructors();
+			AutowireUtils.sortConstructors(candidates);
 
-			// Try to resolve arguments for current constructor.
-			try {
-				Class[] paramTypes = constructor.getParameterTypes();
-				ArgumentsHolder args = createArgumentArray(
-						beanName, mbd, resolvedValues, bw, paramTypes, constructor);
+			int minTypeDiffWeight = Integer.MAX_VALUE;
 
-				int typeDiffWeight = args.getTypeDifferenceWeight(paramTypes);
-				// Choose this constructor if it represents the closest match.
-				if (typeDiffWeight < minTypeDiffWeight) {
-					constructorToUse = constructor;
-					argsToUse = args.arguments;
-					minTypeDiffWeight = typeDiffWeight;
+			for (int i = 0; i < candidates.length; i++) {
+				Constructor constructor = candidates[i];
+
+				if (constructorToUse != null &&
+								constructorToUse.getParameterTypes().length > constructor.getParameterTypes().length) {
+					// Already found greedy constructor that can be satisfied ->
+					// do not look any further, there are only less greedy constructors left.
+					break;
+				}
+				if (constructor.getParameterTypes().length < minNrOfArgs) {
+					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+									minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" +
+													beanName + "' " +
+													"(hint: specify index and/or type arguments for simple parameters to avoid type ambiguities)");
+				}
+
+				// Try to resolve arguments for current constructor.
+				try {
+					Class[] paramTypes = constructor.getParameterTypes();
+					ArgumentsHolder args = createArgumentArray(
+									beanName, mbd, resolvedValues, bw, paramTypes, constructor);
+
+					int typeDiffWeight = args.getTypeDifferenceWeight(paramTypes);
+					// Choose this constructor if it represents the closest match.
+					if (typeDiffWeight < minTypeDiffWeight) {
+						constructorToUse = constructor;
+						argsToUse = args.arguments;
+						minTypeDiffWeight = typeDiffWeight;
+					}
+				}
+				catch (UnsatisfiedDependencyException ex) {
+					if (this.beanFactory.logger.isTraceEnabled()) {
+						this.beanFactory.logger.trace("Ignoring constructor [" + constructor + "] of bean '" + beanName +
+										"': " + ex);
+					}
+					if (i == candidates.length - 1 && constructorToUse == null) {
+						throw ex;
+					}
+					else {
+						// Swallow and try next constructor.
+					}
 				}
 			}
-			catch (UnsatisfiedDependencyException ex) {
-				if (this.beanFactory.logger.isTraceEnabled()) {
-					this.beanFactory.logger.trace("Ignoring constructor [" + constructor + "] of bean '" + beanName +
-							"': " + ex);
-				}
-				if (i == candidates.length - 1 && constructorToUse == null) {
-					throw ex;
-				}
-				else {
-					// Swallow and try next constructor.
-				}
+
+			if (constructorToUse == null) {
+				throw new BeanCreationException(
+								mbd.getResourceDescription(), beanName, "Could not resolve matching constructor");
+			}
+			else {
+				CONSTRUCTOR_CACHE.put(mbd, constructorToUse);
 			}
 		}
-
-		if (constructorToUse == null) {
-			throw new BeanCreationException(
-					mbd.getResourceDescription(), beanName, "Could not resolve matching constructor");
+		else {
+			argsToUse = createArgumentArray(beanName, mbd, resolvedValues, bw, constructorToUse.getParameterTypes(), constructorToUse).arguments;
 		}
 
 		Object beanInstance = this.instantiationStrategy.instantiate(

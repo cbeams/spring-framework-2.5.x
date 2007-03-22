@@ -24,6 +24,8 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Collections;
+import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,6 +45,7 @@ import org.springframework.util.StringUtils;
  * Used as a delegate by {@link BeanWrapperImpl} and {@link SimpleTypeConverter}.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 2.0
  * @see BeanWrapperImpl
  * @see SimpleTypeConverter
@@ -53,6 +56,8 @@ class TypeConverterDelegate {
 	 * We'll create a lot of these objects, so we don't want a new logger every time.
 	 */
 	private static final Log logger = LogFactory.getLog(TypeConverterDelegate.class);
+
+	private static final Map UNKNOWN_EDITOR_TYPES = Collections.synchronizedMap(new WeakHashMap());
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
@@ -182,9 +187,13 @@ class TypeConverterDelegate {
 			if (pe == null && requiredType != null) {
 				// No custom editor -> check BeanWrapperImpl's default editors.
 				pe = (PropertyEditor) this.propertyEditorRegistry.getDefaultEditor(requiredType);
-				if (pe == null) {
+				if (pe == null && !UNKNOWN_EDITOR_TYPES.containsKey(requiredType)) {
 					// No BeanWrapper default editor -> check standard JavaBean editors.
 					pe = PropertyEditorManager.findEditor(requiredType);
+
+					if(pe == null) {
+						UNKNOWN_EDITOR_TYPES.put(requiredType, Boolean.TRUE);
+					}
 				}
 			}
 			convertedValue = convertValue(convertedValue, requiredType, pe, oldValue);
