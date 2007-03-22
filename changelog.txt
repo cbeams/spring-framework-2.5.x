@@ -7,12 +7,15 @@ Changes in version 2.0.4 (30.3.2007)
 ------------------------------------
 
 Package org.springframework.aop
+* fixed AspectJAfterReturningAdvice to avoid NPE within returning type check in case of the return value being null
 * fixed AspectJAwareAdvisorAutoProxyCreator's "toString()" implementation to be compatible with JDK 1.3/1.4
 
 Package org.springframework.beans
 * fixed PropertyPlaceholderConfigurer/BeanDefinitionVisitor to correctly handle TypedStringValue objects with null value
 * AbstractFactoryBean offers a protected "getBeanFactory()" method for accessing its BeanFactory reference
 * DefaultListableBeanFactory is able to invoke public init and destroy methods on package-protected classes
+* ConstructorResolver caches the resolved constructor or factory method, for faster re-creation of prototype instances
+* ConstructorResolver caches converted argument values, to avoid conversion overhead for re-created prototype instances
 * DefaultNamespaceHandlerResolver logs linkage error at warn level, in case of a handler class found but not loadable
 
 Package org.springframework.dao
@@ -33,8 +36,15 @@ Package org.springframework.jms
 Package org.springframework.mail
 * added "setPriority" method to MimeMessageHelper, for populating the "X-Priority" mail header
 
+Package org.springframework.orm
+* added protected "getPersistenceUnitInfo" method to DefaultPersistenceUnitManager, to allow for better subclassing
+* DefaultPersistenceUnitManager clears the default PersistenceUnitInfo once it has been obtained
+
 Package org.springframework.remoting
 * RemoteInvocationUtils detects cycles in exception causes when updating the stack trace (avoiding an infinite loop)
+
+Package org.springframework.samples
+* PetPortal's build script properly includes the Log4J jar in the WAR file
 
 Package org.springframework.scripting
 * LangNamespaceHandler references ScriptFactory classes by name, to avoid NoClassDefFoundErrors in all scenarios
@@ -42,6 +52,7 @@ Package org.springframework.scripting
 * updated JRuby support for JRuby 0.9.8 (requiring this version now due to incompatible JRuby API changes)
 
 Package org.springframework.transaction
+* factored out TransactionOperations interface from TransactionTemplate, defining the central "execute" operation
 * introduced ResourceTransactionManager (i.e. non-JTA) interface, indicating the resource factory that it operates on
 * "tx:advice" expects that the XML parser might not expose the defaults defined in "spring-tx-2.0.xsd" (e.g. on Resin)
 
