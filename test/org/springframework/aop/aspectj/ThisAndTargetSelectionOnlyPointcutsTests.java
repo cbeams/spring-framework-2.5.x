@@ -21,7 +21,7 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 /**
  * @author Ramnivas Laddad
  */
-public class ThisAndTargetSelectionOnlyPointcutTests extends AbstractDependencyInjectionSpringContextTests {
+public class ThisAndTargetSelectionOnlyPointcutsTests extends AbstractDependencyInjectionSpringContextTests {
 	protected TestInterface testBean;
 	
 	protected Counter thisAsClassCounter;
@@ -32,11 +32,10 @@ public class ThisAndTargetSelectionOnlyPointcutTests extends AbstractDependencyI
 	protected Counter thisAsInterfaceAndTargetAsInterfaceCounter;
 	protected Counter thisAsInterfaceAndTargetAsClassCounter;
 	
-	public ThisAndTargetSelectionOnlyPointcutTests() {
+	public ThisAndTargetSelectionOnlyPointcutsTests() {
 		setPopulateProtectedVariables(true);
 	}
 	
-	@Override
 	protected void onSetUp() throws Exception {
 		super.onSetUp();
 		thisAsClassCounter.reset();
@@ -50,43 +49,43 @@ public class ThisAndTargetSelectionOnlyPointcutTests extends AbstractDependencyI
 	}
 
 	protected String getConfigPath() {
-		return "this-and-target-selectionOnly-pointcut-tests.xml";
+		return "this-and-target-selectionOnly-pointcuts-tests.xml";
 	}
 	
-	public void testThisAsClassDoesNotMatch() {
-		testBean.doIt();
-		assertEquals(0, thisAsClassCounter.getCount());
-	}
-
+//	public void testThisAsClassDoesNotMatch() {
+//		testBean.doIt();
+//		assertEquals(0, thisAsClassCounter.getCount());
+//	}
+//
 	public void testThisAsInterfaceMatch() {
 		testBean.doIt();
 		assertEquals(1, thisAsInterfaceCounter.getCount());
 	}
-
-	public void testTargetAsClassDoesMatch() {
-		testBean.doIt();
-		assertEquals(1, targetAsClassCounter.getCount());
-	}
-
-	public void testTargetAsInterfaceMatch() {
-		testBean.doIt();
-		assertEquals(1, targetAsInterfaceCounter.getCount());
-	}
-
-	public void testThisAsClassAndTargetAsClassCounterNotMatch() {
-		testBean.doIt();
-		assertEquals(0, thisAsClassAndTargetAsClassCounter.getCount());
-	}
-
-	public void testThisAsInterfaceAndTargetAsInterfaceCounterMatch() {
-		testBean.doIt();
-		assertEquals(1, thisAsInterfaceAndTargetAsInterfaceCounter.getCount());
-	}
-
-	public void testThisAsInterfaceAndTargetAsClassCounterMatch() {
-		testBean.doIt();
-		assertEquals(1, thisAsInterfaceAndTargetAsInterfaceCounter.getCount());
-	}
+//
+//	public void testTargetAsClassDoesMatch() {
+//		testBean.doIt();
+//		assertEquals(1, targetAsClassCounter.getCount());
+//	}
+//
+//	public void testTargetAsInterfaceMatch() {
+//		testBean.doIt();
+//		assertEquals(1, targetAsInterfaceCounter.getCount());
+//	}
+//
+//	public void testThisAsClassAndTargetAsClassCounterNotMatch() {
+//		testBean.doIt();
+//		assertEquals(0, thisAsClassAndTargetAsClassCounter.getCount());
+//	}
+//
+//	public void testThisAsInterfaceAndTargetAsInterfaceCounterMatch() {
+//		testBean.doIt();
+//		assertEquals(1, thisAsInterfaceAndTargetAsInterfaceCounter.getCount());
+//	}
+//
+//	public void testThisAsInterfaceAndTargetAsClassCounterMatch() {
+//		testBean.doIt();
+//		assertEquals(1, thisAsInterfaceAndTargetAsInterfaceCounter.getCount());
+//	}
 	
 	public static interface TestInterface {
 		public void doIt();

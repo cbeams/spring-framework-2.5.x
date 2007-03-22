@@ -280,8 +280,12 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		 * 
 		 * See SPR-2979 for the original bug.
 		 */
+		/*
+		 * Note: Temporarily reverting the fix. Annotation matches fail due to this change
+		 * 
+		 */
 		try {
-			shadowMatch = getShadowMatch(method, method);
+			shadowMatch = getShadowMatch(AopUtils.getMostSpecificMethod(method, targetClass), method);
 		}
 		catch (ReflectionWorld.ReflectionWorldException ex) {
 			// Could neither introspect the target class nor the proxy class ->
