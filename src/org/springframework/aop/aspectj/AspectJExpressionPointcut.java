@@ -58,6 +58,7 @@ import org.springframework.util.StringUtils;
  * @author Adrian Colyer
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut
@@ -261,10 +262,26 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	public boolean matches(Method method, Class targetClass, Object[] args) {
 		checkReadyToMatch();
-		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 		ShadowMatch shadowMatch = null;
+		/*
+		 * Obtain shadow using the original method; this way we do retain
+		 * InstanceOf residue in the computed shadow. This residue then
+		 * correctly deals with the cases, where we have a pointcut containing
+		 * this(TYPE_PATTERN) or target(TYPE_PATTERN).
+		 * 
+		 * If we go for the most specific method, we will get only Literal
+		 * residue test in pointcut shadow and the decision will be made based
+		 * on static context alone. Depending upon if we choose target or proxy
+		 * class' method, if we have this(TYPE_PATTERN) or target(TYPE_PATTERN)
+		 * the shadow will be computed incorrectly in either of the cases.
+		 * Instead, by basing shadow on the method being invoked (proxy's method
+		 * based on interface or CGLIB proxy subclass), we don't determine
+		 * pointcut's matchign solely based on static context. 
+		 * 
+		 * See SPR-2979 for the original bug.
+		 */
 		try {
-			shadowMatch = getShadowMatch(targetMethod, method);
+			shadowMatch = getShadowMatch(method, method);
 		}
 		catch (ReflectionWorld.ReflectionWorldException ex) {
 			// Could neither introspect the target class nor the proxy class ->
