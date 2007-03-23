@@ -75,9 +75,6 @@ public class MethodParameter {
 	 */
 	public MethodParameter(Method method, int parameterIndex, int nestingLevel) {
 		Assert.notNull(method, "Method must not be null");
-		Assert.isTrue(parameterIndex >= -1, "Parameter index must not be -1 or higher");
-		Assert.isTrue(parameterIndex < method.getParameterTypes().length,
-				"Parameter index must not exceed " + (method.getParameterTypes().length - 1));
 		this.method = method;
 		this.parameterIndex = parameterIndex;
 		this.nestingLevel = nestingLevel;
@@ -102,9 +99,6 @@ public class MethodParameter {
 	 */
 	public MethodParameter(Constructor constructor, int parameterIndex, int nestingLevel) {
 		Assert.notNull(constructor, "Constructor must not be null");
-		Assert.isTrue(parameterIndex >= 0, "Parameter index must not be negative");
-		Assert.isTrue(parameterIndex < constructor.getParameterTypes().length,
-				"Parameter index must not exceed " + (constructor.getParameterTypes().length - 1));
 		this.constructor = constructor;
 		this.parameterIndex = parameterIndex;
 		this.nestingLevel = nestingLevel;
