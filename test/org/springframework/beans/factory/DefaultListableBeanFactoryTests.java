@@ -940,7 +940,29 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1000);
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 500);
+	}
+
+	public void testPrototypeCreationWithConstructorArgumentsIsFastEnough() {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class, false);
+		rbd.getConstructorArgumentValues().addGenericArgumentValue("juergen");
+		rbd.getConstructorArgumentValues().addGenericArgumentValue("99");
+		lbf.registerBeanDefinition("test", rbd);
+		StopWatch sw = new StopWatch();
+		sw.start("prototype");
+		for (int i = 0; i < 10000; i++) {
+			TestBean tb = (TestBean) lbf.getBean("test");
+			assertEquals("juergen", tb.getName());
+			assertEquals(99, tb.getAge());
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 750);
 	}
 
 	public void testPrototypeCreationWithPropertiesIsFastEnough() {
@@ -956,11 +978,13 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		StopWatch sw = new StopWatch();
 		sw.start("prototype");
 		for (int i = 0; i < 10000; i++) {
-			lbf.getBean("test");
+			TestBean tb = (TestBean) lbf.getBean("test");
+			assertEquals("juergen", tb.getName());
+			assertEquals(99, tb.getAge());
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 2000);
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1000);
 	}
 
 	public void testPrototypeCreationWithDependencyCheckIsFastEnough() {
@@ -980,7 +1004,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1000);
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 500);
 	}
 
 	public void testBeanPostProcessorWithWrappedObjectAndDisposableBean() {
