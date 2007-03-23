@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
  * via JDK 1.5 API happens in {@link GenericCollectionTypeResolver} only.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 2.0
  * @see GenericCollectionTypeResolver
  */
@@ -51,7 +52,7 @@ public class MethodParameter {
 	private int nestingLevel;
 
 	/** Map from Integer level to Integer type index */
-	private final Map typeIndexesPerLevel = new HashMap(4);
+	private volatile Map typeIndexesPerLevel;
 
 
 	/**
@@ -145,7 +146,7 @@ public class MethodParameter {
 	 * @see #getNestingLevel()
 	 */
 	public void decreaseNestingLevel() {
-		this.typeIndexesPerLevel.remove(new Integer(this.nestingLevel));
+		this.getTypeIndexesPerLevel().remove(new Integer(this.nestingLevel));
 		this.nestingLevel--;
 	}
 
@@ -165,7 +166,7 @@ public class MethodParameter {
 	 * @see #getNestingLevel()
 	 */
 	public void setTypeIndexForCurrentLevel(int typeIndex) {
-		this.typeIndexesPerLevel.put(new Integer(this.nestingLevel), new Integer(typeIndex));
+		this.getTypeIndexesPerLevel().put(new Integer(this.nestingLevel), new Integer(typeIndex));
 	}
 
 	/**
@@ -185,7 +186,7 @@ public class MethodParameter {
 	 * if none specified (indicating the default type index)
 	 */
 	public Integer getTypeIndexForLevel(int nestingLevel) {
-		return (Integer) this.typeIndexesPerLevel.get(new Integer(nestingLevel));
+		return (Integer) this.getTypeIndexesPerLevel().get(new Integer(nestingLevel));
 	}
 
 
@@ -210,4 +211,13 @@ public class MethodParameter {
 		}
 	}
 
+	/**
+	 * Gets the (lazily constructed) type indexes per level {@link Map}. 
+	 */
+	protected Map getTypeIndexesPerLevel() {
+		if(this.typeIndexesPerLevel == null) {
+			this.typeIndexesPerLevel = new HashMap(4);
+		}
+		return this.typeIndexesPerLevel;
+	}
 }
