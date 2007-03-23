@@ -64,6 +64,7 @@ import org.springframework.util.ClassUtils;
  * Mainly serves as base class for BeanWrapperImpl.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 1.2.6
  * @see PropertyEditorRegistry
  * @see BeanWrapperImpl
@@ -87,6 +88,11 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	//---------------------------------------------------------------------
 
 	/**
+	 * Register default editors in this instance, for restricted environments.
+	 * We're not using the JRE's PropertyEditorManager to avoid potential
+	 * SecurityExceptions when running in a SecurityManager.
+	 * <p>Registers a <code>CustomNumberEditor</code> for all primitive number types,
+	 * their corresponding wrapper types, <code>BigInteger</code> and <code>BigDecimal</code>.
 	 * Activate the default editors for this registry instance,
 	 * allowing for lazily registering default editors when needed.
 	 */
@@ -189,6 +195,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(BigDecimal.class, new CustomNumberEditor(BigDecimal.class, true));
 		this.defaultEditors.put(BigInteger.class, new CustomNumberEditor(BigInteger.class, true));
 	}
+
 
 	/**
 	 * Copy the default editors registered in this instance to the given target registry.

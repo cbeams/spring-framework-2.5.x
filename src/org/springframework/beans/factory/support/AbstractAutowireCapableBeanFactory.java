@@ -57,6 +57,7 @@ import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostP
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * Abstract BeanFactory superclass that implements default bean creation,
@@ -1046,6 +1047,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				PropertyValue pv = pvArray[i];
 				Object resolvedValue =
 						valueResolver.resolveValueIfNecessary("bean property '" + pv.getName() + "'", pv.getValue());
+
+				Class targetType = bw.getPropertyType(pv.getName());
+				if(targetType != null && pv.getValue() == resolvedValue && !ClassUtils.isAssignableValue(targetType, resolvedValue)) {
+					resolvedValue = bw.convertIfNecessary(resolvedValue, targetType);
+					if(mbd.getPropertyValues().contains(pv.getName())) {
+						mbd.getPropertyValues().addPropertyValue(pv.getName(), resolvedValue);
+					}
+				}
 				deepCopy.addPropertyValue(pv.getName(), resolvedValue);
 			}
 
