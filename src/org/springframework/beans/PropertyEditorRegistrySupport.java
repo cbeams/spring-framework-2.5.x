@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,8 @@ import org.springframework.util.ClassUtils;
  */
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
+	private boolean defaultEditorsActive = false;
+
 	private Map defaultEditors;
 
 	private Map customEditors;
@@ -85,11 +87,32 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Register default editors in this instance, for restricted environments.
-	 * We're not using the JRE's PropertyEditorManager to avoid potential
-	 * SecurityExceptions when running in a SecurityManager.
-	 * <p>Registers a <code>CustomNumberEditor</code> for all primitive number types,
-	 * their corresponding wrapper types, <code>BigInteger</code> and <code>BigDecimal</code>.
+	 * Activate the default editors for this registry instance,
+	 * allowing for lazily registering default editors when needed.
+	 */
+	protected void registerDefaultEditors() {
+		this.defaultEditorsActive = true;
+	}
+
+	/**
+	 * Retrieve the default editor for the given property type, if any.
+	 * <p>Lazily registers the default editors, if they are active.
+	 * @param requiredType type of the property
+	 * @return the default editor, or <code>null</code> if none found
+	 * @see #registerDefaultEditors
+	 */
+	protected PropertyEditor getDefaultEditor(Class requiredType) {
+		if (!this.defaultEditorsActive) {
+			return null;
+		}
+		if (this.defaultEditors == null) {
+			doRegisterDefaultEditors();
+		}
+		return (PropertyEditor) this.defaultEditors.get(requiredType);
+	}
+
+	/**
+	 * Actually register the default editors for this registry instance.
 	 * @see org.springframework.beans.propertyeditors.ByteArrayPropertyEditor
 	 * @see org.springframework.beans.propertyeditors.ClassEditor
 	 * @see org.springframework.beans.propertyeditors.CharacterEditor
@@ -109,7 +132,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @see org.springframework.transaction.interceptor.TransactionAttributeSourceEditor
 	 * @see org.springframework.beans.propertyeditors.URLEditor
 	 */
-	protected void registerDefaultEditors() {
+	private void doRegisterDefaultEditors() {
 		this.defaultEditors = new HashMap(32);
 
 		// Simple editors, without parameterization capabilities.
@@ -165,18 +188,6 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(Double.class, new CustomNumberEditor(Double.class, true));
 		this.defaultEditors.put(BigDecimal.class, new CustomNumberEditor(BigDecimal.class, true));
 		this.defaultEditors.put(BigInteger.class, new CustomNumberEditor(BigInteger.class, true));
-	}
-
-	/**
-	 * Retrieve the default editor for the given property type, if any.
-	 * @param requiredType type of the property
-	 * @return the default editor, or <code>null</code> if none found
-	 */
-	protected PropertyEditor getDefaultEditor(Class requiredType) {
-		if (this.defaultEditors == null) {
-			return null;
-		}
-		return (PropertyEditor) this.defaultEditors.get(requiredType);
 	}
 
 	/**
