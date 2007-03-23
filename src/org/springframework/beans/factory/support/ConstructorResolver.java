@@ -153,9 +153,7 @@ abstract class ConstructorResolver {
 				throw new BeanCreationException(
 						mbd.getResourceDescription(), beanName, "Could not resolve matching constructor");
 			}
-			else {
-				mbd.resolvedConstructorOrFactoryMethod = constructorToUse;
-			}
+			mbd.resolvedConstructorOrFactoryMethod = constructorToUse;
 		}
 
 		Object beanInstance = this.instantiationStrategy.instantiate(
@@ -290,9 +288,7 @@ abstract class ConstructorResolver {
 						 "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
 						"factory method '" + mbd.getFactoryMethodName() + "'");
 			}
-			else {
-				mbd.resolvedConstructorOrFactoryMethod = factoryMethodToUse;
-			}
+			mbd.resolvedConstructorOrFactoryMethod = factoryMethodToUse;
 		}
 
 		Object beanInstance = this.instantiationStrategy.instantiate(
@@ -398,7 +394,7 @@ abstract class ConstructorResolver {
 				usedValueHolders.add(valueHolder);
 				args.rawArguments[index] = valueHolder.getValue();
 				if (valueHolder.isConverted()) {
-					args.arguments[index] = valueHolder.getValue();
+					args.arguments[index] = valueHolder.getConvertedValue();
 				}
 				else {
 					try {

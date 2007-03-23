@@ -375,6 +375,8 @@ public class ConstructorArgumentValues {
 
 		private boolean converted = false;
 
+		private Object convertedValue;
+
 		/**
 		 * Create a new ValueHolder for the given value.
 		 * @param value the argument value
@@ -440,20 +442,28 @@ public class ConstructorArgumentValues {
 		}
 
 		/**
-		 * Set the converted value of the constructor argument,
-		 * after processed type conversion.
-		 */
-		public void setConvertedValue(Object value) {
-			this.value = value;
-			this.converted = true;
-		}
-
-		/**
 		 * Return whether this holder contains a converted value already (<code>true</code>),
 		 * or whether the value still needs to be converted (<code>false</code>).
 		 */
-		public boolean isConverted() {
+		public synchronized boolean isConverted() {
 			return this.converted;
+		}
+
+		/**
+		 * Set the converted value of the constructor argument,
+		 * after processed type conversion.
+		 */
+		public synchronized void setConvertedValue(Object value) {
+			this.converted = true;
+			this.convertedValue = value;
+		}
+
+		/**
+		 * Return the converted value of the constructor argument,
+		 * after processed type conversion.
+		 */
+		public synchronized Object getConvertedValue() {
+			return this.convertedValue;
 		}
 
 		/**
