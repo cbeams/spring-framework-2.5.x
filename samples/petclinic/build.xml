@@ -100,8 +100,8 @@
 		<fileset dir="${spring.root}/lib/j2ee">
 			<!-- connector.jar only needed for OpenJPA -->
 			<include name="connector.jar"/>
+			<!-- jta.jar only needed for Hibernate -->
 			<include name="jta.jar"/>
-			<include name="servlet-api.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-dbcp.jar"/>
@@ -124,6 +124,7 @@
 			<include name="toplink.jar"/>
 			<include name="xmlparserv2.jar"/>
 		</fileset>
+
 		<fileset dir="${spring.root}/dist">
 			<include name="spring-mock.jar"/>
 		</fileset>
@@ -158,7 +159,6 @@
 		<delete>
 			<fileset dir="${webclasses.dir}">
 				<include name="*.hbm.xml"/>
-				<include name="OJB*.*"/>
 				<include name="toplink*.*"/>
 				<!-- JPA meta-inf -->
 				<include name="META-INF/*"/>
@@ -188,7 +188,6 @@
 		<copy todir="${webclasses.dir}" preservelastmodified="true">
 			<fileset dir="${src.dir}">
 				<include name="*.hbm.xml"/>
-				<include name="OJB*.*"/>
 				<include name="toplink*.*"/>
 				<!-- JPA meta-inf -->
 				<include name="META-INF/*"/>
@@ -202,7 +201,7 @@
 			</fileset>
 		</jar>
 
-		<!-- rest of petclinic classes -->
+		<!-- rest of PetClinic classes -->
 		<jar jarfile="${weblib.dir}/${name}.jar" compress="true">
 			<fileset dir="${build.dir}">
 				<include name="**/*"/>
@@ -236,12 +235,19 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/hibernate">
 				<include name="hibernate3.jar"/>
+				<include name="hibernate-entitymanager.jar"/>
+				<include name="hibernate-annotations.jar"/>
+				<include name="hibernate-commons-annotations.jar"/>
+				<include name="jboss-archive-browsing.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/hsqldb">
 				<include name="hsqldb.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
+				<!-- connector.jar only needed for OpenJPA -->
+				<include name="connector.jar"/>
 				<include name="jstl.jar"/>
+				<!-- jta.jar only needed for Hibernate -->
 				<include name="jta.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
@@ -256,6 +262,13 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/jpa">
 				<include name="persistence.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/openjpa">
+				<include name="openjpa*.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/serp">
+				<!-- Serp only needed for OpenJPA -->
+				<include name="serp*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/toplink">
 				<include name="toplink-essentials.jar"/>
@@ -296,37 +309,8 @@
 		-->
 	</target>
 
-	<target name="earfile" depends="build, warfile" description="Build the enterprise application archive" >
 
-		<mkdir dir="${ear.dir}/package"/>
-		
-		<copy file="${war.dir}/WEB-INF/lib/${name}-domain.jar" todir="${ear.dir}/package"/>
-			
-		<war warfile="${ear.dir}/package/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
-			<include name="*"/>
-			<include name="docs/**"/>
-			<include name="html/**"/>
-			<include name="WEB-INF/*.*"/>
-			<exclude name="WEB-INF/web.xml"/>
-			<include name="WEB-INF/classes/*.*"/>
-			<include name="WEB-INF/classes/META-INF/**"/>
-			<include name="WEB-INF/lib/**"/>
-			<include name="WEB-INF/jsp/**"/>
-			<include name="META-INF/*"/>
-			<exclude name="**/petclinic-domain.jar"/>
-			<exclude name="**/.*"/>
-			<exclude name="WEB-INF/geronimo-web.xml"/>
-		</war>
-		
-		<ear earfile="${dist.dir}/${name}.ear" basedir="${ear.dir}/package" appxml="${ear.dir}/META-INF/application.xml" manifest="${ear.dir}/META-INF/MANIFEST.MF">
-			<include name="${name}.war" />
-
-			<include name="${name}-domain.jar"/>
-		</ear>
-
-	</target>
-
-	<target name="warfile" depends="build, docs" description="Build the web application archive">
+	<target name="warfile" depends="build,docs" description="Build the web application archive">
 
 		<mkdir dir="${dist.dir}"/>
 
@@ -349,12 +333,11 @@
 
 
 	<!--
-		If you are going to deploy the application into Geronimo (or an
-		application server variant of Geronimo), run this target in preference
-		to the plain 'warfile'. This is required because of Geronimo
-		class loading issues.
+		If you are going to deploy the application into Geronimo (or an application server
+		variant of Geronimo), run this target in preference to the plain 'warfile'.
+		This is required in order to avoid Geronimo class loading issues.
 	-->
-	<target name="geronimo.warfile" depends="build"
+	<target name="warfile-geronimo" depends="build,docs"
 			description="Build the web application archive packaged specifically for Geronimo">
 
 		<mkdir dir="${dist.dir}"/>
@@ -372,6 +355,37 @@
 			<exclude name="WEB-INF/lib/commons-logging.jar"/>
 			<exclude name="WEB-INF/lib/cglib*.jar"/>
 		</war>
+
+	</target>
+
+
+	<target name="earfile" depends="build,docs" description="Build the enterprise application archive" >
+
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${ear.dir}/package"/>
+
+		<copy file="${war.dir}/WEB-INF/lib/${name}-domain.jar" todir="${ear.dir}/package"/>
+
+		<war warfile="${ear.dir}/package/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
+			<include name="*"/>
+			<include name="docs/**"/>
+			<include name="html/**"/>
+			<include name="WEB-INF/*.*"/>
+			<exclude name="WEB-INF/web.xml"/>
+			<include name="WEB-INF/classes/*.*"/>
+			<include name="WEB-INF/classes/META-INF/**"/>
+			<include name="WEB-INF/lib/**"/>
+			<include name="WEB-INF/jsp/**"/>
+			<include name="META-INF/*"/>
+			<exclude name="**/petclinic-domain.jar"/>
+			<exclude name="**/.*"/>
+			<exclude name="WEB-INF/geronimo-web.xml"/>
+		</war>
+
+		<ear earfile="${dist.dir}/${name}.ear" basedir="${ear.dir}/package" appxml="${ear.dir}/META-INF/application.xml" manifest="${ear.dir}/META-INF/MANIFEST.MF">
+			<include name="${name}.war" />
+			<include name="${name}-domain.jar"/>
+		</ear>
 
 	</target>
 

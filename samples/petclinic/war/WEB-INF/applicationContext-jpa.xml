@@ -35,9 +35,20 @@
 			<bean class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter">
 				<property name="databasePlatform"
 						value="org.springframework.samples.petclinic.toplink.EssentialsHSQLPlatformWithNativeSequence"/>
-				<property name="generateDdl" value="false"/>
-				<property name="showSql" value="true" />
+				<property name="showSql" value="true"/>
 			</bean>
+			<!--
+			<bean id="jpaAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<property name="database" value="HSQL"/>
+				<property name="showSql" value="true"/>
+			</bean>
+			-->
+			<!--
+			<bean id="jpaAdapter" class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter">
+				<property name="database" value="HSQL"/>
+				<property name="showSql" value="true"/>
+			</bean>
+			-->
 		</property>
 	</bean>
 
