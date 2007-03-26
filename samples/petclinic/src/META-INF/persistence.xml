@@ -5,42 +5,11 @@
 
 	<persistence-unit name="PetClinic" transaction-type="RESOURCE_LOCAL">
 
-		<!--
-			Don't need to specify the provider when using Spring.
-			This is defined in the Spring configuration.
-		-->
-		<!--
-		<provider>oracle.toplink.essentials.PersistenceProvider</provider>
-		-->
+		<!-- Explicitly define mapping file path, else Hibernate won't find the default -->
+		<mapping-file>META-INF/orm.xml</mapping-file>
 
-		<!--
-			Prevent annotation scanning. In this app we are purely driven by orm.xml.
-		-->
+		<!-- Prevent annotation scanning. In this app we are purely driven by orm.xml -->
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
-
-		<!--
-			Using Spring we don't need the basic required vendor-specific properties like 
-			the following, which in this sample app are all conveyed in Spring configuration...
-		-->
-		<properties>
-			<!--
-			<property name="toplink.jdbc.driver" value="org.hsqldb.jdbcDriver"/>
-			<property name="toplink.jdbc.url" value="jdbc:hsqldb:hsql://localhost:9001"/>
-			<property name="toplink.jdbc.user" value="sa"/>
-			<property name="toplink.jdbc.password" value=""/>
-			<property name="toplink.logging.level" value="FINEST"/>
-			<property name="toplink.platform.class.name"
-				value="org.springframework.samples.petclinic.toplink.EssentialsHSQLPlatformWithNativeSequence"/>
-			-->
-
-			<!--
-			Some specific TopLink properties can make logging less verbose...
-			-->
-			<property name="toplink.logging.timestamp" value="false"/>
-			<property name="toplink.logging.thread" value="false"/>
-			<property name="toplink.logging.session" value="false"/>
-			<property name="toplink.throw.orm.exceptions" value="true"/>
-		</properties>
 
 	</persistence-unit>
 
