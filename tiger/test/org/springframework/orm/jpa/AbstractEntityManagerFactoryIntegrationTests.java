@@ -40,10 +40,12 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 	public static Provider getProvider() {
 		String provider = System.getProperty("org.springframework.orm.jpa.provider");
 		if (provider != null) {
-			if (provider.toLowerCase().contains("hibernate"))
+			if (provider.toLowerCase().contains("hibernate")) {
 				return Provider.HIBERNATE;
-			if (provider.toLowerCase().contains("openjpa"))
+			}
+			if (provider.toLowerCase().contains("openjpa")) {
 				return Provider.OPENJPA;
+			}
 		}
 		return Provider.TOPLINK;
 	}
@@ -51,7 +53,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 
 	@Override
 	protected String getActualOrmXmlLocation() {
-		// Specify that we do NOT want to find such a file
+		// Specify that we do NOT want to find such a file.
 		return null;
 	}
 
