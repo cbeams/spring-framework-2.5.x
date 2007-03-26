@@ -211,6 +211,10 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 					"ideally specify the appropriate JpaVendorAdapter class for this provider.");
 		}
 
+		if (logger.isInfoEnabled()) {
+			logger.info("Building JPA container EntityManagerFactory for persistence unit '" +
+					this.persistenceUnitInfo.getPersistenceUnitName() + "'");
+		}
 		this.nativeEntityManagerFactory =
 				provider.createContainerEntityManagerFactory(this.persistenceUnitInfo, getJpaPropertyMap());
 		postProcessEntityManagerFactory(this.nativeEntityManagerFactory, this.persistenceUnitInfo);

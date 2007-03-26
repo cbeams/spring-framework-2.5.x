@@ -336,7 +336,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Close the EntityManagerFactory on bean factory shutdown.
 	 */
 	public void destroy() {
-		logger.info("Closing JPA EntityManagerFactory for <" + persistenceUnitName + ">");
+		if (logger.isInfoEnabled()) {
+			logger.info("Closing JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
+		}
 		this.entityManagerFactory.close();
 	}
 

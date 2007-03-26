@@ -72,6 +72,9 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 * @throws javax.persistence.PersistenceException in case of JPA initialization errors
 	 */
 	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
+		if (logger.isInfoEnabled()) {
+			logger.info("Building JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
+		}
 		PersistenceProvider provider = getPersistenceProvider();
 		if (provider != null) {
 			// Create EntityManagerFactory directly through PersistenceProvider.
