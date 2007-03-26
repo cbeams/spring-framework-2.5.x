@@ -6,8 +6,13 @@ import org.springframework.samples.petclinic.aspects.UsageLogAspect;
 
 /**
  * Tests for the DAO variant based on the shared EntityManager approach.
+ * Uses TopLink Essentials (the reference implementation) for testing.
+ *
+ * <p>Specifically tests usage of an <code>orm.xml</code> file, loaded by the
+ * persistence provider through the Spring-provided persistence unit root URL.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class EntityManagerClinicTests extends AbstractJpaClinicTests {
 
@@ -17,10 +22,11 @@ public class EntityManagerClinicTests extends AbstractJpaClinicTests {
 		this.usageLogAspect = usageLogAspect;
 	}
 
-	protected String[] getConfigLocations() {
+	protected String[] getConfigPaths() {
 		return new String[] {
-			"/org/springframework/samples/petclinic/jpa/applicationContext-jpaCommon.xml",
-			"/org/springframework/samples/petclinic/jpa/applicationContext-entityManager.xml"
+			"applicationContext-jpaCommon.xml",
+			"applicationContext-toplinkAdapter.xml",
+			"applicationContext-entityManager.xml"
 		};
 	}
 

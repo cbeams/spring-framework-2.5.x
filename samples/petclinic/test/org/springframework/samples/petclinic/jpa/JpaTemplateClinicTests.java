@@ -2,15 +2,18 @@ package org.springframework.samples.petclinic.jpa;
 
 /**
  * Tests for the DAO variant based on Spring's JpaTemplate.
+ * Uses TopLink Essentials (the reference implementation) for testing.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class JpaTemplateClinicTests extends AbstractJpaClinicTests {
 
-	protected String[] getConfigLocations() {
+	protected String[] getConfigPaths() {
 		return new String[] {
-			"/org/springframework/samples/petclinic/jpa/applicationContext-jpaCommon.xml",
-			"/org/springframework/samples/petclinic/jpa/applicationContext-jpaTemplate.xml"
+			"applicationContext-jpaCommon.xml",
+			"applicationContext-toplinkAdapter.xml",
+			"applicationContext-entityManager.xml"
 		};
 	}
 

@@ -28,28 +28,28 @@
 
 	<path id="master-classpath">
 
-		<fileset dir="${spring.root}/lib/hibernate">
-			<include name="hibernate3.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/lib/jakarta-commons">
-			<include name="commons-logging.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/lib/j2ee">
-			<include name="servlet-api.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/lib/jpa">
-			<include name="persistence.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/lib/asm">
 			<include name="asm-*.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/lib/toplink">
-			<include name="toplink-essentials.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/aspectj">
 			<include name="aspectjweaver.jar"/>
 		</fileset>
-		
+		<fileset dir="${spring.root}/lib/hibernate">
+			<include name="hibernate3.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/j2ee">
+			<include name="servlet-api.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/jakarta-commons">
+			<include name="commons-logging.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/jpa">
+			<include name="persistence.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/toplink">
+			<include name="toplink-essentials.jar"/>
+		</fileset>
+
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
@@ -88,10 +88,18 @@
 		<fileset dir="${spring.root}/lib/ehcache">
 			<include name="ehcache*.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/hibernate">
+			<include name="hibernate-entitymanager.jar"/>
+			<include name="hibernate-annotations.jar"/>
+			<include name="hibernate-commons-annotations.jar"/>
+			<include name="jboss-archive-browsing.jar"/>
+		</fileset>
 		<fileset dir="${spring.root}/lib/hsqldb">
 			<include name="hsqldb.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
+			<!-- connector.jar only needed for OpenJPA -->
+			<include name="connector.jar"/>
 			<include name="jta.jar"/>
 			<include name="servlet-api.jar"/>
 		</fileset>
@@ -103,6 +111,13 @@
 		</fileset>
 		<fileset dir="${spring.root}/lib/log4j">
 			<include name="log4j-*.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/openjpa">
+			<include name="openjpa*.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/serp">
+			<!-- Serp only needed for OpenJPA -->
+			<include name="serp*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/toplink">
 			<include name="toplink-essentials.jar"/>
@@ -240,7 +255,7 @@
 				<include name="standard.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jpa">
-				<include name="*.jar"/>
+				<include name="persistence.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/toplink">
 				<include name="toplink-essentials.jar"/>
@@ -265,7 +280,7 @@
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" windowtitle="PetClinic"
 				source="1.5" author="true" version="true" use="true" packagenames="*">
 			<doctitle><![CDATA[<h1>PetClinic</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Ken Krebs and Juergen Hoeller, 2003-2006.</i>]]></bottom>
+			<bottom><![CDATA[<i>Ken Krebs and Juergen Hoeller, 2003-2007.</i>]]></bottom>
 			<classpath refid="master-classpath"/>
 			<classpath refid="build-classpath"/>
 		</javadoc>
@@ -406,7 +421,10 @@
 
 		<copy todir="${build.dir}" preservelastmodified="true">
 			<fileset dir="${src.dir}">
-				<include name="META-INF/*"/>
+				<include name="**/*.xml"/>
+			</fileset>
+			<fileset dir="${testsrc.dir}">
+				<include name="**/*.xml"/>
 			</fileset>
 		</copy>
 
@@ -416,12 +434,12 @@
 			<test name="org.springframework.samples.petclinic.jdbc.JdbcClinicTests" todir="${testreports.dir}"/>
 			<test name="org.springframework.samples.petclinic.hibernate.HibernateClinicTests" todir="${testreports.dir}"/>
 			<test name="org.springframework.samples.petclinic.toplink.TopLinkClinicTests" todir="${testreports.dir}"/>
-			<test name="org.springframework.samples.petclinic.jpa.EntityManagerClinicTests" todir="${testreports.dir}"/>			
 			<test name="org.springframework.samples.petclinic.jpa.JpaTemplateClinicTests" todir="${testreports.dir}"/>
+			<test name="org.springframework.samples.petclinic.jpa.EntityManagerClinicTests" todir="${testreports.dir}"/>
+			<test name="org.springframework.samples.petclinic.jpa.HibernateEntityManagerClinicTests" todir="${testreports.dir}"/>
+			<test name="org.springframework.samples.petclinic.jpa.OpenJpaEntityManagerClinicTests" todir="${testreports.dir}"/>
 			<classpath path="${build.dir}"/>
-			<classpath path="${src.dir}"/>
 			<classpath path="${testbuild.dir}"/>
-			<classpath path="${testsrc.dir}"/>
 			<classpath refid="master-classpath"/>
 			<classpath refid="test-classpath"/>
 		</junit>

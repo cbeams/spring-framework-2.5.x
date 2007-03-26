@@ -4,10 +4,10 @@
 <beans>
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="org.hsqldb.jdbcDriver" />
-		<property name="url" value="jdbc:hsqldb:hsql://localhost:9001" />
-		<property name="username" value="sa" />
-		<property name="password" value="" />
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+		<property name="url" value="jdbc:hsqldb:hsql://localhost:9001"/>
+		<property name="username" value="sa"/>
+		<property name="password" value=""/>
 	</bean>
 
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
@@ -15,14 +15,8 @@
 		<property name="loadTimeWeaver">
 			<bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/>
 		</property>
-		<property name="jpaVendorAdapter">
-			<bean class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter">
-				<property name="databasePlatform"
-						value="org.springframework.samples.petclinic.toplink.EssentialsHSQLPlatformWithNativeSequence"/>
-				<property name="generateDdl" value="false"/>
-				<property name="showSql" value="true" />
-			</bean>
-		</property>
+		<!-- Specific "jpaAdapter" bean sits in adapter context file -->
+		<property name="jpaVendorAdapter" ref="jpaAdapter"/>
 	</bean>
 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
