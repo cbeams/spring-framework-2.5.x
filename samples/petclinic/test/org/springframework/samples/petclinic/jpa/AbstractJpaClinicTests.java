@@ -156,8 +156,6 @@ public abstract class AbstractJpaClinicTests extends AbstractJpaTests {
 		pet.setBirthDate(new Date());
 		o6.addPet(pet);
 		assertEquals(found + 1, o6.getPets().size());
-		// both storePet and storeOwner are necessary to cover all ORM tools
-		this.clinic.storePet(pet);
 		this.clinic.storeOwner(o6);
 		// assertTrue(!pet.isNew());  -- NOT TRUE FOR TOPLINK (before commit)
 		o6 = this.clinic.loadOwner(6);
@@ -179,8 +177,6 @@ public abstract class AbstractJpaClinicTests extends AbstractJpaTests {
 		Visit visit = new Visit();
 		p7.addVisit(visit);
 		visit.setDescription("test");
-		// both storeVisit and storePet are necessary to cover all ORM tools
-		this.clinic.storeVisit(visit);
 		this.clinic.storePet(p7);
 		// assertTrue(!visit.isNew());  -- NOT TRUE FOR TOPLINK (before commit)
 		p7 = this.clinic.loadPet(7);
