@@ -18,6 +18,7 @@ package org.springframework.mock.web;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -68,7 +69,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private final ByteArrayOutputStream content = new ByteArrayOutputStream();
 
-	private final DelegatingServletOutputStream outputStream = new DelegatingServletOutputStream(this.content);
+	private final ServletOutputStream outputStream = new ResponseServletOutputStream(this.content);
 
 	private PrintWriter writer;
 
@@ -161,7 +162,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		if (this.writer == null) {
 			Writer targetWriter = (this.characterEncoding != null ?
 					new OutputStreamWriter(this.content, this.characterEncoding) : new OutputStreamWriter(this.content));
-			this.writer = new PrintWriter(targetWriter);
+			this.writer = new ResponsePrintWriter(targetWriter);
 		}
 		return this.writer;
 	}
@@ -209,25 +210,21 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void flushBuffer() {
-		if (this.writer != null) {
-			this.writer.flush();
-		}
-		if (this.outputStream != null) {
-			try {
-				this.outputStream.flush();
-			}
-			catch (IOException ex) {
-				throw new IllegalStateException("Could not flush OutputStream: " + ex.getMessage());
-			}
-		}
-		this.committed = true;
+		setCommitted(true);
 	}
 
 	public void resetBuffer() {
-		if (this.committed) {
+		if (isCommitted()) {
 			throw new IllegalStateException("Cannot reset buffer - response is already committed");
 		}
 		this.content.reset();
+	}
+
+	private void setCommittedIfBufferSizeExceeded() {
+		int bufSize = getBufferSize();
+		if (bufSize > 0 && this.content.size() > bufSize) {
+			setCommitted(true);
+		}
 	}
 
 	public void setCommitted(boolean committed) {
@@ -333,29 +330,29 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void sendError(int status, String errorMessage) throws IOException {
-		if (this.committed) {
+		if (isCommitted()) {
 			throw new IllegalStateException("Cannot set error status - response is already committed");
 		}
 		this.status = status;
 		this.errorMessage = errorMessage;
-		this.committed = true;
+		setCommitted(true);
 	}
 
 	public void sendError(int status) throws IOException {
-		if (this.committed) {
+		if (isCommitted()) {
 			throw new IllegalStateException("Cannot set error status - response is already committed");
 		}
 		this.status = status;
-		this.committed = true;
+		setCommitted(true);
 	}
 
 	public void sendRedirect(String url) throws IOException {
-		if (this.committed) {
+		if (isCommitted()) {
 			throw new IllegalStateException("Cannot send redirect - response is already committed");
 		}
 		Assert.notNull(url, "Redirect URL must not be null");
 		this.redirectedUrl = url;
-		this.committed = true;
+		setCommitted(true);
 	}
 
 	public String getRedirectedUrl() {
@@ -445,6 +442,58 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	public String getIncludedUrl() {
 		return this.includedUrl;
+	}
+
+
+	/**
+	 * Inner class that adapts the ServletOutputStream to mark the
+	 * response as committed once the buffer size is exceeded.
+	 */
+	private class ResponseServletOutputStream extends DelegatingServletOutputStream {
+
+		public ResponseServletOutputStream(OutputStream out) {
+			super(out);
+		}
+
+		public void write(int b) throws IOException {
+			super.write(b);
+			super.flush();
+			setCommittedIfBufferSizeExceeded();
+		}
+
+		public void flush() throws IOException {
+			super.flush();
+			setCommitted(true);
+		}
+	}
+
+
+	/**
+	 * Inner class that adapts the PrintWriter to mark the
+	 * response as committed once the buffer size is exceeded.
+	 */
+	private class ResponsePrintWriter extends PrintWriter {
+
+		public ResponsePrintWriter(Writer out) {
+			super(out, true);
+		}
+
+		public void write(char buf[], int off, int len) {
+			super.write(buf, off, len);
+			super.flush();
+			setCommittedIfBufferSizeExceeded();
+		}
+
+		public void write(String s, int off, int len) {
+			super.write(s, off, len);
+			super.flush();
+			setCommittedIfBufferSizeExceeded();
+		}
+
+		public void flush() {
+			super.flush();
+			setCommitted(true);
+		}
 	}
 
 }

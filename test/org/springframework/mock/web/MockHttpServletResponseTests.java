@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.springframework.mock.web;
 
-import junit.framework.TestCase;
-import org.springframework.web.util.WebUtils;
-
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Set;
+
+import junit.framework.TestCase;
+
+import org.springframework.web.util.WebUtils;
 
 /**
  * @author Juergen Hoeller
@@ -50,6 +53,60 @@ public final class MockHttpServletResponseTests extends TestCase {
 		assertNotNull(responseHeaders);
 		assertEquals(1, responseHeaders.size());
 		assertEquals("HTTP header casing not being preserved", headerName, responseHeaders.iterator().next());
+	}
+
+	public void testServletOutputStreamCommittedWhenBufferSizeExceeded() throws IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		assertFalse(response.isCommitted());
+		response.getOutputStream().write('X');
+		assertFalse(response.isCommitted());
+		int size = response.getBufferSize();
+		response.getOutputStream().write(new byte[size]);
+		assertTrue(response.isCommitted());
+		assertEquals(size + 1, response.getContentAsByteArray().length);
+	}
+
+	public void testServletWriterCommittedWhenBufferSizeExceeded() throws IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		assertFalse(response.isCommitted());
+		response.getWriter().write("X");
+		assertFalse(response.isCommitted());
+		int size = response.getBufferSize();
+		char[] data = new char[size];
+		Arrays.fill(data, 'p');
+		response.getWriter().write(data);
+		assertTrue(response.isCommitted());
+		assertEquals(size + 1, response.getContentAsByteArray().length);
+	}
+
+	public void testServletOutputStreamCommittedOnOutputStreamFlush() throws IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		assertFalse(response.isCommitted());
+		response.getOutputStream().write('X');
+		assertFalse(response.isCommitted());
+		response.getOutputStream().flush();
+		assertTrue(response.isCommitted());
+		assertEquals(1, response.getContentAsByteArray().length);
+	}
+
+	public void testServletWriterCommittedOnWriterFlush() throws IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		assertFalse(response.isCommitted());
+		response.getWriter().write("X");
+		assertFalse(response.isCommitted());
+		response.getWriter().flush();
+		assertTrue(response.isCommitted());
+		assertEquals(1, response.getContentAsByteArray().length);
+	}
+
+	public void testServletOutputStreamCommittedOnFlushBuffer() throws IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		assertFalse(response.isCommitted());
+		response.getOutputStream().write('X');
+		assertFalse(response.isCommitted());
+		response.flushBuffer();
+		assertTrue(response.isCommitted());
+		assertEquals(1, response.getContentAsByteArray().length);
 	}
 
 }
