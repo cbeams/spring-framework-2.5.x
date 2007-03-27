@@ -18,9 +18,12 @@ package org.springframework.orm.jpa.support;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,7 +55,6 @@ import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * BeanPostProcessor that processes {@link javax.persistence.PersistenceUnit}
@@ -156,6 +158,8 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 
 	private Map<String, String> extendedPersistenceContexts;
 
+	private String defaultPersistenceUnitName = "";
+
 	private ListableBeanFactory beanFactory;
 
 	private Map<Class<?>, List<AnnotatedMember>> classMetadata = new HashMap<Class<?>, List<AnnotatedMember>>();
@@ -172,6 +176,10 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	 * (which needs to resolve to an EntityManagerFactory instance).
 	 * <p>JNDI names specified here should refer to <code>persistence-unit-ref</code>
 	 * entries in the Java EE deployment descriptor, matching the target persistence unit.
+	 * <p>In case of no unit name specified in the annotation, the specified value
+	 * for the {@link #setDefaultPersistenceUnitName default persistence unit}
+	 * will be taken (by default, the value mapped to the empty String),
+	 * or simply the single persistence unit if there is only one.
 	 * <p>This is mainly intended for use in a Java EE 5 environment, with all
 	 * lookup driven by the standard JPA annotations, and all EntityManagerFactory
 	 * references obtained from JNDI. No separate EntityManagerFactory bean
@@ -195,6 +203,10 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	 * <p>JNDI names specified here should refer to <code>persistence-context-ref</code>
 	 * entries in the Java EE deployment descriptors, matching the target persistence unit
 	 * and being set up with persistence context type <code>Transaction</code>.
+	 * <p>In case of no unit name specified in the annotation, the specified value
+	 * for the {@link #setDefaultPersistenceUnitName default persistence unit}
+	 * will be taken (by default, the value mapped to the empty String),
+	 * or simply the single persistence unit if there is only one.
 	 * <p>This is mainly intended for use in a Java EE 5 environment, with all
 	 * lookup driven by the standard JPA annotations, and all EntityManager
 	 * references obtained from JNDI. No separate EntityManagerFactory bean
@@ -212,6 +224,10 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	 * <p>JNDI names specified here should refer to <code>persistence-context-ref</code>
 	 * entries in the Java EE deployment descriptors, matching the target persistence unit
 	 * and being set up with persistence context type <code>Extended</code>.
+	 * <p>In case of no unit name specified in the annotation, the specified value
+	 * for the {@link #setDefaultPersistenceUnitName default persistence unit}
+	 * will be taken (by default, the value mapped to the empty String),
+	 * or simply the single persistence unit if there is only one.
 	 * <p>This is mainly intended for use in a Java EE 5 environment, with all
 	 * lookup driven by the standard JPA annotations, and all EntityManager
 	 * references obtained from JNDI. No separate EntityManagerFactory bean
@@ -220,6 +236,26 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	 */
 	public void setExtendedPersistenceContexts(Map<String, String> extendedPersistenceContexts) {
 		this.extendedPersistenceContexts = extendedPersistenceContexts;
+	}
+
+	/**
+	 * Specify the default persistence unit name, to be used in case
+	 * of no unit name specified in an <code>@PersistenceUnit</code> /
+	 * <code>@PersistenceContext</code> annotation.
+	 * <p>This is mainly intended for lookups in the application context,
+	 * indicating the target persistence unit name (typically matching
+	 * the bean name), but also applies to lookups in the
+	 * {@link #setPersistenceUnits "persistenceUnits"} /
+	 * {@link #setPersistenceContexts "persistenceContexts"} /
+	 * {@link #setExtendedPersistenceContexts "extendedPersistenceContexts"} map,
+	 * avoiding the need for duplicated mappings for the empty String there.
+	 * <p>Default is to check for a single EntityManagerFactory bean
+	 * in the Spring application context, if any. If there are multiple
+	 * such factories, either specify this default persistence unit name
+	 * or explicitly refer to named persistence units in your annotations.
+	 */
+	public void setDefaultPersistenceUnitName(String unitName) {
+		this.defaultPersistenceUnitName = (unitName != null ? unitName : "");
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -278,8 +314,9 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 		}
 	}
 
-	private void addIfPresent(List<AnnotatedMember> metadata, AccessibleObject ao) {
-		PersistenceContext pc = ao.getAnnotation(PersistenceContext.class);
+	private void addIfPresent(List<AnnotatedMember> metadata, Member member) {
+		AnnotatedElement ae = (AnnotatedElement) member;
+		PersistenceContext pc = ae.getAnnotation(PersistenceContext.class);
 		if (pc != null) {
 			Properties properties = null;
 			PersistenceProperty[] pps = pc.properties();
@@ -290,12 +327,12 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 					properties.setProperty(pp.name(), pp.value());
 				}
 			}
-			metadata.add(new AnnotatedMember(ao, pc.unitName(), pc.type(), properties));
+			metadata.add(new AnnotatedMember(member, pc.unitName(), pc.type(), properties));
 		}
 		else {
-			PersistenceUnit pu = ao.getAnnotation(PersistenceUnit.class);
+			PersistenceUnit pu = ae.getAnnotation(PersistenceUnit.class);
 			if (pu != null) {
-				metadata.add(new AnnotatedMember(ao, pu.unitName()));
+				metadata.add(new AnnotatedMember(member, pu.unitName()));
 			}
 		}
 	}
@@ -311,8 +348,12 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	 */
 	protected EntityManagerFactory getPersistenceUnit(String unitName) {
 		if (this.persistenceUnits != null) {
-			String jndiName = this.persistenceUnits.get(unitName != null ? unitName : "");
-			if (jndiName == null && !StringUtils.hasLength(unitName) && this.persistenceUnits.size() == 1) {
+			String unitNameForLookup = (unitName != null ? unitName : "");
+			if ("".equals(unitNameForLookup)) {
+				unitNameForLookup = this.defaultPersistenceUnitName;
+			}
+			String jndiName = this.persistenceUnits.get(unitNameForLookup);
+			if (jndiName == null && "".equals(unitNameForLookup) && this.persistenceUnits.size() == 1) {
 				jndiName = this.persistenceUnits.values().iterator().next();
 			}
 			if (jndiName != null) {
@@ -339,8 +380,12 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	protected EntityManager getPersistenceContext(String unitName, boolean extended) {
 		Map<String, String> contexts = (extended ? this.extendedPersistenceContexts : this.persistenceContexts);
 		if (contexts != null) {
-			String jndiName = contexts.get(unitName != null ? unitName : "");
-			if (jndiName == null && !StringUtils.hasLength(unitName) && contexts.size() == 1) {
+			String unitNameForLookup = (unitName != null ? unitName : "");
+			if ("".equals(unitNameForLookup)) {
+				unitNameForLookup = this.defaultPersistenceUnitName;
+			}
+			String jndiName = contexts.get(unitNameForLookup);
+			if (jndiName == null && "".equals(unitNameForLookup) && contexts.size() == 1) {
 				jndiName = contexts.values().iterator().next();
 			}
 			if (jndiName != null) {
@@ -367,8 +412,12 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 		if (this.beanFactory == null) {
 			throw new IllegalStateException("ListableBeanFactory required for EntityManagerFactory lookup");
 		}
-		if (StringUtils.hasLength(unitName)) {
-			return findNamedEntityManagerFactory(unitName);
+		String unitNameForLookup = (unitName != null ? unitName : "");
+		if ("".equals(unitNameForLookup)) {
+			unitNameForLookup = this.defaultPersistenceUnitName;
+		}
+		if (!"".equals(unitNameForLookup)) {
+			return findNamedEntityManagerFactory(unitNameForLookup);
 		}
 		else {
 			return findDefaultEntityManagerFactory();
@@ -383,23 +432,20 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory in the context
 	 */
 	protected EntityManagerFactory findNamedEntityManagerFactory(String unitName) throws NoSuchBeanDefinitionException {
+		// See whether we can find an EntityManagerFactory with matching persistence unit name.
 		String[] candidateNames =
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, EntityManagerFactory.class);
 		for (String candidateName : candidateNames) {
-			EntityManagerFactory emf = (EntityManagerFactory) this.beanFactory.getBean(candidateName);
-			String nameToCompare = candidateName;
-			if (emf instanceof EntityManagerFactoryInfo) {
-				EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) emf;
-				if (emfi.getPersistenceUnitName() != null) {
-					nameToCompare = emfi.getPersistenceUnitName();
+			if (this.beanFactory.isTypeMatch(candidateName, EntityManagerFactoryInfo.class)) {
+				EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) this.beanFactory.getBean(candidateName);
+				if (unitName.equals(emfi.getPersistenceUnitName())) {
+					return (EntityManagerFactory) emfi;
 				}
 			}
-			if (unitName.equals(nameToCompare)) {
-				return emf;
-			}
 		}
-		throw new NoSuchBeanDefinitionException(EntityManagerFactory.class,
-				"No EntityManagerFactory found for persistence unit name '" + unitName + "'");
+		// No matching persistence unit found - simply take the EntityManagerFactory
+		// with the persistence unit name as bean name (by convention).
+		return (EntityManagerFactory) this.beanFactory.getBean(unitName);
 	}
 
 	/**
@@ -419,7 +465,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	 */
 	private class AnnotatedMember {
 
-		private final AccessibleObject member;
+		private final Member member;
 
 		private final String unitName;
 
@@ -427,16 +473,16 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 
 		private final Properties properties;
 
-		public AnnotatedMember(AccessibleObject member, String unitName) {
+		public AnnotatedMember(Member member, String unitName) {
 			this(member, unitName, null, null);
 		}
 
-		public AnnotatedMember(AccessibleObject member, String unitName, PersistenceContextType type, Properties properties) {
+		public AnnotatedMember(Member member, String unitName, PersistenceContextType type, Properties properties) {
+			this.member = member;
 			this.unitName = unitName;
 			this.type = type;
 			this.properties = properties;
-			this.member = member;
-			
+
 			// Validate member type
 			Class<?> memberType = getMemberType();
 			if (!(EntityManagerFactory.class.isAssignableFrom(memberType) ||
@@ -448,8 +494,9 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 		public void inject(Object instance) {
 			Object value = resolve();
 			try {
-				if (!this.member.isAccessible()) {
-					this.member.setAccessible(true);
+				if (!Modifier.isPublic(this.member.getModifiers()) ||
+						!Modifier.isPublic(this.member.getDeclaringClass().getModifiers())) {
+					((AccessibleObject) this.member).setAccessible(true);
 				}
 				if (this.member instanceof Field) {
 					((Field) this.member).set(instance, value);
