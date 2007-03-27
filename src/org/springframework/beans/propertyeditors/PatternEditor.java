@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,33 @@ import java.util.regex.Pattern;
  */
 public class PatternEditor extends PropertyEditorSupport {
 
+	private final int flags;
+
+
+	/**
+	 * Create a new PatternEditor with default settings.
+	 */
+	public PatternEditor() {
+		this.flags = 0;
+	}
+
+	/**
+	 * Create a new PatternEditor with the given settings.
+	 * @param flags the <code>java.util.regex.Pattern</code> flags to apply
+	 * @see java.util.regex.Pattern#compile(String, int)
+	 * @see java.util.regex.Pattern#CASE_INSENSITIVE
+	 * @see java.util.regex.Pattern#MULTILINE
+	 * @see java.util.regex.Pattern#DOTALL
+	 * @see java.util.regex.Pattern#UNICODE_CASE
+	 * @see java.util.regex.Pattern#CANON_EQ
+	 */
+	public PatternEditor(int flags) {
+		this.flags = flags;
+	}
+
+
 	public void setAsText(String text) {
-		setValue(text != null ? Pattern.compile(text) : null);
+		setValue(text != null ? Pattern.compile(text, this.flags) : null);
 	}
 
 	public String getAsText() {
