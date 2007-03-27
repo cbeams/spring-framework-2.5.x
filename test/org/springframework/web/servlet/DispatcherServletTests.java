@@ -767,6 +767,7 @@ public class DispatcherServletTests extends TestCase {
 		assertEquals("noview/simple.jsp", response.getForwardedUrl());
 	}
 
+
 	public static class ControllerFromParent implements Controller {
 
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
