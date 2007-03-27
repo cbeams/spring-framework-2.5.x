@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.io.OutputStream;
 
 import javax.servlet.ServletOutputStream;
 
+import org.springframework.util.Assert;
+
 /**
  * Delegating implementation of {@link javax.servlet.ServletOutputStream}.
  *
@@ -37,15 +39,19 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
 
 
 	/**
-	 * Create a new DelegatingServletOutputStream.
-	 * @param targetStream the target OutputStream
+	 * Create a DelegatingServletOutputStream for the given target stream.
+	 * @param targetStream the target stream (never <code>null</code>)
 	 */
 	public DelegatingServletOutputStream(OutputStream targetStream) {
+		Assert.notNull(targetStream, "Target OutputStream must not be null");
 		this.targetStream = targetStream;
 	}
 
-	public OutputStream getTargetStream() {
-		return targetStream;
+	/**
+	 * Return the underlying target stream (never <code>null</code>).
+	 */
+	public final OutputStream getTargetStream() {
+		return this.targetStream;
 	}
 
 

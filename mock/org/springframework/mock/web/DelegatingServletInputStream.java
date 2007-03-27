@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.io.InputStream;
 
 import javax.servlet.ServletInputStream;
 
+import org.springframework.util.Assert;
+
 /**
  * Delegating implementation of {@link javax.servlet.ServletInputStream}.
  *
@@ -37,15 +39,19 @@ public class DelegatingServletInputStream extends ServletInputStream {
 
 
 	/**
-	 * Create a new DelegatingServletInputStream.
-	 * @param sourceStream the sourceStream InputStream
+	 * Create a DelegatingServletInputStream for the given source stream.
+	 * @param sourceStream the source stream (never <code>null</code>)
 	 */
 	public DelegatingServletInputStream(InputStream sourceStream) {
+		Assert.notNull(sourceStream, "Source InputStream must not be null");
 		this.sourceStream = sourceStream;
 	}
 
-	public InputStream getSourceStream() {
-		return sourceStream;
+	/**
+	 * Return the underlying source stream (never <code>null</code>).
+	 */
+	public final InputStream getSourceStream() {
+		return this.sourceStream;
 	}
 
 
