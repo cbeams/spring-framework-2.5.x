@@ -58,7 +58,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private boolean jedi;
 
-	private ITestBean spouse;
+	private ITestBean[] spouses;
 
 	private String touchy;
 
@@ -107,7 +107,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 	public TestBean(ITestBean spouse) {
-		this.spouse = spouse;
+		this.spouses = new ITestBean[] {spouse};
 	}
 
 	public TestBean(String name, int age) {
@@ -116,7 +116,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 	public TestBean(ITestBean spouse, Properties someProperties) {
-		this.spouse = spouse;
+		this.spouses = new ITestBean[] {spouse};
 		this.someProperties = someProperties;
 	}
 
@@ -194,11 +194,15 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 	public ITestBean getSpouse() {
-		return spouse;
+		return (spouses != null ? spouses[0] : null);
 	}
 
 	public void setSpouse(ITestBean spouse) {
-		this.spouse = spouse;
+		this.spouses = new ITestBean[] {spouse};
+	}
+
+	public ITestBean[] getSpouses() {
+		return spouses;
 	}
 
 	public String getTouchy() {
@@ -425,6 +429,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	public String toString() {
 		String s = "name=" + name + "; age=" + age + "; touchy=" + touchy;
+		ITestBean spouse = getSpouse();
 		s += "; spouse={" + (spouse != null ? spouse.getName() : null) + "}";
 		return s;
 	}

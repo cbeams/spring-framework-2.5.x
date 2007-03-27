@@ -41,6 +41,8 @@ public interface ITestBean {
 
 	void setSpouse(ITestBean spouse);
 
+	ITestBean[] getSpouses();
+
 	String[] getStringArray();
 
 	void setStringArray(String[] stringArray);

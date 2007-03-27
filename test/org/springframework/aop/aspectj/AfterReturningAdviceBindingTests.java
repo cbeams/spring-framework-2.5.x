@@ -30,6 +30,7 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
  *
  * @author Adrian Colyer
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class AfterReturningAdviceBindingTests extends AbstractDependencyInjectionSpringContextTests {
 
@@ -129,6 +130,15 @@ public class AfterReturningAdviceBindingTests extends AbstractDependencyInjectio
 		mockControl.verify();
 	}
 	
+	public void testReturningBeanArray() {
+		this.testBeanTarget.setSpouse(new TestBean());
+		ITestBean[] spouses = (ITestBean[]) this.testBeanTarget.getSpouses();
+		mockCollaborator.testBeanArrayArg(spouses);
+		mockControl.replay();
+		testBeanProxy.getSpouses();
+		mockControl.verify();
+	}
+
 	public void testNoInvokeWhenReturningParameterTypeDoesNotMatch() {
 		// we need a strict mock for this...
 		mockControl = MockControl.createControl(AfterReturningAdviceBindingCollaborator.class);

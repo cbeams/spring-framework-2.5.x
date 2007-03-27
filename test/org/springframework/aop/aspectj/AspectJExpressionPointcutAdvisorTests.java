@@ -21,6 +21,7 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class AspectJExpressionPointcutAdvisorTests extends AbstractDependencyInjectionSpringContextTests {
 
@@ -48,9 +49,9 @@ public class AspectJExpressionPointcutAdvisorTests extends AbstractDependencyInj
 
 	public void testPointcutting() throws Exception {
 		assertEquals("Count should be 0", 0, interceptor.getCount());
-		testBean.getAge();
+		testBean.getSpouses();
 		assertEquals("Count should be 1", 1, interceptor.getCount());
-		testBean.setAge(90);
+		testBean.getSpouse();
 		assertEquals("Count should be 1", 1, interceptor.getCount());
 	}
 

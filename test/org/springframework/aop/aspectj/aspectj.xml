@@ -3,20 +3,13 @@
 
 <beans>
 
-	<bean id="testBean" class="org.springframework.beans.TestBean"/>
-
-	<!--
-	<aspect target="testBean">
-		<advice ref="interceptor">
-			<pointcut expression="execution(int org.springframework.beans.ITestBean.getAge())"/>
-		</advice>
-	</aop:aspect>-->
-
-
 	<bean id="proxyCreator" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
 
+	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+
 	<bean id="advisor" class="org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
-		<property name="expression" value="execution(int org.springframework.beans.ITestBean.getAge())"/>
+		<property name="expression"
+				value="execution(org.springframework.beans.ITestBean[] org.springframework.beans.ITestBean.*(..))"/>
 		<property name="advice" ref="interceptor"/>
 	</bean>
 
