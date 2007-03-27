@@ -340,6 +340,34 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected void initFrameworkServlet() throws ServletException, BeansException {
 	}
 
+	/**
+	 * Refresh this servlet's application context, as well as the
+	 * dependent state of the servlet.
+	 * <p>Delegates to {@link #onRefresh()} after the context refresh.
+	 * @throws BeansException in case of errors
+	 * @see #getWebApplicationContext()
+	 * @see org.springframework.context.ConfigurableApplicationContext#refresh()
+	 */
+	public void refresh() throws BeansException {
+		WebApplicationContext wac = getWebApplicationContext();
+		if (!(wac instanceof ConfigurableApplicationContext)) {
+			throw new IllegalStateException("WebApplicationContext does not support refresh: " + wac);
+		}
+		((ConfigurableApplicationContext) wac).refresh();
+		onRefresh();
+	}
+
+	/**
+	 * Template method which can be overridden to add servlet-specific refresh work.
+	 * Called after successful context refresh.
+	 * <p>This implementation is empty.
+	 * @throws BeansException in case of errors
+	 * @see #refresh()
+	 */
+	protected void onRefresh() throws BeansException {
+		// For subclasses: do nothing by default.
+	}
+
 
 	/**
 	 * Delegate GET requests to processRequest/doService.

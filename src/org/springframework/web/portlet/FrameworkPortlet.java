@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,39 +116,25 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 	public static final String[] DEFAULT_USERINFO_ATTRIBUTE_NAMES = {"user.login.id", "user.name"};
 
 
-	/**
-	 * Portlet ApplicationContext implementation class to use
-	 */
+	/** Portlet ApplicationContext implementation class to use */
 	private Class contextClass = DEFAULT_CONTEXT_CLASS;
 
-	/**
-	 * Namespace for this portlet
-	 */
+	/** Namespace for this portlet */
 	private String namespace;
 
-	/**
-	 * Explicit context config location
-	 */
+	/** Explicit context config location */
 	private String contextConfigLocation;
 
-	/**
-	 * Should we publish the context as a PortletContext attribute?
-	 */
+	/** Should we publish the context as a PortletContext attribute? */
 	private boolean publishContext = true;
 
-	/**
-	 * Should we publish a PortletRequestHandledEvent at the end of each request?
-	 */
+	/** Should we publish a PortletRequestHandledEvent at the end of each request? */
 	private boolean publishEvents = true;
 
-	/**
-	 * USER_INFO attributes that may contain the username of the current user
-	 */
+	/** USER_INFO attributes that may contain the username of the current user */
 	private String[] userinfoUsernameAttributes = DEFAULT_USERINFO_ATTRIBUTE_NAMES;
 
-	/**
-	 * ApplicationContext for this portlet
-	 */
+	/** ApplicationContext for this portlet */
 	private ApplicationContext portletApplicationContext;
 
 
@@ -166,7 +152,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 	 * Return the custom context class.
 	 */
 	public Class getContextClass() {
-		return contextClass;
+		return this.contextClass;
 	}
 
 	/**
@@ -198,7 +184,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 	 * Return the explicit context config location, if any.
 	 */
 	public String getContextConfigLocation() {
-		return contextConfigLocation;
+		return this.contextConfigLocation;
 	}
 
 	/**
@@ -215,7 +201,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 	 * Return whether to publish this portlet's context as a PortletContext attribute.
 	 */
 	public boolean isPublishContext() {
-		return publishContext;
+		return this.publishContext;
 	}
 
 	/**
@@ -233,7 +219,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 	 * of each request.
 	 */
 	public boolean isPublishEvents() {
-		return publishEvents;
+		return this.publishEvents;
 	}
 
 	/**
@@ -251,7 +237,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 	 * @see #getUsernameForRequest
 	 */
 	public String[] getUserinfoUsernameAttributes() {
-		return userinfoUsernameAttributes;
+		return this.userinfoUsernameAttributes;
 	}
 
 
@@ -367,18 +353,45 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 	 * Return this portlet's ApplicationContext.
 	 */
 	public final ApplicationContext getPortletApplicationContext() {
-		return portletApplicationContext;
+		return this.portletApplicationContext;
 	}
 
 	/**
 	 * This method will be invoked after any bean properties have been set and
 	 * the PortletApplicationContext has been loaded. The default implementation is empty;
 	 * subclasses may override this method to perform any initialization they require.
-	 *
 	 * @throws PortletException in case of an initialization exception
 	 * @throws BeansException if thrown by ApplicationContext methods
 	 */
 	protected void initFrameworkPortlet() throws PortletException, BeansException {
+	}
+
+	/**
+	 * Refresh this portlet's application context, as well as the
+	 * dependent state of the portlet.
+	 * <p>Delegates to {@link #onRefresh()} after the context refresh.
+	 * @throws BeansException in case of errors
+	 * @see #getPortletApplicationContext()
+	 * @see org.springframework.context.ConfigurableApplicationContext#refresh()
+	 */
+	public void refresh() throws BeansException {
+		ApplicationContext pac = getPortletApplicationContext();
+		if (!(pac instanceof ConfigurableApplicationContext)) {
+			throw new IllegalStateException("Portlet ApplicationContext does not support refresh: " + pac);
+		}
+		((ConfigurableApplicationContext) pac).refresh();
+		onRefresh();
+	}
+
+	/**
+	 * Template method which can be overridden to add portlet-specific refresh work.
+	 * Called after successful context refresh.
+	 * <p>This implementation is empty.
+	 * @throws BeansException in case of errors
+	 * @see #refresh()
+	 */
+	protected void onRefresh() throws BeansException {
+		// For subclasses: do nothing by default.
 	}
 
 

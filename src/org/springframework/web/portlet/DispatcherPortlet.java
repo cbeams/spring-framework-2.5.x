@@ -244,7 +244,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	private boolean threadContextInheritable = false;
 
 
-	/** MultipartResolver used by this servlet */
+	/** MultipartResolver used by this portlet */
 	private PortletMultipartResolver multipartResolver;
 
 	/** List of HandlerMappings used by this portlet */
@@ -272,9 +272,9 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	}
 
 	/**
-	 * Set whether to detect all HandlerAdapter beans in this servlet's context.
+	 * Set whether to detect all HandlerAdapter beans in this portlet's context.
 	 * Else, just a single bean with name "handlerAdapter" will be expected.
-	 * <p>Default is "true". Turn this off if you want this servlet to use a
+	 * <p>Default is "true". Turn this off if you want this portlet to use a
 	 * single HandlerAdapter, despite multiple HandlerAdapter beans being
 	 * defined in the context.
 	 */
@@ -305,8 +305,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	}
 
 	/**
-	 * Set the ViewRendererServlet.  This servlet is used to ultimately render
-	 * all views in the portlet application.
+	 * Set the URL to the ViewRendererServlet. That servlet is used to
+	 * ultimately render all views in the portlet application.
 	 */
 	public void setViewRendererUrl(String viewRendererUrl) {
 		this.viewRendererUrl = viewRendererUrl;
@@ -330,12 +330,27 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 
 	/**
-	 * Overridden method, invoked after any bean properties have been set and the
-	 * PortletApplicationContext and BeanFactory for this namespace is available.
-	 * <p>Loads HandlerMapping and HandlerAdapter objects, and configures a
-	 * ViewResolver and a LocaleResolver.
+	 * Overridden method, invoked after any bean properties have been set
+	 * and the PortletApplicationContext for this namespace is available.
+	 * <p>This implementation calls {@link #initStrategies()}.
 	 */
 	protected void initFrameworkPortlet() throws PortletException, BeansException {
+		initStrategies();
+	}
+
+	/**
+	 * This implementation calls {@link #initStrategies()}.
+	 */
+	public void onRefresh() {
+		initStrategies();
+	}
+
+	/**
+	 * Refresh the strategy objects that this portlet uses.
+	 * <p>May be overridden in subclasses in order to initialize
+	 * further strategy objects.
+	 */
+	protected void initStrategies() {
 		initMultipartResolver();
 		initHandlerMappings();
 		initHandlerAdapters();

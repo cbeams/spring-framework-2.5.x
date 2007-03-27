@@ -379,12 +379,27 @@ public class DispatcherServlet extends FrameworkServlet {
 
 
 	/**
-	 * Overridden method, invoked after any bean properties have been set and the
-	 * WebApplicationContext and BeanFactory for this namespace is available.
-	 * <p>Loads HandlerMapping and HandlerAdapter objects, and configures a
-	 * ViewResolver and a LocaleResolver.
+	 * Overridden method, invoked after any bean properties have been set
+	 * and the WebApplicationContext for this namespace is available.
+	 * <p>This implementation calls {@link #initStrategies()}.
 	 */
 	protected void initFrameworkServlet() throws ServletException, BeansException {
+		initStrategies();
+	}
+
+	/**
+	 * This implementation calls {@link #initStrategies()}.
+	 */
+	public void onRefresh() {
+		initStrategies();
+	}
+
+	/**
+	 * Initialize the strategy objects that this servlet uses.
+	 * <p>May be overridden in subclasses in order to initialize
+	 * further strategy objects.
+	 */
+	protected void initStrategies() {
 		initMultipartResolver();
 		initLocaleResolver();
 		initThemeResolver();
