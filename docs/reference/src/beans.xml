@@ -2582,7 +2582,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 					interfaces.</para>
                 	<programlisting><lineannotation>&lt;!-- <classname>DefaultUserPreferences</classname> implements the <interfacename>UserPreferences</interfacename> interface --&gt;</lineannotation><![CDATA[
 <bean id="userPreferences" class="com.foo.DefaultUserPreferences" scope="session">
-    <aop:scoped-proxy proxy-target-class="false" ]]><emphasis role="bold">proxy-target-class="false"<literal></literal></emphasis>/&gt;<![CDATA[
+    <aop:scoped-proxy ]]><emphasis role="bold">proxy-target-class="false"<literal></literal></emphasis>/&gt;<![CDATA[
 </bean>
 
 <bean id="userManager" class="com.foo.UserManager">
