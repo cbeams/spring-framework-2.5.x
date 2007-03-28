@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
@@ -81,29 +82,41 @@ abstract class ConstructorResolver {
 	 */
 	protected BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd) {
 		ConstructorArgumentValues cargs = mbd.getConstructorArgumentValues();
-		ConstructorArgumentValues resolvedValues = new ConstructorArgumentValues();
 
 		BeanWrapper bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
-
-		int minNrOfArgs = 0;
-		if (cargs != null) {
-			minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
-		}
 
 		Constructor constructorToUse = (Constructor) mbd.resolvedConstructorOrFactoryMethod;
 		Object[] argsToUse = null;
 
 		if (constructorToUse != null) {
 			// Found a cached constructor...
-			argsToUse = createArgumentArray(
-					beanName, mbd, resolvedValues, bw, constructorToUse.getParameterTypes(), constructorToUse).arguments;
+			argsToUse = mbd.resolvedConstructorArguments;
+			if (argsToUse == null) {
+				Object[] argsToResolve = mbd.preparedConstructorArguments;
+				BeanDefinitionValueResolver valueResolver =
+						new BeanDefinitionValueResolver(this.beanFactory, beanName, mbd, bw);
+				argsToUse = new Object[argsToResolve.length];
+				for (int i = 0; i < argsToResolve.length; i++) {
+					Object argValue = argsToResolve[i];
+					if (argValue instanceof BeanMetadataElement) {
+						String argName = "constructor argument with index " + i;
+						argsToUse[i] = valueResolver.resolveValueIfNecessary(argName, argValue);
+					}
+					else {
+						argsToUse[i] = argValue;
+					}
+				}
+			}
 		}
 
 		else {
 			// Need to determine the constructor...
 			Constructor[] candidates = mbd.getBeanClass().getDeclaredConstructors();
 			AutowireUtils.sortConstructors(candidates);
+
+			ConstructorArgumentValues resolvedValues = new ConstructorArgumentValues();
+			int minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 
 			for (int i = 0; i < candidates.length; i++) {
@@ -159,10 +172,6 @@ abstract class ConstructorResolver {
 		Object beanInstance = this.instantiationStrategy.instantiate(
 				mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 		bw.setWrappedInstance(beanInstance);
-		if (this.beanFactory.logger.isDebugEnabled()) {
-			this.beanFactory.logger.debug(
-					"Bean '" + beanName + "' instantiated via constructor [" + constructorToUse + "]");
-		}
 		return bw;
 	}
 
@@ -298,10 +307,6 @@ abstract class ConstructorResolver {
 		}
 
 		bw.setWrappedInstance(beanInstance);
-		if (this.beanFactory.logger.isDebugEnabled()) {
-			this.beanFactory.logger.debug(
-					"Bean '" + beanName + "' instantiated via factory method '" + factoryMethodToUse + "'");
-		}
 		return bw;
 	}
 
@@ -376,6 +381,7 @@ abstract class ConstructorResolver {
 
 		ArgumentsHolder args = new ArgumentsHolder(paramTypes.length);
 		Set usedValueHolders = new HashSet(paramTypes.length);
+		boolean resolveNecessary = false;
 
 		for (int index = 0; index < paramTypes.length; index++) {
 			// Try to find matching constructor argument value, either indexed or generic.
@@ -394,7 +400,9 @@ abstract class ConstructorResolver {
 				usedValueHolders.add(valueHolder);
 				args.rawArguments[index] = valueHolder.getValue();
 				if (valueHolder.isConverted()) {
-					args.arguments[index] = valueHolder.getConvertedValue();
+					Object convertedValue = valueHolder.getConvertedValue();
+					args.arguments[index] = convertedValue;
+					args.preparedArguments[index] = convertedValue;
 				}
 				else {
 					try {
@@ -407,6 +415,11 @@ abstract class ConstructorResolver {
 						if (valueHolder.getValue() == sourceHolder.getValue()) {
 							// Not a resolved value but still the original one: store converted value.
 							sourceHolder.setConvertedValue(convertedValue);
+							args.preparedArguments[index] = convertedValue;
+						}
+						else {
+							resolveNecessary = true;
+							args.preparedArguments[index] = sourceHolder.getValue();
 						}
 					}
 					catch (TypeMismatchException ex) {
@@ -450,6 +463,13 @@ abstract class ConstructorResolver {
 				}
 			}
 		}
+
+		if (resolveNecessary) {
+			mbd.preparedConstructorArguments = args.preparedArguments;
+		}
+		else {
+			mbd.resolvedConstructorArguments = args.arguments;
+		}
 		return args;
 	}
 
@@ -478,14 +498,18 @@ abstract class ConstructorResolver {
 
 		public Object arguments[];
 
+		public Object preparedArguments[];
+
 		public ArgumentsHolder(int size) {
 			this.rawArguments = new Object[size];
 			this.arguments = new Object[size];
+			this.preparedArguments = new Object[size];
 		}
 
 		public ArgumentsHolder(Object[] args) {
 			this.rawArguments = args;
 			this.arguments = args;
+			this.preparedArguments = args;
 		}
 
 		public int getTypeDifferenceWeight(Class[] paramTypes) {

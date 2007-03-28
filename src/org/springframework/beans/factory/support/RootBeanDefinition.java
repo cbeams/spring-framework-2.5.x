@@ -34,8 +34,14 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-	/** Package-visible field for caching the resolved constructor */
+	/** Package-visible field for caching the resolved constructor or factory method */
 	volatile Object resolvedConstructorOrFactoryMethod;
+
+	/** Package-visible field for caching fully resolved constructor arguments */
+	volatile Object[] resolvedConstructorArguments;
+
+	/** Package-visible field for caching partly prepared constructor arguments */
+	volatile Object[] preparedConstructorArguments;
 
 
 	/**
