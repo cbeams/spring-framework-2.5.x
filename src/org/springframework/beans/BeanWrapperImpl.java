@@ -360,6 +360,16 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 	}
 
+	public Object convertIfNecessary(Object value, String propertyName) throws TypeMismatchException {
+		PropertyDescriptor pd = this.cachedIntrospectionResults.getPropertyDescriptor(propertyName);
+		try {
+			return this.typeConverterDelegate.convertIfNecessary(null, value, pd);
+		}
+		catch (IllegalArgumentException ex) {
+			throw new TypeMismatchException(value, pd.getPropertyType(), ex);
+		}
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation methods
@@ -503,15 +513,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	private Object getPropertyValue(PropertyTokenHolder tokens) throws BeansException {
 		String propertyName = tokens.canonicalName;
 		String actualName = tokens.actualName;
-		PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
+		PropertyDescriptor pd = this.cachedIntrospectionResults.getPropertyDescriptor(actualName);
 		if (pd == null || pd.getReadMethod() == null) {
 			throw new NotReadablePropertyException(getRootClass(), this.nestedPath + propertyName);
 		}
 		Method readMethod = pd.getReadMethod();
-		if (logger.isTraceEnabled()) {
-			logger.trace("About to invoke read method [" + readMethod + "] on object of class [" +
-					this.object.getClass().getName() + "]");
-		}
 		try {
 			if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
 				readMethod.setAccessible(true);
@@ -601,11 +607,35 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					"Nested property in path '" + propertyName + "' does not exist", ex);
 		}
 		PropertyTokenHolder tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));
-		nestedBw.setPropertyValue(tokens, value);
+		nestedBw.setPropertyValue(tokens, new PropertyValue(propertyName, value));
 	}
 
-	private void setPropertyValue(PropertyTokenHolder tokens, Object newValue) throws BeansException {
+	public void setPropertyValue(PropertyValue pv) throws BeansException {
+		PropertyTokenHolder tokens = (PropertyTokenHolder) pv.resolvedTokens;
+		if (tokens == null) {
+			String propertyName = pv.getName();
+			BeanWrapperImpl nestedBw = null;
+			try {
+				nestedBw = getBeanWrapperForPropertyPath(propertyName);
+			}
+			catch (NotReadablePropertyException ex) {
+				throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName,
+						"Nested property in path '" + propertyName + "' does not exist", ex);
+			}
+			tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));
+			if (nestedBw == this) {
+				pv.resolvedTokens = tokens;
+			}
+			nestedBw.setPropertyValue(tokens, pv);
+		}
+		else {
+			setPropertyValue(tokens, pv);
+		}
+	}
+
+	private void setPropertyValue(PropertyTokenHolder tokens, PropertyValue pv) throws BeansException {
 		String propertyName = tokens.canonicalName;
+		String actualName = tokens.actualName;
 
 		if (tokens.keys != null) {
 			// Apply indexes and map keys: fetch value for all keys but the last one.
@@ -639,12 +669,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						oldValue = Array.get(propValue, arrayIndex);
 					}
 					Object convertedValue = this.typeConverterDelegate.convertIfNecessary(
-							propertyName, oldValue, newValue, requiredType);
+							propertyName, oldValue, pv.getValue(), requiredType);
 					Array.set(propValue, Integer.parseInt(key), convertedValue);
 				}
 				catch (IllegalArgumentException ex) {
 					PropertyChangeEvent pce =
-							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
+							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
 					throw new TypeMismatchException(pce, requiredType, ex);
 				}
 				catch (IndexOutOfBoundsException ex) {
@@ -653,7 +683,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 			}
 			else if (propValue instanceof List) {
-				PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
+				PropertyDescriptor pd = this.cachedIntrospectionResults.getPropertyDescriptor(actualName);
 				Class requiredType = null;
 				if (JdkVersion.isAtLeastJava15()) {
 					requiredType = GenericCollectionTypeResolver.getCollectionReturnType(
@@ -667,7 +697,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 				try {
 					Object convertedValue = this.typeConverterDelegate.convertIfNecessary(
-							propertyName, oldValue, newValue, requiredType);
+							propertyName, oldValue, pv.getValue(), requiredType);
 					if (index < list.size()) {
 						list.set(index, convertedValue);
 					}
@@ -688,12 +718,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 				catch (IllegalArgumentException ex) {
 					PropertyChangeEvent pce =
-							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
+							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
 					throw new TypeMismatchException(pce, requiredType, ex);
 				}
 			}
 			else if (propValue instanceof Map) {
-				PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
+				PropertyDescriptor pd = this.cachedIntrospectionResults.getPropertyDescriptor(actualName);
 				Class mapKeyType = null;
 				Class mapValueType = null;
 				if (JdkVersion.isAtLeastJava15()) {
@@ -716,19 +746,19 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 				catch (IllegalArgumentException ex) {
 					PropertyChangeEvent pce =
-							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
+							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
 					throw new TypeMismatchException(pce, mapKeyType, ex);
 				}
 				try {
 					// Pass full property name and old value in here, since we want full
 					// conversion ability for map values.
 					convertedMapValue = this.typeConverterDelegate.convertIfNecessary(
-							propertyName, oldValue, newValue, mapValueType, null,
+							propertyName, oldValue, pv.getValue(), mapValueType, null,
 							new MethodParameter(pd.getReadMethod(), -1, tokens.keys.length + 1));
 				}
 				catch (IllegalArgumentException ex) {
 					PropertyChangeEvent pce =
-							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
+							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
 					throw new TypeMismatchException(pce, mapValueType, ex);
 				}
 				map.put(convertedMapKey, convertedMapValue);
@@ -736,12 +766,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			else {
 				throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 						"Property referenced in indexed property path '" + propertyName +
-						"' is neither an array nor a List nor a Map; returned value was [" + newValue + "]");
+						"' is neither an array nor a List nor a Map; returned value was [" + pv.getValue() + "]");
 			}
 		}
 
 		else {
-			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
+			PropertyDescriptor pd = this.cachedIntrospectionResults.getPropertyDescriptor(actualName);
 			if (pd == null || pd.getWriteMethod() == null) {
 				PropertyMatches matches = PropertyMatches.forProperty(propertyName, getRootClass());
 				throw new NotWritablePropertyException(
@@ -749,11 +779,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						matches.buildErrorMessage(), matches.getPossibleMatches());
 			}
 
-			Method readMethod = pd.getReadMethod();
-			Method writeMethod = pd.getWriteMethod();
 			Object oldValue = null;
-
-			if (isExtractOldValueForEditor() && readMethod != null) {
+			if (isExtractOldValueForEditor() && pd.getReadMethod() != null) {
+				Method readMethod = pd.getReadMethod();
 				if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
 					readMethod.setAccessible(true);
 				}
@@ -768,29 +796,17 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 
 			try {
-				Object convertedValue = this.typeConverterDelegate.convertIfNecessary(oldValue, newValue, pd);
-
-				if (pd.getPropertyType().isPrimitive() && (convertedValue == null || "".equals(convertedValue))) {
-					throw new IllegalArgumentException("Invalid value [" + newValue + "] for property '" +
-							pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
-				}
-
-				if (logger.isTraceEnabled()) {
-					logger.trace("About to invoke write method [" + writeMethod + "] on object of class [" +
-							this.object.getClass().getName() + "]");
-				}
+				Object convertedValue = (pv.isConverted() ? pv.getConvertedValue() :
+						this.typeConverterDelegate.convertIfNecessary(oldValue, pv.getValue(), pd));
+				Method writeMethod = pd.getWriteMethod();
 				if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
 					writeMethod.setAccessible(true);
 				}
 				writeMethod.invoke(this.object, new Object[] {convertedValue});
-				if (logger.isTraceEnabled()) {
-					logger.trace("Invoked write method [" + writeMethod + "] with value of type [" +
-							pd.getPropertyType().getName() + "]");
-				}
 			}
 			catch (InvocationTargetException ex) {
 				PropertyChangeEvent propertyChangeEvent =
-						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
+						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
 				if (ex.getTargetException() instanceof ClassCastException) {
 					throw new TypeMismatchException(propertyChangeEvent, pd.getPropertyType(), ex.getTargetException());
 				}
@@ -800,12 +816,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 			catch (IllegalArgumentException ex) {
 				PropertyChangeEvent pce =
-						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
+						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
 				throw new TypeMismatchException(pce, pd.getPropertyType(), ex);
 			}
 			catch (IllegalAccessException ex) {
 				PropertyChangeEvent pce =
-						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
+						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
 				throw new MethodInvocationException(pce, ex);
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,14 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Class to hold information and value for an individual property.
- * Using an object here, rather than just storing all properties in a
- * map keyed by property name, allows for more flexibility, and the
- * ability to handle indexed properties etc in a special way if necessary.
+ * Object to hold information and value for an individual bean property.
+ * Using an object here, rather than just storing all properties in
+ * a map keyed by property name, allows for more flexibility, and the
+ * ability to handle indexed properties etc in an optimized way.
  *
  * <p>Note that the value doesn't need to be the final required type:
- * A BeanWrapper implementation should handle any necessary conversion, as
- * this object doesn't know anything about the objects it will be applied to.
+ * A {@link BeanWrapper} implementation should handle any necessary conversion,
+ * as this object doesn't know anything about the objects it will be applied to.
  *
  * @author Rod Johnson
  * @author Rob Harrop
@@ -47,23 +47,27 @@ public class PropertyValue extends AttributeAccessorSupport implements BeanMetad
 
 	private Object source;
 
+	private boolean converted = false;
+
+	private Object convertedValue;
+
+	/** Package-visible field for caching the resolved property path tokens */
+	volatile Object resolvedTokens;
+
 
 	/**
 	 * Create a new PropertyValue instance.
-	 * @param name name of the property
-	 * @param value value of the property (possibly before type conversion)
+	 * @param name the name of the property (never <code>null</code>)
+	 * @param value the value of the property (possibly before type conversion)
 	 */
 	public PropertyValue(String name, Object value) {
-		if (name == null) {
-			throw new IllegalArgumentException("Property name cannot be null");
-		}
 		this.name = name;
 		this.value = value;
 	}
 
 	/**
 	 * Copy constructor.
-	 * @param original the PropertyValue to copy
+	 * @param original the PropertyValue to copy (never <code>null</code>)
 	 */
 	public PropertyValue(PropertyValue original) {
 		Assert.notNull(original, "Original must not be null");
@@ -78,7 +82,7 @@ public class PropertyValue extends AttributeAccessorSupport implements BeanMetad
 	 * Return the name of the property.
 	 */
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	/**
@@ -88,7 +92,7 @@ public class PropertyValue extends AttributeAccessorSupport implements BeanMetad
 	 * perform type conversion.
 	 */
 	public Object getValue() {
-		return value;
+		return this.value;
 	}
 
 	/**
@@ -100,7 +104,32 @@ public class PropertyValue extends AttributeAccessorSupport implements BeanMetad
 	}
 
 	public Object getSource() {
-		return source;
+		return this.source;
+	}
+
+	/**
+	 * Return whether this holder contains a converted value already (<code>true</code>),
+	 * or whether the value still needs to be converted (<code>false</code>).
+	 */
+	public synchronized boolean isConverted() {
+		return this.converted;
+	}
+
+	/**
+	 * Set the converted value of the constructor argument,
+	 * after processed type conversion.
+	 */
+	public synchronized void setConvertedValue(Object value) {
+		this.converted = true;
+		this.convertedValue = value;
+	}
+
+	/**
+	 * Return the converted value of the constructor argument,
+	 * after processed type conversion.
+	 */
+	public synchronized Object getConvertedValue() {
+		return this.convertedValue;
 	}
 
 
