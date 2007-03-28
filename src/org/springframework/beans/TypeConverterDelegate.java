@@ -22,9 +22,9 @@ import java.beans.PropertyEditorManager;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Collections;
 import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
@@ -34,7 +34,6 @@ import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -78,7 +77,6 @@ class TypeConverterDelegate {
 	 * @param targetObject the target object to work on (as context that can be passed to editors)
 	 */
 	public TypeConverterDelegate(PropertyEditorRegistrySupport propertyEditorRegistry, Object targetObject) {
-		Assert.notNull(propertyEditorRegistry, "Property editor registry must not be null");
 		this.propertyEditorRegistry = propertyEditorRegistry;
 		this.targetObject = targetObject;
 	}
@@ -140,7 +138,6 @@ class TypeConverterDelegate {
 	public Object convertIfNecessary(Object oldValue, Object newValue, PropertyDescriptor descriptor)
 			throws IllegalArgumentException {
 
-		Assert.notNull(descriptor, "PropertyDescriptor must not be null");
 		return convertIfNecessary(
 				descriptor.getName(), oldValue, newValue, descriptor.getPropertyType(), descriptor,
 				new MethodParameter(descriptor.getWriteMethod(), 0));
