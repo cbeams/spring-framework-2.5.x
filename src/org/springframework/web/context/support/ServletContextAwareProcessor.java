@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,8 +28,9 @@ import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 
 /**
- * BeanPostProcessor implementation that passes the ServletContext to
- * beans that implement the ServletContextAware interface.
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor}
+ * implementation that passes the ServletContext to beans that implement
+ * the {@link ServletContextAware} interface.
  *
  * <p>Web application contexts will automatically register this with their
  * underlying bean factory. Applications do not use this directly.
@@ -80,18 +81,12 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 				throw new IllegalStateException("Cannot satisfy ServletContextAware for bean '" +
 						beanName + "' without ServletContext");
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setServletContext on ServletContextAware bean '" + beanName + "'");
-			}
 			((ServletContextAware) bean).setServletContext(this.servletContext);
 		}
 		if (bean instanceof ServletConfigAware) {
 			if (this.servletConfig == null) {
 				throw new IllegalStateException("Cannot satisfy ServletConfigAware for bean '" +
 						beanName + "' without ServletConfig");
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setServletConfig on ServletConfigAware bean '" + beanName + "'");
 			}
 			((ServletConfigAware) bean).setServletConfig(this.servletConfig);
 		}
