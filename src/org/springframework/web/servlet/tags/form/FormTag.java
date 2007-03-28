@@ -297,7 +297,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	protected String resolveAction() throws JspException {
 		String action = getAction();
 		if (StringUtils.hasText(action)) {
-			return ObjectUtils.getDisplayString(evaluate(ACTION_ATTRIBUTE, action));
+			return getDisplayString(evaluate(ACTION_ATTRIBUTE, action));
 		}
 		else {
 			String requestUri = getRequestContext().getRequestUri();
