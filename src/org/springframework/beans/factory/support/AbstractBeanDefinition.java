@@ -110,6 +110,10 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 	private String scope = SCOPE_SINGLETON;
 
+	private boolean singleton = true;
+
+	private boolean prototype = false;
+
 	private boolean abstractFlag = false;
 
 	private boolean lazyInit = false;
@@ -334,6 +338,8 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	public void setScope(String scope) {
 		Assert.notNull(scope, "Scope must not be null");
 		this.scope = scope;
+		this.singleton = SCOPE_SINGLETON.equals(scope);
+		this.prototype = SCOPE_PROTOTYPE.equals(scope);
 	}
 
 	/**
@@ -357,6 +363,8 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 */
 	public void setSingleton(boolean singleton) {
 		this.scope = (singleton ? SCOPE_SINGLETON : SCOPE_PROTOTYPE);
+		this.singleton = singleton;
+		this.prototype = !singleton;
 	}
 
 	/**
@@ -365,7 +373,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * @see #SCOPE_SINGLETON
 	 */
 	public boolean isSingleton() {
-		return (SCOPE_SINGLETON.equals(this.scope));
+		return this.singleton;
 	}
 
 	/**
@@ -374,7 +382,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * @see #SCOPE_PROTOTYPE
 	 */
 	public boolean isPrototype() {
-		return (SCOPE_PROTOTYPE.equals(this.scope));
+		return this.prototype;
 	}
 
 	/**
@@ -528,7 +536,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Return constructor argument values for this bean (never <code>null</code>).
 	 */
 	public ConstructorArgumentValues getConstructorArgumentValues() {
-		return constructorArgumentValues;
+		return this.constructorArgumentValues;
 	}
 
 	/**
