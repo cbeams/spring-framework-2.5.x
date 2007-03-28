@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * {@link org.springframework.beans.BeanWrapperImpl} and
  * {@link org.springframework.beans.factory.support.AbstractBeanFactory}.
  *
- * <p>Note that this class does not depend on JDK 1.5 API artifacts,
+ * <p>Note that this class does not depend on JDK 1.5 API artifacts, in order
  * to remain compatible with JDK 1.3/1.4. Concrete generic type resolution
  * via JDK 1.5 API happens in {@link GenericCollectionTypeResolver} only.
  *
@@ -52,7 +52,7 @@ public class MethodParameter {
 	private int nestingLevel;
 
 	/** Map from Integer level to Integer type index */
-	private volatile Map typeIndexesPerLevel;
+	private Map typeIndexesPerLevel;
 
 
 	/**
@@ -146,7 +146,7 @@ public class MethodParameter {
 	 * @see #getNestingLevel()
 	 */
 	public void decreaseNestingLevel() {
-		this.getTypeIndexesPerLevel().remove(new Integer(this.nestingLevel));
+		getTypeIndexesPerLevel().remove(new Integer(this.nestingLevel));
 		this.nestingLevel--;
 	}
 
@@ -166,7 +166,7 @@ public class MethodParameter {
 	 * @see #getNestingLevel()
 	 */
 	public void setTypeIndexForCurrentLevel(int typeIndex) {
-		this.getTypeIndexesPerLevel().put(new Integer(this.nestingLevel), new Integer(typeIndex));
+		getTypeIndexesPerLevel().put(new Integer(this.nestingLevel), new Integer(typeIndex));
 	}
 
 	/**
@@ -186,7 +186,17 @@ public class MethodParameter {
 	 * if none specified (indicating the default type index)
 	 */
 	public Integer getTypeIndexForLevel(int nestingLevel) {
-		return (Integer) this.getTypeIndexesPerLevel().get(new Integer(nestingLevel));
+		return (Integer) getTypeIndexesPerLevel().get(new Integer(nestingLevel));
+	}
+
+	/**
+	 * Obtain the (lazily constructed) type-indexes-per-level Map.
+	 */
+	private Map getTypeIndexesPerLevel() {
+		if (this.typeIndexesPerLevel == null) {
+			this.typeIndexesPerLevel = new HashMap(4);
+		}
+		return this.typeIndexesPerLevel;
 	}
 
 
@@ -211,13 +221,4 @@ public class MethodParameter {
 		}
 	}
 
-	/**
-	 * Gets the (lazily constructed) type indexes per level {@link Map}. 
-	 */
-	protected Map getTypeIndexesPerLevel() {
-		if(this.typeIndexesPerLevel == null) {
-			this.typeIndexesPerLevel = new HashMap(4);
-		}
-		return this.typeIndexesPerLevel;
-	}
 }
