@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.springframework.beans;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Abstract implementation of the ConfigurablePropertyAccessor interface.
+ * Abstract implementation of the {@link PropertyAccessor} interface.
  * Provides base implementations of all convenience methods, with the
  * implementation of actual property access left to subclasses
  *
@@ -64,14 +66,16 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
 			throws BeansException {
 
-		List propertyAccessExceptions = new LinkedList();
-		PropertyValue[] pvArray = pvs.getPropertyValues();
-		for (int i = 0; i < pvArray.length; i++) {
+		List propertyAccessExceptions = null;
+		List propertyValues = (pvs instanceof MutablePropertyValues ?
+				((MutablePropertyValues) pvs).getPropertyValueList() : Arrays.asList(pvs.getPropertyValues()));
+		for (Iterator it = propertyValues.iterator(); it.hasNext();) {
+			PropertyValue pv = (PropertyValue) it.next();
 			try {
 				// This method may throw any BeansException, which won't be caught
 				// here, if there is a critical failure such as no matching field.
 				// We can attempt to deal only with less serious exceptions.
-				setPropertyValue(pvArray[i]);
+				setPropertyValue(pv);
 			}
 			catch (NotWritablePropertyException ex) {
 				if (!ignoreUnknown) {
@@ -86,12 +90,15 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 				// Otherwise, just ignore it and continue...
 			}
 			catch (PropertyAccessException ex) {
+				if (propertyAccessExceptions == null) {
+					propertyAccessExceptions = new LinkedList();
+				}
 				propertyAccessExceptions.add(ex);
 			}
 		}
 
 		// If we encountered individual exceptions, throw the composite exception.
-		if (!propertyAccessExceptions.isEmpty()) {
+		if (propertyAccessExceptions != null) {
 			PropertyAccessException[] paeArray = (PropertyAccessException[])
 					propertyAccessExceptions.toArray(new PropertyAccessException[propertyAccessExceptions.size()]);
 			throw new PropertyBatchUpdateException(paeArray);
@@ -99,6 +106,7 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 	}
 
 
+	// Redefined with public visibility.
 	public Class getPropertyType(String propertyPath) {
 		return null;
 	}
