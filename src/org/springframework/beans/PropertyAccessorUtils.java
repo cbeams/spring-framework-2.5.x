@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@ package org.springframework.beans;
 
 /**
  * Utility methods for classes that perform bean property access
- * according to the PropertyAccessor interface.
+ * according to the {@link PropertyAccessor} interface.
  *
  * @author Juergen Hoeller
  * @since 1.2.6
- * @see PropertyAccessor
  */
 public abstract class PropertyAccessorUtils {
 
@@ -35,6 +34,25 @@ public abstract class PropertyAccessorUtils {
 	public static String getPropertyName(String propertyPath) {
 		int separatorIndex = propertyPath.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR);
 		return (separatorIndex != -1 ? propertyPath.substring(0, separatorIndex) : propertyPath);
+	}
+
+	/**
+	 * Check whether the given property path indicates an indexed or nested property.
+	 * @param propertyPath the property path to check
+	 * @return whether the path indicates an indexed or nested property
+	 */
+	public static boolean isNestedOrIndexedProperty(String propertyPath) {
+		if (propertyPath == null) {
+			return false;
+		}
+		for (int i = 0; i < propertyPath.length(); i++) {
+			char ch = propertyPath.charAt(i);
+			if (ch == PropertyAccessor.NESTED_PROPERTY_SEPARATOR_CHAR ||
+					ch == PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -66,7 +84,7 @@ public abstract class PropertyAccessorUtils {
 	 */
 	private static int getNestedPropertySeparatorIndex(String propertyPath, boolean last) {
 		boolean inKey = false;
-		final int length = propertyPath.length();
+		int length = propertyPath.length();
 		int i = (last ? length - 1 : 0);
 		while (last ? i >= 0 : i < length) {
 			switch (propertyPath.charAt(i)) {
@@ -79,10 +97,12 @@ public abstract class PropertyAccessorUtils {
 						return i;
 					}
 			}
-			if (last)
+			if (last) {
 				i--;
-			else
+			}
+			else {
 				i++;
+			}
 		}
 		return -1;
 	}
