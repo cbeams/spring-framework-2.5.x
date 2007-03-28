@@ -68,8 +68,7 @@ class BeanDefinitionValueResolver {
 
 
 	/**
-	 * Create a new BeanDefinitionValueResolver for the given BeanFactory
-	 * and BeanDefinition.
+	 * Create a BeanDefinitionValueResolver for the given BeanFactory and BeanDefinition.
 	 * @param beanFactory the BeanFactory to resolve against
 	 * @param beanName the name of the bean that we work on
 	 * @param beanDefinition the BeanDefinition of the bean that we work on
@@ -105,15 +104,9 @@ class BeanDefinitionValueResolver {
 	public Object resolveValueIfNecessary(String argName, Object value) {
 		// We must check each value to see whether it requires a runtime reference
 		// to another bean to be resolved.
-		if (value instanceof BeanDefinitionHolder) {
-			// Resolve BeanDefinitionHolder: contains BeanDefinition with name and aliases.
-			BeanDefinitionHolder bdHolder = (BeanDefinitionHolder) value;
-			return resolveInnerBean(argName, bdHolder.getBeanName(), bdHolder.getBeanDefinition());
-		}
-		else if (value instanceof BeanDefinition) {
-			// Resolve plain BeanDefinition, without contained name: use dummy name.
-			BeanDefinition bd = (BeanDefinition) value;
-			return resolveInnerBean(argName, "(inner bean)", bd);
+		if (value instanceof RuntimeBeanReference) {
+			RuntimeBeanReference ref = (RuntimeBeanReference) value;
+			return resolveReference(argName, ref);
 		}
 		else if (value instanceof RuntimeBeanNameReference) {
 			String ref = ((RuntimeBeanNameReference) value).getBeanName();
@@ -123,9 +116,15 @@ class BeanDefinitionValueResolver {
 			}
 			return ref;
 		}
-		else if (value instanceof RuntimeBeanReference) {
-			RuntimeBeanReference ref = (RuntimeBeanReference) value;
-			return resolveReference(argName, ref);
+		else if (value instanceof BeanDefinitionHolder) {
+			// Resolve BeanDefinitionHolder: contains BeanDefinition with name and aliases.
+			BeanDefinitionHolder bdHolder = (BeanDefinitionHolder) value;
+			return resolveInnerBean(argName, bdHolder.getBeanName(), bdHolder.getBeanDefinition());
+		}
+		else if (value instanceof BeanDefinition) {
+			// Resolve plain BeanDefinition, without contained name: use dummy name.
+			BeanDefinition bd = (BeanDefinition) value;
+			return resolveInnerBean(argName, "(inner bean)", bd);
 		}
 		else if (value instanceof ManagedList) {
 			// May need to resolve contained runtime references.
@@ -205,10 +204,6 @@ class BeanDefinitionValueResolver {
 	 * @return the resolved inner bean instance
 	 */
 	private Object resolveInnerBean(String argName, String innerBeanName, BeanDefinition innerBd) {
-		if (this.beanFactory.logger.isTraceEnabled()) {
-			this.beanFactory.logger.trace(
-					"Resolving inner bean definition '" + innerBeanName + "' of bean '" + this.beanName + "'");
-		}
 		RootBeanDefinition mbd = null;
 		try {
 			mbd = this.beanFactory.getMergedBeanDefinition(innerBeanName, innerBd, this.beanDefinition);
@@ -253,10 +248,6 @@ class BeanDefinitionValueResolver {
 	 * Resolve a reference to another bean in the factory.
 	 */
 	private Object resolveReference(String argName, RuntimeBeanReference ref) {
-		if (this.beanFactory.logger.isTraceEnabled()) {
-			this.beanFactory.logger.trace("Resolving reference from property " + argName + " in bean '" +
-					this.beanName + "' to bean '" + ref.getBeanName() + "'");
-		}
 		try {
 			if (ref.isToParent()) {
 				if (this.beanFactory.getParentBeanFactory() == null) {
