@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.Map;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the PropertyValues interface.
+ * Default implementation of the {@link PropertyValues} interface.
  * Allows simple manipulation of properties, and provides constructors
  * to support deep copy and construction from a Map.
  *
@@ -38,6 +38,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/** List of PropertyValue objects */
 	private final List propertyValueList;
+
+	private volatile boolean converted = false;
 
 
 	/**
@@ -74,7 +76,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Construct a new PropertyValues object from a Map.
+	 * Construct a new MutablePropertyValues object from a Map.
 	 * @param original Map with property values keyed by property name Strings
 	 * @see #addPropertyValues(Map)
 	 */
@@ -95,6 +97,27 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		}
 	}
 
+	/**
+	 * Construct a new MutablePropertyValues object using the given List of
+	 * PropertyValue objects as-is.
+	 * <p>This is a constructor for advanced usage scenarios.
+	 * It is not intended for typical programmatic use.
+	 * @param propertyValueList List of PropertyValue objects
+	 */
+	public MutablePropertyValues(List propertyValueList) {
+		this.propertyValueList = (propertyValueList != null ? propertyValueList : new ArrayList());
+	}
+
+
+	/**
+	 * Return the underlying List of PropertyValue objects in its raw form.
+	 * The returned List can be modified directly, although this is not recommended.
+	 * <p>This is an accessor for optimized access to all PropertyValue objects.
+	 * It is not intended for typical programmatic use.
+	 */
+	public List getPropertyValueList() {
+		return this.propertyValueList;
+	}
 
 	/**
 	 * Copy all given PropertyValues into this object. Guarantees PropertyValue
@@ -262,6 +285,23 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 			}
 		}
 		return changes;
+	}
+
+
+	/**
+	 * Mark this holder as containing converted values only
+	 * (i.e. no runtime resolution needed anymore).
+	 */
+	public void setConverted() {
+		this.converted = true;
+	}
+
+	/**
+	 * Return whether this holder contains converted values only (<code>true</code>),
+	 * or whether the values still need to be converted (<code>false</code>).
+	 */
+	public boolean isConverted() {
+		return this.converted;
 	}
 
 
