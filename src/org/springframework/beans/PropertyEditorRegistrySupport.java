@@ -50,6 +50,7 @@ import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PatternEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
+import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.core.CollectionFactory;
@@ -59,15 +60,13 @@ import org.springframework.core.io.support.ResourceArrayPropertyEditor;
 import org.springframework.util.ClassUtils;
 
 /**
- * Base implementation of the PropertyEditorRegistry interface.
+ * Base implementation of the {@link PropertyEditorRegistry} interface.
  * Provides management of default editors and custom editors.
- * Mainly serves as base class for BeanWrapperImpl.
+ * Mainly serves as base class for {@link BeanWrapperImpl}.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 1.2.6
- * @see PropertyEditorRegistry
- * @see BeanWrapperImpl
  * @see java.beans.PropertyEditorManager
  * @see java.beans.PropertyEditorSupport#setAsText
  * @see java.beans.PropertyEditorSupport#setValue
@@ -75,6 +74,10 @@ import org.springframework.util.ClassUtils;
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	private boolean defaultEditorsActive = false;
+
+	private boolean configValueEditorsActive = false;
+
+	private boolean propertySpecificEditorRegistered = false;
 
 	private Map defaultEditors;
 
@@ -88,16 +91,22 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Register default editors in this instance, for restricted environments.
-	 * We're not using the JRE's PropertyEditorManager to avoid potential
-	 * SecurityExceptions when running in a SecurityManager.
-	 * <p>Registers a <code>CustomNumberEditor</code> for all primitive number types,
-	 * their corresponding wrapper types, <code>BigInteger</code> and <code>BigDecimal</code>.
 	 * Activate the default editors for this registry instance,
 	 * allowing for lazily registering default editors when needed.
 	 */
 	protected void registerDefaultEditors() {
 		this.defaultEditorsActive = true;
+	}
+
+	/**
+	 * Activate config value editors which are only intended for configuration purposes,
+	 * such as {@link org.springframework.beans.propertyeditors.StringArrayPropertyEditor}.
+	 * <p>Those editors are not registered by default simply because they are in
+	 * general inappropriate for data binding purposes. Of course, you may register
+	 * them individually in any case, through {@link #registerCustomEditor}.
+	 */
+	public void useConfigValueEditors() {
+		this.configValueEditorsActive = true;
 	}
 
 	/**
@@ -139,7 +148,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @see org.springframework.beans.propertyeditors.URLEditor
 	 */
 	private void doRegisterDefaultEditors() {
-		this.defaultEditors = new HashMap(32);
+		this.defaultEditors = new HashMap(64);
 
 		// Simple editors, without parameterization capabilities.
 		// The JDK does not contain a default editor for any of these target types.
@@ -194,8 +203,12 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(Double.class, new CustomNumberEditor(Double.class, true));
 		this.defaultEditors.put(BigDecimal.class, new CustomNumberEditor(BigDecimal.class, true));
 		this.defaultEditors.put(BigInteger.class, new CustomNumberEditor(BigInteger.class, true));
-	}
 
+		// Only register config value editors if explicitly requested.
+		if (this.configValueEditorsActive) {
+			this.defaultEditors.put(String[].class, new StringArrayPropertyEditor());
+		}
+	}
 
 	/**
 	 * Copy the default editors registered in this instance to the given target registry.
@@ -223,6 +236,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		}
 		if (propertyPath != null) {
 			this.customEditors.put(propertyPath, new CustomEditorHolder(propertyEditor, requiredType));
+			this.propertySpecificEditorRegistered = true;
 		}
 		else {
 			this.customEditors.put(requiredType, propertyEditor);
@@ -236,20 +250,22 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		}
 		Class requiredTypeToUse = requiredType;
 		if (propertyPath != null) {
-			// Check property-specific editor first.
-			PropertyEditor editor = getCustomEditor(propertyPath, requiredType);
-			if (editor == null) {
-				List strippedPaths = new LinkedList();
-				addStrippedPropertyPaths(strippedPaths, "", propertyPath);
-				for (Iterator it = strippedPaths.iterator(); it.hasNext() && editor == null;) {
-					String strippedPath = (String) it.next();
-					editor = getCustomEditor(strippedPath, requiredType);
+			if (this.propertySpecificEditorRegistered) {
+				// Check property-specific editor first.
+				PropertyEditor editor = getCustomEditor(propertyPath, requiredType);
+				if (editor == null) {
+					List strippedPaths = new LinkedList();
+					addStrippedPropertyPaths(strippedPaths, "", propertyPath);
+					for (Iterator it = strippedPaths.iterator(); it.hasNext() && editor == null;) {
+						String strippedPath = (String) it.next();
+						editor = getCustomEditor(strippedPath, requiredType);
+					}
+				}
+				if (editor != null) {
+					return editor;
 				}
 			}
-			if (editor != null) {
-				return editor;
-			}
-			else if (requiredType == null) {
+			if (requiredType == null) {
 				requiredTypeToUse = getPropertyType(propertyPath);
 			}
 		}
