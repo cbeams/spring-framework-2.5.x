@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -33,6 +34,7 @@ import org.springframework.util.StringUtils;
  * to override to add Method Injection support, for example by overriding methods.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 1.1
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
@@ -42,7 +44,21 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 		// Don't override the class with CGLIB if no overrides.
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
-			return BeanUtils.instantiateClass(beanDefinition.getBeanClass());
+			Constructor constructorToUse = (Constructor) beanDefinition.resolvedConstructorOrFactoryMethod;
+			if (constructorToUse == null) {
+				Class clazz = beanDefinition.getBeanClass();
+				if (clazz.isInterface()) {
+					throw new BeanInstantiationException(clazz, "Specified class is an interface");
+				}
+				try {
+					constructorToUse = clazz.getDeclaredConstructor((Class[]) null);
+					beanDefinition.resolvedConstructorOrFactoryMethod = constructorToUse;
+				}
+				catch (Exception ex) {
+					throw new BeanInstantiationException(clazz, "No default constructor found", ex);
+				}
+			}
+			return BeanUtils.instantiateClass(constructorToUse, null);
 		}
 		else {
 			// Must generate CGLIB subclass.
