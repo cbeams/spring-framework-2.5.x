@@ -360,8 +360,21 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 	}
 
-	public Object convertIfNecessary(Object value, String propertyName) throws TypeMismatchException {
+	/**
+	 * Convert the given value for the specified property to the latter's type.
+	 * <p>This method is only intended for optimizations in a BeanFactory.
+	 * Use the <code>convertIfNecessary</code> methods for programmatic conversion.
+	 * @param value the value to convert
+	 * @param propertyName the target property
+	 * (note that nested or indexed properties are not supported here)
+	 * @return the new value, possibly the result of type conversion
+	 * @throws TypeMismatchException if type conversion failed
+	 */
+	public Object convertForProperty(Object value, String propertyName) throws TypeMismatchException {
 		PropertyDescriptor pd = this.cachedIntrospectionResults.getPropertyDescriptor(propertyName);
+		if (pd == null) {
+			throw new IllegalStateException("No PropertyDescriptor found for property '" + propertyName + "'");
+		}
 		try {
 			return this.typeConverterDelegate.convertIfNecessary(null, value, pd);
 		}
