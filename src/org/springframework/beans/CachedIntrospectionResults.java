@@ -151,11 +151,6 @@ public class CachedIntrospectionResults {
 				classCache.put(beanClass, new WeakReference(results));
 			}
 		}
-		else {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Using cached introspection results for class [" + beanClass.getName() + "]");
-			}
-		}
 		return results;
 	}
 
