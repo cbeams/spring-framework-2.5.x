@@ -31,6 +31,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.beans.PropertyEditorRegistrySupport;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
@@ -56,7 +57,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.Scope;
-import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
@@ -675,30 +675,42 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 	/**
 	 * Callback before prototype creation.
-	 * <p>Default implementation register the prototype as currently in creation.
+	 * <p>The default implementation register the prototype as currently in creation.
 	 * @param beanName the name of the prototype about to be created
 	 * @see #isPrototypeCurrentlyInCreation
 	 */
 	protected void beforePrototypeCreation(String beanName) {
-		Set beanNames = (Set) this.prototypesCurrentlyInCreation.get();
-		if (beanNames == null) {
-			beanNames = new HashSet();
-			this.prototypesCurrentlyInCreation.set(beanNames);
+		Object curVal = this.prototypesCurrentlyInCreation.get();
+		if (curVal == null) {
+			this.prototypesCurrentlyInCreation.set(beanName);
 		}
-		beanNames.add(beanName);
+		else if (curVal instanceof String) {
+			Set beanNameSet = new HashSet(2);
+			beanNameSet.add(curVal);
+			beanNameSet.add(beanName);
+			this.prototypesCurrentlyInCreation.set(beanNameSet);
+		}
+		else {
+			Set beanNameSet = (Set) curVal;
+			beanNameSet.add(beanName);
+		}
 	}
 
 	/**
 	 * Callback after prototype creation.
-	 * <p>Default implementation marks the prototype as not in creation anymore.
+	 * <p>The default implementation marks the prototype as not in creation anymore.
 	 * @param beanName the name of the prototype that has been created
 	 * @see #isPrototypeCurrentlyInCreation
 	 */
 	protected void afterPrototypeCreation(String beanName) {
-		Set beanNames = (Set) this.prototypesCurrentlyInCreation.get();
-		if (beanNames != null) {
-			beanNames.remove(beanName);
-			if (beanNames.isEmpty()) {
+		Object curVal = this.prototypesCurrentlyInCreation.get();
+		if (curVal instanceof String) {
+			this.prototypesCurrentlyInCreation.set(null);
+		}
+		else if (curVal instanceof Set) {
+			Set beanNameSet = (Set) curVal;
+			beanNameSet.remove(beanName);
+			if (beanNameSet.isEmpty()) {
 				this.prototypesCurrentlyInCreation.set(null);
 			}
 		}
@@ -710,8 +722,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @param beanName the name of the bean
 	 */
 	protected final boolean isPrototypeCurrentlyInCreation(String beanName) {
-		Set beanNames = (Set) this.prototypesCurrentlyInCreation.get();
-		return (beanNames != null ? beanNames.contains(beanName) : false);
+		Object curVal = this.prototypesCurrentlyInCreation.get();
+		return (curVal != null &&
+				(curVal.equals(beanName) || (curVal instanceof Set && ((Set) curVal).contains(beanName))));
 	}
 
 	public boolean isCurrentlyInCreation(String beanName) {
@@ -822,7 +835,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @param registry the PropertyEditorRegistry to initialize
 	 */
 	protected void registerCustomEditors(PropertyEditorRegistry registry) {
-		registry.registerCustomEditor(String[].class, new StringArrayPropertyEditor());
+		if (registry instanceof PropertyEditorRegistrySupport) {
+			((PropertyEditorRegistrySupport) registry).useConfigValueEditors();
+		}
 		for (Iterator it = this.propertyEditorRegistrars.iterator(); it.hasNext();) {
 			PropertyEditorRegistrar registrar = (PropertyEditorRegistrar) it.next();
 			registrar.registerCustomEditors(registry);
@@ -886,29 +901,27 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	/**
 	 * Return a RootBeanDefinition for the given bean name,
 	 * merging a child bean definition with its parent if necessary.
-	 * @param name the name of the bean to retrieve the merged definition for
+	 * @param beanName the name of the bean to retrieve the merged definition for
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
-	public RootBeanDefinition getMergedBeanDefinition(String name) throws BeansException {
-		return getMergedBeanDefinition(name, false);
+	public RootBeanDefinition getMergedBeanDefinition(String beanName) throws BeansException {
+		return getMergedBeanDefinition(beanName, false);
 	}
 
 	/**
 	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a
 	 * child definition. Can ask the parent bean factory if not found in this instance.
-	 * @param name the name of the bean to retrieve the merged definition for
+	 * @param beanName the name of the bean to retrieve the merged definition for
 	 * @param includingAncestors whether to ask the parent bean factory if not found
 	 * in this instance
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
-	protected RootBeanDefinition getMergedBeanDefinition(String name, boolean includingAncestors)
+	protected RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
 	    throws BeansException {
-
-		String beanName = transformedBeanName(name);
 
 		// Efficiently check whether bean definition exists in this factory.
 		if (includingAncestors && !containsBeanDefinition(beanName) &&
@@ -962,13 +975,14 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 					ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
 					RootBeanDefinition pbd = null;
 					try {
-						if (!beanName.equals(cbd.getParentName())) {
-							pbd = getMergedBeanDefinition(cbd.getParentName(), true);
+						String parentBeanName = transformedBeanName(cbd.getParentName());
+						if (!beanName.equals(parentBeanName)) {
+							pbd = getMergedBeanDefinition(parentBeanName, true);
 						}
 						else {
 							if (getParentBeanFactory() instanceof AbstractBeanFactory) {
 								AbstractBeanFactory parentFactory = (AbstractBeanFactory) getParentBeanFactory();
-								pbd = parentFactory.getMergedBeanDefinition(cbd.getParentName(), true);
+								pbd = parentFactory.getMergedBeanDefinition(parentBeanName, true);
 							}
 							else {
 								throw new NoSuchBeanDefinitionException(cbd.getParentName(),
@@ -1162,12 +1176,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @return the object to expose for the bean
 	 */
 	protected Object getObjectForBeanInstance(Object beanInstance, String name, RootBeanDefinition mbd) {
-		String beanName = transformedBeanName(name);
-
 		// Don't let calling code try to dereference the
 		// bean factory if the bean isn't a factory.
 		if (BeanFactoryUtils.isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
-			throw new BeanIsNotAFactoryException(beanName, beanInstance.getClass());
+			throw new BeanIsNotAFactoryException(transformedBeanName(name), beanInstance.getClass());
 		}
 
 		boolean shared = (mbd == null || mbd.isSingleton());
@@ -1180,9 +1192,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			if (!BeanFactoryUtils.isFactoryDereference(name)) {
 				// Return bean instance from factory.
 				FactoryBean factory = (FactoryBean) beanInstance;
-				if (logger.isTraceEnabled()) {
-					logger.trace("Bean with name '" + beanName + "' is a factory bean");
-				}
+				String beanName = transformedBeanName(name);
 				// Cache object obtained from FactoryBean if it is a singleton.
 				if (shared && factory.isSingleton()) {
 					synchronized (getSingletonMutex()) {
@@ -1195,12 +1205,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				}
 				else {
 					object = getObjectFromFactoryBean(factory, beanName, mbd);
-				}
-			}
-			else {
-	 			// The user wants the factory itself.
-				if (logger.isTraceEnabled()) {
-					logger.trace("Calling code asked for FactoryBean instance for name '" + beanName + "'");
 				}
 			}
 		}
