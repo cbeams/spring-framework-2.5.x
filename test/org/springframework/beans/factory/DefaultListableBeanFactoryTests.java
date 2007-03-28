@@ -326,7 +326,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	}
 
 	public void testCanReferenceParentBeanFromChildViaAlias() {
-		final String PARENTS_ALIAS = "alias";
 		final String EXPECTED_NAME = "Juergen";
 		final int EXPECTED_AGE = 41;
 
@@ -335,12 +334,12 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		parentDefinition.getPropertyValues().addPropertyValue("name", EXPECTED_NAME);
 		parentDefinition.getPropertyValues().addPropertyValue("age", new Integer(EXPECTED_AGE));
 
-		ChildBeanDefinition childDefinition = new ChildBeanDefinition(PARENTS_ALIAS);
+		ChildBeanDefinition childDefinition = new ChildBeanDefinition("alias");
 
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("parent", parentDefinition);
 		factory.registerBeanDefinition("child", childDefinition);
-		factory.registerAlias("parent", PARENTS_ALIAS);
+		factory.registerAlias("parent", "alias");
 
 		TestBean child = (TestBean) factory.getBean("child");
 		assertEquals(EXPECTED_NAME, child.getName());
@@ -935,13 +934,35 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.registerBeanDefinition("test", rbd);
 		StopWatch sw = new StopWatch();
 		sw.start("prototype");
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 100000; i++) {
 			lbf.getBean("test");
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1000);
+	}
+
+	/**
+	public void testPrototypeCreationIsFastEnough2() throws Exception {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		Method setBeanNameMethod = TestBean.class.getMethod("setBeanName", String.class);
+		Method setBeanFactoryMethod = TestBean.class.getMethod("setBeanFactory", BeanFactory.class);
+		StopWatch sw = new StopWatch();
+		sw.start("prototype");
+		for (int i = 0; i < 100000; i++) {
+			TestBean tb = TestBean.class.newInstance();
+			setBeanNameMethod.invoke(tb, "test");
+			setBeanFactoryMethod.invoke(tb, lbf);
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 500);
 	}
+	*/
 
 	public void testPrototypeCreationWithConstructorArgumentsIsFastEnough() {
 		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
@@ -955,14 +976,61 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.registerBeanDefinition("test", rbd);
 		StopWatch sw = new StopWatch();
 		sw.start("prototype");
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 100000; i++) {
 			TestBean tb = (TestBean) lbf.getBean("test");
 			assertEquals("juergen", tb.getName());
 			assertEquals(99, tb.getAge());
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 750);
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1500);
+	}
+
+	/**
+	public void testPrototypeCreationWithConstructorArgumentsIsFastEnough2() throws Exception {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		Constructor<TestBean> ctor = TestBean.class.getConstructor(String.class, int.class);
+		Method setBeanNameMethod = TestBean.class.getMethod("setBeanName", String.class);
+		Method setBeanFactoryMethod = TestBean.class.getMethod("setBeanFactory", BeanFactory.class);
+		StopWatch sw = new StopWatch();
+		sw.start("prototype");
+		for (int i = 0; i < 100000; i++) {
+			TestBean tb = ctor.newInstance("juergen", 99);
+			setBeanNameMethod.invoke(tb, "test");
+			setBeanFactoryMethod.invoke(tb, lbf);
+			assertEquals("juergen", tb.getName());
+			assertEquals(99, tb.getAge());
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1500);
+	}
+	*/
+
+	public void testPrototypeCreationWithResolvedConstructorArgumentsIsFastEnough() {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class, false);
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(new RuntimeBeanReference("spouse"));
+		lbf.registerBeanDefinition("test", rbd);
+		lbf.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
+		TestBean spouse = (TestBean) lbf.getBean("spouse");
+		StopWatch sw = new StopWatch();
+		sw.start("prototype");
+		for (int i = 0; i < 100000; i++) {
+			TestBean tb = (TestBean) lbf.getBean("test");
+			assertSame(spouse, tb.getSpouse());
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 2000);
 	}
 
 	public void testPrototypeCreationWithPropertiesIsFastEnough() {
@@ -977,14 +1045,62 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.registerBeanDefinition("test", rbd);
 		StopWatch sw = new StopWatch();
 		sw.start("prototype");
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 100000; i++) {
 			TestBean tb = (TestBean) lbf.getBean("test");
 			assertEquals("juergen", tb.getName());
 			assertEquals(99, tb.getAge());
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1000);
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1500);
+	}
+
+	/**
+	public void testPrototypeCreationWithPropertiesIsFastEnough2() throws Exception {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		StopWatch sw = new StopWatch();
+		Method setBeanNameMethod = TestBean.class.getMethod("setBeanName", String.class);
+		Method setBeanFactoryMethod = TestBean.class.getMethod("setBeanFactory", BeanFactory.class);
+		Method setNameMethod = TestBean.class.getMethod("setName", String.class);
+		Method setAgeMethod = TestBean.class.getMethod("setAge", int.class);
+		sw.start("prototype");
+		for (int i = 0; i < 100000; i++) {
+			TestBean tb = TestBean.class.newInstance();
+			setBeanNameMethod.invoke(tb, "test");
+			setBeanFactoryMethod.invoke(tb, lbf);
+			setNameMethod.invoke(tb, "juergen");
+			setAgeMethod.invoke(tb, 99);
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 750);
+	}
+	*/
+
+	public void testPrototypeCreationWithResolvedPropertiesIsFastEnough() {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class, false);
+		rbd.getPropertyValues().addPropertyValue("spouse", new RuntimeBeanReference("spouse"));
+		lbf.registerBeanDefinition("test", rbd);
+		lbf.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
+		TestBean spouse = (TestBean) lbf.getBean("spouse");
+		StopWatch sw = new StopWatch();
+		sw.start("prototype");
+		for (int i = 0; i < 100000; i++) {
+			TestBean tb = (TestBean) lbf.getBean("test");
+			assertSame(spouse, tb.getSpouse());
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 2000);
 	}
 
 	public void testPrototypeCreationWithDependencyCheckIsFastEnough() {
@@ -999,12 +1115,12 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.addBeanPostProcessor(new LifecycleBean.PostProcessor());
 		StopWatch sw = new StopWatch();
 		sw.start("prototype");
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 100000; i++) {
 			lbf.getBean("test");
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 500);
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1000);
 	}
 
 	public void testBeanPostProcessorWithWrappedObjectAndDisposableBean() {
@@ -1165,16 +1281,15 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	public void testImplicitScopeInheritanceForChildBeanDefinitions() throws Exception {
 		RootBeanDefinition parent = new RootBeanDefinition();
 		parent.setScope("bonanza!");
-		
-		AbstractBeanDefinition child = BeanDefinitionBuilder
-				.childBeanDefinition("parent").getBeanDefinition();
+
+		AbstractBeanDefinition child = new ChildBeanDefinition("parent");
 		child.setBeanClass(TestBean.class);
-		
+
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("parent", parent);
 		factory.registerBeanDefinition("child", child);
 
-		AbstractBeanDefinition def = (AbstractBeanDefinition) factory.getBeanDefinition("child");
+		RootBeanDefinition def = factory.getMergedBeanDefinition("child");
 		assertTrue("Child 'scope' not overriding parent scope (it must).", def.isSingleton());
 	}
 
