@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,8 @@ public abstract class BeanUtils {
 	 * class-loading issues.
 	 * <p>Note that this method tries to set the constructor accessible
 	 * if given a non-accessible (that is, non-public) constructor.
-	 * @param ctor constructor to instantiate
+	 * @param ctor the constructor to instantiate
+	 * @param args the constructor arguments to apply
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
 	 */
@@ -245,6 +246,9 @@ public abstract class BeanUtils {
 	 * <code>methodName</code> with the least number of arguments, whereas <code>methodName()</code>
 	 * means the method called <code>methodName</code> with exactly 0 arguments.
 	 * <p>If no method can be found, then <code>null</code> is returned.
+	 * @param signature the method signature as String representation
+	 * @param clazz the class to resolve the method signature against
+	 * @return the resolved Method
 	 * @see #findMethod
 	 * @see #findMethodWithMinimalParameters
 	 */
@@ -350,9 +354,11 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Check if the given class represents a "simple" property:
+	 * Check if the given type represents a "simple" property:
 	 * a primitive, a String, a Class, or a corresponding array.
 	 * <p>Used to determine properties to check for a "simple" dependency-check.
+	 * @param clazz the type to check
+	 * @return whether the given type represent a "simple" property
 	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
 	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#checkDependencies
 	 */

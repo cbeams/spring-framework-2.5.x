@@ -28,8 +28,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Convenience methods operating on bean factories, in particular on the
- * ListableBeanFactory interface.
+ * Convenience methods operating on bean factories, in particular
+ * on the {@link ListableBeanFactory} interface.
  *
  * <p>Returns bean counts, bean names or bean instances,
  * taking into account the nesting hierarchy of a bean factory
@@ -39,7 +39,6 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 04.07.2003
- * @see ListableBeanFactory
  */
 public abstract class BeanFactoryUtils {
 
@@ -56,7 +55,7 @@ public abstract class BeanFactoryUtils {
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
 	 */
 	public static boolean isFactoryDereference(String name) {
-		return name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX);
+		return (name != null && name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));
 	}
 
 	/**
