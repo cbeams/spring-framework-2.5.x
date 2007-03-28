@@ -19,9 +19,6 @@ package org.springframework.web.context.support;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.web.context.ServletConfigAware;
@@ -41,8 +38,6 @@ import org.springframework.web.context.ServletContextAware;
  * @see org.springframework.web.context.support.XmlWebApplicationContext#postProcessBeanFactory
  */
 public class ServletContextAwareProcessor implements BeanPostProcessor {
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private ServletContext servletContext;
 
