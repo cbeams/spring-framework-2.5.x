@@ -73,7 +73,7 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 		}
 
 		public String getPersistenceUnitName() {
-			throw new UnsupportedOperationException();
+			return "test";
 		}
 	}
 
