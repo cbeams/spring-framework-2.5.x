@@ -43,6 +43,8 @@ public class BeanFactoryAdvisorRetrievalHelper {
 
 	private final ConfigurableListableBeanFactory beanFactory;
 
+	private String[] cachedAdvisorBeanNames;
+
 
 	/**
 	 * Create a new BeanFactoryAdvisorRetrievalHelper for the given BeanFactory.
@@ -61,11 +63,23 @@ public class BeanFactoryAdvisorRetrievalHelper {
 	 * @see #isEligibleBean
 	 */
 	public List findAdvisorBeans() {
+		// Determine list of advisor bean names, if not cached already.
+		String[] advisorNames = null;
+		synchronized (this) {
+			advisorNames = this.cachedAdvisorBeanNames;
+			if (advisorNames == null) {
+				// Do not initialize FactoryBeans here: We need to leave all regular beans
+				// uninitialized to let the auto-proxy creator apply to them!
+				advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
+						this.beanFactory, Advisor.class, true, false);
+				this.cachedAdvisorBeanNames = advisorNames;
+			}
+		}
+		if (advisorNames.length == 0) {
+			return new LinkedList();
+		}
+
 		List advisors = new LinkedList();
-		// Do not initialize FactoryBeans here: We need to leave all regular beans
-		// uninitialized to let the auto-proxy creator apply to them!
-		String[] advisorNames =
-				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, Advisor.class, true, false);
 		for (int i = 0; i < advisorNames.length; i++) {
 			String name = advisorNames[i];
 			if (isEligibleBean(name) && !this.beanFactory.isCurrentlyInCreation(name)) {
