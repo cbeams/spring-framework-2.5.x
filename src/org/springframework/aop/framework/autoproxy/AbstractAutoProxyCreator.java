@@ -136,7 +136,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * created a custom TargetSource for. Used to detect own pre-built proxies (from
 	 * "postProcessBeforeInstantiation") in the "postProcessAfterInitialization" method.
 	 */
-	private final Set targetSourcedBeanNames = Collections.synchronizedSet(new HashSet());
+	private final Set targetSourcedBeans = Collections.synchronizedSet(new HashSet());
+
+	private final Set advisedBeans = Collections.synchronizedSet(new HashSet());
+
+	private final Set nonAdvisedBeans = Collections.synchronizedSet(new HashSet());
 
 
 	/**
@@ -231,8 +235,16 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 
 	public Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException {
-		if (isInfrastructureClass(beanClass, beanName) || shouldSkip(beanClass, beanName)) {
-			return null;
+		Object cacheKey = getCacheKey(beanClass, beanName);
+
+		if (!this.targetSourcedBeans.contains(cacheKey)) {
+			if (this.advisedBeans.contains(cacheKey) || this.nonAdvisedBeans.contains(cacheKey)) {
+				return null;
+			}
+			if (isInfrastructureClass(beanClass, beanName) || shouldSkip(beanClass, beanName)) {
+				this.nonAdvisedBeans.add(cacheKey);
+				return null;
+			}
 		}
 
 		// Create proxy here if we have a custom TargetSource.
@@ -240,7 +252,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		// The TargetSource will handle target instances in a custom fashion.
 		TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
 		if (targetSource != null) {
-			this.targetSourcedBeanNames.add(beanName);
+			this.targetSourcedBeans.add(beanName);
 			Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
 			return createProxy(beanClass, beanName, specificInterceptors, targetSource);
 		}
@@ -268,20 +280,39 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see #getAdvicesAndAdvisorsForBean
 	 */
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		if (this.targetSourcedBeanNames.contains(beanName) ||
-				isInfrastructureClass(bean.getClass(), beanName) || shouldSkip(bean.getClass(), beanName)) {
+		if (this.targetSourcedBeans.contains(beanName)) {
+			return bean;
+		}
+		Object cacheKey = getCacheKey(bean.getClass(), beanName);
+		if (this.nonAdvisedBeans.contains(cacheKey)) {
+			return bean;
+		}
+		if (isInfrastructureClass(bean.getClass(), beanName) || shouldSkip(bean.getClass(), beanName)) {
+			this.nonAdvisedBeans.add(cacheKey);
 			return bean;
 		}
 
 		// Create proxy if we have advice.
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		if (specificInterceptors != DO_NOT_PROXY) {
+			this.advisedBeans.add(cacheKey);
 			return createProxy(bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
 		}
 
+		this.nonAdvisedBeans.add(cacheKey);
 		return bean;
 	}
 
+
+	/**
+	 * Build a cache key for the given bean class and bean name.
+	 * @param beanClass the bean class
+	 * @param beanName the bean name
+	 * @return the cache key for the given class and name
+	 */
+	protected Object getCacheKey(Class beanClass, String beanName) {
+		return beanClass.getName() + "_" + beanName;
+	}
 
 	/**
 	 * Return whether the given bean class and bean name represents an
@@ -338,22 +369,18 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 */
 	protected TargetSource getCustomTargetSource(Class beanClass, String beanName) {
 		// We can't create fancy target sources for directly registered singletons.
-		if (this.beanFactory != null && this.beanFactory.containsBean(beanName)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Checking for custom TargetSource for bean with name '" + beanName + "'");
-			}
-			if (this.customTargetSourceCreators != null) {
-				for (int i = 0; i < this.customTargetSourceCreators.length; i++) {
-					TargetSourceCreator tsc = this.customTargetSourceCreators[i];
-					TargetSource ts = tsc.getTargetSource(beanClass, beanName);
-					if (ts != null) {
-						// Found a matching TargetSource.
-						if (logger.isDebugEnabled()) {
-							logger.debug("TargetSourceCreator [" + tsc +
-									" found custom TargetSource for bean with name '" + beanName + "'");
-						}
-						return ts;
+		if (this.customTargetSourceCreators != null &&
+				this.beanFactory != null && this.beanFactory.containsBean(beanName)) {
+			for (int i = 0; i < this.customTargetSourceCreators.length; i++) {
+				TargetSourceCreator tsc = this.customTargetSourceCreators[i];
+				TargetSource ts = tsc.getTargetSource(beanClass, beanName);
+				if (ts != null) {
+					// Found a matching TargetSource.
+					if (logger.isDebugEnabled()) {
+						logger.debug("TargetSourceCreator [" + tsc +
+								" found custom TargetSource for bean with name '" + beanName + "'");
 					}
+					return ts;
 				}
 			}
 		}
