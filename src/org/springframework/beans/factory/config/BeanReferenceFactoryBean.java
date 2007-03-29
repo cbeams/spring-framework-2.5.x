@@ -81,14 +81,23 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 	}
 
 	public Class getObjectType() {
+		if (this.beanFactory == null) {
+			return null;
+		}
 		return this.beanFactory.getType(this.targetBeanName);
 	}
 
 	public boolean isSingleton() {
+		if (this.beanFactory == null) {
+			throw new FactoryBeanNotInitializedException();
+		}
 		return this.beanFactory.isSingleton(this.targetBeanName);
 	}
 
 	public boolean isPrototype() {
+		if (this.beanFactory == null) {
+			throw new FactoryBeanNotInitializedException();
+		}
 		return this.beanFactory.isPrototype(this.targetBeanName);
 	}
 
