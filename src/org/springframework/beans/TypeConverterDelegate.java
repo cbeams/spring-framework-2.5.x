@@ -51,12 +51,9 @@ import org.springframework.util.StringUtils;
  */
 class TypeConverterDelegate {
 
-	/**
-	 * We'll create a lot of these objects, so we don't want a new logger every time.
-	 */
 	private static final Log logger = LogFactory.getLog(TypeConverterDelegate.class);
 
-	private static final Map UNKNOWN_EDITOR_TYPES = Collections.synchronizedMap(new WeakHashMap());
+	private static final Map unknownEditorTypes = Collections.synchronizedMap(new WeakHashMap());
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
@@ -184,12 +181,11 @@ class TypeConverterDelegate {
 			if (pe == null && requiredType != null) {
 				// No custom editor -> check BeanWrapperImpl's default editors.
 				pe = (PropertyEditor) this.propertyEditorRegistry.getDefaultEditor(requiredType);
-				if (pe == null && !UNKNOWN_EDITOR_TYPES.containsKey(requiredType)) {
+				if (pe == null && !unknownEditorTypes.containsKey(requiredType)) {
 					// No BeanWrapper default editor -> check standard JavaBean editors.
 					pe = PropertyEditorManager.findEditor(requiredType);
-
-					if(pe == null) {
-						UNKNOWN_EDITOR_TYPES.put(requiredType, Boolean.TRUE);
+					if (pe == null) {
+						unknownEditorTypes.put(requiredType, Boolean.TRUE);
 					}
 				}
 			}
