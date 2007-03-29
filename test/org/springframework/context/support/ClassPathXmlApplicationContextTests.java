@@ -29,8 +29,8 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.PropertyBatchUpdateException;
 import org.springframework.beans.ResourceTestBean;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
@@ -95,10 +95,9 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 			fail("Should have thrown BeanCreationException");
 		}
 		catch (BeanCreationException ex) {
-			assertTrue(ex.getCause() instanceof PropertyBatchUpdateException);
+			assertTrue(ex.contains(TypeMismatchException.class));
 			assertTrue(ex.toString().indexOf("someMessageSource") != -1);
 			assertTrue(ex.toString().indexOf("useCodeAsDefaultMessage") != -1);
-			assertTrue(ex.toString().indexOf("alwaysUseMessageFormat") != -1);
 			checkExceptionFromInvalidValueType(ex);
 			checkExceptionFromInvalidValueType(new ExceptionInInitializerError(ex));
 		}
@@ -111,7 +110,6 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 				new InputStreamReader(new ByteArrayInputStream(baos.toByteArray())));
 		assertTrue(dump.indexOf("someMessageSource") != -1);
 		assertTrue(dump.indexOf("useCodeAsDefaultMessage") != -1);
-		assertTrue(dump.indexOf("alwaysUseMessageFormat") != -1);
 	}
 
 	public void testContextWithInvalidLazyClass() {
