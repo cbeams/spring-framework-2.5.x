@@ -57,7 +57,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.TypedStringValue;
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -127,8 +126,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/** Cache of unfinished FactoryBean instances: FactoryBean name --> BeanWrapper */
 	private final Map factoryBeanInstanceCache = new HashMap();
 
-	/** Cache of analyzed PropertyDescriptors for dependency checking: PropertyDescriptor -> Boolean */
-	private final Map excludedPropertyDescriptorsCache = CollectionFactory.createIdentityMapIfPossible(16);
+	/** Cache of filtered PropertyDescriptors: bean Class -> PropertyDescriptor array */
+	private final Map filteredPropertyDescriptorsCache = new HashMap();
 
 
 	/**
@@ -957,14 +956,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #isExcludedFromDependencyCheck
 	 */
 	protected PropertyDescriptor[] filterPropertyDescriptorsForDependencyCheck(BeanWrapper bw) {
-		List pds = new LinkedList(Arrays.asList(bw.getPropertyDescriptors()));
-		for (Iterator it = pds.iterator(); it.hasNext();) {
-			PropertyDescriptor pd = (PropertyDescriptor) it.next();
-			if (isExcludedFromDependencyCheck(pd)) {
-				it.remove();
+		synchronized (this.filteredPropertyDescriptorsCache) {
+			PropertyDescriptor[] filtered = (PropertyDescriptor[])
+					this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
+			if (filtered == null) {
+				List pds = new LinkedList(Arrays.asList(bw.getPropertyDescriptors()));
+				for (Iterator it = pds.iterator(); it.hasNext();) {
+					PropertyDescriptor pd = (PropertyDescriptor) it.next();
+					if (isExcludedFromDependencyCheck(pd)) {
+						it.remove();
+					}
+				}
+				filtered = (PropertyDescriptor[]) pds.toArray(new PropertyDescriptor[pds.size()]);
+				this.filteredPropertyDescriptorsCache.put(bw.getWrappedClass(), filtered);
 			}
+			return filtered;
 		}
-		return (PropertyDescriptor[]) pds.toArray(new PropertyDescriptor[pds.size()]);
 	}
 
 	/**
@@ -978,16 +985,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #ignoreDependencyInterface(Class)
 	 */
 	protected boolean isExcludedFromDependencyCheck(PropertyDescriptor pd) {
-		synchronized (this.excludedPropertyDescriptorsCache) {
-			Boolean marker = (Boolean) this.excludedPropertyDescriptorsCache.get(pd);
-			if (marker == null) {
-			 	marker = new Boolean(AutowireUtils.isExcludedFromDependencyCheck(pd) ||
-					this.ignoredDependencyTypes.contains(pd.getPropertyType()) ||
-					AutowireUtils.isSetterDefinedInInterface(pd, this.ignoredDependencyInterfaces));
-				this.excludedPropertyDescriptorsCache.put(pd, marker);
-			}
-			return marker.booleanValue();
-		}
+		return (AutowireUtils.isExcludedFromDependencyCheck(pd) ||
+				this.ignoredDependencyTypes.contains(pd.getPropertyType()) ||
+				AutowireUtils.isSetterDefinedInInterface(pd, this.ignoredDependencyInterfaces));
 	}
 
 	/**
