@@ -255,8 +255,12 @@ public abstract class AopUtils {
 	 * @param candidateAdvisors the Advisors to evaluate
 	 * @param clazz the target class
 	 * @return sublist of Advisors that can apply to an object of the given class
+	 * (may be the incoming List as-is)
 	 */
 	public static List findAdvisorsThatCanApply(List candidateAdvisors, Class clazz) {
+		if (candidateAdvisors.isEmpty()) {
+			return candidateAdvisors;
+		}
 		List eligibleAdvisors = new LinkedList();
 		for (Iterator it = candidateAdvisors.iterator(); it.hasNext();) {
 			Advisor candidate = (Advisor) it.next();
@@ -284,6 +288,7 @@ public abstract class AopUtils {
 	 * @param target the target object
 	 * @param method the method to invoke
 	 * @param args the arguments for the method
+	 * @return the invocation result, if any
 	 * @throws Throwable if thrown by the target method
 	 * @throws org.springframework.aop.AopInvocationException in case of a reflection error
 	 */
