@@ -46,7 +46,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Superclass for Spring Advices wrapping an AspectJ aspect
+ * Base class for Spring Advices wrapping an AspectJ aspect
  * or annotated advice method.
  *
  * @author Rod Johnson
@@ -456,10 +456,10 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 */
 	private void configurePointcutParameters(int argumentIndexOffset) {
 		int numParametersToRemove = argumentIndexOffset;
-		if (returningName != null) {
+		if (this.returningName != null) {
 			numParametersToRemove++;
 		}
-		if (throwingName != null) {
+		if (this.throwingName != null) {
 			numParametersToRemove++;
 		}
 		String[] pointcutParameterNames = new String[this.argumentNames.length - numParametersToRemove];
@@ -609,8 +609,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	// 'last man wins' which is not what we want at all.
 	// Using the expression is guaranteed to be safe, since 2 identical expressions
 	// are guaranteed to bind in exactly the same way.
-	protected JoinPointMatch getJoinPointMatch(ProxyMethodInvocation rmi) {
-		return (JoinPointMatch) rmi.getUserAttribute(this.pointcut.getExpression());
+	protected JoinPointMatch getJoinPointMatch(ProxyMethodInvocation pmi) {
+		return (JoinPointMatch) pmi.getUserAttribute(this.pointcut.getExpression());
 	}
 
 
