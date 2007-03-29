@@ -373,13 +373,16 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	public Object convertForProperty(Object value, String propertyName) throws TypeMismatchException {
 		PropertyDescriptor pd = this.cachedIntrospectionResults.getPropertyDescriptor(propertyName);
 		if (pd == null) {
-			throw new IllegalStateException("No PropertyDescriptor found for property '" + propertyName + "'");
+			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+					"No property '" + propertyName + "' found");
 		}
 		try {
 			return this.typeConverterDelegate.convertIfNecessary(null, value, pd);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new TypeMismatchException(value, pd.getPropertyType(), ex);
+			PropertyChangeEvent pce =
+					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, null, value);
+			throw new TypeMismatchException(pce, pd.getPropertyType(), ex);
 		}
 	}
 
