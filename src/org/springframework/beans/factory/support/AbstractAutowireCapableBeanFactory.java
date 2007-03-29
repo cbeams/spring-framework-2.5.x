@@ -56,6 +56,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -1061,6 +1062,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				new BeanDefinitionValueResolver(this, beanName, mbd, bw);
 
 		// Create a deep copy, resolving any references for values.
+		BeanWrapperImpl bwi = (bw instanceof BeanWrapperImpl ? (BeanWrapperImpl) bw : null);
 		List deepCopy = new ArrayList(original.size());
 		boolean resolveNecessary = false;
 		for (Iterator it = original.iterator(); it.hasNext();) {
@@ -1069,20 +1071,26 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				deepCopy.add(pv);
 			}
 			else {
+				String propertyName = pv.getName();
+				Object originalValue = pv.getValue();
 				Object resolvedValue =
-						valueResolver.resolveValueIfNecessary("bean property '" + pv.getName() + "'", pv.getValue());
-				if (pv.getValue() == resolvedValue) {
-					// Store converted value in merged bean definition,
-					// in order to avoid re-conversion for every created bean instance.
-					if (bw instanceof BeanWrapperImpl && !PropertyAccessorUtils.isNestedOrIndexedProperty(pv.getName())) {
-						resolvedValue = ((BeanWrapperImpl) bw).convertForProperty(resolvedValue, pv.getName());
-						pv.setConvertedValue(resolvedValue);
+						valueResolver.resolveValueIfNecessary("bean property '" + propertyName + "'", originalValue);
+				// Possibly store converted value in merged bean definition,
+				// in order to avoid re-conversion for every created bean instance.
+				if (resolvedValue == originalValue) {
+					if (bwi != null && !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName)) {
+						pv.setConvertedValue(bwi.convertForProperty(resolvedValue, propertyName));
 					}
+					deepCopy.add(pv);
+				}
+				else if (originalValue instanceof TypedStringValue &&
+						bwi != null && !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName)) {
+					pv.setConvertedValue(bwi.convertForProperty(resolvedValue, propertyName));
 					deepCopy.add(pv);
 				}
 				else {
 					resolveNecessary = true;
-					deepCopy.add(new PropertyValue(pv.getName(), resolvedValue));
+					deepCopy.add(new PropertyValue(propertyName, resolvedValue));
 				}
 			}
 		}
