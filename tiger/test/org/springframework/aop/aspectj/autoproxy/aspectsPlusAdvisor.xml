@@ -3,17 +3,26 @@
 
 <beans>
 
-	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" />
+	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"/>
 
-	<bean class="org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue" >
-		<property name="multiple" value="3" />
+	<bean class="org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue">
+		<property name="multiple" value="3"/>
 	</bean>
-		
+
 	<bean id="adrian" class="org.springframework.beans.TestBean">
-		<property name="name" value="Adrian" />
-		<property name="age" value="34" />
+		<property name="name" value="Adrian"/>
+		<property name="age" value="34"/>
 	</bean>
-	
-	<bean class="org.springframework.aop.aspectj.autoproxy.TestBeanAdvisor" />
-	
+
+	<bean id="adrian2" class="org.springframework.beans.TestBean" scope="prototype">
+		<property name="name" value="Adrian"/>
+		<property name="age" value="34"/>
+	</bean>
+
+	<bean id="i21" class="org.springframework.beans.NestedTestBean" scope="prototype">
+		<property name="company" value="i21"/>
+	</bean>
+
+	<bean class="org.springframework.aop.aspectj.autoproxy.TestBeanAdvisor"/>
+
 </beans>

@@ -17,6 +17,8 @@
 package org.springframework.aop.aspectj.autoproxy;
 
 import junit.framework.TestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
@@ -24,23 +26,30 @@ import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.INestedTestBean;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.util.StopWatch;
 
 /**
- * Tests for AspectJ auto proxying. Includes mixing with Spring AOP Advisors
+ * Tests for AspectJ auto-proxying. Includes mixing with Spring AOP Advisors
  * to demonstrate that existing autoproxying contract is honoured.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
 public class AspectJAutoProxyCreatorTests extends TestCase {
+
+	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
 	public void testAspectsAreApplied() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
@@ -66,6 +75,65 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		testAspectsAndAdvisorAreApplied(ac, shouldBeWeaved);
 	}
 
+	public void testAspectsAndAdvisorAppliedToPrototypeIsFastEnough() {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
+		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
+				"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
+		StopWatch sw = new StopWatch();
+		sw.start("prototype");
+		for (int i = 0; i < 10000; i++) {
+			ITestBean shouldBeWeaved = (ITestBean) ac.getBean("adrian2");
+			if (i < 10) {
+				testAspectsAndAdvisorAreApplied(ac, shouldBeWeaved);
+			}
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 3000);
+	}
+
+	public void testAspectsAndAdvisorNotAppliedToPrototypeIsFastEnough() {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
+		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
+				"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
+		StopWatch sw = new StopWatch();
+		sw.start("prototype");
+		for (int i = 0; i < 100000; i++) {
+			INestedTestBean shouldNotBeWeaved = (INestedTestBean) ac.getBean("i21");
+			if (i < 10) {
+				assertFalse(AopUtils.isAopProxy(shouldNotBeWeaved));
+			}
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 2500);
+	}
+
+	public void testAspectsAndAdvisorNotAppliedToManySingletonsIsFastEnough() {
+		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+			// Skip this test: Trace logging blows the time limit.
+			return;
+		}
+		GenericApplicationContext ac = new GenericApplicationContext();
+		new XmlBeanDefinitionReader(ac).loadBeanDefinitions(
+				"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
+		for (int i = 0; i < 10000; i++) {
+			ac.registerBeanDefinition("singleton" + i, new RootBeanDefinition(NestedTestBean.class));
+		}
+		StopWatch sw = new StopWatch();
+		sw.start("singleton");
+		ac.refresh();
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Singleton creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 3000);
+	}
+
 	public void testAspectsAndAdvisorAreAppliedEvenIfComingFromParentFactory() {
 		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
@@ -76,7 +144,8 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 				addPropertyValue(new PropertyValue("age", new Integer(34)));
 		childAc.registerBeanDefinition("adrian2", bd);
 		// Register the advisor auto proxy creator with subclass
-		childAc.registerBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class.getName(), new RootBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class));
+		childAc.registerBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class.getName(),
+				new RootBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class));
 		childAc.refresh();
 
 		ITestBean beanFromChildContextThatShouldBeWeaved = (ITestBean) childAc.getBean("adrian2");
@@ -158,14 +227,14 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 	}
 
 	public void testTwoAdviceAspectSingleton() {
-		testTwoAdviceAspectWith("twoAdviceAspect.xml");
+		doTestTwoAdviceAspectWith("twoAdviceAspect.xml");
 	}
 
 	public void testTwoAdviceAspectPrototype() {
-		testTwoAdviceAspectWith("twoAdviceAspectPrototype.xml");
+		doTestTwoAdviceAspectWith("twoAdviceAspectPrototype.xml");
 	}
 
-	private void testTwoAdviceAspectWith(String location) {
+	private void doTestTwoAdviceAspectWith(String location) {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/" + location);
 
