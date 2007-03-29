@@ -75,6 +75,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 
 	/**
 	 * Find all eligible advices for auto-proxying this class.
+	 * @param clazz the clazz to find advisors for
 	 * @return the empty list, not <code>null</code>,
 	 * if there are no pointcuts or interceptors
 	 * @see #findCandidateAdvisors
@@ -102,6 +103,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * Return whether the Advisor bean with the given name is eligible
 	 * for proxying in the first place.
 	 * @param beanName the name of the Advisor bean
+	 * @return whether the bean is eligible
 	 */
 	protected boolean isEligibleAdvisorBean(String beanName) {
 		return true;
@@ -110,6 +112,8 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	/**
 	 * Sort advisors based on ordering. Subclasses may choose to override this
 	 * method to customize the sorting strategy.
+	 * @param advisors the source List of Advisors
+	 * @return the sorted List of Advisors
 	 * @see org.springframework.core.Ordered
 	 * @see org.springframework.core.OrderComparator
 	 */
