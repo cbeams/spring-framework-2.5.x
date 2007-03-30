@@ -105,7 +105,15 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 
 
 	public Class getTargetClass() {
-		return (this.cachedObject != null ? this.cachedObject.getClass() : this.targetClass);
+		if (this.cachedObject != null) {
+			return this.cachedObject.getClass();
+		}
+		else if (this.targetClass != null) {
+			return this.targetClass;
+		}
+		else {
+			return getExpectedType();
+		}
 	}
 
 	public boolean isStatic() {
