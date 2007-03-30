@@ -252,6 +252,17 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	public void testSPR3304() throws Exception {
+		Method bridgedMethod = MegaMessageProducerImpl.class.getDeclaredMethod("receive", MegaMessageEvent.class);
+		assertFalse(bridgedMethod.isBridge());
+
+		Method bridgeMethod  = MegaMessageProducerImpl.class.getDeclaredMethod("receive", MegaEvent.class);
+		assertTrue(bridgeMethod.isBridge());
+
+		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+		Map variableMap = BridgeMethodResolver.createTypeVariableMap(MegaMessageProducerImpl.class);
+	}
+
 	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
 		Method[] methods = targetType.getMethods();
 		for (Method m : methods) {
@@ -979,4 +990,50 @@ public class BridgeMethodResolverTests extends TestCase {
     }
 	}
 
+	/***
+	 * SPR-3304
+	 */
+	private static class MegaEvent {
+
+	}
+
+	private static class MegaMessageEvent extends MegaEvent {
+
+	}
+
+	private static class NewMegaMessageEvent extends MegaEvent {
+
+	}
+
+	private static class ModifiedMegaMessageEvent extends MegaEvent {
+
+	}
+
+
+	private static interface MegaReceiver<E extends MegaEvent> {
+		  void receive(E event);
+	}
+
+	private static interface MegaMessageProducer extends MegaReceiver<MegaMessageEvent> {
+
+	}
+
+	private static class Other<S,T> {
+
+	}
+
+	private static class MegaMessageProducerImpl extends Other<Long, String> implements MegaMessageProducer {
+
+		public void receive(NewMegaMessageEvent event) {
+			throw new UnsupportedOperationException();
+		}
+
+		public void receive(ModifiedMegaMessageEvent event) {
+			throw new UnsupportedOperationException();
+		}
+
+		public void receive(MegaMessageEvent event) {
+			throw new UnsupportedOperationException();
+		}
+	}
 }
