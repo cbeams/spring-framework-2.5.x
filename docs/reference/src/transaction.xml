@@ -1102,8 +1102,8 @@ public class DefaultFooService implements FooService {
 			<interfacename>@Transactional</interfacename> annotation.</para>
 			
 			<para>
-                <table id="tx-annotation-drive-settings">
-                    <title><literal>&lt;tx:annotation-drive/&gt;</literal> settings</title>
+                <table id="tx-annotation-driven-settings">
+                    <title><literal>&lt;tx:annotation-driven/&gt;</literal> settings</title>
                     <tgroup cols="4">
                         <thead>
                             <row>
