@@ -57,7 +57,7 @@ import org.springframework.util.ClassUtils;
  */
 public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryBean, BeanClassLoaderAware {
 
-	private Class proxyInterface;
+	private Class[] proxyInterfaces;
 
 	private boolean lookupOnStartup = true;
 
@@ -72,17 +72,28 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 
 	/**
 	 * Specify the proxy interface to use for the JNDI object.
+	 * <p>Typically used in conjunction with "lookupOnStartup"=false and/or "cache"=false.
 	 * Needs to be specified because the actual JNDI object type is not known
 	 * in advance in case of a lazy lookup.
-	 * <p>Typically used in conjunction with "lookupOnStartup"=false and/or "cache"=false.
+	 * @see #setProxyInterfaces
 	 * @see #setLookupOnStartup
 	 * @see #setCache
 	 */
 	public void setProxyInterface(Class proxyInterface) {
-		if (!proxyInterface.isInterface()) {
-			throw new IllegalArgumentException("[" + proxyInterface.getName() + "] is not an interface");
-		}
-		this.proxyInterface = proxyInterface;
+		this.proxyInterfaces = new Class[] {proxyInterface};
+	}
+
+	/**
+	 * Specify multiple proxy interfaces to use for the JNDI object.
+	 * <p>Typically used in conjunction with "lookupOnStartup"=false and/or "cache"=false.
+	 * Note that proxy interfaces will be autodetected from a specified "expectedType",
+	 * if necessary.
+	 * @see #setExpectedType
+	 * @see #setLookupOnStartup
+	 * @see #setCache
+	 */
+	public void setProxyInterfaces(Class[] proxyInterfaces) {
+		this.proxyInterfaces = proxyInterfaces;
 	}
 
 	/**
@@ -134,7 +145,26 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	public void afterPropertiesSet() throws IllegalArgumentException, NamingException {
 		super.afterPropertiesSet();
 
-		if (this.proxyInterface != null) {
+		if (!this.lookupOnStartup || !this.cache) {
+			// We need to create a proxy for this...
+			if (this.proxyInterfaces == null) {
+				Class expectedType = getExpectedType();
+				if (expectedType != null) {
+					if (expectedType.isInterface()) {
+						this.proxyInterfaces = new Class[] {expectedType};
+					}
+					else {
+						this.proxyInterfaces = ClassUtils.getAllInterfacesForClass(expectedType);
+					}
+				}
+			}
+			if (this.proxyInterfaces == null) {
+				throw new IllegalArgumentException(
+						"Cannot deactivate 'lookupOnStartup' or 'cache' without specifying a 'proxyInterface'");
+			}
+		}
+
+		if (this.proxyInterfaces != null) {
 			if (this.defaultObject != null) {
 				throw new IllegalArgumentException(
 						"'defaultObject' is not supported in combination with 'proxyInterface'");
@@ -144,10 +174,6 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 		}
 
 		else {
-			if (!this.lookupOnStartup || !this.cache) {
-				throw new IllegalArgumentException(
-				    "Cannot deactivate 'lookupOnStartup' or 'cache' without specifying a 'proxyInterface'");
-			}
 			if (this.defaultObject != null && getExpectedType() != null &&
 					!getExpectedType().isInstance(this.defaultObject)) {
 				throw new IllegalArgumentException("Default object [" + this.defaultObject +
@@ -198,10 +224,15 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	}
 
 	public Class getObjectType() {
-		if (this.proxyInterface != null) {
-			return this.proxyInterface;
+		if (this.proxyInterfaces != null) {
+			if (this.proxyInterfaces.length == 1) {
+				return this.proxyInterfaces[0];
+			}
+			else if (this.proxyInterfaces.length > 1) {
+				return createCompositeInterface(this.proxyInterfaces);
+			}
 		}
-		else if (this.jndiObject != null) {
+		if (this.jndiObject != null) {
 			return this.jndiObject.getClass();
 		}
 		else {
@@ -211,6 +242,20 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 
 	public boolean isSingleton() {
 		return true;
+	}
+
+
+	/**
+	 * Create a composite interface Class for the given interfaces,
+	 * implementing the given interfaces in one single Class.
+	 * <p>The default implementation builds a JDK proxy class for the
+	 * given interfaces.
+	 * @param interfaces the interfaces to merge
+	 * @return the merged interface as Class
+	 * @see java.lang.reflect.Proxy#getProxyClass
+	 */
+	protected Class createCompositeInterface(Class[] interfaces) {
+		return ClassUtils.createCompositeInterface(interfaces, this.beanClassLoader);
 	}
 
 
@@ -232,7 +277,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 
 			// Create a proxy with JndiObjectFactoryBean's proxy interface and the JndiObjectTargetSource.
 			ProxyFactory proxyFactory = new ProxyFactory();
-			proxyFactory.addInterface(jof.proxyInterface);
+			proxyFactory.setInterfaces(jof.proxyInterfaces);
 			proxyFactory.setTargetSource(targetSource);
 			return proxyFactory.getProxy(jof.beanClassLoader);
 		}
