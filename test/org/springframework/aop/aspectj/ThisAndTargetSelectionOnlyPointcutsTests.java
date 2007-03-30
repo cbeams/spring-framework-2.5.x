@@ -52,40 +52,40 @@ public class ThisAndTargetSelectionOnlyPointcutsTests extends AbstractDependency
 		return "this-and-target-selectionOnly-pointcuts-tests.xml";
 	}
 	
-//	public void testThisAsClassDoesNotMatch() {
-//		testBean.doIt();
-//		assertEquals(0, thisAsClassCounter.getCount());
-//	}
-//
+	public void testThisAsClassDoesNotMatch() {
+		testBean.doIt();
+		assertEquals(0, thisAsClassCounter.getCount());
+	}
+
 	public void testThisAsInterfaceMatch() {
 		testBean.doIt();
 		assertEquals(1, thisAsInterfaceCounter.getCount());
 	}
-//
-//	public void testTargetAsClassDoesMatch() {
-//		testBean.doIt();
-//		assertEquals(1, targetAsClassCounter.getCount());
-//	}
-//
-//	public void testTargetAsInterfaceMatch() {
-//		testBean.doIt();
-//		assertEquals(1, targetAsInterfaceCounter.getCount());
-//	}
-//
-//	public void testThisAsClassAndTargetAsClassCounterNotMatch() {
-//		testBean.doIt();
-//		assertEquals(0, thisAsClassAndTargetAsClassCounter.getCount());
-//	}
-//
-//	public void testThisAsInterfaceAndTargetAsInterfaceCounterMatch() {
-//		testBean.doIt();
-//		assertEquals(1, thisAsInterfaceAndTargetAsInterfaceCounter.getCount());
-//	}
-//
-//	public void testThisAsInterfaceAndTargetAsClassCounterMatch() {
-//		testBean.doIt();
-//		assertEquals(1, thisAsInterfaceAndTargetAsInterfaceCounter.getCount());
-//	}
+
+	public void testTargetAsClassDoesMatch() {
+		testBean.doIt();
+		assertEquals(1, targetAsClassCounter.getCount());
+	}
+
+	public void testTargetAsInterfaceMatch() {
+		testBean.doIt();
+		assertEquals(1, targetAsInterfaceCounter.getCount());
+	}
+
+	public void testThisAsClassAndTargetAsClassCounterNotMatch() {
+		testBean.doIt();
+		assertEquals(0, thisAsClassAndTargetAsClassCounter.getCount());
+	}
+
+	public void testThisAsInterfaceAndTargetAsInterfaceCounterMatch() {
+		testBean.doIt();
+		assertEquals(1, thisAsInterfaceAndTargetAsInterfaceCounter.getCount());
+	}
+
+	public void testThisAsInterfaceAndTargetAsClassCounterMatch() {
+		testBean.doIt();
+		assertEquals(1, thisAsInterfaceAndTargetAsInterfaceCounter.getCount());
+	}
 	
 	public static interface TestInterface {
 		public void doIt();

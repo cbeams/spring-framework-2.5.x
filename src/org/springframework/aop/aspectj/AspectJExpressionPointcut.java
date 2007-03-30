@@ -263,29 +263,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	public boolean matches(Method method, Class targetClass, Object[] args) {
 		checkReadyToMatch();
 		ShadowMatch shadowMatch = null;
-		/*
-		 * Obtain shadow using the original method; this way we do retain
-		 * InstanceOf residue in the computed shadow. This residue then
-		 * correctly deals with the cases, where we have a pointcut containing
-		 * this(TYPE_PATTERN) or target(TYPE_PATTERN).
-		 * 
-		 * If we go for the most specific method, we will get only Literal
-		 * residue test in pointcut shadow and the decision will be made based
-		 * on static context alone. Depending upon if we choose target or proxy
-		 * class' method, if we have this(TYPE_PATTERN) or target(TYPE_PATTERN)
-		 * the shadow will be computed incorrectly in either of the cases.
-		 * Instead, by basing shadow on the method being invoked (proxy's method
-		 * based on interface or CGLIB proxy subclass), we don't determine
-		 * pointcut's matchign solely based on static context. 
-		 * 
-		 * See SPR-2979 for the original bug.
-		 */
-		/*
-		 * Note: Temporarily reverting the fix. Annotation matches fail due to this change
-		 * 
-		 */
+		ShadowMatch originalShadowMatch = null;
 		try {
 			shadowMatch = getShadowMatch(AopUtils.getMostSpecificMethod(method, targetClass), method);
+			originalShadowMatch = getShadowMatch(method, method);
 		}
 		catch (ReflectionWorld.ReflectionWorldException ex) {
 			// Could neither introspect the target class nor the proxy class ->
@@ -314,6 +295,21 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 
 		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(thisObject, targetObject, args);
+		
+		/*
+		 * Do a final check to see if any this(TYPE) kind of residue match. For
+		 * this purpose, we use the original method's (proxy method's) shadow to
+		 * ensure that 'this' is correctly checked against. Without this check,
+		 * we get incorrect match on this(TYPE) where TYPE matches the target
+		 * type but not 'this' (as would be the case of JDK dynamic proxies).
+		 * 
+		 * See SPR-2979 for the original bug.
+		 */
+		RuntimeTestWalker originalMethodResidueTest = new RuntimeTestWalker(originalShadowMatch);
+		if(!originalMethodResidueTest.testThisInstanceOfResidue(thisObject)) {
+			return false;
+		}
+
 		if (joinPointMatch.matches() && pmi != null) {
 			bindParameters(pmi, joinPointMatch);
 		}

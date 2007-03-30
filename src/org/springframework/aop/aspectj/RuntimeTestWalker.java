@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Field;
 
+import org.aspectj.weaver.ResolvedType;
 import org.aspectj.weaver.ast.And;
 import org.aspectj.weaver.ast.Call;
 import org.aspectj.weaver.ast.FieldGetCall;
@@ -30,6 +31,7 @@ import org.aspectj.weaver.ast.Or;
 import org.aspectj.weaver.ast.Test;
 import org.aspectj.weaver.internal.tools.MatchingContextBasedTest;
 import org.aspectj.weaver.reflect.ReflectionVar;
+import org.aspectj.weaver.reflect.ReflectionWorld;
 import org.aspectj.weaver.reflect.ShadowMatchImpl;
 import org.aspectj.weaver.tools.ShadowMatch;
 
@@ -46,6 +48,7 @@ import org.aspectj.weaver.tools.ShadowMatch;
  * <p>See https://bugs.eclipse.org/bugs/show_bug.cgi?id=151593
  *
  * @author Adrian Colyer
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 public class RuntimeTestWalker {
@@ -79,27 +82,20 @@ public class RuntimeTestWalker {
 		return new SubtypeSensitiveVarTypeTestVisitor().testsSubtypeSensitiveVars(this.runtimeTest);
 	}
 
+	public boolean testThisInstanceOfResidue(Object thiz) {
+		return new ThisInstanceOfResidueTestVisitor(thiz).thisInstanceOfMatches(this.runtimeTest);
+	}
 
-	private static class SubtypeSensitiveVarTypeTestVisitor implements ITestVisitor {
+	private static class TestVisitorAdapter implements ITestVisitor {
+		protected static final int THIS_VAR = 0;
+		protected static final int AT_THIS_VAR = 3;
+		protected static final int AT_TARGET_VAR = 4;
+		protected static final int AT_ANNOTATION_VAR = 8;
 
-		private static final int AT_THIS_VAR = 3;
-		private static final int AT_TARGET_VAR = 4;
-		private static final int AT_ANNOTATION_VAR = 8;
-
-		private final Object thisObj = new Object();
-		private final Object targetObj = new Object();
-		private final Object[] argsObjs = new Object[0];
-
-		private boolean testsSubtypeSensitiveVars = false;
-
-		public boolean testsSubtypeSensitiveVars(Test aTest) {
-			aTest.accept(this);
-			return this.testsSubtypeSensitiveVars;
-		}
-		
 		public void visit(And e) {
 			e.getLeft().accept(this);
 			e.getRight().accept(this);
+
 		}
 
 		public void visit(Or e) {
@@ -112,27 +108,30 @@ public class RuntimeTestWalker {
 		}
 
 		public void visit(Instanceof i) {
-			ReflectionVar v = (ReflectionVar) i.getVar();
-			Object varUnderTest = v.getBindingAtJoinPoint(thisObj,targetObj,argsObjs);
-			if ((varUnderTest == thisObj) || (varUnderTest == targetObj)) {
-				this.testsSubtypeSensitiveVars = true;
-			}
 		}
 
-		public void visit(HasAnnotation hasAnn) {
-			// if you thought things were bad before, now we sink to new levels
-			// of horror...
-			ReflectionVar v = (ReflectionVar) hasAnn.getVar();
+		public void visit(Literal literal) {
+		}
+
+		public void visit(Call call) {
+		}
+
+		public void visit(FieldGetCall fieldGetCall) {
+		}
+
+		public void visit(HasAnnotation hasAnnotation) {
+		}
+
+		public void visit(MatchingContextBasedTest matchingContextTest) {
+		}
+		
+		protected int getVarType(ReflectionVar v) {
 			try {
 				Field varTypeField = ReflectionVar.class.getDeclaredField("varType");
 				varTypeField.setAccessible(true);
 				Integer varTypeValue = (Integer) varTypeField.get(v);
 				int varType = varTypeValue.intValue();
-				if ((varType == AT_THIS_VAR) ||
-					(varType == AT_TARGET_VAR) ||
-					(varType == AT_ANNOTATION_VAR)) {
-					this.testsSubtypeSensitiveVars = true;
-				}
+				return varType;
 			}
 			catch(NoSuchFieldException noSuchFieldEx) {
 				throw new IllegalStateException("the version of aspectjtools.jar / aspectjweaver.jar " +
@@ -145,22 +144,78 @@ public class RuntimeTestWalker {
 				throw new IllegalStateException("Unable to access ReflectionVar.varType field.");
 			}
 		}
+	}
 
-		public void visit(Literal e) {
-			// NO-OP
-		}
-
-		public void visit(Call e) {
-			// NO-OP
-		}
-
-		public void visit(FieldGetCall e) {
-			// NO-OP
-		}
-
-		public void visit(MatchingContextBasedTest arg0) {
-			// NO-OP
+	/**
+	 * 
+	 * Check if residue of this(TYPE) kind. See SPR-2979 for more details.
+	 *
+	 */
+	private static class ThisInstanceOfResidueTestVisitor extends TestVisitorAdapter {
+		private Object thiz;
+		private boolean matches = true;
+		
+		public ThisInstanceOfResidueTestVisitor(Object thiz) {
+			this.thiz = thiz;
 		}
 		
+		public boolean thisInstanceOfMatches(Test test) {
+			test.accept(this);
+			return matches;
+		}
+
+		public void visit(Instanceof i) {
+			ResolvedType type = (ResolvedType)i.getType();
+			int varType = getVarType((ReflectionVar)i.getVar());
+			// We are concerned only about this() pointcut
+			// TODO: Optimization: Process only if this() specifies a type and not identifier
+			if(varType != THIS_VAR) {
+				return;
+			}
+			
+			try {
+				Class typeClass = Class.forName(type.getName());
+				// Don't use ReflectionType.isAssignableFrom() as it won't be aware of (Spring) mixins
+				if(!typeClass.isAssignableFrom(thiz.getClass())) {
+					matches = false;
+				}
+			} catch (ClassNotFoundException ex) {
+				matches = false;
+			}
+		}
+
+	}
+	
+	private static class SubtypeSensitiveVarTypeTestVisitor extends TestVisitorAdapter {
+		private final Object thisObj = new Object();
+		private final Object targetObj = new Object();
+		private final Object[] argsObjs = new Object[0];
+
+		private boolean testsSubtypeSensitiveVars = false;
+
+		public boolean testsSubtypeSensitiveVars(Test aTest) {
+			aTest.accept(this);
+			return this.testsSubtypeSensitiveVars;
+		}
+		
+		public void visit(Instanceof i) {
+			ReflectionVar v = (ReflectionVar) i.getVar();
+			Object varUnderTest = v.getBindingAtJoinPoint(thisObj,targetObj,argsObjs);
+			if ((varUnderTest == thisObj) || (varUnderTest == targetObj)) {
+				this.testsSubtypeSensitiveVars = true;
+			}
+		}
+
+		public void visit(HasAnnotation hasAnn) {
+			// if you thought things were bad before, now we sink to new levels
+			// of horror...
+			ReflectionVar v = (ReflectionVar) hasAnn.getVar();
+			int varType = getVarType(v);
+				if ((varType == AT_THIS_VAR) 
+					|| (varType == AT_TARGET_VAR) 
+					|| (varType == AT_ANNOTATION_VAR)) {
+				this.testsSubtypeSensitiveVars = true;
+			}
+		}
 	}
 }
