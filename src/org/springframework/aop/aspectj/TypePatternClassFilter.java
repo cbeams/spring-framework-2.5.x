@@ -21,6 +21,7 @@ import org.aspectj.weaver.tools.TypePatternMatcher;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Spring AOP {@link ClassFilter} implementation using AspectJ type matching.
@@ -79,7 +80,7 @@ public class TypePatternClassFilter implements ClassFilter {
 		this.typePattern = typePattern;
 		this.aspectJTypePatternMatcher =
 				PointcutParser.getPointcutParserSupportingAllPrimitivesAndUsingContextClassloaderForResolution().
-				parseTypePattern(typePattern);
+				parseTypePattern(replaceBooleanOperators(typePattern));
 	}
 
 	public String getTypePattern() {
@@ -99,4 +100,16 @@ public class TypePatternClassFilter implements ClassFilter {
 		return this.aspectJTypePatternMatcher.matches(clazz);
 	}
 
+	/**
+	 * If a type pattern has been specified in XML, the user cannot
+	 * write <code>and</code> as "&&" (though &amp;&amp; will work).
+	 * We also allow <code>and</code> between two sub-expressions.
+	 * <p>This method converts back to <code>&&</code> for the AspectJ pointcut parser.
+	 */
+	private String replaceBooleanOperators(String pcExpr) {
+		pcExpr = StringUtils.replace(pcExpr," and "," && ");
+		pcExpr = StringUtils.replace(pcExpr, " or ", " || ");
+		pcExpr = StringUtils.replace(pcExpr, " not ", " ! ");
+		return pcExpr;
+	}
 }
