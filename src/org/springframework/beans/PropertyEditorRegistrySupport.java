@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -82,6 +83,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	private Map defaultEditors;
 
 	private Map customEditors;
+
+	private Set sharedEditors;
 
 	private Map customEditorCache;
 
@@ -244,6 +247,31 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		}
 	}
 
+	/**
+	 * Register the given custom property editor for all properties
+	 * of the given type, indicating that the given instance is a
+	 * shared editor that might be used concurrently.
+	 * @param requiredType the type of the property
+	 * @param propertyEditor the shared editor to register
+	 */
+	public void registerSharedEditor(Class requiredType, PropertyEditor propertyEditor) {
+		registerCustomEditor(requiredType, null, propertyEditor);
+		if (this.sharedEditors == null) {
+			this.sharedEditors = new HashSet();
+		}
+		this.sharedEditors.add(propertyEditor);
+	}
+
+	/**
+	 * Check whether the given editor instance is a shared editor, that is,
+	 * whether the given editor instance might be used concurrently.
+	 * @param propertyEditor the editor instance to check
+	 * @return whether the editor is a shared instance
+	 */
+	public boolean isSharedEditor(PropertyEditor propertyEditor) {
+		return (this.sharedEditors != null && this.sharedEditors.contains(propertyEditor));
+	}
+
 	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
 		if (this.customEditors == null) {
 			return null;
@@ -328,6 +356,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * Get custom editor for the given type. If no direct match found,
 	 * try custom editor for superclass (which will in any case be able
 	 * to render a value as String via <code>getAsText</code>).
+	 * @param requiredType the type to look for
 	 * @return the custom editor, or <code>null</code> if none found for this type
 	 * @see java.beans.PropertyEditor#getAsText()
 	 */

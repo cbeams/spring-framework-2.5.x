@@ -419,9 +419,8 @@ abstract class ConstructorResolver {
 				else {
 					try {
 						Object originalValue = valueHolder.getValue();
-						Object convertedValue =
-								this.beanFactory.doTypeConversionIfNecessary(bw, originalValue,
-										paramTypes[index], MethodParameter.forMethodOrConstructor(methodOrCtor, index));
+						Object convertedValue = bw.convertIfNecessary(originalValue, paramTypes[index],
+								MethodParameter.forMethodOrConstructor(methodOrCtor, index));
 						args.arguments[index] = convertedValue;
 						ConstructorArgumentValues.ValueHolder sourceHolder =
 								(ConstructorArgumentValues.ValueHolder) valueHolder.getSource();

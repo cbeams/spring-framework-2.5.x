@@ -32,10 +32,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyEditorRegistrySupport;
-import org.springframework.beans.PropertyValues;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
-import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -58,7 +56,6 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.core.CollectionFactory;
-import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -835,8 +832,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @param registry the PropertyEditorRegistry to initialize
 	 */
 	protected void registerCustomEditors(PropertyEditorRegistry registry) {
-		if (registry instanceof PropertyEditorRegistrySupport) {
-			((PropertyEditorRegistrySupport) registry).useConfigValueEditors();
+		PropertyEditorRegistrySupport registrySupport =
+				(registry instanceof PropertyEditorRegistrySupport ? (PropertyEditorRegistrySupport) registry : null);
+		if (registrySupport != null) {
+			registrySupport.useConfigValueEditors();
 		}
 		for (Iterator it = this.propertyEditorRegistrars.iterator(); it.hasNext();) {
 			PropertyEditorRegistrar registrar = (PropertyEditorRegistrar) it.next();
@@ -846,54 +845,14 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			Map.Entry entry = (Map.Entry) it.next();
 			Class clazz = (Class) entry.getKey();
 			PropertyEditor editor = (PropertyEditor) entry.getValue();
-			registry.registerCustomEditor(clazz, editor);
-		}
-	}
-
-	/**
-	 * Apply the given property values to the given bean.
-	 * @param bw the BeanWrapper that wraps the bean
-	 * @param pv the PropertyValues to apply
-	 */
-	protected void applyPropertyValues(BeanWrapper bw, PropertyValues pv) {
-		// Synchronize if custom editors are registered.
-		// Necessary because PropertyEditors are not thread-safe.
-		if (!this.customEditors.isEmpty()) {
-			synchronized (this.customEditors) {
-				bw.setPropertyValues(pv);
+			// Register the editor as shared instance, if possible,
+			// to make it clear that it might be used concurrently.
+			if (registrySupport != null) {
+				registrySupport.registerSharedEditor(clazz, editor);
 			}
-		}
-		else {
-			bw.setPropertyValues(pv);
-		}
-	}
-
-	/**
-	 * Convert the given value into the specified target type,
-	 * using the specified BeanWrapper.
-	 * @param converter the TypeConverter to work on
-	 * @param value the original value
-	 * @param targetType the target type to convert to
-	 * (or <code>null</code> if not known, for example in case of a collection element)
-	 * @param methodParam the method parameter that is the target of the conversion
-	 * (for analysis of generic types; may be <code>null</code>)
-	 * @return the converted value, matching the target type
-	 * @throws org.springframework.beans.TypeMismatchException if type conversion failed
-	 * @see org.springframework.beans.BeanWrapperImpl#convertIfNecessary(Object, Class)
-	 */
-	protected Object doTypeConversionIfNecessary(
-			TypeConverter converter, Object value, Class targetType, MethodParameter methodParam)
-			throws TypeMismatchException {
-
-		// Synchronize if custom editors are registered.
-		// Necessary because PropertyEditors are not thread-safe.
-		if (!this.customEditors.isEmpty()) {
-			synchronized (this.customEditors) {
-				return converter.convertIfNecessary(value, targetType, methodParam);
+			else {
+				registry.registerCustomEditor(clazz, editor);
 			}
-		}
-		else {
-			return converter.convertIfNecessary(value, targetType, methodParam);
 		}
 	}
 
