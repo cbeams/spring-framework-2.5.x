@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.web.servlet.view;
 
 /**
- * Abstract base class for template view resolvers like
- * VelocityViewResolver and FreeMarkerViewResolver.
+ * Abstract base class for template view resolvers,
+ * in particular for Velocity and FreeMarker views.
  *
- * <p>Provides a convenient way to specify AbstractTemplateView's
+ * <p>Provides a convenient way to specify {@link AbstractTemplateView}'s
  * exposure flags for request attributes, session attributes,
  * and Spring's macro helpers.
  *
@@ -34,13 +34,13 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 
 	private boolean exposeRequestAttributes = false;
 
-	private boolean exposeSessionAttributes = false;
-
-	private boolean exposeSpringMacroHelpers = false;
-
 	private boolean allowRequestOverride = false;
 
+	private boolean exposeSessionAttributes = false;
+
 	private boolean allowSessionOverride = false;
+
+	private boolean exposeSpringMacroHelpers = false;
 
 
 	protected Class requiredViewClass() {
@@ -57,24 +57,6 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 	}
 
 	/**
-	 * Set whether all HttpSession attributes should be added to the
-	 * model prior to merging with the template. Default is "false".
-	 * @see AbstractTemplateView#setExposeSessionAttributes
-	 */
-	public void setExposeSessionAttributes(boolean exposeSessionAttributes) {
-		this.exposeSessionAttributes = exposeSessionAttributes;
-	}
-
-	/**
-	 * Set whether to expose a RequestContext for use by Spring's macro library,
-	 * under the name "springBindRequestContext". Default is "false".
-	 * @see AbstractTemplateView#setExposeSpringMacroHelpers
-	 */
-	public void setExposeSpringMacroHelpers(boolean exposeSpringMacroHelpers) {
-		this.exposeSpringMacroHelpers = exposeSpringMacroHelpers;
-	}
-
-	/**
 	 * Set whether HttpServletRequest attributes are allowed to override (hide)
 	 * controller generated model attributes of the same name. Default is "false",
 	 * which causes an exception to be thrown if request attributes of the same
@@ -83,6 +65,15 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 	 */
 	public void setAllowRequestOverride(boolean allowRequestOverride) {
 		this.allowRequestOverride = allowRequestOverride;
+	}
+
+	/**
+	 * Set whether all HttpSession attributes should be added to the
+	 * model prior to merging with the template. Default is "false".
+	 * @see AbstractTemplateView#setExposeSessionAttributes
+	 */
+	public void setExposeSessionAttributes(boolean exposeSessionAttributes) {
+		this.exposeSessionAttributes = exposeSessionAttributes;
 	}
 
 	/**
@@ -96,14 +87,23 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 		this.allowSessionOverride = allowSessionOverride;
 	}
 
+	/**
+	 * Set whether to expose a RequestContext for use by Spring's macro library,
+	 * under the name "springMacroRequestContext". Default is "false".
+	 * @see AbstractTemplateView#setExposeSpringMacroHelpers
+	 */
+	public void setExposeSpringMacroHelpers(boolean exposeSpringMacroHelpers) {
+		this.exposeSpringMacroHelpers = exposeSpringMacroHelpers;
+	}
+
 
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		AbstractTemplateView view = (AbstractTemplateView) super.buildView(viewName);
 		view.setExposeRequestAttributes(this.exposeRequestAttributes);
-		view.setExposeSessionAttributes(this.exposeSessionAttributes);
-		view.setExposeSpringMacroHelpers(this.exposeSpringMacroHelpers);
 		view.setAllowRequestOverride(this.allowRequestOverride);
+		view.setExposeSessionAttributes(this.exposeSessionAttributes);
 		view.setAllowSessionOverride(this.allowSessionOverride);
+		view.setExposeSpringMacroHelpers(this.exposeSpringMacroHelpers);
 		return view;
 	}
 

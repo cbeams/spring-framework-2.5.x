@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 		// Determine whether the Servlet 2.4 ServletResponse.getContentType method
 		// is available.
 		try {
-			ServletResponse.class.getMethod("getContentType", new Class[] {});
+			ServletResponse.class.getMethod("getContentType", new Class[0]);
 			responseGetContentTypeAvailable = true;
 		}
 		catch (NoSuchMethodException ex) {
@@ -65,15 +65,16 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
+
 	private boolean exposeRequestAttributes = false;
+
+	private boolean allowRequestOverride = false;
 
 	private boolean exposeSessionAttributes = false;
 
-	private boolean exposeSpringMacroHelpers = false;
-	
-	private boolean allowRequestOverride = false;
-	
 	private boolean allowSessionOverride = false;
+
+	private boolean exposeSpringMacroHelpers = false;
 
 
 	/**
@@ -85,14 +86,6 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Set whether all HttpSession attributes should be added to the
-	 * model prior to merging with the template. Default is "false".
-	 */
-	public void setExposeSessionAttributes(boolean exposeSessionAttributes) {
-		this.exposeSessionAttributes = exposeSessionAttributes;
-	}
-
-	/**
 	 * Set whether HttpServletRequest attributes are allowed to override (hide)
 	 * controller generated model attributes of the same name. Default is "false",
 	 * which causes an exception to be thrown if request attributes of the same
@@ -101,7 +94,15 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	public void setAllowRequestOverride(boolean allowRequestOverride) {
 		this.allowRequestOverride = allowRequestOverride;
 	}
-    
+
+	/**
+	 * Set whether all HttpSession attributes should be added to the
+	 * model prior to merging with the template. Default is "false".
+	 */
+	public void setExposeSessionAttributes(boolean exposeSessionAttributes) {
+		this.exposeSessionAttributes = exposeSessionAttributes;
+	}
+
 	/**
 	 * Set whether HttpSession attributes are allowed to override (hide)
 	 * controller generated model attributes of the same name. Default is "false",
@@ -116,8 +117,8 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	 * Set whether to expose a RequestContext for use by Spring's macro library,
 	 * under the name "springMacroRequestContext". Default is "false".
 	 * <p>Currently needed for Spring's Velocity and FreeMarker default macros.
-	 * Note that this is <b>not</b> required for templates that use HTML
-	 * forms <b>unless</b> you wish to take advantage of the Spring helper macros.
+	 * Note that this is <i>not</i> required for templates that use HTML
+	 * forms <i>unless</i> you wish to take advantage of the Spring helper macros.
 	 * @see #SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE
 	 */
 	public void setExposeSpringMacroHelpers(boolean exposeSpringMacroHelpers) {
@@ -169,7 +170,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 						"Cannot expose bind macro helper '" + SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE +
 						"' because of an existing model object of the same name");
 			}
-			// expose RequestContext instance for Spring macros
+			// Expose RequestContext instance for Spring macros.
 			model.put(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, new RequestContext(request, model));
 		}
 
