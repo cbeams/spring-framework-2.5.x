@@ -111,8 +111,8 @@
 					metadata. It is <emphasis>not</emphasis> however the only form of
 					configuration metadata that is allowed. The Spring IoC container itself
 					is <emphasis>totally</emphasis> decoupled from the format in which this
-					configuration metadata is actually written.</para>
-					<para>At the time of writing, you can supply this configuration metadata
+					configuration metadata is actually written.
+					At the time of writing, you can supply this configuration metadata
 					using either XML, the Java properties format, or programmatically (using
 					Spring's public API). The XML-based configuration metadata format really is
 					simple though, and so the remainder of this chapter will use the XML format
@@ -142,20 +142,20 @@
 				<literal>web.xml</literal> file of the application will typically suffice
 				(see <xref linkend="context-create" />).</para>
 			</section>
-            <para>At its most basic level, a Spring IoC container configuration consists of the
-            definition of at least one bean that the container must manage, but typically there
-            will be more than one bean definition. When using XML-based configuration metadata,
-			these beans are configured as one or more <literal>&lt;bean/&gt;</literal> elements
-			inside a top-level <literal>&lt;beans/&gt;</literal> element.</para>
+            <para>Spring configuration consists of at least one bean definition that the
+			container must manage, but typically there will be more than one bean definition.
+			When using XML-based configuration metadata, these beans are configured as
+			<literal>&lt;bean/&gt;</literal> elements inside a top-level <literal>&lt;beans/&gt;</literal>
+			element.</para>
 			<para>These bean definitions correspond to the actual objects that make up your
-			application(s). Typically you will have bean definitions for your service layer
+			application. Typically you will have bean definitions for your service layer
 			objects, your data access objects (DAOs), presentation objects such as Struts
 			<interfacename>Action</interfacename> instances, infrastructure objects such as
 			Hibernate <interfacename>SessionFactory</interfacename> instances, JMS
 			<interfacename>Queue</interfacename> references, etc. (the possibilities are of
-			course endless and are limited only by the scope and complexity of your	application).</para>
-			<para>Find below an example of the basic structure of XML-based configuration
-			metadata.</para>
+			course endless, and are limited only by the scope and complexity of your application).
+			(Typically one does not configure fine-grained domain objects in the container.)</para>
+			<para>Find below an example of the basic structure of XML-based configuration metadata.</para>
 			<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -184,6 +184,7 @@ BeanFactory factory = new XmlBeanFactory(resource);]]></programlisting>
 			    <para>... or...</para>
 				<programlisting><![CDATA[ApplicationContext context = new ClassPathXmlApplicationContext(
         new String[] {"applicationContext.xml", "applicationContext-part2.xml"});
+
 ]]><lineannotation>// of course, an <interfacename>ApplicationContext</interfacename> is just a <interfacename>BeanFactory</interfacename></lineannotation><![CDATA[
 BeanFactory factory = (BeanFactory) context;]]></programlisting>
                 <section id="beans-factory-xml-import">
@@ -249,9 +250,8 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
                 </listitem>
                 <listitem>
                     <para>bean behavioral configuration elements, which state how the
-					bean should behave in the container (i.e. prototype or singleton,
-					autowiring mode, dependency checking mode, initialization and
-					destruction methods)</para>
+					bean should behave in the container (prototype or singleton,
+					autowiring mode, initialization and destruction callbacks, and so forth).</para>
                 </listitem>
                 <listitem>
                     <para>constructor arguments and property values to set in the
@@ -261,7 +261,7 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
 					limit.</para>
                 </listitem>
                 <listitem>
-                    <para>other beans which are needed for the bean to do its work, i.e.
+                    <para>other beans which are needed for the bean to do its work, that is
                     <emphasis>collaborators</emphasis> (also called dependencies).</para>
                 </listitem>
             </itemizedlist>
@@ -623,15 +623,15 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
             <title>Injecting dependencies</title>
             <para>
 				The basic principle behind <emphasis>Dependency Injection</emphasis> (DI)
-				is that objects define their dependencies (i.e. the other objects they work
-				with) only through constructor arguments, arguments to a factory method, or
-				properties which are set on the object instance after it has been
-				constructed or returned from a factory method. Then, it is the job of
-				the container to actually <emphasis>inject</emphasis> those dependencies
-				when it creates the bean. This is fundamentally the inverse, hence the
-				name <emphasis>Inversion of Control</emphasis> (IoC), of the bean itself
-				 being in control of instantiating or locating its dependencies on its
-				 own using direct construction of classes, or something like the
+				is that objects define their dependencies (that is to say the other
+				objects they work with) only through constructor arguments, arguments
+				to a factory method, or properties which are set on the object instance
+				after it has been constructed or returned from a factory method. Then, it
+				is the job of the container to actually <emphasis>inject</emphasis> those
+				dependencies when it creates the bean. This is fundamentally the inverse,
+				hence the name <emphasis>Inversion of Control</emphasis> (IoC), of the bean
+				itself being in control of instantiating or locating its dependencies on its
+				own using direct construction of classes, or something like the
 				<emphasis>Service Locator</emphasis> pattern.
 			</para>
 			<para>
@@ -692,7 +692,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
     ]]><lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on the <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
     private MovieFinder movieFinder;
 
-    ]]><lineannotation>// a constructor so that the Spring container can 'inject' a  <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
+    ]]><lineannotation>// a constructor so that the Spring container can 'inject' a <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
     public SimpleMovieLister(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
@@ -737,7 +737,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 				<interfacename>PropertyEditor</interfacename> instances to know how to
 				convert properties from one format to another. However, most users of
 				Spring will not be dealing with these classes directly
-				(i.e. programmatically), but rather with an XML definition file which
+				(that is programmatically), but rather with an XML definition file which
 				will be converted internally into instances of these classes, and used
 				to load an entire Spring IoC container instance.
 			</para>
@@ -785,19 +785,15 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
                 </listitem>
             </orderedlist>
             <para>
-				It is important to realize that Spring validates the
-				configuration of each bean in a container as the container
-				is created, including the validation that properties which are
-				bean references are actually referring to valid beans (i.e. the
-				beans being referred to are also defined in the container.
-				However, the bean properties themselves are not set until the
-				bean <emphasis>is actually created</emphasis>. For that which
-				are singleton-scoped and set to be pre-instantiated (such as
+				The Spring container validates the configuration of each bean as the container
+				is created, including the validation that properties which are bean references
+				are actually referring to valid beans. However, the bean properties themselves
+				are not set until the bean <emphasis>is actually created</emphasis>. For those
+				beans that are singleton-scoped and set to be pre-instantiated (such as
 				singleton beans in an <interfacename>ApplicationContext</interfacename>),
-				creation happens at the time that the container is created, but
-				otherwise this is only when the bean is requested. When a bean
-				actually has to be created, this will potentially cause a graph
-				of other beans to be created, as its dependencies and its
+				creation happens at the time that the container is created, but otherwise this is
+				only when the bean is requested. When a bean actually has to be created, this will
+				potentially cause a graph of other beans to be created, as its dependencies and its
 				dependencies' dependencies (and so on) are created and assigned.
 			</para>
 			<sidebar>
@@ -818,12 +814,11 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 			    and stick to setter injection only.</para>
 			</sidebar>
             <para>
-				You can generally trust Spring to do the right thing. It
-				will detect mis-configuration issues, such as references to
-				non-existent beans and circular dependencies, at container
-				load-time. It will actually set properties and resolve
-				dependencies (i.e. create those dependencies if needed) as late as
-				possible, which is when the bean is actually created. This means that
+				You can generally trust Spring to do the right thing. It will detect
+				mis-configuration issues, such as references to non-existent beans and
+				circular dependencies, at container load-time. It will actually set
+				properties and resolve dependencies as late as possible, which is when
+				the bean is actually created. This means that
 				a Spring container which has loaded correctly can later generate an
 				exception when you request a bean if there is a problem creating that
 				bean or one of its dependencies. This could happen if the bean throws
@@ -835,7 +830,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 				you find out about configuration issues when the
 				<interfacename>ApplicationContext</interfacename> is created, not later.
 				If you wish, you can still override this default behavior and set any of these
-				singleton beans to lazy-initialize (i.e. not be pre-instantiated).
+				singleton beans to lazy-initialize (that is not be pre-instantiated).
 			</para>
             <para>
 				Finally, if it is not immediately apparent, it is worth mentioning that when
@@ -942,15 +937,15 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
     private ExampleBean(...) {
       ...
     }
-    
+    ]]><lineannotation>
     // a static factory method; the arguments to this method can be
     // considered the dependencies of the bean that is returned,
-    // regardless of how those arguments are actually used.
+    // regardless of how those arguments are actually used.</lineannotation><![CDATA[
     public static ExampleBean createInstance (
             AnotherBean anotherBean, YetAnotherBean yetAnotherBean, int i) {
+
         ExampleBean eb = new ExampleBean (...);
-        // some other operations
-        ...
+        ]]><lineannotation>// some other operations...</lineannotation><![CDATA[
         return eb;
     }
 }]]></programlisting>
@@ -977,22 +972,21 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 				in which the constructor arguments are defined in a bean definition
 				is the order in which those arguments will be supplied to the
 				appropriate constructor when it is being instantiated. Consider the
-				following class...
+				following class:
 			</para>
 			<programlisting><![CDATA[package x.y;
 
 public class Foo {
 
     public Foo(Bar bar, Baz baz) {
-        // ...
+        ]]><lineannotation>// ...</lineannotation><![CDATA[
     }
 }]]></programlisting>
 			<para>
 				There is no potential for ambiguity here (assuming of course that <classname>Bar</classname>
 				and <classname>Baz</classname> classes are not related in an inheritance hierarchy).
 				Thus the following configuration will work just fine, and you do not need to
-				specify the constructor argument indexes and / or types explicitly... it just plain
-				works as you would expect it to.
+				specify the constructor argument indexes and / or types explicitly.
 			</para>
 			<programlisting><![CDATA[<beans>
     <bean name="foo" class="x.y.Foo">
@@ -1010,8 +1004,7 @@ public class Foo {
 				When a simple type is used, such as
 				<literal>&lt;value&gt;true&lt;value&gt;</literal>, Spring cannot
 				determine the type of the value, and so cannot match by type without
-				help. Consider the following class, which is used for the following two
-				sections:
+				help. Consider the following class:
 			</para>
 			<programlisting><![CDATA[package examples;
 
@@ -1049,10 +1042,6 @@ public class ExampleBean {
 				<para>As well as solving the ambiguity problem of multiple simple values, specifying
 				an index also solves the problem of	ambiguity where a constructor may have two
 				arguments of the same type.	Note that the <emphasis>index is 0 based</emphasis>.</para>
-				<tip>
-                    <para>Specifying a constructor argument index is the preferred way of performing
-                    constructor IoC.</para>
-				</tip>
             </section>
         </section>
         <section id="beans-factory-properties-detailed">
@@ -1102,8 +1091,7 @@ public class ExampleBean {
             <para>The Spring team generally prefer the attribute style over the use of nested
             <literal>&lt;value/&gt;</literal> elements. If you are reading this reference manual
             straight through from top to bottom (wow!) then we are getting slightly ahead of ourselves here,
-            but did you know that you can specify a <classname>java.util.Properties</classname>
-            instance like this?</para>
+            but you can also configure a <classname>java.util.Properties</classname> instance like so:</para>
             <programlisting><![CDATA[<bean id="mappings" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
             
    ]]><lineannotation>&lt;!-- typed as a <classname>java.util.Properties</classname> --&gt;</lineannotation><![CDATA[
@@ -1212,9 +1200,7 @@ public class ExampleBean {
                 and the target bean must be in a parent container to the current one.
                 The main use of this bean reference variant is when you have a hierarchy
                 of containers and you want to wrap an existing bean in a parent container
-                with some sort of proxy which will have the same name as the parent bean
-                (i.e. the bean definition in the child context is overriding the parent
-                bean).</para>
+                with some sort of proxy which will have the same name as the parent bean.</para>
                 <programlisting><lineannotation>&lt;!-- in the parent context --&gt;</lineannotation><![CDATA[
 <bean id="accountService" class="com.foo.SimpleAccountService">
     ]]><lineannotation>&lt;!-- insert dependencies as required as here --&gt;</lineannotation><![CDATA[
@@ -1317,16 +1303,16 @@ public class ExampleBean {
                     <literal>&lt;set/&gt;</literal> or <literal>&lt;props/&gt;</literal> element, and
                     have child-style <literal>&lt;list/&gt;</literal>, <literal>&lt;map/&gt;</literal>,
                     <literal>&lt;set/&gt;</literal> or <literal>&lt;props/&gt;</literal> elements
-                    inherit and override values from the parent collection; i.e. the child collection's
+                    inherit and override values from the parent collection; that is to say the child collection's
                     values will be the result obtained from the merging of the elements of the parent
                     and child collections, with the child's collection elements overriding values
                     specified in the parent collection.</para>
                     <para><emphasis>Please note that this section on merging makes use of the
                     parent-child bean mechanism. This concept has not yet been introduced, so
                     readers unfamiliar with the concept of parent and child bean definitions
-                    may wish to read the corresponding section before continuing (see the
-                    section entitled <xref linkend="beans-child-bean-definitions" />).</emphasis></para>
-                    <para>An example would perhaps serve best to illustrate this feature:</para>
+                    may wish to read the <link linkend="beans-child-bean-definitions">relevant section</link>
+					before continuing.</emphasis></para>
+                    <para>Find below an example of the collection merging feature:</para>
                     <programlisting><![CDATA[<beans>
 <bean id="parent" abstract="true" class="example.ComplexObject">
     <property name="adminEmails">
@@ -1365,7 +1351,7 @@ support=support@somecompany.co.uk]]></programlisting>
                     <para>This merging behavior applies similarly to the <literal>&lt;list/&gt;</literal>,
                     <literal>&lt;map/&gt;</literal>, and <literal>&lt;set/&gt;</literal> collection
                     types. In the specific case of the <literal>&lt;list/&gt;</literal> element, the
-                    semantics associated with the <classname>List</classname> collection type, i.e. the
+                    semantics associated with the <classname>List</classname> collection type, that is the
                     notion of an <literal>ordered</literal> collection of values, is maintained;
                     the parent's values will precede all of the child list's values. In the
                     case of the <interfacename>Map</interfacename>, <interfacename>Set</interfacename>,
@@ -1887,21 +1873,20 @@ support=support@somecompany.co.uk]]></programlisting>
                             <entry>simple</entry>
                             <entry>
                                 <para>Dependency checking is performed for primitive types
-                                and collections (everything except collaborators, i.e. other
-                                beans)</para>
+                                and collections (everything except collaborators).</para>
                             </entry>
                         </row>
                         <row>
                             <entry>object</entry>
                             <entry>
-                                <para>Dependency checking is performed for collaborators only</para>
+                                <para>Dependency checking is performed for collaborators only.</para>
                             </entry>
                         </row>
                         <row>
                             <entry>all</entry>
                             <entry>
                                 <para>Dependency checking is done for collaborators, primitive types
-                                and collections</para>
+                                and collections.</para>
                             </entry>
                         </row>
                     </tbody>
@@ -2175,7 +2160,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 						</entry>
 						<entry>
 							<para>Scopes a single bean definition to the lifecycle of
-							a single HTTP request; i.e. each and every HTTP request will
+							a single HTTP request; that is each and every HTTP request will
 							have its own instance of a bean created off the back of a
 							single bean definition. Only valid in the context of a
 							web-aware Spring <interfacename>ApplicationContext</interfacename>.</para>
@@ -2350,10 +2335,10 @@ public class ReplacementComputeValue implements MethodReplacer {
 			    <title>Initial web configuration</title>
                 <para>In order to effect the scoping of beans at the <literal>request</literal>,
                 <literal>session</literal>, and <literal>global session</literal> levels
-                (i.e. web-scoped beans), some minor initial configuration is required
+                (web-scoped beans), some minor initial configuration is required
                 before you can set about defining your bean definitions. Please note that
                 this extra setup is <emphasis>not</emphasis> required if you just want to use the
-                'standard' scopes; i.e. singleton and prototype.</para>
+                'standard' scopes (namely singleton and prototype).</para>
                 <para>Now as things stand, there are a couple of ways to effect this
                 initial setup depending on your particular servlet environment. If you are
                 using a Servlet 2.4+ web container, then you need only add the following
@@ -3058,10 +3043,10 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
     <section id="beans-child-bean-definitions">
         <title>Bean definition inheritance</title>
         <para>A bean definition potentially contains a large amount of
-        configuration information, including container specific information (i.e.
-        initialization method, static factory method name, etc.) and constructor
+        configuration information, including container specific information (for example
+        initialization method, static factory method name, and so forth) and constructor
         arguments and property values. A child bean definition is a bean
-        definition which inherits configuration data from a parent definition. It
+        definition that inherits configuration data from a parent definition. It
         is then able to override some values, or add others, as needed. Using
         parent and child bean definitions can potentially save a lot of typing.
         Effectively, this is a form of templating.</para>
@@ -3090,7 +3075,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
         
         <para>A child bean definition will use the bean class from the parent
         definition if none is specified, but can also override it. In the latter
-        case, the child bean class must be compatible with the parent, i.e. it
+        case, the child bean class must be compatible with the parent, that is it
         must accept the parent's property values.</para>
         <para>A child bean definition will inherit constructor argument values,
         property values and method overrides from the parent, with the option to
@@ -3175,7 +3160,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
                 <emphasis>instances</emphasis>; that is to say, the Spring IoC container will
                 have instantiated a bean instance for you, and <emphasis>then</emphasis>
                 <literal>BeanPostProcessors</literal> get a chance to do their stuff.</para>
-                <para>If you want to change the actual bean definition (i.e. the recipe that
+                <para>If you want to change the actual bean definition (that is the recipe that
                 defines the bean), then you rather need to use a
                 <interfacename>BeanFactoryPostProcessor</interfacename> (described below in the
                 section entitled <xref linkend="beans-factory-extension-factory-postprocessors"/>.</para>
@@ -3313,8 +3298,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961]]></programlisting>
             <para>The next extension point that we will look at is the
             <interfacename>org.springframework.beans.factory.config.BeanFactoryPostProcessor</interfacename>.
             The semantics of this interface are similar to the <interfacename>BeanPostProcessor</interfacename>,
-            with one major difference. <literal>BeanFactoryPostProcessors</literal> operate on
-            bean definitions (i.e. the configuration metadata that is supplied to a container); that is to say,
+            with one major difference. <literal>BeanFactoryPostProcessors</literal> operate on; that is to say,
             the Spring IoC container will allow <literal>BeanFactoryPostProcessors</literal> to read the
             configuration metadata and potentially change it <emphasis>before</emphasis> the
             container has actually instantied any other beans.</para>
@@ -3329,7 +3313,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961]]></programlisting>
             and <interfacename>Ordered</interfacename> interfaces for more details.</para>
             <note>
                 <para>If you want to change the actual bean <emphasis>instances</emphasis>
-                (i.e. the objects that are created from the configuration metadata), then
+                (the objects that are created from the configuration metadata), then
                 you rather need to use a <interfacename>BeanPostProcessor</interfacename>
                 (described above in the section entitled
                 <xref linkend="beans-factory-extension-bpp"/>.</para>
@@ -3740,12 +3724,12 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
                                 <classname>ContextRefreshedEvent</classname>
                             </entry>
                             <entry>
-                                <para>Event published when the
+                                <para>Published when the
                                 <interfacename>ApplicationContext</interfacename> is
                                 initialized or refreshed. Initialized here means that all
                                 beans are loaded, singletons are pre-instantiated and the
                                 <interfacename>ApplicationContext</interfacename> is ready
-                                for use</para>
+                                for use.</para>
                             </entry>
                         </row>
                         <row>
@@ -3753,10 +3737,10 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
                                 <classname>ContextClosedEvent</classname>
                             </entry>
                             <entry>
-                                <para>Event published when the <interfacename>ApplicationContext</interfacename> is closed,
+                                <para>Published when the <interfacename>ApplicationContext</interfacename> is closed,
                                 using the <methodname>close()</methodname> method on the
                                 <interfacename>ApplicationContext</interfacename>. Closed here means
-                                that singleton beans are destroyed</para>
+                                that singleton beans (only!) are destroyed.</para>
                             </entry>
                         </row>
                         <row>
@@ -3765,10 +3749,10 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
                             </entry>
                             <entry>
                                 <para>A web-specific event telling all beans that a HTTP
-                                request has been serviced (i.e. this will be published
+                                request has been serviced (this will be published
                                 <emphasis>after</emphasis> the request has been finished).
                                 Note that this event is only applicable for web applications
-                                using Spring's <classname>DispatcherServlet</classname></para>
+                                using Spring's <classname>DispatcherServlet</classname>.</para>
                             </entry>
                         </row>
                     </tbody>
@@ -3875,7 +3859,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 			</para>
             <para>The location path or paths supplied to an <interfacename>ApplicationContext</interfacename>
 			constructor are actually resource strings, and in simple form are
-			treated appropriately to the specific context implementation (i.e.
+			treated appropriately to the specific context implementation (
 			<classname>ClassPathXmlApplicationContext</classname> treats a simple location path as a
 			classpath location), but may also be used with special prefixes to force
 			loading of definitions from the classpath or a URL, regardless of the
@@ -3958,7 +3942,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 		<interfacename>SessionFactory</interfacename>) for each bean to use its own, non-singleton
 		Spring IoC container.</para>
         <para>As another example, in a complex J2EE apps with multiple layers
-        (i.e. various JAR files, EJBs, and WAR files packaged as an EAR),
+        (various JAR files, EJBs, and WAR files packaged as an EAR),
         with each layer having its own Spring IoC container definition
         (effectively forming a hierarchy), the preferred approach when
         there is only one web-app (WAR) in the top hierarchy is to simply
@@ -3976,8 +3960,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
         <literal><ulink url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink></literal>
         or
         <literal><ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink></literal>
-        may be used to demand-load multiple hierarchical (i.e. one is a parent of
-        another) Spring IoC container instances in an effectively singleton fashion,
+        may be used to demand-load multiple hierarchical (that is one container is the parent of
+        another) Spring IoC container instances in a singleton fashion,
         which may then be used as the parents of the web-application Spring IoC
         container instances. The result is that bean definitions for lower layers are
         loaded only as needed, and loaded only once.</para>
