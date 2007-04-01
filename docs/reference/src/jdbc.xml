@@ -481,6 +481,19 @@ public Actor findActor(long id) {
 				advice on how to best use the <classname>SimpleJdbcTemplate</classname> class
 				in the context of an application.
 			</para>
+			<note>
+				<para>
+					The <classname>SimpleJdbcTemplate</classname> class only offers
+					a much smaller subset of the methods exposed on the <classname>JdbcTemplate</classname>
+					class. If you need to use a method from the <classname>JdbcTemplate</classname> that
+					is not defined on the <classname>SimpleJdbcTemplate</classname>, you can always
+					access the underlying <classname>JdbcTemplate</classname> by calling the
+					<methodname>getJdbcOperations()</methodname> method on the <classname>SimpleJdbcTemplate</classname>,
+					which will then allow you to invoke the method that you want. The only
+					downside is that the methods on the <interfacename>JdbcOperations</interfacename>
+					interface are not generified, so you are back to casting and such again.
+				</para>
+			</note>
 		</section>
 		<section id="jdbc-datasource">
 			<title><interfacename>DataSource</interfacename></title>
