@@ -1538,62 +1538,137 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager (txManager); ]]></p
         <para>The Spring Framework provides two means of programmatic transaction management:</para>
         <itemizedlist>
             <listitem>
-                <para>Using the <classname>TransactionTemplate</classname></para>
+                <para>Using the <classname>TransactionTemplate</classname>.</para>
             </listitem>
             <listitem>
                 <para>Using a <interfacename>PlatformTransactionManager</interfacename>
-                implementation directly</para>
+                implementation directly.</para>
             </listitem>
         </itemizedlist>
         <para>If you are going to use programmatic transaction management, the Spring
-        team generally recommend the first approach (i.e. using the
-        <classname>TransactionTemplate</classname>). The second approach is similar to
-        using the JTA <interfacename>UserTransaction</interfacename> API (although
-        exception handling is less cumbersome).</para>
+        team generally recommend, namely that of using the <classname>TransactionTemplate</classname>).
+		The second approach is similar to using the JTA <interfacename>UserTransaction</interfacename>
+		API (although exception handling is less cumbersome).</para>
         <section id="tx-prog-template">
             <title>Using the <classname>TransactionTemplate</classname></title>
             <para>The <classname>TransactionTemplate</classname> adopts the same
-            approach as other Spring <emphasis>templates</emphasis> such as
-            <classname>JdbcTemplate</classname> and
-            <classname>HibernateTemplate</classname>. It uses a callback approach, to
+            approach as other Spring <emphasis>templates</emphasis> such as the
+            <classname>JdbcTemplate</classname>. It uses a callback approach, to
             free application code from having to do the boilerplate acquisition 
-            and release of resources (i.e. no more try/catch/finally/try/catch blocks.)
-            Like many of the other template classes in Spring, a
-            <classname>TransactionTemplate</classname> instance is threadsafe.</para>
-            <para>Application code that must execute in a transaction context looks
-            like this. Note that the <interfacename>TransactionCallback</interfacename> can be
-            used to return a value:</para>
-            <programlisting><![CDATA[Object result = tt.execute(new TransactionCallback() {
+            and release of transactional resources, and results in code that is
+			intention driven, in that the code that is written focuses solely
+			on what the developer wants to do.</para>
+			<note>
+				<para>As you will immediately see in the examples that follow, using
+				the <classname>TransactionTemplate</classname> absolutely
+				couples you to Spring's transaction infrastructure and APIs.
+				Whether or not programmatic transaction management is suitable
+				for your development needs is a decision that you will have to
+				make yourself.</para>
+			</note>
+			<para>Application code that must execute in a transactional context,
+			and that will use the <classname>TransactionTemplate</classname> explicitly,
+			looks like this. You, as an application developer, will write a
+			<interfacename>TransactionCallback</interfacename> implementation (typically
+			expressed as an anonymous inner class) that will contain all of the code
+			that you need to have execute in the context of a transaction. You will then
+			pass an instance of your custom <interfacename>TransactionCallback</interfacename>
+			to the <methodname>execute(..)</methodname> method exposed on the
+			<classname>TransactionTemplate</classname>. </para>
+            <programlisting><![CDATA[public class SimpleService implements Service {
 
-    public Object doInTransaction(TransactionStatus status) {
-        updateOperation1();
-        return resultOfUpdateOperation2();
+    ]]><lineannotation>// single <classname>TransactionTemplate</classname> shared amongst all methods in this instance</lineannotation><![CDATA[
+    private final TransactionTemplate transactionTemplate;
+
+    ]]><lineannotation>// use constructor-injection to supply the <interfacename>PlatformTransactionManager</interfacename></lineannotation><![CDATA[
+    public SimpleService(PlatformTransactionManager transactionManager) {
+        Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
-});]]></programlisting>
+    public Object someServiceMethod() {
+        return transactionTemplate.execute(new TransactionCallback() {
+
+            ]]><lineannotation>// the code in this method executes in a transactional context</lineannotation><![CDATA[
+            public Object doInTransaction(TransactionStatus status) {
+                updateOperation1();
+                return resultOfUpdateOperation2();
+            }
+        });
+    }
+}]]></programlisting>
             <para>If there is no return value, use the convenient
             <classname>TransactionCallbackWithoutResult</classname> class via an
             anonymous class like so:</para>
-            <programlisting><![CDATA[tt.execute(new TransactionCallbackWithoutResult() {
+            <programlisting><![CDATA[transactionTemplate.execute(new ]]><emphasis role="bold">TransactionCallbackWithoutResult</emphasis><![CDATA[() {
     
     protected void doInTransactionWithoutResult(TransactionStatus status) {
         updateOperation1();
         updateOperation2();
     }
-
 });]]></programlisting>
             <para>Code within the callback can roll the transaction back by calling
             the <literal>setRollbackOnly()</literal> method on the supplied
             <interfacename>TransactionStatus</interfacename> object.</para>
-            <para>Application classes wishing to use the
-            <classname>TransactionTemplate</classname> must have access to a
-            <interfacename>PlatformTransactionManager</interfacename> (which will
-            typically be supplied to the class via dependency injection). It is
-            easy to unit test such classes with a mock or stub
-            <interfacename>PlatformTransactionManager</interfacename>. There is
-            no JNDI lookup or <literal>static</literal> shenanigans here: it is a simple
-            interface. As usual, you can use Spring to greatly simplify your unit testing.</para>
-        </section>
+            <programlisting><![CDATA[transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+
+    protected void doInTransactionWithoutResult(TransactionStatus status) {
+        try {
+            updateOperation1();
+            updateOperation2();
+        } catch (SomeBusinessExeption ex) {
+            ]]><emphasis role="bold">status.setRollbackOnly();</emphasis><![CDATA[
+        }
+    }
+});]]></programlisting>
+			<section id="tx-prog-template-settings">
+				<title>Specifying transaction settings</title>
+				<para>
+					Transaction settings such as the propagation mode, the
+					isolation level, the timeout, and so forth can be set
+					on the <classname>TransactionTemplate</classname> either
+					programmatically or in configuration. <classname>TransactionTemplate</classname>
+					instances by default have the <link linkend="transaction-declarative-txadvice-settings">default transactional settings</link>.
+					Find below an example of programmatically customizing the
+					transactional settings for a specific <classname>TransactionTemplate</classname>.
+				</para>
+            	<programlisting><![CDATA[public class SimpleService implements Service {
+
+    private final TransactionTemplate transactionTemplate;
+
+    public SimpleService(PlatformTransactionManager transactionManager) {
+        Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
+
+        ]]><lineannotation>// the transaction settings can be set here explicitly if so desired</lineannotation><![CDATA[
+        this.transactionTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
+        this.transactionTemplate.setTimeout(30); ]]><lineannotation>// 30 seconds</lineannotation><![CDATA[
+        ]]><lineannotation>// and so forth...</lineannotation><![CDATA[
+    }
+}]]></programlisting>
+				<para>
+					Find below an example of defining a <classname>TransactionTemplate</classname> with some custom
+					transactional settings, using Spring XML configuration. The '<literal>sharedTransactionTemplate</literal>'
+					could then be injected into as many services as are required.
+				</para>
+				<programlisting><![CDATA[<bean id="sharedTransactionTemplate"
+      class="org.springframework.transaction.support.TransactionTemplate>
+    <property name="isolationLevelName" value="ISOLATION_READ_UNCOMMITTED"/>
+    <property name="timeout" value="30"/>
+</bean>"]]></programlisting>
+			</section>
+			<para>
+				Fially, instances of the <classname>TransactionTemplate</classname> class are
+				threadsafe, in that instaces do not maintain any conversational state.
+				<classname>TransactionTemplate</classname> instances <emphasis>do</emphasis>
+				however maintain configuration state, so while a number of classes
+				may choose to share a single instance of a <classname>TransactionTemplate</classname>, if a class needed
+				to use a <classname>TransactionTemplate</classname> with different settings
+				(for example, a different isolation level), then two distinct
+				<classname>TransactionTemplate</classname> instances would need to be
+				created and used.
+			</para>
+		</section>
         <section id="transaction-programmatic-ptm">
             <title>Using the <interfacename>PlatformTransactionManager</interfacename></title>
             <para>You can also use the
