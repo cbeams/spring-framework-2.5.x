@@ -115,7 +115,7 @@ class GroovyMessenger implements Messenger {
                 To use the custom dynamic language tags to define dynamic-language-backed beans,
                 you need to have the XML Schema preamble at the top of your Spring XML
                 configuration file. You also need to be using a Spring
-                <interfacename>ApplicationContext</interfacename> implementations as your
+                <interfacename>ApplicationContext</interfacename> implementation as your
                 IoC container. Using the dynamic-language-backed beans with a plain
                 <interfacename>BeanFactory</interfacename> implementation is supported,
                 but you have to manage the plumbing of the Spring internals to do so.

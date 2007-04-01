@@ -125,7 +125,7 @@ public class JmxTestBean implements IJmxTestBean {
     <literal>beans</literal> <interfacename>Map</interfacename> is used as the
     <classname>ObjectName</classname> for the bean referenced by the
     corresponding entry value. This behavior can be changed as described in
-    section entitled <xref linkend="jmx-naming" />.</para>
+    the section entitled <xref linkend="jmx-naming"/>.</para>
 
     <para>With this configuration the <literal>testBean</literal> bean is
     exposed as an MBean under the <classname>ObjectName</classname>
@@ -208,7 +208,7 @@ public class JmxTestBean implements IJmxTestBean {
    <bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
      ]]><lineannotation>&lt;!-- indicate to first look for a server --&gt;</lineannotation><![CDATA[
      <property name="locateExistingServerIfPossible" value="true"/>
-     ]]><lineannotation>&lt;!-- search the <interfacename>MBeanServer</interfacename> instance with the given agentId --&gt;</lineannotation><![CDATA[
+     ]]><lineannotation>&lt;!-- search for the <interfacename>MBeanServer</interfacename> instance with the given agentId --&gt;</lineannotation><![CDATA[
      <property name="agentId" value="]]><emphasis><![CDATA[<MBeanServer instance agentId>]]></emphasis><![CDATA["/>
    </bean>
    

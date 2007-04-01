@@ -650,11 +650,11 @@ public interface SessionAwareMessageListener {
         <para>Please note that if the above <literal>'messageListener'</literal> receives a
         JMS <interfacename>Message</interfacename> of a type other than
         <interfacename>TextMessage</interfacename>, an <classname>IllegalStateException</classname>
-        will be thrown (and subsequently swallowed).</para>
-        <para>Another of the capabilities of the <classname>MessageListenerAdapter</classname>
+        will be thrown (and subsequently swallowed).
+        Another of the capabilities of the <classname>MessageListenerAdapter</classname>
         class is the ability to automatically send back a response <interfacename>Message</interfacename>
-        if a handler method returns a non-void value.</para>
-        <para>Consider the following interface and it's implementation:</para>
+        if a handler method returns a non-void value.
+        Consider the interface and class:</para>
         <programlisting><![CDATA[public interface ResponsiveTextMessageDelegate {
 
     ]]><lineannotation><emphasis role="bold">// notice the return type...</emphasis></lineannotation><![CDATA[
