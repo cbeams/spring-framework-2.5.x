@@ -1605,7 +1605,8 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager (txManager); ]]></p
             <interfacename>TransactionStatus</interfacename> objects you can
             initiate transactions, rollback and commit.</para>
            <programlisting><![CDATA[DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-def.setTransactionName("SomeTxName"); ]]><lineannotation>// explicitly setting the transaction name is something that can only be done programmatically</lineannotation><![CDATA[
+]]><lineannotation>// explicitly setting the transaction name is something that can only be done programmatically</lineannotation><![CDATA[
+def.setTransactionName("SomeTxName");
 def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
 TransactionStatus status = txManager.getTransaction(def);
