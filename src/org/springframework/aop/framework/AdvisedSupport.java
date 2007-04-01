@@ -441,7 +441,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/**
 	 * Determine a list of {@link org.aopalliance.intercept.MethodInterceptor} objects
-	 * for the given method, bsaed on this configuration.
+	 * for the given method, based on this configuration.
 	 * @param method the proxied method
 	 * @param targetClass the target class
 	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
