@@ -430,7 +430,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 	/**
 	 * Want to ensure that said MBean is not exported twice.
 	 */
-	public void testBonaFideMBeanExplictlyExportedAndAutodetectionIsOn() throws Exception {
+	public void testBonaFideMBeanExplicitlyExportedAndAutodetectionIsOn() throws Exception {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition(OBJECT_NAME, builder.getBeanDefinition());
