@@ -823,7 +823,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                     welcomed. Any such contributions are best submitted as patches via
                     the Spring Framework
                     <ulink url="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA Issue Tracker</ulink>
-                    and <emphasis>may</emphasis> may be featured in the next release.</para>
+                    and <emphasis>may</emphasis> be featured in the next release.</para>
                 </sidebar>
                 <para>Unfortunately, precisely because there is no standard XML editor for Eclipse,
                 there are (bar the one below) no further steps showing you how to configure XML
