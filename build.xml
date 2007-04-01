@@ -1345,6 +1345,7 @@
 				<include name="*.png"/>
 			</fileset>
 		</copy>
+		<copy todir="${basedir}/${dist.ref.dir}/html/" file="${basedir}/${doc.ref.dir}/styles/html.css" failonerror="false"/>
 
 		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${dist.ref.dir}/html/">
 			<classpath>
@@ -1372,6 +1373,7 @@
 				<include name="*.png"/>
 			</fileset>
 		</copy>
+		<copy todir="${basedir}/${dist.ref.dir}/html_single/" file="${basedir}/${doc.ref.dir}/styles/html.css" failonerror="false"/>
 
 		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.ref.dir}">
 			<classpath>
