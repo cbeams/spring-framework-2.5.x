@@ -35,6 +35,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Servlet-based implementation of the {@link RequestAttributes} interface.
+ *
  * <p>Accesses objects from servlet request and HTTP session scope,
  * with no distinction between "session" and "global session".
  *
@@ -82,9 +83,9 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 
 	/**
-	 * Exposes the {@link HttpServletRequest} that we're wrapping.
+	 * Exposes the native {@link HttpServletRequest} that we're wrapping.
 	 */
-	protected final HttpServletRequest getRequest() {
+	public final HttpServletRequest getRequest() {
 		return this.request;
 	}
 

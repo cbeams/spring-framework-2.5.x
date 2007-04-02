@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,8 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.portlet.util.PortletUtils;
 
 /**
- * Portlet-based implementation of the RequestAttributes interface.
+ * Portlet-based implementation of the
+ * {@link org.springframework.web.context.request.RequestAttributes} interface.
  *
  * <p>Accesses objects from portlet request and portlet session scope,
  * with a distinction between "session" (the PortletSession's "portlet scope")
@@ -78,9 +79,9 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 
 
 	/**
-	 * Expose the PortletRequest that we're wrapping to subclasses.
+	 * Exposes the native {@link PortletRequest} that we're wrapping.
 	 */
-	protected final PortletRequest getRequest() {
+	public final PortletRequest getRequest() {
 		return this.request;
 	}
 
