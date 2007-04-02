@@ -32,6 +32,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 
 * axis/axis.jar, axis/saaj.jar, axis/wsdl4j.jar
 - Apache Axis 1.4 (http://ws.apache.org/axis)
+- required for building the framework
 - required for running JPetStore
 
 * bsh/bsh-2.0b4.jar
