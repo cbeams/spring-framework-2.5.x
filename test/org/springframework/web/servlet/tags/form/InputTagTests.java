@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,18 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.io.StringWriter;
+
+import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.Tag;
+
 import org.springframework.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.servlet.tags.NestedPathTag;
 
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.Tag;
-import java.io.StringWriter;
-
 /**
- * Unit tests for the {@link InputTag} class.
- *
  * @author Rob Harrop
  * @author Rick Evans
- * @since 2.0
  */
 public class InputTagTests extends AbstractFormTagTests {
 
@@ -41,7 +39,6 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag = createTag(getWriter());
 		this.tag.setPageContext(getPageContext());
 	}
-
 
 	protected final InputTag getTag() {
 		return tag;
@@ -109,7 +106,6 @@ public class InputTagTests extends AbstractFormTagTests {
 		String lang = "en";
 		String dir = "ltr";
 		String tabindex = "2";
-		String readOnly = "true";
 		String disabled = "true";
 		String onclick = "doClick()";
 		String ondblclick = "doDblclick()";
@@ -128,6 +124,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		String maxlength = "12";
 		String alt = "Some text";
 		String onselect = "doSelect()";
+		String readonly = "true";
+		String autocomplete = "off";
 
 		this.tag.setId(id);
 		this.tag.setPath("name");
@@ -138,7 +136,6 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setLang(lang);
 		this.tag.setDir(dir);
 		this.tag.setTabindex(tabindex);
-		this.tag.setReadonly(readOnly);
 		this.tag.setDisabled(disabled);
 		this.tag.setOnclick(onclick);
 		this.tag.setOndblclick(ondblclick);
@@ -157,6 +154,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setMaxlength(maxlength);
 		this.tag.setAlt(alt);
 		this.tag.setOnselect(onselect);
+		this.tag.setReadonly(readonly);
+		this.tag.setAutocomplete(autocomplete);
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 		String output = getWriter().toString();
@@ -175,7 +174,6 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "lang", lang);
 		assertContainsAttribute(output, "dir", dir);
 		assertContainsAttribute(output, "tabindex", tabindex);
-		assertContainsAttribute(output, "readonly", readOnly);
 		assertContainsAttribute(output, "disabled", "disabled");
 		assertContainsAttribute(output, "onclick", onclick);
 		assertContainsAttribute(output, "ondblclick", ondblclick);
@@ -194,6 +192,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "maxlength", maxlength);
 		assertContainsAttribute(output, "alt", alt);
 		assertContainsAttribute(output, "onselect", onselect);
+		assertContainsAttribute(output, "readonly", readonly);
+		assertContainsAttribute(output, "autocomplete", autocomplete);
 	}
 
 	public void testWithNestedBind() throws Exception {

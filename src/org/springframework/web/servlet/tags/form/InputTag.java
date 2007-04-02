@@ -28,57 +28,46 @@ import javax.servlet.jsp.JspException;
  */
 public class InputTag extends AbstractHtmlInputElementTag {
 
-	/**
-	 * The name of the '<code>maxlength</code>' attribute.
-	 */
-	public static final String MAXLENGTH_ATTRIBUTE = "maxlength";
-
-	/**
-	 * The name of the '<code>alt</code>' attribute.
-	 */
-	public static final String ALT_ATTRIBUTE = "alt";
-
-	/**
-	 * The name of the '<code>onselect</code>' attribute.
-	 */
-	public static final String ONSELECT_ATTRIBUTE = "onselect";
-
-	/**
-	 * The name of the '<code>size</code>' attribute.
-	 */
 	public static final String SIZE_ATTRIBUTE = "size";
 
-	/**
-	 * The name of the '<code>readonly</code>' attribute.
-	 */
+	public static final String MAXLENGTH_ATTRIBUTE = "maxlength";
+
+	public static final String ALT_ATTRIBUTE = "alt";
+
+	public static final String ONSELECT_ATTRIBUTE = "onselect";
+
 	public static final String READONLY_ATTRIBUTE = "readonly";
 
+	public static final String AUTOCOMPLETE_ATTRIBUTE = "autocomplete";
 
-	/**
-	 * The value of the '<code>maxlength</code>' attribute.
-	 */
-	private String maxlength;
 
-	/**
-	 * The value of the '<code>alt</code>' attribute.
-	 */
-	private String alt;
-
-	/**
-	 * The value of the '<code>onselect</code>' attribute.
-	 */
-	private String onselect;
-
-	/**
-	 * The value of the '<code>size</code>' attribute.
-	 */
 	private String size;
 
-	/**
-	 * The value of the '<code>readonly</code>' attribute.
-	 */
+	private String maxlength;
+
+	private String alt;
+
+	private String onselect;
+
 	private String readonly;
 
+	private String autocomplete;
+
+
+	/**
+	 * Set the value of the '<code>size</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setSize(String size) {
+		this.size = size;
+	}
+
+	/**
+	 * Get the value of the '<code>size</code>' attribute.
+	 */
+	protected String getSize() {
+		return this.size;
+	}
 
 	/**
 	 * Set the value of the '<code>maxlength</code>' attribute.
@@ -126,21 +115,6 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Set the value of the '<code>size</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	public void setSize(String size) {
-		this.size = size;
-	}
-
-	/**
-	 * Get the value of the '<code>size</code>' attribute.
-	 */
-	protected String getSize() {
-		return this.size;
-	}
-
-	/**
 	 * Set the value of the '<code>readonly</code>' attribute.
 	 * May be a runtime expression.
 	 */
@@ -156,12 +130,18 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>type</code>' attribute. Subclasses
-	 * can override this to change the type of '<code>input</code>' element
-	 * rendered. Default value is '<code>text</code>'.
+	 * Set the value of the '<code>autocomplete</code>' attribute.
+	 * May be a runtime expression.
 	 */
-	protected String getType() {
-		return "text";
+	public void setAutocomplete(String autocomplete) {
+		this.autocomplete = autocomplete;
+	}
+
+	/**
+	 * Get the value of the '<code>autocomplete</code>' attribute.
+	 */
+	protected String getAutocomplete() {
+		return this.autocomplete;
 	}
 
 
@@ -172,6 +152,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("input");
+
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", getType());
 		writeValue(tagWriter);
@@ -182,6 +163,8 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		writeOptionalAttribute(tagWriter, ALT_ATTRIBUTE, getAlt());
 		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, getOnselect());
 		writeOptionalAttribute(tagWriter, READONLY_ATTRIBUTE, getReadonly());
+		writeOptionalAttribute(tagWriter, AUTOCOMPLETE_ATTRIBUTE, getAutocomplete());
+
 		tagWriter.endTag();
 		return EVAL_PAGE;
 	}
@@ -193,6 +176,15 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 */
 	protected void writeValue(TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("value", getDisplayString(getBoundValue(), getPropertyEditor()));
+	}
+
+	/**
+	 * Get the value of the '<code>type</code>' attribute. Subclasses
+	 * can override this to change the type of '<code>input</code>' element
+	 * rendered. Default value is '<code>text</code>'.
+	 */
+	protected String getType() {
+		return "text";
 	}
 
 }
