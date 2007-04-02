@@ -40,10 +40,9 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  */
 public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 
-	/**
-	 * Helper class for rendering values into HTML.
-	 */
+	/** Helper for rendering values into HTML */
 	private final ValueFormatter valueFormatter = new ValueFormatter();
+
 
 	/**
 	 * Evaluates the supplied value for the supplied attribute name. If the supplied value
@@ -52,7 +51,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 */
 	protected Object evaluate(String attributeName, Object value) throws JspException {
 		if (value instanceof String) {
-			return ExpressionEvaluationUtils.evaluate(attributeName, (String)value, this.pageContext);
+			return ExpressionEvaluationUtils.evaluate(attributeName, (String) value, this.pageContext);
 		}
 		else {
 			return value;
@@ -67,8 +66,12 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * or empty, no attribute is written.
 	 * @see TagWriter#writeOptionalAttributeValue(String, String)
 	 */
-	protected final void writeOptionalAttribute(TagWriter tagWriter, String attributeName, String value) throws JspException {
-		tagWriter.writeOptionalAttributeValue(attributeName, getDisplayString(evaluate(attributeName, value)));
+	protected final void writeOptionalAttribute(TagWriter tagWriter, String attributeName, String value)
+			throws JspException {
+
+		if (value != null) {
+			tagWriter.writeOptionalAttributeValue(attributeName, getDisplayString(evaluate(attributeName, value)));
+		}
 	}
 
 	/**
@@ -107,6 +110,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	protected String getDisplayString(Object value, PropertyEditor propertyEditor) {
 		return this.valueFormatter.getDisplayString(value, propertyEditor, isHtmlEscape());
 	}
+
 
 	/**
 	 * Subclasses should implement this method to perform tag content rendering.
