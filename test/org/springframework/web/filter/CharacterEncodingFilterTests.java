@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.filter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
@@ -28,6 +29,7 @@ import org.springframework.mock.web.MockServletContext;
 
 /**
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public final class CharacterEncodingFilterTests extends TestCase {
 
@@ -47,7 +49,11 @@ public final class CharacterEncodingFilterTests extends TestCase {
 		mockRequest.setVoidCallable();
 		mockRequest.replay();
 
-		MockHttpServletResponse response = new MockHttpServletResponse();
+		MockControl mockResponse = MockControl.createControl(HttpServletResponse.class);
+		HttpServletResponse response = (HttpServletResponse) mockResponse.getMock();
+		response.setCharacterEncoding(ENCODING);
+		mockResponse.setVoidCallable();
+		mockResponse.replay();
 
 		MockControl mockFilter = MockControl.createControl(FilterChain.class);
 		FilterChain filterChain = (FilterChain) mockFilter.getMock();
@@ -61,6 +67,7 @@ public final class CharacterEncodingFilterTests extends TestCase {
 		filter.doFilter(request, response, filterChain);
 
 		mockRequest.verify();
+		mockResponse.verify();
 		mockFilter.verify();
 	}
 
