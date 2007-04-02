@@ -435,14 +435,16 @@ public class GroovyScriptFactoryTests extends TestCase {
 		}
 
 		// expect the exception we threw in the custom metaclass to show it got invoked
-		new AssertThrows(IllegalStateException.class) {
+		AssertThrows at = new AssertThrows(IllegalStateException.class) {
 			public void test() throws Exception {
 				ApplicationContext ctx =
 						new ClassPathXmlApplicationContext(xmlFile);
 				Calculator calc = (Calculator) ctx.getBean("delegatingCalculator");
 				calc.add(1, 2);
 			}
-		}.runTest();
+		};
+		at.runTest();
+		assertEquals("Gotcha", at.getActualException().getMessage());
 	}
 
 

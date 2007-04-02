@@ -20,28 +20,26 @@ import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 
 /**
- * Simple method object encapsulation of the 'test-for-Exception'
- * scenario (for JUnit).
- * 
- * <p>Used like so:
- * 
- * <pre class="code">// the class under test
- *public class Foo {
+ * Simple method object encapsulation of the 'test-for-Exception' scenario (for JUnit).
  *
+ * <p>Used like so:
+ *
+ * <pre class="code">
+ * // the class under test
+ * public class Foo {
  *    public void someBusinessLogic(String name) {
- *        if(name == null) {
+ *        if (name == null) {
  *            throw new IllegalArgumentException("The 'name' argument is required");
  *        }
  *        // rest of business logic here...
  *    }
- *}
- * </pre>
- * 
- * <p>The test for the above bad argument path can be expressed using the
- * {@link AssertThrows} class like so:
- * 
- * <pre class="code">public final class FooTest {
+ * }</pre>
  *
+ * The test for the above bad argument path can be expressed using the
+ * {@link AssertThrows} class like so:
+ *
+ * <pre class="code">
+ * public class FooTest {
  *    public void testSomeBusinessLogicBadArgumentPath() {
  *        new AssertThrows(IllegalArgumentException.class) {
  *            public void test() {
@@ -49,29 +47,26 @@ import junit.framework.AssertionFailedError;
  *            }
  *        }.runTest();
  *    }
- *}
- * </pre>
- * 
- * <p>This will result in the test passing if the <code>Foo.someBusinessLogic(..)</code>
+ * }</pre>
+ *
+ * This will result in the test passing if the <code>Foo.someBusinessLogic(..)</code>
  * method threw an {@link java.lang.IllegalArgumentException}; if it did not, the
  * test would fail with the following message:
- * 
- * <pre class="code">
- *    "Must have thrown a [class java.lang.IllegalArgumentException]"
- * </pre>
- * 
- * <p>If the <b>wrong</b> type of {@link java.lang.Exception} was thrown, the
- * test will also fail, this time with a message similar to the following:
- * 
- * <pre class="code">
- *    "junit.framework.AssertionFailedError: Was expecting a [class java.lang.UnsupportedOperationException] to be thrown, but instead a [class java.lang.IllegalArgumentException] was thrown"
- * </pre>
- * 
- * <p>The test for the correct {@link java.lang.Exception} respects polymorphism,
- * so you can test that any old {@link java.lang.Exception} is thrown like so:
- * 
- * <pre class="code">public final class FooTest {
  *
+ * <pre class="code">
+ * "Must have thrown a [class java.lang.IllegalArgumentException]"</pre>
+ *
+ * If the <b>wrong</b> type of {@link java.lang.Exception} was thrown, the
+ * test will also fail, this time with a message similar to the following:
+ *
+ * <pre class="code">
+ * "junit.framework.AssertionFailedError: Was expecting a [class java.lang.UnsupportedOperationException] to be thrown, but instead a [class java.lang.IllegalArgumentException] was thrown"</pre>
+ *
+ * The test for the correct {@link java.lang.Exception} respects polymorphism,
+ * so you can test that any old {@link java.lang.Exception} is thrown like so:
+ *
+ * <pre class="code">
+ * public class FooTest {
  *    public void testSomeBusinessLogicBadArgumentPath() {
  *        // any Exception will do...
  *        new AssertThrows(Exception.class) {
@@ -80,10 +75,9 @@ import junit.framework.AssertionFailedError;
  *            }
  *        }.runTest();
  *    }
- *}
- * </pre>
- * 
- * <p>You might want to compare this class with the
+ * }</pre>
+ *
+ * You might want to compare this class with the
  * {@link junit.extensions.ExceptionTestCase} class.
  *
  * <p>Note: This class requires JDK 1.4 or higher.
@@ -94,9 +88,11 @@ import junit.framework.AssertionFailedError;
  */
 public abstract class AssertThrows {
 
-	private Class expectedException;
+	private final Class expectedException;
 
 	private String failureMessage;
+
+	private Exception actualException;
 
 
 	/**
@@ -158,9 +154,10 @@ public abstract class AssertThrows {
 
 
 	/**
-	 * Subclass must override this <code>abstract</code> method and provide
-	 * the test logic.
-	 * @throws Exception if an error occurs during the execution of the aformentioned test logic
+	 * Subclass must override this <code>abstract</code> method and
+	 * provide the test logic.
+	 * @throws Exception if an error occurs during the execution of the
+	 * aformentioned test logic
 	 */
 	public abstract void test() throws Exception;
 
@@ -180,6 +177,7 @@ public abstract class AssertThrows {
 			doFail();
 		}
 		catch (Exception actualException) {
+			this.actualException = actualException;
 			checkExceptionExpectations(actualException);
 		}
 	}
@@ -235,6 +233,8 @@ public abstract class AssertThrows {
 	/**
 	 * Creates the failure message used if the wrong type
 	 * of {@link java.lang.Exception} is thrown in the body of the test.
+	 * @param actualException the actual exception thrown
+	 * @return the message for the given exception
 	 */
 	protected String createMessageForWrongThrownExceptionType(Exception actualException) {
 		StringBuffer sb = new StringBuffer();
@@ -242,6 +242,15 @@ public abstract class AssertThrows {
 		sb.append("] to be thrown, but instead a [").append(actualException.getClass().getName());
 		sb.append("] was thrown.");
 		return sb.toString();
+	}
+
+
+	/**
+	 * Expose the actual exception thrown from {@link #test}, if any.
+	 * @return the actual exception, or <code>null</code> if none
+	 */
+	public final Exception getActualException() {
+		return this.actualException;
 	}
 
 }
