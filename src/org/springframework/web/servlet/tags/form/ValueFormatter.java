@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +22,23 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.HtmlUtils;
 
 /**
- * Helper class for formatting values for rendering via a form tag. Supports two styles of
- * formatting: plain and {@link PropertyEditor}-aware.
+ * Package-visible helper class for formatting values for rendering via a form tag.
+ * Supports two styles of formatting: plain and {@link PropertyEditor}-aware.
  *
- * <p>Plain formatting simply prevents the string '<code>null</code>' from appearing, replacing
- * it with an empty String, and adds HTML escaping as required.
+ * <p>Plain formatting simply prevents the string '<code>null</code>' from appearing,
+ * replacing it with an empty String, and adds HTML escaping as required.
  *
- * <p>{@link PropertyEditor}-aware formatting will attempt to use the supplied {@link PropertyEditor}
- * to render any non-String value before applying the default rules of plain formatting.
+ * <p>{@link PropertyEditor}-aware formatting will attempt to use the supplied
+ * {@link PropertyEditor} to render any non-String value before applying the
+ * default rules of plain formatting.
  *
  * @author Rob Harrop
  * @since 2.0
  */
-final class ValueFormatter {
+class ValueFormatter {
 
 	/**
-	 * Gets the display value of the supplied <code>Object</code>, HTML escaped
+	 * Build the display value of the supplied <code>Object</code>, HTML escaped
 	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
 	 * @see #getDisplayString(Object, java.beans.PropertyEditor, boolean)
 	 */
@@ -47,7 +48,7 @@ final class ValueFormatter {
 	}
 
 	/**
-	 * Gets the display value of the supplied <code>Object</code>, HTML escaped
+	 * Build the display value of the supplied <code>Object</code>, HTML escaped
 	 * as required. If the supplied value is not a {@link String} and the supplied
 	 * {@link PropertyEditor} is not null then the {@link PropertyEditor} is used
 	 * to obtain the display value.
@@ -64,7 +65,7 @@ final class ValueFormatter {
 			return getDisplayString(propertyEditor.getAsText(), htmlEscape);
 		}
 		catch (Exception ex) {
-			// the PropertyEditor might not support this value... pass through
+			// The PropertyEditor might not support this value... pass through
 			return getDisplayString(value, htmlEscape);
 		}
 		finally {
