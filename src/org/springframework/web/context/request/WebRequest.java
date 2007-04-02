@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.request;
 
+import java.security.Principal;
 import java.util.Locale;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ public interface WebRequest extends RequestAttributes {
 	/**
 	 * Return the request parameter of the given name, or <code>null</code> if none.
 	 * <p>Retrieves the first parameter value in case of a multi-value parameter.
+	 * @see javax.servlet.http.HttpServletRequest#getParameter(String)
 	 */
 	String getParameter(String paramName);
 
@@ -40,6 +42,7 @@ public interface WebRequest extends RequestAttributes {
 	 * Return the request parameter values for the given parameter name,
 	 * or <code>null</code> if none.
 	 * <p>A single-value parameter will be exposed as an array with a single element.
+	 * @see javax.servlet.http.HttpServletRequest#getParameterValues(String)
 	 */
 	String[] getParameterValues(String paramName);
 
@@ -47,12 +50,46 @@ public interface WebRequest extends RequestAttributes {
 	 * Return a immutable Map of the request parameters, with parameter names as map keys
 	 * and parameter values as map values. The map values will be of type String array.
 	 * <p>A single-value parameter will be exposed as an array with a single element.
+	 * @see javax.servlet.http.HttpServletRequest#getParameterMap()
 	 */
 	Map getParameterMap();
 
 	/**
 	 * Return the primary Locale for this request.
+	 * @see javax.servlet.http.HttpServletRequest#getLocale()
 	 */
 	Locale getLocale();
+
+	/**
+	 * Return the context path for this request
+	 * (usually the base path that the current web application is mapped to).
+	 * @see javax.servlet.http.HttpServletRequest#getContextPath()
+	 */
+	String getContextPath();
+
+	/**
+	 * Return the remote user for this request, if any.
+	 * @see javax.servlet.http.HttpServletRequest#getRemoteUser()
+	 */
+	String getRemoteUser();
+
+	/**
+	 * Return the user principal for this request, if any.
+	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
+	 */
+	Principal getUserPrincipal();
+
+	/**
+	 * Determine whether the user is in the given role for this request.
+	 * @see javax.servlet.http.HttpServletRequest#isUserInRole(String)
+	 */
+	boolean isUserInRole(String role);
+
+	/**
+	 * Return whether this request has been sent over a secure transport
+	 * mechanism (such as SSL).
+	 * @see javax.servlet.http.HttpServletRequest#isSecure()
+	 */
+	boolean isSecure();
 
 }

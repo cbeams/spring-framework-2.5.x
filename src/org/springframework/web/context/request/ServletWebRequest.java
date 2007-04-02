@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package org.springframework.web.context.request;
 
+import java.security.Principal;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * WebRequest adapter for an HttpServletRequest.
+ * {@link WebRequest} adapter for an {@link javax.servlet.http.HttpServletRequest}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -51,6 +52,26 @@ public class ServletWebRequest extends ServletRequestAttributes implements WebRe
 
 	public Locale getLocale() {
 		return getRequest().getLocale();
+	}
+
+	public String getContextPath() {
+		return getRequest().getContextPath();
+	}
+
+	public String getRemoteUser() {
+		return getRequest().getRemoteUser();
+	}
+
+	public Principal getUserPrincipal() {
+		return getRequest().getUserPrincipal();
+	}
+
+	public boolean isUserInRole(String role) {
+		return getRequest().isUserInRole(role);
+	}
+
+	public boolean isSecure() {
+		return getRequest().isSecure();
 	}
 
 }
