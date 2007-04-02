@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,31 +22,31 @@ import javax.jdo.PersistenceManagerFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.AttributeAccessor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
 import org.springframework.orm.jdo.PersistenceManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.WebRequestInterceptor;
 
 /**
- * Spring web HandlerInterceptor that binds a JDO PersistenceManager to the
+ * Spring web request interceptor that binds a JDO PersistenceManager to the
  * thread for the entire processing of the request. Intended for the "Open
  * PersistenceManager in View" pattern, i.e. to allow for lazy loading in
  * web views despite the original transactions already being completed.
  *
- * <p>This filter works similar to the AOP JdoInterceptor: It just makes JDO
- * PersistenceManagers available via the thread. It is suitable for
- * non-transactional execution but also for middle tier transactions via
- * JdoTransactionManager or JtaTransactionManager. In the latter case,
- * PersistenceManagers pre-bound by this filter will automatically be used
- * for the transactions.
+ * <p>This interceptor makes JDO PersistenceManagers available via the current thread,
+ * which will be autodetected by transaction managers. It is suitable for service
+ * layer transactions via {@link org.springframework.orm.jdo.JdoTransactionManager}
+ * or {@link org.springframework.transaction.jta.JtaTransactionManager} as well
+ * as for non-transactional read-only execution.
  *
- * <p>In contrast to OpenPersistenceManagerInViewFilter, this interceptor is set
- * up in a Spring application context and can thus take advantage of bean wiring.
- * It derives from JdoAccessor to inherit common JDO configuration properties.
+ * <p>In contrast to {@link OpenPersistenceManagerInViewFilter}, this interceptor
+ * is set up in a Spring application context and can thus take advantage of
+ * bean wiring. It inherits common JDO configuration properties from
+ * {@link org.springframework.orm.jdo.JdoAccessor}, to be configured in a
+ * bean definition.
  *
  * @author Juergen Hoeller
  * @since 1.1

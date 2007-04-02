@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,20 +29,31 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.WebRequestInterceptor;
 
 /**
- * Spring web HandlerInterceptor that binds a Hibernate Session to the thread for the
+ * Spring web request interceptor that binds a Hibernate Session to the thread for the
  * entire processing of the request. Intended for the "Open Session in View" pattern,
  * that is, to allow for lazy loading in web views despite the original transactions
  * already being completed.
  *
- * <p>This interceptor works similar to the AOP HibernateInterceptor: It just makes
- * Hibernate Sessions available via the thread. It is suitable for non-transactional
- * execution but also for service layer transactions via HibernateTransactionManager
- * or JtaTransactionManager. In the latter case, Sessions pre-bound by this interceptor
- * will automatically be used for the transactions and flushed accordingly.
+ * <p>This interceptor makes Hibernate Sessions available via the current thread,
+ * which will be autodetected by transaction managers. It is suitable for service layer
+ * transactions via {@link org.springframework.orm.hibernate3.HibernateTransactionManager}
+ * or {@link org.springframework.transaction.jta.JtaTransactionManager} as well
+ * as for non-transactional execution (if configured appropriately).
  *
- * <p>In contrast to OpenSessionInViewFilter, this interceptor is set up in a Spring
- * application context and can thus take advantage of bean wiring. It derives from
- * HibernateAccessor to inherit common Hibernate configuration properties.
+ * <p><b>NOTE</b>: This interceptor will by default <i>not</i> flush the Hibernate Session,
+ * with the flush mode set to <code>FlushMode.NEVER</code>. It assumes to be used
+ * in combination with service layer transactions that care for the flushing: The
+ * active transaction manager will temporarily change the flush mode to
+ * <code>FlushMode.AUTO</code> during a read-write transaction, with the flush
+ * mode reset to <code>FlushMode.NEVER</code> at the end of each transaction.
+ * If you intend to use this interceptor without transactions, consider changing
+ * the default flush mode (through the "flushMode" property).
+ *
+ * <p>In contrast to {@link OpenSessionInViewFilter}, this interceptor is set up
+ * in a Spring application context and can thus take advantage of bean wiring.
+ * It inherits common Hibernate configuration properties from
+ * {@link org.springframework.orm.hibernate3.HibernateAccessor},
+ * to be configured in a bean definition.
  *
  * <p><b>WARNING:</b> Applying this interceptor to existing logic can cause issues that
  * have not appeared before, through the use of a single Hibernate Session for the
@@ -57,17 +68,10 @@ import org.springframework.web.context.request.WebRequestInterceptor;
  * for deferred close, though, actually processed at request completion.
  *
  * <p>A single session per request allows for most efficient first-level caching,
- * but can cause side effects, for example on saveOrUpdate or if continuing
- * after a rolled-back transaction. The deferred close strategy is as safe as
- * no Open Session in View in that respect, while still allowing for lazy loading
+ * but can cause side effects, for example on <code>saveOrUpdate</code> or when
+ * continuing after a rolled-back transaction. The deferred close strategy is as safe
+ * as no Open Session in View in that respect, while still allowing for lazy loading
  * in views (but not providing a first-level cache for the entire request).
- *
- * <p><b>NOTE</b>: This interceptor will by default <i>not</i> flush the Hibernate Session,
- * as it assumes to be used in combination with service layer transactions that care
- * for the flushing, or HibernateAccessors with "flushMode" FLUSH_EAGER. If you want this
- * interceptor to flush after the handler has been invoked but before view rendering,
- * set the "flushMode" of this interceptor to FLUSH_AUTO in such a scenario. Note that
- * the "flushMode" of this interceptor will just apply in single session mode!
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -210,7 +214,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements W
 
 	/**
 	 * Return the name of the request attribute that identifies that a request is
-	 * already filtered. Default implementation takes the toString representation
+	 * already intercepted. Default implementation takes the toString representation
 	 * of the SessionFactory instance and appends ".PARTICIPATE".
 	 * @see #PARTICIPATE_SUFFIX
 	 */

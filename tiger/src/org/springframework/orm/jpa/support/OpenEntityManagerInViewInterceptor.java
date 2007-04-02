@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,21 +29,22 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.WebRequestInterceptor;
 
 /**
- * Spring web HandlerInterceptor that binds a JPA EntityManager to the
+ * Spring web request interceptor that binds a JPA EntityManager to the
  * thread for the entire processing of the request. Intended for the "Open
  * EntityManager in View" pattern, i.e. to allow for lazy loading in
  * web views despite the original transactions already being completed.
  *
- * <p>This filter works similar to the AOP JpaInterceptor: It just makes JPA
- * EntityManagers available via the thread. It is suitable for
- * non-transactional execution but also for middle tier transactions via
- * JpaTransactionManager or JtaTransactionManager. In the latter case,
- * EntityManagers pre-bound by this filter will automatically be used
- * for the transactions.
+ * <p>This interceptor makes JPA EntityManagers available via the current thread,
+ * which will be autodetected by transaction managers. It is suitable for service
+ * layer transactions via {@link org.springframework.orm.jpa.JpaTransactionManager}
+ * or {@link org.springframework.transaction.jta.JtaTransactionManager} as well
+ * as for non-transactional read-only execution.
  *
- * <p>In contrast to OpenEntityManagerInViewFilter, this interceptor is set
- * up in a Spring application context and can thus take advantage of bean wiring.
- * It derives from JpaAccessor to inherit common JPA configuration properties.
+ * <p>In contrast to {@link OpenEntityManagerInViewFilter}, this interceptor
+ * is set up in a Spring application context and can thus take advantage of
+ * bean wiring. It inherits common JPA configuration properties from
+ * {@link org.springframework.orm.jpa.JpaAccessor}, to be configured in a
+ * bean definition.
  *
  * @author Juergen Hoeller
  * @since 2.0

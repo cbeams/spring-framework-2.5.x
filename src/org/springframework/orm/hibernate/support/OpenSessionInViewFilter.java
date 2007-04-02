@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * i.e. to allow for lazy loading in web views despite the original transactions
  * already being completed.
  *
- * <p>This filter works similar to the AOP HibernateInterceptor: It just makes
- * Hibernate Sessions available via the thread. It is suitable for non-transactional
- * execution but also for business layer transactions via HibernateTransactionManager
- * or JtaTransactionManager. In the latter case, Sessions pre-bound by this filter
- * will automatically be used for the transactions and flushed accordingly.
+ * <p>This filter makes Hibernate Sessions available via the current thread, which
+ * will be autodetected by transaction managers. It is suitable for service layer
+ * transactions via {@link org.springframework.orm.hibernate.HibernateTransactionManager}
+ * or {@link org.springframework.transaction.jta.JtaTransactionManager} as well
+ * as for non-transactional read-only execution.
+ *
+ * <p><b>NOTE</b>: This filter will by default <i>not</i> flush the Hibernate Session,
+ * with the flush mode set to <code>FlushMode.NEVER</code>. It assumes to be used
+ * in combination with service layer transactions that care for the flushing: The
+ * active transaction manager will temporarily change the flush mode to
+ * <code>FlushMode.AUTO</code> during a read-write transaction, with the flush
+ * mode reset to <code>FlushMode.NEVER</code> at the end of each transaction.
  *
  * <p><b>WARNING:</b> Applying this filter to existing logic can cause issues that
  * have not appeared before, through the use of a single Hibernate Session for the
@@ -60,30 +67,20 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * for deferred close, though, actually processed at request completion.
  *
  * <p>A single session per request allows for most efficient first-level caching,
- * but can cause side effects, for example on saveOrUpdate or if continuing
- * after a rolled-back transaction. The deferred close strategy is as safe as
- * no Open Session in View in that respect, while still allowing for lazy loading
+ * but can cause side effects, for example on <code>saveOrUpdate</code> or when
+ * continuing after a rolled-back transaction. The deferred close strategy is as safe
+ * as no Open Session in View in that respect, while still allowing for lazy loading
  * in views (but not providing a first-level cache for the entire request).
- * 
+ *
  * <p>Looks up the SessionFactory in Spring's root web application context.
  * Supports a "sessionFactoryBeanName" filter init-param in <code>web.xml</code>;
  * the default bean name is "sessionFactory". Looks up the SessionFactory on each
  * request, to avoid initialization order issues (when using ContextLoaderServlet,
  * the root application context will get initialized <i>after</i> this filter).
  *
- * <p><b>NOTE</b>: This filter will by default <i>not</i> flush the Hibernate Session,
- * as it assumes to be used in combination with service layer transactions that care
- * for the flushing, or HibernateAccessors with flushMode FLUSH_EAGER. If you want this
- * filter to flush after completed request processing, override <code>closeSession</code>
- * and invoke <code>flush</code> on the Session before closing it. Additionally, you will
- * also need to override <code>getSession()</code> to return a Session in a flush mode
- * other than the default <code>FlushMode.NEVER</code>. Note that <code>getSession</code>
- * and <code>closeSession</code> will just be invoked in single session mode!
- *
  * @author Juergen Hoeller
  * @since 06.12.2003
  * @see #setSingleSession
- * @see #closeSession
  * @see #lookupSessionFactory
  * @see OpenSessionInViewInterceptor
  * @see org.springframework.orm.hibernate.HibernateInterceptor

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * View" pattern, i.e. to allow for lazy loading in web views despite the
  * original transactions already being completed.
  *
- * <p>This filter works similar to the AOP JdoInterceptor: It just makes JDO
- * PersistenceManagers available via the thread. It is suitable for
- * non-transactional execution but also for business layer transactions via
- * JdoTransactionManager or JtaTransactionManager. In the latter case,
- * PersistenceManagers pre-bound by this filter will automatically be used
- * for the transactions.
+ * <p>This filter makes JDO PersistenceManagers available via the current thread,
+ * which will be autodetected by transaction managers. It is suitable for service
+ * layer transactions via {@link org.springframework.orm.jdo.JdoTransactionManager}
+ * or {@link org.springframework.transaction.jta.JtaTransactionManager} as well
+ * as for non-transactional read-only execution.
  *
  * <p>Looks up the PersistenceManagerFactory in Spring's root web application context.
  * Supports a "persistenceManagerFactoryBeanName" filter init-param in <code>web.xml</code>;
