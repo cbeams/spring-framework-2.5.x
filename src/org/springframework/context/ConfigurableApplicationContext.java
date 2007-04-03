@@ -54,6 +54,18 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor);
 
 	/**
+	 * Add a new ApplicationListener that will be notified on context events
+	 * such as context refresh and context shutdown.
+	 * <p>Note that any ApplicationListener registered here will be applied
+	 * on refresh of this context. If a listener is added after the initial
+	 * refresh, it will be applied on next refresh of the context.
+	 * @param listener the ApplicationListener to register
+	 * @see org.springframework.context.event.ContextRefreshedEvent
+	 * @see org.springframework.context.event.ContextClosedEvent
+	 */
+	void addApplicationListener(ApplicationListener listener);
+
+	/**
 	 * Load or refresh the persistent representation of the configuration,
 	 * which might an XML file, properties file, or relational database schema.
 	 * <p>As this is a startup method, it should destroy already created singletons

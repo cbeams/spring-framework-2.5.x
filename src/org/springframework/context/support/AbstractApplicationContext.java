@@ -166,6 +166,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** Helper class used in event publishing */
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
+	/** Statically specified listeners */
+	private List applicationListeners = new ArrayList();
+
 
 	/**
 	 * Create a new AbstractApplicationContext with no parent.
@@ -281,6 +284,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.beanFactoryPostProcessors;
 	}
 
+	public void addApplicationListener(ApplicationListener listener) {
+		this.applicationListeners.add(listener);
+	}
+
+	/**
+	 * Return the list of statically specified ApplicationListeners.
+	 * @see org.springframework.context.ApplicationListener
+	 */
+	public List getApplicationListeners() {
+		return this.applicationListeners;
+	}
+
 
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
@@ -302,6 +317,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				logger.info("Bean factory for application context [" + ObjectUtils.identityToString(this) +
 						"]: " + ObjectUtils.identityToString(beanFactory));
 			}
+			if (logger.isDebugEnabled()) {
+				logger.debug(beanFactory.getBeanDefinitionCount() + " beans defined in " + this);
+			}
 
 			// Tell the internal bean factory to use the context's class loader.
 			beanFactory.setBeanClassLoader(getClassLoader());
@@ -316,25 +334,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
 			beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
 
-			// Allows post-processing of the bean factory in context subclasses.
-			postProcessBeanFactory(beanFactory);
-
-			// Invoke factory processors registered with the context instance.
-			for (Iterator it = getBeanFactoryPostProcessors().iterator(); it.hasNext();) {
-				BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
-				factoryProcessor.postProcessBeanFactory(beanFactory);
-			}
-
-			if (logger.isDebugEnabled()) {
-				logger.debug(getBeanDefinitionCount() + " beans defined in " + this);
-			}
-
 			try {
+				// Allows post-processing of the bean factory in context subclasses.
+				postProcessBeanFactory(beanFactory);
+
 				// Invoke factory processors registered as beans in the context.
-				invokeBeanFactoryPostProcessors();
+				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
-				registerBeanPostProcessors();
+				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
 				initMessageSource();
@@ -397,10 +405,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * respecting explicit order if given.
 	 * Must be called before singleton instantiation.
 	 */
-	private void invokeBeanFactoryPostProcessors() {
+	private void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+		// Invoke factory processors registered with the context instance.
+		for (Iterator it = getBeanFactoryPostProcessors().iterator(); it.hasNext();) {
+			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
+			factoryProcessor.postProcessBeanFactory(beanFactory);
+		}
+
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let the bean factory post-processors apply to them!
-		String[] factoryProcessorNames = getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
+		String[] factoryProcessorNames =
+				beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
 
 		// Separate between BeanFactoryPostProcessor that implement the Ordered
 		// interface and those that do not.
@@ -408,7 +423,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		List nonOrderedFactoryProcessorNames = new ArrayList();
 		for (int i = 0; i < factoryProcessorNames.length; i++) {
 			if (isTypeMatch(factoryProcessorNames[i], Ordered.class)) {
-				orderedFactoryProcessors.add(getBean(factoryProcessorNames[i]));
+				orderedFactoryProcessors.add(beanFactory.getBean(factoryProcessorNames[i]));
 			}
 			else {
 				nonOrderedFactoryProcessorNames.add(factoryProcessorNames[i]);
@@ -419,12 +434,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		Collections.sort(orderedFactoryProcessors, new OrderComparator());
 		for (Iterator it = orderedFactoryProcessors.iterator(); it.hasNext();) {
 			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
-			factoryProcessor.postProcessBeanFactory(getBeanFactory());
+			factoryProcessor.postProcessBeanFactory(beanFactory);
 		}
 		// Second, invoke all other BeanFactoryPostProcessors, one by one.
 		for (Iterator it = nonOrderedFactoryProcessorNames.iterator(); it.hasNext();) {
 			String factoryProcessorName = (String) it.next();
-			((BeanFactoryPostProcessor) getBean(factoryProcessorName)).postProcessBeanFactory(getBeanFactory());
+			((BeanFactoryPostProcessor) getBean(factoryProcessorName)).postProcessBeanFactory(beanFactory);
 		}
 	}
 
@@ -433,14 +448,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * respecting explicit order if given.
 	 * <p>Must be called before any instantiation of application beans.
 	 */
-	private void registerBeanPostProcessors() {
-		String[] processorNames = getBeanNamesForType(BeanPostProcessor.class, true, false);
+	private void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+		String[] processorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
 		// Register BeanPostProcessorChecker that logs an info message when
 		// a bean is created during BeanPostProcessor instantiation, i.e. when
 		// a bean is not eligible for getting processed by all BeanPostProcessors.
-		int beanProcessorTargetCount = getBeanFactory().getBeanPostProcessorCount() + 1 + processorNames.length;
-		getBeanFactory().addBeanPostProcessor(new BeanPostProcessorChecker(beanProcessorTargetCount));
+		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + processorNames.length;
+		beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, beanProcessorTargetCount));
 
 		// Separate between BeanPostProcessor that implement the Ordered
 		// interface and those that do not.
@@ -458,12 +473,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// First, register the BeanPostProcessors that implement Ordered.
 		Collections.sort(orderedProcessors, new OrderComparator());
 		for (Iterator it = orderedProcessors.iterator(); it.hasNext();) {
-			getBeanFactory().addBeanPostProcessor((BeanPostProcessor) it.next());
+			beanFactory.addBeanPostProcessor((BeanPostProcessor) it.next());
 		}
 		// Second, register all other BeanPostProcessors, one by one.
 		for (Iterator it = nonOrderedProcessorNames.iterator(); it.hasNext();) {
 			String processorName = (String) it.next();
-			getBeanFactory().addBeanPostProcessor((BeanPostProcessor) getBean(processorName));
+			beanFactory.addBeanPostProcessor((BeanPostProcessor) getBean(processorName));
 		}
 	}
 
@@ -538,10 +553,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Doesn't affect other listeners, which can be added without being beans.
 	 */
 	private void registerListeners() {
+		// Register statically specified listeners first.
+		for (Iterator it = getApplicationListeners().iterator(); it.hasNext();) {
+			addListener((ApplicationListener) it.next());
+		}
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
-		Collection listeners = getBeansOfType(ApplicationListener.class, true, false).values();
-		for (Iterator it = listeners.iterator(); it.hasNext();) {
+		Collection listenerBeans = getBeansOfType(ApplicationListener.class, true, false).values();
+		for (Iterator it = listenerBeans.iterator(); it.hasNext();) {
 			addListener((ApplicationListener) it.next());
 		}
 	}
@@ -938,9 +957,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	private class BeanPostProcessorChecker implements BeanPostProcessor {
 
+		private final ConfigurableListableBeanFactory beanFactory;
+
 		private final int beanPostProcessorTargetCount;
 
-		public BeanPostProcessorChecker(int beanPostProcessorTargetCount) {
+		public BeanPostProcessorChecker(ConfigurableListableBeanFactory beanFactory, int beanPostProcessorTargetCount) {
+			this.beanFactory = beanFactory;
 			this.beanPostProcessorTargetCount = beanPostProcessorTargetCount;
 		}
 
@@ -949,7 +971,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		public Object postProcessAfterInitialization(Object bean, String beanName) {
-			if (getBeanFactory().getBeanPostProcessorCount() < this.beanPostProcessorTargetCount) {
+			if (this.beanFactory.getBeanPostProcessorCount() < this.beanPostProcessorTargetCount) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Bean '" + beanName + "' is not eligible for getting processed by all " +
 							"BeanPostProcessors (for example: not eligible for auto-proxying)");
