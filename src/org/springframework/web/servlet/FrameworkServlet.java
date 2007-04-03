@@ -25,8 +25,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
@@ -37,7 +41,7 @@ import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Base servlet for Spring's web framework. Offers integration with
+ * Base servlet for Spring's web framework. Provides integration with
  * a Spring application context, in a JavaBean-based overall solution.
  *
  * <p>This class offers the following functionality:
@@ -59,7 +63,7 @@ import org.springframework.web.util.WebUtils;
  * {@link org.springframework.web.context.support.XmlWebApplicationContext},
  * if not found. Note that, with the default FrameworkServlet,
  * a custom context class needs to implement the
- * {@link org.springframework.web.context.ConfigurableWebApplicationContext} interface.
+ * {@link org.springframework.web.context.ConfigurableWebApplicationContext} SPI.
  *
  * <p>Passes a "contextConfigLocation" servlet init-param to the context instance,
  * parsing it into potentially multiple file paths which can be separated by any
@@ -80,12 +84,11 @@ import org.springframework.web.util.WebUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #doService
- * @see #initFrameworkServlet
  * @see #setContextClass
  * @see #setContextConfigLocation
  * @see #setNamespace
  */
-public abstract class FrameworkServlet extends HttpServletBean {
+public abstract class FrameworkServlet extends HttpServletBean implements ApplicationListener {
 
 	/**
 	 * Suffix for WebApplicationContext namespaces. If a servlet of this class is
@@ -124,6 +127,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/** WebApplicationContext for this servlet */
 	private WebApplicationContext webApplicationContext;
+
+	/** Flag used to detect whether onRefresh has already been called */
+	private boolean refreshEventReceived = false;
 
 
 	/**
@@ -249,6 +255,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Initialize and publish the WebApplicationContext for this servlet.
 	 * <p>Delegates to {@link #createWebApplicationContext} for actual creation
 	 * of the context. Can be overridden in subclasses.
+	 * @return the WebApplicationContext instance
 	 * @throws BeansException if the context couldn't be initialized
 	 * @see #setContextClass
 	 * @see #setContextConfigLocation
@@ -256,6 +263,12 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected WebApplicationContext initWebApplicationContext() throws BeansException {
 		WebApplicationContext parent = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		WebApplicationContext wac = createWebApplicationContext(parent);
+
+		if (!this.refreshEventReceived) {
+			// Apparently not a ConfigurableApplicationContext with refresh support:
+			// triggering initial onRefresh manually here.
+			onRefresh(wac);
+		}
 
 		if (isPublishContext()) {
 			// Publish the context as a servlet context attribute.
@@ -277,6 +290,10 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * <p>This implementation expects custom contexts to implement the
 	 * {@link org.springframework.web.context.ConfigurableWebApplicationContext}
 	 * interface. Can be overridden in subclasses.
+	 * <p>Do not forget to register this servlet instance as application listener on the
+	 * created context (for triggering its {@link #onRefresh callback}, and to call
+	 * {@link org.springframework.context.ConfigurableApplicationContext#refresh()}
+	 * before returning the context instance.
 	 * @param parent the parent ApplicationContext to use, or <code>null</code> if none
 	 * @return the WebApplicationContext for this servlet
 	 * @throws BeansException if the context couldn't be initialized
@@ -308,6 +325,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			    StringUtils.tokenizeToStringArray(
 							getContextConfigLocation(), ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
+		wac.addApplicationListener(this);
 		wac.refresh();
 		return wac;
 	}
@@ -330,6 +348,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		return this.webApplicationContext;
 	}
 
+
 	/**
 	 * This method will be invoked after any bean properties have been set and
 	 * the WebApplicationContext has been loaded. The default implementation is empty;
@@ -343,7 +362,6 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	/**
 	 * Refresh this servlet's application context, as well as the
 	 * dependent state of the servlet.
-	 * <p>Delegates to {@link #onRefresh()} after the context refresh.
 	 * @throws BeansException in case of errors
 	 * @see #getWebApplicationContext()
 	 * @see org.springframework.context.ConfigurableApplicationContext#refresh()
@@ -354,17 +372,32 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			throw new IllegalStateException("WebApplicationContext does not support refresh: " + wac);
 		}
 		((ConfigurableApplicationContext) wac).refresh();
-		onRefresh();
+	}
+
+	/**
+	 * ApplicationListener endpoint that receives events from this servlet's
+	 * WebApplicationContext.
+	 * <p>The default implementation calls {@link #onRefresh} in case of a
+	 * {@link org.springframework.context.event.ContextRefreshedEvent},
+	 * triggering a refresh of this servlet's context-dependent state.
+	 * @param event the incoming ApplicationContext event
+	 */
+	public void onApplicationEvent(ApplicationEvent event) {
+		if (event instanceof ContextRefreshedEvent) {
+			this.refreshEventReceived = true;
+			onRefresh(((ContextRefreshedEvent) event).getApplicationContext());
+		}
 	}
 
 	/**
 	 * Template method which can be overridden to add servlet-specific refresh work.
 	 * Called after successful context refresh.
 	 * <p>This implementation is empty.
+	 * @param context the current WebApplicationContext
 	 * @throws BeansException in case of errors
 	 * @see #refresh()
 	 */
-	protected void onRefresh() throws BeansException {
+	protected void onRefresh(ApplicationContext context) throws BeansException {
 		// For subclasses: do nothing by default.
 	}
 

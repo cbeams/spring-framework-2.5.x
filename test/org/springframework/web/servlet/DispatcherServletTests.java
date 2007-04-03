@@ -31,6 +31,7 @@ import junit.framework.TestCase;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -38,10 +39,13 @@ import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.EscapedErrors;
+import org.springframework.web.context.ServletConfigAwareBean;
+import org.springframework.web.context.ServletContextAwareBean;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.BaseCommandController;
@@ -505,7 +509,7 @@ public class DispatcherServletTests extends TestCase {
 		complexDispatcherServlet.service(request, response);
 		assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
 	}
-	
+
 	public void testDetectHandlerMappingFromParent() throws ServletException, IOException {
 		// Create a parent context that includes a mapping
 		StaticWebApplicationContext parent = new StaticWebApplicationContext();
@@ -765,6 +769,66 @@ public class DispatcherServletTests extends TestCase {
 
 		complexDispatcherServlet.service(request, response);
 		assertEquals("noview/simple.jsp", response.getForwardedUrl());
+	}
+
+	public void testDispatcherServletRefresh() throws ServletException {
+		MockServletContext servletContext = new MockServletContext("org/springframework/web/context");
+		DispatcherServlet servlet = new DispatcherServlet();
+
+		servlet.init(new MockServletConfig(servletContext, "empty"));
+		ServletContextAwareBean contextBean = (ServletContextAwareBean)
+				servlet.getWebApplicationContext().getBean("servletContextAwareBean");
+		ServletConfigAwareBean configBean = (ServletConfigAwareBean)
+				servlet.getWebApplicationContext().getBean("servletConfigAwareBean");
+		assertSame(servletContext, contextBean.getServletContext());
+		assertSame(servlet.getServletConfig(), configBean.getServletConfig());
+		MultipartResolver multipartResolver = servlet.getMultipartResolver();
+		assertNotNull(multipartResolver);
+
+		servlet.refresh();
+
+		ServletContextAwareBean contextBean2 = (ServletContextAwareBean)
+				servlet.getWebApplicationContext().getBean("servletContextAwareBean");
+		ServletConfigAwareBean configBean2 = (ServletConfigAwareBean)
+				servlet.getWebApplicationContext().getBean("servletConfigAwareBean");
+		assertSame(servletContext, contextBean2.getServletContext());
+		assertSame(servlet.getServletConfig(), configBean2.getServletConfig());
+		assertTrue(contextBean != contextBean2);
+		assertTrue(configBean != configBean2);
+		MultipartResolver multipartResolver2 = servlet.getMultipartResolver();
+		assertTrue(multipartResolver != multipartResolver2);
+
+		servlet.destroy();
+	}
+
+	public void testDispatcherServletContextRefresh() throws ServletException {
+		MockServletContext servletContext = new MockServletContext("org/springframework/web/context");
+		DispatcherServlet servlet = new DispatcherServlet();
+
+		servlet.init(new MockServletConfig(servletContext, "empty"));
+		ServletContextAwareBean contextBean = (ServletContextAwareBean)
+				servlet.getWebApplicationContext().getBean("servletContextAwareBean");
+		ServletConfigAwareBean configBean = (ServletConfigAwareBean)
+				servlet.getWebApplicationContext().getBean("servletConfigAwareBean");
+		assertSame(servletContext, contextBean.getServletContext());
+		assertSame(servlet.getServletConfig(), configBean.getServletConfig());
+		MultipartResolver multipartResolver = servlet.getMultipartResolver();
+		assertNotNull(multipartResolver);
+
+		((ConfigurableApplicationContext) servlet.getWebApplicationContext()).refresh();
+
+		ServletContextAwareBean contextBean2 = (ServletContextAwareBean)
+				servlet.getWebApplicationContext().getBean("servletContextAwareBean");
+		ServletConfigAwareBean configBean2 = (ServletConfigAwareBean)
+				servlet.getWebApplicationContext().getBean("servletConfigAwareBean");
+		assertSame(servletContext, contextBean2.getServletContext());
+		assertSame(servlet.getServletConfig(), configBean2.getServletConfig());
+		assertTrue(contextBean != contextBean2);
+		assertTrue(configBean != configBean2);
+		MultipartResolver multipartResolver2 = servlet.getMultipartResolver();
+		assertTrue(multipartResolver != multipartResolver2);
+
+		servlet.destroy();
 	}
 
 

@@ -42,6 +42,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
@@ -330,19 +331,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 
 	/**
-	 * Overridden method, invoked after any bean properties have been set
-	 * and the PortletApplicationContext for this namespace is available.
-	 * <p>This implementation calls {@link #initStrategies()}.
+	 * This implementation calls {@link #initStrategies}.
 	 */
-	protected void initFrameworkPortlet() throws PortletException, BeansException {
-		initStrategies();
-	}
-
-	/**
-	 * This implementation calls {@link #initStrategies()}.
-	 */
-	public void onRefresh() {
-		initStrategies();
+	public void onRefresh(ApplicationContext context) {
+		initStrategies(context);
 	}
 
 	/**
@@ -350,12 +342,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * <p>May be overridden in subclasses in order to initialize
 	 * further strategy objects.
 	 */
-	protected void initStrategies() {
-		initMultipartResolver();
-		initHandlerMappings();
-		initHandlerAdapters();
-		initHandlerExceptionResolvers();
-		initViewResolvers();
+	protected void initStrategies(ApplicationContext context) {
+		initMultipartResolver(context);
+		initHandlerMappings(context);
+		initHandlerAdapters(context);
+		initHandlerExceptionResolvers(context);
+		initViewResolvers(context);
 	}
 
 	/**
@@ -363,19 +355,19 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * <p>If no valid bean is defined with the given name in the BeanFactory
 	 * for this namespace, no multipart handling is provided.
 	 */
-	private void initMultipartResolver() {
+	private void initMultipartResolver(ApplicationContext context) {
 		try {
 			this.multipartResolver = (PortletMultipartResolver)
-					getPortletApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME, PortletMultipartResolver.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Using MultipartResolver [" + this.multipartResolver + "]");
+					context.getBean(MULTIPART_RESOLVER_BEAN_NAME, PortletMultipartResolver.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using MultipartResolver [" + this.multipartResolver + "]");
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Default is no multipart resolver.
 			this.multipartResolver = null;
-			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate PortletMultipartResolver with name '"	+ MULTIPART_RESOLVER_BEAN_NAME +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate PortletMultipartResolver with name '"	+ MULTIPART_RESOLVER_BEAN_NAME +
 						"': no multipart request handling provided");
 			}
 		}
@@ -386,12 +378,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * <p>If no HandlerMapping beans are defined in the BeanFactory
 	 * for this namespace, we default to PortletModeHandlerMapping.
 	 */
-	private void initHandlerMappings() {
+	private void initHandlerMappings(ApplicationContext context) {
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext,
 			// including ancestor contexts.
 			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-					getPortletApplicationContext(), HandlerMapping.class, true, false);
+					context, HandlerMapping.class, true, false);
 			if (!matchingBeans.isEmpty()) {
 				this.handlerMappings = new ArrayList(matchingBeans.values());
 				// We keep HandlerMappings in sorted order.
@@ -400,7 +392,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 		else {
 			try {
-				Object hm = getPortletApplicationContext().getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
+				Object hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
 				this.handlerMappings = Collections.singletonList(hm);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -411,9 +403,9 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
 		if (this.handlerMappings == null) {
-			this.handlerMappings = getDefaultStrategies(HandlerMapping.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("No HandlerMappings found in portlet '" + getPortletName() + "': using default");
+			this.handlerMappings = getDefaultStrategies(context, HandlerMapping.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("No HandlerMappings found in portlet '" + getPortletName() + "': using default");
 			}
 		}
 	}
@@ -423,12 +415,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * <p>If no HandlerAdapter beans are defined in the BeanFactory
 	 * for this namespace, we default to SimpleControllerHandlerAdapter.
 	 */
-	private void initHandlerAdapters() {
+	private void initHandlerAdapters(ApplicationContext context) {
 		if (this.detectAllHandlerAdapters) {
 			// Find all HandlerAdapters in the ApplicationContext,
 			// including ancestor contexts.
 			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-					getPortletApplicationContext(), HandlerAdapter.class, true, false);
+					context, HandlerAdapter.class, true, false);
 			if (!matchingBeans.isEmpty()) {
 				this.handlerAdapters = new ArrayList(matchingBeans.values());
 				// We keep HandlerAdapters in sorted order.
@@ -437,7 +429,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 		else {
 			try {
-				Object ha = getPortletApplicationContext().getBean(HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class);
+				Object ha = context.getBean(HANDLER_ADAPTER_BEAN_NAME, HandlerAdapter.class);
 				this.handlerAdapters = Collections.singletonList(ha);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -448,9 +440,9 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		// Ensure we have at least some HandlerAdapters, by registering
 		// default HandlerAdapters if no other adapters are found.
 		if (this.handlerAdapters == null) {
-			this.handlerAdapters = getDefaultStrategies(HandlerAdapter.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("No HandlerAdapters found in portlet '" + getPortletName() + "': using default");
+			this.handlerAdapters = getDefaultStrategies(context, HandlerAdapter.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("No HandlerAdapters found in portlet '" + getPortletName() + "': using default");
 			}
 		}
 	}
@@ -460,25 +452,25 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * <p>If no bean is defined with the given name in the BeanFactory
 	 * for this namespace, we default to no exception resolver.
 	 */
-	private void initHandlerExceptionResolvers() {
+	private void initHandlerExceptionResolvers(ApplicationContext context) {
 		if (this.detectAllHandlerExceptionResolvers) {
 			// Find all HandlerExceptionResolvers in the ApplicationContext,
 			// including ancestor contexts.
 			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-					getPortletApplicationContext(), HandlerExceptionResolver.class, true, false);
+					context, HandlerExceptionResolver.class, true, false);
 			this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
 			// We keep HandlerExceptionResolvers in sorted order.
 			Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
 		}
 		else {
 			try {
-				Object her = getPortletApplicationContext().getBean(
+				Object her = context.getBean(
 						HANDLER_EXCEPTION_RESOLVER_BEAN_NAME, HandlerExceptionResolver.class);
 				this.handlerExceptionResolvers = Collections.singletonList(her);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				// Ignore, no HandlerExceptionResolver is fine too.
-				this.handlerExceptionResolvers = getDefaultStrategies(HandlerExceptionResolver.class);
+				this.handlerExceptionResolvers = getDefaultStrategies(context, HandlerExceptionResolver.class);
 			}
 		}
 	}
@@ -488,12 +480,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * <p>If no ViewResolver beans are defined in the BeanFactory
 	 * for this namespace, we default to InternalResourceViewResolver.
 	 */
-	private void initViewResolvers() {
+	private void initViewResolvers(ApplicationContext context) {
 		if (this.detectAllViewResolvers) {
 			// Find all ViewResolvers in the ApplicationContext,
 			// including ancestor contexts.
 			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-					getPortletApplicationContext(), ViewResolver.class, true, false);
+					context, ViewResolver.class, true, false);
 			if (!matchingBeans.isEmpty()) {
 				this.viewResolvers = new ArrayList(matchingBeans.values());
 				// We keep ViewResolvers in sorted order.
@@ -502,7 +494,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 		else {
 			try {
-				Object vr = getPortletApplicationContext().getBean(VIEW_RESOLVER_BEAN_NAME, ViewResolver.class);
+				Object vr = context.getBean(VIEW_RESOLVER_BEAN_NAME, ViewResolver.class);
 				this.viewResolvers = Collections.singletonList(vr);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -513,9 +505,9 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		// Ensure we have at least one ViewResolver, by registering
 		// a default ViewResolver if no other resolvers are found.
 		if (this.viewResolvers == null) {
-			this.viewResolvers = getDefaultStrategies(ViewResolver.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("No ViewResolvers found in portlet '" + getPortletName() + "': using default");
+			this.viewResolvers = getDefaultStrategies(context, ViewResolver.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("No ViewResolvers found in portlet '" + getPortletName() + "': using default");
 			}
 		}
 	}
@@ -525,13 +517,14 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * Return the default strategy object for the given strategy interface.
 	 * <p>The default implementation delegates to {@link #getDefaultStrategies},
 	 * expecting a single object in the list.
+	 * @param context the current Portlet ApplicationContext
 	 * @param strategyInterface the strategy interface
 	 * @return the corresponding strategy object
 	 * @throws BeansException if initialization failed
 	 * @see #getDefaultStrategies
 	 */
-	protected Object getDefaultStrategy(Class strategyInterface) throws BeansException {
-		List strategies = getDefaultStrategies(strategyInterface);
+	protected Object getDefaultStrategy(ApplicationContext context, Class strategyInterface) throws BeansException {
+		List strategies = getDefaultStrategies(context, strategyInterface);
 		if (strategies.size() != 1) {
 			throw new BeanInitializationException(
 					"DispatcherPortlet needs exactly 1 strategy for interface [" + strategyInterface.getName() + "]");
@@ -545,11 +538,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * (in the same package as the DispatcherPortlet class) to determine the class names.
 	 * It instantiates the strategy objects and satisifies ApplicationContextAware
 	 * if necessary.
+	 * @param context the current Portlet ApplicationContext
 	 * @param strategyInterface the strategy interface
 	 * @return the List of corresponding strategy objects
 	 * @throws BeansException if initialization failed
 	 */
-	protected List getDefaultStrategies(Class strategyInterface) throws BeansException {
+	protected List getDefaultStrategies(ApplicationContext context, Class strategyInterface) throws BeansException {
 		String key = strategyInterface.getName();
 		List strategies = null;
 		String value = defaultStrategies.getProperty(key);
@@ -560,7 +554,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 				String className = classNames[i];
 				try {
 					Class clazz = ClassUtils.forName(className, getClass().getClassLoader());
-					Object strategy = createDefaultStrategy(clazz);
+					Object strategy = createDefaultStrategy(context, clazz);
 					strategies.add(strategy);
 				}
 				catch (ClassNotFoundException ex) {
@@ -585,15 +579,25 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * Create a default strategy.
 	 * <p>The default implementation uses
 	 * {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean}.
+	 * @param context the current Portlet ApplicationContext
 	 * @param clazz the strategy implementation class to instantiate
 	 * @return the fully configured strategy instance
 	 * @throws BeansException if initialization failed
-	 * @see #getPortletApplicationContext()
 	 * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
 	 */
-	protected Object createDefaultStrategy(Class clazz) throws BeansException {
-		return getPortletApplicationContext().getAutowireCapableBeanFactory().createBean(
+	protected Object createDefaultStrategy(ApplicationContext context, Class clazz) throws BeansException {
+		return context.getAutowireCapableBeanFactory().createBean(
 				clazz, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+	}
+
+
+	/**
+	 * Obtain this portlet's PortletMultipartResolver, if any.
+	 * @return the PortletMultipartResolver used by this portlet, or <code>null</code>
+	 * if none (indicating that no multipart support is available)
+	 */
+	public PortletMultipartResolver getMultipartResolver() {
+		return this.multipartResolver;
 	}
 
 

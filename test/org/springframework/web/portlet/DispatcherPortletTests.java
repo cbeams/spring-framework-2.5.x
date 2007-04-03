@@ -31,6 +31,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -49,8 +50,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.portlet.context.PortletApplicationContextUtils;
+import org.springframework.web.portlet.context.PortletConfigAwareBean;
+import org.springframework.web.portlet.context.PortletContextAwareBean;
 import org.springframework.web.portlet.handler.PortletSessionRequiredException;
 import org.springframework.web.portlet.multipart.MultipartActionRequest;
+import org.springframework.web.portlet.multipart.PortletMultipartResolver;
 import org.springframework.web.servlet.ViewRendererServlet;
 import org.springframework.web.servlet.view.InternalResourceView;
 
@@ -920,6 +924,66 @@ public class DispatcherPortletTests extends TestCase {
 			RequestContextHolder.resetRequestAttributes();
 			LocaleContextHolder.resetLocaleContext();
 		}
+	}
+
+	public void testDispatcherPortletRefresh() throws PortletException {
+		MockPortletContext portletContext = new MockPortletContext("org/springframework/web/portlet/context");
+		DispatcherPortlet portlet = new DispatcherPortlet();
+
+		portlet.init(new MockPortletConfig(portletContext, "empty"));
+		PortletContextAwareBean contextBean = (PortletContextAwareBean)
+				portlet.getPortletApplicationContext().getBean("portletContextAwareBean");
+		PortletConfigAwareBean configBean = (PortletConfigAwareBean)
+				portlet.getPortletApplicationContext().getBean("portletConfigAwareBean");
+		assertSame(portletContext, contextBean.getPortletContext());
+		assertSame(portlet.getPortletConfig(), configBean.getPortletConfig());
+		PortletMultipartResolver multipartResolver = portlet.getMultipartResolver();
+		assertNotNull(multipartResolver);
+
+		portlet.refresh();
+
+		PortletContextAwareBean contextBean2 = (PortletContextAwareBean)
+				portlet.getPortletApplicationContext().getBean("portletContextAwareBean");
+		PortletConfigAwareBean configBean2 = (PortletConfigAwareBean)
+				portlet.getPortletApplicationContext().getBean("portletConfigAwareBean");
+		assertSame(portletContext, contextBean.getPortletContext());
+		assertSame(portlet.getPortletConfig(), configBean.getPortletConfig());
+		assertTrue(contextBean != contextBean2);
+		assertTrue(configBean != configBean2);
+		PortletMultipartResolver multipartResolver2 = portlet.getMultipartResolver();
+		assertTrue(multipartResolver != multipartResolver2);
+
+		portlet.destroy();
+	}
+
+	public void testDispatcherPortletContextRefresh() throws PortletException {
+		MockPortletContext portletContext = new MockPortletContext("org/springframework/web/portlet/context");
+		DispatcherPortlet portlet = new DispatcherPortlet();
+
+		portlet.init(new MockPortletConfig(portletContext, "empty"));
+		PortletContextAwareBean contextBean = (PortletContextAwareBean)
+				portlet.getPortletApplicationContext().getBean("portletContextAwareBean");
+		PortletConfigAwareBean configBean = (PortletConfigAwareBean)
+				portlet.getPortletApplicationContext().getBean("portletConfigAwareBean");
+		assertSame(portletContext, contextBean.getPortletContext());
+		assertSame(portlet.getPortletConfig(), configBean.getPortletConfig());
+		PortletMultipartResolver multipartResolver = portlet.getMultipartResolver();
+		assertNotNull(multipartResolver);
+
+		((ConfigurableApplicationContext) portlet.getPortletApplicationContext()).refresh();
+
+		PortletContextAwareBean contextBean2 = (PortletContextAwareBean)
+				portlet.getPortletApplicationContext().getBean("portletContextAwareBean");
+		PortletConfigAwareBean configBean2 = (PortletConfigAwareBean)
+				portlet.getPortletApplicationContext().getBean("portletConfigAwareBean");
+		assertSame(portletContext, contextBean.getPortletContext());
+		assertSame(portlet.getPortletConfig(), configBean.getPortletConfig());
+		assertTrue(contextBean != contextBean2);
+		assertTrue(configBean != configBean2);
+		PortletMultipartResolver multipartResolver2 = portlet.getMultipartResolver();
+		assertTrue(multipartResolver != multipartResolver2);
+
+		portlet.destroy();
 	}
 
 }

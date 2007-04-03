@@ -32,7 +32,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.util.StringUtils;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.PortletApplicationContextUtils;
@@ -40,26 +43,29 @@ import org.springframework.web.portlet.context.PortletRequestHandledEvent;
 import org.springframework.web.portlet.context.XmlPortletApplicationContext;
 
 /**
- * Base portlet for portlets within the portlet framework. Allows integration
- * with an application context, in a JavaBean-based overall solution.
+ * Base portlet for Spring's portlet framework. Provides integration with
+ * a Spring application context, in a JavaBean-based overall solution.
  *
  * <p>This class offers the following functionality:
  * <ul>
- * <li>Uses a Portlet ApplicationContext to access a BeanFactory. The portlet's
- * configuration is determined by beans in the portlet's namespace.
+ * <li>Manages a Portlet {@link org.springframework.context.ApplicationContext}
+ * instance per portlet. The portlet's configuration is determined by beans
+ * in the portlet's namespace.
  * <li>Publishes events on request processing, whether or not a request is
  * successfully handled.
  * </ul>
  *
- * <p>Subclasses must implement <code>doActionService</code> and <code>doRenderService</code>
- * to handle action and render requests. Because this extends GenericPortletBean rather
- * than Portlet directly, bean properties are mapped onto it. Subclasses can override
- * initFrameworkPortlet() for custom initialization.
+ * <p>Subclasses must implement {@link #doActionService} and {@link #doRenderService}
+ * to handle action and render requests. Because this extends {@link GenericPortletBean}
+ * rather than Portlet directly, bean properties are mapped onto it. Subclasses can
+ * override {@link #initFrameworkPortlet()} for custom initialization.
  *
  * <p>Regards a "contextClass" parameter at the portlet init-param level,
- * falling back to the default context class (XmlPortletApplicationContext) if not found.
- * With the default FrameworkPortlet, a context class needs to implement
- * ConfigurablePortletApplicationContext.
+ * falling back to the default context class
+ * ({@link org.springframework.web.portlet.context.XmlPortletApplicationContext})
+ * if not found. Note that, with the default FrameworkPortlet,
+ * a context class needs to implement the
+ * {@link org.springframework.web.portlet.context.ConfigurablePortletApplicationContext} SPI.
  *
  * <p>Passes a "contextConfigLocation" portlet init-param to the context instance,
  * parsing it into potentially multiple file paths which can be separated by any
@@ -83,12 +89,11 @@ import org.springframework.web.portlet.context.XmlPortletApplicationContext;
  * @since 2.0
  * @see #doActionService
  * @see #doRenderService
- * @see #initFrameworkPortlet
  * @see #setContextClass
  * @see #setContextConfigLocation
  * @see #setNamespace
  */
-public abstract class FrameworkPortlet extends GenericPortletBean {
+public abstract class FrameworkPortlet extends GenericPortletBean implements ApplicationListener {
 
 	/**
 	 * Default context class for FrameworkPortlet.
@@ -136,6 +141,9 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 
 	/** ApplicationContext for this portlet */
 	private ApplicationContext portletApplicationContext;
+
+	/** Flag used to detect whether onRefresh has already been called */
+	private boolean refreshEventReceived = false;
 
 
 	/**
@@ -283,9 +291,11 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 
 		ApplicationContext parent = PortletApplicationContextUtils.getWebApplicationContext(getPortletContext());
 		ApplicationContext pac = createPortletApplicationContext(parent);
-		if (logger.isInfoEnabled()) {
-			logger.info("Using context class '" + pac.getClass().getName() + "' for portlet '" +
-					getPortletName() + "'");
+
+		if (!this.refreshEventReceived) {
+			// Apparently not a ConfigurableApplicationContext with refresh support:
+			// triggering initial onRefresh manually here.
+			onRefresh(pac);
 		}
 
 		if (isPublishContext()) {
@@ -335,6 +345,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 			pac.setConfigLocations(StringUtils.tokenizeToStringArray(getContextConfigLocation(),
 					ConfigurablePortletApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
+		pac.addApplicationListener(this);
 		pac.refresh();
 		return pac;
 	}
@@ -356,6 +367,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 		return this.portletApplicationContext;
 	}
 
+
 	/**
 	 * This method will be invoked after any bean properties have been set and
 	 * the PortletApplicationContext has been loaded. The default implementation is empty;
@@ -369,7 +381,6 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 	/**
 	 * Refresh this portlet's application context, as well as the
 	 * dependent state of the portlet.
-	 * <p>Delegates to {@link #onRefresh()} after the context refresh.
 	 * @throws BeansException in case of errors
 	 * @see #getPortletApplicationContext()
 	 * @see org.springframework.context.ConfigurableApplicationContext#refresh()
@@ -380,17 +391,32 @@ public abstract class FrameworkPortlet extends GenericPortletBean {
 			throw new IllegalStateException("Portlet ApplicationContext does not support refresh: " + pac);
 		}
 		((ConfigurableApplicationContext) pac).refresh();
-		onRefresh();
+	}
+
+	/**
+	 * ApplicationListener endpoint that receives events from this servlet's
+	 * WebApplicationContext.
+	 * <p>The default implementation calls {@link #onRefresh} in case of a
+	 * {@link org.springframework.context.event.ContextRefreshedEvent},
+	 * triggering a refresh of this servlet's context-dependent state.
+	 * @param event the incoming ApplicationContext event
+	 */
+	public void onApplicationEvent(ApplicationEvent event) {
+		if (event instanceof ContextRefreshedEvent) {
+			this.refreshEventReceived = true;
+			onRefresh(((ContextRefreshedEvent) event).getApplicationContext());
+		}
 	}
 
 	/**
 	 * Template method which can be overridden to add portlet-specific refresh work.
 	 * Called after successful context refresh.
 	 * <p>This implementation is empty.
+	 * @param context the current Portlet ApplicationContext
 	 * @throws BeansException in case of errors
 	 * @see #refresh()
 	 */
-	protected void onRefresh() throws BeansException {
+	protected void onRefresh(ApplicationContext context) throws BeansException {
 		// For subclasses: do nothing by default.
 	}
 
