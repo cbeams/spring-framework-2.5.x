@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,15 +19,13 @@ package org.springframework.web.portlet.context;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
- * BeanPostProcessor implementation that passes the PortletContext to
- * beans that implement the PortletContextAware interface.
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor}
+ * implementation that passes the PortletContext to beans that implement
+ * the {@link PortletContextAware} interface.
  *
  * <p>Portlet application contexts will automatically register this with their
  * underlying bean factory. Applications do not use this directly.
@@ -39,8 +37,6 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  * @see org.springframework.web.portlet.context.XmlPortletApplicationContext#postProcessBeanFactory
  */
 public class PortletContextAwareProcessor implements BeanPostProcessor {
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private PortletContext portletContext;
 
@@ -74,24 +70,10 @@ public class PortletContextAwareProcessor implements BeanPostProcessor {
 
 
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		if (bean instanceof PortletContextAware) {
-			if (this.portletContext == null) {
-				throw new IllegalStateException("Cannot satisfy PortletContextAware for bean '" +
-						beanName + "' without PortletContext");
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setPortletContext on PortletContextAware bean '" + beanName + "'");
-			}
+		if (this.portletContext != null && bean instanceof PortletContextAware) {
 			((PortletContextAware) bean).setPortletContext(this.portletContext);
 		}
-		if (bean instanceof PortletConfigAware) {
-			if (this.portletConfig == null) {
-				throw new IllegalStateException("Cannot satisfy PortletConfigAware for bean '" +
-						beanName + "' without PortletConfig");
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setPortletConfig on PortletConfigAware bean '" + beanName + "'");
-			}
+		if (this.portletConfig != null && bean instanceof PortletConfigAware) {
 			((PortletConfigAware) bean).setPortletConfig(this.portletConfig);
 		}
 		return bean;

@@ -71,18 +71,10 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 
 
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		if (bean instanceof ServletContextAware) {
-			if (this.servletContext == null) {
-				throw new IllegalStateException("Cannot satisfy ServletContextAware for bean '" +
-						beanName + "' without ServletContext");
-			}
+		if (this.servletContext != null && bean instanceof ServletContextAware) {
 			((ServletContextAware) bean).setServletContext(this.servletContext);
 		}
-		if (bean instanceof ServletConfigAware) {
-			if (this.servletConfig == null) {
-				throw new IllegalStateException("Cannot satisfy ServletConfigAware for bean '" +
-						beanName + "' without ServletConfig");
-			}
+		if (this.servletConfig != null && bean instanceof ServletConfigAware) {
 			((ServletConfigAware) bean).setServletConfig(this.servletConfig);
 		}
 		return bean;

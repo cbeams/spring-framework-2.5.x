@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package org.springframework.web.portlet.context;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 
+import junit.framework.TestCase;
+
 import org.springframework.mock.web.portlet.MockPortletConfig;
 import org.springframework.mock.web.portlet.MockPortletContext;
-
-import junit.framework.TestCase;
 
 /**
  * @author Mark Fisher
@@ -87,13 +87,7 @@ public class PortletContextAwareProcessorTests extends TestCase {
 		PortletContextAwareProcessor processor = new PortletContextAwareProcessor(portletContext);
 		PortletContextAwareBean bean = new PortletContextAwareBean();
 		assertNull(bean.getPortletContext());
-		try {
-			processor.postProcessBeforeInitialization(bean, "testBean");
-			fail("Should have thrown IllegalStateException");
-		} 
-		catch(IllegalStateException e) {
-			// expected
-		}
+		processor.postProcessBeforeInitialization(bean, "testBean");
 		assertNull(bean.getPortletContext());
 	}
 	
@@ -102,13 +96,7 @@ public class PortletContextAwareProcessorTests extends TestCase {
 		PortletContextAwareProcessor processor = new PortletContextAwareProcessor(portletContext);
 		PortletConfigAwareBean bean = new PortletConfigAwareBean();
 		assertNull(bean.getPortletConfig());
-		try {
-			processor.postProcessBeforeInitialization(bean, "testBean");
-			fail("Should have thrown IllegalStateException");
-		} 
-		catch(IllegalStateException e) {
-			// expected
-		}
+		processor.postProcessBeforeInitialization(bean, "testBean");
 		assertNull(bean.getPortletConfig());
 	}
 	
@@ -150,14 +138,8 @@ public class PortletContextAwareProcessorTests extends TestCase {
 		PortletContextAwareProcessor processor = new PortletContextAwareProcessor(portletContext, null);
 		PortletConfigAwareBean bean = new PortletConfigAwareBean();
 		assertNull(bean.getPortletConfig());
-		try {
-			processor.postProcessBeforeInitialization(bean, "testBean");
-			fail("Should have thrown IllegalStateException");
-		} 
-		catch(IllegalStateException e) {
-			// expected
-		}
-		assertNull(bean.getPortletConfig());	
+		processor.postProcessBeforeInitialization(bean, "testBean");
+		assertNull(bean.getPortletConfig());
 	}
 
 	public void testPortletConfigAwareWithNullPortletContext() {
@@ -165,13 +147,8 @@ public class PortletContextAwareProcessorTests extends TestCase {
 		PortletContextAwareProcessor processor = new PortletContextAwareProcessor(portletContext);
 		PortletConfigAwareBean bean = new PortletConfigAwareBean();
 		assertNull(bean.getPortletConfig());
-		try {
-			processor.postProcessBeforeInitialization(bean, "testBean");
-			fail("Should have thrown IllegalStateException");
-		} 
-		catch(IllegalStateException e) {
-			// expected
-		}
+		processor.postProcessBeforeInitialization(bean, "testBean");
 		assertNull(bean.getPortletConfig());
 	}
+
 }
