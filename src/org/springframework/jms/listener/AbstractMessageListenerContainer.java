@@ -131,7 +131,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	private String messageSelector;
 
-	private Object messageListener;
+	private volatile Object messageListener;
 
 	private boolean subscriptionDurable = false;
 
@@ -363,9 +363,6 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		if (this.destination == null) {
 			throw new IllegalArgumentException("Property 'destination' or 'destinationName' is required");
 		}
-		if (this.messageListener == null) {
-			throw new IllegalArgumentException("Property 'messageListener' is required");
-		}
 		if (isSubscriptionDurable() && !isPubSubDomain()) {
 			throw new IllegalArgumentException("A durable subscription requires a topic (pub-sub domain)");
 		}
@@ -442,14 +439,19 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @see #setMessageListener
 	 */
 	protected void invokeListener(Session session, Message message) throws JMSException {
-		if (getMessageListener() instanceof SessionAwareMessageListener) {
-			doInvokeListener((SessionAwareMessageListener) getMessageListener(), session, message);
+		Object listener = getMessageListener();
+		if (listener instanceof SessionAwareMessageListener) {
+			doInvokeListener((SessionAwareMessageListener) listener, session, message);
 		}
-		else if (getMessageListener() instanceof MessageListener) {
-			doInvokeListener((MessageListener) getMessageListener(), message);
+		else if (listener instanceof MessageListener) {
+			doInvokeListener((MessageListener) listener, message);
+		}
+		else if (listener != null) {
+			throw new IllegalArgumentException(
+					"Only MessageListener and SessionAwareMessageListener supported: " + listener);
 		}
 		else {
-			throw new IllegalArgumentException("Only MessageListener and SessionAwareMessageListener supported");
+			throw new IllegalStateException("No message listener specified - see property 'messageListener'");
 		}
 	}
 
