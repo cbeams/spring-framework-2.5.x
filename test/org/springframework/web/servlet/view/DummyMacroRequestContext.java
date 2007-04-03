@@ -33,7 +33,9 @@ public class DummyMacroRequestContext {
 
 	private TestBean command;
 
-	private Map msgMap;
+	private Map messageMap;
+
+	private Map themeMessageMap;
 
 	private String contextPath;
 
@@ -46,22 +48,27 @@ public class DummyMacroRequestContext {
 		return this.command;
 	}
 
-	public void setMsgMap(Map msgMap) {
-		this.msgMap = msgMap;
+	public void setMessageMap(Map messageMap) {
+		this.messageMap = messageMap;
 	}
+
+	public void setThemeMessageMap(Map themeMessageMap) {
+		this.themeMessageMap = themeMessageMap;
+	}
+
 
 	/**
 	 * @see org.springframework.web.servlet.support.RequestContext#getMessage(String)
 	 */
 	public String getMessage(String code) {
-		return (String) this.msgMap.get(code);
+		return (String) this.messageMap.get(code);
 	}
 
 	/**
 	 * @see org.springframework.web.servlet.support.RequestContext#getMessage(String, String)
 	 */
 	public String getMessage(String code, String defaultMsg) {
-		String msg = (String) this.msgMap.get(code);
+		String msg = (String) this.messageMap.get(code);
 		return (msg != null ? msg : defaultMsg);
 	}
 
@@ -69,14 +76,44 @@ public class DummyMacroRequestContext {
 	 * @see org.springframework.web.servlet.support.RequestContext#getMessage(String, List)
 	 */
 	public String getMessage(String code, List args) {
-		return ((String) this.msgMap.get(code)) + args.toString();
+		return ((String) this.messageMap.get(code)) + args.toString();
 	}
 
 	/**
 	 * @see org.springframework.web.servlet.support.RequestContext#getMessage(String, List, String)
 	 */
 	public String getMessage(String code, List args, String defaultMsg) {
-		String msg = (String) this.msgMap.get(code);
+		String msg = (String) this.messageMap.get(code);
+		return (msg != null ? msg  + args.toString(): defaultMsg);
+	}
+
+	/**
+	 * @see org.springframework.web.servlet.support.RequestContext#getThemeMessage(String)
+	 */
+	public String getThemeMessage(String code) {
+		return (String) this.themeMessageMap.get(code);
+	}
+
+	/**
+	 * @see org.springframework.web.servlet.support.RequestContext#getThemeMessage(String, String)
+	 */
+	public String getThemeMessage(String code, String defaultMsg) {
+		String msg = (String) this.themeMessageMap.get(code);
+		return (msg != null ? msg : defaultMsg);
+	}
+
+	/**
+	 * @see org.springframework.web.servlet.support.RequestContext#getThemeMessage(String, List)
+	 */
+	public String getThemeMessage(String code, List args) {
+		return ((String) this.themeMessageMap.get(code)) + args.toString();
+	}
+
+	/**
+	 * @see org.springframework.web.servlet.support.RequestContext#getThemeMessage(String, List, String)
+	 */
+	public String getThemeMessage(String code, List args, String defaultMsg) {
+		String msg = (String) this.themeMessageMap.get(code);
 		return (msg != null ? msg  + args.toString(): defaultMsg);
 	}
 

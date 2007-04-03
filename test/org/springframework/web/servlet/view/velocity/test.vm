@@ -14,6 +14,12 @@ MESSAGE
 DEFAULTMESSAGE
 #springMessageText("no.such.code" "hi") #springMessageText("no.such.code" "planet")
 
+THEME
+#springTheme("hello") #springTheme("world")
+
+DEFAULTTHEME
+#springThemeText("no.such.code" "hi!") #springThemeText("no.such.code" "planet!")
+
 URL
 #springUrl("/aftercontext.html")
 

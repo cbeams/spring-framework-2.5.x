@@ -42,6 +42,7 @@ import org.springframework.web.servlet.view.DummyMacroRequestContext;
 
 /**
  * @author Darren Davison
+ * @author Juergen Hoeller
  * @since 25.01.2005
  */
 public class FreeMarkerMacroTests extends TestCase {
@@ -122,10 +123,14 @@ public class FreeMarkerMacroTests extends TestCase {
 
 	public void testAllMacros() throws Exception {
 		DummyMacroRequestContext rc = new DummyMacroRequestContext();
-		HashMap msgMap = new HashMap();
+		Map msgMap = new HashMap();
 		msgMap.put("hello", "Howdy");
 		msgMap.put("world", "Mundo");
-		rc.setMsgMap(msgMap);
+		rc.setMessageMap(msgMap);
+		Map themeMsgMap = new HashMap();
+		themeMsgMap.put("hello", "Howdy!");
+		themeMsgMap.put("world", "Mundo!");
+		rc.setThemeMessageMap(themeMsgMap);
 		rc.setContextPath("/springtest");
 
 		TestBean tb = new TestBean("Darren", 99);
@@ -166,6 +171,10 @@ public class FreeMarkerMacroTests extends TestCase {
 			if (tokens[i].equals("DEFAULTMESSAGE")) assertEquals("hi planet", tokens[i + 1]);
 			if (tokens[i].equals("MESSAGEARGS")) assertEquals("Howdy[World]", tokens[i + 1]);
 			if (tokens[i].equals("MESSAGEARGSWITHDEFAULTMESSAGE")) assertEquals("Hi", tokens[i + 1]);
+			if (tokens[i].equals("THEME")) assertEquals("Howdy! Mundo!", tokens[i + 1]);
+			if (tokens[i].equals("DEFAULTTHEME")) assertEquals("hi! planet!", tokens[i + 1]);
+			if (tokens[i].equals("THEMEARGS")) assertEquals("Howdy![World]", tokens[i + 1]);
+			if (tokens[i].equals("THEMEARGSWITHDEFAULTMESSAGE")) assertEquals("Hi!", tokens[i + 1]);
 			if (tokens[i].equals("URL")) assertEquals("/springtest/aftercontext.html", tokens[i + 1]);
 			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\"", tokens[i + 1]);
 			if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" class=\"myCssClass\"", tokens[i + 1]);

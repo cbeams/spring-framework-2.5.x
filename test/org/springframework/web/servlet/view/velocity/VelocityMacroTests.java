@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.web.servlet.view.DummyMacroRequestContext;
 
 /**
  * @author Darren Davison
+ * @author Juergen Hoeller
  * @since 18.06.2004
  */
 public class VelocityMacroTests extends TestCase {
@@ -122,10 +123,14 @@ public class VelocityMacroTests extends TestCase {
 
 	public void testAllMacros() throws Exception {
 		DummyMacroRequestContext rc = new DummyMacroRequestContext();
-		HashMap msgMap = new HashMap();
+		Map msgMap = new HashMap();
 		msgMap.put("hello", "Howdy");
 		msgMap.put("world", "Mundo");
-		rc.setMsgMap(msgMap);
+		rc.setMessageMap(msgMap);
+		Map themeMsgMap = new HashMap();
+		themeMsgMap.put("hello", "Howdy!");
+		themeMsgMap.put("world", "Mundo!");
+		rc.setThemeMessageMap(themeMsgMap);
 		rc.setContextPath("/springtest");
 
 		TestBean tb = new TestBean("Darren", 99);
@@ -163,6 +168,8 @@ public class VelocityMacroTests extends TestCase {
 			if (tokens[i].equals("AGE")) assertEquals("99", tokens[i + 1]);
 			if (tokens[i].equals("MESSAGE")) assertEquals("Howdy Mundo", tokens[i + 1]);
 			if (tokens[i].equals("DEFAULTMESSAGE")) assertEquals("hi planet", tokens[i + 1]);
+			if (tokens[i].equals("THEME")) assertEquals("Howdy! Mundo!", tokens[i + 1]);
+			if (tokens[i].equals("DEFAULTTHEME")) assertEquals("hi! planet!", tokens[i + 1]);
 			if (tokens[i].equals("URL")) assertEquals("/springtest/aftercontext.html", tokens[i + 1]);
 			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" >", tokens[i + 1]);
 			if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" class=\"myCssClass\">", tokens[i + 1]);
@@ -173,4 +180,5 @@ public class VelocityMacroTests extends TestCase {
 			if (tokens[i].equals("FORM10")) assertEquals("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\" >", tokens[i + 1]);
 		}
 	}
+
 }

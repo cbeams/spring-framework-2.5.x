@@ -51,6 +51,36 @@
 <#macro messageArgsText code, args, text>${springMacroRequestContext.getMessage(code, args, text)}</#macro>
 
 <#--
+ * theme
+ *
+ * Macro to translate a theme message code into a message.
+ -->
+<#macro theme code>${springMacroRequestContext.getThemeMessage(code)}</#macro>
+
+<#--
+ * themeText
+ *
+ * Macro to translate a theme message code into a message,
+ * using the given default text if no message found.
+ -->
+<#macro themeText code, text>${springMacroRequestContext.getThemeMessage(code, text)}</#macro>
+
+<#--
+ * themeArgs
+ *
+ * Macro to translate a theme message code with arguments into a message.
+ -->
+<#macro themeArgs code, args>${springMacroRequestContext.getThemeMessage(code, args)}</#macro>
+
+<#--
+ * themeArgsText
+ *
+ * Macro to translate a theme message code with arguments into a message,
+ * using the given default text if no message found.
+ -->
+<#macro themeArgsText code, args, text>${springMacroRequestContext.getThemeMessage(code, args, text)}</#macro>
+
+<#--
  * url
  *
  * Takes a relative URL and makes it absolute from the server root by
