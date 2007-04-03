@@ -3,24 +3,32 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.4 (2007-04-02)
+Changes in version 2.0.4 (2007-04-06)
 -------------------------------------
 
 Package org.springframework.aop
+* AbstractAutoProxyCreator caches advice information per bean, for efficient prototype creation with auto-proxying
 * fixed AspectJAfterReturningAdvice to avoid NPE within returning type check in case of the return value being null
 * fixed AspectJAwareAdvisorAutoProxyCreator's "toString()" implementation to be compatible with JDK 1.3/1.4
+* AnnotationAwareAspectJAutoProxyCreator caches Advisors for singleton @Aspect aspects, increasing performance
 
 Package org.springframework.beans
 * PropertyEditorRegistrySupport/BeanWrapperImpl lazily registers default editors when needed (to avoid init overhead)
+* PropertyEditorRegistrySupport supports registration of shared editors, to allow for specific synchronization
 * BeanWrapperImpl mimimizes bean name parsing overhead and caches parsed property path tokens
 * PatternEditor allows for customization through specifying "java.util.regex.Pattern" flags
 * fixed PropertyPlaceholderConfigurer/BeanDefinitionVisitor to correctly handle TypedStringValue objects with null value
 * AbstractFactoryBean offers a protected "getBeanFactory()" method for accessing its BeanFactory reference
+* BeanReferenceFactoryBean returns null from "getObjectType()" if the BeanFactory has not been injected yet
+* AbstractAutowireCapableBeanFactory uses "filteredPropertyDescriptorsCache" for the PropertyDescriptor array per class
 * DefaultListableBeanFactory is able to invoke public init and destroy methods on package-protected classes
 * DefaultListableBeanFactory caches pre-converted property values as far as possible
 * ConstructorResolver caches the resolved constructor or factory method, for faster re-creation of prototype instances
 * ConstructorResolver caches converted argument values, to avoid conversion overhead for re-created prototype instances
 * DefaultNamespaceHandlerResolver logs linkage error at warn level, in case of a handler class found but not loadable
+
+Package org.springframework.context
+* added "addApplicationListener" method to ConfigurableApplicationContext interface, for statically registered listeners
 
 Package org.springframework.dao
 * PersistenceExceptionTranslationInterceptor supports PersistenceExceptionTranslator autodetection in standalone mode
@@ -36,6 +44,14 @@ Package org.springframework.jms
 * DefaultMessageListenerContainer switches "sessionTransacted" to "true" in case of a non-JTA ResourceTransactionManager
 * DefaultMessageListenerContainer rolls back an external transaction in case of a message rejected while stopping
 * DefaultMessageListenerContainer does not eagerly commit/rollback a in case of a synchronized transacted Session
+* DefaultMessageListenerContainer obtains a shared Connection lazily in case of autoStartup="true"
+* DefaultMessageListenerContainer recovers a shared Connection lazily if it is not currently running (has been stopped)
+* DefaultMessageListenerContainer allows for specifying the listener object lazily, and for replacing it at runtime
+
+JuergenPackage org.springframework.jndi
+* added "proxyInterfaces" property to JndiObjectFactoryBean, for specifying multiple interfaces
+* JndiObjectFactoryBean autodetects proxy interfaces from a specified "expectedType", if necessary
+* JndiObjectTargetSource returns the specified "expectedType" as target class if no JNDI object has been obtained yet
 
 Package org.springframework.mail
 * added "setPriority" method to MimeMessageHelper, for populating the "X-Priority" mail header
@@ -59,10 +75,16 @@ Package org.springframework.samples
 * PetClinic's JPA variant explicitly specifies "META-INF/orm.xml" as mapping file (for Hibernate EntityManager 3.3.0)
 * PetPortal's build script properly includes the Log4J jar in the WAR file
 
+Package org.springframework.scheduling
+* ThreadPoolTaskExecutor/ScheduledExecutorFactoryBean includes the corresponding bean name in startup/shutdown logging
+
 Package org.springframework.scripting
 * LangNamespaceHandler references ScriptFactory classes by name, to avoid NoClassDefFoundErrors in all scenarios
 * added "scope" attribute to all script tags in the "lang" namespace, allowing for non-singleton script objects
 * updated JRuby support for JRuby 0.9.8 (requiring this version now due to incompatible JRuby API changes)
+
+Package org.springframework.test
+* added "getActualException()" method to AssertThrows, for introspecting the actual exception instance after throwing
 
 Package org.springframework.transaction
 * factored out TransactionOperations interface from TransactionTemplate, defining the central "execute" operation
@@ -74,11 +96,19 @@ Package org.springframework.util
 * fixed CustomizableThreadCreator to properly apply its "daemon" flag (inherited by SimpleAsyncTaskExecutor)
 
 Package org.springframework.web
+* added "getContextPath", "getRemoteUser", "getUserPrincipal", "isUserInRole", "isSecure" to WebRequest abstraction
+* changed visibility of "getRequest" accessor on ServletWebRequest and PortletWebRequest to public
+* CharacterEncodingFilter sets the encoding as default response encoding on Servlet 2.4+ (if "forceEncoding"="true")
+* Servlet/PortletContextAware and Servlet/PortletConfigAware are simply skipped if they cannot be satisfied
 * added public "refresh()" operation with protected "onRefresh()" template method to DispatcherServlet/Portlet
+* reworked DispatcherServlet/Portlet to automatically refresh internal state if its ApplicationContext refreshes
+* DispatcherPortlet logs startup logging at debug level instead of info level, analogous to DispatcherServlet
 * factored out protected "getHandlerExecutionChain" template method in Servlet/Portlet AbstractHandlerMapping
 * added "getRootHandler()" method to AbstractUrlHandlerMapping, called on each access to the root handler
 * fixed JSP BindTag to correctly save and re-expose a page-scoped "status" attribute (not just a request-scoped one)
 * JSP FormTag escapes the "action" attribute as well if HTML escaping has been requested
+* JSP InputTag supports the common "autocomplete" HTML extension attribute (as supported by IE and Firefox)
+* "spring.tld" and "spring-form.tld" declare the Spring major version number (2.0) as taglib version number
 
 
 Changes in version 2.0.3 (2007-03-09)
