@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,48 +18,35 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
 
-
 /**
  * Databinding-aware JSP tag for rendering an HTML '<code>textarea</code>'.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class TextareaTag extends AbstractHtmlInputElementTag {
 
-	/**
-	 * The name of the '<code>rows</code>' attribute.
-	 */
 	public static final String ROWS_ATTRIBUTE = "rows";
 
-	/**
-	 * The name of the '<code>cols</code>' attribute.
-	 */
 	public static final String COLS_ATTRIBUTE = "cols";
 
-	/**
-	 * The name of the '<code>onselect</code>' attribute.
-	 */
 	public static final String ONSELECT_ATTRIBUTE = "onselect";
 
+	public static final String READONLY_ATTRIBUTE = "readonly";
 
-	/**
-	 * The value of the '<code>rows</code>' attribute.
-	 */
+
 	private String rows;
 
-	/**
-	 * The value of the '<code>cols</code>' attribute.
-	 */
 	private String cols;
 
-	/**
-	 * The value of the '<code>onselect</code>' attribute.
-	 */
 	private String onselect;
 
+	private String readonly;
+
+
 	/**
-	 * Sets the value of the '<code>rows</code>' attribute.
+	 * Set the value of the '<code>rows</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setRows(String rows) {
@@ -67,15 +54,14 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>rows</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>rows</code>' attribute.
 	 */
 	protected String getRows() {
 		return this.rows;
 	}
 
 	/**
-	 * Sets the value of the '<code>cols</code>' attribute.
+	 * Set the value of the '<code>cols</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setCols(String cols) {
@@ -83,15 +69,14 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>cols</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>cols</code>' attribute.
 	 */
 	protected String getCols() {
 		return this.cols;
 	}
 
 	/**
-	 * Sets the value of the '<code>onselect</code>' attribute.
+	 * Set the value of the '<code>onselect</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnselect(String onselect) {
@@ -99,11 +84,25 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>onselect</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>onselect</code>' attribute.
 	 */
 	protected String getOnselect() {
 		return this.onselect;
+	}
+
+	/**
+	 * Set the value of the '<code>readonly</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setReadonly(String readonly) {
+		this.readonly = readonly;
+	}
+
+	/**
+	 * Get the value of the '<code>readonly</code>' attribute.
+	 */
+	protected String getReadonly() {
+		return this.readonly;
 	}
 
 
@@ -113,6 +112,7 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 		writeOptionalAttribute(tagWriter, ROWS_ATTRIBUTE, getRows());
 		writeOptionalAttribute(tagWriter, COLS_ATTRIBUTE, getCols());
 		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, getOnselect());
+		writeOptionalAttribute(tagWriter, READONLY_ATTRIBUTE, getReadonly());
 		tagWriter.appendValue(getDisplayString(getBoundValue(), getPropertyEditor()));
 		tagWriter.endTag();
 		return EVAL_PAGE;

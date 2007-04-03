@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,21 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import javax.servlet.jsp.tagext.Tag;
+
 import org.springframework.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 
-import javax.servlet.jsp.tagext.Tag;
-
 /**
- * Unit tests for the {@link TextareaTag} class.
- * 
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class TextareaTagTests extends AbstractFormTagTests {
+public class TextareaTagTests extends AbstractFormTagTests {
 
 	private TextareaTag tag;
-	private TestBean rob;
 
+	private TestBean rob;
 
 	protected void onSetUp() {
 		this.tag = new TextareaTag() {
@@ -42,13 +41,28 @@ public final class TextareaTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
-
 	public void testSimpleBind() throws Exception {
 		this.tag.setPath("name");
+
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 		String output = getWriter().toString();
 		assertContainsAttribute(output, "name", "name");
 		assertBlockTagContains(output, "Rob");
+	}
+
+	public void testComplexBind() throws Exception {
+		String onselect = "doSelect()";
+		String readonly = "true";
+
+		this.tag.setPath("spouse.name");
+		this.tag.setOnselect(onselect);
+		this.tag.setReadonly(readonly);
+
+		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		String output = getWriter().toString();
+		assertContainsAttribute(output, "name", "spouse.name");
+		assertContainsAttribute(output, "onselect", onselect);
+		assertContainsAttribute(output, "readonly", readonly);
 	}
 
 	public void testSimpleBindWithHtmlEscaping() throws Exception {
@@ -76,7 +90,6 @@ public final class TextareaTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "name", "myFloat");
 		assertBlockTagContains(output, "12.34f");
 	}
-
 
 	protected TestBean createTestBean() {
 		// set up test data

@@ -786,14 +786,12 @@
 			<variable-class>java.lang.Object</variable-class>
 			<description>The actual value bound to the 'value' attribute</description>
 		</variable>
-
 		<variable>
 			<name-given>displayValue</name-given>
 			<variable-class>java.lang.String</variable-class>
 			<description>The String representation of thr value bound to the 'value' attribute, taking into consideration
 			any PropertyEditor associated with the enclosing 'select' tag.</description>
 		</variable>
-
 		<attribute>
 			<name>value</name>
 			<required>true</required>
@@ -1357,6 +1355,12 @@
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>HTML Event Attribute</description>
+		</attribute>
+		<attribute>
+			<name>readonly</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Optional Attribute</description>
 		</attribute>
 	</tag>
 
