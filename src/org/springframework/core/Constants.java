@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.util.StringUtils;
  */
 public class Constants {
 
+	/** The name of the introspected class */
 	private final String className;
 
 	/** Map from String field name to object value */
@@ -54,8 +55,7 @@ public class Constants {
 
 	/**
 	 * Create a new Constants converter class wrapping the given class.
-	 * <p>
-	 * All <b>public</b> static final variables will be exposed, whatever their type.
+	 * <p>All <b>public</b> static final variables will be exposed, whatever their type.
 	 * @param clazz the class to analyze
 	 * @throws IllegalArgumentException if the supplied <code>clazz</code> is <code>null</code>
 	 */
@@ -78,11 +78,12 @@ public class Constants {
 		}
 	}
 
+
 	/**
 	 * Return the name of the analyzed class.
 	 */
 	public final String getClassName() {
-		return className;
+		return this.className;
 	}
 
 	/**
@@ -97,14 +98,14 @@ public class Constants {
 	 * a Map from String field name to object value.
 	 */
 	protected final Map getFieldCache() {
-		return fieldCache;
+		return this.fieldCache;
 	}
 
 
 	/**
 	 * Return a constant value cast to a Number.
 	 * @param code name of the field
-	 * @return long value if successful
+	 * @return the Number value
 	 * @see #asObject
 	 * @throws ConstantException if the field name wasn't found
 	 * or if the type wasn't compatible with Number
@@ -119,9 +120,9 @@ public class Constants {
 
 	/**
 	 * Return a constant value as a String.
-	 * @param code name of the field
-	 * @return String string value if successful.
-	 * Works even if it's not a string (invokes toString()).
+	 * @param code the name of the field
+	 * @return the String value
+	 * Works even if it's not a string (invokes <code>toString()</code>).
 	 * @see #asObject
 	 * @throws ConstantException if the field name wasn't found
 	 */
@@ -130,9 +131,11 @@ public class Constants {
 	}
 
 	/**
-	 * Parse the given string (upper or lower case accepted) and return 
+	 * Parse the given String (upper or lower case accepted) and return
 	 * the appropriate value if it's the name of a constant field in the
 	 * class we're analysing.
+	 * @param code the name of the field
+	 * @return the Object value
 	 * @throws ConstantException if there's no such field
 	 */
 	public Object asObject(String code) throws ConstantException {
@@ -144,21 +147,74 @@ public class Constants {
 		return val;
 	}
 
+
+	/**
+	 * Return all names of the given group of constants.
+	 * <p>Note that this method assumes that constants are named
+	 * in accordance with the standard Java convention for constant
+	 * values (i.e. all uppercase). The supplied <code>namePrefix</code>
+	 * will be uppercased (in a locale-insensitive fashion) prior to
+	 * the main logic of this method kicking in.
+	 * @param namePrefix prefix of the constant names to search (may be <code>null</code>)
+	 * @return the set of constant names
+	 */
+	public Set getNames(String namePrefix) {
+		String prefixToUse = (StringUtils.hasText(namePrefix) ? namePrefix.trim().toUpperCase() : "");
+		Set names = new HashSet();
+		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
+			String code = (String) it.next();
+			if (code.startsWith(prefixToUse)) {
+				names.add(code);
+			}
+		}
+		return names;
+	}
+
+	/**
+	 * Return all names of the group of constants for the
+	 * given bean property name.
+	 * @param propertyName the name of the bean property
+	 * @return the set of values
+	 * @see #propertyToConstantNamePrefix
+	 */
+	public Set getNamesForProperty(String propertyName) {
+		return getNames(propertyToConstantNamePrefix(propertyName));
+	}
+
+	/**
+	 * Return all names of the given group of constants.
+	 * <p>Note that this method assumes that constants are named
+	 * in accordance with the standard Java convention for constant
+	 * values (i.e. all uppercase). The supplied <code>nameSuffix</code>
+	 * will be uppercased (in a locale-insensitive fashion) prior to
+	 * the main logic of this method kicking in.
+	 * @param nameSuffix suffix of the constant names to search (may be <code>null</code>)
+	 * @return the set of constant names
+	 */
+	public Set getNamesForSuffix(String nameSuffix) {
+		String suffixToUse = (StringUtils.hasText(nameSuffix) ? nameSuffix.trim().toUpperCase() : "");
+		Set names = new HashSet();
+		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
+			String code = (String) it.next();
+			if (code.endsWith(suffixToUse)) {
+				names.add(code);
+			}
+		}
+		return names;
+	}
+
 	/**
 	 * Return all values of the given group of constants.
-	 * <p>
-	 * Please note that this method assumes that constants are named
+	 * <p>Note that this method assumes that constants are named
 	 * in accordance with the standard Java convention for constant
 	 * values (i.e. all uppercase). The supplied <code>namePrefix</code>
 	 * will be uppercased (in a locale-insensitive fashion) prior to
 	 * the main logic of this method kicking in. 
-	 * 
 	 * @param namePrefix prefix of the constant names to search (may be <code>null</code>)
 	 * @return the set of values
 	 */
 	public Set getValues(String namePrefix) {
-		String prefixToUse = StringUtils.hasText(namePrefix)
-				? namePrefix.trim().toUpperCase() : "";
+		String prefixToUse = (StringUtils.hasText(namePrefix) ? namePrefix.trim().toUpperCase() : "");
 		Set values = new HashSet();
 		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
 			String code = (String) it.next();
@@ -181,8 +237,31 @@ public class Constants {
 	}
 
 	/**
+	 * Return all values of the given group of constants.
+	 * <p>Note that this method assumes that constants are named
+	 * in accordance with the standard Java convention for constant
+	 * values (i.e. all uppercase). The supplied <code>nameSuffix</code>
+	 * will be uppercased (in a locale-insensitive fashion) prior to
+	 * the main logic of this method kicking in.
+	 * @param nameSuffix suffix of the constant names to search (may be <code>null</code>)
+	 * @return the set of values
+	 */
+	public Set getValuesForSuffix(String nameSuffix) {
+		String suffixToUse = (StringUtils.hasText(nameSuffix) ? nameSuffix.trim().toUpperCase() : "");
+		Set values = new HashSet();
+		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
+			String code = (String) it.next();
+			if (code.endsWith(suffixToUse)) {
+				values.add(this.fieldCache.get(code));
+			}
+		}
+		return values;
+	}
+
+
+	/**
 	 * Look up the given value within the given group of constants.
-	 * Will return the first match.
+	 * <p>Will return the first match.
 	 * @param value constant value to look up
 	 * @param namePrefix prefix of the constant names to search
 	 * @return the name of the constant field
@@ -213,9 +292,10 @@ public class Constants {
 		return toCode(value, propertyToConstantNamePrefix(propertyName));
 	}
 
+
 	/**
 	 * Convert the given bean property name to a constant name prefix.
-	 * Uses a common naming idiom: turning all lower case characters to
+	 * <p>Uses a common naming idiom: turning all lower case characters to
 	 * upper case, and prepending upper case characters with an underscore.
 	 * <p>Example: "imageSize" -> "IMAGE_SIZE"<br>
 	 * Example: "imagesize" -> "IMAGESIZE".<br>

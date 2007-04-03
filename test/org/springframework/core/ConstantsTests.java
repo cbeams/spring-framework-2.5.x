@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,8 +21,6 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 /**
- * Unit tests for the Constants class.
- * 
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -33,7 +31,7 @@ public class ConstantsTests extends TestCase {
 	public void testConstants() {
 		Constants c = new Constants(A.class);
 		assertEquals(A.class.getName(), c.getClassName());
-		assertEquals(5, c.getSize());
+		assertEquals(7, c.getSize());
 		
 		assertEquals(c.asNumber("DOG").intValue(), A.DOG);
 		assertEquals(c.asNumber("dog").intValue(), A.DOG);
@@ -53,6 +51,24 @@ public class ConstantsTests extends TestCase {
 		}
 		catch (ConstantException expected) {
 		}
+	}
+
+	public void testGetNames() {
+		Constants c = new Constants(A.class);
+
+		Set names = c.getNames("");
+		assertEquals(c.getSize(), names.size());
+		assertTrue(names.contains("DOG"));
+		assertTrue(names.contains("CAT"));
+		assertTrue(names.contains("S1"));
+
+		names = c.getNames("D");
+		assertEquals(1, names.size());
+		assertTrue(names.contains("DOG"));
+	}
+
+	public void testGetValues() {
+		Constants c = new Constants(A.class);
 
 		Set values = c.getValues("");
 		assertEquals(c.getSize(), values.size());
@@ -68,6 +84,24 @@ public class ConstantsTests extends TestCase {
 		assertEquals(2, values.size());
 		assertTrue(values.contains(new Integer(1)));
 		assertTrue(values.contains(new Integer(2)));
+	}
+
+	public void testSuffixAccess() {
+		Constants c = new Constants(A.class);
+
+		Set names = c.getNamesForSuffix("_PROPERTY");
+		assertEquals(2, names.size());
+		assertTrue(names.contains("NO_PROPERTY"));
+		assertTrue(names.contains("YES_PROPERTY"));
+
+		Set values = c.getValuesForSuffix("_PROPERTY");
+		assertEquals(2, values.size());
+		assertTrue(values.contains(new Integer(3)));
+		assertTrue(values.contains(new Integer(4)));
+	}
+
+	public void testToCode() {
+		Constants c = new Constants(A.class);
 
 		assertEquals(c.toCode(new Integer(0), ""), "DOG");
 		assertEquals(c.toCode(new Integer(0), "D"), "DOG");
@@ -89,6 +123,7 @@ public class ConstantsTests extends TestCase {
 
 		assertEquals(c.toCodeForProperty(new Integer(1), "myProperty"), "MY_PROPERTY_NO");
 		assertEquals(c.toCodeForProperty(new Integer(2), "myProperty"), "MY_PROPERTY_YES");
+
 		try {
 			c.toCodeForProperty("bogus", "bogus");
 			fail("Should have thrown ConstantException");
@@ -100,19 +135,19 @@ public class ConstantsTests extends TestCase {
 	public void testGetValuesWithNullPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set values = c.getValues(null);
-		assertEquals("Must have returned *all* public static final values", 5, values.size());
+		assertEquals("Must have returned *all* public static final values", 7, values.size());
 	}
 
 	public void testGetValuesWithEmptyStringPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set values = c.getValues("");
-		assertEquals("Must have returned *all* public static final values", 5, values.size());
+		assertEquals("Must have returned *all* public static final values", 7, values.size());
 	}
 
 	public void testGetValuesWithWhitespacedStringPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set values = c.getValues(" ");
-		assertEquals("Must have returned *all* public static final values", 5, values.size());
+		assertEquals("Must have returned *all* public static final values", 7, values.size());
 	}
 
 	public void testWithClassThatExposesNoConstants() throws Exception {
@@ -132,8 +167,10 @@ public class ConstantsTests extends TestCase {
 	}
 
 
-	private static final class NoConstants {}
+	private static final class NoConstants {
+	}
 	
+
 	private static final class A {
 		
 		public static final int DOG = 0;
@@ -142,6 +179,9 @@ public class ConstantsTests extends TestCase {
 
 		public static final int MY_PROPERTY_NO = 1;
 		public static final int MY_PROPERTY_YES = 2;
+
+		public static final int NO_PROPERTY = 3;
+		public static final int YES_PROPERTY = 4;
 
 		/** ignore these */
 		protected static final int P = -1;
