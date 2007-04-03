@@ -161,6 +161,9 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * @see #createListenerConsumer
 	 */
 	protected void doInitialize() throws JMSException {
+		establishSharedConnection();
+
+		// Register Sessions and MessageConsumers.
 		this.sessions = new HashSet(this.concurrentConsumers);
 		this.consumers = new HashSet(this.concurrentConsumers);
 		for (int i = 0; i < this.concurrentConsumers; i++) {

@@ -530,9 +530,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	private void scheduleNewInvoker() {
 		AsyncMessageListenerInvoker invoker = new AsyncMessageListenerInvoker();
-		this.taskExecutor.execute(invoker);
-		this.scheduledInvokers.add(invoker);
-		this.activeInvokerMonitor.notifyAll();
+		if (rescheduleTaskIfNecessary(invoker)) {
+			// This should always be true, since we're only calling this when active.
+			this.scheduledInvokers.add(invoker);
+		}
 	}
 
 	/**
@@ -600,7 +601,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	protected void establishSharedConnection() {
 		try {
-			refreshSharedConnection();
+			super.establishSharedConnection();
 		}
 		catch (JMSException ex) {
 			logger.debug("Could not establish shared JMS Connection - " +
@@ -694,13 +695,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #setRecoveryInterval
 	 */
 	protected void refreshConnectionUntilSuccessful() {
-		while (isActive()) {
+		while (isRunning()) {
 			try {
 				if (sharedConnectionEnabled()) {
 					refreshSharedConnection();
-					if (isRunning()) {
-						startSharedConnection();
-					}
+					startSharedConnection();
 				}
 				else {
 					Connection con = createConnection();

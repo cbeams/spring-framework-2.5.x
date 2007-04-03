@@ -154,15 +154,9 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 				this.active = true;
 				this.lifecycleMonitor.notifyAll();
 			}
-
-			if (sharedConnectionEnabled()) {
-				establishSharedConnection();
-			}
-
 			if (this.autoStartup) {
 				doStart();
 			}
-
 			doInitialize();
 		}
 		catch (JMSException ex) {
@@ -175,15 +169,19 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	/**
 	 * Establish a shared Connection for this container.
-	 * <p>The default implementation delegates to <code>refreshSharedConnection</code>,
+	 * <p>The default implementation delegates to {@link #createSharedConnection()},
 	 * which does one immediate attempt and throws an exception if it fails.
 	 * Can be overridden to have a recovery proces in place, retrying
 	 * until a Connection can be successfully established.
 	 * @throws JMSException if thrown by JMS API methods
-	 * @see #refreshSharedConnection()
 	 */
 	protected void establishSharedConnection() throws JMSException {
-		refreshSharedConnection();
+		synchronized (this.sharedConnectionMonitor) {
+			if (this.sharedConnection == null) {
+				this.sharedConnection = createSharedConnection();
+				logger.debug("Established shared JMS Connection");
+			}
+		}
 	}
 
 	/**
@@ -196,16 +194,26 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		boolean running = isRunning();
 		synchronized (this.sharedConnectionMonitor) {
 			ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), running);
-			this.sharedConnection = null;
-			Connection con = createConnection();
-			try {
-				prepareSharedConnection(con);
-			}
-			catch (JMSException ex) {
-				JmsUtils.closeConnection(con);
-				throw ex;
-			}
-			this.sharedConnection = con;
+			this.sharedConnection = createSharedConnection();
+		}
+	}
+
+	/**
+	 * Create a shared Connection for this container.
+	 * <p>The default implementation creates a standard Connection
+	 * and prepares it through {@link #prepareSharedConnection}.
+	 * @return the prepared Connection
+	 * @throws JMSException if the creation failed
+	 */
+	protected Connection createSharedConnection() throws JMSException {
+		Connection con = createConnection();
+		try {
+			prepareSharedConnection(con);
+			return con;
+		}
+		catch (JMSException ex) {
+			JmsUtils.closeConnection(con);
+			throw ex;
 		}
 	}
 
@@ -332,6 +340,12 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @see #startSharedConnection
 	 */
 	protected void doStart() throws JMSException {
+		// Lazily establish a shared Connection, if necessary.
+		if (sharedConnectionEnabled()) {
+			establishSharedConnection();
+		}
+
+		// Reschedule paused tasks, if any.
 		synchronized (this.lifecycleMonitor) {
 			this.running = true;
 			this.lifecycleMonitor.notifyAll();
@@ -341,6 +355,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 			}
 		}
 
+		// Start the shared Connection, if any.
 		if (sharedConnectionEnabled()) {
 			startSharedConnection();
 		}
