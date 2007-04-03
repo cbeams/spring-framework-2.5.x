@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -368,7 +368,7 @@ public abstract class BaseCommandController extends AbstractController {
 		if (!suppressBinding(request)) {
 			binder.bind(request);
 			onBind(request, command, errors);
-			if (this.validators != null && isValidateOnBinding() && !suppressValidation(request, command)) {
+			if (this.validators != null && isValidateOnBinding() && !suppressValidation(request, command, errors)) {
 				for (int i = 0; i < this.validators.length; i++) {
 					ValidationUtils.invokeValidator(this.validators[i], command, errors);
 				}
@@ -447,6 +447,8 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Determine whether to use direct field access instead of bean property access.
 	 * Applied by {@link #prepareBinder}.
 	 * <p>Default is "false". Can be overridden in subclasses.
+	 * @return whether to use direct field access (<code>true</code>)
+	 * or bean property access (<code>false</code>)
 	 * @see #prepareBinder
 	 * @see org.springframework.validation.DataBinder#initDirectFieldAccess()
 	 */
@@ -507,6 +509,22 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Return whether to suppress validation for the given request.
+	 * <p>The default implementation delegates to {@link #suppressValidation(HttpServletRequest, Object)}.
+	 * @param request current HTTP request
+	 * @param command the command object to validate
+	 * @param errors validation errors holder, allowing for additional
+	 * custom registration of binding errors
+	 * @return whether to suppress validation for the given request
+	 */
+	protected boolean suppressValidation(HttpServletRequest request, Object command, BindException errors) {
+		return suppressValidation(request, command);
+	}
+
+	/**
+	 * Return whether to suppress validation for the given request.
+	 * <p>Called by the default implementation of the
+	 * {@link #suppressValidation(HttpServletRequest, Object, BindException)} variant
+	 * with all parameters.
 	 * <p>The default implementation delegates to {@link #suppressValidation(HttpServletRequest)}.
 	 * @param request current HTTP request
 	 * @param command the command object to validate
@@ -524,6 +542,8 @@ public abstract class BaseCommandController extends AbstractController {
 	 * <p>The default implementation is empty.
 	 * @param request current HTTP request
 	 * @return whether to suppress validation for the given request
+	 * @deprecated as of Spring 2.0.4, in favor of the
+	 * {@link #suppressValidation(HttpServletRequest, Object)} variant
 	 */
 	protected boolean suppressValidation(HttpServletRequest request) {
 		return false;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -285,7 +285,8 @@ public class SimpleFormController extends AbstractFormController {
 	 * <p>Gets called by {@link #suppressValidation} and {@link #processFormSubmission}.
 	 * Consequently, this single method determines to suppress validation
 	 * <i>and</i> to show the form view in any case.
-	 * <p>The default implementation delegates to {@link #onSubmit(Object, BindException)}.
+	 * <p>The default implementation delegates to
+	 * {@link #isFormChangeRequest(javax.servlet.http.HttpServletRequest)}.
 	 * @param request current HTTP request
 	 * @param command form object with request parameters bound onto it
 	 * @return whether the given request is a form change request

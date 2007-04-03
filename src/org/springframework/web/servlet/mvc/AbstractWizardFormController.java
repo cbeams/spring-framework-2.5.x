@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -491,7 +491,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		}
 
 		// Normal submit: validate current page and show specified target page.
-		if (!suppressValidation(request, command)) {
+		if (!suppressValidation(request, command, errors)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Validating wizard page " + currentPage + " for form bean '" + getCommandName() + "'");
 			}
@@ -636,7 +636,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			return showPage(request, errors, currentPage);
 		}
 
-		if (!suppressValidation(request, command)) {
+		if (!suppressValidation(request, command, errors)) {
 			// In case of remaining errors on a page -> show the page.
 			for (int page = 0; page < getPageCount(request, command); page++) {
 				validatePage(command, errors, page, true);
