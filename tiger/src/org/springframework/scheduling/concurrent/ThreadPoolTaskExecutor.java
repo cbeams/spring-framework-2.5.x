@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.task.TaskRejectedException;
@@ -66,7 +67,8 @@ import org.springframework.util.Assert;
  * @see java.util.concurrent.Executors
  * @see ConcurrentTaskExecutor
  */
-public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor, InitializingBean, DisposableBean {
+public class ThreadPoolTaskExecutor
+		implements SchedulingTaskExecutor, Executor, BeanNameAware, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -83,6 +85,8 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 	private ThreadFactory threadFactory = Executors.defaultThreadFactory();
 
 	private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.AbortPolicy();
+
+	private String beanName;
 
 	private ThreadPoolExecutor threadPoolExecutor;
 
@@ -187,6 +191,10 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 				(rejectedExecutionHandler != null ? rejectedExecutionHandler : new ThreadPoolExecutor.AbortPolicy());
 	}
 
+	public void setBeanName(String name) {
+		this.beanName = name;
+	}
+
 
 	/**
 	 * Calls <code>initialize()</code> after the container applied all property values.
@@ -201,7 +209,9 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 	 * @see #createQueue
 	 */
 	public void initialize() {
-		logger.info("Creating ThreadPoolExecutor");
+		if (logger.isInfoEnabled()) {
+			logger.info("Initializing ThreadPoolExecutor" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
+		}
 		BlockingQueue queue = createQueue(this.queueCapacity);
 		this.threadPoolExecutor = new ThreadPoolExecutor(
 				this.corePoolSize, this.maxPoolSize, this.keepAliveSeconds, TimeUnit.SECONDS,
@@ -292,7 +302,9 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 	 * @see java.util.concurrent.ThreadPoolExecutor#shutdown()
 	 */
 	public void shutdown() {
-		logger.info("Shutting down ThreadPoolExecutor");
+		if (logger.isInfoEnabled()) {
+			logger.info("Shutting down ThreadPoolExecutor" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
+		}
 		this.threadPoolExecutor.shutdown();
 	}
 

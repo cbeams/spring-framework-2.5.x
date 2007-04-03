@@ -25,6 +25,7 @@ import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -61,7 +62,7 @@ import org.springframework.util.ObjectUtils;
  * @see edu.emory.mathcs.backport.java.util.concurrent.ScheduledThreadPoolExecutor
  * @see org.springframework.scheduling.timer.TimerFactoryBean
  */
-public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -74,6 +75,8 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 	private RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.AbortPolicy();
 
 	private boolean exposeUnconfigurableExecutor = false;
+
+	private String beanName;
 
 	private ScheduledExecutorService executor;
 
@@ -130,9 +133,16 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 		this.exposeUnconfigurableExecutor = exposeUnconfigurableExecutor;
 	}
 
+	public void setBeanName(String name) {
+		this.beanName = name;
+	}
+
 
 	public void afterPropertiesSet() {
-		logger.info("Initializing SchedulerExecutorService");
+		if (logger.isInfoEnabled()) {
+			logger.info("Initializing ScheduledExecutorService" +
+					(this.beanName != null ? " '" + this.beanName + "'" : ""));
+		}
 		ScheduledExecutorService executor =
 				createExecutor(this.poolSize, this.threadFactory, this.rejectedExecutionHandler);
 
@@ -210,7 +220,10 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 	 * @see edu.emory.mathcs.backport.java.util.concurrent.ScheduledExecutorService#shutdown()
 	 */
 	public void destroy() {
-		logger.info("Shutting down ScheduledExecutorService");
+		if (logger.isInfoEnabled()) {
+			logger.info("Shutting down ScheduledExecutorService" +
+					(this.beanName != null ? " '" + this.beanName + "'" : ""));
+		}
 		this.executor.shutdown();
 	}
 
