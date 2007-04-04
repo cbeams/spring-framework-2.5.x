@@ -155,10 +155,9 @@
  * @param attributes any additional attributes for the element (such as class
  *    or CSS styles or size
  -->
-<#macro formInput path attributes="" fieldType="text" >
+<#macro formInput path attributes="" fieldType="text">
     <@bind path/>
-    <input type="${fieldType}" id="${status.expression}" name="${status.expression}" value="<#if fieldType!="password">${stringStatusValue}</#if>" ${attributes}
-    <@closeTag/>
+    <input type="${fieldType}" id="${status.expression}" name="${status.expression}" value="<#if fieldType!="password">${stringStatusValue}</#if>" ${attributes}<@closeTag/>
 </#macro>
 
 <#--
@@ -173,7 +172,7 @@
  * @param attributes any additional attributes for the element (such as class
  *    or CSS styles or size
  -->
-<#macro formPasswordInput path attributes="" >
+<#macro formPasswordInput path attributes="">
     <@formInput path, attributes, "password"/>
 </#macro>
 
@@ -188,7 +187,7 @@
  * @param attributes any additional attributes for the element (such as class
  *    or CSS styles or size
  -->
-<#macro formHiddenInput path attributes="" >
+<#macro formHiddenInput path attributes="">
     <@formInput path, attributes, "hidden"/>
 </#macro>
 
@@ -201,7 +200,7 @@
  * @param attributes any additional attributes for the element (such as class
  *    or CSS styles or size
  -->
-<#macro formTextarea path attributes="" >
+<#macro formTextarea path attributes="">
     <@bind path/>
     <textarea id="${status.expression}" name="${status.expression}" ${attributes}>${stringStatusValue}</textarea>
 </#macro>
@@ -242,7 +241,7 @@
     <select multiple="multiple" id="${status.expression}" name="${status.expression}" ${attributes}>
         <#list options?keys as value>
         <#assign isSelected = contains(status.value?default([""]), value)>
-        <option value="${value?html}" <#if isSelected>selected="selected"</#if>>${options[value]?html}</option>
+        <option value="${value?html}"<#if isSelected> selected="selected"</#if>>${options[value]?html}</option>
         </#list>
     </select>
 </#macro>
@@ -263,9 +262,7 @@
     <@bind path/>
     <#list options?keys as value>
     <#assign id="${status.expression}${value_index}">
-    <input type="radio" id="${id}" name="${status.expression}" value="${value?html}"
-        <#if stringStatusValue == value>checked="checked"</#if> ${attributes}
-    <@closeTag/>
+    <input type="radio" id="${id}" name="${status.expression}" value="${value?html}"<#if stringStatusValue == value> checked="checked"</#if> ${attributes}<@closeTag/>
     <label for="${id}">${options[value]?html}</label>${separator}
     </#list>
 </#macro>
@@ -287,11 +284,10 @@
     <#list options?keys as value>
     <#assign id="${status.expression}${value_index}">
     <#assign isSelected = contains(status.value?default([""]), value)>
-    <input type="checkbox" id="${id}" name="${status.expression}" value="${value?html}"
-        <#if isSelected>checked="checked"</#if> ${attributes}
-    <@closeTag/>
+    <input type="checkbox" id="${id}" name="${status.expression}" value="${value?html}"<#if isSelected> checked="checked"</#if> ${attributes}<@closeTag/>
     <label for="${id}">${options[value]?html}</label>${separator}
     </#list>
+    <input type="hidden" name="_${status.expression}" value="on"/>
 </#macro>
 
 <#--
