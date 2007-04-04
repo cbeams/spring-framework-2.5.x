@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
@@ -53,9 +52,9 @@ public class VelocityMacroTests extends TestCase {
 
 	private StaticWebApplicationContext wac;
 
-	private HttpServletRequest request;
+	private MockHttpServletRequest request;
 
-	private HttpServletResponse expectedResponse;
+	private MockHttpServletResponse response;
 
 
 	public void setUp() throws Exception {
@@ -75,7 +74,7 @@ public class VelocityMacroTests extends TestCase {
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
-		expectedResponse = new MockHttpServletResponse();
+		response = new MockHttpServletResponse();
 	}
 
 	public void testExposeSpringMacroHelpers() throws Exception {
@@ -94,7 +93,7 @@ public class VelocityMacroTests extends TestCase {
 
 		Map model = new HashMap();
 		model.put("tb", new TestBean("juergen", 99));
-		vv.render(model, request, expectedResponse);
+		vv.render(model, request, response);
 	}
 
 	public void testSpringMacroRequestContextAttributeUsed() {
@@ -113,7 +112,7 @@ public class VelocityMacroTests extends TestCase {
 		model.put(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, helperTool);
 
 		try {
-			vv.render(model, request, expectedResponse);
+			vv.render(model, request, response);
 		}
 		catch (Exception ex) {
 			assertTrue(ex instanceof ServletException);
@@ -122,7 +121,7 @@ public class VelocityMacroTests extends TestCase {
 	}
 
 	public void testAllMacros() throws Exception {
-		DummyMacroRequestContext rc = new DummyMacroRequestContext();
+		DummyMacroRequestContext rc = new DummyMacroRequestContext(request);
 		Map msgMap = new HashMap();
 		msgMap.put("hello", "Howdy");
 		msgMap.put("world", "Mundo");
@@ -134,7 +133,7 @@ public class VelocityMacroTests extends TestCase {
 		rc.setContextPath("/springtest");
 
 		TestBean tb = new TestBean("Darren", 99);
-		rc.setCommand(tb);
+		request.setAttribute("command", tb);
 
 		HashMap names = new HashMap();
 		names.put("Darren", "Darren Davison");
@@ -156,13 +155,13 @@ public class VelocityMacroTests extends TestCase {
 		view.setEncoding("UTF-8");
 		view.setVelocityEngine(ve);
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		MockHttpServletResponse response = new MockHttpServletResponse();
 		view.render(model, request, response);
 
 		// tokenize output and ignore whitespace
 		String output = response.getContentAsString();
+		System.out.println(output);
 		String[] tokens = StringUtils.tokenizeToStringArray(output, "\t\n");
+
 		for (int i = 0; i < tokens.length; i++) {
 			if (tokens[i].equals("NAME")) assertEquals("Darren", tokens[i + 1]);
 			if (tokens[i].equals("AGE")) assertEquals("99", tokens[i + 1]);

@@ -19,7 +19,11 @@ package org.springframework.web.servlet.view;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.TestBean;
+import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.servlet.support.RequestContext;
 
 /**
  * Dummy request context used for VTL and FTL macro tests.
@@ -31,7 +35,7 @@ import org.springframework.beans.TestBean;
  */
 public class DummyMacroRequestContext {
 
-	private TestBean command;
+	private HttpServletRequest request;
 
 	private Map messageMap;
 
@@ -40,13 +44,10 @@ public class DummyMacroRequestContext {
 	private String contextPath;
 
 
-	public void setCommand(TestBean command) {
-		this.command = command;
+	public DummyMacroRequestContext(HttpServletRequest request) {
+		this.request = request;
 	}
 
-	public TestBean getCommand() {
-		return this.command;
-	}
 
 	public void setMessageMap(Map messageMap) {
 		this.messageMap = messageMap;
@@ -131,27 +132,15 @@ public class DummyMacroRequestContext {
 	/**
 	 * @see org.springframework.web.servlet.support.RequestContext#getBindStatus(String)
 	 */
-	public DummyBindStatus getBindStatus(String path) throws IllegalStateException {
-		return new DummyBindStatus();
+	public BindStatus getBindStatus(String path) throws IllegalStateException {
+		return new BindStatus(new RequestContext(this.request), path, false);
 	}
 
 	/**
 	 * @see org.springframework.web.servlet.support.RequestContext#getBindStatus(String, boolean)
 	 */
-	public DummyBindStatus getBindStatus(String path, boolean htmlEscape) throws IllegalStateException {
-		return new DummyBindStatus();
-	}
-
-
-	public static class DummyBindStatus {
-
-		public String getExpression() {
-			return "name";
-		}
-
-		public String getValue() {
-			return "Darren";
-		}
+	public BindStatus getBindStatus(String path, boolean htmlEscape) throws IllegalStateException {
+		return new BindStatus(new RequestContext(this.request), path, true);
 	}
 
 }

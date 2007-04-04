@@ -39,20 +39,19 @@ FORM5
 #springFormSingleSelect("command.name" $nameOptionMap "")
 
 FORM6
-#springFormMultiSelect("command.name" $nameOptionMap "")
+#springFormMultiSelect("command.spouses" $nameOptionMap "")
 
 FORM7
 #springFormRadioButtons("command.name" $nameOptionMap " " "")
 
 FORM8
-#springFormCheckboxes("command.name" $nameOptionMap " " "")
+#springFormCheckboxes("command.spouses" $nameOptionMap " " "")
 
 FORM9
 #springFormPasswordInput("command.name" "")
 
 FORM10
 #springFormHiddenInput("command.name" "")
-
 
 ERRORS
 #springShowErrors(" " "")

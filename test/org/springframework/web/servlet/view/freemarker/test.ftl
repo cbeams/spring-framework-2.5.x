@@ -51,18 +51,14 @@ FORM4
 FORM5
 <@spring.formSingleSelect "command.name", nameOptionMap, ""/>
 
-<#-- WHY DOES THIS FAIL TO PARSE??
 FORM6
-<@spring.formMultiSelect "command.name", nameOptionMap, ""/>
--->
+<@spring.formMultiSelect "command.spouses", nameOptionMap, ""/>
 
 FORM7
 <@spring.formRadioButtons "command.name", nameOptionMap, " ", ""/>
 
-<#-- WHY DOES THIS FAIL TO PARSE??
 FORM8
-<@spring.formCheckboxes "command.name", nameOptionMap, " ", ""/>
--->
+<@spring.formCheckboxes "command.spouses", nameOptionMap, " ", ""/>
 
 FORM9
 <@spring.formPasswordInput "command.name", ""/>

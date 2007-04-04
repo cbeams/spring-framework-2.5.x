@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import freemarker.template.Configuration;
@@ -52,9 +51,9 @@ public class FreeMarkerMacroTests extends TestCase {
 
 	private StaticWebApplicationContext wac;
 
-	private HttpServletRequest request;
+	private MockHttpServletRequest request;
 
-	private HttpServletResponse expectedResponse;
+	private MockHttpServletResponse response;
 
 	private FreeMarkerConfigurer fc;
 
@@ -75,7 +74,7 @@ public class FreeMarkerMacroTests extends TestCase {
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
-		expectedResponse = new MockHttpServletResponse();
+		response = new MockHttpServletResponse();
 	}
 
 	public void testExposeSpringMacroHelpers() throws Exception {
@@ -94,7 +93,7 @@ public class FreeMarkerMacroTests extends TestCase {
 
 		Map model = new HashMap();
 		model.put("tb", new TestBean("juergen", 99));
-		fv.render(model, request, expectedResponse);
+		fv.render(model, request, response);
 	}
 
 	public void testSpringMacroRequestContextAttributeUsed() {
@@ -113,7 +112,7 @@ public class FreeMarkerMacroTests extends TestCase {
 		model.put(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, helperTool);
 
 		try {
-			fv.render(model, request, expectedResponse);
+			fv.render(model, request, response);
 		}
 		catch (Exception ex) {
 			assertTrue(ex instanceof ServletException);
@@ -122,7 +121,7 @@ public class FreeMarkerMacroTests extends TestCase {
 	}
 
 	public void testAllMacros() throws Exception {
-		DummyMacroRequestContext rc = new DummyMacroRequestContext();
+		DummyMacroRequestContext rc = new DummyMacroRequestContext(request);
 		Map msgMap = new HashMap();
 		msgMap.put("hello", "Howdy");
 		msgMap.put("world", "Mundo");
@@ -134,7 +133,8 @@ public class FreeMarkerMacroTests extends TestCase {
 		rc.setContextPath("/springtest");
 
 		TestBean tb = new TestBean("Darren", 99);
-		rc.setCommand(tb);
+		tb.setSpouse(new TestBean("Fred"));
+		request.setAttribute("command", tb);
 
 		HashMap names = new HashMap();
 		names.put("Darren", "Darren Davison");
@@ -154,9 +154,6 @@ public class FreeMarkerMacroTests extends TestCase {
 		view.setUrl("test.ftl");
 		view.setConfiguration(config);
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
-		MockHttpServletResponse response = new MockHttpServletResponse();
 		view.render(model, request, response);
 
 		// tokenize output and ignore whitespace
@@ -176,16 +173,16 @@ public class FreeMarkerMacroTests extends TestCase {
 			if (tokens[i].equals("THEMEARGS")) assertEquals("Howdy![World]", tokens[i + 1]);
 			if (tokens[i].equals("THEMEARGSWITHDEFAULTMESSAGE")) assertEquals("Hi!", tokens[i + 1]);
 			if (tokens[i].equals("URL")) assertEquals("/springtest/aftercontext.html", tokens[i + 1]);
-			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\"", tokens[i + 1]);
-			if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" class=\"myCssClass\"", tokens[i + 1]);
+			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\"     >", tokens[i + 1]);
+			if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" class=\"myCssClass\"    >", tokens[i + 1]);
 			if (tokens[i].equals("FORM3")) assertEquals("<textarea id=\"name\" name=\"name\" >Darren</textarea>", tokens[i + 1]);
 			if (tokens[i].equals("FORM4")) assertEquals("<textarea id=\"name\" name=\"name\" rows=10 cols=30>Darren</textarea>", tokens[i + 1]);
 			//TODO verify remaining output (fix whitespace)
-			if (tokens[i].equals("FORM9")) assertEquals("<input type=\"password\" id=\"name\" name=\"name\" value=\"\"", tokens[i + 1]);
-			if (tokens[i].equals("FORM10")) assertEquals("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\"", tokens[i + 1]);
-			if (tokens[i].equals("FORM11")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\"", tokens[i + 1]);
-			if (tokens[i].equals("FORM12")) assertEquals("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\"", tokens[i + 1]);
-			if (tokens[i].equals("FORM13")) assertEquals("<input type=\"password\" id=\"name\" name=\"name\" value=\"\"", tokens[i + 1]);
+			if (tokens[i].equals("FORM9")) assertEquals("<input type=\"password\" id=\"name\" name=\"name\" value=\"\"     >", tokens[i + 1]);
+			if (tokens[i].equals("FORM10")) assertEquals("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\"     >", tokens[i + 1]);
+			if (tokens[i].equals("FORM11")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\"     >", tokens[i + 1]);
+			if (tokens[i].equals("FORM12")) assertEquals("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\"     >", tokens[i + 1]);
+			if (tokens[i].equals("FORM13")) assertEquals("<input type=\"password\" id=\"name\" name=\"name\" value=\"\"     >", tokens[i + 1]);
 		}
 	}
 
