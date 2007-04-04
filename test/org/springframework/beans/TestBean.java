@@ -428,10 +428,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 	public String toString() {
-		String s = "name=" + name + "; age=" + age + "; touchy=" + touchy;
-		ITestBean spouse = getSpouse();
-		s += "; spouse={" + (spouse != null ? spouse.getName() : null) + "}";
-		return s;
+		return this.name;
 	}
 
 }
