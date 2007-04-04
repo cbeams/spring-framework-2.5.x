@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.ErrorListener;
@@ -59,14 +58,14 @@ import org.springframework.web.util.NestedServletException;
  * <p>Properties:
  * <ul>
  * <li>{@link #setStylesheetLocation(org.springframework.core.io.Resource) stylesheetLocation}:
- * 	a {@link Resource} pointing to the XSLT stylesheet
+ * a {@link Resource} pointing to the XSLT stylesheet
  * <li>{@link #setRoot(String) root}: the name of the root element; defaults to {@link #DEFAULT_ROOT "DocRoot"}
  * <li>{@link #setUriResolver(javax.xml.transform.URIResolver) uriResolver}:
- * 	the {@link URIResolver} to be used in the transform
+ * the {@link URIResolver} to be used in the transform
  * <li>{@link #setErrorListener(javax.xml.transform.ErrorListener) errorListener} (optional):
- * 	the {@link ErrorListener} implementation instance for custom handling of warnings and errors during TransformerFactory operations
+ * the {@link ErrorListener} implementation instance for custom handling of warnings and errors during TransformerFactory operations
  * <li>{@link #setIndent(boolean) indent} (optional): whether additional whitespace
- * 	may be added when outputting the result; defaults to <code>true</code> 
+ * may be added when outputting the result; defaults to <code>true</code>
  * <li>{@link #setCache(boolean) cache} (optional): are templates to be cached; debug setting only; defaults to <code>true</code> 
  * </ul>
  *
@@ -76,14 +75,15 @@ import org.springframework.web.util.NestedServletException;
  * and is not thread-safe.
  *
  * @author Rod Johnson
- * @author Darren Davison
  * @author Juergen Hoeller
+ * @author Darren Davison
  */
 public abstract class AbstractXsltView extends AbstractView {
 
-	/**
-	 * The default document root name.
-	 */
+	/** The default content type if no stylesheet specified */
+	public static final String XML_CONTENT_TYPE = "text/xml; charset=ISO-8859-1";
+
+	/** The default document root name */
 	public static final String DEFAULT_ROOT = "DocRoot";
 
 
@@ -105,7 +105,19 @@ public abstract class AbstractXsltView extends AbstractView {
 
 	private TransformerFactory transformerFactory;
 
-	private Templates templates;
+	private volatile Templates cachedTemplates;
+
+
+	/**
+	 * This constructor sets the content type to "text/xml; charset=ISO-8859-1"
+	 * by default. This will be switched to the standard web view default
+	 * "text/html; charset=ISO-8859-1" if a stylesheet location has been specified.
+	 * A specific content type can be configured via the "contentType" bean property.
+	 * @see #setContentType
+	 */
+	protected AbstractXsltView() {
+		setContentType(XML_CONTENT_TYPE);
+	}
 
 
 	/**
@@ -120,9 +132,14 @@ public abstract class AbstractXsltView extends AbstractView {
 	public void setStylesheetLocation(Resource stylesheetLocation) {
 		this.stylesheetLocation = stylesheetLocation;
 		// Re-cache templates if transformer factory already initialized.
-		if (this.transformerFactory != null) {
-			cacheTemplates();
-		}
+		resetCachedTemplates();
+	}
+
+	/**
+	 * Return the location of the XSLT stylesheet, if any.
+	 */
+	protected Resource getStylesheetLocation() {
+		return this.stylesheetLocation;
 	}
 
 	/**
@@ -143,8 +160,8 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * as well. Set this flag to <code>false</code> if you want to pass in a single
 	 * model object while still using the root element name configured
 	 * through the {@link #setRoot(String) "root" property}.
-     * @param useSingleModelNameAsRoot <code>true</code> if the name of a given single
-     * model object is to be used as the document root element name
+	 * @param useSingleModelNameAsRoot <code>true</code> if the name of a given single
+	 * model object is to be used as the document root element name
 	 * @see #setRoot
 	 */
 	public void setUseSingleModelNameAsRoot(boolean useSingleModelNameAsRoot) {
@@ -196,10 +213,23 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 	/**
-	 * Set whether to activate the cache. Default is <code>true</code>.
+	 * Set whether to activate the template cache for this view.
+	 * <p>Default is <code>true</code>. Turn this off to refresh
+	 * the Templates object on every access, e.g. during development.
+	 * @see #resetCachedTemplates()
 	 */
 	public void setCache(boolean cache) {
 		this.cache = cache;
+	}
+
+	/**
+	 * Reset the cached Templates object, if any.
+	 * <p>The Templates object will subsequently be rebuilt on next
+	 * {@link #getTemplates() access}, if caching is enabled.
+	 * @see #setCache
+	 */
+	public final void resetCachedTemplates() {
+		this.cachedTemplates = null;
 	}
 
 
@@ -211,79 +241,35 @@ public abstract class AbstractXsltView extends AbstractView {
 		this.transformerFactory = TransformerFactory.newInstance();
 		this.transformerFactory.setErrorListener(this.errorListener);
 		if (this.uriResolver != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Using custom URIResolver [" + this.uriResolver + "] in XSLT view with name '" +
-						getBeanName() + "'");
-			}
 			this.transformerFactory.setURIResolver(this.uriResolver);
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("URL in view is " + this.stylesheetLocation);
+		if (getStylesheetLocation() != null) {
+			setContentType(DEFAULT_CONTENT_TYPE);
 		}
-		cacheTemplates();
-	}
-
-	private synchronized void cacheTemplates() throws ApplicationContextException {
-		if (this.stylesheetLocation != null) {
-			try {
-				this.templates = this.transformerFactory.newTemplates(getStylesheetSource(this.stylesheetLocation));
-				if (logger.isDebugEnabled()) {
-					logger.debug("Loaded templates [" + this.templates + "] in XSLT view '" + getBeanName() + "'");
-				}
-			}
-			catch (TransformerConfigurationException ex) {
-				throw new ApplicationContextException("Can't load stylesheet from " + this.stylesheetLocation +
-						" in XSLT view '" + getBeanName() + "'", ex);
-			}
+		try {
+			getTemplates();
+		}
+		catch (TransformerConfigurationException ex) {
+			throw new ApplicationContextException("Can't load stylesheet for XSLT view '" + getBeanName() + "'", ex);
 		}
 	}
 
 	/**
-	 * Load the stylesheet.
-	 * @param stylesheetLocation the stylesheet resource to be loaded
-	 * @return the stylesheet source
-	 * @throws ApplicationContextException if the stylesheet resource could not be loaded
+	 * Return the TransformerFactory used by this view.
+	 * Available once the View object has been fully initialized.
 	 */
-	protected Source getStylesheetSource(Resource stylesheetLocation) throws ApplicationContextException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Loading XSLT stylesheet from " + stylesheetLocation);
-		}
-		try {
-			URL url = stylesheetLocation.getURL();
-			String urlPath = url.toString();
-			String systemId = urlPath.substring(0, urlPath.lastIndexOf('/') + 1);
-			return new StreamSource(url.openStream(), systemId);
-		}
-		catch (IOException ex) {
-			throw new ApplicationContextException("Can't load XSLT stylesheet from " + stylesheetLocation, ex);
-		}
+	protected final TransformerFactory getTransformerFactory() {
+		return this.transformerFactory;
 	}
 
 
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		if (!this.cache) {
-			logger.warn("DEBUG SETTING: NOT THREADSAFE AND WILL IMPAIR PERFORMANCE: template will be refreshed");
-			cacheTemplates();
-		}
-
-		if (this.templates == null) {
-			if (this.transformerFactory == null) {
-				throw new ServletException("XLST view is incorrectly configured. Templates AND TransformerFactory are null");
-			}
-
-			logger.warn("XSLT view is not configured: will copy XML input");
-			response.setContentType("text/xml; charset=ISO-8859-1");
-		}
-		else {
-			// normal case
-			response.setContentType(getContentType());
-		}
+		response.setContentType(getContentType());
 
 		Source source = null;
 		String docRoot = null;
-
 		// Value of a single element in the map, if there is one.
 		Object singleModel = null;
 
@@ -354,7 +340,7 @@ public abstract class AbstractXsltView extends AbstractView {
 			Map model, Source source, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		Map parameters = getParameters(request);
+		Map parameters = getParameters(model, request);
 		Result result = (useWriter() ?
 				new StreamResult(response.getWriter()) :
 				new StreamResult(new BufferedOutputStream(response.getOutputStream())));
@@ -363,9 +349,67 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 	/**
+	 * Return a Map of transformer parameters to be applied to the stylesheet.
+	 * <p>Subclasses can override this method in order to apply one or more
+	 * parameters to the transformation process.
+	 * <p>The default implementation delegates to the
+	 * {@link #getParameters(HttpServletRequest)} variant.
+	 * @param model the model Map
+	 * @param request current HTTP request
+	 * @return a Map of parameters to apply to the transformation process
+	 * @see #getParameters()
+	 * @see javax.xml.transform.Transformer#setParameter
+	 */
+	protected Map getParameters(Map model, HttpServletRequest request) {
+		return getParameters(request);
+	}
+
+	/**
+	 * Return a Map of transformer parameters to be applied to the stylesheet.
+	 * <p>Subclasses can override this method in order to apply one or more
+	 * parameters to the transformation process.
+	 * <p>The default implementation delegates to the simple
+	 * {@link #getParameters()} variant.
+	 * @param request current HTTP request
+	 * @return a Map of parameters to apply to the transformation process
+	 * @see #getParameters(Map, HttpServletRequest)
+	 * @see javax.xml.transform.Transformer#setParameter
+	 */
+	protected Map getParameters(HttpServletRequest request) {
+		return getParameters();
+	}
+
+	/**
+	 * Return a Map of transformer parameters to be applied to the stylesheet.
+	 * @return a Map of parameters to apply to the transformation process
+	 * @deprecated as of Spring 2.0.4, in favor of the
+	 * {@link #getParameters(HttpServletRequest)} variant
+	 */
+	protected Map getParameters() {
+		return null;
+	}
+
+	/**
+	 * Return whether to use a <code>java.io.Writer</code> to write text content
+	 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
+	 * to write binary content to the response.
+	 * <p>The default implementation returns <code>false</code>, indicating a
+	 * a <code>java.io.OutputStream</code>.
+	 * @return whether to use a Writer (<code>true</code>) or an OutputStream
+	 * (<code>false</code>)
+	 * @see javax.servlet.ServletResponse#getWriter()
+	 * @see javax.servlet.ServletResponse#getOutputStream()
+	 */
+	protected boolean useWriter() {
+		return false;
+	}
+
+
+	/**
 	 * Perform the actual transformation, writing to the given result.
 	 * @param source the Source to transform
 	 * @param parameters a Map of parameters to be applied to the stylesheet
+	 * (as determined by {@link #getParameters(Map, HttpServletRequest)})
 	 * @param result the result to write to
 	 * @param encoding the preferred character encoding that the underlying Transformer should use
 	 * @throws Exception if an error occurs
@@ -374,24 +418,11 @@ public abstract class AbstractXsltView extends AbstractView {
 			throws Exception {
 
 		try {
-			Transformer trans = (this.templates != null) ?
-					this.templates.newTransformer() : // we have a stylesheet
-					this.transformerFactory.newTransformer(); // just a copy
+			Transformer trans = buildTransformer(parameters);
 
 			// Explicitly apply URIResolver to every created Transformer.
 			if (this.uriResolver != null) {
 				trans.setURIResolver(this.uriResolver);
-			}
-
-			// Apply any subclass supplied parameters to the transformer.
-			if (parameters != null) {
-				for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
-					Map.Entry entry = (Map.Entry) it.next();
-					trans.setParameter(entry.getKey().toString(), entry.getValue());
-				}
-				if (logger.isDebugEnabled()) {
-					logger.debug("Added parameters [" + parameters + "] to transformer object");
-				}
 			}
 
 			// Specify default output properties.
@@ -411,59 +442,97 @@ public abstract class AbstractXsltView extends AbstractView {
 
 			// Perform the actual XSLT transformation.
 			trans.transform(source, result);
-			if (logger.isDebugEnabled()) {
-				logger.debug("XSLT transformed with stylesheet [" + this.stylesheetLocation + "]");
-			}
 		}
 		catch (TransformerConfigurationException ex) {
-			throw new NestedServletException("Couldn't create XSLT transformer for stylesheet [" +
-					this.stylesheetLocation + "] in XSLT view with name [" + getBeanName() + "]", ex);
+			throw new NestedServletException(
+					"Couldn't create XSLT transformer in XSLT view with name [" + getBeanName() + "]", ex);
 		}
 		catch (TransformerException ex) {
-			throw new NestedServletException("Couldn't perform transform with stylesheet [" +
-					this.stylesheetLocation + "] in XSLT view with name [" + getBeanName() + "]", ex);
+			throw new NestedServletException(
+					"Couldn't perform transform in XSLT view with name [" + getBeanName() + "]", ex);
 		}
 	}
 
 	/**
-	 * Return a Map of transformer parameters to be applied to the stylesheet.
-	 * <p>Subclasses can override this method in order to apply one or more
-	 * parameters to the transformation process.
-	 * <p>The default implementation delegates to the simple
-	 * {@link #getParameters()} variant.
-	 * @param request current HTTP request
-	 * @return a Map of parameters to apply to the transformation process
-	 * @see #getParameters()
-	 * @see javax.xml.transform.Transformer#setParameter
+	 * Build a Transformer object for immediate use, based on the
+	 * given parameters.
+	 * @param parameters a Map of parameters to be applied to the stylesheet
+	 * (as determined by {@link #getParameters(Map, HttpServletRequest)})
+	 * @return the Transformer object (never <code>null</code>)
+	 * @throws TransformerConfigurationException if the Transformer object
+	 * could not be built
 	 */
-	protected Map getParameters(HttpServletRequest request) {
-		return getParameters();
+	protected Transformer buildTransformer(Map parameters) throws TransformerConfigurationException {
+		Templates templates = getTemplates();
+		Transformer transformer =
+				(templates != null ? templates.newTransformer() : getTransformerFactory().newTransformer());
+		applyTransformerParameters(parameters, transformer);
+		return transformer;
 	}
 
 	/**
-	 * Return a Map of transformer parameters to be applied to the stylesheet.
-	 * <p>Subclasses can override this method in order to apply one or more
-	 * parameters to the transformation process.
-	 * <p>The default implementation simply returns <code>null</code>.
-	 * @return a Map of parameters to apply to the transformation process
-	 * @see #getParameters(HttpServletRequest)
-	 * @see javax.xml.transform.Transformer#setParameter
+	 * Obtain the Templates object to use, based on the configured
+	 * stylesheet, either a cached one or a freshly built one.
+	 * <p>Subclasses may override this method e.g. in order to refresh
+	 * the Templates instance, calling {@link #resetCachedTemplates()}
+	 * before delegating to this <code>getTemplates()</code> implementation.
+	 * @return the Templates object (or <code>null</code> if there is
+	 * no stylesheet specified)
+	 * @throws TransformerConfigurationException if the Templates object
+	 * could not be built
+	 * @see #setStylesheetLocation
+	 * @see #setCache
+	 * @see #resetCachedTemplates
 	 */
-	protected Map getParameters() {
+	protected Templates getTemplates() throws TransformerConfigurationException {
+		if (this.cachedTemplates != null) {
+			return this.cachedTemplates;
+		}
+		Resource location = getStylesheetLocation();
+		if (location != null) {
+			Templates templates = getTransformerFactory().newTemplates(getStylesheetSource(location));
+			if (this.cache) {
+				this.cachedTemplates = templates;
+			}
+			return templates;
+		}
 		return null;
 	}
 
 	/**
-	 * Return whether to use a <code>java.io.Writer</code> to write text content
-	 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
-	 * to write binary content to the response.
-	 * <p>The default implementation returns <code>false</code>, indicating a
-	 * a <code>java.io.OutputStream</code>.
-	 * @see javax.servlet.ServletResponse#getWriter()
-	 * @see javax.servlet.ServletResponse#getOutputStream()
+	 * Apply the specified parameters to the given Transformer.
+	 * @param parameters the transformer parameters
+	 * (as determined by {@link #getParameters(Map, HttpServletRequest)})
+	 * @param transformer the Transformer to aply the parameters
 	 */
-	protected boolean useWriter() {
-		return false;
+	protected void applyTransformerParameters(Map parameters, Transformer transformer) {
+		if (parameters != null) {
+			for (Iterator it = parameters.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				transformer.setParameter(entry.getKey().toString(), entry.getValue());
+			}
+		}
+	}
+
+	/**
+	 * Load the stylesheet from the specified location.
+	 * @param stylesheetLocation the stylesheet resource to be loaded
+	 * @return the stylesheet source
+	 * @throws ApplicationContextException if the stylesheet resource could not be loaded
+	 */
+	protected Source getStylesheetSource(Resource stylesheetLocation) throws ApplicationContextException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Loading XSLT stylesheet from " + stylesheetLocation);
+		}
+		try {
+			URL url = stylesheetLocation.getURL();
+			String urlPath = url.toString();
+			String systemId = urlPath.substring(0, urlPath.lastIndexOf('/') + 1);
+			return new StreamSource(url.openStream(), systemId);
+		}
+		catch (IOException ex) {
+			throw new ApplicationContextException("Can't load XSLT stylesheet from " + stylesheetLocation, ex);
+		}
 	}
 
 }

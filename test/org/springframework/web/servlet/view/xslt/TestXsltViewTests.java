@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import org.w3c.dom.Text;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -50,6 +49,7 @@ import org.springframework.web.servlet.ModelAndView;
  * 
  * @author Darren Davison
  * @author Rick Evans
+ * @author Juergen Hoeller
  * @since 11.03.2005
  */
 public class TestXsltViewTests extends TestCase {
@@ -77,22 +77,6 @@ public class TestXsltViewTests extends TestCase {
 		try {
 			view.initApplicationContext();
 			fail("Must have thrown ApplicationContextException");
-		}
-		catch (ApplicationContextException expected) {
-		}
-	}
-
-	public void testChangeStylesheetReCachesTemplate() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
-		view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/valid.xsl"));
-		view.initApplicationContext();
-
-		try {
-			view.setStylesheetLocation(new FileSystemResource("/does/not/exist.xsl"));
-			fail("Must throw ApplicationContextException on re-caching template");
 		}
 		catch (ApplicationContextException expected) {
 		}
@@ -149,8 +133,7 @@ public class TestXsltViewTests extends TestCase {
 			}
 		};
 
-		view.setStylesheetLocation(
-				new DefaultResourceLoader().getResource("classpath:org/springframework/web/servlet/view/xslt/sunnyDay.xsl"));
+		view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/sunnyDay.xsl"));
 		view.setIndent(true);
 		view.initApplicationContext();
 		view.render(new ModelAndView().addObject("hero", new Hero("Jet", 24, "BOOM")).getModel(), request, response);
@@ -174,8 +157,7 @@ public class TestXsltViewTests extends TestCase {
 			}
 		};
 
-		view.setStylesheetLocation(
-				new DefaultResourceLoader().getResource("classpath:org/springframework/web/servlet/view/xslt/sunnyDay.xsl"));
+		view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/sunnyDay.xsl"));
 		Properties outputProperties = new Properties();
 		outputProperties.setProperty("indent", "false");
 		view.setOutputProperties(outputProperties);
@@ -209,8 +191,7 @@ public class TestXsltViewTests extends TestCase {
 				return parameters;
 			}
 		};
-		view.setStylesheetLocation(
-				new DefaultResourceLoader().getResource("classpath:org/springframework/web/servlet/view/xslt/sunnyDay.xsl"));
+		view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/sunnyDay.xsl"));
 		view.initApplicationContext();
 
 		Hero hero = new Hero("Jet", 24, "BOOM");
@@ -223,6 +204,43 @@ public class TestXsltViewTests extends TestCase {
 		view.render(new ModelAndView().addObject("hero", node).getModel(), request, response);
 		String text = response.getContentAsString();
 		assertEquals("<hero name=\"Jet\" age=\"24\" catchphrase=\"BOOM\" sex=\"Male\"/>", text.trim());
+	}
+
+	public void testRenderWithNoStylesheetSpecified() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		AbstractXsltView view = new AbstractXsltView() {
+			protected Map getParameters() {
+				Map parameters = new HashMap();
+				parameters.put("sex", "Male");
+				return parameters;
+			}
+		};
+
+		Properties outputProperties = new Properties();
+		outputProperties.setProperty("indent", "false");
+		view.setOutputProperties(outputProperties);
+		view.initApplicationContext();
+
+		Hero hero = new Hero("Jet", 24, "BOOM");
+		Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+		Element node = document.createElement("hero");
+		node.setAttribute("name", hero.getName());
+		node.setAttribute("age", hero.getAge() + "");
+		node.setAttribute("catchphrase", hero.getCatchphrase());
+
+		view.render(new ModelAndView().addObject("hero", new DOMSource(node)).getModel(), request, response);
+		String text = response.getContentAsString().trim();
+		assertTrue(text.startsWith("<?xml"));
+		assertTrue(text.indexOf("<hero") != -1);
+		assertTrue(text.indexOf("age=\"24\"") != -1);
+		assertTrue(text.indexOf("catchphrase=\"BOOM\"") != -1);
+		assertTrue(text.indexOf("name=\"Jet\"") != -1);
 	}
 
 	public void testRenderSingleNodeInModelWithExplicitDocRootName() throws Exception {
@@ -254,8 +272,7 @@ public class TestXsltViewTests extends TestCase {
 			}
 		};
 
-		view.setStylesheetLocation(
-				new DefaultResourceLoader().getResource("classpath:org/springframework/web/servlet/view/xslt/sunnyDayExplicitRoot.xsl"));
+		view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/sunnyDayExplicitRoot.xsl"));
 		view.setUseSingleModelNameAsRoot(false);
 		view.setRoot("baddie");
 		view.initApplicationContext();
@@ -296,8 +313,7 @@ public class TestXsltViewTests extends TestCase {
 			}
 		};
 
-		view.setStylesheetLocation(
-				new DefaultResourceLoader().getResource("classpath:org/springframework/web/servlet/view/xslt/firstWords.xsl"));
+		view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/firstWords.xsl"));
 		view.setIndent(true);
 		view.initApplicationContext();
 
