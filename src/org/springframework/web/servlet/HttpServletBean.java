@@ -42,16 +42,28 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
 
 /**
  * Simple extension of {@link javax.servlet.http.HttpServlet} which treats
- * its config parameters as bean properties.
+ * its config parameters (<code>init-param</code> entries within the
+ * <code>servlet</code> tag in <code>web.xml</code>) as bean properties.
  *
- * <p>A very handy superclass for any type of servlet. Type conversion is automatic.
- * It is also possible for subclasses to specify required properties.
+ * <p>A handy superclass for any type of servlet. Type conversion of config
+ * parameters is automatic, with the corresponding setter method getting
+ * invoked with the converted value. It is also possible for subclasses to
+ * specify required properties. Parameters without matching bean property
+ * setter will simply be ignored.
  *
  * <p>This servlet leaves request handling to subclasses, inheriting the default
  * behavior of HttpServlet (<code>doGet</code>, <code>doPost</code>, etc).
  *
- * <p>This servlet superclass has no dependency on a Spring application context,
- * in contrast to the {@link FrameworkServlet} class which loads its own context.
+ * <p>This generic servlet base class has no dependency on the Spring
+ * {@link org.springframework.context.ApplicationContext} concept. Simple
+ * servlets usually don't load their own context but rather access service
+ * beans from the Spring root application context, accessible via the
+ * filter's {@link #getServletContext() ServletContext} (see
+ * {@link org.springframework.web.context.support.WebApplicationContextUtils}).
+ *
+ * <p>The {@link FrameworkServlet} class is a more specific servlet base
+ * class which loads its own application context. FrameworkServlet serves
+ * as direct base class of Spring's full-fledged {@link DispatcherServlet}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -59,7 +71,6 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
  * @see #initServletBean
  * @see #doGet
  * @see #doPost
- * @see FrameworkServlet
  */
 public abstract class HttpServletBean extends HttpServlet {
 

@@ -49,25 +49,30 @@ import org.springframework.web.util.NestedServletException;
 
 /**
  * Simple base implementation of {@link javax.servlet.Filter} which treats
- * its config parameters as bean properties. Unknown parameters are ignored.
+ * its config parameters (<code>init-param</code> entries within the
+ * <code>filter</code> tag in <code>web.xml</code>) as bean properties.
  *
- * <p>A very handy superclass for any type of filter. Type conversion of
- * config parameters is automatic. It is also possible for subclasses to
- * specify required properties.
+ * <p>A handy superclass for any type of filter. Type conversion of config
+ * parameters is automatic, with the corresponding setter method getting
+ * invoked with the converted value. It is also possible for subclasses to
+ * specify required properties. Parameters without matching bean property
+ * setter will simply be ignored.
  *
  * <p>This filter leaves actual filtering to subclasses, which have to
  * implement the {@link javax.servlet.Filter#doFilter} method.
  *
- * <p>This filter superclass has no dependency on a Spring application context.
- * Filters usually don't load their own context but rather access beans from
- * the root application context, accessible via the ServletContext.
+ * <p>This generic filter base class has no dependency on the Spring
+ * {@link org.springframework.context.ApplicationContext} concept.
+ * Filters usually don't load their own context but rather access service
+ * beans from the Spring root application context, accessible via the
+ * filter's {@link #getServletContext() ServletContext} (see
+ * {@link org.springframework.web.context.support.WebApplicationContextUtils}).
  *
  * @author Juergen Hoeller
  * @since 06.12.2003
  * @see #addRequiredProperty
  * @see #initFilterBean
  * @see #doFilter
- * @see org.springframework.web.context.support.WebApplicationContextUtils#getWebApplicationContext
  */
 public abstract class GenericFilterBean implements
 		Filter, BeanNameAware, ServletContextAware, InitializingBean, DisposableBean {
