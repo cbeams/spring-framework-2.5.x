@@ -22,6 +22,7 @@ import javax.servlet.jsp.JspException;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.WebDataBinder;
 
 /**
  * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
@@ -41,15 +42,13 @@ import org.springframework.util.CollectionUtils;
  * <h3>Approach Three</h3>
  * For any other bound value type, the '<code>input(checkbox)</code>' is marked as 'checked'
  * if the the configured {@link #setValue(Object) value} is equal to the bound value.
- * 
+ *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class CheckboxTag extends AbstractHtmlInputElementTag {
 
-	/**
-	 * The value of the '<code>value</code>' attribute.
-	 */
 	private Object value;
 
 
@@ -97,9 +96,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 			if (value == null) {
 				throw new IllegalArgumentException("Attribute 'value' is required when binding to non-boolean values");
 			}
-
-			Object resolvedValue = (value instanceof String ? evaluate("value", (String)value) : value);
-
+			Object resolvedValue = (value instanceof String ? evaluate("value", (String) value) : value);
 			if (boundValue != null && boundValue.getClass().isArray()) {
 				renderFromCollection(resolvedValue, CollectionUtils.arrayToList(boundValue), tagWriter);
 			}
@@ -114,11 +111,11 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 		tagWriter.endTag();
 
 		if (!isDisabled()) {
-			// write out the marker field
+			// Write out the 'field was present' marker.
 			tagWriter.startTag("input");
 			tagWriter.writeAttribute("type", "hidden");
-			tagWriter.writeAttribute("value", "1");
-			tagWriter.writeAttribute("name", "_" + getName());
+			tagWriter.writeAttribute("name", WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX + getName());
+			tagWriter.writeAttribute("value", "on");
 			tagWriter.endTag();
 		}
 
@@ -132,7 +129,6 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	 */
 	private void renderSingleValue(Object resolvedValue, TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("value", getDisplayString(resolvedValue));
-
 		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
 			tagWriter.writeAttribute("checked", "checked");
 		}
@@ -145,7 +141,6 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	 */
 	private void renderFromCollection(Object resolvedValue, Collection boundValue, TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("value", getDisplayString(resolvedValue));
-
 		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
 			tagWriter.writeAttribute("checked", "checked");
 		} 
