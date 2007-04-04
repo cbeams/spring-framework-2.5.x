@@ -234,7 +234,7 @@
 #macro( springFormRadioButtons $path $options $separator $attributes )
     #springBind($path)
     #foreach($option in $options.keySet())
-        <input type="radio" id="${status.expression}" name="${status.expression}" value="${option}"
+        <input type="radio" name="${status.expression}" value="${option}"
         #if("$!status.value" == "$option")
             checked="checked"
         #end
@@ -259,13 +259,14 @@
 #macro( springFormCheckboxes $path $options $separator $attributes )
     #springBind($path)
     #foreach($option in $options.keySet())
-        <input type="checkbox" id="${status.expression}" name="${status.expression}" value="${option}" 
+        <input type="checkbox" name="${status.expression}" value="${option}" 
         #foreach($item in $status.value) 
             #if($item == $option) checked="checked" #end 
         #end
         ${attributes} #springCloseTag()
         ${options.get($option)} ${separator}
     #end
+    <input type="hidden" name="_${status.expression}" value="on"/>
 #end
 
 #**
