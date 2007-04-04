@@ -133,7 +133,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(loadFromParent, BridgeMethodResolver.findBridgedMethod(loadFromParentBridge));
 	}
 
-	public void testWithSingleBoundParameterizedOnInstaniate() throws Exception {
+	public void testWithSingleBoundParameterizedOnInstantiate() throws Exception {
 		Method bridgeMethod = DelayQueue.class.getMethod("add", Object.class);
 		assertTrue(bridgeMethod.isBridge());
 		Method actualMethod = DelayQueue.class.getMethod("add", Delayed.class);
@@ -261,6 +261,18 @@ public class BridgeMethodResolverTests extends TestCase {
 
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 		Map variableMap = BridgeMethodResolver.createTypeVariableMap(MegaMessageProducerImpl.class);
+	}
+
+	public void testSPR3324() throws Exception {
+		Method bridgedMethod = BusinessDao.class.getDeclaredMethod("get", Long.class);
+		assertNotNull(bridgedMethod);
+		assertFalse(bridgedMethod.isBridge());
+
+		Method bridgeMethod = BusinessDao.class.getDeclaredMethod("get", Object.class);
+		assertNotNull(bridgeMethod);
+		assertTrue(bridgeMethod.isBridge());
+
+		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
 	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
@@ -972,15 +984,20 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 
-	public class Business<T> {
+	public interface DaoInterface<T,P> {
+			T get(P id);
 	}
 
 
-	public class BusinessGenericDao<T, PK extends Serializable> {
+	public abstract class BusinessGenericDao<T, PK extends Serializable> implements DaoInterface<T, PK> {
 
 		public void save(T object) {
-			// Do nothing;
 		}
+	}
+
+
+	public class Business<T> {
+
 	}
 
 
@@ -988,7 +1005,16 @@ public class BridgeMethodResolverTests extends TestCase {
 
     public void save(Business<?> business) {
     }
+
+		public Business<?> get(Long id) {
+			return null;
+		}
+
+		public Business<?> get(String code) {
+			return null;
+		}
 	}
+
 
 	/***
 	 * SPR-3304
@@ -997,13 +1023,16 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	}
 
+
 	private static class MegaMessageEvent extends MegaEvent {
 
 	}
 
+
 	private static class NewMegaMessageEvent extends MegaEvent {
 
 	}
+
 
 	private static class ModifiedMegaMessageEvent extends MegaEvent {
 
@@ -1011,16 +1040,20 @@ public class BridgeMethodResolverTests extends TestCase {
 
 
 	private static interface MegaReceiver<E extends MegaEvent> {
-		  void receive(E event);
+
+		void receive(E event);
 	}
+
 
 	private static interface MegaMessageProducer extends MegaReceiver<MegaMessageEvent> {
 
 	}
 
+
 	private static class Other<S,T> {
 
 	}
+
 
 	private static class MegaMessageProducerImpl extends Other<Long, String> implements MegaMessageProducer {
 

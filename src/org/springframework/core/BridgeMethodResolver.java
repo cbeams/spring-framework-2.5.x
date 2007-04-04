@@ -295,19 +295,23 @@ public abstract class BridgeMethodResolver {
 		TypeVariable[] typeVariables = ((Class) type.getRawType()).getTypeParameters();
 		for (int i = 0; i < actualTypeArguments.length; i++) {
 			Type actualTypeArgument = actualTypeArguments[i];
+			String variableName = typeVariables[i].getName();
 			if (actualTypeArgument instanceof Class) {
-				typeVariableMap.put(typeVariables[i].getName(), (Class) actualTypeArgument);
+				typeVariableMap.put(variableName, (Class) actualTypeArgument);
 			}
 			else if (actualTypeArgument instanceof ParameterizedType) {
-				typeVariableMap.put(typeVariables[i].getName(), ((ParameterizedType)actualTypeArgument).getRawType());
+				typeVariableMap.put(variableName, ((ParameterizedType) actualTypeArgument).getRawType());
 			}
 			else if (actualTypeArgument instanceof TypeVariable) {
 				// We have a type that is parameterized at instantiation time
 				// the nearest match on the bridge method will be the bounded type.
 				TypeVariable typeVariableArgument = (TypeVariable) actualTypeArgument;
-				Class boundClass = extractClassTypeVariable(typeVariableArgument);
-				if (boundClass != null) {
-					typeVariableMap.put(typeVariables[i].getName(), boundClass);
+				Type resolvedType = (Type) typeVariableMap.get(typeVariableArgument.getName());
+				if (resolvedType == null) {
+					resolvedType = extractClassTypeVariable(typeVariableArgument);
+				}
+				if (resolvedType != null) {
+					typeVariableMap.put(variableName, resolvedType);
 				}
 			}
 		}
@@ -328,7 +332,7 @@ public abstract class BridgeMethodResolver {
 				result = bound;
 			}
 			else if (bound instanceof TypeVariable) {
-				result =  extractClassTypeVariable((TypeVariable)bound);
+				result = extractClassTypeVariable((TypeVariable) bound);
 			}
 		}
 		return (result instanceof Class ? (Class) result : null);
