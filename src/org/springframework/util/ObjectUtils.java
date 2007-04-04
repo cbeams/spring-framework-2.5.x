@@ -521,7 +521,8 @@ public abstract class ObjectUtils {
 		if (obj instanceof short[]) {
 			return nullSafeToString((short[]) obj);
 		}
-		return obj.toString();
+		String str = obj.toString();
+		return (str != null ? str : EMPTY_STRING);
 	}
 
 	/**
