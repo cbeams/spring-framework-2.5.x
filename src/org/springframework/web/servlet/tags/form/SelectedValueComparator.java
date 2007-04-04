@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,17 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.core.enums.LabeledEnum;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.servlet.support.BindStatus;
-
 import java.beans.PropertyEditor;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+
+import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.core.enums.LabeledEnum;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.support.BindStatus;
 
 /**
  * Utility class for testing whether a candidate value matches a {@link BindStatus#getValue data bound value}.
@@ -54,6 +56,7 @@ import java.util.Map;
  * representations if the first comparison results in <code>false</code>.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 abstract class SelectedValueComparator {
@@ -100,7 +103,7 @@ abstract class SelectedValueComparator {
 			return true;
 		}
 		else {
-			return exhaustiveCollectionCompare(boundMap.keySet(), candidateValue, bindStatus.getEditor());
+			return exhaustiveCollectionCompare(boundMap.keySet(), candidateValue, bindStatus);
 		}
 	}
 
@@ -109,7 +112,7 @@ abstract class SelectedValueComparator {
 			return true;
 		}
 		else {
-			return exhaustiveCollectionCompare(boundCollection, candidateValue, bindStatus.getEditor());
+			return exhaustiveCollectionCompare(boundCollection, candidateValue, bindStatus);
 		}
 	}
 
@@ -127,11 +130,19 @@ abstract class SelectedValueComparator {
 	}
 
 	private static boolean exhaustiveCollectionCompare(
-					Collection collection, Object candidateValue, PropertyEditor propertyEditor) {
+			Collection collection, Object candidateValue, BindStatus bindStatus) {
 
-		for (Iterator iterator = collection.iterator(); iterator.hasNext();) {
-			Object o = iterator.next();
-			if (exhaustiveCompare(o, candidateValue, propertyEditor)) {
+		PropertyEditorRegistry editorRegistry = null;
+		if (bindStatus.getErrors() instanceof BindingResult) {
+			editorRegistry = ((BindingResult) bindStatus.getErrors()).getPropertyEditorRegistry();
+		}
+		for (Iterator it = collection.iterator(); it.hasNext();) {
+			Object element = it.next();
+			PropertyEditor propertyEditor = null;
+			if (element != null && editorRegistry != null) {
+				propertyEditor = editorRegistry.findCustomEditor(element.getClass(), bindStatus.getPath());
+			}
+			if (exhaustiveCompare(element, candidateValue, propertyEditor)) {
 				return true;
 			}
 		}
@@ -155,8 +166,7 @@ abstract class SelectedValueComparator {
 			return true;
 		}
 		else if (propertyEditor != null && candidate instanceof String) {
-
-			// try PE-based comparison (PE should *not* be allowed to escape creating thread)
+			// Try PE-based comparison (PE should *not* be allowed to escape creating thread)
 			Object originalValue = propertyEditor.getValue();
 			String candidateAsString = (String) candidate;
 			try {

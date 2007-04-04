@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,28 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.jsp.tagext.Tag;
+
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.springframework.beans.TestBean;
+
 import org.springframework.beans.Colour;
 import org.springframework.beans.Pet;
-
-import javax.servlet.jsp.tagext.Tag;
-import java.io.StringReader;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Calendar;
+import org.springframework.beans.TestBean;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 
 /**
  * @author Rob Harrop
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public class CheckboxTagTests extends AbstractFormTagTests {
 
@@ -175,6 +180,32 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("Rob Harrop", checkboxElement.attribute("value").getValue());
 	}
 
+	public void testWithSingleValueAndEditor() throws Exception {
+		this.bean.setName("Rob Harrop");
+		this.tag.setPath("name");
+		this.tag.setValue("   Rob Harrop");
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
+		bindingResult.getPropertyEditorRegistry().registerCustomEditor(String.class, new StringTrimmerEditor(false));
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("name", checkboxElement.attribute("name").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
+		assertEquals("   Rob Harrop", checkboxElement.attribute("value").getValue());
+	}
+
 	public void testWithMultiValueChecked() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setValue("foo");
@@ -215,6 +246,31 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("stringArray", checkboxElement.attribute("name").getValue());
 		assertNull(checkboxElement.attribute("checked"));
 		assertEquals("abc", checkboxElement.attribute("value").getValue());
+	}
+
+	public void testWithMultiValueWithEditor() throws Exception {
+		this.tag.setPath("stringArray");
+		this.tag.setValue("   foo");
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
+		bindingResult.getPropertyEditorRegistry().registerCustomEditor(String.class, new StringTrimmerEditor(false));
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("stringArray", checkboxElement.attribute("name").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
+		assertEquals("   foo", checkboxElement.attribute("value").getValue());
 	}
 
 	public void testWithCollection() throws Exception {
