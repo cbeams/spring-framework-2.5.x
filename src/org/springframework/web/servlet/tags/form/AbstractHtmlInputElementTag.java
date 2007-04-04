@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,69 +20,39 @@ import javax.servlet.jsp.JspException;
 
 /**
  * Base class for databinding-aware JSP tags that render HTML form input element.
- * 
+ *
  * <p>Provides a set of properties corresponding to the set of HTML attributes
  * that are common across form input elements.
- * 
+ *
  * @author Rob Harrop
  * @since 2.0
  */
 public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag {
 
-	/**
-	 * The name of the '<code>onfocus</code>' attribute.
-	 */
 	public static final String ONFOCUS_ATTRIBUTE = "onfocus";
 
-	/**
-	 * The name of the '<code>onblur</code>' attribute.
-	 */
 	public static final String ONBLUR_ATTRIBUTE = "onblur";
 
-	/**
-	 * The name of the '<code>onchange</code>' attribute.
-	 */
 	public static final String ONCHANGE_ATTRIBUTE = "onchange";
 
-	/**
-	 * The name of the '<code>accesskey</code>' attribute.
-	 */
 	public static final String ACCESSKEY_ATTRIBUTE = "accesskey";
 
-	/**
-	 * The name of the '<code>disabled</code>' attribute.
-	 */
 	public static final String DISABLED_ATTRIBUTE = "disabled";
 
 
-	/**
-	 * The value of the '<code>onfocus</code>' attribute.
-	 */
 	private String onfocus;
 
-	/**
-	 * The value of the '<code>onblur</code>' attribute.
-	 */
 	private String onblur;
 
-	/**
-	 * The value of the '<code>onchange</code>' attribute.
-	 */
 	private String onchange;
 
-	/**
-	 * The value of the '<code>accesskey</code>' attribute.
-	 */
 	private String accesskey;
 
-	/**
-	 * The value of the '<code>disabled</code>' attribute.
-	 */
-	protected String disabled;
+	private String disabled;
 
 
 	/**
-	 * Sets the value of the '<code>onfocus</code>' attribute.
+	 * Set the value of the '<code>onfocus</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnfocus(String onfocus) {
@@ -90,15 +60,14 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Gets the value of the '<code>onfocus</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>onfocus</code>' attribute.
 	 */
 	protected String getOnfocus() {
 		return this.onfocus;
 	}
 
 	/**
-	 * Sets the value of the '<code>onblur</code>' attribute.
+	 * Set the value of the '<code>onblur</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnblur(String onblur) {
@@ -107,15 +76,14 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 
 
 	/**
-	 * Gets the value of the '<code>onblur</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>onblur</code>' attribute.
 	 */
 	protected String getOnblur() {
 		return this.onblur;
 	}
 
 	/**
-	 * Sets the value of the '<code>onchange</code>' attribute.
+	 * Set the value of the '<code>onchange</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnchange(String onchange) {
@@ -123,15 +91,14 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Gets the value of the '<code>onchange</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>onchange</code>' attribute.
 	 */
 	protected String getOnchange() {
 		return this.onchange;
 	}
 
 	/**
-	 * Sets the value of the '<code>accesskey</code>' attribute.
+	 * Set the value of the '<code>accesskey</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setAccesskey(String accesskey) {
@@ -139,15 +106,14 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Gets the value of the '<code>accesskey</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>accesskey</code>' attribute.
 	 */
 	protected String getAccesskey() {
 		return this.accesskey;
 	}
 
 	/**
-	 * Sets the value of the '<code>disabled</code>' attribute.
+	 * Set the value of the '<code>disabled</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setDisabled(String disabled) {
@@ -155,11 +121,10 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Gets the value of the '<code>disabled</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>disabled</code>' attribute.
 	 */
 	protected String getDisabled() {
-		return disabled;
+		return this.disabled;
 	}
 
 
@@ -173,7 +138,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 		writeOptionalAttribute(tagWriter, ONBLUR_ATTRIBUTE, getOnblur());
 		writeOptionalAttribute(tagWriter, ONCHANGE_ATTRIBUTE, getOnchange());
 		writeOptionalAttribute(tagWriter, ACCESSKEY_ATTRIBUTE, getAccesskey());
-		if(isDisabled()) {
+		if (isDisabled()) {
 			tagWriter.writeAttribute(DISABLED_ATTRIBUTE, "disabled");
 		}
 	}
