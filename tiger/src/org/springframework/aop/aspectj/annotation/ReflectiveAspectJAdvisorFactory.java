@@ -216,13 +216,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		if (argNames != null) {
 			springAdvice.setArgumentNamesFromStringArray(argNames);
 		}
-		try {
-			springAdvice.afterPropertiesSet();
-		}
-		catch (Exception ex) {
-			throw new IllegalArgumentException("Advice configuration failed", ex);
-		}
-		return (Advice) springAdvice;
+		springAdvice.calculateArgumentBindings();
+		return springAdvice;
 	}
 
 	private String[] getArgumentNames(Method forMethod) {

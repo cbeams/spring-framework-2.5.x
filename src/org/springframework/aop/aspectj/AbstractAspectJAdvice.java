@@ -37,25 +37,25 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.MethodMatchers;
 import org.springframework.aop.support.StaticMethodMatcher;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Base class for Spring Advices wrapping an AspectJ aspect
- * or annotated advice method.
+ * Base class for AOP Alliance {@link org.aopalliance.aop.Advice} classes
+ * wrapping an AspectJ aspect or an AspectJ-annotated advice method.
  *
  * @author Rod Johnson
  * @author Adrian Colyer
  * @author Juergen Hoeller
  * @since 2.0
  */
-public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedenceInformation, InitializingBean {
-	
+public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedenceInformation {
+
 	/**
 	 * Key used in ReflectiveMethodInvocation userAtributes map for the current joinpoint.
 	 */
@@ -134,7 +134,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 */
 	private int joinPointStaticPartArgumentIndex = -1;
 
-	private final Map argumentBindings = new HashMap();
+	private Map argumentBindings = null;
+
+	private boolean argumentsIntrospected = false;
 
 
 	/**
@@ -165,6 +167,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * Return the AspectJ expression pointcut.
 	 */
 	public final AspectJExpressionPointcut getPointcut() {
+		calculateArgumentBindings();
 		return this.pointcut;
 	}
 
@@ -174,9 +177,10 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * @see #getPointcut()
 	 */
 	public final Pointcut buildSafePointcut() {
+		Pointcut pc = getPointcut();
 		MethodMatcher safeMethodMatcher = MethodMatchers.intersection(
-				new AdviceExcludingMethodMatcher(this.aspectJAdviceMethod), this.pointcut.getMethodMatcher());
-		return new ComposablePointcut(this.pointcut.getClassFilter(), safeMethodMatcher);
+				new AdviceExcludingMethodMatcher(this.aspectJAdviceMethod), pc.getMethodMatcher());
+		return new ComposablePointcut(pc.getClassFilter(), safeMethodMatcher);
 	}
 
 	/**
@@ -308,15 +312,6 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 
 	/**
-	 * Argument names have to be discovered and set on the associated pointcut expression,
-	 * and we also calculate argument bindings for advice invocation so that actual dispatch
-	 * can be as fast as possible.
-	 */
-	public void afterPropertiesSet() throws Exception {
-		calculateArgumentBindings();
-	}	
-
-	/**
 	 * Do as much work as we can as part of the set-up so that argument binding
 	 * on subsequent advice invocations can be as fast as possible.
 	 * <p>If the first argument is of type JoinPoint or ProceedingJoinPoint then we
@@ -329,14 +324,13 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * to which argument name. There are multiple strategies for determining
 	 * this binding, which are arranged in a ChainOfResponsibility.
 	 */
-	private void calculateArgumentBindings() {
+	public synchronized final void calculateArgumentBindings() {
 		// The simple case... nothing to bind.
-		if (this.adviceInvocationArgumentCount == 0) {
+		if (this.argumentsIntrospected || this.adviceInvocationArgumentCount == 0) {
 			return;
 		}
 
 		int numUnboundArgs = this.adviceInvocationArgumentCount;
-
 		Class[] parameterTypes = this.aspectJAdviceMethod.getParameterTypes();
 		if (maybeBindJoinPoint(parameterTypes[0])) {
 			numUnboundArgs--;
@@ -349,6 +343,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			// need to bind arguments by name as returned from the pointcut match
 			bindArgumentsByName(numUnboundArgs);
 		}
+
+		this.argumentsIntrospected = true;
 	}
 
 	private boolean maybeBindJoinPoint(Class candidateParameterType) {
@@ -409,6 +405,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 	private void bindExplicitArguments(int numArgumentsLeftToBind) {
+		this.argumentBindings = new HashMap();
+
 		int numExpectedArgumentNames = this.aspectJAdviceMethod.getParameterTypes().length;
 		if (this.argumentNames.length != numExpectedArgumentNames) {
 			throw new IllegalStateException("Expecting to find " + numExpectedArgumentNames
@@ -493,6 +491,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * @return the empty array if there are no arguments
 	 */
 	protected Object[] argBinding(JoinPoint jp, JoinPointMatch jpMatch, Object returnValue, Throwable t) {
+		calculateArgumentBindings();
+
 		// AMC start
 		Object[] adviceInvocationArgs = new Object[this.adviceInvocationArgumentCount];
 		int numBound = 0;
@@ -506,7 +506,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			numBound++;
 		}
 
-		if (!this.argumentBindings.isEmpty()) {
+		if (!CollectionUtils.isEmpty(this.argumentBindings)) {
 			// binding from pointcut match
 			if (jpMatch != null) {
 				PointcutParameter[] parameterBindings = jpMatch.getParameterBindings();
