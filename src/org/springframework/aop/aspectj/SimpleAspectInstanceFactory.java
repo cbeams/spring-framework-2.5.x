@@ -16,36 +16,49 @@
 
 package org.springframework.aop.aspectj;
 
+import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of {@link AspectInstanceFactory} that is backed by a
- * specified singleton object, returning the same instance for every
- * {@link #getAspectInstance()} call.
+ * Implementation of {@link AspectInstanceFactory} that creates a new instance
+ * of the specified aspect class for every {@link #getAspectInstance()} call.
  *
- * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 2.0
- * @see SimpleAspectInstanceFactory
+ * @since 2.0.4
  */
-public class SingletonAspectInstanceFactory implements AspectInstanceFactory {
-	
-	private final Object aspectInstance;
+public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
+
+	private final Class aspectClass;
 
 
 	/**
-	 * Create a new SingletonAspectInstanceFactory for the given aspect instance.
-	 * @param aspectInstance the singleton aspect instance
+	 * Create a new SimpleAspectInstanceFactory for the given aspect class.
+	 * @param aspectClass the aspect class
 	 */
-	public SingletonAspectInstanceFactory(Object aspectInstance) {
-		Assert.notNull(aspectInstance, "Aspect instance must not be null");
-		this.aspectInstance = aspectInstance;
+	public SimpleAspectInstanceFactory(Class aspectClass) {
+		Assert.notNull(aspectClass, "Aspect class must not be null");
+		this.aspectClass = aspectClass;
+	}
+
+	/**
+	 * Return the specified aspect class (never <code>null</code>).
+	 */
+	public final Class getAspectClass() {
+		return this.aspectClass;
 	}
 
 
 	public final Object getAspectInstance() {
-		return this.aspectInstance;
+		try {
+			return this.aspectClass.newInstance();
+		}
+		catch (InstantiationException ex) {
+			throw new AopConfigException("Unable to instantiate aspect class [" + this.aspectClass.getName() + "]", ex);
+		}
+		catch (IllegalAccessException ex) {
+			throw new AopConfigException("Cannot access element class [" + this.aspectClass.getName() + "]", ex);
+		}
 	}
 
 	/**
@@ -57,10 +70,7 @@ public class SingletonAspectInstanceFactory implements AspectInstanceFactory {
 	 * @see #getOrderForAspectClass
 	 */
 	public int getOrder() {
-		if (this.aspectInstance instanceof Ordered) {
-			return ((Ordered) this.aspectInstance).getOrder();
-		}
-		return getOrderForAspectClass(this.aspectInstance.getClass());
+		return getOrderForAspectClass(this.aspectClass);
 	}
 
 	/**

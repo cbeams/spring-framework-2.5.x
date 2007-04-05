@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,14 @@
 package org.springframework.aop.aspectj.annotation;
 
 import junit.framework.TestCase;
+
 import org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue;
 import org.springframework.aop.aspectj.autoproxy.PerThisAspect;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.test.AssertThrows;
 
 /**
  * @author Rob Harrop
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public class AspectProxyFactoryTests extends TestCase {
 
@@ -99,4 +98,25 @@ public class AspectProxyFactoryTests extends TestCase {
 			}
 		}.runTest();
 	}
+
+
+	public static interface ITestBean {
+
+		int getAge();
+	}
+
+
+	public static class TestBean implements ITestBean {
+
+		private int age;
+
+		public int getAge() {
+			return age;
+		}
+
+		public void setAge(int age) {
+			this.age = age;
+		}
+	}
+
 }

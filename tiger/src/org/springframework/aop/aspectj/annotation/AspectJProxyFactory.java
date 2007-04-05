@@ -24,10 +24,8 @@ import org.aspectj.lang.reflect.PerClauseKind;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJProxyUtils;
+import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyCreatorSupport;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -84,28 +82,31 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * supplied must be a singleton aspect. True singleton lifecycle is not honoured when
 	 * using this method - the caller is responsible for managing the lifecycle of any
 	 * aspects added in this way.
+	 * @param aspectInstance the AspectJ aspect instance
 	 */
-	public void addAspect(Object aspect) {
-		Class aspectType = aspect.getClass();
-		String beanName = aspectType.getName();
-		AspectMetadata am = createAspectMetadata(aspectType, beanName);
+	public void addAspect(Object aspectInstance) {
+		Class aspectClass = aspectInstance.getClass();
+		String aspectName = aspectClass.getName();
+		AspectMetadata am = createAspectMetadata(aspectClass, aspectName);
 		if (am.getAjType().getPerClause().getKind() != PerClauseKind.SINGLETON) {
-			throw new IllegalArgumentException("Aspect type '" + aspectType.getName() + "' is not a singleton aspect.");
+			throw new IllegalArgumentException(
+					"Aspect class [" + aspectClass.getName() + "] does not define a singleton aspect");
 		}
-		MetadataAwareAspectInstanceFactory instanceFactory =
-				new SingletonMetadataAwareAspectInstanceFactory(aspect, beanName);
-		addAdvisorsFromAspectInstanceFactory(instanceFactory);
+		addAdvisorsFromAspectInstanceFactory(
+				new SingletonMetadataAwareAspectInstanceFactory(aspectInstance, aspectName));
 	}
 
 	/**
 	 * Add an aspect of the supplied type to the end of the advice chain.
+	 * @param aspectClass the AspectJ aspect class
 	 */
-	public void addAspect(Class aspectType) {
-		String beanName = aspectType.getName();
-		AspectMetadata am = createAspectMetadata(aspectType, beanName);
-		MetadataAwareAspectInstanceFactory instanceFactory = createAspectInstanceFactory(am, aspectType, beanName);
+	public void addAspect(Class aspectClass) {
+		String aspectName = aspectClass.getName();
+		AspectMetadata am = createAspectMetadata(aspectClass, aspectName);
+		MetadataAwareAspectInstanceFactory instanceFactory = createAspectInstanceFactory(am, aspectClass, aspectName);
 		addAdvisorsFromAspectInstanceFactory(instanceFactory);
 	}
+
 
 	/**
 	 * Add all {@link Advisor Advisors} from the supplied {@link MetadataAwareAspectInstanceFactory}
@@ -121,10 +122,10 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	/**
 	 * Create an {@link AspectMetadata} instance for the supplied aspect type.
 	 */
-	private AspectMetadata createAspectMetadata(Class aspectType, String beanName) {
-		AspectMetadata am = new AspectMetadata(aspectType, beanName);
+	private AspectMetadata createAspectMetadata(Class aspectClass, String aspectName) {
+		AspectMetadata am = new AspectMetadata(aspectClass, aspectName);
 		if (!am.getAjType().isAspect()) {
-			throw new IllegalArgumentException("Class [" + aspectType.getName() + "] is not a valid aspect type");
+			throw new IllegalArgumentException("Class [" + aspectClass.getName() + "] is not a valid aspect type");
 		}
 		return am;
 	}
@@ -134,16 +135,18 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * has no per clause, then a {@link SingletonMetadataAwareAspectInstanceFactory} is returned, otherwise
 	 * a {@link PrototypeAspectInstanceFactory} is returned.
 	 */
-	private MetadataAwareAspectInstanceFactory createAspectInstanceFactory(AspectMetadata am, Class aspectType, String beanName) {
+	private MetadataAwareAspectInstanceFactory createAspectInstanceFactory(
+			AspectMetadata am, Class aspectClass, String aspectName) {
+
 		MetadataAwareAspectInstanceFactory instanceFactory = null;
 		if (am.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
-			Object instance = getSingletonAspectInstance(aspectType);
-			instanceFactory = new SingletonMetadataAwareAspectInstanceFactory(instance, beanName);
+			// Create a shared aspect instance.
+			Object instance = getSingletonAspectInstance(aspectClass);
+			instanceFactory = new SingletonMetadataAwareAspectInstanceFactory(instance, aspectName);
 		}
 		else {
-			// create BeanFactory for this aspect
-			DefaultListableBeanFactory bf = getPrototypeAspectBeanFactory(aspectType, beanName);
-			instanceFactory = new PrototypeAspectInstanceFactory(bf, beanName);
+			// Create a factory for independent aspect instances.
+			instanceFactory = new SimpleMetadataAwareAspectInstanceFactory(aspectClass, aspectName);
 		}
 		return instanceFactory;
 	}
@@ -161,30 +164,26 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	}
 
 	/**
-	 * Create a {@link DefaultListableBeanFactory} used to create prototype instances
-	 * of the supplied aspect type.
-	 */
-	private DefaultListableBeanFactory getPrototypeAspectBeanFactory(Class aspectType, String beanName) {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		RootBeanDefinition definition = new RootBeanDefinition(aspectType);
-		definition.setSingleton(false);
-		bf.registerBeanDefinition(beanName, definition);
-		return bf;
-	}
-
-	/**
 	 * Get the singleton aspect instance for the supplied aspect type. An instance
 	 * is created if one cannot be found in the instance cache.
 	 */
-	private Object getSingletonAspectInstance(Class aspectType) {
+	private Object getSingletonAspectInstance(Class aspectClass) {
 		synchronized (aspectCache) {
-			Object instance = aspectCache.get(aspectType);
+			Object instance = aspectCache.get(aspectClass);
 			if (instance != null) {
 				return instance;
 			}
-			instance = BeanUtils.instantiateClass(aspectType);
-			aspectCache.put(aspectType, instance);
-			return instance;
+			try {
+				instance = aspectClass.newInstance();
+				aspectCache.put(aspectClass, instance);
+				return instance;
+			}
+			catch (InstantiationException ex) {
+				throw new AopConfigException("Unable to instantiate aspect class [" + aspectClass.getName() + "]", ex);
+			}
+			catch (IllegalAccessException ex) {
+				throw new AopConfigException("Cannot access aspect class [" + aspectClass.getName() + "]", ex);
+			}
 		}
 	}
 

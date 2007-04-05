@@ -16,34 +16,32 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import org.springframework.aop.aspectj.SingletonAspectInstanceFactory;
+import org.springframework.aop.aspectj.SimpleAspectInstanceFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
 /**
- * Implementation of {@link MetadataAwareAspectInstanceFactory} that is backed
- * by a specified singleton object, returning the same instance for every
+ * Implementation of {@link MetadataAwareAspectInstanceFactory} that
+ * creates a new instance of the specified aspect class for every
  * {@link #getAspectInstance()} call.
  *
- * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 2.0
- * @see SimpleMetadataAwareAspectInstanceFactory
+ * @since 2.0.4
  */
-public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspectInstanceFactory
+public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstanceFactory
 		implements MetadataAwareAspectInstanceFactory {
 
 	private final AspectMetadata metadata;
 
 
 	/**
-	 * Create a new SingletonMetadataAwareAspectInstanceFactory for the given aspect.
-	 * @param aspectInstance the singleton aspect instance
-	 * @param aspectName the name of the aspect
+	 * Create a new SimpleMetadataAwareAspectInstanceFactory for the given aspect class.
+	 * @param aspectClass the aspect class
+	 * @param aspectName the aspect name
 	 */
-	public SingletonMetadataAwareAspectInstanceFactory(Object aspectInstance, String aspectName) {
-		super(aspectInstance);
-		this.metadata = new AspectMetadata(aspectInstance.getClass(), aspectName);
+	public SimpleMetadataAwareAspectInstanceFactory(Class aspectClass, String aspectName) {
+		super(aspectClass);
+		this.metadata = new AspectMetadata(aspectClass, aspectName);
 	}
 
 
@@ -52,10 +50,11 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
 	}
 
 	/**
-	 * Check whether the aspect class carries an
-	 * {@link org.springframework.core.annotation.Order} annotation,
-	 * falling back to <code>Ordered.LOWEST_PRECEDENCE</code>.
-	 * @see org.springframework.core.annotation.Order
+	 * Determine a fallback order for the case that the aspect instance
+	 * does not express an instance-specific order through implementing
+	 * the {@link org.springframework.core.Ordered} interface.
+	 * <p>The default implementation simply returns <code>Ordered.LOWEST_PRECEDENCE</code>.
+	 * @param aspectClass the aspect class
 	 */
 	protected int getOrderForAspectClass(Class aspectClass) {
 		Order order = (Order) aspectClass.getAnnotation(Order.class);
@@ -66,3 +65,4 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
 	}
 
 }
+
