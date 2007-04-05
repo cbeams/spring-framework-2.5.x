@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -303,6 +304,20 @@ public class BeanWrapperGenericsTests extends TestCase {
 		assertEquals(5, ((Integer) obj).intValue());
 	}
 
+	public void testGenericTypeNestingMapOfListOfListOfInteger() throws Exception {
+		Map<String, List<List<String>>> map = new HashMap<String, List<List<String>>>();
+		List<String> list = Arrays.asList(new String[] {"1", "2", "3"});
+		map.put("testKey", Collections.singletonList(list));
+
+		NestedGenericCollectionBean gb = new NestedGenericCollectionBean();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("mapOfListOfListOfInteger", map);
+
+		Object obj = gb.getMapOfListOfListOfInteger().get("testKey").get(0).get(0);
+		assertTrue(obj instanceof Integer);
+		assertEquals(1, ((Integer) obj).intValue());
+	}
+
 	public void testComplexGenericMap() {
 		Map inputMap = new HashMap();
 		List inputKey = new LinkedList();
@@ -392,6 +407,8 @@ public class BeanWrapperGenericsTests extends TestCase {
 
 		private List<Map<String, Integer>> listOfMapOfInteger;
 
+		private Map<String, List<List<Integer>>> mapOfListOfListOfInteger;
+
 		public Map<String, Integer> getMapOfInteger() {
 			return mapOfInteger;
 		}
@@ -414,6 +431,14 @@ public class BeanWrapperGenericsTests extends TestCase {
 
 		public void setListOfMapOfInteger(List<Map<String, Integer>> listOfMapOfInteger) {
 			this.listOfMapOfInteger = listOfMapOfInteger;
+		}
+
+		public Map<String, List<List<Integer>>> getMapOfListOfListOfInteger() {
+			return mapOfListOfListOfInteger;
+		}
+
+		public void setMapOfListOfListOfInteger(Map<String, List<List<Integer>>> mapOfListOfListOfInteger) {
+			this.mapOfListOfListOfInteger = mapOfListOfListOfInteger;
 		}
 	}
 
