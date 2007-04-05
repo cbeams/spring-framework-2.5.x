@@ -30,6 +30,11 @@ Package org.springframework.beans
 Package org.springframework.context
 * added "addApplicationListener" method to ConfigurableApplicationContext interface, for statically registered listeners
 
+Package org.springframework.core
+* added "getNames", "getNamesForProperty", "getNamesForSuffix" and "getValuesForSuffix" methods to Constants
+* fixed GenericCollectionTypeResolver to correctly navigate Map-List-List structures with a nesting level of 3 or more
+* BridgeMethodResolver performs multi-step resolution of type variables, for complex multi-type inheritance scenarios
+
 Package org.springframework.dao
 * PersistenceExceptionTranslationInterceptor supports PersistenceExceptionTranslator autodetection in standalone mode
 
@@ -92,6 +97,7 @@ Package org.springframework.transaction
 * "tx:advice" expects that the XML parser might not expose the defaults defined in "spring-tx-2.0.xsd" (e.g. on Resin)
 
 Package org.springframework.util
+* ObjectUtils's "nullSafeToString"/"getDisplayValue" returns an empty String if "Object.toString()" returned null
 * ClassUtils's "classPackageAsResourcePath" parses the class name in order to detect the package name in all cases
 * fixed CustomizableThreadCreator to properly apply its "daemon" flag (inherited by SimpleAsyncTaskExecutor)
 
@@ -105,10 +111,19 @@ Package org.springframework.web
 * DispatcherPortlet logs startup logging at debug level instead of info level, analogous to DispatcherServlet
 * factored out protected "getHandlerExecutionChain" template method in Servlet/Portlet AbstractHandlerMapping
 * added "getRootHandler()" method to AbstractUrlHandlerMapping, called on each access to the root handler
+* added overloaded "suppressValidation(request, command, errors)" variant to BaseCommandController
+* deprecated "suppressValidation(request)" in BaseCommandController, in favor of the "(request, command)" variant
+* revised AbstractXsltView for transformer customization options ("buildTransformer" and "getTemplates" methods)
+* added "getParameters(model, request") variant to AbstractXsltView, deprecating the old "getParameters()" variant
+* "spring.tld" and "spring-form.tld" declare the Spring major version number (2.0) as taglib version number
 * fixed JSP BindTag to correctly save and re-expose a page-scoped "status" attribute (not just a request-scoped one)
 * JSP FormTag escapes the "action" attribute as well if HTML escaping has been requested
 * JSP InputTag supports the common "autocomplete" HTML extension attribute (as supported by IE and Firefox)
-* "spring.tld" and "spring-form.tld" declare the Spring major version number (2.0) as taglib version number
+* JSP CheckboxTag applies custom editors for the element type when comparing collection elements
+* added missing "readonly" attribute to JSP TextareaTag
+* checkbox and radiobutton macros in "spring.vm" for Velocity do not render an id anymore (because it isn't unique)
+* checkbox macro in "spring.vm" for Velocity and "spring.ftl" for FreeMarker renders the default field marker
+* added theme macros to "spring.vm" for Velocity and "spring.ftl" for FreeMarker, providing access to theme messages
 
 
 Changes in version 2.0.3 (2007-03-09)
