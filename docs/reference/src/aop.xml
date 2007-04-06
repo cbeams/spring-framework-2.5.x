@@ -2267,7 +2267,7 @@ public @interface Idempotent {
    public static void main(String[] args) {
    
       ProxyFactory factory = new ProxyFactory(new SimplePojo());
-      factory.adddInterface(Pojo.class);
+      factory.addInterface(Pojo.class);
       factory.addAdvice(new RetryAdvice());
 
       Pojo pojo = (Pojo) factory.getProxy();
@@ -2297,7 +2297,7 @@ public @interface Idempotent {
 
    public void foo() {
       ]]><lineannotation>// this works, but... gah!</lineannotation><![CDATA[
-      ((Pojo) AopContext.getCurrentProxy()).bar();
+      ((Pojo) AopContext.currentProxy()).bar();
    }
    
    public void bar() {
