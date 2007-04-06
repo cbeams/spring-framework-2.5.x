@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -581,8 +581,14 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 	}
 
 	public void testQueryForListWithArgs() throws Exception {
-		String sql = "SELECT AGE FROM CUSTMR WHERE ID < ?";
+		doTestQueryForListWithArgs("SELECT AGE FROM CUSTMR WHERE ID < ?");
+	}
 
+	public void testQueryForListIsNotConfusedByNamedParameterPrefix() throws Exception {
+		doTestQueryForListWithArgs("SELECT AGE FROM PREFIX:CUSTMR WHERE ID < ?");
+	}
+
+	private void doTestQueryForListWithArgs(String sql) throws Exception {
 		mockResultSetMetaData.getColumnCount();
 		ctrlResultSetMetaData.setReturnValue(1, 2);
 		mockResultSetMetaData.getColumnName(1);
