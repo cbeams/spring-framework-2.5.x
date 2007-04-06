@@ -23,14 +23,26 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
+ * {@link org.springframework.context.ApplicationContext} implementation
+ * for a JCA ResourceAdapter. Needs to be initialized with the JCA
+ * {@link javax.resource.spi.BootstrapContext}, passing it on to
+ * Spring-managed beans that implement {@link BootstrapContextAware}.
+ *
  * @author Juergen Hoeller
  * @since 2.1
+ * @see SpringContextResourceAdapter
+ * @see BootstrapContextAware
  */
 public class ResourceAdapterApplicationContext extends GenericApplicationContext {
 
 	private final BootstrapContext bootstrapContext;
 
 
+	/**
+	 * Create a new ResourceAdapterApplicationContext for the given BootstrapContext.
+	 * @param bootstrapContext the JCA BootstrapContext that the ResourceAdapter
+	 * has been started with
+	 */
 	public ResourceAdapterApplicationContext(BootstrapContext bootstrapContext) {
 		this.bootstrapContext = bootstrapContext;
 	}

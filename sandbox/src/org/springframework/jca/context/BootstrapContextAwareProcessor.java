@@ -22,21 +22,32 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor}
+ * implementation that passes the BootstrapContext to beans that implement
+ * the {@link BootstrapContextAware} interface.
+ *
+ * <p>JCA application contexts will automatically register this with their
+ * underlying bean factory. Applications do not use this directly.
+ *
  * @author Juergen Hoeller
  * @since 2.1
+ * @see BootstrapContextAware
  */
 public class BootstrapContextAwareProcessor implements BeanPostProcessor {
 
 	private final BootstrapContext bootstrapContext;
 
 
+	/**
+	 * Create a new BootstrapContextAwareProcessor for the given context.
+	 */
 	public BootstrapContextAwareProcessor(BootstrapContext bootstrapContext) {
 		this.bootstrapContext = bootstrapContext;
 	}
 
 
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		if (bean instanceof BootstrapContextAware) {
+		if (this.bootstrapContext != null && bean instanceof BootstrapContextAware) {
 			((BootstrapContextAware) bean).setBootstrapContext(this.bootstrapContext);
 		}
 		return bean;
