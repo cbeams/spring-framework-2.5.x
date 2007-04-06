@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,16 @@ package org.springframework.jdbc.object;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.PreparedStatementSetter;
-import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 
 /**
- * RdbmsOperation using a JdbcTemplate and representing a SQL-based
- * operation such as a query or update, as opposed to a stored procedure.
+ * Operation object representing a SQL-based operation such as a query or update,
+ * as opposed to a stored procedure.
  *
- * <p>Configures a PreparedStatementCreatorFactory based on the
- * declared parameters.
+ * <p>Configures a {@link org.springframework.jdbc.core.PreparedStatementCreatorFactory}
+ * based on the declared parameters.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see PreparedStatementCreatorFactory
  */
 public abstract class SqlOperation extends RdbmsOperation {
 
@@ -54,7 +52,6 @@ public abstract class SqlOperation extends RdbmsOperation {
 			this.preparedStatementFactory.setGeneratedKeysColumnNames(getGeneratedKeysColumnNames());
 		}
 		this.preparedStatementFactory.setNativeJdbcExtractor(getJdbcTemplate().getNativeJdbcExtractor());
-		this.preparedStatementFactory.setSqlToUse(NamedParameterUtils.parseSqlStatementIntoString(getSql()));
 
 		onCompileInternal();
 	}

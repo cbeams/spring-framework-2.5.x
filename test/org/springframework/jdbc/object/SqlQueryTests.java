@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.jdbc.core.SqlParameter;
 /**
  * @author Trevor Cook
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
 public class SqlQueryTests extends AbstractJdbcTests {
 
@@ -50,7 +51,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 	private static final String SELECT_FORENAME_EMPTY =
 		"select forename from custmr WHERE 1 = 2";
 	private static final String SELECT_ID_FORENAME_WHERE =
-		"select id, forename from custmr where forename = ?";
+		"select id, forename from prefix:custmr where forename = ?";
 	private static final String SELECT_ID_FORENAME_WHERE_NAMED_PARAMETER_1 =
 		"select id, forename from custmr where id = ?";
 	private static final String SELECT_ID_FORENAME_WHERE_NAMED_PARAMETER_2 =
@@ -115,12 +116,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		replay();
 
 		SqlQuery query = new MappingSqlQueryWithParameters() {
-			protected Object mapRow(
-				ResultSet rs,
-				int rownum,
-				Object[] params,
-				Map context)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum, Object[] params, Map context) throws SQLException {
 				assertTrue("params were null", params == null);
 				assertTrue("context was null", context == null);
 				return new Integer(rs.getInt(1));
@@ -144,8 +140,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		replay();
 
 		MappingSqlQuery query = new MappingSqlQuery() {
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				return new Integer(rs.getInt(1));
 			}
 
@@ -171,11 +166,9 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		replay();
 
 		MappingSqlQuery query = new MappingSqlQuery() {
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				return new Integer(rs.getInt(1));
 			}
-
 		};
 		query.setDataSource(mockDataSource);
 		query.setSql(SELECT_ID_WHERE);
@@ -322,61 +315,6 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		assertTrue("Found 0 results", results.length == 0);
 	}
 
-	public void XtestAnonCustomerQuery() {
-		/*
-				mockPreparedStatement =
-					new SpringMockPreparedStatement[] {
-						 SpringMockJdbcFactory.preparedStatement(
-							SELECT_ID_FORENAME_WHERE,
-							new Object[] { new Integer(1)},
-							null,
-							null,
-							mockConnection)
-				};
-				mockPreparedStatement[0].setExpectedExecuteCalls(1);
-				mockPreparedStatement[0].setExpectedCloseCalls(1);
-
-				mockResultSet =
-					new MockResultSet[] {
-						SpringMockJdbcFactory
-						.resultSet(new Object[][] { { new Integer(1), "rod" }
-					}, COLUMN_NAMES, mockPreparedStatement[0])
-					};
-				mockResultSet[0].setExpectedNextCalls(2);
-
-				SqlQuery query = new MappingSqlQuery() {
-					protected Object mapRow(ResultSet rs, int rownum)
-						throws SQLException {
-						Customer cust = new Customer();
-						cust.setId(rs.getInt(COLUMN_NAMES[0]));
-						cust.setForename(rs.getString(COLUMN_NAMES[1]));
-						return cust;
-					}
-				};
-				query.setDataSource(mockDataSource);
-				query.setSql(SELECT_ID_FORENAME_WHERE);
-				query.declareParameter(new SqlParameter(Types.NUMERIC));
-				query.compile();
-
-				List list = query.execute(1);
-				assertTrue("List is non null", list != null);
-				assertTrue("Found 1 result", list.size() == 1);
-				Customer cust = (Customer) list.get(0);
-				assertTrue("Customer id was assigned correctly", cust.getId() == 1);
-				assertTrue(
-					"Customer forename was assigned correctly",
-					cust.getForename().equals("rod"));
-
-				try {
-					list = query.execute();
-					fail("Shouldn't have executed without arguments");
-				}
-				catch (InvalidDataAccessApiUsageException ex) {
-					// ok
-				}
-		*/
-	}
-
 	public void testFindCustomerIntInt() throws SQLException {
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
@@ -414,8 +352,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -469,8 +406,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -556,8 +492,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -619,8 +554,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -684,8 +618,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -742,8 +675,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -796,8 +728,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -851,8 +782,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -911,8 +841,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -976,8 +905,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
+			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -1049,8 +977,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
-			protected Object updateRow(ResultSet rs, int rownum, Map context)
-			throws SQLException {
+			protected Object updateRow(ResultSet rs, int rownum, Map context) throws SQLException {
 				rs.updateString(2, "" + context.get(new Integer(rs.getInt(COLUMN_NAMES[0]))));
 				return null;
 			}

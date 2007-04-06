@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.util.Assert;
 
 /**
- * Helper class that can efficiently create multiple PreparedStatementCreator
+ * Helper class that efficiently creates multiple {@link PreparedStatementCreator}
  * objects with different parameters based on a SQL statement and a single
  * set of parameter declarations.
  *
@@ -58,8 +58,6 @@ public class PreparedStatementCreatorFactory {
 	private String[] generatedKeysColumnNames = null;
 
 	private NativeJdbcExtractor nativeJdbcExtractor;
-
-	private String sqlToUse = null;
 
 
 	/**
@@ -144,13 +142,6 @@ public class PreparedStatementCreatorFactory {
 		this.nativeJdbcExtractor = nativeJdbcExtractor;
 	}
 
-	/**
-	 * The SQL statement parsed with named parameters expanded.
-	 */
-	public void setSqlToUse(String sqlToUse) {
-		this.sqlToUse = sqlToUse;
-	}
-
 
 	/**
 	 * Return a new PreparedStatementSetter for the given parameters.
@@ -207,7 +198,7 @@ public class PreparedStatementCreatorFactory {
 		private final List parameters;
 
 		public PreparedStatementCreatorImpl(List parameters) {
-			this((sqlToUse != null ? sqlToUse : sql), parameters);
+			this(sql, parameters);
 		}
 
 		public PreparedStatementCreatorImpl(String actualSql, List parameters) {
