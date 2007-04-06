@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.4 (2007-04-06)
+Changes in version 2.0.4 (2007-04-09)
 -------------------------------------
 
 Package org.springframework.aop
@@ -11,6 +11,9 @@ Package org.springframework.aop
 * fixed AspectJAfterReturningAdvice to avoid NPE within returning type check in case of the return value being null
 * fixed AspectJAwareAdvisorAutoProxyCreator's "toString()" implementation to be compatible with JDK 1.3/1.4
 * AnnotationAwareAspectJAutoProxyCreator caches Advisors for singleton @Aspect aspects, increasing performance
+* introduced Simple(MetadataAware)AspectInstanceFactory, creating an independent aspect instance on every invocation
+* revised AspectJProxyFactory to avoid "spring-beans" dependencies, using SimpleMetadataAwareAspectInstanceFactory now
+* AbstractAspectJAdvice lazily calculates argument bindings, avoiding a "spring-beans" dependency (InitializingBean)
 
 Package org.springframework.beans
 * PropertyEditorRegistrySupport/BeanWrapperImpl lazily registers default editors when needed (to avoid init overhead)
@@ -42,6 +45,9 @@ Package org.springframework.jca
 * added "setConnectionSpec" method and corresponding constructor to CciTemplate, for specifying a spec at template level
 * added "getDerivedTemplate(ConnectionSpec) method to CciTemplate, for obtaining a template with just different con spec
 * added "getCciTemplate(ConnectionSpec) method to CciDaoSupport, for obtaining a template with just different con spec
+
+Package org.springframework.jdbc
+* SqlOperation and its subclasses do not pre-parse for named parameters anymore, accepting ":" in plain SQL strings
 
 Package org.springframework.jms
 * added "isSessionTransactional" method to ConnectionFactoryUtils
