@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 
 /**
- * Reusable object to represent a SQL query.
+ * Reusable operation object representing a SQL query.
  *
  * <p>Subclasses must implement the {@link #newRowMapper} method to provide
  * an object that can extract the results of iterating over the
@@ -90,7 +90,7 @@ public abstract class SqlQuery extends SqlOperation {
 	 * Get the number of rows expected.
 	 */
 	public int getRowsExpected() {
-		return rowsExpected;
+		return this.rowsExpected;
 	}
 
 
