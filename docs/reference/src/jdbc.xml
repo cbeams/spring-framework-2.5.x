@@ -709,8 +709,7 @@ public void setDataSource(DataSource dataSource) {
 }
 
 public List getList() {
-    List rows = jt.queryForList("select * from mytable");
-    return rows;
+    return this.jdbcTemplate.queryForList("select * from mytable");
 }]]></programlisting>
 			<para>
 				The list returned would look something like this:
