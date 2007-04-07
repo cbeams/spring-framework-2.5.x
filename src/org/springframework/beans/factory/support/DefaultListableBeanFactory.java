@@ -64,7 +64,6 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
- * @see org.springframework.beans.factory.ListableBeanFactory
  * @see StaticListableBeanFactory
  * @see PropertiesBeanDefinitionReader
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
@@ -190,13 +189,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						}
 					}
 					catch (CannotLoadBeanClassException ex) {
-						if (mbd.isLazyInit()) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Ignoring bean class loading failure for lazy-init bean '" + beanName + "'", ex);
-							}
-						}
-						else {
-							throw ex;
+						// Probably contains a placeholder: let's ignore it for type matching purposes.
+						if (logger.isDebugEnabled()) {
+							logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
 						}
 					}
 				}
