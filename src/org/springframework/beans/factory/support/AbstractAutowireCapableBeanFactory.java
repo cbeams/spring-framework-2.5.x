@@ -61,7 +61,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract BeanFactory superclass that implements default bean creation,
+ * Abstract bean factory superclass that implements default bean creation,
  * with the full capabilities specified by the {@link RootBeanDefinition} class.
  * Implements the {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory}
  * interface in addition to AbstractBeanFactory's {@link #createBean} method.
@@ -87,10 +87,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 13.02.2004
- * @see AutowireCapableBeanFactory
- * @see AbstractBeanFactory#createBean
  * @see RootBeanDefinition
- * @see #findAutowireCandidates
  * @see DefaultListableBeanFactory
  * @see BeanDefinitionRegistry
  */
