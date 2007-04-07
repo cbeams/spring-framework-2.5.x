@@ -2,6 +2,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
+
 	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">
 			<list>
@@ -34,6 +35,7 @@
 	</bean>
 
 	<bean id="exportService" class="org.springframework.scheduling.quartz.QuartzTestBean"/>
+
 	<bean id="importService" class="org.springframework.scheduling.quartz.QuartzTestBean"/>
 
 </beans>
