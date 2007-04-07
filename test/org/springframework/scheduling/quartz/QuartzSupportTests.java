@@ -42,6 +42,7 @@ import org.quartz.TriggerListener;
 import org.quartz.spi.JobFactory;
 
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.task.TaskExecutor;
@@ -56,14 +57,18 @@ import org.springframework.scheduling.TestMethodInvokingTask;
 public class QuartzSupportTests extends TestCase {
 
 	public void testSchedulerFactoryBean() throws Exception {
-		doTestSchedulerFactoryBean(false);
+		doTestSchedulerFactoryBean(false, false);
 	}
 
 	public void testSchedulerFactoryBeanWithExplicitJobDetail() throws Exception {
-		doTestSchedulerFactoryBean(true);
+		doTestSchedulerFactoryBean(true, false);
 	}
 
-	private void doTestSchedulerFactoryBean(boolean explicitJobDetail) throws Exception {
+	public void testSchedulerFactoryBeanWithPrototypeJob() throws Exception {
+		doTestSchedulerFactoryBean(false, true);
+	}
+
+	private void doTestSchedulerFactoryBean(boolean explicitJobDetail, boolean prototypeJob) throws Exception {
 		TestBean tb = new TestBean("tb", 99);
 		JobDetailBean jobDetail0 = new JobDetailBean();
 		jobDetail0.setJobClass(Job.class);
@@ -83,7 +88,15 @@ public class QuartzSupportTests extends TestCase {
 		TestMethodInvokingTask task1 = new TestMethodInvokingTask();
 		MethodInvokingJobDetailFactoryBean mijdfb = new MethodInvokingJobDetailFactoryBean();
 		mijdfb.setBeanName("myJob1");
-		mijdfb.setTargetObject(task1);
+		if (prototypeJob) {
+			StaticListableBeanFactory beanFactory = new StaticListableBeanFactory();
+			beanFactory.addBean("task", task1);
+			mijdfb.setTargetBeanName("task");
+			mijdfb.setBeanFactory(beanFactory);
+		}
+		else {
+			mijdfb.setTargetObject(task1);
+		}
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
 		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();

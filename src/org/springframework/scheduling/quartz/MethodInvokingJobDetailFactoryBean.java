@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,23 +29,32 @@ import org.quartz.StatefulJob;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
 
 /**
- * FactoryBean that exposes a JobDetail object that delegates job execution
- * to a specified (static or non-static) method. Avoids the need to implement
- * a one-line Quartz Job that just invokes an existing service method.
+ * {@link org.springframework.beans.factory.FactoryBean} that exposes a
+ * {@link org.quartz.JobDetail} object which delegates job execution to a
+ * specified (static or non-static) method. Avoids the need for implementing
+ * a one-line Quartz Job that just invokes an existing service method on a
+ * Spring-managed target bean.
  *
- * <p>Derived from MethodInvoker to share common properties and behavior
- * with MethodInvokingFactoryBean.
+ * <p>Inherits common configuration properties from the {@link MethodInvoker}
+ * base class, such as {@link #setTargetObject "targetObject"} and
+ * {@link #setTargetMethod "targetMethod"}, adding support for lookup of the target
+ * bean by name through the {@link #setTargetBeanName "targetBeanName"} property
+ * (as alternative to specifying a "targetObject" directly, allowing for
+ * non-singleton target objects).
  *
  * <p>Supports both concurrently running jobs and non-currently running
- * ones through the "concurrent" property. Jobs created by this
+ * jobs through the "concurrent" property. Jobs created by this
  * MethodInvokingJobDetailFactoryBean are by default volatile and durable
  * (according to Quartz terminology).
  *
@@ -57,13 +66,13 @@ import org.springframework.util.MethodInvoker;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  * @since 18.02.2004
+ * @see #setTargetBeanName
  * @see #setTargetObject
  * @see #setTargetMethod
  * @see #setConcurrent
- * @see org.springframework.beans.factory.config.MethodInvokingFactoryBean
  */
 public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethodInvoker
-    implements FactoryBean, BeanNameAware, BeanClassLoaderAware, InitializingBean {
+    implements FactoryBean, BeanNameAware, BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
 
 	/**
 	 * Determine whether the old Quartz 1.5 JobExecutionException constructor
@@ -81,18 +90,22 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 	private boolean concurrent = true;
 
+	private String targetBeanName;
+
 	private String[] jobListenerNames;
 
 	private String beanName;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	private BeanFactory beanFactory;
+
 	private JobDetail jobDetail;
 
 
 	/**
 	 * Set the name of the job.
-	 * Default is the bean name of this FactoryBean.
+	 * <p>Default is the bean name of this FactoryBean.
 	 * @see org.quartz.JobDetail#setName
 	 */
 	public void setName(String name) {
@@ -101,7 +114,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 	/**
 	 * Set the group of the job.
-	 * Default is the default group of the Scheduler.
+	 * <p>Default is the default group of the Scheduler.
 	 * @see org.quartz.JobDetail#setGroup
 	 * @see org.quartz.Scheduler#DEFAULT_GROUP
 	 */
@@ -116,11 +129,18 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * More information on stateful versus stateless jobs can be found
 	 * <a href="http://www.opensymphony.com/quartz/tutorial.html#jobsMore">here</a>.
 	 * <p>The default setting is to run jobs concurrently.
-	 * @param concurrent whether one wants to execute multiple jobs created
-	 * by this bean concurrently
 	 */
 	public void setConcurrent(boolean concurrent) {
 		this.concurrent = concurrent;
+	}
+
+	/**
+	 * Set the name of the target bean in the Spring BeanFactory.
+	 * <p>This is an alternative to specifying {@link #setTargetObject "targetObject"},
+	 * allowing for non-singleton beans to be invoked.
+	 */
+	public void setTargetBeanName(String targetBeanName) {
+		this.targetBeanName = targetBeanName;
 	}
 
 	/**
@@ -141,6 +161,10 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
 	protected Class resolveClassName(String className) throws ClassNotFoundException {
@@ -179,6 +203,29 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * @param jobDetail the JobDetail prepared by this FactoryBean
 	 */
 	protected void postProcessJobDetail(JobDetail jobDetail) {
+	}
+
+
+	/**
+	 * Overridden to support the {@link #setTargetBeanName "targetBeanName"} feature.
+	 */
+	public Class getTargetClass() {
+		if (this.targetBeanName != null) {
+			Assert.state(this.beanFactory != null, "BeanFactory must be set when using 'targetBeanName'");
+			return this.beanFactory.getType(this.targetBeanName);
+		}
+		return super.getTargetClass();
+	}
+
+	/**
+	 * Overridden to support the {@link #setTargetBeanName "targetBeanName"} feature.
+	 */
+	public Object getTargetObject() {
+		if (this.targetBeanName != null) {
+			Assert.state(this.beanFactory != null, "BeanFactory must be set when using 'targetBeanName'");
+			return this.beanFactory.getBean(this.targetBeanName);
+		}
+		return super.getTargetObject();
 	}
 
 

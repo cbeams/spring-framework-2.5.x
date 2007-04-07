@@ -50,7 +50,7 @@ public class MethodInvoker {
 
 	private String staticMethod;
 
-	private Object[] arguments;
+	private Object[] arguments = new Object[0];
 
 	/** The method we will call */
 	private Method methodObject;
@@ -71,7 +71,7 @@ public class MethodInvoker {
 	 * Return the target class on which to call the target method.
 	 */
 	public Class getTargetClass() {
-		return targetClass;
+		return this.targetClass;
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class MethodInvoker {
 	 * Return the target object on which to call the target method.
 	 */
 	public Object getTargetObject() {
-		return targetObject;
+		return this.targetObject;
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class MethodInvoker {
 	 * Return the name of the method to be invoked.
 	 */
 	public String getTargetMethod() {
-		return targetMethod;
+		return this.targetMethod;
 	}
 
 	/**
@@ -129,14 +129,14 @@ public class MethodInvoker {
 	 * or the Object array is of length 0, a method with no arguments is assumed.
 	 */
 	public void setArguments(Object[] arguments) {
-		this.arguments = arguments;
+		this.arguments = (arguments != null ? arguments : new Object[0]);
 	}
 
 	/**
 	 * Retrun the arguments for the method invocation.
 	 */
 	public Object[] getArguments() {
-		return arguments;
+		return this.arguments;
 	}
 
 
@@ -160,24 +160,24 @@ public class MethodInvoker {
 			this.targetMethod = methodName;
 		}
 
-		if (this.targetClass == null) {
-			throw new IllegalArgumentException("Either targetClass or targetObject is required");
+		Class targetClass = getTargetClass();
+		String targetMethod = getTargetMethod();
+		if (targetClass == null) {
+			throw new IllegalArgumentException("Either 'targetClass' or 'targetObject' is required");
 		}
-		if (this.targetMethod == null) {
-			throw new IllegalArgumentException("targetMethod is required");
-		}
-		if (this.arguments == null) {
-			this.arguments = new Object[0];
+		if (targetMethod == null) {
+			throw new IllegalArgumentException("Property 'targetMethod' is required");
 		}
 
-		Class[] argTypes = new Class[this.arguments.length];
-		for (int i = 0; i < this.arguments.length; ++i) {
-			argTypes[i] = (this.arguments[i] != null ? this.arguments[i].getClass() : Object.class);
+		Object[] arguments = getArguments();
+		Class[] argTypes = new Class[arguments.length];
+		for (int i = 0; i < arguments.length; ++i) {
+			argTypes[i] = (arguments[i] != null ? arguments[i].getClass() : Object.class);
 		}
 
 		// Try to get the exact method first.
 		try {
-			this.methodObject = this.targetClass.getMethod(this.targetMethod, argTypes);
+			this.methodObject = targetClass.getMethod(targetMethod, argTypes);
 		}
 		catch (NoSuchMethodException ex) {
 			// Just rethrow exception if we can't get any match.
@@ -185,10 +185,6 @@ public class MethodInvoker {
 			if (this.methodObject == null) {
 				throw ex;
 			}
-		}
-
-		if (this.targetObject == null && !Modifier.isStatic(this.methodObject.getModifiers())) {
-			throw new IllegalArgumentException("Target method must not be non-static without a target");
 		}
 	}
 
@@ -246,28 +242,37 @@ public class MethodInvoker {
 	}
 
 	/**
-	 * Return the prepared Method object that will be invoker.
-	 * Can for example be used to determine the return type.
+	 * Return the prepared Method object that will be invoked.
+	 * <p>Can for example be used to determine the return type.
+	 * @return the prepared Method object (never <code>null</code>)
+	 * @throws IllegalStateException if the invoker hasn't been prepared yet
 	 * @see #prepare
 	 * @see #invoke
 	 */
-	public Method getPreparedMethod() {
+	public Method getPreparedMethod() throws IllegalStateException {
+		if (this.methodObject == null) {
+			throw new IllegalStateException("prepare() must be called prior to invoke() on MethodInvoker");
+		}
 		return this.methodObject;
 	}
 
 	/**
 	 * Invoke the specified method.
-	 * The invoker needs to have been prepared before.
+	 * <p>The invoker needs to have been prepared before.
 	 * @return the object (possibly null) returned by the method invocation,
 	 * or <code>null</code> if the method has a void return type
+	 * @throws InvocationTargetException if the target method threw an exception
+	 * @throws IllegalAccessException if the target method couldn't be accessed
 	 * @see #prepare
 	 */
 	public Object invoke() throws InvocationTargetException, IllegalAccessException {
-		if (this.methodObject == null) {
-			throw new IllegalStateException("prepare() must be called prior to invoke() on MethodInvoker");
+		// In the static case, target will simply be <code>null</code>.
+		Object targetObject = getTargetObject();
+		Method preparedMethod = getPreparedMethod();
+		if (targetObject == null && !Modifier.isStatic(preparedMethod.getModifiers())) {
+			throw new IllegalArgumentException("Target method must not be non-static without a target");
 		}
-		// In the static case, target will just be <code>null</code>.
-		return this.methodObject.invoke(this.targetObject, this.arguments);
+		return preparedMethod.invoke(targetObject, getArguments());
 	}
 
 }
