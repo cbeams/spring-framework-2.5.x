@@ -15,7 +15,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerMethodMapping;
  *
  * @author Arjen Poutsma
  */
-public abstract class AbstractAnnotationUrlHandlerMapping extends AbstractHandlerMethodMapping
+public abstract class AbstractAnnotationHandlerMapping extends AbstractHandlerMethodMapping
         implements BeanPostProcessor {
 
     public final Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {

@@ -26,7 +26,7 @@ import org.springframework.web.servlet.mvc.WebParamHandlerMethodAdapter;
  *
  * @author Arjen Poutsma
  */
-public class UrlAnnotationHandlerMapping extends AbstractAnnotationUrlHandlerMapping {
+public class UrlAnnotationHandlerMapping extends AbstractAnnotationHandlerMapping {
 
     protected String[] getUrlPaths(Method method) {
         Url url = AnnotationUtils.findAnnotation(method, Url.class);
