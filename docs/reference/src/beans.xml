@@ -3382,12 +3382,12 @@ cfg.postProcessBeanFactory(factory);]]></programlisting>
             </note>
             <section id="beans-factory-placeholderconfigurer">
                 <title>Example: the <interfacename>PropertyPlaceholderConfigurer</interfacename></title>
-                <para>The <interfacename>PropertyPlaceholderConfigurer</interfacename>, implemented
-                as a bean factory post-processor, is used to externalize some property
-                values from a <interfacename>BeanFactory</interfacename> definition, into another
+                <para>The <interfacename>PropertyPlaceholderConfigurer</interfacename>
+				is used to externalize property values from a
+				<interfacename>BeanFactory</interfacename> definition, into another
                 separate file in the standard Java <classname>Properties</classname> format.
-                This is useful to allow the person deploying an application to customize some key
-                properties (for example database URLs, usernames and passwords), without the
+                This is useful to allow the person deploying an application to customize
+				enviroment-specific properties (for example database URLs, usernames and passwords), without the
                 complexity or risk of modifying the main XML definition file or files for the
                 container.</para>
                 <para>Consider the following XML-based configuration metadata fragment, where a
@@ -3396,7 +3396,13 @@ cfg.postProcessBeanFactory(factory);]]></programlisting>
                 file, and at runtime, we will apply a
                 <classname>PropertyPlaceholderConfigurer</classname> to the metadata which will
                 replace some properties of the datasource:</para>
-                <programlisting><![CDATA[<bean id="dataSource" destroy-method="close"
+                <programlisting><![CDATA[<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="locations">
+        <value>classpath:com/foo/jdbc.properties</value>
+    </property>
+</bean>
+
+<bean id="dataSource" destroy-method="close"
       class="org.apache.commons.dbcp.BasicDataSource">
     <property name="driverClassName" value="]]><emphasis role="bold">${jdbc.driverClassName}</emphasis><![CDATA["/>
     <property name="url" value="]]><emphasis role="bold">${jdbc.url}</emphasis><![CDATA["/>
@@ -3419,7 +3425,29 @@ jdbc.password=root]]></programlisting>
 				one to let it override only if the property cannot be found in the
 				properties file specified. Please consult the Javadoc for the
 				<classname>PropertiesPlaceholderConfigurer</classname> for more information.</para>
-            </section>
+				<tip>
+					<title>Class name substitution</title>
+					<para>The <classname>PropertyPlaceholderConfigurer</classname>
+					can be used to substitute class names, which is sometimes useful
+					when you have to pick a particular implementation class at runtime.
+					For example:</para>
+					<programlisting><![CDATA[<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="locations">
+        <value>classpath:com/foo/strategy.properties</value>
+    </property>
+    <property name="properties">
+        <value>custom.strategy.class=com.foo.DefaultStrategy</value>
+    </property>
+</bean>
+
+<bean id="serviceStrategy" class="${custom.strategy.class}"/>]]></programlisting>
+					<para>If the class is unable to be resolved at runtime to a valid class,
+					resolution of the the bean will fail once it is about to be created
+					(which is during the <methodname>preInstantiateSingletons()</methodname>
+					phase of an <interfacename>ApplicationContext</interfacename> for a
+					non-lazy-init bean.)</para>
+				</tip>
+			</section>
             <section id="beans-factory-overrideconfigurer">
                 <title>Example: the <classname>PropertyOverrideConfigurer</classname></title>
                 <para>The <classname>PropertyOverrideConfigurer</classname>, another bean
