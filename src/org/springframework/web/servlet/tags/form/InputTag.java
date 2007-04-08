@@ -49,8 +49,6 @@ public class InputTag extends AbstractHtmlInputElementTag {
 
 	private String onselect;
 
-	private String readonly;
-
 	private String autocomplete;
 
 
@@ -115,21 +113,6 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Set the value of the '<code>readonly</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	public void setReadonly(String readonly) {
-		this.readonly = readonly;
-	}
-
-	/**
-	 * Get the value of the '<code>readonly</code>' attribute.
-	 */
-	protected String getReadonly() {
-		return this.readonly;
-	}
-
-	/**
 	 * Set the value of the '<code>autocomplete</code>' attribute.
 	 * May be a runtime expression.
 	 */
@@ -162,7 +145,6 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		writeOptionalAttribute(tagWriter, MAXLENGTH_ATTRIBUTE, getMaxlength());
 		writeOptionalAttribute(tagWriter, ALT_ATTRIBUTE, getAlt());
 		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, getOnselect());
-		writeOptionalAttribute(tagWriter, READONLY_ATTRIBUTE, getReadonly());
 		writeOptionalAttribute(tagWriter, AUTOCOMPLETE_ATTRIBUTE, getAutocomplete());
 
 		tagWriter.endTag();

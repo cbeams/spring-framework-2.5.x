@@ -25,19 +25,40 @@ import javax.servlet.jsp.JspException;
  * that are common across form input elements.
  *
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 2.0
  */
 public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag {
 
+	/**
+	 * The name of the '<code>onfocus</code>' attribute.
+	 */
 	public static final String ONFOCUS_ATTRIBUTE = "onfocus";
 
+	/**
+	 * The name of the '<code>onblur</code>' attribute.
+	 */
 	public static final String ONBLUR_ATTRIBUTE = "onblur";
 
+	/**
+	 * The name of the '<code>onchange</code>' attribute.
+	 */
 	public static final String ONCHANGE_ATTRIBUTE = "onchange";
 
+	/**
+	 * The name of the '<code>accesskey</code>' attribute.
+	 */
 	public static final String ACCESSKEY_ATTRIBUTE = "accesskey";
 
+	/**
+	 * The name of the '<code>disabled</code>' attribute.
+	 */
 	public static final String DISABLED_ATTRIBUTE = "disabled";
+
+	/**
+	 * The name of the '<code>readonly</code>' attribute.
+	 */
+	public static final String READONLY_ATTRIBUTE = "readonly";
 
 
 	private String onfocus;
@@ -49,6 +70,8 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	private String accesskey;
 
 	private String disabled;
+
+	private String readonly;
 
 
 	/**
@@ -73,7 +96,6 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	public void setOnblur(String onblur) {
 		this.onblur = onblur;
 	}
-
 
 	/**
 	 * Get the value of the '<code>onblur</code>' attribute.
@@ -127,6 +149,24 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 		return this.disabled;
 	}
 
+	/**
+	 * Sets the value of the '<code>readonly</code>' attribute.
+	 * May be a runtime expression.
+	 * @see #isReadonly()
+	 */
+	public void setReadonly(String readonly) {
+		this.readonly = readonly;
+	}
+
+	/**
+	 * Gets the value of the '<code>readonly</code>' attribute.
+	 * May be a runtime expression.
+	 * @see #isReadonly() 
+	 */
+	protected String getReadonly() {
+		return this.readonly;
+	}
+
 
 	/**
 	 * Writes the default attributes configured via this base class to the supplied {@link TagWriter}.
@@ -141,6 +181,9 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 		if (isDisabled()) {
 			tagWriter.writeAttribute(DISABLED_ATTRIBUTE, "disabled");
 		}
+		if (isReadonly()) {
+			writeOptionalAttribute(tagWriter, READONLY_ATTRIBUTE, "readonly");
+		}
 	}
 
 	/**
@@ -148,6 +191,16 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	 */
 	protected boolean isDisabled() {
 		return "true".equals(getDisabled());
+	}
+
+	/**
+	 * Is the current HTML tag readonly?
+	 * <p>Note: some {@link AbstractHtmlInputElementTag} subclasses (such a those
+	 * for checkboxes and radiobuttons)  may contain readonly attributes, but are
+	 * not affected by them since their values don't change (only their status does.)
+	 */
+	protected boolean isReadonly() {
+		return "true".equals(getReadonly());
 	}
 
 }

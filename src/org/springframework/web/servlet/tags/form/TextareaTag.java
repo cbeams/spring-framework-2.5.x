@@ -42,8 +42,6 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 
 	private String onselect;
 
-	private String readonly;
-
 
 	/**
 	 * Set the value of the '<code>rows</code>' attribute.
@@ -90,21 +88,6 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 		return this.onselect;
 	}
 
-	/**
-	 * Set the value of the '<code>readonly</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	public void setReadonly(String readonly) {
-		this.readonly = readonly;
-	}
-
-	/**
-	 * Get the value of the '<code>readonly</code>' attribute.
-	 */
-	protected String getReadonly() {
-		return this.readonly;
-	}
-
 
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("textarea");
@@ -112,7 +95,6 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 		writeOptionalAttribute(tagWriter, ROWS_ATTRIBUTE, getRows());
 		writeOptionalAttribute(tagWriter, COLS_ATTRIBUTE, getCols());
 		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, getOnselect());
-		writeOptionalAttribute(tagWriter, READONLY_ATTRIBUTE, getReadonly());
 		tagWriter.appendValue(getDisplayString(getBoundValue(), getPropertyEditor()));
 		tagWriter.endTag();
 		return EVAL_PAGE;

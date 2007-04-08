@@ -59,7 +59,7 @@
 
            <div>
 			   <form:label path="notes">Notes:</form:label>
-               <form:textarea path="notes" rows="3" cols="20" />
+               <form:textarea path="notes" readonly="true" rows="3" cols="20" />
                <form:errors path="notes" cssClass="error" />
            </div>
 
@@ -150,7 +150,7 @@
 
    &lt;div&gt;
 	   &lt;form:label path="notes"&gt;Notes:&lt;/form:label&gt;
-	   &lt;form:textarea path="notes" rows="3" cols="20" /&gt;
+	   &lt;form:textarea path="notes" readonly="true" rows="3" cols="20" /&gt;
 	   &lt;form:errors path="notes" cssClass="error" /&gt;
    &lt;/div&gt;
 

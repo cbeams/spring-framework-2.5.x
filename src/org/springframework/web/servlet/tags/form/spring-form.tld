@@ -348,7 +348,7 @@
 			<name>readonly</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>HTML Optional Attribute</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will make the HTML element readonly.</description>
 		</attribute>
 		<attribute>
 			<name>autocomplete</name>
@@ -543,7 +543,7 @@
 			<name>readonly</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>HTML Optional Attribute</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will make the HTML element readonly.</description>
 		</attribute>
 		<attribute>
 			<name>autocomplete</name>
@@ -1360,7 +1360,7 @@
 			<name>readonly</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>HTML Optional Attribute</description>
+			<description>HTML Optional Attribute. Setting the value of this attribute to 'true' (without the quotes) will make the HTML element readonly.</description>
 		</attribute>
 	</tag>
 

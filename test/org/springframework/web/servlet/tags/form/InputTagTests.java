@@ -192,7 +192,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "maxlength", maxlength);
 		assertContainsAttribute(output, "alt", alt);
 		assertContainsAttribute(output, "onselect", onselect);
-		assertContainsAttribute(output, "readonly", readonly);
+		assertContainsAttribute(output, "readonly", "readonly");
 		assertContainsAttribute(output, "autocomplete", autocomplete);
 	}
 
@@ -257,6 +257,44 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		assertContainsAttribute(output, "type", getType());
 		assertValueAttribute(output, "12.34f");
+	}
+
+	/**
+	 * See SPR-3127 (http://opensource.atlassian.com/projects/spring/browse/SPR-3127)
+	 */
+	public void testReadOnlyAttributeRenderingWhenReadonlyIsTrue() throws Exception {
+		this.tag.setPath("name");
+		this.tag.setReadonly("true");
+
+		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+
+		String output = getWriter().toString();
+
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertContainsAttribute(output, "type", getType());
+		assertContainsAttribute(output, "readonly", "readonly");
+		assertValueAttribute(output, "Rob");
+	}
+
+	/**
+	 * See SPR-3127 (http://opensource.atlassian.com/projects/spring/browse/SPR-3127)
+	 */
+	public void testReadOnlyAttributeRenderingWhenReadonlyIsFalse() throws Exception {
+		this.tag.setPath("name");
+		this.tag.setReadonly("nope, this is not readonly");
+
+		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+
+		String output = getWriter().toString();
+
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertContainsAttribute(output, "type", getType());
+		assertAttributeNotPresent(output, "readonly");
+		assertValueAttribute(output, "Rob");
 	}
 
 

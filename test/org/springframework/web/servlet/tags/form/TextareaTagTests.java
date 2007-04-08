@@ -43,26 +43,26 @@ public class TextareaTagTests extends AbstractFormTagTests {
 
 	public void testSimpleBind() throws Exception {
 		this.tag.setPath("name");
+		this.tag.setReadonly("true");
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 		String output = getWriter().toString();
 		assertContainsAttribute(output, "name", "name");
+		assertContainsAttribute(output, "readonly", "readonly");
 		assertBlockTagContains(output, "Rob");
 	}
 
 	public void testComplexBind() throws Exception {
 		String onselect = "doSelect()";
-		String readonly = "true";
 
 		this.tag.setPath("spouse.name");
 		this.tag.setOnselect(onselect);
-		this.tag.setReadonly(readonly);
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 		String output = getWriter().toString();
 		assertContainsAttribute(output, "name", "spouse.name");
 		assertContainsAttribute(output, "onselect", onselect);
-		assertContainsAttribute(output, "readonly", readonly);
+		assertAttributeNotPresent(output, "readonly");
 	}
 
 	public void testSimpleBindWithHtmlEscaping() throws Exception {
