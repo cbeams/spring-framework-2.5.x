@@ -69,8 +69,7 @@
       improves on this by not only providing a number of additional scopes
       depending on the environment in which Spring is being deployed (for
       example, request and session scoped beans in a web environment), but
-      also by providing 'hooks' (for want of a better word) so that Spring
-      users can create their own scopes.</para>
+      also by providing integration points so that Spring users can create their own scopes.</para>
 
       <para>It should be noted that although the underlying (and internal)
       implementation for singleton- and prototype-scoped beans has been
