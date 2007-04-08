@@ -17,12 +17,15 @@
 package org.springframework.aop.framework;
 
 /**
- * Strategy interface for a configured proxy, allowing for creation of proxy objects.
+ * Delegate interface for a configured AOP proxy, allowing for the creation
+ * of actual proxy objects.
  *
- * <p>Out-of-the-box implementations are available for dynamic proxies and for CGLIB.
+ * <p>Out-of-the-box implementations are available for JDK dynamic proxies
+ * and for CGLIB proxies, as applied by {@link DefaultAopProxyFactory}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see DefaultAopProxyFactory
  */
 public interface AopProxy {
 
@@ -30,6 +33,7 @@ public interface AopProxy {
 	 * Create a new proxy object.
 	 * <p>Uses the AopProxy's default class loader (if necessary for proxy creation):
 	 * usually, the thread context class loader.
+	 * @return the new proxy object (never <code>null</code>)
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	Object getProxy();
@@ -42,6 +46,7 @@ public interface AopProxy {
 	 * by the AopProxy implementation's {@link #getProxy()} method.
 	 * @param classLoader the class loader to create the proxy with
 	 * (or <code>null</code> for the low-level proxy facility's default)
+	 * @return the new proxy object (never <code>null</code>)
 	 */
 	Object getProxy(ClassLoader classLoader);
 
