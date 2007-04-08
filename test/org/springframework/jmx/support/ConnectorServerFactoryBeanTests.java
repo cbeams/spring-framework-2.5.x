@@ -38,76 +38,76 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
 
 	public void testStartupWithLocatedServer() throws Exception {
-//		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-//			// to avoid NoClassDefFoundError for JSSE
-//			return;
-//		}
-//
-//		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
-//		bean.afterPropertiesSet();
-//
-//		try {
-//			checkServerConnection(getServer());
-//		}
-//		finally {
-//			bean.destroy();
-//		}
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for JSSE
+			return;
+		}
+
+		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
+		bean.afterPropertiesSet();
+
+		try {
+			checkServerConnection(getServer());
+		}
+		finally {
+			bean.destroy();
+		}
 	}
 
 	public void testStartupWithSuppliedServer() throws Exception {
-//		//Added a brief snooze here - seems to fix occasional 
-//		//java.net.BindException: Address already in use errors
-//		Thread.sleep(1);
-//		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-//			// to avoid NoClassDefFoundError for JSSE
-//			return;
-//		}
-//
-//		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
-//		bean.setServer(getServer());
-//		bean.afterPropertiesSet();
-//
-//		try {
-//			checkServerConnection(getServer());
-//		}
-//		finally {
-//			bean.destroy();
-//		}
+		//Added a brief snooze here - seems to fix occasional
+		//java.net.BindException: Address already in use errors
+		Thread.sleep(1);
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			// to avoid NoClassDefFoundError for JSSE
+			return;
+		}
+
+		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
+		bean.setServer(getServer());
+		bean.afterPropertiesSet();
+
+		try {
+			checkServerConnection(getServer());
+		}
+		finally {
+			bean.destroy();
+		}
 	}
 
 	public void testRegisterWithMBeanServer() throws Exception {
-//		//Added a brief snooze here - seems to fix occasional
-//		//java.net.BindException: Address already in use errors
-//		Thread.sleep(1);
-//		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
-//		bean.setObjectName(OBJECT_NAME);
-//		bean.afterPropertiesSet();
-//
-//		try {
-//			// Try to get the connector bean.
-//			ObjectInstance instance = getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
-//			assertNotNull("ObjectInstance should not be null", instance);
-//		}
-//		finally {
-//			bean.destroy();
-//		}
+		//Added a brief snooze here - seems to fix occasional
+		//java.net.BindException: Address already in use errors
+		Thread.sleep(1);
+		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
+		bean.setObjectName(OBJECT_NAME);
+		bean.afterPropertiesSet();
+
+		try {
+			// Try to get the connector bean.
+			ObjectInstance instance = getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
+			assertNotNull("ObjectInstance should not be null", instance);
+		}
+		finally {
+			bean.destroy();
+		}
 	}
 
 	public void testNoRegisterWithMBeanServer() throws Exception {
-//		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
-//		bean.afterPropertiesSet();
-//
-//		try {
-//			// Try to get the connector bean.
-//			getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
-//			fail("Instance should not be found");
-//		}
-//		catch (InstanceNotFoundException ex) {
-//			// expected
-//		}
-//		finally {
-//			bean.destroy();
-//		}
+		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
+		bean.afterPropertiesSet();
+
+		try {
+			// Try to get the connector bean.
+			getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
+			fail("Instance should not be found");
+		}
+		catch (InstanceNotFoundException ex) {
+			// expected
+		}
+		finally {
+			bean.destroy();
+		}
 	}
 
 	private void checkServerConnection(MBeanServer hostedServer) throws IOException, MalformedURLException {
