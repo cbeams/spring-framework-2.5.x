@@ -30,18 +30,46 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 
 /**
+ * Generic implementation of the JCA 1.5
+ * {@link javax.resource.spi.endpoint.MessageEndpointFactory} interface,
+ * providing transaction management capabilities for any kind of message
+ * listener object (e.g. {@link javax.jms.MessageListener} objects or
+ * {@link javax.resource.cci.MessageListener} objects.
+ *
+ * <p>Uses AOP proxies for concrete endpoint instances, simply wrapping
+ * the specified message listener object and exposing all of its implemented
+ * interfaces on the endpoint instance.
+ *
+ * <p>Typically used with Spring's {@link GenericMessageEndpointManager},
+ * but not tied to it. As a consequence, this endpoint factory could
+ * also be used with programmatic endpoint management on a native
+ * {@link javax.resource.spi.ResourceAdapter} instance.
+ *
  * @author Juergen Hoeller
  * @since 2.1
+ * @see #setMessageListener
+ * @see #setTransactionManager
+ * @see GenericMessageEndpointManager
  */
 public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactory {
 
 	private Object messageListener;
 
 
+	/**
+	 * Specify the message listener object that the endpoint should expose
+	 * (e.g. a {@link javax.jms.MessageListener} objects or
+	 * {@link javax.resource.cci.MessageListener} implementation).
+	 */
 	public void setMessageListener(Object messageListener) {
 		this.messageListener = messageListener;
 	}
 
+	/**
+	 * Wrap each concrete endpoint instance with an AOP proxy,
+	 * exposing the message listener's interfaces as well as the
+	 * endpoint SPI through an AOP introduction.
+	 */
 	public MessageEndpoint createEndpoint(XAResource xaResource) throws UnavailableException {
 		GenericMessageEndpoint endpoint = (GenericMessageEndpoint) super.createEndpoint(xaResource);
 		ProxyFactory proxyFactory = new ProxyFactory(this.messageListener);
@@ -51,11 +79,18 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 		return (MessageEndpoint) proxyFactory.getProxy();
 	}
 
+	/**
+	 * Creates a concrete generic message endpoint, internal to this factory.
+	 */
 	protected AbstractMessageEndpoint createEndpointInternal() throws UnavailableException {
 		return new GenericMessageEndpoint();
 	}
 
 
+	/**
+	 * Private inner class that implements the concrete generic message endpoint,
+	 * as an AOP Alliance MethodInterceptor that will be invoked by a proxy.
+	 */
 	private class GenericMessageEndpoint extends AbstractMessageEndpoint implements MethodInterceptor {
 
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
@@ -103,9 +138,17 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 	}
 
 
+	/**
+	 * Internal exception thrown when a ResourceExeption has been encountered
+	 * during the endpoint invocation.
+	 * <p>Will only be used if the ResourceAdapter does not invoke the
+	 * endpoint's <code>beforeDelivery</code> and <code>afterDelivery</code>
+	 * directly, leavng it up to the concrete endpoint to apply those -
+	 * and to handle any ResourceExceptions thrown from them.
+	 */
 	public static class InternalResourceException extends RuntimeException {
 
-		public InternalResourceException(ResourceException cause) {
+		protected InternalResourceException(ResourceException cause) {
 			super(cause);
 		}
 	}
