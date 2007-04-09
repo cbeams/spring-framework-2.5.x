@@ -769,12 +769,12 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * Return the bean name, stripping out the factory dereference prefix if necessary,
 	 * and resolving aliases to canonical names.
 	 * @param name the user-specified name
+	 * @return the transformed bean name
 	 */
 	protected String transformedBeanName(String name) {
-		String beanName = BeanFactoryUtils.transformedBeanName(name);
+		String canonicalName = BeanFactoryUtils.transformedBeanName(name);
 		// Handle aliasing.
 		synchronized (this.aliasMap) {
-			String canonicalName = beanName;
 			String resolvedName = null;
 			do {
 				resolvedName = (String) this.aliasMap.get(canonicalName);
@@ -783,13 +783,14 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				}
 			}
 			while (resolvedName != null);
-			return canonicalName;
 		}
+		return canonicalName;
 	}
 
 	/**
 	 * Determine the original bean name, resolving locally defined aliases to canonical names.
 	 * @param name the user-specified name
+	 * @return the original bean name
 	 */
 	protected String originalBeanName(String name) {
 		String beanName = transformedBeanName(name);
@@ -803,6 +804,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * Determine whether this given bean name is defines as an alias
 	 * (as opposed to the name of an actual bean definition).
 	 * @param beanName the bean name to check
+	 * @return whether the given name is an alias
 	 */
 	protected boolean isAlias(String beanName) {
 		synchronized (this.aliasMap) {
