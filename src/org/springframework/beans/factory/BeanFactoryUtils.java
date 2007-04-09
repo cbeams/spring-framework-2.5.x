@@ -52,6 +52,8 @@ public abstract class BeanFactoryUtils {
 	/**
 	 * Return whether the given name is a factory dereference
 	 * (beginning with the factory dereference prefix).
+	 * @param name the name of the bean
+	 * @return whether the given name is a factory dereference
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
 	 */
 	public static boolean isFactoryDereference(String name) {
@@ -59,14 +61,19 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
-	 * Return the actual bean name, stripping out the factory dereference prefix
-	 * (if any).
+	 * Return the actual bean name, stripping out the factory dereference
+	 * prefix (if any, also stripping repeated factory prefixes if found).
+	 * @param name the name of the bean
+	 * @return the transformed name
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
 	 */
 	public static String transformedBeanName(String name) {
 		Assert.notNull(name, "'name' must not be null");
-		return (name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX) ?
-				name.substring(BeanFactory.FACTORY_BEAN_PREFIX.length()) : name);
+		String beanName = name;
+		while (beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX)) {
+			beanName = beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());
+		}
+		return beanName;
 	}
 
 	/**
