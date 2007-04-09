@@ -3203,17 +3203,34 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
             implementation, bean post-processors explicitly have to be registered, with code like this:</para>
             <programlisting><![CDATA[ConfigurableBeanFactory factory = new XmlBeanFactory(...);
             
-    ]]><lineannotation>// now register any needed <interfacename>BeanPostProcessor</interfacename> instances</lineannotation><![CDATA[
-    MyBeanPostProcessor postProcessor = new MyBeanPostProcessor();
-    factory.addBeanPostProcessor(postProcessor);
+]]><lineannotation>// now register any needed <interfacename>BeanPostProcessor</interfacename> instances</lineannotation><![CDATA[
+MyBeanPostProcessor postProcessor = new MyBeanPostProcessor();
+factory.addBeanPostProcessor(postProcessor);
 
-    ]]><lineannotation>// now start using the factory</lineannotation></programlisting>
+]]><lineannotation>// now start using the factory</lineannotation></programlisting>
             <para>This explicit registration step is not convenient, and this is one of the
             reasons why the various <interfacename>ApplicationContext</interfacename>
             implementations are preferred above plain <interfacename>BeanFactory</interfacename>
             implementations in the vast majority of Spring-backed applications, especially
             when using <literal>BeanPostProcessors</literal>.</para>
-            <para>Find below some examples of how to write, register, and use
+			<note>
+				<title><interfacename>BeanPostProcessors</interfacename> and AOP auto-proxying</title>
+				<para>Classes that implement the <interfacename>BeanPostProcessor</interfacename>
+				interface are <emphasis>special</emphasis>, and so they are treated differently
+				by the container. All <interfacename>BeanPostProcessors</interfacename>
+				<emphasis>and their directly referenced beans</emphasis> will be instantiated
+				on startup, as part of the special startup phase of the
+				<interfacename>ApplicationContext</interfacename>, <emphasis>then</emphasis>
+				all those <interfacename>BeanPostProcessors</interfacename> will be registered
+				in a sorted fashion - and applied to all further beans. Since AOP
+				auto-proxying is implemented as a <interfacename>BeanPostProcessor</interfacename>
+				itself, no <interfacename>BeanPostProcessors</interfacename> or directly
+				referenced beans are eligible for auto-proxying (and thus will not have
+				aspects 'woven' into them.</para>
+				<para>For any such bean, you should see an info log message:
+				<quote><emphasis>Bean 'foo' is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)</emphasis></quote>.</para>
+			</note>
+			<para>Find below some examples of how to write, register, and use
             <literal>BeanPostProcessors</literal> in the context of an
             <interfacename>ApplicationContext</interfacename>.</para>
             <section id="beans-factory-extension-bpp-examples-hw">
