@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.4 (2007-04-09)
+Changes in version 2.0.4 (2007-04-10)
 -------------------------------------
 
 Package org.springframework.aop
@@ -26,6 +26,7 @@ Package org.springframework.beans
 * AbstractAutowireCapableBeanFactory uses "filteredPropertyDescriptorsCache" for the PropertyDescriptor array per class
 * DefaultListableBeanFactory is able to invoke public init and destroy methods on package-protected classes
 * DefaultListableBeanFactory caches pre-converted property values as far as possible
+* DefaultListableBeanFactory allows placeholders in class names even for non-lazy-init beans
 * ConstructorResolver caches the resolved constructor or factory method, for faster re-creation of prototype instances
 * ConstructorResolver caches converted argument values, to avoid conversion overhead for re-created prototype instances
 * DefaultNamespaceHandlerResolver logs linkage error at warn level, in case of a handler class found but not loadable
@@ -87,6 +88,7 @@ Package org.springframework.samples
 * PetPortal's build script properly includes the Log4J jar in the WAR file
 
 Package org.springframework.scheduling
+* added "targetBeanName" property to MethodInvokingJobDetailFactoryBean for Quartz, allowing for non-singleton targets
 * ThreadPoolTaskExecutor/ScheduledExecutorFactoryBean includes the corresponding bean name in startup/shutdown logging
 
 Package org.springframework.scripting
@@ -125,6 +127,7 @@ Package org.springframework.web
 * fixed JSP BindTag to correctly save and re-expose a page-scoped "status" attribute (not just a request-scoped one)
 * JSP FormTag escapes the "action" attribute as well if HTML escaping has been requested
 * JSP InputTag supports the common "autocomplete" HTML extension attribute (as supported by IE and Firefox)
+* JSP InputTag and TextareaTag support the HTML "readonly" element correctly now, only rendering it if specified
 * JSP CheckboxTag applies custom editors for the element type when comparing collection elements
 * added missing "readonly" attribute to JSP TextareaTag
 * checkbox and radiobutton macros in "spring.vm" for Velocity do not render an id anymore (because it isn't unique)

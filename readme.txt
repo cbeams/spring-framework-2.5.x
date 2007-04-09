@@ -1,4 +1,4 @@
-THE SPRING FRAMEWORK, release 2.0.4 (March 2007)
+THE SPRING FRAMEWORK, release 2.0.4 (April 2007)
 ------------------------------------------------
 http://www.springframework.org
 
@@ -99,7 +99,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2605 KB)
+* "spring" (~2620 KB)
 - Convenient jar file combining all standard modules (except for Portlet and Hibernate2 support)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
@@ -110,7 +110,7 @@ MODULE JARS (dist/modules):
 - Contents: core abstractions and utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~375 KB)
+* "spring-beans" (~380 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
@@ -122,7 +122,7 @@ MODULE JARS (dist/modules):
 - Contents: application context, JNDI support, instrumentation, scheduling, validation
 - Dependencies: spring-beans, (spring-aop)
 
-* "spring-dao" (~125 KB)
+* "spring-dao" (~130 KB)
 - Contents: DAO support, transaction infrastructure
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API)
 
@@ -192,7 +192,7 @@ MODULE JARS (dist/modules):
 
 MOCK JAR (dist)
 
-* "spring-mock" (~100 KB)
+* "spring-mock" (~105 KB)
 - Contents: JNDI mocks, Servlet API mocks, Portlet API mocks, JUnit support
 - Dependencies: spring-core
 
