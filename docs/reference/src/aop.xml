@@ -360,11 +360,19 @@ public class NotVeryUsefulAspect {
 
 }]]></programlisting>
 
-	<para>Aspects (classes annotated with <interfacename>@Aspect</interfacename>) may have
-	methods and fields just like any other class. They may also contain pointcut, advice,
-	and introduction (inter-type) declarations.</para>
-	
-    </section>
+		<para>Aspects (classes annotated with <interfacename>@Aspect</interfacename>) may have
+		methods and fields just like any other class. They may also contain pointcut, advice,
+		and introduction (inter-type) declarations.</para>
+
+		<note>
+			<title>Advising aspects</title>
+			<para>In Spring AOP, it is <emphasis>not</emphasis> possible to
+			have aspects themselves be the target of advice from other aspects.
+			The <emphasis>@Aspect</emphasis> annotation on a class marks it as an
+			aspect, and hence excludes it from auto-proxying.</para>
+		</note>
+
+	</section>
 
     <section id="aop-pointcuts">
       <title>Declaring a pointcut</title>
