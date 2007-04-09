@@ -137,7 +137,10 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	/**
 	 * Set the name of the target bean in the Spring BeanFactory.
 	 * <p>This is an alternative to specifying {@link #setTargetObject "targetObject"},
-	 * allowing for non-singleton beans to be invoked.
+	 * allowing for non-singleton beans to be invoked. Note that specified
+	 * "targetObject" and {@link #setTargetClass "targetClass"} values will
+	 * override the corresponding effect of this "targetBeanName" setting
+	 * (i.e. statically pre-define the bean type or even the bean object).
 	 */
 	public void setTargetBeanName(String targetBeanName) {
 		this.targetBeanName = targetBeanName;
@@ -210,22 +213,24 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * Overridden to support the {@link #setTargetBeanName "targetBeanName"} feature.
 	 */
 	public Class getTargetClass() {
-		if (this.targetBeanName != null) {
+		Class targetClass = super.getTargetClass();
+		if (targetClass == null && this.targetBeanName != null) {
 			Assert.state(this.beanFactory != null, "BeanFactory must be set when using 'targetBeanName'");
-			return this.beanFactory.getType(this.targetBeanName);
+			targetClass = this.beanFactory.getType(this.targetBeanName);
 		}
-		return super.getTargetClass();
+		return targetClass;
 	}
 
 	/**
 	 * Overridden to support the {@link #setTargetBeanName "targetBeanName"} feature.
 	 */
 	public Object getTargetObject() {
-		if (this.targetBeanName != null) {
+		Object targetObject = super.getTargetObject();
+		if (targetObject == null && this.targetBeanName != null) {
 			Assert.state(this.beanFactory != null, "BeanFactory must be set when using 'targetBeanName'");
-			return this.beanFactory.getBean(this.targetBeanName);
+			targetObject = this.beanFactory.getBean(this.targetBeanName);
 		}
-		return super.getTargetObject();
+		return targetObject;
 	}
 
 
