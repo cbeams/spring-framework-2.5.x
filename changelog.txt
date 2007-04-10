@@ -14,6 +14,7 @@ Package org.springframework.aop
 * introduced Simple(MetadataAware)AspectInstanceFactory, creating an independent aspect instance on every invocation
 * revised AspectJProxyFactory to avoid "spring-beans" dependencies, using SimpleMetadataAwareAspectInstanceFactory now
 * AbstractAspectJAdvice lazily calculates argument bindings, avoiding a "spring-beans" dependency (InitializingBean)
+* "this" pointcut in AspectJ pointcut expressions is matched against the proxy object rather than the target object
 
 Package org.springframework.beans
 * PropertyEditorRegistrySupport/BeanWrapperImpl lazily registers default editors when needed (to avoid init overhead)
