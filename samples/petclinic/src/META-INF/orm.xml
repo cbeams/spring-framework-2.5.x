@@ -4,10 +4,6 @@
 		xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_1_0.xsd"
 		version="1.0">
 
-	<!--=================================-->
-	<!-- Persistence unit level metadata -->
-	<!--=================================-->
-
 	<persistence-unit-metadata>
 		<xml-mapping-metadata-complete/>
 		<persistence-unit-defaults>
@@ -15,19 +11,7 @@
 		</persistence-unit-defaults>
 	</persistence-unit-metadata>
 
-	<!--=============================-->
-	<!-- Mapping file level metadata -->
-	<!--=============================-->
-
 	<package>org.springframework.samples.petclinic</package>
-
-	<!--=========-->
-	<!-- Queries -->
-	<!--=========-->
-
-	<!--=========================-->
-	<!-- Abstract class mappings -->
-	<!--=========================-->
 
 	<mapped-superclass class="BaseEntity">
 		<attributes>
@@ -56,9 +40,6 @@
 			</basic>
 		</attributes>
 	</mapped-superclass>
-	<!--=================-->
-	<!-- Entity mappings -->
-	<!--=================-->
 
 	<entity class="Vet">
 		<table name="VETS"/>
@@ -69,10 +50,8 @@
 					<inverse-join-column name="SPECIALTY_ID"/>
 				</join-table>
 			</many-to-many>
-
 			<transient name="specialties"/>
 			<transient name="nrOfSpecialties"/>
-
 		</attributes>
 	</entity>
 
@@ -86,13 +65,11 @@
 			<basic name="address"/>
 			<basic name="city"/>
 			<basic name="telephone"/>
-
 			<one-to-many name="petsInternal" target-entity="Pet" mapped-by="owner" fetch="EAGER">
 				<cascade>
 					<cascade-all/>
 				</cascade>
 			</one-to-many>
-
 			<transient name="pets"/>
 		</attributes>
 	</entity>
@@ -119,7 +96,6 @@
 					<cascade-all/>
 				</cascade>
 			</one-to-many>
-
 			<transient name="visits"/>
 		</attributes>
 	</entity>
