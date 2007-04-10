@@ -46,8 +46,8 @@ import org.springframework.util.Assert;
 /**
  * Interceptor for accessing a JMS-based remote service.
  *
- * <p>To be configured with a QueueConnectionFactory and a target queue
- * (either as Queue reference or as queue name).
+ * <p>To be configured with a {@link javax.jms.QueueConnectionFactory} and a
+ * target queue (either as {@link javax.jms.Queue} reference or as queue name).
  *
  * @author Juergen Hoeller
  * @author James Strachan
@@ -86,7 +86,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	/**
 	 * Set the target Queue to send invoker requests to.
 	 */
-	public void setQueue(Object queue) {
+	public void setQueue(Queue queue) {
 		this.queue = queue;
 	}
 
@@ -124,7 +124,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 
 	public void afterPropertiesSet() {
 		if (getConnectionFactory() == null) {
-			throw new IllegalArgumentException("connectionFactory is required");
+			throw new IllegalArgumentException("Property 'connectionFactory' is required");
 		}
 		if (this.queue == null) {
 			throw new IllegalArgumentException("'queue' or 'queueName' is required");
@@ -200,7 +200,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 */
 	protected Queue resolveQueue(Session session) throws JMSException {
 		if (this.queue instanceof Queue) {
-			return (Queue) queue;
+			return (Queue) this.queue;
 		}
 		else if (this.queue instanceof String) {
 			return resolveQueueName(session, (String) this.queue);
