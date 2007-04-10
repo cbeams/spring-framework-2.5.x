@@ -92,17 +92,19 @@
 				<include name="commons-collections.jar"/>
 				<include name="commons-io.jar"/>
 				<include name="commons-fileupload.jar"/>
+				<include name="commons-lang.jar"/>
 				<include name="commons-logging.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
 				<include name="activation.jar"/>
+				<include name="jta.jar"/>
 				<include name="mail.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/quartz">
 				<include name="quartz-*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/velocity">
-				<include name="velocity-1.4*.jar"/>
+				<include name="velocity-1.5*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
