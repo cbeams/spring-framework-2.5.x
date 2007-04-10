@@ -60,6 +60,7 @@ Package org.springframework.jms
 * DefaultMessageListenerContainer obtains a shared Connection lazily in case of autoStartup="true"
 * DefaultMessageListenerContainer recovers a shared Connection lazily if it is not currently running (has been stopped)
 * DefaultMessageListenerContainer allows for specifying the listener object lazily, and for replacing it at runtime
+* fixed JmsInvokerClientInterceptor/ProxyFactoryBean's "queue" property to declare type Queue now
 
 JuergenPackage org.springframework.jndi
 * added "proxyInterfaces" property to JndiObjectFactoryBean, for specifying multiple interfaces
