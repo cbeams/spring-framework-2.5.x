@@ -8,21 +8,24 @@
 				http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd">
 
 	<lang:bsh id="messenger" script-source="classpath:org/springframework/scripting/bsh/Messenger.bsh"
-			script-interfaces="org.springframework.scripting.Messenger">
+			script-interfaces="org.springframework.scripting.Messenger"
+			init-method="init" destroy-method="destroy">
 		<lang:property name="message" value="Hello World!"/>
 	</lang:bsh>
 
 	<lang:bsh id="messengerPrototype" script-source="classpath:org/springframework/scripting/bsh/Messenger.bsh"
 			script-interfaces="org.springframework.scripting.ConfigurableMessenger"
-			scope="prototype">
+			scope="prototype" init-method="init" destroy-method="destroy">
 		<lang:property name="message" value="Hello World!"/>
 	</lang:bsh>
 
-	<lang:bsh id="messengerImpl" script-source="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh">
+	<lang:bsh id="messengerImpl" script-source="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"
+			init-method="init" destroy-method="destroy">
 		<lang:property name="message" value="Hello World!"/>
 	</lang:bsh>
 
-	<lang:bsh id="messengerInstance" script-source="classpath:org/springframework/scripting/bsh/MessengerInstance.bsh">
+	<lang:bsh id="messengerInstance" script-source="classpath:org/springframework/scripting/bsh/MessengerInstance.bsh"
+			init-method="init" destroy-method="destroy">
 		<lang:property name="message" value="Hello World!"/>
 	</lang:bsh>
 
@@ -35,8 +38,9 @@
 	</lang:bsh>
 
 	<lang:bsh id="refreshableMessenger" script-interfaces="org.springframework.scripting.Messenger"
-			script-source="classpath:org/springframework/scripting/bsh/Messenger.bsh" refresh-check-delay="5000">
-		  <lang:property name="message" value="Hello World!"/>
+			script-source="classpath:org/springframework/scripting/bsh/Messenger.bsh" refresh-check-delay="5000"
+			init-method="init" destroy-method="destroy">
+		<lang:property name="message" value="Hello World!"/>
 	</lang:bsh>
 
 </beans>

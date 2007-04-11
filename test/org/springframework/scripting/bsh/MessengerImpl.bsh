@@ -2,13 +2,26 @@ import org.springframework.scripting.ConfigurableMessenger;
 
 public class MyMessenger implements ConfigurableMessenger {
 
-	private String message ;
+	private String message;
+
+	private boolean active;
+
+	public void init() {
+		active = true;
+	}
 
 	public String getMessage() {
+		if (!active && message != null) throw new java.lang.IllegalStateException();
 		return message;
 	}
 
 	public void setMessage(String aMessage) {
 		message = aMessage;
 	}
+
+	public void destroy() {
+		message = null;
+		active = false;
+	}
+
 }

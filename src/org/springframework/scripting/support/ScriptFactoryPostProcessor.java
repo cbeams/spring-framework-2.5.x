@@ -50,7 +50,6 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -311,8 +310,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 				Class[] scriptedInterfaces = interfaces;
 				if (scriptFactory.requiresConfigInterface() && !bd.getPropertyValues().isEmpty()) {
-					PropertyValue[] pvs = bd.getPropertyValues().getPropertyValues();
-					Class configInterface = createConfigInterface(pvs, interfaces);
+					Class configInterface = createConfigInterface(bd, interfaces);
 					scriptedInterfaces = (Class[]) ObjectUtils.addObjectToArray(interfaces, configInterface);
 				}
 
@@ -408,24 +406,35 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	}
 
 	/**
-	 * Create a config interface for the given bean property values.
+	 * Create a config interface for the given bean definition, defining setter
+	 * methods for the defined property values as well as an init method and
+	 * a destroy method (if defined).
 	 * <p>This implementation creates the interface via CGLIB's InterfaceMaker,
 	 * determining the property types from the given interfaces (as far as possible).
-	 * @param pvs the bean property values to create a config interface for
+	 * @param bd the bean definition (property values etc) to create a
+	 * config interface for
 	 * @param interfaces the interfaces to check against (might define
 	 * getters corresponding to the setters we're supposed to generate)
 	 * @return the config interface
 	 * @see net.sf.cglib.proxy.InterfaceMaker
 	 * @see org.springframework.beans.BeanUtils#findPropertyType
 	 */
-	protected Class createConfigInterface(PropertyValue[] pvs, Class[] interfaces) {
-		Assert.notEmpty(pvs, "Property values must not be empty");
+	protected Class createConfigInterface(RootBeanDefinition bd, Class[] interfaces) {
 		InterfaceMaker maker = new InterfaceMaker();
+		PropertyValue[] pvs = bd.getPropertyValues().getPropertyValues();
 		for (int i = 0; i < pvs.length; i++) {
 			String propertyName = pvs[i].getName();
 			Class propertyType = BeanUtils.findPropertyType(propertyName, interfaces);
 			String setterName = "set" + StringUtils.capitalize(propertyName);
 			Signature signature = new Signature(setterName, Type.VOID_TYPE, new Type[] {Type.getType(propertyType)});
+			maker.add(signature, new Type[0]);
+		}
+		if (bd.getInitMethodName() != null) {
+			Signature signature = new Signature(bd.getInitMethodName(), Type.VOID_TYPE, new Type[0]);
+			maker.add(signature, new Type[0]);
+		}
+		if (bd.getDestroyMethodName() != null) {
+			Signature signature = new Signature(bd.getDestroyMethodName(), Type.VOID_TYPE, new Type[0]);
 			maker.add(signature, new Type[0]);
 		}
 		return maker.create();

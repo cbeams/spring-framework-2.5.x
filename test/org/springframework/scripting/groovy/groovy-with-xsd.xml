@@ -12,13 +12,15 @@
 		</aop:aspect>
 	</aop:config>
 
-	<lang:groovy id="getMessageAspect" script-source="classpath:org/springframework/scripting/groovy/CallCounter.groovy"/>
+	<lang:groovy id="getMessageAspect" script-source="classpath:org/springframework/scripting/groovy/CallCounter.groovy"
+			init-method="init" destroy-method="destroy"/>
 
 	<lang:groovy id="messenger" script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
 		<lang:property name="message" value="Hello World!"/>
 	</lang:groovy>
 
-	<lang:groovy id="messengerPrototype" script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy" scope="prototype">
+	<lang:groovy id="messengerPrototype" script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy"
+			scope="prototype">
 		<lang:property name="message" value="Hello World!"/>
 	</lang:groovy>
 

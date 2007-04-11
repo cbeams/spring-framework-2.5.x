@@ -4,7 +4,11 @@ import org.springframework.scripting.CallCounter;
 
 class GroovyCallCounter implements CallCounter {
 
-	int count;
+	int count = -100;
+
+	void init() {
+		count = 0;
+	}
 
 	void before() {
 	  count++;
@@ -12,5 +16,9 @@ class GroovyCallCounter implements CallCounter {
 
 	int getCalls() {
 	  return count;
+	}
+
+	void destroy() {
+		count = -200;
 	}
 }

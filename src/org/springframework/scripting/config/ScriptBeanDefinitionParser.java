@@ -48,6 +48,7 @@ import org.springframework.util.xml.DomUtils;
  *
  * @author Rob Harrop
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
@@ -63,6 +64,10 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private static final String INLINE_SCRIPT_ELEMENT = "inline-script";
 
 	private static final String SCOPE_ATTRIBUTE = "scope";
+
+	private static final String INIT_METHOD_ATTRIBUTE = "init-method";
+
+	private static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
 
 	private static final String SCRIPT_INTERFACES_ATTRIBUTE = "script-interfaces";
 
@@ -111,6 +116,16 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		String scope = element.getAttribute(SCOPE_ATTRIBUTE);
 		if (StringUtils.hasLength(scope)) {
 			beanDefinition.setScope(scope);
+		}
+
+		// Determine init method and destroy method.
+		String initMethod = element.getAttribute(INIT_METHOD_ATTRIBUTE);
+		if (StringUtils.hasLength(initMethod)) {
+			beanDefinition.setInitMethodName(initMethod);
+		}
+		String destroyMethod = element.getAttribute(DESTROY_METHOD_ATTRIBUTE);
+		if (StringUtils.hasLength(destroyMethod)) {
+			beanDefinition.setDestroyMethodName(destroyMethod);
 		}
 
 		// Attach any refresh metadata.
