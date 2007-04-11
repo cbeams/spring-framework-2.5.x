@@ -3,8 +3,19 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.5 (2007-05-11)
+Changes in version 2.0.5 (2007-05-03)
 -------------------------------------
+
+Package org.springframework.beans
+* default editor settings get copied to nested beans even if no default editors have been used yet
+* AbstractBeanFactory uses concurrent maps for singletons, aliases and bean definitions (for better concurrency)
+
+Package org.springframework.context
+* AbstractRefreshableApplicationContext actually calls the 2.0.3-introduced "customizeBeanFactory" template method
+
+Package org.springframework.core
+* BridgeMethodResolver is able to match open type variables in complex overloading scenarios as well
+* added "createConcurrentMap" method to CollectionFactory, creating a JDK 1.5+ or backport-concurrent ConcurrentHashMap
 
 Package org.springframework.scheduling
 * MethodInvokingJobDetailFactoryBean avoids obtaining the target bean twice in case of "targetBeanName" specified
