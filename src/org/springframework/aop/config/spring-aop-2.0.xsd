@@ -21,8 +21,8 @@
 	<xsd:element name="config">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	A section (compartmentalization) of AOP-specific configuration (incl.
-	aspects, pointcuts, etc.).
+	A section (compartmentalization) of AOP-specific configuration (including
+	aspects, pointcuts, etc).
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
@@ -175,7 +175,7 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-	 </xsd:choice>
+		</xsd:choice>
 		<xsd:attribute name="id" type="xsd:ID">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
