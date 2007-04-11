@@ -257,15 +257,11 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 		private MethodInvoker methodInvoker;
 
-		private String errorMessage;
-
 		/**
 		 * Set the MethodInvoker to use.
 		 */
 		public void setMethodInvoker(MethodInvoker methodInvoker) {
 			this.methodInvoker = methodInvoker;
-			this.errorMessage = "Could not invoke method '" + this.methodInvoker.getTargetMethod() +
-					"' on target object [" + this.methodInvoker.getTargetObject() + "]";
 		}
 
 		/**
@@ -276,7 +272,8 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 				this.methodInvoker.invoke();
 			}
 			catch (InvocationTargetException ex) {
-				logger.warn(this.errorMessage, ex.getTargetException());
+				String errorMessage = buildErrorMessage();
+				logger.warn(errorMessage, ex.getTargetException());
 				if (ex.getTargetException() instanceof JobExecutionException) {
 					throw (JobExecutionException) ex.getTargetException();
 				}
@@ -284,22 +281,32 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 					Exception jobEx = (ex.getTargetException() instanceof Exception) ?
 							(Exception) ex.getTargetException() : ex;
 					throw (JobExecutionException) BeanUtils.instantiateClass(
-							oldJobExecutionExceptionConstructor, new Object[] {this.errorMessage, jobEx, Boolean.FALSE});
+							oldJobExecutionExceptionConstructor, new Object[] {errorMessage, jobEx, Boolean.FALSE});
 				}
 				else {
-					throw new JobExecutionException(this.errorMessage, ex.getTargetException());
+					throw new JobExecutionException(errorMessage, ex.getTargetException());
 				}
 			}
 			catch (Exception ex) {
-				logger.warn(this.errorMessage, ex);
+				String errorMessage = buildErrorMessage();
+				logger.warn(errorMessage, ex);
 				if (oldJobExecutionExceptionConstructor != null) {
 					throw (JobExecutionException) BeanUtils.instantiateClass(
-							oldJobExecutionExceptionConstructor, new Object[] {this.errorMessage, ex, Boolean.FALSE});
+							oldJobExecutionExceptionConstructor, new Object[] {errorMessage, ex, Boolean.FALSE});
 				}
 				else {
-					throw new JobExecutionException(this.errorMessage, ex);
+					throw new JobExecutionException(errorMessage, ex);
 				}
 			}
+		}
+
+		/**
+		 * Build an error message for a method invocation failure encountered by this job.
+		 * @return the error message, including the target method name etc
+		 */
+		private String buildErrorMessage() {
+			return "Could not invoke method '" + this.methodInvoker.getTargetMethod() +
+					"' on target class [" + this.methodInvoker.getTargetClass() + "]";
 		}
 	}
 
