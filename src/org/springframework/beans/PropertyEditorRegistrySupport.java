@@ -219,6 +219,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 */
 	protected void copyDefaultEditorsTo(PropertyEditorRegistrySupport target) {
 		target.defaultEditors = this.defaultEditors;
+		target.defaultEditorsActive = this.defaultEditorsActive;
+		target.configValueEditorsActive = this.configValueEditorsActive;
 	}
 
 

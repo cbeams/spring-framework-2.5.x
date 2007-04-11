@@ -85,6 +85,36 @@ public class DataBinderTests extends TestCase {
 		assertTrue(!other.equals(binder.getBindingResult()));
 	}
 
+	public void testedBindingWithDefaultConversionNoErrors() throws Exception {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod, "person");
+		assertTrue(binder.isIgnoreUnknownFields());
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "Rod");
+		pvs.addPropertyValue("jedi", "on");
+
+		binder.bind(pvs);
+		binder.close();
+
+		assertEquals("Rod", rod.getName());
+		assertTrue(rod.isJedi());
+	}
+
+	public void testedNestedBindingWithDefaultConversionNoErrors() throws Exception {
+		TestBean rod = new TestBean(new TestBean());
+		DataBinder binder = new DataBinder(rod, "person");
+		assertTrue(binder.isIgnoreUnknownFields());
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("spouse.name", "Kerry");
+		pvs.addPropertyValue("spouse.jedi", "on");
+
+		binder.bind(pvs);
+		binder.close();
+
+		assertEquals("Kerry", rod.getSpouse().getName());
+		assertTrue(((TestBean) rod.getSpouse()).isJedi());
+	}
+
 	public void testBindingNoErrorsNotIgnoreUnknown() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
