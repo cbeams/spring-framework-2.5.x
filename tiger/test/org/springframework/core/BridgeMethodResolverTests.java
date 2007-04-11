@@ -275,6 +275,20 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	public void testSPR3357() throws Exception {
+		Method bridgedMethod = ExtendsAbstractImplementsInterface.class.getDeclaredMethod(
+				"doSomething", DomainObjectExtendsSuper.class, Object.class);
+		assertNotNull(bridgedMethod);
+		assertFalse(bridgedMethod.isBridge());
+
+		Method bridgeMethod = ExtendsAbstractImplementsInterface.class.getDeclaredMethod(
+				"doSomething", DomainObjectSuper.class, Object.class);
+		assertNotNull(bridgeMethod);
+		assertTrue(bridgeMethod.isBridge());
+
+		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+	}
+
 	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
 		Method[] methods = targetType.getMethods();
 		for (Method m : methods) {
@@ -1069,4 +1083,43 @@ public class BridgeMethodResolverTests extends TestCase {
 			throw new UnsupportedOperationException();
 		}
 	}
+
+
+	/***
+	 * SPR-3357
+	 */
+	private static class DomainObjectSuper {
+
+	}
+
+
+	private static class DomainObjectExtendsSuper extends DomainObjectSuper {
+
+	}
+
+
+	private interface IGenericInterface<D extends DomainObjectSuper> {
+
+		<T> void doSomething(final D domainObject, final T value);
+	}
+
+
+	private static abstract class AbstractImplementsInterface<D extends DomainObjectSuper> implements IGenericInterface<D> {
+
+		public <T> void doSomething(D domainObject, T value) {
+		}
+
+		public void anotherBaseMethod() {
+		}
+	}
+
+
+	private static class ExtendsAbstractImplementsInterface extends AbstractImplementsInterface<DomainObjectExtendsSuper> {
+
+		@Override
+		public <T> void doSomething(DomainObjectExtendsSuper domainObject, T value) {
+			super.doSomething(domainObject, value);
+		}
+	}
+
 }

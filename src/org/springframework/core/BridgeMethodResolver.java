@@ -203,7 +203,8 @@ public abstract class BridgeMethodResolver {
 	private static Type getRawType(Type genericType, Map typeVariableMap) {
 		if (genericType instanceof TypeVariable) {
 			TypeVariable tv = (TypeVariable) genericType;
-			return (Type) typeVariableMap.get(tv.getName());
+			Type result = (Type) typeVariableMap.get(tv.getName());
+			return (result != null ? result: Object.class);
 		}
 		else if (genericType instanceof ParameterizedType) {
 			return ((ParameterizedType) genericType).getRawType();
