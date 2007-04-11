@@ -3,6 +3,18 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0.5 (2007-05-11)
+-------------------------------------
+
+Package org.springframework.scheduling
+* MethodInvokingJobDetailFactoryBean avoids obtaining the target bean twice in case of "targetBeanName" specified
+* revised MethodInvokingJobDetailFactoryBean's error message to include the target class instead of the target object
+
+Package org.springframework.scripting
+* added "init-method" and "destroy-method" attributes on "lang:groovy/bsh/jruby", for init/destroy methods in scripts
+* ScriptFactoryPostProcessor generates config interface methods for init/destroy methods as well, if demanded
+
+
 Changes in version 2.0.4 (2007-04-10)
 -------------------------------------
 
@@ -62,7 +74,7 @@ Package org.springframework.jms
 * DefaultMessageListenerContainer allows for specifying the listener object lazily, and for replacing it at runtime
 * fixed JmsInvokerClientInterceptor/ProxyFactoryBean's "queue" property to declare type Queue now
 
-JuergenPackage org.springframework.jndi
+Package org.springframework.jndi
 * added "proxyInterfaces" property to JndiObjectFactoryBean, for specifying multiple interfaces
 * JndiObjectFactoryBean autodetects proxy interfaces from a specified "expectedType", if necessary
 * JndiObjectTargetSource returns the specified "expectedType" as target class if no JNDI object has been obtained yet
