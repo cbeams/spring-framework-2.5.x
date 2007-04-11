@@ -81,7 +81,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	/** Cache of singleton objects: bean name --> bean instance */
 	private final Map singletonObjects = CollectionFactory.createConcurrentMapIfPossible(16);
 
-	/** Map of registered singletons: bean name --> bean instance */
+	/** Set of registered singletons, containing the bean names in registration order */
 	private final Set registeredSingletons = CollectionFactory.createLinkedSetIfPossible(16);
 
 	/** Names of beans that are currently in creation */

@@ -42,7 +42,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	/** Whether we should cache views, once resolved */
 	private boolean cache = true;
 
-	/** View name --> View instance */
+	/** Map from view name to View instance */
 	private final Map viewCache = new HashMap();
 
 
@@ -60,7 +60,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * Return if caching is enabled.
 	 */
 	public boolean isCache() {
-		return cache;
+		return this.cache;
 	}
 
 
@@ -164,7 +164,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * for the specified view. The returned View objects will be
 	 * cached by this ViewResolver base class.
 	 * <p>Subclasses are not forced to support internationalization:
-	 * A subclass that doesn't may simply ignore the locale parameter.
+	 * A subclass that does not may simply ignore the locale parameter.
 	 * @param viewName the name of the view to retrieve
 	 * @param locale the Locale to retrieve the view for
 	 * @return the View instance, or <code>null</code> if not found
