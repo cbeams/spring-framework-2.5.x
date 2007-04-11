@@ -209,14 +209,16 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Override settings in this bean definition (assumably a copied parent
 	 * from a parent-child inheritance relationship) from the given bean
 	 * definition (assumably the child).
-	 * <p><ul>
+	 * <ul>
 	 * <li>Will override beanClass if specified in the given bean definition.
-	 * <li>Will always take abstract, singleton, lazyInit, autowireMode,
-	 * dependencyCheck, dependsOn from the given bean definition.
-	 * <li>Will add constructorArgumentValues, propertyValues, methodOverrides
-	 * from the given bean definition to existing ones.
-	 * <li>Will override factoryBeanName, factoryMethodName, initMethodName,
-	 * destroyMethodName if specified in the given bean definition.
+	 * <li>Will always take <code>abstract</code>, <code>scope</code>,
+	 * <code>lazyInit</code>, <code>autowireMode</code>, <code>dependencyCheck</code>,
+	 * and <code>dependsOn</code> from the given bean definition.
+	 * <li>Will add <code>constructorArgumentValues</code>, <code>propertyValues</code>,
+	 * <code>methodOverrides</code> from the given bean definition to existing ones.
+	 * <li>Will override <code>factoryBeanName</code>, <code>factoryMethodName</code>,
+	 * <code>initMethodName</code>, and <code>destroyMethodName</code> if specified
+	 * in the given bean definition.
 	 * </ul>
 	 */
 	public void overrideFrom(AbstractBeanDefinition other) {
