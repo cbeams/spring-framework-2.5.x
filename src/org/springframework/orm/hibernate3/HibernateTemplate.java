@@ -160,13 +160,16 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 
 	/**
-	 * Set if a new Session should be created when no transactional Session
-	 * can be found for the current thread.
-	 * <p>HibernateTemplate is aware of a corresponding Session bound to the
-	 * current thread, for example when using HibernateTransactionManager.
-	 * If allowCreate is true, a new non-transactional Session will be created
-	 * if none found, which needs to be closed at the end of the operation.
-	 * If false, an IllegalStateException will get thrown in this case.
+	 * Set if a new {@link Session} should be created when no transactional
+	 * <code>Session</code> can be found for the current thread.
+	 * The default value is "<code>true</code>".
+	 * <p><code>HibernateTemplate</code> is aware of a corresponding
+	 * <code>Session</code> bound to the current thread, for example when using
+	 * {@link HibernateTransactionManager}. If <code>allowCreate</code> is
+	 * <code>true</code>, a new non-transactional <code>Session</code> will be
+	 * created if none is found, which needs to be closed at the end of the operation.
+	 * If <code>false</code>, an {@link IllegalStateException} will get thrown in
+	 * this case.
 	 * @see SessionFactoryUtils#getSession(SessionFactory, boolean)
 	 */
 	public void setAllowCreate(boolean allowCreate) {
