@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
- * <p>A further common usage scenario is activating AspectJ load-time
+ * A further common usage scenario is activating AspectJ load-time
  * weaving through the built-in "registerAspectjPreProcessor" flag:
  *
  * <pre>
@@ -63,6 +63,9 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  *
  * @author Juergen Hoeller
  * @since 2.1
+ * @see #setLoadTimeWeaver
+ * @see #setTransformers
+ * @see #setRegisterAspectjPreProcessor
  */
 public class ClassTransformationConfigurer implements BeanFactoryPostProcessor {
 
@@ -77,6 +80,7 @@ public class ClassTransformationConfigurer implements BeanFactoryPostProcessor {
 	 * Set the LoadTimeWeaver to register the transformers on.
 	 * @see InstrumentationLoadTimeWeaver
 	 * @see ReflectiveLoadTimeWeaver
+	 * @see org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean#setLoadTimeWeaver
 	 */
 	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
 		this.loadTimeWeaver = loadTimeWeaver;
@@ -101,7 +105,9 @@ public class ClassTransformationConfigurer implements BeanFactoryPostProcessor {
 	}
 
 	/**
-	 * Specify the ClassFileTransformers to register.
+	 * Specify custom ClassFileTransformers to register on the LoadTimeWeaver
+	 * that this configurer operates on.
+	 * @see #setLoadTimeWeaver
 	 */
 	public void setTransformers(ClassFileTransformer[] transformers) {
 		this.transformers = transformers;
@@ -110,17 +116,29 @@ public class ClassTransformationConfigurer implements BeanFactoryPostProcessor {
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.loadTimeWeaver == null) {
-			throw new IllegalArgumentException("loadTimeWeaver is required");
+			throw new IllegalArgumentException("Property 'loadTimeWeaver' is required");
 		}
 
 		if (this.registerAspectjPreProcessor) {
-			this.loadTimeWeaver.addTransformer(new ClassPreProcessorAgentAdapter());
+			this.loadTimeWeaver.addTransformer(AspectJPreProcessorFactory.createAspectJPreProcessor());
 		}
 
 		if (this.transformers != null) {
 			for (int i = 0; i < this.transformers.length; i++) {
 				this.loadTimeWeaver.addTransformer(this.transformers[i]);
 			}
+		}
+	}
+
+
+	/**
+	 * Inner factory class used to just introduce an AspectJ dependency
+	 * when actually registering the AspectJ pre-processor.
+	 */
+	private static class AspectJPreProcessorFactory {
+
+		public static ClassFileTransformer createAspectJPreProcessor() {
+			return new ClassPreProcessorAgentAdapter();
 		}
 	}
 
