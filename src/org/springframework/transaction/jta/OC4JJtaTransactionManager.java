@@ -45,9 +45,11 @@ import org.springframework.util.ClassUtils;
  * JDBC Connections that participate in the given transaction.
  *
  * <p>Automatically detects the available OC4J server version and adapts accordingly.
+ * Supports the "com.evermind.server" package in OC4J 10.1.3.2 as well as the
+ * "oracle.j2ee.transaction" package in later OC4J versions.
  *
  * <p>By default, the JTA UserTransaction and TransactionManager handles are
- * fetched directly from OC4J's <code>TransactionUtility</code> in 10.1.3.2.
+ * fetched directly from OC4J's <code>TransactionUtility</code> in 10.1.3.2+.
  * This can be overridden by specifying "userTransaction"/"userTransactionName"
  * and "transactionManager"/"transactionManagerName", passing in existing handles
  * or specifying corresponding JNDI locations to look up.
@@ -60,8 +62,8 @@ import org.springframework.util.ClassUtils;
  * @since 2.0.3
  * @see org.springframework.transaction.TransactionDefinition#getName
  * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel
- * @see com.evermind.server.ApplicationServerTransactionManager#begin(String)
- * @see com.evermind.server.ApplicationServerTransaction#setTransactionIsolation
+ * @see oracle.j2ee.transaction.OC4JTransactionManager#begin(String)
+ * @see oracle.j2ee.transaction.OC4JTransaction#setTransactionIsolation
  * @see oracle.j2ee.transaction.TransactionUtility
  */
 public class OC4JJtaTransactionManager extends JtaTransactionManager {
@@ -70,9 +72,15 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 			"oracle.j2ee.transaction.TransactionUtility";
 
 	private static final String TRANSACTION_MANAGER_CLASS_NAME =
-			"com.evermind.server.ApplicationServerTransactionManager";
+			"oracle.j2ee.transaction.OC4JTransactionManager";
 
 	private static final String TRANSACTION_CLASS_NAME =
+			"oracle.j2ee.transaction.OC4JTransaction";
+
+	private static final String FALLBACK_TRANSACTION_MANAGER_CLASS_NAME =
+			"com.evermind.server.ApplicationServerTransactionManager";
+
+	private static final String FALLBACK_TRANSACTION_CLASS_NAME =
 			"com.evermind.server.ApplicationServerTransaction";
 
 
@@ -113,23 +121,34 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 	}
 
 	private void loadOC4JTransactionClasses() throws TransactionSystemException {
+		// Find available OC4J API (in "oracle.j2ee.transaction" or "com.evermind.server")
+		Class transactionManagerClass = null;
+		Class transactionClass = null;
 		try {
-			Class transactionManagerClass = getClass().getClassLoader().loadClass(TRANSACTION_MANAGER_CLASS_NAME);
-			if (transactionManagerClass.isInstance(getUserTransaction())) {
-				Class transactionClass = getClass().getClassLoader().loadClass(TRANSACTION_CLASS_NAME);
-				this.beginWithNameMethod = ClassUtils.getMethodIfAvailable(
-						transactionManagerClass, "begin", new Class[] {String.class});
-				this.setTransactionIsolationMethod = ClassUtils.getMethodIfAvailable(
-						transactionClass, "setTransactionIsolation", new Class[] {int.class});
-				logger.info("Support for OC4J transaction names and isolation levels available");
+			transactionManagerClass = getClass().getClassLoader().loadClass(TRANSACTION_MANAGER_CLASS_NAME);
+			transactionClass = getClass().getClassLoader().loadClass(TRANSACTION_CLASS_NAME);
+		}
+		catch (ClassNotFoundException ex) {
+			try {
+				transactionManagerClass = getClass().getClassLoader().loadClass(FALLBACK_TRANSACTION_MANAGER_CLASS_NAME);
+				transactionClass = getClass().getClassLoader().loadClass(FALLBACK_TRANSACTION_CLASS_NAME);
 			}
-			else {
-				logger.info("Support for OC4J transaction names and isolation levels not available");
+			catch (ClassNotFoundException ex2) {
+				throw new TransactionSystemException(
+						"Could not initialize OC4JJtaTransactionManager because OC4J API classes are not available", ex);
 			}
 		}
-		catch (Exception ex) {
-			throw new TransactionSystemException(
-					"Could not initialize OC4JJtaTransactionManager because OC4J API classes are not available", ex);
+
+		// Cache reflective Method references for later use.
+		if (transactionManagerClass.isInstance(getUserTransaction())) {
+			this.beginWithNameMethod = ClassUtils.getMethodIfAvailable(
+					transactionManagerClass, "begin", new Class[] {String.class});
+			this.setTransactionIsolationMethod = ClassUtils.getMethodIfAvailable(
+					transactionClass, "setTransactionIsolation", new Class[] {int.class});
+			logger.info("Support for OC4J transaction names and isolation levels available");
+		}
+		else {
+			logger.info("Support for OC4J transaction names and isolation levels not available");
 		}
 	}
 
@@ -143,9 +162,8 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 		// Apply transaction name, if any, through the extended OC4J transaction begin method.
 		if (this.beginWithNameMethod != null && definition.getName() != null) {
 			/*
-			com.evermind.server.ApplicationServerTransactionManager out =
-					(com.evermind.server.ApplicationServerTransactionManager) ut;
-			out.begin(definition.getName());
+			oracle.j2ee.transaction.OC4JTransactionManager otm = (oracle.j2ee.transaction.OC4JTransactionManager) ut;
+			otm.begin(definition.getName());
 			*/
 			try {
 				this.beginWithNameMethod.invoke(txObject.getUserTransaction(), new Object[] {definition.getName()});
@@ -171,8 +189,7 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 				try {
 					Transaction tx = getTransactionManager().getTransaction();
 					/*
-					com.evermind.server.ApplicationServerTransaction otx =
-							(com.evermind.server.ApplicationServerTransaction) tx;
+					oracle.j2ee.transaction.OC4JTransaction otx = (oracle.j2ee.transaction.OC4JTransaction) tx;
 					otx.setTransactionIsolation(definition.getIsolationLevel());
 					*/
 					Integer isolationLevel = new Integer(definition.getIsolationLevel());
