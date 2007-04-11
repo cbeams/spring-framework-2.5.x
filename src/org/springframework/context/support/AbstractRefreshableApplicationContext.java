@@ -97,6 +97,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		// Initialize fresh bean factory.
 		try {
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
+			customizeBeanFactory(beanFactory);
 			loadBeanDefinitions(beanFactory);
 			synchronized (this.beanFactoryMonitor) {
 				this.beanFactory = beanFactory;
