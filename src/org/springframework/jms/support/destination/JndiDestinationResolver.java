@@ -16,8 +16,6 @@
 
 package org.springframework.jms.support.destination;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.jms.Destination;
@@ -27,6 +25,7 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import javax.naming.NamingException;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.util.Assert;
 
@@ -62,7 +61,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 
 	private DestinationResolver dynamicDestinationResolver = new DynamicDestinationResolver();
 
-	private final Map destinationCache = Collections.synchronizedMap(new HashMap());
+	private final Map destinationCache = CollectionFactory.createConcurrentMapIfPossible(16);
 
 
 	/**

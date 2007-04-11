@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,16 +16,15 @@
 
 package org.springframework.web.servlet.mvc.multiaction;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Simple implementation of MethodNameResolver that maps URL to method
- * name. Although this is the default implementation used by the
- * MultiActionController class (because it requires no configuration),
+ * Simple implementation of {@link MethodNameResolver} that maps URL to
+ * method name. Although this is the default implementation used by the
+ * {@link MultiActionController} class (because it requires no configuration),
  * it's bit naive for most applications. In particular, we don't usually
  * want to tie URL to implementation methods.
  *
@@ -44,7 +43,7 @@ public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolve
 	private String suffix = "";
 
 	/** Request URL path String --> method name String */
-	private final Map methodNameCache = Collections.synchronizedMap(new HashMap());
+	private final Map methodNameCache = CollectionFactory.createConcurrentMapIfPossible(16);
 
 
 	/**
@@ -60,7 +59,7 @@ public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolve
 	 * Return the common prefix for handler method names.
 	 */
 	protected String getPrefix() {
-		return prefix;
+		return this.prefix;
 	}
 
 	/**
@@ -76,7 +75,7 @@ public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolve
 	 * Return the common suffix for handler method names.
 	 */
 	protected String getSuffix() {
-		return suffix;
+		return this.suffix;
 	}
 
 

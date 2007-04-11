@@ -16,12 +16,11 @@
 
 package org.springframework.web.servlet.mvc;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -56,7 +55,7 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	private String suffix = "";
 
 	/** Request URL path String --> view name String */
-	private final Map viewNameCache = Collections.synchronizedMap(new HashMap());
+	private final Map viewNameCache = CollectionFactory.createConcurrentMapIfPossible(16);
 
 
 	/**
