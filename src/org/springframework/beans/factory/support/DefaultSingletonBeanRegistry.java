@@ -68,11 +68,21 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
+	/**
+	 * Internal marker for a null singleton object:
+	 * used as marker value for concurrent Maps (which don't support null values).
+	 */
+	private static final Object NULL_OBJECT = new Object();
+
+
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Cache of singletons: bean name --> bean instance */
-	private final Map singletonCache = CollectionFactory.createLinkedMapIfPossible(16);
+	/** Cache of singleton objects: bean name --> bean instance */
+	private final Map singletonObjects = CollectionFactory.createConcurrentMapIfPossible(16);
+
+	/** Map of registered singletons: bean name --> bean instance */
+	private final Set registeredSingletons = CollectionFactory.createLinkedSetIfPossible(16);
 
 	/** Names of beans that are currently in creation */
 	private final Set singletonsCurrentlyInCreation = Collections.synchronizedSet(new HashSet());
@@ -87,16 +97,15 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	private final Map dependentBeanMap = new HashMap();
 
 
-	public void registerSingleton(String beanName, Object sharedBean) throws IllegalStateException {
-		Assert.hasText(beanName, "'beanName' must not be empty");
-		Assert.notNull(sharedBean, "Singleton object must not be null");
-		synchronized (this.singletonCache) {
-			Object oldObject = this.singletonCache.get(beanName);
+	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
+		Assert.notNull(beanName, "'beanName' must not be null");
+		synchronized (this.singletonObjects) {
+			Object oldObject = this.singletonObjects.get(beanName);
 			if (oldObject != null) {
-				throw new IllegalStateException("Could not register object [" + sharedBean +
-						"] under bean name '" + beanName + "': there's already object [" + oldObject + " bound");
+				throw new IllegalStateException("Could not register object [" + singletonObject +
+						"] under bean name '" + beanName + "': there is already object [" + oldObject + "] bound");
 			}
-			addSingleton(beanName, sharedBean);
+			addSingleton(beanName, singletonObject);
 		}
 	}
 
@@ -105,32 +114,35 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * <p>To be called for eager registration of singletons, e.g. to be able to
 	 * resolve circular references.
 	 * @param beanName the name of the bean
-	 * @param sharedBean the singleton object
+	 * @param singletonObject the singleton object
 	 */
-	protected void addSingleton(String beanName, Object sharedBean) {
-		Assert.hasText(beanName, "'beanName' must not be empty");
-		synchronized (this.singletonCache) {
-			this.singletonCache.put(beanName, sharedBean);
+	protected void addSingleton(String beanName, Object singletonObject) {
+		synchronized (this.singletonObjects) {
+			this.singletonObjects.put(beanName, (singletonObject != null ? singletonObject : NULL_OBJECT));
+			this.registeredSingletons.add(beanName);
 		}
 	}
 
 	public Object getSingleton(String beanName) {
-		synchronized (this.singletonCache) {
-			return this.singletonCache.get(beanName);
-		}
+		Assert.notNull(beanName, "'beanName' must not be null");
+		Object singletonObject = this.singletonObjects.get(beanName);
+		return (singletonObject != NULL_OBJECT ? singletonObject : null);
 	}
 
 	/**
 	 * Return the (raw) singleton object registered under the given name,
 	 * creating and registering a new one if none registered yet.
 	 * @param beanName the name of the bean
+	 * @param singletonFactory the ObjectFactory to lazily create the singleton
+	 * with, if necessary
 	 * @return the registered singleton object
 	 */
 	public Object getSingleton(String beanName, ObjectFactory singletonFactory) {
-		synchronized (this.singletonCache) {
+		Assert.notNull(beanName, "'beanName' must not be null");
+		synchronized (this.singletonObjects) {
 			// Re-check singleton cache within synchronized block.
-			Object sharedInstance = this.singletonCache.get(beanName);
-			if (sharedInstance == null) {
+			Object singletonObject = this.singletonObjects.get(beanName);
+			if (singletonObject == null) {
 				if (this.singletonsCurrentlyInDestruction) {
 					throw new BeanCreationNotAllowedException(beanName,
 							"Singleton bean creation not allowed while the singletons of this factory are in destruction " +
@@ -141,14 +153,14 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 				}
 				beforeSingletonCreation(beanName);
 				try {
-					sharedInstance = singletonFactory.getObject();
+					singletonObject = singletonFactory.getObject();
 				}
 				finally {
 					afterSingletonCreation(beanName);
 				}
-				addSingleton(beanName, sharedInstance);
+				addSingleton(beanName, singletonObject);
 			}
-			return sharedInstance;
+			return (singletonObject != NULL_OBJECT ? singletonObject : null);
 		}
 	}
 
@@ -158,26 +170,25 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * @param beanName the name of the bean
 	 */
 	protected void removeSingleton(String beanName) {
-		Assert.hasText(beanName, "'beanName' must not be empty");
-		this.singletonCache.remove(beanName);
+		Assert.notNull(beanName, "'beanName' must not be null");
+		this.singletonObjects.remove(beanName);
+		this.registeredSingletons.remove(beanName);
 	}
 
 	public boolean containsSingleton(String beanName) {
-		Assert.hasText(beanName, "'beanName' must not be empty");
-		synchronized (this.singletonCache) {
-			return this.singletonCache.containsKey(beanName);
-		}
+		Assert.notNull(beanName, "'beanName' must not be null");
+		return (this.singletonObjects.containsKey(beanName));
 	}
 
 	public String[] getSingletonNames() {
-		synchronized (this.singletonCache) {
-			return StringUtils.toStringArray(this.singletonCache.keySet());
+		synchronized (this.singletonObjects) {
+			return StringUtils.toStringArray(this.registeredSingletons);
 		}
 	}
 
 	public int getSingletonCount() {
-		synchronized (this.singletonCache) {
-			return this.singletonCache.size();
+		synchronized (this.singletonObjects) {
+			return this.registeredSingletons.size();
 		}
 	}
 
@@ -273,7 +284,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 		if (logger.isInfoEnabled()) {
 			logger.info("Destroying singletons in " + this);
 		}
-		synchronized (this.singletonCache) {
+		synchronized (this.singletonObjects) {
 			this.singletonsCurrentlyInDestruction = true;
 		}
 		synchronized (this.disposableBeans) {
@@ -282,8 +293,9 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 				destroySingleton(disposableBeanNames[i]);
 			}
 		}
-		synchronized (this.singletonCache) {
-			this.singletonCache.clear();
+		synchronized (this.singletonObjects) {
+			this.singletonObjects.clear();
+			this.registeredSingletons.clear();
 			this.singletonsCurrentlyInDestruction = false;
 		}
 	}
@@ -295,7 +307,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * @see #destroyBean
 	 */
 	public void destroySingleton(String beanName) {
-		synchronized (this.singletonCache) {
+		synchronized (this.singletonObjects) {
 			// Remove a registered singleton of the given name, if any.
 			removeSingleton(beanName);
 		}
@@ -348,7 +360,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * to avoid the potential for deadlocks in lazy-init situations.
 	 */
 	protected final Object getSingletonMutex() {
-		return this.singletonCache;
+		return this.singletonObjects;
 	}
 
 }
