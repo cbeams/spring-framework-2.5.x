@@ -1213,8 +1213,6 @@ public class ExampleBean {
       </property>
     ]]><lineannotation>&lt;!-- insert other configuration and dependencies as required as here --&gt;</lineannotation><![CDATA[
 </bean>]]></programlisting>
-                <para>(In all honesty the usage of the <literal>'parent'</literal> attribute
-                is not at all common.)</para>
             </section>
             <section id="beans-inner-beans">
                 <title>Inner beans</title>
@@ -1224,7 +1222,6 @@ public class ExampleBean {
                 inner bean definition does not need to have any id or name defined, and it is
                 best not to even specify any id or name value because the id or name value
                 simply will be ignored by the container.</para>
-                <para>Find below an example of an inner bean.</para>
                 <programlisting><![CDATA[<bean id="outer" class="...">
   ]]><lineannotation>&lt;!-- instead of using a reference to a target bean, simply define the target bean inline --&gt;</lineannotation><![CDATA[
   <property name="target">
@@ -1234,7 +1231,7 @@ public class ExampleBean {
     </bean>
   </property>
 </bean>]]></programlisting>
-                <para>Note that in the specific case of inner beans, the <literal>'singleton'</literal>
+                <para>Note that in the specific case of inner beans, the <literal>'scope'</literal>
                 flag and any <literal>'id'</literal> or <literal>'name'</literal> attribute are
                 effectively ignored. Inner beans are <emphasis>always</emphasis> anonymous and they
                 are <emphasis>always</emphasis> scoped as
@@ -1420,7 +1417,7 @@ support=support@somecompany.co.uk]]></programlisting>
                 XML-based configuration metadata snippet  results in the email property
                 being set to the empty <classname>String</classname> value ("")</para>
         <programlisting><![CDATA[<bean class="ExampleBean">
-  <property name="email"><value></value></property>
+  <property name="email"><value/></property>
 </bean>]]></programlisting>
                 <para>This is equivalent to the following Java code:
                 <methodname>exampleBean.setEmail("")</methodname>. The special
@@ -1444,9 +1441,7 @@ support=support@somecompany.co.uk]]></programlisting>
             
 	            <section id="beans-value-ref-shortcuts">
 	                <title>XML-based configuration metadata shortcuts</title>
-	                <para>There exist some shortcut forms which are less verbose than using the full
-	                <literal>&lt;value/&gt;</literal> and <literal>&lt;ref/&gt;</literal> elements. The
-	                <literal>&lt;property/&gt;</literal>, <literal>&lt;constructor-arg/&gt;</literal>, and
+	                <para>The <literal>&lt;property/&gt;</literal>, <literal>&lt;constructor-arg/&gt;</literal>, and
 	                <literal>&lt;entry/&gt;</literal> elements all support a <literal>'value'</literal>
 	                attribute which may be used instead of embedding a full <literal>&lt;value/&gt;</literal>
 	                element. Therefore, the following:</para>
@@ -1463,8 +1458,6 @@ support=support@somecompany.co.uk]]></programlisting>
 	                <programlisting><![CDATA[<property name="myProperty" value="hello"/>]]></programlisting>
 	                <programlisting><![CDATA[<constructor-arg value="hello"/>]]></programlisting>
 	                <programlisting><![CDATA[<entry key="myKey" value="hello"/>]]></programlisting>
-	                <para>In general, when typing definitions by hand, you will probably prefer to
-	                use the less verbose shortcut form (the Spring team certainly does).</para>
 	                <para>The <literal>&lt;property/&gt;</literal> and
 	                <literal>&lt;constructor-arg/&gt;</literal> elements support a similar
 	                shortcut <literal>'ref'</literal> attribute which may be used instead
@@ -1503,21 +1496,20 @@ support=support@somecompany.co.uk]]></programlisting>
 	            	<title>The p-namespace and how to use it to configure properties</title>
 	            	<para>
 	            		The second option you have to limit the amount of XML you have to write to configure your components
-	            		is to use the so-called p-namespace. As you might know, Spring 2.0 and later features support for extensible configuration
-	            		formats using namespaces. Those namespaces (such as <literal>util</literal> and <literal>jee</literal>) are
+	            		is to use the special "p-namespace". Spring 2.0 and later features support for extensible configuration
+	            		formats <link linkend="xsd-config">using namespaces</link>. Those namespaces are
 	            		all based on an XML Schema definition. In fact, the <literal>beans</literal> configuration format that you've been
-	            		reading about is just as much defined in an XML Schema document.</para>
+	            		reading about is defined in an XML Schema document.</para>
 	            	<para>
-	            		One namespace however is not defined in an XSD file and only exists in the core of Spring itself. The so-called
-	            		p-namespace doesn't need a schema definition and is a powerful way of configuring your properties differently
+	            		One special namespace is not defined in an XSD file, and only exists in the core of Spring itself. The so-called
+	            		p-namespace doesn't need a schema definition and is an alternative way of configuring your properties differently
 	            		than the way you've seen so far. Instead of using <emphasis role="bold">nested</emphasis> <literal>property</literal>
-	            		elements, using the p-namespace you can use attributes (in the p-namespace) as part of the <literal>bean</literal> element that
-	            		describe your property values. The values of the attributes will be taken as values for your properties.
+	            		elements, using the p-namespace you can use attributes as part of the <literal>bean</literal> element that
+	            		describe your property values. The values of the attributes will be taken as the values for your properties.
 	            	</para>
 	            	<para>
-	            		Let's review an example. The following two XML snippets are (in terms of Spring configuration declaratives)
-	            		entirely the same, except for the fact that the first is using the format you're familiar with (the
-	            		<literal>property</literal> elements) whereas the second example is using the p-namespace</para>
+	            		The following two XML snippets boil down to the same thing in the end: the first is using the format
+						you're familiar with (the <literal>property</literal> elements) whereas the second example is using the p-namespace</para>
 	            		
 	            	<para><programlisting><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:p="http://www.springframework.org/schema/p"
@@ -1534,14 +1526,14 @@ support=support@somecompany.co.uk]]></programlisting>
 </beans>]]></programlisting></para>
 
 					<para>
-						As you can see, we're including a attribute from the p-namespace called email in the bean definition. This is telling
+						As you can see, we're including an attribute from the p-namespace called email in the bean definition. This is telling
 						Spring that it should include a property declaration. As previously mentioned, the p-namespace doesn't have a schema
 						definition, so the name of the attribute can be set to whatever name your property has.
 					</para>
 					<para>
-						The second exampe (see below) included two more bean definitions that both have a reference to another bean:
+						This next example includes two more bean definitions that both have a reference to another bean:
 					</para>
-					<para><programlisting><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
+					<programlisting><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:p="http://www.springframework.org/schema/p"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
@@ -1550,40 +1542,38 @@ support=support@somecompany.co.uk]]></programlisting>
         <property name="name" value="John Doe"/>
         <property name="spouse" ref="jane"/>
     </bean>
-    
-	<bean name="john-modern" 
-		class="com.mycompany.Person"
-		p:name="John Doe"
-		p:spouse-ref="jane"/>
+
+    <bean name="john-modern" 
+        class="com.mycompany.Person"
+        p:name="John Doe"
+        p:spouse-ref="jane"/>
 
     <bean name="jane" class="com.mycompany.Person">
         <property name="name" value="Jane Doe"/>
     </bean>
-</beans>]]></programlisting></para>
+</beans>]]></programlisting>
 					<para>
 						As you can see, this example doesn't only include a property value using the p-namespace, but also uses a special
 						format to declare property references. Whereas the first bean definition uses <literal>&lt;property name="spouse" ref="jane"/&gt;</literal>
 						to create a reference from bean john to bean jane, the second bean definition uses
-						<literal>op:spouse-ref="jane"</literal> as an attribute to do the exact same thing. In this case <emphasis role="bold">spouse</emphasis>
+						<literal>p:spouse-ref="jane"</literal> as an attribute to do the exact same thing. In this case <emphasis role="bold">spouse</emphasis>
 						is the property name whereas the <literal>-ref</literal> part tells Spring this is not a value but a bean reference.
 					</para>
 					<note>
 						<para>Note that we recommend you to choose carefully which approach you are going to use in your project.
 						You should also communicate this to your team members so you won't end up with XML documents using all
-						three approaches at the same time. All this adds to the consistency of your codebase and will prevent
-						people from not understanding the application because of different ways of configurating it.
-						Also not that this functionality is only available as of Spring 2.0.
-					</para></note>
-					<para>
-						Using the p-namespace requires nothing else than simply adding it to your XML declaration as shown above.
-					</para>
+						three approaches at the same time. This will prevent people from not understanding
+						the application because of different ways of configuring it, and will add to the
+						consistency of your codebase. Also note that this functionality is only available as of Spring 2.0.
+						</para>
+					</note>
 				</section>
             </section>
             <section id="beans-compound-property-names">
                 <title>Compound property names</title>
                 <para>Compound or nested property names are perfectly legal
                 when setting bean properties, as long as all components of the path
-                except the final property name are non-null. For example, in this bean
+                except the final property name are not null. For example, in this bean
                 definition:</para>
                 <programlisting><![CDATA[<bean id="foo" class="foo.Bar">
   <property name="fred.bob.sammy" value="123" />
@@ -1591,7 +1581,7 @@ support=support@somecompany.co.uk]]></programlisting>
                 <para>The <literal>foo</literal> bean has a <literal>fred</literal> property
                 which has a <literal>bob</literal> property, which has a 
                 <literal>sammy</literal> property, and that final <literal>sammy</literal>
-                property is being set to a scalar value of <literal>123</literal>. In order
+                property is being set to the value <literal>123</literal>. In order
                 for this to work, the <literal>fred</literal> property of <literal>foo</literal>,
                 and the <literal>bob</literal> property of <literal>fred</literal> must both
                 be non-null after the bean is constructed, or a
@@ -1601,29 +1591,21 @@ support=support@somecompany.co.uk]]></programlisting>
         <section id="beans-factory-dependson">
             <title>Using <literal>depends-on</literal></title>
             <para>For most situations, the fact that a bean is a dependency of another is 
-            expressed simply by the fact that one bean is set as a property of another.
-            This is typically accomplished with the <literal>&lt;ref/&gt;</literal> element
-            in XML-based configuration metadata. In a variation of this, sometimes a bean
-            which is aware of the container is simply given the id of its dependency (using
-            a string value or alternately the <literal>&lt;idref/&gt;</literal> element,
-            which evaluates the same as a string value). The first bean then programmatically
-            asks the container for its dependency. In either case, the dependency is properly
-            initialized before the dependent bean.</para>
-            <para>For the relatively infrequent situations where dependencies
-			between beans are less direct (for example, when a static initializer in
-			a class needs to be triggered, such as database driver registration),
+            expressed by the fact that one bean is set as a property of another.
+            This is typically accomplished with the <link linkend="beans-ref-element"><literal>&lt;ref/&gt;</literal> element</link>
+            in XML-based configuration metadata. For the relatively infrequent situations
+			where dependencies between beans are less direct (for example, when a static
+			initializer in a class needs to be triggered, such as database driver registration),
 			the <literal>'depends-on'</literal> attribute may be used to explicitly
 			force one or more beans to be initialized before the bean using this
 			element is initialized. Find below an example of using the
 			<literal>'depends-on'</literal> attribute to express a dependency on a single bean.</para>
-            <programlisting><![CDATA[<bean id="beanOne" class="ExampleBean" depends-on="manager"/>
+            <programlisting><![CDATA[<bean id="beanOne" class="ExampleBean" depends-on="]]><emphasis role="bold">manager</emphasis><![CDATA["/>
 
-<bean id="manager" class="ManagerBean" />]]></programlisting>
+<bean id="]]><emphasis role="bold">manager</emphasis><![CDATA[" class="ManagerBean" />]]></programlisting>
             <para>If you need to express a dependency on multiple beans, you can supply a
-            delimited list of bean names as the value of the <literal>'depends-on'</literal>
-            attribute, with commas, whitespace and semi-colons all valid delimiters. Find
-            below an example of using <literal>'depends-on'</literal> to express a dependency
-            on a number of beans.</para>
+            list of bean names as the value of the <literal>'depends-on'</literal>
+            attribute, with commas, whitespace and semi-colons all valid delimiters, like so:</para>
             <programlisting><![CDATA[<bean id="beanOne" class="ExampleBean" depends-on="manager,accountDao">
   <property name="manager" ref="manager" />
 </bean>
@@ -1631,43 +1613,38 @@ support=support@somecompany.co.uk]]></programlisting>
 <bean id="manager" class="ManagerBean" />
 <bean id="accountDao" class="x.y.jdbc.JdbcAccountDao" />]]></programlisting>
 			<note>
-				<para>The '<literal>depends-on</literal>' is used not only to
+				<para>The '<literal>depends-on</literal>' attribute and property is used not only to
 				specify an initialization time dependency, but also to specify
 				the corresponding destroy time dependency (in the case of
-				singleton beans only). Dependant beans that are defined in the
+				<link linkend="beans-factory-scopes-singleton">singleton</link> beans only). Dependant beans that are defined in the
 				'<literal>depends-on</literal>' attribute will be destroyed
-				first prior to the relevant bean itself being destroyed. This
-				allows you to control shutdown order too (if that is important to you).</para>	
+				first prior to the relevant bean itself being destroyed. This thus
+				allows you to control shutdown order too.</para>	
 			</note>
 		</section>
         <section id="beans-factory-lazy-init">
-            <title>Lazily-instantiating beans</title>
+            <title>Lazily-instantiated beans</title>
             <para>The default behavior for <interfacename>ApplicationContext</interfacename>
             implementations is to eagerly pre-instantiate all <literal>singleton</literal> beans
             at startup. Pre-instantiation means that an <interfacename>ApplicationContext</interfacename>
-            implementation instance will eagerly create and configure all of it's singleton beans
-            as part of its initialization process. This is generally <emphasis>a good thing</emphasis>,
+            will eagerly create and configure all of its <link linkend="beans-factory-scopes-singleton">singleton</link>
+			beans as part of its initialization process. Generally this is <emphasis>a good thing</emphasis>,
             because it means that any errors in the configuration or in the surrounding environment
             will be discovered immediately (as opposed to possibly hours or even days down the line).</para>
             <para>However, there are times when this behavior is <emphasis>not</emphasis> what is wanted.
             If you do not want a singleton bean to be pre-instantiated when using
-            an <interfacename>ApplicationContext</interfacename> implementation, you can (on
-            a bean-definition by bean-definition basis) selectively control this by marking a
-            bean definition as lazy-initialized. A lazily-initialized bean indicates to the
-            IoC container whether or not a bean instance should be created at startup or when it
-            is first requested.</para>
+            an <interfacename>ApplicationContext</interfacename>, you can selectively
+			control this by marking a bean definition as lazy-initialized. A lazily-initialized
+			bean indicates to the IoC container whether or not a bean instance should be
+			created at startup or when it is first requested.</para>
             <para>When configuring beans via XML, this lazy loading is controlled by the
             <literal>'lazy-init'</literal> attribute on the <literal>&lt;bean/&gt;</literal>
             element; for example:</para>
-            <programlisting><![CDATA[<bean id="lazy" class="com.foo.ExpensiveToCreateBean" ]]><emphasis role="bold">lazy-init="true"</emphasis><![CDATA[>
-    ]]><lineannotation>&lt;!-- various properties here... --&gt;</lineannotation><![CDATA[
-</bean>
+            <programlisting><![CDATA[<bean id="lazy" class="com.foo.ExpensiveToCreateBean" ]]><emphasis role="bold">lazy-init="true"</emphasis>/><![CDATA[
 
-<bean name="not.lazy" class="com.foo.AnotherBean">
-    ]]><lineannotation>&lt;!-- various properties here... --&gt;</lineannotation><![CDATA[
-</bean>]]></programlisting>
+<bean name="not.lazy" class="com.foo.AnotherBean"/>]]></programlisting>
             <para>When the above configuration is consumed by an
-            <interfacename>ApplicationContext</interfacename> implementation, the bean named
+            <interfacename>ApplicationContext</interfacename>, the bean named
             <literal>'lazy'</literal> will <emphasis>not</emphasis> be eagerly pre-instantiated
             when the <interfacename>ApplicationContext</interfacename> is starting up, whereas
             the <literal>'not.lazy'</literal> bean will be eagerly pre-instantiated.</para>
@@ -1675,12 +1652,11 @@ support=support@somecompany.co.uk]]></programlisting>
             definition may be marked up as being lazy-initialized, if the lazy-initialized bean
             is the dependency of a singleton bean that is not lazy-initialized, when the
             <interfacename>ApplicationContext</interfacename> is eagerly pre-instantiating the
-            singleton, it will (of course) have to satisfy all of the singletons dependencies,
+            singleton, it will have to satisfy all of the singletons dependencies,
             one of which will be the lazy-initialized bean! So don't be confused if the IoC
             container creates one of the beans that you have explicitly configured as
             lazy-initialized at startup; all that means is that the lazy-initialized bean
-            probably is being injected into a non-lazy-initialized singleton bean elsewhere
-            in your configuration.</para>
+            is being injected into a non-lazy-initialized singleton bean elsewhere.</para>
             <para>It is also possible to control lazy-initialization at the container level by using
             the <literal>'default-lazy-init'</literal> attribute on the <literal>&lt;beans/&gt;</literal>
             element; for example:</para>
@@ -1807,8 +1783,8 @@ support=support@somecompany.co.uk]]></programlisting>
                     <para>Autowiring is more magical than explicit wiring. Although,
                     as noted in the above table, Spring is careful to avoid guessing
                     in case of ambiguity which might have unexpected results, the
-                    relationships between your Spring-managed objects is no longer
-                    explicitly documented.</para>
+                    relationships between your Spring-managed objects are no longer
+                    documented explicitly.</para>
                 </listitem>
                 <listitem>
                     <para>Wiring information may not be available to tools that may
@@ -1821,13 +1797,13 @@ support=support@somecompany.co.uk]]></programlisting>
                     ambiguity.</para>
                 </listitem>
             </itemizedlist>
-            <para>There is no "wrong" or "right" answer in all cases. A degree of
+            <para>There is no wrong or right answer in all cases. A degree of
             consistency across a project is best though; for example, if autowiring is
             not used in general, it might be confusing to developers to use it just
             to wire one or two bean definitions.</para>
             <section id="beans-factory-autowire-candidate">
                 <title>Excluding a bean from being available for autowiring</title>
-                <para>You can also (on a per bean basis) totally exclude a bean from being an
+                <para>You can also (on a per-bean basis) totally exclude a bean from being an
                 autowire candidate. When configuring beans using Spring's XML format, the
                 <literal>'autowire-candidate'</literal> attribute of the
                 <literal>&lt;bean/&gt;</literal> element can be set to
@@ -1843,7 +1819,7 @@ support=support@somecompany.co.uk]]></programlisting>
         </section>
         <section id="beans-factory-dependencies">
             <title>Checking for dependencies</title>
-            <para>The Spring IoC container also has the ability to try to check for the
+            <para>The Spring IoC container also has the ability to check for the
 			existence of unresolved dependencies of a bean deployed into the container.
 			These are JavaBeans properties of the bean, which do not have actual values
 			set for them in the bean definition, or alternately provided
@@ -1908,15 +1884,15 @@ support=support@somecompany.co.uk]]></programlisting>
         <section id="beans-factory-method-injection">
             <title>Method Injection</title>
             <para>For most application scenarios, the majority of the beans in the
-            container will be singletons. When a singleton bean needs to collaborate
-            with (use) another singleton bean, or a non-singleton bean needs to collaborate
-            with another non-singleton bean, the typical and common approach of
-            handling this dependency by defining one bean to be a property of the
-            other, is quite adequate. There is however a problem when the bean
+            container will be <link linkend="beans-factory-scopes-singleton">singletons</link>.
+			When a singleton bean needs to collaborate with another singleton bean, or a
+			non-singleton bean needs to collaborate with another non-singleton bean, the
+			typical and common approach of handling this dependency by defining one bean
+			to be a property of the other is quite adequate. There is a problem when the bean
             lifecycles are different. Consider a singleton bean A which needs to use
             a non-singleton (prototype) bean B, perhaps on each method invocation on
             A. The container will only create the singleton bean A once, and thus
-            only get the opportunity to set its properties once. There is no
+            only get the opportunity to set the properties once. There is no
             opportunity for the container to provide bean A with a new instance of
             bean B every time one is needed.</para>
             <para>One solution to this issue is to forgo some inversion of
@@ -1976,10 +1952,9 @@ public class CommandManager implements BeanFactoryAware {
                 to override methods on <emphasis>container managed beans</emphasis>, to
                 return the result of looking up another named bean in the container.
                 The lookup will typically be of a prototype bean as in the scenario
-                described above (although it can also be a singleton of course - but in that
-                case injecting the instance straight into the object would suffice). The
-                Spring Framework implements this method injection by dynamically generating
-                a subclass overriding the method, using bytecode generation via the CGLIB library.</para>
+                described above. The Spring Framework implements this method injection
+				by dynamically generating a subclass overriding the method, using bytecode
+				generation via the CGLIB library.</para>
                 <para>So if you look at the code from previous code snippet (the
                 <classname>CommandManager</classname> class), the Spring container
                 is going to dynamically override the implementation of the
@@ -2026,11 +2001,8 @@ public abstract class CommandManager {
                 is important to note that the person deploying the beans must be
                 careful to deploy the <literal>command</literal> bean as a
                 prototype (if that is actually what is needed). If it is deployed
-                as a singleton (either explicitly, or relying on the default
-                <emphasis>true</emphasis> setting for this flag), the same instance of
+                as a <link linkend="beans-factory-scopes-singleton">singleton</link>, the same instance of
                 the <literal>command</literal> bean will be returned each time!</para>
-                <para>Note that lookup method injection can be combined with
-                both Constructor and Setter Injection.</para>
                 <para>Please be aware that in order for this dynamic subclassing to work,
                 you will need to have the CGLIB jar(s) on your classpath. Additionally, the
                 class that the Spring container is going to subclass cannot be
@@ -2038,7 +2010,7 @@ public abstract class CommandManager {
                 <literal>final</literal> either. Also, testing a class that has an
                 <literal>abstract</literal> method can be somewhat odd in that you will have
                 to subclass the class yourself and supply a stub implementation of the
-                <literal>abstract</literal> method. Finally, beans that have been the target
+                <literal>abstract</literal> method. Finally, objects that have been the target
                 of method injection cannot be serialized.</para>
                 <tip>
                     <para>The interested reader may also find the <classname>ServiceLocatorFactoryBean</classname>
@@ -2119,12 +2091,11 @@ public class ReplacementComputeValue implements MethodReplacer {
 
     <section id="beans-factory-scopes">
         <title>Bean scopes</title>
-        <para>When you create a bean definition (typically in an XML configuration file)
-        what you are actually creating is (loosely speaking) a <emphasis>recipe</emphasis>
-        or template for creating actual instances of the objects defined by that
-        bean definition. The fact that a bean definition is a recipe is important,
-        because it means that, just like a class, you can potentially have many object
-        instances created from a single recipe.</para>
+        <para>When you create a bean definition what you are actually creating is a
+		<emphasis>recipe</emphasis> for creating actual instances of the class
+		defined by that bean definition. The idea that a bean definition is a recipe
+		is important, because it means that, just like a class, you can potentially
+		have many object instances created from a single recipe.</para>
         <para>You can control not only the various dependencies and
         configuration values that are to be plugged into an object that is created
         from a particular bean definition, but also the <firstterm>scope</firstterm>
@@ -2132,10 +2103,9 @@ public class ReplacementComputeValue implements MethodReplacer {
         powerful and gives you the flexibility to <emphasis>choose</emphasis> the scope
         of the objects you create through configuration instead of having to 'bake in' 
         the scope of an object at the Java class level. Beans can be defined to be 
-        deployed in one of a number of scopes:
-        out of the box, the Spring Framework supports exactly five scopes (of which 
-        three are available only if you are using a web-aware Spring
-        <interfacename>ApplicationContext</interfacename>).</para>
+        deployed in one of a number of scopes: out of the box, the Spring Framework
+		supports exactly five scopes (of which three are available only if you are using
+		a web-aware <interfacename>ApplicationContext</interfacename>).</para>
 		<para>The scopes supported out of the box are listed below:</para>
 		<table id="beans-factory-scopes-tbl">
 			<title>Bean scopes</title>
@@ -2205,17 +2175,16 @@ public class ReplacementComputeValue implements MethodReplacer {
         <section id="beans-factory-scopes-singleton">
 		    <title>The singleton scope</title>
 		    <para>When a bean is a singleton, only one <emphasis>shared</emphasis>
-		    instance of the bean will be managed and all requests for beans with
+		    instance of the bean will be managed, and all requests for beans with
 		    an id or ids matching that bean definition will result in that one
 		    specific bean instance being returned by the Spring container.</para>
 		    <para>To put it another way, when you define a bean definition and it
 		    is scoped as a singleton, then the Spring IoC container will create
 		    <emphasis>exactly one</emphasis> instance of the object defined by
-		    that bean definition (or recipe). This single instance will be 
-		    stored in a singleton cache, and <emphasis>all subsequent requests
-		    and references</emphasis> for that named bean will result in the cached
-		    object instance being returned.</para>
-		    <para>The following diagram illustrates the Spring singleton scope.</para>
+		    that bean definition. This single instance will be
+		    stored in a cache of such singleton beans, and <emphasis>all subsequent
+			requests and references</emphasis> for that named bean will result in
+			the cached object being returned.</para>
 		    <para>
 			    <mediaobject>
 				    <imageobject role="fo">
@@ -2228,16 +2197,15 @@ public class ReplacementComputeValue implements MethodReplacer {
 		    </para>
 			<para>Please be aware that Spring's concept of a singleton bean is quite
 			different from the Singleton pattern as defined in the seminal Gang of
-			Four (GoF) patterns book. The classic GoF Singleton hardcodes the scope of
+			Four (GoF) patterns book. The GoF Singleton hardcodes the scope of
 			an object such that one <emphasis>and only one</emphasis> instance of a
 			particular class will ever be created<emphasis> per
 			<classname>ClassLoader</classname></emphasis>. The scope of the Spring singleton
-			is best described as <emphasis>per <interfacename>container</interfacename>
-			and per bean</emphasis>. This means that if you define one bean for a particular
-			class in a single Spring container, then the Spring container will create one
+			is best described as <emphasis>per container and per bean</emphasis>.
+			This means that if you define one bean for a particular class in a single
+			Spring container, then the Spring container will create one
 			<emphasis>and only one</emphasis> instance of the class defined by that
-			bean definition.</para>
-		    <para><emphasis>The singleton scope is the default scope in Spring</emphasis>.
+			bean definition. <emphasis>The singleton scope is the default scope in Spring</emphasis>.
 		    To define a bean as a singleton in XML, you would write configuration like so:</para>
 		    <programlisting><![CDATA[<bean id="accountService" class="com.foo.DefaultAccountService"/>
 
@@ -2284,27 +2252,27 @@ public class ReplacementComputeValue implements MethodReplacer {
 			bean: the container instantiates, configures, decorates and otherwise assembles a
 			prototype object, hands it to the client and then has no further knowledge of that
 			prototype instance. This means that while initialization lifecycle callback
-			methods will be (and are) called on all objects regardless of scope, in the case
+			methods will be called on all objects regardless of scope, in the case
 			of prototypes, any configured destruction lifecycle callbacks will <emphasis>not</emphasis>
 			be called. It is the responsibility of the client code to clean up
 			prototype scoped objects and release any expensive resources that the prototype
 			bean(s) are holding onto. (One possible way to get the Spring container
 		    to release resources used by singleton-scoped beans is through the use
-			of a bean post processor which would hold a reference to the beans that need to be cleaned
-			up.)</para>
-			<para>In some respects, you can think of the Spring container's role when talking
+			of a custom <link linkend="beans-factory-extension-bpp">bean post processor</link>
+			which would hold a reference to the beans that need to be cleaned up.)</para>
+			<para>In some respects, you can think of the Spring containers role when talking
 			about a prototype-scoped bean as somewhat of a replacement for the Java
 			<literal>'new'</literal> operator. Any lifecycle aspects past that point have to
 			be handled by the client. The lifecycle of a bean in a Spring IoC container is
 			further described in the section entitled
-			<xref linkend="beans-factory-lifecycle" />.</para>
+			<xref linkend="beans-factory-lifecycle"/>.</para>
 		</section>
 
         <note>
             <title>Backwards compatibility note: specifying the lifecycle scope in XML</title>
             <para>If you are referencing the <filename>'spring-beans.dtd'</filename> DTD in
             a bean definition file(s), and you are being explicit about the lifecycle scope
-            of your bean(s) you must use the "<literal>singleton</literal>" attribute to
+            of your beans you must use the "<literal>singleton</literal>" attribute to
             express the lifecycle scope (remembering that the
             <link linkend="beans-factory-scopes-singleton">singleton lifecycle scope</link> is
             the default). If you are referencing the <filename>'spring-beans-2.0.dtd'</filename>
