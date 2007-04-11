@@ -17,6 +17,9 @@ Package org.springframework.core
 * BridgeMethodResolver is able to match open type variables in complex overloading scenarios as well
 * added "createConcurrentMap" method to CollectionFactory, creating a JDK 1.5+ or backport-concurrent ConcurrentHashMap
 
+Package org.springframework.jndi
+* JndiDestinationResolver prefers a concurrent Map for caching purposes
+
 Package org.springframework.scheduling
 * MethodInvokingJobDetailFactoryBean avoids obtaining the target bean twice in case of "targetBeanName" specified
 * revised MethodInvokingJobDetailFactoryBean's error message to include the target class instead of the target object
@@ -24,6 +27,12 @@ Package org.springframework.scheduling
 Package org.springframework.scripting
 * added "init-method" and "destroy-method" attributes on "lang:groovy/bsh/jruby", for init/destroy methods in scripts
 * ScriptFactoryPostProcessor generates config interface methods for init/destroy methods as well, if demanded
+
+Package org.springframework.ui
+* ResourceBundleThemeSource will always return the same Theme instance for a given theme name
+
+Package org.springframework.web
+* UrlFilenameViewController and InternalPathMethodNameResolver prefer a concurrent Map for caching purposes
 
 
 Changes in version 2.0.4 (2007-04-10)
