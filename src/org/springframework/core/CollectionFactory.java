@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -30,6 +31,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections.map.CaseInsensitiveMap;
 import org.apache.commons.collections.map.IdentityMap;
@@ -43,8 +45,9 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Factory for collections, being aware of JDK 1.4+ extended collections
- * and Commons Collection 3.x's corresponding versions for older JDKs.
- * Mainly for internal use within the framework.
+ * and Commons Collection 3.x's corresponding versions for older JDKs,
+ * as well as JDK 1.5+ concurrent collections and backport-concurrent
+ * versions of those. Mainly for internal use within the framework.
  *
  * <p>The goal of this class is to avoid runtime dependencies on JDK 1.4+
  * or Commons Collections 3.x, simply using the best collection implementation
@@ -64,8 +67,13 @@ public abstract class CollectionFactory {
 
 	/** Whether the Commons Collections 3.x library is present on the classpath */
 	private static final boolean commonsCollections3Available =
-			ClassUtils.isPresent(
-					"org.apache.commons.collections.map.LinkedMap", CollectionFactory.class.getClassLoader());
+			ClassUtils.isPresent("org.apache.commons.collections.map.LinkedMap",
+					CollectionFactory.class.getClassLoader());
+
+	/** Whether the backport-concurrent library is present on the classpath */
+	private static final boolean backportConcurrentAvailable =
+			ClassUtils.isPresent("edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap",
+					CollectionFactory.class.getClassLoader());
 
 
 	/**
@@ -80,7 +88,7 @@ public abstract class CollectionFactory {
 	public static Set createLinkedSetIfPossible(int initialCapacity) {
 		if (JdkVersion.isAtLeastJava14()) {
 			logger.trace("Creating [java.util.LinkedHashSet]");
-			return Jdk14CollectionFactory.createLinkedHashSet(initialCapacity);
+			return JdkCollectionFactory.createLinkedHashSet(initialCapacity);
 		}
 		else if (commonsCollections3Available) {
 			logger.trace("Creating [org.apache.commons.collections.set.ListOrderedSet]");
@@ -104,7 +112,7 @@ public abstract class CollectionFactory {
 	public static Map createLinkedMapIfPossible(int initialCapacity) {
 		if (JdkVersion.isAtLeastJava14()) {
 			logger.trace("Creating [java.util.LinkedHashMap]");
-			return Jdk14CollectionFactory.createLinkedHashMap(initialCapacity);
+			return JdkCollectionFactory.createLinkedHashMap(initialCapacity);
 		}
 		else if (commonsCollections3Available) {
 			logger.trace("Creating [org.apache.commons.collections.map.LinkedMap]");
@@ -132,7 +140,7 @@ public abstract class CollectionFactory {
 		}
 		else if (JdkVersion.isAtLeastJava14()) {
 			logger.debug("Falling back to [java.util.LinkedHashMap] for linked case-insensitive map");
-			return Jdk14CollectionFactory.createLinkedHashMap(initialCapacity);
+			return JdkCollectionFactory.createLinkedHashMap(initialCapacity);
 		}
 		else {
 			logger.debug("Falling back to plain [java.util.HashMap] for linked case-insensitive map");
@@ -152,7 +160,7 @@ public abstract class CollectionFactory {
 	public static Map createIdentityMapIfPossible(int initialCapacity) {
 		if (JdkVersion.isAtLeastJava14()) {
 			logger.trace("Creating [java.util.IdentityHashMap]");
-			return Jdk14CollectionFactory.createIdentityHashMap(initialCapacity);
+			return JdkCollectionFactory.createIdentityHashMap(initialCapacity);
 		}
 		else if (commonsCollections3Available) {
 			logger.trace("Creating [org.apache.commons.collections.map.IdentityMap]");
@@ -161,6 +169,30 @@ public abstract class CollectionFactory {
 		else {
 			logger.debug("Falling back to plain [java.util.HashMap] for identity map");
 			return new HashMap(initialCapacity);
+		}
+	}
+
+	/**
+	 * Create a concurrent map if possible: that is, if running on JDK >= 1.5
+	 * or if the backport-concurrent library is available. Prefers a JDK 1.5+
+	 * ConcurrentHashMap to its backport-concurrent equivalent.
+	 * @param initialCapacity the initial capacity of the map
+	 * @return the new map instance
+	 * @see java.util.concurrent.ConcurrentHashMap
+	 * @see edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap
+	 */
+	public static Map createConcurrentMapIfPossible(int initialCapacity) {
+		if (JdkVersion.isAtLeastJava15()) {
+			logger.trace("Creating [java.util.concurrent.ConcurrentHashMap]");
+			return JdkCollectionFactory.createConcurrentHashMap(initialCapacity);
+		}
+		else if (backportConcurrentAvailable) {
+			logger.trace("Creating [edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap]");
+			return BackportConcurrentCollectionFactory.createConcurrentHashMap(initialCapacity);
+		}
+		else {
+			logger.debug("Falling back to plain synchronized [java.util.HashMap] for concurrent map");
+			return Collections.synchronizedMap(new HashMap(initialCapacity));
 		}
 	}
 
@@ -211,7 +243,7 @@ public abstract class CollectionFactory {
 	 * Actual creation of JDK 1.4+ Collections.
 	 * In separate inner class to avoid runtime dependency on JDK 1.4+.
 	 */
-	private static abstract class Jdk14CollectionFactory {
+	private static abstract class JdkCollectionFactory {
 
 		private static Set createLinkedHashSet(int initialCapacity) {
 			return new LinkedHashSet(initialCapacity);
@@ -223,6 +255,10 @@ public abstract class CollectionFactory {
 
 		private static Map createIdentityHashMap(int initialCapacity) {
 			return new IdentityHashMap(initialCapacity);
+		}
+
+		private static Map createConcurrentHashMap(int initialCapacity) {
+			return new ConcurrentHashMap(initialCapacity);
 		}
 	}
 
@@ -250,6 +286,18 @@ public abstract class CollectionFactory {
 		private static Map createIdentityMap(int initialCapacity) {
 			// Commons Collections does not support initial capacity of 0.
 			return new IdentityMap(initialCapacity == 0 ? 1 : initialCapacity);
+		}
+	}
+
+
+	/**
+	 * Actual creation of backport-concurrent Collections.
+	 * In separate inner class to avoid runtime dependency on the backport-concurrent library.
+	 */
+	private static abstract class BackportConcurrentCollectionFactory {
+
+		private static Map createConcurrentHashMap(int initialCapacity) {
+			return new edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap(initialCapacity);
 		}
 	}
 
