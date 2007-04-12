@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 /**
  * Interface that defines common functionality for objects that can
  * offer parameter values for named SQL parameters, serving as argument
- * for NamedParameterJdbcTemplate operations.
+ * for {@link NamedParameterJdbcTemplate} operations.
  *
  * <p>This interface allows for the specification of SQL type in addition
  * to parameter values. All parameter values and types are identified by
@@ -52,6 +52,7 @@ public interface SqlParameterSource {
 	/**
 	 * Determine whether there is a value for the specified named parameter.
 	 * @param paramName the name of the parameter
+	 * @return whether there is a value defined
 	 */
 	boolean hasValue(String paramName);
 

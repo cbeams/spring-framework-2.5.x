@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
 
 /**
  * Helper class that aggregates a {@link javax.management.NotificationListener},
@@ -75,7 +74,7 @@ public class NotificationListenerBean implements InitializingBean {
 	 * @return said {@link javax.management.NotificationListener}
 	 */
 	public NotificationListener getNotificationListener() {
-		return notificationListener;
+		return this.notificationListener;
 	}
 
 	/**
@@ -95,7 +94,7 @@ public class NotificationListenerBean implements InitializingBean {
 	 * @return said {@link javax.management.NotificationFilter}
 	 */
 	public NotificationFilter getNotificationFilter() {
-		return notificationFilter;
+		return this.notificationFilter;
 	}
 
 	/**
@@ -118,7 +117,7 @@ public class NotificationListenerBean implements InitializingBean {
 	 * @see javax.management.NotificationListener#handleNotification(javax.management.Notification, Object)
 	 */
 	public Object getHandback() {
-		return handback;
+		return this.handback;
 	}
 
 	/**
@@ -154,16 +153,14 @@ public class NotificationListenerBean implements InitializingBean {
 	 * be registered as a listener for {@link javax.management.Notification Notifications}.
 	 */
 	public String[] getMappedObjectNames() {
-		return mappedObjectNames;
+		return this.mappedObjectNames;
 	}
 
 
-	/**
-	 * Check that this {@link NotificationListenerBean} has been
-	 * correctly configured.
-	 */
 	public void afterPropertiesSet() {
-		Assert.notNull(this.notificationListener, "Property 'notificationListener' is required");
+		if (this.notificationListener == null) {
+			throw new IllegalArgumentException("Property 'notificationListener' is required");
+		}
 	}
 
 }

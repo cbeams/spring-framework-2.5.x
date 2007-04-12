@@ -248,7 +248,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Add anonymous parameters, specifying only their SQL types
 	 * as defined in the <code>java.sql.Types</code> class.
 	 * <p>Parameter ordering is significant. This method is an alternative
-	 * to the declareParameter() method, which should normally be preferred.
+	 * to the {@link #declareParameter} method, which should normally be preferred.
 	 * @param types array of SQL types as defined in the
 	 * <code>java.sql.Types</code> class
 	 * @throws InvalidDataAccessApiUsageException if the operation is already compiled
@@ -266,20 +266,21 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/**
 	 * Declare a parameter. The order in which this method is called is significant.
-	 * @param param SqlParameter to add. This will specify SQL type and (optionally)
-	 * the parameter's name.
+	 * @param param the SqlParameter to add. This will specify SQL type and (optionally)
+	 * the parameter's name. Note that you typically use the {@link SqlParameter} class
+	 * itself here, not any of its subclasses.
 	 * @throws InvalidDataAccessApiUsageException if the operation is already compiled,
 	 * and hence cannot be configured further
 	 */
 	public void declareParameter(SqlParameter param) throws InvalidDataAccessApiUsageException {
 		if (isCompiled()) {
-			throw new InvalidDataAccessApiUsageException("Cannot add parameters once query is compiled");
+			throw new InvalidDataAccessApiUsageException("Cannot add parameters once the query is compiled");
 		}
 		this.declaredParameters.add(param);
 	}
 
 	/**
-	 * Return a list of the declared SqlParameter objects.
+	 * Return a list of the declared {@link SqlParameter} objects.
 	 */
 	protected List getDeclaredParameters() {
 		return this.declaredParameters;
