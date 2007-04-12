@@ -272,7 +272,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 				this.methodInvoker.invoke();
 			}
 			catch (InvocationTargetException ex) {
-				String errorMessage = buildErrorMessage();
+				String errorMessage = getInvocationFailureMessage();
 				logger.warn(errorMessage, ex.getTargetException());
 				if (ex.getTargetException() instanceof JobExecutionException) {
 					throw (JobExecutionException) ex.getTargetException();
@@ -288,7 +288,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 				}
 			}
 			catch (Exception ex) {
-				String errorMessage = buildErrorMessage();
+				String errorMessage = getInvocationFailureMessage();
 				logger.warn(errorMessage, ex);
 				if (oldJobExecutionExceptionConstructor != null) {
 					throw (JobExecutionException) BeanUtils.instantiateClass(
@@ -301,12 +301,12 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		}
 
 		/**
-		 * Build an error message for a method invocation failure encountered by this job.
+		 * Build a message for an invocation failure exception.
 		 * @return the error message, including the target method name etc
 		 */
-		private String buildErrorMessage() {
-			return "Could not invoke method '" + this.methodInvoker.getTargetMethod() +
-					"' on target class [" + this.methodInvoker.getTargetClass() + "]";
+		private String getInvocationFailureMessage() {
+			return "Invocation of method '" + this.methodInvoker.getTargetMethod() +
+					"' on target class [" + this.methodInvoker.getTargetClass() + "] failed";
 		}
 	}
 
