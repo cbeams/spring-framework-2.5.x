@@ -8,7 +8,7 @@ Changes in version 2.0.5 (2007-05-03)
 
 Package org.springframework.beans
 * default editor settings get copied to nested beans even if no default editors have been used yet
-* AbstractBeanFactory uses concurrent maps for singletons, aliases and bean definitions (for better concurrency)
+* AbstractBeanFactory uses concurrent Maps for singletons, aliases and bean definitions (for better concurrency)
 
 Package org.springframework.context
 * AbstractRefreshableApplicationContext actually calls the 2.0.3-introduced "customizeBeanFactory" template method
@@ -16,9 +16,11 @@ Package org.springframework.context
 Package org.springframework.core
 * BridgeMethodResolver is able to match open type variables in complex overloading scenarios as well
 * added "createConcurrentMap" method to CollectionFactory, creating a JDK 1.5+ or backport-concurrent ConcurrentHashMap
+* Constants class always uses upper-case transformation according to English notation
+* added "toCodeForSuffix" operation to Constants class
 
 Package org.springframework.jndi
-* JndiDestinationResolver prefers a concurrent Map for caching purposes
+* JndiDestinationResolver prefers a concurrent Map for caching purposes (for better concurrency)
 
 Package org.springframework.scheduling
 * MethodInvokingJobDetailFactoryBean avoids obtaining the target bean twice in case of "targetBeanName" specified
@@ -27,6 +29,9 @@ Package org.springframework.scheduling
 Package org.springframework.scripting
 * added "init-method" and "destroy-method" attributes on "lang:groovy/bsh/jruby", for init/destroy methods in scripts
 * ScriptFactoryPostProcessor generates config interface methods for init/destroy methods as well, if demanded
+
+Package org.springframework.transaction
+* revised OC4JJtaTransactionManager to support the "oracle.j2ee.transaction" package on OC4J later than 10.1.3.2
 
 Package org.springframework.ui
 * ResourceBundleThemeSource will always return the same Theme instance for a given theme name
