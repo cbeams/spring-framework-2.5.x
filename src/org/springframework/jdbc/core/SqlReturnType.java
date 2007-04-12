@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import java.sql.CallableStatement;
 import java.sql.SQLException;
 
 /**
- * Interface to be implemented for retrieving values for more complex database specific
- * types not supported by the standard <code>getObject</code> method.
+ * Interface to be implemented for retrieving values for more complex database-specific
+ * types not supported by the standard <code>CallableStatement.getObject</code> method.
  *
  * <p>Implementations perform the actual work of getting the actual values. They must
  * implement the callback method <code>getTypeValue</code> which can throw SQLExceptions
@@ -46,12 +46,14 @@ public interface SqlReturnType {
 	 */
 	int TYPE_UNKNOWN = Integer.MIN_VALUE;
 
+
 	/**
 	 * Get the type value from the specific object.
-	 * @param cs the CallableStatement to work on
+	 * @param cs the CallableStatement to operate on
 	 * @param paramIndex the index of the parameter for which we need to set the value
 	 * @param sqlType SQL type of the parameter we are setting
 	 * @param typeName the type name of the parameter
+	 * @return the target value
 	 * @throws SQLException if a SQLException is encountered setting parameter values
 	 * (that is, there's no need to catch SQLException)
 	 * @see java.sql.Types

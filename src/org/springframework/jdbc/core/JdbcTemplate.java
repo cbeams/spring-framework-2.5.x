@@ -1196,7 +1196,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 
 		public String getSql() {
-			return sql;
+			return this.sql;
 		}
 	}
 
@@ -1218,7 +1218,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 
 		public String getSql() {
-			return callString;
+			return this.callString;
 		}
 
 	}
