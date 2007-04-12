@@ -20,12 +20,12 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * This class can be used to parse other classes containing constant definitions
@@ -104,7 +104,7 @@ public class Constants {
 
 	/**
 	 * Return a constant value cast to a Number.
-	 * @param code name of the field
+	 * @param code the name of the field (never <code>null</code>)
 	 * @return the Number value
 	 * @see #asObject
 	 * @throws ConstantException if the field name wasn't found
@@ -120,7 +120,7 @@ public class Constants {
 
 	/**
 	 * Return a constant value as a String.
-	 * @param code the name of the field
+	 * @param code the name of the field (never <code>null</code>)
 	 * @return the String value
 	 * Works even if it's not a string (invokes <code>toString()</code>).
 	 * @see #asObject
@@ -133,13 +133,14 @@ public class Constants {
 	/**
 	 * Parse the given String (upper or lower case accepted) and return
 	 * the appropriate value if it's the name of a constant field in the
-	 * class we're analysing.
-	 * @param code the name of the field
+	 * class that we're analysing.
+	 * @param code the name of the field (never <code>null</code>)
 	 * @return the Object value
 	 * @throws ConstantException if there's no such field
 	 */
 	public Object asObject(String code) throws ConstantException {
-		String codeToUse = code.toUpperCase();
+		Assert.notNull(code, "Code must not be null");
+		String codeToUse = code.toUpperCase(Locale.ENGLISH);
 		Object val = this.fieldCache.get(codeToUse);
 		if (val == null) {
 			throw new ConstantException(this.className, codeToUse, "not found");
@@ -159,7 +160,7 @@ public class Constants {
 	 * @return the set of constant names
 	 */
 	public Set getNames(String namePrefix) {
-		String prefixToUse = (StringUtils.hasText(namePrefix) ? namePrefix.trim().toUpperCase() : "");
+		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : "");
 		Set names = new HashSet();
 		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
 			String code = (String) it.next();
@@ -192,7 +193,7 @@ public class Constants {
 	 * @return the set of constant names
 	 */
 	public Set getNamesForSuffix(String nameSuffix) {
-		String suffixToUse = (StringUtils.hasText(nameSuffix) ? nameSuffix.trim().toUpperCase() : "");
+		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
 		Set names = new HashSet();
 		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
 			String code = (String) it.next();
@@ -202,6 +203,7 @@ public class Constants {
 		}
 		return names;
 	}
+
 
 	/**
 	 * Return all values of the given group of constants.
@@ -214,7 +216,7 @@ public class Constants {
 	 * @return the set of values
 	 */
 	public Set getValues(String namePrefix) {
-		String prefixToUse = (StringUtils.hasText(namePrefix) ? namePrefix.trim().toUpperCase() : "");
+		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : "");
 		Set values = new HashSet();
 		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
 			String code = (String) it.next();
@@ -247,7 +249,7 @@ public class Constants {
 	 * @return the set of values
 	 */
 	public Set getValuesForSuffix(String nameSuffix) {
-		String suffixToUse = (StringUtils.hasText(nameSuffix) ? nameSuffix.trim().toUpperCase() : "");
+		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
 		Set values = new HashSet();
 		for (Iterator it = this.fieldCache.keySet().iterator(); it.hasNext();) {
 			String code = (String) it.next();
@@ -263,12 +265,12 @@ public class Constants {
 	 * Look up the given value within the given group of constants.
 	 * <p>Will return the first match.
 	 * @param value constant value to look up
-	 * @param namePrefix prefix of the constant names to search
+	 * @param namePrefix prefix of the constant names to search (may be <code>null</code>)
 	 * @return the name of the constant field
 	 * @throws ConstantException if the value wasn't found
 	 */
 	public String toCode(Object value, String namePrefix) throws ConstantException {
-		String prefixToUse = namePrefix.toUpperCase();
+		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : null);
 		for (Iterator it = this.fieldCache.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			String key = (String) entry.getKey();
@@ -290,6 +292,26 @@ public class Constants {
 	 */
 	public String toCodeForProperty(Object value, String propertyName) throws ConstantException {
 		return toCode(value, propertyToConstantNamePrefix(propertyName));
+	}
+
+	/**
+	 * Look up the given value within the given group of constants.
+	 * <p>Will return the first match.
+	 * @param value constant value to look up
+	 * @param nameSuffix suffix of the constant names to search (may be <code>null</code>)
+	 * @return the name of the constant field
+	 * @throws ConstantException if the value wasn't found
+	 */
+	public String toCodeForSuffix(Object value, String nameSuffix) throws ConstantException {
+		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : null);
+		for (Iterator it = this.fieldCache.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			String key = (String) entry.getKey();
+			if (key.endsWith(suffixToUse) && entry.getValue().equals(value)) {
+				return key;
+			}
+		}
+		throw new ConstantException(this.className, suffixToUse, value);
 	}
 
 

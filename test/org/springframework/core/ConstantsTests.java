@@ -16,6 +16,7 @@
 
 package org.springframework.core;
 
+import java.util.Locale;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -31,7 +32,7 @@ public class ConstantsTests extends TestCase {
 	public void testConstants() {
 		Constants c = new Constants(A.class);
 		assertEquals(A.class.getName(), c.getClassName());
-		assertEquals(7, c.getSize());
+		assertEquals(9, c.getSize());
 		
 		assertEquals(c.asNumber("DOG").intValue(), A.DOG);
 		assertEquals(c.asNumber("dog").intValue(), A.DOG);
@@ -65,13 +66,17 @@ public class ConstantsTests extends TestCase {
 		names = c.getNames("D");
 		assertEquals(1, names.size());
 		assertTrue(names.contains("DOG"));
+
+		names = c.getNames("d");
+		assertEquals(1, names.size());
+		assertTrue(names.contains("DOG"));
 	}
 
 	public void testGetValues() {
 		Constants c = new Constants(A.class);
 
 		Set values = c.getValues("");
-		assertEquals(c.getSize(), values.size());
+		assertEquals(7, values.size());
 		assertTrue(values.contains(new Integer(0)));
 		assertTrue(values.contains(new Integer(66)));
 		assertTrue(values.contains(""));
@@ -80,10 +85,46 @@ public class ConstantsTests extends TestCase {
 		assertEquals(1, values.size());
 		assertTrue(values.contains(new Integer(0)));
 
+		values = c.getValues("prefix");
+		assertEquals(2, values.size());
+		assertTrue(values.contains(new Integer(1)));
+		assertTrue(values.contains(new Integer(2)));
+
 		values = c.getValuesForProperty("myProperty");
 		assertEquals(2, values.size());
 		assertTrue(values.contains(new Integer(1)));
 		assertTrue(values.contains(new Integer(2)));
+	}
+
+	public void testGetValuesInTurkey() {
+		Locale oldLocale = Locale.getDefault();
+		Locale.setDefault(new Locale("tr"));
+		try {
+			Constants c = new Constants(A.class);
+
+			Set values = c.getValues("");
+			assertEquals(7, values.size());
+			assertTrue(values.contains(new Integer(0)));
+			assertTrue(values.contains(new Integer(66)));
+			assertTrue(values.contains(""));
+
+			values = c.getValues("D");
+			assertEquals(1, values.size());
+			assertTrue(values.contains(new Integer(0)));
+
+			values = c.getValues("prefix");
+			assertEquals(2, values.size());
+			assertTrue(values.contains(new Integer(1)));
+			assertTrue(values.contains(new Integer(2)));
+
+			values = c.getValuesForProperty("myProperty");
+			assertEquals(2, values.size());
+			assertTrue(values.contains(new Integer(1)));
+			assertTrue(values.contains(new Integer(2)));
+		}
+		finally {
+			Locale.setDefault(oldLocale);
+		}
 	}
 
 	public void testSuffixAccess() {
@@ -123,9 +164,26 @@ public class ConstantsTests extends TestCase {
 
 		assertEquals(c.toCodeForProperty(new Integer(1), "myProperty"), "MY_PROPERTY_NO");
 		assertEquals(c.toCodeForProperty(new Integer(2), "myProperty"), "MY_PROPERTY_YES");
-
 		try {
 			c.toCodeForProperty("bogus", "bogus");
+			fail("Should have thrown ConstantException");
+		}
+		catch (ConstantException expected) {
+		}
+
+		assertEquals(c.toCodeForSuffix(new Integer(0), ""), "DOG");
+		assertEquals(c.toCodeForSuffix(new Integer(0), "G"), "DOG");
+		assertEquals(c.toCodeForSuffix(new Integer(0), "OG"), "DOG");
+		assertEquals(c.toCodeForSuffix(new Integer(0), "DoG"), "DOG");
+		assertEquals(c.toCodeForSuffix(new Integer(66), ""), "CAT");
+		assertEquals(c.toCodeForSuffix(new Integer(66), "T"), "CAT");
+		assertEquals(c.toCodeForSuffix(new Integer(66), "at"), "CAT");
+		assertEquals(c.toCodeForSuffix(new Integer(66), "cAt"), "CAT");
+		assertEquals(c.toCodeForSuffix("", ""), "S1");
+		assertEquals(c.toCodeForSuffix("", "1"), "S1");
+		assertEquals(c.toCodeForSuffix("", "s1"), "S1");
+		try {
+			c.toCodeForSuffix("bogus", "bogus");
 			fail("Should have thrown ConstantException");
 		}
 		catch (ConstantException expected) {
@@ -176,6 +234,9 @@ public class ConstantsTests extends TestCase {
 		public static final int DOG = 0;
 		public static final int CAT = 66;
 		public static final String S1 = "";
+
+		public static final int PREFIX_NO = 1;
+		public static final int PREFIX_YES = 2;
 
 		public static final int MY_PROPERTY_NO = 1;
 		public static final int MY_PROPERTY_YES = 2;
