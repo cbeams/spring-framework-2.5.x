@@ -36,7 +36,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 			ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
 			factory.setPoolSize(-1);
 			factory.setScheduledExecutorTasks(new ScheduledExecutorTask[]{
-				new ScheduledExecutorFactoryBeanTests.NoOpScheduledExecutorTask()
+				new NoOpScheduledExecutorTask()
 			});
 			factory.afterPropertiesSet();
 			fail("Pool size less than zero");
@@ -58,7 +58,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 			}
 		};
 		factory.setScheduledExecutorTasks(new ScheduledExecutorTask[]{
-			new ScheduledExecutorFactoryBeanTests.NoOpScheduledExecutorTask()
+			new NoOpScheduledExecutorTask()
 		});
 		factory.afterPropertiesSet();
 		factory.destroy();
@@ -66,8 +66,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		mockScheduledExecutorService.verify();
 	}
 
-	public void testOneTimeExecutionIsSetupAndFiresCorrectly() throws Exception {
-
+	public void testOneTimeExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
 		runnable.run();
@@ -85,8 +84,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		mockRunnable.verify();
 	}
 
-	public void testFixedRepeatedExecutionIsSetupAndFiresCorrectly() throws Exception {
-
+	public void testFixedRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
 		runnable.run();
@@ -108,8 +106,30 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		mockRunnable.verify();
 	}
 
-	public void testWithInitialDelayRepeatedExecutionIsSetupAndFiresCorrectly() throws Exception {
+	public void testFixedRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
+		MockControl mockRunnable = MockControl.createControl(Runnable.class);
+		Runnable runnable = (Runnable) mockRunnable.getMock();
+		runnable.run();
+		mockRunnable.setThrowable(new IllegalStateException());
+		runnable.run();
+		mockRunnable.setThrowable(new IllegalStateException());
+		mockRunnable.replay();
 
+		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
+		task.setPeriod(500);
+		task.setFixedRate(true);
+
+		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
+		factory.setScheduledExecutorTasks(new ScheduledExecutorTask[]{task});
+		factory.setContinueScheduledExecutionAfterException(true);
+		factory.afterPropertiesSet();
+		pauseToLetTaskStart(2);
+		factory.destroy();
+
+		mockRunnable.verify();
+	}
+
+	public void testWithInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		MockControl mockRunnable = MockControl.createControl(Runnable.class);
 		Runnable runnable = (Runnable) mockRunnable.getMock();
 		runnable.run();
@@ -123,9 +143,36 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		task.setDelay(3000); // nice long wait...
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
-		factory.setScheduledExecutorTasks(new ScheduledExecutorTask[]{
-			task
-		});
+		factory.setScheduledExecutorTasks(new ScheduledExecutorTask[] {task});
+		factory.afterPropertiesSet();
+		pauseToLetTaskStart(1);
+		// invoke destroy before tasks have even been scheduled...
+		factory.destroy();
+
+		try {
+			mockRunnable.verify();
+			fail("Mock must never have been called");
+		}
+		catch (AssertionFailedError expected) {
+		}
+	}
+
+	public void testWithInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
+		MockControl mockRunnable = MockControl.createControl(Runnable.class);
+		Runnable runnable = (Runnable) mockRunnable.getMock();
+		runnable.run();
+		mockRunnable.setThrowable(new IllegalStateException());
+		runnable.run();
+		mockRunnable.setThrowable(new IllegalStateException());
+		mockRunnable.replay();
+
+		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
+		task.setPeriod(500);
+		task.setDelay(3000); // nice long wait...
+
+		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
+		factory.setScheduledExecutorTasks(new ScheduledExecutorTask[] {task});
+		factory.setContinueScheduledExecutionAfterException(true);
 		factory.afterPropertiesSet();
 		pauseToLetTaskStart(1);
 		// invoke destroy before tasks have even been scheduled...
@@ -147,7 +194,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 			}
 		};
 		factory.setScheduledExecutorTasks(new ScheduledExecutorTask[]{
-			new ScheduledExecutorFactoryBeanTests.NoOpScheduledExecutorTask()
+			new NoOpScheduledExecutorTask()
 		});
 		factory.setThreadFactory(null); // the null must not propagate
 		factory.afterPropertiesSet();
@@ -162,7 +209,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 			}
 		};
 		factory.setScheduledExecutorTasks(new ScheduledExecutorTask[]{
-			new ScheduledExecutorFactoryBeanTests.NoOpScheduledExecutorTask()
+			new NoOpScheduledExecutorTask()
 		});
 		factory.setRejectedExecutionHandler(null); // the null must not propagate
 		factory.afterPropertiesSet();
@@ -184,7 +231,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 	}
 
 
-	private static final class NoOpScheduledExecutorTask extends ScheduledExecutorTask {
+	private static class NoOpScheduledExecutorTask extends ScheduledExecutorTask {
 
 		public NoOpScheduledExecutorTask() {
 			super(new NoOpRunnable());

@@ -30,6 +30,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.scheduling.support.DelegatingExceptionProofRunnable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -64,8 +65,6 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private ScheduledExecutorTask[] scheduledExecutorTasks;
-
 	private int poolSize = 1;
 
 	private ThreadFactory threadFactory = Executors.defaultThreadFactory();
@@ -74,22 +73,14 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 
 	private boolean exposeUnconfigurableExecutor = false;
 
+	private ScheduledExecutorTask[] scheduledExecutorTasks;
+
+	private boolean continueScheduledExecutionAfterException = false;
+
 	private String beanName;
 
 	private ScheduledExecutorService executor;
 
-
-	/**
-	 * Register a list of ScheduledExecutorTask objects with the ScheduledExecutorService
-	 * that this FactoryBean creates. Depending on each ScheduledExecutorTask's settings,
-	 * it will be registered via one of ScheduledExecutorService's schedule methods.
-	 * @see java.util.concurrent.ScheduledExecutorService#schedule(java.lang.Runnable, long, java.util.concurrent.TimeUnit)
-	 * @see java.util.concurrent.ScheduledExecutorService#scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
-	 * @see java.util.concurrent.ScheduledExecutorService#scheduleAtFixedRate(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
-	 */
-	public void setScheduledExecutorTasks(ScheduledExecutorTask[] scheduledExecutorTasks) {
-		this.scheduledExecutorTasks = scheduledExecutorTasks;
-	}
 
 	/**
 	 * Set the ScheduledExecutorService's pool size.
@@ -131,6 +122,31 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 		this.exposeUnconfigurableExecutor = exposeUnconfigurableExecutor;
 	}
 
+	/**
+	 * Register a list of ScheduledExecutorTask objects with the ScheduledExecutorService
+	 * that this FactoryBean creates. Depending on each ScheduledExecutorTask's settings,
+	 * it will be registered via one of ScheduledExecutorService's schedule methods.
+	 * @see java.util.concurrent.ScheduledExecutorService#schedule(java.lang.Runnable, long, java.util.concurrent.TimeUnit)
+	 * @see java.util.concurrent.ScheduledExecutorService#scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
+	 * @see java.util.concurrent.ScheduledExecutorService#scheduleAtFixedRate(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
+	 */
+	public void setScheduledExecutorTasks(ScheduledExecutorTask[] scheduledExecutorTasks) {
+		this.scheduledExecutorTasks = scheduledExecutorTasks;
+	}
+
+	/**
+	 * Specify whether to continue the execution of a scheduled task
+	 * after it threw an exception.
+	 * <p>Default is "false", matching the native behavior of a
+	 * {@link java.util.concurrent.ScheduledExecutorService}.
+	 * Switch this flag to "true" for exception-proof execution of each task,
+	 * continuing scheduled execution as in the case of successful execution.
+	 * @see java.util.concurrent.ScheduledExecutorService#scheduleAtFixedRate
+	 */
+	public void setContinueScheduledExecutionAfterException(boolean continueScheduledExecutionAfterException) {
+		this.continueScheduledExecutionAfterException = continueScheduledExecutionAfterException;
+	}
+
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
@@ -157,7 +173,7 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 	/**
 	 * Create a new {@link ScheduledExecutorService} instance.
 	 * Called by <code>afterPropertiesSet</code>.
-	 * <p>Default implementation creates a {@link ScheduledThreadPoolExecutor}.
+	 * <p>The default implementation creates a {@link ScheduledThreadPoolExecutor}.
 	 * Can be overridden in subclasses to provide custom
 	 * {@link ScheduledExecutorService} instances.
 	 * @param poolSize the specified pool size
@@ -182,19 +198,37 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 	protected void registerTasks(ScheduledExecutorTask[] tasks, ScheduledExecutorService executor) {
 		for (int i = 0; i < tasks.length; i++) {
 			ScheduledExecutorTask task = tasks[i];
+			Runnable runnable = getRunnableToSchedule(task);
 			if (task.isOneTimeTask()) {
-				executor.schedule(task.getRunnable(), task.getDelay(), task.getTimeUnit());
+				executor.schedule(runnable, task.getDelay(), task.getTimeUnit());
 			}
 			else {
 				if (task.isFixedRate()) {
-					executor.scheduleAtFixedRate(
-							task.getRunnable(), task.getDelay(), task.getPeriod(), task.getTimeUnit());
+					executor.scheduleAtFixedRate(runnable, task.getDelay(), task.getPeriod(), task.getTimeUnit());
 				}
 				else {
-					executor.scheduleWithFixedDelay(
-							task.getRunnable(), task.getDelay(), task.getPeriod(), task.getTimeUnit());
+					executor.scheduleWithFixedDelay(runnable, task.getDelay(), task.getPeriod(), task.getTimeUnit());
 				}
 			}
+		}
+	}
+
+	/**
+	 * Determine the actual Runnable to schedule for the given task.
+	 * <p>Wraps the task's Runnable in a
+	 * {@link org.springframework.scheduling.support.DelegatingExceptionProofRunnable}
+	 * if necessary, according to the
+	 * {@link #setContinueScheduledExecutionAfterException "continueScheduledExecutionAfterException"}
+	 * flag.
+	 * @param task the ScheduledExecutorTask to schedule
+	 * @return the actual Runnable to schedule (may be a decorator)
+	 */
+	protected Runnable getRunnableToSchedule(ScheduledExecutorTask task) {
+		if (this.continueScheduledExecutionAfterException) {
+			return new DelegatingExceptionProofRunnable(task.getRunnable());
+		}
+		else {
+			return task.getRunnable();
 		}
 	}
 
