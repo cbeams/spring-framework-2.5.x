@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,27 +30,24 @@ import org.springframework.util.ClassUtils;
  * Adapter that implements the Runnable interface as a configurable
  * method invocation based on Spring's MethodInvoker.
  *
- * <p>Derives from ArgumentConvertingMethodInvoker, inheriting common
- * configuration properties from MethodInvoker.
+ * <p>Inherits common configuration properties from
+ * {@link org.springframework.util.MethodInvoker}.
  *
- * <p>Useful to generically encapsulate a method invocation as timer task for
- * <code>java.util.Timer</code>, in combination with a DelegatingTimerTask adapter.
+ * <p>Useful to generically encapsulate a method invocation as timer task
+ * for <code>java.util.Timer</code>, in combination with a
+ * {@link org.springframework.scheduling.timer.DelegatingTimerTask} adapter.
  * Can also be used with JDK 1.5's <code>java.util.concurrent.Executor</code>
  * abstraction, which works with plain Runnables.
  *
- * <p>Extended by Spring's MethodInvokingTimerTaskFactoryBean adapter
- * for <code>java.util.TimerTask</code>. Note that you can populate a
+ * <p>Extended by Spring's
+ * {@link org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean}
+ * adapter for <code>java.util.TimerTask</code>. Note that you can populate a
  * ScheduledTimerTask object with a plain MethodInvokingRunnable instance
  * as well, which will automatically get wrapped with a DelegatingTimerTask.
  *
  * @author Juergen Hoeller
  * @since 1.2.4
- * @see org.springframework.util.MethodInvoker
- * @see org.springframework.beans.support.ArgumentConvertingMethodInvoker
- * @see org.springframework.scheduling.timer.DelegatingTimerTask
- * @see org.springframework.scheduling.timer.ScheduledTimerTask#setRunnable
- * @see org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean
- * @see java.util.Timer
+ * @see org.springframework.scheduling.timer.ScheduledTimerTask#setRunnable(Runnable)
  * @see java.util.concurrent.Executor#execute(Runnable)
  */
 public class MethodInvokingRunnable extends ArgumentConvertingMethodInvoker
@@ -79,18 +76,22 @@ public class MethodInvokingRunnable extends ArgumentConvertingMethodInvoker
 			invoke();
 		}
 		catch (InvocationTargetException ex) {
-			logger.error(getInvocationFailureMessage(), ex);
-			// Do not throw exception, else the main loop of the Timer will stop!
+			logger.warn(getInvocationFailureMessage(), ex);
+			// Do not throw exception, else the main loop of the scheduler might stop!
 		}
 		catch (Throwable ex) {
-			logger.error(getInvocationFailureMessage(), ex);
-			// Do not throw exception, else the main loop of the Timer will stop!
+			logger.warn(getInvocationFailureMessage(), ex);
+			// Do not throw exception, else the main loop of the scheduler might stop!
 		}
 	}
 
+	/**
+	 * Build a message for an invocation failure exception.
+	 * @return the error message, including the target method name etc
+	 */
 	protected String getInvocationFailureMessage() {
-		return  "Invocation of method '" + getTargetMethod() +
-				"' on target object [" + getTargetObject() + "] failed";
+		return "Invocation of method '" + getTargetMethod() +
+				"' on target class [" + getTargetClass() + "] failed";
 	}
 
 }
