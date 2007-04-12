@@ -371,7 +371,9 @@ public interface JdbcOperations {
 	 * ResultSetExtractor.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
 	 * @param rse object that will extract results
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if the query fails
@@ -427,7 +429,9 @@ public interface JdbcOperations {
 	 * with a RowCallbackHandler.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
 	 * @param rch object that will extract results, one row at a time
 	 * @throws DataAccessException if the query fails
 	 */
@@ -484,7 +488,9 @@ public interface JdbcOperations {
 	 * via a RowMapper.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
 	 * @param rowMapper object that will map one object per row
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
@@ -515,7 +521,9 @@ public interface JdbcOperations {
 	 * Java object via a RowMapper.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
 	 * @param rowMapper object that will map one object per row
 	 * @return the single mapped object
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
@@ -552,7 +560,9 @@ public interface JdbcOperations {
 	 * result will be directly mapped to the corresponding object type.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
 	 * @param requiredType the type that the result object is expected to match
 	 * @return the result object of the required type, or <code>null</code> in case of SQL NULL
 	 * @throws IncorrectResultSizeDataAccessException if the query does not return
@@ -592,7 +602,9 @@ public interface JdbcOperations {
 	 * mapped to a Map (one entry for each column, using the column name as the key).
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
 	 * @return the result Map (one entry for each column, using the
 	 * column name as the key)
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
@@ -628,7 +640,9 @@ public interface JdbcOperations {
 	 * results in a long value.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
 	 * @return the long value, or 0 in case of SQL NULL
 	 * @throws IncorrectResultSizeDataAccessException if the query does not return
 	 * exactly one row, or does not return exactly one column in that row
@@ -662,7 +676,9 @@ public interface JdbcOperations {
 	 * results in an int value.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
 	 * @return the int value, or 0 in case of SQL NULL
 	 * @throws IncorrectResultSizeDataAccessException if the query does not return
 	 * exactly one row, or does not return exactly one column in that row
@@ -678,7 +694,6 @@ public interface JdbcOperations {
 	 * result objects, each of them matching the specified element type.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param argTypes SQL types of the arguments
 	 * (constants from <code>java.sql.Types</code>)
 	 * @param elementType the required type of element in the result list
@@ -698,7 +713,9 @@ public interface JdbcOperations {
 	 * result objects, each of them matching the specified element type.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
 	 * @param elementType the required type of element in the result list
 	 * (for example, <code>Integer.class</code>)
 	 * @return a List of objects that match the specified element type
@@ -717,7 +734,6 @@ public interface JdbcOperations {
 	 * queryForMap() methods.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param argTypes SQL types of the arguments
 	 * (constants from <code>java.sql.Types</code>)
 	 * @return a List that contains a Map per row
@@ -736,7 +752,9 @@ public interface JdbcOperations {
 	 * queryForMap() methods.
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
 	 * @return a List that contains a Map per row
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForList(String)
@@ -777,7 +795,9 @@ public interface JdbcOperations {
 	 * Sun's JDBC RowSet Implementations download (rowset.jar).
 	 * @param sql SQL query to execute
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
 	 * @return a SqlRowSet representation (possibly a wrapper around a
 	 * <code>javax.sql.rowset.CachedRowSet</code>)
 	 * @throws DataAccessException if there is any problem executing the query
@@ -843,7 +863,9 @@ public interface JdbcOperations {
 	 * Issue an update via a prepared statement, binding the given arguments.
 	 * @param sql SQL containing bind parameters
 	 * @param args arguments to bind to the query
-	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type);
+	 * may also contain {@link SqlParameterValue} objects which indicate not
+	 * only the argument value but also the SQL type and optionally the scale
 	 * @return the number of rows affected
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */

@@ -66,15 +66,32 @@ public abstract class StatementCreatorUtils {
 	 * of the parameter and we can handle complex types like arrays and LOBs.
 	 * @param ps the prepared statement or callable statement
 	 * @param paramIndex index of the parameter we are setting
-	 * @param declaredParam the parameter as it is declared including type
+	 * @param param the parameter as it is declared including type
 	 * @param inValue the value to set
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 */
 	public static void setParameterValue(
-	    PreparedStatement ps, int paramIndex, SqlParameter declaredParam, Object inValue)
+	    PreparedStatement ps, int paramIndex, SqlParameter param, Object inValue)
 	    throws SQLException {
 
-		setParameterValue(ps, paramIndex, declaredParam.getSqlType(), declaredParam.getTypeName(), inValue);
+		setParameterValueInternal(ps, paramIndex, param.getSqlType(), param.getTypeName(), param.getScale(), inValue);
+	}
+
+	/**
+	 * Set the value for a parameter. The method used is based on the SQL type
+	 * of the parameter and we can handle complex types like arrays and LOBs.
+	 * @param ps the prepared statement or callable statement
+	 * @param paramIndex index of the parameter we are setting
+	 * @param sqlType the SQL type of the parameter
+	 * @param inValue the value to set (plain value or a SqlTypeValue)
+	 * @throws SQLException if thrown by PreparedStatement methods
+	 * @see SqlTypeValue
+	 */
+	public static void setParameterValue(
+	    PreparedStatement ps, int paramIndex, int sqlType, Object inValue)
+	    throws SQLException {
+
+		setParameterValueInternal(ps, paramIndex, sqlType, null, null, inValue);
 	}
 
 	/**
@@ -91,6 +108,27 @@ public abstract class StatementCreatorUtils {
 	 */
 	public static void setParameterValue(
 	    PreparedStatement ps, int paramIndex, int sqlType, String typeName, Object inValue)
+	    throws SQLException {
+
+		setParameterValueInternal(ps, paramIndex, sqlType, typeName, null, inValue);
+	}
+
+	/**
+	 * Set the value for a parameter. The method used is based on the SQL type
+	 * of the parameter and we can handle complex types like arrays and LOBs.
+	 * @param ps the prepared statement or callable statement
+	 * @param paramIndex index of the parameter we are setting
+	 * @param sqlType the SQL type of the parameter
+	 * @param typeName the type name of the parameter
+	 * (optional, only used for SQL NULL and SqlTypeValue)
+	 * @param scale the number of digits after the decimal point
+	 * (for DECIMAL and NUMERIC types)
+	 * @param inValue the value to set (plain value or a SqlTypeValue)
+	 * @throws SQLException if thrown by PreparedStatement methods
+	 * @see SqlTypeValue
+	 */
+	private static void setParameterValueInternal(
+	    PreparedStatement ps, int paramIndex, int sqlType, String typeName, Integer scale, Object inValue)
 	    throws SQLException {
 
 		if (logger.isDebugEnabled()) {
@@ -134,6 +172,9 @@ public abstract class StatementCreatorUtils {
 			else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
 				if (inValue instanceof BigDecimal) {
 					ps.setBigDecimal(paramIndex, (BigDecimal) inValue);
+				}
+				else if (scale != null) {
+					ps.setObject(paramIndex, inValue, sqlType, scale.intValue());
 				}
 				else {
 					ps.setObject(paramIndex, inValue, sqlType);

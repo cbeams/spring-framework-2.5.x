@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,10 @@ class ArgPreparedStatementSetter implements PreparedStatementSetter, ParameterDi
 	private final Object[] args;
 
 
+	/**
+	 * Create a new ArgPreparedStatementSetter for the given arguments.
+	 * @param args the arguments to set
+	 */
 	public ArgPreparedStatementSetter(Object[] args) {
 		this.args = args;
 	}
@@ -38,7 +42,14 @@ class ArgPreparedStatementSetter implements PreparedStatementSetter, ParameterDi
 	public void setValues(PreparedStatement ps) throws SQLException {
 		if (this.args != null) {
 			for (int i = 0; i < this.args.length; i++) {
-				StatementCreatorUtils.setParameterValue(ps, i + 1, SqlTypeValue.TYPE_UNKNOWN, null, this.args[i]);
+				Object arg = this.args[i];
+				if (arg instanceof SqlParameterValue) {
+					SqlParameterValue paramValue = (SqlParameterValue) arg;
+					StatementCreatorUtils.setParameterValue(ps, i + 1, paramValue, paramValue.getValue());
+				}
+				else {
+					StatementCreatorUtils.setParameterValue(ps, i + 1, SqlTypeValue.TYPE_UNKNOWN, this.args[i]);
+				}
 			}
 		}
 	}

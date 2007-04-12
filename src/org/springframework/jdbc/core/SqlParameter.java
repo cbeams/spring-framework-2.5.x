@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,34 +27,51 @@ import java.util.List;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @see java.sql.Types
  */
 public class SqlParameter {
 
-	private final String name;
-	
+	/** The name of the parameter, if any */
+	private String name;
+
 	/** SQL type constant from <code>java.sql.Types</code> */
 	private final int sqlType;
 
 	/** Used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, named array types */
-	private final String typeName;
+	private String typeName;
+
+	/** The scale to apply in case of a NUMERIC or DECIMAL type, if any */
+	private Integer scale;
 
 
 	/**
-	 * Create a new anonymous SqlParameter, supplying SQL type.
+	 * Create a new anonymous SqlParameter, supplying the SQL type.
 	 * @param sqlType SQL type of the parameter according to <code>java.sql.Types</code>
 	 */
 	public SqlParameter(int sqlType) {
-		this(null, sqlType, null);
+		this.sqlType = sqlType;
 	}
 
 	/**
-	 * Create a new anonymous SqlParameter, supplying SQL type.
+	 * Create a new anonymous SqlParameter, supplying the SQL type.
 	 * @param sqlType SQL type of the parameter according to <code>java.sql.Types</code>
 	 * @param typeName the type name of the parameter (optional)
 	 */
 	public SqlParameter(int sqlType, String typeName) {
-		this(null, sqlType, typeName);
+		this.sqlType = sqlType;
+		this.typeName = typeName;
+	}
+
+	/**
+	 * Create a new anonymous SqlParameter, supplying the SQL type.
+	 * @param sqlType SQL type of the parameter according to <code>java.sql.Types</code>
+	 * @param scale the number of digits after the decimal point
+	 * (for DECIMAL and NUMERIC types)
+	 */
+	public SqlParameter(int sqlType, int scale) {
+		this.sqlType = sqlType;
+		this.scale = new Integer(scale);
 	}
 
 	/**
@@ -63,9 +80,10 @@ public class SqlParameter {
 	 * @param sqlType SQL type of the parameter according to <code>java.sql.Types</code>
 	 */
 	public SqlParameter(String name, int sqlType) {
-		this(name, sqlType, (String) null);
+		this.name = name;
+		this.sqlType = sqlType;
 	}
-	
+
 	/**
 	 * Create a new SqlParameter, supplying name and SQL type.
 	 * @param name name of the parameter, as used in input and output maps
@@ -76,6 +94,19 @@ public class SqlParameter {
 		this.name = name;
 		this.sqlType = sqlType;
 		this.typeName = typeName;
+	}
+
+	/**
+	 * Create a new SqlParameter, supplying name and SQL type.
+	 * @param name name of the parameter, as used in input and output maps
+	 * @param sqlType SQL type of the parameter according to <code>java.sql.Types</code>
+	 * @param scale the number of digits after the decimal point
+	 * (for DECIMAL and NUMERIC types)
+	 */
+	public SqlParameter(String name, int sqlType, int scale) {
+		this.name = name;
+		this.sqlType = sqlType;
+		this.scale = new Integer(scale);
 	}
 
 
@@ -98,6 +129,13 @@ public class SqlParameter {
 	 */
 	public String getTypeName() {
 		return this.typeName;
+	}
+
+	/**
+	 * Return the scale of the parameter, if any.
+	 */
+	public Integer getScale() {
+		return this.scale;
 	}
 
 

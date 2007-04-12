@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,6 +53,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractorAdapter;
  *
  * @author Rod Johnson
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
 public class JdbcTemplateTests extends AbstractJdbcTests {
 
@@ -483,17 +485,44 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		mockConnection.createStatement();
 		ctrlConnection.setReturnValue(mockStatement);
-
 		ctrlStatement.replay();
 		replay();
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-
 		int actualRowsAffected = template.update(sql);
-		assertTrue(
-			"Actual rows affected is correct",
-			actualRowsAffected == rowsAffected);
+		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
+		ctrlStatement.verify();
+	}
 
+	/**
+	 * Test update with dynamic SQL.
+	 */
+	public void testSqlUpdateWithArguments() throws Exception {
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ? and PR = ?";
+		int rowsAffected = 33;
+
+		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
+		mockStatement.setObject(1, new Integer(4));
+		ctrlStatement.setVoidCallable();
+		mockStatement.setObject(2, new Float(1.4142), Types.NUMERIC, 2);
+		ctrlStatement.setVoidCallable();
+		mockStatement.executeUpdate();
+		ctrlStatement.setReturnValue(33);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(sql);
+		ctrlConnection.setReturnValue(mockStatement);
+		ctrlStatement.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		int actualRowsAffected = template.update(sql,
+				new Object[] {new Integer(4), new SqlParameterValue(Types.NUMERIC, 2, new Float(1.4142))});
+		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
 		ctrlStatement.verify();
 	}
 

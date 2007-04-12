@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter, Paramet
 
 	/**
 	 * Create a new ArgTypePreparedStatementSetter for the given arguments.
-	 * @param args
-	 * @param argTypes
+	 * @param args the arguments to set
+	 * @param argTypes the corresponding SQL types of the arguments
 	 */
 	public ArgTypePreparedStatementSetter(Object[] args, int[] argTypes) {
 		if ((args != null && argTypes == null) || (args == null && argTypes != null) ||
@@ -61,11 +61,11 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter, Paramet
 					Collection entries = (Collection) arg;
 					for (Iterator it = entries.iterator(); it.hasNext();) {
 						Object entry = it.next();
-						StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], null, entry);
+						StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], entry);
 					}
 				}
 				else {
-					StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], null, arg);
+					StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], arg);
 				}
 			}
 		}

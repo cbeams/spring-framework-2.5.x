@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,6 +34,7 @@ import org.springframework.jdbc.support.KeyHolder;
 /**
  * @author Trevor Cook
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
 public class SqlUpdateTests extends AbstractJdbcTests {
 
@@ -161,7 +162,7 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 
 	public void testUpdateMixed() throws SQLException {
 		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
-		mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC);
+		mockPreparedStatement.setObject(2, new Integer(1), Types.NUMERIC, 2);
 		mockPreparedStatement.setString(3, "rod");
 		mockPreparedStatement.setObject(4, Boolean.TRUE, Types.BOOLEAN);
 		ctrlPreparedStatement.setVoidCallable();
@@ -423,7 +424,7 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 			setSql(UPDATE_OBJECTS);
 			setDataSource(mockDataSource);
 			declareParameter(new SqlParameter(Types.NUMERIC));
-			declareParameter(new SqlParameter(Types.NUMERIC));
+			declareParameter(new SqlParameter(Types.NUMERIC, 2));
 			declareParameter(new SqlParameter(Types.VARCHAR));
 			declareParameter(new SqlParameter(Types.BOOLEAN));
 			compile();
