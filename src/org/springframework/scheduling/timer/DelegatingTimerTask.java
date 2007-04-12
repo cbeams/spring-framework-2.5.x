@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,24 @@ package org.springframework.scheduling.timer;
 
 import java.util.TimerTask;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 
 /**
- * Simple TimerTask adapter that delegates to a given Runnable.
+ * Simple {@link java.util.TimerTask} adapter that delegates to a
+ * given {@link java.lang.Runnable}.
  *
  * <p>This is often preferable to deriving from TimerTask, to be able to
  * implement an interface rather than extend an abstract base class.
  *
  * @author Juergen Hoeller
  * @since 1.2.4
- * @see java.util.TimerTask
- * @see java.lang.Runnable
  */
 public class DelegatingTimerTask extends TimerTask {
+
+	private static final Log logger = LogFactory.getLog(DelegatingTimerTask.class);
 
 	private final Runnable delegate;
 
@@ -49,15 +53,22 @@ public class DelegatingTimerTask extends TimerTask {
 	 * Return the wrapped Runnable implementation.
 	 */
 	public final Runnable getDelegate() {
-		return delegate;
+		return this.delegate;
 	}
 
 
 	/**
-	 * Delegates execution to the underlying Runnable.
+	 * Delegates execution to the underlying Runnable, catching any exception
+	 * or error thrown in order to continue scheduled execution.
 	 */
 	public void run() {
-		this.delegate.run();
+		try {
+			this.delegate.run();
+		}
+		catch (Throwable ex) {
+			logger.error("Unexpected exception thrown from Runnable", ex);
+			// Do not throw the exception, else the main loop of the Timer might stop!
+		}
 	}
 
 }
