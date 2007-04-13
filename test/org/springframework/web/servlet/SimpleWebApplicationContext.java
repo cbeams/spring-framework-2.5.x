@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValue;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
@@ -39,6 +38,9 @@ import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.mvc.throwaway.ThrowawayController;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.servlet.view.XmlViewResolver;
+import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 
 /**
  * @author Juergen Hoeller
@@ -48,8 +50,8 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 	public void refresh() throws BeansException {
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("commandClass", "org.springframework.beans.TestBean"));
-		pvs.addPropertyValue(new PropertyValue("formView", "form"));
+		pvs.addPropertyValue("commandClass", "org.springframework.beans.TestBean");
+		pvs.addPropertyValue("formView", "form");
 		registerSingleton("/form.do", SimpleFormController.class, pvs);
 
 		registerSingleton("/locale.do", LocaleChecker.class);
@@ -62,6 +64,13 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		addMessage("testArgsFormat", Locale.ENGLISH, "test {0} message {1,number,#.##} X");
 
 		registerSingleton(UiApplicationContextUtils.THEME_SOURCE_BEAN_NAME, DummyThemeSource.class);
+
+		registerSingleton("handlerMapping", BeanNameUrlHandlerMapping.class);
+		registerSingleton("viewResolver", InternalResourceViewResolver.class);
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("location", "org/springframework/web/context/WEB-INF/sessionContext.xml");
+		registerSingleton("viewResolver2", XmlViewResolver.class, pvs);
 
 		super.refresh();
 	}

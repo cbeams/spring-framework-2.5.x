@@ -3,24 +3,14 @@
 
 <beans>
 
-	<bean id="rodProto" class="org.springframework.beans.TestBean" scope="prototype">
-		<property name="name">
-			<value>dummy</value>
-		</property>
-		<property name="age">
-			<value>-1</value>
-		</property>
-	</bean>
-
 	<bean id="rob" class="org.springframework.beans.TestBean">
-		<property name="name">
-			<value>dummy</value>
-		</property>
-		<property name="age">
-			<value>-1</value>
-		</property>
+		<property name="name" value="dummy"/>
+		<property name="age" value="-1"/>
 	</bean>
 
-	
-	
+	<bean id="rodProto" class="org.springframework.beans.TestBean" scope="prototype">
+		<property name="name" value="dummy"/>
+		<property name="age" value="-1"/>
+	</bean>
+
 </beans>

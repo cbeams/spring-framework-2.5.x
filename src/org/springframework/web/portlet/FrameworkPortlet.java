@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.SourceFilteringListener;
 import org.springframework.util.StringUtils;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.PortletApplicationContextUtils;
@@ -345,7 +346,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 			pac.setConfigLocations(StringUtils.tokenizeToStringArray(getContextConfigLocation(),
 					ConfigurablePortletApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
-		pac.addApplicationListener(this);
+		pac.addApplicationListener(new SourceFilteringListener(pac, this));
 		pac.refresh();
 		return pac;
 	}
