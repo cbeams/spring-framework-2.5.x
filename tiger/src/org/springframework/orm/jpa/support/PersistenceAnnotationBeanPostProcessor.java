@@ -436,10 +436,10 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 		String[] candidateNames =
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, EntityManagerFactory.class);
 		for (String candidateName : candidateNames) {
-			if (this.beanFactory.isTypeMatch(candidateName, EntityManagerFactoryInfo.class)) {
-				EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) this.beanFactory.getBean(candidateName);
-				if (unitName.equals(emfi.getPersistenceUnitName())) {
-					return (EntityManagerFactory) emfi;
+			EntityManagerFactory emf = (EntityManagerFactory) this.beanFactory.getBean(candidateName);
+			if (emf instanceof EntityManagerFactoryInfo) {
+				if (unitName.equals(((EntityManagerFactoryInfo) emf).getPersistenceUnitName())) {
+					return emf;
 				}
 			}
 		}
