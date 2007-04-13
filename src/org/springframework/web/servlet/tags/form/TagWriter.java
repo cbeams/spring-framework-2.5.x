@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.StringUtils;
-import org.springframework.util.Assert;
-
-import javax.servlet.jsp.JspException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Stack;
+
+import javax.servlet.jsp.JspException;
+
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Utility class for writing HTML content to a {@link Writer} instance.
@@ -30,6 +31,7 @@ import java.util.Stack;
  * <p>Intended to support output from JSP tag libraries.
  * 
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class TagWriter {
@@ -39,7 +41,6 @@ public class TagWriter {
 	 */
 	private final SafeWriter writer;
 
-
 	/**
 	 * Stores {@link TagStateEntry tag state}. Stack model naturally supports tag nesting.
 	 */
@@ -47,19 +48,19 @@ public class TagWriter {
 
 
 	/**
-	 * Creates a new instance of the {@link TagWriter} class that writes to
+	 * Create a new instance of the {@link TagWriter} class that writes to
 	 * the supplied {@link Writer}.
 	 * @param writer the {@link Writer} to write tag content to
 	 * @throws IllegalArgumentException oif the supplied {@link Writer} is <code>null</code> 
 	 */
 	public TagWriter(Writer writer) {
-		Assert.notNull(writer);
+		Assert.notNull(writer, "Writer must not be null");
 		this.writer = new SafeWriter(writer);
 	}
 
 
 	/**
-	 * Starts a new tag with the supplied name. Leaves the tag open so
+	 * Start a new tag with the supplied name. Leaves the tag open so
 	 * that attributes, inner text or nested tags can be written into it.
 	 * @see #endTag()
 	 */
@@ -72,7 +73,7 @@ public class TagWriter {
 	}
 
 	/**
-	 * Writes an HTML attribute with the specified name and value.
+	 * Write an HTML attribute with the specified name and value.
 	 * <p>Be sure to write all attributes <strong>before</strong> writing
 	 * any inner text or nested tags.
 	 * @throws IllegalStateException if the opening tag is closed
@@ -86,7 +87,7 @@ public class TagWriter {
 	}
 
 	/**
-	 * Writes an HTML attribute if the supplied value is not <code>null</code>
+	 * Write an HTML attribute if the supplied value is not <code>null</code>
 	 * or zero length.
 	 * @see #writeAttribute(String, String)
 	 */
@@ -97,7 +98,7 @@ public class TagWriter {
 	}
 
 	/**
-	 * Closes the current opening tag (if necessary) and appends the
+	 * Close the current opening tag (if necessary) and appends the
 	 * supplied value as inner text.
 	 * @throws IllegalStateException if no tag is open
 	 */
@@ -111,7 +112,7 @@ public class TagWriter {
 
 
 	/**
-	 * Indicates that the currently open tag should be closed and marked
+	 * Indicate that the currently open tag should be closed and marked
 	 * as a block level element.
 	 * <p>Useful when you plan to write additional content in the body
 	 * outside the context of the current {@link TagWriter}.
@@ -124,20 +125,38 @@ public class TagWriter {
 	}
 
 	/**
-	 * Closes the current tag.
+	 * Close the current tag.
 	 * <p>Correctly writes an empty tag if no inner text or nested tags
 	 * have been written.
 	 */
 	public void endTag() throws JspException {
+		endTag(false);
+	}
+
+	/**
+	 * Close the current tag, allowing to enforce a full closing tag.
+	 * <p>Correctly writes an empty tag if no inner text or nested tags
+	 * have been written.
+	 * @param enforceClosingTag whether a full closing tag should be
+	 * rendered in any case, even in case of a non-block tag
+	 */
+	public void endTag(boolean enforceClosingTag) throws JspException {
 		if (!inTag()) {
 			throw new IllegalStateException("Cannot write end of tag. No open tag available.");
 		}
-		if (currentState().isBlockTag()) {
-			// writing the end of the block - the opening tag was closed earlier.
-			this.writer.append("</").append(currentState().getTagName()).append(">");
+		boolean renderClosingTag = true;
+		if (!currentState().isBlockTag()) {
+			// Opening tag still needs to be closed...
+			if (enforceClosingTag) {
+				this.writer.append(">");
+			}
+			else {
+				this.writer.append("/>");
+				renderClosingTag = false;
+			}
 		}
-		else {
-			this.writer.append("/>");
+		if (renderClosingTag) {
+			this.writer.append("</").append(currentState().getTagName()).append(">");
 		}
 		this.tagState.pop();
 	}
@@ -178,25 +197,21 @@ public class TagWriter {
 
 		private boolean blockTag;
 
-
 		public TagStateEntry(String tagName) {
 			this.tagName = tagName;
 		}
 
-
 		public String getTagName() {
-			return tagName;
+			return this.tagName;
 		}
-
-		public boolean isBlockTag() {
-			return blockTag;
-		}
-
 
 		public void markAsBlockTag() {
 			this.blockTag = true;
 		}
 
+		public boolean isBlockTag() {
+			return this.blockTag;
+		}
 	}
 
 
@@ -208,12 +223,10 @@ public class TagWriter {
 
 		private final Writer writer;
 
-		
 		public SafeWriter(Writer writer) {
 			this.writer = writer;
 		}
 
-		
 		public SafeWriter append(String value) throws JspException {
 			try {
 				this.writer.write(String.valueOf(value));
@@ -223,7 +236,6 @@ public class TagWriter {
 				throw new JspException("Unable to write to JspWriter", ex);
 			}
 		}
-		
 	}
 
 }

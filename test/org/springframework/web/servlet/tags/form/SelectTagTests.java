@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import java.beans.PropertyEditor;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,19 @@ public final class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
+
+	public void testEmpty() throws Exception {
+		this.tag.setPath("country");
+		this.tag.setItems(Collections.EMPTY_LIST);
+
+		this.tag.setItemValue("isoCode");
+		this.tag.setItemLabel("name");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertEquals("<select id=\"country\" name=\"country\"></select>", output);
+	}
 
 	public void testWithList() throws Exception {
 		this.tag.setPath("country");
@@ -179,7 +193,6 @@ public final class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	public void testWithFloatCustom() throws Exception {
-
 		PropertyEditor propertyEditor = new SimpleFloatEditor();
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(getTestBean(), COMMAND_NAME);
 		errors.getPropertyAccessor().registerCustomEditor(Float.class, propertyEditor);
@@ -187,10 +200,10 @@ public final class SelectTagTests extends AbstractFormTagTests {
 
 		this.tag.setPath("myFloat");
 
-		Float[] array = new Float[]{
-						new Float("12.30"), new Float("12.32"), new Float("12.34"), new Float("12.36"),
-						new Float("12.38"), new Float("12.40"), new Float("12.42"), new Float("12.44"),
-						new Float("12.46"), new Float("12.48")
+		Float[] array = new Float[] {
+				new Float("12.30"), new Float("12.32"), new Float("12.34"), new Float("12.36"),
+				new Float("12.38"), new Float("12.40"), new Float("12.42"), new Float("12.44"),
+				new Float("12.46"), new Float("12.48")
 		};
 
 		this.tag.setItems(array);
@@ -285,7 +298,6 @@ public final class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	public void testMultiWithEmptyCollection() throws Exception {
-
 		this.bean.setSomeList(new ArrayList());
 
 		this.tag.setPath("someList");

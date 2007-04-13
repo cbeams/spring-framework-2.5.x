@@ -203,16 +203,14 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 		Object items = getItems();
 		if (items != null) {
 			Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
-
-			String valueProperty = (getItemValue() == null ? null :
-							ObjectUtils.getDisplayString(evaluate("itemValue", getItemValue())));
-			String labelProperty = (getItemLabel() == null ? null :
-							ObjectUtils.getDisplayString(evaluate("itemLabel", getItemLabel())));
-
-			OptionWriter optionWriter = new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
+			String valueProperty = (getItemValue() != null ?
+					ObjectUtils.getDisplayString(evaluate("itemValue", getItemValue())) : null);
+			String labelProperty = (getItemLabel() != null ?
+					ObjectUtils.getDisplayString(evaluate("itemLabel", getItemLabel())) : null);
+			OptionWriter optionWriter =
+					new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
 			optionWriter.writeOptions(tagWriter);
-
-			tagWriter.endTag();
+			tagWriter.endTag(true);
 			writeHiddenTagIfNecessary(tagWriter);
 			return EVAL_PAGE;
 		}
