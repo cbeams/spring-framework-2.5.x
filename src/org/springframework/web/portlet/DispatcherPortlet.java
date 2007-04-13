@@ -379,6 +379,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * for this namespace, we default to PortletModeHandlerMapping.
 	 */
 	private void initHandlerMappings(ApplicationContext context) {
+		this.handlerMappings = null;
+
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext,
 			// including ancestor contexts.
@@ -416,6 +418,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * for this namespace, we default to SimpleControllerHandlerAdapter.
 	 */
 	private void initHandlerAdapters(ApplicationContext context) {
+		this.handlerAdapters = null;
+
 		if (this.detectAllHandlerAdapters) {
 			// Find all HandlerAdapters in the ApplicationContext,
 			// including ancestor contexts.
@@ -453,14 +457,18 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * for this namespace, we default to no exception resolver.
 	 */
 	private void initHandlerExceptionResolvers(ApplicationContext context) {
+		this.handlerExceptionResolvers = null;
+
 		if (this.detectAllHandlerExceptionResolvers) {
 			// Find all HandlerExceptionResolvers in the ApplicationContext,
 			// including ancestor contexts.
 			Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					context, HandlerExceptionResolver.class, true, false);
-			this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
-			// We keep HandlerExceptionResolvers in sorted order.
-			Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
+			if (!matchingBeans.isEmpty()) {
+				this.handlerExceptionResolvers = new ArrayList(matchingBeans.values());
+				// We keep HandlerExceptionResolvers in sorted order.
+				Collections.sort(this.handlerExceptionResolvers, new OrderComparator());
+			}
 		}
 		else {
 			try {
@@ -470,7 +478,15 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				// Ignore, no HandlerExceptionResolver is fine too.
-				this.handlerExceptionResolvers = getDefaultStrategies(context, HandlerExceptionResolver.class);
+			}
+		}
+
+		// Just for consistency, check for default HandlerExceptionResolvers...
+		// There aren't any in usual scenarios.
+		if (this.handlerExceptionResolvers == null) {
+			this.handlerExceptionResolvers = getDefaultStrategies(context, HandlerExceptionResolver.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("No HandlerExceptionResolvers found in portlet '" + getPortletName() + "': using default");
 			}
 		}
 	}
@@ -481,6 +497,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * for this namespace, we default to InternalResourceViewResolver.
 	 */
 	private void initViewResolvers(ApplicationContext context) {
+		this.viewResolvers = null;
+
 		if (this.detectAllViewResolvers) {
 			// Find all ViewResolvers in the ApplicationContext,
 			// including ancestor contexts.
