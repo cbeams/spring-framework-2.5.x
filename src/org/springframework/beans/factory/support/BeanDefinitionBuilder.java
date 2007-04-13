@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class BeanDefinitionBuilder  {
 
 	/**
 	 * Create a new <code>BeanDefinitionBuilder</code> used to construct a {@link RootBeanDefinition}.
-	 * @param beanClass the <code>Class</code> of the bean the definition is being created for.
+	 * @param beanClass the <code>Class</code> of the bean that the definition is being created for
 	 */
 	public static BeanDefinitionBuilder rootBeanDefinition(Class beanClass) {
 		return rootBeanDefinition(beanClass, null);
@@ -43,20 +43,41 @@ public class BeanDefinitionBuilder  {
 
 	/**
 	 * Create a new <code>BeanDefinitionBuilder</code> used to construct a {@link RootBeanDefinition}.
-	 * @param beanClass the <code>Class</code> of the bean the definition is being created for.
-	 * @param factoryMethod the name of the method to use to construct the bean instance.
+	 * @param beanClass the <code>Class</code> of the bean that the definition is being created for
+	 * @param factoryMethodName the name of the method to use to construct the bean instance
 	 */
-	public static BeanDefinitionBuilder rootBeanDefinition(Class beanClass, String factoryMethod) {
+	public static BeanDefinitionBuilder rootBeanDefinition(Class beanClass, String factoryMethodName) {
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
 		builder.beanDefinition = new RootBeanDefinition();
 		builder.beanDefinition.setBeanClass(beanClass);
-		builder.beanDefinition.setFactoryMethodName(factoryMethod);
+		builder.beanDefinition.setFactoryMethodName(factoryMethodName);
+		return builder;
+	}
+
+	/**
+	 * Create a new <code>BeanDefinitionBuilder</code> used to construct a {@link RootBeanDefinition}.
+	 * @param beanClassName the class name for the bean that the definition is being created for
+	 */
+	public static BeanDefinitionBuilder rootBeanDefinition(String beanClassName) {
+		return rootBeanDefinition(beanClassName, null);
+	}
+
+	/**
+	 * Create a new <code>BeanDefinitionBuilder</code> used to construct a {@link RootBeanDefinition}.
+	 * @param beanClassName the class name for the bean that the definition is being created for
+	 * @param factoryMethodName the name of the method to use to construct the bean instance
+	 */
+	public static BeanDefinitionBuilder rootBeanDefinition(String beanClassName, String factoryMethodName) {
+		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
+		builder.beanDefinition = new RootBeanDefinition();
+		builder.beanDefinition.setBeanClassName(beanClassName);
+		builder.beanDefinition.setFactoryMethodName(factoryMethodName);
 		return builder;
 	}
 
 	/**
 	 * Create a new <code>BeanDefinitionBuilder</code> used to construct a {@link ChildBeanDefinition}.
-	 * @param parentBeanName the name of the parent bean.
+	 * @param parentBeanName the name of the parent bean
 	 */
 	public static BeanDefinitionBuilder childBeanDefinition(String parentBeanName) {
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
