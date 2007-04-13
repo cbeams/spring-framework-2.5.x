@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import org.springframework.validation.DataBinder;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Special DataBinder to perform data binding from web request parameters
- * to JavaBeans. Designed for web environments, but not dependent on the
- * Servlet API; serves as base class for more specific DataBinder variants,
- * such as ServletRequestDataBinder.
+ * Special {@link DataBinder} for data binding from web request parameters
+ * to JavaBean objects. Designed for web environments, but not dependent on
+ * the Servlet API; serves as base class for more specific DataBinder variants,
+ * such as {@link org.springframework.web.bind.ServletRequestDataBinder}.
  *
  * <p>Includes support for field markers which address a common problem with
  * HTML checkboxes and select options: detecting that a field was part of
@@ -114,7 +114,7 @@ public class WebDataBinder extends DataBinder {
 	 * Return the prefix for parameters that mark potentially empty fields.
 	 */
 	public String getFieldMarkerPrefix() {
-		return fieldMarkerPrefix;
+		return this.fieldMarkerPrefix;
 	}
 
 	/**
@@ -133,7 +133,7 @@ public class WebDataBinder extends DataBinder {
 	 * Return whether to bind empty MultipartFile parameters.
 	 */
 	public boolean isBindEmptyMultipartFiles() {
-		return bindEmptyMultipartFiles;
+		return this.bindEmptyMultipartFiles;
 	}
 
 
