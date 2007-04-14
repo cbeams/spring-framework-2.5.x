@@ -201,11 +201,14 @@ private static final class ActorMapper implements RowMapper {
 					<programlisting><![CDATA[this.jdbcTemplate.update("delete from orders");]]><lineannotation> // :)</lineannotation></programlisting>
 				</section>
 				<section id="jdbc-JdbcTemplate-examples-other">
-					<title>Other operations (DDL)</title>
+					<title>Other operations</title>
 					<para>The <methodname>execute(..)</methodname> method can be used to execute any
 					arbitrary SQL, and as such is often used for DDL statements. It is heavily overloaded
 					with variants taking callback interfaces, bind variable arrays, and suchlike.</para>
 					<programlisting><![CDATA[this.jdbcTemplate.execute("create table mytable (id integer, name varchar(100))");]]></programlisting>
+					<para>Invoking a simple stored procedure (more sophisticated stored procedure
+					support is <link linkend="jdbc-StoredProcedure">covered later</link>).</para>
+					<programlisting><![CDATA[this.jdbcTemplate.update("call SUPPORT.REFRESH_ACTORS_SUMMARY(?)", new Object[]{new Long(unionId)});]]></programlisting>
 				</section>
 			</section>
 			<section id="jdbc-JdbcTemplate-idioms">
