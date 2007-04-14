@@ -1016,7 +1016,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             <para>The ease-of-use afforded by the use of the <interfacename>@Transactional</interfacename>
             annotation is best illustrated with an example, after which all of the details
             will be explained. Consider the following class definition:</para>
-            <programlisting><lineannotation>&lt;!-- the service class that we want to make transactional --&gt;</lineannotation><![CDATA[
+            <programlisting><lineannotation>// the service class that we want to make transactional</lineannotation><![CDATA[
 ]]><emphasis role="bold">@Transactional</emphasis><![CDATA[
 public class DefaultFooService implements FooService {
 
@@ -1147,8 +1147,8 @@ public class DefaultFooService implements FooService {
                                 beans annotated with <code>@Transactional</code>. More on the rules related
                                 to ordering of AOP advice can be found in the AOP chapter (see section
                                 <xref linkend="aop-ataspectj-advice-ordering"/>). Note that not specifying
-                                order values with <emphasis role="bold">any</emphasis> will leave the decision
-                                as to what order the advices are run in to the AOP subsystem.</para></entry>
+                                any ordering will leave the decision as to what order advice is run in to
+								the AOP subsystem.</para></entry>
                             </row>
                         </tbody>
                     </tgroup>

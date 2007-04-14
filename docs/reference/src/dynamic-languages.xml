@@ -422,15 +422,11 @@ class GroovyMessenger implements Messenger {
 					<xref linkend="dynamic-language-scenarios-validators" />  for such an example.)
 				</para>
 				<para>
-		            Also, don't forget that in the case of more complex classes than the one
-		            shown above, you may have to surround the inline source in a
-		            <literal>&lt;![CDATA[]]&gt;</literal> region (see below for an example).
-				</para>
-				<para>
-		            Below is an example of defining the source for a JRuby-based bean
+		            Find below an example of defining the source for a JRuby-based bean
 		            directly in a Spring XML configuration file using the
 		            <literal>inline:</literal> notation. (Notice the use of the <![CDATA[&lt;]]>
-		            characters to denote a <literal>'&lt;'</literal> character.)
+		            characters to denote a <literal>'&lt;'</literal> character. In such a case
+					surrounding the inline source in a <literal>&lt;![CDATA[]]&gt;</literal> region might be better.)
 				</para>
 				<programlisting><![CDATA[<lang:jruby id="messenger" script-interfaces="org.springframework.scripting.Messenger">
     <lang:inline-script>
@@ -460,15 +456,9 @@ end
 					with regard to Spring's dynamic language support. Namely, it is not (currently)
 					possible to supply constructor arguments to dynamic-language-backed beans (and hence
 					constructor-injection is not available for dynamic-language-backed beans).
-				</para>
-				<para>
 		            In the interests of making this special handling of constructors and
 		            properties 100% clear, the following mixture of code and configuration
 		            will <emphasis>not</emphasis> work.
-				</para>
-				<para>
-					Here is an implementation of the <interfacename>Messenger</interfacename>
-					interface in Groovy.
 				</para>
 				<programlisting><lineannotation>// from the file 'Messenger.groovy'</lineannotation><![CDATA[
 package org.springframework.scripting.groovy;
@@ -559,7 +549,6 @@ class GroovyMessenger implements Messenger {
 public interface Messenger {
 
     String getMessage();
-
 }]]></programlisting>
 			<programlisting><![CDATA[require 'java'
 
@@ -766,8 +755,6 @@ public class Main {
 					Spring reference manual. Consult the relevant section of the Groovy
 					reference manual, or do a search online: there are plenty of articles
 					concerning this topic.
-				</para>
-				<para>
 					Actually making use of a <interfacename>GroovyObjectCustomizer</interfacename>
 					is easy if you are using the Spring 2.0 namespace support.
 				</para>
@@ -923,7 +910,7 @@ void setMessage(String aMessage) {
 	            <filename class="directory">'samples/showcases/dynamvc/'</filename> directory
 	            of the Spring distribution.
 			</para>
-			<programlisting><lineannotation>&lt;!-- from the file '/WEB-INF/groovy/FortuneController.groovy' --&gt;</lineannotation><![CDATA[
+			<programlisting><lineannotation>// from the file '<filename>/WEB-INF/groovy/FortuneController.groovy</filename>'</lineannotation><![CDATA[
 package org.springframework.showcase.fortune.web
 
 import org.springframework.showcase.fortune.service.FortuneService
@@ -943,7 +930,6 @@ class FortuneController implements Controller {
 
         return new ModelAndView("tell", "fortune", this.fortuneService.tellFortune())
     }
-
 }]]></programlisting>
 			<programlisting><![CDATA[<lang:groovy id="fortune"
              refresh-check-delay="3000"
@@ -995,13 +981,11 @@ class TestBeanValidator implements Validator {
     }
     
     void validate(Object bean, Errors errors) {
-        def name = bean.name
-        if(name?.trim()?.size() > 0) {
+        if(bean.name?.trim()?.size() > 0) {
             return
         }
-	errors.reject("whitespace", "Cannot be composed wholly of whitespace")
+	errors.reject("whitespace", "Cannot be composed wholly of whitespace.")
     }
-}
 }]]></programlisting>
 		</section>
 	</section>

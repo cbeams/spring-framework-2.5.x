@@ -436,17 +436,13 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
                     the value of the <literal>'class'</literal> attribute on a bean definition would
                     be...</para>
                     <para><classname>com.example.Foo$Bar</classname></para>
-                    <para>Notice the use of the binary <literal>$</literal> character in the name to
+                    <para>Notice the use of the <literal>$</literal> character in the name to
                     separate the inner class name from the outer class name.</para>
                 </sidebar>
-                <para>So far as a Spring IoC container is concerned, a bean definition
-                is basically a recipe for creating one or more actual objects. The 
-                container looks at the recipe for a named bean when asked, and uses
-                the configuration metadata encapsulated by that bean definition to
-                go off and reflectively create an actual object. This section is thus
-                concerned with communicating to you, the application developer, how you
-                inform a Spring IoC container both what type (or class) of object to
-                instantiate and how to instantiate the resulting object.</para>
+                <para>A bean definition can be seen as a recipe for creating one or more
+				actual objects. The container looks at the recipe for a named bean when
+				asked, and uses the configuration metadata encapsulated by that bean
+				definition to create (or acquire) an actual object.</para>
                 <para>If you are using XML-based configuration metadata, you can specify
                 the type (or class) of object that is to be instantiated using the
                 <literal>'class'</literal> attribute of the <literal>&lt;bean/&gt;</literal>
@@ -1373,13 +1369,12 @@ support=support@somecompany.co.uk]]></programlisting>
                     <para>If you are one of the lucky few to be using Java5 (Tiger), you will be aware
                     that it is possible to have strongly typed collections. That is, it is possible to
                     declare a <interfacename>Collection</interfacename> type such that it can only
-                    contain <classname>String</classname> elements (for example).</para>
-                    <para>If you are using Spring to dependency inject a strongly-typed
+                    contain <classname>String</classname> elements (for example).
+                    If you are using Spring to dependency inject a strongly-typed
                     <interfacename>Collection</interfacename> into a bean, you can take advantage
                     of Spring's type-conversion support such that the elements of your strongly-typed
                     <interfacename>Collection</interfacename> instances will be converted to the
                     appropriate type prior to being added to the <interfacename>Collection</interfacename>.</para>
-                    <para>Consider the following example::</para>
                     <programlisting><![CDATA[public class Foo {
                 
     private Map<String, Float> accounts;
@@ -1432,11 +1427,11 @@ support=support@somecompany.co.uk]]></programlisting>
             <section id="xml-config-shortcuts">
             	<title>Shortcuts and other convenience options for XML-based configuration metadata</title>
             	<para>
-            		The configuration metadata that you saw above in some places is a little verbose. That's why there
+            		The configuration metadata shown so far is a tad verbose. That is why there
             		are several options available for you to limit the amount of XML you have to write to configure your
-            		components a little bit. The first is a shortcut to define values and references to other beans
-            		as part of a &lt;property/&gt; definition. The second is slightly different format of specifying properties
-            		all together.
+            		components. The first is a shortcut to define values and references to other beans
+            		as part of a <literal>&lt;property/&gt;</literal> definition. The second is slightly different format
+					of specifying properties alltogether.
             	</para>
             
 	            <section id="beans-value-ref-shortcuts">
@@ -1503,7 +1498,7 @@ support=support@somecompany.co.uk]]></programlisting>
 	            	<para>
 	            		One special namespace is not defined in an XSD file, and only exists in the core of Spring itself. The so-called
 	            		p-namespace doesn't need a schema definition and is an alternative way of configuring your properties differently
-	            		than the way you've seen so far. Instead of using <emphasis role="bold">nested</emphasis> <literal>property</literal>
+	            		than the way you have seen so far. Instead of using <emphasis role="bold">nested</emphasis> <literal>property</literal>
 	            		elements, using the p-namespace you can use attributes as part of the <literal>bean</literal> element that
 	            		describe your property values. The values of the attributes will be taken as the values for your properties.
 	            	</para>
@@ -1526,7 +1521,7 @@ support=support@somecompany.co.uk]]></programlisting>
 </beans>]]></programlisting></para>
 
 					<para>
-						As you can see, we're including an attribute from the p-namespace called email in the bean definition. This is telling
+						As you can see, we are including an attribute from the p-namespace called email in the bean definition. This is telling
 						Spring that it should include a property declaration. As previously mentioned, the p-namespace doesn't have a schema
 						definition, so the name of the attribute can be set to whatever name your property has.
 					</para>
@@ -1661,20 +1656,20 @@ support=support@somecompany.co.uk]]></programlisting>
             the <literal>'default-lazy-init'</literal> attribute on the <literal>&lt;beans/&gt;</literal>
             element; for example:</para>
             <programlisting><![CDATA[<beans default-lazy-init="true">
-    ]]><lineannotation>&lt;!-- no beans will be eagerly pre-instantiated... --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- no beans will be pre-instantiated... --&gt;</lineannotation><![CDATA[
 </beans>]]></programlisting>
         </section>
         <section id="beans-factory-autowire">
             <title>Autowiring collaborators</title>
-            <para>A Spring IoC container is able to <emphasis>autowire</emphasis>
+            <para>The Spring container is able to <emphasis>autowire</emphasis>
             relationships between collaborating beans. This means that it is possible to
             automatically let Spring resolve collaborators (other beans) for your
             bean by inspecting the contents of the <interfacename>BeanFactory</interfacename>.
             The autowiring functionality has five modes. Autowiring is specified
             <emphasis>per</emphasis> bean and can thus be enabled for some beans,
-            while other beans won't be autowired. Using autowiring, it is possible
+            while other beans will not be autowired. Using autowiring, it is possible
             to reduce or eliminate the need to specify properties or constructor
-            arguments, saving a significant amount of typing.
+            arguments, thus saving a significant amount of typing.
             <footnote><para>See the section entitled <xref linkend="beans-factory-collaborators" /></para></footnote>
             When using XML-based configuration metadata, the autowire mode for a bean definition
             is specified by using the <literal>autowire</literal> attribute of the

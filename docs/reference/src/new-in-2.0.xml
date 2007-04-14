@@ -282,20 +282,12 @@
     <section id="new-in-2-other-java5">
       <title>Java 5 (Tiger) support</title>
 
-      <para>If you are one of the lucky few to be developing projects using
-      Java 5 (Tiger), you will be pleased to know that Spring 2.0 now has some
-      compelling support for Tiger. Below is a set of pointers to Spring Java
-      5-only features.</para>
+      <para>Find below pointers to documentation describing some of the new
+	  Java 5 support in Spring 2.0.</para>
 
       <itemizedlist>
 		<listitem>
-			<xref linkend="transaction-declarative-aspectj"/>
-		</listitem>
-		<listitem>
-			<xref linkend="aop-atconfigurable"/>
-		</listitem>
-		<listitem>
-			<xref linkend="aop-ataspectj"/>
+			<xref linkend="transaction-declarative-annotations"/>
 		</listitem>
         <listitem>
           <xref linkend="metadata-annotations-required" />
@@ -303,6 +295,15 @@
         <listitem>
           <xref linkend="jdbc-SimpleJdbcTemplate" />
         </listitem>
+        <listitem>
+          <xref linkend="orm-jpa" />
+        </listitem>
+		<listitem>
+			<xref linkend="aop-ataspectj"/>
+		</listitem>
+		<listitem>
+			<xref linkend="aop-atconfigurable"/>
+		</listitem>
       </itemizedlist>
     </section>
   </section>
@@ -310,8 +311,7 @@
   <section id="new-in-2-migrating">
     <title>Migrating to Spring 2.0</title>
     <para>This final section details issues that may arise during any migration from Spring 1.2.x
-    to Spring 2.0.</para>
-    <para>Feel free to take this next statement with a pinch of salt, but upgrading to Spring 2.0
+    to Spring 2.0. Feel free to take this next statement with a pinch of salt, but upgrading to Spring 2.0
     from a Spring 1.2 application <emphasis>should</emphasis> simply be a matter of dropping the
     Spring 2.0 jar into the appropriate location in your application's directory structure.</para>
     
