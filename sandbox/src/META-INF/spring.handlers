@@ -1,4 +1,6 @@
 http\://www.springframework.org/schema/mvc=org.springframework.web.servlet.config.MvcNamespaceHandler
 http\://www.springframework.org/schema/orm/jpa=org.springframework.orm.jpa.config.JpaNamespaceHandler
+http\://www.springframework.org/schema/jms=org.springframework.jms.config.JmsNamespaceHandler
+
 
 
