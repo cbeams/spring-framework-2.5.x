@@ -128,6 +128,11 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 		if (this.serviceInterface == null) {
 			throw new IllegalArgumentException("Property 'serviceInterface' is required");
 		}
+		if (this.service instanceof String) {
+			throw new IllegalArgumentException("Service [" + this.service + "] is a String " +
+					"rather than an actual service reference: Have you accidentally specified " +
+					"the service bean name as value instead of as reference?");
+		}
 		if (!this.serviceInterface.isInstance(this.service)) {
 			throw new IllegalArgumentException(
 					"Service interface [" + this.serviceInterface.getName() +
