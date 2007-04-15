@@ -34,6 +34,7 @@ import org.easymock.MockControl;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.AbstractJdbcTests;
+import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 
@@ -63,8 +64,8 @@ public class SqlQueryTests extends AbstractJdbcTests {
 	private static final String SELECT_ID_FORENAME_WHERE_ID =
 		"select id, forename from custmr where id <= ?";
 
-	private static final String[] COLUMN_NAMES = new String[] { "id", "forename" };
-	private static final int[] COLUMN_TYPES = new int[] { Types.INTEGER, Types.VARCHAR };
+	private static final String[] COLUMN_NAMES = new String[] {"id", "forename"};
+	private static final int[] COLUMN_TYPES = new int[] {Types.INTEGER, Types.VARCHAR};
 
 	private MockControl ctrlPreparedStatement;
 	private PreparedStatement mockPreparedStatement;
@@ -92,6 +93,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.replay();
 		ctrlResultSet.replay();
 	}
+
 
 	public void testQueryWithoutParams() throws SQLException {
 		mockResultSet.next();
@@ -511,7 +513,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 
 		Customer cust1 = query.findCustomer(1, "rod");
 		assertTrue("Found customer", cust1 != null);
-		assertTrue("Customer id was assigned correctly", cust1.id == 1);
+		assertTrue("Customer id was assigned correctly", cust1.getId() == 1);
 
 		Customer cust2 = query.findCustomer(1, "Roger");
 		assertTrue("No customer found", cust2 == null);
@@ -1004,33 +1006,6 @@ public class SqlQueryTests extends AbstractJdbcTests {
 			List list = execute();
 			String[] results = (String[]) list.toArray(new String[list.size()]);
 			return results;
-		}
-	}
-
-
-	private static class Customer {
-
-		private int id;
-		private String forename;
-
-		public int getId() {
-			return id;
-		}
-
-		public void setId(int id) {
-			this.id = id;
-		}
-
-		public String getForename() {
-			return forename;
-		}
-
-		public void setForename(String forename) {
-			this.forename = forename;
-		}
-
-		public String toString() {
-			return "Customer: id=" + id + "; forename=" + forename;
 		}
 	}
 
