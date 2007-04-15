@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -75,6 +75,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 
 	private String defaultParentView;
 
+	private Locale[] localesToInitialize;
+
 	/* Locale -> BeanFactory */
 	private final Map localeCache = new HashMap();
 
@@ -87,7 +89,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	}
 
 	public int getOrder() {
-		return order;
+		return this.order;
 	}
 
 	/**
@@ -97,7 +99,6 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	 * a base name of "views" might map to <code>ResourceBundle</code> files
 	 * "views", "views_en_au" and "views_de".
 	 * <p>The default is "views".
-	 * @param basename the <code>ResourceBundle</code> basename
 	 * @see #setBasenames
 	 * @see java.util.ResourceBundle
 	 */
@@ -107,7 +108,6 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 
 	/**
 	 * Set multiple <code>ResourceBundle</code> basenames.
-	 * @param basenames multiple <code>ResourceBundle</code> basenames
 	 * @see #setBasename
 	 */
 	public void setBasenames(String[] basenames) {
@@ -117,7 +117,6 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	/**
 	 * Set the {@link ClassLoader} to load resource bundles with.
 	 * Default is the thread context <code>ClassLoader</code>.
-	 * @param classLoader the <code>ClassLoader</code> to load resource bundles with
 	 */
 	public void setBundleClassLoader(ClassLoader classLoader) {
 		this.bundleClassLoader = classLoader;
@@ -127,10 +126,9 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	 * Return the {@link ClassLoader} to load resource bundles with.
 	 * <p>Default is the specified bundle <code>ClassLoader</code>,
 	 * usually the thread context <code>ClassLoader</code>.
-	 * @return the <code>ClassLoader</code> to load resource bundles with
 	 */
 	protected ClassLoader getBundleClassLoader() {
-		return bundleClassLoader;
+		return this.bundleClassLoader;
 	}
 
 	/**
@@ -145,12 +143,28 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	 * default parent setting does not apply to a bean definition that
 	 * carries a class is there for backwards compatiblity reasons.
 	 * It still matches the typical use case.
-	 * @param defaultParentView the default parent view
 	 */
 	public void setDefaultParentView(String defaultParentView) {
 		this.defaultParentView = defaultParentView;
 	}
 
+	/**
+	 * Specify Locales to initialize eagerly, rather than lazily when actually accessed.
+	 * <p>Allows for pre-initialization of common Locales, eagerly checking
+	 * the view configuration for those Locales.
+	 */
+	public void setLocalesToInitialize(Locale[] localesToInitialize) {
+		this.localesToInitialize = localesToInitialize;
+	}
+
+
+	protected void initApplicationContext() throws BeansException {
+		if (this.localesToInitialize != null) {
+			for (int i = 0; i < this.localesToInitialize.length; i++) {
+				initFactory(this.localesToInitialize[i]);
+			}
+		}
+	}
 
 	protected View loadView(String viewName, Locale locale) throws Exception {
 		BeanFactory factory = initFactory(locale);
@@ -164,12 +178,14 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	}
 
 	/**
-	 * Initialize the {@link BeanFactory} from the <code>ResourceBundle</code>,
+	 * Initialize the View {@link BeanFactory} from the <code>ResourceBundle</code>,
 	 * for the given {@link Locale locale}.
 	 * <p>Synchronized because of access by parallel threads.
 	 * @param locale the target <code>Locale</code>
+	 * @return the View factory for the given Locale
+	 * @throws BeansException in case of initialization errors
 	 */
-	protected synchronized BeanFactory initFactory(Locale locale) throws Exception {
+	protected synchronized BeanFactory initFactory(Locale locale) throws BeansException {
 		// Try to find cached factory for Locale:
 		// Have we already encountered that Locale before?
 		if (isCache()) {
@@ -234,7 +250,7 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 
 
 	/**
-	 * Close the bundle bean factories on context shutdown.
+	 * Close the bundle View factories on context shutdown.
 	 */
 	public void destroy() throws BeansException {
 		for (Iterator it = this.bundleCache.values().iterator(); it.hasNext();) {

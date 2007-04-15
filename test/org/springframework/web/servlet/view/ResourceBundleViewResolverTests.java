@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class ResourceBundleViewResolverTests extends TestCase {
 	private StaticWebApplicationContext wac;
 
 
-	public ResourceBundleViewResolverTests() {
+	protected void setUp() throws Exception {
 		rb = new ResourceBundleViewResolver();
 		rb.setBasename(PROPS_FILE);
 		rb.setCache(getCache());
@@ -56,7 +56,7 @@ public class ResourceBundleViewResolverTests extends TestCase {
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();
 
-		// This will be propagated to views, so we need it
+		// This will be propagated to views, so we need it.
 		rb.setApplicationContext(wac);
 	}
 
@@ -101,6 +101,23 @@ public class ResourceBundleViewResolverTests extends TestCase {
 	}
 
 	public void testDebugViewFrench() throws Exception {
+		View v = rb.resolveViewName("debugView", Locale.FRENCH);
+		assertTrue("French debugView must be of type InternalResourceView", v instanceof InternalResourceView);
+		InternalResourceView jv = (InternalResourceView) v;
+		assertTrue("French debugView must have correct URL", "jsp/debug/deboug.jsp".equals(jv.getUrl()));
+		assertTrue(
+			"Correct overridden (XML) content type, not '" + jv.getContentType() + "'",
+			jv.getContentType().equals("text/xml; charset=ISO-8859-1"));
+	}
+
+	public void testEagerInitialization() throws Exception {
+		ResourceBundleViewResolver rb = new ResourceBundleViewResolver();
+		rb.setBasename(PROPS_FILE);
+		rb.setCache(getCache());
+		rb.setDefaultParentView("testParent");
+		rb.setLocalesToInitialize(new Locale[] {Locale.ENGLISH, Locale.FRENCH});
+		rb.setApplicationContext(wac);
+
 		View v = rb.resolveViewName("debugView", Locale.FRENCH);
 		assertTrue("French debugView must be of type InternalResourceView", v instanceof InternalResourceView);
 		InternalResourceView jv = (InternalResourceView) v;
