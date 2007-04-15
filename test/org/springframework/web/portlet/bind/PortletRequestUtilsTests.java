@@ -370,6 +370,7 @@ public class PortletRequestUtilsTests extends TestCase {
 			PortletRequestUtils.getIntParameter(request, "nonExistingParam", 0);
 		}
 		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
 		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
@@ -381,6 +382,7 @@ public class PortletRequestUtilsTests extends TestCase {
 			PortletRequestUtils.getLongParameter(request, "nonExistingParam", 0);
 		}
 		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
 		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
@@ -392,6 +394,7 @@ public class PortletRequestUtilsTests extends TestCase {
 			PortletRequestUtils.getFloatParameter(request, "nonExistingParam", 0f);
 		}
 		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
 		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
@@ -403,6 +406,7 @@ public class PortletRequestUtilsTests extends TestCase {
 			PortletRequestUtils.getDoubleParameter(request, "nonExistingParam", 0d);
 		}
 		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
 		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
@@ -414,6 +418,7 @@ public class PortletRequestUtilsTests extends TestCase {
 			PortletRequestUtils.getBooleanParameter(request, "nonExistingParam", false);
 		}
 		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
 		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
@@ -425,6 +430,7 @@ public class PortletRequestUtilsTests extends TestCase {
 			PortletRequestUtils.getStringParameter(request, "nonExistingParam", "defaultValue");
 		}
 		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
 		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
