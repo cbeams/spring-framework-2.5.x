@@ -3,12 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.5 (2007-05-03)
+Changes in version 2.0.5 (2007-05-01)
 -------------------------------------
 
 Package org.springframework.beans
 * default editor settings get copied to nested beans even if no default editors have been used yet
 * AbstractBeanFactory uses concurrent Maps for singletons, aliases and bean definitions (for better concurrency)
+* added overloaded "rootBeanDefinition" factory methods with bean class name (instead of Class) to BeanDefinitionBuilder
 
 Package org.springframework.context
 * AbstractRefreshableApplicationContext actually calls the 2.0.3-introduced "customizeBeanFactory" template method
@@ -19,12 +20,29 @@ Package org.springframework.core
 * Constants class always uses upper-case transformation according to English notation
 * added "toCodeForSuffix" operation to Constants class
 
+Package org.springframework.jdbc
+* added scale support to SqlParameter, for declaring numeric RdbmsOperation parameters with a specific scale
+* added SqlParameterValue class, holding a value including SQL type and scale, accepted by JdbcTemplate argument arrays
+* optimized SQL parsing in NamedParameterUtils, NamedParameterJdbcTemplate and SqlOperation through the use of caching
+* added "execute" operation with PreparedStatementCallback argument to NamedParameterJdbcOperations/Template
+* added overloaded "query" operations with ResultSetExtractor argument to NamedParameterJdbcOperations/Template
+* SqlQuery and SqlUpdate accept named parameter declarations in arbitrary order (not requiring positional declaration)
+* SqlQuery and SqlUpdate accept unparameter declarations for named parameter usage (assuming positional declaration)
+
 Package org.springframework.jndi
 * JndiDestinationResolver prefers a concurrent Map for caching purposes (for better concurrency)
+
+Package org.springframework.orm
+* PersistenceAnnotationBeanPostProcessor is able to resolve a lazy EntityManagerFactory via its unit name as well
+
+Package org.springframework.remoting
+* RemoteExporter shows "use reference, not value" error message in case of the specified service object being a String
 
 Package org.springframework.scheduling
 * MethodInvokingJobDetailFactoryBean avoids obtaining the target bean twice in case of "targetBeanName" specified
 * revised MethodInvokingJobDetailFactoryBean's error message to include the target class instead of the target object
+* DelegatingTimerTask catches any exception or error thrown from its delegate Runnable, to make the Timer proceed
+* added "continueScheduledExecutionAfterException" flag to ScheduledExecutorFactoryBean, overriding the default behavior
 
 Package org.springframework.scripting
 * added "init-method" and "destroy-method" attributes on "lang:groovy/bsh/jruby", for init/destroy methods in scripts
@@ -37,7 +55,11 @@ Package org.springframework.ui
 * ResourceBundleThemeSource will always return the same Theme instance for a given theme name
 
 Package org.springframework.web
+* DispatcherServlet/Portlet only refresh their strategies if their own ApplicationContext refreshes
+* XmlViewResolver (and similar strategies) work again in combination with the implicit default BeanNameUrlHandlerMapping
 * UrlFilenameViewController and InternalPathMethodNameResolver prefer a concurrent Map for caching purposes
+* added "localesToInitialize" property to ResourceBundleViewResolver, for initializing common locales eagerly
+* JSP SelectTag always renders a full closing tag (i.e. never renders a short-circuited opening tag with "/>" ending)
 
 
 Changes in version 2.0.4 (2007-04-10)
