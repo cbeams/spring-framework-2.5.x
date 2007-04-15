@@ -21,6 +21,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.easymock.MockControl;
 
@@ -44,6 +46,8 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 		"update seat_status set booking_id = null where performance_id = ?";
 	private static final String UPDATE_INT_INT =
 		"update seat_status set booking_id = null where performance_id = ? and price_band_id = ?";
+	private static final String UPDATE_NAMED_PARAMETERS =
+		"update seat_status set booking_id = null where performance_id = :perfId and price_band_id = :priceId";
 	private static final String UPDATE_STRING =
 		"update seat_status set booking_id = null where name = ?";
 	private static final String UPDATE_OBJECTS =
@@ -136,6 +140,59 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 		replay();
 
 		IntIntUpdater pc = new IntIntUpdater();
+		int rowsAffected = pc.run(1, 1);
+		assertEquals(1, rowsAffected);
+	}
+
+	public void testNamedParameterUpdateWithUnnamedDeclarations() throws SQLException {
+		doTestNamedParameterUpdate(false);
+	}
+
+	public void testNamedParameterUpdateWithNamedDeclarations() throws SQLException {
+		doTestNamedParameterUpdate(true);
+	}
+
+	private void doTestNamedParameterUpdate(final boolean namedDeclarations) throws SQLException {
+		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
+		mockPreparedStatement.setObject(2, new Integer(1), Types.DECIMAL);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(1);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(UPDATE_INT_INT);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+
+		replay();
+
+		class NamedParameterUpdater extends SqlUpdate {
+
+			public NamedParameterUpdater() {
+				setSql(UPDATE_NAMED_PARAMETERS);
+				setDataSource(mockDataSource);
+				if (namedDeclarations) {
+					declareParameter(new SqlParameter("priceId", Types.DECIMAL));
+					declareParameter(new SqlParameter("perfId", Types.NUMERIC));
+				}
+				else {
+					declareParameter(new SqlParameter(Types.NUMERIC));
+					declareParameter(new SqlParameter(Types.DECIMAL));
+				}
+				compile();
+			}
+
+			public int run(int performanceId, int type) {
+				Map params = new HashMap();
+				params.put("perfId", new Integer(performanceId));
+				params.put("priceId", new Integer(type));
+				return updateByNamedParam(params);
+			}
+		}
+
+		NamedParameterUpdater pc = new NamedParameterUpdater();
 		int rowsAffected = pc.run(1, 1);
 		assertEquals(1, rowsAffected);
 	}

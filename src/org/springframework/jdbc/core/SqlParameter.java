@@ -19,6 +19,8 @@ package org.springframework.jdbc.core;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.util.Assert;
+
 /**
  * Object to represent a SQL parameter definition.
  *
@@ -40,6 +42,7 @@ public class SqlParameter {
 
 	/** Used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, named array types */
 	private String typeName;
+
 
 	/** The scale to apply in case of a NUMERIC or DECIMAL type, if any */
 	private Integer scale;
@@ -107,6 +110,18 @@ public class SqlParameter {
 		this.name = name;
 		this.sqlType = sqlType;
 		this.scale = new Integer(scale);
+	}
+
+	/**
+	 * Copy constructor.
+	 * @param otherParam the SqlParameter object to copy from
+	 */
+	public SqlParameter(SqlParameter otherParam) {
+		Assert.notNull(otherParam, "SqlParameter object must not be null");
+		this.name = otherParam.name;
+		this.sqlType = otherParam.sqlType;
+		this.typeName = otherParam.typeName;
+		this.scale = otherParam.scale;
 	}
 
 

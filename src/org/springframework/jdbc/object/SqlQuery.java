@@ -220,10 +220,10 @@ public abstract class SqlQuery extends SqlOperation {
 	 */
 	public List executeByNamedParam(Map paramMap, Map context) throws DataAccessException {
 		validateNamedParameters(paramMap);
-		Object[] parameters = NamedParameterUtils.buildValueArray(getSql(), paramMap);
-		RowMapper rowMapper = newRowMapper(parameters, context);
+		Object[] params = NamedParameterUtils.buildValueArray(getSql(), paramMap, getDeclaredParameters());
+		RowMapper rowMapper = newRowMapper(params, context);
 		String sqlToUse = NamedParameterUtils.substituteNamedParameters(getSql(), new MapSqlParameterSource(paramMap));
- 		return getJdbcTemplate().query(newPreparedStatementCreator(sqlToUse, parameters), rowMapper);
+ 		return getJdbcTemplate().query(newPreparedStatementCreator(sqlToUse, params), rowMapper);
 	}
 
 	/**

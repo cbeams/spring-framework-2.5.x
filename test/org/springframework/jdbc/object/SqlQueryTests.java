@@ -52,10 +52,10 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		"select forename from custmr WHERE 1 = 2";
 	private static final String SELECT_ID_FORENAME_WHERE =
 		"select id, forename from prefix:custmr where forename = ?";
-	private static final String SELECT_ID_FORENAME_WHERE_NAMED_PARAMETER_1 =
-		"select id, forename from custmr where id = ?";
-	private static final String SELECT_ID_FORENAME_WHERE_NAMED_PARAMETER_2 =
-		"select id, forename from custmr where id = :id";
+	private static final String SELECT_ID_FORENAME_NAMED_PARAMETERS =
+		"select id, forename from custmr where id = :id and country = :country";
+	private static final String SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED =
+		"select id, forename from custmr where id = ? and country = ?";
 	private static final String SELECT_ID_FORENAME_WHERE_ID_IN_LIST_1 =
 		"select id, forename from custmr where id in (?, ?)";
 	private static final String SELECT_ID_FORENAME_WHERE_ID_IN_LIST_2 =
@@ -80,11 +80,11 @@ public class SqlQueryTests extends AbstractJdbcTests {
 	}
 
 	protected void tearDown() throws Exception {
-		/*
 		super.tearDown();
-		ctrlPreparedStatement.verify();
-		ctrlResultSet.verify();
-		*/
+		if (shouldVerify()) {
+			ctrlPreparedStatement.verify();
+			ctrlResultSet.verify();
+		}
 	}
 
 	protected void replay() {
@@ -363,6 +363,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				return (Customer) findObject(id, otherNum);
 			}
 		}
+
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 		Customer cust = query.findCustomer(1, 1);
 
@@ -417,6 +418,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				return (Customer) findObject(id);
 			}
 		}
+
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 		Customer cust = query.findCustomer("rod");
 
@@ -504,6 +506,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 					new Object[] { new Integer(id), name });
 			}
 		}
+
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 
 		Customer cust1 = query.findCustomer(1, "rod");
@@ -565,6 +568,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				return (Customer) findObject(id);
 			}
 		}
+
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 		try {
 			Customer cust = query.findCustomer("rod");
@@ -624,10 +628,9 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
 				return cust;
 			}
-
 		}
-		CustomerQuery query = new CustomerQuery(mockDataSource);
 
+		CustomerQuery query = new CustomerQuery(mockDataSource);
 		List list = query.execute(1, 1);
 		assertTrue("2 results in list", list.size() == 2);
 		for (Iterator itr = list.iterator(); itr.hasNext();) {
@@ -683,8 +686,8 @@ public class SqlQueryTests extends AbstractJdbcTests {
 			}
 
 		}
-		CustomerQuery query = new CustomerQuery(mockDataSource);
 
+		CustomerQuery query = new CustomerQuery(mockDataSource);
 		List list = query.execute("one");
 		assertTrue("2 results in list", list.size() == 2);
 		for (Iterator itr = list.iterator(); itr.hasNext();) {
@@ -739,38 +742,14 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				return (Customer) findObject(id);
 			}
 		}
+
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 		Customer cust = query.findCustomer(1);
-
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
 		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
 	}
 
 	public void testUnnamedParameterDeclarationWithNamedParameterQuery() throws SQLException {
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getInt("id");
-		ctrlResultSet.setReturnValue(1);
-		mockResultSet.getString("forename");
-		ctrlResultSet.setReturnValue("rod");
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet);
-		mockPreparedStatement.getWarnings();
-		ctrlPreparedStatement.setReturnValue(null);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(
-				SELECT_ID_FORENAME_WHERE, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
 		replay();
 
 		class CustomerQuery extends MappingSqlQuery {
@@ -795,6 +774,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				return (Customer) executeByNamedParam(params).get(0);
 			}
 		}
+
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 		try {
 			Customer cust = query.findCustomer(1);
@@ -805,7 +785,15 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		}
 	}
 
-	public void testNamedParameterCustomerQuery() throws SQLException {
+	public void testNamedParameterCustomerQueryWithUnnamedDeclarations() throws SQLException {
+		doTestNamedParameterCustomerQuery(false);
+	}
+
+	public void testNamedParameterCustomerQueryWithNamedDeclarations() throws SQLException {
+		doTestNamedParameterCustomerQuery(true);
+	}
+
+	private void doTestNamedParameterCustomerQuery(final boolean namedDeclarations) throws SQLException {
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
 		mockResultSet.getInt("id");
@@ -819,6 +807,8 @@ public class SqlQueryTests extends AbstractJdbcTests {
 
 		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
 		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setString(2, "UK");
+		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeQuery();
 		ctrlPreparedStatement.setReturnValue(mockResultSet);
 		mockPreparedStatement.getWarnings();
@@ -827,7 +817,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		ctrlPreparedStatement.setVoidCallable();
 
 		mockConnection.prepareStatement(
-				SELECT_ID_FORENAME_WHERE_NAMED_PARAMETER_1, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+				SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 		ctrlConnection.setReturnValue(mockPreparedStatement);
 
 		replay();
@@ -835,9 +825,16 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		class CustomerQuery extends MappingSqlQuery {
 
 			public CustomerQuery(DataSource ds) {
-				super(ds, SELECT_ID_FORENAME_WHERE_NAMED_PARAMETER_2);
+				super(ds, SELECT_ID_FORENAME_NAMED_PARAMETERS);
 				setResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE);
-				declareParameter(new SqlParameter("id", Types.NUMERIC));
+				if (namedDeclarations) {
+					declareParameter(new SqlParameter("country", Types.VARCHAR));
+					declareParameter(new SqlParameter("id", Types.NUMERIC));
+				}
+				else {
+					declareParameter(new SqlParameter(Types.NUMERIC));
+					declareParameter(new SqlParameter(Types.VARCHAR));
+				}
 				compile();
 			}
 
@@ -848,15 +845,16 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				return cust;
 			}
 
-			public Customer findCustomer(int id) {
+			public Customer findCustomer(int id, String country) {
 				Map params = new HashMap();
 				params.put("id", new Integer(id));
+				params.put("country", country);
 				return (Customer) executeByNamedParam(params).get(0);
 			}
 		}
-		CustomerQuery query = new CustomerQuery(mockDataSource);
-		Customer cust = query.findCustomer(1);
 
+		CustomerQuery query = new CustomerQuery(mockDataSource);
+		Customer cust = query.findCustomer(1, "UK");
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
 		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
 	}
@@ -918,6 +916,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				return (List) executeByNamedParam(params);
 			}
 		}
+
 		CustomerQuery query = new CustomerQuery(mockDataSource);
 		List ids = new ArrayList();
 		ids.add(new Integer(1));

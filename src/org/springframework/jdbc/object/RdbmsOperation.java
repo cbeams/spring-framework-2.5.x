@@ -18,6 +18,7 @@ package org.springframework.jdbc.object;
 
 import java.sql.ResultSet;
 import java.sql.Types;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -265,7 +266,11 @@ public abstract class RdbmsOperation implements InitializingBean {
 	}
 
 	/**
-	 * Declare a parameter. The order in which this method is called is significant.
+	 * Declare a parameter for this operation.
+	 * <p>The order in which this method is called is significant when using
+	 * positional parameters. It is not significant when using named parameters
+	 * with named SqlParameter objects here; it remains significant when using
+	 * named parameters in combination with unnamed SqlParameter objects here.
 	 * @param param the SqlParameter to add. This will specify SQL type and (optionally)
 	 * the parameter's name. Note that you typically use the {@link SqlParameter} class
 	 * itself here, not any of its subclasses.
@@ -359,11 +364,10 @@ public abstract class RdbmsOperation implements InitializingBean {
 		if (this.declaredParameters != null) {
 			Iterator it = this.declaredParameters.iterator();
 			while (it.hasNext()) {
-				Object param = it.next();
+				SqlParameter param = (SqlParameter) it.next();
 				if (!(param instanceof ResultSetSupportingSqlParameter)) {
 					if (!supportsLobParameters() &&
-							(((SqlParameter) param).getSqlType() == Types.BLOB ||
-							((SqlParameter) param).getSqlType() == Types.CLOB)) {
+							(param.getSqlType() == Types.BLOB || param.getSqlType() == Types.CLOB)) {
 						throw new InvalidDataAccessApiUsageException(
 								"BLOB or CLOB parameters are not allowed for this kind of operation");
 					}
@@ -372,30 +376,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 			}
 		}
 
-		if (parameters != null) {
-			if (this.declaredParameters == null) {
-				throw new InvalidDataAccessApiUsageException("Didn't expect any parameters: none was declared");
-			}
-			if (parameters.length < declaredInParameters) {
-				throw new InvalidDataAccessApiUsageException(
-						parameters.length + " parameters were supplied, but " +
-						declaredInParameters + " in parameters were declared in class [" +
-						getClass().getName() + "]");
-			}
-			if (!allowsUnusedParameters() && parameters.length > this.declaredParameters.size()) {
-				throw new InvalidDataAccessApiUsageException(
-						parameters.length + " parameters were supplied, but " +
-						this.declaredParameters.size() + " parameters were declared " +
-						"in class [" + getClass().getName() + "]");
-			}
-		}
-		else {
-			// No parameters were supplied.
-			if (this.declaredParameters != null && !this.declaredParameters.isEmpty()) {
-				throw new InvalidDataAccessApiUsageException(
-						this.declaredParameters.size() + " parameters must be supplied");
-			}
-		}
+		validateParameterCount((parameters != null ? parameters.length : 0), declaredInParameters);
 	}
 
 	/**
@@ -407,42 +388,54 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 */
 	protected void validateNamedParameters(Map parameters) throws InvalidDataAccessApiUsageException {
 		checkCompiled();
+		Map paramsToUse = (parameters != null ? parameters : Collections.EMPTY_MAP);
 
+		int declaredInParameters = 0;
 		if (this.declaredParameters != null) {
 			Iterator it = this.declaredParameters.iterator();
 			while (it.hasNext()) {
-				Object param = it.next();
+				SqlParameter param = (SqlParameter) it.next();
 				if (!(param instanceof ResultSetSupportingSqlParameter)) {
 					if (!supportsLobParameters() &&
-							(((SqlParameter) param).getSqlType() == Types.BLOB ||
-							((SqlParameter) param).getSqlType() == Types.CLOB)) {
+							(param.getSqlType() == Types.BLOB || param.getSqlType() == Types.CLOB)) {
 						throw new InvalidDataAccessApiUsageException(
 								"BLOB or CLOB parameters are not allowed for this kind of operation");
 					}
-					if (((SqlParameter) param).getName() == null) {
-						throw new InvalidDataAccessApiUsageException(
-								"All parameters must have name specified when using the methods " +
-									"dedicated to named parameter support");
+					if (param.getName() != null && !paramsToUse.containsKey(param.getName())) {
+						throw new InvalidDataAccessApiUsageException("The parameter named '" + param.getName() +
+								"' was not among the parameters supplied: " + paramsToUse.keySet());
 					}
-					if (!parameters.containsKey(((SqlParameter) param).getName())) {
-						throw new InvalidDataAccessApiUsageException(
-								"The parameter named '" + ((SqlParameter)param).getName() +
-									"' were not among the parameters supplied: " +
-									parameters.keySet());
-					}
+					declaredInParameters++;
 				}
 			}
 		}
 
-		if (parameters != null && parameters.size() > 0) {
-			if (this.declaredParameters == null) {
-				throw new InvalidDataAccessApiUsageException("Didn't expect any parameters: none was declared");
+		validateParameterCount(paramsToUse.size(), declaredInParameters);
+	}
+
+	/**
+	 * Validate the given parameter count against the given declared parameters.
+	 * @param paramCount the number of actual parameters given
+	 * @param declaredParams the number of parameters declared
+	 */
+	private void validateParameterCount(int paramCount, int declaredParams) {
+		if (paramCount > 0) {
+			if (declaredParams == 0) {
+				throw new InvalidDataAccessApiUsageException("Didn't expect any parameters: none were declared");
+			}
+			if (paramCount < declaredParams) {
+				throw new InvalidDataAccessApiUsageException(paramCount + " parameters were supplied, but " +
+						declaredParams + " in parameters were declared in class [" + getClass().getName() + "]");
+			}
+			if (!allowsUnusedParameters() && paramCount > declaredParams) {
+				throw new InvalidDataAccessApiUsageException(paramCount + " parameters were supplied, but " +
+						declaredParams + " parameters were declared " + "in class [" + getClass().getName() + "]");
 			}
 		}
 		else {
 			// No parameters were supplied.
-			if (this.declaredParameters != null && !this.declaredParameters.isEmpty()) {
-				throw new InvalidDataAccessApiUsageException("Parameters must be supplied");
+			if (declaredParams > 0) {
+				throw new InvalidDataAccessApiUsageException(declaredParams + " parameters must be supplied");
 			}
 		}
 	}

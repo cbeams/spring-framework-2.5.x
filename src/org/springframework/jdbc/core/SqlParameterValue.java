@@ -72,6 +72,16 @@ public class SqlParameterValue extends SqlParameter {
 		this.value = value;
 	}
 
+	/**
+	 * Create a new SqlParameterValue based on the given SqlParameter declaration.
+	 * @param declaredParam the declared SqlParameter to define a value for
+	 * @param value the value object
+	 */
+	public SqlParameterValue(SqlParameter declaredParam, Object value) {
+		super(declaredParam);
+		this.value = value;
+	}
+
 
 	/**
 	 * Return the value object that this parameter value holds.

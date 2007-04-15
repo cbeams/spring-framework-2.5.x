@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,13 @@ package org.springframework.jdbc.core.namedparam;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.util.Assert;
 
 /**
@@ -206,27 +209,51 @@ public abstract class NamedParameterUtils {
 		return newSql.toString();
 	}
 
+
 	/**
 	 * Convert a Map of named parameter values to a corresponding array.
-	 * <p>This is necessary in order to reuse existing methods on JdbcTemplate.
-	 * See below for additional info.
 	 * @param sql the SQL statement
 	 * @param paramMap the Map of parameters
+	 * @return the array of values
 	 */
 	public static Object[] buildValueArray(String sql, Map paramMap) {
-		ParsedSql parsedSql = parseSqlStatement(sql);
-		return buildValueArray(parsedSql, new MapSqlParameterSource(paramMap));
+		return buildValueArray(sql, paramMap, null);
 	}
 
 	/**
 	 * Convert a Map of named parameter values to a corresponding array.
-	 * This is necessary in order to reuse existing methods on JdbcTemplate.
-	 * Any named parameters are placed in the correct position in the Object
-	 * array based on the parsed SQL statement info.
+	 * @param sql the SQL statement
+	 * @param paramMap the Map of parameters
+	 * @param declaredParams the List of declared SqlParameter objects
+	 * (may be <code>null</code>). If specified, the parameter metadata will
+	 * be built into the value array in the form of SqlParameterValue objects.
+	 * @return the array of values
+	 */
+	public static Object[] buildValueArray(String sql, Map paramMap, List declaredParams) {
+		ParsedSql parsedSql = parseSqlStatement(sql);
+		return buildValueArray(parsedSql, new MapSqlParameterSource(paramMap), declaredParams);
+	}
+
+	/**
+	 * Convert a Map of named parameter values to a corresponding array.
 	 * @param parsedSql the parsed SQL statement
 	 * @param paramSource the source for named parameters
+	 * @return the array of values
 	 */
 	static Object[] buildValueArray(ParsedSql parsedSql, SqlParameterSource paramSource) {
+		return buildValueArray(parsedSql, paramSource, null);
+	}
+
+	/**
+	 * Convert a Map of named parameter values to a corresponding array.
+	 * @param parsedSql the parsed SQL statement
+	 * @param paramSource the source for named parameters
+	 * @param declaredParams the List of declared SqlParameter objects
+	 * (may be <code>null</code>). If specified, the parameter metadata will
+	 * be built into the value array in the form of SqlParameterValue objects.
+	 * @return the array of values
+	 */
+	static Object[] buildValueArray(ParsedSql parsedSql, SqlParameterSource paramSource, List declaredParams) {
 		Object[] paramArray = new Object[parsedSql.getTotalParameterCount()];
 		if (parsedSql.getNamedParameterCount() > 0 && parsedSql.getUnnamedParameterCount() > 0) {
 			throw new InvalidDataAccessApiUsageException(
@@ -239,7 +266,9 @@ public abstract class NamedParameterUtils {
 		for (int i = 0; i < paramNames.length; i++) {
 			String paramName = paramNames[i];
 			try {
-				paramArray[i] = paramSource.getValue(paramName);
+				Object value = paramSource.getValue(paramName);
+				SqlParameter param = findParameter(declaredParams, paramName, i);
+				paramArray[i] = (param != null ? new SqlParameterValue(param, value) : value);
 			}
 			catch (IllegalArgumentException ex) {
 				throw new InvalidDataAccessApiUsageException(
@@ -248,6 +277,35 @@ public abstract class NamedParameterUtils {
 		}
 		return paramArray;
 	}
+
+	/**
+	 * Find a matching parameter in the given list of declared parameters.
+	 * @param declaredParams the declared SqlParameter objects
+	 * @param paramName the name of the desired parameter
+	 * @param paramIndex the index of the desired parameter
+	 * @return the declared SqlParameter, or <code>null</code> if none found
+	 */
+	private static SqlParameter findParameter(List declaredParams, String paramName, int paramIndex) {
+		if (declaredParams != null) {
+			// First pass: Look for named parameter match.
+			for (Iterator it = declaredParams.iterator(); it.hasNext();) {
+				SqlParameter declaredParam = (SqlParameter) it.next();
+				if (paramName.equals(declaredParam.getName())) {
+					return declaredParam;
+				}
+			}
+			// Second pass: Look for parameter index match.
+			if (paramIndex < declaredParams.size()) {
+				SqlParameter declaredParam = (SqlParameter) declaredParams.get(paramIndex);
+				// Only accept unnamed parameters for index matches.
+				if (declaredParam.getName() == null) {
+					return declaredParam;
+				}
+			}
+		}
+		return null;
+	}
+
 
 	/**
 	 * Convert a Map of parameter types to a corresponding int array.

@@ -93,7 +93,8 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Add a new declared parameter.
-	 * Order of parameter addition is significant.
+	 * <p>Order of parameter addition is significant.
+	 * @param param the parameter to add to the list of declared parameters.
 	 */
 	public void addParameter(SqlParameter param) {
 		this.declaredParameters.add(param);
@@ -249,8 +250,18 @@ public class PreparedStatementCreatorFactory {
 			// Set arguments: Does nothing if there are no parameters.
 			int sqlColIndx = 1;
 			for (int i = 0; i < this.parameters.size(); i++) {
-				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
 				Object in = this.parameters.get(i);
+				SqlParameter declaredParameter = null;
+				// SqlParameterValue overrides declared parameter metadata, in particular for
+				// independence from the declared parameter position in case of named parameters.
+				if (in instanceof SqlParameterValue) {
+					SqlParameterValue paramValue = (SqlParameterValue) in;
+					in = paramValue.getValue();
+					declaredParameter = paramValue;
+				}
+				else {
+					declaredParameter = (SqlParameter) declaredParameters.get(i);
+				}
 				if (in instanceof Collection && declaredParameter.getSqlType() != Types.ARRAY) {
 					Collection entries = (Collection) in;
 					for (Iterator it = entries.iterator(); it.hasNext();) {
