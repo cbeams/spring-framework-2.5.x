@@ -56,15 +56,10 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 		"insert into show (name) values(?)";
 
 	private MockControl ctrlPreparedStatement;
-
 	private PreparedStatement mockPreparedStatement;
-	
 	private MockControl ctrlResultSet;
-
 	private ResultSet mockResultSet;
-	
-	private  MockControl ctrlResultSetMetaData;
-	
+	private MockControl ctrlResultSetMetaData;
 	private ResultSetMetaData mockResultSetMetaData;
 
 	protected void setUp() throws Exception {
@@ -84,6 +79,7 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 		super.replay();
 		ctrlPreparedStatement.replay();
 	}
+
 
 	public void testUpdate() throws SQLException {
 		mockPreparedStatement.executeUpdate();
