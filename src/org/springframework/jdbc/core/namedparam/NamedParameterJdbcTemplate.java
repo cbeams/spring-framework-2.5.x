@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,10 +27,12 @@ import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCallback;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.SqlRowSetResultSetExtractor;
 import org.springframework.jdbc.support.KeyHolder;
@@ -37,13 +40,13 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.Assert;
 
 /**
- * This class provides basic set of JDBC operations allowing the use of
- * named parameters rather than the traditional '?' placeholders.
+ * Template class with a basic set of JDBC operations, allowing the use
+ * of named parameters rather than traditional '?' placeholders.
  *
- * <p>It delegates to a wrapped {@link #getJdbcOperations() JdbcTemplate} once
- * the substitution from named parameters to JDBC style '?' placeholders is done
- * at execution time. It also allows for expanding a {@link java.util.List} of
- * values to the appropriate number of placeholders.
+ * <p>This class delegates to a wrapped {@link #getJdbcOperations() JdbcTemplate}
+ * once the substitution from named parameters to JDBC style '?' placeholders is
+ * done at execution time. It also allows for expanding a {@link java.util.List}
+ * of values to the appropriate number of placeholders.
  *
  * <p>The underlying {@link org.springframework.jdbc.core.JdbcTemplate} is
  * exposed to allow for convenient access to the traditional
@@ -57,10 +60,11 @@ import org.springframework.util.Assert;
  */
 public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations {
 
-	/**
-	 * The JdbcTemplate we are wrapping
-	 */
+	/** The JdbcTemplate we are wrapping */
 	private final JdbcOperations classicJdbcTemplate;
+
+	/** Map of original SQL String to ParsedSql representation */
+	private final Map parsedSqlCache = new HashMap();
 
 
 	/**
@@ -79,7 +83,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	 * @param classicJdbcTemplate the classic Spring JdbcTemplate to wrap
 	 */
 	public NamedParameterJdbcTemplate(JdbcOperations classicJdbcTemplate) {
-		Assert.notNull(classicJdbcTemplate, "The [classicJdbcTemplate] argument cannot be null.");
+		Assert.notNull(classicJdbcTemplate, "JdbcTemplate must not be null");
 		this.classicJdbcTemplate = classicJdbcTemplate;
 	}
 
@@ -92,18 +96,30 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 
-	//-------------------------------------------------------------------------
-	// Query operations
-	//-------------------------------------------------------------------------
+	public Object execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback action)
+			throws DataAccessException {
+
+		return getJdbcOperations().execute(getPreparedStatementCreator(sql, paramSource), action);
+	}
+
+	public Object execute(String sql, Map paramMap, PreparedStatementCallback action) throws DataAccessException {
+		return execute(sql, new MapSqlParameterSource(paramMap), action);
+	}
+
+	public Object query(String sql, SqlParameterSource paramSource, ResultSetExtractor rse)
+			throws DataAccessException {
+
+		return getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rse);
+	}
+
+	public Object query(String sql, Map paramMap, ResultSetExtractor rse) throws DataAccessException {
+		return query(sql, new MapSqlParameterSource(paramMap), rse);
+	}
 
 	public void query(String sql, SqlParameterSource paramSource, RowCallbackHandler rch)
 			throws DataAccessException {
 
-		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
-		int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
-		getJdbcOperations().query(sqlToUse, args, argTypes, rch);
+		getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rch);
 	}
 
 	public void query(String sql, Map paramMap, RowCallbackHandler rch) throws DataAccessException {
@@ -113,12 +129,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	public List query(String sql, SqlParameterSource paramSource, RowMapper rowMapper)
 			throws DataAccessException {
 
-		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
-		int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
-		return (List) getJdbcOperations().query(
-				sqlToUse, args, argTypes, new RowMapperResultSetExtractor(rowMapper));
+		return getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rowMapper);
 	}
 
 	public List query(String sql, Map paramMap, RowMapper rowMapper) throws DataAccessException {
@@ -128,12 +139,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	public Object queryForObject(String sql, SqlParameterSource paramSource, RowMapper rowMapper)
 			throws DataAccessException {
 
-		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
-		int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
-		List results = (List) getJdbcOperations().query(
-				sqlToUse, args, argTypes, new RowMapperResultSetExtractor(rowMapper, 1));
+		List results = getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rowMapper);
 		return DataAccessUtils.requiredSingleResult(results);
 	}
 
@@ -143,6 +149,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	public Object queryForObject(String sql, SqlParameterSource paramSource, Class requiredType)
 			throws DataAccessException {
+
 		return queryForObject(sql, paramSource, new SingleColumnRowMapper(requiredType));
 	}
 
@@ -194,28 +201,16 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public SqlRowSet queryForRowSet(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
-		int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
-		return (SqlRowSet) getJdbcOperations().query(sqlToUse, args, argTypes, new SqlRowSetResultSetExtractor());
+		return (SqlRowSet) getJdbcOperations().query(
+				getPreparedStatementCreator(sql, paramSource), new SqlRowSetResultSetExtractor());
 	}
 
 	public SqlRowSet queryForRowSet(String sql, Map paramMap) throws DataAccessException {
 		return queryForRowSet(sql, new MapSqlParameterSource(paramMap));
 	}
 
-
-	//-------------------------------------------------------------------------
-	// Update operations
-	//-------------------------------------------------------------------------
-
 	public int update(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
-		int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
-		return getJdbcOperations().update(sqlToUse, args, argTypes);
+		return getJdbcOperations().update(getPreparedStatementCreator(sql, paramSource));
 	}
 
 	public int update(String sql, Map paramMap) throws DataAccessException {
@@ -232,18 +227,51 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 			String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames)
 			throws DataAccessException {
 
-		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		Object[] args = NamedParameterUtils.buildValueArray(parsedSql, paramSource);
-		int[] argTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
-		PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, argTypes);
+		ParsedSql parsedSql = getParsedSql(sql);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
+		int[] paramTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
+		PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, paramTypes);
 		if (keyColumnNames != null) {
 			pscf.setGeneratedKeysColumnNames(keyColumnNames);
 		}
 		else {
 			pscf.setReturnGeneratedKeys(true);
 		}
-		return getJdbcOperations().update(pscf.newPreparedStatementCreator(args), generatedKeyHolder);
+		return getJdbcOperations().update(pscf.newPreparedStatementCreator(params), generatedKeyHolder);
+	}
+
+
+	/**
+	 * Build a PreparedStatementCreator based on the given SQL and named parameters.
+	 * <p>Note: Not used for the <code>update</code> variant with generated key handling.
+	 * @param sql SQL to execute
+	 * @param paramSource container of arguments to bind
+	 * @return the corresponding PreparedStatementCreator
+	 */
+	protected PreparedStatementCreator getPreparedStatementCreator(String sql, SqlParameterSource paramSource) {
+		ParsedSql parsedSql = getParsedSql(sql);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
+		int[] paramTypes = NamedParameterUtils.buildSqlTypeArray(parsedSql, paramSource);
+		PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, paramTypes);
+		return pscf.newPreparedStatementCreator(params);
+	}
+
+	/**
+	 * Obtain a parsed representation of the given SQL statement.
+	 * @param sql the original SQL
+	 * @return a representation of the parsed SQL statement
+	 */
+	protected ParsedSql getParsedSql(String sql) {
+		synchronized (this.parsedSqlCache) {
+			ParsedSql parsedSql = (ParsedSql) this.parsedSqlCache.get(sql);
+			if (parsedSql == null) {
+				parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+				this.parsedSqlCache.put(sql, parsedSql);
+			}
+			return parsedSql;
+		}
 	}
 
 }

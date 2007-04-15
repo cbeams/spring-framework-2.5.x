@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,22 @@ import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.PreparedStatementCallback;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
- * Interface specifying a basic set of JDBC operations allowing
- * the use of named parameters rather than the traditional '?' placeholders.
+ * Interface specifying a basic set of JDBC operations allowing the use
+ * of named parameters rather than the traditional '?' placeholders.
  *
- * <p>This is an alternative to the classic JdbcOperations interface,
- * implemented by NamedParameterJdbcTemplate. This interface is not often used
- * directly, but provides a useful option to enhance testability, as it can
- * easily be mocked or stubbed.
+ * <p>This is an alternative to the classic
+ * {@link org.springframework.jdbc.core.JdbcOperations} interface,
+ * implemented by {@link NamedParameterJdbcTemplate}. This interface is not
+ * often used directly, but provides a useful option to enhance testability,
+ * as it can easily be mocked or stubbed.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -50,9 +53,66 @@ public interface NamedParameterJdbcOperations {
 	JdbcOperations getJdbcOperations();
 
 
-	//-------------------------------------------------------------------------
-	// Query operations
-	//-------------------------------------------------------------------------
+	/**
+	 * Execute a JDBC data access operation, implemented as callback action
+	 * working on a JDBC PreparedStatement. This allows for implementing arbitrary
+	 * data access operations on a single Statement, within Spring's managed
+	 * JDBC environment: that is, participating in Spring-managed transactions
+	 * and converting JDBC SQLExceptions into Spring's DataAccessException hierarchy.
+	 * <p>The callback action can return a result object, for example a
+	 * domain object or a collection of domain objects.
+	 * @param sql SQL to execute
+	 * @param paramSource container of arguments to bind to the query
+	 * @param action callback object that specifies the action
+	 * @return a result object returned by the action, or <code>null</code>
+	 * @throws DataAccessException if there is any problem
+	 */
+	Object execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback action)
+			throws DataAccessException;
+
+	/**
+	 * Execute a JDBC data access operation, implemented as callback action
+	 * working on a JDBC PreparedStatement. This allows for implementing arbitrary
+	 * data access operations on a single Statement, within Spring's managed
+	 * JDBC environment: that is, participating in Spring-managed transactions
+	 * and converting JDBC SQLExceptions into Spring's DataAccessException hierarchy.
+	 * <p>The callback action can return a result object, for example a
+	 * domain object or a collection of domain objects.
+	 * @param sql SQL to execute
+	 * @param paramMap map of parameters to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * @param action callback object that specifies the action
+	 * @return a result object returned by the action, or <code>null</code>
+	 * @throws DataAccessException if there is any problem
+	 */
+	Object execute(String sql, Map paramMap, PreparedStatementCallback action)
+			throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, reading the ResultSet with a
+	 * ResultSetExtractor.
+	 * @param sql SQL query to execute
+	 * @param paramSource container of arguments to bind to the query
+	 * @param rse object that will extract results
+	 * @return an arbitrary result object, as returned by the ResultSetExtractor
+	 * @throws DataAccessException if the query fails
+	 */
+	Object query(String sql, SqlParameterSource paramSource, ResultSetExtractor rse)
+			throws DataAccessException;
+
+	/**
+	 * Query given SQL to create a prepared statement from SQL and a list
+	 * of arguments to bind to the query, reading the ResultSet with a
+	 * ResultSetExtractor.
+	 * @param sql SQL query to execute
+	 * @param paramMap map of parameters to bind to the query
+	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
+	 * @param rse object that will extract results
+	 * @return an arbitrary result object, as returned by the ResultSetExtractor
+	 * @throws org.springframework.dao.DataAccessException if the query fails
+	 */
+	Object query(String sql, Map paramMap, ResultSetExtractor rse) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -63,7 +123,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param rch object that will extract results, one row at a time
 	 * @throws DataAccessException if the query fails
 	 */
-	public void query(String sql, SqlParameterSource paramSource, RowCallbackHandler rch)
+	void query(String sql, SqlParameterSource paramSource, RowCallbackHandler rch)
 			throws DataAccessException;
 
 	/**
@@ -379,11 +439,6 @@ public interface NamedParameterJdbcOperations {
 	 * @see javax.sql.rowset.CachedRowSet
 	 */
 	SqlRowSet queryForRowSet(String sql, Map paramMap) throws DataAccessException;
-
-
-	//-------------------------------------------------------------------------
-	// Update operations
-	//-------------------------------------------------------------------------
 
 	/**
 	 * Issue an update via a prepared statement, binding the given arguments.
