@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:jms="http://www.springframework.org/schema/jms"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-2.0.xsd">
+		
+	<jms:listener-container connection-factory="testConnectionFactory" transaction-manager="testTransactionManager">
+		<jms:listener id="listener1" destination="testDestination" ref="testBean1" method="setName"/>
+		<jms:listener id="listener2" destination="testDestination" ref="testBean2" method="setName"/>
+    </jms:listener-container>
+    
+	<jms:listener-container>
+		<jms:listener destination="testDestination" ref="testBean3" method="setName"/>
+    </jms:listener-container>    
+
+	<!-- the default connectionFactory -->
+	<bean id="connectionFactory" class="org.springframework.jms.config.StubConnectionFactory"/>
+	
+	<bean id="testConnectionFactory" class="org.springframework.jms.config.StubConnectionFactory"/>
+	
+	<bean id="testTransactionManager" class="org.springframework.jms.config.StubTransactionManager"/>
+	
+	<bean id="testDestination" class="org.springframework.jms.StubQueue">
+		<constructor-arg value="testQueue"/>
+	</bean>
+	
+	<bean id="testBean1" class="org.springframework.beans.TestBean"/>
+	
+	<bean id="testBean2" class="org.springframework.beans.TestBean"/>
+	
+	<bean id="testBean3" class="org.springframework.beans.TestBean"/>
+		
+</beans>
