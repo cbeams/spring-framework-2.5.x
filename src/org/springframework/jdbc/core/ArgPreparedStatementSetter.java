@@ -48,7 +48,7 @@ class ArgPreparedStatementSetter implements PreparedStatementSetter, ParameterDi
 					StatementCreatorUtils.setParameterValue(ps, i + 1, paramValue, paramValue.getValue());
 				}
 				else {
-					StatementCreatorUtils.setParameterValue(ps, i + 1, SqlTypeValue.TYPE_UNKNOWN, this.args[i]);
+					StatementCreatorUtils.setParameterValue(ps, i + 1, SqlTypeValue.TYPE_UNKNOWN, arg);
 				}
 			}
 		}

@@ -146,7 +146,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementSetter for the given parameters.
-	 * @param params List of parameters. May be <code>null</code>.
+	 * @param params List of parameters (may be <code>null</code>)
 	 */
 	public PreparedStatementSetter newPreparedStatementSetter(List params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);
@@ -154,7 +154,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementSetter for the given parameters.
-	 * @param params parameter array. May be <code>null</code>.
+	 * @param params the parameter array (may be <code>null</code>)
 	 */
 	public PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
 		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
@@ -162,7 +162,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementCreator for the given parameters.
-	 * @param params List of parameters. May be <code>null</code>.
+	 * @param params List of parameters (may be <code>null</code>)
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(List params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);
@@ -170,7 +170,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementCreator for the given parameters.
-	 * @param params parameter array. May be <code>null</code>.
+	 * @param params the parameter array (may be <code>null</code>)
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
 		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
@@ -180,7 +180,7 @@ public class PreparedStatementCreatorFactory {
 	 * Return a new PreparedStatementCreator for the given parameters.
 	 * @param sqlToUse the actual SQL statement to use (if different from
 	 * the factory's, for example because of named parameter expanding)
-	 * @param params parameter array. May be <code>null</code>.
+	 * @param params the parameter array (may be <code>null</code>)
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object[] params) {
 		return new PreparedStatementCreatorImpl(
