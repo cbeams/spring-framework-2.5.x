@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,23 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Holds information for parsed SQL statements.
+ * Holds information about a parsed SQL statement.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.0
  */
-class ParsedSql {
+public class ParsedSql {
 
-	private String sql;
+	private String originalSql;
 
-	private String newSql;
+	private List parameterNames = new ArrayList();
 
-	private String[] parameterNames;
+	private List parameterIndexes = new ArrayList();
 
 	private int namedParameterCount;
 
@@ -38,108 +42,103 @@ class ParsedSql {
 
 
 	/**
-	 * Creates a new instance of the {@link ParsedSql} class.
+	 * Create a new instance of the {@link ParsedSql} class.
+	 * @param originalSql the SQL statement that is being (or is to be) parsed
 	 */
-	public ParsedSql() {
+	ParsedSql(String originalSql) {
+		this.originalSql = originalSql;
 	}
 
 	/**
-	 * Creates a new instance of the {@link ParsedSql} class.
-	 * @param sql the SQL statement that is being (or is to be) parsed
+	 * Return the SQL statement that is being parsed.
 	 */
-	public ParsedSql(String sql) {
-		this.sql = sql;
+	String getOriginalSql() {
+		return this.originalSql;
 	}
 
 
 	/**
-	 * Set the SQL statement that is being (or is to be) parsed.
+	 * Add a named parameter parsed from this SQL statement.
+	 * @param parameterName the name of the parameter
+	 * @param startIndex the start index in the original SQL String
+	 * @param endIndex the end index in the original SQL String
 	 */
-	public void setSql(String sql) {
-		this.sql = sql;
+	void addNamedParameter(String parameterName, int startIndex, int endIndex) {
+		this.parameterNames.add(parameterName);
+		this.parameterIndexes.add(new int[] {startIndex, endIndex});
 	}
 
 	/**
-	 * Get the SQL statement that is being (or is to be) parsed.
-	 */
-	public String getSql() {
-		return sql;
-	}
-
-	/**
-	 * Set the new (parsed) SQL.
-	 */
-	public void setNewSql(String newSql) {
-		this.newSql = newSql;
-	}
-
-	/**
-	 * Get the new (parsed) SQL.
-	 */
-	public String getNewSql() {
-		return newSql;
-	}
-
-	/**
-	 * Set the parameters (bind variables) in the parsed SQL statement.
+	 * Return all of the parameters (bind variables) in the parsed SQL statement.
 	 * Repeated occurences of the same parameter name are included here.
 	 */
-	public void setParameterNames(String[] parameterNames) {
-		this.parameterNames = parameterNames;
+	List getParameterNames() {
+		return this.parameterNames;
 	}
 
 	/**
-	 * Get all of the parameters (bind variables) in the parsed SQL statement.
-	 * Repeated occurences of the same parameter name are included here.
+	 * Return the parameter indexes for the specified parameter.
+	 * @param parameterPosition the position of the parameter
+	 * (as index in the parameter names List)
+	 * @return the start index and end index, combined into
+	 * a int array of length 2
 	 */
-	public String[] getParameterNames() {
-		return parameterNames;
+	int[] getParameterIndexes(int parameterPosition) {
+		return (int[]) this.parameterIndexes.get(parameterPosition);
 	}
 
 	/**
 	 * Set the count of named parameters in the SQL statement.
 	 * Each parameter name counts once; repeated occurences do not count here.
 	 */
-	public void setNamedParameterCount(int namedParameterCount) {
+	void setNamedParameterCount(int namedParameterCount) {
 		this.namedParameterCount = namedParameterCount;
 	}
 
 	/**
-	 * Get the count of named parameters in the SQL statement.
+	 * Return the count of named parameters in the SQL statement.
 	 * Each parameter name counts once; repeated occurences do not count here.
 	 */
-	public int getNamedParameterCount() {
-		return namedParameterCount;
+	int getNamedParameterCount() {
+		return this.namedParameterCount;
 	}
 
 	/**
 	 * Set the count of all of the unnamed parameters in the SQL statement.
 	 */
-	public void setUnnamedParameterCount(int unnamedParameterCount) {
+	void setUnnamedParameterCount(int unnamedParameterCount) {
 		this.unnamedParameterCount = unnamedParameterCount;
 	}
 
 	/**
-	 * Gets the count of all of the unnamed parameters in the SQL statement.
+	 * Return the count of all of the unnamed parameters in the SQL statement.
 	 */
-	public int getUnnamedParameterCount() {
-		return unnamedParameterCount;
+	int getUnnamedParameterCount() {
+		return this.unnamedParameterCount;
 	}
 
 	/**
 	 * Set the total count of all of the parameters in the SQL statement.
 	 * Repeated occurences of the same parameter name do count here.
 	 */
-	public void setTotalParameterCount(int totalParameterCount) {
+	void setTotalParameterCount(int totalParameterCount) {
 		this.totalParameterCount = totalParameterCount;
 	}
 
 	/**
-	 * Get the total count of all of the parameters in the SQL statement.
+	 * Return the total count of all of the parameters in the SQL statement.
 	 * Repeated occurences of the same parameter name do count here.
 	 */
-	public int getTotalParameterCount() {
-		return totalParameterCount;
+	int getTotalParameterCount() {
+		return this.totalParameterCount;
+	}
+
+
+	/**
+	 * Exposes the original SQL String.
+	 */
+	public String toString() {
+		return this.originalSql;
 	}
 
 }

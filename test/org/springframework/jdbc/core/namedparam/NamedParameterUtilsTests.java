@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,21 +36,21 @@ public final class NamedParameterUtilsTests extends TestCase {
 		String sql2 = "xxx &a yyyy ? zzzzz";
 		String sql3 = "xxx &a+:b" + '\t' + ":c%10 yyyy ? zzzzz";
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
-		assertEquals("xxx ? yyyy ? ? ? zzzzz", psql.getNewSql());
-		assertEquals("a", psql.getParameterNames()[0]);
-		assertEquals("c", psql.getParameterNames()[2]);
-		assertEquals("a", psql.getParameterNames()[3]);
+		assertEquals("xxx ? yyyy ? ? ? zzzzz", NamedParameterUtils.substituteNamedParameters(psql, null));
+		assertEquals("a", psql.getParameterNames().get(0));
+		assertEquals("c", psql.getParameterNames().get(2));
+		assertEquals("a", psql.getParameterNames().get(3));
 		assertEquals(4, psql.getTotalParameterCount());
 		assertEquals(3, psql.getNamedParameterCount());
 		ParsedSql psql2 = NamedParameterUtils.parseSqlStatement(sql2);
-		assertEquals("xxx ? yyyy ? zzzzz", psql2.getNewSql());
-		assertEquals("a", psql2.getParameterNames()[0]);
+		assertEquals("xxx ? yyyy ? zzzzz", NamedParameterUtils.substituteNamedParameters(psql2, null));
+		assertEquals("a", psql2.getParameterNames().get(0));
 		assertEquals(2, psql2.getTotalParameterCount());
 		assertEquals(1, psql2.getNamedParameterCount());
 		ParsedSql psql3 = NamedParameterUtils.parseSqlStatement(sql3);
-		assertEquals("a", psql3.getParameterNames()[0]);
-		assertEquals("b", psql3.getParameterNames()[1]);
-		assertEquals("c", psql3.getParameterNames()[2]);
+		assertEquals("a", psql3.getParameterNames().get(0));
+		assertEquals("b", psql3.getParameterNames().get(1));
+		assertEquals("c", psql3.getParameterNames().get(2));
 	}
 
 	public void testSubstituteNamedParameters() {
@@ -106,7 +106,7 @@ public final class NamedParameterUtilsTests extends TestCase {
 		String expectedSql = "select 'first name' from artists where id = ? and quote = 'exsqueeze me?'";
 		String sql = "select 'first name' from artists where id = :id and quote = 'exsqueeze me?'";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		assertEquals(expectedSql, parsedSql.getNewSql());
+		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
 	}
 
 	/*
@@ -114,8 +114,8 @@ public final class NamedParameterUtilsTests extends TestCase {
 	 */
 	public void testParseSqlStatementWithLogicalAnd() {
 		String expectedSql = "xxx & yyyy";
-		ParsedSql psql = NamedParameterUtils.parseSqlStatement(expectedSql);
-		assertEquals(expectedSql, psql.getNewSql());
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(expectedSql);
+		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
 	}
 
 	/*

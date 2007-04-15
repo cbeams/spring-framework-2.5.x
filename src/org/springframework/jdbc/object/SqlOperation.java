@@ -19,6 +19,8 @@ package org.springframework.jdbc.object;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
+import org.springframework.jdbc.core.namedparam.ParsedSql;
 
 /**
  * Operation object representing a SQL-based operation such as a query or update,
@@ -33,10 +35,16 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 public abstract class SqlOperation extends RdbmsOperation {
 
 	/**
-	 * Object enabling us to create PreparedStatementCreators
-	 * efficiently, based on this class's declared parameters.
+	 * Object enabling us to create PreparedStatementCreators efficiently,
+	 * based on this class's declared parameters.
 	 */
 	private PreparedStatementCreatorFactory preparedStatementFactory;
+
+	/** Parsed representation of the SQL statement */
+	private ParsedSql cachedSql;
+
+	/** Monitor for locking the cached representation of the parsed SQL statement */
+	private final Object parsedSqlMonitor = new Object();
 
 
 	/**
@@ -64,11 +72,24 @@ public abstract class SqlOperation extends RdbmsOperation {
 	protected void onCompileInternal() {
 	}
 
+	/**
+	 * Obtain a parsed representation of this operation's SQL statement.
+	 * <p>Typically used for named parameter parsing.
+	 */
+	protected ParsedSql getParsedSql() {
+		synchronized (this.parsedSqlMonitor) {
+			if (this.cachedSql == null) {
+				this.cachedSql = NamedParameterUtils.parseSqlStatement(getSql());
+			}
+			return this.cachedSql;
+		}
+	}
 
+	
 	/**
 	 * Return a PreparedStatementSetter to perform an operation
 	 * with the given parameters.
-	 * @param params parameter array. May be <code>null</code>.
+	 * @param params the parameter array (may be <code>null</code>)
 	 */
 	protected final PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementSetter(params);
@@ -77,7 +98,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	/**
 	 * Return a PreparedStatementCreator to perform an operation
 	 * with the given parameters.
-	 * @param params parameter array. May be <code>null</code>.
+	 * @param params the parameter array (may be <code>null</code>)
 	 */
 	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
@@ -88,7 +109,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * with the given parameters.
 	 * @param sqlToUse the actual SQL statement to use (if different from
 	 * the factory's, for example because of named parameter expanding)
-	 * @param params parameter array. May be <code>null</code>.
+	 * @param params the parameter array (may be <code>null</code>)
 	 */
 	protected final PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementCreator(sqlToUse, params);

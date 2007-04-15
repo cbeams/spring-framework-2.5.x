@@ -24,6 +24,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
+import org.springframework.jdbc.core.namedparam.ParsedSql;
 import org.springframework.jdbc.support.KeyHolder;
 
 /**
@@ -237,8 +238,10 @@ public class SqlUpdate extends SqlOperation {
 	 */
 	public int updateByNamedParam(Map paramMap) throws DataAccessException {
 		validateNamedParameters(paramMap);
-		Object[] params = NamedParameterUtils.buildValueArray(getSql(), paramMap, getDeclaredParameters());
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(getSql(), new MapSqlParameterSource(paramMap));
+		ParsedSql parsedSql = getParsedSql();
+		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
 		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(sqlToUse, params));
 		checkRowsAffected(rowsAffected);
 		return rowsAffected;
@@ -254,8 +257,11 @@ public class SqlUpdate extends SqlOperation {
 	 */
 	public int updateByNamedParam(Map paramMap, KeyHolder generatedKeyHolder) throws DataAccessException {
 		validateNamedParameters(paramMap);
-		Object[] params = NamedParameterUtils.buildValueArray(getSql(), paramMap, getDeclaredParameters());
-		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(params), generatedKeyHolder);
+		ParsedSql parsedSql = getParsedSql();
+		MapSqlParameterSource paramSource = new MapSqlParameterSource(paramMap);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, getDeclaredParameters());
+		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(sqlToUse, params), generatedKeyHolder);
 		checkRowsAffected(rowsAffected);
 		return rowsAffected;
 	}
