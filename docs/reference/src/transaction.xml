@@ -1509,7 +1509,7 @@ public class SimpleProfiler implements Ordered {
 DataSourceTransactionManager txManager = new DataSourceTransactionManager(getDataSource());
 
 ]]><lineannotation>// configure the <classname>AnnotationTransactionAspect</classname> to use it; this must be done before executing any transactional methods</lineannotation><![CDATA[
-AnnotationTransactionAspect.aspectOf().setTransactionManager (txManager); ]]></programlisting>
+AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></programlisting>
         
             <note>
 	            <para>When using this aspect, you must annotate the <emphasis>implementation</emphasis>
