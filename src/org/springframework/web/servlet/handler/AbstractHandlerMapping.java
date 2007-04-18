@@ -16,6 +16,10 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeansException;
@@ -48,11 +52,16 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private Object defaultHandler;
 
-	private Object[] interceptors;
+	private final List interceptors = new ArrayList();
 
 	private HandlerInterceptor[] adaptedInterceptors;
 
 
+	/**
+	 * Specify the order value for this HandlerMapping bean.
+	 * <p>Default value is Integer.MAX_VALUE, meaning that it's non-ordered.
+	 * @see org.springframework.core.Ordered#getOrder()
+	 */
 	public final void setOrder(int order) {
 	  this.order = order;
 	}
@@ -86,17 +95,32 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see org.springframework.web.servlet.HandlerInterceptor
 	 * @see org.springframework.web.context.request.WebRequestInterceptor
 	 */
-	public final void setInterceptors(Object[] interceptors) {
-		this.interceptors = interceptors;
+	public void setInterceptors(Object[] interceptors) {
+		this.interceptors.addAll(Arrays.asList(interceptors));
 	}
 
 
 	/**
-	 * Calls the <code>initInterceptors()</code> method.
+	 * Initializes the interceptors.
+	 * @see #extendInterceptors(java.util.List)
 	 * @see #initInterceptors()
 	 */
 	protected void initApplicationContext() throws BeansException {
+		extendInterceptors(this.interceptors);
 		initInterceptors();
+	}
+
+	/**
+	 * Extension hook that subclasses can override to register additional interceptors,
+	 * given the configured interceptors (see {@link #setInterceptors}).
+	 * <p>Will be invoked before {@link #initInterceptors()} adapts the specified
+	 * interceptors into {@link HandlerInterceptor} instances.
+	 * <p>The default implementation is empty.
+	 * @param interceptors the configured interceptor List (never <code>null</code>),
+	 * allowing to add further interceptors before as well as after the existing
+	 * interceptors
+	 */
+	protected void extendInterceptors(List interceptors) {
 	}
 
 	/**
@@ -105,13 +129,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #adaptInterceptor
 	 */
 	protected void initInterceptors() {
-		if (this.interceptors != null) {
-			this.adaptedInterceptors = new HandlerInterceptor[this.interceptors.length];
-			for (int i = 0; i < this.interceptors.length; i++) {
-				if (this.interceptors[i] == null) {
+		if (!this.interceptors.isEmpty()) {
+			this.adaptedInterceptors = new HandlerInterceptor[this.interceptors.size()];
+			for (int i = 0; i < this.interceptors.size(); i++) {
+				Object interceptor = this.interceptors.get(i);
+				if (interceptor == null) {
 					throw new IllegalArgumentException("Entry number " + i + " in interceptors array is null");
 				}
-				this.adaptedInterceptors[i] = adaptInterceptor(this.interceptors[i]);
+				this.adaptedInterceptors[i] = adaptInterceptor(interceptor);
 			}
 		}
 	}
