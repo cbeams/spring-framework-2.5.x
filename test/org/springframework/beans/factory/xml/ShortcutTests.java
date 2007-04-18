@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,16 @@ import junit.framework.TestCase;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public class ShortcutTests extends TestCase {
 
-	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-	private final XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
-
 	public void testSimpleBeanConfigured() throws Exception {
-		loadDefinitions("shortcutTests.xml");
+		XmlBeanFactory beanFactory = new XmlBeanFactory(new ClassPathResource("shortcutTests.xml", getClass()));
 		ITestBean rob = (TestBean) beanFactory.getBean("rob");
 		ITestBean sally = (TestBean) beanFactory.getBean("sally");
 		assertEquals("Rob Harrop", rob.getName());
@@ -43,7 +39,7 @@ public class ShortcutTests extends TestCase {
 	}
 
 	public void testInnerBeanConfigured() throws Exception {
-		loadDefinitions("shortcutTests.xml");
+		XmlBeanFactory beanFactory = new XmlBeanFactory(new ClassPathResource("shortcutTests.xml", getClass()));
 		TestBean sally = (TestBean) beanFactory.getBean("sally2");
 		ITestBean rob = (TestBean) sally.getSpouse();
 		assertEquals("Rob Harrop", rob.getName());
@@ -53,7 +49,7 @@ public class ShortcutTests extends TestCase {
 
 	public void testWithPropertyDefinedTwice() throws Exception {
 		try {
-			loadDefinitions("shortcutWithErrorsTests.xml");
+			new XmlBeanFactory(new ClassPathResource("shortcutTestsWithErrors.xml", getClass()));
 			fail("Should not be able to load a file with property specified twice.");
 		}
 		catch (BeanDefinitionStoreException e) {
@@ -61,8 +57,10 @@ public class ShortcutTests extends TestCase {
 		}
 	}
 
-	private void loadDefinitions(String path) {
-		reader.loadBeanDefinitions(new ClassPathResource(path, getClass()));
+	public void testPropertyWithNameEndingInRef() throws Exception {
+		XmlBeanFactory beanFactory = new XmlBeanFactory(new ClassPathResource("shortcutTests.xml", getClass()));
+		ITestBean sally = (TestBean) beanFactory.getBean("derivedSally");
+		assertEquals("r", sally.getSpouse().getName());
 	}
 
 }
