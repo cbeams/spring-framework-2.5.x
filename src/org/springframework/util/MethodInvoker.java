@@ -257,6 +257,14 @@ public class MethodInvoker {
 	}
 
 	/**
+	 * Return whether this invoker has been prepared already,
+	 * i.e. whether it allows access to {@link #getPreparedMethod()} already.
+	 */
+	public boolean isPrepared() {
+		return (this.methodObject != null);
+	}
+
+	/**
 	 * Invoke the specified method.
 	 * <p>The invoker needs to have been prepared before.
 	 * @return the object (possibly null) returned by the method invocation,
