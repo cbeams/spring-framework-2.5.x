@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -616,14 +616,14 @@ public interface HibernateOperations {
 	/**
 	 * Execute an HQL query, binding one value to a ":" named parameter
 	 * in the query string.
-	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param queryString a query expressed in Hibernate's query language
 	 * @param paramName the name of the parameter
 	 * @param value the value of the parameter
 	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#getNamedQuery(String)
 	 */
-	List findByNamedParam(String queryName, String paramName, Object value)
+	List findByNamedParam(String queryString, String paramName, Object value)
 			throws DataAccessException;
 
 	/**

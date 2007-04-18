@@ -451,7 +451,7 @@ public interface HibernateOperations {
 	/**
 	 * Execute an HQL query, binding one value to a ":" named parameter
 	 * in the query string.
-	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param queryString a query expressed in Hibernate's query language
 	 * @param paramName the name of parameter
 	 * @param value the value of the parameter
 	 * @return a List containing the results of the query execution
@@ -459,13 +459,13 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
-	List findByNamedParam(String queryName, String paramName, Object value)
+	List findByNamedParam(String queryString, String paramName, Object value)
 			throws DataAccessException;
 
 	/**
 	 * Execute an HQL query, binding one value to a ":" named parameter
 	 * in the query string.
-	 * @param queryName the name of a Hibernate query in a mapping file
+	 * @param queryString a query expressed in Hibernate's query language
 	 * @param paramName the name of the parameter
 	 * @param value the value of the parameter
 	 * @param type Hibernate type of the parameter (or <code>null</code>)
@@ -474,7 +474,7 @@ public interface HibernateOperations {
 	 * @see net.sf.hibernate.Session#find(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#getNamedQuery(String)
 	 */
-	List findByNamedParam(String queryName, String paramName, Object value, Type type)
+	List findByNamedParam(String queryString, String paramName, Object value, Type type)
 			throws DataAccessException;
 
 	/**
