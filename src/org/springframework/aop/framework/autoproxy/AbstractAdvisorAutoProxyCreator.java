@@ -26,26 +26,23 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.OrderComparator;
 
 /**
- * Abstract BeanPostProcessor implementation that creates AOP proxies.
- * This class is completely generic; it contains no special code to handle
- * any particular aspects, such as pooling aspects.
+ * Generic auto proxy creator that builds AOP proxies for specific beans
+ * based on detected Advisors for each bean.
  *
- * <p>Subclasses must implement the abstract <code>findCandidateAdvisors()</code>
+ * <p>Subclasses must implement the abstract {@link #findCandidateAdvisors()}
  * method to return a list of Advisors applying to any object. Subclasses can
- * also override the inherited <code>shouldSkip</code> method to exclude certain
- * objects from auto-proxying, but they must be careful to invoke the base
- * <code>shouldSkip</code> method, which tries to avoid circular reference
- * problems and infinite loops.
+ * also override the inherited {@link #shouldSkip} method to exclude certain
+ * objects from auto-proxying.
  *
- * <p>Advisors or advices requiring ordering should implement the Ordered interface.
- * This class sorts advisors by Ordered order value. Advisors that don't implement
- * the Ordered interface will be considered to be unordered, and will appear
+ * <p>Advisors or advices requiring ordering should implement the
+ * {@link org.springframework.core.Ordered} interface. This class sorts
+ * Advisors by Ordered order value. Advisors that don't implement the
+ * Ordered interface will be considered as unordered; they will appear
  * at the end of the advisor chain in undefined order.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #findCandidateAdvisors
- * @see org.springframework.aop.support.AopUtils
  */
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 
@@ -123,9 +120,9 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * Extension hook that subclasses can choose to register additional Advisors,
-	 * given the sorted Advisors obtained to date. The default implementation
-	 * is empty.
+	 * Extension hook that subclasses can override to register additional Advisors,
+	 * given the sorted Advisors obtained to date.
+	 * <p>The default implementation is empty.
 	 * <p>Typically used to add Advisors that expose contextual information
 	 * required by some of the later advisors.
 	 * @param candidateAdvisors Advisors that have already been identified as

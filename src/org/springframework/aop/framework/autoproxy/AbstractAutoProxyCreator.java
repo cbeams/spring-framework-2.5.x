@@ -146,7 +146,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	/**
 	 * Set the ordering which will apply to this class's implementation
 	 * of Ordered, used when applying multiple BeanPostProcessors.
-	 * Default value is Integer.MAX_VALUE, meaning that it's non-ordered.
+	 * <p>Default value is <code>Integer.MAX_VALUE</code>, meaning that it's non-ordered.
 	 * @param order ordering value
 	 */
 	public final void setOrder(int order) {
@@ -352,6 +352,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * a circular reference. This implementation returns <code>false</code>.
 	 * @param beanClass the class of the bean
 	 * @param beanName the name of the bean
+	 * @return whether to skip the given bean
 	 */
 	protected boolean shouldSkip(Class beanClass, String beanName) {
 		return false;

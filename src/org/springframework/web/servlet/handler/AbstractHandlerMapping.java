@@ -59,7 +59,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Specify the order value for this HandlerMapping bean.
-	 * <p>Default value is Integer.MAX_VALUE, meaning that it's non-ordered.
+	 * <p>Default value is <code>Integer.MAX_VALUE</code>, meaning that it's non-ordered.
 	 * @see org.springframework.core.Ordered#getOrder()
 	 */
 	public final void setOrder(int order) {
