@@ -27,19 +27,22 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.Conventions;
 
 /**
- * Simple <code>NamespaceHandler</code> implementation that maps custom attributes directly through
- * to bean properties. An important point to note is that this <code>NamespaceHandler</code> does not
- * have a corresponding schema since there is no way to know in advance all possible attribute names.
- * <p/>
- * An example of the usage of this <code>NamespaceHandler</code> is shown below:
+ * Simple <code>NamespaceHandler</code> implementation that maps custom attributes
+ * directly through to bean properties. An important point to note is that this
+ * <code>NamespaceHandler</code> does not have a corresponding schema since there
+ * is no way to know in advance all possible attribute names.
+ *
+ * <p>An example of the usage of this <code>NamespaceHandler</code> is shown below:
+ *
  * <pre class="code">
- * &lt;bean id=&quot;rob&quot; class=&quot;..TestBean&quot; p:name=&quot;Rob Harrop&quot; p:spouse-ref=&quot;sally&quot;/&gt;
- * </pre>
- * Here the '<code>p:name</code>' corresponds directly to the '<code>name</code>' property on class
- * '<code>TestBean</code>'. The '<code>p:spouse-ref</code>' attributes corresponds to the
- * '<code>spouse</code>' property and rather than being the concrete value it conatins the name
- * of the bean that will be injected into that property.
- * 
+ * &lt;bean id=&quot;rob&quot; class=&quot;..TestBean&quot; p:name=&quot;Rob Harrop&quot; p:spouse-ref=&quot;sally&quot;/&gt;</pre>
+ *
+ * Here the '<code>p:name</code>' corresponds directly to the '<code>name</code>'
+ * property on class '<code>TestBean</code>'. The '<code>p:spouse-ref</code>'
+ * attributes corresponds to the '<code>spouse</code>' property and, rather
+ * than being the concrete value, it contains the name of the bean that will
+ * be injected into that property.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
@@ -69,7 +72,8 @@ public class SimplePropertyNamespaceHandler implements NamespaceHandler {
 			}
 			if (propertyName.endsWith(REF_SUFFIX)) {
 				propertyName = propertyName.substring(0, propertyName.length() - REF_SUFFIX.length());
-				pvs.addPropertyValue(Conventions.attributeNameToPropertyName(propertyName), new RuntimeBeanReference(propertyValue));
+				pvs.addPropertyValue(
+						Conventions.attributeNameToPropertyName(propertyName), new RuntimeBeanReference(propertyValue));
 			}
 			else {
 				pvs.addPropertyValue(Conventions.attributeNameToPropertyName(propertyName), propertyValue);
