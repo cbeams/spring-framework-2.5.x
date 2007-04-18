@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.config;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -196,12 +195,11 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	 * or <code>null</code> if not known in advance.
 	 */
 	public Class getObjectType() {
-		Method preparedMethod = getPreparedMethod();
-		if (preparedMethod == null) {
+		if (!isPrepared()) {
 			// Not fully initialized yet -> return null to indicate "not known yet".
 			return null;
 		}
-		return preparedMethod.getReturnType();
+		return getPreparedMethod().getReturnType();
 	}
 
 }
