@@ -8,6 +8,7 @@ Changes in version 2.0.5 (2007-05-01)
 
 Package org.springframework.beans
 * default editor settings get copied to nested beans even if no default editors have been used yet
+* revised MethodInvokingFactoryBean's "getObjectType()" implementation to gracefully return null if not prepared already
 * AbstractBeanFactory uses concurrent Maps for singletons, aliases and bean definitions (for better concurrency)
 * added overloaded "rootBeanDefinition" factory methods with bean class name (instead of Class) to BeanDefinitionBuilder
 
@@ -56,9 +57,11 @@ Package org.springframework.ui
 
 Package org.springframework.web
 * DispatcherServlet/Portlet only refresh their strategies if their own ApplicationContext refreshes
-* XmlViewResolver (and similar strategies) work again in combination with the implicit default BeanNameUrlHandlerMapping
+* made AbstractHandlerMapping's "setInterceptors" method non-final
+* added "extendInterceptors" template method to AbstractHandlerMapping, for registering additional interceptors
 * UrlFilenameViewController and InternalPathMethodNameResolver prefer a concurrent Map for caching purposes
 * added "localesToInitialize" property to ResourceBundleViewResolver, for initializing common locales eagerly
+* XmlViewResolver (and similar strategies) work again in combination with the implicit default BeanNameUrlHandlerMapping
 * JSP SelectTag always renders a full closing tag (i.e. never renders a short-circuited opening tag with "/>" ending)
 
 
