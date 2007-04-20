@@ -403,7 +403,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 			babpp.postProcessAfterInstantiation(new SetterWithNoArgs(), "bean name does not matter");
 			fail("Can't inject this setter");
 		}
-		catch (IllegalArgumentException ex) {
+		catch (IllegalStateException ex) {
 			// Ok
 		}
 	}

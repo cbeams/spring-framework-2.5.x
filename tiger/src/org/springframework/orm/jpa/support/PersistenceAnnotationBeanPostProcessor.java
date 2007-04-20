@@ -38,9 +38,6 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
@@ -150,8 +147,6 @@ import org.springframework.util.ReflectionUtils;
 public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
 	private Map<String, String> persistenceUnits;
 
 	private Map<String, String> persistenceContexts;
@@ -162,7 +157,8 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 
 	private ListableBeanFactory beanFactory;
 
-	private Map<Class<?>, List<AnnotatedMember>> classMetadata = new HashMap<Class<?>, List<AnnotatedMember>>();
+	private final Map<Class<?>, List<AnnotatedMember>> annotationMetadataCache =
+			new HashMap<Class<?>, List<AnnotatedMember>>();
 
 
 	public PersistenceAnnotationBeanPostProcessor() {
@@ -270,7 +266,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	}
 
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
-		List<AnnotatedMember> metadata = findClassMetadata(bean.getClass());
+		List<AnnotatedMember> metadata = findAnnotationMetadata(bean.getClass());
 		for (AnnotatedMember member : metadata) {
 			member.inject(bean);
 		}
@@ -292,9 +288,9 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	}
 
 
-	private List<AnnotatedMember> findClassMetadata(Class<? extends Object> clazz) {
-		synchronized (this.classMetadata) {
-			List<AnnotatedMember> metadata = this.classMetadata.get(clazz);
+	private List<AnnotatedMember> findAnnotationMetadata(Class clazz) {
+		synchronized (this.annotationMetadataCache) {
+			List<AnnotatedMember> metadata = this.annotationMetadataCache.get(clazz);
 			if (metadata == null) {
 				final List<AnnotatedMember> newMetadata = new LinkedList<AnnotatedMember>();
 				ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
@@ -308,7 +304,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 					}
 				});
 				metadata = newMetadata;
-				this.classMetadata.put(clazz, metadata);
+				this.annotationMetadataCache.put(clazz, metadata);
 			}
 			return metadata;
 		}
@@ -317,7 +313,15 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	private void addIfPresent(List<AnnotatedMember> metadata, Member member) {
 		AnnotatedElement ae = (AnnotatedElement) member;
 		PersistenceContext pc = ae.getAnnotation(PersistenceContext.class);
+		PersistenceUnit pu = ae.getAnnotation(PersistenceUnit.class);
 		if (pc != null) {
+			if (pu != null) {
+				throw new IllegalStateException(
+						"Method may only be annotated with either @PersistenceContext or @PersistenceUnit, not both");
+			}
+			if (member instanceof Method && ((Method) member).getParameterTypes().length != 1) {
+				throw new IllegalStateException("PersistenceContext annotation requires a single-arg method: " + member);
+			}
 			Properties properties = null;
 			PersistenceProperty[] pps = pc.properties();
 			if (!ObjectUtils.isEmpty(pps)) {
@@ -329,11 +333,11 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 			}
 			metadata.add(new AnnotatedMember(member, pc.unitName(), pc.type(), properties));
 		}
-		else {
-			PersistenceUnit pu = ae.getAnnotation(PersistenceUnit.class);
-			if (pu != null) {
-				metadata.add(new AnnotatedMember(member, pu.unitName()));
+		else if (pu != null) {
+			if (member instanceof Method && ((Method) member).getParameterTypes().length != 1) {
+				throw new IllegalStateException("PersistenceUnit annotation requires a single-arg method: " + member);
 			}
+			metadata.add(new AnnotatedMember(member, pu.unitName()));
 		}
 	}
 
