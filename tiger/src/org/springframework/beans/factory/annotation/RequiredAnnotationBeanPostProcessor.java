@@ -25,15 +25,15 @@ import java.util.List;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanInitializationException;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
- * A {@link BeanFactoryPostProcessor} implementation that ensures that JavaBean
- * properties on beans that are marked with an (arbitrary) {@link Annotation}
- * are actually (configured to be) dependency-injected with a value.
+ * {@link org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor}
+ * implementation which enforces required JavaBean properties to have been configured.
+ * Required bean properties are detected through an annotation: by default,
+ * Spring's {@link Required} annotation.
  *
  * <p>The motivation for the existence of this BeanPostProcessor is to allow
  * developers to annotate the setter properties of their own classes with an
@@ -46,12 +46,13 @@ import org.springframework.util.Assert;
  * <p>Please note that an 'init' method may still need to implemented (and may
  * still be desirable), because all that this class does is enforce that a
  * 'required' property has actually been configured with a value. It does
- * <b>not</b> check anything else... in particular, it does not check that a
+ * <b>not</b> check anything else... In particular, it does not check that a
  * configured value is not <code>null</code>.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #setRequiredAnnotationType
  * @see Required
  */
 public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter {
@@ -61,11 +62,11 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 
 	/**
 	 * Set the 'required' annotation type.
-	 * The default required annotation type is the {@link Required} annotation.
+	 * <p>The default required annotation type is the Spring-provided
+	 * {@link Required} annotation.
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation type to indicate that a property value
 	 * is required.
-	 * @param requiredAnnotationType the desired annotation type
 	 */
 	public void setRequiredAnnotationType(Class<? extends Annotation> requiredAnnotationType) {
 		Assert.notNull(requiredAnnotationType, "'requiredAnnotationType' must not be null");
