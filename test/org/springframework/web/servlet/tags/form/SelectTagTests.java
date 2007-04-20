@@ -40,8 +40,9 @@ import org.springframework.web.servlet.support.BindStatus;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
-public final class SelectTagTests extends AbstractFormTagTests {
+public class SelectTagTests extends AbstractFormTagTests {
 
 	private SelectTag tag;
 
@@ -58,9 +59,22 @@ public final class SelectTagTests extends AbstractFormTagTests {
 	}
 
 
-	public void testEmpty() throws Exception {
+	public void testEmptyItems() throws Exception {
 		this.tag.setPath("country");
 		this.tag.setItems(Collections.EMPTY_LIST);
+
+		this.tag.setItemValue("isoCode");
+		this.tag.setItemLabel("name");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertEquals("<select id=\"country\" name=\"country\"></select>", output);
+	}
+
+	public void testNullItems() throws Exception {
+		this.tag.setPath("country");
+		this.tag.setItems(null);
 
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");

@@ -48,6 +48,12 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	public static final String LIST_VALUE_PAGE_ATTRIBUTE =
 			"org.springframework.web.servlet.tags.form.SelectTag.listValue";
 
+	/**
+	 * Marker object for items that have been specified but resolve to null.
+	 * Allows to differentiate between 'set but null' and 'not set at all'.
+	 */
+	private static final Object EMPTY = new Object();
+
 
 	/**
 	 * The {@link Collection}, {@link Map} or array of objects used to generate the inner
@@ -95,7 +101,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * @param items the items that comprise the options of this selection
 	 */
 	public void setItems(Object items) {
-		this.items = items;
+		this.items = (items != null ? items : EMPTY);
 	}
 
 	/**
@@ -189,29 +195,32 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("select");
 		writeDefaultAttributes(tagWriter);
-
 		if (isMultiple()) {
 			tagWriter.writeAttribute("multiple", "multiple");
 		}
-
 		tagWriter.writeOptionalAttributeValue("size", getDisplayString(evaluate("size", getSize())));
 
 		Object items = getItems();
 		if (items != null) {
-			Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
-			String valueProperty = (getItemValue() != null ?
-					ObjectUtils.getDisplayString(evaluate("itemValue", getItemValue())) : null);
-			String labelProperty = (getItemLabel() != null ?
-					ObjectUtils.getDisplayString(evaluate("itemLabel", getItemLabel())) : null);
-			OptionWriter optionWriter =
-					new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
-			optionWriter.writeOptions(tagWriter);
+			// Items specified, but might still be empty...
+			if (items != EMPTY) {
+				Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
+				if (itemsObject != null) {
+					String valueProperty = (getItemValue() != null ?
+							ObjectUtils.getDisplayString(evaluate("itemValue", getItemValue())) : null);
+					String labelProperty = (getItemLabel() != null ?
+							ObjectUtils.getDisplayString(evaluate("itemLabel", getItemLabel())) : null);
+					OptionWriter optionWriter =
+							new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
+					optionWriter.writeOptions(tagWriter);
+				}
+			}
 			tagWriter.endTag(true);
 			writeHiddenTagIfNecessary(tagWriter);
 			return EVAL_PAGE;
 		}
 		else {
-			// using nested <form:option/> tags so just expose the value in the PageContext
+			// Using nested <form:option/> tags, so just expose the value in the PageContext...
 			tagWriter.forceBlock();
 			this.tagWriter = tagWriter;
 			this.pageContext.setAttribute(LIST_VALUE_PAGE_ATTRIBUTE, getBindStatus());
