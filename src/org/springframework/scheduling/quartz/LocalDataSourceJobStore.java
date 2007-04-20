@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.quartz.utils.DBConnectionManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 /**
- * Subclass of Quartz' JobStoreCMT class that delegates to a Spring-managed
+ * Subclass of Quartz's JobStoreCMT class that delegates to a Spring-managed
  * DataSource instead of using a Quartz-managed connection pool. This JobStore
  * will be used if SchedulerFactoryBean's "dataSource" property is set.
  *
@@ -46,8 +46,8 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * connection handling methods that are aware of a current transaction.
  *
  * <p>Note that all Quartz Scheduler operations that affect the persistent
- * job store should usually be performed within active transaction, as they
- * assume to get proper locks etc.
+ * job store should usually be performed within active transactions,
+ * as they assume to get proper locks etc.
  *
  * @author Juergen Hoeller
  * @since 1.1

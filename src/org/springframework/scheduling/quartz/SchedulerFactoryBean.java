@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,9 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.CollectionUtils;
 
 /**
- * FactoryBean that sets up a Quartz Scheduler and exposes it for bean references.
+ * FactoryBean that sets up a Quartz {@link org.quartz.Scheduler},
+ * manages its lifecycle as part of the Spring application context,
+ * and exposes the Scheduler reference for dependency injection.
  *
  * <p>Allows registration of JobDetails, Calendars and Triggers, automatically
  * starting the scheduler on initialization and shutting it down on destruction.
@@ -85,9 +87,9 @@ import org.springframework.util.CollectionUtils;
  * <p>The preferred way to achieve transactional execution is to demarcate
  * declarative transactions at the business facade level, which will
  * automatically apply to Scheduler operations performed within those scopes.
- * Alternatively, define a TransactionProxyFactoryBean for the Scheduler itself.
+ * Alternatively, you may add transactional advice for the Scheduler itself.
  *
- * <p>This version of SchedulerFactoryBean requires Quartz 1.5 or higher.
+ * <p>This version of Spring's SchedulerFactoryBean requires Quartz 1.5 or higher.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
@@ -309,7 +311,7 @@ public class SchedulerFactoryBean
 	 * <p>This is not relevant with a local DataSource instance and Spring transactions.
 	 * Specifying a single default DataSource as "dataSource" is sufficient there.
 	 * @see #setDataSource
-	 * @see org.springframework.scheduling.quartz.LocalDataSourceJobStore
+	 * @see LocalDataSourceJobStore
 	 */
 	public void setNonTransactionalDataSource(DataSource nonTransactionalDataSource) {
 		this.nonTransactionalDataSource = nonTransactionalDataSource;

@@ -30,10 +30,9 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor}
- * implementation which enforces required JavaBean properties to have been configured.
- * Required bean properties are detected through an annotation: by default,
- * Spring's {@link Required} annotation.
+ * BeanPostProcessor that enforces required JavaBean properties to have been
+ * configured. Required bean properties are detected through an annotation:
+ * by default, Spring's {@link Required} annotation.
  *
  * <p>The motivation for the existence of this BeanPostProcessor is to allow
  * developers to annotate the setter properties of their own classes with an
