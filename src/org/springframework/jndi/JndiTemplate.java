@@ -146,8 +146,7 @@ public class JndiTemplate {
 		Object jndiObject = lookup(name);
 		if (requiredType != null && !requiredType.isInstance(jndiObject)) {
 			throw new TypeMismatchNamingException(
-					"Object [" + jndiObject + "] available at JNDI location [" +
-					name + "] is not assignable to [" + requiredType.getName() + "]");
+					name, requiredType, (jndiObject != null ? jndiObject.getClass() : null));
 		}
 		return jndiObject;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,46 @@ import javax.naming.NamingException;
  */
 public class TypeMismatchNamingException extends NamingException {
 
+	private Class requiredType;
+
+	private Class actualType;
+
+
+	/**
+	 * Construct a new TypeMismatchNamingException,
+	 * building an explanation text from the given arguments.
+	 * @param jndiName the JNDI name
+	 * @param requiredType the required type for the lookup
+	 * @param actualType the actual type that the lookup returned
+	 */
+	public TypeMismatchNamingException(String jndiName, Class requiredType, Class actualType) {
+		super("Object of type [" + actualType + "] available at JNDI location [" +
+				jndiName + "] is not assignable to [" + requiredType.getName() + "]");
+		this.requiredType = requiredType;
+		this.actualType = actualType;
+	}
+
 	/**
 	 * Construct a new TypeMismatchNamingException.
 	 * @param explanation the explanation text
 	 */
 	public TypeMismatchNamingException(String explanation) {
 		super(explanation);
+	}
+
+
+	/**
+	 * Return the required type for the lookup, if available.
+	 */
+	public final Class getRequiredType() {
+		return this.requiredType;
+	}
+
+	/**
+	 * Return the actual type that the lookup returned, if available.
+	 */
+	public final Class getActualType() {
+		return this.actualType;
 	}
 
 }
