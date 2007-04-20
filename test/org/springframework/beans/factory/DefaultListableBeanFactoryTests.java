@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NestedTestBean;
@@ -45,6 +46,7 @@ import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
@@ -922,6 +924,41 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.registerBeanDefinition("test",
 				new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class.getName(), null, null));
 		lbf.preInstantiateSingletons();
+	}
+
+	public void testPrototypeWithArrayConversionForConstructor() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		List list = new ManagedList();
+		list.add("myName");
+		list.add("myBeanName");
+		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class, false);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(list);
+		lbf.registerBeanDefinition("test", bd);
+		DerivedTestBean tb = (DerivedTestBean) lbf.getBean("test");
+		assertEquals("myName", tb.getName());
+		assertEquals("myBeanName", tb.getBeanName());
+		DerivedTestBean tb2 = (DerivedTestBean) lbf.getBean("test");
+		assertTrue(tb != tb2);
+		assertEquals("myName", tb2.getName());
+		assertEquals("myBeanName", tb2.getBeanName());
+	}
+
+	public void testPrototypeWithArrayConversionForFactoryMethod() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		List list = new ManagedList();
+		list.add("myName");
+		list.add("myBeanName");
+		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class, false);
+		bd.setFactoryMethodName("create");
+		bd.getConstructorArgumentValues().addGenericArgumentValue(list);
+		lbf.registerBeanDefinition("test", bd);
+		DerivedTestBean tb = (DerivedTestBean) lbf.getBean("test");
+		assertEquals("myName", tb.getName());
+		assertEquals("myBeanName", tb.getBeanName());
+		DerivedTestBean tb2 = (DerivedTestBean) lbf.getBean("test");
+		assertTrue(tb != tb2);
+		assertEquals("myName", tb2.getName());
+		assertEquals("myBeanName", tb2.getBeanName());
 	}
 
 	public void testPrototypeCreationIsFastEnough() {

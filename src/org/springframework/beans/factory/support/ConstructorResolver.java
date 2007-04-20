@@ -92,6 +92,7 @@ abstract class ConstructorResolver {
 			// Found a cached constructor...
 			argsToUse = mbd.resolvedConstructorArguments;
 			if (argsToUse == null) {
+				Class[] paramTypes = constructorToUse.getParameterTypes();
 				Object[] argsToResolve = mbd.preparedConstructorArguments;
 				BeanDefinitionValueResolver valueResolver =
 						new BeanDefinitionValueResolver(this.beanFactory, beanName, mbd, bw);
@@ -100,11 +101,10 @@ abstract class ConstructorResolver {
 					Object argValue = argsToResolve[i];
 					if (argValue instanceof BeanMetadataElement) {
 						String argName = "constructor argument with index " + i;
-						argsToUse[i] = valueResolver.resolveValueIfNecessary(argName, argValue);
+						argValue = valueResolver.resolveValueIfNecessary(argName, argValue);
 					}
-					else {
-						argsToUse[i] = argValue;
-					}
+					argsToUse[i] = bw.convertIfNecessary(argValue, paramTypes[i],
+							new MethodParameter(constructorToUse, i));
 				}
 			}
 		}
@@ -217,6 +217,7 @@ abstract class ConstructorResolver {
 			else {
 				argsToUse = mbd.resolvedConstructorArguments;
 				if (argsToUse == null) {
+					Class[] paramTypes = factoryMethodToUse.getParameterTypes();
 					Object[] argsToResolve = mbd.preparedConstructorArguments;
 					BeanDefinitionValueResolver valueResolver =
 							new BeanDefinitionValueResolver(this.beanFactory, beanName, mbd, bw);
@@ -225,11 +226,10 @@ abstract class ConstructorResolver {
 						Object argValue = argsToResolve[i];
 						if (argValue instanceof BeanMetadataElement) {
 							String argName = "factory method argument with index " + i;
-							argsToUse[i] = valueResolver.resolveValueIfNecessary(argName, argValue);
+							argValue = valueResolver.resolveValueIfNecessary(argName, argValue);
 						}
-						else {
-							argsToUse[i] = argValue;
-						}
+						argsToUse[i] = bw.convertIfNecessary(argValue, paramTypes[i],
+								new MethodParameter(factoryMethodToUse, i));
 					}
 				}
 			}

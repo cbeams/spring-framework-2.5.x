@@ -34,8 +34,26 @@ public class DerivedTestBean extends TestBean implements Serializable, BeanNameA
 	private boolean destroyed;
 
 
+	public DerivedTestBean() {
+	}
+
+	public DerivedTestBean(String[] names) {
+		if (names == null || names.length < 2) {
+			throw new IllegalArgumentException("Invalid names array");
+		}
+		setName(names[0]);
+		setBeanName(names[1]);
+	}
+
+	public static DerivedTestBean create(String[] names) {
+		return new DerivedTestBean(names);
+	}
+
+
 	public void setBeanName(String beanName) {
-		this.beanName = beanName;
+		if (this.beanName == null || beanName == null) {
+			this.beanName = beanName;
+		}
 	}
 
 	public String getBeanName() {
