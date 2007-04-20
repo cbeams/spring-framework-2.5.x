@@ -21,7 +21,6 @@ import java.util.Map;
 
 import javax.servlet.jsp.JspException;
 
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
 
@@ -36,6 +35,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * (typically one) nested {@link OptionsTag}.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  * @see OptionTag
  */
@@ -95,7 +95,6 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * @param items the items that comprise the options of this selection
 	 */
 	public void setItems(Object items) {
-		Assert.notNull(items, "'items' must not be null");
 		this.items = items;
 	}
 
@@ -115,7 +114,6 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * <p>May be a runtime expression.
 	 */
 	public void setItemValue(String itemValue) {
-		Assert.hasText(itemValue, "'itemValue' must not be empty");
 		this.itemValue = itemValue;
 	}
 
@@ -133,7 +131,6 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * <p>May be a runtime expression.
 	 */
 	public void setItemLabel(String itemLabel) {
-		Assert.hasText(itemLabel, "'itemLabel' must not be empty");
 		this.itemLabel = itemLabel;
 	}
 
@@ -152,7 +149,6 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * @param size the desired value of the '<code>size</code>' attribute
 	 */
 	public void setSize(String size) {
-		Assert.hasText(size, "'size' must not be empty");
 		this.size = size;
 	}
 
