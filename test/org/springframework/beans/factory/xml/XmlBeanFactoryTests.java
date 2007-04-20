@@ -74,7 +74,7 @@ import org.springframework.util.StopWatch;
  * @author Rick Evans
  */
 public class XmlBeanFactoryTests extends TestCase {
-	
+
 	/**
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2368
 	 */
@@ -694,6 +694,10 @@ public class XmlBeanFactoryTests extends TestCase {
 		DependenciesBean rod2 = (DependenciesBean) xbf.getBean("rod2");
 		// should have been autowired
 		assertEquals(kerry, rod2.getSpouse());
+
+		DependenciesBean rod2a = (DependenciesBean) xbf.getBean("rod2a");
+		// should have been set explicitly
+		assertEquals(kerry, rod2a.getSpouse());
 
 		ConstructorDependenciesBean rod3 = (ConstructorDependenciesBean) xbf.getBean("rod3");
 		IndexedTestBean other = (IndexedTestBean) xbf.getBean("other");
