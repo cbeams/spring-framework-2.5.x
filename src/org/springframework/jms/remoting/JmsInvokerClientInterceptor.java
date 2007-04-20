@@ -46,6 +46,10 @@ import org.springframework.util.Assert;
 /**
  * Interceptor for accessing a JMS-based remote service.
  *
+ * <p>Serializes remote invocation objects and deserializes remote invocation
+ * result objects. Uses Java serialization just like RMI, but with the JMS
+ * provider as communication infrastructure.
+ *
  * <p>To be configured with a {@link javax.jms.QueueConnectionFactory} and a
  * target queue (either as {@link javax.jms.Queue} reference or as queue name).
  *
@@ -230,6 +234,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * for the given RemoteInvocation object.
 	 * @param session the current JMS Session
 	 * @param invocation the remote invocation to send
+	 * @return the JMS Message to send
 	 * @throws JMSException if the message could not be created
 	 */
 	protected Message createRequestMessage(Session session, RemoteInvocation invocation) throws JMSException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,15 @@ import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 import org.springframework.remoting.support.RemoteInvocationResult;
 
 /**
- * JMS MessageListener that exports the specified service bean as a
+ * JMS message listener that exports the specified service bean as a
  * JMS service endpoint, accessible via a JMS invoker proxy.
+ *
+ * <p>Note that this class implements Spring's
+ * {@link org.springframework.jms.listener.SessionAwareMessageListener}
+ * interface, since it requires access to the active JMS Session.
+ * Hence, this class can only be used with message listener containers
+ * which support the SessionAwareMessageListener interface (e.g. Spring's
+ * {@link org.springframework.jms.listener.DefaultMessageListenerContainer}).
  *
  * @author Juergen Hoeller
  * @author James Strachan
@@ -76,7 +83,9 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	/**
 	 * Read a RemoteInvocation from the given JMS message.
 	 * @param requestMessage current request message
-	 * @return the RemoteInvocation object
+	 * @return the RemoteInvocation object (or <code>null</code>
+	 * in case of an invalid message that will simply be ignored)
+	 * @throws javax.jms.JMSException in case of message access failure
 	 */
 	protected RemoteInvocation readRemoteInvocation(Message requestMessage) throws JMSException {
 		if (requestMessage instanceof ObjectMessage) {
@@ -134,12 +143,16 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	}
 
 	/**
-	 * Callback that is invoked by <code>readRemoteInvocation</code>
+	 * Callback that is invoked by {@link #readRemoteInvocation}
 	 * when it encounters an invalid request message.
 	 * <p>The default implementation either discards the invalid message or
 	 * throws a MessageFormatException - according to the "ignoreInvalidRequests"
 	 * flag, which is set to "true" (that is, discard invalid messages) by default.
 	 * @param requestMessage the invalid request message
+	 * @return the RemoteInvocation to expose for the invalid request (typically
+	 * <code>null</code> in case of an invalid message that will simply be ignored)
+	 * @throws javax.jms.JMSException in case of the invalid request supposed
+	 * to lead to an exception (instead of ignoring it)
 	 * @see #readRemoteInvocation
 	 * @see #setIgnoreInvalidRequests
 	 */

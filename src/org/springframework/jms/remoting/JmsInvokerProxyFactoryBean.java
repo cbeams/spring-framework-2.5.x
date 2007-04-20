@@ -22,11 +22,15 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.util.ClassUtils;
 
 /**
- * FactoryBean for JMS proxies. Exposes the proxied service for use
+ * FactoryBean for JMS invoker proxies. Exposes the proxied service for use
  * as a bean reference, using the specified service interface.
  *
- * <p>For configuration details, see the
- * {@link JmsInvokerClientInterceptor} javadoc.
+ * <p>Serializes remote invocation objects and deserializes remote invocation
+ * result objects. Uses Java serialization just like RMI, but with the JMS
+ * provider as communication infrastructure.
+ *
+ * <p>To be configured with a {@link javax.jms.QueueConnectionFactory} and a
+ * target queue (either as {@link javax.jms.Queue} reference or as queue name).
  *
  * @author Juergen Hoeller
  * @since 2.0
