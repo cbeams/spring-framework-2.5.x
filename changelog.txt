@@ -10,7 +10,9 @@ Package org.springframework.beans
 * default editor settings get copied to nested beans even if no default editors have been used yet
 * revised MethodInvokingFactoryBean's "getObjectType()" implementation to gracefully return null if not prepared already
 * AbstractBeanFactory uses concurrent Maps for singletons, aliases and bean definitions (for better concurrency)
+* fixed ConstructorResolver to correctly convert prepared collection arguments to arrays if necessary (for prototypes)
 * added overloaded "rootBeanDefinition" factory methods with bean class name (instead of Class) to BeanDefinitionBuilder
+* an (undefined) null value returned from a NamespaceHandler's "decorate" method is treated as 'no decoration required'
 
 Package org.springframework.context
 * AbstractRefreshableApplicationContext actually calls the 2.0.3-introduced "customizeBeanFactory" template method
@@ -30,8 +32,11 @@ Package org.springframework.jdbc
 * SqlQuery and SqlUpdate accept named parameter declarations in arbitrary order (not requiring positional declaration)
 * SqlQuery and SqlUpdate accept unparameter declarations for named parameter usage (assuming positional declaration)
 
-Package org.springframework.jndi
+Package org.springframework.jms
 * JndiDestinationResolver prefers a concurrent Map for caching purposes (for better concurrency)
+
+Package org.springframework.jndi
+* TypeMismatchNamingException carries required type and actual type as explicit attributes
 
 Package org.springframework.orm
 * PersistenceAnnotationBeanPostProcessor is able to resolve a lazy EntityManagerFactory via its unit name as well
@@ -63,6 +68,7 @@ Package org.springframework.web
 * added "localesToInitialize" property to ResourceBundleViewResolver, for initializing common locales eagerly
 * XmlViewResolver (and similar strategies) work again in combination with the implicit default BeanNameUrlHandlerMapping
 * JSP SelectTag always renders a full closing tag (i.e. never renders a short-circuited opening tag with "/>" ending)
+* JSP SelectTag accepts null values for its attributes (doesn't strictly enforce non-null values anymore)
 
 
 Changes in version 2.0.4 (2007-04-10)
