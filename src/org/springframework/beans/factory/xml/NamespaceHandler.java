@@ -23,8 +23,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 
 /**
- * Base interface used by the {@link DefaultBeanDefinitionDocumentReader} for
- * handling custom namespaces in a Spring XML configuration file.
+ * Base interface used by the {@link DefaultBeanDefinitionDocumentReader}
+ * for handling custom namespaces in a Spring XML configuration file.
  *
  * <p>Implementations are expected to return implementations of the
  * {@link BeanDefinitionParser} interface for custom top-level tags and
@@ -84,7 +84,10 @@ public interface NamespaceHandler {
 	 * @param source the source element or attribute that is to be parsed
 	 * @param definition the current bean definition
 	 * @param parserContext the object encapsulating the current state of the parsing process
-	 * @return the decorated definition (to be registered in the BeanFactory)
+	 * @return the decorated definition (to be registered in the BeanFactory),
+	 * or simply the original bean definition if no decoration is required.
+	 * A <code>null</code> value is strictly speaking invalid, but will be leniently
+	 * treated like the case where the original bean definition gets returned.
 	 */
 	BeanDefinitionHolder decorate(Node source, BeanDefinitionHolder definition, ParserContext parserContext);
 

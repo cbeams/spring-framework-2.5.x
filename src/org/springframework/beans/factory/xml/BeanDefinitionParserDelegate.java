@@ -1135,13 +1135,14 @@ public class BeanDefinitionParserDelegate {
 		return finalDefinition;
 	}
 
-	private BeanDefinitionHolder decorateIfRequired(Node node, BeanDefinitionHolder finalDefinition) {
+	private BeanDefinitionHolder decorateIfRequired(Node node, BeanDefinitionHolder originalDefinition) {
 		String uri = node.getNamespaceURI();
+		BeanDefinitionHolder finalDefinition = null;
 		if (!isDefaultNamespace(uri)) {
 			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(uri);
-			finalDefinition = handler.decorate(node, finalDefinition, new ParserContext(this.readerContext, this));
+			finalDefinition = handler.decorate(node, originalDefinition, new ParserContext(this.readerContext, this));
 		}
-		return finalDefinition;
+		return (finalDefinition != null ? finalDefinition : originalDefinition);
 	}
 
 	public boolean isDefaultNamespace(String namespaceUri) {
