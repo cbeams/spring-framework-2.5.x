@@ -43,6 +43,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.aop.RawTargetAccess;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -333,10 +334,11 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 	/**
 	 * Wrap a return of this if necessary to be the proxy
 	 */
-	private static Object massageReturnTypeIfNecessary(Object proxy, Object target, Object retVal) {
+	private static Object massageReturnTypeIfNecessary(Object proxy, Object target, Method method, Object retVal) {
 		// Massage return value if necessary
-		if (retVal != null && retVal == target) {
-			// Special case: it returned "this"
+		if (retVal != null && retVal == target &&
+				!RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {
+			// Special case: it returned "this".
 			// Note that we can't help if the target sets a reference
 			// to itself in another returned object.
 			retVal = proxy;
@@ -379,7 +381,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object retVal = methodProxy.invoke(this.target, args);
-			return massageReturnTypeIfNecessary(proxy, this.target, retVal);
+			return massageReturnTypeIfNecessary(proxy, this.target, method, retVal);
 		}
 	}
 
@@ -401,7 +403,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			try {
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				Object retVal = methodProxy.invoke(this.target, args);
-				return massageReturnTypeIfNecessary(proxy, this.target, retVal);
+				return massageReturnTypeIfNecessary(proxy, this.target, method, retVal);
 			}
 			finally {
 				AopContext.setCurrentProxy(oldProxy);
@@ -427,7 +429,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			Object target = this.advised.getTargetSource().getTarget();
 			try {
 				Object retVal = methodProxy.invoke(target, args);
-				return massageReturnTypeIfNecessary(proxy, target, retVal);
+				return massageReturnTypeIfNecessary(proxy, target, method, retVal);
 			}
 			finally {
 				this.advised.getTargetSource().releaseTarget(target);
@@ -453,7 +455,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			try {
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				Object retVal = methodProxy.invoke(target, args);
-				return massageReturnTypeIfNecessary(proxy, target, retVal);
+				return massageReturnTypeIfNecessary(proxy, target, method, retVal);
 			}
 			finally {
 				AopContext.setCurrentProxy(oldProxy);
@@ -573,7 +575,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 					this.targetClass, this.adviceChain, methodProxy);
 			// If we get here, we need to create a MethodInvocation.
 			retVal = invocation.proceed();
-			retVal = massageReturnTypeIfNecessary(proxy, this.target, retVal);
+			retVal = massageReturnTypeIfNecessary(proxy, this.target, method, retVal);
 			return retVal;
 		}
 	}
@@ -628,7 +630,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 					retVal = invocation.proceed();
 				}
 
-				retVal = massageReturnTypeIfNecessary(proxy, target, retVal);
+				retVal = massageReturnTypeIfNecessary(proxy, target, method, retVal);
 				return retVal;
 			}
 			finally {

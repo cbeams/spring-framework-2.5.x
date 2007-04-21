@@ -16,6 +16,7 @@
 
 package org.springframework.aop.scope;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +25,7 @@ import junit.framework.TestCase;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.config.NoOpScope;
+import org.springframework.beans.factory.config.SimpleMapScope;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
@@ -48,18 +49,35 @@ public class ScopedProxyTests extends TestCase {
 		assertTrue(simpleMap instanceof HashMap);
 	}
 
-	public void testCreateJdkScopedProxy() throws Exception {
+	public void testJdkScopedProxy() throws Exception {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedTestBean.xml", getClass()));
+		SimpleMapScope scope = new SimpleMapScope();
+		bf.registerScope("request", scope);
+
 		ITestBean bean = (ITestBean) bf.getBean("testBean");
 		assertNotNull(bean);
 		assertTrue(AopUtils.isJdkDynamicProxy(bean));
+		assertTrue(bean instanceof ScopedObject);
+		ScopedObject scoped = (ScopedObject) bean;
+		assertEquals(TestBean.class, scoped.getTargetObject().getClass());
+
+		assertTrue(scope.getMap().containsKey("testBeanTarget"));
+		assertEquals(TestBean.class, scope.getMap().get("testBeanTarget").getClass());
 	}
 
-	public void testScopedList() {
+	public void testCglibScopedProxy() {
 		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("scopedList.xml", getClass()));
-		bf.registerScope("request", new NoOpScope());
+		SimpleMapScope scope = new SimpleMapScope();
+		bf.registerScope("request", scope);
+
 		TestBean tb = (TestBean) bf.getBean("testBean");
+		assertTrue(AopUtils.isCglibProxy(tb.getFriends()));
 		assertTrue(tb.getFriends() instanceof ScopedObject);
+		ScopedObject scoped = (ScopedObject) tb.getFriends();
+		assertEquals(ArrayList.class, scoped.getTargetObject().getClass());
+
+		assertTrue(scope.getMap().containsKey("scopedTarget.scopedList"));
+		assertEquals(ArrayList.class, scope.getMap().get("scopedTarget.scopedList").getClass());
 	}
 
 }

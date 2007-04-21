@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.aop.scope;
 
+import org.springframework.aop.RawTargetAccess;
+
 /**
- * An AOP-introduction interface for scoped objects.
+ * An AOP introduction interface for scoped objects.
  *
  * <p>Objects created from the {@link ScopedProxyFactoryBean} can be cast
  * to this interface, enabling access to the raw target object
@@ -28,7 +30,7 @@ package org.springframework.aop.scope;
  * @since 2.0
  * @see ScopedProxyFactoryBean
  */
-public interface ScopedObject {
+public interface ScopedObject extends RawTargetAccess {
 
 	/**
 	 * Return the current target object behind this scoped object proxy,
