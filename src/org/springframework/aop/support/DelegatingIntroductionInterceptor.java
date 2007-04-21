@@ -78,11 +78,12 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 
 
 	/**
-	 * Both constructors use this, as it's impossible to pass
-	 * "this" from one constructor to another. 
+	 * Both constructors use this init method, as it is impossible to pass
+	 * a "this" reference from one constructor to another.
+	 * @param delegate the delegate object
 	 */
 	private void init(Object delegate) {
-		Assert.notNull(delegate, "delegate is required");
+		Assert.notNull(delegate, "Delegate must not be null");
 		this.delegate = delegate;
 		implementInterfacesOnObject(delegate);
 
@@ -107,7 +108,10 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 			// Massage return value if possible: if the delegate returned itself,
 			// we really want to return the proxy.
 			if (retVal == this.delegate && mi instanceof ProxyMethodInvocation) {
-				retVal = ((ProxyMethodInvocation) mi).getProxy();
+				Object proxy = ((ProxyMethodInvocation) mi).getProxy();
+				if (mi.getMethod().getReturnType().isInstance(proxy)) {
+					retVal = proxy;
+				}
 			}
 			return retVal;
 		}
