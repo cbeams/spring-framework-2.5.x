@@ -26,8 +26,9 @@
     ################################################### -->
     <!-- Generate the TOCs for named components only -->
     <xsl:param name="generate.toc">
-        book   toc
-    </xsl:param>
+		book      toc
+		qandaset  toc
+	</xsl:param>
     <!-- Show only Sections up to level 3 in the TOCs -->
     <xsl:param name="toc.section.depth">3</xsl:param>
     <!--###################################################
@@ -40,7 +41,8 @@
     <!--###################################################
                          Callouts
     ################################################### -->
-    <!-- Use images for callouts instead of (1) (2) (3) -->
+	
+	<!-- Use images for callouts instead of (1) (2) (3) -->
     <xsl:param name="callout.graphics">1</xsl:param>
     <xsl:param name="callout.graphics.path">&callout_gfx_path;</xsl:param>
     <!-- Place callout marks at this column in annotated areas -->
