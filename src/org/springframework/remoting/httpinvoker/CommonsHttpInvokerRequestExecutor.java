@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,13 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.springframework.remoting.support.RemoteInvocationResult;
 
 /**
- * HttpInvokerRequestExecutor implementation that uses
+ * {@link HttpInvokerRequestExecutor} implementation that uses
  * <a href="http://jakarta.apache.org/commons/httpclient">Jakarta Commons HttpClient</a>
- * to execute POST requests. Compatible with Commons HttpClient 2.0 and 3.0.
+ * to execute POST requests. Requires Commons HttpClient 3.0 or higher.
  *
- * <p>Allows to use a preconfigured HttpClient instance, potentially
- * with authentication, HTTP connection pooling, etc. Also designed
- * for easy subclassing, customizing specific template methods.
+ * <p>Allows to use a pre-configured {@link org.apache.commons.httpclient.HttpClient}
+ * instance, potentially with authentication, HTTP connection pooling, etc.
+ * Also designed for easy subclassing, providing specific template methods.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -67,6 +67,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 		this.httpClient = httpClient;
 	}
 
+
 	/**
 	 * Set the HttpClient instance to use for this request executor.
 	 */
@@ -78,7 +79,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	 * Return the HttpClient instance that this request executor uses.
 	 */
 	public HttpClient getHttpClient() {
-		return httpClient;
+		return this.httpClient;
 	}
 
 
@@ -212,17 +213,16 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	}
 
 	/**
-	 * Determine whether the given response is a GZIP response.
+	 * Determine whether the given response indicates a GZIP response.
 	 * <p>Default implementation checks whether the HTTP "Content-Encoding"
 	 * header contains "gzip" (in any casing).
 	 * @param postMethod the PostMethod to check
+	 * @return whether the given response indicates a GZIP response
 	 */
 	protected boolean isGzipResponse(PostMethod postMethod) {
 		Header encodingHeader = postMethod.getResponseHeader(HTTP_HEADER_CONTENT_ENCODING);
-		if (encodingHeader == null || encodingHeader.getValue() == null) {
-			return false;
-		}
-		return (encodingHeader.getValue().toLowerCase().indexOf(ENCODING_GZIP) != -1);
+		return (encodingHeader != null && encodingHeader.getValue() != null &&
+				encodingHeader.getValue().toLowerCase().indexOf(ENCODING_GZIP) != -1);
 	}
 
 }
