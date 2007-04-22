@@ -76,21 +76,24 @@
   	<section id="jms-jmstemplate">
   		<title><classname>JmsTemplate</classname></title> 
   		
-  		<para>Two implementations of the <classname>JmsTemplate</classname> class are
-  		provided. The class <classname>JmsTemplate</classname> uses the JMS 1.1 API
-  		and the subclass <classname>JmsTemplate102</classname> uses the JMS 1.0.2 API.</para>
+  		<para>There are two variants of the functionality offered by the
+	    <classname>JmsTemplate</classname>: the <classname>JmsTemplate</classname>
+	    uses the JMS 1.1 API, and the subclass <classname>JmsTemplate102</classname>
+	    uses the JMS 1.0.2 API.</para>
 
     	<para>Code that uses the <classname>JmsTemplate</classname> only needs to
     	implement callback interfaces giving them a clearly defined contract. The
     	<classname>MessageCreator</classname> callback interface creates a message
-    	given a Session provided by the calling code in JmsTemplate. In order to
-    	allow for more complex usage of the JMS API, the callback
-    	<classname>SessionCallback</classname> provides the user with the JMS
-    	session and the callback <classname>ProducerCallback</classname> exposes a
-    	Session and MessageProducer pair.</para>
+    	given a <interfacename>Session</interfacename> provided by the calling code
+		in <classname>JmsTemplate</classname>. In order to allow for more complex
+		usage of the JMS API, the callback <classname>SessionCallback</classname>
+		provides the user with the JMS session and the callback
+		<classname>ProducerCallback</classname> exposes a
+    	<interfacename>Session</interfacename> and
+		<interfacename>MessageProducer</interfacename> pair.</para>
 
     	<para>The JMS API exposes two types of send methods, one that takes
-    	delivery mode, priority, and time-to-live as quality of service (QOS)
+    	delivery mode, priority, and time-to-live as Quality of Service (QOS)
     	parameters and one that takes no QOS parameters which uses default values.
     	Since there are many send methods in <classname>JmsTemplate</classname>,
     	the setting of the QOS parameters have been exposed as bean properties to
@@ -107,7 +110,18 @@
     	management of QOS values, the <classname>JmsTemplate</classname> must 
     	therefore be specifically enabled to use its own QOS values by setting 
     	the boolean property <property>isExplicitQosEnabled</property>
-    	to <literal>true</literal>.</para> 		
+    	to <literal>true</literal>.</para>
+
+		<note>
+		    <para>Instances of the <classname>JmsTemplate</classname> class are
+			<emphasis>threadsafe once configured</emphasis>. This is important because
+			it means that you can configure a single instance of a
+			<classname>JmsTemplate</classname> and then safely inject this
+			<emphasis>shared</emphasis> reference into multiple collaborators. To be
+			clear, the <classname>JmsTemplate</classname> is stateful, in that it
+			maintains a reference to a <interfacename>ConnectionFactory</interfacename>,
+			but this state is <emphasis>not</emphasis> conversational state.</para>
+		</note>
 	</section>
   	
   	<section id="jms-connections">
