@@ -224,7 +224,7 @@
 	  that are amenable to AOP.</para>
 
       <para>Spring AOP will never strive to compete with AspectJ to provide 
-	  a comprehensive AOP solution. We believe thatboth proxy-based frameworks like
+	  a comprehensive AOP solution. We believe that both proxy-based frameworks like
 	  Spring AOP and full-blown frameworks such as AspectJ are valuable, and that they
 	  are complementary, rather than in competition. Spring 2.0 seamlessly integrates
 	  Spring AOP and IoC with AspectJ, to enable all uses of AOP to be catered for within
@@ -240,7 +240,7 @@
 		  model. However, in some places the Spring Framework does give you the option
 		  to introduce Spring Framework-specific dependencies into your codebase: the
 		  rationale in giving you such options is because in certain scenarios it
-		  mught be just plain easier to read or code some specific piece of functionality
+		  might be just plain easier to read or code some specific piece of functionality
 		  in such a way. The Spring Framework (almost) always offers you the choice
 		  though: you have the freedom to make an informed decision as to which option
 		  best suits your particular use case or scenario.</para>
