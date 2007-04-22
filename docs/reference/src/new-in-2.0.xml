@@ -7,7 +7,7 @@
     <para>If you have been using the Spring Framework for some time, you will
     be aware that Spring has just undergone a major revision.</para>
 
-    <sidebar>
+    <sidebar id="new-in-2-intro-jdk">
       <title>JDK Support</title>
       <para>The Spring Framework continues to be totally compatible with all
       versions of Java since (and including) Java 1.3. This means that 1.3,
