@@ -106,8 +106,8 @@
 				<xsd:element name="include" type="includeType" minOccurs="0" maxOccurs="unbounded">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
-	Indicates that only @AspectJ beans with names matched by the pattern
-	will be considered as defining aspects to use for Spring autoproxying.
+	Indicates that only @AspectJ beans with names matched by the (regex)
+	pattern will be considered as defining aspects to use for Spring autoproxying.
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:element>
