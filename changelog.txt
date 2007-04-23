@@ -6,6 +6,11 @@ http://www.springframework.org
 Changes in version 2.0.5 (2007-05-01)
 -------------------------------------
 
+Package org.springframework.aop
+* DelegatingIntroductionInterceptor only replaces a return value with the proxy if the proxy is actually assignable
+* JdkDynamic/Cglib2AopProxy only replaces return value with proxy if declaring class is not marked for raw target access
+* ScopedObject's "getTargetObject()" method returns the actual target object now (instead of the proxy object)
+
 Package org.springframework.beans
 * default editor settings get copied to nested beans even if no default editors have been used yet
 * revised MethodInvokingFactoryBean's "getObjectType()" implementation to gracefully return null if not prepared already
@@ -13,6 +18,7 @@ Package org.springframework.beans
 * fixed ConstructorResolver to correctly convert prepared collection arguments to arrays if necessary (for prototypes)
 * added overloaded "rootBeanDefinition" factory methods with bean class name (instead of Class) to BeanDefinitionBuilder
 * an (undefined) null value returned from a NamespaceHandler's "decorate" method is treated as 'no decoration required'
+* XmlBeanDefinitionReader caches the DefaultNamespaceHandlerResolver instance, sharing it across multiple files
 
 Package org.springframework.context
 * AbstractRefreshableApplicationContext actually calls the 2.0.3-introduced "customizeBeanFactory" template method
