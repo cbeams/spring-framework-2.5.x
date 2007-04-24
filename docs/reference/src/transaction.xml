@@ -1649,17 +1649,17 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></pr
 				<para>
 					Find below an example of defining a <classname>TransactionTemplate</classname> with some custom
 					transactional settings, using Spring XML configuration. The '<literal>sharedTransactionTemplate</literal>'
-					could then be injected into as many services as are required.
+					can then be injected into as many services as are required.
 				</para>
 				<programlisting><![CDATA[<bean id="sharedTransactionTemplate"
-      class="org.springframework.transaction.support.TransactionTemplate>
+      class="org.springframework.transaction.support.TransactionTemplate">
     <property name="isolationLevelName" value="ISOLATION_READ_UNCOMMITTED"/>
     <property name="timeout" value="30"/>
 </bean>"]]></programlisting>
 			</section>
 			<para>
-				Fially, instances of the <classname>TransactionTemplate</classname> class are
-				threadsafe, in that instaces do not maintain any conversational state.
+				Finally, instances of the <classname>TransactionTemplate</classname> class are
+				threadsafe, in that instances do not maintain any conversational state.
 				<classname>TransactionTemplate</classname> instances <emphasis>do</emphasis>
 				however maintain configuration state, so while a number of classes
 				may choose to share a single instance of a <classname>TransactionTemplate</classname>, if a class needed

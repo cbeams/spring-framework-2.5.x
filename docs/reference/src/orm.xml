@@ -334,30 +334,30 @@
       <para>As alternative to using Spring's
       <classname>HibernateTemplate</classname> to implement DAOs, data access
       code can also be written in a more traditional fashion, without wrapping
-      the Hibernate access code in a callback, while still complying to
-      Spring's generic <classname>DataAccessException</classname> hierarchy.
-      Spring's <classname>HibernateDaoSupport</classname> base class offers
+      the Hibernate access code in a callback, while still respecting and
+	  participating in Spring's generic <classname>DataAccessException</classname>
+	  hierarchy.
+      The <classname>HibernateDaoSupport</classname> base class offers
       methods to access the current transactional
       <interfacename>Session</interfacename> and to convert exceptions in such
       a scenario; similar methods are also available as static helpers on the
       <classname>SessionFactoryUtils</classname> class. Note that such code
-      will usually pass "false" into the <methodname>getSession(..)</methodname> method's
-      "allowCreate" argument, to enforce running within a transaction (which
+      will usually pass '<literal>false</literal>' as the value of the
+	  <methodname>getSession(..)</methodname> methods '<literal>allowCreate</literal>'
+	  argument, to enforce running within a transaction (which
       avoids the need to close the returned <interfacename>Session</interfacename>, as
-      it's lifecycle is managed by the transaction).</para>
+      its lifecycle is managed by the transaction).</para>
 
-      <programlisting><![CDATA[public class ProductDaoImpl extends HibernateDaoSupport implements ProductDao {
+      <programlisting><![CDATA[public class HibernateProductDao extends HibernateDaoSupport implements ProductDao {
 
-    public Collection loadProductsByCategory(String category)
-            throws DataAccessException, MyException {
-
-        Session session = getSession(getSessionFactory(), false);
+    public Collection loadProductsByCategory(String category) throws DataAccessException, MyException {
+        Session session = getSession(false);
         try {
-            List result = session.find(
-                "from test.Product product where product.category=?",
-                category, Hibernate.STRING);
+            Query query = session.createQuery("from test.Product product where product.category=?");
+            query.setString(0, category);
+            List result = query.list();
             if (result == null) {
-                throw new MyException("invalid search result");
+                throw new MyException("No search results.");
             }
             return result;
         }
@@ -367,13 +367,14 @@
     }
 }]]></programlisting>
 
-      <para>The major advantage of such direct Hibernate access code is that
-      it allows any checked application exception to be thrown within the data
-      access code, while <classname>HibernateTemplate</classname> is
-      restricted to unchecked exceptions within the callback. Note that one
-      can often defer the corresponding checks and the throwing of application
-      exceptions to after the callback, which still allows working with
-      <classname>HibernateTemplate</classname>. In general, the
+      <para>The advantage of such direct Hibernate access code is that
+      it allows <emphasis>any</emphasis> checked application exception to
+	  be thrown within the data access code; contrast this to the
+	  <classname>HibernateTemplate</classname> class which is
+      restricted to throwing only unchecked exceptions within the callback.
+	  Note that you can often defer the corresponding checks and the throwing
+	  of application exceptions to after the callback, which still allows
+	  working with <classname>HibernateTemplate</classname>. In general, the
       <classname>HibernateTemplate</classname> class' convenience methods are
       simpler and more convenient for many scenarios.</para>
     </section>

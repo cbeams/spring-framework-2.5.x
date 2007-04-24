@@ -342,9 +342,9 @@ public void testProcess() {
 						an exception during execution. The type of the expected
 						exception is provided in the annotation, and if an an instance
 						of the exception is thrown during the test method execution then
-						the test is considered to have passed (likewise if an an instance
+						the test passes. Likewise if an instance
 						of the exception is <emphasis>not</emphasis> thrown during the
-						test method execution then the test is considered to have failed.</para>
+						test method execution then the test fails.</para>
 						<programlisting><![CDATA[@ExpectedException(SomeBusinessException.class)
 public void testProcessRainyDayScenario() {
 	]]><lineannotation>// some logic that results in an <classname>Exception</classname> being thrown</lineannotation><![CDATA[
