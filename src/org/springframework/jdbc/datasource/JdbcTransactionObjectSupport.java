@@ -32,19 +32,21 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Convenient base class for JDBC-aware transaction objects.
- * Can contain a ConnectionHolder, and implements the SavepointManager
+ * Can contain a {@link ConnectionHolder}, and implements the
+ * {@link org.springframework.transaction.SavepointManager}
  * interface based on that ConnectionHolder.
  *
- * <p>Implements the SavepointManager interface to allow for programmatic
- * management of JDBC 3.0 Savepoints. DefaultTransactionStatus will
- * automatically delegate to this, as it auto-detects transaction objects
- * that implement the SavepointManager interface.
+ * <p>Allows for programmatic management of JDBC 3.0
+ * {@link java.sql.Savepoint Savepoints}. Spring's
+ * {@link org.springframework.transaction.support.DefaultTransactionStatus}
+ * will automatically delegate to this, as it autodetects transaction
+ * objects that implement the SavepointManager interface.
  *
- * <p>Note that savepoints are only supported for JDBC 3.0.
+ * <p>Note that savepoints are only supported for drivers which
+ * support JDBC 3.0 or higher.
  *
  * @author Juergen Hoeller
  * @since 1.1
- * @see java.sql.Savepoint
  */
 public abstract class JdbcTransactionObjectSupport implements SavepointManager, SmartTransactionObject {
 
@@ -68,7 +70,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	}
 
 	public ConnectionHolder getConnectionHolder() {
-		return connectionHolder;
+		return this.connectionHolder;
 	}
 
 	public boolean hasConnectionHolder() {
@@ -80,7 +82,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	}
 
 	public Integer getPreviousIsolationLevel() {
-		return previousIsolationLevel;
+		return this.previousIsolationLevel;
 	}
 
 	public void setSavepointAllowed(boolean savepointAllowed) {
@@ -88,7 +90,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	}
 
 	public boolean isSavepointAllowed() {
-		return savepointAllowed;
+		return this.savepointAllowed;
 	}
 
 
