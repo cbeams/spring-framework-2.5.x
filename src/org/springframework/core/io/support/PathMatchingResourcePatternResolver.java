@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,13 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * A ResourcePatternResolver implementation that is able to resolve a specified
- * resource location path into one or more matching Resources. The source path
- * may be a simple path which has a one-to-one mapping to a target Resource,
- * or alternately may contain the special "<code>classpath*:</code>" prefix
- * and/or internal Ant-style regular expressions (matched using Spring's
- * <code>PathMatcher</code> utility).
+ * A {@link ResourcePatternResolver} implementation that is able to resolve a
+ * specified resource location path into one or more matching Resources.
+ * The source path may be a simple path which has a one-to-one mapping to a
+ * target {@link org.springframework.core.io.Resource}, or alternatively
+ * may contain the special "<code>classpath*:</code>" prefix and/or
+ * internal Ant-style regular expressions (matched using Spring's
+ * {@link org.springframework.util.AntPathMatcher} utility).
  * Both of the latter are effectively wildcards.
  *
  * <p><b>No Wildcards:</b>
@@ -66,19 +67,20 @@ import org.springframework.util.StringUtils;
  *
  * <p><b>Ant-style Patterns:</b>
  *
- * <p>When the path location contains an Ant-style pattern, e.g.:<pre>
- *     /WEB-INF/*-context.xml
- *     com/mycompany/**&#47;applicationContext.xml
- *     file:C:/some/path/*-context.xml
- *     classpath:com/mycompany/**&#47;applicationContext.xml
- * </pre>the resolver follows a more complex but defined procedure to try to resolve
+ * <p>When the path location contains an Ant-style pattern, e.g.:
+ * <pre>
+ * /WEB-INF/*-context.xml
+ * com/mycompany/**&#47;applicationContext.xml
+ * file:C:/some/path/*-context.xml
+ * classpath:com/mycompany/**&#47;applicationContext.xml</pre>
+ * the resolver follows a more complex but defined procedure to try to resolve
  * the wildcard. It produces a <code>Resource</code> for the path up to the last
  * non-wildcard segment and obtains a <code>URL</code> from it. If this URL is
  * not a "<code>jar:</code>" URL or container-specific variant (e.g.
  * "<code>zip:</code>" in WebLogic, "<code>wsjar</code>" in WebSphere", etc.),
  * then a <code>java.io.File</code> is obtained from it, and used to resolve the
  * wildcard by walking the filesystem. In the case of a jar URL, the resolver
- * either gets a code>java.net.JarURLConnection</code> from it, or manually parse
+ * either gets a <code>java.net.JarURLConnection</code> from it, or manually parse
  * the jar URL, and then traverse the contents of the jar file, to resolve the
  * wildcards.
  *
