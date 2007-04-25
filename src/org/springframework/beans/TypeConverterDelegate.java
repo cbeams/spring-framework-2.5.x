@@ -208,6 +208,10 @@ class TypeConverterDelegate {
 				return convertToTypedMap((Map) convertedValue, propertyName, methodParam);
 			}
 			else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
+				if (JdkVersion.isAtLeastJava15() && requiredType.isEnum() && "".equals(convertedValue)) {
+					// It's an empty enum identifier: reset the enum value to null.
+					return null;
+				}
 				// Try field lookup as fallback: for JDK 1.5 enum or custom enum
 				// with values defined as static fields. Resulting value still needs
 				// to be checked, hence we don't return it right away.

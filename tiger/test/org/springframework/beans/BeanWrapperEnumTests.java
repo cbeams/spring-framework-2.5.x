@@ -30,4 +30,18 @@ public class BeanWrapperEnumTests extends TestCase {
 		assertEquals(CustomEnum.VALUE_1, gb.getCustomEnum());
 	}
 
+	public void testCustomEnumWithNull() {
+		GenericBean gb = new GenericBean();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("customEnum", null);
+		assertEquals(null, gb.getCustomEnum());
+	}
+
+	public void testCustomEnumWithEmptyString() {
+		GenericBean gb = new GenericBean();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("customEnum", "");
+		assertEquals(null, gb.getCustomEnum());
+	}
+
 }
