@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.springframework.core.io.Resource;
 
 /**
  * @author Juergen Hoeller
- * @since 20.01.2006
  */
 public class GenericBean {
 
@@ -51,6 +50,8 @@ public class GenericBean {
 	private Map<String, Map<Integer, Long>> mapOfMaps;
 
 	private Map<Integer, List<Integer>> mapOfLists;
+
+	private CustomEnum customEnum;
 
 
 	public GenericBean() {
@@ -171,6 +172,14 @@ public class GenericBean {
 
 	public void setMapOfLists(Map<Integer, List<Integer>> mapOfLists) {
 		this.mapOfLists = mapOfLists;
+	}
+
+	public CustomEnum getCustomEnum() {
+		return customEnum;
+	}
+
+	public void setCustomEnum(CustomEnum customEnum) {
+		this.customEnum = customEnum;
 	}
 
 
