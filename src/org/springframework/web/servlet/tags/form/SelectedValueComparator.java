@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.enums.LabeledEnum;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -158,6 +159,17 @@ abstract class SelectedValueComparator {
 				return true;
 			}
 			String enumLabelAsString = ObjectUtils.getDisplayString(labeledEnum.getLabel());
+			if (enumLabelAsString.equals(candidateDisplayString)) {
+				return true;
+			}
+		}
+		else if (JdkVersion.isAtLeastJava15() && boundValue.getClass().isEnum()) {
+			Enum boundEnum = (Enum) boundValue;
+			String enumCodeAsString = ObjectUtils.getDisplayString(boundEnum.name());
+			if (enumCodeAsString.equals(candidateDisplayString)) {
+				return true;
+			}
+			String enumLabelAsString = ObjectUtils.getDisplayString(boundEnum.toString());
 			if (enumLabelAsString.equals(candidateDisplayString)) {
 				return true;
 			}
