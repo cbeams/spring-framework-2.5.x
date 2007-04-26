@@ -56,6 +56,19 @@ import org.springframework.util.StringUtils;
  * <p>Exposes an EntityManagerFactory and a shared EntityManager.
  * Requires an EntityManagerFactory to be injected, plus the DataSource and
  * JpaTransactionManager through the superclass.
+ * 
+ * <p>When using Maven, make sure to use the latest version of Xerces since the
+ * default one (2.0.2) has a critical <a href="http://nagoya.apache.org/bugzilla/show_bug.cgi?id=16014"/>bug</a> 
+ * that leads to StackOverflow.
+ * <p/>
+ * A workaround is to explicitly specify the Xerces version inside the Maven pom: 
+ * <pre>
+ * &lt;dependency&gt;
+ *   &lt;groupId&gt;xerces&lt;/groupId&gt;
+ *     &lt;artifactId&gt;xercesImpl&lt;/artifactId&gt;
+ *   &lt;version&gt;2.8.1&lt;/version&gt;
+ * &lt;/dependency&gt;
+ * </pre>
  *
  * @author Rod Johnson
  * @author Rob Harrop
