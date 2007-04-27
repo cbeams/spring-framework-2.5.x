@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,15 @@
 package org.springframework.web.servlet.view.freemarker;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.GenericServlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +46,7 @@ import freemarker.template.TemplateException;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -100,7 +105,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * Return the encoding for the FreeMarker template.
 	 */
 	protected String getEncoding() {
-		return encoding;
+		return this.encoding;
 	}
 
 	/**
@@ -144,8 +149,14 @@ public class FreeMarkerView extends AbstractTemplateView {
 			this.taglibFactory = config.getTaglibFactory();
 		}
 
-		this.servletContextHashModel = new ServletContextHashModel(
-				new GenericServletAdapter(getServletContext()), getObjectWrapper());
+		GenericServlet servlet = new GenericServletAdapter();
+		try {
+			servlet.init(new DelegatingServletConfig());
+		}
+		catch (ServletException ex) {
+			throw new BeanInitializationException("Initialization of GenericServlet adapter failed", ex);
+		}
+		this.servletContextHashModel = new ServletContextHashModel(servlet, getObjectWrapper());
 
 		checkTemplate();
 	}
@@ -335,23 +346,37 @@ public class FreeMarkerView extends AbstractTemplateView {
 
 
 	/**
-	 * Simple adapter class that extends {@link GenericServlet} and exposes the currently
-	 * active {@link ServletContext}. Needed for JSP access in FreeMarker.
+	 * Simple adapter class that extends {@link GenericServlet}.
+	 * Needed for JSP access in FreeMarker.
 	 */
-	private static final class GenericServletAdapter extends GenericServlet {
-
-		private final ServletContext servletContext;
-
-		public GenericServletAdapter(ServletContext servletContext) {
-			this.servletContext = servletContext;
-		}
+	private static class GenericServletAdapter extends GenericServlet {
 
 		public void service(ServletRequest servletRequest, ServletResponse servletResponse) {
 			// no-op
 		}
+	}
+
+
+	/**
+	 * Internal implementation of the {@link ServletConfig} interface,
+	 * to be passed to the servlet adapter.
+	 */
+	private class DelegatingServletConfig implements ServletConfig {
+
+		public String getServletName() {
+			return FreeMarkerView.this.getBeanName();
+		}
 
 		public ServletContext getServletContext() {
-			return this.servletContext;
+			return FreeMarkerView.this.getServletContext();
+		}
+
+		public String getInitParameter(String paramName) {
+			return null;
+		}
+
+		public Enumeration getInitParameterNames() {
+			return Collections.enumeration(Collections.EMPTY_SET);
 		}
 	}
 
