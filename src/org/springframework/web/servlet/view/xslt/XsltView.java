@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,12 @@ import org.w3c.dom.Node;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.SimpleTransformErrorListener;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
+import org.springframework.web.util.WebUtils;
 
 /**
  * XSLT-driven View that allows for response context to be rendered as the
@@ -67,76 +68,105 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * to be passed to the Transformer.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class XsltView extends AbstractUrlBasedView {
 
-	private TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+
+	private String sourceKey;
+
+	private URIResolver uriResolver;
 
 	private ErrorListener errorListener = new SimpleTransformErrorListener(logger);
 
-	private URIResolver uriResolver;
+	private boolean indent = true;
+
+	private Properties outputProperties;
 
 	private boolean cacheTemplates = true;
 
 	private Templates cachedTemplates;
 
-	private String sourceKey;
-
-	private Properties outputProperties;
-
-	private boolean indent = true;
-
 
 	/**
-	 * Turns on/off the caching of the XSLT {@link Templates} instance. The default
-	 * value is <code>true</code>. Only set this to <code>false</code> in development
-	 * as not caching seriously impacts performance.
+	 * Set the name of the model attribute that represents the XSLT Source.
+	 * If not specified, the model map will be searched for a matching value type.
+	 * <p>The following source types are supported out of the box:
+	 * {@link Source}, {@link Document}, {@link Node}, {@link Reader},
+	 * {@link InputStream} and {@link Resource}.
+	 * @see #getSourceTypes
+	 * @see #convertSource
 	 */
-	public void setCacheTemplates(boolean cacheTemplates) {
-		this.cacheTemplates = cacheTemplates;
+	public void setSourceKey(String sourceKey) {
+		this.sourceKey = sourceKey;
 	}
 
 	/**
-	 * Sets a custom {@link URIResolver} to use for processing the transformation
-	 * and loading the
-	 * @param uriResolver
+	 * Set the URIResolver used in the transform.
+	 * <p>The URIResolver handles calls to the XSLT <code>document()</code> function.
 	 */
 	public void setUriResolver(URIResolver uriResolver) {
 		this.uriResolver = uriResolver;
 	}
 
+	/**
+	 * Set an implementation of the {@link javax.xml.transform.ErrorListener}
+	 * interface for custom handling of transformation errors and warnings.
+	 * <p>If not set, a default
+	 * {@link org.springframework.util.xml.SimpleTransformErrorListener} is
+	 * used that simply logs warnings using the logger instance of the view class,
+	 * and rethrows errors to discontinue the XML transformation.
+	 * @see org.springframework.util.xml.SimpleTransformErrorListener
+	 */
 	public void setErrorListener(ErrorListener errorListener) {
-		Assert.notNull(errorListener, "'errorListener' cannot be null.");
-		this.errorListener = errorListener;
+		this.errorListener = (errorListener != null ? errorListener : new SimpleTransformErrorListener(logger));
 	}
 
-	public void setSourceKey(String sourceKey) {
-		this.sourceKey = sourceKey;
-	}
-
-	public void setOutputProperties(Properties outputProperties) {
-		this.outputProperties = outputProperties;
-	}
-
+	/**
+	 * Set whether the XSLT transformer may add additional whitespace when
+	 * outputting the result tree.
+	 * <p>Default is <code>true</code> (on); set this to <code>false</code> (off)
+	 * to not specify an "indent" key, leaving the choice up to the stylesheet.
+	 * @see javax.xml.transform.OutputKeys#INDENT
+	 */
 	public void setIndent(boolean indent) {
 		this.indent = indent;
 	}
 
-	protected final TransformerFactory getTransformerFactory() {
-		return this.transformerFactory;
+	/**
+	 * Set arbitrary transformer output properties to be applied to the stylesheet.
+	 * <p>Any values specified here will override defaults that this view sets
+	 * programmatically.
+	 * @see javax.xml.transform.Transformer#setOutputProperty
+	 */
+	public void setOutputProperties(Properties outputProperties) {
+		this.outputProperties = outputProperties;
+	}
+
+	/**
+	 * Turn on/off the caching of the XSLT {@link Templates} instance.
+	 * <p>The default value is "true". Only set this to "false" in development,
+	 * where caching does not seriously impact performance.
+	 */
+	public void setCacheTemplates(boolean cacheTemplates) {
+		this.cacheTemplates = cacheTemplates;
 	}
 
 
+	/**
+	 * Initialize this XsltView's TransformerFactory.
+	 */
 	protected void initApplicationContext() throws BeansException {
-		this.getTransformerFactory().setErrorListener(this.errorListener);
+		this.transformerFactory.setErrorListener(this.errorListener);
 
 		if (this.uriResolver != null) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Using custom URIResolver '" + this.uriResolver
 								+ "' in XSLT view with URL '" + getUrl() + "'");
 			}
-			this.getTransformerFactory().setURIResolver(this.uriResolver);
+			this.transformerFactory.setURIResolver(this.uriResolver);
 		}
 
 		if (logger.isDebugEnabled()) {
@@ -148,10 +178,20 @@ public class XsltView extends AbstractUrlBasedView {
 		}
 	}
 
-	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	/**
+	 * Return the TransformerFactory that this XsltView uses.
+	 * @return the TransformerFactory (never <code>null</code>)
+	 */
+	protected final TransformerFactory getTransformerFactory() {
+		return this.transformerFactory;
+	}
+
+
+	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
 		Templates templates = this.cachedTemplates;
 		if (templates == null) {
-			logger.warn("DEBUG SETTING: WILL IMPAIR PERFORMANCE: template will be refreshed");
 			templates = loadTemplates();
 		}
 
@@ -161,55 +201,65 @@ public class XsltView extends AbstractUrlBasedView {
 		Source source = null;
 		try {
 			source = locateSource(model);
-			if(source == null) {
-				throw new IllegalArgumentException("Unable to locate Source object in model.");
+			if (source == null) {
+				throw new IllegalArgumentException("Unable to locate Source object in model: " + model);
 			}
 			transformer.transform(source, createResult(response));
 		}
 		finally {
-			if (source != null) {
-				closeSourceIfNecessary(source);
-			}
+			closeSourceIfNecessary(source);
 		}
 	}
 
 	/**
-	 * Creates the XSLT {@link Result} used to render the result of the transformation.
-	 * Default implementation creates a {@link StreamResult} wrapping the supplied
-	 * {@link HttpServletResponse}.
+	 * Create the XSLT {@link Result} used to render the result of the transformation.
+	 * <p>The default implementation creates a {@link StreamResult} wrapping the supplied
+	 * HttpServletResponse's {@link HttpServletResponse#getOutputStream() OutputStream}.
+	 * @param response current HTTP response
+	 * @return the XSLT Result to use
+	 * @throws Exception if the Result cannot be built
 	 */
 	protected Result createResult(HttpServletResponse response) throws Exception {
 		return new StreamResult(response.getOutputStream());
 	}
 
 	/**
-	 * Locates the {@link Source} object in the supplied model, converting objects as required.
-	 * Default implementation first attempts to look under the configured {@link #setSourceKey source key},
-	 * if any, before attempting to locate an object of {@link #getSourceTypes() supported type}.
+	 * <p>Locate the {@link Source} object in the supplied model,
+	 * converting objects as required.
+	 * The default implementation first attempts to look under the configured
+	 * {@link #setSourceKey source key}, if any, before attempting to locate
+	 * an object of {@link #getSourceTypes() supported type}.
+	 * @param model the merged model Map
+	 * @return the XSLT Source object (or <code>null</code> if none found)
+	 * @throws Exception if an error occured during locating the source
+	 * @see #setSourceKey
+	 * @see #convertSource
 	 */
 	protected Source locateSource(Map model) throws Exception {
 		if (this.sourceKey != null) {
 			return convertSource(model.get(this.sourceKey));
 		}
-
 		Object source = CollectionUtils.findValueOfType(model.values(), getSourceTypes());
 		return (source != null ? convertSource(source) : null);
 	}
 
 	/**
-	 * Returns the array of {@link Class Classes} that are supported when converting to an
-	 * XSLT {@link Source}. Current supports {@link Source}, {@link Document}, {@link Node},
-	 * {@link InputStream}, {@link Reader} and {@link Resource}.
+	 * Return the array of {@link Class Classes} that are supported when converting to an
+	 * XSLT {@link Source}.
+	 * <p>Currently supports {@link Source}, {@link Document}, {@link Node},
+	 * {@link Reader}, {@link InputStream} and {@link Resource}.
+	 * @return the supported source types
 	 */
 	protected Class[] getSourceTypes() {
-		return new Class[]{Source.class, Document.class, Node.class, InputStream.class, Reader.class, Resource.class};
+		return new Class[] {Source.class, Document.class, Node.class, Reader.class, InputStream.class, Resource.class};
 	}
 
 	/**
-	 * Converts the supplied {@link Object} into an XSLT {@link Source} if the
+	 * Convert the supplied {@link Object} into an XSLT {@link Source} if the
 	 * {@link Object} type is {@link #getSourceTypes() supported}.
-	 *
-	 * @throws IllegalArgumentException if the {@link Object} cannot if not of a supported type.
+	 * @param source the original source object
+	 * @return the adapted XSLT Source
+	 * @throws IllegalArgumentException if the given Object is not of a supported type
 	 */
 	protected Source convertSource(Object source) throws Exception {
 		if (source instanceof Source) {
@@ -221,27 +271,30 @@ public class XsltView extends AbstractUrlBasedView {
 		else if (source instanceof Node) {
 			return new DOMSource((Node) source);
 		}
-		else if (source instanceof InputStream) {
-			return new StreamSource((InputStream) source);
-		}
 		else if (source instanceof Reader) {
 			return new StreamSource((Reader) source);
+		}
+		else if (source instanceof InputStream) {
+			return new StreamSource((InputStream) source);
 		}
 		else if (source instanceof Resource) {
 			return new StreamSource(((Resource) source).getInputStream());
 		}
 		else {
-			throw new IllegalArgumentException("Value '" + source + "' cannot be converted to Source.");
+			throw new IllegalArgumentException("Value '" + source + "' cannot be converted to XSLT Source");
 		}
 	}
 
 	/**
-	 * Configures the supplied {@link Transformer} instance. Default implementation copies parameters from
-	 * the model into the {@link Transformer} {@link Transformer#setParameter parameter set}.
+	 * Configure the supplied {@link Transformer} instance.
+	 * <p>The default implementation copies parameters from the model into the
+	 * Transformer's {@link Transformer#setParameter parameter set}.
 	 * This implementation also copies the {@link #setOutputProperties output properties}
 	 * into the {@link Transformer} {@link Transformer#setOutputProperty output properties}.
-	 * Indentation properties are also set by this implementation.
-	 *
+	 * Indentation properties are set as well.
+	 * @param model merged output Map (never <code>null</code>)
+	 * @param response current HTTP response
+	 * @param transformer the target transformer
 	 * @see #copyModelParameters(Map, Transformer)
 	 * @see #copyOutputProperties(Transformer)
 	 * @see #configureIndentation(Transformer)
@@ -253,7 +306,7 @@ public class XsltView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Configures the indentation settings for the supplied {@link Transformer}.
+	 * Configure the indentation settings for the supplied {@link Transformer}.
 	 * @param transformer the target transformer
 	 * @throws IllegalArgumentException if the supplied {@link Transformer} is <code>null</code>
 	 * @see TransformerUtils#enableIndenting(javax.xml.transform.Transformer) 
@@ -269,9 +322,10 @@ public class XsltView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Copies the configured output {@link Properties}, if any, into the
+	 * Copy the configured output {@link Properties}, if any, into the
 	 * {@link Transformer#setOutputProperty output property set} of the supplied
 	 * {@link Transformer}.
+	 * @param transformer the target transformer
 	 */
 	protected final void copyOutputProperties(Transformer transformer) {
 		if (this.outputProperties != null) {
@@ -284,23 +338,41 @@ public class XsltView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Copies all entries from the supplied Map into the
+	 * Copy all entries from the supplied Map into the
 	 * {@link Transformer#setParameter(String, Object) parameter set}
 	 * of the supplied {@link Transformer}.
+	 * @param model merged output Map (never <code>null</code>)
+	 * @param transformer the target transformer
 	 */
 	protected final void copyModelParameters(Map model, Transformer transformer) {
 		copyMapEntriesToTransformerParameters(model, transformer);
 	}
 
 	/**
-	 * Configures the supplied {@link HttpServletResponse}. The default implementation of this
-	 * method sets the {@link HttpServletResponse#setContentType content type} and
-	 * {@link HttpServletResponse#setCharacterEncoding	encoding} from properties specified
-	 * in the {@link Transformer}.
+	 * Configure the supplied {@link HttpServletResponse}.
+	 * <p>The default implementation of this method sets the
+	 * {@link HttpServletResponse#setContentType content type} and
+	 * {@link HttpServletResponse#setCharacterEncoding encoding}
+	 * from the "media-type" and "encoding" output properties
+	 * specified in the {@link Transformer}.
+	 * @param model merged output Map (never <code>null</code>)
+	 * @param response current HTTP response
+	 * @param transformer the target transformer
 	 */
 	protected void configureResponse(Map model, HttpServletResponse response, Transformer transformer) {
-		response.setContentType(transformer.getOutputProperty(OutputKeys.MEDIA_TYPE));
-		response.setCharacterEncoding(transformer.getOutputProperty(OutputKeys.ENCODING));
+		String contentType = getContentType();
+		String mediaType = transformer.getOutputProperty(OutputKeys.MEDIA_TYPE);
+		String encoding = transformer.getOutputProperty(OutputKeys.ENCODING);
+		if (StringUtils.hasText(mediaType)) {
+			contentType = mediaType;
+		}
+		if (StringUtils.hasText(encoding)) {
+			// Only apply encoding if content type is specified but does not contain charset clause already.
+			if (contentType != null && contentType.toLowerCase().indexOf(WebUtils.CONTENT_TYPE_CHARSET_PREFIX) == -1) {
+				contentType = contentType + WebUtils.CONTENT_TYPE_CHARSET_PREFIX + encoding;
+			}
+		}
+		response.setContentType(contentType);
 	}
 
 	/**
@@ -309,7 +381,7 @@ public class XsltView extends AbstractUrlBasedView {
 	private Templates loadTemplates() throws ApplicationContextException {
 		Source stylesheetSource = getStylesheetSource();
 		try {
-			Templates templates = getTransformerFactory().newTemplates(stylesheetSource);
+			Templates templates = this.transformerFactory.newTemplates(stylesheetSource);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loading templates '" + templates + "'");
 			}
@@ -324,9 +396,10 @@ public class XsltView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Creates the {@link Transformer} instance used to prefer the XSLT transformation. Default implementation
-	 * simply calls {@link Templates#newTransformer()}. Configures the {@link Transformer} with the custom
-	 * {@link URIResolver} if specified.
+	 * Create the {@link Transformer} instance used to prefer the XSLT transformation.
+	 * <p>The default implementation simply calls {@link Templates#newTransformer()}, and
+	 * configures the {@link Transformer} with the custom {@link URIResolver} if specified.
+	 * @param templates the XSLT Templates instance to create a Transformer for
 	 */
 	protected Transformer createTransformer(Templates templates) throws TransformerConfigurationException {
 		Transformer transformer = templates.newTransformer();
@@ -337,7 +410,7 @@ public class XsltView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Gets the XSLT {@link Source} for the XSLT template under the {@link #setUrl configured URL}.
+	 * Get the XSLT {@link Source} for the XSLT template under the {@link #setUrl configured URL}.
 	 */
 	protected Source getStylesheetSource() {
 		String url = getUrl();
@@ -355,7 +428,7 @@ public class XsltView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Copies all {@link Map.Entry entries} from the supplied {@link Map} into the
+	 * Copy all {@link Map.Entry entries} from the supplied {@link Map} into the
 	 * {@link Transformer#setParameter(String, Object) parameter set} of the supplied
 	 * {@link Transformer}.
 	 */
@@ -367,27 +440,25 @@ public class XsltView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Closes the underlying resource managed by the supplied {@link Source} if applicable.
-	 * Only works for {@link StreamSource StreamSources}.
+	 * Close the underlying resource managed by the supplied {@link Source} if applicable.
+	 * <p>Only works for {@link StreamSource StreamSources}.
+	 * @param source the XSLT Source to close (may be <code>null</code>)
 	 */
 	private void closeSourceIfNecessary(Source source) {
 		if (source instanceof StreamSource) {
 			StreamSource streamSource = (StreamSource) source;
-
+			if (streamSource.getReader() != null) {
+				try {
+					streamSource.getReader().close();
+				}
+				catch (IOException ex) {
+				}
+			}
 			if (streamSource.getInputStream() != null) {
 				try {
 					streamSource.getInputStream().close();
 				}
-				catch (IOException e) {
-					logger.warn("Unable to close InputStream '" + streamSource.getInputStream() + "'");
-				}
-			}
-			else if (streamSource.getReader() != null) {
-				try {
-					streamSource.getReader().close();
-				}
-				catch (IOException e) {
-					logger.warn("Unable to close Reader '" + streamSource.getReader() + "'");
+				catch (IOException ex) {
 				}
 			}
 		}

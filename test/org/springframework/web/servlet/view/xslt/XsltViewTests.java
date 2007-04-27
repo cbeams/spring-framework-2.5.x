@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.test.AssertThrows;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class XsltViewTests extends TestCase {
 
@@ -136,7 +137,8 @@ public class XsltViewTests extends TestCase {
 		model.put("someKey", source);
 
 		view.render(model, this.request, this.response);
-		assertEquals("text/html", this.response.getContentType());
+		assertTrue(this.response.getContentType().startsWith("text/html"));
+		assertEquals("UTF-8", this.response.getCharacterEncoding());
 	}
 
 	public void testModelParametersCarriedAcross() throws Exception {
