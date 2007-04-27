@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * Return the prefix that gets prepended to view names when building a URL.
 	 */
 	protected String getPrefix() {
-		return prefix;
+		return this.prefix;
 	}
 
 	/**
@@ -174,7 +174,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * Return the suffix that gets appended to view names when building a URL.
 	 */
 	protected String getSuffix() {
-		return suffix;
+		return this.suffix;
 	}
 
 	/**
@@ -190,7 +190,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * Return the content type for all views, if any.
 	 */
 	protected String getContentType() {
-		return contentType;
+		return this.contentType;
 	}
 
 	/**
@@ -215,7 +215,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * relative to the web application root.
 	 */
 	protected boolean isRedirectContextRelative() {
-		return redirectContextRelative;
+		return this.redirectContextRelative;
 	}
 
 	/**
@@ -240,7 +240,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * Return whether redirects should stay compatible with HTTP 1.0 clients.
 	 */
 	protected boolean isRedirectHttp10Compatible() {
-		return redirectHttp10Compatible;
+		return this.redirectHttp10Compatible;
 	}
 
 	/**
@@ -256,7 +256,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * Return the name of the RequestContext attribute for all views, if any.
 	 */
 	protected String getRequestContextAttribute() {
-		return requestContextAttribute;
+		return this.requestContextAttribute;
 	}
 
 	/**
@@ -314,7 +314,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * {@link org.springframework.web.servlet.ViewResolver}.
 	 */
 	protected String[] getViewNames() {
-		return viewNames;
+		return this.viewNames;
 	}
 
 	/**
@@ -330,13 +330,13 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * is evaluated.
 	 */
 	public int getOrder() {
-		return order;
+		return this.order;
 	}
 
 	protected void initApplicationContext() {
 		super.initApplicationContext();
 		if (getViewClass() == null) {
-			throw new IllegalArgumentException("viewClass is required");
+			throw new IllegalArgumentException("Property 'viewClass' is required");
 		}
 	}
 
@@ -383,6 +383,9 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * handle the supplied view name. If not, {@link #createView(String, java.util.Locale)} will
 	 * return <code>null</code>. The default implementation checks against the configured
 	 * {@link #setViewNames view names}.
+	 * @param viewName the name of the view to retrieve
+	 * @param locale the Locale to retrieve the view for
+	 * @return whether this resolver applies to the specified view
 	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean canHandle(String viewName, Locale locale) {
@@ -398,6 +401,9 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * <li>ApplicationContextAware's <code>setApplicationContext</code>
 	 * <li>InitializingBean's <code>afterPropertiesSet</code>
 	 * </ul>
+	 * @param viewName the name of the view to retrieve
+	 * @return the View instance
+	 * @throws Exception if the view couldn't be resolved
 	 * @see #buildView(String)
 	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
@@ -416,6 +422,9 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * <p>Subclasses will typically call <code>super.buildView(viewName)</code>
 	 * first, before setting further properties themselves. <code>loadView</code>
 	 * will then apply Spring lifecycle methods at the end of this process.
+	 * @param viewName the name of the view to build
+	 * @return the View instance
+	 * @throws Exception if the view couldn't be resolved
 	 * @see #loadView(String, java.util.Locale)
 	 */
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {

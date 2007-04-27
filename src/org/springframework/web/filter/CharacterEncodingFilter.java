@@ -47,7 +47,7 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 
 	// Determine whether the Servlet 2.4 HttpServletResponse.setCharacterEncoding(String)
 	// method is available, for use in the "doFilterInternal" implementation.
-	private final static boolean setCharacterEncodingAvailable = ClassUtils.hasMethod(
+	private final static boolean responseSetCharacterEncodingAvailable = ClassUtils.hasMethod(
 			HttpServletResponse.class, "setCharacterEncoding", new Class[] {String.class});
 
 
@@ -89,7 +89,7 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 
 		if (this.encoding != null && (this.forceEncoding || request.getCharacterEncoding() == null)) {
 			request.setCharacterEncoding(this.encoding);
-			if (this.forceEncoding && setCharacterEncodingAvailable) {
+			if (this.forceEncoding && responseSetCharacterEncodingAvailable) {
 				response.setCharacterEncoding(this.encoding);
 			}
 		}
