@@ -3,15 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.5 (2007-05-01)
+Changes in version 2.0.5 (2007-05-03)
 -------------------------------------
 
 Package org.springframework.aop
 * DelegatingIntroductionInterceptor only replaces a return value with the proxy if the proxy is actually assignable
 * JdkDynamic/Cglib2AopProxy only replaces return value with proxy if declaring class is not marked for raw target access
 * ScopedObject's "getTargetObject()" method returns the actual target object now (instead of the proxy object)
+* fixed "aop:scoped-proxy" tag to properly apply to defined alias names as well
 
 Package org.springframework.beans
+* BeanWrapper converts an empty String to null in case of a Java 5 enum as target type
 * default editor settings get copied to nested beans even if no default editors have been used yet
 * revised MethodInvokingFactoryBean's "getObjectType()" implementation to gracefully return null if not prepared already
 * AbstractBeanFactory uses concurrent Maps for singletons, aliases and bean definitions (for better concurrency)
@@ -45,7 +47,9 @@ Package org.springframework.jndi
 * TypeMismatchNamingException carries required type and actual type as explicit attributes
 
 Package org.springframework.orm
+* ExtendedEntityManagerCreator efficiently detects JTA through PersistenceUnitInfo's "transactionType" (if possible)
 * PersistenceAnnotationBeanPostProcessor is able to resolve a lazy EntityManagerFactory via its unit name as well
+* factored out "findEntityManagerFactory(ListableBeanFactory, unitName)" method into EntityManagerFactoryUtils
 
 Package org.springframework.remoting
 * RemoteExporter shows "use reference, not value" error message in case of the specified service object being a String
@@ -75,6 +79,11 @@ Package org.springframework.web
 * XmlViewResolver (and similar strategies) work again in combination with the implicit default BeanNameUrlHandlerMapping
 * JSP SelectTag always renders a full closing tag (i.e. never renders a short-circuited opening tag with "/>" ending)
 * JSP SelectTag accepts null values for its attributes (doesn't strictly enforce non-null values anymore)
+* JSP OptionTag properly detects a Java 5 Enum as selected even in case of an overridden "toString()" implementation
+* FreeMarkerView exposes a ServletConfig object to FreeMarker, for use with ServletConfig-accessing JSP tags
+* revised XsltView for Servlet 2.3 compatibility, avoiding the "HttpServletResponse.setCharacterEncoding" method
+* revised XsltView to respect a specified "contentType" property, using it if no XSLT media type has been specified
+* fixed XsltViewResolver to properly apply the "cacheTemplates" flag to created XsltView instances
 
 
 Changes in version 2.0.4 (2007-04-10)
