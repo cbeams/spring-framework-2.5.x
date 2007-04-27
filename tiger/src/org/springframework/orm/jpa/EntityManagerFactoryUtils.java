@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,9 @@ import javax.persistence.TransactionRequiredException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -66,6 +69,42 @@ public abstract class EntityManagerFactoryUtils {
 
 	private static final Log logger = LogFactory.getLog(EntityManagerFactoryUtils.class);
 
+
+	/**
+	 * Find an EntityManagerFactory with the given name in the given
+	 * Spring application context (represented as ListableBeanFactory).
+	 * <p>The specified unit name will be matched against the configured
+	 * peristence unit, provided that a discovered EntityManagerFactory
+	 * implements the {@link EntityManagerFactoryInfo} interface. If not,
+	 * the persistence unit name will be matched against the Spring bean name,
+	 * assuming that the EntityManagerFactory bean names follow that convention.
+	 * @param beanFactory the ListableBeanFactory to search
+	 * @param unitName the name of the persistence unit (never empty)
+	 * @return the EntityManagerFactory
+	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory in the context
+	 * @see EntityManagerFactoryInfo#getPersistenceUnitName()
+	 */
+	public static EntityManagerFactory findEntityManagerFactory(
+			ListableBeanFactory beanFactory, String unitName) throws NoSuchBeanDefinitionException {
+
+		Assert.notNull(beanFactory, "ListableBeanFactory must not be null");
+		Assert.hasLength(unitName, "Unit name must not be empty");
+
+		// See whether we can find an EntityManagerFactory with matching persistence unit name.
+		String[] candidateNames =
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, EntityManagerFactory.class);
+		for (String candidateName : candidateNames) {
+			EntityManagerFactory emf = (EntityManagerFactory) beanFactory.getBean(candidateName);
+			if (emf instanceof EntityManagerFactoryInfo) {
+				if (unitName.equals(((EntityManagerFactoryInfo) emf).getPersistenceUnitName())) {
+					return emf;
+				}
+			}
+		}
+		// No matching persistence unit found - simply take the EntityManagerFactory
+		// with the persistence unit name as bean name (by convention).
+		return (EntityManagerFactory) beanFactory.getBean(unitName, EntityManagerFactory.class);
+	}
 
 	/**
 	 * Obtain a JPA EntityManager from the given factory. Is aware of a

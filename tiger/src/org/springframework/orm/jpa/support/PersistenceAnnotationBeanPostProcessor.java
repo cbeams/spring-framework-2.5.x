@@ -48,6 +48,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.ObjectUtils;
@@ -429,27 +430,16 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	}
 
 	/**
-	 * Find an EntityManagerFactory with the given name in the current Spring
-	 * application context.
+	 * Find an EntityManagerFactory with the given name in the current
+	 * Spring application context.
 	 * @param unitName the name of the persistence unit (never empty)
 	 * @return the EntityManagerFactory
 	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory in the context
 	 */
-	protected EntityManagerFactory findNamedEntityManagerFactory(String unitName) throws NoSuchBeanDefinitionException {
-		// See whether we can find an EntityManagerFactory with matching persistence unit name.
-		String[] candidateNames =
-				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, EntityManagerFactory.class);
-		for (String candidateName : candidateNames) {
-			EntityManagerFactory emf = (EntityManagerFactory) this.beanFactory.getBean(candidateName);
-			if (emf instanceof EntityManagerFactoryInfo) {
-				if (unitName.equals(((EntityManagerFactoryInfo) emf).getPersistenceUnitName())) {
-					return emf;
-				}
-			}
-		}
-		// No matching persistence unit found - simply take the EntityManagerFactory
-		// with the persistence unit name as bean name (by convention).
-		return (EntityManagerFactory) this.beanFactory.getBean(unitName);
+	protected EntityManagerFactory findNamedEntityManagerFactory(String unitName)
+			throws NoSuchBeanDefinitionException {
+
+		return EntityManagerFactoryUtils.findEntityManagerFactory(this.beanFactory, unitName);
 	}
 
 	/**
