@@ -81,7 +81,7 @@ import org.springframework.web.util.NestedServletException;
 public abstract class AbstractXsltView extends AbstractView {
 
 	/** The default content type if no stylesheet specified */
-	public static final String XML_CONTENT_TYPE = "text/xml; charset=ISO-8859-1";
+	public static final String XML_CONTENT_TYPE = "text/xml;charset=ISO-8859-1";
 
 	/** The default document root name */
 	public static final String DEFAULT_ROOT = "DocRoot";
@@ -109,9 +109,9 @@ public abstract class AbstractXsltView extends AbstractView {
 
 
 	/**
-	 * This constructor sets the content type to "text/xml; charset=ISO-8859-1"
+	 * This constructor sets the content type to "text/xml;charset=ISO-8859-1"
 	 * by default. This will be switched to the standard web view default
-	 * "text/html; charset=ISO-8859-1" if a stylesheet location has been specified.
+	 * "text/html;charset=ISO-8859-1" if a stylesheet location has been specified.
 	 * A specific content type can be configured via the "contentType" bean property.
 	 * @see #setContentType
 	 */
@@ -170,9 +170,7 @@ public abstract class AbstractXsltView extends AbstractView {
 
 	/**
 	 * Set the URIResolver used in the transform.
-	 * <p>The URIResolver handles calls to the XSLT document() function.
-	 * @param uriResolver URIResolver to set. No URIResolver
-	 * will be set if this is <code>null</code>  (this is the default).
+	 * <p>The URIResolver handles calls to the XSLT <code>document()</code> function.
 	 */
 	public void setUriResolver(URIResolver uriResolver) {
 		this.uriResolver = uriResolver;
@@ -250,7 +248,7 @@ public abstract class AbstractXsltView extends AbstractView {
 			getTemplates();
 		}
 		catch (TransformerConfigurationException ex) {
-			throw new ApplicationContextException("Can't load stylesheet for XSLT view '" + getBeanName() + "'", ex);
+			throw new ApplicationContextException("Cannot load stylesheet for XSLT view '" + getBeanName() + "'", ex);
 		}
 	}
 

@@ -97,7 +97,7 @@ public class ResourceBundleViewResolverTests extends TestCase {
 		assertTrue("attribute foo = bar, not '" + m.get("foo") + "'", m.get("foo").equals("bar"));
 		assertTrue("attribute postcode = SE10 9JY", m.get("postcode").equals("SE10 9JY"));
 
-		assertTrue("Correct default content type", jv.getContentType().equals("text/html; charset=ISO-8859-1"));
+		assertTrue("Correct default content type", jv.getContentType().equals(AbstractView.DEFAULT_CONTENT_TYPE));
 	}
 
 	public void testDebugViewFrench() throws Exception {
@@ -107,7 +107,7 @@ public class ResourceBundleViewResolverTests extends TestCase {
 		assertTrue("French debugView must have correct URL", "jsp/debug/deboug.jsp".equals(jv.getUrl()));
 		assertTrue(
 			"Correct overridden (XML) content type, not '" + jv.getContentType() + "'",
-			jv.getContentType().equals("text/xml; charset=ISO-8859-1"));
+			jv.getContentType().equals("text/xml;charset=ISO-8859-1"));
 	}
 
 	public void testEagerInitialization() throws Exception {
@@ -124,7 +124,7 @@ public class ResourceBundleViewResolverTests extends TestCase {
 		assertTrue("French debugView must have correct URL", "jsp/debug/deboug.jsp".equals(jv.getUrl()));
 		assertTrue(
 			"Correct overridden (XML) content type, not '" + jv.getContentType() + "'",
-			jv.getContentType().equals("text/xml; charset=ISO-8859-1"));
+			jv.getContentType().equals("text/xml;charset=ISO-8859-1"));
 	}
 
 	public void testSameBundleOnlyCachedOnce() throws Exception {

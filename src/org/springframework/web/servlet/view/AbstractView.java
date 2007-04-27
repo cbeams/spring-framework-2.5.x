@@ -54,7 +54,7 @@ import org.springframework.web.servlet.support.RequestContext;
 public abstract class AbstractView extends WebApplicationObjectSupport implements View, BeanNameAware {
 
 	/** Default content type. Overridable as bean property. */
-	public static final String DEFAULT_CONTENT_TYPE = "text/html; charset=ISO-8859-1";
+	public static final String DEFAULT_CONTENT_TYPE = "text/html;charset=ISO-8859-1";
 
 
 	private String beanName;
@@ -69,9 +69,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	/**
 	 * Set the view's name. Helpful for traceability.
-	 * Framework code must call this when constructing views.
-	 * @param beanName the view's name. May not be <code>null</code>.
-	 * Views should use this for log messages.
+	 * <p>Framework code must call this when constructing views.
 	 */
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
@@ -82,16 +80,14 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * if the view was correctly configured.
 	 */
 	public String getBeanName() {
-		return beanName;
+		return this.beanName;
 	}
 
 	/**
 	 * Set the content type for this view.
-	 * Default is "text/html; charset=ISO-8859-1".
+	 * Default is "text/html;charset=ISO-8859-1".
 	 * <p>May be ignored by subclasses if the view itself is assumed
 	 * to set the content type, e.g. in case of JSPs.
-	 * @param contentType content type for this view
-	 * @see #DEFAULT_CONTENT_TYPE
 	 */
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
