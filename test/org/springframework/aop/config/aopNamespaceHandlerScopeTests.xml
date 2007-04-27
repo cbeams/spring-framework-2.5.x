@@ -18,7 +18,7 @@
 		<property name="name" value="Rob Harrop"/>
 	</bean>
 
-	<bean id="sessionScoped" class="org.springframework.beans.TestBean" scope="session">
+	<bean id="sessionScoped" name="sessionScopedAlias" class="org.springframework.beans.TestBean" scope="session">
 		<aop:scoped-proxy proxy-target-class="false"/>
 		<property name="name" value="Rob Harrop"/>
 	</bean>

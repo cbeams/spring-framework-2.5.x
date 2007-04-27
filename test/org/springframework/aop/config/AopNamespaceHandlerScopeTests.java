@@ -83,6 +83,9 @@ public class AopNamespaceHandlerScopeTests extends TestCase {
 		assertTrue("Should be AOP proxy", AopUtils.isAopProxy(scoped));
 		assertFalse("Should not be target class proxy", scoped instanceof TestBean);
 
+		ITestBean scopedAlias = (ITestBean) this.context.getBean("sessionScopedAlias");
+		assertSame(scoped, scopedAlias);
+
 		ITestBean testBean = (ITestBean) this.context.getBean("testBean");
 		assertTrue("Should be AOP proxy", AopUtils.isAopProxy(testBean));
 		assertFalse("Regular bean should be JDK proxy", testBean instanceof TestBean);

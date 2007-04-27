@@ -75,7 +75,7 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
 		// Return the scoped proxy definition as primary bean definition
 		// (potentially an inner bean).
-		return new BeanDefinitionHolder(scopedProxyDefinition, originalBeanName);
+		return new BeanDefinitionHolder(scopedProxyDefinition, originalBeanName, definition.getAliases());
 	}
 
 }
