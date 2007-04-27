@@ -20,11 +20,11 @@ import java.util.Enumeration;
 import java.util.Map;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
@@ -51,19 +51,10 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	public static final String SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE = "springMacroRequestContext";
 
 
-	private static boolean responseGetContentTypeAvailable;
-
-	static {
-		// Determine whether the Servlet 2.4 ServletResponse.getContentType method
-		// is available.
-		try {
-			ServletResponse.class.getMethod("getContentType", new Class[0]);
-			responseGetContentTypeAvailable = true;
-		}
-		catch (NoSuchMethodException ex) {
-			responseGetContentTypeAvailable = false;
-		}
-	}
+	// Determine whether the Servlet 2.4 HttpServletResponse.getContentType()
+	// method is available.
+	private static boolean responseGetContentTypeAvailable =
+			ClassUtils.hasMethod(HttpServletResponse.class, "getContentType", new Class[0]);
 
 
 	private boolean exposeRequestAttributes = false;
