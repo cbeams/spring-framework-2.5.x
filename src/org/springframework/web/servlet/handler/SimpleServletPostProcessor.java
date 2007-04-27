@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,9 @@ import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
 
 /**
- * Bean post-processor that applies initialization and destruction callbacks
- * to beans that implement the Servlet interface.
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor}
+ * that applies initialization and destruction callbacks to beans that
+ * implement the {@link javax.servlet.Servlet} interface.
  *
  * <p>After initialization of the bean instance, the Servlet <code>init</code>
  * method will be called with a ServletConfig that contains the bean name
@@ -46,23 +47,22 @@ import org.springframework.web.context.ServletContextAware;
  * supposed to be configured like any other Spring bean, that is, through
  * constructor arguments or bean properties.
  *
- * <p>For reuse of a Servlet implementation in a plain Servlet container and as
- * a bean in a Spring context, consider deriving from Spring's HttpServletBean
- * base class that applies Servlet initialization parameters as bean properties,
- * supporting both initialization styles.
+ * <p>For reuse of a Servlet implementation in a plain Servlet container
+ * and as a bean in a Spring context, consider deriving from Spring's
+ * {@link org.springframework.web.servlet.HttpServletBean} base class that
+ * applies Servlet initialization parameters as bean properties, supporting
+ * both the standard Servlet and the Spring bean initialization style.
  *
  * <p><b>Alternatively, consider wrapping a Servlet with Spring's
- * ServletWrappingController.</b> This is particularly appropriate for
- * existing Servlet classes, allowing to specify Servlet initialization
- * parameters etc.
+ * {@link org.springframework.web.servlet.mvc.ServletWrappingController}.</b>
+ * This is particularly appropriate for existing Servlet classes,
+ * allowing to specify Servlet initialization parameters etc.
  *
  * @author Juergen Hoeller
  * @since 1.1.5
- * @see javax.servlet.Servlet
- * @see javax.servlet.ServletConfig
+ * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
+ * @see javax.servlet.Servlet#destroy()
  * @see SimpleServletHandlerAdapter
- * @see org.springframework.web.servlet.HttpServletBean
- * @see org.springframework.web.servlet.mvc.ServletWrappingController
  */
 public class SimpleServletPostProcessor implements
 		DestructionAwareBeanPostProcessor, ServletContextAware, ServletConfigAware {
@@ -123,8 +123,8 @@ public class SimpleServletPostProcessor implements
 
 
 	/**
-	 * Internal implementation of the ServletConfig interface, to be passed
-	 * to the wrapped servlet.
+	 * Internal implementation of the {@link ServletConfig} interface,
+	 * to be passed to the wrapped servlet.
 	 */
 	private static class DelegatingServletConfig implements ServletConfig {
 
@@ -138,11 +138,11 @@ public class SimpleServletPostProcessor implements
 		}
 
 		public String getServletName() {
-			return servletName;
+			return this.servletName;
 		}
 
 		public ServletContext getServletContext() {
-			return servletContext;
+			return this.servletContext;
 		}
 
 		public String getInitParameter(String paramName) {
