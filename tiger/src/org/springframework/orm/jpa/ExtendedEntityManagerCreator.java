@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TransactionRequiredException;
+import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,7 +69,7 @@ public abstract class ExtendedEntityManagerCreator {
 	public static EntityManager createApplicationManagedEntityManager(
 			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations) {
 
-		return createProxy(rawEntityManager, plusOperations, null, false);
+		return createProxy(rawEntityManager, plusOperations, null, null, false);
 	}
 
 	/**
@@ -87,7 +89,7 @@ public abstract class ExtendedEntityManagerCreator {
 			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations,
 			PersistenceExceptionTranslator exceptionTranslator) {
 
-		return createProxy(rawEntityManager, plusOperations, exceptionTranslator, false);
+		return createProxy(rawEntityManager, plusOperations, exceptionTranslator, null, false);
 	}
 
 	/**
@@ -102,7 +104,7 @@ public abstract class ExtendedEntityManagerCreator {
 	public static EntityManager createContainerManagedEntityManager(
 			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations) {
 
-		return createProxy(rawEntityManager, plusOperations, null, true);
+		return createProxy(rawEntityManager, plusOperations, null, null, true);
 	}
 
 	/**
@@ -121,7 +123,7 @@ public abstract class ExtendedEntityManagerCreator {
 			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations,
 			PersistenceExceptionTranslator exceptionTranslator) {
 
-		return createProxy(rawEntityManager, plusOperations, exceptionTranslator, true);
+		return createProxy(rawEntityManager, plusOperations, exceptionTranslator, null, true);
 	}
 
 	/**
@@ -164,12 +166,14 @@ public abstract class ExtendedEntityManagerCreator {
 			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
 				plusOperations = jpaDialect.getEntityManagerPlusOperations(rawEntityManager);
 			}
-			return createProxy(rawEntityManager, plusOperations, emfInfo.getJpaDialect(), true);
+			PersistenceUnitInfo pui = emfInfo.getPersistenceUnitInfo();
+			Boolean jta = (pui != null ? pui.getTransactionType() == PersistenceUnitTransactionType.JTA : null);
+			return createProxy(rawEntityManager, plusOperations, emfInfo.getJpaDialect(), jta, true);
 		}
 		else {
 			EntityManager rawEntityManager = (!CollectionUtils.isEmpty(properties) ?
 					emf.createEntityManager(properties) : emf.createEntityManager());
-			return createProxy(rawEntityManager, null, null, true);
+			return createProxy(rawEntityManager, null, null, null, true);
 		}
 	}
 
@@ -178,13 +182,16 @@ public abstract class ExtendedEntityManagerCreator {
 	 * @param rawEntityManager raw EntityManager
 	 * @param plusOperations an implementation of the EntityManagerPlusOperations
 	 * interface, if those operations should be exposed (may be <code>null</code>)
+	 * @param exceptionTranslator the PersistenceException translator to use
+	 * @param jta whether to create a JTA-aware EntityManager
+	 * (or <code>null</code> if not known in advance)
 	 * @param containerManaged whether to follow container-managed EntityManager
 	 * or application-managed EntityManager semantics
 	 * @return the EntityManager proxy
 	 */
 	private static EntityManager createProxy(
 			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations,
-			PersistenceExceptionTranslator exceptionTranslator, boolean containerManaged) {
+			PersistenceExceptionTranslator exceptionTranslator, Boolean jta, boolean containerManaged) {
 
 		Assert.notNull(rawEntityManager, "EntityManager must not be null");
 		Class[] ifcs = ClassUtils.getAllInterfaces(rawEntityManager);
@@ -194,7 +201,7 @@ public abstract class ExtendedEntityManagerCreator {
 		return (EntityManager) Proxy.newProxyInstance(
 				ExtendedEntityManagerCreator.class.getClassLoader(), ifcs,
 				new ExtendedEntityManagerInvocationHandler(
-						rawEntityManager, plusOperations, exceptionTranslator, containerManaged));
+						rawEntityManager, plusOperations, exceptionTranslator, jta, containerManaged));
 	}
 
 
@@ -217,13 +224,13 @@ public abstract class ExtendedEntityManagerCreator {
 
 		private ExtendedEntityManagerInvocationHandler(
 				EntityManager target, EntityManagerPlusOperations plusOperations,
-				PersistenceExceptionTranslator exceptionTranslator, boolean containerManaged) {
+				PersistenceExceptionTranslator exceptionTranslator, Boolean jta, boolean containerManaged) {
 
 			this.target = target;
 			this.plusOperations = plusOperations;
 			this.exceptionTranslator = exceptionTranslator;
+			this.jta = (jta != null ? jta.booleanValue() : isJtaEntityManager());
 			this.containerManaged = containerManaged;
-			this.jta = isJtaEntityManager();
 		}
 
 		private boolean isJtaEntityManager() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ import javax.sql.DataSource;
 import org.springframework.util.ClassUtils;
 
 /**
- * Spring's base implementation of the JPA PersistenceUnitInfo interface
+ * Spring's base implementation of the JPA
+ * {@link javax.persistence.spi.PersistenceUnitInfo} interface,
  * used to bootstrap an EntityManagerFactory in a container.
  *
  * <p>This implementation is largely a JavaBean, offering mutators
@@ -46,7 +47,7 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 
 	private String persistenceProviderClassName;
 
-	private PersistenceUnitTransactionType transactionType = PersistenceUnitTransactionType.RESOURCE_LOCAL;
+	private PersistenceUnitTransactionType transactionType;
 
 	private DataSource nonJtaDataSource;
 
@@ -86,7 +87,13 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	}
 
 	public PersistenceUnitTransactionType getTransactionType() {
-		return transactionType;
+		if (this.transactionType != null) {
+			return this.transactionType;
+		}
+		else {
+			return (this.jtaDataSource != null ?
+					PersistenceUnitTransactionType.JTA : PersistenceUnitTransactionType.RESOURCE_LOCAL);
+		}
 	}
 
 	public void setJtaDataSource(DataSource jtaDataSource) {
@@ -94,7 +101,7 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	}
 
 	public DataSource getJtaDataSource() {
-		return jtaDataSource;
+		return this.jtaDataSource;
 	}
 
 	public void setNonJtaDataSource(DataSource nonJtaDataSource) {
@@ -102,7 +109,7 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	}
 
 	public DataSource getNonJtaDataSource() {
-		return nonJtaDataSource;
+		return this.nonJtaDataSource;
 	}
 
 	public void addMappingFileName(String mappingFileName) {
@@ -110,7 +117,7 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	}
 
 	public List<String> getMappingFileNames() {
-		return mappingFileNames;
+		return this.mappingFileNames;
 	}
 
 	public void addJarFileUrl(URL jarFileUrl) {
@@ -118,7 +125,7 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	}
 
 	public List<URL> getJarFileUrls() {
-		return jarFileUrls;
+		return this.jarFileUrls;
 	}
 
 	public void setPersistenceUnitRootUrl(URL persistenceUnitRootUrl) {
@@ -134,7 +141,7 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	}
 
 	public List<String> getManagedClassNames() {
-		return managedClassNames;
+		return this.managedClassNames;
 	}
 
 	public void setExcludeUnlistedClasses(boolean excludeUnlistedClasses) {
@@ -142,7 +149,7 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	}
 
 	public boolean excludeUnlistedClasses() {
-		return excludeUnlistedClasses;
+		return this.excludeUnlistedClasses;
 	}
 
 	public void addProperty(String name, String value) {
@@ -157,7 +164,7 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	}
 
 	public Properties getProperties() {
-		return properties;
+		return this.properties;
 	}
 
 
@@ -176,9 +183,9 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("SpringPersistenceUnitInfo: unitName='");
+		builder.append("PersistenceUnitInfo: name '");
 		builder.append(this.persistenceUnitName);
-		builder.append("', unitRootUrl=[");
+		builder.append("', root URL [");
 		builder.append(this.persistenceUnitRootUrl);
 		builder.append("]");
 		return builder.toString();
