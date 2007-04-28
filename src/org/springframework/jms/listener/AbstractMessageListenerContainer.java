@@ -64,12 +64,11 @@ import org.springframework.util.Assert;
  * The exact behavior might vary according to the concrete listener container
  * and JMS provider used.
  *
- * <p>Note that there is a corner case when using "sessionTransacted",
- * where the listener might have returned successfully but the server
- * died before acknowledging the message. As a consequence, a message
- * <i>might get redelivered even after successful processing</i> -
- * potentially leading to duplicate processing of the message.
- * This violates "exactly-once" semantics, at least potentially.
+ * <b>NOTE:</b> The default behavior of this message listener container is to
+ * <b>never</b> propagate an exception thrown by a message listener up to the
+ * JMS provider. Instead, it will log any such exception at the error level and
+ * rollback the active transaction if there is one. This means that from the
+ * perspective of the attendant JMS provider no listener will ever fail.
  *
  * <p>There are two solutions to the duplicate processing problem:
  * <ul>
