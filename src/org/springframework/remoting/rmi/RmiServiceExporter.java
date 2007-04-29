@@ -16,6 +16,7 @@
 
 package org.springframework.remoting.rmi;
 
+import java.rmi.AlreadyBoundException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -86,6 +87,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	private RMIServerSocketFactory registryServerSocketFactory;
 
 	private boolean alwaysCreateRegistry = false;
+
+	private boolean replaceExistingBinding = true;
 
 	private Remote exportedObject;
 
@@ -206,6 +209,19 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 		this.alwaysCreateRegistry = alwaysCreateRegistry;
 	}
 
+	/**
+	 * Set whether to replace an existing binding in the RMI registry,
+	 * that is, whether to simply override an existing binding with the
+	 * specified service in case of a naming conflict in the registry.
+	 * <p>Default is "true", assuming that an existing binding for this
+	 * exporter's service name is an accidental leftover from a previous
+	 * execution. Switch this to "false" to make the exporter fail in such
+	 * a scenario, indicating that there was already an RMI object bound.
+	 */
+	public void setReplaceExistingBinding(boolean replaceExistingBinding) {
+		this.replaceExistingBinding = replaceExistingBinding;
+	}
+
 
 	public void afterPropertiesSet() throws RemoteException {
 		prepare();
@@ -266,7 +282,18 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 
 		// Bind RMI object to registry.
 		try {
-			this.registry.rebind(this.serviceName, this.exportedObject);
+			if (this.replaceExistingBinding) {
+				this.registry.rebind(this.serviceName, this.exportedObject);
+			}
+			else {
+				this.registry.bind(this.serviceName, this.exportedObject);
+			}
+		}
+		catch (AlreadyBoundException ex) {
+			// Already an RMI object bound for the specified service name...
+			unexportObjectSilently();
+			throw new IllegalStateException(
+					"Already an RMI object bound for name '"  + this.serviceName + "': " + ex.toString());
 		}
 		catch (RemoteException ex) {
 			// Registry binding failed: let's unexport the RMI object as well.
