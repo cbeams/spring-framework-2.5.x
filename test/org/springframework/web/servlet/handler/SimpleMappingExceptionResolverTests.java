@@ -43,7 +43,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 
 	protected void setUp() throws Exception {
 		exceptionResolver = new SimpleMappingExceptionResolver();
-		handler1 = new Object();
+		handler1 = new String();
 		handler2 = new Object();
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
@@ -66,6 +66,13 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 	public void testDefaultErrorViewDifferentHandler() {
 		exceptionResolver.setDefaultErrorView("default-view");
 		exceptionResolver.setMappedHandlers(Collections.singleton(handler1));
+		ModelAndView mav = exceptionResolver.resolveException(request, response, handler2, genericException);
+		assertNull(mav);
+	}
+
+	public void testDefaultErrorViewDifferentHandlerClass() {
+		exceptionResolver.setDefaultErrorView("default-view");
+		exceptionResolver.setMappedHandlerClasses(new Class[] {String.class});
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler2, genericException);
 		assertNull(mav);
 	}
@@ -124,10 +131,37 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		assertEquals("error", mav.getViewName());
 	}
 
+	public void testExactExceptionMappingWithHandlerClassSpecified() {
+		Properties props = new Properties();
+		props.setProperty("java.lang.Exception", "error");
+		exceptionResolver.setMappedHandlerClasses(new Class[] {String.class});
+		exceptionResolver.setExceptionMappings(props);
+		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
+		assertEquals("error", mav.getViewName());
+	}
+
+	public void testExactExceptionMappingWithHandlerInterfaceSpecified() {
+		Properties props = new Properties();
+		props.setProperty("java.lang.Exception", "error");
+		exceptionResolver.setMappedHandlerClasses(new Class[] {Comparable.class});
+		exceptionResolver.setExceptionMappings(props);
+		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
+		assertEquals("error", mav.getViewName());
+	}
+
 	public void testSimpleExceptionMappingWithHandlerSpecifiedButWrongHandler() {
 		Properties props = new Properties();
 		props.setProperty("Exception", "error");
 		exceptionResolver.setMappedHandlers(Collections.singleton(handler1));
+		exceptionResolver.setExceptionMappings(props);
+		ModelAndView mav = exceptionResolver.resolveException(request, response, handler2, genericException);
+		assertNull(mav);
+	}
+
+	public void testSimpleExceptionMappingWithHandlerClassSpecifiedButWrongHandler() {
+		Properties props = new Properties();
+		props.setProperty("Exception", "error");
+		exceptionResolver.setMappedHandlerClasses(new Class[] {String.class});
 		exceptionResolver.setExceptionMappings(props);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler2, genericException);
 		assertNull(mav);

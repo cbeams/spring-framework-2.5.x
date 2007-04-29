@@ -33,8 +33,8 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * {@link org.springframework.web.servlet.HandlerExceptionResolver} implementation
- * that allows for mapping exception class names to view names, either for a list
- * of given handlers or for all handlers in the DispatcherServlet.
+ * that allows for mapping exception class names to view names, either for a
+ * set of given handlers or for all handlers in the DispatcherServlet.
  *
  * <p>Error views are analogous to error page JSPs, but can be used with any
  * kind of exception including any checked one, with fine-granular mappings for
@@ -59,6 +59,8 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 
 	private Set mappedHandlers;
 
+	private Class[] mappedHandlerClasses;
+
 	private Log warnLogger;
 
 	private Properties exceptionMappings;
@@ -79,16 +81,32 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 	/**
-	 * Specify the set of handlers that this exception resolver should map.
+	 * Specify the set of handlers that this exception resolver should apply to.
 	 * The exception mappings and the default error view will only apply
 	 * to the specified handlers.
-	 * <p>If no handlers set, both the exception mappings and the default error
-	 * view will apply to all handlers. This means that a specified default
-	 * error view will be used as fallback for all exceptions; any further
-	 * HandlerExceptionResolvers in the chain will be ignored in this case.
+	 * <p>If no handlers and handler classes are set, the exception mappings
+	 * and the default error view will apply to all handlers. This means that
+	 * a specified default error view will be used as fallback for all exceptions;
+	 * any further HandlerExceptionResolvers in the chain will be ignored in
+	 * this case.
 	 */
 	public void setMappedHandlers(Set mappedHandlers) {
 		this.mappedHandlers = mappedHandlers;
+	}
+
+	/**
+	 * Specify the set of classes that this exception resolver should apply to.
+	 * The exception mappings and the default error view will only apply
+	 * to handlers of the specified type; the specified types may be interfaces
+	 * and superclasses of handlers as well.
+	 * <p>If no handlers and handler classes are set, the exception mappings
+	 * and the default error view will apply to all handlers. This means that
+	 * a specified default error view will be used as fallback for all exceptions;
+	 * any further HandlerExceptionResolvers in the chain will be ignored in
+	 * this case.
+	 */
+	public void setMappedHandlerClasses(Class[] mappedHandlerClasses) {
+		this.mappedHandlerClasses = mappedHandlerClasses;
 	}
 
 	/**
@@ -166,13 +184,67 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 
+	/**
+	 * Checks whether this resolver is supposed to apply (i.e. the handler
+	 * matches in case of "mappedHandlers" having been specified), then
+	 * delegates to the {@link #doResolveException} template method.
+	 */
 	public ModelAndView resolveException(
 	    HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 
-		// Check whether we're supposed to apply to the given handler.
-		if (this.mappedHandlers != null && !this.mappedHandlers.contains(handler)) {
+		if (shouldApplyTo(request, handler)) {
+			return doResolveException(request, response, handler, ex);
+		}
+		else {
 			return null;
 		}
+	}
+
+	/**
+	 * Check whether this resolver is supposed to apply to the given handler.
+	 * <p>The default implementation checks against the specified mapped handlers
+	 * and handler classes, if any.
+	 * @param request current HTTP request
+	 * @param handler the executed handler, or <code>null</code> if none chosen at the
+	 * time of the exception (for example, if multipart resolution failed)
+	 * @return whether this resolved should proceed with resolving the exception
+	 * for the given request and handler
+	 * @see #setMappedHandlers
+	 * @see #setMappedHandlerClasses
+	 */
+	protected boolean shouldApplyTo(HttpServletRequest request, Object handler) {
+		if (handler != null) {
+			if (this.mappedHandlers != null && this.mappedHandlers.contains(handler)) {
+				return true;
+			}
+			if (this.mappedHandlerClasses != null) {
+				for (int i = 0; i < this.mappedHandlerClasses.length; i++) {
+					if (this.mappedHandlerClasses[i].isInstance(handler)) {
+						return true;
+					}
+				}
+			}
+		}
+		// Else only apply if there are no explicit handler mappings.
+		return (this.mappedHandlers == null && this.mappedHandlerClasses == null);
+	}
+
+	/**
+	 * Actually resolve the given exception that got thrown during on handler execution,
+	 * returning a ModelAndView that represents a specific error page if appropriate.
+	 * <p>May be overridden in subclasses, in order to apply specific exception checks.
+	 * Note that this template method will be invoked <i>after</i> checking whether
+	 * this resolved applies ("mappedHandlers" etc), so an implementation may simply
+	 * proceed with its actual exception handling.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler, or <code>null</code> if none chosen at the
+	 * time of the exception (for example, if multipart resolution failed)
+	 * @param ex the exception that got thrown during handler execution
+	 * @return a corresponding ModelAndView to forward to, or <code>null</code> for default processing
+	 */
+	protected ModelAndView doResolveException(
+			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 
 		// Log exception, both at debug log level and at warn level, if desired.
 		if (logger.isDebugEnabled()) {

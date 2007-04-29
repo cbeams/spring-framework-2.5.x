@@ -32,8 +32,9 @@ import org.springframework.web.portlet.HandlerExceptionResolver;
 import org.springframework.web.portlet.ModelAndView;
 
 /**
- * Exception resolver that allows for mapping exception class names to view names,
- * either for a list of given handlers or for all handlers in the DispatcherPortlet.
+ * {@link org.springframework.web.portlet.HandlerExceptionResolver} implementation
+ * that allows for mapping exception class names to view names, either for a
+ * set of given handlers or for all handlers in the DispatcherPortlet.
  *
  * <p>Error views are analogous to error page JSPs, but can be used with any
  * kind of exception including any checked one, with fine-granular mappings for
@@ -57,6 +58,8 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
 	private Set mappedHandlers;
+
+	private Class[] mappedHandlerClasses;
 
 	private boolean renderWhenMinimized = false;
 
@@ -88,6 +91,21 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 */
 	public void setMappedHandlers(Set mappedHandlers) {
 		this.mappedHandlers = mappedHandlers;
+	}
+
+	/**
+	 * Specify the set of classes that this exception resolver should apply to.
+	 * The exception mappings and the default error view will only apply
+	 * to handlers of the specified type; the specified types may be interfaces
+	 * and superclasses of handlers as well.
+	 * <p>If no handlers and handler classes are set, the exception mappings
+	 * and the default error view will apply to all handlers. This means that
+	 * a specified default error view will be used as fallback for all exceptions;
+	 * any further HandlerExceptionResolvers in the chain will be ignored in
+	 * this case.
+	 */
+	public void setMappedHandlerClasses(Class[] mappedHandlerClasses) {
+		this.mappedHandlerClasses = mappedHandlerClasses;
 	}
 
 	/**
@@ -156,16 +174,69 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 
-	public ModelAndView resolveException(RenderRequest request, RenderResponse response, Object handler, Exception ex) {
-		// Check whether we're supposed to apply to the given handler.
-		if (this.mappedHandlers != null && !this.mappedHandlers.contains(handler)) {
+	/**
+	 * Checks whether this resolver is supposed to apply (i.e. the handler
+	 * matches in case of "mappedHandlers" having been specified), then
+	 * delegates to the {@link #doResolveException} template method.
+	 */
+	public ModelAndView resolveException(
+			RenderRequest request, RenderResponse response, Object handler, Exception ex) {
+
+		if (shouldApplyTo(request, handler)) {
+			return doResolveException(request, response, handler, ex);
+		}
+		else {
 			return null;
 		}
+	}
 
+	/**
+	 * Check whether this resolver is supposed to apply to the given handler.
+	 * <p>The default implementation checks against the specified mapped handlers
+	 * and handler classes, if any, and alspo checks the window state (according
+	 * to the "renderWhenMinimize" property).
+	 * @param request current portlet request
+	 * @param handler the executed handler, or <code>null</code> if none chosen at the
+	 * time of the exception (for example, if multipart resolution failed)
+	 * @return whether this resolved should proceed with resolving the exception
+	 * for the given request and handler
+	 * @see #setMappedHandlers
+	 * @see #setMappedHandlerClasses
+	 */
+	protected boolean shouldApplyTo(RenderRequest request, Object handler) {
 		// If the portlet is minimized and we don't want to render then return null.
 		if (WindowState.MINIMIZED.equals(request.getWindowState()) && !this.renderWhenMinimized) {
-			return null;
+			return false;
 		}
+
+		if (handler != null) {
+			if (this.mappedHandlers != null && this.mappedHandlers.contains(handler)) {
+				return true;
+			}
+			if (this.mappedHandlerClasses != null) {
+				for (int i = 0; i < this.mappedHandlerClasses.length; i++) {
+					if (this.mappedHandlerClasses[i].isInstance(handler)) {
+						return true;
+					}
+				}
+			}
+		}
+		// Else only apply if there are no explicit handler mappings.
+		return (this.mappedHandlers == null && this.mappedHandlerClasses == null);
+	}
+
+	/**
+	 * Actually resolve the given exception that got thrown during on handler execution,
+	 * returning a ModelAndView that represents a specific error page if appropriate.
+	 * @param request current portlet request
+	 * @param response current portlet response
+	 * @param handler the executed handler, or null if none chosen at the time of
+	 * the exception (for example, if multipart resolution failed)
+	 * @param ex the exception that got thrown during handler execution
+	 * @return a corresponding ModelAndView to forward to, or null for default processing
+	 */
+	protected ModelAndView doResolveException(
+			RenderRequest request, RenderResponse response, Object handler, Exception ex) {
 
 		// Log exception, both at debug log level and at warn level, if desired.
 		if (logger.isDebugEnabled()) {
