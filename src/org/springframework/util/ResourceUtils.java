@@ -74,6 +74,8 @@ public abstract class ResourceUtils {
 	/**
 	 * Return whether the given resource location is a URL:
 	 * either a special "classpath" pseudo URL or a standard URL.
+	 * @param resourceLocation the location String to check
+	 * @return whether the location qualifies as a URL
 	 * @see #CLASSPATH_URL_PREFIX
 	 * @see java.net.URL
 	 */
@@ -202,6 +204,7 @@ public abstract class ResourceUtils {
 	 * <p>"zip" and "wsjar" are used by BEA WebLogic Server and IBM WebSphere,
 	 * respectively, but can be treated like jar files.
 	 * @param url the URL to check
+	 * @return whether the URL has been identified as a JAR URL
 	 */
 	public static boolean isJarURL(URL url) {
 		String protocol = url.getProtocol();

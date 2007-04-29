@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,28 +25,27 @@ import org.springframework.util.ResourceUtils;
  * location that can be loaded via a ResourcePatternResolver.
  *
  * <p>Callers will usually assume that a location is a relative path
- * if the <code>isUrl</code> method returns <code>false</code>.
+ * if the {@link #isUrl(String)} method returns <code>false</code>.
  *
  * @author Juergen Hoeller
  * @since 1.2.3
- * @see #isUrl(String)
- * @see org.springframework.util.ResourceUtils#isUrl(String)
  */
 public abstract class ResourcePatternUtils {
 
 	/**
 	 * Return whether the given resource location is a URL: either a
 	 * special "classpath" or "classpath*" pseudo URL or a standard URL.
-	 * @see ResourcePatternResolver#CLASSPATH_URL_PREFIX
+	 * @param resourceLocation the location String to check
+	 * @return whether the location qualifies as a URL
+	 * @see ResourcePatternResolver#CLASSPATH_ALL_URL_PREFIX
 	 * @see org.springframework.util.ResourceUtils#CLASSPATH_URL_PREFIX
 	 * @see org.springframework.util.ResourceUtils#isUrl(String)
 	 * @see java.net.URL
 	 */
 	public static boolean isUrl(String resourceLocation) {
-		if (resourceLocation.startsWith(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX)) {
-			return true;
-		}
-		return ResourceUtils.isUrl(resourceLocation);
+		return (resourceLocation != null &&
+				(resourceLocation.startsWith(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX) ||
+						ResourceUtils.isUrl(resourceLocation)));
 	}
 
 	/**
