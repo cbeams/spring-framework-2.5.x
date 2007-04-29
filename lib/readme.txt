@@ -329,8 +329,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Oracle OC4J 10.1.3.1 ClassLoader API extract (http://www.oracle.com/technology/tech/java/oc4j)
 - required for building the framework
 
-* openjpa/openjpa-all-0.9.6-incubating.jar
-- OpenJPA 0.9.6 (http://incubator.apache.org/openjpa)
+* openjpa/openjpa-0.9.7-incubating.jar
+- OpenJPA 0.9.7 (http://incubator.apache.org/openjpa)
 - required for building the framework
 - required at runtime when using Spring's JPA support with OpenJPA as provider
 
@@ -379,7 +379,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - replaced with full toplink.jar at runtime when using Spring's TopLink support
 
 * toplink/toplink-essentials.jar
-- Oracle TopLink Essentials v2 b36 (http://www.oracle.com/technology/products/ias/toplink/jpa)
+- Oracle TopLink Essentials v2 b41 (http://www.oracle.com/technology/products/ias/toplink/jpa)
 - required for building the framework
 - required at runtime when using Spring's JPA support with TopLink as provider
 
