@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import java.sql.SQLException;
 import org.springframework.jdbc.core.InterruptibleBatchPreparedStatementSetter;
 
 /**
- * Abstract implementation of the InterruptibleBatchPreparedStatementSetter
+ * Abstract implementation of the {@link InterruptibleBatchPreparedStatementSetter}
  * interface, combining the check for available values and setting of those
- * into a single callback method (<code>setValuesIfAvailable</code>).
+ * into a single callback method {@link #setValuesIfAvailable}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -37,7 +37,7 @@ public abstract class AbstractInterruptibleBatchPreparedStatementSetter
 
 
 	/**
-	 * This implementation calls <code>setValuesAndCheck</code>
+	 * This implementation calls {@link #setValuesIfAvailable}
 	 * and sets this instance's exhaustion flag accordingly.
 	 */
 	public final void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -68,7 +68,8 @@ public abstract class AbstractInterruptibleBatchPreparedStatementSetter
 	 * @return whether there were values to apply (that is, whether the applied
 	 * parameters should be added to the batch and this method should be called
 	 * for a further iteration)
-	 * @throws SQLException if thrown by JDBC API methods
+	 * @throws SQLException if a SQLException is encountered
+	 * (i.e. there is no need to catch SQLException)
 	 */
 	protected abstract boolean setValuesIfAvailable(PreparedStatement ps, int i) throws SQLException;
 

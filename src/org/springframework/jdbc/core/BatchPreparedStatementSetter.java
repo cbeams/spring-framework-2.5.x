@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,16 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * Callback interface used by the JdbcTemplate class.
+ * Batch update callback interface used by the {@link JdbcTemplate} class.
  *
- * <p>This interface sets values on a PreparedStatement provided by the
- * JdbcTemplate class for each of a number of updates in a batch using the
- * same SQL. Implementations are responsible for setting any necessary
- * parameters. SQL with placeholders will already have been supplied.
+ * <p>This interface sets values on a {@link java.sql.PreparedStatement} provided
+ * by the JdbcTemplate class, for each of a number of updates in a batch using the
+ * same SQL. Implementations are responsible for setting any necessary parameters.
+ * SQL with placeholders will already have been supplied.
  *
- * <p>Implementations <i>do not</i> need to concern themselves with
- * SQLExceptions that may be thrown from operations they attempt.
- * The JdbcTemplate class will catch and handle SQLExceptions appropriately.
+ * <p>Implementations <i>do not</i> need to concern themselves with SQLExceptions
+ * that may be thrown from operations they attempt. The JdbcTemplate class will
+ * catch and handle SQLExceptions appropriately.
  *
  * @author Rod Johnson
  * @since March 2, 2003
@@ -39,17 +39,17 @@ import java.sql.SQLException;
 public interface BatchPreparedStatementSetter {
 
 	/** 
-	* Set values on the given PreparedStatement.
-	* @param ps PreparedStatement we'll invoke setter methods on
-	* @param i index of the statement we're issuing in the batch, starting from 0
-	* @throws SQLException there is no need to catch SQLExceptions
-	* that may be thrown in the implementation of this method.
-	* The JdbcTemplate class will handle them.
-	*/
+	 * Set parameter values on the given PreparedStatement.
+	 * @param ps the PreparedStatement to invoke setter methods on
+	 * @param i index of the statement we're issuing in the batch, starting from 0
+	 * @throws SQLException if a SQLException is encountered
+	 * (i.e. there is no need to catch SQLException)
+	 */
 	void setValues(PreparedStatement ps, int i) throws SQLException;
-	
+
 	/** 
 	 * Return the size of the batch.
+	 * @return the number of statements in the batch
 	 */
 	int getBatchSize();
 

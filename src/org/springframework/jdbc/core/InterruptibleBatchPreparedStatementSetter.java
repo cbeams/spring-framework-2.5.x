@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,26 @@
 package org.springframework.jdbc.core;
 
 /**
- * Extension of the BatchPreparedStatementSetter interface that adds
- * a batch exhaustion check.
+ * Extension of the {@link BatchPreparedStatementSetter} interface,
+ * adding a batch exhaustion check.
  *
  * <p>This interface allows you to signal the end of a batch rather than
  * having to determine the exact batch size upfront. Batch size is still
  * being honored but it is now the maximum size of the batch.
  *
- * <p>The <code>isBatchExhausted</code> method is called after each call to
- * <code>setValues</code> to determine whether there were some values added
+ * <p>The {@link #isBatchExhausted} method is called after each call to
+ * {@link #setValues} to determine whether there were some values added,
  * or if the batch was determined to be complete and no additional values
  * were provided during the last call to <code>setValues</code>.
  *
- * <p>Consider extending the AbstractInterruptibleBatchPreparedStatementSetter
- * base class instead of implementing this interface directly, having a
- * single callback method that combines the check for available values
- * and the setting of those.
+ * <p>Consider extending the
+ * {@link org.springframework.jdbc.core.support.AbstractInterruptibleBatchPreparedStatementSetter}
+ * base class instead of implementing this interface directly, using a single
+ * <code>setValuesIfAvailable</code> callback method that checks for available
+ * values and sets them, returning whether values have actually been provided.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.0
  * @see JdbcTemplate#batchUpdate(String, BatchPreparedStatementSetter)
  * @see org.springframework.jdbc.core.support.AbstractInterruptibleBatchPreparedStatementSetter
@@ -50,7 +52,9 @@ public interface InterruptibleBatchPreparedStatementSetter extends BatchPrepared
 	 * detect exhaustion <i>at the beginning</i> of your <code>setValues</code>
 	 * implementation, letting this method return <code>true</code> based on the flag.
 	 * @param i index of the statement we're issuing in the batch, starting from 0
+	 * @return whether the batch is already exhausted
 	 * @see #setValues
+	 * @see org.springframework.jdbc.core.support.AbstractInterruptibleBatchPreparedStatementSetter#setValuesIfAvailable
 	 */
 	boolean isBatchExhausted(int i);
 
