@@ -470,7 +470,7 @@ public abstract class WebUtils {
 			if ("".equals(prefix) || paramName.startsWith(prefix)) {
 				String unprefixed = paramName.substring(prefix.length());
 				String[] values = request.getParameterValues(paramName);
-				if (values == null) {
+				if (values == null || values.length == 0) {
 					// Do nothing, no values found at all.
 				}
 				else if (values.length > 1) {
