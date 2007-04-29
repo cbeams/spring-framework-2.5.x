@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,13 @@
 
 package org.springframework.web.util;
 
-import org.springframework.util.StringUtils;
-
 /**
  * Utility class for HTML escaping. Escapes and unescapes
  * based on the W3C HTML 4.01 recommendation, handling
  * character entity references.
  *
  * <p>Reference:
- * <a href="http://www.w3.org/TR/html4/charset.html">
- * http://www.w3.org/TR/html4/charset.html
- * </a>
+ * <a href="http://www.w3.org/TR/html4/charset.html">http://www.w3.org/TR/html4/charset.html</a>
  *
  * <p>For a comprehensive set of String escaping utilities,
  * consider Jakarta Commons Lang and its StringEscapeUtils class.
@@ -46,8 +42,6 @@ public abstract class HtmlUtils {
 	 */
 	private static final HtmlCharacterEntityReferences characterEntityReferences =
 			new HtmlCharacterEntityReferences();
-	
-	private static final String PARAMETER_DELIMETER = "&";
 
 
 	/**
@@ -109,33 +103,6 @@ public abstract class HtmlUtils {
 			}
 		}
 		return escaped.toString();
-	}
-
-	/**
-	 * HTML escapes <i>just</i> the parameters of the supplied query string.
-	 * <p>For example, given the query string
-	 * <code>foo=bar&amp;baz=&lt;boz&gt;</code>, the return value will be
-	 * <code>foo=bar&amp;baz=&amp;lt;boz&amp;gt;</code> (the &amp; parameter
-	 * delimeters are thus preserved).
-	 * @param queryString the query string to be so escaped
-	 * @return the escaped query string, or the empty string if the supplied query string is <code>null</code> or empty 
-	 */
-	public static String htmlEscapeQueryStringParameters(String queryString) {
-		if (!StringUtils.hasText(queryString)) {
-			return "";
-		}
-		StringBuffer buffer = new StringBuffer(queryString.length() * 2);
-		String[] parameters = StringUtils.tokenizeToStringArray(queryString, PARAMETER_DELIMETER);
-		if (parameters.length > 0) {
-			for (int i = 0; i < parameters.length; ++i) {
-				String parameter = parameters[i];
-				buffer.append(HtmlUtils.htmlEscape(parameter));
-				if (i < parameters.length - 1) {
-					buffer.append(PARAMETER_DELIMETER);
-				}
-			}
-		}
-		return buffer.toString();
 	}
 
 	/**

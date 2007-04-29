@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.springframework.web.util;
 import junit.framework.TestCase;
 
 /**
- * Unit tests for the {@link HtmlUtils} class.
- * 
  * @author Alef Arendsen
  * @author Martin Kersten
  * @author Rick Evans
@@ -113,17 +111,6 @@ public class HtmlUtilsTests extends TestCase {
 
 		assertEquals("The malformed hex reference '&#x;' should remain '&#x;'",
 				"&#x;", HtmlUtils.htmlUnescape("&#x;"));
-	}
-
-	public void testHtmlEscapeQueryStringParameters() throws Exception {
-		assertEquals("foo=bar&baz=&lt;boz&gt;",
-				HtmlUtils.htmlEscapeQueryStringParameters("foo=bar&baz=<boz>"));
-		assertEquals("",
-				HtmlUtils.htmlEscapeQueryStringParameters("  "));
-		assertEquals("",
-				HtmlUtils.htmlEscapeQueryStringParameters(""));
-		assertEquals("",
-				HtmlUtils.htmlEscapeQueryStringParameters(null));
 	}
 
 }

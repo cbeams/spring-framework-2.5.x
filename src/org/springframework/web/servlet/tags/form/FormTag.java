@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
 
 /**
- * Data-binding aware JSP tag for rendering an HTML '<code>form</code>' whose
+ * Databinding-aware JSP tag for rendering an HTML '<code>form</code>' whose
  * inner elements are bound to properties on a {@link #setCommandName command object}.
  * 
  * <p>Users should place the command object into the
@@ -49,85 +49,39 @@ import org.springframework.web.util.HtmlUtils;
  */
 public class FormTag extends AbstractHtmlElementTag {
 
-	/**
-	 * The default HTTP method using which form values are sent to the server: "post".
-	 */
+	/** The default HTTP method using which form values are sent to the server: "post" */
 	private static final String DEFAULT_METHOD = "post";
 
-	/**
-	 * The default command object name: "command".
-	 */
+	/** The default command object name: "command" */
 	public static final String DEFAULT_COMMAND_NAME = "command";
 
-	/**
-	 * The name of the '<code>name</code>' attribute.
-	 */
 	public static final String NAME_ATTRIBUTE = "name";
 
-	/**
-	 * The name of the '<code>onsubmit</code>' attribute.
-	 */
 	public static final String ONSUBMIT_ATTRIBUTE = "onsubmit";
 
-	/**
-	 * The name of the '<code>onreset</code>' attribute.
-	 */
 	public static final String ONRESET_ATTRIBUTE = "onreset";
 
-	/**
-	 * The name of the '<code>method</code>' attribute.
-	 */
 	public static final String METHOD_ATTRIBUTE = "method";
 
-	/**
-	 * The name of the '<code>action</code>' attribute.
-	 */
 	public static final String ACTION_ATTRIBUTE = "action";
 
-	/**
-	 * The name of the '<code>enctype</code>' attribute.
-	 */
 	public static final String ENCTYPE_ATTRIBUTE = "enctype";
 
 
-	/**
-	 * The {@link TagWriter} instance used by this tag.
-	 */
 	private TagWriter tagWriter;
 
-	/**
-	 * The name of the command object.
-	 */
 	private String commandName = DEFAULT_COMMAND_NAME;
 
-	/**
-	 * The value of the '<code>name</code>' attribute.
-	 */
 	private String name;
 
-	/**
-	 * The value of the '<code>action</code>' attribute.
-	 */
 	private String action;
 
-	/**
-	 * The value of the '<code>method</code>' attribute.
-	 */
 	private String method = DEFAULT_METHOD;
 
-	/**
-	 * The value of the '<code>enctype</code>' attribute.
-	 */
 	private String enctype;
 
-	/**
-	 * The value of the '<code>onsubmit</code>' attribute.
-	 */
 	private String onsubmit;
 
-	/**
-	 * The value of the '<code>onreset</code>' attribute.
-	 */
 	private String onreset;
 
 
@@ -306,14 +260,15 @@ public class FormTag extends AbstractHtmlElementTag {
 				requestUri = ((HttpServletResponse) response).encodeURL(requestUri);
 				String queryString = getRequestContext().getQueryString();
 				if (StringUtils.hasText(queryString)) {
-					requestUri += "?" + HtmlUtils.htmlEscapeQueryStringParameters(queryString);
+					requestUri += "?" + HtmlUtils.htmlEscape(queryString);
 				}
 			}
 			if (StringUtils.hasText(requestUri)) {
 				return requestUri;
-			} else {
+			}
+			else {
 				throw new IllegalArgumentException("Attribute 'action' is required. Attempted to resolve " +
-						"against current request URI but request URI was null.");
+						"against current request URI but request URI was null");
 			}
 		}
 	}
@@ -350,7 +305,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * @throws UnsupportedOperationException always
 	 */
 	public void setPath(String path) {
-		throw new UnsupportedOperationException("The 'path' attribute is not supported for forms.");
+		throw new UnsupportedOperationException("The 'path' attribute is not supported for forms");
 	}
 
 	/**
@@ -358,7 +313,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * @throws UnsupportedOperationException always
 	 */
 	public void setCssErrorClass(String cssErrorClass) {
-		throw new UnsupportedOperationException("The 'cssErrorClass' attribute is not supported for forms.");
+		throw new UnsupportedOperationException("The 'cssErrorClass' attribute is not supported for forms");
 	}
 
 }

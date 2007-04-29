@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,17 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.test.AssertThrows;
-
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.AssertThrows;
+
 /**
- * Unit tests for the {@link FormTag} class.
- *
  * @author Rob Harrop
  * @author Rick Evans
- * @since 2.0
  */
-public final class FormTagTests extends AbstractHtmlElementTagTests {
+public class FormTagTests extends AbstractHtmlElementTagTests {
 	
 	private static final String REQUEST_URI = "/my/form";
 
@@ -141,7 +138,7 @@ public final class FormTagTests extends AbstractHtmlElementTagTests {
 
 	public void testWithNullResolvedCommand() throws Exception {
 		new AssertThrows(IllegalArgumentException.class,
-				"Must not be able to have a command name that resolves to null.") {
+				"Must not be able to have a command name that resolves to null") {
 			public void test() throws Exception {
 				tag.setCommandName("${null}");
 				tag.doStartTag();
@@ -156,7 +153,7 @@ public final class FormTagTests extends AbstractHtmlElementTagTests {
 		String xssQueryString = QUERY_STRING + "&stuff=\"><script>alert('XSS!')</script>";
 		request.setQueryString(xssQueryString);
 		tag.doStartTag();
-		assertEquals("<form id=\"command\" method=\"post\" action=\"/my/form?foo=bar&stuff=&quot;&gt;&lt;script&gt;alert('XSS!')&lt;/script&gt;\">",
+		assertEquals("<form id=\"command\" method=\"post\" action=\"/my/form?foo=bar&amp;stuff=&quot;&gt;&lt;script&gt;alert('XSS!')&lt;/script&gt;\">",
 				getWriter().toString());
 	}
 
