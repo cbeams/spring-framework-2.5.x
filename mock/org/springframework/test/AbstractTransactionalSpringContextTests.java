@@ -152,10 +152,15 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 	/**
 	 * This implementation creates a transaction before test execution.
-	 * Override {@link #onSetUpBeforeTransaction()} and/or
-	 * {@link #onSetUpInTransaction()} to add custom set-up behavior.
+	 * <p>Override {@link #onSetUpBeforeTransaction()} and/or
+	 * {@link #onSetUpInTransaction()} to add custom set-up behavior
+	 * for transactional execution. Alternatively, override this method
+	 * for general set-up behavior, calling <code>super.onSetUp()</code>
+	 * as part of your method implementation.
+	 * @throws Exception simply let any exception propagate
+	 * @see #onTearDown()
 	 */
-	protected final void onSetUp() throws Exception {
+	protected void onSetUp() throws Exception {
 		this.complete = !this.defaultRollback;
 
 		if (this.transactionManager == null) {
@@ -206,15 +211,19 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 	/**
 	 * This implementation ends the transaction after test execution.
-	 * Override {@link #onTearDownInTransaction()} and/or
-	 * {@link #onTearDownAfterTransaction()} to add custom tear-down behavior.
+	 * <p>Override {@link #onTearDownInTransaction()} and/or
+	 * {@link #onTearDownAfterTransaction()} to add custom tear-down behavior
+	 * for transactional execution. Alternatively, override this method for
+	 * general tear-down behavior, calling <code>super.onTearDown()</code>
+	 * as part of your method implementation.
 	 * <p>Note that {@link #onTearDownInTransaction()} will only be called
 	 * if a transaction is still active at the time of the test shutdown.
 	 * In particular, it will <i>not</i> be called if the transaction has
 	 * been completed with an explicit {@link #endTransaction()} call before.
 	 * @throws Exception simply let any exception propagate
+	 * @see #onSetUp()
 	 */
-	protected final void onTearDown() throws Exception {
+	protected void onTearDown() throws Exception {
 		// Call onTearDownInTransaction and end transaction if the transaction is still active.
 		if (this.transactionStatus != null && !this.transactionStatus.isCompleted()) {
 			try {
