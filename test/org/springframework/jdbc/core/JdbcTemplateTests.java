@@ -913,6 +913,68 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlDatabaseMetaData.verify();
 	}
 
+	public void testInterruptibleBatchUpdateWithBaseClassAndNoBatchSupport() throws Exception {
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final int[] ids = new int[] { 100, 200 };
+		final int[] rowsAffected = new int[] { 1, 2 };
+
+		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
+		mockPreparedStatement.getConnection();
+		ctrlPreparedStatement.setReturnValue(mockConnection);
+		mockPreparedStatement.setInt(1, ids[0]);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(rowsAffected[0]);
+		mockPreparedStatement.setInt(1, ids[1]);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeUpdate();
+		ctrlPreparedStatement.setReturnValue(rowsAffected[1]);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("MySQL");
+		mockDatabaseMetaData.supportsBatchUpdates();
+		ctrlDatabaseMetaData.setReturnValue(false);
+
+		mockConnection.prepareStatement(sql);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+		mockConnection.getMetaData();
+		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
+
+		ctrlPreparedStatement.replay();
+		ctrlDatabaseMetaData.replay();
+		replay();
+
+		BatchPreparedStatementSetter setter =
+				new AbstractInterruptibleBatchPreparedStatementSetter() {
+					protected boolean setValuesIfAvailable(PreparedStatement ps, int i) throws SQLException {
+						if (i < ids.length) {
+							ps.setInt(1, ids[i]);
+							return true;
+						}
+						else {
+							return false;
+						}
+					}
+				};
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+
+		int[] actualRowsAffected = template.batchUpdate(sql, setter);
+		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertEquals(rowsAffected[0], actualRowsAffected[0]);
+		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+
+		ctrlPreparedStatement.verify();
+		ctrlDatabaseMetaData.verify();
+	}
+
 	public void testBatchUpdateWithPreparedStatementAndNoBatchSupport() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };

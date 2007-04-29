@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -821,19 +822,24 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 							if (ipss != null && ipss.isBatchExhausted(i)) {
 								break;
 							}
-							else {
-								ps.addBatch();
-							}
+							ps.addBatch();
 						}
 						return ps.executeBatch();
 					}
 					else {
-						int[] rowsAffected = new int[batchSize];
+						List rowsAffected = new ArrayList();
 						for (int i = 0; i < batchSize; i++) {
 							pss.setValues(ps, i);
-							rowsAffected[i] = ps.executeUpdate();
+							if (ipss != null && ipss.isBatchExhausted(i)) {
+								break;
+							}
+							rowsAffected.add(new Integer(ps.executeUpdate()));
 						}
-						return rowsAffected;
+						int[] rowsAffectedArray = new int[rowsAffected.size()];
+						for (int i = 0; i < rowsAffectedArray.length; i++) {
+							rowsAffectedArray[i] = ((Integer) rowsAffected.get(i)).intValue();
+						}
+						return rowsAffectedArray;
 					}
 				}
 				finally {
@@ -1068,6 +1074,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * Prepare the given JDBC Statement (or PreparedStatement or CallableStatement),
 	 * applying statement settings such as fetch size, max rows, and query timeout.
 	 * @param stmt the JDBC Statement to prepare
+	 * @throws SQLException if thrown by JDBC API
 	 * @see #setFetchSize
 	 * @see #setMaxRows
 	 * @see #setQueryTimeout
@@ -1090,6 +1097,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * else log the warnings (at debug level).
 	 * @param warning the warnings object from the current statement.
 	 * May be <code>null</code>, in which case this method does nothing.
+	 * @throws SQLWarningException if not ignoring warnings
 	 * @see org.springframework.jdbc.SQLWarningException
 	 */
 	protected void handleWarnings(SQLWarning warning) throws SQLWarningException {
