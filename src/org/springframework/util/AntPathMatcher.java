@@ -336,12 +336,17 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Given a pattern and a full path, returns the non-pattern mapped part. E.g.:
+	 * Given a pattern and a full path, determine the pattern-mapped part.
+	 * <p>For example:
 	 * <ul>
+	 * <li>'<code>/docs/cvs/commit.html</code>' and '<code>/docs/cvs/commit.html</code> -> ''</li>
 	 * <li>'<code>/docs/*</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
 	 * <li>'<code>/docs/cvs/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>commit.html</code>'</li>
 	 * <li>'<code>/docs/**</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-	 * <li>'<code>/docs/**\/*.html</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit.html</code>'</li>
+	 * <li>'<code>/docs/**\/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>cvs/commit.html</code>'</li>
+	 * <li>'<code>/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>docs/cvs/commit.html</code>'</li>
+	 * <li>'<code>*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li>
+	 * <li>'<code>*</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li>
 	 * </ul>
 	 * <p>Assumes that {@link #match} returns <code>true</code> for '<code>pattern</code>'
 	 * and '<code>path</code>', but does <strong>not</strong> enforce this.
@@ -357,7 +362,7 @@ public class AntPathMatcher implements PathMatcher {
 		for (int i = 0; i < patternParts.length; i++) {
 			String patternPart = patternParts[i];
 			if ((patternPart.indexOf('*') > -1 || patternPart.indexOf('?') > -1) && pathParts.length >= i + 1) {
-				if (puts > 0) {
+				if (puts > 0 || (i == 0 && !pattern.startsWith(this.pathSeparator))) {
 					buffer.append(this.pathSeparator);
 				}
 				buffer.append(pathParts[i]);
