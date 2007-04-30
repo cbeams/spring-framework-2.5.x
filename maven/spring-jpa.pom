@@ -5,7 +5,7 @@
   <artifactId>spring-jpa</artifactId>
   <packaging>jar</packaging>
   <name>Spring Framework: JPA</name>
-  <version>2.0.2</version>
+  <version>2.0.5</version>
   <description>Spring Framework: JPA</description>
   <url>http://www.springframework.org</url>
   <licenses>
@@ -16,9 +16,9 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:cvs:pserver:anonymous:@springframework.cvs.sourceforge.net:/cvsroot/springframework</connection>
-    <developerConnection>scm:cvs:ext:username@springframework.cvs.sourceforge.net:/cvsroot/springframework</developerConnection>
-    <tag>2.0.2</tag>
+    <connection>scm:cvs:pserver:anonymous:@springframework.cvs.sourceforge.net:/cvsroot/springframework/spring</connection>
+    <developerConnection>scm:cvs:ext:username@springframework.cvs.sourceforge.net:/cvsroot/springframework/spring</developerConnection>
+    <tag>release-2-0-5</tag>
     <url>http://springframework.cvs.sourceforge.net/springframework/</url>
   </scm>
   <organization>
@@ -41,7 +41,7 @@
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>toplink-essentials</artifactId>
-      <version>2.16</version>
+      <version>2.41</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -59,14 +59,14 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate</artifactId>
-      <version>3.2.1.ga</version>
+      <version>3.2.3.ga</version>
       <optional>true</optional>
     </dependency>
 <!-- Not currently in ibiblio maven repository -->
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
-      <version>3.2.1.ga</version>
+      <version>3.3.0.ga</version>
       <optional>true</optional>
     </dependency>
 <!-- Spring Dependencies -->
