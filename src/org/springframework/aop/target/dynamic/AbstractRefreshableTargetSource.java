@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,16 +22,19 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.TargetSource;
 
 /**
- * Abstract TargetSource implementation that wraps a refreshable target object.
- * Subclasses can determine whether a refresh is required, and need to provide
- * fresh target objects.
+ * Abstract {@link org.springframework.aop.TargetSource} implementation that
+ * wraps a refreshable target object. Subclasses can determine whether a
+ * refresh is required, and need to provide fresh target objects.
  *
- * <p>Implements the Refreshable interface for explicit control.
+ * <p>Implements the {@link Refreshable} interface in order to allow for
+ * explicit control over the refresh status.
  *
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #requiresRefresh()
+ * @see #freshTarget()
  */
 public abstract class AbstractRefreshableTargetSource implements TargetSource, Refreshable {
 
@@ -53,15 +56,14 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	 * Set the delay between refresh checks, in milliseconds.
 	 * Default is -1, indicating no refresh checks at all.
 	 * <p>Note that an actual refresh will only happen when
-	 * <code>requiresRefresh()</code> returns <code>true</code>.
-	 * @see #requiresRefresh()
+	 * {@link #requiresRefresh()} returns <code>true</code>.
 	 */
 	public void setRefreshCheckDelay(long refreshCheckDelay) {
 		this.refreshCheckDelay = refreshCheckDelay;
 	}
 
 
-	public Class getTargetClass() {
+	public synchronized Class getTargetClass() {
 		if (this.targetObject == null) {
 			refresh();
 		}
@@ -129,9 +131,10 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	/**
 	 * Determine whether a refresh is required.
 	 * Invoked for each refresh check, after the refresh check delay has elapsed.
-	 * <p>Default implementation always returns <code>true</code>, trigger
+	 * <p>The default implementation always returns <code>true</code>, triggering
 	 * a refresh every time the delay has elapsed. To be overridden by subclasses
 	 * with an appropriate check of the underlying target resource.
+	 * @return whether a refresh is required
 	 */
 	protected boolean requiresRefresh() {
 		return true;
@@ -139,9 +142,9 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 
 	/**
 	 * Obtain a fresh target object.
-	 * Only invoked if a refresh check has found that a refresh is required
-	 * (that is, <code>requiresRefresh</code> has returned <code>true</code>).
-	 * @see #requiresRefresh()
+	 * <p>Only invoked if a refresh check has found that a refresh is required
+	 * (that is, {@link #requiresRefresh()} has returned <code>true</code>).
+	 * @return the fresh target object
 	 */
 	protected abstract Object freshTarget();
 
