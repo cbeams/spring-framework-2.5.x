@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,7 +45,6 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 	 * Worker method so subclass can use it too.
 	 */
 	protected void basicFunctionalityTest(SingletonBeanFactoryLocator facLoc) {
-		
 		BeanFactoryReference bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
 		BeanFactory fac = bfr.getFactory();
 		BeanFactoryReference bfr2 = facLoc.useBeanFactory("another.qualified.name");
@@ -62,8 +61,8 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 		fac = bfr4.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
-		// now verify that we can call release in any order
-		// unfortunately this doesn't validate complete release after the last one
+		// Now verify that we can call release in any order.
+		// Unfortunately this doesn't validate complete release after the last one.
 		bfr2.release();
 		bfr3.release();
 		bfr.release();
@@ -76,7 +75,7 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 	 * an issue really, since the contained beanfactories will still be loaded and released.
 	 */
 	public void testGetInstance() {
-		// try with and without 'classpath*:' prefix, and with 'classpath:' prefix
+		// Try with and without 'classpath*:' prefix, and with 'classpath:' prefix.
 		BeanFactoryLocator facLoc = SingletonBeanFactoryLocator.getInstance(
 				ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
 		getInstanceTest1(facLoc);
@@ -85,7 +84,7 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 				"classpath*:/" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
 		getInstanceTest2(facLoc);
 
-		// this will actually get another locator instance, as the key is the resource name
+		// This will actually get another locator instance, as the key is the resource name.
 		facLoc = SingletonBeanFactoryLocator.getInstance(
 				"classpath:" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
 		getInstanceTest3(facLoc);
@@ -96,7 +95,6 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 	 * Worker method so subclass can use it too
 	 */
 	protected void getInstanceTest1(BeanFactoryLocator facLoc) {
-		
 		BeanFactoryReference bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
 		BeanFactory fac = bfr.getFactory();
 		BeanFactoryReference bfr2 = facLoc.useBeanFactory("another.qualified.name");
@@ -184,4 +182,5 @@ public class SingletonBeanFactoryLocatorTests extends TestCase {
 		bfr2.release();
 		bfr.release();
 	}
+
 }
