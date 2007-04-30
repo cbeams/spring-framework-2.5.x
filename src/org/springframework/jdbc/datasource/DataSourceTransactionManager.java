@@ -27,8 +27,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.ResourceTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager}
@@ -38,6 +38,14 @@ import org.springframework.transaction.support.ResourceTransactionManager;
  * as its Connection factory mechanism. Binds a JDBC Connection from the specified
  * DataSource to the current thread, potentially allowing for one thread-bound
  * Connection per DataSource.
+ *
+ * <p><b>Note: The DataSource that this transaction manager operates on needs
+ * to return independent Connections.</b> The Connections may come from a pool
+ * (the typical case), but the DataSource must not return thread-scoped /
+ * request-scoped Connections or the like. This transaction manager will
+ * associate Connections with thread-bound transactions itself, according
+ * to the specified propagation behavior. It assumes that a separate,
+ * independent Connection can be obtained even during an ongoing transaction.
  *
  * <p>Application code is required to retrieve the JDBC Connection via
  * {@link DataSourceUtils#getConnection(DataSource)} instead of a standard
@@ -129,6 +137,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 * manager needs to work on the underlying target DataSource. If there's
 	 * nevertheless a TransactionAwareDataSourceProxy passed in, it will be
 	 * unwrapped to extract its target DataSource.
+	 * <p><b>The DataSource passed in here needs to return independent Connections.</b>
+	 * The Connections may come from a pool (the typical case), but the DataSource
+	 * must not return thread-scoped / request-scoped Connections or the like.
 	 * @see TransactionAwareDataSourceProxy
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
