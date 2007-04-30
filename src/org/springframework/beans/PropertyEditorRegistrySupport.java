@@ -78,7 +78,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	private boolean configValueEditorsActive = false;
 
-	private boolean propertySpecificEditorRegistered = false;
+	private boolean propertySpecificEditorsRegistered = false;
 
 	private Map defaultEditors;
 
@@ -241,7 +241,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		}
 		if (propertyPath != null) {
 			this.customEditors.put(propertyPath, new CustomEditorHolder(propertyEditor, requiredType));
-			this.propertySpecificEditorRegistered = true;
+			this.propertySpecificEditorsRegistered = true;
 		}
 		else {
 			this.customEditors.put(requiredType, propertyEditor);
@@ -280,7 +280,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		}
 		Class requiredTypeToUse = requiredType;
 		if (propertyPath != null) {
-			if (this.propertySpecificEditorRegistered) {
+			if (this.propertySpecificEditorsRegistered) {
 				// Check property-specific editor first.
 				PropertyEditor editor = getCustomEditor(propertyPath, requiredType);
 				if (editor == null) {
@@ -307,34 +307,38 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * Determine whether this registry contains a custom editor
 	 * for the specified array/collection element.
 	 * @param elementType the target type of the element
-	 * @param propertyPath the property path (typically of the array/collection)
+	 * (can be <code>null</code> if not known)
+	 * @param propertyPath the property path (typically of the array/collection;
+	 * can be <code>null</code> if not known)
 	 * @return whether a matching custom editor has been found
 	 */
 	public boolean hasCustomEditorForElement(Class elementType, String propertyPath) {
 		if (this.customEditors == null) {
 			return false;
 		}
-		for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			if (entry.getKey() instanceof String) {
-				String regPath = (String) entry.getKey();
-				if (PropertyAccessorUtils.matchesProperty(regPath, propertyPath)) {
-					CustomEditorHolder editorHolder = (CustomEditorHolder) entry.getValue();
-					if (editorHolder.getPropertyEditor(elementType) != null) {
-						return true;
+		if (propertyPath != null && this.propertySpecificEditorsRegistered) {
+			for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				if (entry.getKey() instanceof String) {
+					String regPath = (String) entry.getKey();
+					if (PropertyAccessorUtils.matchesProperty(regPath, propertyPath)) {
+						CustomEditorHolder editorHolder = (CustomEditorHolder) entry.getValue();
+						if (editorHolder.getPropertyEditor(elementType) != null) {
+							return true;
+						}
 					}
 				}
 			}
 		}
 		// No property-specific editor -> check type-specific editor.
-		return this.customEditors.containsKey(elementType);
+		return (elementType != null && this.customEditors.containsKey(elementType));
 	}
 
 	/**
 	 * Determine the property type for the given property path.
-	 * Called by <code>findCustomEditor</code> if no required type has been specified,
+	 * <p>Called by {@link #findCustomEditor} if no required type has been specified,
 	 * to be able to find a type-specific editor even if just given a property path.
-	 * <p>Default implementation always returns <code>null</code>.
+	 * <p>The default implementation always returns <code>null</code>.
 	 * BeanWrapperImpl overrides this with the standard <code>getPropertyType</code>
 	 * method as defined by the BeanWrapper interface.
 	 * @param propertyPath the property path to determine the type for
@@ -347,6 +351,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	/**
 	 * Get custom editor that has been registered for the given property.
+	 * @param propertyName the property path to look for
+	 * @param requiredType the type to look for
 	 * @return the custom editor, or <code>null</code> if none specific for this property
 	 */
 	private PropertyEditor getCustomEditor(String propertyName, Class requiredType) {
