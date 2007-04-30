@@ -91,25 +91,28 @@ public class ContextLoader {
 	/**
 	 * Optional servlet context parameter used only when obtaining a parent
 	 * context using the default implementation of
-	 * {@link #loadParentContext(ServletContext servletContext)}. Specifies the
-	 * 'selector' used in the
+	 * {@link #loadParentContext(ServletContext servletContext)}.
+	 * Specifies the 'selector' used in the
 	 * {@link ContextSingletonBeanFactoryLocator#getInstance(String selector)}
-	 * method call used to obtain the BeanFactoryLocator instance from which the
-	 * parent context is obtained.
-	 * <p>This will normally be set to <code>classpath*:beanRefContext.xml</code>
-	 * to match the default applied for the
+	 * method call used to obtain the BeanFactoryLocator instance from which
+	 * the parent context is obtained.
+	 * <p>The default is <code>classpath*:beanRefContext.xml</code>,
+	 * matching the default applied for the
 	 * {@link ContextSingletonBeanFactoryLocator#getInstance()} method.
+	 * Supplying the "parentContextKey" parameter is sufficient in this case.
 	 */
 	public static final String LOCATOR_FACTORY_SELECTOR_PARAM = "locatorFactorySelector";
 
 	/**
 	 * Optional servlet context parameter used only when obtaining a parent
 	 * context using the default implementation of
-	 * {@link #loadParentContext(ServletContext servletContext)}. Specifies the
-	 * 'factoryKey' used in the
-	 * {@link BeanFactoryLocator#useBeanFactory(String factoryKey)} method call
-	 * used to obtain the parent application context from the BeanFactoryLocator
-	 * instance.
+	 * {@link #loadParentContext(ServletContext servletContext)}.
+	 * Specifies the 'factoryKey' used in the
+	 * {@link BeanFactoryLocator#useBeanFactory(String factoryKey)} method call,
+	 * obtaining the parent application context from the BeanFactoryLocator instance.
+	 * <p>Supplying this "parentContextKey" parameter is sufficient when relying
+	 * on the default <code>classpath*:beanRefContext.xml</code> selector for
+	 * candidate factory references.
 	 */
 	public static final String LOCATOR_FACTORY_KEY_PARAM = "parentContextKey";
 
@@ -284,7 +287,8 @@ public class ContextLoader {
 	 * alternately to also share the same parent context that is visible to
 	 * EJBs. For pure web applications, there is usually no need to worry about
 	 * having a parent context to the root web application context.
-	 * <p>The default implementation uses ContextSingletonBeanFactoryLocator,
+	 * <p>The default implementation uses
+	 * {@link org.springframework.context.access.ContextSingletonBeanFactoryLocator},
 	 * configured via {@link #LOCATOR_FACTORY_SELECTOR_PARAM} and
 	 * {@link #LOCATOR_FACTORY_KEY_PARAM}, to load a parent context
 	 * which will be shared by all other users of ContextsingletonBeanFactoryLocator
@@ -292,7 +296,6 @@ public class ContextLoader {
 	 * @param servletContext current servlet context
 	 * @return the parent application context, or <code>null</code> if none
 	 * @throws BeansException if the context couldn't be initialized
-	 * @see org.springframework.beans.factory.access.BeanFactoryLocator
 	 * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
 	 */
 	protected ApplicationContext loadParentContext(ServletContext servletContext)
@@ -302,7 +305,8 @@ public class ContextLoader {
 		String locatorFactorySelector = servletContext.getInitParameter(LOCATOR_FACTORY_SELECTOR_PARAM);
 		String parentContextKey = servletContext.getInitParameter(LOCATOR_FACTORY_KEY_PARAM);
 
-		if (locatorFactorySelector != null) {
+		if (parentContextKey != null) {
+			// locatorFactorySelector may be null, indicating the default "classpath*:beanRefContext.xml"
 			BeanFactoryLocator locator = ContextSingletonBeanFactoryLocator.getInstance(locatorFactorySelector);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Getting parent context definition: using parent context key of '" +
@@ -323,6 +327,7 @@ public class ContextLoader {
 	 * parent context, release one reference to that shared parent context.
 	 * <p>If overriding {@link #loadParentContext(ServletContext)}, you may have
 	 * to override this method as well.
+	 * @param servletContext the ServletContext that the WebApplicationContext runs in
 	 */
 	public void closeWebApplicationContext(ServletContext servletContext) {
 		servletContext.log("Closing Spring root WebApplicationContext");
