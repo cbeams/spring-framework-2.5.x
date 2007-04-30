@@ -1006,6 +1006,20 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals("rob", ((TestBean) bean.getMap().get(new Integer(2))).getName());
 	}
 
+	public void testRawMapAccessWithNoEditorRegistered() {
+		IndexedTestBean bean = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		Map inputMap = new HashMap();
+		inputMap.put(new Integer(1), "rod");
+		inputMap.put(new Integer(2), "rob");
+		ReadOnlyMap readOnlyMap = new ReadOnlyMap(inputMap);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("map", readOnlyMap);
+		bw.setPropertyValues(pvs);
+		assertSame(readOnlyMap, bean.getMap());
+		assertFalse(readOnlyMap.isAccessed());
+	}
+
 	public void testPrimitiveArray() {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -1618,6 +1632,8 @@ public class BeanWrapperTests extends TestCase {
 
 		private boolean frozen = false;
 
+		private boolean accessed = false;
+
 		public ReadOnlyMap() {
 			this.frozen = true;
 		}
@@ -1634,6 +1650,25 @@ public class BeanWrapperTests extends TestCase {
 			else {
 				return super.put(key, value);
 			}
+		}
+
+		public Set entrySet() {
+			this.accessed = true;
+			return super.entrySet();
+		}
+
+		public Set keySet() {
+			this.accessed = true;
+			return super.keySet();
+		}
+
+		public int size() {
+			this.accessed = true;
+			return super.size();
+		}
+
+		public boolean isAccessed() {
+			return this.accessed;
 		}
 	}
 

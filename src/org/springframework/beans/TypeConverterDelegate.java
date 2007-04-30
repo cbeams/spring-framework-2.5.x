@@ -201,11 +201,11 @@ class TypeConverterDelegate {
 			}
 			else if (convertedValue instanceof Collection && Collection.class.isAssignableFrom(requiredType)) {
 				// Convert elements to target type, if determined.
-				return convertToTypedCollection((Collection) convertedValue, propertyName, methodParam);
+				convertedValue = convertToTypedCollection((Collection) convertedValue, propertyName, methodParam);
 			}
 			else if (convertedValue instanceof Map && Map.class.isAssignableFrom(requiredType)) {
 				// Convert keys and values to respective target type, if determined.
-				return convertToTypedMap((Map) convertedValue, propertyName, methodParam);
+				convertedValue = convertToTypedMap((Map) convertedValue, propertyName, methodParam);
 			}
 			else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
 				if (JdkVersion.isAtLeastJava15() && requiredType.isEnum() && "".equals(convertedValue)) {
@@ -264,12 +264,14 @@ class TypeConverterDelegate {
 			// for type conversion from non-String values to the required type.
 			Object newConvertedValue = null;
 			if (sharedEditor) {
+				// Synchronized access to shared editor instance.
 				synchronized (editor) {
 					editor.setValue(convertedValue);
 					newConvertedValue = editor.getValue();
 				}
 			}
 			else {
+				// Unsynchronized access to non-shared editor instance.
 				editor.setValue(convertedValue);
 				newConvertedValue = editor.getValue();
 			}
@@ -304,7 +306,7 @@ class TypeConverterDelegate {
 				}
 			}
 			else {
-				// Unsynchronized access to shared editor instance.
+				// Unsynchronized access to non-shared editor instance.
 				return doConvertTextValue(oldValue, newTextValue, editor);
 			}
 		}
@@ -370,6 +372,11 @@ class TypeConverterDelegate {
 		if (methodParam != null && JdkVersion.isAtLeastJava15()) {
 			elementType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
 		}
+		if (elementType == null &&
+				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
+			return original;
+		}
+
 		Collection convertedCopy = null;
 		Iterator it = null;
 		try {
@@ -409,6 +416,11 @@ class TypeConverterDelegate {
 			keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
 			valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
 		}
+		if (keyType == null && valueType == null &&
+				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
+			return original;
+		}
+
 		Map convertedCopy = null;
 		Iterator it = null;
 		try {
