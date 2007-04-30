@@ -9,10 +9,12 @@ Changes in version 2.0.5 (2007-05-03)
 Package org.springframework.aop
 * DelegatingIntroductionInterceptor only replaces a return value with the proxy if the proxy is actually assignable
 * JdkDynamic/Cglib2AopProxy only replaces return value with proxy if declaring class is not marked for raw target access
+* AbstractRefreshableTargetSource's "getTargetClass()" method is properly synchronized
 * ScopedObject's "getTargetObject()" method returns the actual target object now (instead of the proxy object)
 * fixed "aop:scoped-proxy" tag to properly apply to defined alias names as well
 
 Package org.springframework.beans
+* BeanWrapper doesn't iterate over Collection/Map if no generic type declared and no property-specific editor registered
 * BeanWrapper converts an empty String to null in case of a Java 5 enum as target type
 * default editor settings get copied to nested beans even if no default editors have been used yet
 * revised MethodInvokingFactoryBean's "getObjectType()" implementation to gracefully return null if not prepared already
@@ -23,6 +25,7 @@ Package org.springframework.beans
 * XmlBeanDefinitionReader caches the DefaultNamespaceHandlerResolver instance, sharing it across multiple files
 
 Package org.springframework.context
+* factored out fine-grained protected template methods from AbstractApplicationContext's "refresh()" implementation
 * AbstractRefreshableApplicationContext actually calls the 2.0.3-introduced "customizeBeanFactory" template method
 
 Package org.springframework.core
@@ -32,6 +35,7 @@ Package org.springframework.core
 * added "toCodeForSuffix" operation to Constants class
 
 Package org.springframework.jdbc
+* fixed JdbcTemplate's fallback support for batch updates to properly handle InterruptibleBatchPreparedStatementSetters
 * added scale support to SqlParameter, for declaring numeric RdbmsOperation parameters with a specific scale
 * added SqlParameterValue class, holding a value including SQL type and scale, accepted by JdbcTemplate argument arrays
 * optimized SQL parsing in NamedParameterUtils, NamedParameterJdbcTemplate and SqlOperation through the use of caching
@@ -53,6 +57,7 @@ Package org.springframework.orm
 
 Package org.springframework.remoting
 * RemoteExporter shows "use reference, not value" error message in case of the specified service object being a String
+* added "replaceExistingBinding" property to RmiServiceExporter, allowing to turn off the automatic replacement strategy
 
 Package org.springframework.scheduling
 * MethodInvokingJobDetailFactoryBean avoids obtaining the target bean twice in case of "targetBeanName" specified
@@ -64,19 +69,30 @@ Package org.springframework.scripting
 * added "init-method" and "destroy-method" attributes on "lang:groovy/bsh/jruby", for init/destroy methods in scripts
 * ScriptFactoryPostProcessor generates config interface methods for init/destroy methods as well, if demanded
 
+Package org.springframework.test
+* AbstractTransactionalSpringContextTests' "onSetUp()"/"onTearDown()" are non-final, allowing for flexible overriding
+
 Package org.springframework.transaction
 * revised OC4JJtaTransactionManager to support the "oracle.j2ee.transaction" package on OC4J later than 10.1.3.2
 
 Package org.springframework.ui
 * ResourceBundleThemeSource will always return the same Theme instance for a given theme name
 
+Package org.springframework.util
+* PathMatcher's javadoc defines the semantics of the "extractPathWithinPattern" method in more detail
+* AntPathMatcher's "extractPathWithinPattern" preserved a path's leading separator in case of a "*.html" pattern match
+
 Package org.springframework.web
+* ContextLoader loads parent context based on "parentContextKey" parameter, not requiring "locatorFactorySelector" param
 * DispatcherServlet/Portlet only refresh their strategies if their own ApplicationContext refreshes
 * made AbstractHandlerMapping's "setInterceptors" method non-final
 * added "extendInterceptors" template method to AbstractHandlerMapping, for registering additional interceptors
 * UrlFilenameViewController and InternalPathMethodNameResolver prefer a concurrent Map for caching purposes
+* added "mappedHandlerClasses" property to Servlet/Portlet SimpleMappingExceptionResolver, for mapping specific types
+* factored out protected "shouldApplyTo" and "doResolveException" template methods in SimpleMappingExceptionResolver
 * added "localesToInitialize" property to ResourceBundleViewResolver, for initializing common locales eagerly
 * XmlViewResolver (and similar strategies) work again in combination with the implicit default BeanNameUrlHandlerMapping
+* JSP FormTag escapes the entire query string, including the parameter separators
 * JSP SelectTag always renders a full closing tag (i.e. never renders a short-circuited opening tag with "/>" ending)
 * JSP SelectTag accepts null values for its attributes (doesn't strictly enforce non-null values anymore)
 * JSP OptionTag properly detects a Java 5 Enum as selected even in case of an overridden "toString()" implementation
@@ -84,6 +100,7 @@ Package org.springframework.web
 * revised XsltView for Servlet 2.3 compatibility, avoiding the "HttpServletResponse.setCharacterEncoding" method
 * revised XsltView to respect a specified "contentType" property, using it if no XSLT media type has been specified
 * fixed XsltViewResolver to properly apply the "cacheTemplates" flag to created XsltView instances
+* PortletUtils' "getParametersStartingWith" method checks for an empty value array (WebSphere Portal 6.0 peculiarity)
 
 
 Changes in version 2.0.4 (2007-04-10)
