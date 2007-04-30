@@ -350,7 +350,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			methodDefinition.setSynthetic(true);
 
 			// create instance factory definition
-			RootBeanDefinition aspectFactoryDef = new RootBeanDefinition(SimpleBeanFactoryAwareAspectInstanceFactory.class);
+			RootBeanDefinition aspectFactoryDef =
+					new RootBeanDefinition(SimpleBeanFactoryAwareAspectInstanceFactory.class);
 			aspectFactoryDef.getPropertyValues().addPropertyValue("aspectBeanName", aspectName);
 			aspectFactoryDef.setSynthetic(true);
 
@@ -394,16 +395,22 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(adviceElement));
 		adviceDefinition.setSource(parserContext.extractSource(adviceElement));
 
-		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY, aspectName);
-		adviceDefinition.getPropertyValues().addPropertyValue(DECLARATION_ORDER_PROPERTY, new Integer(order));
+		adviceDefinition.getPropertyValues().addPropertyValue(
+				ASPECT_NAME_PROPERTY, aspectName);
+		adviceDefinition.getPropertyValues().addPropertyValue(
+				DECLARATION_ORDER_PROPERTY, new Integer(order));
+
 		if (adviceElement.hasAttribute(RETURNING)) {
-			adviceDefinition.getPropertyValues().addPropertyValue(RETURNING_PROPERTY, adviceElement.getAttribute(RETURNING));
+			adviceDefinition.getPropertyValues().addPropertyValue(
+					RETURNING_PROPERTY, adviceElement.getAttribute(RETURNING));
 		}
 		if (adviceElement.hasAttribute(THROWING)) {
-			adviceDefinition.getPropertyValues().addPropertyValue(THROWING_PROPERTY, adviceElement.getAttribute(THROWING));
+			adviceDefinition.getPropertyValues().addPropertyValue(
+					THROWING_PROPERTY, adviceElement.getAttribute(THROWING));
 		}
 		if (adviceElement.hasAttribute(ARG_NAMES)) {
-			adviceDefinition.getPropertyValues().addPropertyValue(ARG_NAMES_PROPERTY, adviceElement.getAttribute(ARG_NAMES));
+			adviceDefinition.getPropertyValues().addPropertyValue(
+					ARG_NAMES_PROPERTY, adviceElement.getAttribute(ARG_NAMES));
 		}
 
 		ConstructorArgumentValues cav = adviceDefinition.getConstructorArgumentValues();
@@ -492,7 +499,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			return parserContext.getReaderContext().registerWithGeneratedName(pointcutDefinition);
 		}
 		else if (element.hasAttribute(POINTCUT_REF)) {
-			return element.getAttribute(POINTCUT_REF);
+			String pointcutRef = element.getAttribute(POINTCUT_REF);
+			if (!StringUtils.hasText(pointcutRef)) {
+				parserContext.getReaderContext().error(
+						"'pointcut-ref' attribute contains empty value.", element, this.parseState.snapshot());
+			}
+			return pointcutRef;
 		}
 		else {
 			parserContext.getReaderContext().error(
