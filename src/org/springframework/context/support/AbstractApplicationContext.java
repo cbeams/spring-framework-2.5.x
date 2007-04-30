@@ -262,6 +262,24 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.applicationEventMulticaster;
 	}
 
+	/**
+	 * Return the ResourcePatternResolver to use for resolving location patterns
+	 * into Resource instances. Default is a
+	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver},
+	 * supporting Ant-style location patterns.
+	 * <p>Can be overridden in subclasses, for extended resolution strategies,
+	 * for example in a web environment.
+	 * <p><b>Do not call this when needing to resolve a location pattern.</b>
+	 * Call the context's <code>getResources</code> method instead, which
+	 * will delegate to the ResourcePatternResolver.
+	 * @return the ResourcePatternResolver for this context
+	 * @see #getResources
+	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
+	 */
+	protected ResourcePatternResolver getResourcePatternResolver() {
+		return new PathMatchingResourcePatternResolver(this);
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of ConfigurableApplicationContext interface
@@ -299,40 +317,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
-			this.startupDate = System.currentTimeMillis();
+			// Prepare this context for refreshing.
+			prepareRefresh();
 
-			if (logger.isInfoEnabled()) {
-				logger.info("Refreshing " + this);
-			}
+			// Tell the subclass to refresh the internal bean factory.
+			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
-			synchronized (this.activeMonitor) {
-				this.active = true;
-			}
-
-			// Tell subclass to refresh the internal bean factory.
-			refreshBeanFactory();
-			ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-
-			if (logger.isInfoEnabled()) {
-				logger.info("Bean factory for application context [" + ObjectUtils.identityToString(this) +
-						"]: " + ObjectUtils.identityToString(beanFactory));
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug(beanFactory.getBeanDefinitionCount() + " beans defined in " + this);
-			}
-
-			// Tell the internal bean factory to use the context's class loader.
-			beanFactory.setBeanClassLoader(getClassLoader());
-
-			// Populate the bean factory with context-specific resource editors.
-			beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
-
-			// Configure the bean factory with context semantics.
-			beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
-			beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
-			beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
-			beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
-			beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+			// Prepare the bean factory for use in this context.
+			prepareBeanFactory(beanFactory);
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
@@ -372,21 +364,60 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Return the ResourcePatternResolver to use for resolving location patterns
-	 * into Resource instances. Default is a
-	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver},
-	 * supporting Ant-style location patterns.
-	 * <p>Can be overridden in subclasses, for extended resolution strategies,
-	 * for example in a web environment.
-	 * <p><b>Do not call this when needing to resolve a location pattern.</b>
-	 * Call the context's <code>getResources</code> method instead, which
-	 * will delegate to the ResourcePatternResolver.
-	 * @return the ResourcePatternResolver for this context
-	 * @see #getResources
-	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
+	 * Prepare this context for refreshing, setting its startup date and
+	 * active flag.
 	 */
-	protected ResourcePatternResolver getResourcePatternResolver() {
-		return new PathMatchingResourcePatternResolver(this);
+	protected void prepareRefresh() {
+		this.startupDate = System.currentTimeMillis();
+
+		synchronized (this.activeMonitor) {
+			this.active = true;
+		}
+
+		if (logger.isInfoEnabled()) {
+			logger.info("Refreshing " + this);
+		}
+	}
+
+	/**
+	 * Tell the subclass to refresh the internal bean factory.
+	 * @return the fresh BeanFactory instance
+	 * @see #refreshBeanFactory()
+	 * @see #getBeanFactory()
+	 */
+	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+		refreshBeanFactory();
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+
+		if (logger.isInfoEnabled()) {
+			logger.info("Bean factory for application context [" + ObjectUtils.identityToString(this) +
+					"]: " + ObjectUtils.identityToString(beanFactory));
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug(beanFactory.getBeanDefinitionCount() + " beans defined in " + this);
+		}
+
+		return beanFactory;
+	}
+
+	/**
+	 * Configure the factory's standard context characteristics,
+	 * such as the context's ClassLoader and post-processors.
+	 * @param beanFactory the BeanFactory to configure
+	 */
+	protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		// Tell the internal bean factory to use the context's class loader.
+		beanFactory.setBeanClassLoader(getClassLoader());
+
+		// Populate the bean factory with context-specific resource editors.
+		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
+
+		// Configure the bean factory with context semantics.
+		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
+		beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
+		beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
+		beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
 	}
 
 	/**
@@ -395,9 +426,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * will have been instantiated yet. This allows for registering special
 	 * BeanPostProcessors etc in certain ApplicationContext implementations.
 	 * @param beanFactory the bean factory used by the application context
-	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
-	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 	}
 
 	/**
@@ -417,7 +447,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		String[] factoryProcessorNames =
 				beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
 
-		// Separate between BeanFactoryPostProcessor that implement the Ordered
+		// Separate between BeanFactoryPostProcessors that implement the Ordered
 		// interface and those that do not.
 		List orderedFactoryProcessors = new ArrayList();
 		List nonOrderedFactoryProcessorNames = new ArrayList();
@@ -457,7 +487,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + processorNames.length;
 		beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, beanProcessorTargetCount));
 
-		// Separate between BeanPostProcessor that implement the Ordered
+		// Separate between BeanPostProcessors that implement the Ordered
 		// interface and those that do not.
 		List orderedProcessors = new ArrayList();
 		List nonOrderedProcessorNames = new ArrayList();
