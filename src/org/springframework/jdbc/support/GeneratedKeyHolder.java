@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,17 @@ import java.util.Map;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
-/** 
- * An implementation of the KeyHolder interface, to be used for holding
- * auto-generated keys as potentially returned by JDBC insert statements.
+/**
+ * Default implementation of the {@link KeyHolder} interface, to be used for
+ * holding auto-generated keys (as potentially returned by JDBC insert statements).
  *
  * <p>Create an instance of this class for each insert operation, and pass
- * it to the corresponding JdbcTemplate or SqlUpdate methods.
+ * it to the corresponding {@link org.springframework.jdbc.core.JdbcTemplate}
+ * or {org.springframework.jdbc.object.SqlUpdate} methods.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 1.1
- * @see org.springframework.jdbc.core.JdbcTemplate
- * @see org.springframework.jdbc.object.SqlUpdate
  */
 public class GeneratedKeyHolder implements KeyHolder {
 
@@ -72,7 +72,8 @@ public class GeneratedKeyHolder implements KeyHolder {
 			if (!(key instanceof Number)) {
 				throw new DataRetrievalFailureException(
 						"The generated key is not of a supported numeric type. " +
-						"Unable to cast [" + key.getClass().getName() + "] to [" + Number.class.getName() + "]");
+						"Unable to cast [" + (key != null ? key.getClass().getName() : null) +
+						"] to [" + Number.class.getName() + "]");
 			}
 			return (Number) key;
 		}
@@ -94,7 +95,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	}
 
 	public List getKeyList() {
-		return keyList;
+		return this.keyList;
 	}
 
 }
