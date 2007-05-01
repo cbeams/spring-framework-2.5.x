@@ -79,9 +79,10 @@ abstract class ConstructorResolver {
 	 * dependency resolution.
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
+	 * @param chosenCtor a pre-chosen Constructor (or <code>null</code> if none)
 	 * @return a BeanWrapper for the new instance
 	 */
-	protected BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd) {
+	protected BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd, Constructor chosenCtor) {
 		BeanWrapper bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
@@ -110,60 +111,75 @@ abstract class ConstructorResolver {
 		}
 
 		else {
-			// Need to determine the constructor...
-			Constructor[] candidates = mbd.getBeanClass().getDeclaredConstructors();
-			AutowireUtils.sortConstructors(candidates);
-			int minTypeDiffWeight = Integer.MAX_VALUE;
+			// Need to resolve the constructor.
+			boolean autowiring = (chosenCtor != null ||
+					mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 
 			ConstructorArgumentValues cargs = mbd.getConstructorArgumentValues();
 			ConstructorArgumentValues resolvedValues = new ConstructorArgumentValues();
 			int minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
 
-			for (int i = 0; i < candidates.length; i++) {
-				Constructor constructor = candidates[i];
-				Class[] paramTypes = constructor.getParameterTypes();
+			// Take specified constructor, if any.
+			if (chosenCtor != null) {
+				Class[] paramTypes = chosenCtor.getParameterTypes();
+				argsToUse = createArgumentArray(
+						beanName, mbd, resolvedValues, bw, paramTypes, chosenCtor, autowiring).arguments;
+				constructorToUse = chosenCtor;
+			}
 
-				if (constructorToUse != null && argsToUse.length > paramTypes.length) {
-					// Already found greedy constructor that can be satisfied ->
-					// do not look any further, there are only less greedy constructors left.
-					break;
-				}
-				if (paramTypes.length < minNrOfArgs) {
-					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-							minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" +
-							beanName + "' " +
-							"(hint: specify index and/or type arguments for simple parameters to avoid type ambiguities)");
+			else {
+				Constructor[] candidates = mbd.getBeanClass().getDeclaredConstructors();
+				AutowireUtils.sortConstructors(candidates);
+				int minTypeDiffWeight = Integer.MAX_VALUE;
+
+				for (int i = 0; i < candidates.length; i++) {
+					Constructor candidate = candidates[i];
+					Class[] paramTypes = candidate.getParameterTypes();
+
+					if (constructorToUse != null && argsToUse.length > paramTypes.length) {
+						// Already found greedy constructor that can be satisfied ->
+						// do not look any further, there are only less greedy constructors left.
+						break;
+					}
+					if (paramTypes.length < minNrOfArgs) {
+						throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+								minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" +
+								beanName + "' " +
+								"(hint: specify index and/or type arguments for simple parameters to avoid type ambiguities)");
+					}
+
+					// Try to resolve arguments for current constructor.
+					try {
+						ArgumentsHolder args = createArgumentArray(
+								beanName, mbd, resolvedValues, bw, paramTypes, candidate, autowiring);
+						int typeDiffWeight = args.getTypeDifferenceWeight(paramTypes);
+						// Choose this constructor if it represents the closest match.
+						if (typeDiffWeight < minTypeDiffWeight) {
+							constructorToUse = candidate;
+							argsToUse = args.arguments;
+							minTypeDiffWeight = typeDiffWeight;
+						}
+					}
+					catch (UnsatisfiedDependencyException ex) {
+						if (this.beanFactory.logger.isTraceEnabled()) {
+							this.beanFactory.logger.trace(
+									"Ignoring constructor [" + candidate + "] of bean '" + beanName + "': " + ex);
+						}
+						if (i == candidates.length - 1 && constructorToUse == null) {
+							throw ex;
+						}
+						else {
+							// Swallow and try next constructor.
+						}
+					}
 				}
 
-				// Try to resolve arguments for current constructor.
-				try {
-					ArgumentsHolder args = createArgumentArray(beanName, mbd, resolvedValues, bw, paramTypes, constructor);
-					int typeDiffWeight = args.getTypeDifferenceWeight(paramTypes);
-					// Choose this constructor if it represents the closest match.
-					if (typeDiffWeight < minTypeDiffWeight) {
-						constructorToUse = constructor;
-						argsToUse = args.arguments;
-						minTypeDiffWeight = typeDiffWeight;
-					}
-				}
-				catch (UnsatisfiedDependencyException ex) {
-					if (this.beanFactory.logger.isTraceEnabled()) {
-						this.beanFactory.logger.trace(
-								"Ignoring constructor [" + constructor + "] of bean '" + beanName + "': " + ex);
-					}
-					if (i == candidates.length - 1 && constructorToUse == null) {
-						throw ex;
-					}
-					else {
-						// Swallow and try next constructor.
-					}
+				if (constructorToUse == null) {
+					throw new BeanCreationException(
+							mbd.getResourceDescription(), beanName, "Could not resolve matching constructor");
 				}
 			}
 
-			if (constructorToUse == null) {
-				throw new BeanCreationException(
-						mbd.getResourceDescription(), beanName, "Could not resolve matching constructor");
-			}
 			mbd.resolvedConstructorOrFactoryMethod = constructorToUse;
 		}
 
@@ -239,6 +255,7 @@ abstract class ConstructorResolver {
 			// Need to determine the factory method...
 			// Try all methods with this name to see if they match the given arguments.
 			Method[] candidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
+			boolean autowiring = (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			ConstructorArgumentValues resolvedValues = null;
 
@@ -255,11 +272,11 @@ abstract class ConstructorResolver {
 			}
 
 			for (int i = 0; i < candidates.length; i++) {
-				Method factoryMethod = candidates[i];
-				Class[] paramTypes = factoryMethod.getParameterTypes();
+				Method candidate = candidates[i];
+				Class[] paramTypes = candidate.getParameterTypes();
 
-				if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
-						factoryMethod.getName().equals(mbd.getFactoryMethodName()) &&
+				if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&
+						candidate.getName().equals(mbd.getFactoryMethodName()) &&
 						paramTypes.length >= minNrOfArgs) {
 
 					ArgumentsHolder args = null;
@@ -268,11 +285,11 @@ abstract class ConstructorResolver {
 						// Resolved contructor arguments: type conversion and/or autowiring necessary.
 						try {
 							args = createArgumentArray(
-									beanName, mbd, resolvedValues, bw, paramTypes, factoryMethod);
+									beanName, mbd, resolvedValues, bw, paramTypes, candidate, autowiring);
 						}
 						catch (UnsatisfiedDependencyException ex) {
 							if (this.beanFactory.logger.isTraceEnabled()) {
-								this.beanFactory.logger.trace("Ignoring factory method [" + factoryMethod +
+								this.beanFactory.logger.trace("Ignoring factory method [" + candidate +
 										"] of bean '" + beanName + "': " + ex);
 							}
 							if (i == candidates.length - 1 && factoryMethodToUse == null) {
@@ -296,7 +313,7 @@ abstract class ConstructorResolver {
 					int typeDiffWeight = args.getTypeDifferenceWeight(paramTypes);
 					// Choose this constructor if it represents the closest match.
 					if (typeDiffWeight < minTypeDiffWeight) {
-						factoryMethodToUse = factoryMethod;
+						factoryMethodToUse = candidate;
 						argsToUse = args.arguments;
 						minTypeDiffWeight = typeDiffWeight;
 					}
@@ -386,7 +403,7 @@ abstract class ConstructorResolver {
 	 */
 	private ArgumentsHolder createArgumentArray(
 			String beanName, RootBeanDefinition mbd, ConstructorArgumentValues resolvedValues,
-			BeanWrapper bw, Class[] paramTypes, Object methodOrCtor)
+			BeanWrapper bw, Class[] paramTypes, Object methodOrCtor, boolean autowiring)
 			throws UnsatisfiedDependencyException {
 
 		String methodType = (methodOrCtor instanceof Constructor ? "constructor" : "factory method");
@@ -402,8 +419,7 @@ abstract class ConstructorResolver {
 			// If we couldn't find a direct match and are not supposed to autowire,
 			// let's try the next generic, untyped argument value as fallback:
 			// it could match after type conversion (for example, String -> int).
-			if (valueHolder == null &&
-					mbd.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
+			if (valueHolder == null && !autowiring) {
 				valueHolder = resolvedValues.getGenericArgumentValue(null, usedValueHolders);
 			}
 			if (valueHolder != null) {
@@ -447,7 +463,7 @@ abstract class ConstructorResolver {
 			else {
 				// No explicit match found: we're either supposed to autowire or
 				// have to fail creating an argument array for the given constructor.
-				if (mbd.getResolvedAutowireMode() != RootBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
+				if (!autowiring) {
 					throw new UnsatisfiedDependencyException(
 							mbd.getResourceDescription(), beanName, index, paramTypes[index],
 							"Ambiguous " + methodType + " argument types - " +

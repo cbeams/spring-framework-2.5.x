@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -39,6 +40,10 @@ import org.springframework.beans.PropertyValues;
 public abstract class InstantiationAwareBeanPostProcessorAdapter implements SmartInstantiationAwareBeanPostProcessor {
 
 	public Class predictBeanType(Class beanClass, String beanName) {
+		return null;
+	}
+
+	public Constructor determineConstructor(Class beanClass, String beanName) throws BeansException {
 		return null;
 	}
 

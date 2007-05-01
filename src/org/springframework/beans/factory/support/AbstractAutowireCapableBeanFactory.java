@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -254,7 +255,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
 		bd.setSingleton(false);
 		if (bd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR) {
-			return autowireConstructor(beanClass.getName(), bd).getWrappedInstance();
+			return autowireConstructor(beanClass.getName(), bd, null).getWrappedInstance();
 		}
 		else {
 			Object bean = getInstantiationStrategy().instantiate(bd, null, this);
@@ -707,19 +708,45 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #instantiateBean
 	 */
 	protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd, Object[] args) {
-		BeanWrapper instanceWrapper = null;
 		if (mbd.getFactoryMethodName() != null)  {
-			instanceWrapper = instantiateUsingFactoryMethod(beanName, mbd, args);
+			return instantiateUsingFactoryMethod(beanName, mbd, args);
 		}
-		else if (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
-				mbd.hasConstructorArgumentValues() )  {
-			instanceWrapper = autowireConstructor(beanName, mbd);
+
+		// Need to determine the constructor...
+		Constructor constructor = determineConstructorFromBeanPostProcessors(mbd.getBeanClass(), beanName);
+		if (constructor != null ||
+				mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
+				mbd.hasConstructorArgumentValues())  {
+			return autowireConstructor(beanName, mbd, constructor);
 		}
-		else {
-			// No special handling: simply use no-arg constructor.
-			instanceWrapper = instantiateBean(beanName, mbd);
+
+		// No special handling: simply use no-arg constructor.
+		return instantiateBean(beanName, mbd);
+	}
+
+	/**
+	 * Determine the constructor to use for the given bean, checking all registered
+	 * {@link SmartInstantiationAwareBeanPostProcessor SmartInstantiationAwareBeanPostProcessors}.
+	 * @param beanClass the raw class of the bean
+	 * @param beanName the name of the bean
+	 * @return the constructor to use, or <code>null</code> if none specified
+	 * @throws org.springframework.beans.BeansException in case of errors
+	 * @see org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor#determineConstructor
+	 */
+	protected Constructor determineConstructorFromBeanPostProcessors(Class beanClass, String beanName)
+			throws BeansException {
+
+		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
+			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
+			if (beanProcessor instanceof SmartInstantiationAwareBeanPostProcessor) {
+				SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) beanProcessor;
+				Constructor ctor = ibp.determineConstructor(beanClass, beanName);
+				if (ctor != null) {
+					return ctor;
+				}
+			}
 		}
-		return instanceWrapper;
+		return null;
 	}
 
 	/**
@@ -769,8 +796,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mbd the bean definition for the bean
 	 * @return BeanWrapper for the new instance
 	 */
-	protected BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd) {
-		return this.constructorResolver.autowireConstructor(beanName, mbd);
+	protected BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd, Constructor ctor) {
+		return this.constructorResolver.autowireConstructor(beanName, mbd, ctor);
 	}
 
 	/**

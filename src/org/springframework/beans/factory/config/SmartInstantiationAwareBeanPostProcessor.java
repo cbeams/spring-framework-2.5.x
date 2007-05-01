@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
+import java.lang.reflect.Constructor;
+
 import org.springframework.beans.BeansException;
 
 /**
@@ -43,5 +45,14 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
 	Class predictBeanType(Class beanClass, String beanName) throws BeansException;
+
+	/**
+	 * Determine the constructor to use for the given bean.
+	 * @param beanClass the raw class of the bean
+	 * @param beanName the name of the bean
+	 * @return the constructor to use, or <code>null</code> if none specified
+	 * @throws org.springframework.beans.BeansException in case of errors
+	 */
+	Constructor determineConstructor(Class beanClass, String beanName) throws BeansException;
 
 }
