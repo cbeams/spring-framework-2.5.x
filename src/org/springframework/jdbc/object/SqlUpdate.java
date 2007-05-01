@@ -28,20 +28,24 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
 import org.springframework.jdbc.support.KeyHolder;
 
 /**
- * RdbmsOperation subclass representing a SQL update.
- * Like a query, an update object is reusable. Like all RdbmsOperation
- * objects, an update can have parameters and is defined in SQL.
+ * Reusable operation object representing a SQL update.
  *
- * <p>This class provides a number of <code>update()</code> methods,
- * analogous to the <code>execute()</code> methods of query objects.
+ * <p>This class provides a number of <code>update</code> methods,
+ * analogous to the <code>execute</code> methods of query objects.
  *
  * <p>This class is concrete. Although it can be subclassed (for example
  * to add a custom update method) it can easily be parameterized by setting
  * SQL and declaring parameters.
  *
+ * <p>Like all <code>RdbmsOperation</code> classes that ship with the Spring
+ * Framework, <code>SqlQuery</code> instances are thread-safe after their
+ * initialization is complete. That is, after they are constructed and configured
+ * via their setter methods, they can be used safely from multiple threads.
+ *
  * @author Rod Johnson
- * @author Isabelle Muszynski
  * @author Thomas Risberg
+ * @author Juergen Hoeller
+ * @see SqlQuery
  */
 public class SqlUpdate extends SqlOperation {
 

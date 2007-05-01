@@ -43,14 +43,14 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
  * this class's untyped query methods.
  *
  * <p>Like all <code>RdbmsOperation</code> classes that ship with the Spring
- * Framework, <code>SqlQuery</code> instances are threadsafe after their
+ * Framework, <code>SqlQuery</code> instances are thread-safe after their
  * initialization is complete. That is, after they are constructed and configured
  * via their setter methods, they can be used safely from multiple threads.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Thomas Risberg
- * @author Jean-Pierre Pawlak
+ * @see SqlUpdate
  */
 public abstract class SqlQuery extends SqlOperation {
 

@@ -26,8 +26,8 @@ import org.springframework.dao.DataAccessException;
  * or Stored Procedures to do the job.
  *
  * @author Dmitriy Kopylenko
- * @author Isabelle Muszynski
  * @author Jean-Pierre Pawlak
+ * @author Juergen Hoeller
  */
 public interface DataFieldMaxValueIncrementer {
 

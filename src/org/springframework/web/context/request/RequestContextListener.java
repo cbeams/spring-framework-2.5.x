@@ -38,7 +38,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
  * Within Spring's own web support, DispatcherServlet's processing is perfectly sufficient.
  *
  * @author Juergen Hoeller
- * @author Steven Devijver
  * @since 2.0
  * @see javax.servlet.ServletRequestListener
  * @see org.springframework.context.i18n.LocaleContextHolder
