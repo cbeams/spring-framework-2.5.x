@@ -208,7 +208,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for running PetClinic, JPetStore (by Commons DBCP, Hibernate)
 
 * jakarta-commons/commons-dbcp.jar
-- Commons DBCP 1.2.1 (http://jakarta.apache.org/commons/dbcp)
+- Commons DBCP 1.2.2 (http://jakarta.apache.org/commons/dbcp)
 - required for building the framework
 - required at runtime when using Spring's CommonsDbcpNativeJdbcExtractor
 - required for running JPetStore
@@ -256,13 +256,13 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Jakarta's JSTL implementation 1.1.2 (http://jakarta.apache.org/taglibs)
 - required for running JPetStore, PetClinic, Countries
 
-* jamon/JAMon.jar
-- JAMon API (Java Application Monitor) 1.0 (http://www.jamonapi.com)
+* jamon/jamon-2.4.jar
+- JAMon API (Java Application Monitor) 2.4 (http://www.jamonapi.com)
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
-* jasperreports/jasperreports-1.3.1.jar
-- JasperReports 1.3.1 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-1.3.3.jar
+- JasperReports 1.3.3 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
