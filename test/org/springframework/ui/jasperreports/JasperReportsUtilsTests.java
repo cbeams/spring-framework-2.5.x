@@ -195,7 +195,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		HSSFSheet sheet = workbook.getSheetAt(0);
 		assertNotNull("Sheet should not be null", sheet);
 		HSSFRow row = sheet.getRow(3);
-		HSSFCell cell = row.getCell((short) 0);
+		HSSFCell cell = row.getCell((short) 1);
 		assertNotNull("Cell should not be null", cell);
 		assertEquals("Cell content should be Dear Lord!", "Dear Lord!", cell.getStringCellValue());
 	}
