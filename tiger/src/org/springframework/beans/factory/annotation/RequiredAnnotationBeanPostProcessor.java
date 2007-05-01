@@ -30,8 +30,9 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
- * BeanPostProcessor that enforces required JavaBean properties to have been
- * configured. Required bean properties are detected through an annotation:
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
+ * that enforces required JavaBean properties to have been configured.
+ * Required bean properties are detected through a Java 5 annotation:
  * by default, Spring's {@link Required} annotation.
  *
  * <p>The motivation for the existence of this BeanPostProcessor is to allow
@@ -60,7 +61,8 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 
 
 	/**
-	 * Set the 'required' annotation type.
+	 * Set the 'required' annotation type, to be used on bean property
+	 * setter methods.
 	 * <p>The default required annotation type is the Spring-provided
 	 * {@link Required} annotation.
 	 * <p>This setter property exists so that developers can provide their own

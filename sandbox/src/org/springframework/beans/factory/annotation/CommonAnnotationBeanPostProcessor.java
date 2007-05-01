@@ -58,12 +58,11 @@ import org.springframework.util.StringUtils;
  * (e.g. Spring's {@link org.springframework.jndi.support.SimpleJndiBeanFactory} for
  * JNDI lookup behavior equivalent to standard Java EE 5 resource injection}.
  *
- * <p>The common JSR-250 annotations supported by this post-processor are
- * available in Java 6 (JDK 1.6) as well as in Java EE 5 (which provides
- * a standalone jar for its common annotations as well, allowing for use
- * in any Java 5 based application). Hence, this post-processor works
- * out of the box on JDK 1.6, and requires the JSR-250 API jar to be added
- * on JDK 1.5.
+ * <p>The common JSR-250 annotations supported by this post-processor are available
+ * in Java 6 (JDK 1.6) as well as in Java EE 5 (which provides a standalone jar for
+ * its common annotations as well, allowing for use in any Java 5 based application).
+ * Hence, this post-processor works out of the box on JDK 1.6, and requires the
+ * JSR-250 API jar to be added to the classpath on JDK 1.5.
  *
  * <p>For default usage, resolving resource names as Spring bean names,
  * simply define the following in your application context:
@@ -85,6 +84,7 @@ import org.springframework.util.StringUtils;
  * @since 2.1
  * @see #setResourceFactory
  * @see InitDestroyAnnotationBeanPostProcessor
+ * @see AutowiredAnnotationBeanPostProcessor
  */
 public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Serializable {
@@ -180,6 +180,15 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 	}
 
+	/**
+	 * Obtain the resource object for the given name and type.
+	 * @param name the name of the target resource
+	 * @param type the type of the target resource
+	 * @param shareable whether the target resource is shareable
+	 * (as defined in the @Resource annotation)
+	 * @return the resource object (never <code>null</code>)
+	 * @throws BeansException if we failed to obtain the target resource
+	 */
 	protected Object getResource(String name, Class type, boolean shareable) throws BeansException {
 		if (this.resourceFactory == null) {
 			throw new IllegalStateException("No resource factory configured - " +
