@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,19 +26,20 @@ import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.easymock.MockControl;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
+import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 2.0
  */
 public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
 	
@@ -79,8 +80,6 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		
 		MockControl emMc = MockControl.createControl(EntityManager.class);
 		EntityManager mockEm = (EntityManager) emMc.getMock();
-		mockEm.getTransaction();
-		emMc.setReturnValue(null, 1);
 		mockEm.contains(testEntity);
 		emMc.setReturnValue(false);
 		emMc.replay();
@@ -120,7 +119,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		MockControl emMc = MockControl.createControl(EntityManager.class);
 		EntityManager mockEm = (EntityManager) emMc.getMock();
 		mockEm.getTransaction();
-		emMc.setReturnValue(mockTx, 3);
+		emMc.setReturnValue(mockTx, 2);
 		mockEm.contains(testEntity);
 		emMc.setReturnValue(false);
 		emMc.replay();
@@ -181,7 +180,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		MockControl emMc = MockControl.createControl(EntityManager.class);
 		EntityManager mockEm = (EntityManager) emMc.getMock();
 		mockEm.getTransaction();
-		emMc.setReturnValue(mockTx, 3);
+		emMc.setReturnValue(mockTx, 2);
 		mockEm.contains(testEntity);
 		emMc.setReturnValue(false);
 		emMc.replay();
@@ -239,8 +238,6 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 		MockControl emMc = MockControl.createControl(EntityManager.class);
 		EntityManager mockEm = (EntityManager) emMc.getMock();
-		mockEm.getTransaction();
-		emMc.setThrowable(new IllegalStateException(), 1);
 		mockEm.joinTransaction();
 		emMc.setVoidCallable(1);
 		mockEm.contains(testEntity);
@@ -268,6 +265,8 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		emfMc.replay();
 
 		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
+		MutablePersistenceUnitInfo pui = ((MutablePersistenceUnitInfo) cefb.getPersistenceUnitInfo());
+		pui.setTransactionType(PersistenceUnitTransactionType.JTA);
 
 		JpaTransactionManager jpatm = new JpaTransactionManager();
 		jpatm.setEntityManagerFactory(cefb.getObject());

@@ -356,15 +356,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 		private final EntityManagerFactoryPlusOperations entityManagerFactoryPlusOperations;
 
-		private final JpaDialect jpaDialect;
-
 		public ManagedEntityManagerFactoryInvocationHandler(EntityManagerFactory targetEmf,
 				EntityManagerFactoryInfo emfInfo, EntityManagerFactoryPlusOperations entityManagerFactoryPlusOperations) {
 
 			this.targetEntityManagerFactory = targetEmf;
 			this.entityManagerFactoryInfo = emfInfo;
 			this.entityManagerFactoryPlusOperations = entityManagerFactoryPlusOperations;
-			this.jpaDialect = emfInfo.getJpaDialect();
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -378,12 +375,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 				Object retVal = method.invoke(this.targetEntityManagerFactory, args);
 				if (retVal instanceof EntityManager) {
 					EntityManager rawEntityManager = (EntityManager) retVal;
-					EntityManagerPlusOperations plusOperations = null;
-					if (this.jpaDialect != null && this.jpaDialect.supportsEntityManagerPlusOperations()) {
-						plusOperations = this.jpaDialect.getEntityManagerPlusOperations(rawEntityManager);
-					}
 					retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(
-							rawEntityManager, plusOperations, this.jpaDialect);
+							rawEntityManager, this.entityManagerFactoryInfo);
 				}
 				return retVal;
 			}
