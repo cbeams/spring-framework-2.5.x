@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,6 +41,17 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Juergen Hoeller
  */
 public class BridgeMethodResolverTests extends TestCase {
+
+	private static TypeVariable findTypeVariable(Class clazz, String name) {
+		TypeVariable[] variables = clazz.getTypeParameters();
+		for (int i = 0; i < variables.length; i++) {
+			TypeVariable variable = variables[i];
+			if (variable.getName().equals(name)) {
+				return variable;
+			}
+		}
+		return null;
+	}
 
 	public void testFindBridgedMethod() throws Exception {
 		Method unbridged = MyFoo.class.getDeclaredMethod("someMethod", String.class, Object.class);
@@ -83,15 +95,20 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	public void testCreateTypeVariableMap() throws Exception {
 		Map<String, Class> typeVariableMap = BridgeMethodResolver.createTypeVariableMap(MyBar.class);
-		assertEquals(String.class, typeVariableMap.get("T"));
+		TypeVariable barT = findTypeVariable(InterBar.class, "T");
+		assertEquals(String.class, typeVariableMap.get(barT));
 
 		typeVariableMap = BridgeMethodResolver.createTypeVariableMap(MyFoo.class);
-		assertEquals(String.class, typeVariableMap.get("T"));
+		TypeVariable fooT = findTypeVariable(Foo.class, "T");
+		assertEquals(String.class, typeVariableMap.get(fooT));
 
 		typeVariableMap = BridgeMethodResolver.createTypeVariableMap(ExtendsEnclosing.ExtendsEnclosed.ExtendsReallyDeepNow.class);
-		assertEquals(Long.class, typeVariableMap.get("R"));
-		assertEquals(Integer.class, typeVariableMap.get("S"));
-		assertEquals(String.class, typeVariableMap.get("T"));
+		TypeVariable r = findTypeVariable(Enclosing.Enclosed.ReallyDeepNow.class, "R");
+		TypeVariable s = findTypeVariable(Enclosing.Enclosed.class, "S");
+		TypeVariable t = findTypeVariable(Enclosing.class, "T");
+		assertEquals(Long.class, typeVariableMap.get(r));
+		assertEquals(Integer.class, typeVariableMap.get(s));
+		assertEquals(String.class, typeVariableMap.get(t));
 	}
 
 	public void testDoubleParameterization() throws Exception {
@@ -197,7 +214,9 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	public void testSPR2454() throws Exception {
 		Map typeVariableMap = BridgeMethodResolver.createTypeVariableMap(YourHomer.class);
-		assertEquals(AbstractBounded.class, typeVariableMap.get("L"));
+		TypeVariable variable2 = findTypeVariable(YourHomer.class, "L");
+		TypeVariable variable = findTypeVariable(MyHomer.class, "L");
+		assertEquals(AbstractBounded.class, typeVariableMap.get(variable));
 	}
 
 	public void testSPR2603() throws Exception {
@@ -260,7 +279,6 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertTrue(bridgeMethod.isBridge());
 
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
-		Map variableMap = BridgeMethodResolver.createTypeVariableMap(MegaMessageProducerImpl.class);
 	}
 
 	public void testSPR3324() throws Exception {
@@ -1064,7 +1082,7 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 
-	private static class Other<S,T> {
+	private static class Other<S,E> {
 
 	}
 
