@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.5 (2007-05-03)
+Changes in version 2.0.5 (2007-05-04)
 -------------------------------------
 
 Package org.springframework.aop
@@ -18,6 +18,7 @@ Package org.springframework.beans
 * BeanWrapper converts an empty String to null in case of a Java 5 enum as target type
 * default editor settings get copied to nested beans even if no default editors have been used yet
 * revised MethodInvokingFactoryBean's "getObjectType()" implementation to gracefully return null if not prepared already
+* added "determineConstructor(beanClass, beanName)" method to SmartInstantiationAwareBeanPostProcessor
 * AbstractBeanFactory uses concurrent Maps for singletons, aliases and bean definitions (for better concurrency)
 * fixed ConstructorResolver to correctly convert prepared collection arguments to arrays if necessary (for prototypes)
 * added overloaded "rootBeanDefinition" factory methods with bean class name (instead of Class) to BeanDefinitionBuilder
@@ -30,11 +31,13 @@ Package org.springframework.context
 
 Package org.springframework.core
 * BridgeMethodResolver is able to match open type variables in complex overloading scenarios as well
+* BridgeMethodResolver caches based on TypeVariable references, handling overlapping type variable names appropriately
 * added "createConcurrentMap" method to CollectionFactory, creating a JDK 1.5+ or backport-concurrent ConcurrentHashMap
 * Constants class always uses upper-case transformation according to English notation
 * added "toCodeForSuffix" operation to Constants class
 
 Package org.springframework.jdbc
+* fixed GeneratedKeyHolder to avoid NPE in exception message in case of a null key returned by the JDBC driver
 * fixed JdbcTemplate's fallback support for batch updates to properly handle InterruptibleBatchPreparedStatementSetters
 * added scale support to SqlParameter, for declaring numeric RdbmsOperation parameters with a specific scale
 * added SqlParameterValue class, holding a value including SQL type and scale, accepted by JdbcTemplate argument arrays
@@ -58,6 +61,8 @@ Package org.springframework.orm
 Package org.springframework.remoting
 * RemoteExporter shows "use reference, not value" error message in case of the specified service object being a String
 * added "replaceExistingBinding" property to RmiServiceExporter, allowing to turn off the automatic replacement strategy
+* JndiRmiClientInterceptor/ProxyFactoryBean detects CORBA SystemExceptions and converts them to RemoteAccessExceptions
+* JndiRmiClientInterceptor/ProxyFactoryBean detects CORBA OBJECT_NOT_FOUND connect failures and recovers accordingly
 
 Package org.springframework.scheduling
 * MethodInvokingJobDetailFactoryBean avoids obtaining the target bean twice in case of "targetBeanName" specified
@@ -73,6 +78,7 @@ Package org.springframework.test
 * AbstractTransactionalSpringContextTests' "onSetUp()"/"onTearDown()" are non-final, allowing for flexible overriding
 
 Package org.springframework.transaction
+* AbstractPlatformTransactionManager properly resumes 'foreign' existing synchronization even in case of begin failure
 * revised OC4JJtaTransactionManager to support the "oracle.j2ee.transaction" package on OC4J later than 10.1.3.2
 
 Package org.springframework.ui
