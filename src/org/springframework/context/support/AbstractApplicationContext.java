@@ -435,7 +435,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * respecting explicit order if given.
 	 * Must be called before singleton instantiation.
 	 */
-	private void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		// Invoke factory processors registered with the context instance.
 		for (Iterator it = getBeanFactoryPostProcessors().iterator(); it.hasNext();) {
 			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
@@ -478,7 +478,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * respecting explicit order if given.
 	 * <p>Must be called before any instantiation of application beans.
 	 */
-	private void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+	protected void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		String[] processorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
 		// Register BeanPostProcessorChecker that logs an info message when
@@ -516,7 +516,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Initialize the MessageSource.
 	 * Use parent's if none defined in this context.
 	 */
-	private void initMessageSource() {
+	protected void initMessageSource() {
 		if (containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
 			this.messageSource = (MessageSource) getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
 			// Make MessageSource aware of parent MessageSource.
@@ -549,7 +549,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Uses SimpleApplicationEventMulticaster if none defined in the context.
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
-	private void initApplicationEventMulticaster() {
+	protected void initApplicationEventMulticaster() {
 		if (containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster = (ApplicationEventMulticaster)
 					getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
@@ -582,7 +582,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Add beans that implement ApplicationListener as listeners.
 	 * Doesn't affect other listeners, which can be added without being beans.
 	 */
-	private void registerListeners() {
+	protected void registerListeners() {
 		// Register statically specified listeners first.
 		for (Iterator it = getApplicationListeners().iterator(); it.hasNext();) {
 			addListener((ApplicationListener) it.next());
