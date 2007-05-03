@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,8 +62,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			if (logger.isDebugEnabled()) {
 				logger.debug("IOException whilst attempting to read '.class' file for class [" +
 						method.getDeclaringClass().getName() +
-						"] - unable to determine parameter names for method: " + method,
-						ex);
+						"] - unable to determine parameter names for method: " + method, ex);
 			}
 		}
 		return null;
@@ -228,53 +226,42 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	private static class LocalVariableTableVisitor extends EmptyVisitor {
 
 		private boolean isStatic;
-		
 		private ParameterNameDiscoveringVisitor memberVisitor;
-
 		private int numParameters;
-		
 		private int[] lvtSlotIndices;
-
 		private String[] parameterNames;
-
 		private boolean hasLVTInfo = false;
-		
+
 		public LocalVariableTableVisitor(
-				boolean isStatic, 
-				ParameterNameDiscoveringVisitor memberVisitor, 
-				int numParams,
-				int[] lvtSlotIndices) {
+				boolean isStatic, ParameterNameDiscoveringVisitor memberVisitor, int numParams, int[] lvtSlotIndices) {
 			this.isStatic = isStatic;
 			this.numParameters = numParams;
 			this.parameterNames = new String[this.numParameters];
 			this.memberVisitor = memberVisitor;
 			this.lvtSlotIndices = lvtSlotIndices;
 		}
-		
-		public void visitLocalVariable(String name, String description, String signature, Label start, Label end, int index) {
+
+		public void visitLocalVariable(
+				String name, String description, String signature, Label start, Label end, int index) {
 			this.hasLVTInfo = true;
 			if (isMethodArgumentSlot(index)) {
 				this.parameterNames[parameterNameIndexForSlot(index)] = name;
 			}
 		}
-		
+
 		public void visitEnd() {
 			if (this.hasLVTInfo || this.isStatic && numParameters == 0) {
-				/*
-				 *  visitLocalVariable will never be called for static no args methods
-				 *  which doesn't use any local variables.
-				 *  This means that hasLVTInfo could be false for that kind of methods 
-				 *  even if the class has local variable info.
-				 */
+				 // visitLocalVariable will never be called for static no args methods
+				 // which doesn't use any local variables.
+				 // This means that hasLVTInfo could be false for that kind of methods
+				 // even if the class has local variable info.
 				this.memberVisitor.setParameterNames(this.parameterNames);
 			}
 		}
-		
+
 		/**
 		 * An lvt entry describes an argument (as opposed to a local var) if 
 		 * it appears in the lvtSlotIndices table
-		 * @param index
-		 * @return
 		 */
 		private boolean isMethodArgumentSlot(int index) {
 			for (int i = 0; i < this.lvtSlotIndices.length; i++) {
@@ -284,14 +271,15 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			}
 			return false;
 		}
-		
+
 		private int parameterNameIndexForSlot(int slot) {
 			for (int i = 0; i < this.lvtSlotIndices.length; i++) {
 				if (this.lvtSlotIndices[i] == slot) {
 					return i;
 				}
 			}
-			throw new IllegalStateException("Asked for index for a slot which failed the isMethodArgumentSlot test: " + slot);
+			throw new IllegalStateException(
+					"Asked for index for a slot which failed the isMethodArgumentSlot test: " + slot);
 		}
 	}
 
