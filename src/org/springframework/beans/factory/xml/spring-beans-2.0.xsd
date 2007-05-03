@@ -475,7 +475,7 @@
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	Indicates whether or not this bean should be considered when looking
-	for candidates to satisfy another beans autowiring requirements.
+	for candidates to satisfy another bean's autowiring requirements.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>

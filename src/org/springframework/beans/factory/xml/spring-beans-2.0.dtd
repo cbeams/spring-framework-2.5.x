@@ -205,7 +205,7 @@
 
 <!--
   Indicates whether or not this bean should be considered when looking
-  for candidates to satisfy another beans autowiring requirements.
+  for candidates to satisfy another bean's autowiring requirements.
 -->
 <!ATTLIST bean autowire-candidate (true | false) #IMPLIED>
 
