@@ -87,6 +87,8 @@ public abstract class AbstractXsltView extends AbstractView {
 	public static final String DEFAULT_ROOT = "DocRoot";
 
 
+	private boolean customContentTypeSet = false;
+
 	private Resource stylesheetLocation;
 
 	private String root = DEFAULT_ROOT;
@@ -112,13 +114,18 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * This constructor sets the content type to "text/xml;charset=ISO-8859-1"
 	 * by default. This will be switched to the standard web view default
 	 * "text/html;charset=ISO-8859-1" if a stylesheet location has been specified.
-	 * A specific content type can be configured via the "contentType" bean property.
-	 * @see #setContentType
+	 * <p>A specific content type can be configured via the
+	 * {@link #setContentType "contentType"} bean property.
 	 */
 	protected AbstractXsltView() {
-		setContentType(XML_CONTENT_TYPE);
+		super.setContentType(XML_CONTENT_TYPE);
 	}
 
+
+	public void setContentType(String contentType) {
+		super.setContentType(contentType);
+		this.customContentTypeSet = true;
+	}
 
 	/**
 	 * Set the location of the XSLT stylesheet.
@@ -241,8 +248,10 @@ public abstract class AbstractXsltView extends AbstractView {
 		if (this.uriResolver != null) {
 			this.transformerFactory.setURIResolver(this.uriResolver);
 		}
-		if (getStylesheetLocation() != null) {
-			setContentType(DEFAULT_CONTENT_TYPE);
+		if (getStylesheetLocation() != null && !this.customContentTypeSet) {
+			// Use "text/html" as default (instead of "text/xml") if a stylesheet
+			// has been configured but no custom content type has been set.
+			super.setContentType(DEFAULT_CONTENT_TYPE);
 		}
 		try {
 			getTemplates();

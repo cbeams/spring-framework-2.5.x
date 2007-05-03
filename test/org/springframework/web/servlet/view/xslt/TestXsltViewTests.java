@@ -136,7 +136,40 @@ public class TestXsltViewTests extends TestCase {
 		view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/sunnyDay.xsl"));
 		view.setIndent(true);
 		view.initApplicationContext();
+
 		view.render(new ModelAndView().addObject("hero", new Hero("Jet", 24, "BOOM")).getModel(), request, response);
+		assertEquals("text/html;charset=ISO-8859-1", response.getContentType());
+		String text = response.getContentAsString();
+		assertEquals("<hero name=\"Jet\" age=\"24\" catchphrase=\"BOOM\" sex=\"Female\"/>", text.trim());
+	}
+
+	public void testRenderWithCustomContentType() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		AbstractXsltView view = new AbstractXsltView() {
+			protected Source createXsltSource(Map model, String root, HttpServletRequest request, HttpServletResponse response) throws Exception {
+				Hero hero = (Hero) model.get("hero");
+				Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+				Element node = document.createElement(root);
+				node.setAttribute("name", hero.getName());
+				node.setAttribute("age", hero.getAge() + "");
+				node.setAttribute("catchphrase", hero.getCatchphrase());
+				return new DOMSource(node);
+			}
+		};
+
+		view.setContentType("text/plain");
+		view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/sunnyDay.xsl"));
+		view.setIndent(true);
+		view.initApplicationContext();
+
+		view.render(new ModelAndView().addObject("hero", new Hero("Jet", 24, "BOOM")).getModel(), request, response);
+		assertEquals("text/plain", response.getContentType());
 		String text = response.getContentAsString();
 		assertEquals("<hero name=\"Jet\" age=\"24\" catchphrase=\"BOOM\" sex=\"Female\"/>", text.trim());
 	}
@@ -150,7 +183,7 @@ public class TestXsltViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractXsltView view = new AbstractXsltView() {
-			protected Map getParameters() {
+			protected Map getParameters(HttpServletRequest request) {
 				Map parameters = new HashMap();
 				parameters.put("sex", "Male");
 				return parameters;
@@ -171,6 +204,7 @@ public class TestXsltViewTests extends TestCase {
 		node.setAttribute("catchphrase", hero.getCatchphrase());
 
 		view.render(new ModelAndView().addObject("hero", new DOMSource(node)).getModel(), request, response);
+		assertEquals("text/html;charset=ISO-8859-1", response.getContentType());
 		String text = response.getContentAsString();
 		assertEquals("<hero name=\"Jet\" age=\"24\" catchphrase=\"BOOM\" sex=\"Male\"/>", text.trim());
 	}
@@ -185,7 +219,7 @@ public class TestXsltViewTests extends TestCase {
 		response.setWriterAccessAllowed(false);
 
 		AbstractXsltView view = new AbstractXsltView() {
-			protected Map getParameters() {
+			protected Map getParameters(HttpServletRequest request) {
 				Map parameters = new HashMap();
 				parameters.put("sex", "Male");
 				return parameters;
@@ -215,7 +249,7 @@ public class TestXsltViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractXsltView view = new AbstractXsltView() {
-			protected Map getParameters() {
+			protected Map getParameters(HttpServletRequest request) {
 				Map parameters = new HashMap();
 				parameters.put("sex", "Male");
 				return parameters;
@@ -235,6 +269,7 @@ public class TestXsltViewTests extends TestCase {
 		node.setAttribute("catchphrase", hero.getCatchphrase());
 
 		view.render(new ModelAndView().addObject("hero", new DOMSource(node)).getModel(), request, response);
+		assertEquals("text/xml;charset=ISO-8859-1", response.getContentType());
 		String text = response.getContentAsString().trim();
 		assertTrue(text.startsWith("<?xml"));
 		assertTrue(text.indexOf("<hero") != -1);
@@ -262,7 +297,7 @@ public class TestXsltViewTests extends TestCase {
 				node.setAttribute("catchphrase", hero.getCatchphrase());
 				return new DOMSource(node);
 			}
-			protected Map getParameters() {
+			protected Map getParameters(HttpServletRequest request) {
 				Map parameters = new HashMap();
 				parameters.put("sex", "Male");
 				return parameters;
