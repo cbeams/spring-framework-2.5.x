@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.5 (2007-05-04)
+Changes in version 2.0.5 (2007-05-05)
 -------------------------------------
 
 Package org.springframework.aop
@@ -35,6 +35,9 @@ Package org.springframework.core
 * added "createConcurrentMap" method to CollectionFactory, creating a JDK 1.5+ or backport-concurrent ConcurrentHashMap
 * Constants class always uses upper-case transformation according to English notation
 * added "toCodeForSuffix" operation to Constants class
+
+Package org.springframework.instrument
+* ShadowingClassLoader explicitly defines a package for all classes that it loads, for "Class.getPackage()" to work
 
 Package org.springframework.jdbc
 * fixed GeneratedKeyHolder to avoid NPE in exception message in case of a null key returned by the JDBC driver
@@ -103,9 +106,11 @@ Package org.springframework.web
 * JSP SelectTag accepts null values for its attributes (doesn't strictly enforce non-null values anymore)
 * JSP OptionTag properly detects a Java 5 Enum as selected even in case of an overridden "toString()" implementation
 * FreeMarkerView exposes a ServletConfig object to FreeMarker, for use with ServletConfig-accessing JSP tags
+* fixed AbstractXsltView to correctly apply a specified custom "contentType", even in case of a stylesheet specified
 * revised XsltView for Servlet 2.3 compatibility, avoiding the "HttpServletResponse.setCharacterEncoding" method
 * revised XsltView to respect a specified "contentType" property, using it if no XSLT media type has been specified
 * fixed XsltViewResolver to properly apply the "cacheTemplates" flag to created XsltView instances
+* revised AbstractJasperReportsView to accept a model without explicit data source as well (for Hibernate/JPA queries)
 * PortletUtils' "getParametersStartingWith" method checks for an empty value array (WebSphere Portal 6.0 peculiarity)
 
 
