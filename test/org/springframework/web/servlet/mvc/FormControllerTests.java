@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,9 @@
 package org.springframework.web.servlet.mvc;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -468,6 +470,18 @@ public class FormControllerTests extends TestCase {
 		assertTrue("No errors", errors.getErrorCount() == 0);
 	}
 
+	public void testFormBindingOfNestedBooleans() throws Exception {
+		BooleanBindingFormController controller = new BooleanBindingFormController();
+		controller.setCommandClass(ListForm.class);
+		MockHttpServletRequest req = new MockHttpServletRequest("POST", "/myurl");
+		MockHttpServletResponse res = new MockHttpServletResponse();
+		req.addParameter("oks[0].ok", "true");
+		ModelAndView mav = controller.handleRequest(req, res);
+		ListForm form = (ListForm) mav.getModelMap().get("command");
+		Boolean ok = ((Ok) form.getOks().get(0)).getOk();
+		assertNotNull(ok);
+	}
+
 	public void testFormControllerInWebApplicationContext() {
 		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
 		ctx.setServletContext(new MockServletContext());
@@ -575,6 +589,57 @@ public class FormControllerTests extends TestCase {
 
 		public void invokeWebSpecificStuff() {
 			getTempDir();
+		}
+	}
+
+
+	public static class BooleanBindingFormController extends AbstractFormController {
+
+		protected ModelAndView processFormSubmission
+				(HttpServletRequest req, HttpServletResponse resp, Object command, BindException errors) throws Exception {
+			ModelAndView mav = new ModelAndView();
+			mav.addObject("command", command);
+			return mav;
+		}
+
+		protected ModelAndView showForm(
+				HttpServletRequest req, HttpServletResponse resp, BindException err) throws Exception {
+			return null;
+		}
+	}
+
+
+	public static class Ok {
+
+		private Boolean ok;
+
+		public Boolean getOk () {
+			return ok;
+		}
+
+		public void setOk(Boolean ok) {
+			this.ok = ok;
+		}
+	}
+
+
+	public static class ListForm {
+
+		private List oks = new ArrayList();
+
+		public ListForm () {
+			for (int index = 0; index < 5; index++) {
+				Ok ok = new Ok();
+				oks.add(ok);
+			}
+		}
+
+		public List getOks() {
+			return oks;
+		}
+
+		public void setOks(List oks) {
+			this.oks = oks;
 		}
 	}
 
