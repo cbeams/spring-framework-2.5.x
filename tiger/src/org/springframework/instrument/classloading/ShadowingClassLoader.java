@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -39,10 +38,10 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Rod Johnson
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 2.0
  * @see #addTransformer
  * @see #isClassNameExcludedFromShadowing(String)
- * @see #getOptionalExcludedPackages()
  */
 public class ShadowingClassLoader extends ClassLoader {
 
@@ -50,9 +49,6 @@ public class ShadowingClassLoader extends ClassLoader {
 	public static final String[] DEFAULT_EXCLUDED_PACKAGES = new String[] {"java.", "javax.", "sun.", "com.sun.",
 			"org.w3c.", "org.xml.", "org.dom4j.", "org.aspectj.", "org.apache.xerces.", "org.apache.commons.logging."};
 
-
-	/** Optional excluded packages */
-	public final List<String> optionalExcludedPackages = new ArrayList<String>();
 
 	private final ClassLoader enclosingClassLoader;
 
@@ -69,6 +65,7 @@ public class ShadowingClassLoader extends ClassLoader {
 		Assert.notNull(enclosingClassLoader, "Enclosing ClassLoader must not be null");
 		this.enclosingClassLoader = enclosingClassLoader;
 	}
+
 
 	/**
 	 * Add the given ClassFileTransformer to the list of transformers that this
@@ -107,6 +104,7 @@ public class ShadowingClassLoader extends ClassLoader {
 	/**
 	 * Determine whether the given class should be excluded from shadowing.
 	 * @param className the name of the class
+	 * @return whether the specified class should be shadowed
 	 */
 	private boolean shouldShadow(String className) {
 		return (!className.equals(getClass().getName()) && !className.endsWith("ShadowingClassLoader")
@@ -116,16 +114,11 @@ public class ShadowingClassLoader extends ClassLoader {
 	/**
 	 * Determine whether the given class is defined in an excluded package.
 	 * @param className the name of the class
+	 * @return whether the specified package is excluded
 	 */
 	private boolean isExcludedPackage(String className) {
 		for (int i = 0; i < DEFAULT_EXCLUDED_PACKAGES.length; i++) {
 			if (className.startsWith(DEFAULT_EXCLUDED_PACKAGES[i])) {
-				return true;
-			}
-		}
-		// optional exclude packages
-		for (String pkg : this.optionalExcludedPackages) {
-			if (className.startsWith(pkg)) {
 				return true;
 			}
 		}
@@ -136,10 +129,12 @@ public class ShadowingClassLoader extends ClassLoader {
 	 * Subclasses can override this method to specify whether or not a
 	 * particular class should be excluded from shadowing.
 	 * @param className the class name to test
+	 * @return whether the specified class is excluded
 	 */
 	protected boolean isClassNameExcludedFromShadowing(String className) {
 		return false;
 	}
+
 
 	private Class doLoadClass(String name) throws ClassNotFoundException {
 		String internalName = StringUtils.replace(name, ".", "/") + ".class";
@@ -151,6 +146,11 @@ public class ShadowingClassLoader extends ClassLoader {
 			byte[] bytes = FileCopyUtils.copyToByteArray(is);
 			bytes = applyTransformers(name, bytes);
 			Class cls = defineClass(name, bytes, 0, bytes.length);
+			// Additional check for defining the package, if not defined yet.
+			if (cls.getPackage() == null) {
+				String packageName = name.substring(0, name.lastIndexOf('.'));
+				definePackage(packageName, null, null, null, null, null, null, null);
+			}
 			this.classCache.put(name, cls);
 			return cls;
 		}
@@ -173,6 +173,7 @@ public class ShadowingClassLoader extends ClassLoader {
 		}
 	}
 
+
 	public URL getResource(String name) {
 		return this.enclosingClassLoader.getResource(name);
 	}
@@ -183,13 +184,6 @@ public class ShadowingClassLoader extends ClassLoader {
 
 	public Enumeration<URL> getResources(String name) throws IOException {
 		return this.enclosingClassLoader.getResources(name);
-	}
-
-	/**
-	 * Get the list of optional package names that can be excluded from shadowing.
-	 */
-	public List<String> getOptionalExcludedPackages() {
-		return this.optionalExcludedPackages;
 	}
 
 }
