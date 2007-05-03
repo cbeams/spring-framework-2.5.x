@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,8 +117,9 @@ import org.springframework.web.portlet.util.PortletUtils;
  * to the render phase of the second controller, such as the parameter indicating a form
  * submit ocurred in an <code>AbstractFormController</code>.
  *
+ * <p>Thanks to Rainer Schmitz and Nick Lothian for their suggestions!
+ *
  * @author John A. Lewis
- * @author Rainer Schmitz
  * @author Juergen Hoeller
  * @since 2.0
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,29 +25,31 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
- * <p>Implementation of the HandlerMapping interface to map from
- * a request parameter to request handler beans.</p>
+ * Implementation of the HandlerMapping interface to map from a request
+ * parameter to request handler beans.
  *
  * <p>The default name of the parameter is "action", but can be changed using
- * {@link #setParameterName setParameterName()}.</p>
+ * {@link #setParameterName setParameterName()}.
  *
- * <p>The bean configuration for this mapping will look somthing like this:</p>
- * <pre>
- * 	&lt;bean id="parameterHandlerMapping" class="org.springframework.web.portlet.handler.ParameterHandlerMapping"&gt;
- * 		&lt;property name="parameterMap"&gt;
- * 			&lt;map&gt;
- * 				&lt;entry key="add"&gt;&lt;ref bean="addItemHandler"/&gt;&lt;/entry&gt;
- * 				&lt;entry key="edit"&gt;&lt;ref bean="editItemHandler"/&gt;&lt;/entry&gt;
- * 				&lt;entry key="delete"&gt;&lt;ref bean="deleteItemHandler"/&gt;&lt;/entry&gt;
- * 			&lt;/map&gt;
- * 		&lt;/property&gt;
- * 	&lt;/bean&gt;
- * </pre>
+ * <p>The bean configuration for this mapping will look somthing like this:
  *
- * @author Rainer Schmitz
+ * <pre class="code">
+ * &lt;bean id="parameterHandlerMapping" class="org.springframework.web.portlet.handler.ParameterHandlerMapping"&gt;
+ *   &lt;property name="parameterMap"&gt;
+ *     &lt;map&gt;
+ * 	     &lt;entry key="add"&gt;&lt;ref bean="addItemHandler"/&gt;&lt;/entry&gt;
+ *       &lt;entry key="edit"&gt;&lt;ref bean="editItemHandler"/&gt;&lt;/entry&gt;
+ *       &lt;entry key="delete"&gt;&lt;ref bean="deleteItemHandler"/&gt;&lt;/entry&gt;
+ *     &lt;/map&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
+ *
+ * Thanks to Rainer Schmitz for suggesting this mapping strategy!
+ *
  * @author John A. Lewis
- * @see ParameterMappingInterceptor
+ * @author Juergen Hoeller
  * @since 2.0
+ * @see ParameterMappingInterceptor
  */
 public class ParameterHandlerMapping extends AbstractMapBasedHandlerMapping {
 

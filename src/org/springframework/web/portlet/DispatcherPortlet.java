@@ -113,11 +113,11 @@ import org.springframework.web.servlet.ViewResolver;
  * as loaded by {@link org.springframework.web.context.ContextLoaderListener},
  * if any, will be shared.
  *
+ * <p>Thanks to Rainer Schmitz and Nick Lothian for their suggestions!
+ *
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
  * @author Juergen Hoeller
- * @author Nick Lothian
- * @author Rainer Schmitz
  * @since 2.0
  * @see org.springframework.web.portlet.mvc.Controller
  * @see org.springframework.web.servlet.ViewRendererServlet

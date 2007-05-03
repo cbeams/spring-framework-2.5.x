@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,53 +31,53 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * <p>Implementation of the HandlerMapping interface to map from
+ * Implementation of the HandlerMapping interface to map from
  * the current PortletMode and a request parameter to request handler beans.
  * The mapping consists of two levels: first the PortletMode and then the
  * parameter value.  In order to be mapped, both elements must
- * match the mapping definition.</p>
+ * match the mapping definition.
  *
  * <p>This is a combination of the methods used in {@link PortletModeHandlerMapping PortletModeHandlerMapping}
  * and {@link ParameterHandlerMapping ParameterHandlerMapping}.  Unlike
  * those two classes, this mapping cannot be initialized with properties since it
- * requires a two-level map.</p>
+ * requires a two-level map.
  *
  * <p>The default name of the parameter is "action", but can be changed using
- * {@link #setParameterName setParameterName()}.</p>
+ * {@link #setParameterName setParameterName()}.
  *
  * <p>By default, the same parameter value may not be used in two different portlet
  * modes.  This is so that if the portal itself changes the portlet mode, the request
  * will no longer be valid in the mapping.  This behavior can be changed with
- * {@link #setAllowDuplicateParameters setAllowDupParameters()}.</p>
+ * {@link #setAllowDuplicateParameters setAllowDupParameters()}.
  *
- * <p>The bean configuration for this mapping will look somthing like this:</p>
- * <pre>
- * 	&lt;bean id="portletModeParameterHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeParameterHandlerMapping"&gt;
- * 		&lt;property name="portletModeParameterMap"&gt;
- * 			&lt;map&gt;
- * 				&lt;entry key="view"&gt; &lt;!-- portlet mode: view --&gt;
- * 					&lt;map&gt;
- * 						&lt;entry key="add"&gt;&lt;ref bean="addItemHandler"/&gt;&lt;/entry&gt;
- * 						&lt;entry key="edit"&gt;&lt;ref bean="editItemHandler"/&gt;&lt;/entry&gt;
- * 						&lt;entry key="delete"&gt;&lt;ref bean="deleteItemHandler"/&gt;&lt;/entry&gt;
- * 					&lt;/map&gt;
- * 				&lt;/entry&gt;
- * 				&lt;entry key="edit"&gt; &lt;!-- portlet mode: edit --&gt;
- * 					&lt;map&gt;
- * 						&lt;entry key="prefs"&gt;&lt;ref bean="preferencesHandler"/&gt;&lt;/entry&gt;
- * 						&lt;entry key="resetPrefs"&gt;&lt;ref bean="resetPreferencesHandler"/&gt;&lt;/entry&gt;
- * 					&lt;/map&gt;
- * 				&lt;/entry&gt;
- * 			&lt;/map&gt;
- * 		&lt;/property&gt;
- * 	&lt;/bean&gt;
- * </pre>
+ * <p>The bean configuration for this mapping will look somthing like this:
+ *
+ * <pre class="code">
+ * &lt;bean id="portletModeParameterHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeParameterHandlerMapping"&gt;
+ *   &lt;property name="portletModeParameterMap"&gt;
+ *     &lt;map&gt;
+ *       &lt;entry key="view"&gt; &lt;!-- portlet mode: view --&gt;
+ *         &lt;map&gt;
+ *           &lt;entry key="add"&gt;&lt;ref bean="addItemHandler"/&gt;&lt;/entry&gt;
+ *           &lt;entry key="edit"&gt;&lt;ref bean="editItemHandler"/&gt;&lt;/entry&gt;
+ *           &lt;entry key="delete"&gt;&lt;ref bean="deleteItemHandler"/&gt;&lt;/entry&gt;
+ *         &lt;/map&gt;
+ *       &lt;/entry&gt;
+ *       &lt;entry key="edit"&gt; &lt;!-- portlet mode: edit --&gt;
+ *         &lt;map&gt;
+ *           &lt;entry key="prefs"&gt;&lt;ref bean="preferencesHandler"/&gt;&lt;/entry&gt;
+ *           &lt;entry key="resetPrefs"&gt;&lt;ref bean="resetPreferencesHandler"/&gt;&lt;/entry&gt;
+ *         &lt;/map&gt;
+ *       &lt;/entry&gt;
+ *     &lt;/map&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
  * <p>This mapping can be chained ahead of a {@link PortletModeHandlerMapping PortletModeHandlerMapping},
  * which can then provide defaults for each mode and an overall default as well.
  *
- * @author Rainer Schmitz
- * @author Yujin Kim
+ * <p>Thanks to Rainer Schmitz and Yujin Kim for suggesting this mapping strategy!
+ *
  * @author John A. Lewis
  * @author Juergen Hoeller
  * @since 2.0

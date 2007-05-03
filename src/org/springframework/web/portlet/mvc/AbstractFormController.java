@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * {@link BaseCommandController BaseCommandController}.</p>
  *
  * This controller is different from it's servlet counterpart in that it must take
+
  * into account the two phases of a portlet request: the action phase and the render
  * phase.  See the JSR-168 spec for more details on these two phases.
  * Be especially aware that the action phase is called only once, but that the
@@ -234,11 +235,12 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * </table>
  * </p>
  *
+ * <p>Thanks to Rainer Schmitz and Nick Lothian for their suggestions!
+ *
  * @author John A. Lewis
  * @author Juergen Hoeller
  * @author Alef Arendsen
  * @author Rob Harrop
- * @author Rainer Schmitz
  * @since 2.0
  * @see #showForm(RenderRequest, RenderResponse, BindException)
  * @see SimpleFormController

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,11 +126,11 @@ import org.springframework.web.portlet.ModelAndView;
  * If there are render parameters you need in <code>onSubmitRender</code>,
  * then you need to pass those forward from <code>onSubmitAction</code>.
  *
+ * <p>Thanks to Rainer Schmitz and Nick Lothian for their suggestions!
+ *
  * @author John A. Lewis
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @author Nick Lothian
- * @author Rainer Schmitz
  * @since 2.0
  */
 public class SimpleFormController extends AbstractFormController {
