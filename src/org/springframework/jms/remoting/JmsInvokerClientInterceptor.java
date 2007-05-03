@@ -53,6 +53,9 @@ import org.springframework.util.Assert;
  * <p>To be configured with a {@link javax.jms.QueueConnectionFactory} and a
  * target queue (either as {@link javax.jms.Queue} reference or as queue name).
  *
+ * <p>Thanks to James Strachan for the original prototype that this
+ * JMS invoker mechanism was inspired by!
+ *
  * @author Juergen Hoeller
  * @author James Strachan
  * @since 2.0
