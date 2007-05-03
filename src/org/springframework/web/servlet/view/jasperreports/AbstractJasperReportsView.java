@@ -576,11 +576,16 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Creates a populated <code>JasperPrint</code> instance from the configured
-	 * <code>JasperReport</code> instance. By default, will use any <code>JRDataSource</code>
-	 * instance (or wrappable <code>Object</code>) that can be located using
-	 * <code>getReportData(Map)</code>. If no <code>JRDataSource</code> can be found, will use a
-	 * <code>Connection</code> obtained from the configured <code>javax.sql.DataSource</code>.
+	 * Create a populated <code>JasperPrint</code> instance from the configured
+	 * <code>JasperReport</code> instance.
+	 * <p>By default, thois method will use any <code>JRDataSource</code> instance
+	 * (or wrappable <code>Object</code>) that can be located using {@link #getReportData}.
+	 * If no <code>JRDataSource</code> can be found, this method will use a JDBC
+	 * <code>Connection</code> obtained from the configured <code>javax.sql.DataSource</code>
+	 * (or a DataSource attribute in the model). If no JDBC DataSource can be found
+	 * either, the JasperReports engine will be invoked with plain model Map,
+	 * assuming that the model contains parameters that identify the source
+	 * for report data (e.g. Hibernate or JPA queries).
 	 * @param model the model for this request
 	 * @throws IllegalArgumentException if no <code>JRDataSource</code> can be found
 	 * and no <code>javax.sql.DataSource</code> is supplied
@@ -607,28 +612,31 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		else {
 			if (this.jdbcDataSource == null) {
 				this.jdbcDataSource = (DataSource) CollectionUtils.findValueOfType(model.values(), DataSource.class);
-				if (this.jdbcDataSource == null) {
-					throw new IllegalArgumentException(
-							"No report data source found in model, " +
-							"and no [javax.sql.DataSource] specified in configuration or in model");
+			}
+
+			if (this.jdbcDataSource != null) {
+				// Use the JDBC DataSource.
+				if (logger.isDebugEnabled()) {
+					logger.debug("Filling report with JDBC DataSource [" + this.jdbcDataSource + "].");
+				}
+				Connection con = this.jdbcDataSource.getConnection();
+				try {
+					return JasperFillManager.fillReport(this.report, model, con);
+				}
+				finally {
+					try {
+						con.close();
+					}
+					catch (SQLException ex) {
+						logger.debug("Could not close JDBC Connection", ex);
+					}
 				}
 			}
 
-			// Use the JDBC DataSource.
-			if (logger.isDebugEnabled()) {
-				logger.debug("Filling report with JDBC DataSource [" + this.jdbcDataSource + "].");
-			}
-			Connection con = this.jdbcDataSource.getConnection();
-			try {
-				return JasperFillManager.fillReport(this.report, model, con);
-			}
-			finally {
-				try {
-					con.close();
-				}
-				catch (SQLException ex) {
-					logger.warn("Could not close JDBC Connection", ex);
-				}
+			else {
+				// Assume that the model contains parameters that identify
+				// the source for report data (e.g. Hibernate or JPA queries).
+				return JasperFillManager.fillReport(this.report, model);
 			}
 		}
 	}
@@ -711,12 +719,11 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Return the value types that can be converted to a <code>JRDataSource</code>,
 	 * in prioritized order. Should only return types that the
-	 * <code>convertReportData</code> method is actually able to convert.
+	 * {@link #convertReportData} method is actually able to convert.
 	 * <p>Default value types are: <code>JRDataSource</code>,
 	 * <code>JRDataSourceProvider</code> <code>java.util.Collection</code>
 	 * and <code>Object</code> array.
 	 * @return the value types in prioritized order
-	 * @see #convertReportData
 	 */
 	protected Class[] getReportDataTypes() {
 		return new Class[] {JRDataSource.class, JRDataSourceProvider.class, Collection.class, Object[].class};

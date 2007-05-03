@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import net.sf.jasperreports.engine.JRDataSource;
@@ -106,14 +107,9 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 	public void testWithoutDatasource() throws Exception {
 		Map model = getModel();
 		model.remove("dataSource");
-		try {
-			AbstractJasperReportsView view = getView(COMPILED_REPORT);
-			view.render(model, request, response);
-			fail("No data source should result in NoDataSourceException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		AbstractJasperReportsView view = getView(COMPILED_REPORT);
+		view.render(model, request, response);
+		assertTrue(response.getStatus() == HttpServletResponse.SC_OK);
 	}
 
 	public void testWithCollection() throws Exception {
@@ -133,7 +129,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		try {
 			AbstractJasperReportsView view = getView(COMPILED_REPORT);
 			view.render(model, request, response);
-			fail("No data source should result in NoDataSourceException");
+			fail("No unique data source should result in IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {
 			// expected
@@ -375,7 +371,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 			view.render(getModel(), request, response);
 		}
 		catch (SQLException ex) {
-			fail("javax.sql.DataSource was used when JRDataSource should have overriden it");
+			fail("javax.sql.DataSource was used when JRDataSource should have overridden it");
 		}
 	}
 
