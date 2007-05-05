@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.web.servlet.HandlerAdapter;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 04.07.2003
  */
 public class BeanFactoryUtilsTests extends TestCase {
@@ -143,7 +144,6 @@ public class BeanFactoryUtilsTests extends TestCase {
 	public void testFindsBeansOfTypeWithDefaultFactory() {
 		Object test3 = this.listableBeanFactory.getBean("test3");
 		Object test = this.listableBeanFactory.getBean("test");
-		Object testFactory1 = this.listableBeanFactory.getBean("testFactory1");
 
 		TestBean t1 = new TestBean();
 		TestBean t2 = new TestBean();
@@ -168,6 +168,7 @@ public class BeanFactoryUtilsTests extends TestCase {
 		// because they are FactoryBean definitions that haven't been initialized yet.
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, false, true);
+		Object testFactory1 = this.listableBeanFactory.getBean("testFactory1");
 		assertEquals(5, beans.size());
 		assertEquals(test, beans.get("test"));
 		assertEquals(testFactory1, beans.get("testFactory1"));
@@ -204,29 +205,34 @@ public class BeanFactoryUtilsTests extends TestCase {
 	public void testHierarchicalResolutionWithOverride() throws Exception {
 		Object test3 = this.listableBeanFactory.getBean("test3");
 		Object test = this.listableBeanFactory.getBean("test");
-		Object testFactory1 = this.listableBeanFactory.getBean("testFactory1");
 
 		Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, false);
 		assertEquals(2, beans.size());
 		assertEquals(test3, beans.get("test3"));
 		assertEquals(test, beans.get("test"));
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, false, false);
 		assertEquals(1, beans.size());
 		assertEquals(test, beans.get("test"));
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, false, true);
+		Object testFactory1 = this.listableBeanFactory.getBean("testFactory1");
 		assertEquals(2, beans.size());
 		assertEquals(test, beans.get("test"));
 		assertEquals(testFactory1, beans.get("testFactory1"));
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, true);
 		assertEquals(4, beans.size());
 		assertEquals(test3, beans.get("test3"));
 		assertEquals(test, beans.get("test"));
 		assertEquals(testFactory1, beans.get("testFactory1"));
 		assertTrue(beans.get("testFactory2") instanceof TestBean);
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, DummyFactory.class, true, true);
 		assertEquals(2, beans.size());
 		assertEquals(this.listableBeanFactory.getBean("&testFactory1"), beans.get("&testFactory1"));
 		assertEquals(this.listableBeanFactory.getBean("&testFactory2"), beans.get("&testFactory2"));
+
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, FactoryBean.class, true, true);
 		assertEquals(2, beans.size());
 		assertEquals(this.listableBeanFactory.getBean("&testFactory1"), beans.get("&testFactory1"));

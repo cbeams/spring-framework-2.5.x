@@ -112,6 +112,73 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertTrue("prototype was instantiated", DummyFactory.wasPrototypeCreated());
 	}
 
+	public void testNonInitializedFactoryBeanIgnoredByNonEagerTypeMatching() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		Properties p = new Properties();
+		p.setProperty("x1.(class)", DummyFactory.class.getName());
+		// Reset static state
+		DummyFactory.reset();
+		p.setProperty("x1.singleton", "false");
+		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
+		assertEquals(TestBean.class, lbf.getType("x1"));
+
+		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
+		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
+		assertEquals(0, beanNames.length);
+		assertFalse(lbf.containsSingleton("x1"));
+		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
+	}
+
+	public void testInitializedFactoryBeanFoundByNonEagerTypeMatching() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		Properties p = new Properties();
+		p.setProperty("x1.(class)", DummyFactory.class.getName());
+		// Reset static state
+		DummyFactory.reset();
+		p.setProperty("x1.singleton", "false");
+		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
+		assertEquals(TestBean.class, lbf.getType("x1"));
+		lbf.preInstantiateSingletons();
+
+		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
+		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("x1", beanNames[0]);
+		assertTrue(lbf.containsSingleton("x1"));
+		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
+	}
+
+	public void testStaticFactoryMethodFoundByNonEagerTypeMatching() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBeanFactory.class);
+		rbd.setFactoryMethodName("createTestBean");
+		lbf.registerBeanDefinition("x1", rbd);
+
+		TestBeanFactory.initialized = false;
+		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("x1", beanNames[0]);
+		assertFalse(lbf.containsSingleton("x1"));
+		assertFalse(TestBeanFactory.initialized);
+	}
+
+	public void testNonStaticFactoryMethodFoundByNonEagerTypeMatching() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition factoryBd = new RootBeanDefinition(TestBeanFactory.class);
+		lbf.registerBeanDefinition("factory", factoryBd);
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBeanFactory.class);
+		rbd.setFactoryBeanName("factory");
+		rbd.setFactoryMethodName("createTestBeanNonStatic");
+		lbf.registerBeanDefinition("x1", rbd);
+
+		TestBeanFactory.initialized = false;
+		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("x1", beanNames[0]);
+		assertFalse(lbf.containsSingleton("x1"));
+		assertFalse(TestBeanFactory.initialized);
+	}
+
 	public void testEmpty() {
 		ListableBeanFactory lbf = new DefaultListableBeanFactory();
 		assertTrue("No beans defined --> array != null", lbf.getBeanDefinitionNames() != null);
@@ -1485,6 +1552,24 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 		public boolean isSingleton() {
 			return false;
+		}
+	}
+
+
+	public static class TestBeanFactory {
+
+		public static boolean initialized = false;
+
+		public TestBeanFactory() {
+			initialized = true;
+		}
+
+		public static TestBean createTestBean() {
+			return new TestBean();
+		}
+
+		public TestBean createTestBeanNonStatic() {
+			return new TestBean();
 		}
 	}
 

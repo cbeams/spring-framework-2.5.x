@@ -75,7 +75,7 @@ import org.springframework.util.StopWatch;
  */
 public class XmlBeanFactoryTests extends TestCase {
 
-	/**
+	/*
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2368
 	 */
 	public void testCollectionsReferredToAsRefLocals() throws Exception {
@@ -351,17 +351,19 @@ public class XmlBeanFactoryTests extends TestCase {
 
 	public void testDependenciesMaterializeThis() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("dependenciesMaterializeThis.xml", getClass()));
+
+		assertEquals(2, xbf.getBeansOfType(DummyBo.class, true, false).size());
+		assertEquals(3, xbf.getBeansOfType(DummyBo.class, true, true).size());
+		assertEquals(3, xbf.getBeansOfType(DummyBo.class, true, false).size());
+		assertEquals(3, xbf.getBeansOfType(DummyBo.class).size());
+		assertEquals(2, xbf.getBeansOfType(DummyBoImpl.class, true, true).size());
+		assertEquals(1, xbf.getBeansOfType(DummyBoImpl.class, false, true).size());
+		assertEquals(2, xbf.getBeansOfType(DummyBoImpl.class).size());
+
 		DummyBoImpl bos = (DummyBoImpl) xbf.getBean("boSingleton");
 		DummyBoImpl bop = (DummyBoImpl) xbf.getBean("boPrototype");
 		assertNotSame(bos, bop);
 		assertTrue(bos.dao == bop.dao);
-
-		assertEquals(2, xbf.getBeansOfType(DummyBoImpl.class, true, true).size());
-		assertEquals(1, xbf.getBeansOfType(DummyBoImpl.class, false, true).size());
-		assertEquals(2, xbf.getBeansOfType(DummyBoImpl.class).size());
-		assertEquals(3, xbf.getBeansOfType(DummyBo.class, true, true).size());
-		assertEquals(2, xbf.getBeansOfType(DummyBo.class, true, false).size());
-		assertEquals(3, xbf.getBeansOfType(DummyBo.class).size());
 	}
 
 	public void testChildOverridesParentBean() throws Exception {

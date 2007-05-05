@@ -72,7 +72,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		});
 		this.factory.addBeanPostProcessor(new LifecycleBean.PostProcessor());
 		this.factory.addBeanPostProcessor(new ProtectedLifecycleBean.PostProcessor());
-		this.factory.preInstantiateSingletons();
+		//this.factory.preInstantiateSingletons();
 	}
 
 	protected BeanFactory getBeanFactory() {

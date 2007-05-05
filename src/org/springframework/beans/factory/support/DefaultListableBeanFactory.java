@@ -170,21 +170,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					// In case of FactoryBean, match object created by FactoryBean.
 					try {
 						boolean isFactoryBean = isBeanClassMatch(beanName, mbd, FactoryBean.class);
-						if (isFactoryBean || mbd.getFactoryBeanName() != null) {
-							if (allowEagerInit && (includePrototypes || isSingleton(beanName)) && isTypeMatch(beanName, type)) {
-								result.add(beanName);
-								// Match found for this bean: do not match FactoryBean itself anymore.
-								continue;
-							}
-							// We're done for anything but a full FactoryBean.
-							if (!isFactoryBean) {
-								continue;
-							}
-							// In case of FactoryBean, try to match FactoryBean itself next.
+						boolean matchFound =
+								(allowEagerInit || !requiresEagerInitForType(beanName, isFactoryBean, mbd.getFactoryBeanName())) &&
+								(includePrototypes || isSingleton(beanName)) && isTypeMatch(beanName, type);
+						if (!matchFound && isFactoryBean) {
+							// In case of FactoryBean, try to match FactoryBean instance itself next.
 							beanName = FACTORY_BEAN_PREFIX + beanName;
+							matchFound = (includePrototypes || mbd.isSingleton()) && isTypeMatch(beanName, type);
 						}
-						// Match raw bean instance (might be raw FactoryBean).
-						if ((includePrototypes || mbd.isSingleton()) && isTypeMatch(beanName, type)) {
+						if (matchFound) {
 							result.add(beanName);
 						}
 					}
@@ -222,6 +216,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		return StringUtils.toStringArray(result);
+	}
+
+	/**
+	 * Check whether the specified bean would need to be eagerly initialized
+	 * in order to determine its type.
+	 * @param beanName the name of the bean
+	 * @param isFactoryBean whether the bean itself is a FactoryBean
+	 * @param factoryBeanName a factory-bean reference that the bean definition
+	 * defines a factory method for
+	 * @return whether eager initialization is necessary
+	 */
+	private boolean requiresEagerInitForType(String beanName, boolean isFactoryBean, String factoryBeanName) {
+		return (isFactoryBean && !containsSingleton(beanName)) ||
+				(factoryBeanName != null && isFactoryBean(factoryBeanName) && !containsSingleton(factoryBeanName));
 	}
 
 	public Map getBeansOfType(Class type) throws BeansException {
