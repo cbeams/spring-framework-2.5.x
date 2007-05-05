@@ -20,12 +20,13 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageProducer;
-import javax.jms.ObjectMessage;
 import javax.jms.Session;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 import org.springframework.remoting.support.RemoteInvocationResult;
@@ -53,10 +54,28 @@ import org.springframework.remoting.support.RemoteInvocationResult;
 public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 		implements SessionAwareMessageListener, InitializingBean {
 
+	private MessageConverter messageConverter = new SimpleMessageConverter();
+
 	private boolean ignoreInvalidRequests = true;
 
 	private Object proxy;
 
+
+	/**
+	 * Specify the MessageConverter to use for turning request messages into
+	 * {@link org.springframework.remoting.support.RemoteInvocation} objects,
+	 * as well as {@link org.springframework.remoting.support.RemoteInvocationResult}
+	 * objects into response messages.
+	 * <p>Default is a {@link org.springframework.jms.support.converter.SimpleMessageConverter},
+	 * using a standard JMS {@link javax.jms.ObjectMessage} for each invocation /
+	 * invocation result object.
+	 * <p>Custom implementations may generally adapt Serializables into
+	 * special kinds of messages, or might be specifically tailored for
+	 * translating RemoteInvocation(Result)s into specific kinds of messages.
+	 */
+	public void setMessageConverter(MessageConverter messageConverter) {
+		this.messageConverter = (messageConverter != null ? messageConverter : new SimpleMessageConverter());
+	}
 
 	/**
 	 * Set whether invalidly formatted messages should be discarded.
@@ -91,12 +110,9 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * @throws javax.jms.JMSException in case of message access failure
 	 */
 	protected RemoteInvocation readRemoteInvocation(Message requestMessage) throws JMSException {
-		if (requestMessage instanceof ObjectMessage) {
-			ObjectMessage objectMessage = (ObjectMessage) requestMessage;
-			Object body = objectMessage.getObject();
-			if (body instanceof RemoteInvocation) {
-				return (RemoteInvocation) body;
-			}
+		Object content = this.messageConverter.fromMessage(requestMessage);
+		if (content instanceof RemoteInvocation) {
+			return (RemoteInvocation) content;
 		}
 		return onInvalidRequest(requestMessage);
 	}
@@ -135,13 +151,8 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	protected Message createResponseMessage(Message requestMessage, Session session, RemoteInvocationResult result)
 			throws JMSException {
 
-		// An alternative strategy could be to use XStream and text messages.
-		// Though some JMS providers, like ActiveMQ, might do this kind of thing for us under the covers.
-		ObjectMessage response = session.createObjectMessage(result);
-
-		// Let's preserve the correlation ID.
+		Message response = this.messageConverter.toMessage(result, session);
 		response.setJMSCorrelationID(requestMessage.getJMSCorrelationID());
-
 		return response;
 	}
 

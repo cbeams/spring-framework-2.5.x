@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,18 @@ import javax.jms.Message;
 import javax.jms.Session;
 
 /**
- * Strategy interface that specifies a MessageConverter
- * between Java objects and JMS messages.
+ * Strategy interface that specifies a converter between Java objects and JMS messages.
+ *
+ * <p>Check out {@link SimpleMessageConverter} for a default implementation,
+ * converting between the 'standard' message payloads and JMS Message types.
  *
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @since 1.1
+ * @see org.springframework.jms.core.JmsTemplate#setMessageConverter
+ * @see org.springframework.jms.listener.adapter.MessageListenerAdapter#setMessageConverter
+ * @see org.springframework.jms.remoting.JmsInvokerClientInterceptor#setMessageConverter
+ * @see org.springframework.jms.remoting.JmsInvokerServiceExporter#setMessageConverter
  */
 public interface MessageConverter {
 
@@ -37,7 +43,7 @@ public interface MessageConverter {
 	 * @param session the Session to use for creating a JMS Message
 	 * @return the JMS Message
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
-	 * @throws org.springframework.jms.support.converter.MessageConversionException in case of conversion failure
+	 * @throws MessageConversionException in case of conversion failure
 	 */
 	Message toMessage(Object object, Session session) throws JMSException, MessageConversionException;
 
@@ -45,7 +51,8 @@ public interface MessageConverter {
 	 * Convert from a JMS Message to a Java object.
 	 * @param message the message to convert
 	 * @return the converted Java object
-	 * @throws org.springframework.jms.support.converter.MessageConversionException in case of conversion failure
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 * @throws MessageConversionException in case of conversion failure
 	 */
 	Object fromMessage(Message message) throws JMSException, MessageConversionException;
 
