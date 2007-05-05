@@ -109,7 +109,65 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
 		lbf.getBean("x1");
 		assertEquals(TestBean.class, lbf.getType("x1"));
+		assertTrue(lbf.containsBean("x1"));
+		assertTrue(lbf.containsBean("&x1"));
 		assertTrue("prototype was instantiated", DummyFactory.wasPrototypeCreated());
+	}
+
+	public void testPrototypeFactoryBeanIgnoredByNonEagerTypeMatching() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		Properties p = new Properties();
+		p.setProperty("x1.(class)", DummyFactory.class.getName());
+		// Reset static state
+		DummyFactory.reset();
+		p.setProperty("x1.(singleton)", "false");
+		p.setProperty("x1.singleton", "false");
+		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
+
+		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
+		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
+		assertEquals(0, beanNames.length);
+		assertFalse(lbf.containsSingleton("x1"));
+		assertTrue(lbf.containsBean("x1"));
+		assertTrue(lbf.containsBean("&x1"));
+		assertFalse(lbf.isSingleton("x1"));
+		assertFalse(lbf.isSingleton("&x1"));
+		assertTrue(lbf.isPrototype("x1"));
+		assertTrue(lbf.isPrototype("&x1"));
+		assertTrue(lbf.isTypeMatch("x1", TestBean.class));
+		assertFalse(lbf.isTypeMatch("&x1", TestBean.class));
+		assertTrue(lbf.isTypeMatch("&x1", DummyFactory.class));
+		assertEquals(TestBean.class, lbf.getType("x1"));
+		assertEquals(DummyFactory.class, lbf.getType("&x1"));
+		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
+	}
+
+	public void testPrototypeSingletonFactoryBeanIgnoredByNonEagerTypeMatching() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		Properties p = new Properties();
+		p.setProperty("x1.(class)", DummyFactory.class.getName());
+		// Reset static state
+		DummyFactory.reset();
+		p.setProperty("x1.(singleton)", "false");
+		p.setProperty("x1.singleton", "true");
+		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
+
+		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
+		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
+		assertEquals(0, beanNames.length);
+		assertFalse(lbf.containsSingleton("x1"));
+		assertTrue(lbf.containsBean("x1"));
+		assertTrue(lbf.containsBean("&x1"));
+		assertFalse(lbf.isSingleton("x1"));
+		assertFalse(lbf.isSingleton("&x1"));
+		assertTrue(lbf.isPrototype("x1"));
+		assertTrue(lbf.isPrototype("&x1"));
+		assertTrue(lbf.isTypeMatch("x1", TestBean.class));
+		assertFalse(lbf.isTypeMatch("&x1", TestBean.class));
+		assertTrue(lbf.isTypeMatch("&x1", DummyFactory.class));
+		assertEquals(TestBean.class, lbf.getType("x1"));
+		assertEquals(DummyFactory.class, lbf.getType("&x1"));
+		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
 	}
 
 	public void testNonInitializedFactoryBeanIgnoredByNonEagerTypeMatching() {
@@ -120,12 +178,22 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		DummyFactory.reset();
 		p.setProperty("x1.singleton", "false");
 		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
-		assertEquals(TestBean.class, lbf.getType("x1"));
 
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
 		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
 		assertEquals(0, beanNames.length);
 		assertFalse(lbf.containsSingleton("x1"));
+		assertTrue(lbf.containsBean("x1"));
+		assertTrue(lbf.containsBean("&x1"));
+		assertFalse(lbf.isSingleton("x1"));
+		assertTrue(lbf.isSingleton("&x1"));
+		assertTrue(lbf.isPrototype("x1"));
+		assertFalse(lbf.isPrototype("&x1"));
+		assertTrue(lbf.isTypeMatch("x1", TestBean.class));
+		assertFalse(lbf.isTypeMatch("&x1", TestBean.class));
+		assertTrue(lbf.isTypeMatch("&x1", DummyFactory.class));
+		assertEquals(TestBean.class, lbf.getType("x1"));
+		assertEquals(DummyFactory.class, lbf.getType("&x1"));
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
 	}
 
@@ -137,7 +205,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		DummyFactory.reset();
 		p.setProperty("x1.singleton", "false");
 		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
-		assertEquals(TestBean.class, lbf.getType("x1"));
 		lbf.preInstantiateSingletons();
 
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
@@ -145,7 +212,47 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertEquals(1, beanNames.length);
 		assertEquals("x1", beanNames[0]);
 		assertTrue(lbf.containsSingleton("x1"));
+		assertTrue(lbf.containsBean("x1"));
+		assertTrue(lbf.containsBean("&x1"));
+		assertTrue(lbf.containsLocalBean("x1"));
+		assertTrue(lbf.containsLocalBean("&x1"));
+		assertFalse(lbf.isSingleton("x1"));
+		assertTrue(lbf.isSingleton("&x1"));
+		assertTrue(lbf.isPrototype("x1"));
+		assertFalse(lbf.isPrototype("&x1"));
+		assertTrue(lbf.isTypeMatch("x1", TestBean.class));
+		assertFalse(lbf.isTypeMatch("&x1", TestBean.class));
+		assertTrue(lbf.isTypeMatch("&x1", DummyFactory.class));
+		assertTrue(lbf.isTypeMatch("x1", Object.class));
+		assertTrue(lbf.isTypeMatch("&x1", Object.class));
+		assertEquals(TestBean.class, lbf.getType("x1"));
+		assertEquals(DummyFactory.class, lbf.getType("&x1"));
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
+
+		lbf.registerAlias("x1", "x2");
+		assertTrue(lbf.containsBean("x2"));
+		assertTrue(lbf.containsBean("&x2"));
+		assertTrue(lbf.containsLocalBean("x2"));
+		assertTrue(lbf.containsLocalBean("&x2"));
+		assertFalse(lbf.isSingleton("x2"));
+		assertTrue(lbf.isSingleton("&x2"));
+		assertTrue(lbf.isPrototype("x2"));
+		assertFalse(lbf.isPrototype("&x2"));
+		assertTrue(lbf.isTypeMatch("x2", TestBean.class));
+		assertFalse(lbf.isTypeMatch("&x2", TestBean.class));
+		assertTrue(lbf.isTypeMatch("&x2", DummyFactory.class));
+		assertTrue(lbf.isTypeMatch("x2", Object.class));
+		assertTrue(lbf.isTypeMatch("&x2", Object.class));
+		assertEquals(TestBean.class, lbf.getType("x2"));
+		assertEquals(DummyFactory.class, lbf.getType("&x2"));
+		assertEquals(1, lbf.getAliases("x1").length);
+		assertEquals("x2", lbf.getAliases("x1")[0]);
+		assertEquals(1, lbf.getAliases("&x1").length);
+		assertEquals("&x2", lbf.getAliases("&x1")[0]);
+		assertEquals(1, lbf.getAliases("x2").length);
+		assertEquals("x1", lbf.getAliases("x2")[0]);
+		assertEquals(1, lbf.getAliases("&x2").length);
+		assertEquals("&x1", lbf.getAliases("&x2")[0]);
 	}
 
 	public void testStaticFactoryMethodFoundByNonEagerTypeMatching() {
@@ -159,6 +266,40 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertEquals(1, beanNames.length);
 		assertEquals("x1", beanNames[0]);
 		assertFalse(lbf.containsSingleton("x1"));
+		assertTrue(lbf.containsBean("x1"));
+		assertFalse(lbf.containsBean("&x1"));
+		assertTrue(lbf.isSingleton("x1"));
+		assertFalse(lbf.isSingleton("&x1"));
+		assertFalse(lbf.isPrototype("x1"));
+		assertFalse(lbf.isPrototype("&x1"));
+		assertTrue(lbf.isTypeMatch("x1", TestBean.class));
+		assertFalse(lbf.isTypeMatch("&x1", TestBean.class));
+		assertEquals(TestBean.class, lbf.getType("x1"));
+		assertEquals(null, lbf.getType("&x1"));
+		assertFalse(TestBeanFactory.initialized);
+	}
+
+	public void testStaticPrototypeFactoryMethodFoundByNonEagerTypeMatching() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBeanFactory.class, false);
+		rbd.setFactoryMethodName("createTestBean");
+		lbf.registerBeanDefinition("x1", rbd);
+
+		TestBeanFactory.initialized = false;
+		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("x1", beanNames[0]);
+		assertFalse(lbf.containsSingleton("x1"));
+		assertTrue(lbf.containsBean("x1"));
+		assertFalse(lbf.containsBean("&x1"));
+		assertFalse(lbf.isSingleton("x1"));
+		assertFalse(lbf.isSingleton("&x1"));
+		assertTrue(lbf.isPrototype("x1"));
+		assertFalse(lbf.isPrototype("&x1"));
+		assertTrue(lbf.isTypeMatch("x1", TestBean.class));
+		assertFalse(lbf.isTypeMatch("&x1", TestBean.class));
+		assertEquals(TestBean.class, lbf.getType("x1"));
+		assertEquals(null, lbf.getType("&x1"));
 		assertFalse(TestBeanFactory.initialized);
 	}
 
@@ -176,7 +317,73 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertEquals(1, beanNames.length);
 		assertEquals("x1", beanNames[0]);
 		assertFalse(lbf.containsSingleton("x1"));
+		assertTrue(lbf.containsBean("x1"));
+		assertFalse(lbf.containsBean("&x1"));
+		assertTrue(lbf.isSingleton("x1"));
+		assertFalse(lbf.isSingleton("&x1"));
+		assertFalse(lbf.isPrototype("x1"));
+		assertFalse(lbf.isPrototype("&x1"));
+		assertTrue(lbf.isTypeMatch("x1", TestBean.class));
+		assertFalse(lbf.isTypeMatch("&x1", TestBean.class));
+		assertEquals(TestBean.class, lbf.getType("x1"));
+		assertEquals(null, lbf.getType("&x1"));
 		assertFalse(TestBeanFactory.initialized);
+	}
+
+	public void testNonStaticPrototypeFactoryMethodFoundByNonEagerTypeMatching() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition factoryBd = new RootBeanDefinition(TestBeanFactory.class);
+		lbf.registerBeanDefinition("factory", factoryBd);
+		RootBeanDefinition rbd = new RootBeanDefinition();
+		rbd.setFactoryBeanName("factory");
+		rbd.setFactoryMethodName("createTestBeanNonStatic");
+		rbd.setSingleton(false);
+		lbf.registerBeanDefinition("x1", rbd);
+
+		TestBeanFactory.initialized = false;
+		String[] beanNames = lbf.getBeanNamesForType(TestBean.class, true, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("x1", beanNames[0]);
+		assertFalse(lbf.containsSingleton("x1"));
+		assertTrue(lbf.containsBean("x1"));
+		assertFalse(lbf.containsBean("&x1"));
+		assertTrue(lbf.containsLocalBean("x1"));
+		assertFalse(lbf.containsLocalBean("&x1"));
+		assertFalse(lbf.isSingleton("x1"));
+		assertFalse(lbf.isSingleton("&x1"));
+		assertTrue(lbf.isPrototype("x1"));
+		assertFalse(lbf.isPrototype("&x1"));
+		assertTrue(lbf.isTypeMatch("x1", TestBean.class));
+		assertFalse(lbf.isTypeMatch("&x1", TestBean.class));
+		assertTrue(lbf.isTypeMatch("x1", Object.class));
+		assertFalse(lbf.isTypeMatch("&x1", Object.class));
+		assertEquals(TestBean.class, lbf.getType("x1"));
+		assertEquals(null, lbf.getType("&x1"));
+		assertFalse(TestBeanFactory.initialized);
+
+		lbf.registerAlias("x1", "x2");
+		assertTrue(lbf.containsBean("x2"));
+		assertFalse(lbf.containsBean("&x2"));
+		assertTrue(lbf.containsLocalBean("x2"));
+		assertFalse(lbf.containsLocalBean("&x2"));
+		assertFalse(lbf.isSingleton("x2"));
+		assertFalse(lbf.isSingleton("&x2"));
+		assertTrue(lbf.isPrototype("x2"));
+		assertFalse(lbf.isPrototype("&x2"));
+		assertTrue(lbf.isTypeMatch("x2", TestBean.class));
+		assertFalse(lbf.isTypeMatch("&x2", TestBean.class));
+		assertTrue(lbf.isTypeMatch("x2", Object.class));
+		assertFalse(lbf.isTypeMatch("&x2", Object.class));
+		assertEquals(TestBean.class, lbf.getType("x2"));
+		assertEquals(null, lbf.getType("&x2"));
+		assertEquals(1, lbf.getAliases("x1").length);
+		assertEquals("x2", lbf.getAliases("x1")[0]);
+		assertEquals(1, lbf.getAliases("&x1").length);
+		assertEquals("&x2", lbf.getAliases("&x1")[0]);
+		assertEquals(1, lbf.getAliases("x2").length);
+		assertEquals("x1", lbf.getAliases("x2")[0]);
+		assertEquals(1, lbf.getAliases("&x2").length);
+		assertEquals("&x1", lbf.getAliases("&x2")[0]);
 	}
 
 	public void testEmpty() {
