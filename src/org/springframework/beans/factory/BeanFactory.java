@@ -150,8 +150,10 @@ public interface BeanFactory {
 	Object getBean(String name, Class requiredType) throws BeansException;
 
 	/**
-	 * Does this bean factory contain a bean with the given name?
-	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * Does this bean factory contain a bean with the given name? More specifically,
+	 * is {@link #getBean} able to obtain a bean instance for the given name?
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to query
 	 * @return whether a bean with the given name is defined
 	 */
@@ -164,7 +166,8 @@ public interface BeanFactory {
 	 * independent instances. It indicates non-singleton instances, which may correspond
 	 * to a scoped bean as well. Use the {@link #isPrototype} operation to explicitly
 	 * check for independent instances.
-	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to query
 	 * @return whether this bean corresponds to a singleton instance
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
@@ -180,7 +183,8 @@ public interface BeanFactory {
 	 * a singleton object. It indicates non-independent instances, which may correspond
 	 * to a scoped bean as well. Use the {@link #isSingleton} operation to explicitly
 	 * check for a shared singleton instance.
-	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to query
 	 * @return whether this bean will always deliver independent instances
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
@@ -192,6 +196,10 @@ public interface BeanFactory {
 
 	/**
 	 * Check whether the bean with the given name matches the specified type.
+	 * More specifically, check whether a {@link #getBean} call for the given name
+	 * would return an object that is assignable to the specified target type.
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to query
 	 * @param targetType the type to match against
 	 * @return <code>true</code> if the bean type matches,
@@ -205,25 +213,30 @@ public interface BeanFactory {
 
 	/**
 	 * Determine the type of the bean with the given name. More specifically,
-	 * check the type of object that {@link #getBean} would return.
-	 * For a FactoryBean, return the type of object that the FactoryBean creates.
+	 * determine the type of object that {@link #getBean} would return for the given name.
+	 * <p>For a {@link FactoryBean}, return the type of object that the FactoryBean creates,
+	 * as exposed by {@link FactoryBean#getObjectType()}.
+	 * <p>Translates aliases back to the corresponding canonical bean name.
+	 * Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to query
 	 * @return the type of the bean, or <code>null</code> if not determinable
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @since 1.1.2
 	 * @see #getBean
-	 * @see FactoryBean#getObjectType()
+	 * @see #isTypeMatch
 	 */
 	Class getType(String name) throws NoSuchBeanDefinitionException;
 
 	/**
-	 * Return the aliases for the given bean name, if defined.
+	 * Return the aliases for the given bean name, if any.
+	 * All of those aliases point to the same bean when used in a {@link #getBean} call.
 	 * <p>If the given name is an alias, the corresponding original bean name
 	 * and other aliases (if any) will be returned, with the original bean name
 	 * being the first element in the array.
 	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the bean name to check for aliases
 	 * @return the aliases, or an empty array if none
+	 * @see #getBean
 	 */
 	String[] getAliases(String name);
 
