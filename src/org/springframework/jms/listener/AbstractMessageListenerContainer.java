@@ -163,14 +163,14 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * if the configured destination is not an actual {@link Destination} type;
 	 * c.f. {@link #setDestinationName(String) when the destination is a String}.
 	 */
-	protected Destination getDestination() {
+	public Destination getDestination() {
 		return (this.destination instanceof Destination ? (Destination) this.destination : null);
 	}
 
 	/**
 	 * Set the name of the destination to receive messages from.
 	 * <p>The specified name will be dynamically resolved via the configured
-	 * {@link #setDestinationResolver(org.springframework.jms.support.destination.DestinationResolver) destination resolver}.
+	 * {@link #setDestinationResolver destination resolver}.
 	 * <p>Alternatively, specify a JMS {@link Destination} object as "destination".
 	 * @param destinationName the desired destination (can be <code>null</code>)
 	 * @see #setDestination(javax.jms.Destination)
@@ -186,7 +186,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * {@link String} type; c.f. {@link #setDestination(Destination) when
 	 * it is an actual Destination}.
 	 */
-	protected String getDestinationName() {
+	public String getDestinationName() {
 		return (this.destination instanceof String ? (String) this.destination : null);
 	}
 
@@ -202,7 +202,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	/**
 	 * Return the JMS message selector expression (or <code>null</code> if none).
 	 */
-	protected String getMessageSelector() {
+	public String getMessageSelector() {
 		return this.messageSelector;
 	}
 
@@ -240,7 +240,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		if (!(messageListener instanceof MessageListener ||
 				messageListener instanceof SessionAwareMessageListener)) {
 			throw new IllegalArgumentException(
-					"messageListener needs to be of type [" + MessageListener.class.getName() +
+					"Message listener needs to be of type [" + MessageListener.class.getName() +
 					"] or [" + SessionAwareMessageListener.class.getName() + "]");
 		}
 	}
@@ -248,7 +248,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	/**
 	 * Return the message listener object to register.
 	 */
-	protected Object getMessageListener() {
+	public Object getMessageListener() {
 		return this.messageListener;
 	}
 
@@ -268,7 +268,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	/**
 	 * Return whether to make the subscription durable.
 	 */
-	protected boolean isSubscriptionDurable() {
+	public boolean isSubscriptionDurable() {
 		return this.subscriptionDurable;
 	}
 
@@ -284,14 +284,13 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @see #setMessageListener
 	 */
 	public void setDurableSubscriptionName(String durableSubscriptionName) {
-		Assert.notNull(durableSubscriptionName, "'durableSubscriptionName' must not be null");
 		this.durableSubscriptionName = durableSubscriptionName;
 	}
 
 	/**
 	 * Return the name of a durable subscription to create, if any.
 	 */
-	protected String getDurableSubscriptionName() {
+	public String getDurableSubscriptionName() {
 		return this.durableSubscriptionName;
 	}
 
@@ -307,7 +306,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Return the JMS ExceptionListener to notify in case of a JMSException thrown
 	 * by the registered message listener or the invocation infrastructure, if any.
 	 */
-	protected ExceptionListener getExceptionListener() {
+	public ExceptionListener getExceptionListener() {
 		return this.exceptionListener;
 	}
 
@@ -328,7 +327,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Return whether to expose the listener JMS {@link Session} to a
 	 * registered {@link SessionAwareMessageListener}.
 	 */
-	protected boolean isExposeListenerSession() {
+	public boolean isExposeListenerSession() {
 		return this.exposeListenerSession;
 	}
 
@@ -354,7 +353,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Return whether to accept received messages while the listener container
 	 * in the process of stopping.
 	 */
-	protected boolean isAcceptMessagesWhileStopping() {
+	public boolean isAcceptMessagesWhileStopping() {
 		return this.acceptMessagesWhileStopping;
 	}
 

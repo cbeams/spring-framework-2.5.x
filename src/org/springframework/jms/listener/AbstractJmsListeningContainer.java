@@ -98,7 +98,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * Return the JMS client ID for the shared Connection created and used
 	 * by this container, if any.
 	 */
-	protected String getClientId() {
+	public String getClientId() {
 		return this.clientId;
 	}
 
