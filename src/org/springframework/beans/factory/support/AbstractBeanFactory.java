@@ -1083,16 +1083,16 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @return the type of the bean, or <code>null</code> if not predictable
 	 */
 	protected Class predictBeanType(String beanName, RootBeanDefinition mbd) {
-		if (mbd.getFactoryMethodName() == null) {
-			return resolveBeanClass(mbd, beanName);
+		if (mbd.getFactoryMethodName() != null) {
+			return null;
 		}
-		return null;
+		return resolveBeanClass(mbd, beanName);
 	}
 
 	/**
 	 * Determine the bean type for the given FactoryBean definition, as far as possible.
 	 * Only called if there is no singleton instance registered for the target bean already.
-	 * <p>Default implementation creates the FactoryBean via <code>getBean</code>
+	 * <p>The default implementation creates the FactoryBean via <code>getBean</code>
 	 * to call its <code>getObjectType</code> method. Subclasses are encouraged to optimize
 	 * this, typically by just instantiating the FactoryBean but not populating it yet,
 	 * trying whether its <code>getObjectType</code> method already returns a type.
@@ -1105,6 +1105,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @see #getBean(String)
 	 */
 	protected Class getTypeForFactoryBean(String beanName, RootBeanDefinition mbd) {
+		if (!mbd.isSingleton()) {
+			return null;
+		}
 		try {
 			FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 			return getTypeForFactoryBean(factoryBean);
