@@ -102,10 +102,8 @@ public class JmsTemplateTests extends TestCase {
 	}
 
 	private void createMockforDestination() throws JMSException, NamingException {
-		connectionFactoryControl =
-				MockControl.createControl(ConnectionFactory.class);
-		mockConnectionFactory =
-				(ConnectionFactory) connectionFactoryControl.getMock();
+		connectionFactoryControl = MockControl.createControl(ConnectionFactory.class);
+		mockConnectionFactory = (ConnectionFactory) connectionFactoryControl.getMock();
 
 		connectionControl = MockControl.createControl(Connection.class);
 		mockConnection = (Connection) connectionControl.getMock();
