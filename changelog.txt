@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.5 (2007-05-05)
+Changes in version 2.0.5 (2007-05-06)
 -------------------------------------
 
 Package org.springframework.aop
@@ -19,7 +19,9 @@ Package org.springframework.beans
 * default editor settings get copied to nested beans even if no default editors have been used yet
 * revised MethodInvokingFactoryBean's "getObjectType()" implementation to gracefully return null if not prepared already
 * added "determineConstructor(beanClass, beanName)" method to SmartInstantiationAwareBeanPostProcessor
+* AbstractBeanFactory's "containsBean"/"isSingleton"/"isTypeMatch"/etc behave correctly for "&" FactoryBean dereferences
 * AbstractBeanFactory uses concurrent Maps for singletons, aliases and bean definitions (for better concurrency)
+* DefaultListableBeanFactory finds initialized FactoryBeans / factory-bean references in case of allowEagerInit=false
 * fixed ConstructorResolver to correctly convert prepared collection arguments to arrays if necessary (for prototypes)
 * added overloaded "rootBeanDefinition" factory methods with bean class name (instead of Class) to BeanDefinitionBuilder
 * an (undefined) null value returned from a NamespaceHandler's "decorate" method is treated as 'no decoration required'
@@ -52,6 +54,8 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * JndiDestinationResolver prefers a concurrent Map for caching purposes (for better concurrency)
+* changed visibility of various AbstractMessageListenerContainer property accessors from protected to public
+* JmsInvokerClientInterceptor/ProxyFactoryBean and JmsInvokerServiceExporter support a configurable MessageConverter
 
 Package org.springframework.jndi
 * TypeMismatchNamingException carries required type and actual type as explicit attributes
