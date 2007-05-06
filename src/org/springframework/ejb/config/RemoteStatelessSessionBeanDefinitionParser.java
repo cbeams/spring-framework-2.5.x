@@ -21,13 +21,18 @@ import org.w3c.dom.Element;
 import org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean;
 
 /**
+ * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
+ * implementation for parsing '<code>remote-slsb</code>' tags and
+ * creating {@link SimpleRemoteStatelessSessionProxyFactoryBean} definitions.
+ *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 class RemoteStatelessSessionBeanDefinitionParser extends AbstractJndiLocatingBeanDefinitionParser {
 
-	protected Class getBeanClass(Element element) {
-		return SimpleRemoteStatelessSessionProxyFactoryBean.class;
+	protected String getBeanClassName(Element element) {
+		return "org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean";
 	}
 
 }

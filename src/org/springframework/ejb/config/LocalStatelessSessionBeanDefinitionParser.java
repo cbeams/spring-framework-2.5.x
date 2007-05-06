@@ -21,17 +21,18 @@ import org.w3c.dom.Element;
 import org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean;
 
 /**
- * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} implementation for parsing
- * '<code>local-slsb</code>' tags and creating {@link LocalStatelessSessionProxyFactoryBean} definitions.
+ * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
+ * implementation for parsing '<code>local-slsb</code>' tags and
+ * creating {@link LocalStatelessSessionProxyFactoryBean} definitions.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
- * @see LocalStatelessSessionProxyFactoryBean
  */
 class LocalStatelessSessionBeanDefinitionParser extends AbstractJndiLocatingBeanDefinitionParser {
 
-	protected Class getBeanClass(Element element) {
-		return LocalStatelessSessionProxyFactoryBean.class;
+	protected String getBeanClassName(Element element) {
+		return "org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean";
 	}
 
 }

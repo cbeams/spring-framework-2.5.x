@@ -40,6 +40,9 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @since 2.0
+ * @see #getBeanClass
+ * @see #getBeanClassName
+ * @see #doParse
  */
 public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
@@ -55,9 +58,17 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	 * @see #doParse
 	 */
 	protected final AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+		BeanDefinitionBuilder builder = null;
 		Class beanClass = getBeanClass(element);
-		Assert.state(beanClass != null, "Class returned from getBeanClass(Element) must not be null");
-		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(beanClass);
+		if (beanClass != null) {
+			builder = BeanDefinitionBuilder.rootBeanDefinition(beanClass);
+		}
+		else {
+			String beanClassName = getBeanClassName(element);
+			Assert.state(beanClassName != null,
+					"Either 'getBeanClass' or 'getBeanClassName' must be overridden and return a non-null value");
+			builder = BeanDefinitionBuilder.rootBeanDefinition(beanClassName);
+		}
 		builder.setSource(parserContext.extractSource(element));
 		if (parserContext.isNested()) {
 			// Inner bean definition must receive same singleton status as containing bean.
@@ -73,12 +84,30 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 
 	/**
 	 * Determine the bean class corresponding to the supplied {@link Element}.
+	 * <p>Note that, for application classes, it is generally preferable to
+	 * override {@link #getBeanClassName} instead, in order to avoid a direct
+	 * dependence on the bean implementation class. The BeanDefinitionParser
+	 * and its NamespaceHandler can be used within an IDE plugin then, even
+	 * if the application classes are not available on the plugin's classpath.
 	 * @param element the <code>Element</code> that is being parsed
-	 * @return the {@link Class} of the bean that is being defined via parsing the supplied <code>Element</code>
-	 * (must <b>not</b> be <code>null</code>)
-	 * @see #parseInternal(org.w3c.dom.Element, ParserContext)   
+	 * @return the {@link Class} of the bean that is being defined via parsing
+	 * the supplied <code>Element</code>
+	 * @see #getBeanClassName
 	 */
-	protected abstract Class getBeanClass(Element element);
+	protected Class getBeanClass(Element element) {
+		return null;
+	}
+
+	/**
+	 * Determine the bean class name corresponding to the supplied {@link Element}.
+	 * @param element the <code>Element</code> that is being parsed
+	 * @return the class name of the bean that is being defined via parsing
+	 * the supplied <code>Element</code>
+	 * @see #getBeanClass
+	 */
+	protected String getBeanClassName(Element element) {
+		return null;
+	}
 
 	/**
 	 * Parse the supplied {@link Element} and populate the supplied

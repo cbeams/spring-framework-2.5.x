@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jee;
+package org.springframework.ejb.config;
 
 import junit.framework.TestCase;
 
