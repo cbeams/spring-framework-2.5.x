@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema xmlns="http://www.springframework.org/schema/jms"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		targetNamespace="http://www.springframework.org/schema/jms"
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
+
+	<xsd:element name="listener-container">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Each listener child element will be hosted by a container whose configuration is determined by this parent element.		
+			]]></xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="org.springframework.jms.listener.AbstractMessageListenerContainer"/>
+				</tool:annotation>	
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="listener" type="listenerType" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:sequence>
+			<xsd:attribute name="container-type" default="default">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+		The type of this listener container: "default" or "simple".
+					]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:NMTOKEN">
+						<xsd:enumeration value="default"/>
+						<xsd:enumeration value="default102"/>
+						<xsd:enumeration value="simple"/>
+						<xsd:enumeration value="simple102"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+			<xsd:attribute name="connection-factory" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A reference to the JMS ConnectionFactory bean.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="task-executor" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A reference to the Spring TaskExecutor for the JMS listener invokers.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="destination-resolver" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A reference to the DestinationResolver for resolving destination names.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="destination-type" default="queue">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+		The JMS destination type for this listener: "queue", "topic" or "durableTopic".
+					]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:NMTOKEN">
+						<xsd:enumeration value="queue"/>
+						<xsd:enumeration value="topic"/>
+						<xsd:enumeration value="durableTopic"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+			<xsd:attribute name="client-id" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+		The JMS client id for this listener container.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="concurrent-consumers" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The number of concurrent consumers to start for this listener.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="transaction-manager" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A reference to the PlatformTransactionManager.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="jca-listener-container">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Each listener child element will be hosted by a container whose configuration is determined by this parent element.
+			]]></xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="org.springframework.jms.listener.endpoint.JmsMessageEndpointManager"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="listener" type="listenerType" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:sequence>
+			<xsd:attribute name="resource-adapter" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A reference to the JCA ResourceAdapter bean for the JMS provider.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="activation-spec-factory" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A reference to the JmsActivationSpecFactory.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="destination-type" default="queue">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+		The JMS destination type for this listener: "queue", "topic" or "durableTopic".
+					]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:NMTOKEN">
+						<xsd:enumeration value="queue"/>
+						<xsd:enumeration value="topic"/>
+						<xsd:enumeration value="durableTopic"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+			<xsd:attribute name="client-id" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+		The JMS client id for this listener container.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="concurrent-consumers" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The number of concurrent consumers to start for this listener.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="transaction-manager" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A reference to the Spring JtaTransactionManager or [javax.transaction.TransactionManager].
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:complexType name="listenerType">
+			<xsd:attribute name="id" type="xsd:ID">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The unique identifier for a listener.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		<xsd:attribute name="destination" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The destination name for this listener, resolved through the DestinationResolver.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="subscription" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The name for the durable subscription, if any.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="selector" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The JMS message selector for this listener.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="ref" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The bean name of the handler object.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="method" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The name of the handler method to invoke.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+</xsd:schema>

@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2007 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,31 +25,24 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
-import org.springframework.jms.listener.DefaultMessageListenerContainer102;
-import org.springframework.jms.listener.SimpleMessageListenerContainer;
-import org.springframework.jms.listener.SimpleMessageListenerContainer102;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
+import org.springframework.jms.listener.endpoint.JmsActivationSpecConfig;
+import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 import org.springframework.util.StringUtils;
 
 /**
- * Parser for the JMS <code>&lt;listener-container&gt;</code> element.
- * 
- * @author Mark Fisher
+ * Parser for the JMS <code>&lt;jca-listener-container&gt;</code> element.
+ *
  * @author Juergen Hoeller
  * @since 2.1
  */
-public class ListenerContainerParser implements BeanDefinitionParser {
+public class JcaListenerContainerParser implements BeanDefinitionParser {
 
-	private static final String CONTAINER_TYPE_ATTRIBUTE = "container-type";
+	private static final String RESOURCE_ADAPTER_ATTRIBUTE = "resource-adapter";
 
-	private static final String CONNECTION_FACTORY_ATTRIBUTE = "connection-factory";
+	private static final String DEFAULT_RESOURCE_ADAPTER_BEAN_NAME = "resourceAdapter";
 
-	private static final String DEFAULT_CONNECTION_FACTORY_BEAN_NAME = "connectionFactory";
-
-	private static final String TASK_EXECUTOR_ATTRIBUTE = "task-executor";
-
-	private static final String DESTINATION_RESOLVER_ATTRIBUTE = "destination-resolver";
+	private static final String ACTIVATION_SPEC_FACTORY_ATTRIBUTE = "activation-spec-factory";
 
 	private static final String DESTINATION_TYPE_ATTRIBUTE = "destination-type";
 
@@ -96,6 +89,8 @@ public class ListenerContainerParser implements BeanDefinitionParser {
 
 	private void parseListener(Element listenerEle, Element containerEle, ParserContext parserContext) {
 		RootBeanDefinition containerDef = parseContainer(containerEle, parserContext);
+		RootBeanDefinition configDef = (RootBeanDefinition)
+				containerDef.getPropertyValues().getPropertyValue("activationSpecConfig").getValue();
 		RootBeanDefinition listenerDef = new RootBeanDefinition(MessageListenerAdapter.class);
 
 		String destinationName = listenerEle.getAttribute(DESTINATION_ATTRIBUTE);
@@ -103,7 +98,7 @@ public class ListenerContainerParser implements BeanDefinitionParser {
 			parserContext.getReaderContext().error(
 					"Listener 'destination' attribute contains empty value.", listenerEle);
 		}
-		containerDef.getPropertyValues().addPropertyValue("destinationName", destinationName);
+		configDef.getPropertyValues().addPropertyValue("destinationName", destinationName);
 
 		if (listenerEle.hasAttribute(SUBSCRIPTION_ATTRIBUTE)) {
 			String subscriptionName = listenerEle.getAttribute(SUBSCRIPTION_ATTRIBUTE);
@@ -111,7 +106,7 @@ public class ListenerContainerParser implements BeanDefinitionParser {
 				parserContext.getReaderContext().error(
 						"Listener 'subscription' attribute contains empty value.", listenerEle);
 			}
-			containerDef.getPropertyValues().addPropertyValue("durableSubscriptionName", subscriptionName);
+			configDef.getPropertyValues().addPropertyValue("durableSubscriptionName", subscriptionName);
 		}
 
 		if (listenerEle.hasAttribute(SELECTOR_ATTRIBUTE)) {
@@ -120,7 +115,7 @@ public class ListenerContainerParser implements BeanDefinitionParser {
 				parserContext.getReaderContext().error(
 						"Listener 'selector' attribute contains empty value.", listenerEle);
 			}
-			containerDef.getPropertyValues().addPropertyValue("messageSelector", selector);
+			configDef.getPropertyValues().addPropertyValue("messageSelector", selector);
 		}
 
 		String handlerBean = listenerEle.getAttribute(HANDLER_BEAN_ATTRIBUTE);
@@ -153,49 +148,26 @@ public class ListenerContainerParser implements BeanDefinitionParser {
 	}
 
 	private RootBeanDefinition parseContainer(Element ele, ParserContext parserContext) {
-		String connectionFactoryBeanName = DEFAULT_CONNECTION_FACTORY_BEAN_NAME;
-		if (ele.hasAttribute(CONNECTION_FACTORY_ATTRIBUTE)) {
-			connectionFactoryBeanName = ele.getAttribute(CONNECTION_FACTORY_ATTRIBUTE);
-			if (!StringUtils.hasText(connectionFactoryBeanName)) {
+		String resourceAdapterBeanName = DEFAULT_RESOURCE_ADAPTER_BEAN_NAME;
+		if (ele.hasAttribute(RESOURCE_ADAPTER_ATTRIBUTE)) {
+			resourceAdapterBeanName = ele.getAttribute(RESOURCE_ADAPTER_ATTRIBUTE);
+			if (!StringUtils.hasText(resourceAdapterBeanName)) {
 				parserContext.getReaderContext().error(
-						"Listener container 'connection-factory' attribute contains empty value.", ele);
+						"Listener container 'resource-adapter' attribute contains empty value.", ele);
 			}
 		}
 
-		RootBeanDefinition containerDef = new RootBeanDefinition();
+		RootBeanDefinition containerDef = new RootBeanDefinition(JmsMessageEndpointManager.class);
+		containerDef.getPropertyValues().addPropertyValue("resourceAdapter",
+				new RuntimeBeanReference(resourceAdapterBeanName));
 
-		String containerType = ele.getAttribute(CONTAINER_TYPE_ATTRIBUTE);
-		if ("default".equals(containerType)) {
-			containerDef.setBeanClass(DefaultMessageListenerContainer.class);
-		}
-		else if ("default102".equals(containerType)) {
-			containerDef.setBeanClass(DefaultMessageListenerContainer102.class);
-		}
-		else if ("simple".equals(containerType)) {
-			containerDef.setBeanClass(SimpleMessageListenerContainer.class);
-		}
-		else if ("simple102".equals(containerType)) {
-			containerDef.setBeanClass(SimpleMessageListenerContainer102.class);
-		}
-		else {
-			parserContext.getReaderContext().error(
-					"Invalid 'container-type' attribute: only \"default\" and \"simple\" supported.", ele);
+		String activationSpecFactoryBeanName = ele.getAttribute(ACTIVATION_SPEC_FACTORY_ATTRIBUTE);
+		if (StringUtils.hasText(activationSpecFactoryBeanName)) {
+			containerDef.getPropertyValues().addPropertyValue("activationSpecFactory",
+					new RuntimeBeanReference(activationSpecFactoryBeanName));
 		}
 
-		containerDef.getPropertyValues().addPropertyValue("connectionFactory",
-				new RuntimeBeanReference(connectionFactoryBeanName));
-
-		String taskExecutorBeanName = ele.getAttribute(TASK_EXECUTOR_ATTRIBUTE);
-		if (StringUtils.hasText(taskExecutorBeanName)) {
-			containerDef.getPropertyValues().addPropertyValue("taskExecutor",
-					new RuntimeBeanReference(taskExecutorBeanName));
-		}
-
-		String destinationResolverBeanName = ele.getAttribute(DESTINATION_RESOLVER_ATTRIBUTE);
-		if (StringUtils.hasText(destinationResolverBeanName)) {
-			containerDef.getPropertyValues().addPropertyValue("destinationResolver",
-					new RuntimeBeanReference(destinationResolverBeanName));
-		}
+		RootBeanDefinition configDef = new RootBeanDefinition(JmsActivationSpecConfig.class);
 
 		String destinationType = ele.getAttribute(DESTINATION_TYPE_ATTRIBUTE);
 		if (StringUtils.hasText(destinationType)) {
@@ -212,8 +184,8 @@ public class ListenerContainerParser implements BeanDefinitionParser {
 				parserContext.getReaderContext().error("Invalid listener container 'destination-type': " +
 						"only \"queue\", \"topic\" and \"durableTopic\" supported.", ele);
 			}
-			containerDef.getPropertyValues().addPropertyValue("pubSubDomain", Boolean.valueOf(pubSubDomain));
-			containerDef.getPropertyValues().addPropertyValue("subscriptionDurable", Boolean.valueOf(subscriptionDurable));
+			configDef.getPropertyValues().addPropertyValue("pubSubDomain", Boolean.valueOf(pubSubDomain));
+			configDef.getPropertyValues().addPropertyValue("subscriptionDurable", Boolean.valueOf(subscriptionDurable));
 		}
 
 		if (ele.hasAttribute(CLIENT_ID_ATTRIBUTE)) {
@@ -222,20 +194,18 @@ public class ListenerContainerParser implements BeanDefinitionParser {
 				parserContext.getReaderContext().error(
 						"Listener 'client-id' attribute contains empty value.", ele);
 			}
-			containerDef.getPropertyValues().addPropertyValue("clientId", clientId);
+			configDef.getPropertyValues().addPropertyValue("clientId", clientId);
 		}
 
 		String concurrentConsumers = ele.getAttribute(CONCURRENT_CONSUMERS_ATTRIBUTE);
 		if (StringUtils.hasText(concurrentConsumers)) {
-			containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", new Integer(concurrentConsumers));
+			configDef.getPropertyValues().addPropertyValue("concurrentConsumers", new Integer(concurrentConsumers));
 		}
+
+		containerDef.getPropertyValues().addPropertyValue("activationSpecConfig", configDef);
 
 		String transactionManagerBeanName = ele.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE);
 		if (StringUtils.hasText(transactionManagerBeanName)) {
-			if (containerType.startsWith("simple")) {
-				parserContext.getReaderContext().error(
-						"'transaction-manager' attribute not supported for listener container of type \"simple\".", ele);
-			}
 			containerDef.getPropertyValues().addPropertyValue("transactionManager",
 					new RuntimeBeanReference(transactionManagerBeanName));
 		}

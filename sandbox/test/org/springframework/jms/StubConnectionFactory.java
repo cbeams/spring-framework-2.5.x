@@ -14,28 +14,25 @@
  * limitations under the License.
  */
 
-package org.springframework.jms.config;
+package org.springframework.jms;
 
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.TransactionStatus;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
 
 /**
- * A stub transaction manager for testing.
+ * A stub implementation of the JMS ConnectionFactory for testing.
  * 
  * @author Mark Fisher
  */
-public class StubTransactionManager implements PlatformTransactionManager {
+public class StubConnectionFactory implements ConnectionFactory {
 
-	public void commit(TransactionStatus status) throws TransactionException {
-	}
-
-	public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
+	public Connection createConnection() throws JMSException {
 		return null;
 	}
 
-	public void rollback(TransactionStatus status) throws TransactionException {
+	public Connection createConnection(String username, String password) throws JMSException {
+		return null;
 	}
 
 }

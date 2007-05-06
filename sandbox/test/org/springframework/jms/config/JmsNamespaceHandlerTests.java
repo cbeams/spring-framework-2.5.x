@@ -20,12 +20,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 import javax.jms.ConnectionFactory;
+import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -34,6 +35,7 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class JmsNamespaceHandlerTests extends TestCase {
 
@@ -49,7 +51,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 
 	public void testBeansCreated() {
 		Map containers = context.getBeansOfType(DefaultMessageListenerContainer.class);
-		Map listeners = context.getBeansOfType(MessageListener.class);
+		Map listeners = context.getBeansOfType(MessageListenerAdapter.class);
 
 		assertEquals("context should contain 3 containers", 3, containers.size());
 		assertEquals("context should contain 3 listeners", 3, listeners.size());
@@ -81,18 +83,18 @@ public class JmsNamespaceHandlerTests extends TestCase {
 	public void testListeners() throws Exception {
 		TestBean testBean1 = (TestBean) context.getBean("testBean1");
 		TestBean testBean2 = (TestBean) context.getBean("testBean2");
-		TestBean testBean3 = (TestBean) context.getBean("testBean3");
+		TestMessageListener testBean3 = (TestMessageListener) context.getBean("testBean3");
 
 		assertNull(testBean1.getName());
 		assertNull(testBean2.getName());
-		assertNull(testBean3.getName());
+		assertNull(testBean3.message);
 
 		MockControl control1 = MockControl.createControl(TextMessage.class);
 		TextMessage message1 = (TextMessage) control1.getMock();
 		control1.expectAndReturn(message1.getText(), "Test1");
 		control1.replay();
 
-		MessageListener listener1 = (MessageListener) context.getBean("listener1");
+		MessageListener listener1 = getListener("listener1");
 		listener1.onMessage(message1);
 		assertEquals("Test1", testBean1.getName());
 		control1.verify();
@@ -102,7 +104,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		control2.expectAndReturn(message2.getText(), "Test2");
 		control2.replay();
 
-		MessageListener listener2 = (MessageListener) context.getBean("listener2");
+		MessageListener listener2 = getListener("listener2");
 		listener2.onMessage(message2);
 		assertEquals("Test2", testBean2.getName());
 		control2.verify();
@@ -112,10 +114,26 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		control3.expectAndReturn(message3.getText(), "Test3");
 		control3.replay();
 
-		MessageListener listener3 = (MessageListener) context.getBean(MessageListenerAdapter.class.getName());
+		MessageListener listener3 = getListener(DefaultMessageListenerContainer.class.getName());
 		listener3.onMessage(message3);
-		assertEquals("Test3", testBean3.getName());
+		assertSame(message3, testBean3.message);
 		control3.verify();
+	}
+
+	private MessageListener getListener(String containerBeanName) {
+		DefaultMessageListenerContainer container =
+				(DefaultMessageListenerContainer) this.context.getBean(containerBeanName);
+		return (MessageListener) container.getMessageListener();
+	}
+
+
+	public static class TestMessageListener implements MessageListener {
+
+		public Message message;
+
+		public void onMessage(Message message) {
+			this.message = message;
+		}
 	}
 
 }
