@@ -100,9 +100,9 @@
 				<xsd:simpleType>
 					<xsd:restriction base="xsd:NMTOKEN">
 						<xsd:enumeration value="none"/>
-						<xsd:enumeration value="all"/>
-						<xsd:enumeration value="objects"/>
 						<xsd:enumeration value="simple"/>
+						<xsd:enumeration value="objects"/>
+						<xsd:enumeration value="all"/>
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>
@@ -115,11 +115,11 @@
 				</xsd:annotation>
 				<xsd:simpleType>
 					<xsd:restriction base="xsd:NMTOKEN">
-						<xsd:enumeration value="byType"/>
-						<xsd:enumeration value="byName"/>
 						<xsd:enumeration value="no"/>
-						<xsd:enumeration value="autodetect"/>
+						<xsd:enumeration value="byName"/>
+						<xsd:enumeration value="byType"/>
 						<xsd:enumeration value="constructor"/>
+						<xsd:enumeration value="autodetect"/>
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>
@@ -356,12 +356,12 @@
 			</xsd:annotation>
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:NMTOKEN">
-					<xsd:enumeration value="byType"/>
-					<xsd:enumeration value="byName"/>
 					<xsd:enumeration value="default"/>
 					<xsd:enumeration value="no"/>
-					<xsd:enumeration value="autodetect"/>
+					<xsd:enumeration value="byName"/>
+					<xsd:enumeration value="byType"/>
 					<xsd:enumeration value="constructor"/>
+					<xsd:enumeration value="autodetect"/>
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>
@@ -384,9 +384,9 @@
 				<xsd:restriction base="xsd:NMTOKEN">
 					<xsd:enumeration value="default"/>
 					<xsd:enumeration value="none"/>
-					<xsd:enumeration value="all"/>
-					<xsd:enumeration value="objects"/>
 					<xsd:enumeration value="simple"/>
+					<xsd:enumeration value="objects"/>
+					<xsd:enumeration value="all"/>
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>
