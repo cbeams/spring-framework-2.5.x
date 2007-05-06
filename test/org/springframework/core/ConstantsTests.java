@@ -98,7 +98,7 @@ public class ConstantsTests extends TestCase {
 
 	public void testGetValuesInTurkey() {
 		Locale oldLocale = Locale.getDefault();
-		Locale.setDefault(new Locale("tr"));
+		Locale.setDefault(new Locale("tr", ""));
 		try {
 			Constants c = new Constants(A.class);
 
