@@ -91,16 +91,46 @@ public class UtilNamespaceHandlerTests extends TestCase {
 	public void testSimpleMap() throws Exception {
 		Map map = (Map) this.beanFactory.getBean("simpleMap");
 		assertEquals("bar", map.get("foo"));
+		Map map2 = (Map) this.beanFactory.getBean("simpleMap");
+		assertTrue(map == map2);
+	}
+
+	public void testScopedMap() throws Exception {
+		Map map = (Map) this.beanFactory.getBean("scopedMap");
+		assertEquals("bar", map.get("foo"));
+		Map map2 = (Map) this.beanFactory.getBean("scopedMap");
+		assertEquals("bar", map2.get("foo"));
+		assertTrue(map != map2);
 	}
 
 	public void testSimpleList() throws Exception {
 		List list = (List) this.beanFactory.getBean("simpleList");
 		assertEquals("Rob Harrop", list.get(0));
+		List list2 = (List) this.beanFactory.getBean("simpleList");
+		assertTrue(list == list2);
+	}
+
+	public void testScopedList() throws Exception {
+		List list = (List) this.beanFactory.getBean("scopedList");
+		assertEquals("Rob Harrop", list.get(0));
+		List list2 = (List) this.beanFactory.getBean("scopedList");
+		assertEquals("Rob Harrop", list2.get(0));
+		assertTrue(list != list2);
 	}
 
 	public void testSimpleSet() throws Exception {
-		Set list = (Set) this.beanFactory.getBean("simpleSet");
-		assertTrue(list.contains("Rob Harrop"));
+		Set set = (Set) this.beanFactory.getBean("simpleSet");
+		assertTrue(set.contains("Rob Harrop"));
+		Set set2 = (Set) this.beanFactory.getBean("simpleSet");
+		assertTrue(set == set2);
+	}
+
+	public void testScopedSet() throws Exception {
+		Set set = (Set) this.beanFactory.getBean("scopedSet");
+		assertTrue(set.contains("Rob Harrop"));
+		Set set2 = (Set) this.beanFactory.getBean("scopedSet");
+		assertTrue(set2.contains("Rob Harrop"));
+		assertTrue(set != set2);
 	}
 
 	public void testMapWithRef() throws Exception {
@@ -230,6 +260,18 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		Properties props = (Properties) this.beanFactory.getBean("myProperties");
 		assertEquals("Incorrect property value", "bar", props.get("foo"));
 		assertEquals("Incorrect property value", null, props.get("foo2"));
+		Properties props2 = (Properties) this.beanFactory.getBean("myProperties");
+		assertTrue(props == props2);
+	}
+
+	public void testScopedProperties() throws Exception {
+		Properties props = (Properties) this.beanFactory.getBean("myScopedProperties");
+		assertEquals("Incorrect property value", "bar", props.get("foo"));
+		assertEquals("Incorrect property value", null, props.get("foo2"));
+		Properties props2 = (Properties) this.beanFactory.getBean("myScopedProperties");
+		assertEquals("Incorrect property value", "bar", props.get("foo"));
+		assertEquals("Incorrect property value", null, props.get("foo2"));
+		assertTrue(props != props2);
 	}
 
 	public void testLocalProperties() throws Exception {

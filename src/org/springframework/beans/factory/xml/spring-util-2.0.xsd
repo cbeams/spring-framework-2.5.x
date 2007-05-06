@@ -69,6 +69,17 @@
 							</xsd:appinfo>
 						</xsd:annotation>
 					</xsd:attribute>
+					<xsd:attribute name="scope" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+		The scope of this collection bean: typically "singleton" (one shared instance,
+		which will be returned by all calls to getBean with the given id), or
+		"prototype" (independent instance resulting from each call to getBean).
+		Default is "singleton". Further scopes, such as "request" or "session",
+		might be supported by extended bean factories (e.g. in a web environment).
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
 				</xsd:extension>
 			</xsd:complexContent>
 		</xsd:complexType>
@@ -94,6 +105,17 @@
 									<tool:assignable-to type="java.util.Set"/>
 								</tool:annotation>
 							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="scope" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+		The scope of this collection bean: typically "singleton" (one shared instance,
+		which will be returned by all calls to getBean with the given id), or
+		"prototype" (independent instance resulting from each call to getBean).
+		Default is "singleton". Further scopes, such as "request" or "session",
+		might be supported by extended bean factories (e.g. in a web environment).
+							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
 				</xsd:extension>
@@ -123,6 +145,17 @@
 							</xsd:appinfo>
 						</xsd:annotation>
 					</xsd:attribute>
+					<xsd:attribute name="scope" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+		The scope of this collection bean: typically "singleton" (one shared instance,
+		which will be returned by all calls to getBean with the given id), or
+		"prototype" (independent instance resulting from each call to getBean).
+		Default is "singleton". Further scopes, such as "request" or "session",
+		might be supported by extended bean factories (e.g. in a web environment).
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
 				</xsd:extension>
 			</xsd:complexContent>
 		</xsd:complexType>
@@ -150,6 +183,17 @@
 									<tool:expected-type type="org.springframework.core.io.Resource"/>
 								</tool:annotation>
 							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="scope" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+		The scope of this collection bean: typically "singleton" (one shared instance,
+		which will be returned by all calls to getBean with the given id), or
+		"prototype" (independent instance resulting from each call to getBean).
+		Default is "singleton". Further scopes, such as "request" or "session",
+		might be supported by extended bean factories (e.g. in a web environment).
+							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
 				</xsd:extension>

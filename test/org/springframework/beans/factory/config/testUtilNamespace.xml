@@ -40,6 +40,10 @@
 		<entry key="foo" value="bar"/>
 	</util:map>
 
+	<util:map id="scopedMap" scope="prototype">
+		<entry key="foo" value="bar"/>
+	</util:map>
+
 	<util:map id="mapWithRef" map-class="java.util.TreeMap">
 		<entry key="bean" value-ref="testBean"/>
 	</util:map>
@@ -48,7 +52,15 @@
 		<value>Rob Harrop</value>
 	</util:list>
 
+	<util:list id="scopedList" scope="prototype">
+		<value>Rob Harrop</value>
+	</util:list>
+
 	<util:set id="simpleSet">
+		<value>Rob Harrop</value>
+	</util:set>
+
+	<util:set id="scopedSet" scope="prototype">
 		<value>Rob Harrop</value>
 	</util:set>
 
@@ -133,6 +145,9 @@
 
 	<util:properties id="myProperties"
 			location="classpath:org/springframework/beans/factory/config/util.properties"/>
+
+	<util:properties id="myScopedProperties"
+			location="classpath:org/springframework/beans/factory/config/util.properties" scope="prototype"/>
 
 	<util:properties id="myLocalProperties">
 		<prop key="foo2">bar2</prop>

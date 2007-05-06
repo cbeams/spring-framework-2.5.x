@@ -42,6 +42,9 @@ import org.springframework.util.StringUtils;
  */
 public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
+	private static final String SCOPE_ATTRIBUTE = "scope";
+
+
 	public void init() {
 		registerBeanDefinitionParser("constant", new ConstantBeanDefinitionParser());
 		registerBeanDefinitionParser("property-path", new PropertyPathBeanDefinitionParser());
@@ -115,6 +118,10 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			if (StringUtils.hasText(listClass)) {
 				builder.addPropertyValue("targetListClass", listClass);
 			}
+			String scope = element.getAttribute(SCOPE_ATTRIBUTE);
+			if (StringUtils.hasLength(scope)) {
+				builder.setScope(scope);
+			}
 		}
 	}
 
@@ -131,6 +138,10 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			builder.addPropertyValue("sourceSet", parsedSet);
 			if (StringUtils.hasText(setClass)) {
 				builder.addPropertyValue("targetSetClass", setClass);
+			}
+			String scope = element.getAttribute(SCOPE_ATTRIBUTE);
+			if (StringUtils.hasLength(scope)) {
+				builder.setScope(scope);
 			}
 		}
 	}
@@ -149,6 +160,10 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			if (StringUtils.hasText(mapClass)) {
 				builder.addPropertyValue("targetMapClass", mapClass);
 			}
+			String scope = element.getAttribute(SCOPE_ATTRIBUTE);
+			if (StringUtils.hasLength(scope)) {
+				builder.setScope(scope);
+			}
 		}
 	}
 
@@ -159,10 +174,18 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			return PropertiesFactoryBean.class;
 		}
 
+		protected boolean isEligibleAttribute(String attributeName) {
+			return super.isEligibleAttribute(attributeName) && !SCOPE_ATTRIBUTE.equals(attributeName);
+		}
+
 		protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 			super.doParse(element, parserContext, builder);
 			Properties parsedProps = parserContext.getDelegate().parsePropsElement(element);
 			builder.addPropertyValue("properties", parsedProps);
+			String scope = element.getAttribute(SCOPE_ATTRIBUTE);
+			if (StringUtils.hasLength(scope)) {
+				builder.setScope(scope);
+			}
 		}
 	}
 
