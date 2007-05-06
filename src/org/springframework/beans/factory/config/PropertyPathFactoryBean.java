@@ -188,7 +188,7 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 	public Object getObject() throws BeansException {
 		BeanWrapper target = this.targetBeanWrapper;
 		if (target == null) {
-			// fetch prototype target bean
+			// Fetch prototype target bean...
 			target = new BeanWrapperImpl(this.beanFactory.getBean(this.targetBeanName));
 		}
 
@@ -208,7 +208,7 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 	 * While this FactoryBean will often be used for singleton targets,
 	 * the invoked getters for the property path might return a new object
 	 * for each call, so we have to assume that we're not returning the
-	 * same object for each getObject() call.
+	 * same object for each {@link #getObject()} call.
 	 */
 	public boolean isSingleton() {
 		return false;

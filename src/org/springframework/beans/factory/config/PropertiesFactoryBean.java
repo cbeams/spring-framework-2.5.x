@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,9 +34,12 @@ import org.springframework.core.io.support.PropertiesLoaderSupport;
  * an exception will be thrown on initialization.
  *
  * <p>Can create a singleton or a new object on each request.
- * Default is singleton.
+ * Default is a singleton.
  *
  * @author Juergen Hoeller
+ * @see #setLocation
+ * @see #setProperties
+ * @see #setLocalOverride
  * @see java.util.Properties
  */
 public class PropertiesFactoryBean extends PropertiesLoaderSupport
@@ -48,15 +51,16 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 
 
 	/**
-	 * Set if a singleton should be created, or a new object
-	 * on each request else. Default is "true" (a singleton).
+	 * Set whether a shared 'singleton' Properties instance should be
+	 * created, or rather a new Properties instance on each request.
+	 * <p>Default is "true" (a shared singleton).
 	 */
 	public final void setSingleton(boolean singleton) {
 		this.singleton = singleton;
 	}
 
 	public final boolean isSingleton() {
-		return singleton;
+		return this.singleton;
 	}
 
 
@@ -82,12 +86,12 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 
 	/**
 	 * Template method that subclasses may override to construct the object
-	 * returned by this factory. Default returns the plain merged Properties.
-	 * <p>Invoked on initialization of this FactoryBean in case of
-	 * a singleton; else, on each <code>getObject()</code> call.
+	 * returned by this factory. The default implementation returns the
+	 * plain merged Properties instance.
+	 * <p>Invoked on initialization of this FactoryBean in case of a
+	 * shared singleton; else, on each {@link #getObject()} call.
 	 * @return the object returned by this factory
 	 * @throws IOException if an exception occured during properties loading
-	 * @see #getObject()
 	 * @see #mergeProperties()
 	 */
 	protected Object createInstance() throws IOException {
@@ -95,4 +99,3 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 	}
 
 }
-
