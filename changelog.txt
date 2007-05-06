@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.5 (2007-05-06)
+Changes in version 2.0.5 (2007-05-07)
 -------------------------------------
 
 Package org.springframework.aop
@@ -26,6 +26,8 @@ Package org.springframework.beans
 * added overloaded "rootBeanDefinition" factory methods with bean class name (instead of Class) to BeanDefinitionBuilder
 * an (undefined) null value returned from a NamespaceHandler's "decorate" method is treated as 'no decoration required'
 * XmlBeanDefinitionReader caches the DefaultNamespaceHandlerResolver instance, sharing it across multiple files
+* added "getBeanClassName" template method to AbstractSingleBeanDefinitionParser, as alternative to "getBeanClass"
+* added "scope" attribute to "util:list", "util:set", "util:map" and "util:properties", allowing for scoped collections
 
 Package org.springframework.context
 * factored out fine-grained protected template methods from AbstractApplicationContext's "refresh()" implementation
