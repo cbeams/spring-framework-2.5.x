@@ -3,6 +3,19 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.1 M1 (2007-05-11)
+--------------------------------------
+
+Package org.springframework.beans
+* introduced InitDestroyAnnotationBeanPostProcessor, processing configurable init and destroy annotations
+* introduced CommonAnnotationBeanPostProcessor, processing JSR-250's @PostConstructor, @PreDestroy and @Resource
+* introduced @Autowired annotation, indicating that a field, config method or constructor is supposed to be autowired
+* introduced AutowiredAnnotationBeanPostProcessor, processing the new @Autowired annotation
+
+Package org.springframework.jndi
+* added SimpleJndiBeanFactory to "jndi.support" package, providing a JNDI-based BeanFactory implementation
+
+
 Changes in version 2.0.5 (2007-05-07)
 -------------------------------------
 
