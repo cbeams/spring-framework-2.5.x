@@ -6,8 +6,8 @@
   This script requires a "lib" directory containing the necessary third party JAR files.
   See "project.properties" for the definitions of the properties used in this file.
 
-  Building Spring requires JDK 1.5+; the releases are built with Sun's JDK 1.5.0.
-	The test suite is able to run on JDK 1.4 and 1.3 as well.
+  Building Spring requires JDK 1.6+; the releases are built with Sun's JDK 1.6.0.
+	The test suite is able to run on JDK 1.5 and 1.4 as well.
 
   Note: To successfully run the tests on JDK < 1.5.0, you need to use Xerces or any
 	other JAXP parser that properly supports XML includes. A simple way to achieve this
@@ -1597,6 +1597,7 @@
 				<include name="lib/jpa/**"/>
 				<include name="lib/jruby/**"/>
 				<include name="lib/jsf/**"/>
+				<include name="lib/jsr250/**"/>
 				<include name="lib/junit/**"/>
 				<include name="lib/log4j/**"/>
 				<include name="lib/oc4j/**"/>
