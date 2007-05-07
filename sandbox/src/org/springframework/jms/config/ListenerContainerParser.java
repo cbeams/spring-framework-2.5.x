@@ -63,7 +63,7 @@ public class ListenerContainerParser implements BeanDefinitionParser {
 
 	private static final String TRANSACTION_MANAGER_ATTRIBUTE = "transaction-manager";
 
-	private static final String CONCURRENT_CONSUMERS_ATTRIBUTE = "concurrent-consumers";
+	private static final String CONCURRENCY_ATTRIBUTE = "concurrency";
 
 	private static final String ID_ATTRIBUTE = "id";
 
@@ -225,9 +225,14 @@ public class ListenerContainerParser implements BeanDefinitionParser {
 			containerDef.getPropertyValues().addPropertyValue("clientId", clientId);
 		}
 
-		String concurrentConsumers = ele.getAttribute(CONCURRENT_CONSUMERS_ATTRIBUTE);
-		if (StringUtils.hasText(concurrentConsumers)) {
-			containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", new Integer(concurrentConsumers));
+		String concurrency = ele.getAttribute(CONCURRENCY_ATTRIBUTE);
+		if (StringUtils.hasText(concurrency)) {
+			if (containerType.startsWith("default")) {
+				containerDef.getPropertyValues().addPropertyValue("maxConcurrentConsumers", new Integer(concurrency));
+			}
+			else {
+				containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", new Integer(concurrency));
+			}
 		}
 
 		String transactionManagerBeanName = ele.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE);

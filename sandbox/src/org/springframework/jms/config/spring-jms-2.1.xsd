@@ -82,10 +82,10 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="concurrent-consumers" type="xsd:int">
+			<xsd:attribute name="concurrency" type="xsd:int">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The number of concurrent consumers to start for this listener.
+	The maximum number of concurrent consumers to start for each listener.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -149,10 +149,10 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="concurrent-consumers" type="xsd:int">
+			<xsd:attribute name="concurrency" type="xsd:int">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The number of concurrent consumers to start for this listener.
+	The maximum number of concurrent sessions to activate for each listener.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

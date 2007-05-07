@@ -16,6 +16,8 @@
 
 package org.springframework.jms.listener.endpoint;
 
+import org.springframework.util.Assert;
+
 /**
  * @author Juergen Hoeller
  * @since 2.1
@@ -34,7 +36,7 @@ public class JmsActivationSpecConfig {
 
 	private String messageSelector;
 
-	private int concurrentConsumers = 1;
+	private int maxConcurrency = 1;
 
 
 	public void setDestinationName(String destinationName) {
@@ -85,12 +87,13 @@ public class JmsActivationSpecConfig {
 		return this.messageSelector;
 	}
 
-	public void setConcurrentConsumers(int concurrentConsumers) {
-		this.concurrentConsumers = concurrentConsumers;
+	public void setMaxConcurrency(int maxConcurrency) {
+		Assert.isTrue(maxConcurrency > 0, "'maxConcurrency' value must be at least 1 (one)");
+		this.maxConcurrency = maxConcurrency;
 	}
 
-	public int getConcurrentConsumers() {
-		return this.concurrentConsumers;
+	public int getMaxConcurrency() {
+		return this.maxConcurrency;
 	}
 
 }

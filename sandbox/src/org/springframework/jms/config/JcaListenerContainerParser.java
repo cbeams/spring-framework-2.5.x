@@ -56,7 +56,7 @@ public class JcaListenerContainerParser implements BeanDefinitionParser {
 
 	private static final String TRANSACTION_MANAGER_ATTRIBUTE = "transaction-manager";
 
-	private static final String CONCURRENT_CONSUMERS_ATTRIBUTE = "concurrent-consumers";
+	private static final String CONCURRENCY_ATTRIBUTE = "concurrency";
 
 	private static final String ID_ATTRIBUTE = "id";
 
@@ -197,9 +197,9 @@ public class JcaListenerContainerParser implements BeanDefinitionParser {
 			configDef.getPropertyValues().addPropertyValue("clientId", clientId);
 		}
 
-		String concurrentConsumers = ele.getAttribute(CONCURRENT_CONSUMERS_ATTRIBUTE);
-		if (StringUtils.hasText(concurrentConsumers)) {
-			configDef.getPropertyValues().addPropertyValue("concurrentConsumers", new Integer(concurrentConsumers));
+		String concurrency = ele.getAttribute(CONCURRENCY_ATTRIBUTE);
+		if (StringUtils.hasText(concurrency)) {
+			configDef.getPropertyValues().addPropertyValue("maxConcurrency", new Integer(concurrency));
 		}
 
 		containerDef.getPropertyValues().addPropertyValue("activationSpecConfig", configDef);
