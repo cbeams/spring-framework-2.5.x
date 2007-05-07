@@ -189,8 +189,6 @@
 			<fileset dir="${src.dir}">
 				<include name="*.hbm.xml"/>
 				<include name="toplink*.*"/>
-				<!-- JPA meta-inf -->
-				<include name="META-INF/*"/>
 			</fileset>
 		</copy>
 
