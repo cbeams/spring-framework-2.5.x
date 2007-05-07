@@ -160,8 +160,6 @@
 			<fileset dir="${webclasses.dir}">
 				<include name="*.hbm.xml"/>
 				<include name="toplink*.*"/>
-				<!-- JPA meta-inf -->
-				<include name="META-INF/*"/>
 			</fileset>
 		</delete>
 		<delete dir="${weblib.dir}"/>
@@ -194,6 +192,9 @@
 
 		<!-- petclinic-domain.jar -->
 		<jar jarfile="${weblib.dir}/${name}-domain.jar" compress="true">
+			<fileset dir="${src.dir}">
+				<include name="META-INF/*.xml"/>
+			</fileset>
 			<fileset dir="${build.dir}">
 				<include name="${domain.classes}"/>
 			</fileset>
@@ -319,7 +320,6 @@
 			<include name="WEB-INF/*.*"/>
 			<exclude name="WEB-INF/web.xml"/>
 			<include name="WEB-INF/classes/*.*"/>
-			<include name="WEB-INF/classes/META-INF/**"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
 			<include name="META-INF/*"/>
@@ -371,7 +371,6 @@
 			<include name="WEB-INF/*.*"/>
 			<exclude name="WEB-INF/web.xml"/>
 			<include name="WEB-INF/classes/*.*"/>
-			<include name="WEB-INF/classes/META-INF/**"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
 			<include name="META-INF/*"/>
@@ -431,7 +430,7 @@
 			<classpath refid="test-classpath"/>
 		</javac>
 
-		<copy todir="${build.dir}" preservelastmodified="true">
+		<copy todir="${testbuild.dir}" preservelastmodified="true">
 			<fileset dir="${src.dir}">
 				<include name="**/*.xml"/>
 			</fileset>
