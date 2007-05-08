@@ -6,14 +6,56 @@ http://www.springframework.org
 Changes in version 2.1 M1 (2007-05-11)
 --------------------------------------
 
+General
+* Spring is built on JDK 1.6 now, with support for common Java 6 APIs / Java EE 5 APIs
+* Spring requires JDK 1.4 or higher now, not supporting JDK 1.3 anymore (JDK 1.3 has reached its official end-of-life)
+* Spring's Hibernate3 support generally requires Hibernate 3.1 or higher (note: there's still Hibernate 2.1 support)
+
+Package org.springframework.aop
+* removed Perl5RegexpMethodPoint and RegexpMethodPointcutAdvisor's "perl5" flag (always using java.util.regex now)
+
 Package org.springframework.beans
 * introduced InitDestroyAnnotationBeanPostProcessor, processing configurable init and destroy annotations
-* introduced CommonAnnotationBeanPostProcessor, processing JSR-250's @PostConstructor, @PreDestroy and @Resource
+* introduced CommonAnnotationBeanPostProcessor, processing JSR-250's @PostConstruct, @PreDestroy and @Resource
 * introduced @Autowired annotation, indicating that a field, config method or constructor is supposed to be autowired
 * introduced AutowiredAnnotationBeanPostProcessor, processing the new @Autowired annotation
 
+Package org.springframework.context
+* introduced CandidateComponentProvider mechnism, for finding annotated component classes through scanning the classpath
+* introduced "context" XML schema namespace, providing convenient tags for annotation-based configuration and scanning
+* removed deprecated ConsoleListener class
+
+Package org.springframework.core
+* introduced the "core.typefilter" package, for ASM-based scanning of class files
+
+Package org.springframework.jca
+* introduced GenericMessageEndpointManager for JCA 1.5 message endpoint management, plus supporting infrastructure
+* introduced SpringContextResourceAdapter, for deploying a Spring application context as JCA 1.5 RAR file
+* added BootstrapContextAware interface, as a callback in a JCA 1.5 resource adapter environment
+
+Package org.springframework.jdbc
+* AbstractDataSource and DelegatingDataSource support the JDBC 4.0 Wrapper interface
+* added "streamAsLob" flag to DefaultLobHandler, allowing for explicit usage of the JDBC 4.0 setBlob/setClob variants
+
+Package org.springframework.jms
+* added JmsMessageEndpointManager, extending GenericMessageEndpointManager with the JmsActivationSpecFactory mechanism
+* introduced "jms" XML schema namespace, providing convenient tags for listener container configuration
+
 Package org.springframework.jndi
 * added SimpleJndiBeanFactory to "jndi.support" package, providing a JNDI-based BeanFactory implementation
+
+Package org.springframework.orm
+* Hibernate LocalSessionFactoryBean prefers a Hibernate 3.1 CurrentSessionContext now, instead of a SessionFactory proxy
+* Hibernate3 AbstractSessionFactoryBean's "exposeTransactionAwareSessionFactory" to refer to a SpringSessionContext now
+
+Package org.springframework.transaction
+* added TransactionFactory interface to "jta" subpackage, abstracting the creation of specific JTA Transaction objects
+* JtaTransactionManager and WebLogic/OC4JJtaTransactionManager implement the TransactionFactory interface accordingly
+* JtaTransactionManager autodetects and uses JTA 1.1's TransactionSynchronizationRegistry (e.g. on Java EE 5)
+
+Package org.springframework.web
+* removed deprecated BindInitializer and BindUtils from the "bind" package
+* removed deprecated "setFilterConfig" method from GenericFilterBean (no WebLogic 6.1 compatibility necessary anymore)
 
 
 Changes in version 2.0.5 (2007-05-07)
