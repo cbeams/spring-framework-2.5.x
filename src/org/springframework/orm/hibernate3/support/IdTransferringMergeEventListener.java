@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,6 @@ import org.hibernate.persister.entity.EntityPersister;
  * <p>Typically specified as entry for LocalSessionFactoryBean's "eventListeners"
  * map, with key "merge".
  *
- * <p><b>NOTE:</b> Due to incompatible changes in the Hibernate 3.1 event listener
- * API, this merge event listener will only work as-is with Hibernate 3.1+. Consider
- * copying this implementation and adapting it to the older API if you want to run
- * it against Hibernate 3.0.
- *
  * @author Juergen Hoeller
  * @since 1.2
  * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setEventListeners(java.util.Map)
@@ -58,7 +53,6 @@ public class IdTransferringMergeEventListener extends DefaultMergeEventListener 
 
 	/**
 	 * Hibernate 3.1 implementation of ID transferral.
-	 * Comment this out and the below in for a Hibernate 3.0 version of this class.
 	 */
 	protected void entityIsTransient(MergeEvent event, Map copyCache) {
 		super.entityIsTransient(event, copyCache);
@@ -69,22 +63,5 @@ public class IdTransferringMergeEventListener extends DefaultMergeEventListener 
 		// Set id on original object (which remains detached).
 		persister.setIdentifier(event.getOriginal(), id, session.getEntityMode());
 	}
-
-	/**
-	 * Hibernate 3.0 implementation of ID transferral.
-	 * Comment this in and the above out for a Hibernate 3.0 version of this class.
-	 */
-	/*
-	protected Object entityIsTransient(MergeEvent event, Map copyCache) {
-		Object mergedCopy = super.entityIsTransient(event, copyCache);
-		SessionImplementor session = event.getSession();
-		EntityPersister persister = session.getEntityPersister(event.getEntityName(), event.getEntity());
-		// Extract id from merged copy (which is currently registered with Session).
-		Serializable id = persister.getIdentifier(mergedCopy, session.getEntityMode());
-		// Set id on original object (which remains detached).
-		persister.setIdentifier(event.getOriginal(), id, session.getEntityMode());
-		return mergedCopy;
-	}
-	*/
 
 }

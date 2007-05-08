@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,15 +58,10 @@ import org.springframework.beans.factory.InitializingBean;
  * Alternatively, specify a bean id (or name) attribute for the inner bean,
  * instead of the "filterName" property.
  *
- * <p><b>NOTE:</b> As of Spring 2.0, this FactoryBean uses Hibernate 3.1 API.
- * (Unfortunately, Hibernate 3.1 changed its FilterDefinition class in a
- * non-backwards-compatible fashion.) Consider defining filters within Hibernate's
- * own configuration file instead of through this FactoryBean, if you need to
- * keep running on Hibernate 3.0.
- *
  * @author Juergen Hoeller
  * @since 1.2
- * @see LocalSessionFactoryBean#setFilterDefinitions(org.hibernate.engine.FilterDefinition[])
+ * @see org.hibernate.engine.FilterDefinition
+ * @see LocalSessionFactoryBean#setFilterDefinitions
  */
 public class FilterDefinitionFactoryBean implements FactoryBean, BeanNameAware, InitializingBean {
 
