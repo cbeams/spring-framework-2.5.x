@@ -406,6 +406,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * JDBC Connection as a transactional Session, if applicable), a pre-bound
 	 * Session in case of "allowCreate" turned off, and a pre-bound or new Session
 	 * else (new only if no transactional or otherwise pre-bound Session exists).
+	 * @return the Session to use (never <code>null</code>)
 	 * @see SessionFactoryUtils#getSession
 	 * @see SessionFactoryUtils#getNewSession
 	 * @see #setAlwaysUseNewSession
