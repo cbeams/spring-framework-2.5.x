@@ -34,7 +34,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -181,24 +180,6 @@ public abstract class GenericFilterBean implements
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Filter '" + filterConfig.getFilterName() + "' configured successfully");
-		}
-	}
-
-	/**
-	 * Alternative way of initializing this filter.
-	 * Used by Servlet Filter version that shipped with WebLogic 6.1.
-	 * @param filterConfig the configuration for this filter
-	 * @throws BeanInitializationException wrapping a ServletException
-	 * thrown by the <code>init</code> method
-	 * @deprecated as of Spring 2.0; to be removed in Spring 2.1
-	 * @see #init(javax.servlet.FilterConfig)
-	 */
-	public final void setFilterConfig(FilterConfig filterConfig) {
-		try {
-			init(filterConfig);
-		}
-		catch (ServletException ex) {
-			throw new BeanInitializationException("Could not initialize filter bean", ex);
 		}
 	}
 

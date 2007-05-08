@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,8 @@ import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.interceptor.SideEffectBean;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
-import org.springframework.aop.support.DynamicMethodMatcherPointcutAdvisor;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.DynamicMethodMatcherPointcut;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.Person;
 import org.springframework.beans.TestBean;
@@ -49,7 +50,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ConsoleListener;
+import org.springframework.context.TestListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.SerializationTestUtils;
 
@@ -63,7 +64,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 
 	protected void setUp() throws Exception {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
-		parent.registerBeanDefinition("target2", new RootBeanDefinition(ConsoleListener.class));
+		parent.registerBeanDefinition("target2", new RootBeanDefinition(TestListener.class));
 		this.factory = new XmlBeanFactory(new ClassPathResource("proxyFactoryTests.xml", getClass()), parent);
 	}
 
@@ -630,7 +631,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 	/**
 	 * Fires only on void methods. Saves list of methods intercepted.
 	 */
-	public static class PointcutForVoid extends DynamicMethodMatcherPointcutAdvisor {
+	public static class PointcutForVoid extends DefaultPointcutAdvisor {
 		
 		public static List methodNames = new LinkedList();
 		
@@ -639,17 +640,17 @@ public class ProxyFactoryBeanTests extends TestCase {
 		}
 		
 		public PointcutForVoid() {
-			super( new MethodInterceptor() {
+			setAdvice(new MethodInterceptor() {
 				public Object invoke(MethodInvocation invocation) throws Throwable {
 					methodNames.add(invocation.getMethod().getName());
 					return invocation.proceed();
 				}
 			});
-		}
-		
-		/** Should fire only if it returns null */
-		public boolean matches(Method m, Class targetClass, Object[] args) {//, AttributeRegistry attributeRegistry) {
-			return m.getReturnType() == Void.TYPE;
+			setPointcut(new DynamicMethodMatcherPointcut() {
+				public boolean matches(Method m, Class targetClass, Object[] args) {
+					return m.getReturnType() == Void.TYPE;
+				}
+			});
 		}
 	}
 
