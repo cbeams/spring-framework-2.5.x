@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://www.springframework.org/schema/context"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+        targetNamespace="http://www.springframework.org/schema/context"
+        elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
+		
+	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
+
+	<xsd:element name="annotation-config"/>
+	
+	<xsd:element name="annotation-scan">
+		<xsd:annotation>
+			<xsd:documentation>
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="exclude-filter" type="filterType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="include-filter" type="filterType" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:sequence>
+			<xsd:attribute name="base-package" type="xsd:string"/>
+			<xsd:attribute name="use-default-filters" type="xsd:boolean" default="true"/>
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:complexType name="filterType">
+		<xsd:attribute name="type" use="required">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="ASSIGNABLE_TYPE"/>
+					<xsd:enumeration value="ANNOTATION"/>
+					<xsd:enumeration value="INHERITABLE_ANNOTATION"/>
+					<xsd:enumeration value="REGEX_PATTERN"/>
+					<xsd:enumeration value="ASPECTJ_PATTERN"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="expression" type="xsd:string" use="required"/>
+	</xsd:complexType>
+
+</xsd:schema>
