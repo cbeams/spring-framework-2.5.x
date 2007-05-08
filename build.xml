@@ -23,16 +23,13 @@
 
 	<!--
 		Set up properties that indicate whether we're building on JDK 1.5.
-		Currently simply checks whether the Java version is not 1.3 or 1.4,
+		Currently simply checks whether the Java version is not 1.4,
 		due to the lack of a greater-than comparator in Ant.
 	-->
 
 	<condition property="tiger.available">
 		<not>
-			<or>
-				<equals arg1="${ant.java.version}" arg2="1.3"/>
-				<equals arg1="${ant.java.version}" arg2="1.4"/>
-			</or>
+			<equals arg1="${ant.java.version}" arg2="1.4"/>
 		</not>
 	</condition>
 
@@ -132,7 +129,7 @@
 		<mkdir dir="${target.classes.dir}"/>
 		<mkdir dir="${target.classes.dir}/META-INF"/>
 
-		<javac destdir="${target.classes.dir}" source="1.3" target="1.3" debug="${debug}"
+		<javac destdir="${target.classes.dir}" source="1.3" target="1.4" debug="${debug}"
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<!-- Include Commons Attributes generated Java sources -->
@@ -600,7 +597,7 @@
 
 		<mkdir dir="${target.mockclasses.dir}"/>
 
-		<javac destdir="${target.mockclasses.dir}" source="1.3" target="1.3" debug="${debug}"
+		<javac destdir="${target.mockclasses.dir}" source="1.3" target="1.4" debug="${debug}"
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${mock.dir}"/>
 			<classpath refid="all-libs"/>
@@ -707,13 +704,19 @@
 		<copy file="${src.dir}/org/springframework/aop/config/spring-aop-2.0.xsd"
 				todir="${dist.dir}/resources" preservelastmodified="true"/>
 
-		<copy file="${src.dir}/org/springframework/ejb/config/spring-jee-2.0.xsd"
+		<copy file="${src.dir}/org/springframework/context/config/spring-context-2.1.xsd"
 				todir="${dist.dir}/resources" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/scripting/config/spring-lang-2.0.xsd"
 				todir="${dist.dir}/resources" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/transaction/config/spring-tx-2.0.xsd"
+				todir="${dist.dir}/resources" preservelastmodified="true"/>
+
+		<copy file="${src.dir}/org/springframework/ejb/config/spring-jee-2.0.xsd"
+				todir="${dist.dir}/resources" preservelastmodified="true"/>
+
+		<copy file="${src.dir}/org/springframework/jms/config/spring-jms-2.1.xsd"
 				todir="${dist.dir}/resources" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/web/servlet/tags/spring.tld"
@@ -750,7 +753,7 @@
 		<delete dir="${javadoc.dir}" failonerror="false"/>
 		<mkdir dir="${javadoc.dir}"/>
 
-		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" windowtitle="Spring Framework API 2.0"
+		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" windowtitle="Spring Framework API 2.1"
 				source="1.5" access="protected" author="true" version="true" use="true"
 				defaultexcludes="true" stylesheetfile="${doc.dir}/stylesheet.css"
 				overview="${doc.dir}/overview.html"
@@ -760,7 +763,7 @@
 			<arg value="-J-XX:MaxPermSize=128m"/>
 			<arg value="-J-Dhttp.proxyHost=${javadoc.proxyhost}"/>
 			<arg value="-J-Dhttp.proxyPort=${javadoc.proxyport}"/>
-			<doctitle><![CDATA[<h1>Spring Framework API 2.0</h1>]]></doctitle>
+			<doctitle><![CDATA[<h1>Spring Framework API 2.1</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Copyright &copy; 2002-2007 <a href="http://www.springframework.org/" target="_top">The Spring Framework</a>.</i>]]></bottom>
 			<classpath refid="all-libs"/>
 			<packageset dir="${src.dir}">
@@ -775,8 +778,8 @@
 			<packageset dir="${tiger.mock.dir}">
 				<include name="org/springframework/**"/>
 			</packageset>
+			<link href="http://java.sun.com/javase/6/docs/api"/>
 			<link href="http://java.sun.com/j2ee/1.4/docs/api"/>
-			<link href="http://java.sun.com/j2se/1.5.0/docs/api"/>
 			<link href="http://aopalliance.sourceforge.net/doc"/>
 			<!-- Caucho Burlap/Hessian -->
 			<link href="http://cglib.sourceforge.net/apidocs"/>
@@ -840,7 +843,7 @@
 
 		<mkdir dir="${target.testclasses.dir}"/>
 
-		<javac destdir="${target.testclasses.dir}" source="1.3" target="1.3" debug="${debug}"
+		<javac destdir="${target.testclasses.dir}" source="1.3" target="1.4" debug="${debug}"
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${test.dir}"/>
 			<!-- Include Commons Attributes generated Java sources -->
@@ -1060,7 +1063,7 @@
 
 		<mkdir dir="${target.clover.dir}"/>
 
-		<javac destdir="${target.clover.dir}" source="1.3" target="1.3" debug="${debug}"
+		<javac destdir="${target.clover.dir}" source="1.3" target="1.4" debug="${debug}"
 				deprecation="false" optimize="false" failonerror="true"
 				compiler="modern" fork="yes" memorymaximumsize="256M">
 			<src path="${src.dir}"/>
