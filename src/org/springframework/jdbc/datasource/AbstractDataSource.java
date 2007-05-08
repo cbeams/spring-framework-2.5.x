@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,11 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.Assert;
+
 /**
- * Abstract base class for Spring's DataSource implementations,
- * taking care of the padding.
+ * Abstract base class for Spring's {@link javax.sql.DataSource}
+ * implementations, taking care of the padding.
  *
  * @author Juergen Hoeller
  * @since 07.05.2003
@@ -64,6 +66,24 @@ public abstract class AbstractDataSource implements DataSource {
 	 */
 	public void setLogWriter(PrintWriter pw) throws SQLException {
 		throw new UnsupportedOperationException("setLogWriter");
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of JDBC 4.0's Wrapper interface
+	//---------------------------------------------------------------------
+
+	public Object unwrap(Class iface) throws SQLException {
+		Assert.notNull(iface, "Interface argument must not be null");
+		if (!DataSource.class.equals(iface)) {
+			throw new SQLException("DataSource of type [" + getClass().getName() +
+					"] can only be unwrapped as [javax.sql.DataSource], not as [" + iface.getName());
+		}
+		return this;
+	}
+
+	public boolean isWrapperFor(Class iface) throws SQLException {
+		return DataSource.class.equals(iface);
 	}
 
 }

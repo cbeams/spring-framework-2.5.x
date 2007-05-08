@@ -104,4 +104,17 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 		getTargetDataSource().setLoginTimeout(seconds);
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of JDBC 4.0's Wrapper interface
+	//---------------------------------------------------------------------
+
+	public Object unwrap(Class iface) throws SQLException {
+		return getTargetDataSource().unwrap(iface);
+	}
+
+	public boolean isWrapperFor(Class iface) throws SQLException {
+		return getTargetDataSource().isWrapperFor(iface);
+	}
+
 }
