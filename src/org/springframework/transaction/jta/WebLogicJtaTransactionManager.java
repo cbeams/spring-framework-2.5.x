@@ -331,4 +331,42 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		}
 	}
 
+
+	public Transaction createTransaction(String name, int timeout) throws NotSupportedException, SystemException {
+		if (this.weblogicUserTransactionAvailable && name != null) {
+			try {
+				if (timeout >= 0) {
+					this.beginWithNameAndTimeoutMethod.invoke(getUserTransaction(), new Object[] {name, new Integer(timeout)});
+				}
+				else {
+					this.beginWithNameMethod.invoke(getUserTransaction(), new Object[] {name});
+				}
+			}
+			catch (InvocationTargetException ex) {
+				if (ex.getTargetException() instanceof NotSupportedException) {
+					throw (NotSupportedException) ex.getTargetException();
+				}
+				else if (ex.getTargetException() instanceof SystemException) {
+					throw (SystemException) ex.getTargetException();
+				}
+				else if (ex.getTargetException() instanceof RuntimeException) {
+					throw (RuntimeException) ex.getTargetException();
+				}
+				else {
+					throw new SystemException(
+							"WebLogic's begin() method failed with an unexpected error: " + ex.getTargetException());
+				}
+			}
+			catch (Exception ex) {
+				throw new SystemException("Could not invoke WebLogic's UserTransaction.begin() method: " + ex);
+			}
+			return getTransactionManager().getTransaction();
+		}
+
+		else {
+			// No name specified - standard JTA is sufficient.
+			return super.createTransaction(name, timeout);
+		}
+	}
+
 }

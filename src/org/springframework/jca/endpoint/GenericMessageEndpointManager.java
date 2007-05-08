@@ -236,7 +236,9 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 					this.resourceAdapter.endpointActivation(this.messageEndpointFactory, this.activationSpec);
 				}
 				catch (ResourceException ex) {
-					throw new IllegalStateException("Could not activate message endpoint", ex);
+					IllegalStateException wrapped = new IllegalStateException("Could not activate message endpoint");
+					wrapped.initCause(ex);
+					throw wrapped;
 				}
 				this.running = true;
 			}

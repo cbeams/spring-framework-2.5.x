@@ -151,7 +151,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.orm.hibernate.LocalSessionFactoryBean#setJtaTransactionManager
  */
 public class JtaTransactionManager extends AbstractPlatformTransactionManager
-		implements InitializingBean, Serializable {
+		implements TransactionFactory, InitializingBean, Serializable {
 
 	/**
 	 * Default JNDI location for the JTA UserTransaction. Many J2EE servers
@@ -942,6 +942,21 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 					"processing Spring after-completion callbacks with outcome status 'unknown'");
 			invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
 		}
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of TransactionFactory interface
+	//---------------------------------------------------------------------
+
+	public Transaction createTransaction(String name, int timeout) throws NotSupportedException, SystemException {
+		TransactionManager tm = getTransactionManager();
+		Assert.state(tm != null, "No JTA TransactionManager available");
+		if (timeout >= 0) {
+			tm.setTransactionTimeout(timeout);
+		}
+		tm.begin();
+		return tm.getTransaction();
 	}
 
 

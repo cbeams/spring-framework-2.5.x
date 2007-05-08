@@ -210,4 +210,41 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 		}
 	}
 
+
+	public Transaction createTransaction(String name, int timeout) throws NotSupportedException, SystemException {
+		if (this.beginWithNameMethod != null && name != null) {
+			UserTransaction ut = getUserTransaction();
+			if (timeout >= 0) {
+				ut.setTransactionTimeout(timeout);
+			}
+			try {
+				this.beginWithNameMethod.invoke(ut, new Object[] {name});
+			}
+			catch (InvocationTargetException ex) {
+				if (ex.getTargetException() instanceof NotSupportedException) {
+					throw (NotSupportedException) ex.getTargetException();
+				}
+				else if (ex.getTargetException() instanceof SystemException) {
+					throw (SystemException) ex.getTargetException();
+				}
+				else if (ex.getTargetException() instanceof RuntimeException) {
+					throw (RuntimeException) ex.getTargetException();
+				}
+				else {
+					throw new SystemException(
+							"OC4J's begin(String) method failed with an unexpected error: " + ex.getTargetException());
+				}
+			}
+			catch (Exception ex) {
+				throw new SystemException("Could not invoke OC4J's UserTransaction.begin(String) method: " + ex);
+			}
+			return getTransactionManager().getTransaction();
+		}
+
+		else {
+			// No name specified - standard JTA is sufficient.
+			return super.createTransaction(name, timeout);
+		}
+	}
+
 }
