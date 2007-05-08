@@ -29,7 +29,6 @@ import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.CallCounter;
@@ -50,10 +49,6 @@ import org.springframework.test.AssertThrows;
 public class GroovyScriptFactoryTests extends TestCase {
 
 	public void testStaticScript() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
 
 		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Calculator.class)).contains("calculator"));
@@ -82,10 +77,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testStaticPrototypeScript() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
@@ -104,10 +95,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testStaticScriptWithInstance() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
 		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerInstance"));
 		Messenger messenger = (Messenger) ctx.getBean("messengerInstance");
@@ -121,10 +108,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testNonStaticScript() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyRefreshableContext.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
@@ -142,10 +125,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testNonStaticPrototypeScript() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyRefreshableContext.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
@@ -169,10 +148,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testScriptCompilationException() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		try {
 			new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyBrokenContext.xml");
 			fail("Should throw exception for broken script file");
@@ -183,10 +158,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testScriptedClassThatDoesNotHaveANoArgCtor() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		MockControl mock = MockControl.createControl(ScriptSource.class);
 		ScriptSource script = (ScriptSource) mock.getMock();
 		script.getScriptAsString();
@@ -205,10 +176,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testScriptedClassThatHasNoPublicNoArgCtor() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		MockControl mock = MockControl.createControl(ScriptSource.class);
 		ScriptSource script = (ScriptSource) mock.getMock();
 		script.getScriptAsString();
@@ -227,10 +194,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testWithTwoClassesDefinedInTheOneGroovyFile_CorrectClassFirst() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("twoClassesCorrectOneFirst.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 		assertNotNull(messenger);
@@ -241,10 +204,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testWithTwoClassesDefinedInTheOneGroovyFile_WrongClassFirst() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		try {
 			ApplicationContext ctx = new ClassPathXmlApplicationContext("twoClassesWrongOneFirst.xml", getClass());
 			ctx.getBean("messenger", Messenger.class);
@@ -256,10 +215,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		try {
 			new GroovyScriptFactory(null);
 			fail("Must have thrown exception by this point.");
@@ -269,10 +224,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		try {
 			new GroovyScriptFactory("");
 			fail("Must have thrown exception by this point.");
@@ -282,10 +233,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		try {
 			new GroovyScriptFactory("\n   ");
 			fail("Must have thrown exception by this point.");
@@ -295,10 +242,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testWithInlineScriptWithLeadingWhitespace() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		try {
 			new ClassPathXmlApplicationContext("lwspBadGroovyContext.xml", getClass());
 			fail("Must have thrown a BeanCreationException ('inline:' prefix was preceded by whitespace");
@@ -309,10 +252,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testGetScriptedObjectDoesNotChokeOnNullInterfacesBeingPassedIn() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		MockControl mock = MockControl.createControl(ScriptSource.class);
 		ScriptSource scriptSource = (ScriptSource) mock.getMock();
 		scriptSource.getScriptAsString();
@@ -326,10 +265,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testGetScriptedObjectDoesChokeOnNullScriptSourceBeingPassedIn() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		GroovyScriptFactory factory = new GroovyScriptFactory("a script source locator (doesn't matter here)");
 		try {
 			factory.getScriptedObject(null, null);
@@ -340,10 +275,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testResourceScriptFromTag() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 		CallCounter countingAspect = (CallCounter) ctx.getBean("getMessageAspect");
@@ -359,10 +290,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testPrototypeScriptFromTag() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
@@ -378,10 +305,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testInlineScriptFromTag() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Calculator calculator = (Calculator) ctx.getBean("calculator");
 		assertNotNull(calculator);
@@ -389,10 +312,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testRefreshableFromTag() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("refreshableMessenger"));
 
@@ -413,10 +332,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	 * passed to a scripted bean :(
 	 */
 	public void testCanPassInMoreThanOneProperty() {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-multiple-properties.xml", getClass());
 		ContextScriptBean bean = (ContextScriptBean) ctx.getBean("bean");
 		assertEquals("The first property ain't bein' injected.", "Sophie Marceau", bean.getName());
@@ -433,10 +348,6 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 	
 	private void testMetaClass(final String xmlFile) {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		// expect the exception we threw in the custom metaclass to show it got invoked
 		AssertThrows at = new AssertThrows(IllegalStateException.class) {
 			public void test() throws Exception {

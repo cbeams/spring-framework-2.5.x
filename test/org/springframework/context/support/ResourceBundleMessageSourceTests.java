@@ -72,8 +72,6 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 		ac.registerSingleton("messageSource", clazz, pvs);
 		ac.refresh();
 
-		expectGermanFallback = expectGermanFallback && (JdkVersion.getMajorJavaVersion() > JdkVersion.JAVA_13);
-
 		Locale.setDefault(expectGermanFallback ? Locale.GERMAN : Locale.CANADA);
 		assertEquals("message1", ac.getMessage("code1", null, Locale.ENGLISH));
 		assertEquals(fallbackToSystemLocale && expectGermanFallback ? "nachricht2" : "message2",

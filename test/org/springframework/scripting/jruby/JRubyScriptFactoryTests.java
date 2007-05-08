@@ -25,7 +25,6 @@ import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.JdkVersion;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.ConfigurableMessenger;
 import org.springframework.scripting.Messenger;
@@ -46,10 +45,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 
 	public void testStaticScript() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContext.xml", getClass());
 		Calculator calc = (Calculator) ctx.getBean("calculator");
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
@@ -68,10 +63,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testNonStaticScript() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyRefreshableContext.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
@@ -89,10 +80,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testScriptCompilationException() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		try {
 			new ClassPathXmlApplicationContext("jrubyBrokenContext.xml", getClass());
 			fail("Should throw exception for broken script file");
@@ -103,10 +90,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		try {
 			new JRubyScriptFactory(null, new Class[]{Messenger.class});
 			fail("Must have thrown exception by this point.");
@@ -116,10 +99,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		try {
 			new JRubyScriptFactory("", new Class[]{Messenger.class});
 			fail("Must have thrown exception by this point.");
@@ -129,10 +108,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		try {
 			new JRubyScriptFactory("\n   ", new Class[]{Messenger.class});
 			fail("Must have thrown exception by this point.");
@@ -142,10 +117,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithNullScriptInterfacesArray() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		try {
 			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, null);
 			fail("Must have thrown exception by this point.");
@@ -155,10 +126,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testCtorWithEmptyScriptInterfacesArray() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		try {
 			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, new Class[]{});
 			fail("Must have thrown exception by this point.");
@@ -168,10 +135,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testResourceScriptFromTag() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 		assertEquals("Hello World!", messenger.getMessage());
@@ -179,10 +142,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testPrototypeScriptFromTag() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
@@ -198,10 +157,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testInlineScriptFromTag() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		Calculator calculator = (Calculator) ctx.getBean("calculator");
 		assertNotNull(calculator);
@@ -209,10 +164,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testRefreshableFromTag() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
 		assertEquals("Hello World!", messenger.getMessage());
@@ -220,10 +171,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testThatMultipleScriptInterfacesAreSupported() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("calculatingMessenger");
 		assertEquals("Hello World!", messenger.getMessage());
@@ -234,10 +181,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testWithComplexArg() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContext.xml", getClass());
 		Printer printer = (Printer) ctx.getBean("printer");
 		CountingPrintable printable = new CountingPrintable();
@@ -246,10 +189,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testWithPrimitiveArgsInReturnTypeAndParameters() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContextForPrimitives.xml", getClass());
 		PrimitiveAdder adder = (PrimitiveAdder) ctx.getBean("adder");
 		assertEquals(2, adder.addInts(1, 1));
@@ -263,10 +202,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testWithWrapperArgsInReturnTypeAndParameters() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContextForWrappers.xml", getClass());
 		WrapperAdder adder = (WrapperAdder) ctx.getBean("adder");
 
@@ -322,10 +257,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testAOP() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-aop.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 		assertEquals(new StringBuffer("Hello World!").reverse().toString(), messenger.getMessage());

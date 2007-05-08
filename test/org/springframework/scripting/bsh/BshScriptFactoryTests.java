@@ -268,10 +268,6 @@ public class BshScriptFactoryTests extends TestCase {
 	}
 
 	public void testPrototypeScriptFromTag() throws Exception {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");

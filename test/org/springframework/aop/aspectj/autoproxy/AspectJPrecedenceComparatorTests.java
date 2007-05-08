@@ -32,7 +32,6 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.core.JdkVersion;
 
 /**
  * @author Adrian Colyer
@@ -84,10 +83,6 @@ public class AspectJPrecedenceComparatorTests extends TestCase {
 
 
 	public void testSameAspectNoAfterAdvice() {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		Advisor advisor1 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someAspect");
 		assertEquals("advisor1 sorted before advisor2", -1, this.comparator.compare(advisor1, advisor2));
@@ -98,10 +93,6 @@ public class AspectJPrecedenceComparatorTests extends TestCase {
 	}
 
 	public void testSameAspectAfterAdvice() {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		Advisor advisor1 = createAspectJAfterAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJAroundAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someAspect");
 		assertEquals("advisor2 sorted before advisor1", 1, this.comparator.compare(advisor1, advisor2));
@@ -112,20 +103,12 @@ public class AspectJPrecedenceComparatorTests extends TestCase {
 	}
 
 	public void testSameAspectOneOfEach() {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		Advisor advisor1 = createAspectJAfterAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someAspect");
 		assertEquals("advisor1 and advisor2 not comparable", 0, this.comparator.compare(advisor1, advisor2));
 	}
 
 	public void testSameAdvisorPrecedenceDifferentAspectNoAfterAdvice() {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		Advisor advisor1 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someOtherAspect");
 		assertEquals("nothing to say about order here", 0, this.comparator.compare(advisor1, advisor2));
@@ -136,10 +119,6 @@ public class AspectJPrecedenceComparatorTests extends TestCase {
 	}
 
 	public void testSameAdvisorPrecedenceDifferentAspectAfterAdvice() {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		Advisor advisor1 = createAspectJAfterAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJAroundAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someOtherAspect");
 		assertEquals("nothing to say about order here", 0, this.comparator.compare(advisor1, advisor2));
@@ -150,10 +129,6 @@ public class AspectJPrecedenceComparatorTests extends TestCase {
 	}
 
 	public void testHigherAdvisorPrecedenceNoAfterAdvice() {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		Advisor advisor1 = createSpringAOPBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER);
 		Advisor advisor2 = createAspectJBeforeAdvice(LOW_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someOtherAspect");
 		assertEquals("advisor1 sorted before advisor2", -1, this.comparator.compare(advisor1, advisor2));
@@ -164,10 +139,6 @@ public class AspectJPrecedenceComparatorTests extends TestCase {
 	}
 
 	public void testHigherAdvisorPrecedenceAfterAdvice() {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		Advisor advisor1 = createAspectJAfterAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJAroundAdvice(LOW_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someOtherAspect");
 		assertEquals("advisor1 sorted before advisor2", -1, this.comparator.compare(advisor1, advisor2));
@@ -178,10 +149,6 @@ public class AspectJPrecedenceComparatorTests extends TestCase {
 	}
 
 	public void testLowerAdvisorPrecedenceNoAfterAdvice() {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		Advisor advisor1 = createAspectJBeforeAdvice(LOW_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someOtherAspect");
 		assertEquals("advisor1 sorted after advisor2", 1, this.comparator.compare(advisor1, advisor2));
@@ -192,10 +159,6 @@ public class AspectJPrecedenceComparatorTests extends TestCase {
 	}
 
 	public void testLowerAdvisorPrecedenceAfterAdvice() {
-		if (!JdkVersion.isAtLeastJava14()) {
-			return;
-		}
-
 		Advisor advisor1 = createAspectJAfterAdvice(LOW_PRECEDENCE_ADVISOR_ORDER, EARLY_ADVICE_DECLARATION_ORDER, "someAspect");
 		Advisor advisor2 = createAspectJAroundAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER, LATE_ADVICE_DECLARATION_ORDER, "someOtherAspect");
 		assertEquals("advisor1 sorted after advisor2", 1, this.comparator.compare(advisor1, advisor2));
