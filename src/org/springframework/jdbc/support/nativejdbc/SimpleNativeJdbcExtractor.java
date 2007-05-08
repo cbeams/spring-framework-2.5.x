@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,8 @@
 
 package org.springframework.jdbc.support.nativejdbc;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
- * Simple implementation of the NativeJdbcExtractor interface.
+ * Simple implementation of the {@link NativeJdbcExtractor} interface.
  * Assumes a pool that wraps Connection handles but not DatabaseMetaData:
  * In this case, the underlying native Connection can be retrieved by simply
  * calling <code>conHandle.getMetaData().getConnection()</code>.
@@ -43,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * <p>SimpleNativeJdbcExtractor is a common choice for use with OracleLobHandler,
  * which just needs Connection unwrapping via the
- * <code>getNativeConnectionFromStatement</code> method. This usage will work
+ * {@link #getNativeConnectionFromStatement} method. This usage will work
  * with almost any connection pool. Known to work are, for example:
  * <ul>
  * <li>Caucho Resin 2.1.x, 3.0.x
@@ -68,13 +62,10 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Juergen Hoeller
  * @since 05.12.2003
- * @see java.sql.DatabaseMetaData#getConnection
- * @see #getNativeConnection
  * @see #setNativeConnectionNecessaryForNativeStatements
  * @see #setNativeConnectionNecessaryForNativePreparedStatements
  * @see #setNativeConnectionNecessaryForNativeCallableStatements
- * @see CommonsDbcpNativeJdbcExtractor
- * @see JBossNativeJdbcExtractor
+ * @see Jdbc4NativeJdbcExtractor
  * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
  * @see org.springframework.jdbc.support.lob.OracleLobHandler#setNativeJdbcExtractor
  */
@@ -104,7 +95,7 @@ public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
-		return nativeConnectionNecessaryForNativeStatements;
+		return this.nativeConnectionNecessaryForNativeStatements;
 	}
 
 	/**
@@ -124,7 +115,7 @@ public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
-		return nativeConnectionNecessaryForNativePreparedStatements;
+		return this.nativeConnectionNecessaryForNativePreparedStatements;
 	}
 
 	/**
@@ -144,7 +135,7 @@ public class SimpleNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
-		return nativeConnectionNecessaryForNativeCallableStatements;
+		return this.nativeConnectionNecessaryForNativeCallableStatements;
 	}
 
 }
