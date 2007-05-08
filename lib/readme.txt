@@ -334,11 +334,6 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JPA support with OpenJPA as provider
 
-* oro/jakarta-oro-2.0.8.jar
-- Jakarta ORO 2.0.8 (http://jakarta.apache.org/oro)
-- required for building the framework
-- required at runtime when using Spring's RegexpMethodPointcut
-
 * poi/poi-2.5.1.jar
 - Apache POI 2.5.1 (http://jakarta.apache.org/poi)
 - required for building the framework

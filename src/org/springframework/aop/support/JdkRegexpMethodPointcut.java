@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * Java 1.4+ regular expression pointcut. JavaBean properties are:
+ * Regular expression pointcut based on the <code>java.util.regex</code> package.
+ * Supports the following JavaBean properties:
  * <ul>
- * <li>pattern: Java 1.4 regular expression for the fully-qualified method names to match
+ * <li>pattern: regular expression for the fully-qualified method names to match
  * <li>patterns: alternative property taking a String array of patterns. The result will
  * be the union of these patterns.
  * </ul>
@@ -32,29 +33,25 @@ import java.util.regex.PatternSyntaxException;
  * <code>.*get.*</code> will match com.mycom.Foo.getBar().
  * <code>get.*</code> will not.
  *
- * <p>Requires JDK 1.4+, as it builds on the <code>java.util.regex</code> package.
- * As alternative on JDK 1.3 or for Perl5-style regular expression parsing,
- * consider Perl5RegexpMethodPointcut.
- *
  * @author Dmitriy Kopylenko
  * @author Rob Harrop
  * @since 1.1
- * @see Perl5RegexpMethodPointcut
  */
 public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	
 	/** 
-	 * Java 1.4 compiled form of the patterns.
+	 * Compiled form of the patterns.
 	 */
 	private transient Pattern[] compiledPatterns = new Pattern[0];
 
 	/** 
-	 * Java 1.4 compiled form of the exclusion patterns.
+	 * Compiled form of the exclusion patterns.
 	 */
 	private transient Pattern[] compiledExclusionPatterns = new Pattern[0];
 
+
 	/**
-	 * Initialize Java 1.4 {@link Pattern Patterns} from the supplied <code>String[]</code>.
+	 * Initialize {@link Pattern Patterns} from the supplied <code>String[]</code>.
 	 */
 	protected void initPatternRepresentation(String[] patterns) throws PatternSyntaxException {
 		this.compiledPatterns = compilePatterns(patterns);
@@ -70,7 +67,7 @@ public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	}
 
 	/**
-	 * Initialize Java 1.4 exclusion {@link Pattern Patterns} from the supplied <code>String[]</code>.
+	 * Initialize exclusion {@link Pattern Patterns} from the supplied <code>String[]</code>.
 	 */
 	protected void initExcludedPatternRepresentation(String[] excludedPatterns) throws IllegalArgumentException {
 		this.compiledExclusionPatterns = compilePatterns(excludedPatterns);
