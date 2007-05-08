@@ -5,7 +5,7 @@
   <artifactId>spring-jmx</artifactId>
   <packaging>jar</packaging>
   <name>Spring Framework: JMX</name>
-  <version>2.0.5</version>
+  <version>2.0.6</version>
   <description>Spring Framework: JMX</description>
   <url>http://www.springframework.org</url>
   <licenses>
@@ -18,7 +18,7 @@
   <scm>
     <connection>scm:cvs:pserver:anonymous:@springframework.cvs.sourceforge.net:/cvsroot/springframework/spring</connection>
     <developerConnection>scm:cvs:ext:username@springframework.cvs.sourceforge.net:/cvsroot/springframework/spring</developerConnection>
-    <tag>release-2-0-5</tag>
+    <tag>release-2-0-6</tag>
     <url>http://springframework.cvs.sourceforge.net/springframework/</url>
   </scm>
   <organization>
