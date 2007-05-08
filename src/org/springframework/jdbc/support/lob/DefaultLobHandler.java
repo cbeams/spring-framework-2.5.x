@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,18 +26,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Default implementation of the LobHandler interface. Invokes the
- * direct accessor methods that <code>java.sql.ResultSet</code> and
- * <code>java.sql.PreparedStatement</code> offer.
+ * Default implementation of the {@link LobHandler} interface. Invokes
+ * the direct accessor methods that <code>java.sql.ResultSet</code>
+ * and <code>java.sql.PreparedStatement</code> offer.
  *
  * <p>This LobHandler should work for any JDBC driver that is JDBC compliant
  * in terms of the spec's suggestions regarding simple BLOB and CLOB handling.
  * This does not apply to Oracle 9i, and only to a limited degree to Oracle 10g!
- * As a consequence, use OracleLobHandler for accessing Oracle BLOBs/CLOBs.
+ * As a consequence, use {@link OracleLobHandler} for accessing Oracle BLOBs/CLOBs.
  *
  * @author Juergen Hoeller
  * @since 04.12.2003
- * @see OracleLobHandler
+ * @see #setStreamAsLob
  * @see java.sql.ResultSet#getBytes
  * @see java.sql.ResultSet#getBinaryStream
  * @see java.sql.ResultSet#getString
@@ -52,6 +52,27 @@ import org.apache.commons.logging.LogFactory;
 public class DefaultLobHandler extends AbstractLobHandler {
 
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	private boolean streamAsLob = false;
+
+
+	/**
+	 * Specify whether a submitted binary stream / character stream
+	 * should be passed to the JDBC driver as explicit LOB content,
+	 * using the JDBC 4.0 <code>setBlob</code> / <code>setClob</code>
+	 * method with a stream argument.
+	 * <p>Default is "false", using the common JDBC 2.0 <code>setBinaryStream</code>
+	 * / <code>setCharacterStream</code> method for setting the content.
+	 * Switch this to "true" for explicit JDBC 4.0 usage, provided that
+	 * your JDBC driver actually supports those JDBC 4.0 operations.
+	 * @see java.sql.PreparedStatement#setBlob(int, java.io.InputStream, long)
+	 * @see java.sql.PreparedStatement#setClob(int, java.io.Reader, long)
+	 * @see java.sql.PreparedStatement#setBinaryStream(int, java.io.InputStream, int)
+	 * @see java.sql.PreparedStatement#setCharacterStream(int, java.io.Reader, int)
+	 */
+	public void setStreamAsLob(boolean streamAsLob) {
+		this.streamAsLob = streamAsLob;
+	}
 
 
 	public byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException {
@@ -101,7 +122,12 @@ public class DefaultLobHandler extends AbstractLobHandler {
 				PreparedStatement ps, int paramIndex, InputStream binaryStream, int contentLength)
 				throws SQLException {
 
-			ps.setBinaryStream(paramIndex, binaryStream, contentLength);
+			if (streamAsLob) {
+				ps.setBlob(paramIndex, binaryStream, contentLength);
+			}
+			else {
+				ps.setBinaryStream(paramIndex, binaryStream, contentLength);
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug(binaryStream != null ? "Set binary stream for BLOB with length " + contentLength :
 						"Set BLOB to null");
@@ -129,12 +155,16 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			}
 		}
 
-
 		public void setClobAsCharacterStream(
 				PreparedStatement ps, int paramIndex, Reader characterStream, int contentLength)
 		    throws SQLException {
 
-			ps.setCharacterStream(paramIndex, characterStream, contentLength);
+			if (streamAsLob) {
+				ps.setClob(paramIndex, characterStream, contentLength);
+			}
+			else {
+				ps.setCharacterStream(paramIndex, characterStream, contentLength);
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug(characterStream != null ? "Set character stream for CLOB with length " + contentLength :
 						"Set CLOB to null");
