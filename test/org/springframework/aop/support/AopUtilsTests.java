@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,6 @@ package org.springframework.aop.support;
 import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
-import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
@@ -78,28 +77,6 @@ public class AopUtilsTests extends TestCase {
 		assertSame(Pointcuts.GETTERS, SerializationTestUtils.serializeAndDeserialize(Pointcuts.GETTERS));
 		assertSame(ExposeInvocationInterceptor.INSTANCE,
 				SerializationTestUtils.serializeAndDeserialize(ExposeInvocationInterceptor.INSTANCE));
-	}
-
-	public void testDynamicSuperclasses() {
-		DynamicMethodMatcherPointcut mmpc = new DynamicMethodMatcherPointcut() {
-			public boolean matches(Method m, Class targetClass, Object[] args) {
-				throw new UnsupportedOperationException();
-			}
-		};
-		assertSame(mmpc, mmpc.getMethodMatcher());
-		assertSame(ClassFilter.TRUE, mmpc.getClassFilter());
-		
-		DynamicMethodMatcherPointcutAdvisor a = new DynamicMethodMatcherPointcutAdvisor() {
-			public boolean matches(Method m, Class targetClass, Object[] args) {
-				throw new UnsupportedOperationException();
-			}
-		};
-		Advice advice = new NopInterceptor();
-		a.setAdvice(advice);
-		assertSame(a, a.getMethodMatcher());
-		assertSame(ClassFilter.TRUE, a.getClassFilter());
-		assertSame(a, a.getPointcut());
-		assertSame(advice, a.getAdvice());
 	}
 
 }

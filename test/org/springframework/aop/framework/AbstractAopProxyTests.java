@@ -47,7 +47,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.aop.support.DynamicMethodMatcherPointcutAdvisor;
+import org.springframework.aop.support.DynamicMethodMatcherPointcut;
 import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.aop.support.Pointcuts;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
@@ -1078,36 +1078,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		}
 	}
 
-
-	/**
-	 * Fires on setter methods that take a string. Replaces null arg with "".
-	 */
-	public static class StringSetterNullReplacementAdvice extends DynamicMethodMatcherPointcutAdvisor {
-
-		private static MethodInterceptor cleaner = new MethodInterceptor() {
-			public Object invoke(MethodInvocation mi) throws Throwable {
-				// We know it can only be invoked if there's a single parameter of type string
-				mi.getArguments()[0] = "";
-				return mi.proceed();
-			}
-		};
-
-		public StringSetterNullReplacementAdvice() {
-			super(cleaner);
-		}
-
-		public boolean matches(Method m, Class targetClass, Object[] args){//, AttributeRegistry attributeRegistry) {
-			return args[0] == null;
-		}
-
-		public boolean matches(Method m, Class targetClass){//, AttributeRegistry attributeRegistry) {
-			return m.getName().startsWith("set") &&
-				m.getParameterTypes().length == 1 &&
-				m.getParameterTypes()[0].equals(String.class);
-		}
-	}
-
-
 	public void testDynamicMethodPointcutThatAlwaysAppliesStatically() throws Throwable {
 		TestBean tb = new TestBean();
 		ProxyFactory pc = new ProxyFactory(new Class[] { ITestBean.class });
@@ -1125,9 +1095,9 @@ public abstract class AbstractAopProxyTests extends TestCase {
 
 	public void testDynamicMethodPointcutThatAppliesStaticallyOnlyToSetters() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] { ITestBean.class });
+		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
 		// Could apply dynamically to getAge/setAge but not to getName
-		TestDynamicPointcutAdvice dp = new TestDynamicPointcutForSettersOnly(new NopInterceptor(), "Age");
+		TestDynamicPointcutForSettersOnly dp = new TestDynamicPointcutForSettersOnly(new NopInterceptor(), "Age");
 		pc.addAdvisor(dp);
 		this.mockTargetSource.setTarget(tb);
 		pc.setTargetSource(mockTargetSource);
@@ -1702,32 +1672,68 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	}
 
 
-	protected static class TestDynamicPointcutAdvice extends DynamicMethodMatcherPointcutAdvisor {
+	/**
+	 * Fires on setter methods that take a string. Replaces null arg with "".
+	 */
+	protected static class StringSetterNullReplacementAdvice extends DefaultPointcutAdvisor {
 
-		private String pattern;
-		public int count;
+		private static MethodInterceptor cleaner = new MethodInterceptor() {
+			public Object invoke(MethodInvocation mi) throws Throwable {
+				// We know it can only be invoked if there's a single parameter of type string
+				mi.getArguments()[0] = "";
+				return mi.proceed();
+			}
+		};
 
-		public TestDynamicPointcutAdvice(MethodInterceptor mi, String pattern) {
-			super(mi);
-			this.pattern = pattern;
-		}
-
-		public boolean matches(Method m, Class targetClass, Object[] args) {
-			boolean run = m.getName().indexOf(pattern) != -1;
-			if (run) ++count;
-			return run;
+		public StringSetterNullReplacementAdvice() {
+			super(cleaner);
+			setPointcut(new DynamicMethodMatcherPointcut() {
+				public boolean matches(Method m, Class targetClass, Object[] args) {
+					return args[0] == null;
+				}
+				public boolean matches(Method m, Class targetClass) {
+					return m.getName().startsWith("set") &&
+						m.getParameterTypes().length == 1 &&
+						m.getParameterTypes()[0].equals(String.class);
+				}
+			});
 		}
 	}
 
 
-	protected static class TestDynamicPointcutForSettersOnly extends TestDynamicPointcutAdvice {
+	protected static class TestDynamicPointcutAdvice extends DefaultPointcutAdvisor {
 
-		public TestDynamicPointcutForSettersOnly(MethodInterceptor mi, String pattern) {
-			super(mi, pattern);
+		public int count;
+
+		public TestDynamicPointcutAdvice(MethodInterceptor mi, final String pattern) {
+			super(mi);
+			setPointcut(new DynamicMethodMatcherPointcut() {
+				public boolean matches(Method m, Class targetClass, Object[] args) {
+					boolean run = m.getName().indexOf(pattern) != -1;
+					if (run) ++count;
+					return run;
+				}
+			});
 		}
+	}
 
-		public boolean matches(Method m, Class clazz) {
-			return m.getName().startsWith("set");
+
+	protected static class TestDynamicPointcutForSettersOnly extends DefaultPointcutAdvisor {
+
+		public int count;
+
+		public TestDynamicPointcutForSettersOnly(MethodInterceptor mi, final String pattern) {
+			super(mi);
+			setPointcut(new DynamicMethodMatcherPointcut() {
+				public boolean matches(Method m, Class targetClass, Object[] args) {
+					boolean run = m.getName().indexOf(pattern) != -1;
+					if (run) ++count;
+					return run;
+				}
+				public boolean matches(Method m, Class clazz) {
+					return m.getName().startsWith("set");
+				}
+			});
 		}
 	}
 
