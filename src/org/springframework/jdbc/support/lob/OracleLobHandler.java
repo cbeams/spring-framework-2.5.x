@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,24 +43,24 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * LobHandler implementation for Oracle databases. Uses proprietary API to
- * create <code>oracle.sql.BLOB</code> and <code>oracle.sql.CLOB</code>
+ * {@link LobHandler} implementation for Oracle databases. Uses proprietary API
+ * to create <code>oracle.sql.BLOB</code> and <code>oracle.sql.CLOB</code>
  * instances, as necessary when working with Oracle's JDBC driver.
  * Note that this LobHandler requires Oracle JDBC driver 9i or higher!
  *
- * <p>While most databases are able to work with DefaultLobHandler, Oracle just
- * accepts Blob/Clob instances created via its own proprietary BLOB/CLOB API,
- * and additionally doesn't accept large streams for PreparedStatement's
- * corresponding setter methods. Therefore, you need to use a strategy like
- * this LobHandler implementation.
+ * <p>While most databases are able to work with {@link DefaultLobHandler},
+ * Oracle just accepts Blob/Clob instances created via its own proprietary
+ * BLOB/CLOB API, and additionally doesn't accept large streams for
+ * PreparedStatement's corresponding setter methods. Therefore, you need
+ * to use a strategy like this LobHandler implementation.
  *
  * <p>Needs to work on a native JDBC Connection, to be able to cast it to
- * <code>oracle.jdbc.OracleConnection</code>. If you pass in Connections from
- * a connection pool (the usual case in a J2EE environment), you need to set
- * an appropriate NativeJdbcExtractor to allow for automatical retrieval of
- * the underlying native JDBC Connection. LobHandler and NativeJdbcExtractor
- * are separate concerns, therefore they are represented by separate strategy
- * interfaces.
+ * <code>oracle.jdbc.OracleConnection</code>. If you pass in Connections from a
+ * connection pool (the usual case in a J2EE environment), you need to set an
+ * appropriate {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor}
+ * to allow for automatical retrieval of the underlying native JDBC Connection.
+ * LobHandler and NativeJdbcExtractor are separate concerns, therefore they
+ * are represented by separate strategy interfaces.
  *
  * <p>Coded via reflection to avoid dependencies on Oracle classes.
  * Even reads in Oracle constants via reflection because of different Oracle
@@ -230,7 +230,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 				}
 			}
 			else {
-				ps.setBlob(paramIndex, null);
+				ps.setBlob(paramIndex, (Blob) null);
 				logger.debug("Set Oracle BLOB to null");
 			}
 		}
@@ -253,7 +253,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 				}
 			}
 			else {
-				ps.setBlob(paramIndex, null);
+				ps.setBlob(paramIndex, (Blob) null);
 				logger.debug("Set Oracle BLOB to null");
 			}
 		}
@@ -275,7 +275,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 				}
 			}
 			else {
-				ps.setClob(paramIndex, null);
+				ps.setClob(paramIndex, (Clob) null);
 				logger.debug("Set Oracle CLOB to null");
 			}
 		}
@@ -298,7 +298,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 				}
 			}
 			else {
-				ps.setClob(paramIndex, null);
+				ps.setClob(paramIndex, (Clob) null);
 				logger.debug("Set Oracle CLOB to null");
 			}
 		}
@@ -321,7 +321,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 				}
 			}
 			else {
-				ps.setClob(paramIndex, null);
+				ps.setClob(paramIndex, (Clob) null);
 				logger.debug("Set Oracle CLOB to null");
 			}
 		}
