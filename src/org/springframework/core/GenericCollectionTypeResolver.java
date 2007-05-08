@@ -33,7 +33,7 @@ import java.util.Map;
  * (to be able to attempt type conversion if appropriate).
  *
  * <p>Only usable on Java 5. Use an appropriate JdkVersion check before
- * calling this class, if a fallback for JDK 1.3/1.4 is desirable.
+ * calling this class, if a fallback for JDK 1.4 is desirable.
  *
  * @author Juergen Hoeller
  * @since 2.0

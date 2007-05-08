@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,19 +35,6 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 	public Class getType() {
 		return getClass();
 	}
-
-
-	/*
-	 * This abstract method declaration shadows the method in the LabeledEnum interface.
-	 * This is necessary to properly work on Sun's JDK 1.3 classic VM in all cases.
-	 */
-	public abstract Comparable getCode();
-
-	/*
-	 * This abstract method declaration shadows the method in the LabeledEnum interface.
-	 * This is necessary to properly work on Sun's JDK 1.3 classic VM in all cases.
-	 */
-	public abstract String getLabel();
 
 
 	public int compareTo(Object obj) {

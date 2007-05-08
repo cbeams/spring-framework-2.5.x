@@ -21,7 +21,7 @@ package org.springframework.core;
  * that Spring is operating on, to allow for automatically
  * adapting to the present platform's capabilities.
  *
- * <p>Note that Spring does not support 1.2 or earlier JVMs.
+ * <p>Note that Spring requires JVM 1.4 or higher, as of Spring 2.1.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -71,12 +71,9 @@ public abstract class JdkVersion {
 		else if (javaVersion.indexOf("1.5.") != -1) {
 			majorJavaVersion = JAVA_15;
 		}
-		else if (javaVersion.indexOf("1.4.") != -1) {
-			majorJavaVersion = JAVA_14;
-		}
 		else {
-			// else leave 1.3 as default (it's either 1.3 or unknown)
-			majorJavaVersion = JAVA_13;
+			// else leave 1.4 as default (it's either 1.4 or unknown)
+			majorJavaVersion = JAVA_14;
 		}
 	}
 
@@ -115,7 +112,7 @@ public abstract class JdkVersion {
 	 * @see #JAVA_17
 	 */
 	public static boolean isAtLeastJava14() {
-		return getMajorJavaVersion() >= JAVA_14;
+		return true;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.util.StringUtils;
 
 /**
@@ -87,9 +86,6 @@ public class UrlPathHelper {
 	 * in contrast to the servlet path.
 	 * <p>Uses either the request encoding or the default encoding according
 	 * to the Servlet spec (ISO-8859-1).
-	 * <p>Note: Setting this to "true" requires JDK 1.4 if the encoding differs
-	 * from the VM's platform default encoding, as JDK 1.3's URLDecoder class
-	 * does not offer a way to specify the encoding.
 	 * @see #getServletPath
 	 * @see #getContextPath
 	 * @see #getRequestUri
@@ -307,9 +303,7 @@ public class UrlPathHelper {
 	/**
 	 * Decode the given source string with a URLDecoder. The encoding will be taken
 	 * from the request, falling back to the default "ISO-8859-1".
-	 * <p>Default implementation uses <code>URLDecoder.decode(input, enc)</code>
-	 * on JDK 1.4+, falling back to <code>URLDecoder.decode(input)</code>
-	 * (which uses the platform default encoding) on JDK 1.3.
+	 * <p>The default implementation uses <code>URLDecoder.decode(input, enc)</code>.
 	 * @param request current HTTP request
 	 * @param source the String to decode
 	 * @return the decoded String
@@ -322,9 +316,6 @@ public class UrlPathHelper {
 		if (this.urlDecode) {
 			String enc = determineEncoding(request);
 			try {
-				if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-					throw new UnsupportedEncodingException("JDK 1.3 URLDecoder does not support custom encoding");
-				}
 				return URLDecoder.decode(source, enc);
 			}
 			catch (UnsupportedEncodingException ex) {

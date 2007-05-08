@@ -97,19 +97,6 @@ public abstract class AbstractResource implements Resource {
 		throw new IllegalStateException(getDescription() + " does not carry a filename");
 	}
 
-	/**
-	 * This abstract method declaration shadows the method in the Resource interface.
-	 * This is necessary to make the <code>toString</code> implementation in this
-	 * class work on Sun's JDK 1.3 classic VM, which can't find the method when
-	 * executing <code>toString</code> else. Furthermore, <code>getDescription</code>
-	 * is also called from <code>equals</code> and <code>hashCode</code>
-	 * @see Resource#getDescription()
-	 * @see #toString()
-	 * @see #equals(Object)
-	 * @see #hashCode()
-	 */
-	public abstract String getDescription();
-
 
 	/**
 	 * This implementation returns the description of this resource.

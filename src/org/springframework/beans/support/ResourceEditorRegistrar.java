@@ -28,7 +28,6 @@ import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
@@ -85,9 +84,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 
 		ClassLoader classLoader = this.resourceLoader.getClassLoader();
 		registry.registerCustomEditor(Class.class, new ClassEditor(classLoader));
-		if (JdkVersion.isAtLeastJava14()) {
-			registry.registerCustomEditor(URI.class, new URIEditor(classLoader));
-		}
+		registry.registerCustomEditor(URI.class, new URIEditor(classLoader));
 
 		if (this.resourceLoader instanceof ResourcePatternResolver) {
 			registry.registerCustomEditor(Resource[].class,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.beans.propertyeditors;
 import java.beans.PropertyEditorSupport;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -57,7 +56,6 @@ public class PropertiesEditor extends PropertyEditorSupport {
 			try {
 				// Must use the ISO-8859-1 encoding because Properties.load(stream) expects it.
 				props.load(new ByteArrayInputStream(text.getBytes("ISO-8859-1")));
-				dropComments(props);
 			}
 			catch (IOException ex) {
 				// Should never happen.
@@ -79,22 +77,6 @@ public class PropertiesEditor extends PropertyEditorSupport {
 		}
 		else {
 			super.setValue(value);
-		}
-	}
-
-	/**
-	 * Remove comment lines, even if they contain whitespace before the
-	 * comment marker. This happens automatically on JDK >= 1.4, but we
-	 * need to do this manually on JDK 1.3.
-	 */
-	private void dropComments(Properties props) {
-		Iterator keys = props.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = (String) keys.next();
-			// A comment line starts with one of our comment markers.
-			if (key.length() > 0 && COMMENT_MARKERS.indexOf(key.charAt(0)) != -1) {
-				keys.remove();
-			}
 		}
 	}
 

@@ -45,7 +45,7 @@ import org.springframework.util.ReflectionUtils;
  * The Java Language Specification</a> for more details on the use of bridge methods.
  *
  * <p>Only usable on JDK 1.5 and higher. Use an appropriate {@link JdkVersion}
- * check before calling this class, if a fallback for JDK 1.3/1.4 is desirable.
+ * check before calling this class, if a fallback for JDK 1.4 is desirable.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

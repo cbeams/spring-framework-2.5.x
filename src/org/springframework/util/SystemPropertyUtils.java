@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,13 +53,9 @@ public abstract class SystemPropertyUtils {
 	public static String resolvePlaceholders(String text) {
 		StringBuffer buf = new StringBuffer(text);
 
-		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
-		// method to retain JDK 1.3 compatibility. The slight loss in performance
-		// is not really relevant, as this code will typically just run on startup.
-
-		int startIndex = text.indexOf(PLACEHOLDER_PREFIX);
+		int startIndex = buf.indexOf(PLACEHOLDER_PREFIX);
 		while (startIndex != -1) {
-			int endIndex = buf.toString().indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
+			int endIndex = buf.indexOf(PLACEHOLDER_SUFFIX, startIndex + PLACEHOLDER_PREFIX.length());
 			if (endIndex != -1) {
 				String placeholder = buf.substring(startIndex + PLACEHOLDER_PREFIX.length(), endIndex);
 				int nextIndex = endIndex + PLACEHOLDER_SUFFIX.length();
@@ -86,7 +82,7 @@ public abstract class SystemPropertyUtils {
 								"] as system property: " + ex);
 					}
 				}
-				startIndex = buf.toString().indexOf(PLACEHOLDER_PREFIX, nextIndex);
+				startIndex = buf.indexOf(PLACEHOLDER_PREFIX, nextIndex);
 			}
 			else {
 				startIndex = -1;

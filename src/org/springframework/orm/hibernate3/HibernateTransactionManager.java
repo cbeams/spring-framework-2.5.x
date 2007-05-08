@@ -49,9 +49,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.ResourceTransactionManager;
-import org.springframework.util.ClassUtils;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager}
@@ -64,8 +63,7 @@ import org.springframework.util.ClassUtils;
  * access code that needs to support this transaction handling mechanism.
  *
  * <p>Supports custom isolation levels, and timeouts that get applied as
- * Hibernate transaction timeouts (on Hibernate 3.1+) or as appropriate
- * query timeouts (on Hibernate 3.0, when using {@link HibernateTemplate}).
+ * Hibernate transaction timeouts.
  *
  * <p>This transaction manager is appropriate for applications that use a single
  * Hibernate SessionFactory for transactional data access, but it also supports
@@ -112,11 +110,7 @@ import org.springframework.util.ClassUtils;
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
  *
- * <p>Requires Hibernate 3.0.3 or later. As of Spring 2.0, this transaction manager
- * autodetects Hibernate 3.1 and uses its advanced timeout functionality, while
- * remaining compatible with Hibernate 3.0 as well. Running against Hibernate 3.1.3+
- * is recommended, unless you need to remain compatible with JDK 1.3. (Note that
- * Hibernate 3.1+ only runs on JDK 1.4+!)
+ * <p>Requires Hibernate 3.1 or later, as of Spring 2.1.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -137,12 +131,6 @@ import org.springframework.util.ClassUtils;
  */
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
-
-	// Determine whether the Hibernate 3.1 Transaction.setTimeout(int) method
-	// is available, for use in this HibernateTransactionManager's doBegin.
-	private final static boolean hibernateSetTimeoutAvailable =
-			ClassUtils.hasMethod(Transaction.class, "setTimeout", new Class[] {int.class});
-
 
 	private SessionFactory sessionFactory;
 
@@ -491,19 +479,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// Register transaction timeout.
 			int timeout = determineTimeout(definition);
 			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-				if (hibernateSetTimeoutAvailable) {
-					// Use Hibernate's own transaction timeout mechanism on Hibernate 3.1
-					// Applies to all statements, also to inserts, updates and deletes!
-					hibTx = session.getTransaction();
-					hibTx.setTimeout(timeout);
-					hibTx.begin();
-				}
-				else {
-					// Use Spring query timeouts driven by SessionHolder on Hibernate 3.0
-					// Only applies to Hibernate queries, not to insert/update/delete statements.
-					hibTx = session.beginTransaction();
-					txObject.getSessionHolder().setTimeoutInSeconds(timeout);
-				}
+				// Use Hibernate's own transaction timeout mechanism on Hibernate 3.1
+				// Applies to all statements, also to inserts, updates and deletes!
+				hibTx = session.getTransaction();
+				hibTx.setTimeout(timeout);
+				hibTx.begin();
 			}
 			else {
 				// Open a plain Hibernate transaction without specified timeout.
@@ -660,14 +640,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
 				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
 			}
-			if (hibernateSetTimeoutAvailable) {
-				// Running against Hibernate 3.1+...
-				// Let's explicitly disconnect the Session to provide efficient Connection handling
-				// even with connection release mode "on_close". The Session will automatically
-				// obtain a new Connection in case of further database access.
-				// Couldn't do this on Hibernate 3.0, where disconnect required a manual reconnect.
-				session.disconnect();
-			}
+			session.disconnect();
 		}
 		txObject.getSessionHolder().clear();
 	}
@@ -678,7 +651,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * can safely prepare and clean up the JDBC Connection used for a transaction.
 	 * <p>Default implementation checks the Session's connection release mode
 	 * to be "on_close". Unfortunately, this requires casting to SessionImpl,
-	 * as of Hibernate 3.0/3.1. If that cast doesn't work, we'll simply assume
+	 * as of Hibernate 3.1. If that cast doesn't work, we'll simply assume
 	 * we're safe and return <code>true</code>.
 	 * @param session the Hibernate Session to check
 	 * @see org.hibernate.impl.SessionImpl#getConnectionReleaseMode()

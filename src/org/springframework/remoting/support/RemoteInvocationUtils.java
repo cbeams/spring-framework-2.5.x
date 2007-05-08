@@ -43,7 +43,7 @@ public abstract class RemoteInvocationUtils {
 	 * @see java.lang.Throwable#setStackTrace(StackTraceElement[])
 	 */
 	public static void fillInClientStackTraceIfPossible(Throwable ex) {
-		if (JdkVersion.isAtLeastJava14() && ex != null) {
+		if (ex != null) {
 			StackTraceElement[] clientStack = new Throwable().getStackTrace();
 			Set visitedExceptions = new HashSet();
 			Throwable exToUpdate = ex;

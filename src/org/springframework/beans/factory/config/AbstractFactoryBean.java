@@ -187,16 +187,6 @@ public abstract class AbstractFactoryBean
 
 
 	/**
-	 * This abstract method declaration shadows the method in the FactoryBean interface.
-	 * This is necessary to make the <code>getEarlySingletonInterfaces</code> implementation
-	 * in this class work on Sun's JDK 1.3 classic VM, which can't find the method
-	 * when executing <code>getEarlySingletonInterfaces</code> else.
-	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
-	 * @see #getEarlySingletonInterfaces()
-	 */
-	public abstract Class getObjectType();
-
-	/**
 	 * Template method that subclasses must override to construct
 	 * the object returned by this factory.
 	 * <p>Invoked on initialization of this FactoryBean in case of

@@ -37,11 +37,9 @@ import org.apache.commons.logging.LogFactory;
  * Internal class that caches JavaBeans {@link java.beans.PropertyDescriptor}
  * information for a Java class. Not intended for direct use by application code.
  *
- * <p>Necessary as {@link java.beans.Introspector#getBeanInfo()} in JDK 1.3 will
- * return a new deep copy of the BeanInfo every time we ask for it. We take the
- * opportunity to cache property descriptors by method name for fast lookup.
- * Furthermore, we do our own caching of descriptors here, rather than rely on
- * the JDK's system-wide BeanInfo cache (to avoid leaks on ClassLoader shutdown).
+ * <p>Necessary for own caching of descriptors within the application's
+ * ClassLoader, rather than rely on the JDK's system-wide BeanInfo cache
+ * (in order to avoid leaks on ClassLoader shutdown).
  *
  * <p>Information is cached statically, so we don't need to create new
  * objects of this class for every JavaBean we manipulate. Hence, this class

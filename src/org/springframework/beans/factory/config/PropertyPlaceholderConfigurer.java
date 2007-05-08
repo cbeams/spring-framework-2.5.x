@@ -269,13 +269,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 		StringBuffer buf = new StringBuffer(strVal);
 
-		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
-		// method to retain JDK 1.3 compatibility. The slight loss in performance
-		// is not really relevant, as this code will typically just run on startup.
-
 		int startIndex = strVal.indexOf(this.placeholderPrefix);
 		while (startIndex != -1) {
-			int endIndex = buf.toString().indexOf(
+			int endIndex = buf.indexOf(
 			    this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
 			if (endIndex != -1) {
 				String placeholder = buf.substring(startIndex + this.placeholderPrefix.length(), endIndex);
@@ -292,11 +288,11 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 					if (logger.isTraceEnabled()) {
 						logger.trace("Resolved placeholder '" + placeholder + "'");
 					}
-					startIndex = buf.toString().indexOf(this.placeholderPrefix, startIndex + propVal.length());
+					startIndex = buf.indexOf(this.placeholderPrefix, startIndex + propVal.length());
 				}
 				else if (this.ignoreUnresolvablePlaceholders) {
 					// Proceed with unprocessed value.
-					startIndex = buf.toString().indexOf(this.placeholderPrefix, endIndex + this.placeholderSuffix.length());
+					startIndex = buf.indexOf(this.placeholderPrefix, endIndex + this.placeholderSuffix.length());
 				}
 				else {
 					throw new BeanDefinitionStoreException("Could not resolve placeholder '" + placeholder + "'");

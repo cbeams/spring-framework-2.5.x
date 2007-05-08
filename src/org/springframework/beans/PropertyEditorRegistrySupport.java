@@ -55,7 +55,6 @@ import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.core.CollectionFactory;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
 import org.springframework.util.ClassUtils;
@@ -165,10 +164,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(URL.class, new URLEditor());
 
 		// Register JDK-1.4-specific editors.
-		if (JdkVersion.isAtLeastJava14()) {
-			this.defaultEditors.put(URI.class, new URIEditor());
-			this.defaultEditors.put(Pattern.class, new PatternEditor());
-		}
+		this.defaultEditors.put(URI.class, new URIEditor());
+		this.defaultEditors.put(Pattern.class, new PatternEditor());
 
 		// Default instances of collection editors.
 		// Can be overridden by registering custom instances of those as custom editors.

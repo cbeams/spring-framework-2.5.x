@@ -29,8 +29,6 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.util.ClassUtils;
-
 /**
  * Utility methods for PreparedStatementSetter/Creator and CallableStatementCreator
  * implementations, providing sophisticated parameter management (including support
@@ -54,11 +52,6 @@ import org.springframework.util.ClassUtils;
 public abstract class StatementCreatorUtils {
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
-
-	// Determine whether JDK 1.4's CharSequence interface is available,
-	// treating any of its implementations as String value.
-	private static final boolean charSequenceAvailable =
-			ClassUtils.isPresent("java.lang.CharSequence", StatementCreatorUtils.class.getClassLoader());
 
 
 	/**
@@ -258,14 +251,8 @@ public abstract class StatementCreatorUtils {
 	 * Check whether the given value can be treated as a String value.
 	 */
 	private static boolean isStringValue(Object inValue) {
-		if (charSequenceAvailable) {
-			// Consider any CharSequence (including JDK 1.5's StringBuilder) as String.
-			return (inValue instanceof CharSequence || inValue instanceof StringWriter);
-		}
-		else {
-			// Explicit enumeration of well-known types for JDK 1.3.
-			return (inValue instanceof String || inValue instanceof StringBuffer || inValue instanceof StringWriter);
-		}
+		// Consider any CharSequence (including JDK 1.5's StringBuilder) as String.
+		return (inValue instanceof CharSequence || inValue instanceof StringWriter);
 	}
 
 	/**

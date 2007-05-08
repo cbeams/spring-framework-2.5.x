@@ -183,9 +183,6 @@ public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * Create an ObjectInputStream for the given InputStream.
 	 * <p>The default implementation creates a Spring
 	 * {@link org.springframework.remoting.rmi.CodebaseAwareObjectInputStream}.
-	 * <p>Spring's CodebaseAwareObjectInputStream is used to explicitly resolve
-	 * primitive class names. This is done by the standard ObjectInputStream
-	 * on JDK 1.4+, but needs to be done explicitly on JDK 1.3.
 	 * @param is the InputStream to read from
 	 * @return the new ObjectInputStream instance to use
 	 * @throws IOException if creation of the ObjectInputStream failed

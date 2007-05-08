@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
  * {@link org.springframework.beans.factory.support.AbstractBeanFactory}.
  *
  * <p>Note that this class does not depend on JDK 1.5 API artifacts, in order
- * to remain compatible with JDK 1.3/1.4. Concrete generic type resolution
+ * to remain compatible with JDK 1.4. Concrete generic type resolution
  * via JDK 1.5 API happens in {@link GenericCollectionTypeResolver} only.
  *
  * @author Juergen Hoeller

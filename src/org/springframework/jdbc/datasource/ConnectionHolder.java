@@ -18,6 +18,7 @@ package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
@@ -168,10 +169,10 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	/**
 	 * Create a new JDBC 3.0 Savepoint for the current Connection,
 	 * using generated savepoint names that are unique for the Connection.
-	 * @return the new Savepoint (typed as Object for JDK 1.3 compatibility)
+	 * @return the new Savepoint
 	 * @throws SQLException if thrown by the JDBC driver
 	 */
-	public Object createSavepoint() throws SQLException {
+	public Savepoint createSavepoint() throws SQLException {
 		this.savepointCounter++;
 		return getConnection().setSavepoint(SAVEPOINT_NAME_PREFIX + this.savepointCounter);
 	}

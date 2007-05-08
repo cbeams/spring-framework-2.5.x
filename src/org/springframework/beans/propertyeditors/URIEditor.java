@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,6 @@ import org.springframework.util.ResourceUtils;
  * <p>Note: A URI is more relaxed than a URL in that it does not require
  * a valid protocol to be specified. Any scheme within a valid URI syntax
  * is allowed, even without a matching protocol handler being registered.
- *
- * <p>Since <code>java.net.URI</code> is only available on JDK 1.4 or higher,
- * this editor is only available on JDK 1.4 or higher as well.
  *
  * @author Juergen Hoeller
  * @since 2.0.2

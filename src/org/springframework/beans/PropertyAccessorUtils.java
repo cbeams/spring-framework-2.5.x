@@ -141,17 +141,13 @@ public abstract class PropertyAccessorUtils {
 			return "";
 		}
 
-		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
-		// method to retain JDK 1.3 compatibility. The slight loss in performance
-		// is not really relevant, as this code will typically just run on startup.
-
 		StringBuffer buf = new StringBuffer(propertyName);
 		int searchIndex = 0;
 		while (searchIndex != -1) {
-			int keyStart = buf.toString().indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX, searchIndex);
+			int keyStart = buf.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX, searchIndex);
 			searchIndex = -1;
 			if (keyStart != -1) {
-				int keyEnd = buf.toString().indexOf(
+				int keyEnd = buf.indexOf(
 						PropertyAccessor.PROPERTY_KEY_SUFFIX, keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length());
 				if (keyEnd != -1) {
 					String key = buf.substring(keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length(), keyEnd);

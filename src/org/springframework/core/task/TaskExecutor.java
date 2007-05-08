@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ package org.springframework.core.task;
  * such as: synchronous, asynchronous, using a thread pool, and more.
  *
  * <p>Equivalent to JDK 1.5's {@link java.util.concurrent.Executor}
- * interface. Separate mainly for compatibility with JDK 1.3+.
+ * interface. Separate mainly for compatibility with JDK 1.4.
  * Implementations can simply implement the JDK 1.5 <code>Executor</code>
  * interface as well, as it defines the exact same method signature.
  *

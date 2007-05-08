@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,14 @@ package org.springframework.web.servlet.view;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.util.StringUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Simply transforms the URI of the incoming request into the view name.
+ * {@link org.springframework.web.servlet.RequestToViewNameTranslator}
+ * that simply transforms the URI of the incoming request into a view name.
  * 
  * <p>Can be explicitly defined as the "viewNameTranslator" bean in a
  * {@link org.springframework.web.servlet.DispatcherServlet} context; else,
@@ -132,10 +133,6 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * in contrast to the servlet path.
 	 * <p>Uses either the request encoding or the default encoding according
 	 * to the Servlet spec (ISO-8859-1).
-	 * <p>Note: Setting this to "true" requires JDK 1.4 if the encoding differs
-	 * from the VM's platform default encoding, as JDK 1.3's URLDecoder class
-	 * does not offer a way to specify the encoding.
-	 * @param urlDecode <code>true</code> if the context path and request URI should be URL-decoded
 	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
 	 */
 	public void setUrlDecode(boolean urlDecode) {

@@ -34,7 +34,7 @@ import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
  * in contrast to Quartz which creates a new Job instance for each execution.
  *
  * <p>This class is analogous to the {@link org.springframework.scheduling.timer.ScheduledTimerTask}
- * class for the JDK 1.3 {@link java.util.Timer} facility.
+ * class for the JDK {@link java.util.Timer} facility.
  *
  * @author Juergen Hoeller
  * @since 2.0.3

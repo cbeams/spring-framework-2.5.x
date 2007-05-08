@@ -57,9 +57,6 @@ public abstract class AbstractUrlViewController extends AbstractController {
 	 * in contrast to the servlet path.
 	 * <p>Uses either the request encoding or the default encoding according
 	 * to the Servlet spec (ISO-8859-1).
-	 * <p>Note: Setting this to "true" requires JDK 1.4 if the encoding differs
-	 * from the VM's platform default encoding, as JDK 1.3's URLDecoder class
-	 * does not offer a way to specify the encoding.
 	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
 	 */
 	public void setUrlDecode(boolean urlDecode) {

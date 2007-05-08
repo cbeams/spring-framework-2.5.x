@@ -25,8 +25,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.core.JdkVersion;
-
 /**
  * <p>View that redirects to an absolute, context relative, or current request
  * relative URL, exposing all model attributes as HTTP query parameters.
@@ -181,10 +179,8 @@ public class RedirectView extends AbstractUrlBasedView {
 			throws UnsupportedEncodingException {
 
 		// Extract anchor fragment, if any.
-		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
-		// method to retain JDK 1.3 compatibility.
 		String fragment = null;
-		int anchorIndex = targetUrl.toString().indexOf('#');
+		int anchorIndex = targetUrl.indexOf("#");
 		if (anchorIndex > -1) {
 			fragment = targetUrl.substring(anchorIndex);
 			targetUrl.delete(anchorIndex, targetUrl.length());
@@ -216,9 +212,7 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * URL-encode the given input String with the given encoding scheme.
-	 * <p>Default implementation uses <code>URLEncoder.encode(input, enc)</code>
-	 * on JDK 1.4+, falling back to <code>URLEncoder.encode(input)</code>
-	 * (which uses the platform default encoding) on JDK 1.3.
+	 * <p>Default implementation uses <code>URLEncoder.encode(input, enc)</code>.
 	 * @param input the unencoded input String
 	 * @param encodingScheme the encoding scheme
 	 * @return the encoded output String
@@ -227,13 +221,6 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * @see java.net.URLEncoder#encode(String)
 	 */
 	protected String urlEncode(String input, String encodingScheme) throws UnsupportedEncodingException {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Only JDK 1.3 URLEncoder available: using platform default encoding " +
-						"instead of the requested scheme '" + encodingScheme + "'");
-			}
-			return URLEncoder.encode(input);
-		}
 		return URLEncoder.encode(input, encodingScheme);
 	}
 

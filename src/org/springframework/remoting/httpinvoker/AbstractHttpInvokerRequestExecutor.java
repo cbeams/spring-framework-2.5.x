@@ -259,10 +259,6 @@ public abstract class AbstractHttpInvokerRequestExecutor
 	/**
 	 * Create an ObjectInputStream for the given InputStream and codebase.
 	 * The default implementation creates a CodebaseAwareObjectInputStream.
-	 * <p>Spring's CodebaseAwareObjectInputStream is not only used for loading
-	 * from a specified codebase, but also to explicitly resolve primitive
-	 * class names. This is done by the standard ObjectInputStream
-	 * on JDK 1.4+, but needs to be done explicitly on JDK 1.3.
 	 * @param is the InputStream to read from
 	 * @param codebaseUrl the codebase URL to load classes from if not found locally
 	 * (can be <code>null</code>)

@@ -104,13 +104,6 @@ public class CodebaseAwareObjectInputStream extends ObjectInputStream {
 			}
 		}
 		catch (ClassNotFoundException ex) {
-			// Explicitly resolve primitive class name.
-			// This will be done by the standard ObjectInputStream on JDK 1.4+,
-			// but needs to be done explicitly on JDK 1.3.
-			Class clazz = ClassUtils.resolvePrimitiveClassName(classDesc.getName());
-			if (clazz != null) {
-				return clazz;
-			}
 			// If codebaseUrl is set, try to load the class with the RMIClassLoader.
 			// Else, propagate the ClassNotFoundException.
 			if (this.codebaseUrl == null) {
