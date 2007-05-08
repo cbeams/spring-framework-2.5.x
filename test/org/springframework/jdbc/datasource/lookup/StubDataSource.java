@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.io.PrintWriter;
+
+import org.springframework.jdbc.datasource.AbstractDataSource;
 
 /**
  * Stub, do-nothing DataSource implementation.
@@ -28,29 +28,13 @@ import java.io.PrintWriter;
  * 
  * @author Rick Evans
  */
-class StubDataSource implements DataSource {
+class StubDataSource extends AbstractDataSource {
 
 	public Connection getConnection() throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
 	public Connection getConnection(String username, String password) throws SQLException {
-		throw new UnsupportedOperationException();
-	}
-
-	public PrintWriter getLogWriter() throws SQLException {
-		throw new UnsupportedOperationException();
-	}
-
-	public void setLogWriter(PrintWriter out) throws SQLException {
-		throw new UnsupportedOperationException();
-	}
-
-	public void setLoginTimeout(int seconds) throws SQLException {
-		throw new UnsupportedOperationException();
-	}
-
-	public int getLoginTimeout() throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
