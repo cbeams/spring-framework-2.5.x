@@ -27,6 +27,7 @@ import javax.resource.spi.work.WorkRejectedException;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.core.task.TaskTimeoutException;
+import org.springframework.jca.context.BootstrapContextAware;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
@@ -50,7 +51,8 @@ import org.springframework.util.Assert;
  * @see #setWorkManager
  * @see javax.resource.spi.work.WorkManager#scheduleWork
  */
-public class WorkManagerTaskExecutor implements SchedulingTaskExecutor, AsyncTaskExecutor, WorkManager {
+public class WorkManagerTaskExecutor
+		implements SchedulingTaskExecutor, AsyncTaskExecutor, WorkManager, BootstrapContextAware {
 
 	private WorkManager workManager = new SimpleTaskWorkManager();
 
