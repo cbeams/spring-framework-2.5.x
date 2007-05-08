@@ -16,17 +16,13 @@
 
 package org.springframework.orm.hibernate3;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.JDBCException;
 import org.hibernate.SessionFactory;
-import org.hibernate.engine.SessionFactoryImplementor;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -38,10 +34,10 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 /**
  * Abstract {@link org.springframework.beans.factory.FactoryBean} that creates
  * a Hibernate {@link org.hibernate.SessionFactory} within a Spring application
- * context. Supports building a transaction-aware SessionFactory proxy that
- * exposes a Spring-managed transactional Session as "current Session".
+ * context, providing general infrastructure not related to Hibernate's
+ * specific configuration API.
  *
- * <p>This class also implements the
+ * <p>This class implements the
  * {@link org.springframework.dao.support.PersistenceExceptionTranslator}
  * interface, as autodetected by Spring's
  * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor},
@@ -64,6 +60,10 @@ public abstract class AbstractSessionFactoryBean
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private DataSource dataSource;
+
+	private boolean useTransactionAwareDataSource = false;
+
 	private boolean exposeTransactionAwareSessionFactory = true;
 
 	private SQLExceptionTranslator jdbcExceptionTranslator;
@@ -72,9 +72,89 @@ public abstract class AbstractSessionFactoryBean
 
 
 	/**
-	 * Set whether to expose a transaction-aware proxy for the SessionFactory,
-	 * returning the Session that's associated with the current Spring-managed
-	 * transaction on <code>getCurrentSession()</code>, if any.
+	 * Set the DataSource to be used by the SessionFactory.
+	 * If set, this will override corresponding settings in Hibernate properties.
+	 * <p>If this is set, the Hibernate settings should not define
+	 * a connection provider to avoid meaningless double configuration.
+	 * <p>If using HibernateTransactionManager as transaction strategy, consider
+	 * proxying your target DataSource with a LazyConnectionDataSourceProxy.
+	 * This defers fetching of an actual JDBC Connection until the first JDBC
+	 * Statement gets executed, even within JDBC transactions (as performed by
+	 * HibernateTransactionManager). Such lazy fetching is particularly beneficial
+	 * for read-only operations, in particular if the chances of resolving the
+	 * result in the second-level cache are high.
+	 * <p>As JTA and transactional JNDI DataSources already provide lazy enlistment
+	 * of JDBC Connections, LazyConnectionDataSourceProxy does not add value with
+	 * JTA (i.e. Spring's JtaTransactionManager) as transaction strategy.
+	 * @see #setUseTransactionAwareDataSource
+	 * @see HibernateTransactionManager
+	 * @see org.springframework.transaction.jta.JtaTransactionManager
+	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
+	 */
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	/**
+	 * Return the DataSource to be used by the SessionFactory.
+	 */
+	public DataSource getDataSource() {
+		return this.dataSource;
+	}
+
+	/**
+	 * Set whether to use a transaction-aware DataSource for the SessionFactory,
+	 * i.e. whether to automatically wrap the passed-in DataSource with Spring's
+	 * TransactionAwareDataSourceProxy.
+	 * <p>Default is "false": LocalSessionFactoryBean is usually used with Spring's
+	 * HibernateTransactionManager or JtaTransactionManager, both of which work nicely
+	 * on a plain JDBC DataSource. Hibernate Sessions and their JDBC Connections are
+	 * fully managed by the Hibernate/JTA transaction infrastructure in such a scenario.
+	 * <p>If you switch this flag to "true", Spring's Hibernate access will be able to
+	 * <i>participate in JDBC-based transactions managed outside of Hibernate</i>
+	 * (for example, by Spring's DataSourceTransactionManager). This can be convenient
+	 * if you need a different local transaction strategy for another O/R mapping tool,
+	 * for example, but still want Hibernate access to join into those transactions.
+	 * <p>A further benefit of this option is that <i>plain Sessions opened directly
+	 * via the SessionFactory</i>, outside of Spring's Hibernate support, will still
+	 * participate in active Spring-managed transactions. However, consider using
+	 * Hibernate's <code>getCurrentSession()</code> method instead (see javadoc of
+	 * "exposeTransactionAwareSessionFactory" property).
+	 * <p><b>WARNING:</b> When using a transaction-aware JDBC DataSource in combination
+	 * with OpenSessionInViewFilter/Interceptor, whether participating in JTA or
+	 * external JDBC-based transactions, it is strongly recommended to set Hibernate's
+	 * Connection release mode to "after_transaction" or "after_statement", which
+	 * guarantees proper Connection handling in such a scenario. In contrast to that,
+	 * HibernateTransactionManager generally requires release mode "on_close".
+	 * <p>Note: If you want to use Hibernate's Connection release mode "after_statement"
+	 * with a DataSource specified on this LocalSessionFactoryBean (for example, a
+	 * JTA-aware DataSource fetched from JNDI), switch this setting to "true".
+	 * Else, the ConnectionProvider used underneath will vote against aggressive
+	 * release and thus silently switch to release mode "after_transaction".
+	 * @see #setDataSource
+	 * @see #setExposeTransactionAwareSessionFactory
+	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
+	 * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter
+	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor
+	 * @see HibernateTransactionManager
+	 * @see org.springframework.transaction.jta.JtaTransactionManager
+	 */
+	public void setUseTransactionAwareDataSource(boolean useTransactionAwareDataSource) {
+		this.useTransactionAwareDataSource = useTransactionAwareDataSource;
+	}
+
+	/**
+	 * Return whether to use a transaction-aware DataSource for the SessionFactory.
+	 */
+	protected boolean isUseTransactionAwareDataSource() {
+		return this.useTransactionAwareDataSource;
+	}
+
+	/**
+	 * Set whether to expose a transaction-aware current Session from the
+	 * SessionFactory's <code>getCurrentSession()</code> method, returning the
+	 * Session that's associated with the current Spring-managed transaction, if any.
 	 * <p>Default is "true", letting data access code work with the plain
 	 * Hibernate SessionFactory and its <code>getCurrentSession()</code> method,
 	 * while still being able to participate in current Spring-managed transactions:
@@ -83,18 +163,15 @@ public abstract class AbstractSessionFactoryBean
 	 * Furthermore, <code>getCurrentSession()</code> will also seamlessly work with
 	 * a request-scoped Session managed by OpenSessionInViewFilter/Interceptor.
 	 * <p>Turn this flag off to expose the plain Hibernate SessionFactory with
-	 * Hibernate's default <code>getCurrentSession()</code> behavior, where
-	 * Hibernate 3.0.x only supports plain JTA synchronization. On Hibernate 3.1+,
-	 * such a plain SessionFactory will by default have a SpringSessionContext
-	 * registered to nevertheless provide Spring-managed Sessions; this can be
-	 * overridden through the corresponding Hibernate property
-	 * "hibernate.current_session_context_class".
+	 * Hibernate's default <code>getCurrentSession()</code> behavior, supporting
+	 * plain JTA synchronization only. Alternatively, simply override the
+	 * corresponding Hibernate property "hibernate.current_session_context_class".
+	 * @see SpringSessionContext
 	 * @see org.hibernate.SessionFactory#getCurrentSession()
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 * @see HibernateTransactionManager
 	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter
 	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor
-	 * @see SpringSessionContext
 	 */
 	public void setExposeTransactionAwareSessionFactory(boolean exposeTransactionAwareSessionFactory) {
 		this.exposeTransactionAwareSessionFactory = exposeTransactionAwareSessionFactory;
@@ -104,7 +181,7 @@ public abstract class AbstractSessionFactoryBean
 	 * Return whether to expose a transaction-aware proxy for the SessionFactory.
 	 */
 	protected boolean isExposeTransactionAwareSessionFactory() {
-		return exposeTransactionAwareSessionFactory;
+		return this.exposeTransactionAwareSessionFactory;
 	}
 
 	/**
@@ -137,41 +214,22 @@ public abstract class AbstractSessionFactoryBean
 	}
 
 	/**
-	 * Wrap the given SessionFactory with a transaction-aware proxy, if demanded.
-	 * @param rawSf the raw SessionFactory as built by <code>buildSessionFactory()</code>
+	 * Wrap the given SessionFactory with a proxy, if demanded.
+	 * <p>The default implementation simply returns the given SessionFactory as-is.
+	 * Subclasses may override this to implement transaction awareness through
+	 * a SessionFactory proxy, for example.
+	 * @param rawSf the raw SessionFactory as built by {@link #buildSessionFactory()}
 	 * @return the SessionFactory reference to expose
 	 * @see #buildSessionFactory()
-	 * @see #getTransactionAwareSessionFactoryProxy
 	 */
 	protected SessionFactory wrapSessionFactoryIfNecessary(SessionFactory rawSf) {
-		if (isExposeTransactionAwareSessionFactory()) {
-			 return getTransactionAwareSessionFactoryProxy(rawSf);
-		}
-		else {
-			return rawSf;
-		}
-	}
-
-	/**
-	 * Wrap the given SessionFactory with a proxy that delegates every method call
-	 * to it but delegates <code>getCurrentSession</code> calls to SessionFactoryUtils,
-	 * for participating in Spring-managed transactions.
-	 * @param target the original SessionFactory to wrap
-	 * @return the wrapped SessionFactory
-	 * @see org.hibernate.SessionFactory#getCurrentSession()
-	 * @see SessionFactoryUtils#doGetSession(org.hibernate.SessionFactory, boolean)
-	 */
-	protected SessionFactory getTransactionAwareSessionFactoryProxy(SessionFactory target) {
-		Class sfInterface = SessionFactory.class;
-		if (target instanceof SessionFactoryImplementor) {
-			sfInterface = SessionFactoryImplementor.class;
-		}
-		return (SessionFactory) Proxy.newProxyInstance(sfInterface.getClassLoader(),
-				new Class[] {sfInterface}, new TransactionAwareInvocationHandler(target));
+		return rawSf;
 	}
 
 	/**
 	 * Return the exposed SessionFactory.
+	 * Will throw an exception if not initialized yet.
+	 * @return the SessionFactory (never <code>null</code>)
 	 * @throws IllegalStateException if the SessionFactory has not been initialized yet
 	 */
 	protected final SessionFactory getSessionFactory() {
@@ -259,6 +317,7 @@ public abstract class AbstractSessionFactoryBean
 	 * successfully created. The SessionFactory is already available through
 	 * <code>getSessionFactory()</code> at this point.
 	 * <p>This implementation is empty.
+	 * @throws Exception in case of initialization failure
 	 * @see #getSessionFactory()
 	 */
 	protected void afterSessionFactoryCreation() throws Exception {
@@ -272,50 +331,6 @@ public abstract class AbstractSessionFactoryBean
 	 * @see #getSessionFactory()
 	 */
 	protected void beforeSessionFactoryDestruction() {
-	}
-
-
-	/**
-	 * Invocation handler that delegates <code>getCurrentSession()</code> calls
-	 * to SessionFactoryUtils, for being aware of thread-bound transactions.
-	 */
-	private static class TransactionAwareInvocationHandler implements InvocationHandler {
-
-		private final SessionFactory target;
-
-		public TransactionAwareInvocationHandler(SessionFactory target) {
-			this.target = target;
-		}
-
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			// Invocation on SessionFactory/SessionFactoryImplementor interface coming in...
-
-			if (method.getName().equals("getCurrentSession")) {
-				// Handle getCurrentSession method: return transactional Session, if any.
-				try {
-					return SessionFactoryUtils.doGetSession((SessionFactory) proxy, false);
-				}
-				catch (IllegalStateException ex) {
-					throw new HibernateException(ex.getMessage());
-				}
-			}
-			else if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of SessionFactory proxy.
-				return new Integer(hashCode());
-			}
-
-			// Invoke method on target SessionFactory.
-			try {
-				return method.invoke(this.target, args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
-		}
 	}
 
 }

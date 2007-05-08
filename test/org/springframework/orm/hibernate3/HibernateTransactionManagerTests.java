@@ -57,17 +57,12 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.ClassUtils;
 
 /**
  * @author Juergen Hoeller
  * @since 05.03.2005
  */
 public class HibernateTransactionManagerTests extends TestCase {
-
-	private final static boolean hibernateSetTimeoutAvailable =
-			ClassUtils.hasMethod(Transaction.class, "setTimeout", new Class[] {int.class});
-
 
 	public void testTransactionCommit() throws Exception {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
@@ -95,25 +90,16 @@ public class HibernateTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(false, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
-		if (hibernateSetTimeoutAvailable) {
-			// only on Hibernate 3.1+
-			session.getTransaction();
-			sessionControl.setReturnValue(tx, 1);
-			tx.setTimeout(10);
-			txControl.setVoidCallable(1);
-			tx.begin();
-			txControl.setVoidCallable(1);
-		}
-		else {
-			session.beginTransaction();
-			sessionControl.setReturnValue(tx, 1);
-			query.setTimeout(10);
-			queryControl.setReturnValue(query, 1);
-		}
+		session.getTransaction();
+		sessionControl.setReturnValue(tx, 1);
+		tx.setTimeout(10);
+		txControl.setVoidCallable(1);
+		tx.begin();
+		txControl.setVoidCallable(1);
 		session.connection();
 		sessionControl.setReturnValue(con, 3);
 		session.isOpen();
-		sessionControl.setReturnValue(true, 2);
+		sessionControl.setReturnValue(true, 1);
 		session.createQuery("some query string");
 		sessionControl.setReturnValue(query, 1);
 		query.list();
@@ -157,7 +143,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
-				assertEquals(session, sfProxy.getCurrentSession());
 				HibernateTemplate ht = new HibernateTemplate(sfProxy);
 				return ht.find("some query string");
 			}
@@ -310,7 +295,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
 		session.isOpen();
-		sessionControl.setReturnValue(true, 2);
+		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.AUTO, 1);
 		session.flush();
@@ -346,7 +331,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 			public Object doInTransaction(TransactionStatus status) {
 				return tt.execute(new TransactionCallback() {
 					public Object doInTransaction(TransactionStatus status) {
-						assertEquals(session, sfProxy.getCurrentSession());
 						HibernateTemplate ht = new HibernateTemplate(sfProxy);
 						ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
 						return ht.executeFind(new HibernateCallback() {
@@ -669,8 +653,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.NEVER, 1);
 		session.setFlushMode(FlushMode.AUTO);
@@ -713,7 +695,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 					}
 				});
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sfProxy));
-				assertEquals(session, sfProxy.getCurrentSession());
 				return null;
 			}
 		});
@@ -743,8 +724,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session1Control.setReturnValue(FlushMode.AUTO, 2);
 		session1.flush();
 		session1Control.setVoidCallable(2);
-		session1.isOpen();
-		session1Control.setReturnValue(true, 1);
 		session1.close();
 		session1Control.setReturnValue(null, 1);
 
@@ -759,7 +738,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session2.flush();
 		session2Control.setVoidCallable(1);
 		session2.isOpen();
-		session2Control.setReturnValue(true, 2);
+		session2Control.setReturnValue(true, 1);
 		tx.commit();
 		txControl.setVoidCallable(1);
 		session2.isConnected();
@@ -803,10 +782,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 					}
 				});
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sfProxy));
-				assertEquals(session1, sfProxy.getCurrentSession());
 				tt2.execute(new TransactionCallback() {
 					public Object doInTransaction(TransactionStatus status) {
-						assertSame(session2, sfProxy.getCurrentSession());
 						return ht.executeFind(new HibernateCallback() {
 							public Object doInHibernate(org.hibernate.Session session) {
 								assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
@@ -1177,11 +1154,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(true, 1);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
-		if (hibernateSetTimeoutAvailable) {
-			// only on Hibernate 3.1+
-			session.disconnect();
-			sessionControl.setReturnValue(null, 1);
-		}
+		session.disconnect();
+		sessionControl.setReturnValue(null, 1);
 
 		dsControl.replay();
 		conControl.replay();
@@ -1271,11 +1245,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(con, 6);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 2);
-		if (hibernateSetTimeoutAvailable) {
-			// only on Hibernate 3.1+
-			session.disconnect();
-			sessionControl.setReturnValue(null, 2);
-		}
+		session.disconnect();
+		sessionControl.setReturnValue(null, 2);
 
 		dsControl.replay();
 		conControl.replay();

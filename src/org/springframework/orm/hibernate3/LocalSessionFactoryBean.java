@@ -88,7 +88,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter} /
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
  *
- * <p>Requires Hibernate 3.0.3 or later. Note that this factory will use
+ * <p>Requires Hibernate 3.1 or later. Note that this factory will use
  * "on_close" as default Hibernate connection release mode, unless in the
  * case of a "jtaTransactionManager" specified, for the reason that
  * this is appropriate for most Spring-based applications (in particular when
@@ -168,10 +168,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 	private Resource[] mappingDirectoryLocations;
 
 	private Properties hibernateProperties;
-
-	private DataSource dataSource;
-
-	private boolean useTransactionAwareDataSource = false;
 
 	private TransactionManager jtaTransactionManager;
 
@@ -331,79 +327,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 	}
 
 	/**
-	 * Set the DataSource to be used by the SessionFactory.
-	 * If set, this will override corresponding settings in Hibernate properties.
-	 * <p>If this is set, the Hibernate settings should not define
-	 * a connection provider to avoid meaningless double configuration.
-	 * <p>If using HibernateTransactionManager as transaction strategy, consider
-	 * proxying your target DataSource with a LazyConnectionDataSourceProxy.
-	 * This defers fetching of an actual JDBC Connection until the first JDBC
-	 * Statement gets executed, even within JDBC transactions (as performed by
-	 * HibernateTransactionManager). Such lazy fetching is particularly beneficial
-	 * for read-only operations, in particular if the chances of resolving the
-	 * result in the second-level cache are high.
-	 * <p>As JTA and transactional JNDI DataSources already provide lazy enlistment
-	 * of JDBC Connections, LazyConnectionDataSourceProxy does not add value with
-	 * JTA (i.e. Spring's JtaTransactionManager) as transaction strategy.
-	 * @see #setUseTransactionAwareDataSource
-	 * @see LocalDataSourceConnectionProvider
-	 * @see HibernateTransactionManager
-	 * @see org.springframework.transaction.jta.JtaTransactionManager
-	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
-	 */
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
-	/**
-	 * Set whether to use a transaction-aware DataSource for the SessionFactory,
-	 * i.e. whether to automatically wrap the passed-in DataSource with Spring's
-	 * TransactionAwareDataSourceProxy.
-	 * <p>Default is "false": LocalSessionFactoryBean is usually used with Spring's
-	 * HibernateTransactionManager or JtaTransactionManager, both of which work nicely
-	 * on a plain JDBC DataSource. Hibernate Sessions and their JDBC Connections are
-	 * fully managed by the Hibernate/JTA transaction infrastructure in such a scenario.
-	 * <p>If you switch this flag to "true", Spring's Hibernate access will be able to
-	 * <i>participate in JDBC-based transactions managed outside of Hibernate</i>
-	 * (for example, by Spring's DataSourceTransactionManager). This can be convenient
-	 * if you need a different local transaction strategy for another O/R mapping tool,
-	 * for example, but still want Hibernate access to join into those transactions.
-	 * <p>A further benefit of this option is that <i>plain Sessions opened directly
-	 * via the SessionFactory</i>, outside of Spring's Hibernate support, will still
-	 * participate in active Spring-managed transactions. However, consider using
-	 * Hibernate's <code>getCurrentSession()</code> method instead (see javadoc of
-	 * "exposeTransactionAwareSessionFactory" property).
-	 * <p>As a further effect, using a transaction-aware DataSource will <i>apply
-	 * remaining transaction timeouts to all created JDBC Statements</i>. This means
-	 * that all operations performed by the SessionFactory will automatically
-	 * participate in Spring-managed transaction timeouts, not just queries.
-	 * This adds value even for HibernateTransactionManager, but only on Hibernate 3.0,
-	 * as there is a direct transaction timeout facility in Hibernate 3.1.
-	 * <p><b>WARNING:</b> When using a transaction-aware JDBC DataSource in combination
-	 * with OpenSessionInViewFilter/Interceptor, whether participating in JTA or
-	 * external JDBC-based transactions, it is strongly recommended to set Hibernate's
-	 * Connection release mode to "after_transaction" or "after_statement", which
-	 * guarantees proper Connection handling in such a scenario. In contrast to that,
-	 * HibernateTransactionManager generally requires release mode "on_close".
-	 * <p>Note: If you want to use Hibernate's Connection release mode "after_statement"
-	 * with a DataSource specified on this LocalSessionFactoryBean (for example, a
-	 * JTA-aware DataSource fetched from JNDI), switch this setting to "true".
-	 * Else, the ConnectionProvider used underneath will vote against aggressive
-	 * release and thus silently switch to release mode "after_transaction".
-	 * @see #setDataSource
-	 * @see #setExposeTransactionAwareSessionFactory
-	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
-	 * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
-	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter
-	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor
-	 * @see HibernateTransactionManager
-	 * @see org.springframework.transaction.jta.JtaTransactionManager
-	 */
-	public void setUseTransactionAwareDataSource(boolean useTransactionAwareDataSource) {
-		this.useTransactionAwareDataSource = useTransactionAwareDataSource;
-	}
-
-	/**
 	 * Set the JTA TransactionManager to be used for Hibernate's
 	 * TransactionManagerLookup. If set, this will override corresponding
 	 * settings in Hibernate properties. Allows to use a Spring-managed
@@ -560,9 +483,10 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 		// Create Configuration instance.
 		Configuration config = newConfiguration();
 
-		if (this.dataSource != null) {
+		DataSource dataSource = getDataSource();
+		if (dataSource != null) {
 			// Make given DataSource available for SessionFactory configuration.
-			configTimeDataSourceHolder.set(this.dataSource);
+			configTimeDataSourceHolder.set(dataSource);
 		}
 
 		if (this.jtaTransactionManager != null) {
@@ -593,10 +517,9 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 				config.setProperty(Environment.RELEASE_CONNECTIONS, ConnectionReleaseMode.ON_CLOSE.toString());
 			}
 
-			if (!isExposeTransactionAwareSessionFactory()) {
-				// Not exposing a SessionFactory proxy with transaction-aware
-				// getCurrentSession() method -> set Hibernate 3.1 CurrentSessionContext
-				// implementation instead, providing the Spring-managed Session that way.
+			if (isExposeTransactionAwareSessionFactory()) {
+				// Set Hibernate 3.1 CurrentSessionContext implementation,
+				// providing the Spring-managed Session as current Session.
 				// Can be overridden by a custom value for the corresponding Hibernate property.
 				config.setProperty(Environment.CURRENT_SESSION_CONTEXT_CLASS,
 						"org.springframework.orm.hibernate3.SpringSessionContext");
@@ -640,9 +563,9 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 				config.addProperties(this.hibernateProperties);
 			}
 
-			if (this.dataSource != null) {
+			if (dataSource != null) {
 				boolean actuallyTransactionAware =
-						(this.useTransactionAwareDataSource || this.dataSource instanceof TransactionAwareDataSourceProxy);
+						(isUseTransactionAwareDataSource() || dataSource instanceof TransactionAwareDataSourceProxy);
 				// Set Spring-provided DataSource as Hibernate ConnectionProvider.
 				config.setProperty(Environment.CONNECTION_PROVIDER,
 						actuallyTransactionAware ?
@@ -746,7 +669,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 		}
 
 		finally {
-			if (this.dataSource != null) {
+			if (dataSource != null) {
 				// Reset DataSource holder.
 				configTimeDataSourceHolder.set(null);
 			}
@@ -824,16 +747,17 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 	 */
 	protected void afterSessionFactoryCreation() throws Exception {
 		if (this.schemaUpdate) {
-			if (this.dataSource != null) {
+			DataSource dataSource = getDataSource();
+			if (dataSource != null) {
 				// Make given DataSource available for the schema update,
 				// which unfortunately reinstantiates a ConnectionProvider.
-				configTimeDataSourceHolder.set(this.dataSource);
+				configTimeDataSourceHolder.set(dataSource);
 			}
 			try {
 				updateDatabaseSchema();
 			}
 			finally {
-				if (this.dataSource != null) {
+				if (dataSource != null) {
 					// Reset DataSource holder.
 					configTimeDataSourceHolder.set(null);
 				}
@@ -845,16 +769,17 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 	 * Allows for schema export on shutdown.
 	 */
 	public void destroy() throws HibernateException {
-		if (this.dataSource != null) {
+		DataSource dataSource = getDataSource();
+		if (dataSource != null) {
 			// Make given DataSource available for potential SchemaExport,
 			// which unfortunately reinstantiates a ConnectionProvider.
-			configTimeDataSourceHolder.set(this.dataSource);
+			configTimeDataSourceHolder.set(dataSource);
 		}
 		try {
 			super.destroy();
 		}
 		finally {
-			if (this.dataSource != null) {
+			if (dataSource != null) {
 				// Reset DataSource holder.
 				configTimeDataSourceHolder.set(null);
 			}
