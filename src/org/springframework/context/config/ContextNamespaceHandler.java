@@ -16,10 +16,10 @@
 
 package org.springframework.context.config;
 
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.context.annotation.AnnotationConfigParser;
-import org.springframework.context.annotation.AnnotationScanParser;
 import org.springframework.core.JdkVersion;
+import org.springframework.util.ClassUtils;
 
 /**
  * Handler for the context namespace.
@@ -36,8 +36,28 @@ public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 	
 	public void init() {
 		if (JdkVersion.isAtLeastJava15()) {
-			this.registerBeanDefinitionParser(ANNOTATION_CONFIG_ELEMENT, new AnnotationConfigParser());
-			this.registerBeanDefinitionParser(ANNOTATION_SCAN_ELEMENT, new AnnotationScanParser());
+			this.registerBeanDefinitionParser(ANNOTATION_CONFIG_ELEMENT, AnnotationParserFactory.createAnnotationConfigParser());
+			this.registerBeanDefinitionParser(ANNOTATION_SCAN_ELEMENT, AnnotationParserFactory.createAnnotationScanParser());
+		}
+	}
+	
+	private static class AnnotationParserFactory {
+		
+		static BeanDefinitionParser createAnnotationConfigParser() {
+			return doCreateParser("org.springframework.context.annotation.AnnotationConfigParser");
+		}
+		
+		static BeanDefinitionParser createAnnotationScanParser() {
+			return doCreateParser("org.springframework.context.annotation.AnnotationScanParser");
+		}
+		
+		private static BeanDefinitionParser doCreateParser(String className) {
+			try {
+				return (BeanDefinitionParser) ClassUtils.forName(className).newInstance();
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("unable to create parser: " + className);
+			}			
 		}
 	}
 
