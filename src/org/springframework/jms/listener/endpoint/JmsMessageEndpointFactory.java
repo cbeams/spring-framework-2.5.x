@@ -24,23 +24,49 @@ import javax.resource.spi.UnavailableException;
 import org.springframework.jca.endpoint.AbstractMessageEndpointFactory;
 
 /**
+ * JMS-specific implementation of the JCA 1.5
+ * {@link javax.resource.spi.endpoint.MessageEndpointFactory} interface,
+ * providing transaction management capabilities for a JMS listener object
+ * (e.g. a {@link javax.jms.MessageListener} object).
+ *
+ * <p>Uses a static endpoint implementation, simply wrapping the
+ * specified message listener object and exposing all of its implemented
+ * interfaces on the endpoint instance.
+ *
+ * <p>Typically used with Spring's {@link JmsMessageEndpointManager},
+ * but not tied to it. As a consequence, this endpoint factory could
+ * also be used with programmatic endpoint management on a native
+ * {@link javax.resource.spi.ResourceAdapter} instance.
+ *
  * @author Juergen Hoeller
  * @since 2.1
+ * @see #setMessageListener
+ * @see #setTransactionManager
+ * @see JmsMessageEndpointManager
  */
 public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 
 	private MessageListener messageListener;
 
 
+	/**
+	 * Set the JMS MessageListener for this endpoint.
+	 */
 	public void setMessageListener(MessageListener messageListener) {
 		this.messageListener = messageListener;
 	}
 
+	/**
+	 * Creates a concrete JMS message endpoint, internal to this factory.
+	 */
 	protected AbstractMessageEndpoint createEndpointInternal() throws UnavailableException {
 		return new JmsMessageEndpoint();
 	}
 
 
+	/**
+	 * Private inner class that implements the concrete JMS message endpoint.
+	 */
 	private class JmsMessageEndpoint extends AbstractMessageEndpoint implements MessageListener {
 
 		public void onMessage(Message message) {
@@ -82,6 +108,14 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 	}
 
 
+	/**
+	 * Internal exception thrown when a ResourceExeption has been encountered
+	 * during the endpoint invocation.
+	 * <p>Will only be used if the ResourceAdapter does not invoke the
+	 * endpoint's <code>beforeDelivery</code> and <code>afterDelivery</code>
+	 * directly, leavng it up to the concrete endpoint to apply those -
+	 * and to handle any ResourceExceptions thrown from them.
+	 */
 	public static class JmsResourceException extends RuntimeException {
 
 		public JmsResourceException(ResourceException cause) {

@@ -19,8 +19,18 @@ package org.springframework.jms.listener.endpoint;
 import org.springframework.util.Assert;
 
 /**
+ * Common configuration object for activating a JMS message endpoint.
+ * Gets converted into a provided-specific JCA 1.5 ActivationSpec
+ * object for activating the endpoint.
+ *
+ * <p>Typically used in combination with {@link JmsMessageEndpointManager},
+ * but not tied it.
+ *
  * @author Juergen Hoeller
  * @since 2.1
+ * @see JmsActivationSpecFactory
+ * @see JmsMessageEndpointManager#setActivationSpecConfig
+ * @see javax.resource.spi.ResourceAdapter#endpointActivation
  */
 public class JmsActivationSpecConfig {
 
