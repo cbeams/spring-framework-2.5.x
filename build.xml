@@ -1594,10 +1594,7 @@
 				<include name="lib/jdo/**"/>
 				<include name="lib/jmx/**"/>
 				<include name="lib/jotm/**"/>
-				<include name="lib/jpa/**"/>
 				<include name="lib/jruby/**"/>
-				<include name="lib/jsf/**"/>
-				<include name="lib/jsr250/**"/>
 				<include name="lib/junit/**"/>
 				<include name="lib/log4j/**"/>
 				<include name="lib/oc4j/**"/>

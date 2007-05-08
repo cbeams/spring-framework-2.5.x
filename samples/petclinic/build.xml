@@ -38,13 +38,11 @@
 			<include name="hibernate3.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/j2ee">
+			<include name="persistence.jar"/>
 			<include name="servlet-api.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-logging.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/lib/jpa">
-			<include name="persistence.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/toplink">
 			<include name="toplink-essentials.jar"/>
@@ -248,6 +246,7 @@
 				<include name="jstl.jar"/>
 				<!-- jta.jar only needed for Hibernate -->
 				<include name="jta.jar"/>
+				<include name="persistence.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-commons">
 				<include name="commons-collections.jar"/>
@@ -258,9 +257,6 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
-			</fileset>
-			<fileset dir="${spring.root}/lib/jpa">
-				<include name="persistence.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/openjpa">
 				<include name="openjpa*.jar"/>

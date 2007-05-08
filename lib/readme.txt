@@ -138,9 +138,14 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's AbstractPdfView
 
 * j2ee/activation.jar
-- JavaBeans Activation Framework 1.0.2 (http://java.sun.com/products/javabeans/glasgow/jaf.html)
-- required for building the framework
-- required at runtime when using Spring's JavaMailSender
+- JavaBeans Activation Framework 1.1 (http://java.sun.com/products/javabeans/glasgow/jaf.html)
+- required for building the framework on JDK < 1.6
+- required at runtime when using Spring's JavaMailSender on JDK < 1.6
+
+* j2ee/common-annotations.jar
+- JSR-250 Common Annotations (http://jcp.org/en/jsr/detail?id=250)
+- required for building the framework on JDK < 1.6
+- required at runtime when using Spring's Common Annotations support on JDK < 1.6
 
 * j2ee/connector.jar
 - J2EE Connector Architecture 1.5 (http://java.sun.com/j2ee/connector)
@@ -161,6 +166,11 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JMS support
 
+* j2ee/jsf-api.jar
+- JSF API 1.1 (http://java.sun.com/j2ee/javaserverfaces)
+- required for building the framework
+- required at runtime when using Spring's JSF support
+
 * j2ee/jsp-api.jar
 - JSP API 2.0 (http://java.sun.com/products/jsp)
 - required for building the framework
@@ -172,14 +182,19 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's JstlView
 
 * j2ee/jta.jar
-- Java Transaction API 1.0.1b (http://java.sun.com/products/jta)
+- Java Transaction API 1.1 (http://java.sun.com/products/jta)
 - required for building the framework
 - required at runtime when using Spring's JtaTransactionManager
 
 * j2ee/mail.jar
-- JavaMail 1.3.2 (http://java.sun.com/products/javamail)
+- JavaMail 1.4 (http://java.sun.com/products/javamail)
 - required for building the framework
 - required at runtime when using Spring's JavaMailSender
+
+* j2ee/persistence.jar
+- Java Persistence API 1.0 (http://www.oracle.com/technology/products/ias/toplink/jpa)
+- required for building the framework
+- required at runtime when using Spring's JPA support
 
 * j2ee/rowset.jar
 - JDBC RowSet Implementations 1.0.1 (http://java.sun.com/products/jdbc)
@@ -301,20 +316,10 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's XAPoolNativeJdbcExtractor
 
-* jpa/persistence.jar
-- Java Persistence API 1.0 (http://www.oracle.com/technology/products/ias/toplink/jpa)
-- required for building the framework
-- required at runtime when using Spring's JPA support
-
 * jruby/jruby.jar
 - JRuby 0.9.8 (http://jruby.codehaus.org)
 - required for building the framework
 - required at runtime when using Spring's JRuby support
-
-* jsf/jsf-api.jar
-- JSF API 1.1 (http://java.sun.com/j2ee/javaserverfaces)
-- required for building the framework
-- required at runtime when using Spring's JSF support
 
 * junit/junit.jar
 - JUnit 3.8.1 (http://www.junit.org)
