@@ -783,7 +783,6 @@
 			<link href="http://aopalliance.sourceforge.net/doc"/>
 			<!-- Caucho Burlap/Hessian -->
 			<link href="http://cglib.sourceforge.net/apidocs"/>
-			<!-- COS -->
 			<!-- EasyMock -->
 			<link href="http://ehcache.sourceforge.net/apidocs"/>
 			<link href="http://freemarker.sourceforge.net/docs/api/"/>
@@ -1577,7 +1576,6 @@
 				<include name="lib/cglib/**"/>
 				<include name="lib/commonj/**"/>
 				<include name="lib/concurrent/**"/>
-				<include name="lib/cos/**"/>
 				<include name="lib/dom4j/**"/>
 				<include name="lib/easymock/**"/>
 				<include name="lib/ehcache/**"/>

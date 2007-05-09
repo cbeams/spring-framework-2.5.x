@@ -9,12 +9,6 @@
 	<!-- MultipartResolver for parsing file uploads, implementation for Commons FileUpload -->
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 
-	<!-- MultipartResolver for parsing file uploads, implementation for Jason Hunter's COS. -->
-	<!-- Uncomment this and comment out the above to switch to COS as multipart parsing strategy. -->
-	<!--
-	<bean id="multipartResolver" class="org.springframework.web.multipart.cos.CosMultipartResolver"/>
-	-->
-
 	<!-- Configurer that sets up a shared VelocityEngine for Velocity views -->
 	<bean id="velocityConfigurer" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
 		<property name="resourceLoaderPath" value="WEB-INF/views/"/>

@@ -82,9 +82,6 @@
 			<fileset dir="${spring.root}/lib/c3p0">
 				<include name="c3p0*.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/cos">
-				<include name="cos.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/lib/freemarker">
 				<include name="freemarker.jar"/>
 			</fileset>

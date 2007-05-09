@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,15 @@
 
 package org.springframework.mail;
 
-import junit.framework.TestCase;
-import org.springframework.mail.cos.CosMailSenderImpl;
-import org.springframework.test.AssertThrows;
-
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import junit.framework.TestCase;
+
+import org.springframework.test.AssertThrows;
+
 /**
- * Unit tests for the <code>SimpleMailMessage</code> class.
- *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -151,22 +149,6 @@ public final class SimpleMailMessageTests extends TestCase {
 		message1.setText("text");
 		message2 = new SimpleMailMessage(message1);
 		assertTrue(message1.equals(message2));
-	}
-
-	public void testCosMailSenderImplWithSimpleMessageAndBadHostName() throws MailException {
-		new AssertThrows(MailSendException.class) {
-			public void test() throws Exception {
-				SimpleMailMessage message = new SimpleMailMessage();
-				message.setFrom("a@a.com");
-				message.setTo("b@b.com");
-				message.setSubject("test");
-				message.setText("another test");
-
-				CosMailSenderImpl sender = new CosMailSenderImpl();
-				sender.setHost("hostxyzdoesnotexist");
-				sender.send(message);
-			}
-		}.runTest();
 	}
 
 	public void testCopyCtorChokesOnNullOriginalMessage() throws Exception {

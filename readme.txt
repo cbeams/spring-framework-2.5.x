@@ -135,7 +135,7 @@ MODULE JARS (dist/modules):
 
 * "spring-web" (~150 KB)
 - Contents: web application context, multipart resolver, web utilities
-- Dependencies: spring-context, Servlet API, (JSP API, JSTL, Commons FileUpload, COS)
+- Dependencies: spring-context, Servlet API, (JSP API, JSTL, Commons FileUpload)
 
 * "spring-webmvc" (~280 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
