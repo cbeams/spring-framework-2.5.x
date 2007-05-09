@@ -1047,7 +1047,7 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(1024, tb.getArray().length);
 		assertEquals(0, tb.getArray()[0]);
 		long time1 = sw.getLastTaskTimeMillis();
-		assertTrue(sw.getLastTaskTimeMillis() < 100);
+		assertTrue("Took too long", sw.getLastTaskTimeMillis() < 100);
 
 		bw.registerCustomEditor(String.class, new StringTrimmerEditor(false));
 		sw.start("array2");
@@ -1055,7 +1055,7 @@ public class BeanWrapperTests extends TestCase {
 			bw.setPropertyValue("array", input);
 		}
 		sw.stop();
-		assertTrue(sw.getLastTaskTimeMillis() < 100);
+		assertTrue("Took too long", sw.getLastTaskTimeMillis() < 100);
 
 		bw.registerCustomEditor(int.class, "array.somePath", new CustomNumberEditor(Integer.class, false));
 		sw.start("array3");
@@ -1063,7 +1063,7 @@ public class BeanWrapperTests extends TestCase {
 			bw.setPropertyValue("array", input);
 		}
 		sw.stop();
-		assertTrue(sw.getLastTaskTimeMillis() < 100);
+		assertTrue("Took too long", sw.getLastTaskTimeMillis() < 100);
 
 		bw.registerCustomEditor(int.class, "array[0].somePath", new CustomNumberEditor(Integer.class, false));
 		sw.start("array3");
@@ -1071,7 +1071,7 @@ public class BeanWrapperTests extends TestCase {
 			bw.setPropertyValue("array", input);
 		}
 		sw.stop();
-		assertTrue(sw.getLastTaskTimeMillis() < 100);
+		assertTrue("Took too long", sw.getLastTaskTimeMillis() < 100);
 
 		bw.registerCustomEditor(int.class, new CustomNumberEditor(Integer.class, false));
 		sw.start("array4");
@@ -1081,7 +1081,7 @@ public class BeanWrapperTests extends TestCase {
 		sw.stop();
 		assertEquals(1024, tb.getArray().length);
 		assertEquals(0, tb.getArray()[0]);
-		assertTrue(sw.getLastTaskTimeMillis() > time1);
+		assertTrue("Took too long", sw.getLastTaskTimeMillis() > time1);
 	}
 
 	public void testLargeMatchingPrimitiveArrayWithSpecificEditor() {
