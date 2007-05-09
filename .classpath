@@ -3,23 +3,15 @@
 	<classpathentry kind="src" output="target/classes" path="src"/>
 	<classpathentry kind="src" path="tiger/src"/>
 	<classpathentry kind="src" output="target/test-classes" path="test"/>
-	<classpathentry kind="src" output="target/load-classes" path="load"/>
 	<classpathentry kind="src" output="target/mock-classes" path="mock"/>
 	<classpathentry kind="src" output="target/sandbox/classes" path="sandbox/src"/>
 	<classpathentry kind="src" output="target/sandbox/test-classes" path="sandbox/test"/>
 	<classpathentry kind="src" path="samples/countries/src"/>
 	<classpathentry kind="src" path="samples/imagedb/src"/>
-	<classpathentry kind="src" path="samples/jasperdemo/src/java"/>
-	<classpathentry kind="src" path="samples/jca-1.0/src"/>
 	<classpathentry kind="src" path="samples/jpetstore/src"/>
 	<classpathentry kind="src" path="samples/jpetstore/annotation/src"/>
 	<classpathentry kind="src" output="samples/petclinic/.classes" path="samples/petclinic/src"/>
 	<classpathentry kind="src" path="samples/petportal/src"/>
-	<classpathentry kind="src" path="samples/tiles-example/src"/>
-	<classpathentry kind="src" path="samples/webapp-minimal/src"/>
-	<classpathentry kind="src" output="target/autobuilds/classes" path="autobuilds/src"/>
-	<classpathentry kind="src" path="benchmark/cmt/src"/>
-	<classpathentry kind="src" path="benchmark/cmt/test"/>
 	<classpathentry kind="src" path="tiger/mock"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/jms.jar"/>
@@ -37,13 +29,10 @@
 	<classpathentry exported="true" kind="lib" path="lib/jakarta-commons/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/mail.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-fileupload.jar"/>
-	<classpathentry kind="lib" path="lib/cos/cos.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/activation.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-pool.jar"/>
 	<classpathentry kind="lib" path="lib/qdox/qdox-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/ant/ant.jar"/>
-	<classpathentry kind="lib" path="lib/httpunit/httpunit.jar"/>
-	<classpathentry kind="lib" path="lib/httpunit/Tidy.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/jaxrpc.jar"/>
 	<classpathentry kind="lib" path="lib/axis/axis.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/jstl.jar"/>
@@ -90,7 +79,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/cglib/cglib-nodep-2.1_3.jar"/>
 	<classpathentry kind="lib" path="lib/ognl/ognl.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/rowset.jar"/>
-	<classpathentry kind="lib" path="samples/jca-1.0/lib/spring-cciblackbox-tx.jar"/>
 	<classpathentry kind="lib" path="lib/toplink/toplink-api.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-annotations.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aspectj/aspectjweaver.jar"/>
@@ -102,7 +90,6 @@
 	<classpathentry kind="lib" path="lib/httpclient/commons-httpclient-3.0.jar"/>
 	<classpathentry kind="lib" path="lib/log4j/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="lib/jruby/jruby.jar"/>
-	<classpathentry kind="lib" path="lib/innovation/HTTPClient-0.3-3.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-2.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-commons-2.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-util-2.2.3.jar"/>
