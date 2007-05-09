@@ -67,11 +67,13 @@ public class ComponentScanBeanDefinitionParser extends AnnotationConfigBeanDefin
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		ResourceLoader resourceLoader = parserContext.getReaderContext().getResourceLoader();
 
-		// create the component provider
 		boolean useDefaultFilters = Boolean.valueOf(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
 		String basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);
+		String[] basePackages = StringUtils.commaDelimitedListToStringArray(basePackage);
+
+		// create the component provider
 		ClassPathScanningCandidateComponentProvider candidateComponentProvider =
-				new ClassPathScanningCandidateComponentProvider(basePackage, useDefaultFilters);
+				new ClassPathScanningCandidateComponentProvider(basePackages, useDefaultFilters);
 		candidateComponentProvider.setResourceLoader(resourceLoader);
 
 		// parse exclude and include filter elements

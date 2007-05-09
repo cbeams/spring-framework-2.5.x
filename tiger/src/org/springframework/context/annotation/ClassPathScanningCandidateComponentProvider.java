@@ -59,7 +59,7 @@ public class ClassPathScanningCandidateComponentProvider
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final String basePackage;
+	private final String[] packageSearchPaths;
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
@@ -67,13 +67,21 @@ public class ClassPathScanningCandidateComponentProvider
 
 	private final List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
 
-	
+
 	public ClassPathScanningCandidateComponentProvider(String basePackage) {
-		this.basePackage = ClassUtils.convertClassNameToResourcePath(basePackage);
+		this(new String[] {basePackage}, true);
 	}
 
 	public ClassPathScanningCandidateComponentProvider(String basePackage, boolean useDefaultFilters) {
-		this(basePackage);
+		this(new String[] {basePackage}, useDefaultFilters);
+	}
+
+	public ClassPathScanningCandidateComponentProvider(String[] basePackages, boolean useDefaultFilters) {
+		this.packageSearchPaths = new String[basePackages.length];
+		for (int i = 0; i < basePackages.length; i++) {
+			this.packageSearchPaths[i] =
+					"classpath*:" + ClassUtils.convertClassNameToResourcePath(basePackages[i]) + "/**/*.class";
+		}
 		if (useDefaultFilters) {
 			initDefaultFilters();
 		}
@@ -109,19 +117,19 @@ public class ClassPathScanningCandidateComponentProvider
 
 	public Set<Class> findCandidateComponents() {
 		Set<Class> candidates = new HashSet<Class>();
-		String scanPath = "classpath*:" + this.basePackage + "/**/*.class";
-		
-		try {
-			Resource[] resources = this.resourcePatternResolver.getResources(scanPath);
-			for (int i = 0; i < resources.length; i++) {
-				Class clazz = loadClassIfCandidate(resources[i]);
-				if (clazz != null) {
-					candidates.add(clazz);
+		for (int i = 0; i < this.packageSearchPaths.length; i++) {
+			try {
+				Resource[] resources = this.resourcePatternResolver.getResources(this.packageSearchPaths[i]);
+				for (int j = 0; j < resources.length; j++) {
+					Class clazz = loadClassIfCandidate(resources[j]);
+					if (clazz != null) {
+						candidates.add(clazz);
+					}
 				}
 			}
-		}
-		catch (IOException e) {
-			throw new FatalBeanException("failed in classpath scan", e);
+			catch (IOException e) {
+				throw new FatalBeanException("failed in classpath scan", e);
+			}
 		}
 		return candidates;
 	}
@@ -131,11 +139,9 @@ public class ClassPathScanningCandidateComponentProvider
 		if (logger.isDebugEnabled()) {
 			logger.debug("Checking for candidate: " + resource);
 		}
-
 		if (!name.endsWith(CLASS_FILE_EXTENSION)) {
 			return null;
 		}
-
 		InputStream stream = resource.getInputStream();
 		try {
 			ClassReader classReader = new ClassReader(stream);
@@ -166,10 +172,9 @@ public class ClassPathScanningCandidateComponentProvider
 	}
 
 	/**
-	 * 
 	 * @param classReader ASM ClassReader for the class
-	 * @return true if this class does not match any exclude filter 
-	 *              and does match at least one include filter
+	 * @return true if this class does not match any exclude filter
+	 * and does match at least one include filter
 	 */
 	protected boolean isCandidateComponent(ClassReader classReader) {
 		for (TypeFilter tf : this.excludeFilters) {
@@ -184,7 +189,7 @@ public class ClassPathScanningCandidateComponentProvider
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Utility method which loads a class without initializing it.
 	 * Translates any ClassNotFoundException into BeanDefinitionStoreException.
