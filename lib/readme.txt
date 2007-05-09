@@ -66,11 +66,6 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's backport-concurrent support
 
-* cos/cos.jar
-- Jason Hunter's COS 05Nov02 (http://www.servlets.com/cos)
-- required for building the framework
-- required at runtime when using Spring's CosMultipartResolver or CosMailSender
-
 * dom4j/dom4j-1.6.1, dom4j/jaxen-1.1-beta-7.jar
 - DOM4J 1.6.1 XML parser (http://www.dom4j.org)
 - required for running PetClinic (by Hibernate)
@@ -139,12 +134,10 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 
 * j2ee/activation.jar
 - JavaBeans Activation Framework 1.1 (http://java.sun.com/products/javabeans/glasgow/jaf.html)
-- required for building the framework on JDK < 1.6
 - required at runtime when using Spring's JavaMailSender on JDK < 1.6
 
 * j2ee/common-annotations.jar
 - JSR-250 Common Annotations (http://jcp.org/en/jsr/detail?id=250)
-- required for building the framework on JDK < 1.6
 - required at runtime when using Spring's Common Annotations support on JDK < 1.6
 
 * j2ee/connector.jar
@@ -198,7 +191,6 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 
 * j2ee/rowset.jar
 - JDBC RowSet Implementations 1.0.1 (http://java.sun.com/products/jdbc)
-- required for building the framework on JDK < 1.5
 - required at runtime when using Spring's RowSet support on JDK < 1.5
 
 * j2ee/servlet-api.jar
@@ -293,17 +285,14 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 
 * jmx/jmxri.jar
 - JMX 1.2.1 reference implementation
-- required for building the framework on JDK < 1.5
 - required at runtime when using Spring's JMX support on JDK < 1.5
 
 * jmx/jmxremote.jar
 - JMX Remote API 1.0.1 reference implementation
-- required for building the framework on JDK < 1.5
 - required at runtime when using Spring's JMX support on JDK < 1.5
 
 * jmx/jmxremote_optional.jar
 - JMXMP connector (from JMX Remote API 1.0.1 reference implementation)
-- required for running the framework test suite (even on JDK 1.5)
 - required at runtime when using the JMXMP connector (even on JDK 1.5)
 
 * jotm/jotm.jar
@@ -323,7 +312,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 
 * junit/junit.jar
 - JUnit 3.8.1 (http://www.junit.org)
-- required for building the test suite
+- required for building the framework's test suite
 
 * log4j/log4j-1.2.14.jar
 - Log4J 1.2.14 (http://logging.apache.org/log4j)
