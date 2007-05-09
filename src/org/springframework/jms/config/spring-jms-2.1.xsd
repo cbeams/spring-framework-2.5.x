@@ -10,10 +10,19 @@
 
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
+	<xsd:annotation>
+		<xsd:documentation><![CDATA[
+	Defines the configuration elements for the Spring Framework's JMS support.
+	Allows for configuring JMS listener containers in XML 'shortcut' style.
+		]]></xsd:documentation>
+	</xsd:annotation>
+
 	<xsd:element name="listener-container">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Each listener child element will be hosted by a container whose configuration is determined by this parent element.		
+	Each listener child element will be hosted by a container whose configuration
+	is determined by this parent element. This variant builds standard JMS
+	listener containers, operating against a specified JMS ConnectionFactory.
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
@@ -102,7 +111,10 @@
 	<xsd:element name="jca-listener-container">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Each listener child element will be hosted by a container whose configuration is determined by this parent element.
+	Each listener child element will be hosted by a container whose configuration
+	is determined by this parent element. This variant builds standard JCA-based
+	listener containers, operating against a specified JCA ResourceAdapter
+	(which needs to be provided by the JMS message broker, e.g. ActiveMQ).
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
