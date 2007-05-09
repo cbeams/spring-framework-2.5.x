@@ -66,9 +66,8 @@
 	<classpathentry kind="lib" path="lib/jmock/jmock.jar"/>
 	<classpathentry kind="lib" path="lib/jmock/jmock-cglib.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxri.jar"/>
-	<classpathentry kind="lib" path="lib/jsf/jsf-api.jar"/>
+	<classpathentry kind="lib" path="lib/j2ee/jsf-api.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-httpclient.jar"/>
-	<classpathentry kind="lib" path="lib/oro/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/poi/poi-2.5.1.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-api.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-attributes-compiler.jar"/>
@@ -115,7 +114,7 @@
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-entitymanager.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/jboss-archive-browsing.jar"/>
 	<classpathentry kind="lib" path="lib/tomcat/catalina.jar"/>
-	<classpathentry kind="lib" path="lib/jpa/persistence.jar"/>
+	<classpathentry kind="lib" path="lib/j2ee/persistence.jar"/>
 	<classpathentry kind="lib" path="lib/caucho/hessian-3.0.20.jar"/>
 	<classpathentry kind="lib" path="lib/oc4j/oc4j-clapi.jar"/>
 	<classpathentry kind="lib" path="lib/glassfish/glassfish-clapi.jar"/>
