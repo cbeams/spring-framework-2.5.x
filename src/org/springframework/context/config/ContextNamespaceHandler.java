@@ -23,41 +23,43 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Handler for the context namespace.
- * 
+ *
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 2.1
  */
 public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 
+	private static final String PROPERTY_PLACEHOLDER_ELEMENT = "property-placeholder";
+
 	private static final String ANNOTATION_CONFIG_ELEMENT = "annotation-config";
 	
-	private static final String ANNOTATION_SCAN_ELEMENT = "annotation-scan";
+	private static final String COMPONENT_SCAN_ELEMENT = "component-scan";
 
-	
+
 	public void init() {
+		registerBeanDefinitionParser(PROPERTY_PLACEHOLDER_ELEMENT, new PropertyPlaceholderBeanDefinitionParser());
 		if (JdkVersion.isAtLeastJava15()) {
-			this.registerBeanDefinitionParser(ANNOTATION_CONFIG_ELEMENT, AnnotationParserFactory.createAnnotationConfigParser());
-			this.registerBeanDefinitionParser(ANNOTATION_SCAN_ELEMENT, AnnotationParserFactory.createAnnotationScanParser());
+			registerBeanDefinitionParser(ANNOTATION_CONFIG_ELEMENT, createAnnotationConfigParser());
+			registerBeanDefinitionParser(COMPONENT_SCAN_ELEMENT, createComponentScanParser());
 		}
 	}
-	
-	private static class AnnotationParserFactory {
-		
-		static BeanDefinitionParser createAnnotationConfigParser() {
-			return doCreateParser("org.springframework.context.annotation.AnnotationConfigParser");
+
+
+	protected BeanDefinitionParser createAnnotationConfigParser() {
+		return doCreateParser("org.springframework.context.annotation.AnnotationConfigBeanDefinitionParser");
+	}
+
+	protected BeanDefinitionParser createComponentScanParser() {
+		return doCreateParser("org.springframework.context.annotation.ComponentScanBeanDefinitionParser");
+	}
+
+	protected static BeanDefinitionParser doCreateParser(String className) {
+		try {
+			return (BeanDefinitionParser) ClassUtils.forName(className).newInstance();
 		}
-		
-		static BeanDefinitionParser createAnnotationScanParser() {
-			return doCreateParser("org.springframework.context.annotation.AnnotationScanParser");
-		}
-		
-		private static BeanDefinitionParser doCreateParser(String className) {
-			try {
-				return (BeanDefinitionParser) ClassUtils.forName(className).newInstance();
-			}
-			catch (Exception e) {
-				throw new IllegalStateException("unable to create parser: " + className);
-			}			
+		catch (Exception ex) {
+			throw new IllegalStateException("Unable to create JDK 1.5 dependent parser: " + className, ex);
 		}
 	}
 

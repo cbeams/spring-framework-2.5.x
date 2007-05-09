@@ -26,12 +26,6 @@ import org.springframework.core.typefilter.TypeFilter;
  */
 public interface CandidateComponentProvider {
 	
-	void setBasePackage(String basePackage);
-	
-	void addExcludeFilter(TypeFilter excludeFilter);
-	
-	void addIncludeFilter(TypeFilter excludeFilter);
-	
 	Set<Class> findCandidateComponents();
 
 }

@@ -20,13 +20,15 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class SimpleScanTests extends AbstractDependencyInjectionSpringContextTests {
 
 	private FooService fooService;
-	
+
 	private ServiceInvocationCounter serviceInvocationCounter;
-	
+
+
 	public void setFooService(FooService fooService) {
 		this.fooService = fooService;
 	}
@@ -35,19 +37,25 @@ public class SimpleScanTests extends AbstractDependencyInjectionSpringContextTes
 		this.serviceInvocationCounter = serviceInvocationCounter;
 	}
 
-	public void testFooService() throws Exception {
-		String value = fooService.foo(1);
-		assertEquals("bar", value);
-		
-		assertEquals(1, serviceInvocationCounter.getCount());
-		
-		fooService.foo(1);
-		assertEquals(2, serviceInvocationCounter.getCount());
-	}
-	
+
 	@Override
 	protected String[] getConfigLocations() {
 		return new String[] {"org/springframework/context/annotation/simpleScanTests.xml"};
+	}
+
+
+	public void testFooService() throws Exception {
+		assertEquals(0, serviceInvocationCounter.getCount());
+
+		assertTrue(fooService.isInitCalled());
+		assertEquals(1, serviceInvocationCounter.getCount());
+
+		String value = fooService.foo(1);
+		assertEquals("bar", value);
+		assertEquals(2, serviceInvocationCounter.getCount());
+		
+		fooService.foo(1);
+		assertEquals(3, serviceInvocationCounter.getCount());
 	}
 
 }

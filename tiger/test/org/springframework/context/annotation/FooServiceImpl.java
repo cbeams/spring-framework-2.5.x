@@ -16,18 +16,35 @@
 
 package org.springframework.context.annotation;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class FooServiceImpl implements FooService {
 
 	@Autowired
 	private FooDao fooDao;
 
-	public String foo(int id) {
-		return fooDao.findFoo(id);
+	private boolean initCalled = false;
+
+	@PostConstruct
+	private void init() {
+		if (this.initCalled) {
+			throw new IllegalStateException("Init already called");
+		}
+		this.initCalled = true;
 	}
-	
+
+	public String foo(int id) {
+		return this.fooDao.findFoo(id);
+	}
+
+	public boolean isInitCalled() {
+		return this.initCalled;
+	}
+
 }

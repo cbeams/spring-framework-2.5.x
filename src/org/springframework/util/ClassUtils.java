@@ -507,6 +507,8 @@ public abstract class ClassUtils {
 	/**
 	 * Check if the given class represents a primitive wrapper,
 	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
+	 * @param clazz the class to check
+	 * @return whether the given class is a primitive wrapper class
 	 */
 	public static boolean isPrimitiveWrapper(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -517,6 +519,8 @@ public abstract class ClassUtils {
 	 * Check if the given class represents a primitive (i.e. boolean, byte,
 	 * char, short, int, long, float, or double) or a primitive wrapper
 	 * (i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double).
+	 * @param clazz the class to check
+	 * @return whether the given class is a primitive or primitive wrapper class
 	 */
 	public static boolean isPrimitiveOrWrapper(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -526,6 +530,8 @@ public abstract class ClassUtils {
 	/**
 	 * Check if the given class represents an array of primitives,
 	 * i.e. boolean, byte, char, short, int, long, float, or double.
+	 * @param clazz the class to check
+	 * @return whether the given class is a primitive array class
 	 */
 	public static boolean isPrimitiveArray(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -535,6 +541,8 @@ public abstract class ClassUtils {
 	/**
 	 * Check if the given class represents an array of primitive wrappers,
 	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
+	 * @param clazz the class to check
+	 * @return whether the given class is a primitive wrapper array class
 	 */
 	public static boolean isPrimitiveWrapperArray(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -569,6 +577,24 @@ public abstract class ClassUtils {
 		return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
 	}
 
+
+	/**
+	 * Convert a "/"-based resource path to a "."-based fully qualified class name.
+	 * @param resourcePath the resource path pointing to a class
+	 * @return the corresponding fully qualified class name
+	 */
+	public static String convertResourcePathToClassName(String resourcePath) {
+		return resourcePath.replace('/', '.');
+	}
+
+	/**
+	 * Convert a "."-based fully qualified class name to a "/"-based resource path.
+	 * @param className the fully qualified class name
+	 * @return the corresponding resource path, pointing to the class
+	 */
+	public static String convertClassNameToResourcePath(String className) {
+		return className.replace('.', '/');
+	}
 
 	/**
 	 * Return a path suitable for use with <code>ClassLoader.getResource</code>

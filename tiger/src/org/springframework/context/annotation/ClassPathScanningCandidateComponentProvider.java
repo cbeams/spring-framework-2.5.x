@@ -26,18 +26,20 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
+
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.typefilter.AnnotationTypeFilter;
 import org.springframework.core.typefilter.ClassNameAndTypesReadingVisitor;
-import org.springframework.core.typefilter.ClassNameUtils;
 import org.springframework.core.typefilter.TypeFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -46,47 +48,55 @@ import org.springframework.util.ClassUtils;
  * 
  * @author Mark Fisher
  * @author Ramnivas Laddad
+ * @author Juergen Hoeller
  * @since 2.1
  */
-public class ClassPathScanningCandidateComponentProvider implements CandidateComponentProvider {
-	
-	protected final Log log = LogFactory.getLog(getClass());
+public class ClassPathScanningCandidateComponentProvider
+		implements CandidateComponentProvider, ResourceLoaderAware {
 
-	private static final String CLASS_EXTENSION = ".class";
-	
-	private String basePackage = "";
-	
-	private final List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
-	
-	private final List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
-	
+	private static final String CLASS_FILE_EXTENSION = ".class";
+
+
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	private final String basePackage;
+
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
+	private final List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
+
+	private final List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
+
 	
-	public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters) {
+	public ClassPathScanningCandidateComponentProvider(String basePackage) {
+		this.basePackage = ClassUtils.convertClassNameToResourcePath(basePackage);
+	}
+
+	public ClassPathScanningCandidateComponentProvider(String basePackage, boolean useDefaultFilters) {
+		this(basePackage);
 		if (useDefaultFilters) {
 			initDefaultFilters();
 		}
 	}
-	
+
+
 	@SuppressWarnings("unchecked")
 	private void initDefaultFilters() {
-		includeFilters.add(new AnnotationTypeFilter(Component.class, true));
-		includeFilters.add(new AnnotationTypeFilter(Repository.class, true));
+		this.includeFilters.add(new AnnotationTypeFilter(Component.class, true));
+		this.includeFilters.add(new AnnotationTypeFilter(Repository.class, true));
 		try {
-			includeFilters.add(new AnnotationTypeFilter(
-					ClassUtils.forName("org.aspectj.lang.annotation.Aspect"), false));
+			this.includeFilters.add(new AnnotationTypeFilter(
+					ClassUtils.forName("org.aspectj.lang.annotation.Aspect", getClass().getClassLoader()), false));
 		}
-		catch (ClassNotFoundException e) {
-			// will not scan for @Aspect annotations
+		catch (ClassNotFoundException ex) {
+			// will not scan for @Aspect annotations if not present
 		}
 	}
 	
-	public void setBasePackage(String basePackage) {
-		Assert.notNull("basePackage cannnot be null", basePackage);
-		this.basePackage = ClassNameUtils.convertLoadableClassNameToInternalClassName(basePackage);
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
-	
+
 	public void addExcludeFilter(TypeFilter excludeFilter) {
 		// add exclude filters to the front of the list
 		this.excludeFilters.add(0, excludeFilter);
@@ -99,10 +109,10 @@ public class ClassPathScanningCandidateComponentProvider implements CandidateCom
 
 	public Set<Class> findCandidateComponents() {
 		Set<Class> candidates = new HashSet<Class>();
-		String scanPath = "classpath*:" + basePackage + "/**/*.class";
+		String scanPath = "classpath*:" + this.basePackage + "/**/*.class";
 		
 		try {
-			Resource[] resources = resourcePatternResolver.getResources(scanPath);
+			Resource[] resources = this.resourcePatternResolver.getResources(scanPath);
 			for (int i = 0; i < resources.length; i++) {
 				Class clazz = loadClassIfCandidate(resources[i]);
 				if (clazz != null) {
@@ -118,14 +128,14 @@ public class ClassPathScanningCandidateComponentProvider implements CandidateCom
 
 	private Class loadClassIfCandidate(Resource resource) throws IOException {
 		String name = resource.getFilename();
-		if (log.isDebugEnabled()) {
-			log.debug("checking for candidate: " + resource);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Checking for candidate: " + resource);
 		}
 
-		if (!name.endsWith(CLASS_EXTENSION)) {
+		if (!name.endsWith(CLASS_FILE_EXTENSION)) {
 			return null;
 		}
-		
+
 		InputStream stream = resource.getInputStream();
 		try {
 			ClassReader classReader = new ClassReader(stream);
@@ -133,8 +143,8 @@ public class ClassPathScanningCandidateComponentProvider implements CandidateCom
 			classReader.accept(nameReader, true);
 
 			if (isCandidateComponent(classReader)) {
-				if (log.isInfoEnabled()) {
-					log.info("found match - loading class: " + nameReader.getClassName());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found candidate - loading class: " + nameReader.getClassName());
 				}
 				Class clazz = loadClass(nameReader.getClassName());
 				if (!clazz.isInterface()) {
@@ -162,12 +172,12 @@ public class ClassPathScanningCandidateComponentProvider implements CandidateCom
 	 *              and does match at least one include filter
 	 */
 	protected boolean isCandidateComponent(ClassReader classReader) {
-		for (TypeFilter tf : excludeFilters) {
+		for (TypeFilter tf : this.excludeFilters) {
 			if (tf.match(classReader)) {
 				return false;
 			}
 		}
-		for (TypeFilter tf : includeFilters) {
+		for (TypeFilter tf : this.includeFilters) {
 			if (tf.match(classReader)) {
 				return true;
 			}
@@ -178,17 +188,16 @@ public class ClassPathScanningCandidateComponentProvider implements CandidateCom
 	/**
 	 * Utility method which loads a class without initializing it.
 	 * Translates any ClassNotFoundException into BeanDefinitionStoreException.
-	 * 
-	 * @param className
+	 * @param className the name of the class
 	 * @return the loaded class
 	 */
 	protected Class loadClass(String className) {
 		try {
-			return Class.forName(ClassNameUtils.convertInternalClassNameToLoadableClassName(className), 
-					false, ClassUtils.getDefaultClassLoader());
+			return Class.forName(ClassUtils.convertResourcePathToClassName(className),
+					false, this.resourcePatternResolver.getClassLoader());
 		}
-		catch (ClassNotFoundException e) {
-			throw new BeanDefinitionStoreException("unable to load class: " + className, e);
+		catch (ClassNotFoundException ex) {
+			throw new BeanDefinitionStoreException("Unable to load class: " + className, ex);
 		}
 	}
 

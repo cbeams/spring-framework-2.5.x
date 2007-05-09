@@ -20,10 +20,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.commons.EmptyVisitor;
 
+import org.springframework.util.ClassUtils;
+
 /**
- * ASM class visitor which looks only for the classname and implemented types. 
+ * ASM class visitor which looks only for the class name and implemented types.
  * Inner classes are not handled by the visitor but by the lookup class.
- * 
+ *
  * @author Rod Johnson
  * @author Costin Leau
  * @author Mark Fisher
@@ -35,58 +37,37 @@ public class ClassNameAndTypesReadingVisitor extends EmptyVisitor {
 	protected final Log log = LogFactory.getLog(getClass());
 	
 	private String name;
+
 	private String superName;
+
 	private String[] interfaces;
 
-	public void visit(int version, int access, String name, String signature, 
-			String supername, String[] interfaces) {
-		this.name = ClassNameUtils.convertInternalClassNameToLoadableClassName(name);
-		if(supername != null) {
-			this.superName = ClassNameUtils.convertInternalClassNameToLoadableClassName(supername);
+
+	public void visit(int version, int access, String name, String signature,  String supername, String[] interfaces) {
+		this.name = ClassUtils.convertResourcePathToClassName(name);
+		if (supername != null) {
+			this.superName = ClassUtils.convertResourcePathToClassName(supername);
 		}
 		this.interfaces = interfaces;
 		for (int i = 0; i < interfaces.length; i++) {
-			interfaces[i] = ClassNameUtils.convertInternalClassNameToLoadableClassName(interfaces[i]);
+			interfaces[i] = ClassUtils.convertResourcePathToClassName(interfaces[i]);
 		}
 	}
 	
-	/**
-	 * @return the name
-	 */
 	public String getClassName() {
-		return name;
+		return this.name;
 	}
 	
-	/**
-	 * @return the superName
-	 */
 	public String getSuperName() {
-		return superName;
+		return this.superName;
 	}
 	
-	/**
-	 * @return the interfaces
-	 */
 	public String[] getInterfaceNames() {
-		return interfaces;
+		return this.interfaces;
 	}
 	
 	public boolean hasSuperClass() {
-		return superName != null;
+		return (this.superName != null);
 	}
-	
-	// TODO go through regular path
-	public Class loadClass() {
-		try {
-			if (log.isInfoEnabled()) {
-				log.info("loading: " + getClassName() + " in " + this.getClass());
-			}
-			Class theClass = Class.forName(getClassName(), false, getClass().getClassLoader());
-			return theClass;
-		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalArgumentException("Cannot load class with name '" + getClassName() + "'");
-		}
-	}
-	
+
 }
