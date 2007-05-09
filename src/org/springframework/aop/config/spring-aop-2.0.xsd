@@ -13,8 +13,7 @@
 
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[
-	Defines the configuration elements for the Spring Framework's
-	AOP support.
+	Defines the configuration elements for the Spring Framework's AOP support.
 		]]></xsd:documentation>
 	</xsd:annotation>
 
