@@ -16,6 +16,8 @@
 
 package org.springframework.jms.listener.endpoint;
 
+import javax.jms.Session;
+
 import org.springframework.util.Assert;
 
 /**
@@ -47,6 +49,8 @@ public class JmsActivationSpecConfig {
 	private String messageSelector;
 
 	private int maxConcurrency = 1;
+
+	private int acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
 
 
 	public void setDestinationName(String destinationName) {
@@ -104,6 +108,14 @@ public class JmsActivationSpecConfig {
 
 	public int getMaxConcurrency() {
 		return this.maxConcurrency;
+	}
+
+	public void setAcknowledgeMode(int acknowledgeMode) {
+		this.acknowledgeMode = acknowledgeMode;
+	}
+
+	public int getAcknowledgeMode() {
+		return this.acknowledgeMode;
 	}
 
 }

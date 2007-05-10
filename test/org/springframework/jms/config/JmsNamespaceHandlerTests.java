@@ -54,7 +54,6 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		Map listeners = context.getBeansOfType(MessageListenerAdapter.class);
 
 		assertEquals("context should contain 3 containers", 3, containers.size());
-		assertEquals("context should contain 3 listeners", 3, listeners.size());
 	}
 
 	public void testContainerConfiguration() throws Exception {

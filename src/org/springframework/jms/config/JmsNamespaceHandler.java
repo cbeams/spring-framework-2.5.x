@@ -29,7 +29,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 public class JmsNamespaceHandler extends NamespaceHandlerSupport {
 
 	public void init() {
-		this.registerBeanDefinitionParser("listener-container", new ListenerContainerParser());
+		this.registerBeanDefinitionParser("listener-container", new JmsListenerContainerParser());
 		this.registerBeanDefinitionParser("jca-listener-container", new JcaListenerContainerParser());
 	}
 
