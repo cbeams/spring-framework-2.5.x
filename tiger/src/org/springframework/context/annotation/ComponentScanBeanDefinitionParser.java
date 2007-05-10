@@ -26,6 +26,7 @@ import org.w3c.dom.NodeList;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.io.ResourceLoader;
@@ -59,11 +60,8 @@ public class ComponentScanBeanDefinitionParser extends AnnotationConfigBeanDefin
 	private static final String FILTER_TYPE_ATTRIBUTE = "type";
 
 	private static final String FILTER_EXPRESSION_ATTRIBUTE = "expression";
-	
-	
-	private BeanNamingStrategy beanNamingStrategy = new DefaultBeanNamingStrategy();
-	
-	
+
+
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		ResourceLoader resourceLoader = parserContext.getReaderContext().getResourceLoader();
 
@@ -92,19 +90,15 @@ public class ComponentScanBeanDefinitionParser extends AnnotationConfigBeanDefin
 				}
 			}
 		}
-		
+
 		// find candidate components and retrieve their metadata
 		Set<Class> candidates = candidateComponentProvider.findCandidateComponents();		
-		ComponentMetadataResolver metadataResolver = new ComponentMetadataResolver();
-		
+		BeanNameGenerator beanNameGenerator = new ComponentBeanNameGenerator();
+
 		// register base bean definitions
-		for (Class beanClass : candidates) {
-			ComponentMetadata metadata = metadataResolver.resolveMetadata(beanClass);
+		for (Class<?> beanClass : candidates) {
 			BeanDefinition beanDefinition = new RootBeanDefinition(beanClass);
-			String beanName = metadata.getProvidedBeanName();
-			if (!StringUtils.hasLength(beanName)) {
-				beanName = beanNamingStrategy.generateName(beanDefinition);
-			}
+			String beanName = beanNameGenerator.generateBeanName(beanDefinition, parserContext.getRegistry());
 			parserContext.getRegistry().registerBeanDefinition(beanName, beanDefinition);
 		}
 
