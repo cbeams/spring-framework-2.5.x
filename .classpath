@@ -110,5 +110,7 @@
 	<classpathentry kind="lib" path="lib/serp/serp-1.12.1.jar"/>
 	<classpathentry kind="lib" path="lib/groovy/groovy-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/concurrent/backport-util-concurrent.jar"/>
+	<classpathentry kind="lib" path="lib/j2ee/el-api.jar"/>
+	<classpathentry kind="lib" path="lib/websphere/websphere_uow_api.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
