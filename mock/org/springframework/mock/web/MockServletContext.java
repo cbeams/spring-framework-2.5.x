@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,9 +80,11 @@ public class MockServletContext implements ServletContext {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	private final String resourceBasePath;
-	
 	private final ResourceLoader resourceLoader;
+
+	private final String resourceBasePath;
+
+	private String contextPath = "";
 
 	private final Properties initParameters = new Properties();
 
@@ -124,8 +126,8 @@ public class MockServletContext implements ServletContext {
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 */
 	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
-		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
+		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
 
 		// Use JVM temp dir as ServletContext temp dir.
 		String tempDir = System.getProperty(TEMP_DIR_SYSTEM_PROPERTY);
@@ -133,6 +135,7 @@ public class MockServletContext implements ServletContext {
 			this.attributes.put(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File(tempDir));
 		}
 	}
+
 
 	/**
 	 * Build a full resource location for the given path,
@@ -150,6 +153,14 @@ public class MockServletContext implements ServletContext {
 
 	public ServletContext getContext(String name) {
 		throw new UnsupportedOperationException("getContext");
+	}
+
+	public void setContextPath(String contextPath) {
+		this.contextPath = contextPath;
+	}
+
+	public String getContextPath() {
+		return this.contextPath;
 	}
 
 	public int getMajorVersion() {
@@ -313,7 +324,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public String getServletContextName() {
-		return servletContextName;
+		return this.servletContextName;
 	}
 
 }
