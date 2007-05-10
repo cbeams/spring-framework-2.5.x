@@ -56,12 +56,6 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>cos</groupId>
-      <artifactId>cos</artifactId>
-      <version>05Nov2002</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>freemarker</groupId>
       <artifactId>freemarker</artifactId>
       <version>2.3.10</version>

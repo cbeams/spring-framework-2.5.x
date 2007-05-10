@@ -45,6 +45,12 @@
       <version>2.2.3</version>
       <optional>true</optional>
     </dependency>
+	<dependency>
+		<groupId>backport-util-concurrent</groupId>
+		<artifactId>backport-util-concurrent</artifactId>
+		<version>3.0</version>
+		<optional>true</optional>
+	</dependency>
     <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>

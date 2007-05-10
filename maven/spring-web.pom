@@ -39,12 +39,6 @@
       <version>1.1</version>
     </dependency>
     <dependency>
-      <groupId>cos</groupId>
-      <artifactId>cos</artifactId>
-      <version>05Nov2002</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>javax.faces</groupId>
       <artifactId>jsf-api</artifactId>
       <version>1.1</version>
