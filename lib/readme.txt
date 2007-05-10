@@ -149,6 +149,11 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's EJB support
 
+* j2ee/el-api.jar
+- JSP 2.1's EL API (http://java.sun.com/products/jsp), as used by JSF 1.2
+- required for building the framework
+- required at runtime when using Spring's JSF 1.2 support
+
 * j2ee/jaxrpc.jar
 - JAX-RPC API 1.1 (http://java.sun.com/xml/jaxrpc)
 - required for building the framework
