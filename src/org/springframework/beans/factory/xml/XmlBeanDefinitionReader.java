@@ -124,11 +124,11 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Create new XmlBeanDefinitionReader for the given bean factory.
-	 * @param beanFactory the BeanFactory to load bean definitions into,
+	 * @param registry the BeanFactory to load bean definitions into,
 	 * in the form of a BeanDefinitionRegistry
 	 */
-	public XmlBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
-		super(beanFactory);
+	public XmlBeanDefinitionReader(BeanDefinitionRegistry registry) {
+		super(registry);
 
 		// Determine EntityResolver to use.
 		if (getResourceLoader() != null) {
@@ -454,9 +454,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 		// Read document based on new BeanDefinitionDocumentReader SPI.
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
-		int countBefore = getBeanFactory().getBeanDefinitionCount();
+		int countBefore = getRegistry().getBeanDefinitionCount();
 		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
-		return getBeanFactory().getBeanDefinitionCount() - countBefore;
+		return getRegistry().getBeanDefinitionCount() - countBefore;
 	}
 
 	/**

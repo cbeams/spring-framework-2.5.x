@@ -102,8 +102,8 @@ public class BeanDefinitionReaderUtils {
 	/**
 	 * Generate a bean name for the given bean definition, unique within the
 	 * given bean factory.
-	 * @param beanDefinition the bean definition to generate a bean name for
-	 * @param beanFactory the bean factory that the definition is going to be
+	 * @param definition the bean definition to generate a bean name for
+	 * @param registry the bean factory that the definition is going to be
 	 * registered with (to check for existing bean names)
 	 * @param isInnerBean whether the given bean definition will be registered
 	 * as inner bean or as top-level bean (allowing for special name generation
@@ -113,35 +113,35 @@ public class BeanDefinitionReaderUtils {
 	 * for the given bean definition
 	 */
 	public static String generateBeanName(
-			AbstractBeanDefinition beanDefinition, BeanDefinitionRegistry beanFactory, boolean isInnerBean)
+			AbstractBeanDefinition definition, BeanDefinitionRegistry registry, boolean isInnerBean)
 			throws BeanDefinitionStoreException {
 
-		String generatedId = beanDefinition.getBeanClassName();
-		if (generatedId == null) {
-			if (beanDefinition instanceof ChildBeanDefinition) {
-				generatedId = ((ChildBeanDefinition) beanDefinition).getParentName() + "$child";
+		String generatedBeanName = definition.getBeanClassName();
+		if (generatedBeanName == null) {
+			if (definition instanceof ChildBeanDefinition) {
+				generatedBeanName = ((ChildBeanDefinition) definition).getParentName() + "$child";
 			}
-			else if (beanDefinition.getFactoryBeanName() != null) {
-				generatedId = beanDefinition.getFactoryBeanName() + "$created";
+			else if (definition.getFactoryBeanName() != null) {
+				generatedBeanName = definition.getFactoryBeanName() + "$created";
 			}
 		}
-		if (!StringUtils.hasText(generatedId)) {
+		if (!StringUtils.hasText(generatedBeanName)) {
 			throw new BeanDefinitionStoreException("Unnamed bean definition specifies neither " +
 					"'class' nor 'parent' nor 'factory-bean' - can't generate bean name");
 		}
 
-		String id = generatedId;
+		String id = generatedBeanName;
 		if (isInnerBean) {
 			// Inner bean: generate identity hashcode suffix.
-			id = generatedId + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(beanDefinition);
+			id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(definition);
 		}
 		else {
 			// Top-level bean: use plain class name. If not already unique,
 			// add counter - increasing the counter until the name is unique.
 			int counter = 0;
-			while (beanFactory.containsBeanDefinition(id)) {
+			while (registry.containsBeanDefinition(id)) {
 				counter++;
-				id = generatedId + GENERATED_BEAN_NAME_SEPARATOR + counter;
+				id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + counter;
 			}
 		}
 		return id;
@@ -151,38 +151,38 @@ public class BeanDefinitionReaderUtils {
 	 * Generate a bean name for the given top-level bean definition,
 	 * unique within the given bean factory.
 	 * @param beanDefinition the bean definition to generate a bean name for
-	 * @param beanFactory the bean factory that the definition is going to be
+	 * @param registry the bean factory that the definition is going to be
 	 * registered with (to check for existing bean names)
 	 * @return the generated bean name
 	 * @throws BeanDefinitionStoreException if no unique name can be generated
 	 * for the given bean definition
 	 */
 	public static String generateBeanName(
-			AbstractBeanDefinition beanDefinition, BeanDefinitionRegistry beanFactory)
+			AbstractBeanDefinition beanDefinition, BeanDefinitionRegistry registry)
 			throws BeanDefinitionStoreException {
 
-		return generateBeanName(beanDefinition, beanFactory, false);
+		return generateBeanName(beanDefinition, registry, false);
 	}
 
 	/**
 	 * Register the given bean definition with the given bean factory.
-	 * @param bdHolder the bean definition including name and aliases
-	 * @param beanFactory the bean factory to register with
+	 * @param definitionHolder the bean definition including name and aliases
+	 * @param registry the bean factory to register with
 	 * @throws BeanDefinitionStoreException if registration failed
 	 */
 	public static void registerBeanDefinition(
-			BeanDefinitionHolder bdHolder, BeanDefinitionRegistry beanFactory)
+			BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry)
 			throws BeanDefinitionStoreException {
 
 		// Register bean definition under primary name.
-		String beanName = bdHolder.getBeanName();
-		beanFactory.registerBeanDefinition(beanName, bdHolder.getBeanDefinition());
+		String beanName = definitionHolder.getBeanName();
+		registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
 
 		// Register aliases for bean name, if any.
-		String[] aliases = bdHolder.getAliases();
+		String[] aliases = definitionHolder.getAliases();
 		if (aliases != null) {
 			for (int i = 0; i < aliases.length; i++) {
-				beanFactory.registerAlias(beanName, aliases[i]);
+				registry.registerAlias(beanName, aliases[i]);
 			}
 		}
 	}
@@ -190,18 +190,18 @@ public class BeanDefinitionReaderUtils {
 	/**
 	 * Register the given bean definition with a generated name,
 	 * unique within the given bean factory.
-	 * @param beanDefinition the bean definition to generate a bean name for
-	 * @param beanFactory the bean factory to register with
+	 * @param definition the bean definition to generate a bean name for
+	 * @param registry the bean factory to register with
 	 * @return the generated bean name
 	 * @throws BeanDefinitionStoreException if no unique name can be generated
 	 * for the given bean definition or the definition cannot be registered
 	 */
 	public static String registerWithGeneratedName(
-			AbstractBeanDefinition beanDefinition, BeanDefinitionRegistry beanFactory)
+			AbstractBeanDefinition definition, BeanDefinitionRegistry registry)
 			throws BeanDefinitionStoreException {
 
-		String generatedName = generateBeanName(beanDefinition, beanFactory, false);
-		beanFactory.registerBeanDefinition(generatedName, beanDefinition);
+		String generatedName = generateBeanName(definition, registry, false);
+		registry.registerBeanDefinition(generatedName, definition);
 		return generatedName;
 	}
 

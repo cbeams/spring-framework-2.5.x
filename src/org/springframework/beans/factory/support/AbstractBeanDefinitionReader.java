@@ -41,15 +41,16 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractBeanDefinitionReader implements BeanDefinitionReader {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final BeanDefinitionRegistry beanFactory;
-
-	private BeanNameGenerator beanNameGenerator = new DefaultBeanNameGenerator();
+	private final BeanDefinitionRegistry registry;
 
 	private ResourceLoader resourceLoader;
 
 	private ClassLoader beanClassLoader;
+
+	private BeanNameGenerator beanNameGenerator = new DefaultBeanNameGenerator();
 
 
 	/**
@@ -60,33 +61,30 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	 * {@link org.springframework.context.ApplicationContext} implementations.
 	 * <p>If given a plain BeanDefinitionRegistry, the default ResourceLoader will be a
 	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
-	 * @param beanFactory the BeanFactory to load bean definitions into,
+	 * @param registry the BeanFactory to load bean definitions into,
 	 * in the form of a BeanDefinitionRegistry
 	 * @see #setResourceLoader
 	 */
-	protected AbstractBeanDefinitionReader(BeanDefinitionRegistry beanFactory) {
-		Assert.notNull(beanFactory, "Bean factory must not be null");
-		this.beanFactory = beanFactory;
+	protected AbstractBeanDefinitionReader(BeanDefinitionRegistry registry) {
+		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
+		this.registry = registry;
 
 		// Determine ResourceLoader to use.
-		if (this.beanFactory instanceof ResourceLoader) {
-			this.resourceLoader = (ResourceLoader) this.beanFactory;
+		if (this.registry instanceof ResourceLoader) {
+			this.resourceLoader = (ResourceLoader) this.registry;
 		}
 		else {
 			this.resourceLoader = new PathMatchingResourcePatternResolver();
 		}
 	}
 
-	public BeanDefinitionRegistry getBeanFactory() {
-		return this.beanFactory;
+
+	public final BeanDefinitionRegistry getBeanFactory() {
+		return this.registry;
 	}
 
-	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
-		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new DefaultBeanNameGenerator());
-	}
-
-	public BeanNameGenerator getBeanNameGenerator() {
-		return this.beanNameGenerator;
+	public final BeanDefinitionRegistry getRegistry() {
+		return this.registry;
 	}
 
 	/**
@@ -121,6 +119,23 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 
 	public ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
+	}
+
+	/**
+	 * Set the BeanNameGenerator to use for anonymous beans
+	 * (without explicit bean name specified).
+	 * <p>Default is a {@link DefaultBeanNameGenerator}.
+	 */
+	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
+		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new DefaultBeanNameGenerator());
+	}
+
+	/**
+	 * Return the BeanNameGenerator to use for anonymous beans
+	 * (without explicit bean name specified).
+	 */
+	public BeanNameGenerator getBeanNameGenerator() {
+		return this.beanNameGenerator;
 	}
 
 
