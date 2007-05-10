@@ -38,7 +38,7 @@ import org.springframework.core.typefilter.TypeFilter;
 import org.springframework.util.StringUtils;
 
 /**
- * Parser for the &lt;context:annotation-scan/&gt; element.
+ * Parser for the &lt;context:component-scan/&gt; element.
  * 
  * @author Mark Fisher
  * @author Ramnivas Laddad

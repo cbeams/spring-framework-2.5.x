@@ -51,7 +51,7 @@ public class AnnotationConfigBeanDefinitionParser implements BeanDefinitionParse
 					"org.springframework.context.config.internalRequiredAnnotationProcessor";
 
 	/**
-	 * The bean name of the internally managed Required annotation processor.
+	 * The bean name of the internally managed JSR-250 annotation processor.
 	 */
 	public static final String COMMON_ANNOTATION_PROCESSOR_BEAN_NAME =
 					"org.springframework.context.config.internalCommonAnnotationProcessor";

@@ -45,7 +45,9 @@ import org.springframework.util.ClassUtils;
 /**
  * A component provider that scans the classpath from a base package (default is empty).
  * It then applies exclude and include filters to the resulting classes to find candidates.
- * 
+ *
+ * @author Costin Leau
+ * @author Rod Johnson
  * @author Mark Fisher
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
