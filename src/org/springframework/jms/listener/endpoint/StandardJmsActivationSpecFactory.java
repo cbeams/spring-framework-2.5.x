@@ -16,6 +16,8 @@
 
 package org.springframework.jms.listener.endpoint;
 
+import java.util.Properties;
+
 import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.Topic;
@@ -47,6 +49,8 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 
 	private Class activationSpecClass;
 
+	private Properties defaultProperties;
+
 
 	/**
 	 * Specify the fully-qualified ActivationSpec class name for the target
@@ -54,6 +58,16 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 */
 	public void setActivationSpecClass(Class activationSpecClass) {
 		this.activationSpecClass = activationSpecClass;
+	}
+
+	/**
+	 * Specify custom default properties, with String keys and String values.
+	 * <p>Applied to each ActivationSpec object before it gets populated with
+	 * listener-specific settings. Allows for configuring vendor-specific properties
+	 * beyond the Spring-defined settings in {@link JmsActivationSpecConfig}.
+	 */
+	public void setDefaultProperties(Properties defaultProperties) {
+		this.defaultProperties = defaultProperties;
 	}
 
 
@@ -65,7 +79,11 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 				throw new IllegalStateException("Property 'activationSpecClass' is required");
 			}
 		}
+
 		BeanWrapper bw = new BeanWrapperImpl(activationSpecClassToUse);
+		if (this.defaultProperties != null) {
+			bw.setPropertyValues(this.defaultProperties);
+		}
 		populateActivationSpecProperties(bw, config);
 		return (ActivationSpec) bw.getWrappedInstance();
 	}
@@ -94,9 +112,16 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 		bw.setPropertyValue("destination", config.getDestinationName());
 		bw.setPropertyValue("destinationType", config.isPubSubDomain() ? Topic.class.getName() : Queue.class.getName());
 		bw.setPropertyValue("subscriptionDurability", config.isSubscriptionDurable() ? "Durable" : "NonDurable");
-		bw.setPropertyValue("subscriptionName", config.getDurableSubscriptionName());
-		bw.setPropertyValue("clientId", config.getClientId());
-		bw.setPropertyValue("messageSelector", config.getMessageSelector());
+
+		if (config.getDurableSubscriptionName() != null) {
+			bw.setPropertyValue("subscriptionName", config.getDurableSubscriptionName());
+		}
+		if (config.getClientId() != null) {
+			bw.setPropertyValue("clientId", config.getClientId());
+		}
+		if (config.getMessageSelector() != null) {
+			bw.setPropertyValue("messageSelector", config.getMessageSelector());
+		}
 
 		applyAcknowledgeMode(bw, config.getAcknowledgeMode());
 	}
