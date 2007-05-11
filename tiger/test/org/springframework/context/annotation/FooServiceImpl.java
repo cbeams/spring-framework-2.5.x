@@ -19,11 +19,13 @@ package org.springframework.context.annotation;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
  */
+@Component
 public class FooServiceImpl implements FooService {
 
 	@Autowired

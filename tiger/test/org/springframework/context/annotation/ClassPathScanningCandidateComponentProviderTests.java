@@ -87,16 +87,6 @@ public class ClassPathScanningCandidateComponentProviderTests extends TestCase {
 		assertTrue(candidates.contains(FooServiceImpl.class));
 	}
 	
-	public void testWithComponentAnnotationNotInherited() {
-		ClassPathScanningCandidateComponentProvider provider =
-				new ClassPathScanningCandidateComponentProvider(TEST_BASE_PACKAGE, false);
-		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class, false));
-		Set<Class> candidates = provider.findCandidateComponents();
-		assertEquals(1, candidates.size());
-		assertTrue(candidates.contains(NamedComponent.class));
-		assertFalse(candidates.contains(FooServiceImpl.class));
-	}
-	
 	@SuppressWarnings("unchecked")
 	public void testWithAspectAnnotationOnly() throws Exception {
 		if (!aspectjAnnotationsAvailable) {

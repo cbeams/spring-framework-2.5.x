@@ -27,16 +27,14 @@ import java.util.Set;
  * @since 2.1
  */
 public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter {
-	public final Set<String> typeNames = new HashSet<String>();
+	public final String typeName;
 	
 	/**
-	 * @param types
+	 * @param type type to match
 	 */
-	public AssignableTypeFilter(Class<?> ... types) {
-		super(true);
-		for (Class<?> type : types) {
-			typeNames.add(type.getName());
-		}
+	public AssignableTypeFilter(Class type) {
+		super(true, true);
+		this.typeName = type.getName();
 	}
 	
 	@Override
@@ -55,6 +53,6 @@ public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	}
 	
 	private boolean matchType(String typeName) {
-		return typeNames.contains(typeName);
+		return this.typeName.equals(typeName);
 	}
 }

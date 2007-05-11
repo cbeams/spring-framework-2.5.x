@@ -17,6 +17,7 @@
 package org.springframework.core.typefilter;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Inherited;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,9 @@ import org.objectweb.asm.commons.EmptyVisitor;
 /**
  * Matches classes with a given annotation optionally including inherited annotations.
  * 
+ * The matching logic mirrors that of Class.isAnnotationPresent() with an additional option
+ * to explicitely control if any inherited annotatins should be considered.
+ * 
  * @author Mark Fisher
  * @author Ramnivas Laddad
  * @since 2.1
@@ -41,11 +45,11 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	private final Class<? extends Annotation> annotationClass;
 
 	/**
-	 * @param annotationClass
-	 * @param considerInherited
+	 * @param annotationClass The annotation to match 
+	 * @param considerInherited search inheritance hierarchy for the annotation
 	 */
 	public AnnotationTypeFilter(final Class<? extends Annotation> annotationClass, boolean considerInherited) {
-		super(considerInherited);
+		super(considerInherited && annotationClass.isAnnotationPresent(Inherited.class), false);
 		this.annotationClass = annotationClass;
 	}
 	

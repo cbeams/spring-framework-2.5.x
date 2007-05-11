@@ -16,6 +16,8 @@
 
 package org.springframework.core.typefilter;
 
+import java.lang.annotation.Inherited;
+
 import junit.framework.TestCase;
 
 import org.objectweb.asm.ClassReader;
@@ -35,11 +37,26 @@ public class AnnotationTypeFilterTests extends TestCase {
 		ClassReader classReader = new ClassReader(classUnderTest);
 		
 		assertTrue(filter.match(classReader));
+		
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
-	public void testInheritedAnnotationMatch() throws Exception {
-		String classUnderTest = "org.springframework.core.typefilter.SomeComponentImpl";
+	public void testInheritedAnnotationFromInterfaceDoesNotMatch() throws Exception {
+		String classUnderTest = "org.springframework.core.typefilter.SomeSubClassOfSomeComponentInterface";
+		ClassReader classReader = new ClassReader(classUnderTest);
+
+		AnnotationTypeFilter inheritingFilter = new AnnotationTypeFilter(Component.class, true);
+		AnnotationTypeFilter nonInheritingFilter = new AnnotationTypeFilter(Component.class, false);
+		
+		// Must fail in both cases as annotation on interfaces should not be considered a match
+		assertFalse(inheritingFilter.match(classReader));
+		assertFalse(nonInheritingFilter.match(classReader));
+		
+		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
+	}
+	
+	public void testInheritedAnnotationFromBaseClassDoesMatch() throws Exception {
+		String classUnderTest = "org.springframework.core.typefilter.SomeSubClassOfSomeComponent";
 		ClassReader classReader = new ClassReader(classUnderTest);
 
 		AnnotationTypeFilter inheritingFilter = new AnnotationTypeFilter(Component.class, true);
@@ -47,6 +64,21 @@ public class AnnotationTypeFilterTests extends TestCase {
 		
 		assertTrue(inheritingFilter.match(classReader));
 		assertFalse(nonInheritingFilter.match(classReader));
+		
+		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
+	}
+
+	public void testNonInheritedAnnotationDoesNotMatch() throws Exception {
+		String classUnderTest = "org.springframework.core.typefilter.SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation";
+		ClassReader classReader = new ClassReader(classUnderTest);
+
+		AnnotationTypeFilter inheritingFilter = new AnnotationTypeFilter(NonInheritedAnnotation.class, true);
+		AnnotationTypeFilter nonInheritingFilter = new AnnotationTypeFilter(NonInheritedAnnotation.class, false);
+		
+		// Must fail in either case as annotation isn't inherited
+		assertFalse(inheritingFilter.match(classReader));
+		assertFalse(nonInheritingFilter.match(classReader));
+		
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 	
@@ -64,6 +96,8 @@ public class AnnotationTypeFilterTests extends TestCase {
 
 // We must use a standalone set of types to ensure that no one else is loading them
 // and interfering with ClassloadingAssertions.assertClassNotLoaded()
+
+// Note that Component is @Inherited 
 @Component
 class SomeComponent {
 }
@@ -72,8 +106,23 @@ class SomeComponent {
 interface SomeComponentInterface {
 }
 
-class SomeComponentImpl implements SomeComponentInterface {
+class SomeSubClassOfSomeComponentInterface implements SomeComponentInterface {
 }
+
+class SomeSubClassOfSomeComponent extends SomeComponent {
+}
+//----
+@interface NonInheritedAnnotation {
+	
+}
+
+@NonInheritedAnnotation
+class SomeClassMarkedWithNonInheritedAnnotation {
+}
+
+class SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation extends SomeClassMarkedWithNonInheritedAnnotation {
+}
+//----
 
 class SomeNonCandidateClass {
 }

@@ -36,9 +36,11 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 	protected final Log log = LogFactory.getLog(getClass());
 
 	private boolean considerInherited;
+	private boolean considerInterfaces;
 
-	public AbstractTypeHierarchyTraversingFilter(boolean considerInherited) {
+	public AbstractTypeHierarchyTraversingFilter(boolean considerInherited, boolean considerInterfaces) {
 		this.considerInherited = considerInherited;
+		this.considerInterfaces = considerInterfaces;
 	}
 
 	public boolean match(ClassReader classReader) {
@@ -67,6 +69,11 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 				return true;
 			}
 		}
+
+		if (!considerInterfaces) {
+			return false;
+		}
+
 		for (String interfaze : typesReadingVisitor.getInterfaceNames()) {
 			// Optimization to avoid creating ClassReader for super class
 			if (matchInterfaceName(interfaze)) {
