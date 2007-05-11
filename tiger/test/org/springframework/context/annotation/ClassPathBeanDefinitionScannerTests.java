@@ -194,13 +194,15 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 	}
 	
 	public void testMultipleBasePackagesWithDefaultsOnly() {
-		GenericApplicationContext context = new GenericApplicationContext();
-		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
-		int beanCount = scanner.scan(
-				new String[] { BASE_PACKAGE, "org.springframework.core.typefilter" });
-		assertTrue(beanCount > 7);
-		assertTrue(context.containsBean("someComponent"));
-		assertTrue(context.containsBean("someComponentImpl"));
+		GenericApplicationContext singlePackageContext = new GenericApplicationContext();
+		ClassPathBeanDefinitionScanner singlePackageScanner = new ClassPathBeanDefinitionScanner(singlePackageContext);
+		GenericApplicationContext multiPackageContext = new GenericApplicationContext();
+		ClassPathBeanDefinitionScanner multiPackageScanner = new ClassPathBeanDefinitionScanner(multiPackageContext);
+		int singlePackageBeanCount = singlePackageScanner.scan(BASE_PACKAGE);
+		assertEquals(7, singlePackageBeanCount);
+		int multiPackageBeanCount = multiPackageScanner.scan(
+				new String[] { BASE_PACKAGE, "org.springframework.aop.aspectj.annotation" });
+		assertTrue(multiPackageBeanCount > singlePackageBeanCount);
 	}
 	
 	public void testMultipleScanCalls() {
@@ -209,7 +211,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		int beanCount = scanner.scan(BASE_PACKAGE);
 		assertEquals(7, beanCount);
 		assertEquals(beanCount, context.getBeanDefinitionCount());
-		int addedBeanCount = scanner.scan("org.springframework.core.typefilter");
+		int addedBeanCount = scanner.scan("org.springframework.aop.aspectj.annotation");
 		assertEquals(beanCount + addedBeanCount, context.getBeanDefinitionCount());
 	}
 	
