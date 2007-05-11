@@ -31,24 +31,23 @@ import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.support.JmsUtils;
 
 /**
- * Message listener container that builds on the JMS ServerSessionPool SPI,
- * creating JMS ServerSessions through a pluggable ServerSessionFactory.
- *
- * <p>This is the most sophisticated message listener container possible
- * with standard JMS. It allows for dynamic management of JMS Sessions,
- * potentially using a pool of Sessions that receive messages in parallel.
+ * Message listener container that builds on the {@link javax.jms.ServerSessionPool}
+ * SPI, creating JMS ServerSession instances through a pluggable
+ * {@link ServerSessionFactory}.
  *
  * <p>Note that the default ServerSessionFactory is a {@link SimpleServerSessionFactory},
  * which will create a new ServerSession for each listener execution.
- * Consider specifying a {@link CommonsPoolServerSessionFactory} to reuse JMS Sessions
- * and/or to limit the number of concurrent ServerSession executions
+ * Consider specifying a {@link CommonsPoolServerSessionFactory} to reuse JMS
+ * Sessions and/or to limit the number of concurrent ServerSession executions.
  *
  * <p>See the {@link AbstractMessageListenerContainer} javadoc for details
- * on acknowledge modes and transaction options.
+ * on acknowledge modes and other configuration options.
  *
  * <p>For a simpler message listener container, in particular when using
  * a JMS provider without ServerSessionPool support, consider using
  * {@link org.springframework.jms.listener.SimpleMessageListenerContainer}.
+ * For a general one-stop shop that is nevertheless very flexible, consider
+ * {@link org.springframework.jms.listener.DefaultMessageListenerContainer}.
  *
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
  * domain-independent API. <b>Use the {@link ServerSessionMessageListenerContainer102}
@@ -57,6 +56,7 @@ import org.springframework.jms.support.JmsUtils;
  * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.jms.listener.SimpleMessageListenerContainer
+ * @see org.springframework.jms.listener.DefaultMessageListenerContainer
  * @see ServerSessionMessageListenerContainer102
  */
 public class ServerSessionMessageListenerContainer extends AbstractMessageListenerContainer
@@ -146,6 +146,8 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	 * via this container's ServerSessionFactory.
 	 * <p>This message listener container implements the ListenerSessionManager
 	 * interface, hence can be passed to the ServerSessionFactory itself.
+	 * @return the ServerSessionPool
+	 * @throws JMSException if creation of the ServerSessionPool failed
 	 * @see #setServerSessionFactory
 	 * @see ServerSessionFactory#getServerSession(ListenerSessionManager)
 	 */
@@ -230,6 +232,8 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	 * Create a JMS ConnectionConsumer for the given Connection.
 	 * <p>This implementation uses JMS 1.1 API.
 	 * @param con the JMS Connection to create a Session for
+	 * @param destination the JMS Destination to listen to
+	 * @param pool the ServerSessionpool to use
 	 * @return the new JMS Session
 	 * @throws JMSException if thrown by JMS API methods
 	 */
