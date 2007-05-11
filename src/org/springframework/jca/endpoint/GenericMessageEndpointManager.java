@@ -167,6 +167,13 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 	}
 
 	/**
+	 * Return the JCA ResourceAdapter to manage endpoints for.
+	 */
+	public ResourceAdapter getResourceAdapter() {
+		return this.resourceAdapter;
+	}
+
+	/**
 	 * Set the JCA MessageEndpointFactory to activate, pointing to a
 	 * MessageListener object that the endpoints will delegate to.
 	 * <p>A MessageEndpointFactory instance may be shared across multiple
@@ -179,12 +186,26 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 	}
 
 	/**
+	 * Return the JCA MessageEndpointFactory to activate.
+	 */
+	public MessageEndpointFactory getMessageEndpointFactory() {
+		return this.messageEndpointFactory;
+	}
+
+	/**
 	 * Set the JCA ActivationSpec to use for activating the endpoint.
 	 * <p>Note that this ActivationSpec instance should not be shared
 	 * across multiple ResourceAdapter instances.
 	 */
 	public void setActivationSpec(ActivationSpec activationSpec) {
 		this.activationSpec = activationSpec;
+	}
+
+	/**
+	 * Return the JCA ActivationSpec to use for activating the endpoint.
+	 */
+	public ActivationSpec getActivationSpec() {
+		return this.activationSpec;
 	}
 
 	/**
@@ -203,22 +224,23 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 	 * if the "autoStartup" flag is set to "true".
 	 */
 	public void afterPropertiesSet() throws ResourceException {
-		if (this.resourceAdapter == null) {
+		if (getResourceAdapter() == null) {
 			throw new IllegalArgumentException("Property 'resourceAdapter' is required");
 		}
-		if (this.messageEndpointFactory == null) {
+		if (getMessageEndpointFactory() == null) {
 			throw new IllegalArgumentException("Property 'messageEndpointFactory' is required");
 		}
-		if (this.activationSpec == null) {
+		ActivationSpec activationSpec = getActivationSpec();
+		if (activationSpec == null) {
 			throw new IllegalArgumentException("Property 'activationSpec' is required");
 		}
 
-		if (this.activationSpec.getResourceAdapter() == null) {
-			this.activationSpec.setResourceAdapter(this.resourceAdapter);
+		if (activationSpec.getResourceAdapter() == null) {
+			activationSpec.setResourceAdapter(getResourceAdapter());
 		}
-		else if (this.activationSpec.getResourceAdapter() != this.resourceAdapter) {
-			throw new IllegalArgumentException("ActivationSpec [" + this.activationSpec +
-					"] is associated with a different ResourceAdapter: " + this.resourceAdapter);
+		else if (activationSpec.getResourceAdapter() != getResourceAdapter()) {
+			throw new IllegalArgumentException("ActivationSpec [" + activationSpec +
+					"] is associated with a different ResourceAdapter: " + activationSpec.getResourceAdapter());
 		}
 
 		if (this.autoStartup) {
@@ -233,7 +255,7 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 		synchronized (this.lifecycleMonitor) {
 			if (!this.running) {
 				try {
-					this.resourceAdapter.endpointActivation(this.messageEndpointFactory, this.activationSpec);
+					getResourceAdapter().endpointActivation(getMessageEndpointFactory(), getActivationSpec());
 				}
 				catch (ResourceException ex) {
 					IllegalStateException wrapped = new IllegalStateException("Could not activate message endpoint");
@@ -251,7 +273,7 @@ public class GenericMessageEndpointManager implements InitializingBean, Lifecycl
 	public void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (this.running) {
-				this.resourceAdapter.endpointDeactivation(this.messageEndpointFactory, this.activationSpec);
+				getResourceAdapter().endpointDeactivation(getMessageEndpointFactory(), getActivationSpec());
 				this.running = false;
 			}
 		}
