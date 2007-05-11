@@ -63,8 +63,6 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 
 	protected static final String CLIENT_ID_ATTRIBUTE = "client-id";
 
-	protected static final String CONCURRENCY_ATTRIBUTE = "concurrency";
-
 	protected static final String ACKNOWLEDGE_ATTRIBUTE = "acknowledge";
 
 	protected static final String ACKNOWLEDGE_AUTO = "auto";
@@ -76,6 +74,10 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 	protected static final String ACKNOWLEDGE_TRANSACTED = "transacted";
 
 	protected static final String TRANSACTION_MANAGER_ATTRIBUTE = "transaction-manager";
+
+	protected static final String CONCURRENCY_ATTRIBUTE = "concurrency";
+
+	protected static final String PREFETCH_ATTRIBUTE = "prefetch";
 
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {

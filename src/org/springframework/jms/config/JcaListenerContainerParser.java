@@ -65,23 +65,28 @@ public class JcaListenerContainerParser extends AbstractListenerContainerParser 
 		parseListenerConfiguration(listenerEle, parserContext, configDef);
 		parseContainerConfiguration(containerEle, parserContext, configDef);
 
-		String concurrency = containerEle.getAttribute(CONCURRENCY_ATTRIBUTE);
-		if (StringUtils.hasText(concurrency)) {
-			configDef.getPropertyValues().addPropertyValue("maxConcurrency", new Integer(concurrency));
-		}
-
 		Integer acknowledgeMode = parseAcknowledgeMode(containerEle, parserContext);
 		if (acknowledgeMode != null) {
 			configDef.getPropertyValues().addPropertyValue("acknowledgeMode", acknowledgeMode);
 		}
-
-		containerDef.getPropertyValues().addPropertyValue("activationSpecConfig", configDef);
 
 		String transactionManagerBeanName = containerEle.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE);
 		if (StringUtils.hasText(transactionManagerBeanName)) {
 			containerDef.getPropertyValues().addPropertyValue("transactionManager",
 					new RuntimeBeanReference(transactionManagerBeanName));
 		}
+
+		String concurrency = containerEle.getAttribute(CONCURRENCY_ATTRIBUTE);
+		if (StringUtils.hasText(concurrency)) {
+			configDef.getPropertyValues().addPropertyValue("maxConcurrency", new Integer(concurrency));
+		}
+
+		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);
+		if (StringUtils.hasText(prefetch)) {
+			configDef.getPropertyValues().addPropertyValue("prefetchSize", new Integer(prefetch));
+		}
+
+		containerDef.getPropertyValues().addPropertyValue("activationSpecConfig", configDef);
 
 		return containerDef;
 	}

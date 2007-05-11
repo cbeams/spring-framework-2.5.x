@@ -96,16 +96,6 @@ public class JmsListenerContainerParser extends AbstractListenerContainerParser 
 					new RuntimeBeanReference(destinationResolverBeanName));
 		}
 
-		String concurrency = containerEle.getAttribute(CONCURRENCY_ATTRIBUTE);
-		if (StringUtils.hasText(concurrency)) {
-			if (containerType.startsWith("default")) {
-				containerDef.getPropertyValues().addPropertyValue("maxConcurrentConsumers", new Integer(concurrency));
-			}
-			else {
-				containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", new Integer(concurrency));
-			}
-		}
-
 		Integer acknowledgeMode = parseAcknowledgeMode(containerEle, parserContext);
 		if (acknowledgeMode != null) {
 			if (acknowledgeMode.intValue() == Session.SESSION_TRANSACTED) {
@@ -124,6 +114,23 @@ public class JmsListenerContainerParser extends AbstractListenerContainerParser 
 			}
 			containerDef.getPropertyValues().addPropertyValue("transactionManager",
 					new RuntimeBeanReference(transactionManagerBeanName));
+		}
+
+		String concurrency = containerEle.getAttribute(CONCURRENCY_ATTRIBUTE);
+		if (StringUtils.hasText(concurrency)) {
+			if (containerType.startsWith("default")) {
+				containerDef.getPropertyValues().addPropertyValue("maxConcurrentConsumers", new Integer(concurrency));
+			}
+			else {
+				containerDef.getPropertyValues().addPropertyValue("concurrentConsumers", new Integer(concurrency));
+			}
+		}
+
+		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);
+		if (StringUtils.hasText(prefetch)) {
+			if (containerType.startsWith("default")) {
+				containerDef.getPropertyValues().addPropertyValue("maxMessagesPerTask", new Integer(prefetch));
+			}
 		}
 
 		return containerDef;

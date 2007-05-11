@@ -91,13 +91,6 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="concurrency" type="xsd:int">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	The maximum number of concurrent consumers to start for each listener.
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
 			<xsd:attribute name="acknowledge" default="auto">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
@@ -119,6 +112,21 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	A reference to the PlatformTransactionManager.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="concurrency" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The maximum number of concurrent sessions/consumers to start for each listener.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="prefetch" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The maximum number of messages to load into a single session.
+	Note that raising this number might lead to starvation of concurrent consumers!
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -178,13 +186,6 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="concurrency" type="xsd:int">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	The maximum number of concurrent sessions to activate for each listener.
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
 			<xsd:attribute name="acknowledge" default="auto">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
@@ -206,6 +207,21 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	A reference to the Spring JtaTransactionManager or [javax.transaction.TransactionManager].
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="concurrency" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The maximum number of concurrent sessions to activate for each listener.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="prefetch" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The maximum number of messages to load into a single session.
+	Note that raising this number might lead to starvation of concurrent consumers!
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
