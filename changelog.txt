@@ -10,6 +10,7 @@ General
 * Spring is built on JDK 1.6 now, with support for common Java 6 APIs / Java EE 5 APIs
 * Spring requires JDK 1.4 or higher now, not supporting JDK 1.3 anymore (JDK 1.3 has reached its official end-of-life)
 * Spring's Hibernate3 support generally requires Hibernate 3.1 or higher (note: there's separate Hibernate 2.1 support)
+* fixed contents of spring-remoting.jar: does not include RemoteInvocationUtilsTests anymore
 
 Package org.springframework.aop
 * removed Perl5RegexpMethodPoint and RegexpMethodPointcutAdvisor's "perl5" flag (always using java.util.regex now)
@@ -41,9 +42,12 @@ Package org.springframework.jdbc
 * AbstractDataSource and DelegatingDataSource support the JDBC 4.0 Wrapper interface
 * added Jdbc4NativeJdbcExtractor, delegating to JDBC 4.0's "unwrap" method (defined by java.sql.Wrapper)
 * added "streamAsLob" flag to DefaultLobHandler, allowing for explicit usage of the JDBC 4.0 setBlob/setClob variants
+* fixed SQLErrorCodeSQLExceptionTranslator to avoid potential NPE in debug log message
 
 Package org.springframework.jms
 * added JmsMessageEndpointManager, extending GenericMessageEndpointManager with the JmsActivationSpecFactory mechanism
+* added StandardJmsActivationSpecFactory, supporting all standard JMS propertied as defined by the JCA 1.5 specification
+* added DefaultJmsActivationSpecFactory, autodetecting ActiveMQ and JORAM's ActivationSpecs and extended properties
 * introduced "jms" XML schema namespace, providing convenient tags for listener container configuration
 
 Package org.springframework.jndi
@@ -64,12 +68,15 @@ Package org.springframework.transaction
 * JtaTransactionManager and WebLogic/OC4JJtaTransactionManager implement the TransactionFactory interface accordingly
 * JtaTransactionManager autodetects and uses JTA 1.1's TransactionSynchronizationRegistry (e.g. on Java EE 5)
 * added WebSphereUowTransactionManager, supporting full transaction management via IBM's UOWManager API on WAS 6.0/6.1
+* removed WAS 4.0/5.0 support from WebSphereTransactionManagerFactoryBean, keeping it for WAS 5.1 support only
+* removed outdated WebLogicServerTransactionManagerFactoryBean (for WebLogic 7.0)
 
 Package org.springframework.web
 * removed deprecated BindInitializer and BindUtils from the "bind" package
 * removed deprecated "setFilterConfig" method from GenericFilterBean (no WebLogic 6.1 compatibility necessary anymore)
 * removed CosMultipartResolver (as part of generally removing COS support from the Spring codebase)
 * introduced explicit JSF 1.2 support (web.jsf.el): DelegatingFacedELResolver and WebApplicationContextFacesELResolver
+* JSP InputTag, SelectTag etc support expressions as "disabled" and "readonly" attribute values
 
 
 Changes in version 2.0.5 (2007-05-07)
