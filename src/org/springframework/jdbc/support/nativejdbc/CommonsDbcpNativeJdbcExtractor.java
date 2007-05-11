@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import java.sql.Statement;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Implementation of the NativeJdbcExtractor interface for the
- * Jakarta Commons DBCP connection pool.
+ * Implementation of the {@link NativeJdbcExtractor} interface for the
+ * Jakarta Commons DBCP connection pool, version 1.1 or higher.
  *
  * <p>Returns the underlying native Connection, Statement, etc to application
  * code instead of DBCP's wrapper implementations. The returned JDBC classes
@@ -38,12 +38,6 @@ import org.springframework.util.ReflectionUtils;
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with a
  * Commons DBCP DataSource: If a given object is not a Commons DBCP wrapper,
  * it will be returned as-is.
- *
- * <p>Tested against Commons DBCP 1.1 and 1.2, but should also work with 1.0.
- * Before Commons DBCP 1.1, DelegatingCallableStatement and DelegatingResultSet
- * have not offered any means to access underlying delegates: As a consequence,
- * <code>getNativeCallableStatement</code> and <code>getNativeResultSet</code>
- * will not work with Commons DBCP 1.0.
  *
  * <p>Note that this version of CommonsDbcpNativeJdbcExtractor will work
  * against the original Commons DBCP in <code>org.apache.commons.dbcp</code>

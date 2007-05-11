@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import com.mchange.v2.c3p0.C3P0ProxyConnection;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Implementation of the NativeJdbcExtractor interface for the C3P0 connection pool.
+ * Implementation of the {@link NativeJdbcExtractor} interface for the
+ * C3P0 connection pool.
  *
  * <p>Returns underlying native Connections to application code instead of C3P0's
  * wrapper implementations; unwraps the Connection for native Statements.
