@@ -17,7 +17,8 @@
 package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.w3c.dom.Element;
@@ -26,8 +27,7 @@ import org.w3c.dom.NodeList;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.typefilter.AnnotationTypeFilter;
@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.1
  */
-public class ComponentScanBeanDefinitionParser extends AnnotationConfigBeanDefinitionParser {
+public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String BASE_PACKAGE_ATTRIBUTE = "base-package";
 
@@ -66,13 +66,13 @@ public class ComponentScanBeanDefinitionParser extends AnnotationConfigBeanDefin
 		ResourceLoader resourceLoader = parserContext.getReaderContext().getResourceLoader();
 
 		boolean useDefaultFilters = Boolean.valueOf(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
+		boolean annotationConfig = Boolean.valueOf(element.getAttribute(ANNOTATION_CONFIG_ATTRIBUTE));
+		
 		String basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);
 		String[] basePackages = StringUtils.commaDelimitedListToStringArray(basePackage);
 
-		// create the component provider
-		ClassPathScanningCandidateComponentProvider candidateComponentProvider =
-				new ClassPathScanningCandidateComponentProvider(basePackages, useDefaultFilters);
-		candidateComponentProvider.setResourceLoader(resourceLoader);
+		List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
+		List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
 
 		// parse exclude and include filter elements
 		NodeList nodeList = element.getChildNodes();
@@ -82,31 +82,21 @@ public class ComponentScanBeanDefinitionParser extends AnnotationConfigBeanDefin
 				String localName = node.getLocalName();
 				if (EXCLUDE_FILTER_ELEMENT.equals(localName)) {
 					TypeFilter typeFilter = createTypeFilter((Element) node, resourceLoader.getClassLoader());
-					candidateComponentProvider.addExcludeFilter(typeFilter);
+					excludeFilters.add(0, typeFilter);
 				}
 				else if (INCLUDE_FILTER_ELEMENT.equals(localName)) {
 					TypeFilter typeFilter = createTypeFilter((Element) node, resourceLoader.getClassLoader());
-					candidateComponentProvider.addIncludeFilter(typeFilter);	
+					includeFilters.add(typeFilter);
 				}
 			}
 		}
-
-		// find candidate components and retrieve their metadata
-		Set<Class> candidates = candidateComponentProvider.findCandidateComponents();		
-		BeanNameGenerator beanNameGenerator = new ComponentBeanNameGenerator();
-
-		// register base bean definitions
-		for (Class<?> beanClass : candidates) {
-			BeanDefinition beanDefinition = new RootBeanDefinition(beanClass);
-			String beanName = beanNameGenerator.generateBeanName(beanDefinition, parserContext.getRegistry());
-			parserContext.getRegistry().registerBeanDefinition(beanName, beanDefinition);
-		}
-
-		String annotationConfig = element.getAttribute(ANNOTATION_CONFIG_ATTRIBUTE);
-		if (Boolean.valueOf(annotationConfig)) {
-			registerAnnotationConfigProcessors(parserContext.getReaderContext());
-		}
-
+		
+		// delegate bean definition registration to the scanner
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(parserContext.getRegistry());
+		scanner.setResourceLoader(resourceLoader);
+		scanner.setIncludeAnnotationConfig(annotationConfig);
+		scanner.scan(basePackages, useDefaultFilters, excludeFilters, includeFilters);
+		
 		return null;
 	}
 

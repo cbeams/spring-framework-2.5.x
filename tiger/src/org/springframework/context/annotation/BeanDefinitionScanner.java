@@ -16,24 +16,14 @@
 
 package org.springframework.context.annotation;
 
-import org.w3c.dom.Element;
-
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
-import org.springframework.beans.factory.xml.ParserContext;
-
 /**
- * Parser for the &lt;context:annotation-config/&gt; element.
- *
  * @author Mark Fisher
- * @author Juergen Hoeller
  * @since 2.1
  */
-public class AnnotationConfigBeanDefinitionParser extends AnnotationConfigRegistrar implements BeanDefinitionParser {
+public interface BeanDefinitionScanner {
 
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		registerAnnotationConfigProcessors(parserContext.getRegistry());
-		return null;
-	}
+	int scan(String[] basePackages);
+	
+	int scan(String basePackage);
 
 }

@@ -18,8 +18,6 @@ package org.springframework.context.annotation;
 
 import java.util.Set;
 
-import org.springframework.core.typefilter.TypeFilter;
-
 /**
  * @author Mark Fisher
  * @since 2.1
