@@ -87,7 +87,6 @@ Project info at the SourceForge site: http://sourceforge.net/projects/springfram
 The Spring Framework is released under the terms of the Apache Software License (see license.txt).
 All libraries included in the "-with-dependencies" download are subject to their respective licenses.
 This product includes software developed by the Apache Software Foundation (http://www.apache.org).
-This product includes software developed by Clinton Begin (http://www.ibatis.com).
 
 
 3. DISTRIBUTION JAR FILES
@@ -98,7 +97,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2710 KB)
+* "spring" (~2720 KB)
 - Convenient jar file combining all standard modules (except for Portlet and Hibernate2 support)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
@@ -157,7 +156,7 @@ MODULE JARS (dist/modules):
 - Contents: JCA 1.0/1.5 support
 - Dependencies: spring-beans, spring-dao, JCA API, (spring-context)
 
-* "spring-jms" (~155 KB)
+* "spring-jms" (~160 KB)
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-beans, spring-dao, JMS API, (spring-remoting)
 
