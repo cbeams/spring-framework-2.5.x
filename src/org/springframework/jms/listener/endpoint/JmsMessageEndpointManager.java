@@ -50,7 +50,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager {
 
 	private boolean messageListenerSet = false;
 
-	private JmsActivationSpecFactory activationSpecFactory;
+	private JmsActivationSpecFactory activationSpecFactory = new DefaultJmsActivationSpecFactory();
 
 	private JmsActivationSpecConfig activationSpecConfig;
 
@@ -87,10 +87,16 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager {
 	 * creating JCA ActivationSpecs based on
 	 * {@link #setActivationSpecConfig JmsActivationSpecConfig} objects.
 	 * <p>This factory is dependent on the concrete JMS provider, e.g. on ActiveMQ.
-	 * For this reason, there is no default - it needs to be configured.
+	 * The default implementation simply guesses the ActivationSpec class name
+	 * from the provider's class name (e.g. "ActiveMQResourceAdapter" ->
+	 * "ActiveMQActivationSpec" in the same package), and populates the
+	 * ActivationSpec properties as suggested by the JCA 1.5 specification
+	 * (plus a couple of autodetected vendor-specific properties).
+	 * @see DefaultJmsActivationSpecFactory
 	 */
 	public void setActivationSpecFactory(JmsActivationSpecFactory activationSpecFactory) {
-		this.activationSpecFactory = activationSpecFactory;
+		this.activationSpecFactory =
+				(activationSpecFactory != null ? activationSpecFactory : new DefaultJmsActivationSpecFactory());
 	}
 
 	/**
@@ -109,11 +115,8 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager {
 			setMessageEndpointFactory(this.endpointFactory);
 		}
 		if (this.activationSpecConfig != null) {
-			if (this.activationSpecFactory == null) {
-				throw new IllegalStateException(
-						"Property 'activationSpecConfig' requires property 'activationSpecFactory' to be set");
-			}
-			setActivationSpec(this.activationSpecFactory.createActivationSpec(this.activationSpecConfig));
+			setActivationSpec(
+					this.activationSpecFactory.createActivationSpec(getResourceAdapter(), this.activationSpecConfig));
 		}
 		super.afterPropertiesSet();
 	}

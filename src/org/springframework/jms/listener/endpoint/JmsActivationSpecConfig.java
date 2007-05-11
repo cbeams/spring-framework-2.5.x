@@ -18,8 +18,6 @@ package org.springframework.jms.listener.endpoint;
 
 import javax.jms.Session;
 
-import org.springframework.util.Assert;
-
 /**
  * Common configuration object for activating a JMS message endpoint.
  * Gets converted into a provided-specific JCA 1.5 ActivationSpec
@@ -48,9 +46,11 @@ public class JmsActivationSpecConfig {
 
 	private String messageSelector;
 
-	private int maxConcurrency = 1;
-
 	private int acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
+
+	private int maxConcurrency = -1;
+
+	private int prefetchSize = -1;
 
 
 	public void setDestinationName(String destinationName) {
@@ -101,8 +101,15 @@ public class JmsActivationSpecConfig {
 		return this.messageSelector;
 	}
 
+	public void setAcknowledgeMode(int acknowledgeMode) {
+		this.acknowledgeMode = acknowledgeMode;
+	}
+
+	public int getAcknowledgeMode() {
+		return this.acknowledgeMode;
+	}
+
 	public void setMaxConcurrency(int maxConcurrency) {
-		Assert.isTrue(maxConcurrency > 0, "'maxConcurrency' value must be at least 1 (one)");
 		this.maxConcurrency = maxConcurrency;
 	}
 
@@ -110,12 +117,12 @@ public class JmsActivationSpecConfig {
 		return this.maxConcurrency;
 	}
 
-	public void setAcknowledgeMode(int acknowledgeMode) {
-		this.acknowledgeMode = acknowledgeMode;
+	public void setPrefetchSize(int prefetchSize) {
+		this.prefetchSize = prefetchSize;
 	}
 
-	public int getAcknowledgeMode() {
-		return this.acknowledgeMode;
+	public int getPrefetchSize() {
+		return this.prefetchSize;
 	}
 
 }

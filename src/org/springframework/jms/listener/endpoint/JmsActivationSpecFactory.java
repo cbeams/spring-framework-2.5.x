@@ -17,6 +17,7 @@
 package org.springframework.jms.listener.endpoint;
 
 import javax.resource.spi.ActivationSpec;
+import javax.resource.spi.ResourceAdapter;
 
 /**
  * Strategy interface for creating JCA 1.5 ActivationSpec objects
@@ -38,10 +39,11 @@ public interface JmsActivationSpecFactory {
 	/**
 	 * Create a JCA 1.5 ActivationSpec object based on the given
 	 * {@link JmsActivationSpecConfig} object.
+	 * @param adapter the ResourceAdapter to create an ActivationSpec object for
 	 * @param config the configured object holding common JMS settings
 	 * @return the provider-specific JCA ActivationSpec object,
 	 * representing the same settings
 	 */
-	ActivationSpec createActivationSpec(JmsActivationSpecConfig config);
+	ActivationSpec createActivationSpec(ResourceAdapter adapter, JmsActivationSpecConfig config);
 
 }
