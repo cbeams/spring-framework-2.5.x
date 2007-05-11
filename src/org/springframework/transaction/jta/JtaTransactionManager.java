@@ -104,23 +104,13 @@ import org.springframework.util.StringUtils;
  * by default). Consequently, JtaTransactionManager will support transaction suspension
  * out-of-the-box on many J2EE servers.
  *
- * <p>For IBM WebSphere and standalone JOTM, static accessor methods are required to
- * obtain the JTA TransactionManager: Therefore, WebSphere and JOTM have their own
- * FactoryBean implementations, to be wired with the "transactionManager" property.
- * In case of {@link JotmFactoryBean}, the same JTA object implements UserTransaction
- * too: Therefore, passing the object to the "userTransaction" property is sufficient.
- *
  * <p><b>Note: Support for the JTA TransactionManager interface is not required by J2EE.
  * Almost all J2EE servers expose it, but do so as extension to J2EE. There might be some
  * issues with compatibility, despite the TransactionManager interface being part of JTA.</b>
- *
- * <p>JTA 1.1 adds the TransactionSynchronizationRegistry facility, as public Java EE 5
- * API in addition to the standard JTA UserTransaction handle. As of Spring 2.1, this
- * JtaTransactionManager autodetects the TransactionSynchronizationRegistry and uses
- * it for registering Spring-managed synchronizations when participating in an existing
- * JTA transaction (e.g. controlled by EJB CMT). If no TransactionSynchronizationRegistry
- * is available (or the JTA 1.1 API isn't available), then such synchronizations
- * will be registered via the (non-J2EE) JTA TransactionManager handle.
+ * As a consequence, Spring provides various vendor-specific PlatformTransactionManagers,
+ * which are recommended to be used if appropriate: {@link WebLogicJtaTransactionManager},
+ * {@link WebSphereUowTransactionManager} and {@link OC4JJtaTransactionManager}.
+ * For all other J2EE servers, the standard JtaTransactionManager is sufficient.
  *
  * <p><b>This pure JtaTransactionManager supports timeouts but not per-transaction
  * isolation levels.</b> Custom subclasses may override {@link #doJtaBegin} for
@@ -129,6 +119,14 @@ import org.springframework.util.StringUtils;
  * classes, for BEA's WebLogic Server and Oracle's OC4J, respectively. Such adapters
  * for specific J2EE transaction coordinators may also expose transaction names for
  * monitoring; with standard JTA, transaction names will simply be ignored.
+ *
+ * <p>JTA 1.1 adds the TransactionSynchronizationRegistry facility, as public Java EE 5
+ * API in addition to the standard JTA UserTransaction handle. As of Spring 2.1, this
+ * JtaTransactionManager autodetects the TransactionSynchronizationRegistry and uses
+ * it for registering Spring-managed synchronizations when participating in an existing
+ * JTA transaction (e.g. controlled by EJB CMT). If no TransactionSynchronizationRegistry
+ * is available (or the JTA 1.1 API isn't available), then such synchronizations
+ * will be registered via the (non-J2EE) JTA TransactionManager handle.
  *
  * <p>This class is serializable. However, active synchronizations do not survive
  * serialization.

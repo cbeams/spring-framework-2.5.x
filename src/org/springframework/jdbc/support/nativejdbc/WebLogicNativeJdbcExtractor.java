@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.sql.SQLException;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Implementation of the NativeJdbcExtractor interface for WebLogic Server
- * 6.1+.
+ * Implementation of the {@link NativeJdbcExtractor} interface for WebLogic,
+ * supporting WebLogic Server 8.1 and higher.
  *
  * <p>Returns the underlying native Connection to application code instead
  * of WebLogic's wrapper implementation; unwraps the Connection for native

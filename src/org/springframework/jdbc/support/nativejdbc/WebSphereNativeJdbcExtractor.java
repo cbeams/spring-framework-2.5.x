@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,11 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Implementation of the NativeJdbcExtractor interface for WebSphere.
+ * Implementation of the {@link NativeJdbcExtractor} interface for WebSphere,
+ * supporting WebSphere Application Server 5.1 and higher.
  *
  * <p>Returns the underlying native Connection to application code instead
  * of WebSphere's wrapper implementation; unwraps the Connection for
@@ -37,15 +35,10 @@ import org.springframework.util.ReflectionUtils;
  * with a WebSphere DataSource: If a given object is not a WebSphere
  * Connection wrapper, it will be returned as-is.
  *
- * <p>Supports both WebSphere 5 and WebSphere 4. Currently tested with
- * IBM WebSphere 5.1.0, 5.0.2 and 4.0.6. Thanks to Dave Keller and Victor
- * for figuring out how to do the unwrapping on WebSphere 5 and 4!
- *
  * @author Juergen Hoeller
  * @since 1.1
  * @see com.ibm.ws.rsadapter.jdbc.WSJdbcConnection
  * @see com.ibm.ws.rsadapter.jdbc.WSJdbcUtil#getNativeConnection
- * @see com.ibm.ejs.cm.proxy.ConnectionProxy#getPhysicalConnection
  */
 public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
@@ -53,18 +46,10 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private static final String JDBC_ADAPTER_UTIL_NAME_5 = "com.ibm.ws.rsadapter.jdbc.WSJdbcUtil";
 
-	private static final String CONNECTION_PROXY_NAME_4 = "com.ibm.ejs.cm.proxy.ConnectionProxy";
-
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Class webSphere5ConnectionClass;
 
-	private Class webSphere4ConnectionClass;
-
 	private Method webSphere5NativeConnectionMethod;
-
-	private Method webSphere4PhysicalConnectionMethod;
 
 
 	/**
@@ -72,31 +57,18 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 * so we can get the underlying vendor connection using reflection.
 	 */
 	public WebSphereNativeJdbcExtractor() {
-		// Detect WebSphere 5 connection classes.
 		try {
-			logger.debug("Trying WebSphere 5 Connection: " + JDBC_ADAPTER_CONNECTION_NAME_5);
 			this.webSphere5ConnectionClass = getClass().getClassLoader().loadClass(JDBC_ADAPTER_CONNECTION_NAME_5);
 			Class jdbcAdapterUtilClass = getClass().getClassLoader().loadClass(JDBC_ADAPTER_UTIL_NAME_5);
 			this.webSphere5NativeConnectionMethod =
 					jdbcAdapterUtilClass.getMethod("getNativeConnection", new Class[] {this.webSphere5ConnectionClass});
 		}
 		catch (Exception ex) {
-			logger.debug("Could not find WebSphere 5 connection pool classes", ex);
-		}
-
-		// Detect WebSphere 4 connection classes.
-		// Might also be found on WebSphere 5, for version 4 DataSources.
-		try {
-			logger.debug("Trying WebSphere 4 Connection: " + CONNECTION_PROXY_NAME_4);
-			this.webSphere4ConnectionClass = getClass().getClassLoader().loadClass(CONNECTION_PROXY_NAME_4);
-			this.webSphere4PhysicalConnectionMethod =
-					this.webSphere4ConnectionClass.getMethod("getPhysicalConnection", (Class[]) null);
-		}
-		catch (Exception ex) {
-			logger.debug("Could not find WebSphere 4 connection pool classes", ex);
+			throw new IllegalStateException(
+					"Could not initialize WebSphereNativeJdbcExtractor because WebSphere API classes are not available: " + ex);
 		}
 	}
-	
+
 
 	/**
 	 * Return <code>true</code>, as WebSphere returns wrapped Statements.
@@ -123,28 +95,11 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 * Retrieve the Connection via WebSphere's <code>getNativeConnection</code> method.
 	 */
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
-		// WebSphere 5 connection?
-		if (this.webSphere5ConnectionClass != null &&
-				this.webSphere5ConnectionClass.isAssignableFrom(con.getClass())) {
-			// WebSphere 5's WSJdbcUtil.getNativeConnection(wsJdbcConnection)
+		if (this.webSphere5ConnectionClass.isAssignableFrom(con.getClass())) {
 			return (Connection) ReflectionUtils.invokeMethod(
 					this.webSphere5NativeConnectionMethod, null, new Object[] {con});
 		}
-
-		// WebSphere 4 connection (or version 4 connection on WebSphere 5)?
-		else if (this.webSphere4ConnectionClass != null &&
-				this.webSphere4ConnectionClass.isAssignableFrom(con.getClass())) {
-			// WebSphere 4's connectionProxy.getPhysicalConnection()
-			return (Connection) ReflectionUtils.invokeMethod(this.webSphere4PhysicalConnectionMethod, con);
-		}
-
-		// No known WebSphere connection -> return as-is.
-		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Connection [" + con + "] is not a WebSphere 5/4 connection, returning as-is");
-			}
-			return con;
-		}
+		return con;
 	}
 
 }
