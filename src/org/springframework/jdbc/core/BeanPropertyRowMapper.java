@@ -87,35 +87,15 @@ public class BeanPropertyRowMapper implements RowMapper {
 	 * @param mappedClass the class that each row should be mapped to.
 	 */
 	public BeanPropertyRowMapper(Class mappedClass) {
-		setMappedClass(mappedClass);
+		initialize(mappedClass);
 	}
 
 	/**
 	 * Set the class that each row should be mapped to.
 	 */
-	public void setMappedClass(Class mappedClass) {
+	public synchronized void setMappedClass(Class mappedClass) {
 		if (this.mappedClass == null) {
-			this.mappedClass = mappedClass;
-			try {
-				this.defaultConstruct = mappedClass.getConstructor((Class[]) null);
-			}
-			catch (NoSuchMethodException ex) {
-				throw new DataAccessResourceFailureException(new StringBuffer().
-						append("Failed to access default or no-arg constructor of ").
-						append(mappedClass.getName()).toString(), ex);
-			}
-			this.mappedFields = new HashMap();
-			Field[] f = mappedClass.getDeclaredFields();
-			for (int i = 0; i < f.length; i++) {
-				PersistentField pf = new PersistentField();
-				pf.setFieldName(f[i].getName());
-				pf.setJavaType(f[i].getType());
-				this.mappedFields.put(f[i].getName().toLowerCase(), pf);
-				String underscoredName = underscoreName(f[i].getName());
-				if (!f[i].getName().toLowerCase().equals(underscoredName)) {
-					this.mappedFields.put(underscoredName, pf);
-				}
-			}
+			initialize(mappedClass);
 		}
 		else {
 			if (!this.mappedClass.equals(mappedClass)) {
@@ -219,6 +199,34 @@ public class BeanPropertyRowMapper implements RowMapper {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Initialize the mapping metadata
+	 * @param mappedClass
+	 */
+	private void initialize(Class mappedClass) {
+		this.mappedClass = mappedClass;
+		try {
+			this.defaultConstruct = mappedClass.getConstructor((Class[]) null);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new DataAccessResourceFailureException(new StringBuffer().
+					append("Failed to access default or no-arg constructor of ").
+					append(mappedClass.getName()).toString(), ex);
+		}
+		this.mappedFields = new HashMap();
+		Field[] f = mappedClass.getDeclaredFields();
+		for (int i = 0; i < f.length; i++) {
+			PersistentField pf = new PersistentField();
+			pf.setFieldName(f[i].getName());
+			pf.setJavaType(f[i].getType());
+			this.mappedFields.put(f[i].getName().toLowerCase(), pf);
+			String underscoredName = underscoreName(f[i].getName());
+			if (!f[i].getName().toLowerCase().equals(underscoredName)) {
+				this.mappedFields.put(underscoredName, pf);
+			}
+		}
 	}
 
 	/**
