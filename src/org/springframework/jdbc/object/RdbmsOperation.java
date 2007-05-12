@@ -33,6 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetSupportingSqlParameter;
+import org.springframework.jdbc.core.SqlInOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 
 /**
@@ -371,6 +372,10 @@ public abstract class RdbmsOperation implements InitializingBean {
 						throw new InvalidDataAccessApiUsageException(
 								"BLOB or CLOB parameters are not allowed for this kind of operation");
 					}
+					declaredInParameters++;
+				}
+				else if (param instanceof SqlInOutParameter) {
+					// Special case: a ResultSetSupportingSqlParameter, but counts as in value.
 					declaredInParameters++;
 				}
 			}
