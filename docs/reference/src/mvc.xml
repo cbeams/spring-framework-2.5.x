@@ -1592,7 +1592,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       the name of the cookie, as well as the maximum age. Find below an example of
       defining a <classname>CookieLocaleResolver</classname>.</para>
       
-      <programlisting><![CDATA[<bean id="localeResolver">
+      <programlisting><![CDATA[<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
 
     <property name="cookieName" value="clientlanguage"/>
     
