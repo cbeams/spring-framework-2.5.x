@@ -92,6 +92,7 @@ public class BeanPropertyRowMapper implements RowMapper {
 
 	/**
 	 * Set the class that each row should be mapped to.
+	 * @param mappedClass the class that each row should be mapped to.
 	 */
 	public synchronized void setMappedClass(Class mappedClass) {
 		if (this.mappedClass == null) {
