@@ -27,6 +27,7 @@ import junit.framework.TestCase;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlInOutParameter;
+import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
@@ -180,8 +181,9 @@ public class RdbmsOperationTests extends TestCase {
 		TestRdbmsOperation operation = new TestRdbmsOperation();
 		operation.setDataSource(new DriverManagerDataSource());
 		operation.setSql("DUMMY_PROC");
-		operation.declareParameter(new SqlInOutParameter("DUMMY_PARAM", Types.VARCHAR));
-		operation.validateParameters(new Object[] {"DUMMY_VALUE"});
+		operation.declareParameter(new SqlOutParameter("DUMMY_OUT_PARAM", Types.VARCHAR));
+		operation.declareParameter(new SqlInOutParameter("DUMMY_IN_OUT_PARAM", Types.VARCHAR));
+		operation.validateParameters(new Object[] {"DUMMY_VALUE1", "DUMMY_VALUE2"});
 	}
 
 

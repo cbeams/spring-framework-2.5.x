@@ -155,6 +155,16 @@ public class SqlParameter {
 
 
 	/**
+	 * Return whether this parameter holds input values that should be set
+	 * before execution even if they are <code>null</code>.
+	 * <p>This implementation always returns <code>true</code>.
+	 */
+	public boolean isInputValueProvided() {
+		return true;
+	}
+
+
+	/**
 	 * Convert a list of JDBC types, as defined in <code>java.sql.Types</code>,
 	 * to a List of SqlParameter objects as used in this package.
 	 */

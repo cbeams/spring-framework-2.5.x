@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,10 @@ package org.springframework.jdbc.core;
 
 /**
  * Common base class for ResultSet-supporting SqlParameters like
- * SqlOutParameter and SqlReturnResultSet.
+ * {@link SqlOutParameter} and {@link SqlReturnResultSet}.
  *
  * @author Juergen Hoeller
  * @since 1.0.2
- * @see SqlOutParameter
- * @see SqlReturnResultSet
  */
 public class ResultSetSupportingSqlParameter extends SqlParameter {
 
@@ -114,6 +112,14 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	 */
 	public RowMapper getRowMapper() {
 		return this.rowMapper;
+	}
+
+
+	/**
+	 * <p>This implementation always returns <code>false</code>.
+	 */
+	public boolean isInputValueProvided() {
+		return false;
 	}
 
 }
