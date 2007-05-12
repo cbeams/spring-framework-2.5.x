@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,24 +19,25 @@ package org.springframework.jmx.support;
 import java.beans.PropertyDescriptor;
 
 import javax.management.DynamicMBean;
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import javax.management.StandardMBean;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.core.JdkVersion;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.TestDynamicMBean;
 import org.springframework.util.ObjectUtils;
-import org.springframework.core.JdkVersion;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class JmxUtilsTests extends TestCase {
 
@@ -62,6 +63,11 @@ public class JmxUtilsTests extends TestCase {
 	public void testSimpleMBean() throws Exception {
 		Foo foo = new Foo();
 		assertTrue("Simple MBean not detected correctly", JmxUtils.isMBean(foo.getClass()));
+	}
+
+	public void testSimpleMXBean() throws Exception {
+		FooX foo = new FooX();
+		assertTrue("Simple MXBean not detected correctly", JmxUtils.isMBean(foo.getClass()));
 	}
 
 	public void testSimpleMBeanThroughInheritance() throws Exception {
@@ -168,6 +174,20 @@ public class JmxUtilsTests extends TestCase {
 
 
 	public static class Foo implements FooMBean {
+
+		public String getName() {
+			return "Rob Harrop";
+		}
+	}
+
+
+	public static interface FooMXBean {
+
+		String getName();
+	}
+
+
+	public static class FooX implements FooMXBean {
 
 		public String getName() {
 			return "Rob Harrop";

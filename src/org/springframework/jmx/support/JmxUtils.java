@@ -26,6 +26,7 @@ import javax.management.DynamicMBean;
 import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+import javax.management.MXBean;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -56,10 +57,20 @@ public abstract class JmxUtils {
 	public static final String IDENTITY_OBJECT_NAME_KEY = "identity";
 
 	/**
-	 * Suffix used to identify an MBean interface
+	 * Suffix used to identify an MBean interface.
 	 */
 	private static final String MBEAN_SUFFIX = "MBean";
 
+	/**
+	 * Suffix used to identify a Java 6 MXBean interface.
+	 */
+	private static final String MXBEAN_SUFFIX = "MXBean";
+
+	private static final String MXBEAN_ANNOTATION_CLASS_NAME = "javax.management.MXBean";
+
+
+	private static final boolean mxBeanAnnotationAvailable =
+			ClassUtils.isPresent(MXBEAN_ANNOTATION_CLASS_NAME, JmxUtils.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(JmxUtils.class);
 
@@ -180,29 +191,25 @@ public abstract class JmxUtils {
 	}
 
 	/**
-	 * Determine whether the given bean class qualifies as an MBean as-is.
-	 * <p>This implementation checks for {@link javax.management.DynamicMBean}
-	 * classes as well as classes with corresponding "*MBean" interface
-	 * (Standard MBeans).
-	 * @param beanClass the bean class to analyze
-	 * @return whether the class qualifies as an MBean
-	 * @see org.springframework.jmx.export.MBeanExporter#isMBean(Class)
+	 * Append an additional key/value pair to an existing {@link ObjectName} with the key being
+	 * the static value <code>identity</code> and the value being the identity hash code of the
+	 * managed resource being exposed on the supplied {@link ObjectName}. This can be used to
+	 * provide a unique {@link ObjectName} for each distinct instance of a particular bean or
+	 * class. Useful when generating {@link ObjectName ObjectNames} at runtime for a set of
+	 * managed resources based on the template value supplied by a
+	 * {@link org.springframework.jmx.export.naming.ObjectNamingStrategy}.
+	 * @param objectName the original JMX ObjectName
+	 * @param managedResource the MBean instance
+	 * @return an ObjectName with the MBean identity added
+	 * @throws MalformedObjectNameException in case of an invalid object name specification
+	 * @see org.springframework.util.ObjectUtils#getIdentityHexString(Object)
 	 */
-	public static boolean isMBean(Class beanClass) {
-		if (beanClass == null) {
-			return false;
-		}
-		if (DynamicMBean.class.isAssignableFrom(beanClass)) {
-			return true;
-		}
-		Class cls = beanClass;
-		while (cls != null && cls != Object.class) {
-			if (hasMBeanInterface(cls)) {
-				return true;
-			}
-			cls = cls.getSuperclass();
-		}
-		return false;
+	public static ObjectName appendIdentityToObjectName(ObjectName objectName, Object managedResource)
+			throws MalformedObjectNameException {
+
+		Hashtable keyProperties = objectName.getKeyPropertyList();
+		keyProperties.put(IDENTITY_OBJECT_NAME_KEY, ObjectUtils.getIdentityHexString(managedResource));
+		return ObjectNameManager.getInstance(objectName.getDomain(), keyProperties);
 	}
 
 	/**
@@ -234,13 +241,31 @@ public abstract class JmxUtils {
 	}
 
 	/**
+	 * Determine whether the given bean class qualifies as an MBean as-is.
+	 * <p>This implementation checks for {@link javax.management.DynamicMBean}
+	 * classes as well as classes with corresponding "*MBean" interface
+	 * (Standard MBeans).
+	 * @param beanClass the bean class to analyze
+	 * @return whether the class qualifies as an MBean
+	 * @see org.springframework.jmx.export.MBeanExporter#isMBean(Class)
+	 */
+	public static boolean isMBean(Class beanClass) {
+		return (beanClass != null &&
+				(DynamicMBean.class.isAssignableFrom(beanClass) ||
+						hasMBeanInterface(beanClass) || hasMXBeanInterface(beanClass)));
+	}
+
+	/**
 	 * Return whether a Standard MBean interface exists for the given class
 	 * (that is, an interface whose name matches the class name of the
-	 * given class but with suffix "MBean).
+	 * given class but with suffix "MBean").
 	 * @param clazz the class to check
 	 * @return whether there is a Standard MBean interface for the given class
 	 */
 	private static boolean hasMBeanInterface(Class clazz) {
+		if (clazz.getSuperclass() == null) {
+			return false;
+		}
 		Class[] implementedInterfaces = clazz.getInterfaces();
 		String mbeanInterfaceName = clazz.getName() + MBEAN_SUFFIX;
 		for (int x = 0; x < implementedInterfaces.length; x++) {
@@ -249,29 +274,52 @@ public abstract class JmxUtils {
 				return true;
 			}
 		}
-		return false;
+		return hasMBeanInterface(clazz.getSuperclass());
 	}
 
 	/**
-	 * Append an additional key/value pair to an existing {@link ObjectName} with the key being
-	 * the static value <code>identity</code> and the value being the identity hash code of the
-	 * managed resource being exposed on the supplied {@link ObjectName}. This can be used to
-	 * provide a unique {@link ObjectName} for each distinct instance of a particular bean or
-	 * class. Useful when generating {@link ObjectName ObjectNames} at runtime for a set of
-	 * managed resources based on the template value supplied by a
-	 * {@link org.springframework.jmx.export.naming.ObjectNamingStrategy}.
-	 * @param objectName the original JMX ObjectName
-	 * @param managedResource the MBean instance
-	 * @return an ObjectName with the MBean identity added
-	 * @throws MalformedObjectNameException in case of an invalid object name specification
-	 * @see org.springframework.util.ObjectUtils#getIdentityHexString(Object)
+	 * Return whether a Java 6 MXBean interface exists for the given class
+	 * (that is, an interface whose name ends with "MXBean" and/or
+	 * carries an appropriate MXBean annotation).
+	 * @param clazz the class to check
+	 * @return whether there is an MXBean interface for the given class
 	 */
-	public static ObjectName appendIdentityToObjectName(ObjectName objectName, Object managedResource)
-			throws MalformedObjectNameException {
+	private static boolean hasMXBeanInterface(Class clazz) {
+		if (clazz.getSuperclass() == null) {
+			return false;
+		}
+		Class[] implementedInterfaces = clazz.getInterfaces();
+		for (int x = 0; x < implementedInterfaces.length; x++) {
+			Class iface = implementedInterfaces[x];
+			boolean isMxBean = iface.getName().endsWith(MXBEAN_SUFFIX);
+			if (mxBeanAnnotationAvailable) {
+				Boolean checkResult = MXBeanChecker.hasMXBeanAnnotation(iface);
+				if (checkResult != null) {
+					isMxBean = checkResult.booleanValue();
+				}
+			}
+			if (isMxBean) {
+				return true;
+			}
+		}
+		return hasMXBeanInterface(clazz.getSuperclass());
+	}
 
-		Hashtable keyProperties = objectName.getKeyPropertyList();
-		keyProperties.put(IDENTITY_OBJECT_NAME_KEY, ObjectUtils.getIdentityHexString(managedResource));
-		return ObjectNameManager.getInstance(objectName.getDomain(), keyProperties);
+
+	/**
+	 * Inner class to avoid a Java 6 dependency.
+	 */
+	private static class MXBeanChecker {
+
+		public static Boolean hasMXBeanAnnotation(Class iface) {
+			MXBean mxBean = (MXBean) iface.getAnnotation(MXBean.class);
+			if (mxBean != null) {
+				return Boolean.valueOf(mxBean.value());
+			}
+			else {
+				return null;
+			}
+		}
 	}
 
 }
