@@ -43,6 +43,7 @@ Package org.springframework.jdbc
 * added Jdbc4NativeJdbcExtractor, delegating to JDBC 4.0's "unwrap" method (defined by java.sql.Wrapper)
 * added "streamAsLob" flag to DefaultLobHandler, allowing for explicit usage of the JDBC 4.0 setBlob/setClob variants
 * fixed SQLErrorCodeSQLExceptionTranslator to avoid potential NPE in debug log message
+* added BeanPropertyRowMapper that will provide atomatic mapping between columns and bean properties
 
 Package org.springframework.jms
 * added JmsMessageEndpointManager, extending GenericMessageEndpointManager with the JmsActivationSpecFactory mechanism
