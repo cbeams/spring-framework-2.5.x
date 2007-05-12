@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M1 (2007-05-12)
+Changes in version 2.1 M1 (2007-05-13)
 --------------------------------------
 
 General
@@ -43,13 +43,18 @@ Package org.springframework.jdbc
 * added Jdbc4NativeJdbcExtractor, delegating to JDBC 4.0's "unwrap" method (defined by java.sql.Wrapper)
 * added "streamAsLob" flag to DefaultLobHandler, allowing for explicit usage of the JDBC 4.0 setBlob/setClob variants
 * fixed SQLErrorCodeSQLExceptionTranslator to avoid potential NPE in debug log message
-* added BeanPropertyRowMapper that will provide automatic mapping between columns and bean properties
+* added BeanPropertyRowMapper, providing automatic mapping between columns and bean properties
+* moved "isInputValueProvided" method from SqlOutParameter up to the SqlParameter root class
+* fixed RdbmsOperation's "validateParameters" to properly detect and count input-providing SqlOutParameters
 
 Package org.springframework.jms
 * added JmsMessageEndpointManager, extending GenericMessageEndpointManager with the JmsActivationSpecFactory mechanism
 * added StandardJmsActivationSpecFactory, supporting all standard JMS propertied as defined by the JCA 1.5 specification
 * added DefaultJmsActivationSpecFactory, autodetecting ActiveMQ and JORAM's ActivationSpecs and extended properties
 * introduced "jms" XML schema namespace, providing convenient tags for listener container configuration
+
+Package org.springframework.jmx
+* default MBean checks in JmxUtils and MBeanExporter automatically detect a Java 6 MXBean as well
 
 Package org.springframework.jndi
 * added SimpleJndiBeanFactory to "jndi.support" package, providing a JNDI-based BeanFactory implementation
