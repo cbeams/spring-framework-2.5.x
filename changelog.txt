@@ -20,9 +20,12 @@ Package org.springframework.beans
 * introduced CommonAnnotationBeanPostProcessor, processing JSR-250's @PostConstruct, @PreDestroy and @Resource
 * introduced @Autowired annotation, indicating that a field, config method or constructor is supposed to be autowired
 * introduced AutowiredAnnotationBeanPostProcessor, processing the new @Autowired annotation
+* fixed AbstractAutowireCapableBeanFactory to allow for changing the InstantiantionStrategy (again)
 * deprecated BeanDefinitionReader's "BeanDefinitionRegistry getBeanFactory()" method in favor of "getRegistry()"
+* exposed "getBeanNameGenerator()" method in BeanDefinitionReader interface
 * changed XmlReaderContext's "getReader()" method to expose the plain BeanDefinitionReader interface
 * added "getResourceLoader()" convenience method to XmlReaderContext, exposing the context's ResourceLoader (if any)
+* added "getBeanClassLoader()" convenience method to XmlReaderContext
 
 Package org.springframework.context
 * introduced CandidateComponentProvider mechnism, for finding annotated component classes through scanning the classpath
