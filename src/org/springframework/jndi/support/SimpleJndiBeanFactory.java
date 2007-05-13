@@ -43,7 +43,7 @@ import org.springframework.jndi.TypeMismatchNamingException;
  * J2EE application's "java:comp/env/" namespace. It caches the resolved
  * types for all obtained objects, and optionally also caches shareable
  * objects (if they are explicitly marked as
- * {@see #addShareableResource shareable resource}.
+ * {@link #addShareableResource shareable resource}.
  *
  * <p>The main intent of this factory is usage in combination with Spring's
  * {@link org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor},
