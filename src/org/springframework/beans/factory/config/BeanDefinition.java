@@ -65,24 +65,24 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * {@link org.springframework.beans.factory.parsing.ComponentDefinition}.
 	 * <code>SUPPORT</code> beans are considered important enough to be aware
 	 * of when looking more closely at a particular
-	 * {@link org.springframework.beans.factory.parsing.ComponentDefinition}, but
-	 * not when looking at the overall configuration of an application.
+	 * {@link org.springframework.beans.factory.parsing.ComponentDefinition},
+	 * but not when looking at the overall configuration of an application.
 	 */
 	int ROLE_SUPPORT = 1;
 
 	/**
-	 * Role hint indicating that a <code>BeanDefinition</code> is providing
-	 * an entirely background role and has no relevance to the end-user. This
-	 * hint is used when registering beans that are completely part of the internal
-	 * workings of a {@link org.springframework.beans.factory.parsing.ComponentDefinition}.
+	 * Role hint indicating that a <code>BeanDefinition</code> is providing an
+	 * entirely background role and has no relevance to the end-user. This hint is
+	 * used when registering beans that are completely part of the internal workings
+	 * of a {@link org.springframework.beans.factory.parsing.ComponentDefinition}.
 	 */
 	int ROLE_INFRASTRUCTURE = 2;
 
 
 	/**
 	 * Return the current bean class name of this bean definition.
-	 * <p>Note that this does not have to be the actual class name used at runtime,
-	 * in case of a child definition overriding/inheriting the class name from its parent.
+	 * <p>Note that this does not have to be the actual class name used at runtime, in
+	 * case of a child definition overriding/inheriting the class name from its parent.
 	 * Hence, do <i>not</i> consider this to be the definitive bean type at runtime but
 	 * rather only use it for parsing purposes at the individual bean definition level.
 	 */
