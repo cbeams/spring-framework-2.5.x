@@ -16,8 +16,6 @@
 
 package org.springframework.core.typefilter;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
 
 /**
@@ -26,19 +24,13 @@ import org.objectweb.asm.ClassReader;
  * @since 2.1
  */
 public abstract class AbstractClassTestingTypeFilter implements TypeFilter {
-	
-	protected final Log log = LogFactory.getLog(getClass());
 
 	public final boolean match(ClassReader cr) {
-		ClassNameAndTypesReadingVisitor v = new ClassNameAndTypesReadingVisitor();
-		cr.accept(v, false);
-		return match(v);
+		ClassNameAndTypesReadingVisitor visitor = new ClassNameAndTypesReadingVisitor();
+		cr.accept(visitor, false);
+		return match(visitor);
 	}
 
-	/**
-	 * @param v
-	 * @return
-	 */
-	protected abstract boolean match(ClassNameAndTypesReadingVisitor v);
-	
+	protected abstract boolean match(ClassNameAndTypesReadingVisitor visitor);
+
 }

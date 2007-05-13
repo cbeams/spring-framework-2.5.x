@@ -21,8 +21,6 @@ import java.lang.annotation.Inherited;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
@@ -40,25 +38,25 @@ import org.objectweb.asm.commons.EmptyVisitor;
  */
 public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter {
 	
-	protected final Log log = LogFactory.getLog(getClass());
-
 	private final Class<? extends Annotation> annotationClass;
+
 
 	/**
 	 * @param annotationClass The annotation to match 
 	 * @param considerInherited search inheritance hierarchy for the annotation
 	 */
-	public AnnotationTypeFilter(final Class<? extends Annotation> annotationClass, boolean considerInherited) {
+	public AnnotationTypeFilter(Class<? extends Annotation> annotationClass, boolean considerInherited) {
 		super(considerInherited && annotationClass.isAnnotationPresent(Inherited.class), false);
 		this.annotationClass = annotationClass;
 	}
 	
 	/**
-	 * @param annotationClass
+	 * @param annotationClass The annotation to match
 	 */
 	public AnnotationTypeFilter(final Class<? extends Annotation> annotationClass) {
 		this(annotationClass, true);
 	}
+
 
 	@Override
 	protected boolean matchSelf(ClassReader classReader) {
@@ -71,18 +69,19 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 		}
 		return false;
 	}
-	
+
+
 	/**
 	 * ASM annotation visitor used for reading innerClasses without loading the
 	 * class. The reader is simplified at considers only the innerClasses
 	 * description and not their value.
 	 */
-	public static class AnnotationReadingVisitor extends EmptyVisitor {
+	private static class AnnotationReadingVisitor extends EmptyVisitor {
 
-		private List<String> annotations = createList();
+		private final List<String> annotations = createList();
 
 		public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-			annotations.add(Type.getType(desc).getClassName());
+			this.annotations.add(Type.getType(desc).getClassName());
 			return super.visitAnnotation(desc, visible);
 		}
 
@@ -95,11 +94,8 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 			return new ArrayList<String>();
 		}
 		
-		/**
-		 * @return the annotations
-		 */
 		public List<String> getAnnotationNames() {
-			return annotations;
+			return this.annotations;
 		}
 	}
 

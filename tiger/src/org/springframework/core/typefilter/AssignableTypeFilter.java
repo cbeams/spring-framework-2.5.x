@@ -16,10 +16,6 @@
 
 package org.springframework.core.typefilter;
 
-import java.util.HashSet;
-import java.util.Set;
-
-
 /**
  * @author Rod Johnson
  * @author Mark Fisher
@@ -27,8 +23,10 @@ import java.util.Set;
  * @since 2.1
  */
 public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter {
+
 	public final String typeName;
 	
+
 	/**
 	 * @param type type to match
 	 */
@@ -37,6 +35,7 @@ public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 		this.typeName = type.getName();
 	}
 	
+
 	@Override
 	protected boolean matchClassName(String className) {
 		return matchType(className);
@@ -55,4 +54,5 @@ public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	private boolean matchType(String typeName) {
 		return this.typeName.equals(typeName);
 	}
+
 }

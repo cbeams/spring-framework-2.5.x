@@ -34,6 +34,6 @@ public interface TypeFilter {
 		}
 	};
 	
-	boolean match(ClassReader cr);
+	boolean match(ClassReader classReader);
 	
 }

@@ -16,8 +16,6 @@
 
 package org.springframework.core.typefilter;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 import org.springframework.util.ClassUtils;
@@ -33,9 +31,7 @@ import org.springframework.util.ClassUtils;
  * @since 2.1
  */
 public class ClassNameAndTypesReadingVisitor extends EmptyVisitor {
-	
-	protected final Log log = LogFactory.getLog(getClass());
-	
+
 	private String name;
 
 	private String superName;

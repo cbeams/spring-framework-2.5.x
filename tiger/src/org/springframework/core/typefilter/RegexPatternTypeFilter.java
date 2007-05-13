@@ -18,6 +18,8 @@ package org.springframework.core.typefilter;
 
 import java.util.regex.Pattern;
 
+import org.springframework.util.Assert;
+
 /**
  * A simple filter for matching a fully-qualified classname with a {@link Pattern}.
  * 
@@ -26,15 +28,18 @@ import java.util.regex.Pattern;
  */
 public class RegexPatternTypeFilter extends AbstractClassTestingTypeFilter {
 
-	private Pattern pattern;
-	
+	private final Pattern pattern;
+
+
 	public RegexPatternTypeFilter(Pattern pattern) {
+		Assert.notNull(pattern, "Pattern must not be null");
 		this.pattern = pattern;
 	}
-	
+
+
 	@Override
-	protected boolean match(ClassNameAndTypesReadingVisitor v) {
-		return pattern.matcher(v.getClassName()).matches();
+	protected boolean match(ClassNameAndTypesReadingVisitor visitor) {
+		return this.pattern.matcher(visitor.getClassName()).matches();
 	}
 
 }

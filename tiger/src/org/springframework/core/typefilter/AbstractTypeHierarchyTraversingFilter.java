@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.typefilter;
 
 import java.io.IOException;
@@ -33,10 +34,11 @@ import org.objectweb.asm.ClassReader;
  * @since 2.1
  */
 public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilter {
-	protected final Log log = LogFactory.getLog(getClass());
 
-	private boolean considerInherited;
-	private boolean considerInterfaces;
+	private final boolean considerInherited;
+
+	private final boolean considerInterfaces;
+
 
 	public AbstractTypeHierarchyTraversingFilter(boolean considerInherited, boolean considerInterfaces) {
 		this.considerInherited = considerInherited;
@@ -56,7 +58,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 			return true;
 		}
 
-		if (!considerInherited) {
+		if (!this.considerInherited) {
 			return false;
 		}
 
@@ -70,7 +72,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 			}
 		}
 
-		if (!considerInterfaces) {
+		if (!this.considerInterfaces) {
 			return false;
 		}
 
@@ -91,38 +93,26 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 			return match(new ClassReader(className));
 		}
 		catch (IOException ex) {
-			log.error("Failed loading: " + className);
-			throw new IllegalArgumentException("Cannot load class with name '" + className + "'");
+			throw new IllegalArgumentException("Cannot load class with name '" + className + "'", ex);
 		}
 	}
 
 	/**
 	 * Override this to match self characterisitcs alone. Typically,
-	 * implementation will use a visitor to extract information to peform
-	 * matching.
-	 * 
-	 * @param classReader
-	 * @return
-	 * 
+	 * the implementation will use a visitor to extract information
+	 * to perform matching.
 	 */
 	protected boolean matchSelf(ClassReader classReader) {
 		return false;
 	}
 
 	/**
-	 * Override this to match on type name
-	 * @param className
-	 * @return
+	 * Override this to match on type name.
 	 */
 	protected boolean matchClassName(String className) {
 		return false;
 	}
 
-	/**
-	 * 
-	 * @param
-	 * @return
-	 */
 	protected boolean matchSuperClassName(String superClassName) {
 		return false;
 	}
@@ -130,4 +120,5 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 	protected boolean matchInterfaceName(String interfaceNames) {
 		return false;
 	}
+
 }
