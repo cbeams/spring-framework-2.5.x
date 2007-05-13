@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation;
+package org.springframework.beans.factory.annotation;
 
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
-import org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor;
-import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.AnnotationConfigBeanDefinitionParser;
 import org.springframework.util.ClassUtils;
 
 /**
- * Registers the necessary {@link BeanPostProcessor} definitions for annotation-based configuration.
- * 
+ * Utility class that allows for convenient registration of common
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor}
+ * definitions for annotation-based configuration.
+ *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.1
@@ -33,7 +33,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor
  * @see org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor
  */
-public class AnnotationConfigRegistrar {
+public class AnnotationConfigUtils {
 
 	/**
 	 * The bean name of the internally managed Autowired annotation processor.
@@ -57,8 +57,12 @@ public class AnnotationConfigRegistrar {
 	private static final boolean jsr250Present = ClassUtils.isPresent(
 			"javax.annotation.Resource", AnnotationConfigBeanDefinitionParser.class.getClassLoader());
 
-	
-	protected void registerAnnotationConfigProcessors(BeanDefinitionRegistry registry) {
+
+	/**
+	 * Register all relevant annotation post processors in the given registry.
+	 * @param registry the registry to operate on
+	 */
+	public static void registerAnnotationConfigProcessors(BeanDefinitionRegistry registry) {
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			registry.registerBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
 					new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class));

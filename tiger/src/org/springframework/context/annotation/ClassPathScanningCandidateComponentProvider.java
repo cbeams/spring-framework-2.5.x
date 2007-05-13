@@ -46,15 +46,18 @@ import org.springframework.util.ClassUtils;
  * A component provider that scans the classpath from a base package (default is empty).
  * It then applies exclude and include filters to the resulting classes to find candidates.
  *
+ * <p>This implementation is based on the ASM {@link org.objectweb.asm.ClassReader}.
+ *
  * @author Costin Leau
  * @author Rod Johnson
  * @author Mark Fisher
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
  * @since 2.1
+ * @see org.objectweb.asm.ClassReader
+ * @see org.springframework.core.typefilter.ClassNameAndTypesReadingVisitor
  */
-public class ClassPathScanningCandidateComponentProvider
-		implements CandidateComponentProvider, ResourceLoaderAware {
+public class ClassPathScanningCandidateComponentProvider implements CandidateComponentProvider, ResourceLoaderAware {
 
 	private static final String CLASS_FILE_EXTENSION = ".class";
 

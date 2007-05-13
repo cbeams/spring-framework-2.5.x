@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.typefilter.AnnotationTypeFilter;
 import org.springframework.core.typefilter.AssignableTypeFilter;
@@ -47,9 +48,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertTrue(context.containsBean("myNamedComponent"));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 	
 	public void testSimpleScanWithDefaultFiltersAndNoPostProcessors() {
@@ -72,9 +73,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		int beanCount = scanner.scan(BASE_PACKAGE, false, null, includeFilters);
 		assertEquals(4, beanCount);
 		assertTrue(context.containsBean("messageBean"));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	public void testCustomIncludeFilterWithoutDefaultsAndNoPostProcessors() {
@@ -89,9 +90,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertFalse(context.containsBean("fooServiceImpl"));
 		assertFalse(context.containsBean("stubFooDao"));
 		assertFalse(context.containsBean("myNamedComponent"));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 	
 	public void testCustomIncludeFilterAndDefaults() {
@@ -106,9 +107,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertTrue(context.containsBean("myNamedComponent"));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	public void testCustomAnnotationExcludeFilterAndDefaults() {
@@ -122,9 +123,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertTrue(context.containsBean("myNamedComponent"));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	public void testCustomAssignableTypeExcludeFilterAndDefaults() {
@@ -138,9 +139,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertTrue(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertTrue(context.containsBean("myNamedComponent"));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	public void testCustomAssignableTypeExcludeFilterAndDefaultsWithoutPostProcessors() {
@@ -155,9 +156,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertTrue(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertTrue(context.containsBean("myNamedComponent"));
-		assertFalse(context.containsBean(AnnotationConfigRegistrar.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertFalse(context.containsBean(AnnotationConfigRegistrar.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertFalse(context.containsBean(AnnotationConfigRegistrar.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertFalse(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertFalse(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertFalse(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	public void testMultipleCustomExcludeFiltersAndDefaults() {
@@ -172,9 +173,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertFalse(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertTrue(context.containsBean("myNamedComponent"));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 
 	public void testCustomBeanNameGenerator() {
@@ -188,9 +189,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertTrue(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertTrue(context.containsBean("myNamedComponent"));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
-		assertTrue(context.containsBean(AnnotationConfigRegistrar.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
+		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
 	
 	public void testMultipleBasePackagesWithDefaultsOnly() {
