@@ -18,12 +18,15 @@ package org.springframework.context.config;
 
 import org.w3c.dom.Element;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.util.StringUtils;
 
 /**
+ * Parser for the &lt;context:property-placeholder/&gt; element.
+ *
  * @author Juergen Hoeller
  * @since 2.1
  */
@@ -41,6 +44,7 @@ class PropertyPlaceholderBeanDefinitionParser extends AbstractSingleBeanDefiniti
 		String location = element.getAttribute("location");
 		String[] locations = StringUtils.commaDelimitedListToStringArray(location);
 		builder.addPropertyValue("locations", locations);
+		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 	}
 
 }

@@ -34,7 +34,8 @@ import org.springframework.beans.factory.xml.ParserContext;
 public class AnnotationConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(parserContext.getRegistry());
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(
+				parserContext.getRegistry(), parserContext.extractSource(element));
 		return null;
 	}
 

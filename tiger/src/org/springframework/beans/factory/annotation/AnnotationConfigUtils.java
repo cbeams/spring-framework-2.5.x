@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.annotation;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.ClassUtils;
@@ -62,19 +63,36 @@ public class AnnotationConfigUtils {
 	 * @param registry the registry to operate on
 	 */
 	public static void registerAnnotationConfigProcessors(BeanDefinitionRegistry registry) {
+		registerAnnotationConfigProcessors(registry, null);
+	}
+
+	/**
+	 * Register all relevant annotation post processors in the given registry.
+	 * @param registry the registry to operate on
+	 * @param source the configuration source element (already extracted)
+	 * that this registration was triggered from. May be <code>null</code>.
+	 */
+	public static void registerAnnotationConfigProcessors(BeanDefinitionRegistry registry, Object source) {
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			registry.registerBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
-					new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class));
+			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
+			def.setSource(source);
+			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			registry.registerBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME, def);
 		}
+
 		if (!registry.containsBeanDefinition(REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			registry.registerBeanDefinition(REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
-					new RootBeanDefinition(RequiredAnnotationBeanPostProcessor.class));
+			RootBeanDefinition def = new RootBeanDefinition(RequiredAnnotationBeanPostProcessor.class);
+			def.setSource(source);
+			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			registry.registerBeanDefinition(REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME, def);
 		}
 
 		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-			registry.registerBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME,
-					new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class));
+			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
+			def.setSource(source);
+			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			registry.registerBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME, def);
 		}
 	}
 

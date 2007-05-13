@@ -19,6 +19,7 @@ package org.springframework.transaction.config;
 import org.w3c.dom.Element;
 
 import org.springframework.aop.config.AopNamespaceUtils;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -73,6 +74,7 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 		// Create the TransactionInterceptor definition.
 		RootBeanDefinition interceptorDefinition = new RootBeanDefinition(TransactionInterceptor.class);
 		interceptorDefinition.setSource(parserContext.extractSource(element));
+		interceptorDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		interceptorDefinition.getPropertyValues().addPropertyValue(
 				TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
 		interceptorDefinition.getPropertyValues().addPropertyValue(
@@ -81,6 +83,7 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 		// Create the TransactionAttributeSourceAdvisor definition.
 		RootBeanDefinition advisorDefinition = new RootBeanDefinition(TransactionAttributeSourceAdvisor.class);
 		advisorDefinition.setSource(parserContext.extractSource(element));
+		advisorDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		advisorDefinition.getPropertyValues().addPropertyValue(TRANSACTION_INTERCEPTOR, interceptorDefinition);
 		if (element.hasAttribute(ORDER)) {
 			advisorDefinition.getPropertyValues().addPropertyValue(
