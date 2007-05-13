@@ -34,6 +34,11 @@ import org.springframework.util.StringUtils;
 public class XmlValidationModeDetector {
 
 	/**
+	 * Indicates that the validation should be disabled.
+	 */
+	public static final int VALIDATION_NONE = 0;
+
+	/**
 	 * Indicates that the validation mode should be auto-guessed, since we cannot find
 	 * a clear indication (probably choked on some special characters, or the like).
 	 */

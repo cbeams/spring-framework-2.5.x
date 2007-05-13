@@ -27,6 +27,8 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 
+import org.springframework.util.xml.XmlValidationModeDetector;
+
 /**
  * The default {@link DocumentLoader} implementation.
  * 
@@ -78,8 +80,10 @@ public class DefaultDocumentLoader implements DocumentLoader {
 
 	/**
 	 * Create the {@link DocumentBuilderFactory} instance.
-	 * @param validationMode the type of validation ({@link XmlBeanDefinitionReader#VALIDATION_NONE none}, {@link XmlBeanDefinitionReader#VALIDATION_DTD DTD}, or {@link XmlBeanDefinitionReader#VALIDATION_XSD XSD})
+	 * @param validationMode the type of validation {@link XmlValidationModeDetector#VALIDATION_DTD DTD}
+	 * or {@link XmlValidationModeDetector#VALIDATION_XSD XSD})
 	 * @param namespaceAware <code>true</code> if the returned factory is to provide support for XML namespaces
+	 * @return the JAXP DocumentBuilderFactory
 	 * @throws ParserConfigurationException if we failed to build a proper DocumentBuilderFactory
 	 */
 	protected DocumentBuilderFactory createDocumentBuilderFactory(int validationMode, boolean namespaceAware)
@@ -88,10 +92,10 @@ public class DefaultDocumentLoader implements DocumentLoader {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(namespaceAware);
 
-		if (validationMode != XmlBeanDefinitionReader.VALIDATION_NONE) {
+		if (validationMode != XmlValidationModeDetector.VALIDATION_NONE) {
 			factory.setValidating(true);
 
-			if (validationMode == XmlBeanDefinitionReader.VALIDATION_XSD) {
+			if (validationMode == XmlValidationModeDetector.VALIDATION_XSD) {
 				// enforce namespace aware for XSD
 				factory.setNamespaceAware(true);
 				try {
@@ -115,6 +119,8 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	 * adding further initialization of the builder.
 	 * @param factory the JAXP DocumentBuilderFactory that the DocumentBuilder
 	 * should be created with
+	 * @param entityResolver the SAX EntityResolver to use
+	 * @param errorHandler the SAX ErrorHandler to use
 	 * @return the JAXP DocumentBuilder
 	 * @throws ParserConfigurationException if thrown by JAXP methods
 	 */

@@ -76,7 +76,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * Indicates that the validation should be disabled.
 	 */
-	public static final int VALIDATION_NONE = 0;
+	public static final int VALIDATION_NONE = XmlValidationModeDetector.VALIDATION_NONE;
 
 	/**
 	 * Indicates that the validation mode should be detected automatically.
