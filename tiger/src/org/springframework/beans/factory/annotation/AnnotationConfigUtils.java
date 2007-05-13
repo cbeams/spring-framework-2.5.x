@@ -18,7 +18,6 @@ package org.springframework.beans.factory.annotation;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.annotation.AnnotationConfigBeanDefinitionParser;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -55,7 +54,7 @@ public class AnnotationConfigUtils {
 
 
 	private static final boolean jsr250Present = ClassUtils.isPresent(
-			"javax.annotation.Resource", AnnotationConfigBeanDefinitionParser.class.getClassLoader());
+			"javax.annotation.Resource", AnnotationConfigUtils.class.getClassLoader());
 
 
 	/**
