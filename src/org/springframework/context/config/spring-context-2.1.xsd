@@ -50,13 +50,6 @@
 	Likewise, this tag does not activate processing of Spring's @Transactional annotation
 	either; consider the use of the <tx:annotation-driven> tag for that purpose.
 			]]></xsd:documentation>
-			<xsd:appinfo>
-				<tool:annotation>
-					<tool:exports type="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
-					<tool:exports type="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor"/>
-					<tool:exports type="org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor"/>
-				</tool:annotation>
-			</xsd:appinfo>
 		</xsd:annotation>
 	</xsd:element>
 
