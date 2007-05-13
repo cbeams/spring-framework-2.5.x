@@ -37,7 +37,7 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class XmlReaderContext extends ReaderContext {
 
-	private final XmlBeanDefinitionReader reader;
+	private final BeanDefinitionReader reader;
 
 	private final NamespaceHandlerResolver namespaceHandlerResolver;
 
@@ -45,7 +45,7 @@ public class XmlReaderContext extends ReaderContext {
 	public XmlReaderContext(
 			Resource resource, ProblemReporter problemReporter,
 			ReaderEventListener eventListener, SourceExtractor sourceExtractor,
-			XmlBeanDefinitionReader reader, NamespaceHandlerResolver namespaceHandlerResolver) {
+			BeanDefinitionReader reader, NamespaceHandlerResolver namespaceHandlerResolver) {
 
 		super(resource, problemReporter, eventListener, sourceExtractor);
 		this.reader = reader;
@@ -63,6 +63,10 @@ public class XmlReaderContext extends ReaderContext {
 
 	public final ResourceLoader getResourceLoader() {
 		return this.reader.getResourceLoader();
+	}
+
+	public final ClassLoader getBeanClassLoader() {
+		return this.reader.getBeanClassLoader();
 	}
 
 	public final NamespaceHandlerResolver getNamespaceHandlerResolver() {

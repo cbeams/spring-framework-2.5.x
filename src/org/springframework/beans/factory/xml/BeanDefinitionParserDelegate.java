@@ -403,7 +403,7 @@ public class BeanDefinitionParserDelegate {
 			this.parseState.push(new BeanEntry(beanName));
 
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
-					parent, className, this.readerContext.getReader().getBeanClassLoader());
+					parent, className, this.readerContext.getBeanClassLoader());
 
 			if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
 				// Spring 2.0 "scope" attribute
@@ -872,7 +872,7 @@ public class BeanDefinitionParserDelegate {
 	private Object buildTypedStringValue(String value, String targetTypeName, Element ele)
 			throws ClassNotFoundException {
 
-		ClassLoader classLoader = this.readerContext.getReader().getBeanClassLoader();
+		ClassLoader classLoader = this.readerContext.getBeanClassLoader();
 		TypedStringValue typedValue = null;
 		if (!StringUtils.hasText(targetTypeName)) {
 			typedValue = new TypedStringValue(value);

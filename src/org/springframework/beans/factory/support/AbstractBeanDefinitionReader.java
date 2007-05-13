@@ -130,10 +130,6 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new DefaultBeanNameGenerator());
 	}
 
-	/**
-	 * Return the BeanNameGenerator to use for anonymous beans
-	 * (without explicit bean name specified).
-	 */
 	public BeanNameGenerator getBeanNameGenerator() {
 		return this.beanNameGenerator;
 	}
