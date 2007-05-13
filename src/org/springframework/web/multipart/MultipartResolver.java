@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,10 +24,10 @@ import javax.servlet.http.HttpServletRequest;
  * Implementations are typically usable both within an application context
  * and standalone.
  *
- * <p>There are two concrete implementations included in Spring:
+ * <p>There is only one concrete implementation included in Spring,
+ * as of Spring 2.1:
  * <ul>
  * <li>{@link org.springframework.web.multipart.commons.CommonsMultipartResolver} for Jakarta Commons FileUpload
- * <li>{@link org.springframework.web.multipart.cos.CosMultipartResolver} for Jason Hunter's COS (com.oreilly.servlet)
  * </ul>
  *
  * <p>There is no default resolver implementation used for Spring
@@ -83,7 +83,6 @@ import javax.servlet.http.HttpServletRequest;
  * @see MultipartHttpServletRequest
  * @see MultipartFile
  * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
- * @see org.springframework.web.multipart.cos.CosMultipartResolver
  * @see org.springframework.web.multipart.support.ByteArrayMultipartFileEditor
  * @see org.springframework.web.multipart.support.StringMultipartFileEditor
  * @see org.springframework.web.servlet.DispatcherServlet
