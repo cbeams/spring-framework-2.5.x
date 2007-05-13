@@ -118,9 +118,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	private final Set ignoredDependencyInterfaces = new HashSet();
 
-	/** Adapted ConstructorResolver for this factory */
-	private final ConstructorResolver constructorResolver = new ConstructorResolverAdapter();
-
 	/** Cache of unfinished FactoryBean instances: FactoryBean name --> BeanWrapper */
 	private final Map factoryBeanInstanceCache = new HashMap();
 
@@ -794,10 +791,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * dependency resolution.
 	 * @param beanName the name of the bean
 	 * @param mbd the bean definition for the bean
+	 * @param ctor the target constructor
 	 * @return BeanWrapper for the new instance
 	 */
 	protected BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd, Constructor ctor) {
-		return this.constructorResolver.autowireConstructor(beanName, mbd, ctor);
+		ConstructorResolver constructorResolver = new ConstructorResolverAdapter();
+		return constructorResolver.autowireConstructor(beanName, mbd, ctor);
 	}
 
 	/**
