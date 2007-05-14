@@ -49,12 +49,12 @@ public class ParameterizedBeanPropertyRowMapper<T> extends AbstractBeanPropertyR
 		initialize(mappedClass);
 	}
 
-    /**
+	/**
 	 * Extract the values for all columns in the current row.
 	 * <p>Utilizes public setters and result set metadata.
 	 * @see java.sql.ResultSetMetaData
 	 */
-    @SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		return (T)doMapRow(rs, rowNumber);
 	}
