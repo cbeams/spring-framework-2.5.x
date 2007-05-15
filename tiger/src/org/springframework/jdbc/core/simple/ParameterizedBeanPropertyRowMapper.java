@@ -45,7 +45,7 @@ public class ParameterizedBeanPropertyRowMapper<T> extends AbstractBeanPropertyR
 	 * Create a new ParameterizedBeanPropertyRowMapper.
 	 * @param mappedClass the class that each row should be mapped to.
 	 */
-	public ParameterizedBeanPropertyRowMapper(Class mappedClass) {
+	public ParameterizedBeanPropertyRowMapper(Class<T> mappedClass) {
 		initialize(mappedClass);
 	}
 
