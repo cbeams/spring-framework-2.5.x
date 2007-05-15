@@ -23,7 +23,9 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -41,6 +43,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Thomas Risberg
  * @since 2.0
  * @see ParameterizedRowMapper
  * @see SimpleJdbcDaoSupport
@@ -48,8 +51,8 @@ import org.springframework.util.ObjectUtils;
  */
 public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	
-	/** The JdbcTemplate that we are wrapping */
-	private final JdbcOperations classicJdbcTemplate;
+	/** The NamedParameterJdbcTemplate that we are wrapping */
+	private final NamedParameterJdbcOperations namedParameterJdbcOperations;
 
 
 	/**
@@ -58,7 +61,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	 * @param dataSource the JDBC DataSource to access
 	 */
 	public SimpleJdbcTemplate(DataSource dataSource) {
-		this.classicJdbcTemplate = new JdbcTemplate(dataSource);
+		this.namedParameterJdbcOperations = new NamedParameterJdbcTemplate(dataSource);
 	}
 
 	/**
@@ -66,7 +69,15 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	 * @param classicJdbcTemplate the classic Spring JdbcTemplate to wrap
 	 */
 	public SimpleJdbcTemplate(JdbcOperations classicJdbcTemplate) {
-		this.classicJdbcTemplate = classicJdbcTemplate;
+		this.namedParameterJdbcOperations = new NamedParameterJdbcTemplate(classicJdbcTemplate);
+	}
+
+	/**
+	 * Create a new SimpleJdbcTemplate for the given Spring NamedParameterJdbcTemplate.
+	 * @param namedParameterJdbcTemplate the Spring NamedParameterJdbcTemplate to wrap
+	 */
+	public SimpleJdbcTemplate(NamedParameterJdbcOperations namedParameterJdbcTemplate) {
+		this.namedParameterJdbcOperations = namedParameterJdbcTemplate;
 	}
 
 	/**
@@ -74,20 +85,55 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	 * less commonly used methods.
 	 */
 	public JdbcOperations getJdbcOperations() {
-		return this.classicJdbcTemplate;
+		return this.namedParameterJdbcOperations.getJdbcOperations();
 	}
-	
-	
+
+	/**
+	 * Expose the Spring NamedParameterJdbcTemplate to allow invocation of
+	 * less commonly used methods.
+	 */
+	public NamedParameterJdbcOperations getNamedParameterJdbcOperations() {
+		return namedParameterJdbcOperations;
+	}
+
+
+	public int queryForInt(String sql, Map args) throws DataAccessException {
+		return getNamedParameterJdbcOperations().queryForInt(sql, args);
+	}
+
+	public int queryForInt(String sql, SqlParameterSource args) throws DataAccessException {
+		return getNamedParameterJdbcOperations().queryForInt(sql, args);
+	}
+
 	public int queryForInt(String sql, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 					getJdbcOperations().queryForInt(sql) :
 					getJdbcOperations().queryForInt(sql, args));
 	}
 
+	public long queryForLong(String sql, Map args) throws DataAccessException {
+		return getNamedParameterJdbcOperations().queryForLong(sql, args);
+	}
+
+	public long queryForLong(String sql, SqlParameterSource args) throws DataAccessException {
+		return getNamedParameterJdbcOperations().queryForLong(sql, args);
+	}
+
 	public long queryForLong(String sql, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 					getJdbcOperations().queryForLong(sql) :
 					getJdbcOperations().queryForLong(sql, args));
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T queryForObject(String sql, Class<T> requiredType, Map args) throws DataAccessException {
+		return (T) getNamedParameterJdbcOperations().queryForObject(sql, args, requiredType);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T queryForObject(String sql, Class<T> requiredType, SqlParameterSource args)
+			throws DataAccessException {
+		return (T) getNamedParameterJdbcOperations().queryForObject(sql, args, requiredType);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -98,17 +144,50 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	}
 
 	@SuppressWarnings("unchecked")
+	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Map args) throws DataAccessException {
+		return (T) getNamedParameterJdbcOperations().queryForObject(sql, args, rm);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
+			throws DataAccessException {
+		return (T) getNamedParameterJdbcOperations().queryForObject(sql, args, rm);
+	}
+
+	@SuppressWarnings("unchecked")
 	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
 		return (T) (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForObject(sql, rm):
 				getJdbcOperations().queryForObject(sql, args, rm));
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Map args) throws DataAccessException {
+		return (List<T>) getNamedParameterJdbcOperations().query(sql, args, rm);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
+			throws DataAccessException {
+		return (List<T>) getNamedParameterJdbcOperations().query(sql, args, rm);
+	}
+
 	@SuppressWarnings("unchecked")
 	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
 		return (List<T>) (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().query(sql, rm) :
 				getJdbcOperations().query(sql, args, rm));
+	}
+
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> queryForMap(String sql, Map args) throws DataAccessException {
+		return getNamedParameterJdbcOperations().queryForMap(sql, args);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> queryForMap(String sql, SqlParameterSource args)
+			throws DataAccessException {
+		return getNamedParameterJdbcOperations().queryForMap(sql, args);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -119,10 +198,29 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	}
 
 	@SuppressWarnings("unchecked")
+	public List<Map<String, Object>> queryForList(String sql, Map args) throws DataAccessException {
+		return getNamedParameterJdbcOperations().queryForList(sql, args);
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Map<String, Object>> queryForList(String sql, SqlParameterSource args)
+			throws DataAccessException {
+		return getNamedParameterJdbcOperations().queryForList(sql, args);
+	}
+
+	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> queryForList(String sql, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForList(sql) :
 				getJdbcOperations().queryForList(sql, args));
+	}
+
+	public int update(String sql, Map args) throws DataAccessException {
+		return getNamedParameterJdbcOperations().update(sql, args);
+	}
+
+	public int update(String sql, SqlParameterSource args) throws DataAccessException {
+		return getNamedParameterJdbcOperations().update(sql, args);
 	}
 
 	public int update(String sql, Object ... args) throws DataAccessException {

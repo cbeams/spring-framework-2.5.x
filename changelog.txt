@@ -9,6 +9,10 @@ Changes in version 2.1 M2 (2007-05-31)
 General
 * added missing websphere_uow_api.jar to -with-dependencies distribution
 
+Package org.springframework.jdbc
+* added ParameterizedBeanPropertyRowMapper, providing automatic mapping between columns and bean properties
+* added named parameter support to SimpleJdbcTemplate
+
 
 Changes in version 2.1 M1 (2007-05-13)
 --------------------------------------
