@@ -63,6 +63,14 @@ public class BeanPropertyRowMapper extends AbstractBeanPropertyRowMapper impleme
 
 
 	/**
+	 * Set the class that each row should be mapped to.
+	 * @param mappedClass the mapped class
+	 */
+	public void setMappedClass(Class mappedClass) {
+		doSetMappedClass(mappedClass);
+	}
+
+	/**
 	 * Extract the values for all columns in the current row.
 	 * <p>Utilizes public setters and result set metadata.
 	 * @see java.sql.ResultSetMetaData

@@ -62,7 +62,7 @@ public abstract class AbstractBeanPropertyRowMapper {
 	 * Set the class that each row should be mapped to.
 	 * @param mappedClass the mapped class
 	 */
-	public synchronized void setMappedClass(Class mappedClass) {
+	protected synchronized void doSetMappedClass(Class mappedClass) {
 		if (this.mappedClass == null) {
 			initialize(mappedClass);
 		}

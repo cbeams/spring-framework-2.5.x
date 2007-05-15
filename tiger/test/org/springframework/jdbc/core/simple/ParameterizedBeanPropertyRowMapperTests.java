@@ -41,11 +41,10 @@ public class ParameterizedBeanPropertyRowMapperTests extends AbstractRowMapperTe
 		ParameterizedBeanPropertyRowMapper<Person> mapper =
 				new ParameterizedBeanPropertyRowMapper<Person>(Person.class);
 		try {
-			mapper.setMappedClass(Long.class);
+			((ParameterizedBeanPropertyRowMapper)mapper).setMappedClass(Long.class);
 			fail("Setting new class should have thrown InvalidDataAccessApiUsageException");
 		}
-		catch (InvalidDataAccessApiUsageException ex) {
-		}
+		catch (InvalidDataAccessApiUsageException ex) {}
 		try {
 			mapper.setMappedClass(Person.class);
 		}
