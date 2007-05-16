@@ -302,7 +302,7 @@ sender.send(message);]]></programlisting>
 			to create email content.</para>
 			<section id="mail-templates-example">
 				<title>A Velocity-based example</title>
-				<para>To use <ulink url="http://jakarta.apache.org/velocity/">Velocity</ulink> to
+				<para>To use <ulink url="http://velocity.apache.org">Velocity</ulink> to
 				create your email template(s), you will need to have the Velocity libraries
 				available on your classpath. You will also need to create one or more Velocity templates
 				for the email content that your application needs. Find below the Velocity

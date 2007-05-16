@@ -205,7 +205,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
   <section id="view-velocity">
     <title>Velocity &amp; FreeMarker</title>
 
-    <para><ulink url="http://jakarta.apache.org/velocity">Velocity</ulink> and
+    <para><ulink url="http://velocity.apache.org">Velocity</ulink> and
     <ulink url="http://www.freemarker.org">FreeMarker</ulink> are two
     templating languages that can both be used as view technologies within
     Spring MVC applications. The languages are quite similar and serve similar

@@ -809,7 +809,7 @@
 			<link href="http://portals.apache.org/pluto/multiproject/portlet-api/apidocs/"/>
 			<link href="http://quartz.sourceforge.net/javadoc/"/>
 			<link href="http://struts.apache.org/struts-doc-1.2.9/api/"/>
-			<link href="http://jakarta.apache.org/velocity/api/"/>
+			<link href="http://velocity.apache.org/engine/devel/apidocs/"/>
 		</javadoc>
 
 	</target>
