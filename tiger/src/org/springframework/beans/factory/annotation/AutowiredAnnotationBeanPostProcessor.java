@@ -37,6 +37,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -61,6 +62,7 @@ import org.springframework.util.ReflectionUtils;
  * do not have to be public.
  *
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 2.1
  * @see #setAutowiredAnnotationType
  * @see Autowired
@@ -76,6 +78,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 
 	private Class<? extends Annotation> autowiredAnnotationType = Autowired.class;
+	
+	private String requiredParameterName = "required";
+	
+	private boolean requiredParameterValue = true;
 
 
 	/**
@@ -92,6 +98,26 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		this.autowiredAnnotationType = autowiredAnnotationType;
 	}
 
+	/**
+	 * Set the name of a parameter of the annotation that specifies
+	 * whether it is required.
+	 * @see #setRequiredParameterValue(boolean)
+	 */
+	public void setRequiredParameterName(String requiredParameterName) {
+		this.requiredParameterName = requiredParameterName;
+	}
+
+	/**
+	 * Set the boolean value that marks a dependency as required 
+	 * <p>For example if using 'required=true' (the default), 
+	 * this value should be <code>true</code>; but if using 
+	 * 'optional=false', this value should be <code>false</code>.
+	 * @see #setRequiredParameterName(String)
+	 */
+	public void setRequiredParameterValue(boolean requiredParameterValue) {
+		this.requiredParameterValue = requiredParameterValue;
+	}
+	
 	/**
 	 * Return the 'autowired' annotation type.
 	 */
@@ -142,18 +168,22 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				final AutowiringMetadata newMetadata = new AutowiringMetadata();
 				ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
 					public void doWith(Field field) {
-						if (field.getAnnotation(getAutowiredAnnotationType()) != null) {
-							newMetadata.addAutowiredMember(field);
+						Annotation annotation = field.getAnnotation(getAutowiredAnnotationType());
+						if (annotation != null) {
+							boolean required = determineRequiredStatus(annotation);
+							newMetadata.addAutowiredMember(field, required);
 						}
 					}
 				});
 				ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
 					public void doWith(Method method) {
-						if (method.getAnnotation(getAutowiredAnnotationType()) != null) {
+						Annotation annotation = method.getAnnotation(getAutowiredAnnotationType());
+						if (annotation != null) {
 							if (method.getParameterTypes().length == 0) {
 								throw new IllegalStateException("Autowired annotation requires at least one argument: " + method);
 							}
-							newMetadata.addAutowiredMember(method);
+							boolean required = determineRequiredStatus(annotation);
+							newMetadata.addAutowiredMember(method, required);
 						}
 					}
 				});
@@ -167,15 +197,38 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	/**
 	 * Obtain a unique bean of the given type.
 	 * @param type the type of the bean
-	 * @return the target bean (never <code>null</code>)
-	 * @throws BeansException if we failed to obtain the bean
+	 * @return the target bean or <code>null</code> if no bean of this type is found
+	 * @throws BeansException if multiple beans are available
 	 */
 	protected Object getBeanOfType(Class type) throws BeansException {
 		if (this.beanFactory == null) {
 			throw new IllegalStateException("No BeanFactory configured - " +
 					"override the getBeanOfType method or specify the 'beanFactory' property");
 		}
-		return BeanFactoryUtils.beanOfTypeIncludingAncestors(this.beanFactory, type);
+		Map beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.beanFactory, type);
+		if (beansOfType.size() > 1) {
+			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
+		}
+		return beansOfType.size() == 0 ? null : beansOfType.values().iterator().next();
+	}
+
+	/**
+	 * Determines if the annotated field or method requires its dependency.
+	 * A required dependency means that autowiring should fail when no beans are 
+	 * found. Otherwise, the autowiring process will simply bypass the field or 
+	 * method when no beans are found.
+	 * @param annotation
+	 * @return true if the annotation indicates that a dependency is required
+	 */
+	protected boolean determineRequiredStatus(Annotation annotation) {
+		try {
+			Method method = ReflectionUtils.findMethod(annotation.annotationType(), requiredParameterName, new Class[] {});
+			return requiredParameterValue == (Boolean) ReflectionUtils.invokeMethod(method, annotation);
+		}
+		catch(Exception e) {
+			// required by default
+			return true;
+		}
 	}
 
 
@@ -186,8 +239,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private Set<AutowiredMember> autowiredMembers = new LinkedHashSet<AutowiredMember>();
 
-		public void addAutowiredMember(Member member) {
-			this.autowiredMembers.add(new AutowiredMember(member));
+		public void addAutowiredMember(Member member, boolean required) {
+			this.autowiredMembers.add(new AutowiredMember(member, required));
 		}
 
 		public void autowireMembers(Object target) throws Throwable {
@@ -207,8 +260,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private final Member member;
 
-		public AutowiredMember(Member member) {
+		private final boolean required;
+		
+		public AutowiredMember(Member member, boolean required) {
 			this.member = member;
+			this.required = required;
 		}
 
 		public void autowireMember(Object bean) throws Throwable {
@@ -219,8 +275,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			if (this.member instanceof Field) {
 				Field field = (Field) this.member;
 				try {
-					Object argument = getBeanOfType(field.getType());
-					field.set(bean, argument);
+					Object argument = resolveDependency(field.getType());
+					if (argument != null) {
+						field.set(bean, argument);
+					}
 				}
 				catch (BeansException ex) {
 					throw new BeanCreationException("Could not autowire field: " + field, ex);
@@ -231,10 +289,16 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				Class[] paramTypes = method.getParameterTypes();
 				Object[] arguments = new Object[paramTypes.length];
 				try {
+					boolean shouldInvoke = true; 
 					for (int i = 0; i < arguments.length; i++) {
-						arguments[i] = getBeanOfType(paramTypes[i]);
+						arguments[i] = resolveDependency(paramTypes[i]);
+						if (arguments[i] == null) {
+							shouldInvoke = false;
+						}
 					}
-					method.invoke(bean, arguments);
+					if (shouldInvoke) {
+						method.invoke(bean, arguments);
+					}
 				}
 				catch (BeansException ex) {
 					throw new BeanCreationException("Could not autowire method: " + method, ex);
@@ -243,6 +307,14 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					throw ex.getTargetException();
 				}
 			}
+		}
+		
+		private Object resolveDependency(Class type) {
+			Object bean = getBeanOfType(type);
+			if (this.required && bean == null) {
+				throw new NoSuchBeanDefinitionException(type, "expected single bean but found 0");
+			}
+			return bean;
 		}
 
 		public boolean equals(Object other) {

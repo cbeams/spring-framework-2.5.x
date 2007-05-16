@@ -16,13 +16,10 @@
 
 package org.springframework.context.annotation;
 
-import org.springframework.stereotype.Component;
-
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
  */
-@Component
 public interface FooService {
 
 	String foo(int id);

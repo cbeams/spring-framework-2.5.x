@@ -38,15 +38,25 @@ import java.lang.annotation.Target;
  * a special case of such a general config method. Such config methods
  * do not have to be public.
  *
+ * <p>In the case of multiple argument methods, the 'required' parameter is 
+ * applicable for all arguments.
+ * 
  * <p>Please do consult the javadoc for the {@link AutowiredAnnotationBeanPostProcessor}
  * class (which, by default, checks for the presence of this annotation).
  *
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 2.1
  * @see AutowiredAnnotationBeanPostProcessor
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD})
 public @interface Autowired {
+
+	/**
+	 * <code>true</code> if the dependency is required.
+	 * <p>Defaults to <code>true</code>.
+	 */
+	boolean required() default true;
 
 }

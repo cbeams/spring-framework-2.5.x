@@ -16,16 +16,23 @@
 
 package org.springframework.beans.factory.annotation;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import junit.framework.TestCase;
 
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  * @author Juergen Hoeller
+ * @author Mark Fisher
  */
 public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
@@ -81,8 +88,268 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(tb, bean.getTestBean4());
 		bf.destroySingletons();
 	}
+	
+	public void testCustomAnnotationRequiredFieldResourceInjection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setAutowiredAnnotationType(MyAutowired.class);
+		bpp.setRequiredParameterName("optional");
+		bpp.setRequiredParameterValue(false);
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("customBean", 
+				new RootBeanDefinition(CustomAnnotationRequiredFieldResourceInjectionBean.class));
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		
+		CustomAnnotationRequiredFieldResourceInjectionBean bean = 
+				(CustomAnnotationRequiredFieldResourceInjectionBean) bf.getBean("customBean");
+		assertSame(tb, bean.getTestBean());
+		bf.destroySingletons();
+	}
 
+	public void testCustomAnnotationRequiredFieldResourceInjectionFailsWhenNoDependencyFound() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setAutowiredAnnotationType(MyAutowired.class);
+		bpp.setRequiredParameterName("optional");
+		bpp.setRequiredParameterValue(false);
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("customBean", 
+				new RootBeanDefinition(CustomAnnotationRequiredFieldResourceInjectionBean.class));
+		
+		try {
+			bf.getBean("customBean");
+			fail("expected BeanCreationException; no dependency available for required field");
+		}
+		catch (BeanCreationException e) {
+			// expected
+		}
+		bf.destroySingletons();
+	}
 
+	public void testCustomAnnotationRequiredFieldResourceInjectionFailsWhenMultipleDependenciesFound() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setAutowiredAnnotationType(MyAutowired.class);
+		bpp.setRequiredParameterName("optional");
+		bpp.setRequiredParameterValue(false);
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("customBean", 
+				new RootBeanDefinition(CustomAnnotationRequiredFieldResourceInjectionBean.class));
+		TestBean tb1 = new TestBean();
+		bf.registerSingleton("testBean1", tb1);
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean2", tb2);
+		
+		try {
+			bf.getBean("customBean");
+			fail("expected BeanCreationException; multiple beans of dependency type available");
+		}
+		catch (BeanCreationException e) {
+			// expected
+		}
+		bf.destroySingletons();
+	}
+	
+	public void testCustomAnnotationRequiredMethodResourceInjection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setAutowiredAnnotationType(MyAutowired.class);
+		bpp.setRequiredParameterName("optional");
+		bpp.setRequiredParameterValue(false);
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("customBean", 
+				new RootBeanDefinition(CustomAnnotationRequiredMethodResourceInjectionBean.class));
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		
+		CustomAnnotationRequiredMethodResourceInjectionBean bean = 
+				(CustomAnnotationRequiredMethodResourceInjectionBean) bf.getBean("customBean");
+		assertSame(tb, bean.getTestBean());
+		bf.destroySingletons();
+	}
+	
+	public void testCustomAnnotationRequiredMethodResourceInjectionFailsWhenNoDependencyFound() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setAutowiredAnnotationType(MyAutowired.class);
+		bpp.setRequiredParameterName("optional");
+		bpp.setRequiredParameterValue(false);
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("customBean", 
+				new RootBeanDefinition(CustomAnnotationRequiredMethodResourceInjectionBean.class));
+		
+		try {
+			bf.getBean("customBean");
+			fail("expected BeanCreationException; no dependency available for required method");
+		}
+		catch (BeanCreationException e) {
+			// expected
+		}
+		bf.destroySingletons();
+	}
+
+	public void testCustomAnnotationRequiredMethodResourceInjectionFailsWhenMultipleDependenciesFound() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setAutowiredAnnotationType(MyAutowired.class);
+		bpp.setRequiredParameterName("optional");
+		bpp.setRequiredParameterValue(false);
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("customBean", 
+				new RootBeanDefinition(CustomAnnotationRequiredMethodResourceInjectionBean.class));
+		TestBean tb1 = new TestBean();
+		bf.registerSingleton("testBean1", tb1);
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean2", tb2);
+		
+		try {
+			bf.getBean("customBean");
+			fail("expected BeanCreationException; multiple beans of dependency type available");
+		}
+		catch (BeanCreationException e) {
+			// expected
+		}
+		bf.destroySingletons();
+	}
+	
+	public void testCustomAnnotationOptionalFieldResourceInjection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setAutowiredAnnotationType(MyAutowired.class);
+		bpp.setRequiredParameterName("optional");
+		bpp.setRequiredParameterValue(false);
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("customBean", 
+				new RootBeanDefinition(CustomAnnotationOptionalFieldResourceInjectionBean.class));
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		
+		CustomAnnotationOptionalFieldResourceInjectionBean bean = 
+				(CustomAnnotationOptionalFieldResourceInjectionBean) bf.getBean("customBean");
+		assertSame(tb, bean.getTestBean3());
+		assertNull(bean.getTestBean());
+		assertNull(bean.getTestBean2());
+		bf.destroySingletons();
+	}
+
+	public void testCustomAnnotationOptionalFieldResourceInjectionWhenNoDependencyFound() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setAutowiredAnnotationType(MyAutowired.class);
+		bpp.setRequiredParameterName("optional");
+		bpp.setRequiredParameterValue(false);
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("customBean", 
+				new RootBeanDefinition(CustomAnnotationOptionalFieldResourceInjectionBean.class));
+		
+		CustomAnnotationOptionalFieldResourceInjectionBean bean = 
+				(CustomAnnotationOptionalFieldResourceInjectionBean) bf.getBean("customBean");
+		assertNull(bean.getTestBean3());
+		assertNull(bean.getTestBean());
+		assertNull(bean.getTestBean2());
+		bf.destroySingletons();
+	}
+
+	public void testCustomAnnotationOptionalFieldResourceInjectionWhenMultipleDependenciesFound() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setAutowiredAnnotationType(MyAutowired.class);
+		bpp.setRequiredParameterName("optional");
+		bpp.setRequiredParameterValue(false);
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("customBean", 
+				new RootBeanDefinition(CustomAnnotationOptionalFieldResourceInjectionBean.class));
+		TestBean tb1 = new TestBean();
+		bf.registerSingleton("testBean1", tb1);
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean2", tb2);
+
+		try {
+			bf.getBean("customBean");
+			fail("expected BeanCreationException; multiple beans of dependency type available");
+		}
+		catch (BeanCreationException e) {
+			// expected
+		}
+		bf.destroySingletons();
+	}
+
+	public void testCustomAnnotationOptionalMethodResourceInjection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setAutowiredAnnotationType(MyAutowired.class);
+		bpp.setRequiredParameterName("optional");
+		bpp.setRequiredParameterValue(false);
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("customBean", 
+				new RootBeanDefinition(CustomAnnotationOptionalMethodResourceInjectionBean.class));
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		
+		CustomAnnotationOptionalMethodResourceInjectionBean bean = 
+				(CustomAnnotationOptionalMethodResourceInjectionBean) bf.getBean("customBean");
+		assertSame(tb, bean.getTestBean3());
+		assertNull(bean.getTestBean());
+		assertNull(bean.getTestBean2());
+		bf.destroySingletons();
+	}
+
+	public void testCustomAnnotationOptionalMethodResourceInjectionWhenNoDependencyFound() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setAutowiredAnnotationType(MyAutowired.class);
+		bpp.setRequiredParameterName("optional");
+		bpp.setRequiredParameterValue(false);
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("customBean", 
+				new RootBeanDefinition(CustomAnnotationOptionalMethodResourceInjectionBean.class));
+		
+		CustomAnnotationOptionalMethodResourceInjectionBean bean = 
+				(CustomAnnotationOptionalMethodResourceInjectionBean) bf.getBean("customBean");
+		assertNull(bean.getTestBean3());
+		assertNull(bean.getTestBean());
+		assertNull(bean.getTestBean2());
+		bf.destroySingletons();
+	}
+
+	public void testCustomAnnotationOptionalMethodResourceInjectionWhenMultipleDependenciesFound() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setAutowiredAnnotationType(MyAutowired.class);
+		bpp.setRequiredParameterName("optional");
+		bpp.setRequiredParameterValue(false);
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("customBean", 
+				new RootBeanDefinition(CustomAnnotationOptionalMethodResourceInjectionBean.class));
+		TestBean tb1 = new TestBean();
+		bf.registerSingleton("testBean1", tb1);
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean2", tb2);
+
+		try {
+			bf.getBean("customBean");
+			fail("expected BeanCreationException; multiple beans of dependency type available");
+		}
+		catch (BeanCreationException e) {
+			// expected
+		}
+		bf.destroySingletons();
+	}
+	
+	
 	public static class ResourceInjectionBean {
 
 		@Autowired
@@ -197,6 +464,61 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		public NestedTestBean getNestedTestBean() {
 			return nestedTestBean;
 		}
+	}
+	
+	public static class CustomAnnotationRequiredFieldResourceInjectionBean {
+		
+		@MyAutowired(optional=false)
+		private TestBean testBean;
+		
+		public TestBean getTestBean() {
+			return testBean;
+		}
+	}
+	
+	public static class CustomAnnotationRequiredMethodResourceInjectionBean {
+
+		private TestBean testBean;
+		
+		@MyAutowired(optional=false)
+		public void setTestBean(TestBean testBean) {
+			this.testBean = testBean;
+		}
+
+		public TestBean getTestBean() {
+			return testBean;
+		}
+	}
+
+	public static class CustomAnnotationOptionalFieldResourceInjectionBean extends ResourceInjectionBean {
+
+		@MyAutowired(optional=true)
+		private TestBean testBean3;
+		
+		public TestBean getTestBean3() {
+			return testBean3;
+		}
+	}
+	
+	public static class CustomAnnotationOptionalMethodResourceInjectionBean extends ResourceInjectionBean {
+
+		private TestBean testBean3;
+		
+		@MyAutowired(optional=true)
+		public void setTestBean3(TestBean testBean3) {
+			this.testBean3 = testBean3;
+		}
+		
+		public TestBean getTestBean3() {
+			return testBean3;
+		}
+	}
+	
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.METHOD, ElementType.FIELD})
+	public static @interface MyAutowired {
+		
+		boolean optional() default false;
 	}
 
 }
