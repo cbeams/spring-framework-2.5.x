@@ -819,6 +819,14 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		}
 	}
 
+	public void testReregisterBeanDefinition() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+		assertTrue(lbf.getBean("testBean") instanceof TestBean);
+		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(NestedTestBean.class));
+		assertTrue(lbf.getBean("testBean") instanceof NestedTestBean);
+	}
+
 	public void testAutowireWithNoDependencies() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());

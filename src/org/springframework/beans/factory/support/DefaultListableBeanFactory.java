@@ -279,7 +279,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (!containsSingleton(beanName) && containsBeanDefinition(beanName)) {
 				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
 				if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
-					Class beanClass = resolveBeanClass(bd, beanName);
+					Class beanClass = resolveBeanClass(bd, beanName, true);
 					if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
 						getBean(FACTORY_BEAN_PREFIX + beanName);
 					}
@@ -330,6 +330,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			this.beanDefinitionNames.add(beanName);
 		}
 		this.beanDefinitionMap.put(beanName, beanDefinition);
+
+		// Remove the merged bean definition for the given bean, if already created.
+		clearMergedBeanDefinition(beanName);
 
 		// Remove corresponding bean from singleton cache, if any. Shouldn't usually
 		// be necessary, rather just meant for overriding a context's default beans
