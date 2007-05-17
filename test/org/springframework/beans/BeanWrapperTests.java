@@ -265,21 +265,11 @@ public class BeanWrapperTests extends TestCase {
 		BooleanTestBean tb = new BooleanTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 
-		try {
-			bw.setPropertyValue("bool2", "true");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("bool2", "true");
 		assertTrue("Correct bool2 value", Boolean.TRUE.equals(bw.getPropertyValue("bool2")));
 		assertTrue("Correct bool2 value", tb.getBool2().booleanValue());
 
-		try {
-			bw.setPropertyValue("bool2", "false");
-		}
-		catch (BeansException ex) {
-			fail("Should not throw BeansException: " + ex.getMessage());
-		}
+		bw.setPropertyValue("bool2", "false");
 		assertTrue("Correct bool2 value", Boolean.FALSE.equals(bw.getPropertyValue("bool2")));
 		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
 
