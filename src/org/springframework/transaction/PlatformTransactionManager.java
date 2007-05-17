@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,16 @@ package org.springframework.transaction;
  * declarative transaction demarcation through AOP.
  *
  * <p>For implementors, it is recommended to derive from the provided
- * AbstractPlatformTransactionManager class, which pre-implements the defined
- * propagation behavior and completely handles transaction synchronization.
- * Subclasses have to implement template methods for specific states of the
- * underlying transaction, for example: begin, suspend, resume, commit.
+ * {@link org.springframework.transaction.support.AbstractPlatformTransactionManager}
+ * class, which pre-implements the defined propagation behavior and takes care
+ * of transaction synchronization handling. Subclasses have to implement
+ * template methods for specific states of the underlying transaction,
+ * for example: begin, suspend, resume, commit.
  *
  * <p>The default implementations of this strategy interface are
- * JtaTransactionManager and DataSourceTransactionManager, which can serve
- * as implementation guide for other transaction strategies.
+ * {@link org.springframework.transaction.jta.JtaTransactionManager} and
+ * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager},
+ * which can serve as an implementation guide for other transaction strategies.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -38,9 +40,6 @@ package org.springframework.transaction;
  * @see org.springframework.transaction.support.TransactionTemplate
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
- * @see org.springframework.transaction.support.AbstractPlatformTransactionManager
- * @see org.springframework.transaction.jta.JtaTransactionManager
- * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  */
 public interface PlatformTransactionManager {
 
@@ -67,8 +66,7 @@ public interface PlatformTransactionManager {
 	 * @see TransactionDefinition#getTimeout
 	 * @see TransactionDefinition#isReadOnly
 	 */
-	TransactionStatus getTransaction(TransactionDefinition definition)
-	    throws TransactionException;
+	TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException;
 
 	/**
 	 * Commit the given transaction, with regard to its status. If the transaction

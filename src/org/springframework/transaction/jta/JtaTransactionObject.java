@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.SmartTransactionObject;
 
 /**
- * JTA transaction object, representing a UserTransaction.
- * Used as transaction object by JtaTransactionManager.
+ * JTA transaction object, representing a {@link javax.transaction.UserTransaction}.
+ * Used as transaction object by Spring's {@link JtaTransactionManager}.
  *
  * <p>Note: This is an SPI class, not intended to be used by applications.
  *
@@ -51,8 +51,8 @@ public class JtaTransactionObject implements SmartTransactionObject {
 	/**
 	 * Return the JTA UserTransaction object for the current transaction.
 	 */
-	public UserTransaction getUserTransaction() {
-		return userTransaction;
+	public final UserTransaction getUserTransaction() {
+		return this.userTransaction;
 	}
 
 
@@ -61,7 +61,8 @@ public class JtaTransactionObject implements SmartTransactionObject {
 	 */
 	public boolean isRollbackOnly() {
 		try {
-			return (getUserTransaction().getStatus() == Status.STATUS_MARKED_ROLLBACK);
+			return (this.userTransaction != null &&
+					this.userTransaction.getStatus() == Status.STATUS_MARKED_ROLLBACK);
 		}
 		catch (SystemException ex) {
 			throw new TransactionSystemException("JTA failure on getStatus", ex);
