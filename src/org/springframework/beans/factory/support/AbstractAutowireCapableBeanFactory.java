@@ -456,13 +456,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mbd the merged bean definition to determine the type for
 	 * @return the type of the bean, or <code>null</code> if not predictable
 	 */
-	protected Class predictBeanType(String beanName, RootBeanDefinition mbd) {
+	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, boolean typeMatchOnly) {
 		Class beanClass = null;
 		if (mbd.getFactoryMethodName() != null) {
-			beanClass = getTypeForFactoryMethod(beanName, mbd);
+			beanClass = getTypeForFactoryMethod(beanName, mbd, typeMatchOnly);
 		}
 		else {
-			beanClass = resolveBeanClass(mbd, beanName);
+			beanClass = resolveBeanClass(mbd, beanName, typeMatchOnly);
 		}
 		// Apply SmartInstantiationAwareBeanPostProcessors to predict the
 		// eventual type after a before-instantiation shortcut.
@@ -493,7 +493,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @return the type for the bean if determinable, or <code>null</code> else
 	 * @see #createBean
 	 */
-	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd) {
+	protected Class getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd, boolean typeMatchOnly) {
 		Class factoryClass = null;
 		boolean isStatic = true;
 
@@ -504,7 +504,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		else {
 			// Check declared factory method return type on bean class.
-			factoryClass = resolveBeanClass(mbd, beanName);
+			factoryClass = resolveBeanClass(mbd, beanName, typeMatchOnly);
 		}
 
 		if (factoryClass == null) {

@@ -99,6 +99,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	/** ClassLoader to resolve bean class names with, if necessary */
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	/** ClassLoader to temporarily resolve bean class names with, if necessary */
+	private ClassLoader tempClassLoader;
+
 	/** Whether to cache bean metadata or rather reobtain it for every access */
 	private boolean cacheBeanMetadata = true;
 
@@ -428,7 +431,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			}
 
 			RootBeanDefinition mbd = getMergedBeanDefinition(beanName, false);
-			Class beanClass = predictBeanType(beanName, mbd);
+			Class beanClass = predictBeanType(beanName, mbd, true);
 
 			if (beanClass == null) {
 				return false;
@@ -475,7 +478,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			}
 
 			RootBeanDefinition mbd = getMergedBeanDefinition(beanName, false);
-			Class beanClass = predictBeanType(beanName, mbd);
+			Class beanClass = predictBeanType(beanName, mbd, false);
 
 			// Check bean class whether we're dealing with a FactoryBean.
 			if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
@@ -557,6 +560,14 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 	public ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
+	}
+
+	public void setTempClassLoader(ClassLoader tempClassLoader) {
+		this.tempClassLoader = tempClassLoader;
+	}
+
+	public ClassLoader getTempClassLoader() {
+		return this.tempClassLoader;
 	}
 
 	public void setCacheBeanMetadata(boolean cacheBeanMetadata) {
@@ -1050,6 +1061,15 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	/**
+	 * Remove the merged bean definition for the specified bean,
+	 * recreating it on next access.
+	 * @param beanName the bean name to clear the merged definition for
+	 */
+	protected void clearMergedBeanDefinition(String beanName) {
+		this.mergedBeanDefinitions.remove(beanName);
+	}
+
+	/**
 	 * Resolve the bean class for the specified bean definition,
 	 * resolving a bean class name into a Class reference (if necessary)
 	 * and storing the resolved Class in the bean definition for further use.
@@ -1058,11 +1078,30 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @return the resolved bean class (or <code>null</code> if none)
 	 * @throws CannotLoadBeanClassException if we failed to load the class
 	 */
-	protected Class resolveBeanClass(RootBeanDefinition mbd, String beanName) throws CannotLoadBeanClassException {
-		if (mbd.hasBeanClass()) {
-			return mbd.getBeanClass();
-		}
+	protected Class resolveBeanClass(RootBeanDefinition mbd, String beanName) {
+		return resolveBeanClass(mbd, beanName, false);
+	}
+
+	/**
+	 * Resolve the bean class for the specified bean definition,
+	 * resolving a bean class name into a Class reference (if necessary)
+	 * and storing the resolved Class in the bean definition for further use.
+	 * @param mbd the merged bean definition to determine the class for
+	 * @param beanName the name of the bean (for error handling purposes)
+	 * @param typeMatchOnly whether the predicated is only used for internal
+	 * type matching purposes (i.e. never exposed to application code)
+	 * @return the resolved bean class (or <code>null</code> if none)
+	 * @throws CannotLoadBeanClassException if we failed to load the class
+	 */
+	protected Class resolveBeanClass(RootBeanDefinition mbd, String beanName, boolean typeMatchOnly)
+			throws CannotLoadBeanClassException {
 		try {
+			if (mbd.hasBeanClass()) {
+				return mbd.getBeanClass();
+			}
+			if (typeMatchOnly && getTempClassLoader() != null) {
+				return ClassUtils.forName(mbd.getBeanClassName(), getTempClassLoader());
+			}
 			return mbd.resolveBeanClass(getBeanClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
@@ -1091,7 +1130,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	protected boolean isBeanClassMatch(String beanName, RootBeanDefinition mbd, Class targetType)
 			throws CannotLoadBeanClassException {
 
-		Class beanClass = resolveBeanClass(mbd, beanName);
+		Class beanClass = resolveBeanClass(mbd, beanName, true);
 		return (beanClass != null && targetType.isAssignableFrom(beanClass));
 	}
 
@@ -1106,13 +1145,15 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * To be overridden in subclasses, applying more sophisticated type detection.
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition to determine the type for
+	 * @param typeMatchOnly whether the predicated is only used for internal
+	 * type matching purposes (i.e. never exposed to application code)
 	 * @return the type of the bean, or <code>null</code> if not predictable
 	 */
-	protected Class predictBeanType(String beanName, RootBeanDefinition mbd) {
+	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, boolean typeMatchOnly) {
 		if (mbd.getFactoryMethodName() != null) {
 			return null;
 		}
-		return resolveBeanClass(mbd, beanName);
+		return resolveBeanClass(mbd, beanName, typeMatchOnly);
 	}
 
 	/**

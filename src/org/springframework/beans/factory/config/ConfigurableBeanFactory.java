@@ -88,6 +88,22 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	ClassLoader getBeanClassLoader();
 
 	/**
+	 * Specify a temporary ClassLoader to use for type matching purposes.
+	 * Default is none, simply using the standard bean ClassLoader.
+	 * <p>A temporary ClassLoader is usually just specified if
+	 * <i>load-time weaving</i> is involved, to make sure that actual bean
+	 * classes are loaded as lazily as possible. The temporary loader is
+	 * then removed once the BeanFactory completes its bootstrap phase.
+	 */
+	void setTempClassLoader(ClassLoader tempClassLoader);
+
+	/**
+	 * Return the temporary ClassLoader to use for type matching purposes,
+	 * if any.
+	 */
+	ClassLoader getTempClassLoader();
+
+	/**
 	 * Set whether to cache bean metadata such as given bean definitions
 	 * (in merged fashion) and resolved bean classes. Default is on.
 	 * <p>Turn this flag off to enable hot-refreshing of bean definition objects
