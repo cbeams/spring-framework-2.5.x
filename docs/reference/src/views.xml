@@ -152,9 +152,9 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
       <para>As you can see, there are five files containing definitions, which
       are all located in the <filename class="directory">'WEB-INF/defs'</filename> directory. At initialization of the
       <interfacename>WebApplicationContext</interfacename>, the files will be loaded and the
-      definitionsfactory defined by the
-      <literal>factoryClass</literal>-property is initialized. After that has
-      been done, the tiles includes in the definition files can be used as
+      definitions factory defined by the
+      <literal>factoryClass</literal> property is initialized. After that has
+      been done, the Tiles includes in the definition files can be used as
       views within your Spring web application. To be able to use the views
       you have to have a <interfacename>ViewResolver</interfacename> just as with any
       other view technology used with Spring. Below you can find two
@@ -227,11 +227,11 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       application. It is of course assumed that you already have the
       <filename class="libraryfile">spring.jar</filename> in your
       <filename class="directory">'WEB-INF/lib'</filename> directory too!
-      The latest stable velocity, freemarker and commons
-      collections jars are supplied with the Spring framework and can be
+      The latest stable Velocity, FreeMarker and Commons
+      Collections jars are supplied with the Spring framework and can be
       copied from the relevant <filename class="libraryfile">/lib/</filename>
-      sub-directories. If you make use of Spring's dateToolAttribute or
-      numberToolAttribute in your Velocity views, you will also need to include the
+      sub-directories. If you make use of Spring's 'dateToolAttribute' or
+      'numberToolAttribute' in your Velocity views, you will also need to include the
       <filename class="libraryfile">velocity-tools-generic-1.x.jar</filename></para>
     </section>
 
