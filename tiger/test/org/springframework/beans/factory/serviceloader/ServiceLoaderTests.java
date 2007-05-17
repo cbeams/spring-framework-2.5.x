@@ -38,7 +38,7 @@ public class ServiceLoaderTests extends TestCase {
 		}
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceLoaderFactoryBean.class);
-		bd.getPropertyValues().addPropertyValue("serviceClass", DocumentBuilderFactory.class.getName());
+		bd.getPropertyValues().addPropertyValue("serviceType", DocumentBuilderFactory.class.getName());
 		bf.registerBeanDefinition("service", bd);
 		ServiceLoader serviceLoader = (ServiceLoader) bf.getBean("service");
 		assertTrue(serviceLoader.iterator().next() instanceof DocumentBuilderFactory);
@@ -50,7 +50,7 @@ public class ServiceLoaderTests extends TestCase {
 		}
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceFactoryBean.class);
-		bd.getPropertyValues().addPropertyValue("serviceClass", DocumentBuilderFactory.class.getName());
+		bd.getPropertyValues().addPropertyValue("serviceType", DocumentBuilderFactory.class.getName());
 		bf.registerBeanDefinition("service", bd);
 		assertTrue(bf.getBean("service") instanceof DocumentBuilderFactory);
 	}
@@ -61,7 +61,7 @@ public class ServiceLoaderTests extends TestCase {
 		}
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceListFactoryBean.class);
-		bd.getPropertyValues().addPropertyValue("serviceClass", DocumentBuilderFactory.class.getName());
+		bd.getPropertyValues().addPropertyValue("serviceType", DocumentBuilderFactory.class.getName());
 		bf.registerBeanDefinition("service", bd);
 		List serviceList = (List) bf.getBean("service");
 		assertTrue(serviceList.get(0) instanceof DocumentBuilderFactory);

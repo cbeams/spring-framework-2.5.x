@@ -21,6 +21,7 @@ import java.util.ServiceLoader;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Abstract base class for FactoryBeans operating on the
@@ -33,23 +34,23 @@ import org.springframework.util.Assert;
 public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFactoryBean
 		implements BeanClassLoaderAware {
 
-	private Class serviceClass;
+	private Class serviceType;
 
-	private ClassLoader beanClassLoader;
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	/**
-	 * Specify the desired service class.
+	 * Specify the desired service type (typically the service's public API).
 	 */
-	public void setServiceClass(Class serviceClass) {
-		this.serviceClass = serviceClass;
+	public void setServiceType(Class serviceType) {
+		this.serviceType = serviceType;
 	}
 
 	/**
-	 * Return the desired service class.
+	 * Return the desired service type.
 	 */
-	public Class getServiceClass() {
-		return this.serviceClass;
+	public Class getServiceType() {
+		return this.serviceType;
 	}
 
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
@@ -62,8 +63,8 @@ public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFact
 	 * @return the object to expose
 	 */
 	protected Object createInstance() {
-		Assert.notNull(getServiceClass(), "Property 'serviceClass' is required");
-		return getObjectToExpose(ServiceLoader.load(getServiceClass(), this.beanClassLoader));
+		Assert.notNull(getServiceType(), "Property 'serviceType' is required");
+		return getObjectToExpose(ServiceLoader.load(getServiceType(), this.beanClassLoader));
 	}
 
 	/**

@@ -36,13 +36,13 @@ public class ServiceFactoryBean extends AbstractServiceLoaderBasedFactoryBean im
 		Iterator it = serviceLoader.iterator();
 		if (!it.hasNext()) {
 			throw new IllegalStateException(
-					"ServiceLoader could not find service for class [" + getServiceClass() + "]");
+					"ServiceLoader could not find service for type [" + getServiceType() + "]");
 		}
 		return it.next();
 	}
 
 	public Class getObjectType() {
-		return getServiceClass();
+		return getServiceType();
 	}
 
 }
