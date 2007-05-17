@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,22 +246,27 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 
 		// Fetch cache region: If none with the given name exists,
 		// create one on the fly.
+		Cache rawCache = null;
 		if (this.cacheManager.cacheExists(this.cacheName)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using existing EHCache cache region '" + this.cacheName + "'");
 			}
-			this.cache = this.cacheManager.getEhcache(this.cacheName);
+			rawCache = this.cacheManager.getCache(this.cacheName);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Creating new EHCache cache region '" + this.cacheName + "'");
 			}
-			Cache rawCache = createCache();
+			rawCache = createCache();
 			this.cacheManager.addCache(rawCache);
-			Ehcache decoratedCache = decorateCache(rawCache);
-			this.cacheManager.replaceCacheWithDecoratedCache(rawCache, decoratedCache);
-			this.cache = decoratedCache;
 		}
+
+		// Decorate cache if necessary.
+		Ehcache decoratedCache = decorateCache(rawCache);
+		if (decoratedCache != rawCache) {
+			this.cacheManager.replaceCacheWithDecoratedCache(rawCache, decoratedCache);
+		}
+		this.cache = decoratedCache;
 	}
 
 	/**
