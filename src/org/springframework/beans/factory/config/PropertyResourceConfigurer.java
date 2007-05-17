@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Properties;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.core.io.support.PropertiesLoaderSupport;
 import org.springframework.util.ObjectUtils;
 
@@ -50,7 +51,7 @@ import org.springframework.util.ObjectUtils;
  * @see #convertPropertyValue
  */
 public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
-		implements BeanFactoryPostProcessor, Ordered {
+		implements BeanFactoryPostProcessor, PriorityOrdered {
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 

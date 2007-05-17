@@ -3,12 +3,23 @@
 
 <beans>
 
-	<bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="properties">
 			<props>
 				<prop key="testBean.name">Rob Harrop</prop>
 				<prop key="testBean.age">100</prop>
+				<prop key="scopeName">myScope</prop>
 			</props>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+		<property name="scopes">
+			<map>
+				<entry key="${scopeName}">
+					<bean class="org.springframework.beans.factory.config.SimpleMapScope"/>
+				</entry>
+			</map>
 		</property>
 	</bean>
 
@@ -22,7 +33,7 @@
 		</property>
 	</bean>
 
-	<bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+	<bean id="testBean" class="org.springframework.jmx.JmxTestBean" scope="myScope">
 		<property name="name">
 			<value>${testBean.name}</value>
 		</property>
