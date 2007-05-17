@@ -17,13 +17,17 @@
 package org.springframework.transaction.jta;
 
 import javax.transaction.RollbackException;
+import javax.transaction.Status;
+import javax.transaction.UserTransaction;
 
 import com.ibm.wsspi.uow.UOWAction;
 import com.ibm.wsspi.uow.UOWException;
 import com.ibm.wsspi.uow.UOWManager;
 import junit.framework.TestCase;
+import org.easymock.MockControl;
 
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.TransactionDefinition;
@@ -37,6 +41,61 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Juergen Hoeller
  */
 public class WebSphereUowTransactionManagerTests extends TestCase {
+
+	public void testUowManagerFoundInJndi() {
+		MockUOWManager manager = new MockUOWManager();
+		ExpectedLookupTemplate jndiTemplate =
+				new ExpectedLookupTemplate(WebSphereUowTransactionManager.DEFAULT_UOW_MANAGER_NAME, manager);
+		WebSphereUowTransactionManager ptm = new WebSphereUowTransactionManager();
+		ptm.setJndiTemplate(jndiTemplate);
+		ptm.afterPropertiesSet();
+
+		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+		assertEquals("result", ptm.execute(definition, new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				return "result";
+			}
+		}));
+
+		assertEquals(UOWManager.UOW_TYPE_GLOBAL_TRANSACTION, manager.getUOWType());
+		assertFalse(manager.getJoined());
+		assertFalse(manager.getRollbackOnly());
+	}
+
+	public void testUowManagerAndUserTransactionFoundInJndi() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut.begin();
+		utControl.setVoidCallable(1);
+		ut.commit();
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		MockUOWManager manager = new MockUOWManager();
+		ExpectedLookupTemplate jndiTemplate = new ExpectedLookupTemplate();
+		jndiTemplate.addObject(WebSphereUowTransactionManager.DEFAULT_USER_TRANSACTION_NAME, ut);
+		jndiTemplate.addObject(WebSphereUowTransactionManager.DEFAULT_UOW_MANAGER_NAME, manager);
+		WebSphereUowTransactionManager ptm = new WebSphereUowTransactionManager();
+		ptm.setJndiTemplate(jndiTemplate);
+		ptm.afterPropertiesSet();
+
+		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+		TransactionStatus ts = ptm.getTransaction(definition);
+		ptm.commit(ts);
+		assertEquals("result", ptm.execute(definition, new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				return "result";
+			}
+		}));
+
+		assertEquals(UOWManager.UOW_TYPE_GLOBAL_TRANSACTION, manager.getUOWType());
+		assertFalse(manager.getJoined());
+		assertFalse(manager.getRollbackOnly());
+	}
 
 	public void testPropagationMandatoryFailsInCaseOfNoExistingTransaction() {
 		MockUOWManager manager = new MockUOWManager();

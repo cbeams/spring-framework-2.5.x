@@ -137,9 +137,9 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 
 
 	public void afterPropertiesSet() throws TransactionSystemException {
-		super.afterPropertiesSet();
+		initUserTransactionAndTransactionManager();
 
-		// Fetch JTA UserTransaction from JNDI, if necessary.
+		// Fetch UOWManager handle from JNDI, if necessary.
 		if (this.uowManager == null) {
 			if (this.uowManagerName != null) {
 				this.uowManager = lookupUowManager(this.uowManagerName);
@@ -160,8 +160,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 	 * @see #setJndiTemplate
 	 * @see #setUowManagerName
 	 */
-	protected UOWManager lookupUowManager(String uowManagerName)
-			throws TransactionSystemException {
+	protected UOWManager lookupUowManager(String uowManagerName) throws TransactionSystemException {
 		try {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Retrieving WebSphere UOWManager from JNDI location [" + uowManagerName + "]");
@@ -172,6 +171,13 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 			throw new TransactionSystemException(
 					"WebSphere UOWManager is not available at JNDI location [" + uowManagerName + "]", ex);
 		}
+	}
+
+	/**
+	 * Registers the synchronizations as interposed JTA Synchronization on the UOWManager.
+	 */
+	protected void doRegisterAfterCompletionWithJtaTransaction(JtaTransactionObject txObject, List synchronizations) {
+		this.uowManager.registerInterposedSynchronization(new JtaAfterCompletionSynchronization(synchronizations));
 	}
 
 

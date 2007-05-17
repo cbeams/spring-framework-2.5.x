@@ -426,6 +426,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	public void afterPropertiesSet() throws TransactionSystemException {
 		initUserTransactionAndTransactionManager();
+		checkUserTransactionAndTransactionManager();
 		initTransactionSynchronizationRegistry();
 	}
 
@@ -470,7 +471,14 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		if (this.userTransaction == null && this.transactionManager != null) {
 			this.userTransaction = buildUserTransaction(this.transactionManager);
 		}
+	}
 
+	/**
+	 * Check the UserTransaction as well as the TransactionManager handle,
+	 * assuming standard JTA requirements.
+	 * @throws IllegalStateException if no sufficient handles are available
+	 */
+	protected void checkUserTransactionAndTransactionManager() throws IllegalStateException {
 		// We at least need the JTA UserTransaction.
 		if (this.userTransaction != null) {
 			if (logger.isInfoEnabled()) {
@@ -478,9 +486,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 		else {
-			throw new IllegalStateException(
-					"Either 'userTransaction' or 'userTransactionName' or 'transactionManager' " +
-					"or 'transactionManagerName' must be specified");
+			throw new IllegalStateException("No JTA UserTransaction available - specify either " +
+					"'userTransaction' or 'userTransactionName' or 'transactionManager' or 'transactionManagerName'");
 		}
 
 		// For transaction suspension, the JTA TransactionManager is necessary too.
@@ -782,6 +789,10 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	protected Object doGetTransaction() {
 		UserTransaction ut = getUserTransaction();
+		if (ut == null) {
+			throw new CannotCreateTransactionException("No JTA UserTransaction available - " +
+					"programmatic PlatformTransactionManager.getTransaction usage not supported");
+		}
 		if (!this.cacheUserTransaction) {
 			ut = lookupUserTransaction(
 					this.userTransactionName != null ? this.userTransactionName : DEFAULT_USER_TRANSACTION_NAME);
@@ -1071,8 +1082,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see javax.transaction.Transaction#registerSynchronization
 	 * @see javax.transaction.TransactionSynchronizationRegistry#registerInterposedSynchronization
 	 */
-	protected void doRegisterAfterCompletionWithJtaTransaction(
-			JtaTransactionObject txObject, List synchronizations)
+	protected void doRegisterAfterCompletionWithJtaTransaction(JtaTransactionObject txObject, List synchronizations)
 			throws RollbackException, SystemException {
 
 		if (this.transactionSynchronizationRegistry != null) {
