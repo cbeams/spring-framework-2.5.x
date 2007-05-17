@@ -57,6 +57,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
+import org.springframework.core.OverridingClassLoader;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -121,6 +123,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
 	public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
+
+	/**
+	 * Name of the LoadTimeWeaver bean in the factory. If such a bean is supplied,
+	 * the context will use a temporary ClassLoader for type matching, in order
+	 * to allow the LoadTimeWeaver to process all actual bean classes.
+	 * @see org.springframework.instrument.classloading.LoadTimeWeaver
+	 */
+	public static final String LOAD_TIME_WEAVER_BEAN_NAME = "loadTimeWeaver";
 
 
 	static {
@@ -348,11 +358,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Check for listener beans and register them.
 				registerListeners();
 
-				// Instantiate singletons this late to allow them to access the message source.
-				beanFactory.preInstantiateSingletons();
+				// Instantiate all remaining (non-lazy-init) singletons.
+				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
-				publishEvent(new ContextRefreshedEvent(this));
+				finishRefresh();
 			}
 
 			catch (BeansException ex) {
@@ -409,6 +419,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Tell the internal bean factory to use the context's class loader.
 		beanFactory.setBeanClassLoader(getClassLoader());
 
+		// Set a temporary ClassLoader for type matching, if necessary.
+		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
+			OverridingClassLoader overridingClassLoader = new OverridingClassLoader(getClassLoader());
+			overridingClassLoader.excludePackage("org.springframework");
+			beanFactory.setTempClassLoader(overridingClassLoader);
+		}
+
 		// Populate the bean factory with context-specific resource editors.
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
 
@@ -433,7 +450,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Instantiate and invoke all registered BeanFactoryPostProcessor beans,
 	 * respecting explicit order if given.
-	 * Must be called before singleton instantiation.
+	 * <p>Must be called before singleton instantiation.
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		// Invoke factory processors registered with the context instance.
@@ -444,32 +461,55 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let the bean factory post-processors apply to them!
-		String[] factoryProcessorNames =
+		String[] postProcessorNames =
 				beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
 
-		// Separate between BeanFactoryPostProcessors that implement the Ordered
-		// interface and those that do not.
-		List orderedFactoryProcessors = new ArrayList();
-		List nonOrderedFactoryProcessorNames = new ArrayList();
-		for (int i = 0; i < factoryProcessorNames.length; i++) {
-			if (isTypeMatch(factoryProcessorNames[i], Ordered.class)) {
-				orderedFactoryProcessors.add(beanFactory.getBean(factoryProcessorNames[i]));
+		// Separate between BeanFactoryPostProcessors that implement PriorityOrdered,
+		// Ordered, and the rest.
+		List priorityOrderedPostProcessors = new ArrayList();
+		List orderedPostProcessorNames = new ArrayList();
+		List nonOrderedPostProcessorNames = new ArrayList();
+		for (int i = 0; i < postProcessorNames.length; i++) {
+			if (isTypeMatch(postProcessorNames[i], PriorityOrdered.class)) {
+				priorityOrderedPostProcessors.add(beanFactory.getBean(postProcessorNames[i]));
+			}
+			else if (isTypeMatch(postProcessorNames[i], Ordered.class)) {
+				orderedPostProcessorNames.add(postProcessorNames[i]);
 			}
 			else {
-				nonOrderedFactoryProcessorNames.add(factoryProcessorNames[i]);
+				nonOrderedPostProcessorNames.add(postProcessorNames[i]);
 			}
 		}
 
-		// First, invoke the BeanFactoryPostProcessors that implement Ordered.
-		Collections.sort(orderedFactoryProcessors, new OrderComparator());
-		for (Iterator it = orderedFactoryProcessors.iterator(); it.hasNext();) {
-			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
-			factoryProcessor.postProcessBeanFactory(beanFactory);
+		// First, invoke the BeanFactoryPostProcessors that implement PriorityOrdered.
+		Collections.sort(priorityOrderedPostProcessors, new OrderComparator());
+		invokeBeanFactoryPostProcessors(beanFactory, priorityOrderedPostProcessors);
+
+		// Next, invoke the BeanFactoryPostProcessors that implement Ordered.
+		List orderedPostProcessors = new ArrayList();
+		for (Iterator it = orderedPostProcessorNames.iterator(); it.hasNext();) {
+			String postProcessorName = (String) it.next();
+			orderedPostProcessors.add(getBean(postProcessorName));
 		}
-		// Second, invoke all other BeanFactoryPostProcessors, one by one.
-		for (Iterator it = nonOrderedFactoryProcessorNames.iterator(); it.hasNext();) {
-			String factoryProcessorName = (String) it.next();
-			((BeanFactoryPostProcessor) getBean(factoryProcessorName)).postProcessBeanFactory(beanFactory);
+		Collections.sort(orderedPostProcessors, new OrderComparator());
+		invokeBeanFactoryPostProcessors(beanFactory, orderedPostProcessors);
+
+		// Finally, invoke all other BeanFactoryPostProcessors.
+		List nonOrderedPostProcessors = new ArrayList();
+		for (Iterator it = nonOrderedPostProcessorNames.iterator(); it.hasNext();) {
+			String postProcessorName = (String) it.next();
+			nonOrderedPostProcessors.add(getBean(postProcessorName));
+		}
+		invokeBeanFactoryPostProcessors(beanFactory, nonOrderedPostProcessors);
+	}
+
+	/**
+	 * Invoke the given BeanFactoryPostProcessor beans.
+	 */
+	private void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory, List postProcessors) {
+		for (Iterator it = postProcessors.iterator(); it.hasNext();) {
+			BeanFactoryPostProcessor postProcessor = (BeanFactoryPostProcessor) it.next();
+			postProcessor.postProcessBeanFactory(beanFactory);
 		}
 	}
 
@@ -479,36 +519,60 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Must be called before any instantiation of application beans.
 	 */
 	protected void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) {
-		String[] processorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
+		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
 		// Register BeanPostProcessorChecker that logs an info message when
 		// a bean is created during BeanPostProcessor instantiation, i.e. when
 		// a bean is not eligible for getting processed by all BeanPostProcessors.
-		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + processorNames.length;
+		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + postProcessorNames.length;
 		beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, beanProcessorTargetCount));
 
-		// Separate between BeanPostProcessors that implement the Ordered
-		// interface and those that do not.
-		List orderedProcessors = new ArrayList();
-		List nonOrderedProcessorNames = new ArrayList();
-		for (int i = 0; i < processorNames.length; i++) {
-			if (isTypeMatch(processorNames[i], Ordered.class)) {
-				orderedProcessors.add(getBean(processorNames[i]));
+		// Separate between BeanPostProcessors that implement PriorityOrdered,
+		// Ordered, and the rest.
+		List priorityOrderedPostProcessors = new ArrayList();
+		List orderedPostProcessorNames = new ArrayList();
+		List nonOrderedPostProcessorNames = new ArrayList();
+		for (int i = 0; i < postProcessorNames.length; i++) {
+			if (isTypeMatch(postProcessorNames[i], PriorityOrdered.class)) {
+				priorityOrderedPostProcessors.add(beanFactory.getBean(postProcessorNames[i]));
+			}
+			else if (isTypeMatch(postProcessorNames[i], Ordered.class)) {
+				orderedPostProcessorNames.add(postProcessorNames[i]);
 			}
 			else {
-				nonOrderedProcessorNames.add(processorNames[i]);
+				nonOrderedPostProcessorNames.add(postProcessorNames[i]);
 			}
 		}
 
-		// First, register the BeanPostProcessors that implement Ordered.
-		Collections.sort(orderedProcessors, new OrderComparator());
-		for (Iterator it = orderedProcessors.iterator(); it.hasNext();) {
-			beanFactory.addBeanPostProcessor((BeanPostProcessor) it.next());
+		// First, invoke the BeanPostProcessors that implement PriorityOrdered.
+		Collections.sort(priorityOrderedPostProcessors, new OrderComparator());
+		registerBeanPostProcessors(beanFactory, priorityOrderedPostProcessors);
+
+		// Next, invoke the BeanPostProcessors that implement Ordered.
+		List orderedPostProcessors = new ArrayList();
+		for (Iterator it = orderedPostProcessorNames.iterator(); it.hasNext();) {
+			String postProcessorName = (String) it.next();
+			orderedPostProcessors.add(getBean(postProcessorName));
 		}
-		// Second, register all other BeanPostProcessors, one by one.
-		for (Iterator it = nonOrderedProcessorNames.iterator(); it.hasNext();) {
-			String processorName = (String) it.next();
-			beanFactory.addBeanPostProcessor((BeanPostProcessor) getBean(processorName));
+		Collections.sort(orderedPostProcessors, new OrderComparator());
+		registerBeanPostProcessors(beanFactory, orderedPostProcessors);
+
+		// Finally, invoke all other BeanPostProcessors.
+		List nonOrderedPostProcessors = new ArrayList();
+		for (Iterator it = nonOrderedPostProcessorNames.iterator(); it.hasNext();) {
+			String postProcessorName = (String) it.next();
+			nonOrderedPostProcessors.add(getBean(postProcessorName));
+		}
+		registerBeanPostProcessors(beanFactory, nonOrderedPostProcessors);
+	}
+
+	/**
+	 * Register the given BeanPostProcessor beans.
+	 */
+	private void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, List postProcessors) {
+		for (Iterator it = postProcessors.iterator(); it.hasNext();) {
+			BeanPostProcessor postProcessor = (BeanPostProcessor) it.next();
+			beanFactory.addBeanPostProcessor(postProcessor);
 		}
 	}
 
@@ -602,6 +666,26 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void addListener(ApplicationListener listener) {
 		getApplicationEventMulticaster().addApplicationListener(listener);
+	}
+
+	/**
+	 * Finish the initialization of this context's bean factory,
+	 * initializing all remaining singleton beans.
+	 */
+	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+		// Stop using the temporary ClassLoader for type matching.
+		beanFactory.setTempClassLoader(null);
+
+		// Instantiate all remaining (non-lazy-init) singletons.
+		beanFactory.preInstantiateSingletons();
+	}
+
+	/**
+	 * Finish the refresh of this context, publishing the
+	 * {@link org.springframework.context.event.ContextRefreshedEvent}.
+	 */
+	protected void finishRefresh() {
+		publishEvent(new ContextRefreshedEvent(this));
 	}
 
 
