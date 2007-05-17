@@ -9,9 +9,33 @@ Changes in version 2.1 M2 (2007-05-31)
 General
 * added missing websphere_uow_api.jar to -with-dependencies distribution
 
+Package org.springframework.beans
+* CustomBooleanEditor trims text before comparing against true/false Strings
+* added temporary ClassLoader support to ConfigurableBeanFactory / AbstractBeanFactory
+* DefaultListableBeanFactory clears a cached merged bean definition in case of re-registering a bean definition
+* PropertyResourceConfigurer (and in particular PropertyPlaceholderConfigurer) is marked as PriorityOrdered
+* added support for the JDK 1.6 ServiceLoader facility (package "beans.factory.serviceloader")
+
+Package org.springframework.cache
+* EhCacheFactoryBean applies a specified CacheEntryFactory to an existing cache region as well
+
+Package org.springframework.context
+* AbstractApplicationContext instantiates and applies priority-ordered Bean(Factory)PostProcessors first
+* AbstractApplicationContext creates all non-ordered BeanPostProcessors first before registering them with the factory
+* AbstractApplicationContext sets a temporary ClassLoader for type matching if a bean named "loadTimeWeaver" is defined
+
+Package org.springframework.core
+* introduced PriorityOrdered marker interface, with order values automatically applied before any plain Ordered values
+
 Package org.springframework.jdbc
 * added ParameterizedBeanPropertyRowMapper, providing automatic mapping between columns and bean properties
 * added named parameter support to SimpleJdbcTemplate
+
+Package org.springframework.transaction
+* WebSphereUowTransactionManager does not enforce the presence of a JTA UserTransaction anymore
+
+Package org.springframework.web
+* RequestContext uses a shared default Theme instance as fallback, avoiding the recreating of empty Theme instances
 
 
 Changes in version 2.1 M1 (2007-05-13)
