@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,18 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeansException;
 
 /**
- * Allows for custom modification of new bean instances, e.g.
- * checking for marker interfaces or wrapping them with proxies.
+ * Factory hook that allows for custom modification of new bean instances,
+ * e.g. checking for marker interfaces or wrapping them with proxies.
  *
- * <p>Application contexts can auto-detect BeanPostProcessor beans in their
- * bean definitions and apply them before any other beans get created.
- * Plain bean factories allow for programmatic registration of post-processors.
+ * <p>ApplicationContexts can autodetect BeanPostProcessor beans in their
+ * bean definitions and apply them to any beans subsequently created.
+ * Plain bean factories allow for programmatic registration of post-processors,
+ * applying to all beans created through this factory.
  *
  * <p>Typically, post-processors that populate beans via marker interfaces
- * or the like will implement postProcessBeforeInitialization, and post-processors
- * that wrap beans with proxies will normally implement postProcessAfterInitialization.
+ * or the like will implement {@link #postProcessBeforeInitialization},
+ * while post-processors that wrap beans with proxies will normally
+ * implement {@link #postProcessAfterInitialization}.
  *
  * @author Juergen Hoeller
  * @since 10.10.2003
