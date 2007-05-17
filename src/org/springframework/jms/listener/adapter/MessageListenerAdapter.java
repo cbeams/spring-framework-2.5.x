@@ -165,6 +165,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 
 	/**
 	 * Create a new {@link MessageListenerAdapter} for the given delegate.
+	 * @param delegate the delegate object
 	 */
 	public MessageListenerAdapter(Object delegate) {
 		initDefaultStrategies();
