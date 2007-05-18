@@ -19,8 +19,10 @@ package org.springframework.context.annotation;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.AnnotationConfigUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -40,16 +42,28 @@ import org.springframework.util.Assert;
  * @since 2.1
  */
 public class ClassPathBeanDefinitionScanner implements BeanDefinitionScanner, ResourceLoaderAware {
-
+	
 	private final BeanDefinitionRegistry registry;
 
 	private ResourcePatternResolver resourcePatternResolver;
 
 	private BeanNameGenerator beanNameGenerator = new ComponentBeanNameGenerator();
-
+	
+	private ScopeMetadataResolver scopeMetadataResolver;
+	
 	private boolean includeAnnotationConfig = true;
 
 
+	/**
+	 * A convenience constructor for using the default scopedProxyMode (no proxies).
+	 * @param registry the BeanFactory to load bean definitions into,
+	 * in the form of a BeanDefinitionRegistry
+	 * @see #ClassPathBeanDefinitionScanner(BeanDefinitionRegistry, ScopedProxyMode)
+	 */
+	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry) {
+		this(registry, ScopedProxyMode.NO);
+	}
+	
 	/**
 	 * Create a new ClassPathBeanDefinitionScanner for the given bean factory.
 	 * <p>If the passed-in bean factory does not only implement the BeanDefinitionRegistry
@@ -60,12 +74,14 @@ public class ClassPathBeanDefinitionScanner implements BeanDefinitionScanner, Re
 	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
 	 * @param registry the BeanFactory to load bean definitions into,
 	 * in the form of a BeanDefinitionRegistry
+	 * @param scopedProxyMode the proxy behavior for non-singleton scoped beans
 	 * @see #setResourceLoader
 	 */
-	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry) {
+	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, ScopedProxyMode scopedProxyMode) {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		this.registry = registry;
-
+		this.scopeMetadataResolver = new AnnotationScopeMetadataResolver(scopedProxyMode);
+		
 		// Determine ResourceLoader to use.
 		if (this.registry instanceof ResourceLoader) {
 			this.resourcePatternResolver =
@@ -95,6 +111,14 @@ public class ClassPathBeanDefinitionScanner implements BeanDefinitionScanner, Re
 	 */
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new ComponentBeanNameGenerator());
+	}
+	
+	/**
+	 * Set the ScopeMetadataResolver to use for detected bean classes.
+	 * <p>Default is an {@link AnnotationScopeMetadataResolver}.
+	 */
+	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
+		this.scopeMetadataResolver = scopeMetadataResolver;
 	}
 	
 	/**
@@ -166,6 +190,8 @@ public class ClassPathBeanDefinitionScanner implements BeanDefinitionScanner, Re
 		for (Class<?> beanClass : candidates) {
 			BeanDefinition beanDefinition = new RootBeanDefinition(beanClass);
 			String beanName = this.beanNameGenerator.generateBeanName(beanDefinition, this.registry);
+			ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(beanDefinition, beanClass);
+			beanDefinition = applyScope(beanDefinition, beanName, scopeMetadata);
 			this.registry.registerBeanDefinition(beanName, beanDefinition);
 		}
 
@@ -176,5 +202,17 @@ public class ClassPathBeanDefinitionScanner implements BeanDefinitionScanner, Re
 
 		return this.registry.getBeanDefinitionCount() - beanCountAtScanStart;
 	}
-
+	
+	private BeanDefinition applyScope(BeanDefinition beanDefinition, String beanName, ScopeMetadata scopeMetadata) {
+		beanDefinition.setScope(scopeMetadata.getScopeName());
+		ScopedProxyMode scopedProxyMode = scopeMetadata.getScopedProxyMode();
+		if (beanDefinition.isSingleton() || scopedProxyMode.equals(ScopedProxyMode.NO)) {
+			return beanDefinition;
+		}
+		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
+		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(beanDefinition, beanName);
+		BeanDefinitionHolder scopedProxyDefinition = ScopedProxyUtils.createScopedProxy(definitionHolder, registry, proxyTargetClass);
+		return scopedProxyDefinition.getBeanDefinition();
+	}
+	
 }
