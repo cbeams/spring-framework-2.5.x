@@ -64,7 +64,6 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
 	private void addIncludePatterns(Element element, ParserContext parserContext, BeanDefinition beanDef) {
 		ManagedList includePatterns = new ManagedList();
-		includePatterns.setSource(parserContext.extractSource(element));
 		NodeList childNodes = element.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node node = childNodes.item(i);
@@ -75,7 +74,10 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 				includePatterns.add(valueHolder);
 			}
 		}
-		beanDef.getPropertyValues().addPropertyValue("includePatterns", includePatterns);
+		if (!includePatterns.isEmpty()) {
+			includePatterns.setSource(parserContext.extractSource(element));
+			beanDef.getPropertyValues().addPropertyValue("includePatterns", includePatterns);
+		}
 	}
 
 }
