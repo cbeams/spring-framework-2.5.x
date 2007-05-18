@@ -43,20 +43,12 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 
 	/**
 	 * @param annotationClass The annotation to match 
-	 * @param considerInherited search inheritance hierarchy for the annotation
 	 */
-	public AnnotationTypeFilter(Class<? extends Annotation> annotationClass, boolean considerInherited) {
-		super(considerInherited && annotationClass.isAnnotationPresent(Inherited.class), false);
+	public AnnotationTypeFilter(Class<? extends Annotation> annotationClass) {
+		super(annotationClass.isAnnotationPresent(Inherited.class), false);
 		this.annotationClass = annotationClass;
 	}
 	
-	/**
-	 * @param annotationClass The annotation to match
-	 */
-	public AnnotationTypeFilter(final Class<? extends Annotation> annotationClass) {
-		this(annotationClass, true);
-	}
-
 
 	@Override
 	protected boolean matchSelf(ClassReader classReader) {

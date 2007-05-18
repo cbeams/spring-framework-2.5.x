@@ -95,11 +95,11 @@ public class ClassPathScanningCandidateComponentProvider implements CandidateCom
 
 	@SuppressWarnings("unchecked")
 	private void initDefaultFilters() {
-		this.includeFilters.add(new AnnotationTypeFilter(Component.class, true));
-		this.includeFilters.add(new AnnotationTypeFilter(Repository.class, true));
+		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
+		this.includeFilters.add(new AnnotationTypeFilter(Repository.class));
 		try {
 			this.includeFilters.add(new AnnotationTypeFilter(
-					ClassUtils.forName("org.aspectj.lang.annotation.Aspect", getClass().getClassLoader()), false));
+					ClassUtils.forName("org.aspectj.lang.annotation.Aspect", getClass().getClassLoader())));
 		}
 		catch (ClassNotFoundException ex) {
 			// will not scan for @Aspect annotations if not present

@@ -84,9 +84,8 @@
 				<xsd:restriction base="xsd:string">
 					<xsd:enumeration value="ASSIGNABLE_TYPE"/>
 					<xsd:enumeration value="ANNOTATION"/>
-					<xsd:enumeration value="INHERITABLE_ANNOTATION"/>
 					<xsd:enumeration value="REGEX_PATTERN"/>
-					<xsd:enumeration value="ASPECTJ_PATTERN"/>
+					<!-- xsd:enumeration value="ASPECTJ_PATTERN"/ -->
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>

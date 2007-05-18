@@ -108,9 +108,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		try {
 			switch (type) {
 				case ANNOTATION :
-					return new AnnotationTypeFilter((Class<Annotation>) classLoader.loadClass(expression), false);
-				case INHERITABLE_ANNOTATION :
-					return new AnnotationTypeFilter((Class<Annotation>) classLoader.loadClass(expression), true);
+					return new AnnotationTypeFilter((Class<Annotation>) classLoader.loadClass(expression));
 				case ASSIGNABLE_TYPE :
 					return new AssignableTypeFilter(classLoader.loadClass(expression));
 				case REGEX_PATTERN :

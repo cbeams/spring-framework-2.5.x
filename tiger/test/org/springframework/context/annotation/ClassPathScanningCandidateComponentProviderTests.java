@@ -96,7 +96,7 @@ public class ClassPathScanningCandidateComponentProviderTests extends TestCase {
 		ClassPathScanningCandidateComponentProvider provider =
 				new ClassPathScanningCandidateComponentProvider(TEST_BASE_PACKAGE, false);
 		provider.addIncludeFilter(new AnnotationTypeFilter(
-				ClassUtils.forName("org.aspectj.lang.annotation.Aspect"), false));
+				ClassUtils.forName("org.aspectj.lang.annotation.Aspect")));
 		Set<Class> candidates = provider.findCandidateComponents();
 		assertEquals(1, candidates.size());
 		assertTrue(candidates.contains(ServiceInvocationCounter.class));		

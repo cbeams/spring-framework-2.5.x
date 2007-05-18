@@ -32,7 +32,7 @@ public class AnnotationTypeFilterTests extends TestCase {
 	
 	public void testDirectAnnotationMatch() throws Exception {
 		String classUnderTest = "org.springframework.core.typefilter.SomeComponent";
-		AnnotationTypeFilter filter = new AnnotationTypeFilter(Component.class, false);
+		AnnotationTypeFilter filter = new AnnotationTypeFilter(Component.class);
 		
 		ClassReader classReader = new ClassReader(classUnderTest);
 		
@@ -45,12 +45,10 @@ public class AnnotationTypeFilterTests extends TestCase {
 		String classUnderTest = "org.springframework.core.typefilter.SomeSubClassOfSomeComponentInterface";
 		ClassReader classReader = new ClassReader(classUnderTest);
 
-		AnnotationTypeFilter inheritingFilter = new AnnotationTypeFilter(Component.class, true);
-		AnnotationTypeFilter nonInheritingFilter = new AnnotationTypeFilter(Component.class, false);
+		AnnotationTypeFilter filter = new AnnotationTypeFilter(Component.class);
 		
-		// Must fail in both cases as annotation on interfaces should not be considered a match
-		assertFalse(inheritingFilter.match(classReader));
-		assertFalse(nonInheritingFilter.match(classReader));
+		// Must fail as annotation on interfaces should not be considered a match
+		assertFalse(filter.match(classReader));
 		
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
@@ -59,11 +57,9 @@ public class AnnotationTypeFilterTests extends TestCase {
 		String classUnderTest = "org.springframework.core.typefilter.SomeSubClassOfSomeComponent";
 		ClassReader classReader = new ClassReader(classUnderTest);
 
-		AnnotationTypeFilter inheritingFilter = new AnnotationTypeFilter(Component.class, true);
-		AnnotationTypeFilter nonInheritingFilter = new AnnotationTypeFilter(Component.class, false);
+		AnnotationTypeFilter filter = new AnnotationTypeFilter(Component.class);
 		
-		assertTrue(inheritingFilter.match(classReader));
-		assertFalse(nonInheritingFilter.match(classReader));
+		assertTrue(filter.match(classReader));
 		
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
@@ -72,19 +68,17 @@ public class AnnotationTypeFilterTests extends TestCase {
 		String classUnderTest = "org.springframework.core.typefilter.SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation";
 		ClassReader classReader = new ClassReader(classUnderTest);
 
-		AnnotationTypeFilter inheritingFilter = new AnnotationTypeFilter(NonInheritedAnnotation.class, true);
-		AnnotationTypeFilter nonInheritingFilter = new AnnotationTypeFilter(NonInheritedAnnotation.class, false);
+		AnnotationTypeFilter filter = new AnnotationTypeFilter(NonInheritedAnnotation.class);
 		
-		// Must fail in either case as annotation isn't inherited
-		assertFalse(inheritingFilter.match(classReader));
-		assertFalse(nonInheritingFilter.match(classReader));
+		// Must fail as annotation isn't inherited
+		assertFalse(filter.match(classReader));
 		
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 	
 	public void testNonAnnotatedClassDoesntMatch() throws Exception {
 		String classUnderTest = "org.springframework.core.typefilter.SomeNonCandidateClass";
-		AnnotationTypeFilter filter = new AnnotationTypeFilter(Component.class, true);
+		AnnotationTypeFilter filter = new AnnotationTypeFilter(Component.class);
 		
 		ClassReader classReader = new ClassReader(classUnderTest);
 		
