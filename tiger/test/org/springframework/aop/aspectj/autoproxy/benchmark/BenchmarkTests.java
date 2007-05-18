@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,29 +27,20 @@ import org.springframework.util.StopWatch;
 /**
  * Tests for AspectJ auto proxying. Includes mixing with Spring AOP 
  * Advisors to demonstrate that existing autoproxying contract is honoured.
- * <p>
- * Change the return of the getCount() method to MEANINGFUL_NUMBER_OF_PASSES
- * to make this test actually run a meaningful benchmark. Currently it is set
- * to execute the test suite quickly, not produce meaningful results.
+ *
  * @author Rod Johnson
  */
 public class BenchmarkTests extends TestCase {
-	
-	/**
-	 * Number of passes high enough to produce meaningful results.
-	 */
-	private static final int MEANINGFUL_NUMBER_OF_PASSES = 1000000;
-	
+
 	private static final String ASPECTJ_CONTEXT = "/org/springframework/aop/aspectj/autoproxy/benchmark/aspectj.xml";
 
+	private static final String SPRING_AOP_CONTEXT = "/org/springframework/aop/aspectj/autoproxy/benchmark/springAop.xml";
+
 	/**
-	 * Change the return number to MEANINGFUL_NUMBER_OF_PASSES to make this
-	 * test useful
-	 * @return the number of passes to runs
+	 * Change the return number to a higher number to make this test useful.
 	 */
 	protected int getCount() {
 		return 10;
-		//return MEANINGFUL_NUMBER_OF_PASSES;
 	}
 	
 	public void testRepeatedAroundAdviceInvocationsWithAspectJ() {
@@ -57,7 +48,7 @@ public class BenchmarkTests extends TestCase {
 	}
 	
 	public void testRepeatedAroundAdviceInvocationsWithSpringAop() {
-		testRepeatedAroundAdviceInvocations(SPRING_AOP_CONTEXT(), getCount(), "Spring AOP");
+		testRepeatedAroundAdviceInvocations(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
 	
 	public void testRepeatedBeforeAdviceInvocationsWithAspectJ() {
@@ -65,7 +56,7 @@ public class BenchmarkTests extends TestCase {
 	}
 	
 	public void testRepeatedBeforeAdviceInvocationsWithSpringAop() {
-		testBeforeAdviceWithoutJoinPoint(SPRING_AOP_CONTEXT(), getCount(), "Spring AOP");
+		testBeforeAdviceWithoutJoinPoint(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
 	
 	public void testRepeatedAfterReturningAdviceInvocationsWithAspectJ() {
@@ -73,7 +64,7 @@ public class BenchmarkTests extends TestCase {
 	}
 	
 	public void testRepeatedAfterReturningAdviceInvocationsWithSpringAop() {
-		testAfterReturningAdviceWithoutJoinPoint(SPRING_AOP_CONTEXT(), getCount(), "Spring AOP");
+		testAfterReturningAdviceWithoutJoinPoint(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
 
 	public void testRepeatedMixWithAspectJ() {
@@ -81,13 +72,9 @@ public class BenchmarkTests extends TestCase {
 	}
 	
 	public void testRepeatedMixWithSpringAop() {
-		testMix(SPRING_AOP_CONTEXT(), getCount(), "Spring AOP");
+		testMix(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
 
-	private String SPRING_AOP_CONTEXT() {
-		return "/org/springframework/aop/aspectj/autoproxy/benchmark/springAop.xml";
-	}
-	
 	private long testRepeatedAroundAdviceInvocations(String file, int howmany, String technology) {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file);
 
@@ -177,16 +164,5 @@ public class BenchmarkTests extends TestCase {
 		System.out.println(sw.prettyPrint());
 		return sw.getLastTaskTimeMillis();
 	}
-	
-	// TODO test mixed
-	
-	// TODO test regular
-	
-	// TODO test n proxy creation
-	
-	// Useful for profilers that don't allow profiling unit tests
-	public static void main(String[] args) {
-		new BenchmarkTests().testRepeatedAroundAdviceInvocationsWithAspectJ();
-	}
-	
+
 }
