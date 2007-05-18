@@ -17,10 +17,13 @@
 package org.springframework.core.typefilter;
 
 import java.io.IOException;
+import java.io.InputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.util.ClassUtils;
 
 /**
  * Type filter that is aware of traversing over hierarchy.
@@ -31,6 +34,7 @@ import org.objectweb.asm.ClassReader;
  * carried out.
  * 
  * @author Ramnivas Laddad
+ * @author Mark Fisher
  * @since 2.1
  */
 public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilter {
@@ -89,11 +93,25 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 	}
 
 	private boolean match(String className) {
+		String resourcePath = ClassUtils.convertClassNameToResourcePath(className) + ".class";
+		Resource resource = new ClassPathResource(resourcePath);
+		InputStream stream = null;
 		try {
-			return match(new ClassReader(className));
+			stream = resource.getInputStream();
+			return match(new ClassReader(stream));
 		}
 		catch (IOException ex) {
 			throw new IllegalArgumentException("Cannot load class with name '" + className + "'", ex);
+		}
+		finally {
+			try {
+				if (stream != null) {
+					stream.close();
+				}
+			}
+			catch (IOException ex) {
+				// ignore, cleanup
+			}
 		}
 	}
 
