@@ -43,7 +43,7 @@ public abstract class InstantiationAwareBeanPostProcessorAdapter implements Smar
 		return null;
 	}
 
-	public Constructor determineConstructor(Class beanClass, String beanName) throws BeansException {
+	public Constructor[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException {
 		return null;
 	}
 

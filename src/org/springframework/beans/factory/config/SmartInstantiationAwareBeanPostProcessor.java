@@ -47,12 +47,12 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	Class predictBeanType(Class beanClass, String beanName) throws BeansException;
 
 	/**
-	 * Determine the constructor to use for the given bean.
+	 * Determine the candidate constructors to use for the given bean.
 	 * @param beanClass the raw class of the bean
 	 * @param beanName the name of the bean
-	 * @return the constructor to use, or <code>null</code> if none specified
+	 * @return the candidate constructors, or <code>null</code> if none specified
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
-	Constructor determineConstructor(Class beanClass, String beanName) throws BeansException;
+	Constructor[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException;
 
 }
