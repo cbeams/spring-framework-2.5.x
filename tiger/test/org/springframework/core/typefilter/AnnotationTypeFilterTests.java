@@ -19,104 +19,98 @@ package org.springframework.core.typefilter;
 import java.lang.annotation.Inherited;
 
 import junit.framework.TestCase;
-
 import org.objectweb.asm.ClassReader;
+
 import org.springframework.stereotype.Component;
 
 /**
- * 
  * @author Ramnivas Laddad
- *
+ * @author Juergen Hoeller
  */
 public class AnnotationTypeFilterTests extends TestCase {
 	
 	public void testDirectAnnotationMatch() throws Exception {
-		String classUnderTest = "org.springframework.core.typefilter.SomeComponent";
-		AnnotationTypeFilter filter = new AnnotationTypeFilter(Component.class);
-		
+		String classUnderTest = "org.springframework.core.typefilter.AnnotationTypeFilterTests$SomeComponent";
+		AnnotationTypeFilter filter = new AnnotationTypeFilter(InheritedAnnotation.class);
 		ClassReader classReader = new ClassReader(classUnderTest);
 		
 		assertTrue(filter.match(classReader));
-		
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
 	public void testInheritedAnnotationFromInterfaceDoesNotMatch() throws Exception {
-		String classUnderTest = "org.springframework.core.typefilter.SomeSubClassOfSomeComponentInterface";
+		String classUnderTest = "org.springframework.core.typefilter.AnnotationTypeFilterTests$SomeSubClassOfSomeComponentInterface";
 		ClassReader classReader = new ClassReader(classUnderTest);
-
-		AnnotationTypeFilter filter = new AnnotationTypeFilter(Component.class);
+		AnnotationTypeFilter filter = new AnnotationTypeFilter(InheritedAnnotation.class);
 		
 		// Must fail as annotation on interfaces should not be considered a match
 		assertFalse(filter.match(classReader));
-		
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 	
 	public void testInheritedAnnotationFromBaseClassDoesMatch() throws Exception {
-		String classUnderTest = "org.springframework.core.typefilter.SomeSubClassOfSomeComponent";
+		String classUnderTest = "org.springframework.core.typefilter.AnnotationTypeFilterTests$SomeSubClassOfSomeComponent";
 		ClassReader classReader = new ClassReader(classUnderTest);
+		AnnotationTypeFilter filter = new AnnotationTypeFilter(InheritedAnnotation.class);
 
-		AnnotationTypeFilter filter = new AnnotationTypeFilter(Component.class);
-		
 		assertTrue(filter.match(classReader));
-		
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
 	public void testNonInheritedAnnotationDoesNotMatch() throws Exception {
-		String classUnderTest = "org.springframework.core.typefilter.SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation";
+		String classUnderTest = "org.springframework.core.typefilter.AnnotationTypeFilterTests$SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation";
 		ClassReader classReader = new ClassReader(classUnderTest);
 
 		AnnotationTypeFilter filter = new AnnotationTypeFilter(NonInheritedAnnotation.class);
 		
 		// Must fail as annotation isn't inherited
 		assertFalse(filter.match(classReader));
-		
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 	
 	public void testNonAnnotatedClassDoesntMatch() throws Exception {
-		String classUnderTest = "org.springframework.core.typefilter.SomeNonCandidateClass";
+		String classUnderTest = "org.springframework.core.typefilter.AnnotationTypeFilterTests$SomeNonCandidateClass";
 		AnnotationTypeFilter filter = new AnnotationTypeFilter(Component.class);
-		
 		ClassReader classReader = new ClassReader(classUnderTest);
 		
 		assertFalse(filter.match(classReader));
-		
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
-}
 
-// We must use a standalone set of types to ensure that no one else is loading them
-// and interfering with ClassloadingAssertions.assertClassNotLoaded()
 
-// Note that Component is @Inherited 
-@Component
-class SomeComponent {
-}
+	// We must use a standalone set of types to ensure that no one else is loading them
+	// and interfering with ClassloadingAssertions.assertClassNotLoaded()
 
-@Component
-interface SomeComponentInterface {
-}
+	@Inherited
+	private static @interface InheritedAnnotation {
+	}
 
-class SomeSubClassOfSomeComponentInterface implements SomeComponentInterface {
-}
+	@InheritedAnnotation
+	private static class SomeComponent {
+	}
 
-class SomeSubClassOfSomeComponent extends SomeComponent {
-}
-//----
-@interface NonInheritedAnnotation {
-	
-}
+	@InheritedAnnotation
+	private static interface SomeComponentInterface {
+	}
 
-@NonInheritedAnnotation
-class SomeClassMarkedWithNonInheritedAnnotation {
-}
+	private static class SomeSubClassOfSomeComponentInterface implements SomeComponentInterface {
+	}
 
-class SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation extends SomeClassMarkedWithNonInheritedAnnotation {
-}
-//----
+	private static class SomeSubClassOfSomeComponent extends SomeComponent {
+	}
 
-class SomeNonCandidateClass {
+	private static @interface NonInheritedAnnotation {
+	}
+
+	@NonInheritedAnnotation
+	private static class SomeClassMarkedWithNonInheritedAnnotation {
+	}
+
+	private static class SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation extends SomeClassMarkedWithNonInheritedAnnotation {
+	}
+	//----
+
+	private static class SomeNonCandidateClass {
+	}
+
 }
