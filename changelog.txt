@@ -9,11 +9,16 @@ Changes in version 2.1 M2 (2007-05-31)
 General
 * added missing websphere_uow_api.jar to -with-dependencies distribution
 
+Package org.springframework.aop
+* "aop:aspectj-autoproxy" XML configuration tag detects all aspect beans in case of empty XML body content as well
+
 Package org.springframework.beans
 * CustomBooleanEditor trims text before comparing against true/false Strings
 * added temporary ClassLoader support to ConfigurableBeanFactory / AbstractBeanFactory
-* DefaultListableBeanFactory clears a cached merged bean definition in case of re-registering a bean definition
 * PropertyResourceConfigurer (and in particular PropertyPlaceholderConfigurer) is marked as PriorityOrdered
+* reworked SmartInstantiationAwareBeanPostProcessor's "determineConstructor" hook into "determineCandidateConstructors"
+* DefaultListableBeanFactory clears a cached merged bean definition in case of re-registering a bean definition
+* added 'required' attribute to @Autowired annotation (configurable for a custom autowire annotation as well)
 * added support for the JDK 1.6 ServiceLoader facility (package "beans.factory.serviceloader")
 
 Package org.springframework.cache
@@ -23,18 +28,30 @@ Package org.springframework.context
 * AbstractApplicationContext instantiates and applies priority-ordered Bean(Factory)PostProcessors first
 * AbstractApplicationContext creates all non-ordered BeanPostProcessors first before registering them with the factory
 * AbstractApplicationContext sets a temporary ClassLoader for type matching if a bean named "loadTimeWeaver" is defined
+* added LoadTimeWeaverFactoryBean, building a default LoadTimeWeaver (autodetecting the runtime environment)
+* added LoadTimeWeaverAware interface, automatically supported if a default LoadTimeWeaver is available
+* added AspectJWeavingEnabler, registering AspectJ's class transformer for standard AspectJ load-time weaving
+* added "context:load-time-weaver" XML tag, building a default LoadTimeWeaver and enabling AspectJ load-time weaving
+* "context:component-scan" only detects the @Component annotation at the concrete class level (not inherited anymore)
+* added @Scope annotation for autodetected components, indicating the target bean scope in the Spring context
 
 Package org.springframework.core
 * introduced PriorityOrdered marker interface, with order values automatically applied before any plain Ordered values
+* PathMatchingResourcePatternResolver explicitly closes freshly created JarFile handles, to allow for hot redeployment
+* StringCodedLabeledEnum accepts empty codes (that purely consist of whitespace) as well
 
 Package org.springframework.jdbc
 * added ParameterizedBeanPropertyRowMapper, providing automatic mapping between columns and bean properties
 * added named parameter support to SimpleJdbcTemplate
 
+Package org.springframework.orm
+* LocalContainerEntityManagerFactoryBean and DefaultPersistenceUnitManager autodetect a context's default LoadTimeWeaver
+
 Package org.springframework.transaction
 * WebSphereUowTransactionManager does not enforce the presence of a JTA UserTransaction anymore
 
 Package org.springframework.web
+* CookieLocaleResolver checks specified "defaultLocale" in case of a setLocale call with null argument
 * RequestContext uses a shared default Theme instance as fallback, avoiding the recreating of empty Theme instances
 
 
@@ -1454,7 +1471,7 @@ Package org.springframework.web
 * fixed Servlet/PortletRequestAttributes to correctly update accessed attributes
 * turned WebContentGenerator's method constants public again, for calling "setSupportedMethods" in subclasses
 * FrameworkPortlet now catches all RuntimeException/Errors and rethrows them as PortletException
-* PortletContentGenerator response preperation operates on RenderRequest and RenderResponse only
+* PortletContentGenerator response preparation operates on RenderRequest and RenderResponse only
 * changed Portlet HandlerInterceptor interface to have explicit callback methods for action/render requests
 * Portlet HandlerInterceptorAdapter allows to adapt the specific action/render callback methods to general callbacks
 * Portlet OpenXxxInViewInterceptors just wrap the render request, not the action request anymore
