@@ -88,6 +88,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of <code>getObjectType</code>
 	 * in the case of FactoryBeans.
+	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
+	 * check nested beans which might match the specified type as well.
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.
@@ -96,8 +98,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * to include beans in ancestor factories too.
 	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
 	 * by other means than bean definitions.
-	 * <p>This version of getBeanNamesForType matches all kinds of beans, be it
-	 * singletons, prototypes, or FactoryBeans. In most implementations, the
+	 * <p>This version of <code>getBeanNamesForType</code> matches all kinds of beans,
+	 * be it singletons, prototypes, or FactoryBeans. In most implementations, the
 	 * result will be the same as for <code>getBeanNamesOfType(type, true, true)</code>.
 	 * <p>Bean names returned by this method should always return bean names <i>in the
 	 * order of definition</i> in the backend configuration, as far as possible.
@@ -113,6 +115,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of <code>getObjectType</code>
 	 * in the case of FactoryBeans.
+	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
+	 * check nested beans which might match the specified type as well.
 	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit" flag is set,
 	 * which means that FactoryBeans will get initialized. If the object created by the
 	 * FactoryBean doesn't match, the raw FactoryBean itself will be matched against the
@@ -144,6 +148,8 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
 	 * <code>getObjectType</code> in the case of FactoryBeans.
+	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
+	 * check nested beans which might match the specified type as well.
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.
@@ -157,8 +163,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * result will be the same as for <code>getBeansOfType(type, true, true)</code>.
 	 * <p>The Map returned by this method should always return bean names and
 	 * corresponding bean instances <i>in the order of definition</i> in the
-	 * backend configuration, as far as possible. This will usually mean that
-	 * either JDK 1.4 or Commons Collections needs to be available.
+	 * backend configuration, as far as possible.
 	 * @param type the class or interface to match, or <code>null</code> for all concrete beans
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
@@ -173,6 +178,8 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
 	 * <code>getObjectType</code> in the case of FactoryBeans.
+	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
+	 * check nested beans which might match the specified type as well.
 	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit" flag is set,
 	 * which means that FactoryBeans will get initialized. If the object created by the
 	 * FactoryBean doesn't match, the raw FactoryBean itself will be matched against the
@@ -185,8 +192,7 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * by other means than bean definitions.
 	 * <p>The Map returned by this method should always return bean names and
 	 * corresponding bean instances <i>in the order of definition</i> in the
-	 * backend configuration, as far as possible. This will usually mean that
-	 * either JDK 1.4 or Commons Collections needs to be available.
+	 * backend configuration, as far as possible.
 	 * @param type the class or interface to match, or <code>null</code> for all concrete beans
 	 * @param includePrototypes whether to include prototype beans too
 	 * or just singletons (also applies to FactoryBeans)
