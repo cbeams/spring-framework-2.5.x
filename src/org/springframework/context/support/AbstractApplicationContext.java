@@ -29,8 +29,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -55,6 +57,7 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.OverridingClassLoader;
@@ -64,6 +67,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -123,14 +127,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
 	public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
-
-	/**
-	 * Name of the LoadTimeWeaver bean in the factory. If such a bean is supplied,
-	 * the context will use a temporary ClassLoader for type matching, in order
-	 * to allow the LoadTimeWeaver to process all actual bean classes.
-	 * @see org.springframework.instrument.classloading.LoadTimeWeaver
-	 */
-	public static final String LOAD_TIME_WEAVER_BEAN_NAME = "loadTimeWeaver";
 
 
 	static {
@@ -419,13 +415,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Tell the internal bean factory to use the context's class loader.
 		beanFactory.setBeanClassLoader(getClassLoader());
 
-		// Set a temporary ClassLoader for type matching, if necessary.
-		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
-			OverridingClassLoader overridingClassLoader = new OverridingClassLoader(getClassLoader());
-			overridingClassLoader.excludePackage("org.springframework");
-			beanFactory.setTempClassLoader(overridingClassLoader);
-		}
-
 		// Populate the bean factory with context-specific resource editors.
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
 
@@ -435,6 +424,26 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
 		beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
 		beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+
+		// Detect a LoadTimeWeaver and prepare for weaving, if found.
+		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME) && JdkVersion.isAtLeastJava15()) {
+			// Register the (JDK 1.5 specific) LoadTimeWeaverAwareProcessor.
+			try {
+				Class ltwapClass = ClassUtils.forName(
+						"org.springframework.context.weaving.LoadTimeWeaverAwareProcessor", getClass().getClassLoader());
+				BeanPostProcessor ltwap = (BeanPostProcessor) BeanUtils.instantiateClass(ltwapClass);
+				((BeanFactoryAware) ltwap).setBeanFactory(beanFactory);
+				beanFactory.addBeanPostProcessor(ltwap);
+			}
+			catch (ClassNotFoundException ex) {
+				throw new IllegalStateException("Spring's LoadTimeWeaverAwareProcessor class is not available");
+			}
+
+			// Set a temporary ClassLoader for type matching.
+			OverridingClassLoader overridingClassLoader = new OverridingClassLoader(beanFactory.getBeanClassLoader());
+			overridingClassLoader.excludePackage("org.springframework");
+			beanFactory.setTempClassLoader(overridingClassLoader);
+		}
 	}
 
 	/**

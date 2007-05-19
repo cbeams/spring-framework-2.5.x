@@ -36,6 +36,15 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 public interface ConfigurableApplicationContext extends ApplicationContext, Lifecycle {
 
 	/**
+	 * Name of the LoadTimeWeaver bean in the factory. If such a bean is supplied,
+	 * the context will use a temporary ClassLoader for type matching, in order
+	 * to allow the LoadTimeWeaver to process all actual bean classes.
+	 * @see org.springframework.instrument.classloading.LoadTimeWeaver
+	 */
+	String LOAD_TIME_WEAVER_BEAN_NAME = "loadTimeWeaver";
+
+
+	/**
 	 * Set the parent of this application context.
 	 * <p>Note that the parent shouldn't be changed: It should only be set outside
 	 * a constructor if it isn't available when an object of this class is created,
