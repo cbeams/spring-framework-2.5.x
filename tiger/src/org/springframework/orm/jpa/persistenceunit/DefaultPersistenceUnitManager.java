@@ -29,6 +29,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -60,7 +61,8 @@ import org.springframework.util.ObjectUtils;
  * @see #setLoadTimeWeaver
  * @see org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean#setPersistenceUnitManager
  */
-public class DefaultPersistenceUnitManager implements PersistenceUnitManager, ResourceLoaderAware, InitializingBean {
+public class DefaultPersistenceUnitManager
+		implements PersistenceUnitManager, ResourceLoaderAware, LoadTimeWeaverAware, InitializingBean {
 
 	/**
 	 * Default location of the <code>persistence.xml</code> file:
@@ -84,9 +86,9 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 
 	private DataSource defaultDataSource;
 
-	private LoadTimeWeaver loadTimeWeaver;
-
 	private PersistenceUnitPostProcessor[] persistenceUnitPostProcessors;
+
+	private LoadTimeWeaver loadTimeWeaver;
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
@@ -184,33 +186,6 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 	}
 
 	/**
-	 * Specify the Spring LoadTimeWeaver to use for class instrumentation according
-	 * to the JPA class transformer contract.
-	 * <p>It is not required to specify a LoadTimeWeaver: Most providers will be
-	 * able to provide a subset of their functionality without class instrumentation
-	 * as well, or operate with their VM agent specified on JVM startup.
-	 * <p>In terms of Spring-provided weaving options, the most important ones are
-	 * InstrumentationLoadTimeWeaver, which requires a Spring-specific (but very general)
-	 * VM agent specified on JVM startup, and ReflectiveLoadTimeWeaver, which interacts
-	 * with an underlying ClassLoader based on specific extended methods being available
-	 * on it (for example, interacting with Spring's TomcatInstrumentableClassLoader).
-	 * @see org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver
-	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
-	 * @see org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader
-	 */
-	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
-		this.loadTimeWeaver = loadTimeWeaver;
-	}
-
-	/**
-	 * Return the Spring LoadTimeWeaver to use for class instrumentation according
-	 * to the JPA class transformer contract.
-	 */
-	public LoadTimeWeaver getLoadTimeWeaver() {
-		return this.loadTimeWeaver;
-	}
-
-	/**
 	 * Set the PersistenceUnitPostProcessors to be applied to each
 	 * PersistenceUnitInfo that has been parsed by this manager.
 	 * <p>Such post-processors can, for example, register further entity
@@ -227,6 +202,38 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 	 */
 	public PersistenceUnitPostProcessor[] getPersistenceUnitPostProcessors() {
 		return this.persistenceUnitPostProcessors;
+	}
+
+	/**
+	 * Specify the Spring LoadTimeWeaver to use for class instrumentation according
+	 * to the JPA class transformer contract.
+	 * <p>It is not required to specify a LoadTimeWeaver: Most providers will be
+	 * able to provide a subset of their functionality without class instrumentation
+	 * as well, or operate with their VM agent specified on JVM startup.
+	 * <p>In terms of Spring-provided weaving options, the most important ones are
+	 * InstrumentationLoadTimeWeaver, which requires a Spring-specific (but very general)
+	 * VM agent specified on JVM startup, and ReflectiveLoadTimeWeaver, which interacts
+	 * with an underlying ClassLoader based on specific extended methods being available
+	 * on it (for example, interacting with Spring's TomcatInstrumentableClassLoader).
+	 * <p><b>NOTE:</b> As of Spring 2.1, the context's default LoadTimeWeaver (defined
+	 * as bean with name "loadTimeWeaver") will be picked up automatically, if available,
+	 * removing the need for LoadTimeWeaver configuration on each affected target bean.</b>
+	 * Consider using the <code>context:load-time-weaver</code> XML tag for creating
+	 * such a shared LoadTimeWeaver (autodetecting the environment by default).
+	 * @see org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver
+	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
+	 * @see org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader
+	 */
+	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
+		this.loadTimeWeaver = loadTimeWeaver;
+	}
+
+	/**
+	 * Return the Spring LoadTimeWeaver to use for class instrumentation according
+	 * to the JPA class transformer contract.
+	 */
+	public LoadTimeWeaver getLoadTimeWeaver() {
+		return this.loadTimeWeaver;
 	}
 
 	public void setResourceLoader(ResourceLoader resourceLoader) {
