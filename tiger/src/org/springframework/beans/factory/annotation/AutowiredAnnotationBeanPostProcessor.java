@@ -24,10 +24,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -99,6 +101,13 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	/**
+	 * Return the 'autowired' annotation type.
+	 */
+	protected Class<? extends Annotation> getAutowiredAnnotationType() {
+		return this.autowiredAnnotationType;
+	}
+
+	/**
 	 * Set the name of a parameter of the annotation that specifies
 	 * whether it is required.
 	 * @see #setRequiredParameterValue(boolean)
@@ -117,13 +126,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	public void setRequiredParameterValue(boolean requiredParameterValue) {
 		this.requiredParameterValue = requiredParameterValue;
 	}
-	
-	/**
-	 * Return the 'autowired' annotation type.
-	 */
-	protected Class<? extends Annotation> getAutowiredAnnotationType() {
-		return this.autowiredAnnotationType;
-	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (!(beanFactory instanceof ListableBeanFactory)) {
@@ -133,20 +135,49 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 
-	public Constructor determineConstructor(Class beanClass, String beanName) throws BeansException {
-		Constructor[] candidates = beanClass.getDeclaredConstructors();
-		Constructor constructor = null;
-		for (int i = 0; i < candidates.length; i++) {
-			Constructor candidate = candidates[i];
-			if (candidate.getAnnotation(getAutowiredAnnotationType()) != null) {
-				if (constructor != null) {
-					throw new BeanCreationException(
-							"Multiple constructors carrying the Autowired annotation: " + constructor + ", " + candidate);
+	public Constructor[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException {
+		Constructor[] rawCandidates = beanClass.getDeclaredConstructors();
+		List candidates = new ArrayList(rawCandidates.length);
+		Constructor requiredConstructor = null;
+		Constructor defaultConstructor = null;
+
+		for (int i = 0; i < rawCandidates.length; i++) {
+			Constructor candidate = rawCandidates[i];
+			Annotation annotation = candidate.getAnnotation(getAutowiredAnnotationType());
+			if (annotation != null) {
+				if (requiredConstructor != null) {
+					throw new BeanCreationException("Invalid autowire-marked constructor: " + candidate +
+							". Found another constructor with 'required' Autowired annotation: " + requiredConstructor);
 				}
-				constructor = candidate;
+				if (candidate.getParameterTypes().length == 0) {
+					throw new IllegalStateException("Autowired annotation requires at least one argument: " + candidate);
+				}
+				boolean required = determineRequiredStatus(annotation);
+				if (required) {
+					if (!candidates.isEmpty()) {
+						throw new BeanCreationException("Invalid autowire-marked constructors: " + candidates +
+								". Found another constructor with 'required' Autowired annotation: " + requiredConstructor);
+					}
+					requiredConstructor = candidate;
+				}
+				candidates.add(candidate);
+			}
+			else if (candidate.getParameterTypes().length == 0) {
+				defaultConstructor = candidate;
 			}
 		}
-		return constructor;
+
+		if (!candidates.isEmpty()) {
+			// Add default constructor to list of optional constructors, as fallback.
+			if (requiredConstructor == null && defaultConstructor != null) {
+				candidates.add(defaultConstructor);
+			}
+			return (Constructor[]) candidates.toArray(new Constructor[candidates.size()]);
+		}
+		else {
+			// No annotated candidate constructors found.
+			return null;
+		}
 	}
 
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
@@ -213,19 +244,20 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	/**
-	 * Determines if the annotated field or method requires its dependency.
-	 * A required dependency means that autowiring should fail when no beans are 
-	 * found. Otherwise, the autowiring process will simply bypass the field or 
-	 * method when no beans are found.
-	 * @param annotation
-	 * @return true if the annotation indicates that a dependency is required
+	 * Determine if the annotated field or method requires its dependency.
+	 * <p>A 'required' dependency means that autowiring should fail when no beans
+	 * are found. Otherwise, the autowiring process will simply bypass the field
+	 * or method when no beans are found.
+	 * @param annotation the Autowired annotation
+	 * @return whether the annotation indicates that a dependency is required
 	 */
 	protected boolean determineRequiredStatus(Annotation annotation) {
 		try {
-			Method method = ReflectionUtils.findMethod(annotation.annotationType(), requiredParameterName, new Class[] {});
-			return requiredParameterValue == (Boolean) ReflectionUtils.invokeMethod(method, annotation);
+			Method method =
+					ReflectionUtils.findMethod(annotation.annotationType(), this.requiredParameterName, new Class[0]);
+			return (this.requiredParameterValue == (Boolean) ReflectionUtils.invokeMethod(method, annotation));
 		}
-		catch(Exception e) {
+		catch (Exception ex) {
 			// required by default
 			return true;
 		}
