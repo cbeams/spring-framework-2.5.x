@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
  * functionality like <code>LabeledEnumResolver.getLabeledEnumSet(type) in this case.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 1.2.2
  * @see org.springframework.core.enums.LabeledEnumResolver#getLabeledEnumSet(Class)
  */
@@ -44,13 +45,13 @@ public class StringCodedLabeledEnum extends AbstractGenericLabeledEnum {
 	 */
 	public StringCodedLabeledEnum(String code, String label) {
 		super(label);
-		Assert.hasText(code, "'code' must not be empty");
+		Assert.notNull(code, "'code' must not be null");
 		this.code = code;
 	}
 
 
 	public Comparable getCode() {
-		return code;
+		return this.code;
 	}
 
 	/**
