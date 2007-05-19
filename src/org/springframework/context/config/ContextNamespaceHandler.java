@@ -32,6 +32,8 @@ public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static final String PROPERTY_PLACEHOLDER_ELEMENT = "property-placeholder";
 
+	private static final String LOAD_TIME_WEAVER_ELEMENT = "load-time-weaver";
+
 	private static final String ANNOTATION_CONFIG_ELEMENT = "annotation-config";
 	
 	private static final String COMPONENT_SCAN_ELEMENT = "component-scan";
@@ -40,21 +42,16 @@ public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 	public void init() {
 		registerBeanDefinitionParser(PROPERTY_PLACEHOLDER_ELEMENT, new PropertyPlaceholderBeanDefinitionParser());
 		if (JdkVersion.isAtLeastJava15()) {
-			registerBeanDefinitionParser(ANNOTATION_CONFIG_ELEMENT, createAnnotationConfigParser());
-			registerBeanDefinitionParser(COMPONENT_SCAN_ELEMENT, createComponentScanParser());
+			registerBeanDefinitionParser(LOAD_TIME_WEAVER_ELEMENT,
+					instantiateParser("org.springframework.context.weaving.LoadTimeWeaverBeanDefinitionParser"));
+			registerBeanDefinitionParser(ANNOTATION_CONFIG_ELEMENT,
+					instantiateParser("org.springframework.context.annotation.AnnotationConfigBeanDefinitionParser"));
+			registerBeanDefinitionParser(COMPONENT_SCAN_ELEMENT,
+					instantiateParser("org.springframework.context.annotation.ComponentScanBeanDefinitionParser"));
 		}
 	}
 
-
-	protected BeanDefinitionParser createAnnotationConfigParser() {
-		return doCreateParser("org.springframework.context.annotation.AnnotationConfigBeanDefinitionParser");
-	}
-
-	protected BeanDefinitionParser createComponentScanParser() {
-		return doCreateParser("org.springframework.context.annotation.ComponentScanBeanDefinitionParser");
-	}
-
-	protected static BeanDefinitionParser doCreateParser(String className) {
+	protected BeanDefinitionParser instantiateParser(String className) {
 		try {
 			return (BeanDefinitionParser) ClassUtils.forName(className).newInstance();
 		}
