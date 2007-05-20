@@ -10,6 +10,7 @@ General
 * added missing websphere_uow_api.jar to -with-dependencies distribution
 
 Package org.springframework.aop
+* ReflectiveMethodInvocation always uses a shared user attribute Map in clones (for proper binding of multiple advices)
 * "aop:aspectj-autoproxy" XML configuration tag detects all aspect beans in case of empty XML body content as well
 
 Package org.springframework.beans
@@ -19,6 +20,7 @@ Package org.springframework.beans
 * reworked SmartInstantiationAwareBeanPostProcessor's "determineConstructor" hook into "determineCandidateConstructors"
 * DefaultListableBeanFactory clears a cached merged bean definition in case of re-registering a bean definition
 * added 'required' attribute to @Autowired annotation (configurable for a custom autowire annotation as well)
+* avoid double invocation of @Autowired/@Resource setter method in case of explicitly specified property value
 * added support for the JDK 1.6 ServiceLoader facility (package "beans.factory.serviceloader")
 
 Package org.springframework.cache
@@ -37,6 +39,7 @@ Package org.springframework.context
 
 Package org.springframework.core
 * introduced PriorityOrdered marker interface, with order values automatically applied before any plain Ordered values
+* fixed BridgeMethodResolver to properly detect a method that substitutes a type parameter with an array type
 * PathMatchingResourcePatternResolver explicitly closes freshly created JarFile handles, to allow for hot redeployment
 * StringCodedLabeledEnum accepts empty codes (that purely consist of whitespace) as well
 
