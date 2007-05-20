@@ -71,6 +71,29 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.destroySingletons();
 	}
 
+	public void testExtendedResourceInjectionWithOverriding() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition annotatedBd = new RootBeanDefinition(ExtendedResourceInjectionBean.class);
+		TestBean tb2 = new TestBean();
+		annotatedBd.getPropertyValues().addPropertyValue("testBean2", tb2);
+		bf.registerBeanDefinition("annotatedBean", annotatedBd);
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		NestedTestBean ntb = new NestedTestBean();
+		bf.registerSingleton("nestedTestBean", ntb);
+
+		ExtendedResourceInjectionBean bean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tb, bean.getTestBean());
+		assertSame(tb2, bean.getTestBean2());
+		assertSame(tb, bean.getTestBean3());
+		assertSame(tb, bean.getTestBean4());
+		assertSame(ntb, bean.getNestedTestBean());
+		bf.destroySingletons();
+	}
+
 	public void testOptionalResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -450,8 +473,8 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 		bf.destroySingletons();
 	}
-	
-	
+
+
 	public static class ResourceInjectionBean {
 
 		@Autowired(required=false)
@@ -460,7 +483,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		private TestBean testBean2;
 
 		@Autowired
-		protected void setTestBean2(TestBean testBean2) {
+		public void setTestBean2(TestBean testBean2) {
 			if (this.testBean2 != null) {
 				throw new IllegalStateException("Already called");
 			}
@@ -486,13 +509,11 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 		private ITestBean testBean4;
 
-
 		public ExtendedResourceInjectionBean() {
 		}
 
-
 		@Autowired
-		protected void setTestBean2(TestBean testBean2) {
+		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
 		}
 
@@ -525,13 +546,11 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 		private ITestBean testBean4;
 
-
 		public OptionalResourceInjectionBean() {
 		}
 
-
 		@Autowired(required=false)
-		protected void setTestBean2(TestBean testBean2) {
+		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
 		}
 
@@ -564,7 +583,6 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 		private NestedTestBean nestedTestBean;
 
-
 		public ConstructorResourceInjectionBean() {
 			throw new UnsupportedOperationException();
 		}
@@ -587,9 +605,8 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 			throw new UnsupportedOperationException();
 		}
 
-
 		@Autowired
-		protected void setTestBean2(TestBean testBean2) {
+		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
 		}
 
@@ -615,7 +632,6 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 		private NestedTestBean nestedTestBean;
 
-
 		public ConstructorsResourceInjectionBean() {
 		}
 
@@ -637,7 +653,6 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		public ConstructorsResourceInjectionBean(ITestBean testBean3, ITestBean testBean4, NestedTestBean nestedTestBean) {
 			throw new UnsupportedOperationException();
 		}
-
 
 		public ITestBean getTestBean3() {
 			return testBean3;
@@ -683,7 +698,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 		@MyAutowired(optional=true)
 		private TestBean testBean3;
-		
+
 		public TestBean getTestBean3() {
 			return testBean3;
 		}
@@ -695,20 +710,20 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		private TestBean testBean3;
 		
 		@MyAutowired(optional=true)
-		public void setTestBean3(TestBean testBean3) {
+		protected void setTestBean3(TestBean testBean3) {
 			this.testBean3 = testBean3;
 		}
-		
+
 		public TestBean getTestBean3() {
 			return testBean3;
 		}
 	}
-	
+
 
 	@Target({ElementType.METHOD, ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface MyAutowired {
-		
+
 		boolean optional() default false;
 	}
 

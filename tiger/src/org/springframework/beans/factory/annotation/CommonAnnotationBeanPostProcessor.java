@@ -19,24 +19,19 @@ package org.springframework.beans.factory.annotation;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
@@ -91,8 +86,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	private transient BeanFactory resourceFactory;
 
-	private transient final Map<Class<?>, ResourceMetadata> resourceMetadataCache =
-			new HashMap<Class<?>, ResourceMetadata>();
+	private transient final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
+			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
 
 
 	/**
@@ -134,12 +129,12 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
-		ResourceMetadata metadata = findResourceMetadata(bean.getClass());
+		InjectionMetadata metadata = findResourceMetadata(bean.getClass());
 		try {
-			metadata.injectResources(bean);
+			metadata.injectFields(bean);
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "Injection of resources failed", ex);
+			throw new BeanCreationException(beanName, "Injection of resource fields failed", ex);
 		}
 		return true;
 	}
@@ -147,37 +142,49 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 
+		InjectionMetadata metadata = findResourceMetadata(bean.getClass());
+		try {
+			metadata.injectMethods(bean, pvs);
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(beanName, "Injection of resource methods failed", ex);
+		}
 		return pvs;
 	}
 
 
-	private ResourceMetadata findResourceMetadata(Class clazz) {
-		synchronized (this.resourceMetadataCache) {
-			ResourceMetadata metadata = this.resourceMetadataCache.get(clazz);
-			if (metadata == null) {
-				final ResourceMetadata newMetadata = new ResourceMetadata();
-				ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
-					public void doWith(Field field) {
-						if (field.getAnnotation(Resource.class) != null) {
-							newMetadata.addResource(field);
-						}
-					}
-				});
-				ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
-					public void doWith(Method method) {
-						if (method.getAnnotation(Resource.class) != null) {
-							if (method.getParameterTypes().length != 1) {
-								throw new IllegalStateException("Resource annotation requires a single-arg method: " + method);
+	private InjectionMetadata findResourceMetadata(final Class clazz) {
+		// Quick check on the concurrent map first, with minimal locking.
+		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
+		if (metadata == null) {
+			synchronized (this.injectionMetadataCache) {
+				metadata = this.injectionMetadataCache.get(clazz);
+				if (metadata == null) {
+					final InjectionMetadata newMetadata = new InjectionMetadata();
+					ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
+						public void doWith(Field field) {
+							if (field.getAnnotation(Resource.class) != null) {
+								newMetadata.addInjectedField(new ResourceElement(field, null));
 							}
-							newMetadata.addResource(method);
 						}
-					}
-				});
-				metadata = newMetadata;
-				this.resourceMetadataCache.put(clazz, metadata);
+					});
+					ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
+						public void doWith(Method method) {
+							if (method.getAnnotation(Resource.class) != null) {
+								if (method.getParameterTypes().length != 1) {
+									throw new IllegalStateException("Resource annotation requires a single-arg method: " + method);
+								}
+								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+								newMetadata.addInjectedMethod(new ResourceElement(method, pd));
+							}
+						}
+					});
+					metadata = newMetadata;
+					this.injectionMetadataCache.put(clazz, metadata);
+				}
 			}
-			return metadata;
 		}
+		return metadata;
 	}
 
 	/**
@@ -199,32 +206,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 
 	/**
-	 * Class representing information about annotated fields and methods.
-	 */
-	private class ResourceMetadata {
-
-		private Set<ResourceElement> resourceElements = new LinkedHashSet<ResourceElement>();
-
-		public void addResource(Member member) {
-			this.resourceElements.add(new ResourceElement(member));
-		}
-
-		public void injectResources(Object target) throws Throwable {
-			for (Iterator it = this.resourceElements.iterator(); it.hasNext();) {
-				ResourceElement element = (ResourceElement) it.next();
-				element.injectResource(target);
-			}
-		}
-	}
-
-
-	/**
 	 * Class representing injection information about an annotated field
 	 * or setter method.
 	 */
-	private class ResourceElement {
-
-		private final Member member;
+	private class ResourceElement extends InjectionMetadata.InjectedElement {
 
 		private final String name;
 
@@ -232,7 +217,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		private final boolean shareable;
 
-		public ResourceElement(Member member) {
+		private final PropertyDescriptor pd;
+
+		public ResourceElement(Member member, PropertyDescriptor pd) {
+			super(member);
 			AnnotatedElement ae = (AnnotatedElement) member;
 			Resource resource = ae.getAnnotation(Resource.class);
 			String resourceName = resource.name();
@@ -268,22 +256,24 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					resourceType = ((Method) member).getParameterTypes()[0];
 				}
 			}
-			this.member = member;
 			this.name = resourceName;
 			this.type = resourceType;
 			this.shareable = resource.shareable();
+			this.pd = pd;
 		}
 
-		public void injectResource(Object bean) throws Throwable {
+		protected void inject(Object bean, PropertyValues pvs) throws Throwable {
 			Object resourceObject = getResource(this.name, this.type, this.shareable);
-			if (!Modifier.isPublic(this.member.getModifiers()) ||
-					!Modifier.isPublic(this.member.getDeclaringClass().getModifiers())) {
-				((AccessibleObject) this.member).setAccessible(true);
-			}
 			if (this.member instanceof Field) {
+				makeMemberAccessible();
 				((Field) this.member).set(bean, resourceObject);
 			}
 			else {
+				if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
+					// Explicit value provided as part of the bean definition.
+					return;
+				}
+				makeMemberAccessible();
 				try {
 					((Method) this.member).invoke(bean, resourceObject);
 				}
@@ -291,29 +281,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					throw ex.getTargetException();
 				}
 			}
-		}
-
-		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof ResourceElement)) {
-				return false;
-			}
-			ResourceElement otherElement = (ResourceElement) other;
-			if (this.member instanceof Field) {
-				return this.member.equals(otherElement.member);
-			}
-			else {
-				return (otherElement.member instanceof Method &&
-						this.member.getName().equals(otherElement.member.getName()) &&
-						Arrays.equals(((Method) this.member).getParameterTypes(),
-								((Method) otherElement.member).getParameterTypes()));
-			}
-		}
-
-		public int hashCode() {
-			return this.member.getClass().hashCode() * 29 + this.member.getName().hashCode();
 		}
 	}
 

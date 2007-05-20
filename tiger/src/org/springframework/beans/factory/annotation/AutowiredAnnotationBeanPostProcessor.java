@@ -16,24 +16,21 @@
 
 package org.springframework.beans.factory.annotation;
 
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -73,17 +70,16 @@ import org.springframework.util.ReflectionUtils;
 public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
 		implements BeanFactoryAware {
 
-	private transient final Map<Class<?>, AutowiringMetadata> memberMetadataCache =
-			new HashMap<Class<?>, AutowiringMetadata>();
-
-	private ListableBeanFactory beanFactory;
-
-
 	private Class<? extends Annotation> autowiredAnnotationType = Autowired.class;
 	
 	private String requiredParameterName = "required";
 	
 	private boolean requiredParameterValue = true;
+
+	private ListableBeanFactory beanFactory;
+
+	private transient final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
+			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
 
 
 	/**
@@ -181,48 +177,66 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
-		AutowiringMetadata metadata = findAutowiringMetadata(bean.getClass());
+		InjectionMetadata metadata = findAutowiringMetadata(bean.getClass());
 		try {
-			metadata.autowireMembers(bean);
+			metadata.injectFields(bean);
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "Injection of resources failed", ex);
+			throw new BeanCreationException(beanName, "Autowiring of fields failed", ex);
 		}
 		return true;
 	}
 
+	public PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 
-	private AutowiringMetadata findAutowiringMetadata(Class clazz) {
-		synchronized (this.memberMetadataCache) {
-			AutowiringMetadata metadata = this.memberMetadataCache.get(clazz);
-			if (metadata == null) {
-				final AutowiringMetadata newMetadata = new AutowiringMetadata();
-				ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
-					public void doWith(Field field) {
-						Annotation annotation = field.getAnnotation(getAutowiredAnnotationType());
-						if (annotation != null) {
-							boolean required = determineRequiredStatus(annotation);
-							newMetadata.addAutowiredMember(field, required);
-						}
-					}
-				});
-				ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
-					public void doWith(Method method) {
-						Annotation annotation = method.getAnnotation(getAutowiredAnnotationType());
-						if (annotation != null) {
-							if (method.getParameterTypes().length == 0) {
-								throw new IllegalStateException("Autowired annotation requires at least one argument: " + method);
-							}
-							boolean required = determineRequiredStatus(annotation);
-							newMetadata.addAutowiredMember(method, required);
-						}
-					}
-				});
-				metadata = newMetadata;
-				this.memberMetadataCache.put(clazz, metadata);
-			}
-			return metadata;
+		InjectionMetadata metadata = findAutowiringMetadata(bean.getClass());
+		try {
+			metadata.injectMethods(bean, pvs);
 		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(beanName, "Autowiring of methods failed", ex);
+		}
+		return pvs;
+	}
+
+
+	private InjectionMetadata findAutowiringMetadata(final Class clazz) {
+		// Quick check on the concurrent map first, with minimal locking.
+		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
+		if (metadata == null) {
+			synchronized (this.injectionMetadataCache) {
+				metadata = this.injectionMetadataCache.get(clazz);
+				if (metadata == null) {
+					final InjectionMetadata newMetadata = new InjectionMetadata();
+					ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
+						public void doWith(Field field) {
+							Annotation annotation = field.getAnnotation(getAutowiredAnnotationType());
+							if (annotation != null) {
+								boolean required = determineRequiredStatus(annotation);
+								newMetadata.addInjectedField(new AutowiredElement(field, required, null));
+							}
+						}
+					});
+					ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
+						public void doWith(Method method) {
+							Annotation annotation = method.getAnnotation(getAutowiredAnnotationType());
+							if (annotation != null) {
+								if (method.getParameterTypes().length == 0) {
+									throw new IllegalStateException("Autowired annotation requires at least one argument: " + method);
+								}
+								boolean required = determineRequiredStatus(annotation);
+								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+								newMetadata.addInjectedMethod(new AutowiredElement(method, required, pd));
+							}
+						}
+					});
+					metadata = newMetadata;
+					this.injectionMetadataCache.put(clazz, metadata);
+				}
+			}
+		}
+		return metadata;
 	}
 
 	/**
@@ -265,50 +279,28 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 
 	/**
-	 * Class representing information about annotated fields and methods.
-	 */
-	private class AutowiringMetadata {
-
-		private Set<AutowiredMember> autowiredMembers = new LinkedHashSet<AutowiredMember>();
-
-		public void addAutowiredMember(Member member, boolean required) {
-			this.autowiredMembers.add(new AutowiredMember(member, required));
-		}
-
-		public void autowireMembers(Object target) throws Throwable {
-			for (Iterator it = this.autowiredMembers.iterator(); it.hasNext();) {
-				AutowiredMember element = (AutowiredMember) it.next();
-				element.autowireMember(target);
-			}
-		}
-	}
-
-
-	/**
 	 * Class representing injection information about an annotated field
 	 * or setter method.
 	 */
-	private class AutowiredMember {
-
-		private final Member member;
+	private class AutowiredElement extends InjectionMetadata.InjectedElement {
 
 		private final boolean required;
-		
-		public AutowiredMember(Member member, boolean required) {
-			this.member = member;
+
+		private final PropertyDescriptor pd;
+
+		public AutowiredElement(Member member, boolean required, PropertyDescriptor pd) {
+			super(member);
 			this.required = required;
+			this.pd = pd;
 		}
 
-		public void autowireMember(Object bean) throws Throwable {
-			if (!Modifier.isPublic(this.member.getModifiers()) ||
-					!Modifier.isPublic(this.member.getDeclaringClass().getModifiers())) {
-				((AccessibleObject) this.member).setAccessible(true);
-			}
+		protected void inject(Object bean, PropertyValues pvs) throws Throwable {
 			if (this.member instanceof Field) {
 				Field field = (Field) this.member;
 				try {
 					Object argument = resolveDependency(field.getType());
 					if (argument != null) {
+						makeMemberAccessible();
 						field.set(bean, argument);
 					}
 				}
@@ -317,6 +309,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				}
 			}
 			else {
+				if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
+					// Explicit value provided as part of the bean definition.
+					return;
+				}
 				Method method = (Method) this.member;
 				Class[] paramTypes = method.getParameterTypes();
 				Object[] arguments = new Object[paramTypes.length];
@@ -329,6 +325,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						}
 					}
 					if (shouldInvoke) {
+						makeMemberAccessible();
 						method.invoke(bean, arguments);
 					}
 				}
@@ -347,29 +344,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				throw new NoSuchBeanDefinitionException(type, "expected single bean but found 0");
 			}
 			return bean;
-		}
-
-		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof AutowiredMember)) {
-				return false;
-			}
-			AutowiredMember otherElement = (AutowiredMember) other;
-			if (this.member instanceof Field) {
-				return this.member.equals(otherElement.member);
-			}
-			else {
-				return (otherElement.member instanceof Method &&
-						this.member.getName().equals(otherElement.member.getName()) &&
-						Arrays.equals(((Method) this.member).getParameterTypes(),
-								((Method) otherElement.member).getParameterTypes()));
-			}
-		}
-
-		public int hashCode() {
-			return this.member.getClass().hashCode() * 29 + this.member.getName().hashCode();
 		}
 	}
 

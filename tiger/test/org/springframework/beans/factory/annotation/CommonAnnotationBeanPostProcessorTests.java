@@ -154,6 +154,36 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.destroy2Called);
 	}
 
+	public void testExtendedResourceInjectionWithOverriding() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setResourceFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition annotatedBd = new RootBeanDefinition(ExtendedResourceInjectionBean.class);
+		TestBean tb5 = new TestBean();
+		annotatedBd.getPropertyValues().addPropertyValue("testBean2", tb5);
+		bf.registerBeanDefinition("annotatedBean", annotatedBd);
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean2", tb2);
+		TestBean tb3 = new TestBean();
+		bf.registerSingleton("testBean3", tb3);
+		TestBean tb4 = new TestBean();
+		bf.registerSingleton("testBean4", tb4);
+
+		ExtendedResourceInjectionBean bean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
+		assertTrue(bean.initCalled);
+		assertTrue(bean.init2Called);
+		assertSame(tb, bean.getTestBean());
+		assertSame(tb5, bean.getTestBean2());
+		assertSame(tb4, bean.getTestBean3());
+		assertSame(tb3, bean.getTestBean4());
+		bf.destroySingletons();
+		assertTrue(bean.destroyCalled);
+		assertTrue(bean.destroy2Called);
+	}
+
 
 	public static class AnnotatedInitDestroyBean {
 
@@ -210,7 +240,7 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		}
 
 		@Resource
-		protected void setTestBean2(TestBean testBean2) {
+		public void setTestBean2(TestBean testBean2) {
 			if (this.testBean2 != null) {
 				throw new IllegalStateException("Already called");
 			}
@@ -235,7 +265,7 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		private ITestBean testBean4;
 
 		@Resource
-		protected void setTestBean2(TestBean testBean2) {
+		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
 		}
 
