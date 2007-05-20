@@ -180,18 +180,20 @@ public abstract class BridgeMethodResolver {
 		for (int i = 0; i < genericParameters.length; i++) {
 			Type genericParameter = genericParameters[i];
 			Class candidateParameter = candidateParameters[i];
-			if (genericParameter instanceof GenericArrayType && candidateParameter.isArray()) {
+			if (candidateParameter.isArray()) {
 				// An array type: compare the component type.
-				if (!candidateParameter.getComponentType().equals(
-						getRawType(((GenericArrayType) genericParameter).getGenericComponentType(), typeVariableMap))) {
-					return false;
+				Type rawType = getRawType(genericParameter, typeVariableMap);
+				if (rawType instanceof GenericArrayType) {
+					if (!candidateParameter.getComponentType().equals(
+							getRawType(((GenericArrayType) rawType).getGenericComponentType(), typeVariableMap))) {
+						return false;
+					}
+					break;
 				}
 			}
-			else {
-				// A non-array type: compare the type itself.
-				if (!candidateParameter.equals(getRawType(genericParameter, typeVariableMap))) {
-					return false;
-				}
+			// A non-array type: compare the type itself.
+			if (!candidateParameter.equals(getRawType(genericParameter, typeVariableMap))) {
+				return false;
 			}
 		}
 		return true;
@@ -204,7 +206,7 @@ public abstract class BridgeMethodResolver {
 		if (genericType instanceof TypeVariable) {
 			TypeVariable tv = (TypeVariable) genericType;
 			Type result = (Type) typeVariableMap.get(tv);
-			return (result != null ? result: Object.class);
+			return (result != null ? result : Object.class);
 		}
 		else if (genericType instanceof ParameterizedType) {
 			return ((ParameterizedType) genericType).getRawType();
@@ -298,7 +300,10 @@ public abstract class BridgeMethodResolver {
 			Type actualTypeArgument = actualTypeArguments[i];
 			TypeVariable variable = typeVariables[i];
 			if (actualTypeArgument instanceof Class) {
-				typeVariableMap.put(variable, (Class) actualTypeArgument);
+				typeVariableMap.put(variable, actualTypeArgument);
+			}
+			else if (actualTypeArgument instanceof GenericArrayType) {
+				typeVariableMap.put(variable, actualTypeArgument);
 			}
 			else if (actualTypeArgument instanceof ParameterizedType) {
 				typeVariableMap.put(variable, ((ParameterizedType) actualTypeArgument).getRawType());
@@ -309,7 +314,7 @@ public abstract class BridgeMethodResolver {
 				TypeVariable typeVariableArgument = (TypeVariable) actualTypeArgument;
 				Type resolvedType = (Type) typeVariableMap.get(typeVariableArgument);
 				if (resolvedType == null) {
-					resolvedType = extractClassTypeVariable(typeVariableArgument);
+					resolvedType = extractClassForTypeVariable(typeVariableArgument);
 				}
 				if (resolvedType != null) {
 					typeVariableMap.put(variable, resolvedType);
@@ -321,7 +326,7 @@ public abstract class BridgeMethodResolver {
 	/**
 	 * Extracts the bound '<code>Class</code>' for a give {@link TypeVariable}.
 	 */
-	private static Class extractClassTypeVariable(TypeVariable typeVariable) {
+	private static Class extractClassForTypeVariable(TypeVariable typeVariable) {
 		Type[] bounds = typeVariable.getBounds();
 		Type result = null;
 		if (bounds.length > 0) {
@@ -333,7 +338,7 @@ public abstract class BridgeMethodResolver {
 				result = bound;
 			}
 			else if (bound instanceof TypeVariable) {
-				result = extractClassTypeVariable((TypeVariable) bound);
+				result = extractClassForTypeVariable((TypeVariable) bound);
 			}
 		}
 		return (result instanceof Class ? (Class) result : null);

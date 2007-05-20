@@ -307,6 +307,20 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
+	public void testSPR3485() throws Exception {
+		Method bridgedMethod = DomainObject.class.getDeclaredMethod(
+				"method2", ParameterType.class, byte[].class);
+		assertNotNull(bridgedMethod);
+		assertFalse(bridgedMethod.isBridge());
+
+		Method bridgeMethod = DomainObject.class.getDeclaredMethod(
+				"method2", Serializable.class, Object.class);
+		assertNotNull(bridgeMethod);
+		assertTrue(bridgeMethod.isBridge());
+
+		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+	}
+
 	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
 		Method[] methods = targetType.getMethods();
 		for (Method m : methods) {
@@ -1137,6 +1151,38 @@ public class BridgeMethodResolverTests extends TestCase {
 		@Override
 		public <T> void doSomething(DomainObjectExtendsSuper domainObject, T value) {
 			super.doSomething(domainObject, value);
+		}
+	}
+
+
+	//-------------------
+	// SPR-3485 classes
+	//-------------------
+
+	private static class ParameterType implements Serializable {
+
+	}
+
+
+	private static class AbstractDomainObject<P extends Serializable, R> {
+
+		public R method1(P p) {
+			return null;
+		}
+
+		public void method2(P p, R r) {
+		}
+	}
+
+
+	private static class DomainObject extends AbstractDomainObject<ParameterType, byte[]> {
+
+		public byte[] method1(ParameterType p) {
+			return super.method1(p);
+		}
+
+		public void method2(ParameterType p, byte[] r) {
+			super.method2(p, r);
 		}
 	}
 
