@@ -63,6 +63,17 @@ public class BeanPropertyRowMapper extends AbstractBeanPropertyRowMapper impleme
 
 
 	/**
+	 * Static factory method to create a new ParameterizedBeanPropertyRowMapper.
+	 * @param mappedClass the class that each row should be mapped to.
+	 */
+	public static BeanPropertyRowMapper newInstance(Class mappedClass) {
+		BeanPropertyRowMapper newInstance = new BeanPropertyRowMapper();
+		newInstance.setMappedClass(mappedClass);
+		return newInstance;
+	}
+
+
+	/**
 	 * Set the class that each row should be mapped to.
 	 * @param mappedClass the mapped class
 	 */
