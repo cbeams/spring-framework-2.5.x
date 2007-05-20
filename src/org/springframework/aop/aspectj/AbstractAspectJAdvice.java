@@ -485,12 +485,13 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	/**
 	 * Take the arguments at the method execution join point and output a set of arguments
 	 * to the advice method
+	 * @param jp the current JoinPoint
 	 * @param jpMatch the join point match that matched this execution join point
 	 * @param returnValue the return value from the method execution (may be null)
-	 * @param t the exception thrown by the method execution (may be null)
+	 * @param ex the exception thrown by the method execution (may be null)
 	 * @return the empty array if there are no arguments
 	 */
-	protected Object[] argBinding(JoinPoint jp, JoinPointMatch jpMatch, Object returnValue, Throwable t) {
+	protected Object[] argBinding(JoinPoint jp, JoinPointMatch jpMatch, Object returnValue, Throwable ex) {
 		calculateArgumentBindings();
 
 		// AMC start
@@ -527,7 +528,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			// binding from thrown exception
 			if (this.throwingName != null) {
 				Integer index = (Integer) this.argumentBindings.get(this.throwingName);
-				adviceInvocationArgs[index.intValue()] = t;
+				adviceInvocationArgs[index.intValue()] = ex;
 				numBound++;
 			}
 		}
