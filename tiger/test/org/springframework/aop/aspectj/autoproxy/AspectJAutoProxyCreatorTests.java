@@ -61,6 +61,14 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(68, ((ITestBean) factoryBean.getTargetObject()).getAge());
 	}
 
+	public void testMultipleAspectsWithParameterApplied() {
+		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
+				"/org/springframework/aop/aspectj/autoproxy/aspects.xml");
+		ITestBean tb = (ITestBean) bf.getBean("adrian");
+		tb.setAge(10);
+		assertEquals(20, tb.getAge());
+	}
+
 	public void testAspectsAreAppliedInDefinedOrder() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/aspectsWithOrdering.xml");

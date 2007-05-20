@@ -200,6 +200,13 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * @see java.lang.Object#clone()
 	 */
 	public MethodInvocation invocableClone(Object[] arguments) {
+		// Force initialization of the user attributes Map,
+		// for having a shared Map reference in the clone.
+		if (this.userAttributes == null) {
+			this.userAttributes = new HashMap();
+		}
+
+		// Create the MethodInvocation clone.
 		try {
 			ReflectiveMethodInvocation clone = (ReflectiveMethodInvocation) clone();
 			clone.arguments = arguments;

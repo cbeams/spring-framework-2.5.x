@@ -15,6 +15,10 @@
 		<property name="multiple" value="2"/>
 	</bean>
 
+	<bean class="org.springframework.aop.aspectj.autoproxy.DummyAspect"/>
+
+	<bean class="org.springframework.aop.aspectj.autoproxy.DummyAspectWithParameter"/>
+
 	<bean id="adrianParent" abstract="true">
 		<property name="name" value="adrian"/>
 	</bean>
