@@ -41,16 +41,19 @@ public class ParameterizedBeanPropertyRowMapper<T> extends AbstractBeanPropertyR
 	public ParameterizedBeanPropertyRowMapper() {
 	}
 
+
 	/**
-	 * Create a new ParameterizedBeanPropertyRowMapper.
+	 * Static factory method to create a new ParameterizedBeanPropertyRowMapper.
 	 * @param mappedClass the class that each row should be mapped to.
 	 */
-	public ParameterizedBeanPropertyRowMapper(Class<T> mappedClass) {
-		initialize(mappedClass);
+	public static <T> ParameterizedBeanPropertyRowMapper<T> newInstance(Class<T> mappedClass) {
+		ParameterizedBeanPropertyRowMapper<T> newInstance = new ParameterizedBeanPropertyRowMapper<T>();
+		newInstance.setMappedClass(mappedClass);
+		return newInstance;
 	}
 
 
-	/**
+ 	/**
 	 * Set the class that each row should be mapped to.
 	 * @param mappedClass the mapped class
 	 */

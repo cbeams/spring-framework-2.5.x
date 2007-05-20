@@ -39,7 +39,7 @@ public class ParameterizedBeanPropertyRowMapperTests extends AbstractRowMapperTe
 
 	public void testOverridingClassDefinedForMapping() {
 		ParameterizedBeanPropertyRowMapper<Person> mapper =
-				new ParameterizedBeanPropertyRowMapper<Person>(Person.class);
+				ParameterizedBeanPropertyRowMapper.newInstance(Person.class);
 		try {
 			((ParameterizedBeanPropertyRowMapper)mapper).setMappedClass(Long.class);
 			fail("Setting new class should have thrown InvalidDataAccessApiUsageException");
@@ -56,7 +56,7 @@ public class ParameterizedBeanPropertyRowMapperTests extends AbstractRowMapperTe
 	public void testStaticQueryWithRowMapper() throws SQLException {
 
 		List<Person> result = simpleJdbcTemplate.query("select name, age, birth_date, balance from people",
-				new ParameterizedBeanPropertyRowMapper<Person>(Person.class));
+				ParameterizedBeanPropertyRowMapper.newInstance(Person.class));
 
 		assertEquals(1, result.size());
 
