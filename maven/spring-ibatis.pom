@@ -34,9 +34,9 @@
     </dependency>
 <!-- Not currently in ibiblio maven repository -->
     <dependency>
-      <groupId>com.ibatis</groupId>
-      <artifactId>ibatis2</artifactId>
-      <version>2.3.0.677</version>
+      <groupId>org.apache.ibatis</groupId>
+      <artifactId>ibatis-sqlmap</artifactId>
+      <version>2.3.0</version>
     </dependency>
 <!-- Spring Dependencies -->
     <dependency>
