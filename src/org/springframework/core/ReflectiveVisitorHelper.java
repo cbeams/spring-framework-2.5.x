@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,12 @@ import org.springframework.util.ReflectionUtils;
  *   }
  * </pre>
  *
- * See the DefaultValueStyler class for a concrete usage.
- * 
+ * See the {@link org.springframework.core.style.DefaultValueStyler} class
+ * for a concrete usage of this visitor helper.
+ *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 1.2.2
- * @see org.springframework.core.style.DefaultValueStyler
  */
 public final class ReflectiveVisitorHelper {
 
@@ -88,13 +89,12 @@ public final class ReflectiveVisitorHelper {
 		try {
 			Object[] args = null;
 			if (argument != null) {
-				args = new Object[] { argument };
+				args = new Object[] {argument};
 			}
-			if (!Modifier.isPublic(method.getModifiers()) && !method.isAccessible()) {
+			if (!Modifier.isPublic(method.getModifiers())) {
 				method.setAccessible(true);
 			}
 			return method.invoke(visitor, args);
-
 		}
 		catch (Exception ex) {
 			ReflectionUtils.handleReflectionException(ex);
@@ -139,9 +139,9 @@ public final class ReflectiveVisitorHelper {
 		private Method findNullVisitorMethod() {
 			for (Class clazz = this.visitorClass; clazz != null; clazz = clazz.getSuperclass()) {
 				try {
-					return clazz.getDeclaredMethod(VISIT_NULL, (Class[])null);
+					return clazz.getDeclaredMethod(VISIT_NULL, (Class[]) null);
 				}
-				catch (NoSuchMethodException e) {
+				catch (NoSuchMethodException ex) {
 				}
 			}
 			return findDefaultVisitMethod();
@@ -153,7 +153,7 @@ public final class ReflectiveVisitorHelper {
 				try {
 					return clazz.getDeclaredMethod(VISIT_METHOD, args);
 				}
-				catch (NoSuchMethodException e) {
+				catch (NoSuchMethodException ex) {
 				}
 			}
 			if (logger.isWarnEnabled()) {
