@@ -108,13 +108,14 @@ public class InjectionMetadata {
 			}
 		}
 
-		protected abstract void inject(Object target, PropertyValues pvs) throws Throwable;
-
-		protected final void injectSimple(Object target, PropertyValues pvs, Object value) throws Throwable {
+		/**
+		 * Either this or {@link #getResourceToInject} needs to be overridden.
+		 */
+		protected void inject(Object target, PropertyValues pvs) throws Throwable {
 			if (this.member instanceof Field) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
-				field.set(target, value);
+				field.set(target, getResourceToInject());
 			}
 			else {
 				if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
@@ -124,12 +125,19 @@ public class InjectionMetadata {
 				try {
 					Method method = (Method) this.member;
 					ReflectionUtils.makeAccessible(method);
-					method.invoke(target, value);
+					method.invoke(target, getResourceToInject());
 				}
 				catch (InvocationTargetException ex) {
 					throw ex.getTargetException();
 				}
 			}
+		}
+
+		/**
+		 * Either this or {@link #inject} needs to be overridden.
+		 */
+		protected Object getResourceToInject() {
+			return null;
 		}
 
 		public boolean equals(Object other) {

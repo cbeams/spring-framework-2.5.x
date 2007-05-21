@@ -240,9 +240,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			this.shareable = resource.shareable();
 		}
 
-		protected void inject(Object target, PropertyValues pvs) throws Throwable {
-			Object resourceObject = getResource(this.name, this.type, this.shareable);
-			injectSimple(target, pvs, resourceObject);
+		protected Object getResourceToInject() {
+			return getResource(this.name, this.type, this.shareable);
 		}
 	}
 
