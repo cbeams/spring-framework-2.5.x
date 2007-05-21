@@ -93,8 +93,8 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		return this;
 	}
 
-	public SimpleJdbcCall withoutMetaDataAccess() {
-		setAccessMetaData(false);
+	public SimpleJdbcCall withoutProcedureColumnMetaDataAccess() {
+		setAccessProcedureColumnMetaData(false);
 		return this;
 	}
 
@@ -119,15 +119,16 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	public Map<String, Object> execute(Map args) {
-		return null;
-	}
-
-	public Map<String, Object> execute(SqlParameterSource args) {
 		checkCompiled();
-		Map values = ((MapSqlParameterSource)args).getValues();
+		Map values = matchInParameterValuesWithCallParameters(args);
 		CallableStatementCreator csc = this.callableStatementFactory.newCallableStatementCreator(values);
 		Map result = jdbcTemplate.call(csc, getCallParameters());
 		return (Map<String, Object>)result;
+	}
+
+	public Map<String, Object> execute(SqlParameterSource args) {
+		Map values = ((MapSqlParameterSource)args).getValues();
+		return execute(values);
 	}
 
 }

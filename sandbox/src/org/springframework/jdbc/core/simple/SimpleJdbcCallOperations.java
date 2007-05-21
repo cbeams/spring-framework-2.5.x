@@ -51,7 +51,7 @@ public interface SimpleJdbcCallOperations {
 
 	SimpleJdbcCall declareReturnResultSetExtractor(String parameterName, ResultSetExtractor resultSetExtractor);
 
-	SimpleJdbcCall withoutMetaDataAccess();
+	SimpleJdbcCall withoutProcedureColumnMetaDataAccess();
 
 	<T> T executeFunction(Class<T> returnType, Map args);
 
