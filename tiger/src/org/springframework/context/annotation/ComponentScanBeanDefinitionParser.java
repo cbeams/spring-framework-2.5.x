@@ -26,7 +26,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.io.ResourceLoader;
@@ -52,6 +54,10 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	private static final String USE_DEFAULT_FILTERS_ATTRIBUTE = "use-default-filters";
 
 	private static final String ANNOTATION_CONFIG_ATTRIBUTE = "annotation-config";
+	
+	private static final String NAME_GENERATOR_ATTRIBUTE = "name-generator";
+	
+	private static final String SCOPE_RESOLVER_ATTRIBUTE = "scope-resolver";
 
 	private static final String EXCLUDE_FILTER_ELEMENT = "exclude-filter";
 
@@ -95,11 +101,49 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(parserContext.getRegistry());
 		scanner.setResourceLoader(resourceLoader);
 		scanner.setIncludeAnnotationConfig(annotationConfig);
+
+		// register beanNameGenerator if className provided
+		if (element.hasAttribute(NAME_GENERATOR_ATTRIBUTE)) {
+			BeanNameGenerator beanNameGenerator = (BeanNameGenerator) instantiateUserDefinedStrategy(
+					element.getAttribute(NAME_GENERATOR_ATTRIBUTE), BeanNameGenerator.class, resourceLoader.getClassLoader());
+			scanner.setBeanNameGenerator(beanNameGenerator);
+		}
+		
+		// register scopeMetadataResolver if className provided
+		if (element.hasAttribute(SCOPE_RESOLVER_ATTRIBUTE)) {
+			ScopeMetadataResolver scopeMetadataResolver = (ScopeMetadataResolver) instantiateUserDefinedStrategy(
+					element.getAttribute(SCOPE_RESOLVER_ATTRIBUTE), ScopeMetadataResolver.class, resourceLoader.getClassLoader());
+			scanner.setScopeMetadataResolver(scopeMetadataResolver);
+		}
+		
 		scanner.scan(basePackages, useDefaultFilters, excludeFilters, includeFilters);
 		
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
+	private Object instantiateUserDefinedStrategy(String className, Class strategyType, ClassLoader classLoader) {
+		Object result = null;
+		
+		try {
+			Class clazz = Class.forName(className, true, classLoader);
+			result = clazz.newInstance();
+		}
+		catch (ClassNotFoundException ex) {
+			throw new BeanCreationException("no class [" + className + "] found for strategy [" +
+					strategyType.getName() + "]", ex);
+		}
+		catch (Exception ex) {
+			throw new BeanCreationException("unable to instantiate class [" + className + "] for strategy [" + 
+					strategyType.getName() + "]. A zero-argument constructor is required", ex);
+		}
+		
+		if (!strategyType.isAssignableFrom(result.getClass())) {
+			throw new BeanCreationException("provided classname must be an implementation of " + strategyType);
+		}
+		return result;
+	}
+	
 	@SuppressWarnings("unchecked")
 	private TypeFilter createTypeFilter(Element element, ClassLoader classLoader) {
 		String filterTypeName = element.getAttribute(FILTER_TYPE_ATTRIBUTE);
