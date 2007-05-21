@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.jdbc.core.simple;
 
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -21,25 +37,23 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 
-	public synchronized SimpleJdbcCall withProcedureName(String procedureName) {
+	public SimpleJdbcCall withProcedureName(String procedureName) {
 		this.procName = procedureName;
 		setFunction(false);
 		return this;
 	}
 
-	public synchronized SimpleJdbcCall withSchemaName(String schemaName) {
+	public SimpleJdbcCall withSchemaName(String schemaName) {
 		this.schemaName = schemaName;
-		setFunction(false);
 		return this;
 	}
 
-	public synchronized SimpleJdbcCall withCatalogName(String catalogName) {
+	public SimpleJdbcCall withCatalogName(String catalogName) {
 		this.catalogName = catalogName;
-		setFunction(false);
 		return this;
 	}
 
-	public synchronized SimpleJdbcCall withFunctionName(String functionName) {
+	public SimpleJdbcCall withFunctionName(String functionName) {
 		this.procName = functionName;
 		setFunction(true);
 		return this;
@@ -47,17 +61,15 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 
 	public SimpleJdbcCall declareParameter(SqlParameter sqlParameter) {
 		if (sqlParameter != null)
-			declaredParameters.add(sqlParameter);
-		setAutoDetectParameters(false);
+			addDeclaredParameter(sqlParameter);
 		return this;
 	}
 
 	public SimpleJdbcCall declareParameters(SqlParameter... sqlParameters) {
 		for (SqlParameter sqlParameter : sqlParameters) {
 			if (sqlParameter != null)
-				declaredParameters.add(sqlParameter);
+				addDeclaredParameter(sqlParameter);
 		}
-		setAutoDetectParameters(false);
 		return this;
 	}
 
@@ -78,6 +90,11 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	public SimpleJdbcCall declareReturnResultSetExtractor(String parameterName, ResultSetExtractor resultSetExtractor) {
+		return this;
+	}
+
+	public SimpleJdbcCall withoutMetaDataAccess() {
+		setAccessMetaData(false);
 		return this;
 	}
 
@@ -108,9 +125,8 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	public Map<String, Object> execute(SqlParameterSource args) {
 		checkCompiled();
 		Map values = ((MapSqlParameterSource)args).getValues();
-		System.out.println("-->" + values);
 		CallableStatementCreator csc = this.callableStatementFactory.newCallableStatementCreator(values);
-		Map result = jdbcTemplate.call(csc, declaredParameters);
+		Map result = jdbcTemplate.call(csc, getCallParameters());
 		return (Map<String, Object>)result;
 	}
 
