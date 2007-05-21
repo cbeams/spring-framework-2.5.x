@@ -40,7 +40,7 @@ import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * Unit tests for persistence unit and persistence context injection.
+ * Unit tests for persistence context and persistence unit injection.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -81,6 +81,23 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		emfMc.verify();
 	}
 
+	public void testPublicExtendedPersistenceContextSetterWithOverriding() {
+		EntityManager mockEm2 = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
+
+		GenericApplicationContext gac = new GenericApplicationContext();
+		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
+		gac.registerBeanDefinition("annotationProcessor",
+				new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
+		RootBeanDefinition bd = new RootBeanDefinition(DefaultPublicPersistenceContextSetter.class);
+		bd.getPropertyValues().addPropertyValue("entityManager", mockEm2);
+		gac.registerBeanDefinition(DefaultPublicPersistenceContextSetter.class.getName(), bd);
+		gac.refresh();
+
+		DefaultPublicPersistenceContextSetter bean = (DefaultPublicPersistenceContextSetter) gac.getBean(
+				DefaultPublicPersistenceContextSetter.class.getName());
+		assertSame(mockEm2, bean.em);
+	}
+
 	public void testPrivatePersistenceUnitField() {
 		GenericApplicationContext gac = new GenericApplicationContext();
 		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
@@ -107,6 +124,24 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		DefaultPublicPersistenceUnitSetter bean = (DefaultPublicPersistenceUnitSetter) gac.getBean(
 				DefaultPublicPersistenceUnitSetter.class.getName());
 		assertSame(mockEmf, bean.emf);
+	}
+
+	public void testPublicPersistenceUnitSetterWithOverriding() {
+		EntityManagerFactory mockEmf2 =
+				(EntityManagerFactory) MockControl.createControl(EntityManagerFactory.class).getMock();
+
+		GenericApplicationContext gac = new GenericApplicationContext();
+		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
+		gac.registerBeanDefinition("annotationProcessor",
+				new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
+		RootBeanDefinition bd = new RootBeanDefinition(DefaultPublicPersistenceUnitSetter.class);
+		bd.getPropertyValues().addPropertyValue("emf", mockEmf2);
+		gac.registerBeanDefinition(DefaultPublicPersistenceUnitSetter.class.getName(), bd);
+		gac.refresh();
+
+		DefaultPublicPersistenceUnitSetter bean = (DefaultPublicPersistenceUnitSetter) gac.getBean(
+				DefaultPublicPersistenceUnitSetter.class.getName());
+		assertSame(mockEmf2, bean.emf);
 	}
 
 	public void testPublicPersistenceUnitSetterWithUnitIdentifiedThroughBeanName() {
@@ -380,7 +415,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 					"bean name does not matter");
 			fail("Can't inject this field");
 		}
-		catch (IllegalArgumentException ex) {
+		catch (IllegalStateException ex) {
 			// Ok
 		}
 	}
@@ -392,7 +427,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 					"bean name does not matter");
 			fail("Can't inject this setter");
 		}
-		catch (IllegalArgumentException ex) {
+		catch (IllegalStateException ex) {
 			// Ok
 		}
 	}
@@ -577,6 +612,9 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 		@PersistenceContext(type = PersistenceContextType.EXTENDED)
 		public void setEntityManager(EntityManager em) {
+			if (this.em != null) {
+				throw new IllegalStateException("Already called");
+			}
 			this.em = em;
 		}
 
@@ -599,6 +637,9 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 		@PersistenceUnit
 		public void setEmf(EntityManagerFactory emf) {
+			if (this.emf != null) {
+				throw new IllegalStateException("Already called");
+			}
 			this.emf = emf;
 		}
 

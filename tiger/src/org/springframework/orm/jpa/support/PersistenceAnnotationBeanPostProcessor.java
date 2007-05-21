@@ -17,18 +17,13 @@
 package org.springframework.orm.jpa.support;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
@@ -38,13 +33,16 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.InjectionMetadata;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
@@ -158,8 +156,8 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 
 	private ListableBeanFactory beanFactory;
 
-	private final Map<Class<?>, List<AnnotatedMember>> annotationMetadataCache =
-			new HashMap<Class<?>, List<AnnotatedMember>>();
+	private final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
+			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
 
 
 	public PersistenceAnnotationBeanPostProcessor() {
@@ -267,9 +265,12 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	}
 
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
-		List<AnnotatedMember> metadata = findAnnotationMetadata(bean.getClass());
-		for (AnnotatedMember member : metadata) {
-			member.inject(bean);
+		InjectionMetadata metadata = findPersistenceMetadata(bean.getClass());
+		try {
+			metadata.injectFields(bean);
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(beanName, "Injection of persistence fields failed", ex);
 		}
 		return true;
 	}
@@ -277,6 +278,13 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 
+		InjectionMetadata metadata = findPersistenceMetadata(bean.getClass());
+		try {
+			metadata.injectMethods(bean, pvs);
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(beanName, "Injection of persistence methods failed", ex);
+		}
 		return pvs;
 	}
 
@@ -289,59 +297,43 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	}
 
 
-	private List<AnnotatedMember> findAnnotationMetadata(Class clazz) {
-		synchronized (this.annotationMetadataCache) {
-			List<AnnotatedMember> metadata = this.annotationMetadataCache.get(clazz);
-			if (metadata == null) {
-				final List<AnnotatedMember> newMetadata = new LinkedList<AnnotatedMember>();
-				ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
-					public void doWith(Field field) {
-						addIfPresent(newMetadata, field);
-					}
-				});
-				ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
-					public void doWith(Method method) {
-						addIfPresent(newMetadata, method);
-					}
-				});
-				metadata = newMetadata;
-				this.annotationMetadataCache.put(clazz, metadata);
-			}
-			return metadata;
-		}
-	}
-
-	private void addIfPresent(List<AnnotatedMember> metadata, Member member) {
-		AnnotatedElement ae = (AnnotatedElement) member;
-		PersistenceContext pc = ae.getAnnotation(PersistenceContext.class);
-		PersistenceUnit pu = ae.getAnnotation(PersistenceUnit.class);
-		if (pc != null) {
-			if (pu != null) {
-				throw new IllegalStateException(
-						"Method may only be annotated with either @PersistenceContext or @PersistenceUnit, not both");
-			}
-			if (member instanceof Method && ((Method) member).getParameterTypes().length != 1) {
-				throw new IllegalStateException("PersistenceContext annotation requires a single-arg method: " + member);
-			}
-			Properties properties = null;
-			PersistenceProperty[] pps = pc.properties();
-			if (!ObjectUtils.isEmpty(pps)) {
-				properties = new Properties();
-				for (int i = 0; i < pps.length; i++) {
-					PersistenceProperty pp = pps[i];
-					properties.setProperty(pp.name(), pp.value());
+	private InjectionMetadata findPersistenceMetadata(Class clazz) {
+		// Quick check on the concurrent map first, with minimal locking.
+		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
+		if (metadata == null) {
+			synchronized (this.injectionMetadataCache) {
+				metadata = this.injectionMetadataCache.get(clazz);
+				if (metadata == null) {
+					final InjectionMetadata newMetadata = new InjectionMetadata();
+					ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
+						public void doWith(Field field) {
+							PersistenceContext pc = field.getAnnotation(PersistenceContext.class);
+							PersistenceUnit pu = field.getAnnotation(PersistenceUnit.class);
+							if (pc != null || pu != null) {
+								newMetadata.addInjectedField(new PersistenceElement(field, null));
+							}
+						}
+					});
+					ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
+						public void doWith(Method method) {
+							PersistenceContext pc = method.getAnnotation(PersistenceContext.class);
+							PersistenceUnit pu = method.getAnnotation(PersistenceUnit.class);
+							if (pc != null || pu != null) {
+								if (method.getParameterTypes().length != 1) {
+									throw new IllegalStateException("Persistence annotation requires a single-arg method: " + method);
+								}
+								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+								newMetadata.addInjectedMethod(new PersistenceElement(method, pd));
+							}
+						}
+					});
+					metadata = newMetadata;
+					this.injectionMetadataCache.put(clazz, metadata);
 				}
 			}
-			metadata.add(new AnnotatedMember(member, pc.unitName(), pc.type(), properties));
 		}
-		else if (pu != null) {
-			if (member instanceof Method && ((Method) member).getParameterTypes().length != 1) {
-				throw new IllegalStateException("PersistenceUnit annotation requires a single-arg method: " + member);
-			}
-			metadata.add(new AnnotatedMember(member, pu.unitName()));
-		}
+		return metadata;
 	}
-
 
 	/**
 	 * Return a specified persistence unit for the given unit name,
@@ -457,106 +449,57 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	 * Class representing injection information about an annotated field
 	 * or setter method.
 	 */
-	private class AnnotatedMember {
-
-		private final Member member;
+	private class PersistenceElement extends InjectionMetadata.InjectedElement {
 
 		private final String unitName;
 
-		private final PersistenceContextType type;
+		private PersistenceContextType type;
 
-		private final Properties properties;
+		private Properties properties;
 
-		public AnnotatedMember(Member member, String unitName) {
-			this(member, unitName, null, null);
-		}
-
-		public AnnotatedMember(Member member, String unitName, PersistenceContextType type, Properties properties) {
-			this.member = member;
-			this.unitName = unitName;
-			this.type = type;
-			this.properties = properties;
-
-			// Validate member type
-			Class<?> memberType = getMemberType();
-			if (!(EntityManagerFactory.class.isAssignableFrom(memberType) ||
-					EntityManager.class.isAssignableFrom(memberType))) {
-				throw new IllegalArgumentException("Cannot inject " + member + ": not a supported JPA type");
-			}
-		}
-
-		public void inject(Object instance) {
-			Object value = resolve();
-			try {
-				if (!Modifier.isPublic(this.member.getModifiers()) ||
-						!Modifier.isPublic(this.member.getDeclaringClass().getModifiers())) {
-					((AccessibleObject) this.member).setAccessible(true);
+		public PersistenceElement(Member member, PropertyDescriptor pd) {
+			super(member, pd);
+			AnnotatedElement ae = (AnnotatedElement) member;
+			PersistenceContext pc = ae.getAnnotation(PersistenceContext.class);
+			PersistenceUnit pu = ae.getAnnotation(PersistenceUnit.class);
+			Class resourceType = EntityManager.class;
+			if (pc != null) {
+				if (pu != null) {
+					throw new IllegalStateException("Memeber may only be annotated with either " +
+							"@PersistenceContext or @PersistenceUnit, not both: " + member);
 				}
-				if (this.member instanceof Field) {
-					((Field) this.member).set(instance, value);
+				Properties properties = null;
+				PersistenceProperty[] pps = pc.properties();
+				if (!ObjectUtils.isEmpty(pps)) {
+					properties = new Properties();
+					for (int i = 0; i < pps.length; i++) {
+						PersistenceProperty pp = pps[i];
+						properties.setProperty(pp.name(), pp.value());
+					}
 				}
-				else if (this.member instanceof Method) {
-					((Method) this.member).invoke(instance, value);
-				}
-				else {
-					throw new IllegalArgumentException("Cannot inject unknown AccessibleObject type " + this.member);
-				}
-			}
-			catch (IllegalAccessException ex) {
-				throw new IllegalArgumentException("Cannot inject member " + this.member, ex);
-			}
-			catch (InvocationTargetException ex) {
-				// Method threw an exception
-				throw new IllegalArgumentException("Attempt to inject setter method " + this.member +
-						" resulted in an exception", ex);
-			}
-		}
-		
-		/**
-		 * Return the type of the member, whether it's a field or a method.
-		 */
-		public Class<?> getMemberType() {
-			if (this.member instanceof Field) {
-				return ((Field) member).getType();
-			}
-			else if (this.member instanceof Method) {
-				Method setter = (Method) this.member;
-				if (setter.getParameterTypes().length != 1) {
-					throw new IllegalArgumentException(
-							"Supposed setter [" + this.member + "] must have 1 argument, not " +
-							setter.getParameterTypes().length);
-				}
-				return setter.getParameterTypes()[0];
+				this.unitName = pc.unitName();
+				this.type = pc.type();
+				this.properties = properties;
 			}
 			else {
-				throw new IllegalArgumentException(
-						"Unknown AccessibleObject type [" + this.member.getClass() +
-						"]; can only inject setter methods and fields");
+				resourceType = EntityManagerFactory.class;
+				this.unitName = pu.unitName();
 			}
+			checkResourceType(resourceType);
 		}
 
 		/**
 		 * Resolve the object against the application context.
 		 */
-		private Object resolve() {
+		protected Object getResourceToInject() {
 			// Resolves to EntityManagerFactory or EntityManager.
-			if (EntityManagerFactory.class.isAssignableFrom(getMemberType())) {
-				EntityManagerFactory emf = resolveEntityManagerFactory();
-				if (!getMemberType().isInstance(emf)) {
-					throw new IllegalArgumentException("Cannot inject [" + this.member +
-							"] with EntityManagerFactory [" + emf + "]: type mismatch");
-				}
-				return emf;
+			if (this.type != null) {
+				return (this.type == PersistenceContextType.EXTENDED ?
+						resolveExtendedEntityManager() : resolveEntityManager());
 			}
 			else {
-				// OK, so we need an EntityManager...
-				EntityManager em = (this.type == PersistenceContextType.EXTENDED ?
-						resolveExtendedEntityManager() : resolveEntityManager());
-				if (!getMemberType().isInstance(em)) {
-					throw new IllegalArgumentException("Cannot inject [" + this.member +
-							"] with EntityManager [" + em + "]: type mismatch");
-				}
-				return em;
+				// OK, so we need an EntityManagerFactory...
+				return resolveEntityManagerFactory();
 			}
 		}
 
@@ -590,7 +533,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 				}
 				else {
 					// Create EntityManager based on the field's type.
-					em = SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties, getMemberType());
+					em = SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties, getResourceType());
 				}
 			}
 			return em;
