@@ -300,7 +300,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				try {
 					Object argument = resolveDependency(field.getType());
 					if (argument != null) {
-						makeMemberAccessible();
+						ReflectionUtils.makeAccessible(field);
 						field.set(bean, argument);
 					}
 				}
@@ -325,7 +325,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						}
 					}
 					if (shouldInvoke) {
-						makeMemberAccessible();
+						ReflectionUtils.makeAccessible(method);
 						method.invoke(bean, arguments);
 					}
 				}

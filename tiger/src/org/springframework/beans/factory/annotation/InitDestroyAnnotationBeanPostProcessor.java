@@ -20,11 +20,10 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -66,8 +65,8 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 	private Class<? extends Annotation> destroyAnnotationType;
 
-	private transient final Map<Class<?>, AnnotationMetadata> annotationMetadataCache =
-			new HashMap<Class<?>, AnnotationMetadata>();
+	private transient final Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache =
+			new ConcurrentHashMap<Class<?>, LifecycleMetadata>();
 
 
 	/**
@@ -94,7 +93,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		AnnotationMetadata metadata = findAnnotationMetadata(bean.getClass());
+		LifecycleMetadata metadata = findLifecycleMetadata(bean.getClass());
 		try {
 			metadata.invokeInitMethods(bean);
 		}
@@ -109,7 +108,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	}
 
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
-		AnnotationMetadata metadata = findAnnotationMetadata(bean.getClass());
+		LifecycleMetadata metadata = findLifecycleMetadata(bean.getClass());
 		try {
 			metadata.invokeDestroyMethods(bean);
 		}
@@ -119,23 +118,28 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	}
 
 
-	private AnnotationMetadata findAnnotationMetadata(Class clazz) {
-		if (this.annotationMetadataCache == null) {
-			// Happens after deserialization...
-			return buildAnnotationMetadata(clazz);
+	private LifecycleMetadata findLifecycleMetadata(Class clazz) {
+		if (this.lifecycleMetadataCache == null) {
+			// Happens after deserialization, during destruction...
+			return buildLifecycleMetadata(clazz);
 		}
-		synchronized (this.annotationMetadataCache) {
-			AnnotationMetadata metadata = this.annotationMetadataCache.get(clazz);
-			if (metadata == null) {
-				metadata = buildAnnotationMetadata(clazz);
-				this.annotationMetadataCache.put(clazz, metadata);
+		// Quick check on the concurrent map first, with minimal locking.
+		LifecycleMetadata metadata = this.lifecycleMetadataCache.get(clazz);
+		if (metadata == null) {
+			synchronized (this.lifecycleMetadataCache) {
+				metadata = this.lifecycleMetadataCache.get(clazz);
+				if (metadata == null) {
+					metadata = buildLifecycleMetadata(clazz);
+					this.lifecycleMetadataCache.put(clazz, metadata);
+				}
+				return metadata;
 			}
-			return metadata;
 		}
+		return metadata;
 	}
 
-	private AnnotationMetadata buildAnnotationMetadata(Class clazz) {
-		final AnnotationMetadata newMetadata = new AnnotationMetadata();
+	private LifecycleMetadata buildLifecycleMetadata(Class clazz) {
+		final LifecycleMetadata newMetadata = new LifecycleMetadata();
 		ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
 			public void doWith(Method method) {
 				if (initAnnotationType != null) {
@@ -157,55 +161,29 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	/**
 	 * Class representing information about annotated init and destroy methods.
 	 */
-	private static class AnnotationMetadata {
+	private static class LifecycleMetadata {
 
-		private final Set<MethodElement> initMethods = new LinkedHashSet<MethodElement>();
+		private final Set<LifecycleElement> initMethods = new LinkedHashSet<LifecycleElement>();
 
-		private final Set<MethodElement> destroyMethods = new LinkedHashSet<MethodElement>();
+		private final Set<LifecycleElement> destroyMethods = new LinkedHashSet<LifecycleElement>();
 
 		public void addInitMethod(Method method) {
-			if (method.getParameterTypes().length != 0) {
-				throw new IllegalStateException("Init annotation requires a no-arg method: " + method);
-			}
-			this.initMethods.add(new MethodElement(method));
+			this.initMethods.add(new LifecycleElement(method));
 		}
 
 		public void addDestroyMethod(Method method) {
-			if (method.getParameterTypes().length != 0) {
-				throw new IllegalStateException("Destroy annotation requires a no-arg method: " + method);
-			}
-			this.destroyMethods.add(new MethodElement(method));
+			this.destroyMethods.add(new LifecycleElement(method));
 		}
 
 		public void invokeInitMethods(Object target) throws Throwable {
-			for (MethodElement methodElement : this.initMethods) {
-				Method method = methodElement.getMethod();
-				if (!Modifier.isPublic(method.getModifiers()) ||
-						!Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
-					method.setAccessible(true);
-				}
-				try {
-					method.invoke(target, (Object[]) null);
-				}
-				catch (InvocationTargetException ex) {
-					throw ex.getTargetException();
-				}
+			for (LifecycleElement lifecycleElement : this.initMethods) {
+				lifecycleElement.invoke(target);
 			}
 		}
 
 		public void invokeDestroyMethods(Object target) throws Throwable {
-			for (MethodElement methodElement : this.destroyMethods) {
-				Method method = methodElement.getMethod();
-				if (!Modifier.isPublic(method.getModifiers()) ||
-						!Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
-					method.setAccessible(true);
-				}
-				try {
-					method.invoke(target, (Object[]) null);
-				}
-				catch (InvocationTargetException ex) {
-					throw ex.getTargetException();
-				}
+			for (LifecycleElement lifecycleElement : this.destroyMethods) {
+				lifecycleElement.invoke(target);
 			}
 		}
 	}
@@ -214,21 +192,30 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	/**
 	 * Class representing injection information about an annotated method.
 	 */
-	private static class MethodElement {
+	private static class LifecycleElement {
 
 		private final Method method;
 
-		public MethodElement(Method method) {
+		public LifecycleElement(Method method) {
+			if (method.getParameterTypes().length != 0) {
+				throw new IllegalStateException("Lifecycle method annotation requires a no-arg method: " + method);
+			}
 			this.method = method;
 		}
 
-		public Method getMethod() {
-			return this.method;
+		public void invoke(Object target) throws Throwable {
+			ReflectionUtils.makeAccessible(this.method);
+			try {
+				this.method.invoke(target, (Object[]) null);
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
 		}
 
 		public boolean equals(Object other) {
-			return (this == other || (other instanceof MethodElement &&
-					this.method.getName().equals(((MethodElement) other).method.getName())));
+			return (this == other || (other instanceof LifecycleElement &&
+					this.method.getName().equals(((LifecycleElement) other).method.getName())));
 		}
 
 		public int hashCode() {

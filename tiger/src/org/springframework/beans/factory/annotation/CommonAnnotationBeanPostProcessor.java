@@ -21,7 +21,6 @@ import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -217,10 +216,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		private final boolean shareable;
 
-		private final PropertyDescriptor pd;
-
 		public ResourceElement(Member member, PropertyDescriptor pd) {
-			super(member);
+			super(member, pd);
 			AnnotatedElement ae = (AnnotatedElement) member;
 			Resource resource = ae.getAnnotation(Resource.class);
 			String resourceName = resource.name();
@@ -232,55 +229,20 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				}
 			}
 			if (resourceType != null && !Object.class.equals(resourceType)) {
-				if (member instanceof Field) {
-					Class fieldType = ((Field) member).getType();
-					if (!fieldType.isAssignableFrom(resourceType)) {
-						throw new IllegalStateException("Specified resource type [" + resourceType.getName() +
-								"] is not assignable to field type [" + fieldType + "]");
-					}
-				}
-				else {
-					Class paramType = ((Method) member).getParameterTypes()[0];
-					if (!paramType.isAssignableFrom(resourceType)) {
-						throw new IllegalStateException("Specified resource type [" + resourceType.getName() +
-								"] is not assignable to method parameter type [" + paramType + "]");
-					}
-				}
+				checkResourceType(resourceType);
 			}
 			else {
-				// No resource type specified...
-				if (member instanceof Field) {
-					resourceType = ((Field) member).getType();
-				}
-				else {
-					resourceType = ((Method) member).getParameterTypes()[0];
-				}
+				// No resource type specified... check field/method.
+				resourceType = getResourceType();
 			}
 			this.name = resourceName;
 			this.type = resourceType;
 			this.shareable = resource.shareable();
-			this.pd = pd;
 		}
 
-		protected void inject(Object bean, PropertyValues pvs) throws Throwable {
+		protected void inject(Object target, PropertyValues pvs) throws Throwable {
 			Object resourceObject = getResource(this.name, this.type, this.shareable);
-			if (this.member instanceof Field) {
-				makeMemberAccessible();
-				((Field) this.member).set(bean, resourceObject);
-			}
-			else {
-				if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
-					// Explicit value provided as part of the bean definition.
-					return;
-				}
-				makeMemberAccessible();
-				try {
-					((Method) this.member).invoke(bean, resourceObject);
-				}
-				catch (InvocationTargetException ex) {
-					throw ex.getTargetException();
-				}
-			}
+			injectSimple(target, pvs, resourceObject);
 		}
 	}
 

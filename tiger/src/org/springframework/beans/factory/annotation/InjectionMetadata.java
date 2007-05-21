@@ -16,27 +16,31 @@
 
 package org.springframework.beans.factory.annotation;
 
-import java.lang.reflect.AccessibleObject;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.beans.PropertyValues;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Internal class for managing injection metadata.
- * Used by {@link CommonAnnotationBeanPostProcessor}
- * and {@link AutowiredAnnotationBeanPostProcessor}.
+ * Not intended for direct use in applications.
+ *
+ * <p>Used by {@link CommonAnnotationBeanPostProcessor},
+ * {@link AutowiredAnnotationBeanPostProcessor} and
+ * {@link org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor}.
  *
  * @author Juergen Hoeller
  * @since 2.1
  */
-class InjectionMetadata {
+public class InjectionMetadata {
 
 	private Set<InjectedElement> resourceFields = new LinkedHashSet<InjectedElement>();
 
@@ -71,16 +75,60 @@ class InjectionMetadata {
 
 		protected final Member member;
 
-		public InjectedElement(Member member) {
+		private PropertyDescriptor pd;
+
+		protected InjectedElement(Member member) {
 			this.member = member;
+		}
+
+		protected InjectedElement(Member member, PropertyDescriptor pd) {
+			this.member = member;
+			this.pd = pd;
+		}
+
+		protected final Class getResourceType() {
+			return (this.member instanceof Field ?
+					((Field) this.member).getType() : ((Method) this.member).getParameterTypes()[0]);
+		}
+
+		protected final void checkResourceType(Class resourceType) {
+			if (this.member instanceof Field) {
+				Class fieldType = ((Field) member).getType();
+				if (!fieldType.isAssignableFrom(resourceType)) {
+					throw new IllegalStateException("Specified resource type [" + resourceType.getName() +
+							"] is not assignable to field type [" + fieldType + "]");
+				}
+			}
+			else {
+				Class paramType = ((Method) this.member).getParameterTypes()[0];
+				if (!paramType.isAssignableFrom(resourceType)) {
+					throw new IllegalStateException("Specified resource type [" + resourceType.getName() +
+							"] is not assignable to method parameter type [" + paramType + "]");
+				}
+			}
 		}
 
 		protected abstract void inject(Object target, PropertyValues pvs) throws Throwable;
 
-		protected final void makeMemberAccessible() {
-			if (!Modifier.isPublic(this.member.getModifiers()) ||
-					!Modifier.isPublic(this.member.getDeclaringClass().getModifiers())) {
-				((AccessibleObject) this.member).setAccessible(true);
+		protected final void injectSimple(Object target, PropertyValues pvs, Object value) throws Throwable {
+			if (this.member instanceof Field) {
+				Field field = (Field) this.member;
+				ReflectionUtils.makeAccessible(field);
+				field.set(target, value);
+			}
+			else {
+				if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
+					// Explicit value provided as part of the bean definition.
+					return;
+				}
+				try {
+					Method method = (Method) this.member;
+					ReflectionUtils.makeAccessible(method);
+					method.invoke(target, value);
+				}
+				catch (InvocationTargetException ex) {
+					throw ex.getTargetException();
+				}
 			}
 		}
 
