@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -35,6 +36,73 @@ import java.util.List;
  * @since 1.2.2
  */
 public abstract class ReflectionUtils {
+
+	/**
+	 * Attempt to find a {@link Method} on the supplied type with the supplied name
+	 * and parameter types. Searches all superclasses up to <code>Object</code>.
+	 * <p>Returns <code>null</code> if no {@link Method} can be found.
+	 * @param clazz the class to introspect
+	 * @param name the name of the method
+	 * @param paramTypes the parameter types of the method
+	 * @return the Method object, or <code>null</code> if none found
+	 */
+	public static Method findMethod(Class clazz, String name, Class[] paramTypes) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(name, "Method name must not be null");
+		Class searchType = clazz;
+		while (!Object.class.equals(searchType) && searchType != null) {
+			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
+			for (int i = 0; i < methods.length; i++) {
+				Method method = methods[i];
+				if (name.equals(method.getName()) && Arrays.equals(paramTypes, method.getParameterTypes())) {
+					return method;
+				}
+			}
+			searchType = searchType.getSuperclass();
+		}
+		return null;
+	}
+
+	/**
+	 * Invoke the specified {@link Method} against the supplied target object
+	 * with no arguments. The target object can be <code>null</code> when
+	 * invoking a static {@link Method}.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
+	 * @param method the method to invoke
+	 * @param target the target object to invoke the method on
+	 * @return the invocation result, if any
+	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeMethod(Method method, Object target) {
+		return invokeMethod(method, target, null);
+	}
+
+	/**
+	 * Invoke the specified {@link Method} against the supplied target object
+	 * with the supplied arguments. The target object can be <code>null</code>
+	 * when invoking a static {@link Method}.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
+	 * @param method the method to invoke
+	 * @param target the target object to invoke the method on
+	 * @param args the invocation arguments (may be <code>null</code>)
+	 * @return the invocation result, if any
+	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeMethod(Method method, Object target, Object[] args) {
+		try {
+			return method.invoke(target, args);
+		}
+		catch (IllegalAccessException ex) {
+			handleReflectionException(ex);
+			throw new IllegalStateException(
+					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		}
+		catch (InvocationTargetException ex) {
+			handleReflectionException(ex);
+			throw new IllegalStateException(
+					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		}
+	}
 
 	/**
 	 * Handle the given reflection exception. Should only be called if
@@ -77,61 +145,6 @@ public abstract class ReflectionUtils {
 				": " + ex.getTargetException().getMessage());
 	}
 
-	/**
-	 * Attempt to find a {@link Method} on the supplied type with the supplied name
-	 * and parameter types. Searches all superclasses up to <code>Object</code>.
-	 * Returns <code>null</code> if no {@link Method} can be found.
-	 */
-	public static Method findMethod(Class type, String name, Class[] paramTypes) {
-		Assert.notNull(type, "'type' cannot be null.");
-		Assert.notNull(name, "'name' cannot be null.");
-		Class searchType = type;
-		while(!Object.class.equals(searchType) && searchType != null) {
-			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
-			for (int i = 0; i < methods.length; i++) {
-				Method method = methods[i];
-				if(name.equals(method.getName()) && Arrays.equals(paramTypes, method.getParameterTypes())) {
-					return method;
-				}
-			}
-			searchType = searchType.getSuperclass();
-		}
-		return null;
-	}
-
-	/**
-	 * Invoke the specified {@link Method} against the supplied target object
-	 * with no arguments. The target object can be <code>null</code> when
-	 * invoking a static {@link Method}.
-	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
-	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
-	 */
-	public static Object invokeMethod(Method method, Object target) {
-		return invokeMethod(method, target, null);
-	}
-
-	/**
-	 * Invoke the specified {@link Method} against the supplied target object
-	 * with the supplied arguments. The target object can be <code>null</code>
-	 * when invoking a static {@link Method}.
-	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
-	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
-	 */
-	public static Object invokeMethod(Method method, Object target, Object[] args) {
-		try {
-			return method.invoke(target, args);
-		}
-		catch (IllegalAccessException ex) {
-			handleReflectionException(ex);
-			throw new IllegalStateException(
-					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
-		}
-		catch (InvocationTargetException ex) {
-			handleReflectionException(ex);
-			throw new IllegalStateException(
-					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
-		}
-	}
 
 	/**
 	 * Determine whether the given field is a "public static final" constant.
@@ -153,6 +166,34 @@ public abstract class ReflectionUtils {
 		if (!Modifier.isPublic(field.getModifiers()) ||
 				!Modifier.isPublic(field.getDeclaringClass().getModifiers())) {
 			field.setAccessible(true);
+		}
+	}
+
+	/**
+	 * Make the given method accessible, explicitly setting it accessible if necessary.
+	 * The <code>setAccessible(true)</code> method is only called when actually necessary,
+	 * to avoid unnecessary conflicts with a JVM SecurityManager (if active).
+	 * @param method the method to make accessible
+	 * @see java.lang.reflect.Method#setAccessible
+	 */
+	public static void makeAccessible(Method method) {
+		if (!Modifier.isPublic(method.getModifiers()) ||
+				!Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+			method.setAccessible(true);
+		}
+	}
+
+	/**
+	 * Make the given constructor accessible, explicitly setting it accessible if necessary.
+	 * The <code>setAccessible(true)</code> method is only called when actually necessary,
+	 * to avoid unnecessary conflicts with a JVM SecurityManager (if active).
+	 * @param ctor the constructor to make accessible
+	 * @see java.lang.reflect.Constructor#setAccessible
+	 */
+	public static void makeAccessible(Constructor ctor) {
+		if (!Modifier.isPublic(ctor.getModifiers()) ||
+				!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) {
+			ctor.setAccessible(true);
 		}
 	}
 
@@ -203,20 +244,6 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Get all declared methods on the leaf class and all superclasses.
-	 * Leaf class methods are included first.
-	 */
-	public static Method[] getAllDeclaredMethods(Class leafClass) throws IllegalArgumentException {
-		final List l = new LinkedList();
-		doWithMethods(leafClass, new MethodCallback() {
-			public void doWith(Method m) {
-				l.add(m);
-			}
-		});
-		return (Method[]) l.toArray(new Method[l.size()]);
-	}
-
-	/**
 	 * Invoke the given callback on all private fields in the target class,
 	 * going up the class hierarchy to get all declared fields.
 	 * @param targetClass the target class to analyze
@@ -256,6 +283,20 @@ public abstract class ReflectionUtils {
 			targetClass = targetClass.getSuperclass();
 		}
 		while (targetClass != null && targetClass != Object.class);
+	}
+
+	/**
+	 * Get all declared methods on the leaf class and all superclasses.
+	 * Leaf class methods are included first.
+	 */
+	public static Method[] getAllDeclaredMethods(Class leafClass) throws IllegalArgumentException {
+		final List list = new LinkedList();
+		doWithMethods(leafClass, new MethodCallback() {
+			public void doWith(Method m) {
+				list.add(m);
+			}
+		});
+		return (Method[]) list.toArray(new Method[list.size()]);
 	}
 
 	/**
