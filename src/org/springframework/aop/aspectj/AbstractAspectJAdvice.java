@@ -18,7 +18,6 @@ package org.springframework.aop.aspectj;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +42,7 @@ import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -569,10 +569,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			actualArgs = null;
 		}
 		try {
-			if (!Modifier.isPublic(this.aspectJAdviceMethod.getModifiers()) ||
-					!Modifier.isPublic(this.aspectJAdviceMethod.getDeclaringClass().getModifiers())) {
-				this.aspectJAdviceMethod.setAccessible(true);
-			}
+			ReflectionUtils.makeAccessible(this.aspectJAdviceMethod);
 			// TODO AopUtils.invokeJoinpointUsingReflection
 			return this.aspectJAdviceMethod.invoke(this.aspectInstanceFactory.getAspectInstance(), actualArgs);
 		}

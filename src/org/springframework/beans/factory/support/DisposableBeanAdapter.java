@@ -19,7 +19,6 @@ package org.springframework.beans.factory.support;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +30,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Adapter that implements the DisposableBean interface performing
@@ -187,14 +187,10 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 						if (paramTypes.length == 1) {
 							args[0] = Boolean.TRUE;
 						}
-						if (!Modifier.isPublic(destroyMethod.getModifiers()) ||
-								!Modifier.isPublic(destroyMethod.getDeclaringClass().getModifiers())) {
-							destroyMethod.setAccessible(true);
-						}
-
 						if (logger.isDebugEnabled()) {
 							logger.debug("Invoking custom destroy method on bean with name '" + this.beanName + "'");
 						}
+						ReflectionUtils.makeAccessible(destroyMethod);
 						try {
 							destroyMethod.invoke(this.bean, args);
 						}

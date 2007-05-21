@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -78,10 +79,7 @@ public abstract class BeanUtils {
 	public static Object instantiateClass(Constructor ctor, Object[] args) throws BeanInstantiationException {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
-			if (!Modifier.isPublic(ctor.getModifiers()) ||
-					!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) {
-				ctor.setAccessible(true);
-			}
+			ReflectionUtils.makeAccessible(ctor);
 			return ctor.newInstance(args);
 		}
 		catch (InstantiationException ex) {

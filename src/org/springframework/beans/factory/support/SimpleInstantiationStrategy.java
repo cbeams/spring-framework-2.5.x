@@ -19,12 +19,12 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -111,10 +111,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 		try {
 			// It's a static method if the target is null.
-			if (!Modifier.isPublic(factoryMethod.getModifiers()) ||
-					!Modifier.isPublic(factoryMethod.getDeclaringClass().getModifiers())) {
-				factoryMethod.setAccessible(true);
-			}
+			ReflectionUtils.makeAccessible(factoryMethod);
 			return factoryMethod.invoke(factoryBean, args);
 		}
 		catch (IllegalArgumentException ex) {

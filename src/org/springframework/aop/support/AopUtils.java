@@ -18,7 +18,6 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,6 +36,7 @@ import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetClassAware;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Utility methods for AOP support code.
@@ -297,10 +297,7 @@ public abstract class AopUtils {
 
 		// Use reflection to invoke the method.
 		try {
-			if (!Modifier.isPublic(method.getModifiers()) ||
-					!Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
-				method.setAccessible(true);
-			}
+			ReflectionUtils.makeAccessible(method);
 			return method.invoke(target, args);
 		}
 		catch (InvocationTargetException ex) {

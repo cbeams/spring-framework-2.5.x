@@ -1232,10 +1232,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				return;
 			}
 		}
-		if (!Modifier.isPublic(initMethod.getModifiers()) ||
-				!Modifier.isPublic(initMethod.getDeclaringClass().getModifiers())) {
-			initMethod.setAccessible(true);
-		}
+		ReflectionUtils.makeAccessible(initMethod);
 		try {
 			initMethod.invoke(bean, (Object[]) null);
 		}
