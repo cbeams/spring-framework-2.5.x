@@ -187,6 +187,13 @@ public abstract class AbstractFactoryBean
 
 
 	/**
+	 * This abstract method declaration mirrors the method in the FactoryBean
+	 * interface, for a consistent offering of abstract template methods.
+	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
+	 */
+	public abstract Class getObjectType();
+
+	/**
 	 * Template method that subclasses must override to construct
 	 * the object returned by this factory.
 	 * <p>Invoked on initialization of this FactoryBean in case of
