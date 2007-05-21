@@ -199,6 +199,16 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		}
 	}
 
+	public void testAutodetectNoMBeans() throws Exception {
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectNoMBeans.xml", getClass()));
+		try {
+			bf.getBean("exporter");
+		}
+		finally {
+			bf.destroySingletons();
+		}
+	}
+
 	public void testWithMBeanExporterListeners() throws Exception {
 		MockMBeanExporterListener listener1 = new MockMBeanExporterListener();
 		MockMBeanExporterListener listener2 = new MockMBeanExporterListener();
@@ -498,14 +508,6 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 			MBeanExporter exporter = new MBeanExporter();
 			exporter.setAutodetectModeName("That Hansel is... *sssooo* hot right now!");
 			fail("Must have failed when supplying a whitespace-only autodetect mode name");
-		}
-		catch (IllegalArgumentException expected) {}
-	}
-
-	public void testNoBeansForExportAndAutodetectionTurnedOff() throws Exception {
-		try {
-			new MBeanExporter().afterPropertiesSet();
-			fail("Expecting exception because MBeanExporter has nothing to export");
 		}
 		catch (IllegalArgumentException expected) {}
 	}
