@@ -175,7 +175,12 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * @param original the original bean definition to copy from
 	 */
 	protected AbstractBeanDefinition(AbstractBeanDefinition original) {
-		this.beanClass = original.beanClass;
+		if (original.hasBeanClass()) {
+			setBeanClass(original.getBeanClass());
+		}
+		else {
+			setBeanClassName(original.getBeanClassName());
+		}
 
 		setScope(original.getScope());
 		setAbstract(original.isAbstract());
@@ -321,10 +326,11 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * @throws ClassNotFoundException if the class name could be resolved
 	 */
 	public Class resolveBeanClass(ClassLoader classLoader) throws ClassNotFoundException {
-		if (this.beanClass == null) {
+		String className = getBeanClassName();
+		if (className == null) {
 			return null;
 		}
-		Class resolvedClass = ClassUtils.forName(getBeanClassName(), classLoader);
+		Class resolvedClass = ClassUtils.forName(className, classLoader);
 		this.beanClass = resolvedClass;
 		return resolvedClass;
 	}
@@ -798,7 +804,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 		AbstractBeanDefinition that = (AbstractBeanDefinition) other;
 
-		if (!ObjectUtils.nullSafeEquals(this.beanClass, that.beanClass)) return false;
+		if (!ObjectUtils.nullSafeEquals(getBeanClassName(), that.getBeanClassName())) return false;
 		if (!ObjectUtils.nullSafeEquals(this.scope, that.scope)) return false;
 		if (this.abstractFlag != that.abstractFlag) return false;
 		if (this.lazyInit != that.lazyInit) return false;
@@ -827,7 +833,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	}
 
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(this.beanClass);
+		int hashCode = ObjectUtils.nullSafeHashCode(getBeanClassName());
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.scope);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.constructorArgumentValues);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.propertyValues);
