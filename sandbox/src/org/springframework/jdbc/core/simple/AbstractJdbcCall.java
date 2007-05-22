@@ -77,6 +77,7 @@ public abstract class AbstractJdbcCall {
 	protected boolean caseSensitiveParameters = false;
 	protected List<String> outParameterNames = new ArrayList<String>();
 	protected String callString;
+	protected String metaDataProcedureColumnNamePrefix = "";
 
 	/**
 	 * Object enabling us to create CallableStatementCreators
@@ -247,9 +248,14 @@ public abstract class AbstractJdbcCall {
 				public Object processMetaData(DatabaseMetaData databaseMetaData)
 						throws SQLException, MetaDataAccessException {
 					userName = databaseMetaData.getUserName();
-					if ("Oracle".equals(databaseMetaData.getDatabaseProductName())) {
+					String databaseProductName = databaseMetaData.getDatabaseProductName();
+					if ("Oracle".equals(databaseProductName)) {
 						defaultSchemaToUserName = true;
 						useCatalogNameAsPackageName = true;
+					}
+					else if("Microsoft SQL Server".equals(databaseProductName)) {
+						metaDataProcedureColumnNamePrefix = "@";
+						logger.debug("Using procedure column prefix: " + metaDataProcedureColumnNamePrefix);
 					}
 					supportsCatalogsInProcedureCalls = databaseMetaData.supportsCatalogsInProcedureCalls();
 					supportsSchemasInProcedureCalls = databaseMetaData.supportsSchemasInProcedureCalls();
@@ -310,35 +316,47 @@ public abstract class AbstractJdbcCall {
 									logger.debug("Checking metadata parameter for: " + (colName == null ? returnNameToUse : colName));
 								}
 								String colNameToCheck;
+								String colNameToUse;
 								if (colName == null || colName.length() < 1) {
-									colNameToCheck = returnNameToUse;
+									colNameToCheck = colNameToUse = returnNameToUse;
 								}
 								else {
+									colNameToUse = colName;
 									colNameToCheck = caseSensitiveParameters ? colName : colName.toLowerCase();
 								}
-//								if (!((colType == 5 && returnDeclared) || declaredParameterNames.contains(caseSensitiveParameters ? colName : colName.toLowerCase()))) {
-								if (!((colType == 5 && returnDeclared) || declaredParameters.containsKey(colNameToCheck))) {
+								if (colNameToUse.startsWith(metaDataProcedureColumnNamePrefix) && colNameToUse.length() > 1)
+									colNameToUse = colNameToUse.substring(1);
+								if (colNameToCheck.startsWith(metaDataProcedureColumnNamePrefix) && colNameToCheck.length() > 1)
+									colNameToCheck = colNameToCheck.substring(1);
+								if (!((colType == DatabaseMetaData.procedureColumnReturn && returnDeclared) || declaredParameters.containsKey(colNameToCheck))) {
 									int dataType = procs.getInt("DATA_TYPE");
-									if (colType == 5) {
-										parameters.add(new SqlOutParameter(returnNameToUse, dataType));
-										outParameterNames.add(returnNameToUse);
-										setFunction(true);
-										if (logger.isDebugEnabled()) {
-											logger.debug("Added metadata return parameter for: " + returnNameToUse);
-										}
-									}
-									else {
-										if (colType == 4) {
-											parameters.add(new SqlOutParameter(colName, dataType));
-											outParameterNames.add(colName);
+									if (colType == DatabaseMetaData.procedureColumnReturn) {
+										if (!isFunction() && "return_value".equals(colNameToCheck)) {
 											if (logger.isDebugEnabled()) {
-												logger.debug("Added metadata out parameter for: " + colName);
+												logger.debug("Bypassing metadata return parameter for: " + colNameToUse);
 											}
 										}
 										else {
-											parameters.add(new SqlParameter(colName, dataType));
+											parameters.add(new SqlOutParameter(returnNameToUse, dataType));
+											outParameterNames.add(returnNameToUse);
+											setFunction(true);
 											if (logger.isDebugEnabled()) {
-												logger.debug("Added metadata in parameter for: " + colName);
+												logger.debug("Added metadata return parameter for: " + returnNameToUse);
+											}
+										}
+									}
+									else {
+										if (colType == DatabaseMetaData.procedureColumnOut || colType == DatabaseMetaData.procedureColumnInOut) {
+											parameters.add(new SqlOutParameter(colNameToUse, dataType));
+											outParameterNames.add(colNameToUse);
+											if (logger.isDebugEnabled()) {
+												logger.debug("Added metadata out parameter for: " + colNameToUse);
+											}
+										}
+										else {
+											parameters.add(new SqlParameter(colNameToUse, dataType));
+											if (logger.isDebugEnabled()) {
+												logger.debug("Added metadata in parameter for: " + colNameToUse);
 											}
 										}
 									}
@@ -354,7 +372,8 @@ public abstract class AbstractJdbcCall {
 									if (parameter != null) {
 										parameters.add(parameter);
 										if (logger.isDebugEnabled()) {
-											logger.debug("Using declared parameter for: " + (colName == null ? returnNameToUse : colName));
+											logger.debug("Using declared parameter for: " +
+													(colNameToUse == null ? returnNameToUse : colNameToUse));
 										}
 									}
 								}
