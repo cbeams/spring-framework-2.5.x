@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.core.typefilter;
+package org.springframework.core.type.filter;
+
+import java.io.IOException;
+
+import org.objectweb.asm.ClassReader;
+
+import org.springframework.core.type.asm.ClassReaderFactory;
 
 /**
- * Enumeration of the valid type filters to be added for annotation-driven configuration.
+ * Base interface for type filters using an ASM {@link ClassReader}.
  * 
+ * @author Costin Leau
+ * @author Rod Johnson
  * @author Mark Fisher
  * @since 2.1
  */
-public enum FilterType {
-
-	ANNOTATION,
-	ASPECTJ_PATTERN,
-	ASSIGNABLE_TYPE,
-	REGEX_PATTERN
+public interface TypeFilter {
+	
+	boolean match(ClassReader classReader, ClassReaderFactory classReaderFactory) throws IOException;
 
 }
