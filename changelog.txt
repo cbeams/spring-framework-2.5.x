@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M2 (2007-05-31)
+Changes in version 2.1 M2 (2007-05-30)
 --------------------------------------
 
 General
@@ -16,11 +16,14 @@ Package org.springframework.aop
 Package org.springframework.beans
 * CustomBooleanEditor trims text before comparing against true/false Strings
 * added temporary ClassLoader support to ConfigurableBeanFactory / AbstractBeanFactory
+* mirrored FactoryBean's "getObjectType()" as abstract method in AbstractFactoryBean again, for @Override compatibility
 * PropertyResourceConfigurer (and in particular PropertyPlaceholderConfigurer) is marked as PriorityOrdered
 * reworked SmartInstantiationAwareBeanPostProcessor's "determineConstructor" hook into "determineCandidateConstructors"
 * DefaultListableBeanFactory clears a cached merged bean definition in case of re-registering a bean definition
 * added 'required' attribute to @Autowired annotation (configurable for a custom autowire annotation as well)
 * avoid double invocation of @Autowired/@Resource setter method in case of explicitly specified property value
+* InitDestroy/Common/AutowiredAnnotationBeanPostProcessor use ConcurrentHashMaps for minimal locking
+* introduced AnnotatedBeanDefinition interface and AnnotatedRootBeanDefinition implementation class
 * added support for the JDK 1.6 ServiceLoader facility (package "beans.factory.serviceloader")
 
 Package org.springframework.cache
@@ -36,22 +39,38 @@ Package org.springframework.context
 * added "context:load-time-weaver" XML tag, building a default LoadTimeWeaver and enabling AspectJ load-time weaving
 * "context:component-scan" only detects the @Component annotation at the concrete class level (not inherited anymore)
 * added @Scope annotation for autodetected components, indicating the target bean scope in the Spring context
+* introduced ScannedRootBeanDefinition class for autodetected components
 
 Package org.springframework.core
 * introduced PriorityOrdered marker interface, with order values automatically applied before any plain Ordered values
 * fixed BridgeMethodResolver to properly detect a method that substitutes a type parameter with an array type
+* added "getClassLoader()" method to ClassPathResource, exposing the ClassLoader used for resource loading
 * PathMatchingResourcePatternResolver explicitly closes freshly created JarFile handles, to allow for hot redeployment
+* introduced ClassMetadata/AnnotationMetadata abstraction in "core.type" package
+* refactored "core.typefilter" package into "core.type.asm" and "core.type.filter"
+* introduced ClassReaderFactory abstraction, with SimpleClassReaderFactory and CachingClassReaderFactory implementations
+* introduced ClassReaderFactory as TypeFilter match argument, for resolving cached ClassReaders for the type hierarchy
+* moved FilterType enum to "context.annotation" package, since it is closely related to component scanning
+* introduced AnnotatedBeanDefinition interface and AnnotatedRootBeanDefinition implementation class
+* introduced ScannedRootBeanDefinition class for autodetected components
 * StringCodedLabeledEnum accepts empty codes (that purely consist of whitespace) as well
 
 Package org.springframework.jdbc
 * added ParameterizedBeanPropertyRowMapper, providing automatic mapping between columns and bean properties
 * added named parameter support to SimpleJdbcTemplate
 
+Package org.springframework.jmx
+* MBeanExporter does not insist of a minimum of 1 bean exposed anymore, also accepting no beans to export in the context
+
 Package org.springframework.orm
 * LocalContainerEntityManagerFactoryBean and DefaultPersistenceUnitManager autodetect a context's default LoadTimeWeaver
+* avoid double invocation of @PersistenceContext/Unit setter method in case of explicitly specified property value
 
 Package org.springframework.transaction
 * WebSphereUowTransactionManager does not enforce the presence of a JTA UserTransaction anymore
+
+Package org.springframework.util
+* added "makeAccessible(Method)" and "makeAccessible(Constructor)" convenience methods to ReflectionUtils
 
 Package org.springframework.web
 * CookieLocaleResolver checks specified "defaultLocale" in case of a setLocale call with null argument
