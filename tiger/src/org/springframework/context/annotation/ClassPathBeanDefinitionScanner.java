@@ -25,23 +25,22 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.core.typefilter.TypeFilter;
+import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.Assert;
 
 /**
- * A {@link BeanDefinitionScanner} that detects bean candidates on the classpath. 
+ * A BeanDefinition scnaner that detects bean candidates on the classpath.
  * 
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.1
  */
-public class ClassPathBeanDefinitionScanner implements BeanDefinitionScanner, ResourceLoaderAware {
+public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 	
 	private final BeanDefinitionRegistry registry;
 
@@ -137,7 +136,7 @@ public class ClassPathBeanDefinitionScanner implements BeanDefinitionScanner, Re
 	 * @return number of beans registered
 	 */
 	public int scan(String basePackage) {
-		return this.scan(new String[] { basePackage });
+		return scan(new String[] { basePackage });
 	}
 
 	/**
@@ -146,7 +145,7 @@ public class ClassPathBeanDefinitionScanner implements BeanDefinitionScanner, Re
 	 * @return number of beans registered
 	 */
 	public int scan(String[] basePackages) {
-		return this.scan(basePackages, true, null, null);
+		return scan(basePackages, true, null, null);
 	}
 
 	/**
@@ -155,7 +154,7 @@ public class ClassPathBeanDefinitionScanner implements BeanDefinitionScanner, Re
 	 * @return number of beans registered
 	 */
 	public int scan(String basePackage, boolean useDefaultFilters, List<TypeFilter> excludeFilters, List<TypeFilter> includeFilters) {
-		return this.scan(new String[] {basePackage}, useDefaultFilters, excludeFilters, includeFilters);
+		return scan(new String[] {basePackage}, useDefaultFilters, excludeFilters, includeFilters);
 	}
 		
 	/**
@@ -184,14 +183,11 @@ public class ClassPathBeanDefinitionScanner implements BeanDefinitionScanner, Re
 		}
 
 		// Find candidate components...
-		Set<Class> candidates = candidateComponentProvider.findCandidateComponents();		
-
-		// Register corresponding bean definitions.
-		for (Class<?> beanClass : candidates) {
-			BeanDefinition beanDefinition = new RootBeanDefinition(beanClass);
-			String beanName = this.beanNameGenerator.generateBeanName(beanDefinition, this.registry);
-			ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(beanDefinition, beanClass);
-			beanDefinition = applyScope(beanDefinition, beanName, scopeMetadata);
+		Set<BeanDefinition> candidates = candidateComponentProvider.findCandidateComponents();
+		for (BeanDefinition candidate : candidates) {
+			String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+			ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+			BeanDefinition beanDefinition = applyScope(candidate, beanName, scopeMetadata);
 			this.registry.registerBeanDefinition(beanName, beanDefinition);
 		}
 
@@ -211,7 +207,8 @@ public class ClassPathBeanDefinitionScanner implements BeanDefinitionScanner, Re
 		}
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(beanDefinition, beanName);
-		BeanDefinitionHolder scopedProxyDefinition = ScopedProxyUtils.createScopedProxy(definitionHolder, registry, proxyTargetClass);
+		BeanDefinitionHolder scopedProxyDefinition =
+				ScopedProxyUtils.createScopedProxy(definitionHolder, registry, proxyTargetClass);
 		return scopedProxyDefinition.getBeanDefinition();
 	}
 	

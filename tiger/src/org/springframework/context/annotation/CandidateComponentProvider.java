@@ -18,12 +18,15 @@ package org.springframework.context.annotation;
 
 import java.util.Set;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 2.1
  */
 public interface CandidateComponentProvider {
 	
-	Set<Class> findCandidateComponents();
+	Set<BeanDefinition> findCandidateComponents();
 
 }

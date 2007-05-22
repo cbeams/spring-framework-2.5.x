@@ -22,13 +22,13 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Scope;
+import org.springframework.context.annotation.Scope;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.typefilter.AnnotationTypeFilter;
-import org.springframework.core.typefilter.TypeFilter;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.util.ClassUtils;

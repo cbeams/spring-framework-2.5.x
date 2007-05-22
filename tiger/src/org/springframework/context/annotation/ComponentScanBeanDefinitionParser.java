@@ -32,11 +32,10 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.typefilter.AnnotationTypeFilter;
-import org.springframework.core.typefilter.AssignableTypeFilter;
-import org.springframework.core.typefilter.FilterType;
-import org.springframework.core.typefilter.RegexPatternTypeFilter;
-import org.springframework.core.typefilter.TypeFilter;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.core.type.filter.RegexPatternTypeFilter;
+import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.StringUtils;
 
 /**

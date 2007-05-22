@@ -26,6 +26,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
  */
 public interface ScopeMetadataResolver {
 
-	ScopeMetadata resolveScopeMetadata(BeanDefinition beanDefinition, Class beanClass);
+	ScopeMetadata resolveScopeMetadata(BeanDefinition definition);
 	
 }

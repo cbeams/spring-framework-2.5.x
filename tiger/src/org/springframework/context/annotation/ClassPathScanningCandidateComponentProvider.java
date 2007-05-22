@@ -17,8 +17,7 @@
 package org.springframework.context.annotation;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -28,16 +27,17 @@ import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.core.typefilter.AnnotationTypeFilter;
-import org.springframework.core.typefilter.ClassNameAndTypesReadingVisitor;
-import org.springframework.core.typefilter.TypeFilter;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.asm.CachingClassReaderFactory;
+import org.springframework.core.type.asm.ClassReaderFactory;
+import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ClassUtils;
@@ -55,18 +55,17 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 2.1
  * @see org.objectweb.asm.ClassReader
- * @see org.springframework.core.typefilter.ClassNameAndTypesReadingVisitor
+ * @see org.springframework.core.type.asm.AnnotationMetadataReadingVisitor
  */
 public class ClassPathScanningCandidateComponentProvider implements CandidateComponentProvider, ResourceLoaderAware {
-
-	private static final String CLASS_FILE_EXTENSION = ".class";
-
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final String[] packageSearchPaths;
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+
+	private ClassReaderFactory classReaderFactory = new CachingClassReaderFactory(this.resourcePatternResolver);
 
 	private final List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
 
@@ -108,6 +107,7 @@ public class ClassPathScanningCandidateComponentProvider implements CandidateCom
 	
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
+		this.classReaderFactory = new CachingClassReaderFactory(resourceLoader);
 	}
 
 	public void addExcludeFilter(TypeFilter excludeFilter) {
@@ -120,95 +120,58 @@ public class ClassPathScanningCandidateComponentProvider implements CandidateCom
 		this.includeFilters.add(includeFilter);
 	}
 
-	public Set<Class> findCandidateComponents() {
-		Set<Class> candidates = new HashSet<Class>();
+
+	public Set<BeanDefinition> findCandidateComponents() {
+		Set<BeanDefinition> candidates = new LinkedHashSet<BeanDefinition>();
 		for (int i = 0; i < this.packageSearchPaths.length; i++) {
 			try {
 				Resource[] resources = this.resourcePatternResolver.getResources(this.packageSearchPaths[i]);
 				for (int j = 0; j < resources.length; j++) {
-					Class clazz = loadClassIfCandidate(resources[j]);
-					if (clazz != null) {
-						candidates.add(clazz);
+					Resource resource = resources[j];
+					ClassReader classReader = getClassReaderIfCandidate(resource);
+					if (classReader != null) {
+						ScannedRootBeanDefinition sbd = new ScannedRootBeanDefinition(classReader);
+						sbd.setSource(resource);
+						if (sbd.getMetadata().isConcrete()) {
+							candidates.add(sbd);
+						}
 					}
 				}
 			}
-			catch (IOException e) {
-				throw new FatalBeanException("failed in classpath scan", e);
+			catch (IOException ex) {
+				throw new FatalBeanException("I/O failure during classpath scanning", ex);
 			}
 		}
 		return candidates;
 	}
 
-	private Class loadClassIfCandidate(Resource resource) throws IOException {
-		String name = resource.getFilename();
+	private ClassReader getClassReaderIfCandidate(Resource resource) throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Checking for candidate: " + resource);
 		}
-		if (!name.endsWith(CLASS_FILE_EXTENSION)) {
-			return null;
-		}
-		InputStream stream = resource.getInputStream();
-		try {
-			ClassReader classReader = new ClassReader(stream);
-			ClassNameAndTypesReadingVisitor nameReader = new ClassNameAndTypesReadingVisitor();
-			classReader.accept(nameReader, true);
-
-			if (isCandidateComponent(classReader)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found candidate - loading class: " + nameReader.getClassName());
-				}
-				Class clazz = loadClass(nameReader.getClassName());
-				if (!clazz.isInterface()) {
-					return clazz;
-				}
-			}
-		}
-		finally {
-			try {
-				if (stream != null) {
-					stream.close();
-				}
-			}
-			catch (IOException e) {
-				// ignore, cleanup
-			}
+		ClassReader classReader = this.classReaderFactory.getClassReader(resource);
+		if (isCandidateComponent(classReader)) {
+			return classReader;
 		}
 		return null;
 	}
 
 	/**
-	 * @param classReader ASM ClassReader for the class
 	 * @return true if this class does not match any exclude filter
 	 * and does match at least one include filter
 	 */
-	protected boolean isCandidateComponent(ClassReader classReader) {
+	protected boolean isCandidateComponent(ClassReader classReader) throws IOException {
 		for (TypeFilter tf : this.excludeFilters) {
-			if (tf.match(classReader)) {
+			if (tf.match(classReader, this.classReaderFactory)) {
 				return false;
 			}
 		}
 		for (TypeFilter tf : this.includeFilters) {
-			if (tf.match(classReader)) {
+			if (tf.match(classReader, this.classReaderFactory)) {
 				return true;
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Utility method which loads a class without initializing it.
-	 * Translates any ClassNotFoundException into BeanDefinitionStoreException.
-	 * @param className the name of the class
-	 * @return the loaded class
-	 */
-	protected Class loadClass(String className) {
-		try {
-			return Class.forName(ClassUtils.convertResourcePathToClassName(className),
-					false, this.resourcePatternResolver.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			throw new BeanDefinitionStoreException("Unable to load class: " + className, ex);
-		}
 	}
 
 }

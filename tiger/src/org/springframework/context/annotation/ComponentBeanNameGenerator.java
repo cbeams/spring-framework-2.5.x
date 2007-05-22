@@ -17,9 +17,10 @@
 package org.springframework.context.annotation;
 
 import java.beans.Introspector;
+import java.util.Map;
 
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
@@ -50,11 +51,12 @@ public class ComponentBeanNameGenerator implements BeanNameGenerator {
 
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 		String rawBeanName = null;
-		if (definition instanceof AbstractBeanDefinition) {
-			Class<?> beanClass = ((AbstractBeanDefinition) definition).getBeanClass();
-			Component annotation = beanClass.getAnnotation(Component.class);
-			if (annotation != null) {
-				rawBeanName = annotation.value();
+		if (definition instanceof AnnotatedBeanDefinition) {
+			AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
+			Map<String, Object> attributes =
+					annDef.getMetadata().getAnnotationAttributes(Component.class.getName());
+			if (attributes != null) {
+				rawBeanName = (String) attributes.get("value");
 			}
 		}
 		if (!StringUtils.hasLength(rawBeanName)) {

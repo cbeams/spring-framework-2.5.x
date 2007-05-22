@@ -23,7 +23,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  */
 public class TestScopeMetadataResolver implements ScopeMetadataResolver {
 
-	public ScopeMetadata resolveScopeMetadata(BeanDefinition beanDefinition, Class beanClass) {
+	public ScopeMetadata resolveScopeMetadata(BeanDefinition beanDefinition) {
 		ScopeMetadata metadata = new ScopeMetadata();
 		metadata.setScopeName("myCustomScope");
 		return metadata;

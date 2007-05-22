@@ -17,17 +17,19 @@
 package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Scope;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
- * An implementation of {@link ScopeMetadataResolver} that checks for {@link Scope}
- * annotations on the bean class.
+ * An implementation of {@link ScopeMetadataResolver} that checks for
+ * a {@link Scope} annotation on the bean class.
  * 
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 2.1
- * @see org.springframework.beans.factory.annotation.Scope
+ * @see Scope
  */
 public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 
@@ -44,18 +46,24 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 		this.scopedProxyMode = scopedProxyMode;
 	}
 
+
 	public void setScopeAnnotationType(Class<? extends Annotation> scopeAnnotationType) {
 		this.scopeAnnotationType = scopeAnnotationType;
 	}
 	
-	public ScopeMetadata resolveScopeMetadata(BeanDefinition beanDefinition, Class beanClass) {
+
+	public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
 		ScopeMetadata metadata = new ScopeMetadata();
-		Scope annotation = (Scope) beanClass.getAnnotation(this.scopeAnnotationType); 
-		if (annotation != null) {
-			metadata.setScopeName(annotation.value());
-		}
-		if (!metadata.getScopeName().equals(BeanDefinition.SCOPE_SINGLETON)) {
-			metadata.setScopedProxyMode(this.scopedProxyMode);
+		if (definition instanceof AnnotatedBeanDefinition) {
+			AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
+			Map<String, Object> attributes =
+					annDef.getMetadata().getAnnotationAttributes(this.scopeAnnotationType.getName());
+			if (attributes != null) {
+				metadata.setScopeName((String) attributes.get("value"));
+			}
+			if (!metadata.getScopeName().equals(BeanDefinition.SCOPE_SINGLETON)) {
+				metadata.setScopedProxyMode(this.scopedProxyMode);
+			}
 		}
 		return metadata;
 	}
