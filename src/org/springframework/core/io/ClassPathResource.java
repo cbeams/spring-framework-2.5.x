@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,10 +111,17 @@ public class ClassPathResource extends AbstractResource {
 
 
 	/**
-	 * Return the path for this resource.
+	 * Return the path for this resource (as resource path within the class path).
 	 */
 	public final String getPath() {
 		return this.path;
+	}
+
+	/**
+	 * Return the ClassLoader that this resource will be obtained from.
+	 */
+	public final ClassLoader getClassLoader() {
+		return (this.classLoader != null ? this.classLoader : this.clazz.getClassLoader());
 	}
 
 
