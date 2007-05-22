@@ -99,12 +99,12 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	public <T> T executeFunction(Class<T> returnType, Map args) {
-		return (T) execute(args).get("return");
+		return (T) execute(args).get(returnNameToUse);
 
 	}
 
 	public <T> T executeFunction(Class<T> returnType, SqlParameterSource args) {
-		return (T) execute(args).get("return");
+		return (T) execute(args).get(returnNameToUse);
 
 	}
 
@@ -122,6 +122,13 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		checkCompiled();
 		Map values = matchInParameterValuesWithCallParameters(args);
 		CallableStatementCreator csc = this.callableStatementFactory.newCallableStatementCreator(values);
+		if (logger.isDebugEnabled()) {
+			logger.debug("The following parameters are used for call " + getCallString() + " with: " + values);
+			int i = 1;
+			for (SqlParameter p : getCallParameters()) {
+				logger.debug(i++ + ": " +  p.getName() + " SQL Type "+ p.getSqlType() + " Type Name " + p.getTypeName() + " " + p.getClass().getName());
+			}
+		}
 		Map result = jdbcTemplate.call(csc, getCallParameters());
 		return (Map<String, Object>)result;
 	}
