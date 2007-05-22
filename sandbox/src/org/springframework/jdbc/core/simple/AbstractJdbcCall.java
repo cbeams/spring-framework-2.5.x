@@ -77,7 +77,7 @@ public abstract class AbstractJdbcCall {
 	protected boolean caseSensitiveParameters = false;
 	protected List<String> outParameterNames = new ArrayList<String>();
 	protected String callString;
-	protected String metaDataProcedureColumnNamePrefix = "";
+	protected String removableProcedureColumnNamePrefix = "@";
 
 	/**
 	 * Object enabling us to create CallableStatementCreators
@@ -99,10 +99,13 @@ public abstract class AbstractJdbcCall {
 	}
 
 	public void addDeclaredParameter(SqlParameter parameter) {
-		String parameterName = caseSensitiveParameters ? parameter.getName() : parameter.getName().toLowerCase();
-		declaredParameters.put(parameterName, parameter);
+		String parameterNameToMatch = caseSensitiveParameters ? parameter.getName() : parameter.getName().toLowerCase();
+		if (parameterNameToMatch.startsWith(removableProcedureColumnNamePrefix) && parameterNameToMatch.length() > 1) {
+			parameterNameToMatch = parameterNameToMatch.substring(1);
+		}
+		declaredParameters.put(parameterNameToMatch, parameter);
 		if (parameter instanceof SqlOutParameter) {
-			outParameterNames.add(parameter.getName());
+			outParameterNames.add(parameterNameToMatch);
 			returnDeclared = true;
 		}
 		if (logger.isDebugEnabled()) {
@@ -114,6 +117,7 @@ public abstract class AbstractJdbcCall {
 			}
 		}
 	}
+	
 	public List<SqlParameter> getCallParameters() {
 		return callParameters;
 	}
@@ -253,10 +257,6 @@ public abstract class AbstractJdbcCall {
 						defaultSchemaToUserName = true;
 						useCatalogNameAsPackageName = true;
 					}
-					else if("Microsoft SQL Server".equals(databaseProductName)) {
-						metaDataProcedureColumnNamePrefix = "@";
-						logger.debug("Using procedure column prefix: " + metaDataProcedureColumnNamePrefix);
-					}
 					supportsCatalogsInProcedureCalls = databaseMetaData.supportsCatalogsInProcedureCalls();
 					supportsSchemasInProcedureCalls = databaseMetaData.supportsSchemasInProcedureCalls();
 					storesUpperCaseIdentifiers = databaseMetaData.storesUpperCaseIdentifiers();
@@ -324,11 +324,12 @@ public abstract class AbstractJdbcCall {
 									colNameToUse = colName;
 									colNameToCheck = caseSensitiveParameters ? colName : colName.toLowerCase();
 								}
-								if (colNameToUse.startsWith(metaDataProcedureColumnNamePrefix) && colNameToUse.length() > 1)
+								if (colNameToUse.startsWith(removableProcedureColumnNamePrefix) && colNameToUse.length() > 1)
 									colNameToUse = colNameToUse.substring(1);
-								if (colNameToCheck.startsWith(metaDataProcedureColumnNamePrefix) && colNameToCheck.length() > 1)
+								if (colNameToCheck.startsWith(removableProcedureColumnNamePrefix) && colNameToCheck.length() > 1)
 									colNameToCheck = colNameToCheck.substring(1);
-								if (!((colType == DatabaseMetaData.procedureColumnReturn && returnDeclared) || declaredParameters.containsKey(colNameToCheck))) {
+								if (!((colType == DatabaseMetaData.procedureColumnReturn && returnDeclared) ||
+										declaredParameters.containsKey(colNameToCheck))) {
 									int dataType = procs.getInt("DATA_TYPE");
 									if (colType == DatabaseMetaData.procedureColumnReturn) {
 										if (!isFunction() && "return_value".equals(colNameToCheck)) {
@@ -410,16 +411,23 @@ public abstract class AbstractJdbcCall {
 	}
 
 	protected Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> inParameters) {
-		if (caseSensitiveParameters) {
+		if (!accessMetaData) {
 			return inParameters;
 		}
 		Map<String, String> callParameterNames = new HashMap<String, String>(this.callParameters.size());
 		for (SqlParameter parameter : callParameters) {
-			callParameterNames.put(parameter.getName().toLowerCase(), parameter.getName());
+			String parameterName = caseSensitiveParameters ? parameter.getName() : parameter.getName().toLowerCase();
+			String parameterNameToMatch = parameterName;
+			if (parameterNameToMatch.startsWith(removableProcedureColumnNamePrefix) && parameterNameToMatch.length() > 1)
+				parameterNameToMatch = parameterNameToMatch.substring(1);
+			callParameterNames.put(parameterNameToMatch.toLowerCase(), parameterName);
 		}
 		Map<String, Object> matchedParameters = new HashMap<String, Object>(inParameters.size());
 		for (String parameterName : inParameters.keySet()) {
-			String callParameterName = callParameterNames.get(parameterName.toLowerCase());
+			String parameterNameToMatch = parameterName;
+			if (parameterNameToMatch.startsWith(removableProcedureColumnNamePrefix) && parameterNameToMatch.length() > 1)
+				parameterNameToMatch = parameterNameToMatch.substring(1);
+			String callParameterName = callParameterNames.get(parameterNameToMatch.toLowerCase());
 			if (callParameterName == null) {
 				logger.warn("Unable to locate the corresponding parameter for \"" + parameterName + "\" specified in the provided parameter values: " + inParameters);
 			}
