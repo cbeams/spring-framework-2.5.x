@@ -57,7 +57,13 @@ public class LoadTimeWeaverFactoryBean implements FactoryBean {
 			this.loadTimeWeaver = new InstrumentationLoadTimeWeaver();
 		}
 		else {
-			this.loadTimeWeaver = new ReflectiveLoadTimeWeaver();
+			try {
+				this.loadTimeWeaver = new ReflectiveLoadTimeWeaver();
+			}
+			catch (IllegalStateException ex) {
+				throw new IllegalStateException(ex.getMessage() + " Specify a custom LoadTimeWeaver " +
+						"or start your Java virtual machine with Spring's agent: -javaagent:spring-agent.jar");
+			}
 		}
 	}
 
