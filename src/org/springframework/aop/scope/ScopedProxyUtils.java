@@ -29,7 +29,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  * @author Mark Fisher
  * @since 2.1
  */
-public class ScopedProxyUtils {
+public abstract class ScopedProxyUtils {
 
 	private static final String TARGET_NAME_PREFIX = "scopedTarget.";
 
@@ -37,9 +37,9 @@ public class ScopedProxyUtils {
 	/**
 	 * Generates a scoped proxy for the supplied target bean, registering the target
 	 * bean with an internal name and setting 'targetBeanName' on the scoped proxy.
-	 * @param definition
-	 * @param registry
-	 * @param proxyTargetClass
+	 * @param definition the original bean definition
+	 * @param registry the bean definition registry
+	 * @param proxyTargetClass whether to create a target class proxy
 	 * @return the scoped proxy definition
 	 */
 	public static BeanDefinitionHolder createScopedProxy(BeanDefinitionHolder definition,
@@ -50,8 +50,10 @@ public class ScopedProxyUtils {
 
 		// Create a scoped proxy definition for the original bean name,
 		// "hiding" the target bean in an internal target definition.
-		String targetBeanName = TARGET_NAME_PREFIX + originalBeanName;
 		RootBeanDefinition scopedProxyDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
+		scopedProxyDefinition.setSource(definition.getSource());
+
+		String targetBeanName = TARGET_NAME_PREFIX + originalBeanName;
 		scopedProxyDefinition.getPropertyValues().addPropertyValue("targetBeanName", targetBeanName);
 
 		if (proxyTargetClass) {
