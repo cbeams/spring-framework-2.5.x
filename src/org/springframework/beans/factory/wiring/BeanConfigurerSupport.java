@@ -23,7 +23,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -51,7 +51,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 
 	private BeanWiringInfoResolver beanWiringInfoResolver;
 
-	private AutowireCapableBeanFactory beanFactory;
+	private ConfigurableListableBeanFactory beanFactory;
 
 
 	/**
@@ -71,14 +71,14 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 	/**
 	 * Set the {@link BeanFactory} in which this aspect must configure beans.
 	 * @throws IllegalArgumentException if the supplied <code>beanFactory</code> is
-	 * not an {@link AutowireCapableBeanFactory}.
+	 * not an {@link ConfigurableListableBeanFactory}
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (!(beanFactory instanceof AutowireCapableBeanFactory)) {
+		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
 			throw new IllegalArgumentException(
-				 "Bean configurer aspect needs to run in an AutowireCapableBeanFactory, not in [" + beanFactory + "]");
+				 "Bean configurer aspect needs to run in an ConfigurableListableBeanFactory: " + beanFactory);
 		}
-		this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
+		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 	}
 
 	/**
@@ -135,13 +135,24 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 			return;
 		}
 
-		if (bwi.indicatesAutowiring()) {
-			// Perform autowiring.
+		if (bwi.indicatesAutowiring() ||
+				(bwi.isDefaultBeanName() && !this.beanFactory.containsBeanDefinition(bwi.getBeanName()))) {
+			// Perform autowiring (also applying standard factory / post-processor callbacks).
 			this.beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
+			Object result = this.beanFactory.initializeBean(beanInstance, bwi.getBeanName());
+			checkExposedObject(result, beanInstance);
 		}
 		else {
-			// Perform explicit wiring.
-			this.beanFactory.applyBeanPropertyValues(beanInstance, bwi.getBeanName());
+			// Perform explicit wiring based on the specified bean definition.
+			Object result = this.beanFactory.configureBean(beanInstance, bwi.getBeanName());
+			checkExposedObject(result, beanInstance);
+		}
+	}
+
+	private void checkExposedObject(Object exposedObject, Object originalBeanInstance) {
+		if (exposedObject != originalBeanInstance) {
+			throw new IllegalStateException("Post-processor tried to replace bean instance [" + originalBeanInstance +
+					"] with (proxy) object [" + exposedObject + "] - not supported for aspect-configured classes!");
 		}
 	}
 

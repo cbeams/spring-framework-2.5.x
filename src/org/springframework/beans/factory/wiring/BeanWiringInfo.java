@@ -50,10 +50,19 @@ public class BeanWiringInfo {
 
 	private String beanName = null;
 
+	private boolean isDefaultBeanName = false;
+
 	private int autowireMode = AutowireCapableBeanFactory.AUTOWIRE_NO;
 
 	private boolean dependencyCheck = false;
 
+
+	/**
+	 * Create a default BeanWiringInfo that suggests plain initialization of
+	 * factory and post-processor callbacks that the bean class may expect.
+	 */
+	public BeanWiringInfo() {
+	}
 
 	/**
 	 * Create a new BeanWiringInfo that points to the given bean name.
@@ -62,8 +71,21 @@ public class BeanWiringInfo {
 	 * is empty, or consists wholly of whitespace
 	 */
 	public BeanWiringInfo(String beanName) {
+		this(beanName, false);
+	}
+
+	/**
+	 * Create a new BeanWiringInfo that points to the given bean name.
+	 * @param beanName the name of the bean definition to take the property values from
+	 * @param isDefaultBeanName whether the given bean name is a suggested
+	 * default bean name, not necessarily matching an actual bean definition
+	 * @throws IllegalArgumentException if the supplied beanName is <code>null</code>,
+	 * is empty, or consists wholly of whitespace
+	 */
+	public BeanWiringInfo(String beanName, boolean isDefaultBeanName) {
 		Assert.hasText(beanName, "'beanName' must not be empty");
 		this.beanName = beanName;
+		this.isDefaultBeanName = isDefaultBeanName;
 	}
 
 	/**
@@ -79,7 +101,7 @@ public class BeanWiringInfo {
 	 */
 	public BeanWiringInfo(int autowireMode, boolean dependencyCheck) {
 		if (autowireMode != AUTOWIRE_BY_NAME && autowireMode != AUTOWIRE_BY_TYPE) {
-			throw new IllegalArgumentException("Just constants AUTOWIRE_BY_NAME and AUTOWIRE_BY_TYPE allowed");
+			throw new IllegalArgumentException("Only constants AUTOWIRE_BY_NAME and AUTOWIRE_BY_TYPE supported");
 		}
 		this.autowireMode = autowireMode;
 		this.dependencyCheck = dependencyCheck;
@@ -98,6 +120,14 @@ public class BeanWiringInfo {
 	 */
 	public String getBeanName() {
 		return this.beanName;
+	}
+
+	/**
+	 * Return whether the specific bean name is a suggested default bean name,
+	 * not necessarily matching an actual bean definition in the factory.
+	 */
+	public boolean isDefaultBeanName() {
+		return this.isDefaultBeanName;
 	}
 
 	/**

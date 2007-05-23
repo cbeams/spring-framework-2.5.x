@@ -58,6 +58,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -264,13 +265,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	public void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck)
 			throws BeansException {
 
-		if (autowireMode != AUTOWIRE_BY_NAME && autowireMode != AUTOWIRE_BY_TYPE) {
-			throw new IllegalArgumentException("Just constants AUTOWIRE_BY_NAME and AUTOWIRE_BY_TYPE allowed");
+		if (autowireMode == AUTOWIRE_CONSTRUCTOR) {
+			throw new IllegalArgumentException("AUTOWIRE_CONSTRUCTOR not supported for existing bean instance");
 		}
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
-		RootBeanDefinition bd = new RootBeanDefinition(existingBean.getClass(), autowireMode, dependencyCheck);
+		RootBeanDefinition bd =
+				new RootBeanDefinition(ClassUtils.getUserClass(existingBean), autowireMode, dependencyCheck);
 		bd.setSingleton(false);
-		populateBean(existingBean.getClass().getName(), bd, new BeanWrapperImpl(existingBean));
+		populateBean(bd.getBeanClass().getName(), bd, new BeanWrapperImpl(existingBean));
 	}
 
 	public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
@@ -399,27 +401,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Initialize the bean instance.
 			errorMessage = "Initialization of bean failed";
 
-			// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the
-			// state of the bean before properties are set. This can be used, for example,
-			// to support styles of field injection.
-			boolean continueWithPropertyPopulation = true;
-
-			if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-				for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
-					BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
-					if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
-						InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) beanProcessor;
-						if (!ibp.postProcessAfterInstantiation(bean, beanName)) {
-							continueWithPropertyPopulation = false;
-							break;
-						}
-					}
-				}
-			}
-
-			if (continueWithPropertyPopulation) {
-				populateBean(beanName, mbd, instanceWrapper);
-			}
+			populateBean(beanName, mbd, instanceWrapper);
 
 			Object originalBean = bean;
 			bean = initializeBean(beanName, bean, mbd);
@@ -807,6 +789,28 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param bw BeanWrapper with bean instance
 	 */
 	protected void populateBean(String beanName, RootBeanDefinition mbd, BeanWrapper bw) {
+		// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the
+		// state of the bean before properties are set. This can be used, for example,
+		// to support styles of field injection.
+		boolean continueWithPropertyPopulation = true;
+
+		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+			for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
+				BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
+				if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
+					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) beanProcessor;
+					if (!ibp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
+						continueWithPropertyPopulation = false;
+						break;
+					}
+				}
+			}
+		}
+
+		if (!continueWithPropertyPopulation) {
+			return;
+		}
+
 		PropertyValues pvs = mbd.getPropertyValues();
 
 		if (bw == null) {
