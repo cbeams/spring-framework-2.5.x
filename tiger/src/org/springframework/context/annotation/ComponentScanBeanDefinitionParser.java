@@ -17,8 +17,10 @@
 package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.w3c.dom.Element;
@@ -27,7 +29,12 @@ import org.w3c.dom.NodeList;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.annotation.AnnotationConfigUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -69,17 +76,18 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		ResourceLoader resourceLoader = parserContext.getReaderContext().getResourceLoader();
+		Object source = parserContext.extractSource(element);
 
 		boolean useDefaultFilters = Boolean.valueOf(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
 		boolean annotationConfig = Boolean.valueOf(element.getAttribute(ANNOTATION_CONFIG_ATTRIBUTE));
-		
+
 		String basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);
 		String[] basePackages = StringUtils.commaDelimitedListToStringArray(basePackage);
 
 		List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
 		List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
 
-		// parse exclude and include filter elements
+		// Parse exclude and include filter elements.
 		NodeList nodeList = element.getChildNodes();
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node node = nodeList.item(i);
@@ -95,28 +103,43 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 				}
 			}
 		}
-		
-		// delegate bean definition registration to the scanner
+
+		// Delegate bean definition registration to scanner class.
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(parserContext.getRegistry());
 		scanner.setResourceLoader(resourceLoader);
-		scanner.setIncludeAnnotationConfig(annotationConfig);
 
-		// register beanNameGenerator if className provided
+		// Register beanNameGenerator if className provided.
 		if (element.hasAttribute(NAME_GENERATOR_ATTRIBUTE)) {
 			BeanNameGenerator beanNameGenerator = (BeanNameGenerator) instantiateUserDefinedStrategy(
 					element.getAttribute(NAME_GENERATOR_ATTRIBUTE), BeanNameGenerator.class, resourceLoader.getClassLoader());
 			scanner.setBeanNameGenerator(beanNameGenerator);
 		}
-		
-		// register scopeMetadataResolver if className provided
+
+		// Register scopeMetadataResolver if className provided.
 		if (element.hasAttribute(SCOPE_RESOLVER_ATTRIBUTE)) {
 			ScopeMetadataResolver scopeMetadataResolver = (ScopeMetadataResolver) instantiateUserDefinedStrategy(
 					element.getAttribute(SCOPE_RESOLVER_ATTRIBUTE), ScopeMetadataResolver.class, resourceLoader.getClassLoader());
 			scanner.setScopeMetadataResolver(scopeMetadataResolver);
 		}
-		
-		scanner.scan(basePackages, useDefaultFilters, excludeFilters, includeFilters);
-		
+
+		// Actually scan for bean definitions and register them.
+		Set<BeanDefinitionHolder> beanDefinitions =
+				scanner.doScan(basePackages, useDefaultFilters, excludeFilters, includeFilters);
+
+		CompositeComponentDefinition compositeDef = new CompositeComponentDefinition(element.getTagName(), source);
+		for (Iterator it = beanDefinitions.iterator(); it.hasNext();) {
+			BeanDefinitionHolder beanDefHolder = (BeanDefinitionHolder) it.next();
+			AbstractBeanDefinition beanDef = (AbstractBeanDefinition) beanDefHolder.getBeanDefinition();
+			beanDef.setSource(parserContext.extractSource(beanDef.getSource()));
+			compositeDef.addNestedComponent(new BeanComponentDefinition(beanDefHolder));
+		}
+		parserContext.getReaderContext().fireComponentRegistered(compositeDef);
+
+		// Register annotation config processors, if necessary.
+		if (annotationConfig) {
+			AnnotationConfigUtils.registerAnnotationConfigProcessors(parserContext.getRegistry(), source);
+		}
+
 		return null;
 	}
 

@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -156,14 +157,38 @@ public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 	public int scan(String basePackage, boolean useDefaultFilters, List<TypeFilter> excludeFilters, List<TypeFilter> includeFilters) {
 		return scan(new String[] {basePackage}, useDefaultFilters, excludeFilters, includeFilters);
 	}
-		
+
 	/**
 	 * Perform a scan within the specified base packages.
 	 * @param basePackages the packages to check for annotated classes
 	 * @return number of beans registered
 	 */
-	public int scan(String[] basePackages, boolean useDefaultFilters, List<TypeFilter> excludeFilters, List<TypeFilter> includeFilters) {
+	public int scan(String[] basePackages, boolean useDefaultFilters,
+			List<TypeFilter> excludeFilters, List<TypeFilter> includeFilters) {
+
 		int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
+
+		doScan(basePackages, useDefaultFilters, excludeFilters, includeFilters);
+
+		// Register annotation config processors, if necessary.
+		if (this.includeAnnotationConfig) {
+			AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
+		}
+
+		return this.registry.getBeanDefinitionCount() - beanCountAtScanStart;
+	}
+
+
+	/**
+	 * Perform a scan within the specified base packages,
+	 * returning the registered bean definitions.
+	 * <p>This method does <i>not</i> register an annotation config processor
+	 * but rather leaves this up to the caller.
+	 * @param basePackages the packages to check for annotated classes
+	 * @return number of beans registered
+	 */
+	protected Set<BeanDefinitionHolder> doScan(String[] basePackages, boolean useDefaultFilters,
+			List<TypeFilter> excludeFilters, List<TypeFilter> includeFilters) {
 
 		// Create the candidate component provider.
 		ClassPathScanningCandidateComponentProvider candidateComponentProvider =
@@ -184,21 +209,18 @@ public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 
 		// Find candidate components...
 		Set<BeanDefinition> candidates = candidateComponentProvider.findCandidateComponents();
+		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<BeanDefinitionHolder>();
 		for (BeanDefinition candidate : candidates) {
 			String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
 			ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 			BeanDefinition beanDefinition = applyScope(candidate, beanName, scopeMetadata);
+			beanDefinitions.add(new BeanDefinitionHolder(beanDefinition, beanName));
 			this.registry.registerBeanDefinition(beanName, beanDefinition);
 		}
 
-		// Register annotation config processors, if necessary.
-		if (this.includeAnnotationConfig) {
-			AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
-		}
-
-		return this.registry.getBeanDefinitionCount() - beanCountAtScanStart;
+		return beanDefinitions;
 	}
-	
+
 	private BeanDefinition applyScope(BeanDefinition beanDefinition, String beanName, ScopeMetadata scopeMetadata) {
 		beanDefinition.setScope(scopeMetadata.getScopeName());
 		ScopedProxyMode scopedProxyMode = scopeMetadata.getScopedProxyMode();
@@ -207,9 +229,23 @@ public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 		}
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(beanDefinition, beanName);
-		BeanDefinitionHolder scopedProxyDefinition =
-				ScopedProxyUtils.createScopedProxy(definitionHolder, registry, proxyTargetClass);
-		return scopedProxyDefinition.getBeanDefinition();
+		return ScopedProxyCreator.createScopedProxy(definitionHolder, registry, proxyTargetClass);
 	}
-	
+
+
+	/**
+	 * Inner factory class used to just introduce an AOP framework dependency
+	 * when actually creating a scoped proxy.
+	 */
+	private static class ScopedProxyCreator {
+
+		public static BeanDefinition createScopedProxy(
+				BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry, boolean proxyTargetClass) {
+
+			BeanDefinitionHolder scopedProxyDefinition =
+					ScopedProxyUtils.createScopedProxy(definitionHolder, registry, proxyTargetClass);
+			return scopedProxyDefinition.getBeanDefinition();
+		}
+	}
+
 }
