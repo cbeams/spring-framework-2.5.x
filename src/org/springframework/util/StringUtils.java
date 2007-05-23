@@ -82,7 +82,7 @@ public abstract class StringUtils {
 
 	/**
 	 * Check whether the given String has actual text.
-	 * More specifically, returns <code>true</code> if the string not <code>null<code>,
+	 * More specifically, returns <code>true</code> if the string not <code>null</code>,
 	 * its length is greater than 0, and it contains at least one non-whitespace character.
 	 * <p><pre>
 	 * StringUtils.hasText(null) = false
@@ -93,7 +93,7 @@ public abstract class StringUtils {
 	 * </pre>
 	 * @param str the String to check (may be <code>null</code>)
 	 * @return <code>true</code> if the String is not <code>null</code>, its length is
-	 * greater than 0, and is does not contain whitespace only
+	 * greater than 0, and it does not contain whitespace only
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static boolean hasText(String str) {
