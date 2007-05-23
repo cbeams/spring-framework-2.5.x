@@ -19,7 +19,8 @@ package org.springframework.ejb.config;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
- * {@link org.springframework.beans.factory.xml.NamespaceHandler} for the '<code>jee</code>' namespace.
+ * {@link org.springframework.beans.factory.xml.NamespaceHandler}
+ * for the '<code>jee</code>' namespace.
  *
  * @author Rob Harrop
  * @since 2.0
