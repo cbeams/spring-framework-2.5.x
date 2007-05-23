@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -465,6 +465,17 @@ public class MultiActionControllerTests extends TestCase {
 		assertNotNull("ModelAndView cannot be null", mav);
 		assertFalse("ModelAndView should not have a view", mav.hasView());
 		assertTrue(model.containsKey("exception"));
+	}
+
+	public void testCannotCallExceptionHandlerDirectly() throws Exception {
+		Map model = new HashMap();
+
+		MultiActionController mac = new ModelOnlyMultiActionController(model);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/handleIllegalStateException.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mav = mac.handleRequest(request, response);
+		assertEquals(HttpServletResponse.SC_NOT_FOUND, response.getStatus());
 	}
 
 	public void testHandlerReturnsVoid() throws Exception {
