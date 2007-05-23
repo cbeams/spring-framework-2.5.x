@@ -19,6 +19,9 @@ Package org.springframework.beans
 * mirrored FactoryBean's "getObjectType()" as abstract method in AbstractFactoryBean again, for @Override compatibility
 * PropertyResourceConfigurer (and in particular PropertyPlaceholderConfigurer) is marked as PriorityOrdered
 * reworked SmartInstantiationAwareBeanPostProcessor's "determineConstructor" hook into "determineCandidateConstructors"
+* BeanWiringInfo and ClassName/AnnotationBeanWiringInfoResolver support the notion of a 'default' bean name
+* BeanConfigurerSupport (and AnnotationBeanConfigurerAspect) applies factory callbacks and post-processors as well
+* BeanConfigurerSupport applies factory callbacks and post-processors if no bean definition found for default bean name
 * DefaultListableBeanFactory clears a cached merged bean definition in case of re-registering a bean definition
 * added 'required' attribute to @Autowired annotation (configurable for a custom autowire annotation as well)
 * avoid double invocation of @Autowired/@Resource setter method in case of explicitly specified property value
@@ -75,6 +78,7 @@ Package org.springframework.util
 Package org.springframework.web
 * CookieLocaleResolver checks specified "defaultLocale" in case of a setLocale call with null argument
 * RequestContext uses a shared default Theme instance as fallback, avoiding the recreating of empty Theme instances
+* MultiActionController explicitly disallows direct invocation of exception handler methods (as handler methods)
 
 
 Changes in version 2.1 M1 (2007-05-13)
