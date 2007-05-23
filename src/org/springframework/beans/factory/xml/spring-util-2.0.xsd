@@ -17,11 +17,6 @@
 	Reference a public, static field on a type and expose its value as
 	a bean. For example <code>&lt;util:constant static-field=&quot;java.lang.Integer.MAX_VALUE&quot;/&gt;</code>.
 			</xsd:documentation>
-			<xsd:appinfo>
-				<tool:annotation>
-					<tool:exports/>
-				</tool:annotation>
-			</xsd:appinfo>
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:attribute name="id" type="xsd:ID"/>
@@ -35,11 +30,6 @@
 	Reference a property on a bean (or as a nested value) and expose its values as
 	a bean. For example &lt;util:property-path path=&quot;order.customer.name&quot;/&gt;.
 			</xsd:documentation>
-			<xsd:appinfo>
-				<tool:annotation>
-					<tool:exports/>
-				</tool:annotation>
-			</xsd:appinfo>
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:attribute name="id" type="xsd:ID"/>

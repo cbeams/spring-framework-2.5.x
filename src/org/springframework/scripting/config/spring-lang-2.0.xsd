@@ -45,13 +45,6 @@
 
 	<!-- Script Types -->
 	<xsd:complexType name="simpleScriptType">
-		<xsd:annotation>
-			<xsd:appinfo>
-				<tool:annotation>
-					<tool:exports/>
-				</tool:annotation>
-			</xsd:appinfo>
-		</xsd:annotation>
 		<xsd:complexContent>
 			<xsd:extension base="beans:identifiedType">
 				<xsd:sequence>
