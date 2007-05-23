@@ -22,7 +22,6 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.context.annotation.Scope;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
