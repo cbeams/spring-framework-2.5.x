@@ -2243,13 +2243,14 @@ public class ReplacementComputeValue implements MethodReplacer {
 <bean id="accountService" class="com.foo.DefaultAccountService" singleton="false"/>]]></programlisting>
 			<para>There is one quite important thing to be aware of when deploying a bean
 			in the prototype scope, in that the lifecycle of the bean changes slightly.
-			Spring cannot (and hence does not) manage the complete lifecycle of a prototype
-			bean: the container instantiates, configures, decorates and otherwise assembles a
-			prototype object, hands it to the client and then has no further knowledge of that
-			prototype instance. This means that while initialization lifecycle callback
-			methods will be called on all objects regardless of scope, in the case
-			of prototypes, any configured destruction lifecycle callbacks will <emphasis>not</emphasis>
-			be called. It is the responsibility of the client code to clean up
+			Spring does not manage the complete lifecycle of a prototype bean: the
+			container instantiates, configures, decorates and otherwise assembles a
+			prototype object, hands it to the client and then has no further knowledge
+			of that prototype instance. This means that while <emphasis>initialization</emphasis>
+			lifecycle callback methods will be called on all objects regardless of scope,
+			in the case of prototypes, any configured <emphasis>destruction</emphasis>
+			lifecycle callbacks will <emphasis>not</emphasis> be called. It is the
+			responsibility of the client code to clean up
 			prototype scoped objects and release any expensive resources that the prototype
 			bean(s) are holding onto. (One possible way to get the Spring container
 		    to release resources used by singleton-scoped beans is through the use
@@ -2257,13 +2258,37 @@ public class ReplacementComputeValue implements MethodReplacer {
 			which would hold a reference to the beans that need to be cleaned up.)</para>
 			<para>In some respects, you can think of the Spring containers role when talking
 			about a prototype-scoped bean as somewhat of a replacement for the Java
-			<literal>'new'</literal> operator. Any lifecycle aspects past that point have to
-			be handled by the client. The lifecycle of a bean in a Spring IoC container is
-			further described in the section entitled
-			<xref linkend="beans-factory-lifecycle"/>.</para>
+			<literal>'new'</literal> operator. All lifecycle aspects past that point
+			have to be handled by the client. (The lifecycle of a bean in the Spring
+			container is further described in the section entitled
+			<xref linkend="beans-factory-lifecycle"/>.)</para>
 		</section>
 
-        <note>
+		<section id="beans-factory-scopes-sing-prot-interaction">
+		    <title>Singleton beans with prototype-bean dependencies</title>
+		    <para>When using singleton-scoped beans that have dependencies on
+			beans that are scoped as prototypes, please be aware that
+			<emphasis>dependencies are resolved at instantiation time</emphasis>.
+			This means that if you dependency inject a prototype-scoped
+			bean into a singleton-scoped bean, a brand new prototype bean
+			will be instantiated and then dependency injected into the singleton
+			bean... <emphasis>but that is all</emphasis>. That exact same
+			prototype instance will be the sole instance that is ever supplied
+			to the singleton-scoped bean, which is fine if that is what you want.</para>
+			<para>However, sometimes what you actually want is for the
+			singleton-scoped bean to be able to acquire a brand new instance of
+			the prototype-scoped bean again and again and again at runtime.
+			In that case it is no use just dependency injecting a prototype-scoped
+			bean into your singleton bean, because as explained above, that
+			only happens <emphasis>once</emphasis> when the Spring container
+			is instantiating the singleton bean and resolving and injecting
+			its dependencies. If you are in the scenario where you need to get
+			a brand new instance of a (prototype) bean again and again and again
+			at runtime, you are referred to the section entitled
+			<xref linkend="beans-factory-method-injection"/></para>
+		</section>
+
+		<note>
             <title>Backwards compatibility note: specifying the lifecycle scope in XML</title>
             <para>If you are referencing the <filename>'spring-beans.dtd'</filename> DTD in
             a bean definition file(s), and you are being explicit about the lifecycle scope
