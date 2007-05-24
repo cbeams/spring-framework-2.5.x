@@ -9,7 +9,7 @@ distribution/website before using any of them in your own applications.
 
 * antlr/antlr-2.7.6.jar
 - ANTLR 2.7.6 (http://www.antlr.org)
-- required for running PetClinic (by Hibernate3)
+- required for running PetClinic (by Hibernate)
 
 * aopalliance/aopalliance.jar
 - AOP Alliance 1.0 (http://aopalliance.sourceforge.net)
@@ -94,15 +94,10 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's Groovy support
 
-* hibernate/hibernate2.jar
-- Hibernate 2.1.8 (http://www.hibernate.org)
-- required for building the framework
-- required at runtime when using Spring's Hibernate 2.1 support
-
 * hibernate/hibernate3.jar
 - Hibernate 3.2.4 (http://www.hibernate.org)
 - required for building the framework
-- required at runtime when using Spring's Hibernate 3.x support
+- required at runtime when using Spring's Hibernate support
 
 * hibernate/hibernate-annotation.jar
 - Hibernate Annotations 3.3.0 (http://www.hibernate.org)

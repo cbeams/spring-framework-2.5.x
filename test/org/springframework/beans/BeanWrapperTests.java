@@ -36,8 +36,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import junit.framework.TestCase;
-import net.sf.hibernate.FlushMode;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.FlushMode;
 
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;

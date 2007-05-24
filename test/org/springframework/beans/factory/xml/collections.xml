@@ -364,8 +364,8 @@
 	<bean id="enumSetFactory" class="org.springframework.beans.factory.config.SetFactoryBean">
 		<property name="sourceSet">
 			<set>
-				<value type="net.sf.hibernate.FlushMode">NEVER</value>
-				<value type="net.sf.hibernate.FlushMode">COMMIT</value>
+				<value type="org.hibernate.FlushMode">NEVER</value>
+				<value type="org.hibernate.FlushMode">COMMIT</value>
 			</set>
 		</property>
 	</bean>
