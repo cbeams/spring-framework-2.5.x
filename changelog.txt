@@ -8,6 +8,7 @@ Changes in version 2.1 M2 (2007-05-30)
 
 General
 * added missing websphere_uow_api.jar to -with-dependencies distribution
+* removed support for Hibernate 2.1; Spring's Hibernate support generally requires Hibernate 3.1 or higher now
 
 Package org.springframework.aop
 * ReflectiveMethodInvocation always uses a shared user attribute Map in clones (for proper binding of multiple advices)
@@ -20,9 +21,10 @@ Package org.springframework.beans
 * PropertyResourceConfigurer (and in particular PropertyPlaceholderConfigurer) is marked as PriorityOrdered
 * reworked SmartInstantiationAwareBeanPostProcessor's "determineConstructor" hook into "determineCandidateConstructors"
 * BeanWiringInfo and ClassName/AnnotationBeanWiringInfoResolver support the notion of a 'default' bean name
-* BeanConfigurerSupport (and AnnotationBeanConfigurerAspect) applies factory callbacks and post-processors as well
-* BeanConfigurerSupport applies factory callbacks and post-processors if no bean definition found for default bean name
+* @Configurable applies factory callbacks (BeanFactoryAware, InitializingBean etc) and post-processors as well
+* @Configurable applies factory callbacks and post-processors if no bean definition found for default bean name
 * DefaultListableBeanFactory clears a cached merged bean definition in case of re-registering a bean definition
+* AbstractBeanDefinition excludes purely descriptive metadata from its equals check (for more lenient equality)
 * added 'required' attribute to @Autowired annotation (configurable for a custom autowire annotation as well)
 * avoid double invocation of @Autowired/@Resource setter method in case of explicitly specified property value
 * InitDestroy/Common/AutowiredAnnotationBeanPostProcessor use ConcurrentHashMaps for minimal locking
@@ -40,9 +42,10 @@ Package org.springframework.context
 * added LoadTimeWeaverAware interface, automatically supported if a default LoadTimeWeaver is available
 * added AspectJWeavingEnabler, registering AspectJ's class transformer for standard AspectJ load-time weaving
 * added "context:load-time-weaver" XML tag, building a default LoadTimeWeaver and enabling AspectJ load-time weaving
-* "context:component-scan" only detects the @Component annotation at the concrete class level (not inherited anymore)
-* added @Scope annotation for autodetected components, indicating the target bean scope in the Spring context
 * introduced ScannedRootBeanDefinition class for autodetected components
+* added @Scope annotation for autodetected components, indicating the target bean scope in the Spring context
+* reworked ComponentBeanNameGenerator into AnnotationBeanNameGenerator, handling @Repository name values as well
+* explicit bean names indicated by autodetected components are enforced, only to be overridden by explicit definitions
 
 Package org.springframework.core
 * introduced PriorityOrdered marker interface, with order values automatically applied before any plain Ordered values
@@ -71,6 +74,7 @@ Package org.springframework.orm
 
 Package org.springframework.transaction
 * WebSphereUowTransactionManager does not enforce the presence of a JTA UserTransaction anymore
+* WebSphereTransactionManagerFactoryBean uses the context class loader for compatibility with the WSAD 5.1 test server
 
 Package org.springframework.util
 * added "makeAccessible(Method)" and "makeAccessible(Constructor)" convenience methods to ReflectionUtils
