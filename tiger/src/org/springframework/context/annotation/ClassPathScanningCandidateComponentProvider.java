@@ -96,15 +96,8 @@ public class ClassPathScanningCandidateComponentProvider implements CandidateCom
 	private void initDefaultFilters() {
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
 		this.includeFilters.add(new AnnotationTypeFilter(Repository.class));
-		try {
-			this.includeFilters.add(new AnnotationTypeFilter(
-					ClassUtils.forName("org.aspectj.lang.annotation.Aspect", getClass().getClassLoader())));
-		}
-		catch (ClassNotFoundException ex) {
-			// will not scan for @Aspect annotations if not present
-		}
 	}
-	
+
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.classReaderFactory = new CachingClassReaderFactory(resourceLoader);

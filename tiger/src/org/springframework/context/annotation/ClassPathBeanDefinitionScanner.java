@@ -35,11 +35,19 @@ import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.Assert;
 
 /**
- * A BeanDefinition scnaner that detects bean candidates on the classpath.
- * 
+ * A bean definition scanner that detects bean candidates on the classpath,
+ * registering corresponding bean definitions with a given registry
+ * (BeanFactory or ApplicationContext).
+ *
+ * <p>Candidate classes are detected through configurable type filters.
+ * The default filters include classes that are annotated with Spring's
+ * <code>@Component</code> or <code>@Repository</code> stereotype.
+ *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.1
+ * @see org.springframework.stereotype.Component
+ * @see org.springframework.stereotype.Repository
  */
 public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 	
@@ -47,7 +55,7 @@ public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 
 	private ResourcePatternResolver resourcePatternResolver;
 
-	private BeanNameGenerator beanNameGenerator = new ComponentBeanNameGenerator();
+	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
 	
 	private ScopeMetadataResolver scopeMetadataResolver;
 	
@@ -107,10 +115,10 @@ public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 
 	/**
 	 * Set the BeanNameGenerator to use for detected bean classes.
-	 * <p>Default is a {@link ComponentBeanNameGenerator}.
+	 * <p>Default is a {@link AnnotationBeanNameGenerator}.
 	 */
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
-		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new ComponentBeanNameGenerator());
+		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new AnnotationBeanNameGenerator());
 	}
 	
 	/**
@@ -200,7 +208,6 @@ public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 				candidateComponentProvider.addExcludeFilter(excludeFilter);
 			}
 		}
-
 		if (includeFilters != null) {
 			for (TypeFilter includeFilter : includeFilters) {
 				candidateComponentProvider.addIncludeFilter(includeFilter);
@@ -212,15 +219,64 @@ public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<BeanDefinitionHolder>();
 		for (BeanDefinition candidate : candidates) {
 			String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
-			ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
-			BeanDefinition beanDefinition = applyScope(candidate, beanName, scopeMetadata);
-			beanDefinitions.add(new BeanDefinitionHolder(beanDefinition, beanName));
-			this.registry.registerBeanDefinition(beanName, beanDefinition);
+			if (checkBeanName(beanName, candidate)) {
+				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+				BeanDefinition beanDefinition = applyScope(candidate, beanName, scopeMetadata);
+				beanDefinitions.add(new BeanDefinitionHolder(beanDefinition, beanName));
+				this.registry.registerBeanDefinition(beanName, beanDefinition);
+			}
 		}
 
 		return beanDefinitions;
 	}
 
+	/**
+	 * Check the given bean name, determining whether the corresponding
+	 * bean definition needs to be registered or conflicts with an
+	 * existing definition.
+	 * @param beanName the suggested name for the bean
+	 * @param beanDefinition the corresponding bean definition
+	 * @return <code>true</code> if the bean can be registered as-is;
+	 * <code>false</code> if it should be skipped because there is an
+	 * existing, compatible bean definition for the specified name
+	 * @throws IllegalStateException if an existing, incompatible
+	 * bean definition has been found for the specified name
+	 */
+	private boolean checkBeanName(String beanName, BeanDefinition beanDefinition) throws IllegalStateException {
+		if (!this.registry.containsBeanDefinition(beanName)) {
+			return true;
+		}
+		BeanDefinition existingDef = this.registry.getBeanDefinition(beanName);
+		if (isCompatible(beanDefinition, existingDef)) {
+			return false;
+		}
+		throw new IllegalStateException("Annotation-specified bean name '" + beanName +
+				"' for bean class [" + beanDefinition.getBeanClassName() + "] conflicts with existing, " +
+				"non-compatible bean definition of same name and class [" + existingDef.getBeanClassName() + "]");
+	}
+
+	/**
+	 * Determine whether the given new bean definition is compatible with
+	 * the given existing bean definition.
+	 * <p>The default implementation simply considers them as compatible
+	 * when the bean class name matches.
+	 * @param newDefinition the new bean definition, originated from scanning
+	 * @param existingDefinition the existing bean definition, probably from
+	 * an existing bean definition
+	 * @return whether the definitions are considered as compatible, with the
+	 * new definition to be skipped in favor of the existing definition
+	 */
+	private boolean isCompatible(BeanDefinition newDefinition, BeanDefinition existingDefinition) {
+		return newDefinition.getBeanClassName().equals(existingDefinition.getBeanClassName());
+	}
+
+	/**
+	 * Apply the specified scope to the given bean definition.
+	 * @param beanDefinition the bean definition to configure
+	 * @param beanName the name of the bean
+	 * @param scopeMetadata the corresponding scope metadata
+	 * @return the final bean definition to use (potentially a proxy)
+	 */
 	private BeanDefinition applyScope(BeanDefinition beanDefinition, String beanName, ScopeMetadata scopeMetadata) {
 		beanDefinition.setScope(scopeMetadata.getScopeName());
 		ScopedProxyMode scopedProxyMode = scopeMetadata.getScopedProxyMode();

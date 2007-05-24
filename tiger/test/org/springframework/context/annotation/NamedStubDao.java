@@ -16,17 +16,16 @@
 
 package org.springframework.context.annotation;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.stereotype.Repository;
 
 /**
- * @author Mark Fisher
+ * @author Juergen Hoeller
  */
-public class TestBeanNameGenerator extends AnnotationBeanNameGenerator {
+@Repository("myNamedDao")
+public class NamedStubDao {
 
-	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
-		String beanName = super.generateBeanName(definition, registry);
-		return "testing." + beanName;
+	public String find(int id) {
+		return "bar";
 	}
 
 }

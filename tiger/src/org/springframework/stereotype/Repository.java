@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,27 @@ import java.lang.annotation.Target;
  * annotated class is also clarified as to its role in the overall
  * application architecture for the purpose of tools, aspects, etc.
  *
+ * <p>As of Spring 2.1, this annotation also serves as a specialization
+ * of <code>@Component</code>, allowing for implementation classes
+ * to be autodetected through classpath scanning.
+ *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
+ * @see Component
+ * @see org.springframework.context.annotation.ClassPathBeanDefinitionScanner
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
 public @interface Repository {
+
+	/**
+	 * The value may indicate a suggestion for a logical component name,
+	 * to be turned into a Spring bean in case of an autodetected component.
+	 * @return the suggested component name, if any
+	 */
+	String value() default "";
 
 }
