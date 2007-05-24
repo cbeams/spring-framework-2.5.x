@@ -64,6 +64,10 @@ Package org.springframework.core
 Package org.springframework.jdbc
 * added ParameterizedBeanPropertyRowMapper, providing automatic mapping between columns and bean properties
 * added named parameter support to SimpleJdbcTemplate
+* added new SqlReturnUpdateCount parameter to provide name for update counts from stored procs
+* added support for retrieving update counts and storing the retrieved int in the output map.
+* added automatic processing of stored proc returned resultsets. Will create default one if declared parameter missing
+* added automatic processing of stored proc update counts.  Will create default one if declared parameter missing
 
 Package org.springframework.jmx
 * MBeanExporter does not insist of a minimum of 1 bean exposed anymore, also accepting no beans to export in the context
