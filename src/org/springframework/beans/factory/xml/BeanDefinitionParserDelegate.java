@@ -986,7 +986,7 @@ public class BeanDefinitionParserDelegate {
 					error("<entry> element contains empty 'key-ref' attribute", entryEle);
 				}
 				RuntimeBeanReference ref = new RuntimeBeanReference(refName);
-				ref.setSource(extractSource(keyEle));
+				ref.setSource(extractSource(entryEle));
 				key = ref;
 			}
 			else if (keyEle != null) {
@@ -1015,7 +1015,7 @@ public class BeanDefinitionParserDelegate {
 					error("<entry> element contains empty 'value-ref' attribute", entryEle);
 				}
 				RuntimeBeanReference ref = new RuntimeBeanReference(refName);
-				ref.setSource(extractSource(valueEle));
+				ref.setSource(extractSource(entryEle));
 				value = ref;
 			}
 			else if (valueEle != null) {
