@@ -825,10 +825,6 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		if (!ObjectUtils.nullSafeEquals(this.destroyMethodName, that.destroyMethodName)) return false;
 		if (this.enforceDestroyMethod != that.enforceDestroyMethod) return false;
 
-		if (!ObjectUtils.nullSafeEquals(this.resourceDescription, that.resourceDescription)) return false;
-		if (!ObjectUtils.nullSafeEquals(this.source, that.source)) return false;
-		if (this.role != that.role) return false;
-
 		return super.equals(other);
 	}
 
