@@ -17,6 +17,7 @@
 package org.springframework.core.type.asm;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.objectweb.asm.ClassReader;
 
@@ -70,7 +71,13 @@ public class SimpleClassReaderFactory implements ClassReaderFactory {
 	}
 
 	public ClassReader getClassReader(Resource resource) throws IOException {
-		return new ClassReader(resource.getInputStream());
+		InputStream is = resource.getInputStream();
+		try {
+			return new ClassReader(is);
+		}
+		finally {
+			is.close();
+		}
 	}
 
 }

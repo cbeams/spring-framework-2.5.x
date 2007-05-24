@@ -16,7 +16,9 @@
 
 package org.springframework.core;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -113,7 +115,16 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	 * Create a ClassReader for the given class.
 	 */
 	private ClassReader createClassReader(Class clazz) throws IOException {
-		return new ClassReader(clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz)));
+		InputStream is = clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz));
+		if (is == null) {
+			throw new FileNotFoundException("Class file for class [" + clazz.getName() + "] not found");
+		}
+		try {
+			return new ClassReader(is);
+		}
+		finally {
+			is.close();
+		}
 	}
 
 
@@ -156,7 +167,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 				return new LocalVariableTableVisitor(isStatic(access), this,this.numParamsExpected,this.lvtSlotIndex);	
 			} 
 			else {
-				// not interested in this method...
+				// Not interested in this method...
 				return null;
 			}
 		}
