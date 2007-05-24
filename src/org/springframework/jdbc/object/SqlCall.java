@@ -140,7 +140,7 @@ public abstract class SqlCall extends RdbmsOperation {
 			}
 			for (int i = 0; i < parameters.size(); i++) {
 				SqlParameter parameter = (SqlParameter) parameters.get(i);
-				if (!(parameter instanceof SqlReturnResultSet)) {
+				if (!(parameter.isResultsParameter())) {
 					if (parameterCount > 0) {
 						this.callString += ", ";
 					}

@@ -90,6 +90,8 @@ import org.springframework.util.Assert;
  * @see org.springframework.jdbc.support.SQLExceptionTranslator
  */
 public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
+	private static final String RETURN_RESULT_SET_PREFIX = "#result-set-";
+	private static final String RETURN_UPDATE_COUNT_PREFIX = "#update-count-";
 
 	/** Custom NativeJdbcExtractor */
 	private NativeJdbcExtractor nativeJdbcExtractor;
@@ -910,7 +912,24 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return execute(new SimpleCallableStatementCreator(callString), action);
 	}
 
-	public Map call(CallableStatementCreator csc, final List declaredParameters) throws DataAccessException {
+	public Map call(CallableStatementCreator csc, List declaredParameters) throws DataAccessException {
+		final List updateCountParameters = new ArrayList();
+		final List resultSetParameters = new ArrayList();
+		final List callParameters = new ArrayList();
+		for (int i = 0; i < declaredParameters.size(); i++) {
+			SqlParameter parameter = (SqlParameter) declaredParameters.get(i);
+			if (parameter.isResultsParameter()) {
+				if (parameter instanceof SqlReturnResultSet) {
+					resultSetParameters.add(parameter);
+				}
+				else {
+					updateCountParameters.add(parameter);					
+				}
+			}
+			else {
+				callParameters.add(parameter);
+			}
+		}
 		return (Map) execute(csc, new CallableStatementCallback() {
 			public Object doInCallableStatement(CallableStatement cs) throws SQLException {
 				boolean retVal = cs.execute();
@@ -921,9 +940,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 				Map returnedResults = new HashMap();
 				if (retVal || updateCount != -1) {
-					returnedResults.putAll(extractReturnedResultSets(cs, declaredParameters, updateCount));
+					returnedResults.putAll(extractReturnedResults(cs, updateCountParameters, resultSetParameters, updateCount));
 				}
-				returnedResults.putAll(extractOutputParameters(cs, declaredParameters));
+				returnedResults.putAll(extractOutputParameters(cs, callParameters));
 				return returnedResults;
 			}
 		});
@@ -932,31 +951,44 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Extract returned ResultSets from the completed stored procedure.
 	 * @param cs JDBC wrapper for the stored procedure
-	 * @param parameters Parameter list for the stored procedure
+	 * @param updateCountParameters Parameter list of declared update count parameters for the stored procedure
+	 * @param resultSetParameters Parameter list of declared resturn resultSet parameters for the stored procedure
 	 * @return Map that contains returned results
 	 */
-	protected Map extractReturnedResultSets(CallableStatement cs, List parameters, int updateCount)
+	protected Map extractReturnedResults(CallableStatement cs, List updateCountParameters, List resultSetParameters, int updateCount)
 			throws SQLException {
 
 		Map returnedResults = new HashMap();
 		int rsIndex = 0;
+		int updateIndex = 0;
 		boolean moreResults;
 		if (!skipResultsProcessing) {
 			do {
 				if (updateCount == -1) {
-					Object param = null;
-					if (parameters != null && parameters.size() > rsIndex) {
-						param = parameters.get(rsIndex);
-					}
-					if (param instanceof SqlReturnResultSet) {
-						SqlReturnResultSet rsParam = (SqlReturnResultSet) param;
-						returnedResults.putAll(processResultSet(cs.getResultSet(), rsParam));
+					SqlReturnResultSet rsParam = null;
+					if (resultSetParameters != null && resultSetParameters.size() > rsIndex) {
+						rsParam = (SqlReturnResultSet)resultSetParameters.get(rsIndex);
 					}
 					else {
-						logger.warn("Results returned from stored procedure but a corresponding " +
-								"SqlOutParameter/SqlReturnResultSet parameter was not declared");
+						String rsName = RETURN_RESULT_SET_PREFIX + (rsIndex + 1);
+						rsParam = new SqlReturnResultSet(rsName, new ColumnMapRowMapper());
+						logger.info("Added default SqlReturnResultSet parameter named " + rsName);
 					}
+					returnedResults.putAll(processResultSet(cs.getResultSet(), rsParam));
 					rsIndex++;
+				}
+				else {
+					String ucName = null;
+					if (updateCountParameters != null && updateCountParameters.size() > rsIndex) {
+						SqlReturnUpdateCount ucParam = (SqlReturnUpdateCount)updateCountParameters.get(rsIndex);
+						ucName = ucParam.getName();
+					}
+					else {
+						ucName = RETURN_UPDATE_COUNT_PREFIX + (updateIndex + 1);
+						logger.info("Added default SqlReturnUpdateCount parameter named " + ucName);
+					}
+					returnedResults.put(ucName, Integer.valueOf(updateCount));
+					updateIndex++;
 				}
 				moreResults = cs.getMoreResults();
 				updateCount = cs.getUpdateCount();
@@ -980,7 +1012,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		Map returnedResults = new HashMap();
 		int sqlColIndex = 1;
 		for (int i = 0; i < parameters.size(); i++) {
-			Object param = parameters.get(i);
+			SqlParameter param = (SqlParameter) parameters.get(i);
 			if (param instanceof SqlOutParameter) {
 				SqlOutParameter outParam = (SqlOutParameter) param;
 				if (outParam.isReturnTypeSupported()) {
@@ -995,9 +1027,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 							returnedResults.putAll(processResultSet((ResultSet) out, outParam));
 						}
 						else {
-							logger.warn("ResultSet returned from stored procedure but no corresponding SqlOutParameter " +
-									"with a ResultSetExtractor/RowCallbackHandler/RowMapper declared");
-							returnedResults.put(outParam.getName(), "ResultSet was returned but not processed");
+							String rsName = outParam.getName();
+							SqlReturnResultSet rsParam = new SqlReturnResultSet(rsName, new ColumnMapRowMapper());
+							returnedResults.putAll(processResultSet(cs.getResultSet(), rsParam));
+							logger.info("Added default SqlReturnResultSet parameter named " + rsName);
 						}
 					}
 					else {
@@ -1005,7 +1038,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					}
 				}
 			}
-			if (!(param instanceof SqlReturnResultSet)) {
+			if (!(param.isResultsParameter())) {
 				sqlColIndex++;
 			}
 		}

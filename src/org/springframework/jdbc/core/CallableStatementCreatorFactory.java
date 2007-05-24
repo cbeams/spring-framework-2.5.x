@@ -182,32 +182,33 @@ public class CallableStatementCreatorFactory {
 			int sqlColIndx = 1;
 			for (int i = 0; i < declaredParameters.size(); i++) {
 				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
-				if (!this.inParameters.containsKey(declaredParameter.getName()) &&
-						!(declaredParameter instanceof ResultSetSupportingSqlParameter)) {
-					throw new InvalidDataAccessApiUsageException(
-							"Required input parameter '" + declaredParameter.getName() + "' is missing");
-				}
-				// The value may still be null.
-				Object inValue = this.inParameters.get(declaredParameter.getName());
-				if (!(declaredParameter instanceof ResultSetSupportingSqlParameter)) {
-					StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParameter, inValue);
-				}
-				else {
-					// It's an output parameter: Skip SqlReturnResultSet parameters.
-					// It need not (but may be) supplied by the caller.
-					if (declaredParameter instanceof SqlOutParameter) {
-						if (declaredParameter.getTypeName() != null) {
-							cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType(), declaredParameter.getTypeName());
-						}
-						else {
-							cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType());
-						}
-						if (((SqlOutParameter) declaredParameter).isInputValueProvided() || inValue != null) {
-							StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParameter, inValue);
+				if (!declaredParameter.isResultsParameter()) {
+					// So, it's a call parameter - part of the call string.
+					// Get the value - it may still be null.
+					Object inValue = this.inParameters.get(declaredParameter.getName());
+					if (declaredParameter instanceof ResultSetSupportingSqlParameter) {
+						// It's an output parameter: SqlReturnResultSet parameters already excluded.
+						// It need not (but may be) supplied by the caller.
+						if (declaredParameter instanceof SqlOutParameter) {
+							if (declaredParameter.getTypeName() != null) {
+								cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType(), declaredParameter.getTypeName());
+							}
+							else {
+								cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType());
+							}
+							if ((declaredParameter).isInputValueProvided() || inValue != null) {
+								StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParameter, inValue);
+							}
 						}
 					}
-				}
-				if (!(declaredParameter instanceof SqlReturnResultSet)) {
+					else {
+						// It's an input parameter- must be supplied by the caller.
+						if (!this.inParameters.containsKey(declaredParameter.getName())) {
+							throw new InvalidDataAccessApiUsageException(
+									"Required input parameter '" + declaredParameter.getName() + "' is missing");
+						}
+						StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParameter, inValue);
+					}
 					sqlColIndx++;
 				}
 			}

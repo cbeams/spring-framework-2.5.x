@@ -163,6 +163,15 @@ public class SqlParameter {
 		return true;
 	}
 
+	/**
+	 * Return whether this parameter is an implicit return parameter used during the
+	 * reults preocessing of the CallableStatement.getMoreResults/getUpdateCount.
+	 * <p>This implementation always returns <code>false</code>.
+	 */
+	public boolean isResultsParameter() {
+		return false;
+	}
+
 
 	/**
 	 * Convert a list of JDBC types, as defined in <code>java.sql.Types</code>,

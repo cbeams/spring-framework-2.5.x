@@ -1674,18 +1674,27 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		mockPreparedStatement2.executeQuery();
 		ctrlPreparedStatement2.setReturnValue(mockResultSet, 1);
 
+		MockControl ctrlReturnResultSet = MockControl.createControl(ResultSet.class);
+		final ResultSet mockReturnResultSet = (ResultSet) ctrlReturnResultSet.getMock();
+		mockReturnResultSet.next();
+		ctrlReturnResultSet.setReturnValue(false);
+		mockReturnResultSet.close();
+		ctrlReturnResultSet.setVoidCallable(2);
+
 		MockControl ctrlCallableStatement =	MockControl.createControl(CallableStatement.class);
 		final CallableStatement mockCallableStatement =	(CallableStatement) ctrlCallableStatement.getMock();
 		mockCallableStatement.getWarnings();
 		ctrlCallableStatement.setReturnValue(null);
 		mockCallableStatement.close();
 		ctrlCallableStatement.setVoidCallable();
-		MockControl ctrlCallableStatement2 =	MockControl.createControl(CallableStatement.class);
-		final CallableStatement mockCallableStatement2 =	(CallableStatement) ctrlCallableStatement2.getMock();
+		MockControl ctrlCallableStatement2 = MockControl.createControl(CallableStatement.class);
+		final CallableStatement mockCallableStatement2 = (CallableStatement) ctrlCallableStatement2.getMock();
 		mockCallableStatement2.execute();
 		ctrlCallableStatement2.setReturnValue(true);
 		mockCallableStatement2.getUpdateCount();
 		ctrlCallableStatement2.setReturnValue(-1);
+		mockCallableStatement2.getResultSet();
+		ctrlCallableStatement2.setReturnValue(mockReturnResultSet);
 		mockCallableStatement2.getMoreResults();
 		ctrlCallableStatement2.setReturnValue(false);
 		mockCallableStatement2.getUpdateCount();
@@ -1696,6 +1705,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlStatement2.replay();
 		ctrlPreparedStatement.replay();
 		ctrlPreparedStatement2.replay();
+		ctrlReturnResultSet.replay();;
 		ctrlCallableStatement.replay();
 		ctrlCallableStatement2.replay();
 
