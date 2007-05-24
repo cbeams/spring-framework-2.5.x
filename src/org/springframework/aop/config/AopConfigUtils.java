@@ -54,7 +54,7 @@ public abstract class AopConfigUtils {
 	 * The class name of the '<code>AnnotationAwareAspectJAutoProxyCreator</code>' class.
 	 * Only available with AspectJ and Java 5.
 	 */
-	public static final String ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME =
+	public static final String ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME =
 					"org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator";
 
 
@@ -69,7 +69,7 @@ public abstract class AopConfigUtils {
 	static {
 		APC_PRIORITY_LIST.add(DefaultAdvisorAutoProxyCreator.class.getName());
 		APC_PRIORITY_LIST.add(AspectJAwareAdvisorAutoProxyCreator.class.getName());
-		APC_PRIORITY_LIST.add(ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME);
+		APC_PRIORITY_LIST.add(ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME);
 	}
 
 
@@ -89,12 +89,12 @@ public abstract class AopConfigUtils {
 		return registerOrEscalateApcAsRequired(AspectJAwareAdvisorAutoProxyCreator.class, registry, source);
 	}
 
-	public static BeanDefinition registerAtAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
-		return registerAtAspectJAutoProxyCreatorIfNecessary(registry, null);
+	public static BeanDefinition registerAspectJAnnotationAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
+		return registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry, null);
 	}
 
-	public static BeanDefinition registerAtAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry, Object source) {
-		Class cls = getAspectJAutoProxyCreatorClassIfPossible();
+	public static BeanDefinition registerAspectJAnnotationAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry, Object source) {
+		Class cls = getAspectJAnnotationAutoProxyCreatorClassIfPossible();
 		return registerOrEscalateApcAsRequired(cls, registry, source);
 	}
 
@@ -105,24 +105,19 @@ public abstract class AopConfigUtils {
 		}
 	}
 
-	public static boolean isAutoProxyCreatorRegistered(BeanDefinitionRegistry registry) {
-		return registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
-	}
-
 
 	private static BeanDefinition registerOrEscalateApcAsRequired(Class cls, BeanDefinitionRegistry registry, Object source) {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
-			if (cls.getName().equals(apcDefinition.getBeanClassName())) {
-				return apcDefinition;
+			if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
+				int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
+				int requiredPriority = findPriorityForClass(cls.getName());
+				if (currentPriority < requiredPriority) {
+					apcDefinition.setBeanClassName(cls.getName());
+				}
 			}
-			int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
-			int requiredPriority = findPriorityForClass(cls.getName());
-			if (currentPriority < requiredPriority) {
-				apcDefinition.setBeanClassName(cls.getName());
-			}
-			return apcDefinition;
+			return null;
 		}
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -132,13 +127,13 @@ public abstract class AopConfigUtils {
 		return beanDefinition;
 	}
 
-	private static Class getAspectJAutoProxyCreatorClassIfPossible() {
+	private static Class getAspectJAnnotationAutoProxyCreatorClassIfPossible() {
 		try {
-			return ClassUtils.forName(ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME);
+			return ClassUtils.forName(ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME);
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException(
-					"Unable to load class [" + ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME +
+					"Unable to load class [" + ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME +
 					"]. Are you running on Java 1.5+? Root cause: " + ex);
 		}
 	}
