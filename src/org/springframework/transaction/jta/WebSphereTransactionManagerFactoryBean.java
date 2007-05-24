@@ -30,7 +30,7 @@ import org.springframework.transaction.TransactionSystemException;
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that retrieves
  * the JTA TransactionManager for IBM's WebSphere application servers
- * (versions 6.1, 6.0 and 5.1).
+ * (versions 5.1, 6.0 and 6.1).
  *
  * <p>Uses WebSphere's static accessor methods to obtain the internal JTA
  * TransactionManager. This is known to work reliably on all tested WebSphere
@@ -82,13 +82,14 @@ public class WebSphereTransactionManagerFactoryBean implements FactoryBean {
 	 */
 	public WebSphereTransactionManagerFactoryBean() throws TransactionSystemException {
 		try {
-			Class clazz = getClass().getClassLoader().loadClass(FACTORY_CLASS_5_1);
+			// Using the thread context class loader for compatibility with the WSAD test server.
+			Class clazz = Thread.currentThread().getContextClassLoader().loadClass(FACTORY_CLASS_5_1);
 			Method method = clazz.getMethod("getTransactionManager", (Class[]) null);
 			this.transactionManager = (TransactionManager) method.invoke(null, (Object[]) null);
 		}
 		catch (ClassNotFoundException ex) {
 			throw new TransactionSystemException(
-					"Could not find WebSphere 5.1/6.0 TransactionManager factory class", ex);
+					"Could not find WebSphere 5.1/6.0/6.1 TransactionManager factory class", ex);
 		}
 		catch (InvocationTargetException ex) {
 			throw new TransactionSystemException(
