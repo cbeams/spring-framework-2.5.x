@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.Types;
 
 /**
  * @author trisberg
@@ -45,6 +46,9 @@ public abstract class AbstractJdbcCall {
 
 	/** List of SqlParameter objects */
 	private final List<SqlParameter> callParameters = new ArrayList<SqlParameter>();
+
+	/** List of SqlReturn* objects */
+	private final List<SqlParameter> declaredReturnParameters = new ArrayList<SqlParameter>();
 
 	/** List of SqlParameter objects */
 	private final Map<String, SqlParameter> declaredParameters = new HashMap<String, SqlParameter>();
@@ -99,18 +103,26 @@ public abstract class AbstractJdbcCall {
 	}
 
 	public void addDeclaredParameter(SqlParameter parameter) {
-		String parameterNameToMatch = caseSensitiveParameters ? parameter.getName() : parameter.getName().toLowerCase();
-		if (parameterNameToMatch.startsWith(removableProcedureColumnNamePrefix) && parameterNameToMatch.length() > 1) {
-			parameterNameToMatch = parameterNameToMatch.substring(1);
+		if (parameter.isResultsParameter()) {
+			declaredReturnParameters.add(parameter);
 		}
-		declaredParameters.put(parameterNameToMatch, parameter);
-		if (parameter instanceof SqlOutParameter) {
-			outParameterNames.add(parameterNameToMatch);
-			returnDeclared = true;
+		else {
+			String parameterNameToMatch = caseSensitiveParameters ? parameter.getName() : parameter.getName().toLowerCase();
+			if (parameterNameToMatch.startsWith(removableProcedureColumnNamePrefix) && parameterNameToMatch.length() > 1) {
+				parameterNameToMatch = parameterNameToMatch.substring(1);
+			}
+			declaredParameters.put(parameterNameToMatch, parameter);
+			if (parameter instanceof SqlOutParameter) {
+				outParameterNames.add(parameterNameToMatch);
+				returnDeclared = true;
+			}
 		}
 		if (logger.isDebugEnabled()) {
-			if (parameter instanceof SqlOutParameter) {
-				logger.debug("Added return parameter for [" + procName + "]: " + parameter.getName());
+			if (parameter.isResultsParameter()) {
+				logger.debug("Added declared return parameter for [" + procName + "]: " + parameter.getName());
+			}
+			else if (parameter instanceof SqlOutParameter) {
+				logger.debug("Added declared out parameter for [" + procName + "]: " + parameter.getName());
 			}
 			else {
 				logger.debug("Added declared parameter for [" + procName + "]: " + parameter.getName());
@@ -186,7 +198,7 @@ public abstract class AbstractJdbcCall {
 					procedureNameToUse + "(";
 		}
 		for (SqlParameter parameter : parameters) {
-			if (!(parameter instanceof SqlReturnResultSet)) {
+			if (!(parameter.isResultsParameter())) {
 				if (parameterCount > 0) {
 					this.callString += ", ";
 				}
@@ -246,6 +258,7 @@ public abstract class AbstractJdbcCall {
 
 	private void processMetaData() {
 		final List<SqlParameter> parameters = new ArrayList<SqlParameter>();
+		parameters.addAll(declaredReturnParameters);
 		try {
 			JdbcUtils.extractDatabaseMetaData(jdbcTemplate.getDataSource(), new DatabaseMetaDataCallback() {
 
@@ -290,7 +303,7 @@ public abstract class AbstractJdbcCall {
 								(schemaNameToUse != null ? schemaNameToUse :
 										(defaultSchemaToUserName ? userName : null)) : null;
 						if (logger.isDebugEnabled()) {
-							logger.debug("Retreiving metadata for " + metaDataCatalogName + "/" +
+							logger.debug("Retrieving metadata for " + metaDataCatalogName + "/" +
 									metaDataSchemaName + "/" + procedureNameToUse);
 						}
 						ResultSet procs = null;
@@ -306,8 +319,9 @@ public abstract class AbstractJdbcCall {
 										" " + procs.getString("PROCEDURE_SCHEM") +
 										" " + procs.getString("COLUMN_NAME") +
 										" " + procs.getString("COLUMN_TYPE") +
-										" " + procs.getString("DATA_TYPE") +
-										" " + procs.getString("TYPE_NAME")
+										" " + procs.getInt("DATA_TYPE") +
+										" " + procs.getString("TYPE_NAME") +
+										" " + procs.getString("NULLABLE")
 									);
 								}
 								String colName = procs.getString("COLUMN_NAME");
@@ -331,6 +345,7 @@ public abstract class AbstractJdbcCall {
 								if (!((colType == DatabaseMetaData.procedureColumnReturn && returnDeclared) ||
 										declaredParameters.containsKey(colNameToCheck))) {
 									int dataType = procs.getInt("DATA_TYPE");
+									String typeName = procs.getString("TYPE_NAME");
 									if (colType == DatabaseMetaData.procedureColumnReturn) {
 										if (!isFunction() && "return_value".equals(colNameToCheck)) {
 											if (logger.isDebugEnabled()) {
@@ -348,7 +363,12 @@ public abstract class AbstractJdbcCall {
 									}
 									else {
 										if (colType == DatabaseMetaData.procedureColumnOut || colType == DatabaseMetaData.procedureColumnInOut) {
-											parameters.add(new SqlOutParameter(colNameToUse, dataType));
+											if("Oracle".equals(databaseProductName) && dataType == Types.OTHER && "REF CURSOR".equals(typeName)) {
+												parameters.add(new SqlOutParameter(colNameToUse, -10, new ColumnMapRowMapper()));
+											}
+											else {
+												parameters.add(new SqlOutParameter(colNameToUse, dataType));
+											}
 											outParameterNames.add(colNameToUse);
 											if (logger.isDebugEnabled()) {
 												logger.debug("Added metadata out parameter for: " + colNameToUse);
@@ -395,10 +415,12 @@ public abstract class AbstractJdbcCall {
 									" Catalog: " + metaDataCatalogName +
 									" Schema: " + metaDataSchemaName +
 									" Object: " + procedureNameToUse);
+							parameters.addAll(declaredReturnParameters);
 							parameters.addAll(declaredParameters.values());
 						}
 					}
 					else {
+						parameters.addAll(declaredReturnParameters);
 						parameters.addAll(declaredParameters.values());
 					}
 					return null;
@@ -416,7 +438,8 @@ public abstract class AbstractJdbcCall {
 		}
 		Map<String, String> callParameterNames = new HashMap<String, String>(this.callParameters.size());
 		for (SqlParameter parameter : callParameters) {
-			String parameterName = caseSensitiveParameters ? parameter.getName() : parameter.getName().toLowerCase();
+//			String parameterName =   parameter.getName() : parameter.getName().toLowerCase();
+			String parameterName =  parameter.getName();
 			String parameterNameToMatch = parameterName;
 			if (parameterNameToMatch.startsWith(removableProcedureColumnNamePrefix) && parameterNameToMatch.length() > 1)
 				parameterNameToMatch = parameterNameToMatch.substring(1);
@@ -435,6 +458,9 @@ public abstract class AbstractJdbcCall {
 				matchedParameters.put(callParameterName, inParameters.get(parameterName));
 			}
 
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Matching " + inParameters + " with " + callParameterNames);
 		}
 		return matchedParameters;
 	}

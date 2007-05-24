@@ -22,6 +22,7 @@ import org.springframework.jdbc.core.*;
 
 import javax.sql.DataSource;
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * @author trisberg
@@ -116,6 +117,10 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	public <T> T executeObject(Class<T> returnType, SqlParameterSource args) {
 		return (T) execute(args).get(outParameterNames.get(0));
 
+	}
+
+	public Map<String, Object> execute() {
+		return execute(new HashMap());
 	}
 
 	public Map<String, Object> execute(Map args) {

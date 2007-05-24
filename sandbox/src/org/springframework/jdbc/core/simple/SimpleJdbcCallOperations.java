@@ -61,6 +61,8 @@ public interface SimpleJdbcCallOperations {
 
 	<T> T executeObject(Class<T> returnType, SqlParameterSource args);
 
+	Map<String, Object> execute();
+
 	Map<String, Object> execute(Map args);
 
 	Map<String, Object> execute(SqlParameterSource args);
