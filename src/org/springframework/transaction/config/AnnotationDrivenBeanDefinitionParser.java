@@ -18,6 +18,7 @@ package org.springframework.transaction.config;
 
 import org.w3c.dom.Element;
 
+import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -65,7 +66,7 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 
 		boolean proxyTargetClass = Boolean.valueOf(element.getAttribute(PROXY_TARGET_CLASS)).booleanValue();
 		if (proxyTargetClass) {
-			AopNamespaceUtils.forceAutoProxyCreatorToUseClassProxying(parserContext.getRegistry());
+			AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(parserContext.getRegistry());
 		}
 
 		String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);

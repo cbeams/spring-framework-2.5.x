@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj.autoproxy;
 
 import junit.framework.TestCase;
 
+import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.CollectingReaderEventListener;
@@ -64,7 +65,7 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 
-		BeanDefinition definition = registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		BeanDefinition definition = registry.getBeanDefinition(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertEquals("Incorrect APC class",
 				AspectJAwareAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
 	}
@@ -76,7 +77,7 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals("Incorrect definition count", 1, registry.getBeanDefinitionCount());
 
-		BeanDefinition definition = registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		BeanDefinition definition = registry.getBeanDefinition(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertEquals("APC class not switched",
 				AspectJAwareAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
 	}
@@ -88,7 +89,7 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals("Incorrect definition count", 1, registry.getBeanDefinitionCount());
 
-		BeanDefinition definition = registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		BeanDefinition definition = registry.getBeanDefinition(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertEquals("Incorrect APC class",
 				AspectJAwareAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
 	}

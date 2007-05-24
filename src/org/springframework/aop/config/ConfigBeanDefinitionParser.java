@@ -165,7 +165,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(parserContext, element);
 		boolean proxyTargetClass = Boolean.valueOf(element.getAttribute(PROXY_TARGET_CLASS)).booleanValue();
 		if (proxyTargetClass) {
-			AopNamespaceUtils.forceAutoProxyCreatorToUseClassProxying(parserContext.getRegistry());
+			AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(parserContext.getRegistry());
 		}
 	}
 

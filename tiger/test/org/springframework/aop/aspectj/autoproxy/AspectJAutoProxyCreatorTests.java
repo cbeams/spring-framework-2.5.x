@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
-import org.springframework.aop.config.AopNamespaceUtils;
+import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.INestedTestBean;
@@ -292,7 +292,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/aspectsWithCGLIB.xml");
 
-		ProxyConfig pc = (ProxyConfig) bf.getBean(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		ProxyConfig pc = (ProxyConfig) bf.getBean(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertTrue("should be proxying classes", pc.isProxyTargetClass());
 	}
 
