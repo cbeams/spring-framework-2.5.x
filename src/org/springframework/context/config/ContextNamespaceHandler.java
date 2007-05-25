@@ -35,22 +35,14 @@ import org.springframework.util.ClassUtils;
  */
 public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 
-	private static final String PROPERTY_PLACEHOLDER_ELEMENT = "property-placeholder";
-
-	private static final String LOAD_TIME_WEAVER_ELEMENT = "load-time-weaver";
-
-	private static final String ANNOTATION_CONFIG_ELEMENT = "annotation-config";
-	
-	private static final String COMPONENT_SCAN_ELEMENT = "component-scan";
-
-
 	public void init() {
-		registerBeanDefinitionParser(PROPERTY_PLACEHOLDER_ELEMENT, new PropertyPlaceholderBeanDefinitionParser());
-		registerJava5DependentParser(LOAD_TIME_WEAVER_ELEMENT,
+		registerBeanDefinitionParser("property-placeholder", new PropertyPlaceholderBeanDefinitionParser());
+		registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
+		registerJava5DependentParser("load-time-weaver",
 				"org.springframework.context.weaving.LoadTimeWeaverBeanDefinitionParser");
-		registerJava5DependentParser(ANNOTATION_CONFIG_ELEMENT,
+		registerJava5DependentParser("annotation-config",
 				"org.springframework.context.annotation.AnnotationConfigBeanDefinitionParser");
-		registerJava5DependentParser(COMPONENT_SCAN_ELEMENT,
+		registerJava5DependentParser("component-scan",
 				"org.springframework.context.annotation.ComponentScanBeanDefinitionParser");
 	}
 

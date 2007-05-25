@@ -36,41 +36,6 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="load-time-weaver">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
-	Activates a Spring LoadTimeWeaver for this application context, available as bean with name
-	"loadTimeWeaver". Any bean that implements the LoadTimeWeaverAware interface will then
-	receive the LoadTimeWeaver reference automatically; e.g. Spring's JPA bootstrap support.
-
-	The default weaver is determined automatically. As of Spring 2.1: detecting Sun's
-	GlassFish, Oracle's OC4J, Spring's VM agent and any ClassLoader supported by Spring's
-	ReflectiveLoadTimeWeaver (e.g. the TomcatInstrumentableClassLoader).
-
-	Allows for activating AspectJ load-time weaving through a simple boolean flag,
-	with the AspectJ class transformer registered through Spring's LoadTimeWeaver.
-			]]></xsd:documentation>
-			<xsd:appinfo>
-				<tool:annotation>
-					<tool:exports type="org.springframework.instrument.classloading.LoadTimeWeaver"/>
-				</tool:annotation>
-			</xsd:appinfo>
-		</xsd:annotation>
-		<xsd:complexType>
-			<xsd:attribute name="weaver-class" type="xsd:string">
-				<xsd:annotation>
-					<xsd:appinfo>
-						<tool:annotation>
-							<tool:expected-type type="java.lang.Class"/>
-							<tool:assignable-to type="org.springframework.instrument.classloading.LoadTimeWeaver"/>
-						</tool:annotation>
-					</xsd:appinfo>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="aspectj-weaving" type="xsd:boolean" default="false"/>
-		</xsd:complexType>
-	</xsd:element>
-
 	<xsd:element name="annotation-config">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
@@ -113,6 +78,64 @@
 			<xsd:attribute name="name-generator" type="xsd:string"/>
 			<xsd:attribute name="scope-resolver" type="xsd:string"/>
 		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="load-time-weaver">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Activates a Spring LoadTimeWeaver for this application context, available as bean with name
+	"loadTimeWeaver". Any bean that implements the LoadTimeWeaverAware interface will then
+	receive the LoadTimeWeaver reference automatically; e.g. Spring's JPA bootstrap support.
+
+	The default weaver is determined automatically. As of Spring 2.1: detecting Sun's
+	GlassFish, Oracle's OC4J, Spring's VM agent and any ClassLoader supported by Spring's
+	ReflectiveLoadTimeWeaver (e.g. the TomcatInstrumentableClassLoader).
+
+	Allows for activating AspectJ load-time weaving through a simple boolean flag,
+	with the AspectJ class transformer registered through Spring's LoadTimeWeaver.
+	AspectJ weaving will be activated by default if a "META-INF/aop.xml" resource
+	is present in the classpath.
+			]]></xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="org.springframework.instrument.classloading.LoadTimeWeaver"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="weaver-class" type="xsd:string">
+				<xsd:annotation>
+					<xsd:appinfo>
+						<tool:annotation>
+							<tool:expected-type type="java.lang.Class"/>
+							<tool:assignable-to type="org.springframework.instrument.classloading.LoadTimeWeaver"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="aspectj-weaving" default="autodetect">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="on"/>
+						<xsd:enumeration value="off"/>
+						<xsd:enumeration value="autodetect"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="spring-configured">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"><![CDATA[
+	Signals the current application context to apply dependency injection
+	to non-managed objects that are instantiated outside of the Spring bean
+	factory (typically classes annotated with the @Configurable annotation).
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleType>
+			<xsd:restriction base="xsd:string"/>
+		</xsd:simpleType>
 	</xsd:element>
 
 	<xsd:complexType name="filterType">

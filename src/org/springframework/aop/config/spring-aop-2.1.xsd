@@ -109,19 +109,6 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="spring-configured">
-		<xsd:annotation>
-			<xsd:documentation source="java:org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"><![CDATA[
-	Signals the current application context to apply dependency injection
-	to non-managed objects that are instantiated outside of the Spring bean
-	factory (typically classes annotated with the @Configurable annotation).
-			]]></xsd:documentation>
-		</xsd:annotation>
-		<xsd:simpleType>
-			<xsd:restriction base="xsd:string"/>
-		</xsd:simpleType>
-	</xsd:element>
-
 	<xsd:complexType name="aspectType">
 		<xsd:choice minOccurs="0" maxOccurs="unbounded">
 			<xsd:element name="pointcut" type="pointcutType">

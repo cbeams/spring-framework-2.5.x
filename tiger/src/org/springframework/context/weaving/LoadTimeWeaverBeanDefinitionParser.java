@@ -36,7 +36,7 @@ public class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefini
 
 	private static final String WEAVER_CLASS_ATTRIBUTE = "weaver-class";
 
-	private static final String ASPECTJ_WEAVING_ATTRIBUTE = "aspectj-weaving";
+	private static final String ASPECTJ_AOP_XML_RESOURCE = "META-INF/aop.xml";
 
 
 	protected String getBeanClassName(Element element) {
@@ -52,9 +52,23 @@ public class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefini
 
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		if (Boolean.valueOf(element.getAttribute(ASPECTJ_WEAVING_ATTRIBUTE))) {
+		if (isAspectJWeavingEnabled(element.getAttribute("aspectj-weaving"), parserContext)) {
 			parserContext.getReaderContext().registerWithGeneratedName(
 					new RootBeanDefinition(AspectJWeavingEnabler.class));
+		}
+	}
+
+	protected boolean isAspectJWeavingEnabled(String value, ParserContext parserContext) {
+		if ("on".equals(value)) {
+			return true;
+		}
+		else if ("off".equals(value)) {
+			return false;
+		}
+		else {
+			// Determine default...
+			ClassLoader cl = parserContext.getReaderContext().getResourceLoader().getClassLoader();
+			return (cl.getResource(ASPECTJ_AOP_XML_RESOURCE) != null);
 		}
 	}
 
