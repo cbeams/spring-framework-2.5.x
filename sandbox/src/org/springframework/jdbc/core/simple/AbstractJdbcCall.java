@@ -24,10 +24,8 @@ import org.springframework.jdbc.support.DatabaseMetaDataCallback;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
+import javax.sql.DataSource;
+import java.util.*;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -38,11 +36,18 @@ import java.sql.Types;
  */
 public abstract class AbstractJdbcCall {
 
+	private static final String REMOVABLE_COLUMN_PREFIX = "@";
+
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	public static List<String> supportedDatabaseProducts = Arrays.asList(
+			"Oracle",
+			"MySQL",
+			"Microsoft SQL Server");
+
 	/** Lower-level class used to execute SQL */
-	protected JdbcTemplate jdbcTemplate = new JdbcTemplate();
+	private JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
 	/** List of SqlParameter objects */
 	private final List<SqlParameter> callParameters = new ArrayList<SqlParameter>();
@@ -60,46 +65,110 @@ public abstract class AbstractJdbcCall {
 	 */
 	private boolean compiled = false;
 
-	protected String procName;
-	protected String procedureNameToUse;
-	protected String catalogName;
-	protected String catalogNameToUse;
-	protected String schemaNameToUse;
-	protected String schemaName;
-	protected String userName;
-	protected String returnNameToUse;
-	protected boolean returnDeclared = false;
-	protected boolean defaultSchemaToUserName = false;
-	protected boolean useCatalogNameAsPackageName = false;
+	/** name of procedure to call **/
+	private String procedureName;
+	
+	/** name of procedure used for call string **/
+	private String procedureNameToUse;
+
+	/** name of catalog for call **/
+	private String catalogName;
+
+	/** name of catalog used for call string **/
+	private String catalogNameToUse;
+
+	/** name of schema for call **/
+	private String schemaName;
+
+	/** name of schema used for call string **/
+	private String schemaNameToUse;
+
+	/** indicates whether this is a procedure or a function **/
 	private boolean function;
-	protected boolean supportsCatalogsInProcedureCalls = true;
-	protected boolean supportsSchemasInProcedureCalls = true;
+
+	private String userName;
+	private String functionReturnName;
+
+	private String databaseProductName;
+	private boolean returnDeclared = false;
+	private boolean defaultSchemaToUserName = false;
+	private boolean useCatalogNameAsPackageName = false;
+	private boolean supportsCatalogsInProcedureCalls = true;
+	private boolean supportsSchemasInProcedureCalls = true;
 	private boolean accessMetaData = true;
 	private boolean accessProcedureColumnMetaData = true;
-	protected boolean storesUpperCaseIdentifiers = false;
-	protected boolean storesLowerCaseIdentifiers = false;
-	protected boolean caseSensitiveParameters = false;
-	protected List<String> outParameterNames = new ArrayList<String>();
-	protected String callString;
-	protected String removableProcedureColumnNamePrefix = "@";
+	private boolean storesUpperCaseIdentifiers = false;
+	private boolean storesLowerCaseIdentifiers = false;
+	private boolean caseSensitiveParameters = false;
+	private List<String> outParameterNames = new ArrayList<String>();
+	private String callString;
 
 	/**
 	 * Object enabling us to create CallableStatementCreators
 	 * efficiently, based on this class's declared parameters.
 	 */
-	protected CallableStatementCreatorFactory callableStatementFactory;
+	private CallableStatementCreatorFactory callableStatementFactory;
+
+	protected AbstractJdbcCall(DataSource dataSource) {
+		jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	protected AbstractJdbcCall(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
+
+	public String getProcedureName() {
+		return procedureName;
+	}
+
+	public void setProcedureName(String procedureName) {
+		this.procedureName = procedureName;
+	}
+
+	public String getCatalogName() {
+		return catalogName;
+	}
+
+	public void setCatalogName(String catalogName) {
+		this.catalogName = catalogName;
+	}
+
+	public String getSchemaName() {
+		return schemaName;
+	}
+
+	public void setSchemaName(String schemaName) {
+		this.schemaName = schemaName;
+	}
 
 	public boolean isFunction() {
 		return function;
 	}
 
-	protected void setFunction(boolean function) {
+	public void setFunction(boolean function) {
 		this.function = function;
 	}
 
+	protected String getScalarOutParameterName() {
+		if (isFunction()) {
+			return functionReturnName;
+		}
+		else {
+			if (outParameterNames.size() > 1) {
+				logger.warn("Accessing single output value when procedure has more than one output parameter");
+			}
+			return outParameterNames.get(0);
+		}
+	}
 
 	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
+	}
+
+
+	protected CallableStatementCreatorFactory getCallableStatementFactory() {
+		return callableStatementFactory;
 	}
 
 	public void addDeclaredParameter(SqlParameter parameter) {
@@ -108,7 +177,7 @@ public abstract class AbstractJdbcCall {
 		}
 		else {
 			String parameterNameToMatch = caseSensitiveParameters ? parameter.getName() : parameter.getName().toLowerCase();
-			if (parameterNameToMatch.startsWith(removableProcedureColumnNamePrefix) && parameterNameToMatch.length() > 1) {
+			if (parameterNameToMatch.startsWith(REMOVABLE_COLUMN_PREFIX) && parameterNameToMatch.length() > 1) {
 				parameterNameToMatch = parameterNameToMatch.substring(1);
 			}
 			declaredParameters.put(parameterNameToMatch, parameter);
@@ -119,13 +188,13 @@ public abstract class AbstractJdbcCall {
 		}
 		if (logger.isDebugEnabled()) {
 			if (parameter.isResultsParameter()) {
-				logger.debug("Added declared return parameter for [" + procName + "]: " + parameter.getName());
+				logger.debug("Added declared return parameter for [" + procedureName + "]: " + parameter.getName());
 			}
 			else if (parameter instanceof SqlOutParameter) {
-				logger.debug("Added declared out parameter for [" + procName + "]: " + parameter.getName());
+				logger.debug("Added declared out parameter for [" + procedureName + "]: " + parameter.getName());
 			}
 			else {
-				logger.debug("Added declared parameter for [" + procName + "]: " + parameter.getName());
+				logger.debug("Added declared parameter for [" + procedureName + "]: " + parameter.getName());
 			}
 		}
 	}
@@ -151,7 +220,7 @@ public abstract class AbstractJdbcCall {
 	 */
 	public final void compile() throws InvalidDataAccessApiUsageException {
 		if (!isCompiled()) {
-			if (procName == null) {
+			if (procedureName == null) {
 				throw new InvalidDataAccessApiUsageException("Procedure or Function name is required");
 			}
 
@@ -166,7 +235,7 @@ public abstract class AbstractJdbcCall {
 			this.compiled = true;
 
 			if (logger.isDebugEnabled()) {
-				logger.debug("SqlCall for " + (isFunction() ? "function" : "procedure") + " [" + procName + "] compiled");
+				logger.debug("SqlCall for " + (isFunction() ? "function" : "procedure") + " [" + procedureName + "] compiled");
 			}
 		}
 	}
@@ -251,7 +320,7 @@ public abstract class AbstractJdbcCall {
 	}
 
 	private void processDeclaredData() {
-		procedureNameToUse = procName;
+		procedureNameToUse = procedureName;
 		catalogNameToUse = catalogName;
 		schemaNameToUse = schemaName;
 	}
@@ -265,7 +334,11 @@ public abstract class AbstractJdbcCall {
 				public Object processMetaData(DatabaseMetaData databaseMetaData)
 						throws SQLException, MetaDataAccessException {
 					userName = databaseMetaData.getUserName();
-					String databaseProductName = databaseMetaData.getDatabaseProductName();
+					databaseProductName = databaseMetaData.getDatabaseProductName();
+					if (!supportedDatabaseProducts.contains(databaseProductName)) {
+						logger.warn(databaseProductName + " is not one of the supported databases: " +
+								supportedDatabaseProducts);
+					}
 					if ("Oracle".equals(databaseProductName)) {
 						defaultSchemaToUserName = true;
 						useCatalogNameAsPackageName = true;
@@ -275,149 +348,29 @@ public abstract class AbstractJdbcCall {
 					storesUpperCaseIdentifiers = databaseMetaData.storesUpperCaseIdentifiers();
 					storesLowerCaseIdentifiers = databaseMetaData.storesLowerCaseIdentifiers();
 					if (storesUpperCaseIdentifiers) {
-						procedureNameToUse = procName.toUpperCase();
+						procedureNameToUse = procedureName.toUpperCase();
 						catalogNameToUse = catalogName != null ? catalogName.toUpperCase() : null;
 						schemaNameToUse = schemaName != null ? schemaName.toUpperCase() : null;
-						returnNameToUse = "RETURN";
+						functionReturnName = "RETURN";
 					}
 					else if (storesLowerCaseIdentifiers) {
-						procedureNameToUse = procName.toLowerCase();
+						procedureNameToUse = procedureName.toLowerCase();
 						catalogNameToUse = catalogName != null ? catalogName.toLowerCase() : null;
 						schemaNameToUse = schemaName != null ? schemaName.toLowerCase() : null;
-						returnNameToUse = "return";
+						functionReturnName = "return";
 					}
 					else {
-						procedureNameToUse = procName;
+						procedureNameToUse = procedureName;
 						catalogNameToUse = catalogName;
 						schemaNameToUse = schemaName;
-						returnNameToUse = "return";
+						functionReturnName = "return";
 					}
 					// Oracle hack to distinguish between package and non-package functions/procedures with same name
 					if (catalogNameToUse == null && useCatalogNameAsPackageName) {
 						catalogNameToUse = "";
 					}
 					if (accessProcedureColumnMetaData) {
-						String metaDataCatalogName = supportsCatalogsInProcedureCalls || useCatalogNameAsPackageName ?
-								catalogNameToUse : null;
-						String metaDataSchemaName = supportsSchemasInProcedureCalls ?
-								(schemaNameToUse != null ? schemaNameToUse :
-										(defaultSchemaToUserName ? userName : null)) : null;
-						if (logger.isDebugEnabled()) {
-							logger.debug("Retrieving metadata for " + metaDataCatalogName + "/" +
-									metaDataSchemaName + "/" + procedureNameToUse);
-						}
-						ResultSet procs = null;
-						try {
-							procs = databaseMetaData.getProcedureColumns(
-									metaDataCatalogName,
-									metaDataSchemaName,
-									procedureNameToUse,
-									null);
-							while (procs.next()) {
-								if (logger.isDebugEnabled()) {
-									logger.debug("Retrieved metadata: " + procs.getString("PROCEDURE_CAT") +
-										" " + procs.getString("PROCEDURE_SCHEM") +
-										" " + procs.getString("COLUMN_NAME") +
-										" " + procs.getString("COLUMN_TYPE") +
-										" " + procs.getInt("DATA_TYPE") +
-										" " + procs.getString("TYPE_NAME") +
-										" " + procs.getString("NULLABLE")
-									);
-								}
-								String colName = procs.getString("COLUMN_NAME");
-								int colType = procs.getInt("COLUMN_TYPE");
-								if (logger.isDebugEnabled()) {
-									logger.debug("Checking metadata parameter for: " + (colName == null ? returnNameToUse : colName));
-								}
-								String colNameToCheck;
-								String colNameToUse;
-								if (colName == null || colName.length() < 1) {
-									colNameToCheck = colNameToUse = returnNameToUse;
-								}
-								else {
-									colNameToUse = colName;
-									colNameToCheck = caseSensitiveParameters ? colName : colName.toLowerCase();
-								}
-								if (colNameToUse.startsWith(removableProcedureColumnNamePrefix) && colNameToUse.length() > 1)
-									colNameToUse = colNameToUse.substring(1);
-								if (colNameToCheck.startsWith(removableProcedureColumnNamePrefix) && colNameToCheck.length() > 1)
-									colNameToCheck = colNameToCheck.substring(1);
-								if (!((colType == DatabaseMetaData.procedureColumnReturn && returnDeclared) ||
-										declaredParameters.containsKey(colNameToCheck))) {
-									int dataType = procs.getInt("DATA_TYPE");
-									String typeName = procs.getString("TYPE_NAME");
-									if (colType == DatabaseMetaData.procedureColumnReturn) {
-										if (!isFunction() && "return_value".equals(colNameToCheck)) {
-											if (logger.isDebugEnabled()) {
-												logger.debug("Bypassing metadata return parameter for: " + colNameToUse);
-											}
-										}
-										else {
-											parameters.add(new SqlOutParameter(returnNameToUse, dataType));
-											outParameterNames.add(returnNameToUse);
-											setFunction(true);
-											if (logger.isDebugEnabled()) {
-												logger.debug("Added metadata return parameter for: " + returnNameToUse);
-											}
-										}
-									}
-									else {
-										if (colType == DatabaseMetaData.procedureColumnOut || colType == DatabaseMetaData.procedureColumnInOut) {
-											if("Oracle".equals(databaseProductName) && dataType == Types.OTHER && "REF CURSOR".equals(typeName)) {
-												parameters.add(new SqlOutParameter(colNameToUse, -10, new ColumnMapRowMapper()));
-											}
-											else {
-												parameters.add(new SqlOutParameter(colNameToUse, dataType));
-											}
-											outParameterNames.add(colNameToUse);
-											if (logger.isDebugEnabled()) {
-												logger.debug("Added metadata out parameter for: " + colNameToUse);
-											}
-										}
-										else {
-											parameters.add(new SqlParameter(colNameToUse, dataType));
-											if (logger.isDebugEnabled()) {
-												logger.debug("Added metadata in parameter for: " + colNameToUse);
-											}
-										}
-									}
-								}
-								else {
-									SqlParameter parameter;
-									if (colType == 5) {
-										parameter = declaredParameters.get(returnNameToUse);
-									}
-									else {
-										parameter = declaredParameters.get(colNameToCheck);
-									}
-									if (parameter != null) {
-										parameters.add(parameter);
-										if (logger.isDebugEnabled()) {
-											logger.debug("Using declared parameter for: " +
-													(colNameToUse == null ? returnNameToUse : colNameToUse));
-										}
-									}
-								}
-							}
-						}
-						catch (SQLException se) {
-							logger.warn("Error while retreiving metadata for procedure columns: " + se.getMessage());
-						}
-						finally {
-							try {
-								if (procs != null)
-									procs.close();
-							}
-							catch (SQLException ignore) {}
-						}
-						if (parameters.size() == 0) {
-							logger.warn("Problem retreiving metadata for procedure columns -->" +
-									" Catalog: " + metaDataCatalogName +
-									" Schema: " + metaDataSchemaName +
-									" Object: " + procedureNameToUse);
-							parameters.addAll(declaredReturnParameters);
-							parameters.addAll(declaredParameters.values());
-						}
+						retrieveProcedureColumnMetadata(databaseMetaData, parameters);
 					}
 					else {
 						parameters.addAll(declaredReturnParameters);
@@ -432,6 +385,132 @@ public abstract class AbstractJdbcCall {
 		this.callParameters.addAll(parameters);
 	}
 
+	private void retrieveProcedureColumnMetadata(DatabaseMetaData databaseMetaData, List<SqlParameter> parameters) {
+		String metaDataCatalogName = supportsCatalogsInProcedureCalls || useCatalogNameAsPackageName ?
+				catalogNameToUse : null;
+		String metaDataSchemaName = supportsSchemasInProcedureCalls ?
+				(schemaNameToUse != null ? schemaNameToUse :
+						(defaultSchemaToUserName ? userName : null)) : null;
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieving metadata for " + metaDataCatalogName + "/" +
+					metaDataSchemaName + "/" + procedureNameToUse);
+		}
+		ResultSet procs = null;
+		try {
+			procs = databaseMetaData.getProcedureColumns(
+					metaDataCatalogName,
+					metaDataSchemaName,
+					procedureNameToUse,
+					null);
+			while (procs.next()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Retrieved metadata: " + procs.getString("PROCEDURE_CAT") +
+						" " + procs.getString("PROCEDURE_SCHEM") +
+						" " + procs.getString("COLUMN_NAME") +
+						" " + procs.getString("COLUMN_TYPE") +
+						" " + procs.getInt("DATA_TYPE") +
+						" " + procs.getString("TYPE_NAME") +
+						" " + procs.getString("NULLABLE")
+					);
+				}
+				String colName = procs.getString("COLUMN_NAME");
+				int colType = procs.getInt("COLUMN_TYPE");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Checking metadata parameter for: " + (colName == null ? functionReturnName : colName));
+				}
+				String colNameToCheck;
+				String colNameToUse;
+				if (colName == null || colName.length() < 1) {
+					colNameToCheck = colNameToUse = functionReturnName;
+				}
+				else {
+					colNameToUse = colName;
+					colNameToCheck = caseSensitiveParameters ? colName : colName.toLowerCase();
+				}
+				if (colNameToUse.startsWith(REMOVABLE_COLUMN_PREFIX) && colNameToUse.length() > 1)
+					colNameToUse = colNameToUse.substring(1);
+				if (colNameToCheck.startsWith(REMOVABLE_COLUMN_PREFIX) && colNameToCheck.length() > 1)
+					colNameToCheck = colNameToCheck.substring(1);
+				if (!((colType == DatabaseMetaData.procedureColumnReturn && returnDeclared) ||
+						declaredParameters.containsKey(colNameToCheck))) {
+					int dataType = procs.getInt("DATA_TYPE");
+					String typeName = procs.getString("TYPE_NAME");
+					if (colType == DatabaseMetaData.procedureColumnReturn) {
+						if (!isFunction() && "return_value".equals(colNameToCheck)) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Bypassing metadata return parameter for: " + colNameToUse);
+							}
+						}
+						else {
+							parameters.add(new SqlOutParameter(functionReturnName, dataType));
+							outParameterNames.add(functionReturnName);
+							setFunction(true);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Added metadata return parameter for: " + functionReturnName);
+							}
+						}
+					}
+					else {
+						if (colType == DatabaseMetaData.procedureColumnOut || colType == DatabaseMetaData.procedureColumnInOut) {
+							if("Oracle".equals(databaseProductName) && dataType == Types.OTHER && "REF CURSOR".equals(typeName)) {
+								parameters.add(new SqlOutParameter(colNameToUse, -10, new ColumnMapRowMapper()));
+							}
+							else {
+								parameters.add(new SqlOutParameter(colNameToUse, dataType));
+							}
+							outParameterNames.add(colNameToUse);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Added metadata out parameter for: " + colNameToUse);
+							}
+						}
+						else {
+							parameters.add(new SqlParameter(colNameToUse, dataType));
+							if (logger.isDebugEnabled()) {
+								logger.debug("Added metadata in parameter for: " + colNameToUse);
+							}
+						}
+					}
+				}
+				else {
+					SqlParameter parameter;
+					if (colType == 5) {
+						parameter = declaredParameters.get(functionReturnName);
+					}
+					else {
+						parameter = declaredParameters.get(colNameToCheck);
+					}
+					if (parameter != null) {
+						parameters.add(parameter);
+						if (logger.isDebugEnabled()) {
+							logger.debug("Using declared parameter for: " +
+									(colNameToUse == null ? functionReturnName : colNameToUse));
+						}
+					}
+				}
+			}
+		}
+		catch (SQLException se) {
+			logger.warn("Error while retreiving metadata for procedure columns: " + se.getMessage());
+		}
+		finally {
+			try {
+				if (procs != null)
+					procs.close();
+			}
+			catch (SQLException se) {
+				logger.warn("Problem closing resultset for procedure column metadata " + se.getMessage());
+			}
+		}
+		if (parameters.size() == 0) {
+			logger.warn("Problem retreiving metadata for procedure columns -->" +
+					" Catalog: " + metaDataCatalogName +
+					" Schema: " + metaDataSchemaName +
+					" Object: " + procedureNameToUse);
+			parameters.addAll(declaredReturnParameters);
+			parameters.addAll(declaredParameters.values());
+		}
+	}
+
 	protected Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> inParameters) {
 		if (!accessMetaData) {
 			return inParameters;
@@ -441,14 +520,14 @@ public abstract class AbstractJdbcCall {
 //			String parameterName =   parameter.getName() : parameter.getName().toLowerCase();
 			String parameterName =  parameter.getName();
 			String parameterNameToMatch = parameterName;
-			if (parameterNameToMatch.startsWith(removableProcedureColumnNamePrefix) && parameterNameToMatch.length() > 1)
+			if (parameterNameToMatch.startsWith(REMOVABLE_COLUMN_PREFIX) && parameterNameToMatch.length() > 1)
 				parameterNameToMatch = parameterNameToMatch.substring(1);
 			callParameterNames.put(parameterNameToMatch.toLowerCase(), parameterName);
 		}
 		Map<String, Object> matchedParameters = new HashMap<String, Object>(inParameters.size());
 		for (String parameterName : inParameters.keySet()) {
 			String parameterNameToMatch = parameterName;
-			if (parameterNameToMatch.startsWith(removableProcedureColumnNamePrefix) && parameterNameToMatch.length() > 1)
+			if (parameterNameToMatch.startsWith(REMOVABLE_COLUMN_PREFIX) && parameterNameToMatch.length() > 1)
 				parameterNameToMatch = parameterNameToMatch.substring(1);
 			String callParameterName = callParameterNames.get(parameterNameToMatch.toLowerCase());
 			if (callParameterName == null) {

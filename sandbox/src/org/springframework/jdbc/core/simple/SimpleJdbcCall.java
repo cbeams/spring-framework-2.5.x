@@ -16,13 +16,14 @@
 
 package org.springframework.jdbc.core.simple;
 
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.CallableStatementCreator;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.*;
 
 import javax.sql.DataSource;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author trisberg
@@ -30,39 +31,33 @@ import java.util.HashMap;
 public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOperations {
 
 	public SimpleJdbcCall(DataSource dataSource) {
-		jdbcTemplate = new JdbcTemplate(dataSource);
+		super(dataSource);
 	}
 
 	public SimpleJdbcCall(JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+		super(jdbcTemplate);
 	}
 
 
 	public SimpleJdbcCall withProcedureName(String procedureName) {
-		this.procName = procedureName;
+		setProcedureName(procedureName);
 		setFunction(false);
 		return this;
 	}
 
 	public SimpleJdbcCall withSchemaName(String schemaName) {
-		this.schemaName = schemaName;
+		setSchemaName(schemaName);
 		return this;
 	}
 
 	public SimpleJdbcCall withCatalogName(String catalogName) {
-		this.catalogName = catalogName;
+		setCatalogName(catalogName);
 		return this;
 	}
 
 	public SimpleJdbcCall withFunctionName(String functionName) {
-		this.procName = functionName;
+		setProcedureName(functionName);
 		setFunction(true);
-		return this;
-	}
-
-	public SimpleJdbcCall declareParameter(SqlParameter sqlParameter) {
-		if (sqlParameter != null)
-			addDeclaredParameter(sqlParameter);
 		return this;
 	}
 
@@ -74,23 +69,11 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		return this;
 	}
 
-	public SimpleJdbcCall declareInParameterNames(String... inParameterNames) {
+	public SimpleJdbcCall useInParameterNames(String... inParameterNames) {
 		return this;
 	}
 
-	public SimpleJdbcCall declareOutParameterNames(String... inParameterNames) {
-		return this;
-	}
-
-	public SimpleJdbcCall declareReturnTypeHandler(String parameterName, String sqlTypeName, SqlReturnType sqlReturnType) {
-		return this;
-	}
-
-	public SimpleJdbcCall declareReturnRowMapper(String parameterName, RowMapper rowMapper) {
-		return this;
-	}
-
-	public SimpleJdbcCall declareReturnResultSetExtractor(String parameterName, ResultSetExtractor resultSetExtractor) {
+	public SimpleJdbcCall useOutParameterNames(String... inParameterNames) {
 		return this;
 	}
 
@@ -100,22 +83,22 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	public <T> T executeFunction(Class<T> returnType, Map args) {
-		return (T) execute(args).get(returnNameToUse);
+		return (T) execute(args).get(getScalarOutParameterName());
 
 	}
 
-	public <T> T executeFunction(Class<T> returnType, SqlParameterSource args) {
-		return (T) execute(args).get(returnNameToUse);
+	public <T> T executeFunction(Class<T> returnType, MapSqlParameterSource args) {
+		return (T) execute(args).get(getScalarOutParameterName());
 
 	}
 
 	public <T> T executeObject(Class<T> returnType, Map args) {
-		return (T) execute(args).get(outParameterNames.get(0));
+		return (T) execute(args).get(getScalarOutParameterName());
 
 	}
 
-	public <T> T executeObject(Class<T> returnType, SqlParameterSource args) {
-		return (T) execute(args).get(outParameterNames.get(0));
+	public <T> T executeObject(Class<T> returnType, MapSqlParameterSource args) {
+		return (T) execute(args).get(getScalarOutParameterName());
 
 	}
 
@@ -126,7 +109,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	public Map<String, Object> execute(Map args) {
 		checkCompiled();
 		Map values = matchInParameterValuesWithCallParameters(args);
-		CallableStatementCreator csc = this.callableStatementFactory.newCallableStatementCreator(values);
+		CallableStatementCreator csc = getCallableStatementFactory().newCallableStatementCreator(values);
 		if (logger.isDebugEnabled()) {
 			logger.debug("The following parameters are used for call " + getCallString() + " with: " + values);
 			int i = 1;
@@ -134,12 +117,12 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 				logger.debug(i++ + ": " +  p.getName() + " SQL Type "+ p.getSqlType() + " Type Name " + p.getTypeName() + " " + p.getClass().getName());
 			}
 		}
-		Map result = jdbcTemplate.call(csc, getCallParameters());
+		Map result = getJdbcTemplate().call(csc, getCallParameters());
 		return (Map<String, Object>)result;
 	}
 
-	public Map<String, Object> execute(SqlParameterSource args) {
-		Map values = ((MapSqlParameterSource)args).getValues();
+	public Map<String, Object> execute(MapSqlParameterSource args) {
+		Map values = args.getValues();
 		return execute(values);
 	}
 
