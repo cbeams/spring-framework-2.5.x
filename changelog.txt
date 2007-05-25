@@ -13,6 +13,7 @@ General
 Package org.springframework.aop
 * ReflectiveMethodInvocation always uses a shared user attribute Map in clones (for proper binding of multiple advices)
 * "aop:aspectj-autoproxy" XML configuration tag detects all aspect beans in case of empty XML body content as well
+* moved "aop:spring-configured" to context namespace ("context:spring-configured") in the 2.1 versions of the XSDs
 
 Package org.springframework.beans
 * CustomBooleanEditor trims text before comparing against true/false Strings
@@ -24,7 +25,9 @@ Package org.springframework.beans
 * @Configurable applies factory callbacks (BeanFactoryAware, InitializingBean etc) and post-processors as well
 * @Configurable applies factory callbacks and post-processors if no bean definition found for default bean name
 * DefaultListableBeanFactory clears a cached merged bean definition in case of re-registering a bean definition
+* AbstractBeanDefinition declares a public "clone()" method as well as "AbstractBeanDefinition cloneBeanDefinition()"
 * AbstractBeanDefinition excludes purely descriptive metadata from its equals check (for more lenient equality)
+* fixed BeanDefinitionParserDelegate to extract correct source element for "key-ref"/"value-ref" attributes
 * added 'required' attribute to @Autowired annotation (configurable for a custom autowire annotation as well)
 * avoid double invocation of @Autowired/@Resource setter method in case of explicitly specified property value
 * InitDestroy/Common/AutowiredAnnotationBeanPostProcessor use ConcurrentHashMaps for minimal locking
@@ -62,12 +65,12 @@ Package org.springframework.core
 * StringCodedLabeledEnum accepts empty codes (that purely consist of whitespace) as well
 
 Package org.springframework.jdbc
-* added ParameterizedBeanPropertyRowMapper, providing automatic mapping between columns and bean properties
 * added named parameter support to SimpleJdbcTemplate
-* added new SqlReturnUpdateCount parameter to provide name for update counts from stored procs
-* added support for retrieving update counts and storing the retrieved int in the output map.
-* added automatic processing of stored proc returned resultsets. Will create default one if declared parameter missing
-* added automatic processing of stored proc update counts.  Will create default one if declared parameter missing
+* added ParameterizedBeanPropertyRowMapper, providing automatic mapping between columns and bean properties
+* added new SqlReturnUpdateCount parameter to provide name for update counts from stored procedures
+* added stored proc support for retrieving update counts and storing the retrieved int in the output map
+* added automatic processing of stored proc returned resultsets (will create default one if declared parameter missing)
+* added automatic processing of stored proc update counts (will create default one if declared parameter missing)
 
 Package org.springframework.jmx
 * MBeanExporter does not insist of a minimum of 1 bean exposed anymore, also accepting no beans to export in the context
@@ -77,6 +80,7 @@ Package org.springframework.orm
 * avoid double invocation of @PersistenceContext/Unit setter method in case of explicitly specified property value
 
 Package org.springframework.transaction
+* added mode="proxy"/"aspectj" flag to "tx:annotation-driven" config tag, for choosing the AspectJ transaction aspect
 * WebSphereUowTransactionManager does not enforce the presence of a JTA UserTransaction anymore
 * WebSphereTransactionManagerFactoryBean uses the context class loader for compatibility with the WSAD 5.1 test server
 
