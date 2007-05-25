@@ -144,6 +144,10 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	}
 
 
+	public AbstractBeanDefinition cloneBeanDefinition() {
+		return new ChildBeanDefinition(this);
+	}
+
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;

@@ -167,6 +167,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 
+	public AbstractBeanDefinition cloneBeanDefinition() {
+		return new RootBeanDefinition(this);
+	}
+
 	public boolean equals(Object other) {
 		return (this == other || (other instanceof RootBeanDefinition && super.equals(other)));
 	}

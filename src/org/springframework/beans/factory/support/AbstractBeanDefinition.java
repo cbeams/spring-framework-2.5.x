@@ -45,7 +45,7 @@ import org.springframework.util.ObjectUtils;
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
-public abstract class AbstractBeanDefinition extends AttributeAccessorSupport implements BeanDefinition {
+public abstract class AbstractBeanDefinition extends AttributeAccessorSupport implements BeanDefinition, Cloneable {
 
 	/**
 	 * Constant that indicates no autowiring at all.
@@ -792,6 +792,23 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 			mo.setOverloaded(false);
 		}
 	}
+
+
+	/**
+	 * Public declaration of Object's <code>clone()</code> method.
+	 * Delegates to {@link #cloneBeanDefinition()}.
+	 * @see java.lang.Object#clone()
+	 */
+	public Object clone() {
+		return cloneBeanDefinition();
+	}
+
+	/**
+	 * Clone this bean definition.
+	 * To be implemented by concrete subclasses.
+	 * @return the cloned bean definition object
+	 */
+	public abstract AbstractBeanDefinition cloneBeanDefinition();
 
 
 	public boolean equals(Object other) {
