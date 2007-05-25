@@ -26,9 +26,7 @@ import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
 /**
  * Matches classes with a given annotation optionally including inherited annotations.
  *
- * The matching logic mirrors that of <code>Class.isAnnotationPresent()</code>
- * with an additional option to explicitely control if any inherited annotations
- * should be considered.
+ * The matching logic mirrors that of <code>Class.isAnnotationPresent()</code>.
  *
  * @author Mark Fisher
  * @author Ramnivas Laddad
