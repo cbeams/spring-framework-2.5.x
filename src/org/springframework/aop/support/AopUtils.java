@@ -146,18 +146,10 @@ public abstract class AopUtils {
 	 * May be <code>null</code> or may not even implement the method.
 	 * @return the specific target method, or the original method if the
 	 * <code>targetClass</code> doesn't implement it or is <code>null</code>
+	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
 	 */
 	public static Method getMostSpecificMethod(Method method, Class targetClass) {
-		if (method != null && targetClass != null) {
-			try {
-				method = targetClass.getMethod(method.getName(), method.getParameterTypes());
-			}
-			catch (NoSuchMethodException ex) {
-				// Perhaps the target class doesn't implement this method:
-				// that's fine, just use the original method.
-			}
-		}
-		return method;
+		return ClassUtils.getMostSpecificMethod(method, targetClass);
 	}
 
 
