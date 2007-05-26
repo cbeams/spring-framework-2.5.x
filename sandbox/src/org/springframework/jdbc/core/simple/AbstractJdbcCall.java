@@ -41,10 +41,17 @@ public abstract class AbstractJdbcCall {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	public static List<String> supportedDatabaseProducts = Arrays.asList(
-			"Oracle",
+	public static List<String> supportedDatabaseProductsForProcedures = Arrays.asList(
+			"Apache Derby",
 			"MySQL",
-			"Microsoft SQL Server");
+			"Microsoft SQL Server",
+			"Oracle"
+		);
+	public static List<String> supportedDatabaseProductsForFunctions = Arrays.asList(
+			"MySQL",
+			"Microsoft SQL Server",
+			"Oracle"
+		);
 
 	/** Lower-level class used to execute SQL */
 	private JdbcTemplate jdbcTemplate = new JdbcTemplate();
@@ -56,7 +63,7 @@ public abstract class AbstractJdbcCall {
 	private final List<SqlParameter> declaredReturnParameters = new ArrayList<SqlParameter>();
 
 	/** List of SqlParameter objects */
-	private final Map<String, SqlParameter> declaredParameters = new HashMap<String, SqlParameter>();
+	private final Map<String, SqlParameter> declaredParameters = new LinkedHashMap<String, SqlParameter>();
 
 	/**
 	 * Has this operation been compiled? Compilation means at
@@ -86,22 +93,27 @@ public abstract class AbstractJdbcCall {
 	/** indicates whether this is a procedure or a function **/
 	private boolean function;
 
-	private String userName;
+	/** name to use for the return value in the output map */
 	private String functionReturnName;
 
-	private String databaseProductName;
 	private boolean returnDeclared = false;
-	private boolean defaultSchemaToUserName = false;
-	private boolean useCatalogNameAsPackageName = false;
-	private boolean supportsCatalogsInProcedureCalls = true;
-	private boolean supportsSchemasInProcedureCalls = true;
+
 	private boolean accessMetaData = true;
+
 	private boolean accessProcedureColumnMetaData = true;
-	private boolean storesUpperCaseIdentifiers = false;
-	private boolean storesLowerCaseIdentifiers = false;
+
+	/** Oracle returnes the package name as the catalog name
+	 *  used when building the call string
+	**/
+	private boolean useCatalogNameAsPackageName = false;
+
 	private boolean caseSensitiveParameters = false;
+
 	private List<String> outParameterNames = new ArrayList<String>();
+
 	private String callString;
+
+	private String databaseProductName;
 
 	/**
 	 * Object enabling us to create CallableStatementCreators
@@ -333,46 +345,35 @@ public abstract class AbstractJdbcCall {
 
 				public Object processMetaData(DatabaseMetaData databaseMetaData)
 						throws SQLException, MetaDataAccessException {
-					userName = databaseMetaData.getUserName();
 					databaseProductName = databaseMetaData.getDatabaseProductName();
-					if (!supportedDatabaseProducts.contains(databaseProductName)) {
-						logger.warn(databaseProductName + " is not one of the supported databases: " +
-								supportedDatabaseProducts);
+					if (isFunction()) {
+						if (!supportedDatabaseProductsForFunctions.contains(databaseProductName)) {
+							logger.warn(databaseProductName + " is not one of the databases fully supported for function calls -- supported are: " +
+									supportedDatabaseProductsForFunctions);
+							if (accessProcedureColumnMetaData) {
+								logger.warn("Metadata processing disabled - you must specify all parameters explicitly");
+								accessProcedureColumnMetaData = false;
+							}
+						}
 					}
-					if ("Oracle".equals(databaseProductName)) {
-						defaultSchemaToUserName = true;
-						useCatalogNameAsPackageName = true;
+					else {
+						if (!supportedDatabaseProductsForProcedures.contains(databaseProductName)) {
+							logger.warn(databaseProductName + " is not one of the databases fully supported for procedure calls -- supported are: " +
+									supportedDatabaseProductsForProcedures);
+							if (accessProcedureColumnMetaData) {
+								logger.warn("Metadata processing disabled - you must specify all parameters explicitly");
+								accessProcedureColumnMetaData = false;
+							}
+						}
 					}
-					supportsCatalogsInProcedureCalls = databaseMetaData.supportsCatalogsInProcedureCalls();
-					supportsSchemasInProcedureCalls = databaseMetaData.supportsSchemasInProcedureCalls();
-					storesUpperCaseIdentifiers = databaseMetaData.storesUpperCaseIdentifiers();
-					storesLowerCaseIdentifiers = databaseMetaData.storesLowerCaseIdentifiers();
-					if (storesUpperCaseIdentifiers) {
-						procedureNameToUse = procedureName.toUpperCase();
-						catalogNameToUse = catalogName != null ? catalogName.toUpperCase() : null;
-						schemaNameToUse = schemaName != null ? schemaName.toUpperCase() : null;
-						functionReturnName = "RETURN";
-					}
-					else if (storesLowerCaseIdentifiers) {
-						procedureNameToUse = procedureName.toLowerCase();
-						catalogNameToUse = catalogName != null ? catalogName.toLowerCase() : null;
-						schemaNameToUse = schemaName != null ? schemaName.toLowerCase() : null;
-						functionReturnName = "return";
+					if (accessProcedureColumnMetaData) {
+						retrieveProcedureColumnMetadata(databaseMetaData, parameters);
 					}
 					else {
 						procedureNameToUse = procedureName;
 						catalogNameToUse = catalogName;
 						schemaNameToUse = schemaName;
 						functionReturnName = "return";
-					}
-					// Oracle hack to distinguish between package and non-package functions/procedures with same name
-					if (catalogNameToUse == null && useCatalogNameAsPackageName) {
-						catalogNameToUse = "";
-					}
-					if (accessProcedureColumnMetaData) {
-						retrieveProcedureColumnMetadata(databaseMetaData, parameters);
-					}
-					else {
 						parameters.addAll(declaredReturnParameters);
 						parameters.addAll(declaredParameters.values());
 					}
@@ -385,7 +386,43 @@ public abstract class AbstractJdbcCall {
 		this.callParameters.addAll(parameters);
 	}
 
-	private void retrieveProcedureColumnMetadata(DatabaseMetaData databaseMetaData, List<SqlParameter> parameters) {
+	private void retrieveProcedureColumnMetadata(DatabaseMetaData databaseMetaData, List<SqlParameter> parameters)
+			throws SQLException {
+
+		//collect some additional metadata
+		String userName = databaseMetaData.getUserName();
+		boolean defaultSchemaToUserName = false;
+		boolean useCatalogNameAsPackageName = false;
+		if ("Oracle".equals(databaseProductName)) {
+			defaultSchemaToUserName = true;
+			useCatalogNameAsPackageName = true;
+		}
+		boolean supportsCatalogsInProcedureCalls = databaseMetaData.supportsCatalogsInProcedureCalls();
+		boolean supportsSchemasInProcedureCalls = databaseMetaData.supportsSchemasInProcedureCalls();
+		boolean storesUpperCaseIdentifiers = databaseMetaData.storesUpperCaseIdentifiers();
+		boolean storesLowerCaseIdentifiers = databaseMetaData.storesLowerCaseIdentifiers();
+		if (storesUpperCaseIdentifiers) {
+			procedureNameToUse = procedureName.toUpperCase();
+			catalogNameToUse = catalogName != null ? catalogName.toUpperCase() : null;
+			schemaNameToUse = schemaName != null ? schemaName.toUpperCase() : null;
+			functionReturnName = "RETURN";
+		}
+		else if (storesLowerCaseIdentifiers) {
+			procedureNameToUse = procedureName.toLowerCase();
+			catalogNameToUse = catalogName != null ? catalogName.toLowerCase() : null;
+			schemaNameToUse = schemaName != null ? schemaName.toLowerCase() : null;
+			functionReturnName = "return";
+		}
+		else {
+			procedureNameToUse = procedureName;
+			catalogNameToUse = catalogName;
+			schemaNameToUse = schemaName;
+			functionReturnName = "return";
+		}
+		// Oracle hack to distinguish between package and non-package functions/procedures with same name
+		if (catalogNameToUse == null && useCatalogNameAsPackageName) {
+			catalogNameToUse = "";
+		}
 		String metaDataCatalogName = supportsCatalogsInProcedureCalls || useCatalogNameAsPackageName ?
 				catalogNameToUse : null;
 		String metaDataSchemaName = supportsSchemasInProcedureCalls ?
