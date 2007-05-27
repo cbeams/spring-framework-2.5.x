@@ -1507,9 +1507,9 @@ support=support@somecompany.co.uk]]></programlisting>
 						you're familiar with (the <literal>property</literal> elements) whereas the second example is using the p-namespace</para>
 	            		
 	            	<para><programlisting><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:p="http://www.springframework.org/schema/p"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+    xmlns:p="http://www.springframework.org/schema/p"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
     
     <bean name="classic" class="com.mycompany.ExampleBean">
         <property name="email" value="foo@bar.com/>
@@ -1529,9 +1529,9 @@ support=support@somecompany.co.uk]]></programlisting>
 						This next example includes two more bean definitions that both have a reference to another bean:
 					</para>
 					<programlisting><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:p="http://www.springframework.org/schema/p"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+    xmlns:p="http://www.springframework.org/schema/p"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
     
     <bean name="john-classic" class="com.mycompany.Person">
         <property name="name" value="John Doe"/>
@@ -2646,7 +2646,8 @@ beanFactory.registerScope("]]><emphasis role="bold">thread</emphasis><![CDATA[",
                 implementations using the <classname>CustomScopeConfigurer</classname> class is
                 shown below:</para>
                 <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
