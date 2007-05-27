@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,12 @@
 package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
+import org.xml.sax.SAXParseException;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-
-import org.xml.sax.SAXParseException;
 
 /**
  * @author Rob Harrop
@@ -35,11 +33,11 @@ public class SchemaValidationTests extends TestCase {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		try {
-			reader.loadBeanDefinitions(getResource("invalidPerSchema.xml"));
+			reader.loadBeanDefinitions(new ClassPathResource("invalidPerSchema.xml", getClass()));
 			fail("Should not be able to parse a file with errors");
 		}
 		catch (BeansException ex) {
-			assertEquals("Parse error not detected", SAXParseException.class, ex.getCause().getClass());
+			assertTrue(ex.getCause() instanceof SAXParseException);
 		}
 	}
 
@@ -48,11 +46,11 @@ public class SchemaValidationTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_XSD);
 		try {
-			reader.loadBeanDefinitions(getResource("invalidPerSchema.xml"));
+			reader.loadBeanDefinitions(new ClassPathResource("invalidPerSchema.xml", getClass()));
 			fail("Should not be able to parse a file with errors");
 		}
 		catch (BeansException ex) {
-			assertEquals("Parse error not detected", SAXParseException.class, ex.getCause().getClass());
+			assertTrue(ex.getCause() instanceof SAXParseException);
 		}
 	}
 
@@ -60,15 +58,11 @@ public class SchemaValidationTests extends TestCase {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_XSD);
-		reader.loadBeanDefinitions(getResource("schemaValidated.xml"));
+		reader.loadBeanDefinitions(new ClassPathResource("schemaValidated.xml", getClass()));
 
 		TestBean foo = (TestBean) bf.getBean("fooBean");
 		assertNotNull("Spouse is null", foo.getSpouse());
 		assertEquals("Incorrect number of friends", 2, foo.getFriends().size());
-	}
-
-	protected Resource getResource(String file) {
-		return new ClassPathResource(file, getClass());
 	}
 
 }
