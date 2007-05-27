@@ -1108,7 +1108,7 @@ public class BeanDefinitionParserDelegate {
 		String namespaceUri = ele.getNamespaceURI();
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
-			error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "]", ele);
+			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
@@ -1136,13 +1136,20 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	private BeanDefinitionHolder decorateIfRequired(Node node, BeanDefinitionHolder originalDefinition) {
-		String uri = node.getNamespaceURI();
-		BeanDefinitionHolder finalDefinition = null;
-		if (!isDefaultNamespace(uri)) {
-			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(uri);
-			finalDefinition = handler.decorate(node, originalDefinition, new ParserContext(this.readerContext, this));
+		String namespaceUri = node.getNamespaceURI();
+		if (!isDefaultNamespace(namespaceUri)) {
+			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
+			if (handler != null) {
+				return handler.decorate(node, originalDefinition, new ParserContext(this.readerContext, this));
+			}
+			else {
+				// A custom namespace, not to be handled by Spring - maybe "xml:...".
+				if (logger.isDebugEnabled()) {
+					logger.debug("No Spring NamespaceHandler found for XML schema namespace [" + namespaceUri + "]");
+				}
+			}
 		}
-		return (finalDefinition != null ? finalDefinition : originalDefinition);
+		return originalDefinition;
 	}
 
 	public boolean isDefaultNamespace(String namespaceUri) {
