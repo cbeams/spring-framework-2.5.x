@@ -33,9 +33,6 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.MimeMessage;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailParseException;
@@ -72,18 +69,14 @@ import org.springframework.util.Assert;
  */
 public class JavaMailSenderImpl implements JavaMailSender {
 
-	/**
-	 * The default protocol: 'smtp'.
-	 */
+	/** The default protocol: 'smtp' */
 	public static final String DEFAULT_PROTOCOL = "smtp";
 
-	/**
-	 * The default port: -1.
-	 */
+	/** The default port: -1 */
 	public static final int DEFAULT_PORT = -1;
 
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+	private static final String HEADER_MESSAGE_ID = "Message-ID";
+
 
 	private Session session = Session.getInstance(new Properties(), null);
 
@@ -288,9 +281,6 @@ public class JavaMailSenderImpl implements JavaMailSender {
 		List mimeMessages = new ArrayList(simpleMessages.length);
 		for (int i = 0; i < simpleMessages.length; i++) {
 			SimpleMailMessage simpleMessage = simpleMessages[i];
-			if (logger.isDebugEnabled()) {
-				logger.debug("Creating new MIME message using the following mail properties: " + simpleMessage);
-			}
 			MimeMailMessage message = new MimeMailMessage(createMimeMessage());
 			simpleMessage.copyTo(message);
 			mimeMessages.add(message.getMimeMessage());
@@ -384,7 +374,12 @@ public class JavaMailSenderImpl implements JavaMailSender {
 						if (mimeMessage.getSentDate() == null) {
 							mimeMessage.setSentDate(new Date());
 						}
+						String messageId = mimeMessage.getMessageID();
 						mimeMessage.saveChanges();
+						if (messageId != null) {
+							// Preserve explicitly specified message id...
+							mimeMessage.setHeader(HEADER_MESSAGE_ID, messageId);
+						}
 						transport.sendMessage(mimeMessage, mimeMessage.getAllRecipients());
 					}
 					catch (MessagingException ex) {
