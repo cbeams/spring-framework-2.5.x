@@ -16,18 +16,19 @@
 
 package org.springframework.context.weaving;
 
-import org.springframework.beans.factory.FactoryBean;
+import java.lang.instrument.ClassFileTransformer;
+
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.instrument.InstrumentationSavingAgent;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver;
 import org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWeaver;
 import org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver;
-import org.springframework.util.ClassUtils;
 
 /**
- * {@link org.springframework.beans.factory.FactoryBean} that builds a default
- * LoadTimeWeaver for use in an application context. Typically registered for
+ * Default LoadTimeWeaver bean for use in an application context, decorating an
+ * automatically detected internal LoadTimeWeaver. Typically registered for
  * the default bean name "loadTimeWeaver"; the most convenient way to achieve
  * this is Spring's <code>&lt;context:load-time-weaver&gt;</code> XML tag.
  *
@@ -40,44 +41,47 @@ import org.springframework.util.ClassUtils;
  * @since 2.1
  * @see org.springframework.context.ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME
  */
-public class LoadTimeWeaverFactoryBean implements FactoryBean {
+public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLoaderAware {
 
-	private final LoadTimeWeaver loadTimeWeaver;
+	private LoadTimeWeaver loadTimeWeaver;
 
 
-	public LoadTimeWeaverFactoryBean() {
-		ClassLoader cl = ClassUtils.getDefaultClassLoader();
-		if (cl.getClass().getName().startsWith("com.sun.enterprise")) {
-			this.loadTimeWeaver = new GlassFishLoadTimeWeaver(cl);
-		}
-		else if (cl.getClass().getName().startsWith("oracle")) {
-			this.loadTimeWeaver = new OC4JLoadTimeWeaver(cl);
-		}
-		else if (InstrumentationSavingAgent.getInstrumentation() != null) {
-			this.loadTimeWeaver = new InstrumentationLoadTimeWeaver();
-		}
-		else {
-			try {
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		try {
+			if (classLoader.getClass().getName().startsWith("com.sun.enterprise")) {
+				this.loadTimeWeaver = new GlassFishLoadTimeWeaver(classLoader);
+			}
+			else if (classLoader.getClass().getName().startsWith("oracle")) {
+				this.loadTimeWeaver = new OC4JLoadTimeWeaver(classLoader);
+			}
+			else if (InstrumentationSavingAgent.getInstrumentation() != null) {
+				this.loadTimeWeaver = new InstrumentationLoadTimeWeaver();
+			}
+			else {
 				this.loadTimeWeaver = new ReflectiveLoadTimeWeaver();
 			}
-			catch (IllegalStateException ex) {
-				throw new IllegalStateException(ex.getMessage() + " Specify a custom LoadTimeWeaver " +
-						"or start your Java virtual machine with Spring's agent: -javaagent:spring-agent.jar");
-			}
+		}
+		catch (IllegalStateException ex) {
+			throw new IllegalStateException(ex.getMessage() + " Specify a custom LoadTimeWeaver " +
+					"or start your Java virtual machine with Spring's agent: -javaagent:spring-agent.jar");
+		}
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to build appropriate LoadTimeWeaver - " +
+					"make sure that that all required classes are on the classpath: " + ex);
 		}
 	}
 
 
-	public Object getObject() {
-		return this.loadTimeWeaver;
+	public void addTransformer(ClassFileTransformer transformer) {
+		this.loadTimeWeaver.addTransformer(transformer);
 	}
 
-	public Class getObjectType() {
-		return this.loadTimeWeaver.getClass();
+	public ClassLoader getInstrumentableClassLoader() {
+		return this.loadTimeWeaver.getInstrumentableClassLoader();
 	}
 
-	public boolean isSingleton() {
-		return true;
+	public ClassLoader getThrowawayClassLoader() {
+		return this.loadTimeWeaver.getThrowawayClassLoader();
 	}
 
 }

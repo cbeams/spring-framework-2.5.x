@@ -43,7 +43,7 @@ public class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefini
 		if (element.hasAttribute(WEAVER_CLASS_ATTRIBUTE)) {
 			return element.getAttribute(WEAVER_CLASS_ATTRIBUTE);
 		}
-		return LoadTimeWeaverFactoryBean.class.getName();
+		return DefaultContextLoadTimeWeaver.class.getName();
 	}
 
 	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
