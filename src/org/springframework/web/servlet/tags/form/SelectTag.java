@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.servlet.jsp.JspException;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.servlet.support.BindStatus;
 
 /**
@@ -229,15 +230,15 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * If using a multi select, a hidden element is needed to make sure all
+	 * If using a multi-select, a hidden element is needed to make sure all
 	 * items are correctly unselected on the server-side in response to a
-	 * <code>null</code>  post.
+	 * <code>null</code> post.
 	 */
 	private void writeHiddenTagIfNecessary(TagWriter tagWriter) throws JspException {
 		if (isMultiple()) {
 			tagWriter.startTag("input");
 			tagWriter.writeAttribute("type", "hidden");
-			tagWriter.writeAttribute("name", "_" + getName());
+			tagWriter.writeAttribute("name", WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX + getName());
 			tagWriter.writeAttribute("value", "1");
 			tagWriter.endTag();
 		}
@@ -245,9 +246,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 	private boolean isMultiple() throws JspException {
 		Object multiple = getMultiple();
-		if (Boolean.TRUE.equals(multiple)
-				|| "true".equals(multiple)
-				|| "multiple".equals(multiple)) {
+		if (Boolean.TRUE.equals(multiple) || "true".equals(multiple) || "multiple".equals(multiple)) {
 			return true;
 		}
 		else if (this.multiple instanceof String) {
