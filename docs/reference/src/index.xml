@@ -109,6 +109,10 @@
 				<firstname>Rick</firstname>
 				<surname>Evans</surname>
 			</author>
+            <author>
+                <firstname>Mark</firstname>
+                <surname>Fisher</surname>
+            </author>
 		</authorgroup>
 		<legalnotice>
 			Copies of this document may be made for your own use and for

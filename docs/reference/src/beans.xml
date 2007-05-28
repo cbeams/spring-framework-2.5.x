@@ -4023,4 +4023,164 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
             a need.</para>
         </section>
     </section>
+    <section id="beans-annotation-config">
+        <title>Annotation-based configuration</title>
+        <para>As mentioned in the section entitled <xref linkend="beans-factory-extension-bpp-examples-rabpp"/>, 
+        using a <interfacename>BeanPostProcessor</interfacename> in conjunction with annotations 
+        is a common means of extending the Spring IoC container. For example, Spring 2.0 introduced 
+        the possibility of enforcing required properties with the 
+        <link linkend="metadata-annotations-required">@Required</link> annotation. As of Spring 
+        2.1, it is now possible to follow that same general approach even to drive Spring's 
+        dependency injection. Essentially, the <interfacename>@Autowired</interfacename> annotation
+        provides the same capabilities as described in <xref linkend="beans-factory-autowire"/> 
+        but with more fine-grained control and wider applicability as will be demonstrated 
+        momentarily. Spring 2.1 also adds support for JSR-250 annotations such as 
+        <interfacename>@Resource</interfacename>, <interfacename>@PostConstruct</interfacename>, 
+        and <interfacename>@PreDestroy</interfacename>. Of course, these options are only available
+        if you are using Java 5 (Tiger) and thus have access to source level annotations. To use
+        these annotations also requires that certain <interfacename>BeanPostProcessor</interfacename>s
+        be registered within the context. As always, these can be registered as individual bean 
+        definitions, but as a convenience they can be implicitly registered by including the 
+        following tag in an XML-based Spring configuration (also notice the inclusion of the 
+        'context' namespace):</para>
+        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+               
+     <context:annotation-config/>
+     
+</beans>]]></programlisting>
+        <para>The implicitly registered post-processors include 
+        <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html">AutowiredAnnotationBeanPostProcessor</ulink></classname>,
+        and <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/annotation/CommonAnnotationBeanPostProcessor.html">CommonAnnotationBeanPostProcessor</ulink></classname>,
+        as well as the aforementioned 
+        <classname><ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html">RequiredAnnotationBeanPostProcessor</ulink></classname>.
+        </para>
+        <section id="beans-autowired-annotation">
+            <title><interfacename>@Autowired</interfacename></title>
+            <para>The <interfacename>@Autowired</interfacename> annotation may be applied to 
+            "traditional" setter methods as in this example:</para>
+            <programlisting><![CDATA[public class SimpleMovieLister {
+
+    private MovieFinder movieFinder;
+
+    @Autowired
+    public void setMovieFinder(MovieFinder movieFinder) {
+        this.movieFinder = movieFinder;
+    }
+    
+}]]></programlisting>
+            <para>The annotation may also be applied to methods with arbitrary names and/or 
+            multiple arguments:</para>
+            <programlisting><![CDATA[public class MovieRecommender {
+
+    private MovieCatalog movieCatalog;
+    
+    private CustomerPreferenceDao customerPreferenceDao;
+
+    @Autowired
+    public void prepopulateRecommendations(MovieCatalog movieCatalog, CustomerPreferenceDao customerPreferenceDao) {
+        this.movieCatalog = movieCatalog;
+        this.customerPreferenceDao = customerPreferenceDao;
+    }
+    
+}]]></programlisting>
+            <para>The annotation may even be applied on constructors and fields:</para>
+            <programlisting><![CDATA[public class MovieRecommender {
+
+    @Autowired
+    private MovieCatalog movieCatalog;
+    
+    private CustomerPreferenceDao customerPreferenceDao;
+
+    @Autowired
+    public MovieRecommender(CustomerPreferenceDao customerPreferenceDao) {
+        this.customerPreferenceDao = customerPreferenceDao;
+    }
+    
+}]]></programlisting>
+            <para>By default, the autowiring will fail whenever <emphasis>zero</emphasis> 
+            candidates are available. In other words, the default behavior is to treat the 
+            annotated methods, constructors, and fields as indicating 
+            <emphasis>required</emphasis> dependencies. This behavior can easily be overridden 
+            as demonstrated below.</para>
+            <programlisting><![CDATA[public class SimpleMovieLister {
+
+    private MovieFinder movieFinder;
+
+    @Autowired(required=false)
+    public void setMovieFinder(MovieFinder movieFinder) {
+        this.movieFinder = movieFinder;
+    }
+    
+}]]></programlisting>
+            <note>
+                <para>Only one annotated constructor per-class may be <emphasis>required</emphasis>, 
+                but multiple non-required constructors can be annotated as such. In that case, each 
+                will be considered among the candidates and Spring will use the 
+                <emphasis>greediest</emphasis> constructor whose dependencies can be satisfied.</para>
+            </note>
+        </section>
+        <section id="beans-resource-annotation">
+            <title><interfacename>@Resource</interfacename></title>
+            <para>The autowired properties demonstrated thus far have all followed 
+            <emphasis>by-type</emphasis> semantics meaning that multiple candidate matches will 
+            trigger an <classname>Exception</classname>. In order to specify 
+            <emphasis>by-name</emphasis> semantics instead, simply use the JSR-250 
+            <interfacename>@Resource</interfacename> annotation and provide the bean name for the 
+            dependency as demonstrated in this example:</para>
+            <programlisting><![CDATA[public class SimpleMovieLister {
+
+    private MovieFinder movieFinder;
+
+    @Resource(name="myMovieFinder")
+    public void setMovieFinder(MovieFinder movieFinder) {
+        this.movieFinder = movieFinder;
+    }
+    
+}]]></programlisting>
+            <note>
+                <para>The name provided with the annotation will be resolved as a bean name by the 
+                <interfacename>BeanFactory</interfacename> of which the 
+                <classname>CommonAnnotationBeanPostProcessor</classname> is aware. Note that the names 
+                may be resolved via JNDI if Spring's 
+                <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/jndi/support/SimpleJndiBeanFactory.html">SimpleJndiBeanFactory</ulink></classname> 
+                is explicitly configured. However, it is recommended to rely on the default behavior and
+                simply use Spring's JNDI lookup capabilities to preserve the level of indirection.</para>
+            </note>
+        </section>   
+        <section id="beans-postconstruct-and-predestroy-annotations">
+            <title><interfacename>@PostConstruct</interfacename> and <interfacename>@PreDestroy</interfacename></title>
+            <para>The <classname>CommonAnnotationBeanPostProcessor</classname> not only recognizes the
+            <interfacename>@Resource</interfacename> annotation but also the JSR-250 
+            <emphasis>lifecycle</emphasis> annotations. Introduced in Spring 2.1, the support for 
+            these annotations offers yet another alternative to those described in the
+            sections on <link linkend="beans-factory-lifecycle-initializingbean">initialization callbacks</link>
+            and <link linkend="beans-factory-lifecycle-disposablebean">destruction callbacks</link>.
+            Provided that the <classname>CommonAnnotationBeanPostProcessor</classname> is 
+            registered within the Application Context, a method carrying one of these annotations
+            will be invoked at the same point in the lifecycle as the corresponding Spring 
+            lifecycle interface's method or explicitly declared callback method. In the 
+            example below, the cache will be prepopulated upon initialization and cleared
+            upon destruction.</para>
+            <programlisting><![CDATA[public class CachingMovieLister {
+
+    @PostConstruct
+    public void populateMovieCache() {
+        ]]><lineannotation>// populates the movie cache upon initialization...</lineannotation><![CDATA[
+    }
+    
+    @PreDestroy
+    public void clearMovieCache() {
+        ]]><lineannotation>// clears the movie cache upon destruction...</lineannotation><![CDATA[
+    }
+    
+}]]></programlisting>
+        </section>
+    </section>
 </chapter>
