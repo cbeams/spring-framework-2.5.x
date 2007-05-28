@@ -68,17 +68,35 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 
-	public boolean isPattern(String str) {
-		return (str.indexOf('*') != -1 || str.indexOf('?') != -1);
+	public boolean isPattern(String path) {
+		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
 	}
 
-	public boolean match(String pattern, String str) {
-		if (str.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
+	public boolean match(String pattern, String path) {
+		return doMatch(pattern, path, true);
+	}
+
+	public boolean matchStart(String pattern, String path) {
+		return doMatch(pattern, path, false);
+	}
+
+
+	/**
+	 * Actually match the given <code>path</code> against the given <code>pattern</code>.
+	 * @param pattern the pattern to match against
+	 * @param path the path String to test
+	 * @param fullMatch whether a full pattern match is required
+	 * (else a pattern match as far as the given base path goes is sufficient)
+	 * @return <code>true</code> if the supplied <code>path</code> matched,
+	 * <code>false</code> if it didn't
+	 */
+	protected boolean doMatch(String pattern, String path, boolean fullMatch) {
+		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
 
 		String[] patDirs = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
-		String[] strDirs = StringUtils.tokenizeToStringArray(str, this.pathSeparator);
+		String[] strDirs = StringUtils.tokenizeToStringArray(path, this.pathSeparator);
 
 		int patIdxStart = 0;
 		int patIdxEnd = patDirs.length - 1;
@@ -87,11 +105,11 @@ public class AntPathMatcher implements PathMatcher {
 
 		// Match all elements up to the first **
 		while (patIdxStart <= patIdxEnd && strIdxStart <= strIdxEnd) {
-			String patDir = (String) patDirs[patIdxStart];
+			String patDir = patDirs[patIdxStart];
 			if (patDir.equals("**")) {
 				break;
 			}
-			if (!matchStrings(patDir, (String) strDirs[strIdxStart])) {
+			if (!matchStrings(patDir, strDirs[strIdxStart])) {
 				return false;
 			}
 			patIdxStart++;
@@ -99,9 +117,16 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		if (strIdxStart > strIdxEnd) {
-			// String is exhausted, only match if rest of pattern is * or **'s
+			// Path is exhausted, only match if rest of pattern is * or **'s
+			if (patIdxStart > patIdxEnd) {
+				return (pattern.endsWith(this.pathSeparator) ?
+						path.endsWith(this.pathSeparator) : !path.endsWith(this.pathSeparator));
+			}
+			if (!fullMatch) {
+				return true;
+			}
 			if (patIdxStart == patIdxEnd && patDirs[patIdxStart].equals("*") &&
-					str.endsWith(this.pathSeparator)) {
+					path.endsWith(this.pathSeparator)) {
 				return true;
 			}
 			for (int i = patIdxStart; i <= patIdxEnd; i++) {

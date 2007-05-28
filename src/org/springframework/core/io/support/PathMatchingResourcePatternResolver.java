@@ -530,16 +530,14 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (dirContents == null) {
 			throw new IOException("Could not retrieve contents of directory [" + dir.getAbsolutePath() + "]");
 		}
-		boolean dirDepthNotFixed = (fullPattern.indexOf("**") != -1);
 		for (int i = 0; i < dirContents.length; i++) {
-			String currPath = StringUtils.replace(dirContents[i].getAbsolutePath(), File.separator, "/");
-			if (dirContents[i].isDirectory() &&
-					(dirDepthNotFixed ||
-					StringUtils.countOccurrencesOf(currPath, "/") < StringUtils.countOccurrencesOf(fullPattern, "/"))) {
-				doRetrieveMatchingFiles(fullPattern, dirContents[i], result);
+			File content = dirContents[i];
+			String currPath = StringUtils.replace(content.getAbsolutePath(), File.separator, "/");
+			if (content.isDirectory() && getPathMatcher().matchStart(fullPattern, currPath + "/")) {
+				doRetrieveMatchingFiles(fullPattern, content, result);
 			}
 			if (getPathMatcher().match(fullPattern, currPath)) {
-				result.add(dirContents[i]);
+				result.add(content);
 			}
 		}
 	}
