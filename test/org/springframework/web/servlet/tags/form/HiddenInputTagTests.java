@@ -45,7 +45,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		assertTagOpened(output);
 		assertTagClosed(output);
@@ -63,7 +63,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		assertTagOpened(output);
 		assertTagClosed(output);

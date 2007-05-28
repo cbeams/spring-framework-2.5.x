@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ package org.springframework.web.servlet.tags;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.TagSupport;
+import javax.servlet.jsp.tagext.TryCatchFinally;
 
-import org.springframework.validation.Errors;
+import org.springframework.beans.PropertyAccessor;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 
 /**
@@ -39,7 +40,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @author Juergen Hoeller
  * @since 1.1
  */
-public class NestedPathTag extends TagSupport {
+public class NestedPathTag extends TagSupport implements TryCatchFinally {
 
 	/**
 	 * Name of the exposed variable within the scope of this tag: "nestedPath".
@@ -49,8 +50,8 @@ public class NestedPathTag extends TagSupport {
 
 	private String path;
 
-	/** To cache any previous nested path, so that it may be reset */
-	private String previousNestedPath = "";
+	/** Caching a previous nested path, so that it may be reset */
+	private String previousNestedPath;
 
 
 	/**
@@ -63,8 +64,8 @@ public class NestedPathTag extends TagSupport {
 		if (path == null) {
 			path = "";
 		}
-		if (path.length() > 0 && !path.endsWith(Errors.NESTED_PATH_SEPARATOR)) {
-			path += Errors.NESTED_PATH_SEPARATOR;
+		if (path.length() > 0 && !path.endsWith(PropertyAccessor.NESTED_PROPERTY_SEPARATOR)) {
+			path += PropertyAccessor.NESTED_PROPERTY_SEPARATOR;
 		}
 		this.path = path;
 	}
@@ -73,7 +74,7 @@ public class NestedPathTag extends TagSupport {
 	 * Return the path that this tag applies to.
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 
@@ -82,14 +83,10 @@ public class NestedPathTag extends TagSupport {
 
 		// Save previous nestedPath value, build and expose current nestedPath value.
 		// Use request scope to expose nestedPath to included pages too.
-		String nestedPath = (String) pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
-		if (nestedPath != null) {
-			this.previousNestedPath = nestedPath;
-			nestedPath = nestedPath + resolvedPath;
-		}
-		else {
-			nestedPath = resolvedPath;
-		}
+		this.previousNestedPath =
+				(String) pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+		String nestedPath =
+				(this.previousNestedPath != null ? this.previousNestedPath + resolvedPath : resolvedPath);
 		pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, nestedPath, PageContext.REQUEST_SCOPE);
 
 		return EVAL_BODY_INCLUDE;
@@ -109,6 +106,14 @@ public class NestedPathTag extends TagSupport {
 		}
 
 		return EVAL_PAGE;
+	}
+
+	public void doCatch(Throwable throwable) throws Throwable {
+		throw throwable;
+	}
+
+	public void doFinally() {
+		this.previousNestedPath = null;
 	}
 
 }

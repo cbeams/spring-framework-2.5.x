@@ -21,13 +21,12 @@ import java.beans.PropertyEditor;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
-import org.springframework.beans.PropertyAccessor;
 import org.springframework.core.Conventions;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.tags.NestedPathTag;
+import org.springframework.web.servlet.tags.EditorAwareTag;
 
 /**
  * Base tag for all data-binding aware JSP form tags.
@@ -41,7 +40,7 @@ import org.springframework.web.servlet.tags.NestedPathTag;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
+public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag implements EditorAwareTag {
 
 	/**
 	 * The '<code>id</code>' attribute of the rendered HTML tag.
@@ -59,6 +58,12 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 */
 	public static final String COMMAND_NAME_VARIABLE_NAME =
 			Conventions.getQualifiedAttributeName(AbstractFormTag.class, COMMAND_NAME_ATTRIBUTE);
+
+	/**
+	 * Name of the exposed path variable within the scope of this tag: "nestedPath".
+	 * Same value as {@link org.springframework.web.servlet.tags.NestedPathTag#NESTED_PATH_VARIABLE_NAME}.
+	 */
+	public static final String NESTED_PATH_VARIABLE_NAME = NestedPathTag.NESTED_PATH_VARIABLE_NAME;
 
 
 	/**
@@ -82,7 +87,6 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * May be a runtime expression. Required.
 	 */
 	public void setPath(String path) {
-		Assert.hasText(path, "'path' must not be empty");
 		this.path = path;
 	}
 
@@ -91,7 +95,8 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * {@link FormTag#setCommandName command object}.
 	 */
 	protected final String getPath() throws JspException {
-		return (String) evaluate("path", this.path);
+		String resolvedPath = (String) evaluate("path", this.path);
+		return (resolvedPath != null ? resolvedPath : "");
 	}
 
 	/**
@@ -119,7 +124,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * to call the <code>super</code> method.
 	 * <p>Concrete sub-classes should call this method when/if they want
 	 * to render default attributes.
-	 * @param tagWriter the {@link TagWriter} to which any attributes are to be {@link TagWriter#writeAttribute(String, String) written}
+	 * @param tagWriter the {@link TagWriter} to which any attributes are to be written
 	 */
 	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
 		String id = getId();
@@ -143,14 +148,14 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	/**
 	 * Get the value for the HTML '<code>name</code>' attribute.
 	 * <p>The default implementation simply delegates to
-	 * {@link #getCompletePath()} to use the property path as the name.
+	 * {@link #getPropertyPath()} to use the property path as the name.
 	 * For the most part this is desirable as it links with the server-side
 	 * expectation for databinding. However, some subclasses may wish to change
 	 * the value of the '<code>name</code>' attribute without changing the bind path.
 	 * @return the value for the HTML '<code>name</code>' attribute
 	 */
 	protected String getName() throws JspException {
-		return getCompletePath();
+		return getPropertyPath();
 	}
 
 	/**
@@ -173,34 +178,12 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 */
 	protected BindStatus getBindStatus() throws JspException {
 		if (this.bindStatus == null) {
-			String resolvedPropertyPath = getPath();
-			String bindPath = getBindPath(resolvedPropertyPath);
 			// HTML escaping in tags is performed by the ValueFormatter class.
-			this.bindStatus = new BindStatus(getRequestContext(), bindPath, false);
+			String nestedPath = getNestedPath();
+			String pathToUse = (nestedPath != null ? nestedPath + getPath() : getPath());
+			this.bindStatus = new BindStatus(getRequestContext(), pathToUse, false);
 		}
 		return this.bindStatus;
-	}
-
-	/**
-	 * Get the final bind path including the exposed {@link FormTag command name} and
-	 * any {@link NestedPathTag nested paths}.
-	 */
-	private String getBindPath(String resolvedSubPath) {
-		StringBuffer sb = new StringBuffer();
-		addBindPathElement(sb, getCommandName());
-		addBindPathElement(sb, getNestedPath());
-		addBindPathElement(sb, resolvedSubPath);
-		return sb.toString();
-	}
-
-	private void addBindPathElement(StringBuffer sb, String pathElement) {
-		if (StringUtils.hasLength(pathElement)) {
-			int length = sb.length();
-			if (length > 0 && sb.charAt(length - 1) != PropertyAccessor.NESTED_PROPERTY_SEPARATOR_CHAR) {
-				sb.append(PropertyAccessor.NESTED_PROPERTY_SEPARATOR_CHAR);
-			}
-			sb.append(pathElement);
-		}
 	}
 
 	/**
@@ -208,21 +191,21 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * {@link NestedPathTag}.
 	 */
 	protected String getNestedPath() {
-		return (String) this.pageContext.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+		return (String) this.pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 	}
 
 	/**
-	 * Build the complete path for this tag, including the nested path.
+	 * Build the property path for this tag, including the nested path
+	 * but <i>not</i> prefixed with the name of the command attribute.
 	 * @see #getNestedPath()
 	 * @see #getPath()
 	 */
-	protected String getCompletePath() throws JspException {
-		String nestedPath = getNestedPath();
-		return (nestedPath != null ? nestedPath + getPath() : getPath());
+	protected String getPropertyPath() throws JspException {
+		return getBindStatus().getExpression();
 	}
 
-	private String getCommandName() {
-		return (String) this.pageContext.getAttribute(COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+	public PropertyEditor getEditor() throws JspException {
+		return getBindStatus().getEditor();
 	}
 
 	/**

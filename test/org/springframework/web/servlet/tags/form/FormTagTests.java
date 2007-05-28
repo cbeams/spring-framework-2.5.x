@@ -86,7 +86,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.doFinally();
 		assertNull("Command name not cleared after tag ends", getPageContext().getRequest().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertFormTagOpened(output);
 		assertFormTagClosed(output);
 
@@ -124,7 +124,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.doFinally();
 		assertNull("Command name not cleared after tag ends", getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertFormTagOpened(output);
 		assertFormTagClosed(output);
 
@@ -154,7 +154,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		request.setQueryString(xssQueryString);
 		tag.doStartTag();
 		assertEquals("<form id=\"command\" method=\"post\" action=\"/my/form?foo=bar&amp;stuff=&quot;&gt;&lt;script&gt;alert('XSS!')&lt;/script&gt;\">",
-				getWriter().toString());
+				getOutput());
 	}
 
 

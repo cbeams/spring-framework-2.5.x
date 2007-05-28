@@ -58,7 +58,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setPath("someBoolean");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -79,7 +79,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setPath("jedi");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -100,7 +100,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -121,7 +121,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -143,7 +143,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -165,7 +165,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -191,7 +191,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -212,7 +212,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -233,7 +233,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -258,7 +258,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -279,7 +279,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -301,7 +301,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -324,7 +324,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -346,7 +346,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -367,7 +367,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -388,7 +388,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -409,7 +409,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -430,7 +430,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -451,7 +451,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
@@ -481,7 +481,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setDisabled("true");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";

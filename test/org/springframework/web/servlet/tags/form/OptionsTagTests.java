@@ -70,7 +70,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setItemLabel("name");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
-		String output = getWriter().toString();
+		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
 
 		SAXReader reader = new SAXReader();
@@ -100,7 +100,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setItems("${floats}");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
-		String output = getWriter().toString();
+		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
 
 		SAXReader reader = new SAXReader();
@@ -129,7 +129,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setItemLabel("name");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
-		String output = getWriter().toString();
+		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
 
 		SAXReader reader = new SAXReader();
@@ -148,7 +148,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setItemLabel("name");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
-		String output = getWriter().toString();
+		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
 
 		SAXReader reader = new SAXReader();

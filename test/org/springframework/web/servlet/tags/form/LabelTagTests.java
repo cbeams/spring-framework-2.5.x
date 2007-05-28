@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,21 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.Tag;
+
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockPageContext;
 import org.springframework.web.servlet.tags.NestedPathTag;
-
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.Tag;
 
 /**
  * Unit tests for the {@link LabelTag} class.
  *
  * @author Rob Harrop
  * @author Rick Evans
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public final class LabelTagTests extends AbstractFormTagTests {
-
-	private static final String NESTED_PATH = "spouse.";
-
 
 	private LabelTag tag;
 
@@ -48,9 +45,13 @@ public final class LabelTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
-	protected void extendPageContext(MockPageContext pageContext) {
+	protected void extendPageContext(MockPageContext pageContext) throws JspException {
 		super.extendPageContext(pageContext);
-		pageContext.setAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, NESTED_PATH, PageContext.REQUEST_SCOPE);
+
+		NestedPathTag nestedPathTag = new NestedPathTag();
+		nestedPathTag.setPath("spouse.");
+		nestedPathTag.setPageContext(pageContext);
+		nestedPathTag.doStartTag();
 	}
 
 
@@ -61,9 +62,9 @@ public final class LabelTagTests extends AbstractFormTagTests {
 		assertEquals(Tag.EVAL_BODY_INCLUDE, startResult);
 		assertEquals(Tag.EVAL_PAGE, endResult);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		// we are using a nexted path (see extendPageContext(..)), so...
-		assertContainsAttribute(output, "for", NESTED_PATH + "name");
+		assertContainsAttribute(output, "for", "spouse.name");
 		// name attribute is not supported by <label/>
 		assertAttributeNotPresent(output, "name");
 		// id attribute is supported, but we don't want it
@@ -80,7 +81,7 @@ public final class LabelTagTests extends AbstractFormTagTests {
 		assertEquals(Tag.EVAL_BODY_INCLUDE, startResult);
 		assertEquals(Tag.EVAL_PAGE, endResult);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertContainsAttribute(output, "for", "myElement");
 		// name attribute is not supported by <label/>
 		assertAttributeNotPresent(output, "name");

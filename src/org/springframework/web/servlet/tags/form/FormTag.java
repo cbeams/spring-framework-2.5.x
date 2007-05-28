@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.beans.PropertyAccessor;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
@@ -83,6 +84,9 @@ public class FormTag extends AbstractHtmlElementTag {
 	private String onsubmit;
 
 	private String onreset;
+
+	/** Caching a previous nested path, so that it may be reset */
+	private String previousNestedPath;
 
 
 	/**
@@ -208,8 +212,17 @@ public class FormTag extends AbstractHtmlElementTag {
 
 		this.tagWriter.forceBlock();
 
-		// expose the command name for nested tags
-		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, resolveCommandName(), PageContext.REQUEST_SCOPE);
+		// Expose the command name for nested tags...
+		String commandName = resolveCommandName();
+		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, commandName, PageContext.REQUEST_SCOPE);
+
+		// Save previous nestedPath value, build and expose current nestedPath value.
+		// Use request scope to expose nestedPath to included pages too.
+		this.previousNestedPath =
+				(String) pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+		pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME,
+				commandName + PropertyAccessor.NESTED_PROPERTY_SEPARATOR, PageContext.REQUEST_SCOPE);
+
 		return EVAL_BODY_INCLUDE;
 	}
 
@@ -280,7 +293,18 @@ public class FormTag extends AbstractHtmlElementTag {
 	 */
 	public int doEndTag() throws JspException {
 		this.tagWriter.endTag();
-		this.pageContext.getRequest().removeAttribute(COMMAND_NAME_VARIABLE_NAME);
+
+		this.pageContext.removeAttribute(COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+
+		if (this.previousNestedPath != null) {
+			// Expose previous nestedPath value.
+			pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, this.previousNestedPath, PageContext.REQUEST_SCOPE);
+		}
+		else {
+			// Remove exposed nestedPath value.
+			pageContext.removeAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+		}
+
 		return EVAL_PAGE;
 	}
 
@@ -290,6 +314,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	public void doFinally() {
 		super.doFinally();
 		this.tagWriter = null;
+		this.previousNestedPath = null;
 	}
 
 

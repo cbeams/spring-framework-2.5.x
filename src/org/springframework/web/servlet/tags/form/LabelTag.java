@@ -111,7 +111,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 			return getDisplayString(evaluate(FOR_ATTRIBUTE, this.forId));
 		}
 		else {
-			return getCompletePath();
+			return getPropertyPath();
 		}
 	}
 

@@ -27,8 +27,10 @@ import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.beans.TestBean;
+import org.springframework.mock.web.MockBodyContent;
 import org.springframework.mock.web.MockPageContext;
-import org.springframework.validation.BindException;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
@@ -38,7 +40,7 @@ import org.springframework.web.servlet.tags.RequestContextAwareTag;
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public class ErrorsTagTests extends AbstractHtmlElementTagTests {
+public class ErrorsTagTests extends AbstractFormTagTests {
 
 	private static final String COMMAND_NAME = "testBean";
 
@@ -52,8 +54,12 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 			}
 		};
 		this.tag.setPath("name");
+		this.tag.setParent(getFormTag());
 		this.tag.setPageContext(getPageContext());
-		this.tag.setParent(new FormTag());
+	}
+
+	protected TestBean createTestBean() {
+		return new TestBean();
 	}
 
 
@@ -64,7 +70,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		// construct an errors instance of the tag
 		TestBean target = new TestBean();
 		target.setName("Rob Harrop");
-		Errors errors = new BindException(target, COMMAND_NAME);
+		Errors errors = new BeanPropertyBindingResult(target, COMMAND_NAME);
 		errors.rejectValue("name", "some.code", "Default Message");
 
 		exposeBindingResult(errors);
@@ -74,7 +80,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
-		assertEquals(mockContent, getWriter().toString());
+		assertEquals(mockContent, getOutput());
 	}
 
 	public void testWithExplicitWhitespaceBodyContent() throws Exception {
@@ -83,7 +89,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		// construct an errors instance of the tag
 		TestBean target = new TestBean();
 		target.setName("Rob Harrop");
-		Errors errors = new BindException(target, COMMAND_NAME);
+		Errors errors = new BeanPropertyBindingResult(target, COMMAND_NAME);
 		errors.rejectValue("name", "some.code", "Default Message");
 
 		exposeBindingResult(errors);
@@ -94,7 +100,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertElementTagOpened(output);
 		assertElementTagClosed(output);
 
@@ -108,7 +114,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		// construct an errors instance of the tag
 		TestBean target = new TestBean();
 		target.setName("Rob Harrop");
-		Errors errors = new BindException(target, COMMAND_NAME);
+		Errors errors = new BeanPropertyBindingResult(target, COMMAND_NAME);
 		errors.rejectValue("name", "some.code", "Default Message");
 
 		exposeBindingResult(errors);
@@ -119,7 +125,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertElementTagOpened(output);
 		assertElementTagClosed(output);
 
@@ -131,7 +137,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		// construct an errors instance of the tag
 		TestBean target = new TestBean();
 		target.setName("Rob Harrop");
-		Errors errors = new BindException(target, COMMAND_NAME);
+		Errors errors = new BeanPropertyBindingResult(target, COMMAND_NAME);
 		errors.rejectValue("name", "some.code", "Default Message");
 		errors.rejectValue("name", "too.short", "Too Short");
 
@@ -143,7 +149,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertElementTagOpened(output);
 		assertElementTagClosed(output);
 
@@ -159,7 +165,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		// construct an errors instance of the tag
 		TestBean target = new TestBean();
 		target.setName("Rob Harrop");
-		Errors errors = new BindException(target, COMMAND_NAME);
+		Errors errors = new BeanPropertyBindingResult(target, COMMAND_NAME);
 		errors.rejectValue("name", "some.code", "Default <> Message");
 		errors.rejectValue("name", "too.short", "Too & Short");
 
@@ -171,7 +177,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertElementTagOpened(output);
 		assertElementTagClosed(output);
 
@@ -185,7 +191,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		// construct an errors instance of the tag
 		TestBean target = new TestBean();
 		target.setName("Rob Harrop");
-		Errors errors = new BindException(target, COMMAND_NAME);
+		Errors errors = new BeanPropertyBindingResult(target, COMMAND_NAME);
 		errors.rejectValue("name", "some.code", "Default Message");
 		errors.rejectValue("name", "too.short", "Too Short");
 
@@ -198,7 +204,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertElementTagOpened(output);
 		assertElementTagClosed(output);
 
@@ -209,7 +215,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithoutErrors() throws Exception {
-		Errors errors = new BindException(new TestBean(), "COMMAND_NAME");
+		Errors errors = new BeanPropertyBindingResult(new TestBean(), "COMMAND_NAME");
 		exposeBindingResult(errors);
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
@@ -217,7 +223,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertEquals(0, output.length());
 	}
 
@@ -228,12 +234,12 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertEquals(0, output.length());
 	}
 
 	public void testAsBodyTag() throws Exception {
-		Errors errors = new BindException(new TestBean(), "COMMAND_NAME");
+		Errors errors = new BeanPropertyBindingResult(new TestBean(), "COMMAND_NAME");
 		errors.rejectValue("name", "some.code", "Default Message");
 		errors.rejectValue("name", "too.short", "Too Short");
 		exposeBindingResult(errors);
@@ -244,14 +250,14 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
 		this.tag.doEndTag();
 		this.tag.doFinally();
-		assertEquals(bodyContent, getWriter().toString());
+		assertEquals(bodyContent, getOutput());
 		assertNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
 	}
 
 	public void testAsBodyTagWithExistingMessagesAttribute() throws Exception {
 		String existingAttribute = "something";
 		getPageContext().setAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, existingAttribute);
-		Errors errors = new BindException(new TestBean(), "COMMAND_NAME");
+		Errors errors = new BeanPropertyBindingResult(new TestBean(), "COMMAND_NAME");
 		errors.rejectValue("name", "some.code", "Default Message");
 		errors.rejectValue("name", "too.short", "Too Short");
 		exposeBindingResult(errors);
@@ -263,7 +269,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
 		this.tag.doEndTag();
 		this.tag.doFinally();
-		assertEquals(bodyContent, getWriter().toString());
+		assertEquals(bodyContent, getOutput());
 		assertEquals(existingAttribute, getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
 	}
 
@@ -273,7 +279,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 	public void testAsBodyTagWithErrorsAndExistingMessagesAttributeInNonPageScopeAreNotClobbered() throws Exception {
 		String existingAttribute = "something";
 		getPageContext().setAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, existingAttribute, PageContext.APPLICATION_SCOPE);
-		Errors errors = new BindException(new TestBean(), "COMMAND_NAME");
+		Errors errors = new BeanPropertyBindingResult(new TestBean(), "COMMAND_NAME");
 		errors.rejectValue("name", "some.code", "Default Message");
 		errors.rejectValue("name", "too.short", "Too Short");
 		exposeBindingResult(errors);
@@ -285,7 +291,7 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
 		this.tag.doEndTag();
 		this.tag.doFinally();
-		assertEquals(bodyContent, getWriter().toString());
+		assertEquals(bodyContent, getOutput());
 		assertEquals(existingAttribute,
 				getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, PageContext.APPLICATION_SCOPE));
 	}
@@ -318,38 +324,16 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.REQUEST_SCOPE);
 	}
 
-	private void assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(int scope) throws JspException {
-		String existingAttribute = "something";
-		getPageContext().setAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, existingAttribute, scope);
-
-		Errors errors = new BindException(new TestBean(), "COMMAND_NAME");
-		exposeBindingResult(errors);
-		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
-
-		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
-
-		String output = getWriter().toString();
-		assertEquals(0, output.length());
-
-		assertEquals(existingAttribute, getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, scope));
-	}
-
 
 	protected void exposeBindingResult(Errors errors) {
 		// wrap errors in a Model
 		Map model = new HashMap();
-		model.put(BindException.ERROR_KEY_PREFIX + COMMAND_NAME, errors);
+		model.put(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, errors);
 
 		// replace the request context with one containing the errors
 		MockPageContext pageContext = getPageContext();
 		RequestContext context = new RequestContext((HttpServletRequest) pageContext.getRequest(), model);
 		pageContext.setAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE, context);
-	}
-
-	protected void extendPageContext(MockPageContext pageContext) {
-		pageContext.getRequest().setAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, COMMAND_NAME);
 	}
 
 	private void assertElementTagOpened(String output) {
@@ -358,6 +342,24 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 
 	private void assertElementTagClosed(String output) {
 		assertTrue(output.endsWith("</" + this.tag.getElement() + ">"));
+	}
+
+	private void assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(int scope) throws JspException {
+		String existingAttribute = "something";
+		getPageContext().setAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, existingAttribute, scope);
+
+		Errors errors = new BeanPropertyBindingResult(new TestBean(), "COMMAND_NAME");
+		exposeBindingResult(errors);
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getOutput();
+		assertEquals(0, output.length());
+
+		assertEquals(existingAttribute, getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, scope));
 	}
 
 }

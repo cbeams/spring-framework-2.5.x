@@ -46,7 +46,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		this.tag.setReadonly("true");
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertContainsAttribute(output, "name", "name");
 		assertContainsAttribute(output, "readonly", "readonly");
 		assertBlockTagContains(output, "Rob");
@@ -59,7 +59,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		this.tag.setOnselect(onselect);
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertContainsAttribute(output, "name", "spouse.name");
 		assertContainsAttribute(output, "onselect", onselect);
 		assertAttributeNotPresent(output, "readonly");
@@ -74,7 +74,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		this.tag.setHtmlEscape("true");
 		
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
-		String output = getWriter().toString();
+		String output = getOutput();
 		System.out.println(output);
 		assertContainsAttribute(output, "name", "name");
 		assertBlockTagContains(output, HTML_ESCAPED_NAME);
@@ -86,7 +86,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		exposeBindingResult(result);
 		this.tag.setPath("myFloat");
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertContainsAttribute(output, "name", "myFloat");
 		assertBlockTagContains(output, "12.34f");
 	}

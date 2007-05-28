@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.ArrayList;
 
 /**
  * @author Rob Harrop
- * @since 2.0
  */
 public class Country {
 
@@ -33,14 +32,17 @@ public class Country {
 
 	public static final Country COUNTRY_US = new Country("US", "United States");
 
-	private String isoCode;
 
-	private String name;
+	private final String isoCode;
+
+	private final String name;
+
 
 	public Country(String isoCode, String name) {
 		this.isoCode = isoCode;
 		this.name = name;
 	}
+
 
 	public String getIsoCode() {
 		return isoCode;
@@ -50,9 +52,11 @@ public class Country {
 		return name;
 	}
 
+
 	public String toString() {
 		return this.name + "(" + this.isoCode + ")";
 	}
+
 
 	public static List getCountries() {
 		List countries = new ArrayList();
@@ -62,4 +66,5 @@ public class Country {
 		countries.add(COUNTRY_US);
 		return countries;
 	}
+
 }

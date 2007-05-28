@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,8 @@ public class MockPageContext extends PageContext {
 	private final ServletConfig servletConfig;
 
 	private final Hashtable attributes = new Hashtable();
+
+	private JspWriter out;
 
 
 	/**
@@ -263,7 +265,10 @@ public class MockPageContext extends PageContext {
 	}
 
 	public JspWriter getOut() {
-		throw new UnsupportedOperationException("getOut");
+		if (this.out == null) {
+			this.out = new MockJspWriter(this.response);
+		}
+		return this.out;
 	}
 
 	public ExpressionEvaluator getExpressionEvaluator() {
@@ -283,11 +288,11 @@ public class MockPageContext extends PageContext {
 	}
 
 	public ServletRequest getRequest() {
-		return request;
+		return this.request;
 	}
 
 	public ServletResponse getResponse() {
-		return response;
+		return this.response;
 	}
 
 	public Exception getException() {
@@ -295,11 +300,11 @@ public class MockPageContext extends PageContext {
 	}
 
 	public ServletConfig getServletConfig() {
-		return servletConfig;
+		return this.servletConfig;
 	}
 
 	public ServletContext getServletContext() {
-		return servletContext;
+		return this.servletContext;
 	}
 
 	public void forward(String url) throws ServletException, IOException {

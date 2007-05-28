@@ -28,6 +28,7 @@ import javax.servlet.jsp.tagext.Tag;
 import org.springframework.beans.Colour;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
+import org.springframework.mock.web.MockBodyContent;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.AssertThrows;
 import org.springframework.util.StringUtils;
@@ -71,7 +72,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
@@ -89,7 +90,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
@@ -106,7 +107,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
@@ -123,7 +124,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
@@ -157,7 +158,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
@@ -180,7 +181,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
@@ -205,7 +206,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
@@ -232,7 +233,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
 		assertContainsAttribute(output, "value", "Sally");
@@ -249,7 +250,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
@@ -267,7 +268,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
@@ -294,7 +295,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
 		assertContainsAttribute(output, "selected", "selected");
@@ -318,7 +319,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
 		assertAttributeNotPresent(output, "selected");
@@ -338,7 +339,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
 		assertContainsAttribute(output, "selected", "selected");
@@ -358,7 +359,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
 		assertBlockTagContains(output, bodyContent);
@@ -377,7 +378,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
 		assertContainsAttribute(output, "value", bodyContent);

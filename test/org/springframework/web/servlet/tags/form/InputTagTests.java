@@ -16,13 +16,14 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.io.StringWriter;
+import java.io.Writer;
 
-import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.servlet.tags.BindTag;
 import org.springframework.web.servlet.tags.NestedPathTag;
 
 /**
@@ -35,27 +36,52 @@ public class InputTagTests extends AbstractFormTagTests {
 
 	private TestBean rob;
 
+
 	protected void onSetUp() {
 		this.tag = createTag(getWriter());
+		this.tag.setParent(getFormTag());
 		this.tag.setPageContext(getPageContext());
 	}
 
-	protected final InputTag getTag() {
-		return tag;
+	protected TestBean createTestBean() {
+		// set up test data
+		this.rob = new TestBean();
+		this.rob.setName("Rob");
+		this.rob.setMyFloat(new Float(12.34));
+
+		TestBean sally = new TestBean();
+		sally.setName("Sally");
+		this.rob.setSpouse(sally);
+
+		return this.rob;
 	}
+
+	protected final InputTag getTag() {
+		return this.tag;
+	}
+
 
 	public void testSimpleBind() throws Exception {
 		this.tag.setPath("name");
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 
-		String output = getWriter().toString();
-
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 
 		assertContainsAttribute(output, "type", getType());
 		assertValueAttribute(output, "Rob");
+	}
+
+	public void testSimpleBindTagWithinForm() throws Exception {
+		BindTag bindTag = new BindTag();
+		bindTag.setPath("name");
+		bindTag.setPageContext(getPageContext());
+		bindTag.doStartTag();
+
+		BindStatus bindStatus = (BindStatus) getPageContext().findAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertEquals("Rob", bindStatus.getValue());
 	}
 
 	public void testSimpleBindWithHtmlEscaping() throws Exception {
@@ -68,8 +94,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 
-		String output = getWriter().toString();
-
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 
@@ -86,8 +111,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 
-		String output = getWriter().toString();
-
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 
@@ -158,8 +182,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		this.tag.setAutocomplete(autocomplete);
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
-		String output = getWriter().toString();
 
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 
@@ -197,19 +221,36 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	public void testWithNestedBind() throws Exception {
-		getPageContext().setAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, "spouse.", PageContext.REQUEST_SCOPE);
+		NestedPathTag nestedPathTag = new NestedPathTag();
+		nestedPathTag.setPath("spouse.");
+		nestedPathTag.setPageContext(getPageContext());
+		nestedPathTag.doStartTag();
 
 		this.tag.setPath("name");
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 
-		String output = getWriter().toString();
-
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 
 		assertContainsAttribute(output, "type", getType());
 		assertValueAttribute(output, "Sally");
+	}
+
+	public void testWithNestedBindTagWithinForm() throws Exception {
+		NestedPathTag nestedPathTag = new NestedPathTag();
+		nestedPathTag.setPath("spouse.");
+		nestedPathTag.setPageContext(getPageContext());
+		nestedPathTag.doStartTag();
+
+		BindTag bindTag = new BindTag();
+		bindTag.setPath("name");
+		bindTag.setPageContext(getPageContext());
+		bindTag.doStartTag();
+
+		BindStatus bindStatus = (BindStatus) getPageContext().findAttribute(BindTag.STATUS_VARIABLE_NAME);
+		assertEquals("Sally", bindStatus.getValue());
 	}
 
 	public void testWithErrors() throws Exception {
@@ -224,8 +265,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 
-		String output = getWriter().toString();
-
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 
@@ -235,9 +275,11 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	public void testDisabledFalse() throws Exception {
+		this.tag.setPath("name");
 		this.tag.setDisabled("false");
 		this.tag.doStartTag();
-		String output = getWriter().toString();
+
+		String output = getOutput();
 		assertAttributeNotPresent(output, "disabled");
 	}
 
@@ -250,8 +292,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 
-		String output = getWriter().toString();
-
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 
@@ -268,8 +309,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 
-		String output = getWriter().toString();
-
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 
@@ -287,8 +327,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 
-		String output = getWriter().toString();
-
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 
@@ -306,20 +345,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertTrue("Tag not opened properly", output.startsWith("<input "));
 	}
 
-	protected TestBean createTestBean() {
-		// set up test data
-		this.rob = new TestBean();
-		this.rob.setName("Rob");
-		this.rob.setMyFloat(new Float(12.34));
-
-		TestBean sally = new TestBean();
-		sally.setName("Sally");
-		this.rob.setSpouse(sally);
-
-		return this.rob;
-	}
-
-	protected InputTag createTag(final StringWriter writer) {
+	protected InputTag createTag(final Writer writer) {
 		return new InputTag() {
 			protected TagWriter createTagWriter() {
 				return new TagWriter(writer);

@@ -46,7 +46,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @author Juergen Hoeller
  * @see #setPath
  */
-public class BindTag extends HtmlEscapingAwareTag {
+public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 
 	/**
 	 * Name of the exposed variable within the scope of this tag: "status".
@@ -166,11 +166,6 @@ public class BindTag extends HtmlEscapingAwareTag {
 		return this.status.getErrors();
 	}
 
-	/**
-	 * Retrieve the PropertyEditor for the property that this tag is
-	 * currently bound to. Intended for cooperating nesting tags.
-	 * @return the current PropertyEditor, or <code>null</code> if none
-	 */
 	public final PropertyEditor getEditor() {
 		return this.status.getEditor();
 	}

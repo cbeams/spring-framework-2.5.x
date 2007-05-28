@@ -113,12 +113,12 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**
 	 * Get the value for the HTML '<code>id</code>' attribute.
-	 * <p>Appends '<code>.errors</code>' to the value returned by {@link #getCompletePath()}.
+	 * <p>Appends '<code>.errors</code>' to the value returned by {@link #getPropertyPath()}.
 	 * @return the value for the HTML '<code>name</code>' attribute
 	 * @see #getPath()
 	 */
 	protected String autogenerateId() throws JspException {
-		return getCompletePath() + ".errors";
+		return getPropertyPath() + ".errors";
 	}
 
 	/**

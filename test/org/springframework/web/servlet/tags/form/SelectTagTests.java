@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditor;
+import java.beans.PropertyEditorSupport;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +37,9 @@ import org.dom4j.io.SAXReader;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.servlet.tags.TransformTag;
 
 /**
  * @author Rob Harrop
@@ -68,7 +71,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertEquals("<select id=\"country\" name=\"country\"></select>", output);
 	}
 
@@ -81,7 +84,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertEquals("<select id=\"country\" name=\"country\"></select>", output);
 	}
 
@@ -119,7 +122,45 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItemValue("isoCode");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
-		validateOutput(getWriter().toString(), true);
+		validateOutput(getOutput(), true);
+	}
+
+	public void testWithListAndTransformTag() throws Exception {
+		this.tag.setPath("country");
+		this.tag.setItems(Country.getCountries());
+		assertList(true);
+
+		TransformTag transformTag = new TransformTag();
+		transformTag.setValue(Country.getCountries().get(0));
+		transformTag.setVar("key");
+		transformTag.setParent(this.tag);
+		transformTag.setPageContext(getPageContext());
+		transformTag.doStartTag();
+		assertEquals("Austria(AT)", getPageContext().findAttribute("key"));
+	}
+
+	public void testWithListAndTransformTagAndEditor() throws Exception {
+		this.tag.setPath("realCountry");
+		this.tag.setItems("${countries}");
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(getTestBean(), "testBean");
+		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				setValue(new Country(text, ""));
+			}
+			public String getAsText() {
+				return ((Country) getValue()).getName();
+			}
+		});
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
+		this.tag.doStartTag();
+
+		TransformTag transformTag = new TransformTag();
+		transformTag.setValue(Country.getCountries().get(0));
+		transformTag.setVar("key");
+		transformTag.setParent(this.tag);
+		transformTag.setPageContext(getPageContext());
+		transformTag.doStartTag();
+		assertEquals("Austria", getPageContext().findAttribute("key"));
 	}
 
 	public void testWithMap() throws Exception {
@@ -156,7 +197,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals(Tag.EVAL_PAGE, result);
 		this.tag.doFinally();
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertTrue(output.startsWith("<select "));
 		assertTrue(output.endsWith("</select>"));
 		assertContainsAttribute(output, "name", "country");
@@ -184,7 +225,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
 
 		SAXReader reader = new SAXReader();
@@ -224,7 +265,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertTrue(output.startsWith("<select "));
 		assertTrue(output.endsWith("</select>"));
 
@@ -255,7 +296,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
 
 		SAXReader reader = new SAXReader();
@@ -289,7 +330,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
 
 		SAXReader reader = new SAXReader();
@@ -320,7 +361,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		output = "<doc>" + output + "</doc>";
 
 		SAXReader reader = new SAXReader();
@@ -345,7 +386,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertTrue(output.startsWith("<select "));
 		assertTrue(output.endsWith("</select>"));
 
@@ -388,7 +429,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		validateOutput(output, selected);
 		assertContainsAttribute(output, "size", "5");
 	}
@@ -414,7 +455,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	protected TestBean createTestBean() {
-		this.bean = new TestBean();
+		this.bean = new TestBeanWithRealCountry();
 		this.bean.setName("Rob");
 		this.bean.setCountry("UK");
 		this.bean.setSex("M");

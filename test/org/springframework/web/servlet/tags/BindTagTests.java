@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -648,7 +648,7 @@ public class BindTagTests extends AbstractTagTests {
 		tag.doStartTag();
 		int returnValue = tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, returnValue);
-		assertEquals("", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+		assertNull(pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 	}
 
 	public void testNestedPathDoEndTagWithNesting() throws JspException {
@@ -667,7 +667,7 @@ public class BindTagTests extends AbstractTagTests {
 		assertEquals("foo.", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 
 		tag.doEndTag();
-		assertEquals("", pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+		assertNull(pc.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 	}
 
 	public void testNestedPathDoStartTagInternal() throws JspException {

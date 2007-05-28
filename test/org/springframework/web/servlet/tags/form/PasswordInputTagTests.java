@@ -16,15 +16,15 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.io.Writer;
+
 import javax.servlet.jsp.tagext.Tag;
-import java.io.StringWriter;
 
 /**
  * @author Rob Harrop
  * @author Rick Evans
- * @since 2.0
  */
-public final class PasswordInputTagTests extends InputTagTests {
+public class PasswordInputTagTests extends InputTagTests {
 
 	/*
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2866
@@ -34,8 +34,7 @@ public final class PasswordInputTagTests extends InputTagTests {
 
 		assertEquals(Tag.EVAL_PAGE, this.getTag().doStartTag());
 
-		String output = getWriter().toString();
-
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 
@@ -52,8 +51,7 @@ public final class PasswordInputTagTests extends InputTagTests {
 
 		assertEquals(Tag.EVAL_PAGE, this.getTag().doStartTag());
 
-		String output = getWriter().toString();
-
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 
@@ -70,8 +68,7 @@ public final class PasswordInputTagTests extends InputTagTests {
 
 		assertEquals(Tag.EVAL_PAGE, this.getTag().doStartTag());
 
-		String output = getWriter().toString();
-
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 
@@ -92,7 +89,7 @@ public final class PasswordInputTagTests extends InputTagTests {
 		return "password";
 	}
 
-	protected InputTag createTag(final StringWriter writer) {
+	protected InputTag createTag(final Writer writer) {
 		return new PasswordInputTag() {
 			protected TagWriter createTagWriter() {
 				return new TagWriter(writer);

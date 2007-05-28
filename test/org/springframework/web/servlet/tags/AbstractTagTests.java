@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,11 +16,17 @@
 
 package org.springframework.web.servlet.tags;
 
+import java.io.StringWriter;
+
+import javax.servlet.jsp.JspWriter;
+
 import junit.framework.TestCase;
 
+import org.springframework.mock.web.MockBodyContent;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockPageContext;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.LocaleResolver;
@@ -33,6 +39,7 @@ import org.springframework.web.servlet.theme.FixedThemeResolver;
  * Abstract base class for testing tags: provides createPageContext.
  *
  * @author Alef Arendsen
+ * @author Juergen Hoeller
  */
 public abstract class AbstractTagTests extends TestCase {
 	
@@ -44,6 +51,7 @@ public abstract class AbstractTagTests extends TestCase {
 		wac.refresh();
 
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		if (inDispatcherServlet()) {
 			request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 			LocaleResolver lr = new AcceptHeaderLocaleResolver();
@@ -56,7 +64,7 @@ public abstract class AbstractTagTests extends TestCase {
 			sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		}
 
-		return new MockPageContext(sc, request);
+		return new MockPageContext(sc, request, response);
 	}
 
 	protected boolean inDispatcherServlet() {

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,8 @@ import org.springframework.web.util.TagUtils;
 
 /**
  * Tag for transforming reference data values from form controllers and
- * other objects inside a <code>spring:bind</code> tag.
+ * other objects inside a <code>spring:bind</code> tag (or a data-bound
+ * form element tag from Spring's form tag library).
  *
  * <p>The BindTag has a PropertyEditor that it uses to transform properties of
  * a bean to a String, useable in HTML forms. This tag uses that PropertyEditor
@@ -95,16 +96,17 @@ public class TransformTag extends HtmlEscapingAwareTag {
 			String strValue = (String) this.value;
 			resolvedValue = ExpressionEvaluationUtils.evaluate("value", strValue, pageContext);
 		}
+
 		if (resolvedValue != null) {
-			// Find the BindTag, if applicable.
-			BindTag tag = (BindTag) TagSupport.findAncestorWithClass(this, BindTag.class);
+			// Find the containing EditorAwareTag (e.g. BindTag), if applicable.
+			EditorAwareTag tag = (EditorAwareTag) TagSupport.findAncestorWithClass(this, EditorAwareTag.class);
 			if (tag == null) {
-				// The tag can only be used within a BindTag.
-				throw new JspException("TransformTag can only be used within BindTag");
+				throw new JspException("TransformTag can only be used within EditorAwareTag (e.g. BindTag)");
 			}
-			// OK, get the property editor.
-			PropertyEditor editor = tag.getEditor();
+
+			// OK, let's obtain the editor...
 			String result = null;
+			PropertyEditor editor = tag.getEditor();
 			if (editor != null) {
 				// If an editor was found, edit the value.
 				editor.setValue(resolvedValue);
@@ -130,6 +132,7 @@ public class TransformTag extends HtmlEscapingAwareTag {
 				}
 			}
 		}
+
 		return SKIP_BODY;
 	}
 

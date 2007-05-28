@@ -42,7 +42,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 		assertContainsAttribute(output, "name", "sex");
@@ -57,7 +57,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 		assertContainsAttribute(output, "name", "myFloat");
@@ -73,7 +73,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 		assertContainsAttribute(output, "name", "myFloat");
@@ -88,7 +88,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
-		String output = getWriter().toString();
+		String output = getOutput();
 		assertTagOpened(output);
 		assertTagClosed(output);
 		assertContainsAttribute(output, "name", "sex");

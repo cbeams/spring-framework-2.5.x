@@ -17,10 +17,12 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.JspException;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockPageContext;
@@ -33,7 +35,7 @@ import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
 /**
  * @author Rob Harrop
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 
@@ -54,7 +56,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 		onSetUp();
 	}
 
-	protected MockPageContext createAndPopulatePageContext() {
+	protected MockPageContext createAndPopulatePageContext() throws JspException {
 		MockPageContext pageContext = createPageContext();
 		MockHttpServletRequest request = (MockHttpServletRequest) pageContext.getRequest();
 		RequestContext requestContext = new JspAwareRequestContext(pageContext);
@@ -64,7 +66,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 		return pageContext;
 	}
 
-	protected void extendPageContext(MockPageContext pageContext) {
+	protected void extendPageContext(MockPageContext pageContext) throws JspException {
 	}
 
 	protected void extendRequest(MockHttpServletRequest request) {
@@ -73,12 +75,16 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 	protected void onSetUp() {
 	}
 
-	protected StringWriter getWriter() {
+	protected MockPageContext getPageContext() {
+		return this.pageContext;
+	}
+
+	protected Writer getWriter() {
 		return this.writer;
 	}
 
-	protected MockPageContext getPageContext() {
-		return this.pageContext;
+	protected String getOutput() {
+		return this.writer.toString();
 	}
 
 	protected final RequestContext getRequestContext() {
