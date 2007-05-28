@@ -29,45 +29,51 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.WebRequestInterceptor;
 
 /**
- * Spring web request interceptor that binds a Hibernate Session to the thread for the
- * entire processing of the request. Intended for the "Open Session in View" pattern,
- * that is, to allow for lazy loading in web views despite the original transactions
- * already being completed.
+ * Spring web request interceptor that binds a Hibernate <code>Session</code> to the
+ * thread for the entire processing of the request.
  *
- * <p>This interceptor makes Hibernate Sessions available via the current thread,
- * which will be autodetected by transaction managers. It is suitable for service layer
- * transactions via {@link org.springframework.orm.hibernate3.HibernateTransactionManager}
- * or {@link org.springframework.transaction.jta.JtaTransactionManager} as well
- * as for non-transactional execution (if configured appropriately).
+ * <p>This class is a concrete expression of the "Open Session in View" pattern, which
+ * is a pattern that allows for the lazy loading of associations in web views despite
+ * the original transactions already being completed.
  *
- * <p><b>NOTE</b>: This interceptor will by default <i>not</i> flush the Hibernate Session,
- * with the flush mode set to <code>FlushMode.NEVER</code>. It assumes to be used
- * in combination with service layer transactions that care for the flushing: The
- * active transaction manager will temporarily change the flush mode to
- * <code>FlushMode.AUTO</code> during a read-write transaction, with the flush
- * mode reset to <code>FlushMode.NEVER</code> at the end of each transaction.
- * If you intend to use this interceptor without transactions, consider changing
- * the default flush mode (through the "flushMode" property).
+ * <p>This interceptor makes Hibernate <code>Sessions</code> available via the current
+ * thread, which will be autodetected by transaction managers. It is suitable for
+ * service layer transactions via
+ * {@link org.springframework.orm.hibernate3.HibernateTransactionManager} or
+ * {@link org.springframework.transaction.jta.JtaTransactionManager} as well as for
+ * non-transactional execution (if configured appropriately).
  *
- * <p>In contrast to {@link OpenSessionInViewFilter}, this interceptor is set up
- * in a Spring application context and can thus take advantage of bean wiring.
- * It inherits common Hibernate configuration properties from
+ * <p><b>NOTE</b>: This interceptor will by default <i>not</i> flush the Hibernate
+ * <code>Session</code>, with the flush mode being set to <code>FlushMode.NEVER</code>.
+ * It assumes that it will be used in combination with service layer transactions
+ * that handle the flushing: the active transaction manager will temporarily change
+ * the flush mode to <code>FlushMode.AUTO</code> during a read-write transaction,
+ * with the flush mode reset to <code>FlushMode.NEVER</code> at the end of each
+ * transaction. If you intend to use this interceptor without transactions, consider
+ * changing the default flush mode (through the
+ * {@link #setFlushMode(int) "flushMode"} property).
+ *
+ * <p>In contrast to {@link OpenSessionInViewFilter}, this interceptor is
+ * configured in a Spring application context and can thus take advantage of bean
+ * wiring. It inherits common Hibernate configuration properties from
  * {@link org.springframework.orm.hibernate3.HibernateAccessor},
  * to be configured in a bean definition.
  *
- * <p><b>WARNING:</b> Applying this interceptor to existing logic can cause issues that
- * have not appeared before, through the use of a single Hibernate Session for the
- * processing of an entire request. In particular, the reassociation of persistent
- * objects with a Hibernate Session has to occur at the very beginning of request
- * processing, to avoid clashes will already loaded instances of the same objects.
+ * <p><b>WARNING:</b> Applying this interceptor to existing logic can cause issues
+ * that have not appeared before, through the use of a single Hibernate
+ * <code>Session</code> for the processing of an entire request. In particular, the
+ * reassociation of persistent objects with a Hibernate <code>Session</code> has to
+ * occur at the very beginning of request processing, to avoid clashes with already
+ * loaded instances of the same objects.
  *
  * <p>Alternatively, turn this interceptor into deferred close mode, by specifying
  * "singleSession"="false": It will not use a single session per request then,
  * but rather let each data access operation or transaction use its own session
- * (like without Open Session in View). Each of those sessions will be registered
- * for deferred close, though, actually processed at request completion.
+ * (as would be the case without Open Session in View). Each of those sessions will
+ * be registered for deferred close though, which will actually be processed at
+ * request completion.
  *
- * <p>A single session per request allows for most efficient first-level caching,
+ * <p>A single session per request allows for the most efficient first-level caching,
  * but can cause side effects, for example on <code>saveOrUpdate</code> or when
  * continuing after a rolled-back transaction. The deferred close strategy is as safe
  * as no Open Session in View in that respect, while still allowing for lazy loading
@@ -86,8 +92,9 @@ import org.springframework.web.context.request.WebRequestInterceptor;
 public class OpenSessionInViewInterceptor extends HibernateAccessor implements WebRequestInterceptor {
 
 	/**
-	 * Suffix that gets appended to the SessionFactory toString representation
-	 * for the "participate in existing session handling" request attribute.
+	 * Suffix that gets appended to the <code>SessionFactory</code>
+	 * <code>toString()</code> representation for the "participate in existing
+	 * session handling" request attribute.
 	 * @see #getParticipateAttributeName
 	 */
 	public static final String PARTICIPATE_SUFFIX = ".PARTICIPATE";
@@ -97,8 +104,8 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements W
 
 
 	/**
-	 * Create a new OpenSessionInViewInterceptor,
-	 * turning the default flushMode to FLUSH_NEVER.
+	 * Create a new <code>OpenSessionInViewInterceptor</code>,
+	 * turning the default flushMode to <code>FLUSH_NEVER</code>.
 	 * @see #setFlushMode
 	 */
 	public OpenSessionInViewInterceptor() {
@@ -127,10 +134,10 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements W
 
 
 	/**
-	 * Open a new Hibernate Session according to the settings of this HibernateAccessor
-	 * and binds in to the thread via TransactionSynchronizationManager.
+	 * Open a new Hibernate <code>Session</code> according to the settings of this
+	 * <code>HibernateAccessor</code> and bind it to the thread via the
+	 * {@link TransactionSynchronizationManager}.
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession
-	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
 	public void preHandle(WebRequest request) throws DataAccessException {
 		if ((isSingleSession() && TransactionSynchronizationManager.hasResource(getSessionFactory())) ||
@@ -158,10 +165,10 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements W
 	}
 
 	/**
-	 * Flush the Hibernate Session before view rendering, if necessary.
-	 * Note that this just applies in single session mode!
-	 * <p>The default is FLUSH_NEVER to avoid this extra flushing, assuming that
-	 * service layer transactions have flushed their changes on commit.
+	 * Flush the Hibernate <code>Session</code> before view rendering, if necessary.
+	 * <p>Note that this just applies in {@link #isSingleSession() single session mode}!
+	 * <p>The default is <code>FLUSH_NEVER</code> to avoid this extra flushing,
+	 * assuming that service layer transactions have flushed their changes on commit.
 	 * @see #setFlushMode
 	 */
 	public void postHandle(WebRequest request, ModelMap model) throws DataAccessException {
@@ -180,9 +187,9 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements W
 	}
 
 	/**
-	 * Unbind the Hibernate Session from the thread and closes it (in single session
-	 * mode), or process deferred close for all sessions that have been opened
-	 * during the current request (in deferred close mode).
+	 * Unbind the Hibernate <code>Session</code> from the thread and close it (in
+	 * single session mode), or process deferred close for all sessions that have
+	 * been opened during the current request (in deferred close mode).
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
 	public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
@@ -214,9 +221,9 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements W
 
 	/**
 	 * Return the name of the request attribute that identifies that a request is
-	 * already intercepted. Default implementation takes the toString representation
-	 * of the SessionFactory instance and appends ".PARTICIPATE".
-	 * @see #PARTICIPATE_SUFFIX
+	 * already intercepted.
+	 * <p>The default implementation takes the <code>toString()</code> representation
+	 * of the <code>SessionFactory</code> instance and appends {@link #PARTICIPATE_SUFFIX}.
 	 */
 	protected String getParticipateAttributeName() {
 		return getSessionFactory().toString() + PARTICIPATE_SUFFIX;
