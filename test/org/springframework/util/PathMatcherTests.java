@@ -104,7 +104,7 @@ public class PathMatcherTests extends TestCase {
 		assertTrue(pathMatcher.match("*bla*/**/bla/**", "XXXblaXXXX/testing/testing/bla/testing/testing"));
 		assertFalse(pathMatcher.match("*bla*/**/bla/*", "XXXblaXXXX/testing/testing/bla/testing/testing"));
 
-		assertFalse(pathMatcher.match("/x/x/x/", "/x/x/**/bla"));
+		assertFalse(pathMatcher.match("/x/x/**/bla", "/x/x/x/"));
 
 		assertTrue(pathMatcher.match("", ""));
 	}
@@ -180,7 +180,7 @@ public class PathMatcherTests extends TestCase {
 		assertFalse(pathMatcher.matchStart("/*bla/test", "XXXbl/test"));
 
 		assertFalse(pathMatcher.matchStart("/????", "/bala/bla"));
-		assertFalse(pathMatcher.matchStart("/**/*bla", "/bla/bla/bla/bbb"));
+		assertTrue(pathMatcher.matchStart("/**/*bla", "/bla/bla/bla/bbb"));
 
 		assertTrue(pathMatcher.matchStart("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing/"));
 		assertTrue(pathMatcher.matchStart("/*bla*/**/bla/*", "/XXXblaXXXX/testing/testing/bla/testing"));
@@ -190,9 +190,9 @@ public class PathMatcherTests extends TestCase {
 		assertTrue(pathMatcher.matchStart("*bla*/**/bla/**", "XXXblaXXXX/testing/testing/bla/testing/testing/"));
 		assertTrue(pathMatcher.matchStart("*bla*/**/bla/*", "XXXblaXXXX/testing/testing/bla/testing"));
 		assertTrue(pathMatcher.matchStart("*bla*/**/bla/**", "XXXblaXXXX/testing/testing/bla/testing/testing"));
-		assertFalse(pathMatcher.matchStart("*bla*/**/bla/*", "XXXblaXXXX/testing/testing/bla/testing/testing"));
+		assertTrue(pathMatcher.matchStart("*bla*/**/bla/*", "XXXblaXXXX/testing/testing/bla/testing/testing"));
 
-		assertFalse(pathMatcher.matchStart("/x/x/x/", "/x/x/**/bla"));
+		assertTrue(pathMatcher.matchStart("/x/x/**/bla", "/x/x/x/"));
 
 		assertTrue(pathMatcher.matchStart("", ""));
 	}
