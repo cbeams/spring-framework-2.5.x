@@ -7,8 +7,15 @@ Changes in version 2.1 M2 (2007-05-30)
 --------------------------------------
 
 General
-* added missing websphere_uow_api.jar to -with-dependencies distribution
 * removed support for Hibernate 2.1; Spring's Hibernate support generally requires Hibernate 3.1 or higher now
+* spring-context.jar includes JMX support and core remoting support (no spring-jmx and spring-remoting jars anymore)
+* spring-orm.jar combines all ORM support packages (replaces spring-jdo, spring-jpa, spring-hibernate etc jars)
+* spring-web.jar contains web-related remoting and ORM classes (for proper use in J2EE EAR deployment structures)
+* renamed spring-dao.jar to spring-tx.jar, also containing the JCA support now
+* renamed spring-support.jar to spring-context-support.jar
+* renamed spring-portlet.jar to spring-webmvc-portlet.jar
+* module jar files contain module-specific "spring.handlers" and "spring.schemas" files now
+* added missing websphere_uow_api.jar to -with-dependencies distribution
 
 Package org.springframework.aop
 * ReflectiveMethodInvocation always uses a shared user attribute Map in clones (for proper binding of multiple advices)
@@ -27,6 +34,7 @@ Package org.springframework.beans
 * DefaultListableBeanFactory clears a cached merged bean definition in case of re-registering a bean definition
 * AbstractBeanDefinition declares a public "clone()" method as well as "AbstractBeanDefinition cloneBeanDefinition()"
 * AbstractBeanDefinition excludes purely descriptive metadata from its equals check (for more lenient equality)
+* fixed BeanDefinitionParserDelegate to avoid NPE in case of a custom namespace without a NamespaceHandler registered
 * fixed BeanDefinitionParserDelegate to extract correct source element for "key-ref"/"value-ref" attributes
 * added 'required' attribute to @Autowired annotation (configurable for a custom autowire annotation as well)
 * avoid double invocation of @Autowired/@Resource setter method in case of explicitly specified property value

@@ -6,8 +6,8 @@
   This script requires a "lib" directory containing the necessary third party JAR files.
   See "project.properties" for the definitions of the properties used in this file.
 
-  Building Spring requires JDK 1.6+; the releases are built with Sun's JDK 1.6.0.
-	The test suite is able to run on JDK 1.5 and 1.4 as well.
+  Building Spring requires JDK 1.6; the releases are built with Sun's JDK 1.6.0.
+	The test suite is able to run on JDK 1.5.0 and JDK 1.4.2 as well.
 
   Note: To successfully run the tests on JDK < 1.5.0, you need to use Xerces or any
 	other JAXP parser that properly supports XML includes. A simple way to achieve this
@@ -220,7 +220,7 @@
 
 		<mkdir dir="${dist.dir}"/>
 		<mkdir dir="${dist.dir}/modules"/>
-		<mkdir dir="${dist.dir}/weavers"/>
+		<mkdir dir="${dist.dir}/weaving"/>
 		<mkdir dir="${dist.dir}/resources"/>
 
 	</target>
@@ -238,7 +238,6 @@
 				<exclude name="META-INF/aop.xml"/>
 				<exclude name="org/springframework/beans/factory/aspectj/**"/>
 				<exclude name="org/springframework/transaction/aspectj/**"/>
-				<exclude name="org/springframework/orm/hibernate/**"/>
 				<exclude name="org/springframework/web/portlet/**"/>
 			</fileset>
 			<zipfileset src="lib/aopalliance/aopalliance.jar"/>
@@ -246,9 +245,8 @@
 				<attribute name="Implementation-Title" value="${spring-title}"/>
 				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
-				
-				<!-- Allow use of this JAR as a Java agent -->
-				<attribute name="Premain-Class" value="org.springframework.instrument.InstrumentationSavingAgent" />
+				<!-- allow use of this JAR as a Java agent -->
+				<attribute name="Premain-Class" value="org.springframework.instrument.InstrumentationSavingAgent"/>
 			</manifest>
 		</jar>
 
@@ -263,6 +261,92 @@
 			</fileset>
 		</delete>
 
+		<jar jarfile="${dist.dir}/modules/spring-aop.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/aop/**"/>
+				<include name="org/springframework/metadata/**"/>
+			</fileset>
+			<fileset dir="${jarcontent.dir}/spring-aop"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-beans.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/beans/**"/>
+				<!-- exclude content of spring-aspects.jar -->
+				<exclude name="org/springframework/beans/factory/aspectj/**"/>
+			</fileset>
+			<fileset dir="${jarcontent.dir}/spring-beans"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-context.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/context/**"/>
+				<include name="org/springframework/ejb/**"/>
+				<include name="org/springframework/instrument/classloading/**"/>
+				<exclude name="org/springframework/instrument/classloading/glassfish/**"/>
+				<exclude name="org/springframework/instrument/classloading/oc4j/**"/>
+				<exclude name="org/springframework/instrument/classloading/tomcat/**"/>
+				<include name="org/springframework/jmx/**"/>
+				<include name="org/springframework/jndi/**"/>
+				<include name="org/springframework/remoting/**"/>
+				<exclude name="org/springframework/remoting/caucho/**"/>
+				<exclude name="org/springframework/remoting/httpinvoker/**"/>
+				<exclude name="org/springframework/remoting/jaxrpc/**"/>
+				<include name="org/springframework/scheduling/**"/>
+				<exclude name="org/springframework/scheduling/commonj/**"/>
+				<exclude name="org/springframework/scheduling/quartz/**"/>
+				<include name="org/springframework/scripting/**"/>
+				<include name="org/springframework/stereotype/**"/>
+				<include name="org/springframework/ui/**"/>
+				<exclude name="org/springframework/ui/velocity/**"/>
+				<exclude name="org/springframework/ui/freemarker/**"/>
+				<exclude name="org/springframework/ui/jasperreports/**"/>
+				<include name="org/springframework/validation/**"/>
+			</fileset>
+			<fileset dir="${jarcontent.dir}/spring-context"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-context-support.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/cache/**"/>
+				<include name="org/springframework/instrument/classloading/glassfish/**"/>
+				<include name="org/springframework/instrument/classloading/oc4j/**"/>
+				<include name="org/springframework/mail/**"/>
+				<include name="org/springframework/remoting/caucho/**"/>
+				<exclude name="org/springframework/remoting/caucho/*ServiceExporter.*"/>
+				<include name="org/springframework/remoting/httpinvoker/**"/>
+				<exclude name="org/springframework/remoting/httpinvoker/*ServiceExporter.*"/>
+				<include name="org/springframework/remoting/jaxrpc/**"/>
+				<exclude name="org/springframework/remoting/jaxrpc/ServletEndpoint*.*"/>
+				<exclude name="org/springframework/remoting/jaxrpc/support/**"/>
+				<include name="org/springframework/scheduling/commonj/**"/>
+				<include name="org/springframework/scheduling/quartz/**"/>
+				<include name="org/springframework/ui/velocity/**"/>
+				<include name="org/springframework/ui/freemarker/**"/>
+				<include name="org/springframework/ui/jasperreports/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
 		<jar jarfile="${dist.dir}/modules/spring-core.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/core/**"/>
@@ -275,13 +359,9 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-beans.jar">
+		<jar jarfile="${dist.dir}/modules/spring-jdbc.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="META-INF/*.handlers"/>
-				<include name="META-INF/*.schemas"/>
-				<include name="org/springframework/beans/**"/>
-				<!-- exclude content of spring-aspects.jar -->
-				<exclude name="org/springframework/beans/factory/aspectj/**"/>
+				<include name="org/springframework/jdbc/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -290,10 +370,24 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-aop.jar">
+		<jar jarfile="${dist.dir}/modules/spring-jms.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/aop/**"/>
-				<include name="org/springframework/metadata/**"/>
+				<include name="org/springframework/jms/**"/>
+			</fileset>
+			<fileset dir="${jarcontent.dir}/spring-jms"/>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-orm.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/orm/**"/>
+				<exclude name="org/springframework/orm/jdo/support/Open*InView*.*"/>
+				<exclude name="org/springframework/orm/jpa/support/Open*InView*.*"/>
+				<exclude name="org/springframework/orm/hibernate3/support/Open*InView*.*"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -302,22 +396,10 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-context.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/context/**"/>
-				<!-- exclude content of spring-tomcat-weaver.jar -->
-				<include name="org/springframework/instrument/classloading/**"/>
-				<exclude name="org/springframework/instrument/classloading/oc4j/**"/>
-				<exclude name="org/springframework/instrument/classloading/tomcat/**"/>
-				<include name="org/springframework/jndi/**"/>
-				<include name="org/springframework/scheduling/**"/>
-				<exclude name="org/springframework/scheduling/quartz/**"/>
-				<include name="org/springframework/stereotype/**"/>
-				<include name="org/springframework/ui/**"/>
-				<exclude name="org/springframework/ui/velocity/**"/>
-				<exclude name="org/springframework/ui/freemarker/**"/>
-				<exclude name="org/springframework/ui/jasperreports/**"/>
-				<include name="org/springframework/validation/**"/>
+		<jar jarfile="${dist.dir}/modules/spring-mock.jar">
+			<fileset dir="${target.mockclasses.dir}">
+				<include name="META-INF/**"/>
+				<include name="org/springframework/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -326,49 +408,15 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-dao.jar">
+		<jar jarfile="${dist.dir}/modules/spring-tx.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/dao/**"/>
+				<include name="org/springframework/jca/**"/>
 				<include name="org/springframework/transaction/**"/>
 				<!-- exclude content of spring-aspects.jar -->
 				<exclude name="org/springframework/transaction/aspectj/**"/>
 			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-jdbc.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/jdbc/**"/>
-				<include name="org/springframework/orm/**"/>
-				<exclude name="org/springframework/orm/hibernate/**"/>
-				<exclude name="org/springframework/orm/hibernate3/**"/>
-				<exclude name="org/springframework/orm/ibatis/**"/>
-				<exclude name="org/springframework/orm/jdo/**"/>
-				<exclude name="org/springframework/orm/jpa/**"/>
-				<exclude name="org/springframework/orm/toplink/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-support.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/cache/**"/>
-				<include name="org/springframework/instrument/classloading/oc4j/**"/>
-				<include name="org/springframework/mail/**"/>
-				<include name="org/springframework/scheduling/quartz/**"/>
-				<include name="org/springframework/scripting/**"/>
-				<include name="org/springframework/ui/velocity/**"/>
-				<include name="org/springframework/ui/freemarker/**"/>
-				<include name="org/springframework/ui/jasperreports/**"/>
-			</fileset>
+			<fileset dir="${jarcontent.dir}/spring-tx"/>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
 				<attribute name="Implementation-Version" value="${spring-version}"/>
@@ -381,7 +429,13 @@
 				<include name="org/springframework/web/**"/>
 				<exclude name="org/springframework/web/servlet/**"/>
 				<exclude name="org/springframework/web/portlet/**"/>
-				<exclude name="org/springframework/web/struts/**"/>
+				<include name="org/springframework/orm/jdo/support/Open*InView*.*"/>
+				<include name="org/springframework/orm/jpa/support/Open*InView*.*"/>
+				<include name="org/springframework/orm/hibernate3/support/Open*InView*.*"/>
+				<include name="org/springframework/remoting/caucho/*ServiceExporter.*"/>
+				<include name="org/springframework/remoting/httpinvoker/*ServiceExporter.*"/>
+				<include name="org/springframework/remoting/jaxrpc/ServletEndpoint*.*"/>
+				<include name="org/springframework/remoting/jaxrpc/support/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -402,131 +456,9 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-portlet.jar">
+		<jar jarfile="${dist.dir}/modules/spring-webmvc-portlet.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/web/portlet/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-struts.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/web/struts/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-remoting.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/ejb/**"/>
-				<include name="org/springframework/remoting/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-jmx.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/jmx/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-jms.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/jms/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-jca.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/jca/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-jdo.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/jdo/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-jpa.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/jpa/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-hibernate2.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/hibernate/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-hibernate3.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/hibernate3/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-toplink.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/toplink/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-ibatis.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/ibatis/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -538,11 +470,15 @@
 	</target>
 
 
-	<target name="aspectjar" depends="build,initdist" description="Create aspect JAR file (containing AspectJ aspects)">
+	<target name="weavingjars" depends="build,initdist" description="Create weaver JAR files (for specific platforms)">
 
-		<delete file="${dist.dir}/spring-aspects.jar"/>
+		<delete>
+			<fileset dir="${dist.dir}">
+				<include name="weaving/*.jar"/>
+			</fileset>
+		</delete>
 
-		<jar jarfile="${dist.dir}/spring-aspects.jar">
+		<jar jarfile="${dist.dir}/weaving/spring-aspects.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="META-INF/aop.xml"/>
 				<include name="org/springframework/beans/factory/aspectj/**"/>
@@ -555,18 +491,7 @@
 			</manifest>
 		</jar>
 
-	</target>
-
-
-	<target name="weaverjars" depends="build,initdist" description="Create weaver JAR files (for specific platforms)">
-
-		<delete>
-			<fileset dir="${dist.dir}">
-				<include name="weavers/*.jar"/>
-			</fileset>
-		</delete>
-
-		<jar jarfile="${dist.dir}/weavers/spring-agent.jar">
+		<jar jarfile="${dist.dir}/weaving/spring-agent.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/instrument/InstrumentationSavingAgent.class"/>
 			</fileset>
@@ -578,7 +503,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/weavers/spring-tomcat-weaver.jar">
+		<jar jarfile="${dist.dir}/weaving/spring-tomcat-weaver.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/instrument/classloading/WeavingTransformer.class"/>
 				<include name="org/springframework/instrument/classloading/tomcat/**"/>
@@ -640,25 +565,6 @@
 	<target name="buildmock" depends="buildmainmock,buildtigermock" description="Compile all mock source files"/>
 
 
-	<target name="mockjar" depends="buildmock,initdist" description="Create JAR file with Spring mock classes">
-
-		<delete file="${dist.dir}/spring-mock.jar"/>
-
-		<jar jarfile="${dist.dir}/spring-mock.jar">
-			<fileset dir="${target.mockclasses.dir}">
-				<include name="META-INF/**"/>
-				<include name="org/springframework/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-	</target>
-
-
 	<target name="srczip" depends="initdist" description="Create source ZIP (containing Java sources)">
 
 		<delete file="${dist.dir}/spring-src.zip"/>
@@ -686,6 +592,9 @@
 
 	<target name="distfiles" depends="initdist" description="Copy dtd, tld and suchlike to the dist directory">
 
+		<copy file="${src.dir}/org/springframework/aop/config/spring-aop-2.0.xsd"
+				todir="${dist.dir}/resources" preservelastmodified="true"/>
+
 		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.dtd"
 				todir="${dist.dir}/resources" preservelastmodified="true"/>
 
@@ -701,22 +610,19 @@
 		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-util-2.0.xsd"
 				todir="${dist.dir}/resources" preservelastmodified="true"/>
 
-		<copy file="${src.dir}/org/springframework/aop/config/spring-aop-2.0.xsd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
 		<copy file="${src.dir}/org/springframework/context/config/spring-context-2.1.xsd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/scripting/config/spring-lang-2.0.xsd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/transaction/config/spring-tx-2.0.xsd"
 				todir="${dist.dir}/resources" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/ejb/config/spring-jee-2.0.xsd"
 				todir="${dist.dir}/resources" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/jms/config/spring-jms-2.1.xsd"
+				todir="${dist.dir}/resources" preservelastmodified="true"/>
+
+		<copy file="${src.dir}/org/springframework/scripting/config/spring-lang-2.0.xsd"
+				todir="${dist.dir}/resources" preservelastmodified="true"/>
+
+		<copy file="${src.dir}/org/springframework/transaction/config/spring-tx-2.0.xsd"
 				todir="${dist.dir}/resources" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/web/servlet/tags/spring.tld"
@@ -734,15 +640,14 @@
 	</target>
 
 
-	<target name="alljars" depends="fulljar,modulejars,aspectjar,weaverjars,mockjar,srczip"
-			description="Create all JAR files"/>
+	<target name="alljars" depends="fulljar,srczip,modulejars,weavingjars" description="Create all JAR files"/>
 
 
 	<!--
 		Convenience targets, needed for the automated build process. Convenience targets are
 		made up of the individual targets called, separated by an underscore.
 	-->
-	<target name="clean_alljars" depends="clean, alljars"/>
+	<target name="clean_alljars" depends="clean,alljars"/>
 
 
 	<!--
@@ -1934,67 +1839,43 @@
 	<target name="mvn.install.jars" depends="alljars">
 
 		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-beans"/>
+			<param name="spring-module" value="spring-aop"/>
 		</antcall>
 		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-aop"/>
+			<param name="spring-module" value="spring-beans"/>
 		</antcall>
 		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-context"/>
 		</antcall>
 		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-context-support"/>
+		</antcall>
+		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-core"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-dao"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-hibernate2"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-hibernate3"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-ibatis"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-jca"/>
 		</antcall>
 		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-jdbc"/>
 		</antcall>
 		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-jdo"/>
-		</antcall>
-		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-jms"/>
 		</antcall>
 		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-jmx"/>
+			<param name="spring-module" value="spring-mock"/>
 		</antcall>
 		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-jpa"/>
+			<param name="spring-module" value="spring-orm"/>
 		</antcall>
 		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-portlet"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-remoting"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-struts"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-support"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-toplink"/>
+			<param name="spring-module" value="spring-tx"/>
 		</antcall>
 		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-web"/>
 		</antcall>
 		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-webmvc"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-webmvc-portlet"/>
 		</antcall>
 	</target>
 

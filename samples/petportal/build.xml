@@ -23,7 +23,7 @@
 			<include name="spring.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/dist/modules">
-			<include name="spring-portlet.jar"/>
+			<include name="spring-webmvc-portlet.jar"/>
 		</fileset>
 
 	</path>
@@ -99,7 +99,7 @@
 				<include name="spring.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist/modules">
-				<include name="spring-portlet.jar"/>
+				<include name="spring-webmvc-portlet.jar"/>
 			</fileset>
 		</copy>
 

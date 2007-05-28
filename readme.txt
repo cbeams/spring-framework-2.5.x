@@ -51,7 +51,7 @@ knowledge about it immediately.
 
 2. RELEASE INFO
 
-The Spring Framework 2.1 requires J2SE 1.4 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). JDK 1.6 is
+The Spring Framework 2.1 requires JDK 1.4.2 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). JDK 1.6 is
 required for building the framework; for the full build including all aspects, AspectJ is required as well.
 
 Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1/2.2, AspectJ 5, JMX 1.0/1.2,
@@ -97,110 +97,70 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2720 KB)
-- Convenient jar file combining all standard modules (except for Portlet and Hibernate2 support)
+* "spring" (~2765 KB)
+- Convenient jar file combining all standard modules (except for the mock module and the Portlet support)
 - Also includes the AOP Alliance interfaces (as a convenience)
-- Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
+- Note: Does not include contents of spring-mock.jar, spring-webmvc-portlet.jar and spring-aspects.jar!
 
 MODULE JARS (dist/modules):
 
-* "spring-core" (~185 KB)
-- Contents: core abstractions and utilities
-- Dependencies: Commons Logging, (Log4J)
-
-* "spring-beans" (~400 KB)
-- Contents: JavaBeans support, bean container
-- Dependencies: spring-core, (CGLIB)
-
 * "spring-aop" (~295 KB)
 - Contents: AOP framework, source-level metadata support
-- Dependencies: spring-core, (spring-beans, AOP Alliance, CGLIB, Commons Attributes)
+- Dependencies: spring-core, (spring-beans, AOP Alliance)
 
-* "spring-context" (~175 KB)
-- Contents: application context, JNDI support, instrumentation, scheduling, validation
-- Dependencies: spring-beans, (spring-aop)
+* "spring-beans" (~410 KB)
+- Contents: JavaBeans support, bean container
+- Dependencies: spring-core
 
-* "spring-dao" (~135 KB)
-- Contents: DAO support, transaction infrastructure
-- Dependencies: spring-core, (spring-aop, spring-context, JTA API)
+* "spring-context" (~370 KB)
+- Contents: application context, JNDI, JMX, instrumentation, remoting, scripting, scheduling, validation
+- Dependencies: spring-beans, (spring-aop, JMX API, EJB API)
 
-* "spring-jdbc" (~225 KB)
+* "spring-context-support" (~125 KB)
+- Contents: third-party scheduling, third-party instrumentation, extended remoting, UI templating, mail, caching
+- Dependencies: spring-context, (spring-aop, spring-jdbc)
+
+* "spring-core" (~190 KB)
+- Contents: core abstractions and utilities
+- Dependencies: Commons Logging
+
+* "spring-jdbc" (~230 KB)
 - Contents: JDBC support
-- Dependencies: spring-beans, spring-dao
-
-* "spring-support" (~115 KB)
-- Contents: third-party scheduling support, UI template support, scripting, caching, mail support
-- Dependencies: spring-context, (spring-jdbc, Quartz, Velocity, FreeMarker, JasperReports, BSH, Groovy, JRuby, EHCache)
-
-* "spring-web" (~150 KB)
-- Contents: web application context, multipart resolver, web utilities
-- Dependencies: spring-context, Servlet API, (JSP API, JSTL, Commons FileUpload)
-
-* "spring-webmvc" (~280 KB)
-- Contents: framework servlets, web MVC framework, web controllers, web views
-- Dependencies: spring-web, (spring-support, Tiles, iText, POI)
-
-* "spring-portlet" (~115 KB)
-- Contents: framework portlets, portlet MVC framework, portlet controllers
-- Dependencies: spring-web, Portlet API, (spring-webmvc)
-
-* "spring-struts" (~25 KB)
-- Contents: Struts support
-- Dependencies: spring-web, Struts
-
-* "spring-remoting" (~110 KB)
-- Contents: remoting support, EJB support
-- Dependencies: spring-aop, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB API)
-
-* "spring-jca" (~60 KB)
-- Contents: JCA 1.0/1.5 support
-- Dependencies: spring-beans, spring-dao, JCA API, (spring-context)
+- Dependencies: spring-beans, spring-tx
 
 * "spring-jms" (~160 KB)
 - Contents: JMS 1.0.2/1.1 support
-- Dependencies: spring-beans, spring-dao, JMS API, (spring-remoting)
-
-* "spring-jmx" (~85 KB)
-- Contents: JMX 1.0/1.2 support
-- Dependencies: spring-beans, spring-aop, JMX API
-
-* "spring-jdo" (~60 KB)
-- Contents: JDO 1.0/2.0 support
-- Dependencies: spring-jdbc, JDO API, (spring-web)
-
-* "spring-jpa" (~95 KB)
-- Contents: JPA 1.0 support
-- Dependencies: spring-jdbc, JPA API, (spring-web)
-
-* "spring-hibernate2" (~85 KB)
-- Contents: Hibernate 2.1 support (superseded)
-- Dependencies: spring-jdbc, Hibernate2, (spring-web)
-
-* "spring-hibernate3" (~105 KB)
-- Contents: Hibernate 3.1/3.2 support
-- Dependencies: spring-jdbc, Hibernate3, (spring-web)
-
-* "spring-toplink" (~60 KB)
-- Contents: TopLink support
-- Dependencies: spring-jdbc, TopLink
-
-* "spring-ibatis" (~25 KB)
-- Contents: iBATIS SQL Maps support
-- Dependencies: spring-jdbc, iBATIS SQL Maps
-
-MOCK JAR (dist)
+- Dependencies: spring-beans, spring-tx, JMS API
 
 * "spring-mock" (~105 KB)
 - Contents: JNDI mocks, Servlet API mocks, Portlet API mocks, JUnit support
-- Dependencies: spring-core
+- Dependencies: spring-core, (spring-context, spring-jdbc, spring-web, Servlet API, Portlet API, JUnit)
 
-ASPECTS JAR (dist)
+* "spring-orm" (~340 KB)
+- Contents: JDO support, JPA support, Hibernate support, TopLink support, iBATIS support
+- Dependencies: spring-jdbc, (spring-web)
+
+* "spring-tx" (~200 KB)
+- Contents: transaction infrastructure, JCA support, DAO support
+- Dependencies: spring-core, (spring-aop, spring-context, JTA API, JCA API)
+
+* "spring-web" (~195 KB)
+- Contents: web application context, multipart resolver, web remoting support
+- Dependencies: spring-context, Servlet API, (JSP API, JSTL)
+
+* "spring-webmvc" (~280 KB)
+- Contents: framework servlets, web MVC framework, web controllers, web views
+- Dependencies: spring-web, (spring-context-support)
+
+* "spring-webmvc-portlet" (~115 KB)
+- Contents: framework portlets, portlet MVC framework, portlet controllers
+- Dependencies: spring-web, Portlet API, (spring-webmvc)
+
+WEAVING JARS (dist/weaving)
 
 * "spring-aspects" (~15 KB)
 - Contents: AspectJ aspects, for explicitly linking aspects into an IDE (Eclipse AJDT)
-- Dependencies: spring-aop, AspectJ, (spring-dao)
-
-WEAVER JARS (dist/weavers)
+- Dependencies: spring-aop, AspectJ, (spring-tx)
 
 * "spring-agent" (~5 KB)
 - Contents: Spring's InstrumentationSavingAgent (for InstrumentationLoadTimeWeaver)
