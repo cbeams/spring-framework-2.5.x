@@ -226,7 +226,7 @@
 	</target>
 
 
-	<target name="fulljar" depends="build,initdist" description="Create full JAR file with all Spring classes">
+	<target name="fulljar" depends="build,initdist" description="Create JAR file with all core Spring classes">
 
 		<delete file="${dist.dir}/spring.jar"/>
 
@@ -245,7 +245,7 @@
 				<attribute name="Implementation-Title" value="${spring-title}"/>
 				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
-				<!-- allow use of this JAR as a Java agent -->
+				<!-- allow for use of this JAR as a Java agent -->
 				<attribute name="Premain-Class" value="org.springframework.instrument.InstrumentationSavingAgent"/>
 			</manifest>
 		</jar>
