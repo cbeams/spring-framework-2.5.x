@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.transaction.interceptor;
 
+import java.io.Serializable;
+
 /**
  * TransactionAttribute implementation that delegates all calls to a given target
  * TransactionAttribute. Abstract because it is meant to be subclassed,
@@ -25,7 +27,7 @@ package org.springframework.transaction.interceptor;
  * @author Juergen Hoeller
  * @since 1.2
  */
-public abstract class DelegatingTransactionAttribute implements TransactionAttribute {
+public abstract class DelegatingTransactionAttribute implements TransactionAttribute, Serializable {
 
 	private final TransactionAttribute targetAttribute;
 
