@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class CancellableFormControllerTests extends TestCase {
 
@@ -95,22 +97,42 @@ public class CancellableFormControllerTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		String name = "Rob Harrop";
-		int age = 23;
-
 		request.setMethod("POST");
-		request.addParameter("name", name);
-		request.addParameter("age", "xxx" + age);
+		request.addParameter("name", "Rob Harrop");
+		request.addParameter("age", "xxx23");
 
 		ModelAndView mv = ctl.handleRequest(request, response);
-
 		assertEquals("Incorrect view name", formView, mv.getViewName());
 
-		Errors errors = (Errors)mv.getModel().get(BindException.MODEL_KEY_PREFIX + ctl.getCommandName());
-
+		Errors errors = (Errors) mv.getModel().get(BindException.MODEL_KEY_PREFIX + ctl.getCommandName());
 		assertNotNull("No errors", errors);
 		assertEquals(1, errors.getErrorCount());
+	}
 
+	public void testFormSubmissionWithValidationError() throws Exception {
+		String successView = "successView";
+		String formView = "formView";
+
+		TestController ctl = new TestController();
+		ctl.setSuccessView(successView);
+		ctl.setFormView(formView);
+		TestValidator val = new TestValidator();
+		ctl.setValidator(val);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		request.setMethod("POST");
+		request.addParameter("name", "Rob Harrop");
+		request.addParameter("age", "23");
+
+		ModelAndView mv = ctl.handleRequest(request, response);
+		assertEquals("Incorrect view name", formView, mv.getViewName());
+
+		Errors errors = (Errors) mv.getModel().get(BindException.MODEL_KEY_PREFIX + ctl.getCommandName());
+		assertNotNull("No errors", errors);
+		assertEquals(1, errors.getErrorCount());
+		assertTrue(val.invoked);
 	}
 
 	public void testCancelSubmission() throws Exception {
@@ -128,8 +150,31 @@ public class CancellableFormControllerTests extends TestCase {
 		request.addParameter("cancelRequest", "true");
 
 		ModelAndView mv = ctl.handleRequest(request, response);
-
 		assertEquals("Incorrect view name", cancelView, mv.getViewName());
+	}
+
+	public void testCancelSubmissionWithValidationError() throws Exception {
+		String cancelView = "cancelView";
+    String cancelParameterKey = "cancelRequest";
+
+		TestController ctl = new TestController();
+		ctl.setCancelParamKey(cancelParameterKey);
+		ctl.setCancelView(cancelView);
+		TestValidator val = new TestValidator();
+		ctl.setValidator(val);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		request.setMethod("POST");
+		request.addParameter("name", "Rob Harrop");
+		request.addParameter("age", "23");
+		request.addParameter("cancelRequest", "true");
+
+		ModelAndView mv = ctl.handleRequest(request, response);
+		assertEquals("Incorrect view name", cancelView, mv.getViewName());
+
+		assertFalse(val.invoked);
 	}
 
 	public void testCancelSubmissionWithCustomModelParams() throws Exception {
@@ -153,7 +198,6 @@ public class CancellableFormControllerTests extends TestCase {
 		request.addParameter("cancelRequest", "true");
 
 		ModelAndView mv = ctl.handleRequest(request, response);
-
 		assertEquals("Incorrect view name", cancelView, mv.getViewName());
 		assertEquals("Model parameter reason not correct", reason, mv.getModel().get("reason"));
 	}
@@ -169,6 +213,23 @@ public class CancellableFormControllerTests extends TestCase {
 
 		public TestController() {
 			setCommandClass(TestBean.class);
+		}
+	}
+
+
+	private static class TestValidator implements Validator {
+
+		private boolean invoked = false;
+
+		public boolean supports(Class clazz) {
+			return TestBean.class.isAssignableFrom(clazz);
+		}
+		public void validate(Object target, Errors errors) {
+			this.invoked = true;
+			TestBean tb = (TestBean) target;
+			if (tb.getAge() < 25) {
+				errors.rejectValue("age", "TOO_YOUNG");
+			}
 		}
 	}
 
