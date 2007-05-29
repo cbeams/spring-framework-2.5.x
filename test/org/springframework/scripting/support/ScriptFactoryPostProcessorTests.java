@@ -25,7 +25,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.JdkVersion;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.groovy.GroovyScriptFactory;
@@ -90,11 +89,6 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 	}
 
 	public void testChangeScriptWithRefreshableBeanFunctionality() throws Exception {
-		// Groovy requires JDK 1.4
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 
@@ -115,11 +109,6 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 	}
 
 	public void testChangeScriptWithNoRefreshableBeanFunctionality() throws Exception {
-		// Groovy requires JDK 1.4
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(false);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 
@@ -140,11 +129,6 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 	}
 
 	public void testRefreshedScriptReferencePropagatesToCollaborators() throws Exception {
-		// Groovy requires JDK 1.4
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 		BeanDefinitionBuilder collaboratorBuilder = BeanDefinitionBuilder.rootBeanDefinition(DefaultMessengerService.class);
@@ -172,11 +156,6 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 	}
 
 	public void testReferencesAcrossAContainerHierarchy() throws Exception {
-		// Groovy requires JDK 1.4
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		GenericApplicationContext businessContext = new GenericApplicationContext();
 		businessContext.registerBeanDefinition("messenger", BeanDefinitionBuilder.rootBeanDefinition(StubMessenger.class).getBeanDefinition());
 		businessContext.refresh();
@@ -192,21 +171,11 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 	}
 
 	public void testScriptHavingAReferenceToAnotherBean() throws Exception {
-		// Groovy requires JDK 1.4
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		// just tests that the (singleton) script-backed bean is able to be instantiated with references to its collaborators
 		new ClassPathXmlApplicationContext("org/springframework/scripting/support/groovyReferences.xml");
 	}
 
 	public void testForRefreshedScriptHavingErrorPickedUpOnFirstCall() throws Exception {
-		// Groovy requires JDK 1.4
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
 		BeanDefinitionBuilder collaboratorBuilder = BeanDefinitionBuilder.rootBeanDefinition(DefaultMessengerService.class);
@@ -237,11 +206,6 @@ public final class ScriptFactoryPostProcessorTests extends TestCase {
 	}
 
 	public void testPrototypeScriptedBean() throws Exception {
-		// Groovy requires JDK 1.4
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.registerBeanDefinition("messenger", BeanDefinitionBuilder.rootBeanDefinition(StubMessenger.class).getBeanDefinition());
 

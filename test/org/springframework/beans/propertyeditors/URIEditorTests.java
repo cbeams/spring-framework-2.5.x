@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.net.URI;
 
 import junit.framework.TestCase;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -30,9 +29,6 @@ import org.springframework.util.ClassUtils;
 public final class URIEditorTests extends TestCase {
 
 	public void testStandardURI() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText("mailto:juergen.hoeller@interface21.com");
 		Object value = uriEditor.getValue();
@@ -42,9 +38,6 @@ public final class URIEditorTests extends TestCase {
 	}
 
 	public void testStandardURL() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText("http://www.springframework.org");
 		Object value = uriEditor.getValue();
@@ -54,9 +47,6 @@ public final class URIEditorTests extends TestCase {
 	}
 
 	public void testClasspathURL() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class");
@@ -68,9 +58,6 @@ public final class URIEditorTests extends TestCase {
 	}
 
 	public void testWithNonExistentResource() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText("gonna:/freak/in/the/morning/freak/in/the.evening");
 		Object value = uriEditor.getValue();
@@ -80,9 +67,6 @@ public final class URIEditorTests extends TestCase {
 	}
 
 	public void testSetAsTextWithNull() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText(null);
 		assertNull(uriEditor.getValue());
@@ -90,9 +74,6 @@ public final class URIEditorTests extends TestCase {
 	}
 
 	public void testGetAsTextReturnsEmptyStringIfValueNotSet() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
 		PropertyEditor uriEditor = new URIEditor();
 		assertEquals("", uriEditor.getAsText());
 	}

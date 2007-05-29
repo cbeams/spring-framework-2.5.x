@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -28,11 +28,9 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.springframework.core.JdkVersion;
-import org.springframework.jmx.AbstractJmxTests;
+import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
-import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssembler;
 
@@ -48,7 +46,6 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 	protected boolean runTests = true;
 
 	public void onSetUp() throws Exception {
-
 		target = new JmxTestBean();
 		target.setAge(100);
 		target.setName("Rob Harrop");
@@ -145,10 +142,6 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
 	public void testLazyConnectionToRemote() throws Exception {
 		if (!runTests) return;
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			// to avoid NoClassDefFoundError for JSSE
-			return;
-		}
 
 		JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:9876");
 		JMXConnectorServer connector = JMXConnectorServerFactory.newJMXConnectorServer(url, null, getServer());

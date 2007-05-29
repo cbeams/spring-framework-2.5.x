@@ -1339,10 +1339,6 @@ public class HibernateTransactionManagerTests extends TestCase {
 	private void doTestExistingTransactionWithPropagationNestedAndRollback(final boolean manualSavepoint)
 			throws Exception {
 
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);

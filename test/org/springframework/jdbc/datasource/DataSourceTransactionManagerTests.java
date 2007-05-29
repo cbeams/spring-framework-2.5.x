@@ -1378,10 +1378,6 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	private void doTestExistingTransactionWithPropagationNested(final int count) throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -1450,10 +1446,6 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testExistingTransactionWithPropagationNestedAndRollback() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -1519,10 +1511,6 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testExistingTransactionWithManualSavepoint() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -1579,10 +1567,6 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testExistingTransactionWithManualSavepointAndRollback() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);

@@ -69,10 +69,6 @@ public class TestXsltViewTests extends TestCase {
 
 
 	public void testNoSuchStylesheet() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		view.setStylesheetLocation(new FileSystemResource("/does/not/exist.xsl"));
 		try {
 			view.initApplicationContext();
@@ -83,10 +79,6 @@ public class TestXsltViewTests extends TestCase {
 	}
 
 	public void testCustomErrorListener() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		view.setErrorListener(new ErrorListener() {
 			public void warning(TransformerException ex) {
 				incWarnings();
@@ -114,10 +106,6 @@ public class TestXsltViewTests extends TestCase {
 	}
 
 	public void testRender() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -144,10 +132,6 @@ public class TestXsltViewTests extends TestCase {
 	}
 
 	public void testRenderWithCustomContentType() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -175,10 +159,6 @@ public class TestXsltViewTests extends TestCase {
 	}
 
 	public void testRenderWithSingleSourceInModel() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -210,10 +190,6 @@ public class TestXsltViewTests extends TestCase {
 	}
 
 	public void testRenderWithSingleNodeInModel() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setWriterAccessAllowed(false);
@@ -241,10 +217,6 @@ public class TestXsltViewTests extends TestCase {
 	}
 
 	public void testRenderWithNoStylesheetSpecified() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -279,10 +251,6 @@ public class TestXsltViewTests extends TestCase {
 	}
 
 	public void testRenderSingleNodeInModelWithExplicitDocRootName() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setOutputStreamAccessAllowed(false);

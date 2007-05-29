@@ -635,10 +635,6 @@ public class CustomEditorTests extends TestCase {
 	}
 
 	public void testPatternEditor() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		final String REGEX = "a.*";
 
 		PropertyEditor patternEditor = new PatternEditor();

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -16,8 +16,8 @@
 
 package org.springframework.jmx.support;
 
-import org.springframework.core.JdkVersion;
-import org.springframework.jmx.AbstractMBeanServerTests;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
@@ -27,8 +27,8 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import java.io.IOException;
-import java.net.MalformedURLException;
+
+import org.springframework.jmx.AbstractMBeanServerTests;
 
 /**
  * @author Rob Harrop
@@ -38,11 +38,6 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
 
 	public void testStartupWithLocatedServer() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			// to avoid NoClassDefFoundError for JSSE
-			return;
-		}
-
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.afterPropertiesSet();
 
@@ -58,10 +53,6 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 		//Added a brief snooze here - seems to fix occasional
 		//java.net.BindException: Address already in use errors
 		Thread.sleep(1);
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			// to avoid NoClassDefFoundError for JSSE
-			return;
-		}
 
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
 		bean.setServer(getServer());

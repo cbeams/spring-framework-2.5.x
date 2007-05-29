@@ -26,7 +26,6 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.ConfigurableMessenger;
@@ -236,10 +235,6 @@ public class BshScriptFactoryTests extends TestCase {
 	}
 
 	public void testResourceScriptFromTag() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		Collection beanNames = Arrays.asList(ctx.getBeanNamesForType(Messenger.class));
 		assertTrue(beanNames.contains("messenger"));
@@ -283,10 +278,6 @@ public class BshScriptFactoryTests extends TestCase {
 	}
 
 	public void testInlineScriptFromTag() throws Exception {
-	  if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		Calculator calculator = (Calculator) ctx.getBean("calculator");
 		assertNotNull(calculator);
@@ -294,10 +285,6 @@ public class BshScriptFactoryTests extends TestCase {
 	}
 
 	public void testRefreshableFromTag() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
 		assertEquals("Hello World!", messenger.getMessage());

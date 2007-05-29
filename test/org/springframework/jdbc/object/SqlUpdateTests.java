@@ -237,10 +237,6 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 	}
 
 	public void testUpdateAndGeneratedKeys() throws SQLException {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		ctrlResultSetMetaData = MockControl.createControl(ResultSetMetaData.class);
 		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
 		mockResultSetMetaData.getColumnCount();

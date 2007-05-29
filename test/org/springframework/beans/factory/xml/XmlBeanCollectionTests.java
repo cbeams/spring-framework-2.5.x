@@ -29,8 +29,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import junit.framework.TestCase;
-import org.apache.commons.collections.map.LinkedMap;
-import org.apache.commons.collections.set.ListOrderedSet;
 import org.hibernate.FlushMode;
 
 import org.springframework.beans.TestBean;
@@ -40,7 +38,6 @@ import org.springframework.beans.factory.HasMap;
 import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.config.MapFactoryBean;
 import org.springframework.beans.factory.config.SetFactoryBean;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -60,22 +57,12 @@ public class XmlBeanCollectionTests extends TestCase {
 		SetFactoryBean setFactory = new SetFactoryBean();
 		setFactory.setSourceSet(new TreeSet());
 		setFactory.afterPropertiesSet();
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
-			assertTrue(setFactory.getObject() instanceof LinkedHashSet);
-		}
-		else {
-			assertTrue(setFactory.getObject() instanceof ListOrderedSet);
-		}
+		assertTrue(setFactory.getObject() instanceof LinkedHashSet);
 
 		MapFactoryBean mapFactory = new MapFactoryBean();
 		mapFactory.setSourceMap(new TreeMap());
 		mapFactory.afterPropertiesSet();
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
-			assertTrue(mapFactory.getObject() instanceof LinkedHashMap);
-		}
-		else {
-			assertTrue(mapFactory.getObject() instanceof LinkedMap);
-		}
+		assertTrue(mapFactory.getObject() instanceof LinkedHashMap);
 	}
 
 	public void testRefSubelement() throws Exception {

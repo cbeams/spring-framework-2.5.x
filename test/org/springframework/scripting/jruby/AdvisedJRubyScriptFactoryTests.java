@@ -23,7 +23,6 @@ import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.JdkVersion;
 import org.springframework.scripting.Messenger;
 
 /**
@@ -32,10 +31,6 @@ import org.springframework.scripting.Messenger;
 public class AdvisedJRubyScriptFactoryTests extends TestCase {
 
 	public void testAdviseWithProxyFactoryBean() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		ApplicationContext context =
 				new ClassPathXmlApplicationContext("advisedByProxyFactoryBean.xml", getClass());
 
@@ -50,10 +45,6 @@ public class AdvisedJRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testAdviseWithBeanNameAutoProxyCreator() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		ApplicationContext context =
 				new ClassPathXmlApplicationContext("advisedByBeanNameAutoProxyCreator.xml", getClass());
 

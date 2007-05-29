@@ -519,10 +519,6 @@ public class PropertyResourceConfigurerTests extends TestCase {
 	}
 
 	public void testPreferencesPlaceholderConfigurer() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("name", "${myName}");
@@ -548,10 +544,6 @@ public class PropertyResourceConfigurerTests extends TestCase {
 	}
 
 	public void testPreferencesPlaceholderConfigurerWithCustomTreePaths() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("name", "${myName}");
@@ -579,10 +571,6 @@ public class PropertyResourceConfigurerTests extends TestCase {
 	}
 
 	public void testPreferencesPlaceholderConfigurerWithPathInPlaceholder() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		StaticApplicationContext ac = new StaticApplicationContext();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("name", "${mypath/myName}");
