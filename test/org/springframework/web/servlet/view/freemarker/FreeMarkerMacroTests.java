@@ -152,6 +152,7 @@ public class FreeMarkerMacroTests extends TestCase {
 		FreeMarkerView view = new FreeMarkerView();
 		view.setBeanName("myView");
 		view.setUrl("test.ftl");
+		view.setExposeSpringMacroHelpers(false);
 		view.setConfiguration(config);
 
 		view.render(model, request, response);

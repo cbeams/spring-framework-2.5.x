@@ -153,6 +153,7 @@ public class VelocityMacroTests extends TestCase {
 		view.setBeanName("myView");
 		view.setUrl("org/springframework/web/servlet/view/velocity/test.vm");
 		view.setEncoding("UTF-8");
+		view.setExposeSpringMacroHelpers(false);
 		view.setVelocityEngine(ve);
 
 		view.render(model, request, response);

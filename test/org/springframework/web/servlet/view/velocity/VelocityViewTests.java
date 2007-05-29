@@ -40,7 +40,6 @@ import org.apache.velocity.tools.view.tools.LinkTool;
 import org.easymock.MockControl;
 
 import org.springframework.context.ApplicationContextException;
-import org.springframework.core.JdkVersion;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -177,8 +176,9 @@ public class VelocityViewTests extends TestCase {
 
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getParentBeanFactory();
-		wmc.setReturnValue(null);
+		MockServletContext sc = new MockServletContext();
+		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {
@@ -189,12 +189,13 @@ public class VelocityViewTests extends TestCase {
 		Map configurers = new HashMap();
 		configurers.put("velocityConfigurer", vc);
 		wmc.setReturnValue(configurers);
+		wac.getParentBeanFactory();
+		wmc.setReturnValue(null);
+		wac.getServletContext();
+		wmc.setReturnValue(sc, 4);
 		wmc.replay();
 
-		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest req = (HttpServletRequest) reqControl.getMock();
-		reqControl.replay();
-
+		HttpServletRequest request = new MockHttpServletRequest();
 		final HttpServletResponse expectedResponse = new MockHttpServletResponse();
 
 		VelocityView vv = new VelocityView() {
@@ -212,7 +213,7 @@ public class VelocityViewTests extends TestCase {
 		vv.setApplicationContext(wac);
 
 		try {
-			vv.render(model, req, expectedResponse);
+			vv.render(model, request, expectedResponse);
 			if (mergeTemplateFailureException != null) {
 				fail();
 			}
@@ -223,7 +224,6 @@ public class VelocityViewTests extends TestCase {
 		}
 
 		wmc.verify();
-		reqControl.verify();
 	}
 
 	public void testKeepExistingContentType() throws Exception {
@@ -231,8 +231,9 @@ public class VelocityViewTests extends TestCase {
 
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
-		wac.getParentBeanFactory();
-		wmc.setReturnValue(null);
+		MockServletContext sc = new MockServletContext();
+		sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {
@@ -243,6 +244,10 @@ public class VelocityViewTests extends TestCase {
 		Map configurers = new HashMap();
 		configurers.put("velocityConfigurer", vc);
 		wmc.setReturnValue(configurers);
+		wac.getParentBeanFactory();
+		wmc.setReturnValue(null);
+		wac.getServletContext();
+		wmc.setReturnValue(sc, 4);
 		wmc.replay();
 
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -250,11 +255,10 @@ public class VelocityViewTests extends TestCase {
 		expectedResponse.setContentType("myContentType");
 
 		VelocityView vv = new VelocityView() {
-			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
+			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) {
 				assertTrue(template == expectedTemplate);
 				assertTrue(response == expectedResponse);
 			}
-
 			protected void exposeHelpers(Map model, HttpServletRequest request) throws Exception {
 				model.put("myHelper", "myValue");
 			}
@@ -269,10 +273,6 @@ public class VelocityViewTests extends TestCase {
 	}
 
 	public void testExposeHelpers() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		final String templateName = "test.vm";
 
 		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
@@ -333,6 +333,8 @@ public class VelocityViewTests extends TestCase {
 		vv.setVelocityFormatterAttribute("velocityFormatter");
 		vv.setDateToolAttribute("dateTool");
 		vv.setNumberToolAttribute("numberTool");
+		vv.setExposeSpringMacroHelpers(false);
+
 		vv.render(new HashMap(), req, expectedResponse);
 
 		wmc.verify();
@@ -341,10 +343,6 @@ public class VelocityViewTests extends TestCase {
 	}
 
 	public void testVelocityToolboxView() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		final String templateName = "test.vm";
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -388,6 +386,8 @@ public class VelocityViewTests extends TestCase {
 		toolAttributes.setProperty("link2", LinkTool.class.getName());
 		vv.setToolAttributes(toolAttributes);
 		vv.setToolboxConfigLocation("org/springframework/web/servlet/view/velocity/toolbox.xml");
+		vv.setExposeSpringMacroHelpers(false);
+
 		vv.render(new HashMap(), expectedRequest, expectedResponse);
 	}
 
@@ -420,10 +420,6 @@ public class VelocityViewTests extends TestCase {
 	}
 
 	public void testVelocityViewResolverWithToolbox() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine("prefix_test_suffix", new Template());
@@ -448,10 +444,6 @@ public class VelocityViewTests extends TestCase {
 	}
 
 	public void testVelocityViewResolverWithToolboxSubclass() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {
 				TestVelocityEngine ve = new TestVelocityEngine();
@@ -480,10 +472,6 @@ public class VelocityViewTests extends TestCase {
 	}
 
 	public void testVelocityLayoutViewResolver() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
 		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {
 				TestVelocityEngine ve = new TestVelocityEngine();

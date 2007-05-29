@@ -40,7 +40,7 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 
 	private boolean allowSessionOverride = false;
 
-	private boolean exposeSpringMacroHelpers = false;
+	private boolean exposeSpringMacroHelpers = true;
 
 
 	protected Class requiredViewClass() {
@@ -89,7 +89,7 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 
 	/**
 	 * Set whether to expose a RequestContext for use by Spring's macro library,
-	 * under the name "springMacroRequestContext". Default is "false".
+	 * under the name "springMacroRequestContext". Default is "true".
 	 * @see AbstractTemplateView#setExposeSpringMacroHelpers
 	 */
 	public void setExposeSpringMacroHelpers(boolean exposeSpringMacroHelpers) {

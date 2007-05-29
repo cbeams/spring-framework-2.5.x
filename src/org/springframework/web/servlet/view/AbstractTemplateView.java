@@ -28,7 +28,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
- * AbstractTemplateView provides template based view technologies such as
+ * Adapter base class for template-based view technologies such as
  * Velocity and FreeMarker, with the ability to use request and session
  * attributes in their model and the option to expose helper objects
  * for Spring's Velocity/FreeMarker macro library.
@@ -41,6 +41,9 @@ import org.springframework.web.servlet.support.RequestContext;
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 1.0.2
+ * @see AbstractTemplateViewResolver
+ * @see org.springframework.web.servlet.view.velocity.VelocityView
+ * @see org.springframework.web.servlet.view.freemarker.FreeMarkerView
  */
 public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 
@@ -65,7 +68,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 
 	private boolean allowSessionOverride = false;
 
-	private boolean exposeSpringMacroHelpers = false;
+	private boolean exposeSpringMacroHelpers = true;
 
 
 	/**
@@ -106,7 +109,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 
 	/**
 	 * Set whether to expose a RequestContext for use by Spring's macro library,
-	 * under the name "springMacroRequestContext". Default is "false".
+	 * under the name "springMacroRequestContext". Default is "true".
 	 * <p>Currently needed for Spring's Velocity and FreeMarker default macros.
 	 * Note that this is <i>not</i> required for templates that use HTML
 	 * forms <i>unless</i> you wish to take advantage of the Spring helper macros.
@@ -162,7 +165,7 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 						"' because of an existing model object of the same name");
 			}
 			// Expose RequestContext instance for Spring macros.
-			model.put(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, new RequestContext(request, model));
+			model.put(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, new RequestContext(request, getServletContext(), model));
 		}
 
 		applyContentType(response);

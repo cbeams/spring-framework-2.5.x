@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,10 +36,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * @author Juergen Hoeller
@@ -88,6 +87,8 @@ public class FreeMarkerViewTests extends TestCase {
 
 		MockControl wmc = MockControl.createNiceControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
+		MockServletContext sc = new MockServletContext();
+
 		wac.getBeansOfType(FreeMarkerConfig.class, true, false);
 		Map configs = new HashMap();
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
@@ -96,6 +97,8 @@ public class FreeMarkerViewTests extends TestCase {
 		wmc.setReturnValue(configs);
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
+		wac.getServletContext();
+		wmc.setReturnValue(sc, 3);
 		wmc.replay();
 
 		fv.setUrl("templateName");
@@ -103,6 +106,7 @@ public class FreeMarkerViewTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addPreferredLocale(Locale.US);
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		HttpServletResponse response = new MockHttpServletResponse();
 
@@ -119,6 +123,8 @@ public class FreeMarkerViewTests extends TestCase {
 
 		MockControl wmc = MockControl.createNiceControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
+		MockServletContext sc = new MockServletContext();
+
 		wac.getBeansOfType(FreeMarkerConfig.class, true, false);
 		Map configs = new HashMap();
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
@@ -127,6 +133,8 @@ public class FreeMarkerViewTests extends TestCase {
 		wmc.setReturnValue(configs);
 		wac.getParentBeanFactory();
 		wmc.setReturnValue(null);
+		wac.getServletContext();
+		wmc.setReturnValue(sc, 3);
 		wmc.replay();
 
 		fv.setUrl("templateName");
@@ -134,6 +142,7 @@ public class FreeMarkerViewTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addPreferredLocale(Locale.US);
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		HttpServletResponse response = new MockHttpServletResponse();
 		response.setContentType("myContentType");
