@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  * @author Rob Harrop
  * @author Adrian Colyer
  */
-public class TransactionNamespaceHandlerTests extends TestCase {
+public class TxNamespaceHandlerTests extends TestCase {
 
 	private ApplicationContext context;
 
@@ -41,7 +41,7 @@ public class TransactionNamespaceHandlerTests extends TestCase {
 	private Method setAgeMethod;
 
 	public void setUp() throws Exception {
-		this.context = new ClassPathXmlApplicationContext("transactionNamespaceHandlerTests.xml", getClass());
+		this.context = new ClassPathXmlApplicationContext("txNamespaceHandlerTests.xml", getClass());
 		this.getAgeMethod = ITestBean.class.getMethod("getAge", new Class[0]);
 		this.setAgeMethod = ITestBean.class.getMethod("setAge", new Class[] {int.class});
 	}
@@ -58,6 +58,7 @@ public class TransactionNamespaceHandlerTests extends TestCase {
 		// try with transactional
 		assertEquals("Should not have any started transactions", 0, ptm.begun);
 		testBean.getName();
+		assertTrue(ptm.lastDefinition.isReadOnly());
 		assertEquals("Should have 1 started transaction", 1, ptm.begun);
 		assertEquals("Should have 1 committed transaction", 1, ptm.commits);
 
@@ -73,7 +74,6 @@ public class TransactionNamespaceHandlerTests extends TestCase {
 		catch (Throwable throwable) {
 			assertEquals("Should have another started transaction", 2, ptm.begun);
 			assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
-
 		}
 	}
 	
