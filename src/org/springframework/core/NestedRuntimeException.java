@@ -16,9 +16,6 @@
 
 package org.springframework.core;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
-
 /**
  * Handy class for wrapping runtime <code>Exceptions</code> with a root cause.
  *
@@ -48,10 +45,6 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	private static final long serialVersionUID = 5439915454935047936L;
 
 
-	/** Root cause of this nested exception */
-	private Throwable cause;
-
-
 	/**
 	 * Construct a <code>NestedRuntimeException</code> with the specified detail message.
 	 * @param msg the detail message
@@ -67,23 +60,9 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * @param cause the nested exception
 	 */
 	public NestedRuntimeException(String msg, Throwable cause) {
-		super(msg);
-		this.cause = cause;
+		super(msg, cause);
 	}
 
-
-	/**
-	 * Return the nested cause, or <code>null</code> if none.
-	 * <p>Note that this will only check one level of nesting.
-	 * Use {@link #getRootCause()} to retrieve the innermost cause.
-	 */
-	public Throwable getCause() {
-		// Even if you cannot set the cause of this exception other than through
-		// the constructor, we check for the cause being "this" here, as the cause
-		// could still be set to "this" via reflection: for example, by a remoting
-		// deserializer like Hessian's.
-		return (this.cause == this ? null : this.cause);
-	}
 
 	/**
 	 * Return the detail message, including the message from the nested exception
@@ -93,53 +72,20 @@ public abstract class NestedRuntimeException extends RuntimeException {
 		return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
 	}
 
-	/**
-	 * Print the composite message and the embedded stack trace to the specified stream.
-	 * @param ps the print stream
-	 */
-	public void printStackTrace(PrintStream ps) {
-		if (getCause() == null) {
-			super.printStackTrace(ps);
-		}
-		else {
-			ps.println(this);
-			ps.print("Caused by: ");
-			getCause().printStackTrace(ps);
-		}
-	}
-
-	/**
-	 * Print the composite message and the embedded stack trace to the specified writer.
-	 * @param pw the print writer
-	 */
-	public void printStackTrace(PrintWriter pw) {
-		if (getCause() == null) {
-			super.printStackTrace(pw);
-		}
-		else {
-			pw.println(this);
-			pw.print("Caused by: ");
-			getCause().printStackTrace(pw);
-		}
-	}
-
 
 	/**
 	 * Retrieve the innermost cause of this exception, if any.
-	 * <p>Currently just traverses <code>NestedRuntimeException</code> causes.
-	 * Will use the JDK 1.4 exception cause mechanism once Spring requires JDK 1.4.
 	 * @return the innermost exception, or <code>null</code> if none
 	 * @since 2.0
 	 */
 	public Throwable getRootCause() {
-		Throwable cause = getCause();
-		if (cause instanceof NestedRuntimeException) {
-			Throwable rootCause = ((NestedRuntimeException) cause).getRootCause();
-			return (rootCause != null ? rootCause : cause);
+		Throwable rootCause = getCause();
+		if (rootCause != null) {
+			while (rootCause.getCause() != null) {
+				rootCause = rootCause.getCause();
+			}
 		}
-		else {
-			return cause;
-		}
+		return rootCause;
 	}
 
 	/**

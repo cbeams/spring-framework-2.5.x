@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.springframework.web.util;
-
-import java.io.PrintStream;
-import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 
@@ -62,6 +59,11 @@ public class NestedServletException extends ServletException {
 	 */
 	public NestedServletException(String msg, Throwable cause) {
 		super(msg, cause);
+		// Set JDK 1.4 exception chain cause if not done by ServletException class already
+		// (this differs between Servlet API versions).
+		if (getCause() == null) {
+			initCause(cause);
+		}
 	}
 
 
@@ -70,39 +72,7 @@ public class NestedServletException extends ServletException {
 	 * if there is one.
 	 */
 	public String getMessage() {
-		return NestedExceptionUtils.buildMessage(super.getMessage(), getRootCause());
-	}
-
-	/**
-	 * Print the composite message and the embedded stack trace to the specified stream.
-	 * @param ps the print stream
-	 */
-	public void printStackTrace(PrintStream ps) {
-		Throwable cause = getRootCause();
-		if (cause == null) {
-			super.printStackTrace(ps);
-		}
-		else {
-			ps.println(this);
-			ps.print("Caused by: ");
-			cause.printStackTrace(ps);
-		}
-	}
-
-	/**
-	 * Print the composite message and the embedded stack trace to the specified print writer.
-	 * @param pw the print writer
-	 */
-	public void printStackTrace(PrintWriter pw) {
-		Throwable cause = getRootCause();
-		if (cause == null) {
-			super.printStackTrace(pw);
-		}
-		else {
-			pw.println(this);
-			pw.print("Caused by: ");
-			cause.printStackTrace(pw);
-		}
+		return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
 	}
 
 }
