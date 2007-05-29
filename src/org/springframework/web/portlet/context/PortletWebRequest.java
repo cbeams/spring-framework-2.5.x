@@ -21,7 +21,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletSession;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.WebRequest;
 
 /**
@@ -40,6 +42,7 @@ public class PortletWebRequest extends PortletRequestAttributes implements WebRe
 	public PortletWebRequest(PortletRequest request) {
 		super(request);
 	}
+
 
 	public String getParameter(String paramName) {
 		return getRequest().getParameter(paramName);
@@ -75,6 +78,28 @@ public class PortletWebRequest extends PortletRequestAttributes implements WebRe
 
 	public boolean isSecure() {
 		return getRequest().isSecure();
+	}
+
+
+	public String getDescription(boolean includeClientInfo) {
+		PortletRequest request = getRequest();
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("context=").append(request.getContextPath());
+		if (includeClientInfo) {
+			PortletSession session = request.getPortletSession(false);
+			if (session != null) {
+				buffer.append(";session=").append(session.getId());
+			}
+			String user = getRequest().getRemoteUser();
+			if (StringUtils.hasLength(user)) {
+				buffer.append(";user=" + user);
+			}
+		}
+		return buffer.toString();
+	}
+
+	public String toString() {
+		return "PortletWebRequest: " + getDescription(true);
 	}
 
 }

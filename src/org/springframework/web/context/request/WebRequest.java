@@ -92,4 +92,12 @@ public interface WebRequest extends RequestAttributes {
 	 */
 	boolean isSecure();
 
+	/**
+	 * Get a short description of this request,
+	 * typically containing request URI and session id.
+	 * @param includeClientInfo whether to include client-specific
+	 * information such as session id and user name
+	 */
+	String getDescription(boolean includeClientInfo);
+
 }
