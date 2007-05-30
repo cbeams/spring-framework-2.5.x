@@ -16,9 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
@@ -27,7 +24,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.util.ClassUtils;
@@ -37,6 +33,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 
@@ -263,10 +260,9 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 	
 	private ApplicationContext createContext(ScopedProxyMode scopedProxyMode) {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
-		List<TypeFilter> includeFilters = new ArrayList<TypeFilter>();
-		includeFilters.add(new AnnotationTypeFilter(ScopeTestComponent.class));
-		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, scopedProxyMode);
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, false);
 		scanner.setIncludeAnnotationConfig(false);
+		scanner.addIncludeFilter(new AnnotationTypeFilter(ScopeTestComponent.class));
 		scanner.setBeanNameGenerator(new BeanNameGenerator() {
 			public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 				String beanClassName = ClassUtils.getShortName(definition.getBeanClassName());
@@ -275,7 +271,8 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
 				return beanClassName.substring(begin, end).toLowerCase();
 			}
 		});
-		scanner.scan(getClass().getPackage().getName(), false, null, includeFilters);
+		scanner.setScopedProxyMode(scopedProxyMode);
+		scanner.scan(getClass().getPackage().getName());
 		context.refresh();
 		return context;
 	}
@@ -284,28 +281,39 @@ public class ClassPathBeanDefinitionScannerScopeTests extends TestCase {
  	public static @interface ScopeTestComponent {
  	}
 
- 	public static interface IScopedTestBean { 
+
+ 	public static interface IScopedTestBean {
+
  		String getName();
+
  		void setName(String name);
  	}
  	
+
 	public static abstract class ScopedTestBean implements IScopedTestBean {
+
 		private String name = DEFAULT_NAME;
+
 		public String getName() { return this.name; }
-		public void setName(String name) { this.name = name; }	
+
+		public void setName(String name) { this.name = name; }
 	}
 	
-	@ScopeTestComponent	
+
+	@ScopeTestComponent
 	public static class SingletonScopedTestBean extends ScopedTestBean { 
 	}
 	
-	public static interface AnotherScopeTestInterface { 
+
+	public static interface AnotherScopeTestInterface {
 	}
 	
+
 	@Scope("request")
 	@ScopeTestComponent
 	public static class RequestScopedTestBean extends ScopedTestBean implements AnotherScopeTestInterface { 
 	}
+
 
 	@Scope("session")
 	@ScopeTestComponent

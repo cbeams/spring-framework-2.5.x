@@ -18,8 +18,6 @@ package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -81,11 +79,13 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		boolean useDefaultFilters = Boolean.valueOf(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
 		boolean annotationConfig = Boolean.valueOf(element.getAttribute(ANNOTATION_CONFIG_ATTRIBUTE));
 
+		// Delegate bean definition registration to scanner class.
+		ClassPathBeanDefinitionScanner scanner =
+				new ClassPathBeanDefinitionScanner(parserContext.getRegistry(), useDefaultFilters);
+		scanner.setResourceLoader(resourceLoader);
+
 		String basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);
 		String[] basePackages = StringUtils.commaDelimitedListToStringArray(basePackage);
-
-		List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
-		List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
 
 		// Parse exclude and include filter elements.
 		NodeList nodeList = element.getChildNodes();
@@ -93,20 +93,16 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			Node node = nodeList.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				String localName = node.getLocalName();
-				if (EXCLUDE_FILTER_ELEMENT.equals(localName)) {
+				if (INCLUDE_FILTER_ELEMENT.equals(localName)) {
 					TypeFilter typeFilter = createTypeFilter((Element) node, resourceLoader.getClassLoader());
-					excludeFilters.add(0, typeFilter);
+					scanner.addIncludeFilter(typeFilter);
 				}
-				else if (INCLUDE_FILTER_ELEMENT.equals(localName)) {
+				else if (EXCLUDE_FILTER_ELEMENT.equals(localName)) {
 					TypeFilter typeFilter = createTypeFilter((Element) node, resourceLoader.getClassLoader());
-					includeFilters.add(typeFilter);
+					scanner.addExcludeFilter(typeFilter);
 				}
 			}
 		}
-
-		// Delegate bean definition registration to scanner class.
-		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(parserContext.getRegistry());
-		scanner.setResourceLoader(resourceLoader);
 
 		// Register beanNameGenerator if className provided.
 		if (element.hasAttribute(NAME_GENERATOR_ATTRIBUTE)) {
@@ -123,8 +119,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		// Actually scan for bean definitions and register them.
-		Set<BeanDefinitionHolder> beanDefinitions =
-				scanner.doScan(basePackages, useDefaultFilters, excludeFilters, includeFilters);
+		Set<BeanDefinitionHolder> beanDefinitions = scanner.doScan(basePackages);
 
 		CompositeComponentDefinition compositeDef = new CompositeComponentDefinition(element.getTagName(), source);
 		for (Iterator it = beanDefinitions.iterator(); it.hasNext();) {

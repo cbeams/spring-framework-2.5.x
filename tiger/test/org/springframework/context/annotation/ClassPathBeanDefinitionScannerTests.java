@@ -16,9 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import junit.framework.TestCase;
 import org.aspectj.lang.annotation.Aspect;
 
@@ -30,7 +27,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
-import org.springframework.core.type.filter.TypeFilter;
 
 /**
  * @author Mark Fisher
@@ -133,10 +129,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 
 	public void testCustomIncludeFilterWithoutDefaultsButIncludingPostProcessors() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
-		List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
-		includeFilters.add(new AnnotationTypeFilter(CustomComponent.class));
-		int beanCount = scanner.scan(BASE_PACKAGE, false, null, includeFilters);
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, false);
+		scanner.addIncludeFilter(new AnnotationTypeFilter(CustomComponent.class));
+		int beanCount = scanner.scan(BASE_PACKAGE);
 		assertEquals(4, beanCount);
 		assertTrue(context.containsBean("messageBean"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
@@ -146,10 +141,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 
 	public void testCustomIncludeFilterWithoutDefaultsAndNoPostProcessors() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
-		List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
-		includeFilters.add(new AnnotationTypeFilter(CustomComponent.class));
-		int beanCount = scanner.scan(BASE_PACKAGE, false, null, includeFilters);
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, false);
+		scanner.addIncludeFilter(new AnnotationTypeFilter(CustomComponent.class));
+		int beanCount = scanner.scan(BASE_PACKAGE);
 		assertEquals(4, beanCount);
 		assertTrue(context.containsBean("messageBean"));
 		assertFalse(context.containsBean("serviceInvocationCounter"));
@@ -164,10 +158,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 	
 	public void testCustomIncludeFilterAndDefaults() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
-		List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
-		includeFilters.add(new AnnotationTypeFilter(CustomComponent.class));
-		int beanCount = scanner.scan(BASE_PACKAGE, true, null, includeFilters);
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, true);
+		scanner.addIncludeFilter(new AnnotationTypeFilter(CustomComponent.class));
+		int beanCount = scanner.scan(BASE_PACKAGE);
 		assertEquals(9, beanCount);
 		assertTrue(context.containsBean("messageBean"));
 		assertTrue(context.containsBean("serviceInvocationCounter"));
@@ -182,10 +175,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 
 	public void testCustomAnnotationExcludeFilterAndDefaults() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
-		List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
-		excludeFilters.add(new AnnotationTypeFilter(Aspect.class));
-		int beanCount = scanner.scan(BASE_PACKAGE, true, excludeFilters, null);
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, true);
+		scanner.addExcludeFilter(new AnnotationTypeFilter(Aspect.class));
+		int beanCount = scanner.scan(BASE_PACKAGE);
 		assertEquals(7, beanCount);
 		assertFalse(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("fooServiceImpl"));
@@ -199,10 +191,9 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 
 	public void testCustomAssignableTypeExcludeFilterAndDefaults() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
-		List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
-		excludeFilters.add(new AssignableTypeFilter(FooService.class));
-		int beanCount = scanner.scan(BASE_PACKAGE, true, excludeFilters, null);
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, true);
+		scanner.addExcludeFilter(new AssignableTypeFilter(FooService.class));
+		int beanCount = scanner.scan(BASE_PACKAGE);
 		assertEquals(7, beanCount);
 		assertFalse(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("serviceInvocationCounter"));
@@ -216,11 +207,10 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 
 	public void testCustomAssignableTypeExcludeFilterAndDefaultsWithoutPostProcessors() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, true);
 		scanner.setIncludeAnnotationConfig(false);
-		List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
-		excludeFilters.add(new AssignableTypeFilter(FooService.class));
-		int beanCount = scanner.scan(BASE_PACKAGE, true, excludeFilters, null);
+		scanner.addExcludeFilter(new AssignableTypeFilter(FooService.class));
+		int beanCount = scanner.scan(BASE_PACKAGE);
 		assertEquals(4, beanCount);
 		assertFalse(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("serviceInvocationCounter"));
@@ -234,11 +224,10 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 
 	public void testMultipleCustomExcludeFiltersAndDefaults() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
-		List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
-		excludeFilters.add(new AssignableTypeFilter(FooService.class));
-		excludeFilters.add(new AnnotationTypeFilter(Aspect.class));
-		int beanCount = scanner.scan(BASE_PACKAGE, true, excludeFilters, null);
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, true);
+		scanner.addExcludeFilter(new AssignableTypeFilter(FooService.class));
+		scanner.addExcludeFilter(new AnnotationTypeFilter(Aspect.class));
+		int beanCount = scanner.scan(BASE_PACKAGE);
 		assertEquals(6, beanCount);
 		assertFalse(context.containsBean("fooServiceImpl"));
 		assertFalse(context.containsBean("serviceInvocationCounter"));

@@ -22,8 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
 
 import org.springframework.beans.FatalBeanException;
@@ -34,16 +32,16 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.asm.CachingClassReaderFactory;
 import org.springframework.core.type.asm.ClassReaderFactory;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ClassUtils;
 
 /**
- * A component provider that scans the classpath from a base package (default is empty).
+ * A component provider that scans the classpath from a base package.
  * It then applies exclude and include filters to the resulting classes to find candidates.
  *
  * <p>This implementation is based on the ASM {@link org.objectweb.asm.ClassReader}.
@@ -57,91 +55,88 @@ import org.springframework.util.ClassUtils;
  * @see org.objectweb.asm.ClassReader
  * @see org.springframework.core.type.asm.AnnotationMetadataReadingVisitor
  */
-public class ClassPathScanningCandidateComponentProvider implements CandidateComponentProvider, ResourceLoaderAware {
-
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	private final String[] packageSearchPaths;
+public class ClassPathScanningCandidateComponentProvider implements ResourceLoaderAware {
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
 	private ClassReaderFactory classReaderFactory = new CachingClassReaderFactory(this.resourcePatternResolver);
 
-	private final List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
-
 	private final List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
 
+	private final List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
 
-	public ClassPathScanningCandidateComponentProvider(String basePackage) {
-		this(new String[] {basePackage}, true);
-	}
 
-	public ClassPathScanningCandidateComponentProvider(String basePackage, boolean useDefaultFilters) {
-		this(new String[] {basePackage}, useDefaultFilters);
-	}
-
-	public ClassPathScanningCandidateComponentProvider(String[] basePackages, boolean useDefaultFilters) {
-		this.packageSearchPaths = new String[basePackages.length];
-		for (int i = 0; i < basePackages.length; i++) {
-			this.packageSearchPaths[i] =
-					"classpath*:" + ClassUtils.convertClassNameToResourcePath(basePackages[i]) + "/**/*.class";
-		}
+	/**
+	 * Create a ClassPathScanningCandidateComponentProvider.
+	 * @param useDefaultFilters whether to include the default filters for the
+	 * <code>@Component</code> and <code>@Repository</code> annotations
+	 */
+	public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters) {
 		if (useDefaultFilters) {
-			initDefaultFilters();
+			this.includeFilters.add(new AnnotationTypeFilter(Component.class));
+			this.includeFilters.add(new AnnotationTypeFilter(Repository.class));
 		}
 	}
 
 
-	@SuppressWarnings("unchecked")
-	private void initDefaultFilters() {
-		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
-		this.includeFilters.add(new AnnotationTypeFilter(Repository.class));
-	}
-
+	/**
+	 * Set the ResourceLoader to use for resource locations.
+	 * This will typically be a ResourcePatternResolver implementation.
+	 * <p>Default is PathMatchingResourcePatternResolver, also capable of
+	 * resource pattern resolving through the ResourcePatternResolver interface.
+	 * @see org.springframework.core.io.support.ResourcePatternResolver
+	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
+	 */
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.classReaderFactory = new CachingClassReaderFactory(resourceLoader);
 	}
 
-	public void addExcludeFilter(TypeFilter excludeFilter) {
-		// add exclude filters to the front of the list
-		this.excludeFilters.add(0, excludeFilter);
-	}
-
+	/**
+	 * Add an include filter to the <i>end</i> of the list.
+	 */
 	public void addIncludeFilter(TypeFilter includeFilter) {
-		// add include filters to the end of the list
 		this.includeFilters.add(includeFilter);
 	}
 
+	/**
+	 * Add an exclude filter to the <i>front</i> of the list.
+	 */
+	public void addExcludeFilter(TypeFilter excludeFilter) {
+		this.excludeFilters.add(0, excludeFilter);
+	}
 
-	public Set<BeanDefinition> findCandidateComponents() {
+
+	/**
+	 * Scan the class path for candidate components.
+	 * @param basePackage the package to check for annotated classes
+	 * @return a corresponding Set of autodetected bean definitions
+	 */
+	public Set<BeanDefinition> findCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<BeanDefinition>();
-		for (int i = 0; i < this.packageSearchPaths.length; i++) {
-			try {
-				Resource[] resources = this.resourcePatternResolver.getResources(this.packageSearchPaths[i]);
-				for (int j = 0; j < resources.length; j++) {
-					Resource resource = resources[j];
-					ClassReader classReader = getClassReaderIfCandidate(resource);
-					if (classReader != null) {
-						ScannedRootBeanDefinition sbd = new ScannedRootBeanDefinition(classReader);
-						sbd.setSource(resource);
-						if (sbd.getMetadata().isConcrete()) {
-							candidates.add(sbd);
-						}
+		try {
+			String packageSearchPath =
+					"classpath*:" + ClassUtils.convertClassNameToResourcePath(basePackage) + "/**/*.class";
+			Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
+			for (int i = 0; i < resources.length; i++) {
+				Resource resource = resources[i];
+				ClassReader classReader = getClassReaderIfCandidate(resource);
+				if (classReader != null) {
+					ScannedRootBeanDefinition sbd = new ScannedRootBeanDefinition(classReader);
+					sbd.setSource(resource);
+					if (sbd.getMetadata().isConcrete()) {
+						candidates.add(sbd);
 					}
 				}
 			}
-			catch (IOException ex) {
-				throw new FatalBeanException("I/O failure during classpath scanning", ex);
-			}
+		}
+		catch (IOException ex) {
+			throw new FatalBeanException("I/O failure during classpath scanning", ex);
 		}
 		return candidates;
 	}
 
 	private ClassReader getClassReaderIfCandidate(Resource resource) throws IOException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Checking for candidate: " + resource);
-		}
 		ClassReader classReader = this.classReaderFactory.getClassReader(resource);
 		if (isCandidateComponent(classReader)) {
 			return classReader;

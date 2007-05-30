@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
@@ -26,12 +25,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.Assert;
 
 /**
@@ -49,27 +43,24 @@ import org.springframework.util.Assert;
  * @see org.springframework.stereotype.Component
  * @see org.springframework.stereotype.Repository
  */
-public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
+public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateComponentProvider {
 	
 	private final BeanDefinitionRegistry registry;
 
-	private ResourcePatternResolver resourcePatternResolver;
-
 	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
-	
-	private ScopeMetadataResolver scopeMetadataResolver;
-	
+
+	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
+
 	private boolean includeAnnotationConfig = true;
 
 
 	/**
-	 * A convenience constructor for using the default scopedProxyMode (no proxies).
+	 * Create a new ClassPathBeanDefinitionScanner for the given bean factory.
 	 * @param registry the BeanFactory to load bean definitions into,
 	 * in the form of a BeanDefinitionRegistry
-	 * @see #ClassPathBeanDefinitionScanner(BeanDefinitionRegistry, ScopedProxyMode)
 	 */
 	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry) {
-		this(registry, ScopedProxyMode.NO);
+		this(registry, true);
 	}
 	
 	/**
@@ -82,36 +73,22 @@ public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
 	 * @param registry the BeanFactory to load bean definitions into,
 	 * in the form of a BeanDefinitionRegistry
-	 * @param scopedProxyMode the proxy behavior for non-singleton scoped beans
+	 * @param useDefaultFilters whether to include the default filters for the
+	 * <code>@Component</code> and <code>@Repository</code> annotations
 	 * @see #setResourceLoader
 	 */
-	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, ScopedProxyMode scopedProxyMode) {
+	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters) {
+		super(useDefaultFilters);
+
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		this.registry = registry;
-		this.scopeMetadataResolver = new AnnotationScopeMetadataResolver(scopedProxyMode);
-		
+
 		// Determine ResourceLoader to use.
 		if (this.registry instanceof ResourceLoader) {
-			this.resourcePatternResolver =
-					ResourcePatternUtils.getResourcePatternResolver((ResourceLoader) this.registry);
-		}
-		else {
-			this.resourcePatternResolver = new PathMatchingResourcePatternResolver();
+			setResourceLoader((ResourceLoader) this.registry);
 		}
 	}
 
-
-	/**
-	 * Set the ResourceLoader to use for resource locations.
-	 * This will typically be a ResourcePatternResolver implementation.
-	 * <p>Default is PathMatchingResourcePatternResolver, also capable of
-	 * resource pattern resolving through the ResourcePatternResolver interface.
-	 * @see org.springframework.core.io.support.ResourcePatternResolver
-	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
-	 */
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
-	}
 
 	/**
 	 * Set the BeanNameGenerator to use for detected bean classes.
@@ -123,12 +100,24 @@ public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 	
 	/**
 	 * Set the ScopeMetadataResolver to use for detected bean classes.
-	 * <p>Default is an {@link AnnotationScopeMetadataResolver}.
+	 * Note that this will override any custom "scopedProxyMode" setting.
+	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
+	 * @see #setScopedProxyMode
 	 */
 	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
 		this.scopeMetadataResolver = scopeMetadataResolver;
 	}
-	
+
+	/**
+	 * Specify the proxy behavior for non-singleton scoped beans.
+	 * Note that this will override any custom "scopeMetadataResolver" setting.
+	 * <p>The default is {@link ScopedProxyMode#NO}.
+	 * @see #setScopeMetadataResolver
+	 */
+	public void setScopedProxyMode(ScopedProxyMode scopedProxyMode) {
+		this.scopeMetadataResolver = new AnnotationScopeMetadataResolver(scopedProxyMode);
+	}
+
 	/**
 	 * Specify whether to register annotation config post-processors.
 	 * <p>The default is to register the post-processors. Turn this off
@@ -140,43 +129,14 @@ public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 
 
 	/**
-	 * Perform a scan within the specified base package.
-	 * @param basePackage the package to check for annotated classes
-	 * @return number of beans registered
-	 */
-	public int scan(String basePackage) {
-		return scan(new String[] { basePackage });
-	}
-
-	/**
 	 * Perform a scan within the specified base packages.
 	 * @param basePackages the packages to check for annotated classes
 	 * @return number of beans registered
 	 */
-	public int scan(String[] basePackages) {
-		return scan(basePackages, true, null, null);
-	}
-
-	/**
-	 * Perform a scan within the specified base package.
-	 * @param basePackage the package to check for annotated classes
-	 * @return number of beans registered
-	 */
-	public int scan(String basePackage, boolean useDefaultFilters, List<TypeFilter> excludeFilters, List<TypeFilter> includeFilters) {
-		return scan(new String[] {basePackage}, useDefaultFilters, excludeFilters, includeFilters);
-	}
-
-	/**
-	 * Perform a scan within the specified base packages.
-	 * @param basePackages the packages to check for annotated classes
-	 * @return number of beans registered
-	 */
-	public int scan(String[] basePackages, boolean useDefaultFilters,
-			List<TypeFilter> excludeFilters, List<TypeFilter> includeFilters) {
-
+	public int scan(String... basePackages) {
 		int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
 
-		doScan(basePackages, useDefaultFilters, excludeFilters, includeFilters);
+		doScan(basePackages);
 
 		// Register annotation config processors, if necessary.
 		if (this.includeAnnotationConfig) {
@@ -186,7 +146,6 @@ public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 		return this.registry.getBeanDefinitionCount() - beanCountAtScanStart;
 	}
 
-
 	/**
 	 * Perform a scan within the specified base packages,
 	 * returning the registered bean definitions.
@@ -195,40 +154,23 @@ public class ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
 	 * @param basePackages the packages to check for annotated classes
 	 * @return number of beans registered
 	 */
-	protected Set<BeanDefinitionHolder> doScan(String[] basePackages, boolean useDefaultFilters,
-			List<TypeFilter> excludeFilters, List<TypeFilter> includeFilters) {
-
-		// Create the candidate component provider.
-		ClassPathScanningCandidateComponentProvider candidateComponentProvider =
-				new ClassPathScanningCandidateComponentProvider(basePackages, useDefaultFilters);
-		candidateComponentProvider.setResourceLoader(this.resourcePatternResolver);
-
-		if (excludeFilters != null) {
-			for (TypeFilter excludeFilter : excludeFilters) {
-				candidateComponentProvider.addExcludeFilter(excludeFilter);
-			}
-		}
-		if (includeFilters != null) {
-			for (TypeFilter includeFilter : includeFilters) {
-				candidateComponentProvider.addIncludeFilter(includeFilter);
-			}
-		}
-
-		// Find candidate components...
-		Set<BeanDefinition> candidates = candidateComponentProvider.findCandidateComponents();
+	protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<BeanDefinitionHolder>();
-		for (BeanDefinition candidate : candidates) {
-			String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
-			if (checkBeanName(beanName, candidate)) {
-				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
-				BeanDefinition beanDefinition = applyScope(candidate, beanName, scopeMetadata);
-				beanDefinitions.add(new BeanDefinitionHolder(beanDefinition, beanName));
-				this.registry.registerBeanDefinition(beanName, beanDefinition);
+		for (int i = 0; i < basePackages.length; i++) {
+			Set<BeanDefinition> candidates = findCandidateComponents(basePackages[i]);
+			for (BeanDefinition candidate : candidates) {
+				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+				if (checkBeanName(beanName, candidate)) {
+					ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+					BeanDefinition beanDefinition = applyScope(candidate, beanName, scopeMetadata);
+					beanDefinitions.add(new BeanDefinitionHolder(beanDefinition, beanName));
+					this.registry.registerBeanDefinition(beanName, beanDefinition);
+				}
 			}
 		}
-
 		return beanDefinitions;
 	}
+
 
 	/**
 	 * Check the given bean name, determining whether the corresponding
