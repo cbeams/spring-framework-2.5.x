@@ -79,9 +79,9 @@
 			<xsd:attribute name="scoped-proxy">
 				<xsd:simpleType>
 					<xsd:restriction base="xsd:string">
-						<xsd:enumeration value="NO"/>
-						<xsd:enumeration value="INTERFACES"/>
-						<xsd:enumeration value="TARGET_CLASS"/>
+						<xsd:enumeration value="no"/>
+						<xsd:enumeration value="interfaces"/>
+						<xsd:enumeration value="targetClass"/>
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>
@@ -150,10 +150,9 @@
 		<xsd:attribute name="type" use="required">
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
-					<xsd:enumeration value="ASSIGNABLE_TYPE"/>
-					<xsd:enumeration value="ANNOTATION"/>
-					<xsd:enumeration value="REGEX_PATTERN"/>
-					<!-- xsd:enumeration value="ASPECTJ_PATTERN"/ -->
+					<xsd:enumeration value="annotation"/>
+					<xsd:enumeration value="assignable"/>
+					<xsd:enumeration value="regex"/>
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>

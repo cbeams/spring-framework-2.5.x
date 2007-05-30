@@ -106,28 +106,39 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			}
 		}
 
-		// Register beanNameGenerator if className provided.
+		// Register BeanNameGenerator if class name provided.
 		if (element.hasAttribute(NAME_GENERATOR_ATTRIBUTE)) {
 			BeanNameGenerator beanNameGenerator = (BeanNameGenerator) instantiateUserDefinedStrategy(
 					element.getAttribute(NAME_GENERATOR_ATTRIBUTE), BeanNameGenerator.class, resourceLoader.getClassLoader());
 			scanner.setBeanNameGenerator(beanNameGenerator);
 		}
 
-		// Set scoped-proxy mode on scanner if provided
-		if (element.hasAttribute(SCOPED_PROXY_ATTRIBUTE)) {
-			if (element.hasAttribute(SCOPE_RESOLVER_ATTRIBUTE)) {
-				throw new FatalBeanException(
-						"cannot specify both 'scoped-proxy' and 'scope-resolver' attributes on the 'component-scan' element.");
-			}
-			ScopedProxyMode mode = ScopedProxyMode.valueOf(element.getAttribute(SCOPED_PROXY_ATTRIBUTE));
-			scanner.setScopedProxyMode(mode);
-		}
-		
-		// Register scopeMetadataResolver if className provided.
+		// Register ScopeMetadataResolver if class name provided.
 		if (element.hasAttribute(SCOPE_RESOLVER_ATTRIBUTE)) {
+			if (element.hasAttribute(SCOPED_PROXY_ATTRIBUTE)) {
+				parserContext.getReaderContext().error(
+						"Cannot define both 'scope-resolver' and 'scoped-proxy' on <component-scan> tag.", element);
+			}
 			ScopeMetadataResolver scopeMetadataResolver = (ScopeMetadataResolver) instantiateUserDefinedStrategy(
 					element.getAttribute(SCOPE_RESOLVER_ATTRIBUTE), ScopeMetadataResolver.class, resourceLoader.getClassLoader());
 			scanner.setScopeMetadataResolver(scopeMetadataResolver);
+		}
+
+		// Set scoped-proxy mode on scanner if provided.
+		if (element.hasAttribute(SCOPED_PROXY_ATTRIBUTE)) {
+			String mode = element.getAttribute(SCOPED_PROXY_ATTRIBUTE);
+			if ("targetClass".equals(mode)) {
+				scanner.setScopedProxyMode(ScopedProxyMode.TARGET_CLASS);
+			}
+			else if ("interfaces".equals(mode)) {
+				scanner.setScopedProxyMode(ScopedProxyMode.INTERFACES);
+			}
+			else if ("no".equals(mode)) {
+				scanner.setScopedProxyMode(ScopedProxyMode.NO);
+			}
+			else {
+				throw new IllegalArgumentException("scoped-proxy only supports 'no', 'interfaces' and 'targetClass'");
+			}
 		}
 
 		// Actually scan for bean definitions and register them.
@@ -153,49 +164,45 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	@SuppressWarnings("unchecked")
 	private Object instantiateUserDefinedStrategy(String className, Class strategyType, ClassLoader classLoader) {
 		Object result = null;
-		
 		try {
 			Class clazz = Class.forName(className, true, classLoader);
 			result = clazz.newInstance();
 		}
 		catch (ClassNotFoundException ex) {
-			throw new BeanCreationException("no class [" + className + "] found for strategy [" +
-					strategyType.getName() + "]", ex);
+			throw new BeanCreationException("Class [" + className + "] for strategy [" +
+					strategyType.getName() + "] not found", ex);
 		}
 		catch (Exception ex) {
-			throw new BeanCreationException("unable to instantiate class [" + className + "] for strategy [" + 
+			throw new BeanCreationException("Unable to instantiate class [" + className + "] for strategy [" +
 					strategyType.getName() + "]. A zero-argument constructor is required", ex);
 		}
 		
 		if (!strategyType.isAssignableFrom(result.getClass())) {
-			throw new BeanCreationException("provided classname must be an implementation of " + strategyType);
+			throw new BeanCreationException("Provided class name must be an implementation of " + strategyType);
 		}
 		return result;
 	}
 	
 	@SuppressWarnings("unchecked")
 	private TypeFilter createTypeFilter(Element element, ClassLoader classLoader) {
-		String filterTypeName = element.getAttribute(FILTER_TYPE_ATTRIBUTE);
+		String filterType = element.getAttribute(FILTER_TYPE_ATTRIBUTE);
 		String expression = element.getAttribute(FILTER_EXPRESSION_ATTRIBUTE);
-		FilterType type = FilterType.valueOf(filterTypeName);
 		try {
-			switch (type) {
-				case ANNOTATION :
-					return new AnnotationTypeFilter((Class<Annotation>) classLoader.loadClass(expression));
-				case ASSIGNABLE_TYPE :
-					return new AssignableTypeFilter(classLoader.loadClass(expression));
-				case REGEX_PATTERN :
-					return new RegexPatternTypeFilter(Pattern.compile(expression));
-				/* TODO: add this after reintroducing the AspectJPatternTypeFilter
-				case ASPECTJ_PATTERN :
-					return new AspectJPatternTypeFilter(expression);
-				*/
-				default : 
-					throw new IllegalStateException("unsupported type-filter: " + filterTypeName);
+			if ("annotation".equals(filterType)) {
+				return new AnnotationTypeFilter((Class<Annotation>) classLoader.loadClass(expression));
+			}
+			else if ("assignable".equals(filterType)) {
+				return new AssignableTypeFilter(classLoader.loadClass(expression));
+			}
+			else if ("regex".equals(filterType)) {
+				return new RegexPatternTypeFilter(Pattern.compile(expression));
+			}
+			else {
+				throw new IllegalArgumentException("Unsupported filter type: " + filterType);
 			}
 		}
-		catch (ClassNotFoundException e) {
-			throw new FatalBeanException("no class for type-filter: " + type, e);
+		catch (ClassNotFoundException ex) {
+			throw new FatalBeanException("Type filter class not found: " + expression, ex);
 		}
 	}
 
