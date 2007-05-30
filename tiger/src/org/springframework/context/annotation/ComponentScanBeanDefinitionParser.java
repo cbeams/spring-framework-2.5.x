@@ -62,6 +62,8 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	private static final String NAME_GENERATOR_ATTRIBUTE = "name-generator";
 	
 	private static final String SCOPE_RESOLVER_ATTRIBUTE = "scope-resolver";
+	
+	private static final String SCOPED_PROXY_ATTRIBUTE = "scoped-proxy";
 
 	private static final String EXCLUDE_FILTER_ELEMENT = "exclude-filter";
 
@@ -111,6 +113,16 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			scanner.setBeanNameGenerator(beanNameGenerator);
 		}
 
+		// Set scoped-proxy mode on scanner if provided
+		if (element.hasAttribute(SCOPED_PROXY_ATTRIBUTE)) {
+			if (element.hasAttribute(SCOPE_RESOLVER_ATTRIBUTE)) {
+				throw new FatalBeanException(
+						"cannot specify both 'scoped-proxy' and 'scope-resolver' attributes on the 'component-scan' element.");
+			}
+			ScopedProxyMode mode = ScopedProxyMode.valueOf(element.getAttribute(SCOPED_PROXY_ATTRIBUTE));
+			scanner.setScopedProxyMode(mode);
+		}
+		
 		// Register scopeMetadataResolver if className provided.
 		if (element.hasAttribute(SCOPE_RESOLVER_ATTRIBUTE)) {
 			ScopeMetadataResolver scopeMetadataResolver = (ScopeMetadataResolver) instantiateUserDefinedStrategy(

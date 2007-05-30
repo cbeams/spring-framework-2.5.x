@@ -76,6 +76,15 @@
 			<xsd:attribute name="annotation-config" type="xsd:boolean" default="true"/>
 			<xsd:attribute name="name-generator" type="xsd:string"/>
 			<xsd:attribute name="scope-resolver" type="xsd:string"/>
+			<xsd:attribute name="scoped-proxy">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="NO"/>
+						<xsd:enumeration value="INTERFACES"/>
+						<xsd:enumeration value="TARGET_CLASS"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
