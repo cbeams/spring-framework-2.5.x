@@ -26,8 +26,10 @@ Package org.springframework.beans
 * CustomBooleanEditor trims text before comparing against true/false Strings
 * added temporary ClassLoader support to ConfigurableBeanFactory / AbstractBeanFactory
 * mirrored FactoryBean's "getObjectType()" as abstract method in AbstractFactoryBean again, for @Override compatibility
-* PropertyResourceConfigurer (and in particular PropertyPlaceholderConfigurer) is marked as PriorityOrdered
 * reworked SmartInstantiationAwareBeanPostProcessor's "determineConstructor" hook into "determineCandidateConstructors"
+* added "resolveAliases" method to ConfigurableBeanFactory, applying a given StringValueResolver
+* PropertyPlaceholderConfigurer applies its placeholder parsing to alias target names and aliases as well
+* PropertyResourceConfigurer (and in particular PropertyPlaceholderConfigurer) is marked as PriorityOrdered
 * BeanWiringInfo and ClassName/AnnotationBeanWiringInfoResolver support the notion of a 'default' bean name
 * @Configurable applies factory callbacks (BeanFactoryAware, InitializingBean etc) and post-processors as well
 * @Configurable applies factory callbacks and post-processors if no bean definition found for default bean name
@@ -55,6 +57,8 @@ Package org.springframework.context
 * added "context:load-time-weaver" XML tag, building a default LoadTimeWeaver and enabling AspectJ load-time weaving
 * introduced ScannedRootBeanDefinition class for autodetected components
 * added @Scope annotation for autodetected components, indicating the target bean scope in the Spring context
+* reworked ClassPathBeanDefinitionScanner into subclass of ClasspathScanningCandidateComponentProvider
+* ClassPathBeanDefinitionScanner provides "addIncludeFilter" etc config methods instead of overloaded "scan" methods
 * reworked ComponentBeanNameGenerator into AnnotationBeanNameGenerator, handling @Repository name values as well
 * explicit bean names indicated by autodetected components are enforced, only to be overridden by explicit definitions
 
