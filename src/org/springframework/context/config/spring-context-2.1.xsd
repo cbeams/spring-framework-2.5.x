@@ -57,8 +57,7 @@
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	Scans the classpath for annotated components that will be auto-registered as Spring beans.
-	By default, the Spring-provided @Component and @Repository stereotypes will be detected,
-	as well as AspectJ-5-style @Aspect classes.
+	By default, the Spring-provided @Component and @Repository stereotypes will be detected.
 
 	Note: This tag implies the effects of the 'annotation-config' tag, activating @Autowired,
 	@Required, @PostConstruct, @PreDestroy and @Resource annotations in the component classes,
@@ -69,8 +68,8 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="exclude-filter" type="filterType" minOccurs="0" maxOccurs="unbounded"/>
 				<xsd:element name="include-filter" type="filterType" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="exclude-filter" type="filterType" minOccurs="0" maxOccurs="unbounded"/>
 			</xsd:sequence>
 			<xsd:attribute name="base-package" type="xsd:string" use="required"/>
 			<xsd:attribute name="use-default-filters" type="xsd:boolean" default="true"/>
