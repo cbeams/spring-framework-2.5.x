@@ -25,14 +25,14 @@ import java.util.Set;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
- * Visitor base class for traversing {@link BeanDefinition} objects, in particular
- * the property values and constructor argument values contained in them.
- *
- * <p>The abstract {@link #resolveStringValue} method has to be implemented
- * in concrete subclasses, following arbitrary resolution strategies.
+ * Visitor class for traversing {@link BeanDefinition} objects, in particular
+ * the property values and constructor argument values contained in them,
+ * resolving bean metadata values.
  *
  * <p>Used by {@link PropertyPlaceholderConfigurer} to parse all String values
  * contained in a BeanDefinition, resolving any placeholders found.
@@ -42,10 +42,30 @@ import org.springframework.util.ObjectUtils;
  * @see BeanDefinition
  * @see BeanDefinition#getPropertyValues
  * @see BeanDefinition#getConstructorArgumentValues
- * @see #resolveStringValue(String)
  * @see PropertyPlaceholderConfigurer
  */
-public abstract class BeanDefinitionVisitor {
+public class BeanDefinitionVisitor {
+
+	private StringValueResolver valueResolver;
+
+
+	/**
+	 * Create a new BeanDefinitionVisitor, applying the specified
+	 * value resolver to all bean metadata values.
+	 * @param valueResolver the StringValueResolver to apply
+	 */
+	public BeanDefinitionVisitor(StringValueResolver valueResolver) {
+		Assert.notNull(valueResolver, "StringValueResolver must not be null");
+		this.valueResolver = valueResolver;
+	}
+
+	/**
+	 * Create a new BeanDefinitionVisitor for subclassing.
+	 * Subclasses need to override the {@link #resolveStringValue} method.
+	 */
+	protected BeanDefinitionVisitor() {
+	}
+
 
 	/**
 	 * Traverse the given BeanDefinition object and the MutablePropertyValues
@@ -195,6 +215,12 @@ public abstract class BeanDefinitionVisitor {
 	 * @param strVal the original String value
 	 * @return the resolved String value
 	 */
-	protected abstract String resolveStringValue(String strVal);
+	protected String resolveStringValue(String strVal) {
+		if (this.valueResolver == null) {
+			throw new IllegalStateException("No StringValueResolver specified - pass a resolver " +
+					"object into the constructor or override the 'resolveStringValue' method");
+		}
+		return this.valueResolver.resolveStringValue(strVal);
+	}
 
 }

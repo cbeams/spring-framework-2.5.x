@@ -26,6 +26,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.core.Constants;
+import org.springframework.util.StringValueResolver;
 
 /**
  * A property resource configurer that resolves placeholders in bean property values of
@@ -235,7 +236,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
 			throws BeansException {
 
-		BeanDefinitionVisitor visitor = new PlaceholderResolvingBeanDefinitionVisitor(props);
+		StringValueResolver valueResolver = new PlaceholderResolvingStringValueResolver(props);
+		BeanDefinitionVisitor visitor = new BeanDefinitionVisitor(valueResolver);
+
 		String[] beanNames = beanFactoryToProcess.getBeanDefinitionNames();
 		for (int i = 0; i < beanNames.length; i++) {
 			// Check that we're not parsing our own bean definition,
@@ -250,6 +253,9 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 				}
 			}
 		}
+
+		// New in Spring 2.1: resolve placeholders in alias target names and aliases as well.
+		beanFactoryToProcess.resolveAliases(valueResolver);
 	}
 
 	/**
@@ -385,15 +391,15 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * delegating to the <code>parseStringValue</code> method of the
 	 * containing class.
 	 */
-	private class PlaceholderResolvingBeanDefinitionVisitor extends BeanDefinitionVisitor {
+	private class PlaceholderResolvingStringValueResolver implements StringValueResolver {
 
 		private final Properties props;
 
-		public PlaceholderResolvingBeanDefinitionVisitor(Properties props) {
+		public PlaceholderResolvingStringValueResolver(Properties props) {
 			this.props = props;
 		}
 
-		protected String resolveStringValue(String strVal) throws BeansException {
+		public String resolveStringValue(String strVal) throws BeansException {
 			return parseStringValue(strVal, this.props, new HashSet());
 		}
 	}

@@ -89,6 +89,18 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		ctx.close();
 	}
 
+	public void testAliasWithPlaceholder() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				new String[] {
+					"/org/springframework/context/support/test/contextB.xml",
+					"/org/springframework/context/support/test/aliased-contextC.xml",
+					"/org/springframework/context/support/test/contextA.xml"});
+		assertTrue(ctx.containsBean("service"));
+		assertTrue(ctx.containsBean("logicOne"));
+		assertTrue(ctx.containsBean("logicTwo"));
+		ctx.refresh();
+	}
+
 	public void testContextWithInvalidValueType() throws IOException {
 		try {
 			new ClassPathXmlApplicationContext("invalidValueType.xml", getClass());

@@ -59,6 +59,7 @@ import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Abstract base class for {@link org.springframework.beans.factory.BeanFactory}
@@ -510,7 +511,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		synchronized (this.aliasMap) {
 			for (Iterator it = this.aliasMap.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
-				if (entry.getValue().equals(beanName)) {
+				String registeredName = (String) entry.getValue();
+				if (registeredName.equals(beanName)) {
 					String key = (factoryPrefix ? FACTORY_BEAN_PREFIX : "") + entry.getKey();
 					if (!key.equals(name)) {
 						aliases.add(key);
@@ -697,12 +699,38 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
 			}
 			synchronized (this.aliasMap) {
-				Object registeredName = this.aliasMap.get(alias);
+				String registeredName = (String) this.aliasMap.get(alias);
 				if (registeredName != null && !registeredName.equals(beanName)) {
 					throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" +
-							beanName + "': It's already registered for bean name '" + registeredName + "'.");
+							beanName + "': It is already registered for bean name '" + registeredName + "'.");
 				}
 				this.aliasMap.put(alias, beanName);
+			}
+		}
+	}
+
+	public void resolveAliases(StringValueResolver valueResolver) {
+		Assert.notNull(valueResolver, "StringValueResolver must not be null");
+		synchronized (this.aliasMap) {
+			Map aliasCopy = new HashMap(this.aliasMap);
+			for (Iterator it = aliasCopy.keySet().iterator(); it.hasNext();) {
+				String alias = (String) it.next();
+				String registeredName = (String) aliasCopy.get(alias);
+				String resolvedAlias = valueResolver.resolveStringValue(alias);
+				String resolvedName = valueResolver.resolveStringValue(registeredName);
+				if (!resolvedAlias.equals(alias)) {
+					String existingName = (String) this.aliasMap.get(resolvedAlias);
+					if (existingName != null && !existingName.equals(resolvedName)) {
+						throw new BeanDefinitionStoreException("Cannot register resolved alias '" +
+								resolvedAlias + "' (original: '" + alias + "') for bean name '" + resolvedName +
+								"': It is already registered for bean name '" + registeredName + "'.");
+					}
+					this.aliasMap.put(resolvedAlias, resolvedName);
+					this.aliasMap.remove(alias);
+				}
+				else if (!registeredName.equals(resolvedName)) {
+					this.aliasMap.put(alias, resolvedName);
+				}
 			}
 		}
 	}

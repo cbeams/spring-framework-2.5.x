@@ -23,6 +23,7 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Configuration interface to be implemented by most bean factories. Provides
@@ -202,11 +203,20 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * <p>Typically invoked during factory configuration, but can also be
 	 * used for runtime registration of aliases. Therefore, a factory
 	 * implementation should synchronize alias access.
-	 * @param beanName the canonical name of the bean
+	 * @param beanName the canonical name of the target bean
 	 * @param alias the alias to be registered for the bean
 	 * @throws BeanDefinitionStoreException if the alias is already in use
 	 */
 	void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException;
+
+	/**
+	 * Resolve all alias target names and aliases registered in this
+	 * factory, applying the given StringValueResolver to them.
+	 * <p>The value resolver may for example resolve placeholders
+	 * in target bean names and even in alias names.
+	 * @param valueResolver the StringValueResolver to apply
+	 */
+	void resolveAliases(StringValueResolver valueResolver);
 
 	/**
 	 * Return whether the specified bean is currently in creation.
