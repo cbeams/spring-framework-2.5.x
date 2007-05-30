@@ -46,11 +46,11 @@ import org.springframework.util.ClassUtils;
  *
  * <p>This implementation is based on the ASM {@link org.objectweb.asm.ClassReader}.
  *
+ * @author Mark Fisher
+ * @author Juergen Hoeller
  * @author Costin Leau
  * @author Rod Johnson
- * @author Mark Fisher
  * @author Ramnivas Laddad
- * @author Juergen Hoeller
  * @since 2.1
  * @see org.objectweb.asm.ClassReader
  * @see org.springframework.core.type.asm.AnnotationMetadataReadingVisitor
@@ -68,13 +68,13 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 
 	/**
 	 * Create a ClassPathScanningCandidateComponentProvider.
-	 * @param useDefaultFilters whether to include the default filters for the
+	 * @param useDefaultFilters whether to register the default filters for the
 	 * <code>@Component</code> and <code>@Repository</code> annotations
+	 * @see #registerDefaultFilters()
 	 */
 	public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters) {
 		if (useDefaultFilters) {
-			this.includeFilters.add(new AnnotationTypeFilter(Component.class));
-			this.includeFilters.add(new AnnotationTypeFilter(Repository.class));
+			registerDefaultFilters();
 		}
 	}
 
@@ -93,17 +93,42 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	}
 
 	/**
-	 * Add an include filter to the <i>end</i> of the list.
+	 * Add an include type filter to the <i>end</i> of the inclusion list.
 	 */
 	public void addIncludeFilter(TypeFilter includeFilter) {
 		this.includeFilters.add(includeFilter);
 	}
 
 	/**
-	 * Add an exclude filter to the <i>front</i> of the list.
+	 * Add an exclude type filter to the <i>front</i> of the exclusion list.
 	 */
 	public void addExcludeFilter(TypeFilter excludeFilter) {
 		this.excludeFilters.add(0, excludeFilter);
+	}
+
+	/**
+	 * Reset the configured type filters.
+	 * @param useDefaultFilters whether to re-register the default filters for the
+	 * <code>@Component</code> and <code>@Repository</code> annotations
+	 * @see #registerDefaultFilters()
+	 */
+	public void resetFilters(boolean useDefaultFilters) {
+		this.includeFilters.clear();
+		this.excludeFilters.clear();
+		if (useDefaultFilters) {
+			registerDefaultFilters();
+		}
+	}
+
+	/**
+	 * Register the default filters for the <code>@Component</code>
+	 * and <code>@Repository</code> annotations.
+	 * @see org.springframework.stereotype.Component
+	 * @see org.springframework.stereotype.Repository
+	 */
+	protected void registerDefaultFilters() {
+		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
+		this.includeFilters.add(new AnnotationTypeFilter(Repository.class));
 	}
 
 
