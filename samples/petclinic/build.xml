@@ -104,8 +104,8 @@
 			<include name="jta.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
-			<include name="commons-dbcp.jar"/>
 			<include name="commons-collections.jar"/>
+			<include name="commons-dbcp.jar"/>
 			<include name="commons-lang.jar"/>
 			<include name="commons-pool.jar"/>
 		</fileset>
