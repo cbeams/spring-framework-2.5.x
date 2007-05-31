@@ -100,10 +100,10 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
-	
+
 	protected final ParameterNameDiscoverer parameterNameDiscoverer;
-	
-	
+
+
 	protected AbstractAspectJAdvisorFactory() {
 		PrioritizedParameterNameDiscoverer prioritizedParameterNameDiscoverer = new PrioritizedParameterNameDiscoverer();
 		prioritizedParameterNameDiscoverer.addDiscoverer(ASPECTJ_ANNOTATION_PARAMETER_NAME_DISCOVERER);
@@ -118,20 +118,19 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 */
 	public boolean isAspect(Class<?> clazz) {
 		return (AjTypeSystem.getAjType(clazz).isAspect() && 
-				hasAspectAnnotation(clazz) &&
-				!compiledByAjc(clazz));
+				hasAspectAnnotation(clazz) && !compiledByAjc(clazz));
 	}
-	
+
 	private boolean hasAspectAnnotation(Class<?> clazz) {
 		return clazz.isAnnotationPresent(Aspect.class);
 	}
-	
-	/*
-	 * we need to detect this as "code-style" AspectJ aspects should not be
+
+	/**
+	 * We need to detect this as "code-style" AspectJ aspects should not be
 	 * interpreted by Spring AOP. 
 	 */
 	private boolean compiledByAjc(Class<?> clazz) {
-		// the AJTypeSystem goes to great lengths to provide a uniform appearance between code-style and
+		// The AJTypeSystem goes to great lengths to provide a uniform appearance between code-style and
 		// annotation-style aspects. Therefore there is no 'clean' way to tell them apart. Here we rely on
 		// an implementation detail of the AspectJ compiler.
 		for (Field field : clazz.getDeclaredFields()) {

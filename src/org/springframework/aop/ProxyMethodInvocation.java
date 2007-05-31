@@ -26,6 +26,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * if necessary, for example if the invocation target returned itself.
  *
  * @author Juergen Hoeller
+ * @author Adrian Colyer
  * @since 1.1.3
  * @see org.springframework.aop.framework.ReflectiveMethodInvocation
  * @see org.springframework.aop.support.DelegatingIntroductionInterceptor
@@ -61,9 +62,10 @@ public interface ProxyMethodInvocation extends MethodInvocation {
 	/**
 	 * Set the arguments to be used on subsequent invocations in the any advice
 	 * in this chain.
+	 * @param arguments the argument array
 	 */
 	void setArguments(Object[] arguments);
-	
+
 	/**
 	 * Add the specified user attribute with the given value to this invocation.
 	 * <p>Such attributes are not used within the AOP framework itself. They are

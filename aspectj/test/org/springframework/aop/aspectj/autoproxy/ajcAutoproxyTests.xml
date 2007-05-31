@@ -6,12 +6,12 @@
 				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
 	<aop:aspectj-autoproxy/>
-	
-	<bean id="myAspect" class="org.springframework.aop.aspectj.autoproxy.CodeStyleAspect" 
-	      factory-method="aspectOf">
-	      <property name="foo" value="bar"/>
+
+	<bean id="myAspect" class="org.springframework.aop.aspectj.autoproxy.CodeStyleAspect"
+			factory-method="aspectOf">
+		<property name="foo" value="bar"/>
 	</bean>
-	
+
 	<bean id="otherBean" class="java.lang.Object"/>
 
 </beans>

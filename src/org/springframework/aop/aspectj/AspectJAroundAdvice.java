@@ -48,7 +48,7 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 	public boolean isAfterAdvice() {
 		return false;
 	}
-	
+
 	protected boolean supportsProceedingJoinPoint() {
 		return true;
 	}

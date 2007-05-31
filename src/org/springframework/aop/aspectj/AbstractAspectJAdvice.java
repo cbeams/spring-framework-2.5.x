@@ -356,7 +356,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			return false;
 		}
 	}
-	
+
 	private boolean maybeBindProceedingJoinPoint(Class candidateParameterType) {
 		if (candidateParameterType.equals(ProceedingJoinPoint.class)) {
 			if (!supportsProceedingJoinPoint()) {
@@ -369,7 +369,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			return false;
 		}		
 	}
-	
+
 	protected boolean supportsProceedingJoinPoint() {
 		return false;
 	}
