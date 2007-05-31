@@ -332,7 +332,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 		int numUnboundArgs = this.adviceInvocationArgumentCount;
 		Class[] parameterTypes = this.aspectJAdviceMethod.getParameterTypes();
-		if (maybeBindJoinPoint(parameterTypes[0])) {
+		if (maybeBindJoinPoint(parameterTypes[0]) || maybeBindProceedingJoinPoint(parameterTypes[0])) {
 			numUnboundArgs--;
 		} 
 		else if (maybeBindJoinPointStaticPart(parameterTypes[0])) {
@@ -348,14 +348,30 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 	private boolean maybeBindJoinPoint(Class candidateParameterType) {
-		if ((candidateParameterType.equals(JoinPoint.class)) ||
-			(candidateParameterType.equals(ProceedingJoinPoint.class))) {
+		if (candidateParameterType.equals(JoinPoint.class)) {
 			this.joinPointArgumentIndex = 0;
 			return true;
 		}
 		else {
 			return false;
 		}
+	}
+	
+	private boolean maybeBindProceedingJoinPoint(Class candidateParameterType) {
+		if (candidateParameterType.equals(ProceedingJoinPoint.class)) {
+			if (!supportsProceedingJoinPoint()) {
+				throw new IllegalArgumentException("ProceedingJoinPoint is only supported for around advice");
+			}
+			this.joinPointArgumentIndex = 0;
+			return true;
+		}
+		else {
+			return false;
+		}		
+	}
+	
+	protected boolean supportsProceedingJoinPoint() {
+		return false;
 	}
 
 	private boolean maybeBindJoinPointStaticPart(Class candidateParameterType) {
