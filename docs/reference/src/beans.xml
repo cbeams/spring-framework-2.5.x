@@ -4191,7 +4191,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
         demonstrated the possibility of providing a considerable amount of the configuration
         metadata within source-level annotations. Even in those examples, however, the "base"
         bean definitions were explicitly defined in the XML file while the annotations were
-        driving the dependency injection. The current section will introduce an option for
+        driving the dependency injection only. The current section will introduce an option for
         implicitly detecting the <emphasis>candidate beans</emphasis> by scanning the classpath
         and matching against <emphasis>filters</emphasis>.</para>
         <section id="beans-stereotype-annotations">
@@ -4298,8 +4298,8 @@ public class JpaMovieFinder implements MovieFinder {
             <programlisting><![CDATA[<beans ...>
                
      <context:component-scan base-package="org.example">
-        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
         <context:include-filter type="regex" expression=".*Stub.*Repository"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
      </context:component-scan>
      
 </beans>]]></programlisting>
