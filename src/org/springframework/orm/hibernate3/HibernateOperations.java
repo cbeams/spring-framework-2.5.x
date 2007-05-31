@@ -48,8 +48,8 @@ import org.springframework.dao.DataAccessException;
  *
  * <p>Note that lazy loading will just work with an open Hibernate
  * <code>Session</code>, either within a transaction or within
- * {@link org.springframework.orm.hibernate.support.OpenSessionInViewFilter}/
- * {@link org.springframework.orm.hibernate.support.OpenSessionInViewInterceptor}.
+ * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter}/
+ * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
  * Furthermore, some operations just make sense within transactions,
  * for example: <code>contains</code>, <code>evict</code>, <code>lock</code>,
  * <code>flush</code>, <code>clear</code>.

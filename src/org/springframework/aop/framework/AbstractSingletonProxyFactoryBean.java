@@ -97,7 +97,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	 * <p>Note that this is just necessary if you rely on those interceptors in general:
 	 * HibernateTemplate and JdoTemplate work nicely with JtaTransactionManager through
 	 * implicit on-demand thread binding.
-	 * @see org.springframework.orm.hibernate.HibernateInterceptor
+	 * @see org.springframework.orm.hibernate3.HibernateInterceptor
 	 * @see org.springframework.orm.jdo.JdoInterceptor
 	 */
 	public void setPostInterceptors(Object[] postInterceptors) {

@@ -80,7 +80,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * @see TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
- * @see org.springframework.orm.hibernate.HibernateTransactionManager
+ * @see org.springframework.orm.hibernate3.HibernateTransactionManager
  */
 public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager, Serializable {
 
