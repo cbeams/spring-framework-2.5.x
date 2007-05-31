@@ -13,69 +13,75 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+
 import org.springframework.core.Ordered;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
- * Test for SPR-3522.  Arguments changed on a call to proceed should be
+ * Test for SPR-3522. Arguments changed on a call to proceed should be
  * visible to advice further down the invocation chain.
- * 
- * @author acolyer
  *
+ * @author Adrian Colyer
  */
 public class ProceedTests extends AbstractDependencyInjectionSpringContextTests {
 
 	private SimpleBean testBean;
+
 	private ProceedTestingAspect testAspect;
+
 	private ProceedTestingAspect secondTestAspect;
-	
+
+
 	public ProceedTests() {
 		setAutowireMode(AUTOWIRE_BY_NAME);
 	}
-	
+
 	protected String[] getConfigLocations() {
 		return new String[] {"org/springframework/aop/aspectj/proceedTests.xml"};
 	}
-	
+
 	public void setFirstTestAspect(ProceedTestingAspect anAspect) {
 		this.testAspect = anAspect;
 	}
-	
+
 	public void setSecondTestAspect(ProceedTestingAspect anAspect) {
 		this.secondTestAspect = anAspect;
 	}
-	
+
 	public void setTestBean(SimpleBean aBean) {
 		this.testBean = aBean;
 	}
-	
+
+
 	public void testSimpleProceedWithChangedArgs() {
 		this.testBean.setName("abc");
 		assertEquals("Name changed in around advice", "ABC",this.testBean.getName());
 	}
-	
+
 	public void testGetArgsIsDefensive() {
 		this.testBean.setAge(5);
 		assertEquals("getArgs is defensive",5,this.testBean.getAge());
 	}
-	
+
 	public void testProceedWithArgsInSameAspect() {
 		this.testBean.setMyFloat(1.0F);
 		assertTrue("value changed in around advice",this.testBean.getMyFloat() > 1.9F);
 		assertTrue("changed value visible to next advice in chain",this.testAspect.getLastBeforeFloatValue() > 1.9F);
 	}
-	
+
 	public void testProceedWithArgsAcrossAspects() {
 		this.testBean.setSex("male");
 		assertEquals("value changed in around advice","MALE",this.testBean.getSex());
 		assertEquals("changed value visible to next before advice in chain","MALE",this.secondTestAspect.getLastBeforeStringValue());
 		assertEquals("changed value visible to next around advice in chain","MALE",this.secondTestAspect.getLastAroundStringValue());
 	}
-	
+
+
 	public interface SimpleBean {
 		
 		public void setName(String name);
@@ -87,7 +93,8 @@ public class ProceedTests extends AbstractDependencyInjectionSpringContextTests 
 		public void setSex(String sex);
 		public String getSex();
 	}
-	
+
+
 	public static class SimpleBeanImpl implements SimpleBean {
 
 		private int age;
@@ -126,9 +133,9 @@ public class ProceedTests extends AbstractDependencyInjectionSpringContextTests 
 		public void setSex(String sex) {
 			this.sex = sex;
 		}
-		
 	}
-	
+
+
 	public static class ProceedTestingAspect implements Ordered {
 		
 		private String lastBeforeStringValue;
@@ -197,7 +204,6 @@ public class ProceedTests extends AbstractDependencyInjectionSpringContextTests 
 		public float getLastBeforeFloatValue() {
 			return this.lastBeforeFloatValue;
 		}
-		
 	}
-	
+
 }

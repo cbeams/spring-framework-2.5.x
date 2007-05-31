@@ -165,7 +165,8 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 						"' because of an existing model object of the same name");
 			}
 			// Expose RequestContext instance for Spring macros.
-			model.put(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, new RequestContext(request, getServletContext(), model));
+			model.put(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE,
+					new RequestContext(request, getServletContext(), model));
 		}
 
 		applyContentType(response);

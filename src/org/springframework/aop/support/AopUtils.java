@@ -52,7 +52,7 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.aop.framework.AopProxyUtils
  */
 public abstract class AopUtils {
-	
+
 	/**
 	 * Check whether the given object is a JDK dynamic proxy or a CGLIB proxy.
 	 * @param object the object to check
@@ -86,7 +86,7 @@ public abstract class AopUtils {
 	 * @param clazz the class to check
 	 */
 	public static boolean isCglibProxyClass(Class clazz) {
-		return (clazz != null && clazz.getName().indexOf("$$") != -1);
+		return (clazz != null && clazz.getName().indexOf(ClassUtils.CGLIB_CLASS_SEPARATOR) != -1);
 	}
 
 	/**

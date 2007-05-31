@@ -51,9 +51,6 @@ public abstract class ClassUtils {
 	/** Suffix for array class names */
 	public static final String ARRAY_SUFFIX = "[]";
 
-	/** The ".class" file suffix */
-	public static final String CLASS_FILE_SUFFIX = ".class";
-
 	/** The package separator character '.' */
 	private static final char PACKAGE_SEPARATOR = '.';
 
@@ -61,7 +58,10 @@ public abstract class ClassUtils {
 	private static final char INNER_CLASS_SEPARATOR = '$';
 
 	/** The CGLIB class separator character "$$" */
-	private static final String CGLIB_CLASS_SEPARATOR = "$$";
+	public static final String CGLIB_CLASS_SEPARATOR = "$$";
+
+	/** The ".class" file suffix */
+	public static final String CLASS_FILE_SUFFIX = ".class";
 
 
 	private static final Log logger = LogFactory.getLog(ClassUtils.class);
