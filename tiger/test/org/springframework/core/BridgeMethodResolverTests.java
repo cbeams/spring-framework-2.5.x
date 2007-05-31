@@ -53,6 +53,17 @@ public class BridgeMethodResolverTests extends TestCase {
 		return null;
 	}
 
+	private static Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
+		Method[] methods = targetType.getMethods();
+		for (Method m : methods) {
+			if (m.getName().equals(name) && m.getReturnType().equals(returnType)) {
+				return m;
+			}
+		}
+		return null;
+	}
+
+
 	public void testFindBridgedMethod() throws Exception {
 		Method unbridged = MyFoo.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method bridged = MyFoo.class.getDeclaredMethod("someMethod", Serializable.class, Object.class);
@@ -321,14 +332,18 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
-	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
-		Method[] methods = targetType.getMethods();
-		for (Method m : methods) {
-			if (m.getName().equals(name) && m.getReturnType().equals(returnType)) {
-				return m;
-			}
-		}
-		return null;
+	public void testSPR3534() throws Exception {
+		Method bridgedMethod = TestEmailProvider.class.getDeclaredMethod(
+				"findBy", EmailSearchConditions.class);
+		assertNotNull(bridgedMethod);
+		assertFalse(bridgedMethod.isBridge());
+
+		Method bridgeMethod = TestEmailProvider.class.getDeclaredMethod(
+				"findBy", Object.class);
+		assertNotNull(bridgeMethod);
+		assertTrue(bridgeMethod.isBridge());
+
+		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
 
@@ -1062,9 +1077,10 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 
-	/***
-	 * SPR-3304
-	 */
+	//-------------------
+	// SPR-3304 classes
+	//-------------------
+
 	private static class MegaEvent {
 
 	}
@@ -1117,9 +1133,10 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 
-	/***
-	 * SPR-3357
-	 */
+	//-------------------
+	// SPR-3357 classes
+	//-------------------
+
 	private static class DomainObjectSuper {
 
 	}
@@ -1183,6 +1200,66 @@ public class BridgeMethodResolverTests extends TestCase {
 
 		public void method2(ParameterType p, byte[] r) {
 			super.method2(p, r);
+		}
+	}
+
+
+	//-------------------
+	// SPR-3534 classes
+	//-------------------
+
+	public interface SearchProvider<RETURN_TYPE, CONDITIONS_TYPE> {
+
+		Collection<RETURN_TYPE> findBy(CONDITIONS_TYPE conditions);
+	}
+
+
+	public static class SearchConditions {
+
+	}
+
+
+	public interface IExternalMessageProvider<S extends ExternalMessage, T extends ExternalMessageSearchConditions>
+			extends SearchProvider<S, T> {
+	}
+
+
+	public static class ExternalMessage {
+
+	}
+
+
+	public static class ExternalMessageSearchConditions<T extends ExternalMessage> extends SearchConditions {
+
+	}
+
+
+	public static class ExternalMessageProvider<S extends ExternalMessage, T extends ExternalMessageSearchConditions<S>>
+			implements IExternalMessageProvider<S, T> {
+
+		public Collection<S> findBy(T conditions) {
+			return null;
+		}
+	}
+
+
+	public static class EmailMessage extends ExternalMessage {
+
+	}
+
+
+	public static class EmailSearchConditions extends ExternalMessageSearchConditions<EmailMessage> {
+
+	}
+
+
+	public static class EmailMessageProvider extends ExternalMessageProvider<EmailMessage, EmailSearchConditions> { }
+
+
+	public static class TestEmailProvider extends EmailMessageProvider {
+
+		public Collection<EmailMessage> findBy(EmailSearchConditions conditions) {
+			return null;
 		}
 	}
 
