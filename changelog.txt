@@ -3,6 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.1 M3 (2007-06-18)
+--------------------------------------
+
+Package org.springframework.aop
+* added support for "bean(name)" element in AspectJ pointcut expressions
+
+
 Changes in version 2.1 M2 (2007-05-31)
 --------------------------------------
 
