@@ -33,9 +33,11 @@ import org.springframework.core.JdkVersion;
 public class ServiceLoaderTests extends TestCase {
 
 	public void testServiceLoaderFactoryBean() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16){
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 ||
+				!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
 			return;
 		}
+
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceLoaderFactoryBean.class);
 		bd.getPropertyValues().addPropertyValue("serviceType", DocumentBuilderFactory.class.getName());
@@ -45,9 +47,11 @@ public class ServiceLoaderTests extends TestCase {
 	}
 
 	public void testServiceFactoryBean() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16){
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 ||
+				!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
 			return;
 		}
+
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceFactoryBean.class);
 		bd.getPropertyValues().addPropertyValue("serviceType", DocumentBuilderFactory.class.getName());
@@ -56,9 +60,11 @@ public class ServiceLoaderTests extends TestCase {
 	}
 
 	public void testServiceListFactoryBean() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16){
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 ||
+				!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
 			return;
 		}
+
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceListFactoryBean.class);
 		bd.getPropertyValues().addPropertyValue("serviceType", DocumentBuilderFactory.class.getName());
