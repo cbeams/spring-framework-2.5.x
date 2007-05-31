@@ -131,7 +131,10 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	public final Object[] getArguments() {
 		return (this.arguments != null ? this.arguments : new Object[0]);
 	}
-
+	
+	public void setArguments(Object[] arguments) {
+		this.arguments = arguments;
+	}
 
 	public Object proceed() throws Throwable {
 		//	We start with an index of -1 and increment early.

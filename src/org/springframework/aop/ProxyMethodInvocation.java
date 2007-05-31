@@ -59,6 +59,12 @@ public interface ProxyMethodInvocation extends MethodInvocation {
 	MethodInvocation invocableClone(Object[] arguments);
 
 	/**
+	 * Set the arguments to be used on subsequent invocations in the any advice
+	 * in this chain.
+	 */
+	void setArguments(Object[] arguments);
+	
+	/**
 	 * Add the specified user attribute with the given value to this invocation.
 	 * <p>Such attributes are not used within the AOP framework itself. They are
 	 * just kept as part of the invocation object, for use in special interceptors.
