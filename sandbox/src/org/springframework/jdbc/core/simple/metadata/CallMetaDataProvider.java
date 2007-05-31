@@ -16,30 +16,26 @@
 
 package org.springframework.jdbc.core.simple.metadata;
 
-import org.springframework.jdbc.core.simple.metadata.AbstractDatabaseMetaDataProvider;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.simple.CallMetaDataContext;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author trisberg
  */
-public class OracleDatabaseMetaDataProvider extends AbstractDatabaseMetaDataProvider {
+public interface CallMetaDataProvider {
 
-	public OracleDatabaseMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
-		super(databaseMetaData);
-	}
+	void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException;
+	 
+	void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, CallMetaDataContext context) throws SQLException;
 
-	@Override
-	protected String metaDataCatalogNameToUse(CallMetaDataContext context) {
-		// Oracle uses catalog name for package name or an empty string if no package
-		return context.getCatalogName() == null ? "" : super.metaDataCatalogNameToUse(context);
-	}
+	List<SqlParameter> reconcileParameters(List<SqlParameter> parameters, CallMetaDataContext context);
 
-	@Override
-	protected String metaDataSchemaNameToUse(CallMetaDataContext context) {
-		// Use current user schema if no schema specified
-		return context.getSchemaName() == null ? getUserName() : super.metaDataSchemaNameToUse(context);
-	}
+	String createCallString(List<SqlParameter> parameters, CallMetaDataContext context);
+
+	Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> inParameters, List<SqlParameter> callParameters);
 }

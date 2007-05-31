@@ -32,10 +32,10 @@ import java.util.*;
 /**
  * @author trisberg
  */
-public class AbstractDatabaseMetaDataProvider implements DatabaseMetaDataProvider {
+public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 
 	/** Logger available to subclasses */
-	private static final Log logger = LogFactory.getLog(DatabaseMetaDataProvider.class);
+	private static final Log logger = LogFactory.getLog(CallMetaDataProvider.class);
 
 	private boolean procedureColumnMetaDataUsed = false;
 
@@ -53,7 +53,7 @@ public class AbstractDatabaseMetaDataProvider implements DatabaseMetaDataProvide
 
 	private List<CallColumnMetaData> callColumnMetaData = new ArrayList<CallColumnMetaData>();
 
-	protected AbstractDatabaseMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
+	protected AbstractCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		databaseProductName = databaseMetaData.getDatabaseProductName();
 		userName = databaseMetaData.getUserName();
 	}
@@ -296,14 +296,14 @@ public class AbstractDatabaseMetaDataProvider implements DatabaseMetaDataProvide
 		String schemaNameToUse = schemaNameToUse(context.getSchemaName());
 		String procedureNameToUse = procedureNameToUse(context.getProcedureName());
 		if (context.isFunction()) {
-			callString = "{ ? = call " +
+			callString = "{? = call " +
 					(catalogNameToUse != null && catalogNameToUse.length() > 0 ? catalogNameToUse + "." : "") +
 					(schemaNameToUse != null && schemaNameToUse.length() > 0 ? schemaNameToUse + "." : "") +
 					procedureNameToUse + "(";
 			parameterCount = -1;
 		}
 		else {
-			callString = "{ call " +
+			callString = "{call " +
 					(catalogNameToUse != null && catalogNameToUse.length() > 0 ? catalogNameToUse + "." : "") +
 					(schemaNameToUse != null && schemaNameToUse.length() > 0 ? schemaNameToUse + "." : "") +
 					procedureNameToUse + "(";
@@ -319,7 +319,7 @@ public class AbstractDatabaseMetaDataProvider implements DatabaseMetaDataProvide
 				parameterCount++;
 			}
 		}
-		callString += ") }";
+		callString += ")}";
 
 		return callString;
 

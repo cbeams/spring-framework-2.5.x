@@ -19,7 +19,7 @@ package org.springframework.jdbc.core.simple.metadata;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.DatabaseMetaDataCallback;
 import org.springframework.jdbc.support.MetaDataAccessException;
-import org.springframework.jdbc.core.simple.metadata.OracleDatabaseMetaDataProvider;
+import org.springframework.jdbc.core.simple.metadata.OracleCallMetaDataProvider;
 import org.springframework.jdbc.core.simple.CallMetaDataContext;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.apache.commons.logging.Log;
@@ -34,10 +34,10 @@ import java.util.Arrays;
 /**
  * @author trisberg
  */
-public class DatabaseMetaDataProviderFactory {
+public class CallMetaDataProviderFactory {
 
 	/** Logger */
-	private static final Log logger = LogFactory.getLog(DatabaseMetaDataProviderFactory.class);
+	private static final Log logger = LogFactory.getLog(CallMetaDataProviderFactory.class);
 
 	public static final List<String> supportedDatabaseProductsForProcedures = Arrays.asList(
 			"Apache Derby",
@@ -51,10 +51,10 @@ public class DatabaseMetaDataProviderFactory {
 			"Oracle"
 		);
 
-	static public DatabaseMetaDataProvider createMetaDataProcessor(DataSource dataSource,
+	static public CallMetaDataProvider createMetaDataProcessor(DataSource dataSource,
 															 final CallMetaDataContext context) {
 		try {
-			return (DatabaseMetaDataProvider)JdbcUtils.extractDatabaseMetaData(
+			return (CallMetaDataProvider)JdbcUtils.extractDatabaseMetaData(
 					dataSource, new DatabaseMetaDataCallback() {
 
 				public Object processMetaData(DatabaseMetaData databaseMetaData)
@@ -82,15 +82,15 @@ public class DatabaseMetaDataProviderFactory {
 						}
 					}
 
-					DatabaseMetaDataProvider provider;
+					CallMetaDataProvider provider;
 					if ("Oracle".equals(databaseProductName)) {
-						provider = new OracleDatabaseMetaDataProvider(databaseMetaData);
+						provider = new OracleCallMetaDataProvider(databaseMetaData);
 					}
 					else if ("Microsoft SQL Server".equals(databaseProductName)) {
-						provider = new SqlServerDatabaseMetaDataProvider((databaseMetaData));						
+						provider = new SqlServerCallMetaDataProvider((databaseMetaData));
 					}
 					else {
-						provider = new GenericDatabaseMetaDataProvider(databaseMetaData);
+						provider = new GenericCallMetaDataProvider(databaseMetaData);
 					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Using " + provider.getClass().getName());

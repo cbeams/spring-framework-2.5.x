@@ -16,7 +16,8 @@
 
 package org.springframework.jdbc.core.simple.metadata;
 
-import org.springframework.jdbc.core.simple.metadata.AbstractDatabaseMetaDataProvider;
+import org.springframework.jdbc.core.simple.metadata.AbstractCallMetaDataProvider;
+import org.springframework.jdbc.core.simple.CallMetaDataContext;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -24,22 +25,21 @@ import java.sql.SQLException;
 /**
  * @author trisberg
  */
-public class SqlServerDatabaseMetaDataProvider extends AbstractDatabaseMetaDataProvider {
+public class OracleCallMetaDataProvider extends AbstractCallMetaDataProvider {
 
-	private static final String REMOVABLE_COLUMN_PREFIX = "@";
-
-	public SqlServerDatabaseMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
+	public OracleCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		super(databaseMetaData);
 	}
 
+	@Override
+	protected String metaDataCatalogNameToUse(CallMetaDataContext context) {
+		// Oracle uses catalog name for package name or an empty string if no package
+		return context.getCatalogName() == null ? "" : super.metaDataCatalogNameToUse(context);
+	}
 
 	@Override
-	protected String parameterNameToUse(String parameterName) {
-		if (parameterName == null)
-			return null;
-		if (parameterName.length() > 1 && parameterName.startsWith(REMOVABLE_COLUMN_PREFIX))
-			return super.parameterNameToUse(parameterName.substring(1));
-		else
-			return super.parameterNameToUse(parameterName);
+	protected String metaDataSchemaNameToUse(CallMetaDataContext context) {
+		// Use current user schema if no schema specified
+		return context.getSchemaName() == null ? getUserName() : super.metaDataSchemaNameToUse(context);
 	}
 }
