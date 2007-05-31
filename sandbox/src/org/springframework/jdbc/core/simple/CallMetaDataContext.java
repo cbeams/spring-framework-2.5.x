@@ -19,8 +19,8 @@ package org.springframework.jdbc.core.simple;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.simple.metadata.CallMetaDataProvider;
-import org.springframework.jdbc.core.simple.metadata.CallMetaDataProviderFactory;
+import org.springframework.jdbc.core.simple.metadata.DatabaseMetaDataProvider;
+import org.springframework.jdbc.core.simple.metadata.DatabaseMetaDataProviderFactory;
 
 import javax.sql.DataSource;
 import java.util.*;
@@ -58,7 +58,7 @@ public class CallMetaDataContext {
 	/** indicates whether this is a procedure or a function **/
 	private boolean function;
 
-	private CallMetaDataProvider metaDataProvider;
+	private DatabaseMetaDataProvider metaDataProvider;
 
 
 	public String getFunctionReturnName() {
@@ -136,7 +136,7 @@ public class CallMetaDataContext {
 	public void processMetaData(DataSource dataSource, List<SqlParameter> parameters) {
 
 		metaDataProvider =
-				CallMetaDataProviderFactory.createMetaDataProcessor(dataSource, this);
+				DatabaseMetaDataProviderFactory.createMetaDataProcessor(dataSource, this);
 
 		callParameters = metaDataProvider.reconcileParameters(parameters, this);
 

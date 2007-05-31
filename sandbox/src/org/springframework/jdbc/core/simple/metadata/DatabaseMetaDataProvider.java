@@ -16,30 +16,26 @@
 
 package org.springframework.jdbc.core.simple.metadata;
 
-import org.springframework.jdbc.core.simple.metadata.AbstractCallMetaDataProvider;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.simple.CallMetaDataContext;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author trisberg
  */
-public class SqlServerCallMetaDataProvider extends AbstractCallMetaDataProvider {
+public interface DatabaseMetaDataProvider {
 
-	private static final String REMOVABLE_COLUMN_PREFIX = "@";
+	void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException;
+	 
+	void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, CallMetaDataContext context) throws SQLException;
 
-	public SqlServerCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
-		super(databaseMetaData);
-	}
+	List<SqlParameter> reconcileParameters(List<SqlParameter> parameters, CallMetaDataContext context);
 
+	String createCallString(List<SqlParameter> parameters, CallMetaDataContext context);
 
-	@Override
-	protected String parameterNameToUse(String parameterName) {
-		if (parameterName == null)
-			return null;
-		if (parameterName.length() > 1 && parameterName.startsWith(REMOVABLE_COLUMN_PREFIX))
-			return super.parameterNameToUse(parameterName.substring(1));
-		else
-			return super.parameterNameToUse(parameterName);
-	}
+	Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> inParameters, List<SqlParameter> callParameters);
 }

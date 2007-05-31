@@ -22,9 +22,9 @@ import java.sql.SQLException;
 /**
  * @author trisberg
  */
-public class GenericCallMetaDataProvider extends AbstractCallMetaDataProvider {
+public class GenericDatabaseMetaDataProvider extends AbstractDatabaseMetaDataProvider {
 
-	protected GenericCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
+	protected GenericDatabaseMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		super(databaseMetaData);
 	}
 }
