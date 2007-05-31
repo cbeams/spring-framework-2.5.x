@@ -155,6 +155,25 @@ public class SqlParameter {
 
 
 	/**
+	 * Return whether this parameter holds input values that should be set
+	 * before execution even if they are <code>null</code>.
+	 * <p>This implementation always returns <code>true</code>.
+	 */
+	public boolean isInputValueProvided() {
+		return true;
+	}
+
+	/**
+	 * Return whether this parameter is an implicit return parameter used during the
+	 * reults preocessing of the CallableStatement.getMoreResults/getUpdateCount.
+	 * <p>This implementation always returns <code>false</code>.
+	 */
+	public boolean isResultsParameter() {
+		return false;
+	}
+
+
+	/**
 	 * Convert a list of JDBC types, as defined in <code>java.sql.Types</code>,
 	 * to a List of SqlParameter objects as used in this package.
 	 */

@@ -94,9 +94,9 @@
 			fixture will lead to slower overall test runs that could reduce productivity.</para>
 			<para>To address this issue, the
 			<classname>AbstractDependencyInjectionSpringContextTests</classname> has an
-			<literal>abstract</literal> <literal>protected</literal> method that
-			subclasses must implement, to provide the location of contexts:</para>
-		    <programlisting><![CDATA[protected abstract String[] getConfigLocations();]]></programlisting>
+			<literal>protected</literal> method that subclasses must implement
+			to provide the location of context definition files:</para>
+		    <programlisting><![CDATA[protected String[] getConfigLocations();]]></programlisting>
 			<para>Implementations of this method must provide an array containing the
 			resource locations of XML configuration metadata - typically on the
 			classpath - used to configure the application. This will be the same, or

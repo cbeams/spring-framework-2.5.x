@@ -58,10 +58,10 @@ public abstract class ClassUtils {
 	private static final char INNER_CLASS_SEPARATOR = '$';
 
 	/** The CGLIB class separator character "$$" */
-	private static final String CGLIB_CLASS_SEPARATOR = "$$";
+	public static final String CGLIB_CLASS_SEPARATOR = "$$";
 
 	/** The ".class" file suffix */
-	private static final String CLASS_FILE_SUFFIX = ".class";
+	public static final String CLASS_FILE_SUFFIX = ".class";
 
 
 	private static final Log logger = LogFactory.getLog(ClassUtils.class);
@@ -482,6 +482,31 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Given a method, which may come from an interface, and a target class used
+	 * in the current reflective invocation, find the corresponding target method
+	 * if there is one. E.g. the method may be <code>IFoo.bar()</code> and the
+	 * target class may be <code>DefaultFoo</code>. In this case, the method may be
+	 * <code>DefaultFoo.bar()</code>. This enables attributes on that method to be found.
+	 * @param method the method to be invoked, which may come from an interface
+	 * @param targetClass the target class for the current invocation.
+	 * May be <code>null</code> or may not even implement the method.
+	 * @return the specific target method, or the original method if the
+	 * <code>targetClass</code> doesn't implement it or is <code>null</code>
+	 */
+	public static Method getMostSpecificMethod(Method method, Class targetClass) {
+		if (method != null && targetClass != null) {
+			try {
+				method = targetClass.getMethod(method.getName(), method.getParameterTypes());
+			}
+			catch (NoSuchMethodException ex) {
+				// Perhaps the target class doesn't implement this method:
+				// that's fine, just use the original method.
+			}
+		}
+		return method;
+	}
+
+	/**
 	 * Return a static method of a class.
 	 * @param methodName the static method name
 	 * @param clazz	the class which defines the method
@@ -507,6 +532,8 @@ public abstract class ClassUtils {
 	/**
 	 * Check if the given class represents a primitive wrapper,
 	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
+	 * @param clazz the class to check
+	 * @return whether the given class is a primitive wrapper class
 	 */
 	public static boolean isPrimitiveWrapper(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -517,6 +544,8 @@ public abstract class ClassUtils {
 	 * Check if the given class represents a primitive (i.e. boolean, byte,
 	 * char, short, int, long, float, or double) or a primitive wrapper
 	 * (i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double).
+	 * @param clazz the class to check
+	 * @return whether the given class is a primitive or primitive wrapper class
 	 */
 	public static boolean isPrimitiveOrWrapper(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -526,6 +555,8 @@ public abstract class ClassUtils {
 	/**
 	 * Check if the given class represents an array of primitives,
 	 * i.e. boolean, byte, char, short, int, long, float, or double.
+	 * @param clazz the class to check
+	 * @return whether the given class is a primitive array class
 	 */
 	public static boolean isPrimitiveArray(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -535,6 +566,8 @@ public abstract class ClassUtils {
 	/**
 	 * Check if the given class represents an array of primitive wrappers,
 	 * i.e. Boolean, Byte, Character, Short, Integer, Long, Float, or Double.
+	 * @param clazz the class to check
+	 * @return whether the given class is a primitive wrapper array class
 	 */
 	public static boolean isPrimitiveWrapperArray(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");

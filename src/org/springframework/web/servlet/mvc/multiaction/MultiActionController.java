@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,18 +236,12 @@ public class MultiActionController extends AbstractController implements LastMod
 		for (int i = 0; i < methods.length; i++) {
 			// We're looking for methods with given parameters.
 			Method method = methods[i];
-			if (isHandlerMethod(method)) {
+			if (isExceptionHandlerMethod(method)) {
+				registerExceptionHandlerMethod(method);
+			}
+			else if (isHandlerMethod(method)) {
 				registerHandlerMethod(method);
 				registerLastModifiedMethodIfExists(delegate, method);
-			}
-		}
-
-		// Now look for exception handlers.
-		for (int i = 0; i < methods.length; i++) {
-			Method method = methods[i];
-			if (isExceptionHandlerMethod(method)) {
-				// Have an exception handler
-				registerExceptionHandlerMethod(method);
 			}
 		}
 	}

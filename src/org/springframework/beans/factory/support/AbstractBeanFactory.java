@@ -1050,6 +1050,15 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	/**
+	 * Remove the merged bean definition for the specified bean,
+	 * recreating it on next access.
+	 * @param beanName the bean name to clear the merged definition for
+	 */
+	protected void clearMergedBeanDefinition(String beanName) {
+		this.mergedBeanDefinitions.remove(beanName);
+	}
+
+	/**
 	 * Resolve the bean class for the specified bean definition,
 	 * resolving a bean class name into a Class reference (if necessary)
 	 * and storing the resolved Class in the bean definition for further use.

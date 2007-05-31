@@ -49,7 +49,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  *
  * @author Rob Harrop
  * @author Adrian Colyer
- * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class AopNamespaceHandler extends NamespaceHandlerSupport {
@@ -61,9 +61,9 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 	 */
 	public void init() {
 		registerBeanDefinitionParser("config", new ConfigBeanDefinitionParser());
-		registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
 		registerBeanDefinitionParser("aspectj-autoproxy", new AspectJAutoProxyBeanDefinitionParser());
 		registerBeanDefinitionDecorator("scoped-proxy", new ScopedProxyBeanDefinitionDecorator());
+		registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
 	}
 
 }

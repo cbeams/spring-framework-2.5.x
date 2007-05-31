@@ -403,7 +403,7 @@ public class BeanDefinitionParserDelegate {
 			this.parseState.push(new BeanEntry(beanName));
 
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
-					parent, className, this.readerContext.getReader().getBeanClassLoader());
+					parent, className, this.readerContext.getBeanClassLoader());
 
 			if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
 				// Spring 2.0 "scope" attribute
@@ -872,7 +872,7 @@ public class BeanDefinitionParserDelegate {
 	private Object buildTypedStringValue(String value, String targetTypeName, Element ele)
 			throws ClassNotFoundException {
 
-		ClassLoader classLoader = this.readerContext.getReader().getBeanClassLoader();
+		ClassLoader classLoader = this.readerContext.getBeanClassLoader();
 		TypedStringValue typedValue = null;
 		if (!StringUtils.hasText(targetTypeName)) {
 			typedValue = new TypedStringValue(value);
@@ -986,7 +986,7 @@ public class BeanDefinitionParserDelegate {
 					error("<entry> element contains empty 'key-ref' attribute", entryEle);
 				}
 				RuntimeBeanReference ref = new RuntimeBeanReference(refName);
-				ref.setSource(extractSource(keyEle));
+				ref.setSource(extractSource(entryEle));
 				key = ref;
 			}
 			else if (keyEle != null) {
@@ -1015,7 +1015,7 @@ public class BeanDefinitionParserDelegate {
 					error("<entry> element contains empty 'value-ref' attribute", entryEle);
 				}
 				RuntimeBeanReference ref = new RuntimeBeanReference(refName);
-				ref.setSource(extractSource(valueEle));
+				ref.setSource(extractSource(entryEle));
 				value = ref;
 			}
 			else if (valueEle != null) {
@@ -1108,7 +1108,7 @@ public class BeanDefinitionParserDelegate {
 		String namespaceUri = ele.getNamespaceURI();
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
-			error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "]", ele);
+			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
@@ -1136,13 +1136,20 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	private BeanDefinitionHolder decorateIfRequired(Node node, BeanDefinitionHolder originalDefinition) {
-		String uri = node.getNamespaceURI();
-		BeanDefinitionHolder finalDefinition = null;
-		if (!isDefaultNamespace(uri)) {
-			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(uri);
-			finalDefinition = handler.decorate(node, originalDefinition, new ParserContext(this.readerContext, this));
+		String namespaceUri = node.getNamespaceURI();
+		if (!isDefaultNamespace(namespaceUri)) {
+			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
+			if (handler != null) {
+				return handler.decorate(node, originalDefinition, new ParserContext(this.readerContext, this));
+			}
+			else {
+				// A custom namespace, not to be handled by Spring - maybe "xml:...".
+				if (logger.isDebugEnabled()) {
+					logger.debug("No Spring NamespaceHandler found for XML schema namespace [" + namespaceUri + "]");
+				}
+			}
 		}
-		return (finalDefinition != null ? finalDefinition : originalDefinition);
+		return originalDefinition;
 	}
 
 	public boolean isDefaultNamespace(String namespaceUri) {

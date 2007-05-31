@@ -45,6 +45,7 @@ import org.springframework.aop.support.AopUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Adrian Colyer
  * @see #invokeJoinpoint
  * @see #proceed
  * @see #invocableClone
@@ -132,6 +133,10 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		return (this.arguments != null ? this.arguments : new Object[0]);
 	}
 
+	public void setArguments(Object[] arguments) {
+		this.arguments = arguments;
+	}
+
 
 	public Object proceed() throws Throwable {
 		//	We start with an index of -1 and increment early.
@@ -200,6 +205,13 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * @see java.lang.Object#clone()
 	 */
 	public MethodInvocation invocableClone(Object[] arguments) {
+		// Force initialization of the user attributes Map,
+		// for having a shared Map reference in the clone.
+		if (this.userAttributes == null) {
+			this.userAttributes = new HashMap();
+		}
+
+		// Create the MethodInvocation clone.
 		try {
 			ReflectiveMethodInvocation clone = (ReflectiveMethodInvocation) clone();
 			clone.arguments = arguments;

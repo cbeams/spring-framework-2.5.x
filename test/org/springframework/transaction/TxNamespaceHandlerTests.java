@@ -32,7 +32,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  * @author Rob Harrop
  * @author Adrian Colyer
  */
-public class TransactionNamespaceHandlerTests extends TestCase {
+public class TxNamespaceHandlerTests extends TestCase {
 
 	private ApplicationContext context;
 
@@ -41,7 +41,7 @@ public class TransactionNamespaceHandlerTests extends TestCase {
 	private Method setAgeMethod;
 
 	public void setUp() throws Exception {
-		this.context = new ClassPathXmlApplicationContext("transactionNamespaceHandlerTests.xml", getClass());
+		this.context = new ClassPathXmlApplicationContext("txNamespaceHandlerTests.xml", getClass());
 		this.getAgeMethod = ITestBean.class.getMethod("getAge", new Class[0]);
 		this.setAgeMethod = ITestBean.class.getMethod("setAge", new Class[] {int.class});
 	}

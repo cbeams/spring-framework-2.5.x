@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 package org.springframework.jdbc.core;
 
 /**
- * Subclass of SqlOutParameter to represent an INOUT parameter.
- * Will always return true for "isInputValueProvided" test.
+ * Subclass of {@link SqlOutParameter} to represent an INOUT parameter.
+ * Will return <code>true</code> for SqlParameter's {@link #isInputValueProvided}
+ * test, in contrast to a standard SqlOutParameter.
  *
  * <p>Output parameters - like all stored procedure parameters -
  * must have names.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,24 +98,25 @@ public class CustomBooleanEditor extends PropertyEditorSupport {
 	}
 
 	public void setAsText(String text) throws IllegalArgumentException {
-		if (this.allowEmpty && !StringUtils.hasText(text)) {
+		String input = (text != null ? text.trim() : null);
+		if (this.allowEmpty && !StringUtils.hasLength(input)) {
 			// Treat empty String as null value.
 			setValue(null);
 		}
-		else if (this.trueString != null && text.equalsIgnoreCase(this.trueString)) {
+		else if (this.trueString != null && input.equalsIgnoreCase(this.trueString)) {
 			setValue(Boolean.TRUE);
 		}
-		else if (this.falseString != null && text.equalsIgnoreCase(this.falseString)) {
+		else if (this.falseString != null && input.equalsIgnoreCase(this.falseString)) {
 			setValue(Boolean.FALSE);
 		}
 		else if (this.trueString == null &&
-				(text.equalsIgnoreCase(VALUE_TRUE) || text.equalsIgnoreCase(VALUE_ON) ||
-				text.equalsIgnoreCase(VALUE_YES) || text.equals(VALUE_1))) {
+				(input.equalsIgnoreCase(VALUE_TRUE) || input.equalsIgnoreCase(VALUE_ON) ||
+				input.equalsIgnoreCase(VALUE_YES) || input.equals(VALUE_1))) {
 			setValue(Boolean.TRUE);
 		}
 		else if (this.falseString == null &&
-				(text.equalsIgnoreCase(VALUE_FALSE) || text.equalsIgnoreCase(VALUE_OFF) ||
-				text.equalsIgnoreCase(VALUE_NO) || text.equals(VALUE_0))) {
+				(input.equalsIgnoreCase(VALUE_FALSE) || input.equalsIgnoreCase(VALUE_OFF) ||
+				input.equalsIgnoreCase(VALUE_NO) || input.equals(VALUE_0))) {
 			setValue(Boolean.FALSE);
 		}
 		else {

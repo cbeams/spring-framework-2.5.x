@@ -26,6 +26,7 @@ import javax.servlet.jsp.JspException;
  *
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag {
@@ -189,8 +190,8 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	/**
 	 * Is the current HTML tag disabled?
 	 */
-	protected boolean isDisabled() {
-		return "true".equals(getDisabled());
+	protected boolean isDisabled() throws JspException {
+		return "true".equals(evaluate(DISABLED_ATTRIBUTE, getDisabled()));
 	}
 
 	/**
@@ -199,8 +200,8 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	 * for checkboxes and radiobuttons)  may contain readonly attributes, but are
 	 * not affected by them since their values don't change (only their status does.)
 	 */
-	protected boolean isReadonly() {
-		return "true".equals(getReadonly());
+	protected boolean isReadonly() throws JspException {
+		return "true".equals(evaluate(READONLY_ATTRIBUTE, getReadonly()));
 	}
 
 }

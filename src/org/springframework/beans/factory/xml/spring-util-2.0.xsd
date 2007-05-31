@@ -14,14 +14,9 @@
 	<xsd:element name="constant">
 		<xsd:annotation>
 			<xsd:documentation>
-				Reference a public, static field on a type and expose its value as
-				a bean. For example <code>&lt;util:constant static-field=&quot;java.lang.Integer.MAX_VALUE&quot;/&gt;</code>.
+	Reference a public, static field on a type and expose its value as
+	a bean. For example <code>&lt;util:constant static-field=&quot;java.lang.Integer.MAX_VALUE&quot;/&gt;</code>.
 			</xsd:documentation>
-			<xsd:appinfo>
-				<tool:annotation>
-					<tool:exports/>
-				</tool:annotation>
-			</xsd:appinfo>
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:attribute name="id" type="xsd:ID"/>
@@ -32,14 +27,9 @@
 	<xsd:element name="property-path">
 		<xsd:annotation>
 			<xsd:documentation>
-				Reference a property on a bean (or as a nested value) and expose its values as
-				a bean. For example &lt;util:property-path path=&quot;order.customer.name&quot;/&gt;.
+	Reference a property on a bean (or as a nested value) and expose its values as
+	a bean. For example &lt;util:property-path path=&quot;order.customer.name&quot;/&gt;.
 			</xsd:documentation>
-			<xsd:appinfo>
-				<tool:annotation>
-					<tool:exports/>
-				</tool:annotation>
-			</xsd:appinfo>
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:attribute name="id" type="xsd:ID"/>
@@ -52,6 +42,9 @@
 			<xsd:complexContent>
 				<xsd:extension base="beans:listOrSetType">
 					<xsd:annotation>
+						<xsd:documentation source="java:org.springframework.beans.factory.config.ListFactoryBean">
+	Builds a List instance of the specified type, populated with the specified content.
+						</xsd:documentation>
 						<xsd:appinfo>
 							<tool:annotation>
 								<tool:exports type="java.util.List"/>
@@ -72,11 +65,11 @@
 					<xsd:attribute name="scope" type="xsd:string">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-		The scope of this collection bean: typically "singleton" (one shared instance,
-		which will be returned by all calls to getBean with the given id), or
-		"prototype" (independent instance resulting from each call to getBean).
-		Default is "singleton". Further scopes, such as "request" or "session",
-		might be supported by extended bean factories (e.g. in a web environment).
+	The scope of this collection bean: typically "singleton" (one shared instance,
+	which will be returned by all calls to getBean with the given id), or
+	"prototype" (independent instance resulting from each call to getBean).
+	Default is "singleton". Further scopes, such as "request" or "session",
+	might be supported by extended bean factories (e.g. in a web environment).
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -90,6 +83,9 @@
 			<xsd:complexContent>
 				<xsd:extension base="beans:listOrSetType">
 					<xsd:annotation>
+						<xsd:documentation source="java:org.springframework.beans.factory.config.SetFactoryBean">
+	Builds a Set instance of the specified type, populated with the specified content.
+						</xsd:documentation>
 						<xsd:appinfo>
 							<tool:annotation>
 								<tool:exports type="java.util.Set"/>
@@ -110,11 +106,11 @@
 					<xsd:attribute name="scope" type="xsd:string">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-		The scope of this collection bean: typically "singleton" (one shared instance,
-		which will be returned by all calls to getBean with the given id), or
-		"prototype" (independent instance resulting from each call to getBean).
-		Default is "singleton". Further scopes, such as "request" or "session",
-		might be supported by extended bean factories (e.g. in a web environment).
+	The scope of this collection bean: typically "singleton" (one shared instance,
+	which will be returned by all calls to getBean with the given id), or
+	"prototype" (independent instance resulting from each call to getBean).
+	Default is "singleton". Further scopes, such as "request" or "session",
+	might be supported by extended bean factories (e.g. in a web environment).
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -128,6 +124,9 @@
 			<xsd:complexContent>
 				<xsd:extension base="beans:mapType">
 					<xsd:annotation>
+						<xsd:documentation source="java:org.springframework.beans.factory.config.MapFactoryBean">
+	Builds a Map instance of the specified type, populated with the specified content.
+						</xsd:documentation>
 						<xsd:appinfo>
 							<tool:annotation>
 								<tool:exports type="java.util.Map"/>
@@ -148,11 +147,11 @@
 					<xsd:attribute name="scope" type="xsd:string">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-		The scope of this collection bean: typically "singleton" (one shared instance,
-		which will be returned by all calls to getBean with the given id), or
-		"prototype" (independent instance resulting from each call to getBean).
-		Default is "singleton". Further scopes, such as "request" or "session",
-		might be supported by extended bean factories (e.g. in a web environment).
+	The scope of this collection bean: typically "singleton" (one shared instance,
+	which will be returned by all calls to getBean with the given id), or
+	"prototype" (independent instance resulting from each call to getBean).
+	Default is "singleton". Further scopes, such as "request" or "session",
+	might be supported by extended bean factories (e.g. in a web environment).
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -164,7 +163,7 @@
 	<xsd:element name="properties">
 		<xsd:annotation>
 			<xsd:documentation source="java:org.springframework.beans.factory.config.PropertiesFactoryBean">
-				Loads a Properties instance from the resource location specified by the '<code>location</code>' attribute.
+	Loads a Properties instance from the resource location specified by the '<code>location</code>' attribute.
 			</xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
@@ -188,11 +187,11 @@
 					<xsd:attribute name="scope" type="xsd:string">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-		The scope of this collection bean: typically "singleton" (one shared instance,
-		which will be returned by all calls to getBean with the given id), or
-		"prototype" (independent instance resulting from each call to getBean).
-		Default is "singleton". Further scopes, such as "request" or "session",
-		might be supported by extended bean factories (e.g. in a web environment).
+	The scope of this collection bean: typically "singleton" (one shared instance,
+	which will be returned by all calls to getBean with the given id), or
+	"prototype" (independent instance resulting from each call to getBean).
+	Default is "singleton". Further scopes, such as "request" or "session",
+	might be supported by extended bean factories (e.g. in a web environment).
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>

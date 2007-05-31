@@ -327,8 +327,9 @@ public abstract class BeanUtils {
 		Assert.notNull(method, "Method must not be null");
 		PropertyDescriptor[] pds = getPropertyDescriptors(method.getDeclaringClass());
 		for (int i = 0; i < pds.length; i++) {
-			if (method.equals(pds[i].getReadMethod()) || method.equals(pds[i].getWriteMethod())) {
-				return pds[i];
+			PropertyDescriptor pd = pds[i];
+			if (method.equals(pd.getReadMethod()) || method.equals(pd.getWriteMethod())) {
+				return pd;
 			}
 		}
 		return null;
@@ -344,7 +345,7 @@ public abstract class BeanUtils {
 	public static Class findPropertyType(String propertyName, Class[] beanClasses) {
 		if (beanClasses != null) {
 			for (int i = 0; i < beanClasses.length; i++) {
-				PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(beanClasses[i], propertyName);
+				PropertyDescriptor pd = getPropertyDescriptor(beanClasses[i], propertyName);
 				if (pd != null) {
 					return pd.getPropertyType();
 				}

@@ -3,6 +3,48 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0.6 (2007-06-15)
+-------------------------------------
+
+General
+* fixed contents of spring-remoting.jar: does not include RemoteInvocationUtilsTests anymore
+
+Package org.springframework.aop
+* ReflectiveMethodInvocation always uses a shared user attribute Map in clones (for proper binding of multiple advices)
+* fixed MethodInvocationProceedingJoinPoint to properly pass modified arguments (via proceed) to subsequent aspects
+* fixed AbstractAspectJAdvisorFactory to ignore 'code-style' aspect classes that have been compiled by ajc
+
+Package org.springframework.beans
+* CustomBooleanEditor trims text before comparing against true/false Strings
+* fixed AbstractAutowireCapableBeanFactory to allow for changing the InstantiantionStrategy (again)
+* DefaultListableBeanFactory clears a cached merged bean definition in case of re-registering a bean definition
+* added "getResourceLoader()" convenience method to XmlReaderContext, exposing the context's ResourceLoader (if any)
+* added "getBeanClassLoader()" convenience method to XmlReaderContext
+* fixed BeanDefinitionParserDelegate to avoid NPE in case of a custom namespace without a NamespaceHandler registered
+* fixed BeanDefinitionParserDelegate to extract correct source element for "key-ref"/"value-ref" attributes
+
+Package org.springframework.core
+* fixed BridgeMethodResolver to properly detect a method that substitutes a type parameter with an array type
+* fixed BridgeMethodResolver to detect type variables in interface hierarchies with different type variable names
+* PathMatchingResourcePatternResolver explicitly closes freshly obtained JarFile objects, to allow for hot redeployment
+
+Package org.springframework.jdbc
+* fixed SQLErrorCodeSQLExceptionTranslator to avoid potential NPE in debug log message
+* moved "isInputValueProvided" method from SqlOutParameter up to the SqlParameter root class
+* RdbmsOperation's "validateParameters" properly detects and counts SqlInOutParameters
+
+Package org.springframework.jmx
+* MBeanExporter does not insist of a minimum of 1 bean exposed anymore, also accepting no beans to export in the context
+
+Package org.springframework.web
+* CookieLocaleResolver checks specified "defaultLocale" in case of a setLocale call with null argument
+* RequestContext uses a shared default Theme instance as fallback, avoiding the recreating of empty Theme instances
+* MultiActionController explicitly disallows direct invocation of exception handler methods (as handler methods)
+* CancellableFormController suppresses validation for a cancel request
+* AbstractView and AbstractTemplateView pass an explicit ServletContext reference to a created RequestContext instance
+* JSP InputTag, SelectTag etc support expressions as "disabled" and "readonly" attribute values
+
+
 Changes in version 2.0.5 (2007-05-07)
 -------------------------------------
 

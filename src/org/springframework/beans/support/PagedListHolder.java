@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,9 +31,9 @@ import java.util.List;
  * be data binding, i.e. populating the bean from request parameters. The getters
  * will mainly be used by the view.
  *
- * <p>Supports sorting the underlying list via a SortDefinition implementation,
- * available as property "sort". By default, a MutableSortDefinition instance
- * that toggles the ascending value on setting the same property again is used.
+ * <p>Supports sorting the underlying list via a {@link SortDefinition} implementation,
+ * available as property "sort". By default, a {@link MutableSortDefinition} instance
+ * will be used, toggling the ascending value on setting the same property again.
  *
  * <p>The data binding names have to be called "pageSize" and "sort.ascending",
  * as expected by BeanWrapper. Note that the names and the nesting syntax match
@@ -42,13 +42,13 @@ import java.util.List;
  *
  * <p>This class just provides support for an unmodifiable List of beans.
  * If you need on-demand refresh because of Locale or filter changes,
- * consider RefreshablePagedListHolder.
+ * consider {@link RefreshablePagedListHolder}.
  *
  * @author Juergen Hoeller
  * @since 19.05.2003
- * @see #getPageList
- * @see org.springframework.beans.support.RefreshablePagedListHolder
+ * @see #getPageList()
  * @see org.springframework.beans.support.MutableSortDefinition
+ * @see org.springframework.beans.support.RefreshablePagedListHolder
  */
 public class PagedListHolder implements Serializable {
 
@@ -204,7 +204,7 @@ public class PagedListHolder implements Serializable {
 	 * Return the number of pages for the current source list.
 	 */
 	public int getPageCount() {
-		float nrOfPages = (float) getSource().size() / getPageSize();
+		float nrOfPages = (float) getNrOfElements() / getPageSize();
 		return (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages);
 	}
 
@@ -263,28 +263,29 @@ public class PagedListHolder implements Serializable {
 	 */
 	public int getLastElementOnPage() {
 		int endIndex = getPageSize() * (getPage() + 1);
-		return (endIndex > getSource().size() ? getSource().size() : endIndex) -1;
+		int size = getNrOfElements();
+		return (endIndex > size ? size : endIndex) - 1;
 	}
 
 	/**
 	 * Return a sub-list representing the current page.
 	 */
 	public List getPageList() {
-		return getSource().subList(getFirstElementOnPage(), getLastElementOnPage() +1);
+		return getSource().subList(getFirstElementOnPage(), getLastElementOnPage() + 1);
 	}
 
 	/**
 	 * Return the first page to which create a link around the current page.
 	 */
 	public int getFirstLinkedPage() {
-		return Math.max(0, getPage() - (getMaxLinkedPages() /2));
+		return Math.max(0, getPage() - (getMaxLinkedPages() / 2));
 	}
 
 	/**
 	 * Return the last page to which create a link around the current page.
 	 */
 	public int getLastLinkedPage() {
-		return Math.min(getFirstLinkedPage() + getMaxLinkedPages() -1, getPageCount() -1);
+		return Math.min(getFirstLinkedPage() + getMaxLinkedPages() - 1, getPageCount() - 1);
 	}
 
 

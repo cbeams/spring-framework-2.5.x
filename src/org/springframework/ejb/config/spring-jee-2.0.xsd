@@ -120,13 +120,6 @@
 	<!-- base types -->
 	<xsd:complexType name="jndiLocatingType" abstract="true">
 		<xsd:complexContent>
-			<xsd:annotation>
-				<xsd:appinfo>
-					<tool:annotation>
-						<tool:exports/>
-					</tool:annotation>
-				</xsd:appinfo>
-			</xsd:annotation>
 			<xsd:extension base="beans:identifiedType">
 				<xsd:sequence>
 					<xsd:element name="environment" minOccurs="0" maxOccurs="1">

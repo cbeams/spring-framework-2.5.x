@@ -245,7 +245,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * for this exporter. Default is a <code>SimpleReflectiveMBeanInfoAssembler</code>.
 	 * <p>The passed-in assembler can optionally implement the
 	 * <code>AutodetectCapableMBeanInfoAssembler</code> interface, which enables it
-	 * to particiapte in the exporter's MBean autodetection process.
+	 * to participate in the exporter's MBean autodetection process.
 	 * @see org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler
 	 * @see org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler
 	 * @see org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler
@@ -484,11 +484,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 					this.assembler instanceof AutodetectCapableMBeanInfoAssembler) {
 				autodetectBeans((AutodetectCapableMBeanInfoAssembler) this.assembler);
 			}
-		}
-
-		// Check we now have at least one bean.
-		if (this.beans.isEmpty()) {
-			throw new IllegalArgumentException("Must specify at least one bean for registration");
 		}
 
 		try {

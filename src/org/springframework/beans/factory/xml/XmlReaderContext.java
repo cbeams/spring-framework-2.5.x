@@ -23,6 +23,7 @@ import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * Extension of {@link org.springframework.beans.factory.parsing.ReaderContext},
@@ -57,6 +58,14 @@ public class XmlReaderContext extends ReaderContext {
 
 	public final BeanDefinitionRegistry getRegistry() {
 		return this.reader.getBeanFactory();
+	}
+
+	public final ResourceLoader getResourceLoader() {
+		return this.reader.getResourceLoader();
+	}
+
+	public final ClassLoader getBeanClassLoader() {
+		return this.reader.getBeanClassLoader();
 	}
 
 	public final NamespaceHandlerResolver getNamespaceHandlerResolver() {

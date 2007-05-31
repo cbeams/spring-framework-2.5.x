@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,11 @@ import org.springframework.web.util.WebUtils;
  *  </ol>
  * </p>
  *
+ * <p>Thanks to Erwin Bolwidt for submitting the original prototype
+ * of such a cancellable form controller!</p>
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @author Erwin Bolwidt
  * @since 1.2.3
  * @see #setCancelParamKey
  * @see #setCancelView
@@ -84,7 +86,7 @@ public class CancellableFormController extends SimpleFormController {
 	 * Return the key of the request parameter used to identify a cancel request.
 	 */
 	public final String getCancelParamKey() {
-		return cancelParamKey;
+		return this.cancelParamKey;
 	}
 
 	/**
@@ -98,7 +100,7 @@ public class CancellableFormController extends SimpleFormController {
 	 * Gets the name of the cancel view.
 	 */
 	public final String getCancelView() {
-		return cancelView;
+		return this.cancelView;
 	}
 
 
@@ -108,6 +110,14 @@ public class CancellableFormController extends SimpleFormController {
 	 */
 	protected boolean isFormSubmission(HttpServletRequest request) {
 		return super.isFormSubmission(request) || isCancelRequest(request);
+	}
+
+	/**
+	 * Suppress validation for an explicit cancel request too.
+	 * @see #isCancelRequest(javax.servlet.http.HttpServletRequest)
+	 */
+	protected boolean suppressValidation(HttpServletRequest request, Object command) {
+		return super.suppressValidation(request, command) || isCancelRequest(request);
 	}
 
 	/**

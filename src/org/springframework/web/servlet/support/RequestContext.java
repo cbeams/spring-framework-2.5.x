@@ -27,9 +27,10 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.support.StaticMessageSource;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
-import org.springframework.ui.context.support.ResourceBundleThemeSource;
+import org.springframework.ui.context.support.SimpleTheme;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -73,6 +74,11 @@ public class RequestContext {
 	 * @see org.springframework.web.servlet.theme.AbstractThemeResolver#ORIGINAL_DEFAULT_THEME_NAME
 	 */
 	public final static String DEFAULT_THEME_NAME = "theme";
+
+	/**
+	 * Default (empty) Theme used if the RequestContext cannot find a ThemeSource.
+	 */
+	public final static Theme DEFAULT_THEME = new SimpleTheme(DEFAULT_THEME_NAME, new StaticMessageSource());
 
 	/**
 	 * JSTL locale attribute, as used by JSTL implementations to expose their
@@ -242,7 +248,7 @@ public class RequestContext {
 
 	/**
 	 * Determine the fallback locale for this context.
-	 * <p>Default implementation checks for a JSTL locale attribute
+	 * <p>The default implementation checks for a JSTL locale attribute
 	 * in request, session or application scope; if not found,
 	 * returns the <code>HttpServletRequest.getLocale()</code>.
 	 * @return the fallback locale (never <code>null</code>)
@@ -277,15 +283,17 @@ public class RequestContext {
 
 	/**
 	 * Determine the fallback theme for this context.
-	 * <p>Default implementation returns the default theme (with name "theme").
+	 * <p>The default implementation returns the default theme (with name "theme").
 	 * @return the fallback theme, or <code>null
 	 */
 	protected Theme getFallbackTheme() {
 		ThemeSource themeSource = RequestContextUtils.getThemeSource(getRequest());
-		if (themeSource == null) {
-			themeSource = new ResourceBundleThemeSource();
+		if (themeSource != null) {
+			return themeSource.getTheme(DEFAULT_THEME_NAME);
 		}
-		return themeSource.getTheme(DEFAULT_THEME_NAME);
+		else {
+			return DEFAULT_THEME;
+		}
 	}
 
 

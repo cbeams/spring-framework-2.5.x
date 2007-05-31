@@ -28,7 +28,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.support.AopUtils;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -141,7 +141,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 		// The method may be on an interface, but we need attributes from the target class.
 		// If the target class is null, the method will be unchanged.
-		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
+		Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
 
 		// First try is the method in the target class.
 		TransactionAttribute txAtt = findTransactionAttribute(findAllAttributes(specificMethod));

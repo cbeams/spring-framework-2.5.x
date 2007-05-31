@@ -131,7 +131,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	 * Return the transaction manager.
 	 */
 	public PlatformTransactionManager getTransactionManager() {
-		return transactionManager;
+		return this.transactionManager;
 	}
 
 	/**
@@ -183,7 +183,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	 * Return the transaction attribute source.
 	 */
 	public TransactionAttributeSource getTransactionAttributeSource() {
-		return transactionAttributeSource;
+		return this.transactionAttributeSource;
 	}
 
 
@@ -192,7 +192,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	 */
 	public void afterPropertiesSet() {
 		if (getTransactionManager() == null) {
-			throw new IllegalArgumentException("transactionManager is required");
+			throw new IllegalArgumentException("Property 'transactionManager' is required");
 		}
 		if (getTransactionAttributeSource() == null) {
 			throw new IllegalArgumentException(

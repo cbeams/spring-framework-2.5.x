@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,37 +21,36 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 
 /**
- * Extension of the BeanFactory interface to be implemented by bean factories
+ * Extension of the {@link BeanFactory} interface to be implemented by bean factories
  * that can enumerate all their bean instances, rather than attempting bean lookup
  * by name one by one as requested by clients. BeanFactory implementations that
- * preload all their beans (for example, DOM-based XML factories) may implement
- * this interface. This interface is discussed in "Expert One-on-One J2EE Design
- * and Development", by Rod Johnson.
+ * preload all their bean definitions (such as XML-based factories) may implement
+ * this interface.
  *
- * <p>If this is a HierarchicalBeanFactory, the return values will <i>not</i> take
- * any BeanFactory hierarchy into account, but will relate only to the beans defined
- * in the current factory. Use the BeanFactoryUtils helper class to consider beans
- * in ancestor factories too.
- * 
+ * <p>If this is a {@link HierarchicalBeanFactory}, the return values will <i>not</i>
+ * take any BeanFactory hierarchy into account, but will relate only to the beans
+ * defined in the current factory. Use the {@link BeanFactoryUtils} helper class
+ * to consider beans in ancestor factories too.
+ *
  * <p>The methods in this interface will just respect bean definitions of this factory.
  * They will ignore any singleton beans that have been registered by other means like
- * ConfigurableBeanFactory's <code>registerSingleton</code> method, with the exception
- * of <code>getBeanNamesOfType</code> and <code>getBeansOfType</code> which will check
+ * {@link org.springframework.beans.factory.config.ConfigurableBeanFactory}'s
+ * <code>registerSingleton</code> method, with the exception of
+ * <code>getBeanNamesOfType</code> and <code>getBeansOfType</code> which will check
  * such manually registered singletons too. Of course, BeanFactory's <code>getBean</code>
  * does allow transparent access to such special beans as well. However, in typical
  * scenarios, all beans will be defined by external bean definitions anyway, so most
  * applications don't need to worry about this differentation.
  *
- * <p>With the exception of <code>getBeanDefinitionCount</code> and
- * <code>containsBeanDefinition</code>, the methods in this interface are
- * not designed for frequent invocation. Implementations may be slow.
+ * <p><b>NOTE:</b> With the exception of <code>getBeanDefinitionCount</code>
+ * and <code>containsBeanDefinition</code>, the methods in this interface
+ * are not designed for frequent invocation. Implementations may be slow.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16 April 2001
  * @see HierarchicalBeanFactory
  * @see BeanFactoryUtils
- * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#registerSingleton
  */
 public interface ListableBeanFactory extends BeanFactory {
 
@@ -89,6 +88,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of <code>getObjectType</code>
 	 * in the case of FactoryBeans.
+	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
+	 * check nested beans which might match the specified type as well.
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.
@@ -97,8 +98,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * to include beans in ancestor factories too.
 	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
 	 * by other means than bean definitions.
-	 * <p>This version of getBeanNamesForType matches all kinds of beans, be it
-	 * singletons, prototypes, or FactoryBeans. In most implementations, the
+	 * <p>This version of <code>getBeanNamesForType</code> matches all kinds of beans,
+	 * be it singletons, prototypes, or FactoryBeans. In most implementations, the
 	 * result will be the same as for <code>getBeanNamesOfType(type, true, true)</code>.
 	 * <p>Bean names returned by this method should always return bean names <i>in the
 	 * order of definition</i> in the backend configuration, as far as possible.
@@ -114,6 +115,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of <code>getObjectType</code>
 	 * in the case of FactoryBeans.
+	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
+	 * check nested beans which might match the specified type as well.
 	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit" flag is set,
 	 * which means that FactoryBeans will get initialized. If the object created by the
 	 * FactoryBean doesn't match, the raw FactoryBean itself will be matched against the
@@ -145,6 +148,8 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
 	 * <code>getObjectType</code> in the case of FactoryBeans.
+	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
+	 * check nested beans which might match the specified type as well.
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.
@@ -174,6 +179,8 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
 	 * <code>getObjectType</code> in the case of FactoryBeans.
+	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
+	 * check nested beans which might match the specified type as well.
 	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit" flag is set,
 	 * which means that FactoryBeans will get initialized. If the object created by the
 	 * FactoryBean doesn't match, the raw FactoryBean itself will be matched against the

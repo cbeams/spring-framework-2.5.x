@@ -41,7 +41,7 @@ public class TxNamespaceHandlerEventTests extends TestCase {
 	public void setUp() throws Exception {
 		this.reader = new XmlBeanDefinitionReader(this.beanFactory);
 		this.reader.setEventListener(this.eventListener);
-		this.reader.loadBeanDefinitions(new ClassPathResource("transactionNamespaceHandlerTests.xml", getClass()));
+		this.reader.loadBeanDefinitions(new ClassPathResource("txNamespaceHandlerTests.xml", getClass()));
 	}
 
 	public void testComponentEventReceived() {

@@ -13,8 +13,7 @@
 
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[
-	Defines the configuration elements for the Spring Framework's
-	AOP support.
+	Defines the configuration elements for the Spring Framework's AOP support.
 		]]></xsd:documentation>
 	</xsd:annotation>
 
@@ -60,41 +59,6 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="spring-configured">
-		<xsd:annotation>
-			<xsd:documentation source="java:org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"><![CDATA[
-	Signals the container to effect the dependency injection of discrete
-	objects (typically - but not limited to - those classes annotated
-	with the @Configurable annotation).
-			]]></xsd:documentation>
-		</xsd:annotation>
-		<xsd:simpleType>
-			<xsd:restriction base="xsd:string"/>
-		</xsd:simpleType>
-	</xsd:element>
-
-	<xsd:element name="scoped-proxy">
-		<xsd:complexType>
-			<xsd:annotation>
-				<xsd:documentation source="java:org.springframework.aop.scope.ScopedProxyFactoryBean"><![CDATA[
-		Marks a bean definition as being a scoped proxy.
-
-		A bean marked as such will be exposed via a proxy, with the 'real'
-		bean instance being retrieved from some other source (such as a
-		HttpSession) as and when required.
-				]]></xsd:documentation>
-			</xsd:annotation>
-			<xsd:attribute name="proxy-target-class" type="xsd:boolean" default="true">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	Are class-based (CGLIB) proxies to be created? This is the default; in order to
-	switch to standard Java interface-based proxies, turn this flag to "false".
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-		</xsd:complexType>
-	</xsd:element>
-
 	<xsd:element name="aspectj-autoproxy">
 		<xsd:annotation>
 			<xsd:documentation source="java:org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"><![CDATA[
@@ -121,6 +85,41 @@
 				</xsd:annotation>
 			</xsd:attribute>
 		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="scoped-proxy">
+		<xsd:complexType>
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.aop.scope.ScopedProxyFactoryBean"><![CDATA[
+		Marks a bean definition as being a scoped proxy.
+
+		A bean marked as such will be exposed via a proxy, with the 'real'
+		bean instance being retrieved from some other source (such as a
+		HttpSession) as and when required.
+				]]></xsd:documentation>
+			</xsd:annotation>
+			<xsd:attribute name="proxy-target-class" type="xsd:boolean" default="true">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Are class-based (CGLIB) proxies to be created? This is the default; in order to
+	switch to standard Java interface-based proxies, turn this flag to "false".
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="spring-configured">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"><![CDATA[
+	Signals the current application context to apply dependency injection
+	to non-managed objects that are instantiated outside of the Spring bean
+	factory (typically classes annotated with the @Configurable annotation).
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleType>
+			<xsd:restriction base="xsd:string"/>
+		</xsd:simpleType>
 	</xsd:element>
 
 	<xsd:complexType name="aspectType">

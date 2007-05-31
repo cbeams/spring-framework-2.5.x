@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleResol
 	 * if any.
 	 */
 	protected Locale getDefaultLocale() {
-		return defaultLocale;
+		return this.defaultLocale;
 	}
 
 
@@ -112,6 +112,19 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleResol
 		return determineDefaultLocale(request);
 	}
 
+	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
+		if (locale != null) {
+			// Set request attribute and add cookie.
+			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, locale);
+			addCookie(response, locale.toString());
+		}
+		else {
+			// Set request attribute to fallback locale and remove cookie.
+			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, determineDefaultLocale(request));
+			removeCookie(response);
+		}
+	}
+
 	/**
 	 * Determine the default locale for the given request,
 	 * Called if no locale cookie has been found.
@@ -128,19 +141,6 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleResol
 			defaultLocale = request.getLocale();
 		}
 		return defaultLocale;
-	}
-
-	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
-		if (locale != null) {
-			// Set request attribute and add cookie.
-			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, locale);
-			addCookie(response, locale.toString());
-		}
-		else {
-			// Set request attribute to fallback locale and remove cookie.
-			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, request.getLocale());
-			removeCookie(response);
-		}
 	}
 
 }

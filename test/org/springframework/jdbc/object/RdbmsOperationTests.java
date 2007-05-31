@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,14 @@ import junit.framework.TestCase;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SqlInOutParameter;
+import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * @author Trevor Cook
+ * @author Juergen Hoeller
  */
 public class RdbmsOperationTests extends TestCase {
 
@@ -153,9 +156,10 @@ public class RdbmsOperationTests extends TestCase {
 		};
 		operation.setSql("select * from mytable");
 		try {
-		operation.compile();
-		fail("Shouldn't allow compiling without data source");
-		} catch (InvalidDataAccessApiUsageException idaauex) {
+			operation.compile();
+			fail("Shouldn't allow compiling without data source");
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK
 		}
 	}
@@ -171,6 +175,15 @@ public class RdbmsOperationTests extends TestCase {
 		assertEquals(ds, jt.getDataSource());
 		assertEquals(10, jt.getFetchSize());
 		assertEquals(20, jt.getMaxRows());
+	}
+
+	public void testValidateInOutParameter() {
+		TestRdbmsOperation operation = new TestRdbmsOperation();
+		operation.setDataSource(new DriverManagerDataSource());
+		operation.setSql("DUMMY_PROC");
+		operation.declareParameter(new SqlOutParameter("DUMMY_OUT_PARAM", Types.VARCHAR));
+		operation.declareParameter(new SqlInOutParameter("DUMMY_IN_OUT_PARAM", Types.VARCHAR));
+		operation.validateParameters(new Object[] {"DUMMY_VALUE1", "DUMMY_VALUE2"});
 	}
 
 

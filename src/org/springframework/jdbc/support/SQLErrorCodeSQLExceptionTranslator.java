@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,7 +263,7 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 		// We couldn't identify it more precisely - let's hand it over to the SQLState fallback translator.
 		if (logger.isDebugEnabled()) {
 			String codes = null;
-			if (this.sqlErrorCodes.isUseSqlStateForTranslation()) {
+			if (this.sqlErrorCodes != null && this.sqlErrorCodes.isUseSqlStateForTranslation()) {
 				codes = "SQL state '" + sqlEx.getSQLState() +
 					"', error code '" + sqlEx.getErrorCode();
 			}

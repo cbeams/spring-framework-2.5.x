@@ -255,7 +255,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * @see org.springframework.web.servlet.support.RequestContext
 	 */
 	protected RequestContext createRequestContext(HttpServletRequest request, Map model) {
-		return new RequestContext(request, model);
+		return new RequestContext(request, getServletContext(), model);
 	}
 
 	/**

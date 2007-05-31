@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,6 @@ public class PointcutComponentDefinition extends AbstractComponentDefinition {
 
 	private final String description;
 
-	private final String expression;
-
 
 	public PointcutComponentDefinition(String pointcutBeanName, BeanDefinition pointcutDefinition, String expression) {
 		Assert.notNull(pointcutBeanName, "Bean name must not be null");
@@ -44,8 +42,7 @@ public class PointcutComponentDefinition extends AbstractComponentDefinition {
 		Assert.notNull(expression, "Expression must not be null");
 		this.pointcutBeanName = pointcutBeanName;
 		this.pointcutDefinition = pointcutDefinition;
-		this.expression = expression;
-		this.description = "Pointcut <name='" + getName() + "', expression=[" + this.expression + "]>";
+		this.description = "Pointcut <name='" + pointcutBeanName + "', expression=[" + expression + "]>";
 	}
 
 
