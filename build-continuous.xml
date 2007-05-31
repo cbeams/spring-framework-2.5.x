@@ -7,6 +7,8 @@
 <project name="build-spring-continuous" default="snapshot" xmlns:aws="antlib:org.springframework.aws">
 
 	<import file="${basedir}/build.xml"/>
+	
+	<property name="build.number" value="SNAPSHOT"/>
     	
 	<target name="automated-build" depends="clean,testsummary,release"/>
 
