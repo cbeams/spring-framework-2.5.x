@@ -591,52 +591,17 @@
 	</target>
 
 
-	<target name="distfiles" depends="initdist" description="Copy dtd, tld and suchlike to the dist directory">
+	<target name="distfiles" depends="initdist" description="Copy dtd, xsd, tld, etc files to the dist directory">
 
-		<copy file="${src.dir}/org/springframework/aop/config/spring-aop-2.0.xsd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.dtd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans-2.0.dtd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans-2.0.xsd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-tool-2.0.xsd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-util-2.0.xsd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/context/config/spring-context-2.1.xsd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/ejb/config/spring-jee-2.0.xsd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/jms/config/spring-jms-2.1.xsd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/scripting/config/spring-lang-2.0.xsd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/transaction/config/spring-tx-2.0.xsd"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/web/servlet/tags/spring.tld"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/web/servlet/tags/form/spring-form.tld"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/web/servlet/view/velocity/spring.vm"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
-
-		<copy file="${src.dir}/org/springframework/web/servlet/view/freemarker/spring.ftl"
-				todir="${dist.dir}/resources" preservelastmodified="true"/>
+		<copy todir="${dist.dir}/resources" flatten="true" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/*.dtd"/>
+				<include name="**/*.ftl"/>
+				<include name="**/*.tld"/>
+				<include name="**/*.vm"/>
+				<include name="**/*.xsd"/>
+			</fileset>
+		</copy>
 
 	</target>
 
