@@ -4183,4 +4183,200 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 }]]></programlisting>
         </section>
     </section>
+    <section id="beans-classpath-scanning">
+        <title>Classpath scanning for beans</title>
+        <para>Thus far most of the examples within this chapter have used XML for specifying the
+        configuration metadata that produces each <interfacename>BeanDefinition</interfacename>
+        within the Spring container. The previous section, <xref linkend="beans-annotation-config"/>
+        demonstrated the possibility of providing a considerable amount of the configuration
+        metadata within source-level annotations. Even in those examples, however, the "base"
+        bean definitions were explicitly defined in the XML file while the annotations were
+        driving the dependency injection. The current section will introduce an option for
+        implicitly detecting the <emphasis>candidate beans</emphasis> by scanning the classpath
+        and matching against <emphasis>filters</emphasis>.</para>
+        <section id="beans-stereotype-annotations">
+            <title><interfacename>@Component</interfacename> and <interfacename>@Repository</interfacename></title>
+            <para>Beginning with Spring 2.0, the <interfacename>@Repository</interfacename> 
+            annotation was introduced as a marker for any class that fulfils the role, or 
+            <emphasis>stereotype</emphasis> of a repository (a.k.a. Data Access Object or DAO).
+            Among the possibilities for leveraging such a label, is the automatic translation of 
+            exceptions as described in the section entitled 
+            <xref linkend="orm-jpa-exceptions"/>.</para>
+            <para>Spring 2.1 introduces another stereotype annotation:
+            <interfacename>@Component</interfacename>, and provides the capability of
+            automatically detecting 'stereotyped' classes and registering corresponding
+            <interfacename>BeanDefinition</interfacename>s with the Application Context.
+            For example, the following two classes are eligible for such autodetection:
+            </para>
+            <programlisting><![CDATA[@Component
+public class SimpleMovieLister {
+
+    private MovieFinder movieFinder;
+
+    @Autowired
+    public void setMovieFinder(MovieFinder movieFinder) {
+        this.movieFinder = movieFinder;
+    }
+    
+}]]></programlisting>
+        <programlisting><![CDATA[@Repository
+public class JpaMovieFinder implements MovieFinder {
+
+    ]]><lineannotation>// implementation omitted</lineannotation><![CDATA[
+
+}]]></programlisting>
+            <para>To autodetect these classes and register the corresponding beans simply
+            requires inclusion of the following element in XML where 'basePackage' would
+            be a common parent package for the two or alternatively a comma-separated
+            list including a parent package of each.</para>
+            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+               
+     <context:component-scan base-package="org.example"/>
+     
+</beans>]]></programlisting>
+            <para>Furthermore, the <interfacename>AutowiredAnnotationBeanPostProcessor</interfacename>
+            and <interfacename>CommonAnnotationBeanPostProcessor</interfacename> are both included
+            implicitly when using the component-scan element. That means that the two components 
+            are autodetected <emphasis>and</emphasis> wired together - all without any bean
+            configuration metadata provided in XML.
+                <note>The registration of those post-processors can be disabled by including the
+                <emphasis>annotation-config</emphasis> attribute with a value of 'false'.</note>
+            </para>
+        </section>
+        <section id="beans-scanning-filters">
+            <title>Using filters to customize scanning</title>
+            <para>By default, classes with either the <interfacename>@Component</interfacename>
+            or <interfacename>@Repository</interfacename> annotation are the only detected 
+            candidates. However it is simple to modify and extend this behavior by applying
+            custom filters. These can be added as either <emphasis>include-filter</emphasis>
+            or <emphasis>exclude-filter</emphasis> sub-elements of the 'component-scan'
+            element. Each filter element requires the 'type' and 'expression' attributes. 
+            Currently, three filtering options exist as described below.</para>
+            <table id="beans-scanning-filters-tbl">
+                <title>Filter Types</title>
+                <tgroup cols="2">
+                    <colspec colname="c1" colwidth="1*" />
+                    <colspec colname="c2" colwidth="1*" />
+                    <thead>
+                        <row>
+                            <entry>Filter Type</entry>
+                            <entry>Example Expression</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>annotation</entry>
+                            <entry>
+                                <para>org.example.SomeAnnotation</para>
+                            </entry>
+                        </row>
+                        <row>
+                            <entry>assignable</entry>
+                            <entry>
+                                <para>org.example.SomeClass</para>
+                            </entry>
+                        </row>
+                        <row>
+                            <entry>regex</entry>
+                            <entry>
+                                <para>org\.example\.Default.*</para>
+                            </entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+            <para>Find below an example of the XML configuration for ignoring all
+            <interfacename>@Repository</interfacename> annotations and using
+            "stub" repositories instead.</para>
+            <programlisting><![CDATA[<beans ...>
+               
+     <context:component-scan base-package="org.example">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+        <context:include-filter type="regex" expression=".*Stub.*Repository"/>
+     </context:component-scan>
+     
+</beans>]]></programlisting>
+        <note>It is also possible to disable the default filters by providing
+        <emphasis>use-default-filters="false"</emphasis> as an attribute of the
+        &lt;component-scan/&gt; element.</note>
+        </section>
+        <section id="beans-scanning-name-generator">
+            <title>Naming auto-detected beans</title>
+            <para>When a bean is auto-detected as part of the scanning process, its name will be
+            generated by the <interfacename>BeanNameGenerator</interfacename> strategy known to
+            that scanner. By default, any Spring 'stereotype' annotation
+            (<interfacename>@Component</interfacename> and <interfacename>@Repository</interfacename>)
+            that contains a name value will thereby provide that name to the corresponding bean
+            definition. If such annotation contains no name value or for any other detected bean
+            (such as those discovered due to custom filters), the default bean name generator will
+            return the decapitalized non-qualified class name. For example, if the following two
+            beans were detected, the names would be 'myMovieLister' and 'movieFinderImpl':</para>
+            <programlisting><![CDATA[@Component("myMovieLister")
+public class SimpleMovieLister {
+    ...
+}]]></programlisting>
+        <programlisting><![CDATA[@Repository
+public class MovieFinderImpl implements MovieFinder {
+    ...
+}]]></programlisting>
+            <note>If you don't want to rely on that default, you may provide a custom
+            bean-naming strategy. First, implement the 
+            <interfacename><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/support/BeanNameGenerator.html">BeanNameGenerator</ulink></interfacename>
+            interface, and be sure to include a default no-arg constructor. Then, provide the 
+            fully-qualified classname when configuring the scanner:
+            <programlisting><![CDATA[<beans ...>
+               
+     <context:component-scan base-package="org.example"
+                             name-generator="org.example.MyNameGenerator" />
+     
+</beans>]]></programlisting>
+            </note>
+            <para>As a general rule, consider specifying the name with the annotation whenever
+            other beans may be making explicit references to it. On the other hand, the auto-
+            generated names are adequate whenever the container is responsible for wiring.</para>
+        </section>
+        <section id="beans-scanning-scope-resolver">
+            <title>Providing Scope for auto-detected beans</title>
+            <para>As with Spring beans in general, the default and by far most common scope
+            is 'singleton'. However, there are times when other scopes are needed. Therefore 
+            Spring 2.1 introduces a new <interfacename>@Scope</interfacename> annotation
+            as well. Simply provide the name of the scope within the annotation, such as:</para>
+            <programlisting><![CDATA[@Scope("prototype")
+@Repository
+public class MovieFinderImpl implements MovieFinder {
+    ...
+}]]></programlisting>
+            <note>If you would like to provide a custom strategy for scope resolution rather
+            than relying on the annotation-based approach, implement the 
+            <interfacename><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/context/annotation/ScopeMetadataResolver.html">ScopeMetadataResolver</ulink></interfacename>
+            interface, and be sure to include a default no-arg constructor. Then, provide the 
+            fully-qualified classname when configuring the scanner:
+            <programlisting><![CDATA[<beans ...>
+               
+     <context:component-scan base-package="org.example"
+                             scope-resolver="org.example.MyScopeResolver" />
+     
+</beans>]]></programlisting>
+            </note>
+            <para>When using certain non-singleton scopes, it may be necessary to generate proxies
+            for the scoped objects. The reasoning is described in detail within the section 
+            entitled <xref linkend="beans-factory-scopes-other-injection"/>. For this purpose, a
+            <emphasis>scoped-proxy</emphasis> attribute is available on the 'component-scan' element. 
+            The three possible values are: 'no', 'interfaces', and 'targetClass'. For example, the
+            following configuration will result in standard JDK dynamic proxies:</para>
+<programlisting><![CDATA[<beans ...>
+               
+     <context:component-scan base-package="org.example"
+                             scoped-proxy="interfaces" />
+     
+</beans>]]></programlisting>
+        </section>
+    </section>
 </chapter>
