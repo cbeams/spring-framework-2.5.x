@@ -87,8 +87,6 @@ public class SimpleJdbcCallTests extends TestCase {
 		ctrlDatabaseMetaData.setReturnValue("MyDB");
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("MyDB");
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MyDB");
 		mockDatabaseMetaData.getUserName();
 		ctrlDatabaseMetaData.setReturnValue("me");
 		mockDatabaseMetaData.supportsCatalogsInProcedureCalls();
@@ -128,8 +126,6 @@ public class SimpleJdbcCallTests extends TestCase {
 		final int amount = 1103;
 		final int custid = 3;
 
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MyDB");
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("MyDB");
 		mockDatabaseMetaData.getUserName();
@@ -226,8 +222,6 @@ public class SimpleJdbcCallTests extends TestCase {
 
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("Oracle");
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("Oracle");
 		mockDatabaseMetaData.getUserName();
 		ctrlDatabaseMetaData.setReturnValue("ME");
 		mockDatabaseMetaData.supportsCatalogsInProcedureCalls();
@@ -278,8 +272,6 @@ public class SimpleJdbcCallTests extends TestCase {
 		final int amount = 1103;
 		final int custid = 3;
 
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MyDB");
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("MyDB");
 		mockDatabaseMetaData.getUserName();
@@ -374,8 +366,6 @@ public class SimpleJdbcCallTests extends TestCase {
 		ctrlResultSet.setVoidCallable();
 
 
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("Oracle");
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("Oracle");
 		mockDatabaseMetaData.getUserName();

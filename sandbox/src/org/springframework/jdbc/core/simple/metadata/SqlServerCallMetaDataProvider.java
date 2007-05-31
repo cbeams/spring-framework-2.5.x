@@ -27,6 +27,7 @@ import java.sql.SQLException;
 public class SqlServerCallMetaDataProvider extends AbstractCallMetaDataProvider {
 
 	private static final String REMOVABLE_COLUMN_PREFIX = "@";
+	private static final String RETURN_VALUE_NAME = "@RETURN_VALUE";
 
 	public SqlServerCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		super(databaseMetaData);
@@ -41,5 +42,13 @@ public class SqlServerCallMetaDataProvider extends AbstractCallMetaDataProvider 
 			return super.parameterNameToUse(parameterName.substring(1));
 		else
 			return super.parameterNameToUse(parameterName);
+	}
+
+	@Override
+	protected boolean byPassReturnParameter(String parameterName) {
+		if (RETURN_VALUE_NAME.equals(parameterName))
+			return true;
+		else
+			return super.byPassReturnParameter(parameterName);
 	}
 }

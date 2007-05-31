@@ -109,7 +109,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	public SimpleJdbcCall withoutProcedureColumnMetaDataAccess() {
-		setAccessProcedureColumnMetaData(false);
+		setAccessCallParameterMetaData(false);
 		return this;
 	}
 

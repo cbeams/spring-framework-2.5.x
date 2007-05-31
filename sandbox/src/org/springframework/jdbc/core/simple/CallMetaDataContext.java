@@ -53,11 +53,13 @@ public class CallMetaDataContext {
 	/** List of SqlParameter names for out parameters */
 	private List<String> outParameterNames = new ArrayList<String>();
 
-	private boolean accessProcedureColumnMetaData = true;
+	/** should we access call parameter meta data info or not */
+	private boolean accessCallParameterMetaData = true;
 
 	/** indicates whether this is a procedure or a function **/
 	private boolean function;
 
+	/** the provider of call meta data */
 	private CallMetaDataProvider metaDataProvider;
 
 
@@ -109,12 +111,12 @@ public class CallMetaDataContext {
 		this.function = function;
 	}
 
-	public boolean isAccessProcedureColumnMetaData() {
-		return accessProcedureColumnMetaData;
+	public boolean isAccessCallParameterMetaData() {
+		return accessCallParameterMetaData;
 	}
 
-	public void setAccessProcedureColumnMetaData(boolean accessProcedureColumnMetaData) {
-		this.accessProcedureColumnMetaData = accessProcedureColumnMetaData;
+	public void setAccessCallParameterMetaData(boolean accessCallParameterMetaData) {
+		this.accessCallParameterMetaData = accessCallParameterMetaData;
 	}
 
 	public String getScalarOutParameterName() {

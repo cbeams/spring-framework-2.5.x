@@ -60,7 +60,7 @@ public class CallMetaDataProviderFactory {
 				public Object processMetaData(DatabaseMetaData databaseMetaData)
 						throws SQLException, MetaDataAccessException {
 					String databaseProductName = databaseMetaData.getDatabaseProductName();
-					boolean accessProcedureColumnMetaData = context.isAccessProcedureColumnMetaData();
+					boolean accessProcedureColumnMetaData = context.isAccessCallParameterMetaData();
 					if (context.isFunction()) {
 						if (!supportedDatabaseProductsForFunctions.contains(databaseProductName)) {
 							logger.warn(databaseProductName + " is not one of the databases fully supported for function calls -- supported are: " +

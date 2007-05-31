@@ -18,14 +18,20 @@ package org.springframework.jdbc.core.simple.metadata;
 
 import org.springframework.jdbc.core.simple.metadata.AbstractCallMetaDataProvider;
 import org.springframework.jdbc.core.simple.CallMetaDataContext;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.ColumnMapRowMapper;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * @author trisberg
  */
 public class OracleCallMetaDataProvider extends AbstractCallMetaDataProvider {
+
+	private static final String REF_CURSOR_NAME = "REF CURSOR";
 
 	public OracleCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		super(databaseMetaData);
@@ -41,5 +47,13 @@ public class OracleCallMetaDataProvider extends AbstractCallMetaDataProvider {
 	protected String metaDataSchemaNameToUse(CallMetaDataContext context) {
 		// Use current user schema if no schema specified
 		return context.getSchemaName() == null ? getUserName() : super.metaDataSchemaNameToUse(context);
+	}
+
+	@Override
+	protected SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta) {
+		if(meta.getSqlType() == Types.OTHER && REF_CURSOR_NAME.equals(meta.getTypeName()))
+			return new SqlOutParameter(parameterName, -10, new ColumnMapRowMapper());
+		else
+			return super.createDefaultOutParameter(parameterName, meta);
 	}
 }

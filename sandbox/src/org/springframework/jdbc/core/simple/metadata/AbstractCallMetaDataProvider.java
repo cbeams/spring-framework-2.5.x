@@ -20,13 +20,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlOutParameter;
-import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.simple.CallMetaDataContext;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.ResultSet;
-import java.sql.Types;
 import java.util.*;
 
 /**
@@ -35,11 +33,9 @@ import java.util.*;
 public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 
 	/** Logger available to subclasses */
-	private static final Log logger = LogFactory.getLog(CallMetaDataProvider.class);
+	protected static final Log logger = LogFactory.getLog(CallMetaDataProvider.class);
 
 	private boolean procedureColumnMetaDataUsed = false;
-
-	private String databaseProductName;
 
 	private String userName;
 
@@ -51,10 +47,9 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 
 	private boolean storesLowerCaseIdentifiers;
 
-	private List<CallColumnMetaData> callColumnMetaData = new ArrayList<CallColumnMetaData>();
+	private List<CallParameterMetaData> callParameterMetaData = new ArrayList<CallParameterMetaData>();
 
 	protected AbstractCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
-		databaseProductName = databaseMetaData.getDatabaseProductName();
 		userName = databaseMetaData.getUserName();
 	}
 
@@ -67,7 +62,8 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 
 	}
 
-	public void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, CallMetaDataContext context) throws SQLException {
+	public void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, CallMetaDataContext context)
+			throws SQLException {
 
 		procedureColumnMetaDataUsed = true;
 
@@ -134,6 +130,18 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 		return parameterName;
 	}
 
+	protected boolean byPassReturnParameter(String parameterName) {
+		return false;
+	}
+
+	protected SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta) {
+		return new SqlOutParameter(parameterName, meta.getSqlType());		
+	}
+
+	protected SqlParameter createDefaultInParameter(String parameterName, CallParameterMetaData meta) {
+		return new SqlParameter(parameterName, meta.getSqlType());		
+	}
+
 	protected String getUserName() {
 		return userName;
 	}
@@ -172,17 +180,17 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 			return workParameters;
 		}
 
-		for (CallColumnMetaData meta : callColumnMetaData) {
-			String colNameToCheck = null;
-			if (meta.getColumnName() != null)
-				colNameToCheck = parameterNameToUse(meta.getColumnName()).toLowerCase();
-			String colNameToUse = parameterNameToUse(meta.getColumnName());
-			if (!((meta.getColumnType() == DatabaseMetaData.procedureColumnReturn && returnDeclared) ||
-					declaredParameters.containsKey(colNameToCheck))) {
-				if (meta.columnType == DatabaseMetaData.procedureColumnReturn) {
-					if (!context.isFunction() && "return_value".equals(colNameToCheck)) {
+		for (CallParameterMetaData meta : callParameterMetaData) {
+			String parNameToCheck = null;
+			if (meta.getParameterName() != null)
+				parNameToCheck = parameterNameToUse(meta.getParameterName()).toLowerCase();
+			String parNameToUse = parameterNameToUse(meta.getParameterName());
+			if (!((meta.getParameterType() == DatabaseMetaData.procedureColumnReturn && returnDeclared) ||
+					declaredParameters.containsKey(parNameToCheck))) {
+				if (meta.parameterType == DatabaseMetaData.procedureColumnReturn) {
+					if (!context.isFunction() && byPassReturnParameter(meta.getParameterName())) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Bypassing metadata return parameter for: " + colNameToUse);
+							logger.debug("Bypassing metadata return parameter for: " + meta.getParameterName());
 						}
 					}
 					else {
@@ -195,41 +203,35 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 					}
 				}
 				else {
-					if (meta.getColumnType() == DatabaseMetaData.procedureColumnOut ||
-							meta.getColumnType() == DatabaseMetaData.procedureColumnInOut) {
-						if("Oracle".equals(databaseProductName) && meta.getSqlType() == Types.OTHER &&
-								"REF CURSOR".equals(meta.getTypeName())) {
-							workParameters.add(new SqlOutParameter(colNameToUse, -10, new ColumnMapRowMapper()));
-						}
-						else {
-							workParameters.add(new SqlOutParameter(colNameToUse, meta.getSqlType()));
-						}
-						outParameterNames.add(colNameToUse);
+					if (meta.getParameterType() == DatabaseMetaData.procedureColumnOut ||
+							meta.getParameterType() == DatabaseMetaData.procedureColumnInOut) {
+						workParameters.add(createDefaultOutParameter(parNameToUse, meta));
+						outParameterNames.add(parNameToUse);
 						if (logger.isDebugEnabled()) {
-							logger.debug("Added metadata out parameter for: " + colNameToUse);
+							logger.debug("Added metadata out parameter for: " + parNameToUse);
 						}
 					}
 					else {
-						workParameters.add(new SqlParameter(colNameToUse, meta.getSqlType()));
+						workParameters.add(createDefaultInParameter(parNameToUse, meta));
 						if (logger.isDebugEnabled()) {
-							logger.debug("Added metadata in parameter for: " + colNameToUse);
+							logger.debug("Added metadata in parameter for: " + parNameToUse);
 						}
 					}
 				}
 			}
 			else {
 				SqlParameter parameter;
-				if (meta.getColumnType() == 5) {
+				if (meta.getParameterType() == 5) {
 					parameter = declaredParameters.get(context.getFunctionReturnName());
 				}
 				else {
-					parameter = declaredParameters.get(colNameToCheck);
+					parameter = declaredParameters.get(parNameToCheck);
 				}
 				if (parameter != null) {
 					workParameters.add(parameter);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Using declared parameter for: " +
-								(colNameToUse == null ? context.getFunctionReturnName() : colNameToUse));
+								(parNameToUse == null ? context.getFunctionReturnName() : parNameToUse));
 					}
 				}
 			}
@@ -256,18 +258,18 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 					procedureName,
 					null);
 			while (procs.next()) {
-				CallColumnMetaData meta = new CallColumnMetaData(
+				CallParameterMetaData meta = new CallParameterMetaData(
 						procs.getString("COLUMN_NAME"),
 						procs.getInt("COLUMN_TYPE"),
 						procs.getInt("DATA_TYPE"),
 						procs.getString("TYPE_NAME"),
 						procs.getBoolean("NULLABLE")
 				);
-				callColumnMetaData.add(meta);
+				callParameterMetaData.add(meta);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Retrieved metadata: "
-						+ meta.getColumnName() +
-						" " + meta.getColumnType() +
+						+ meta.getParameterName() +
+						" " + meta.getParameterType() +
 						" " + meta.getSqlType() +
 						" " + meta.getTypeName() +
 						" " + meta.isNullable()
@@ -326,7 +328,8 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 
 	}
 
-	public Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> inParameters, List<SqlParameter> callParameters) {
+	public Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> inParameters,
+																		List<SqlParameter> callParameters) {
 		if (!procedureColumnMetaDataUsed) {
 			return inParameters;
 		}
@@ -343,7 +346,8 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 			String parameterNameToMatch = parameterNameToUse(parameterName);
 			String callParameterName = callParameterNames.get(parameterNameToMatch.toLowerCase());
 			if (callParameterName == null) {
-				logger.warn("Unable to locate the corresponding parameter for \"" + parameterName + "\" specified in the provided parameter values: " + inParameters);
+				logger.warn("Unable to locate the corresponding parameter for \"" + parameterName +
+						"\" specified in the provided parameter values: " + inParameters);
 			}
 			else {
 				matchedParameters.put(callParameterName, inParameters.get(parameterName));
@@ -356,29 +360,29 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 		return matchedParameters;
 	}
 
-	protected class CallColumnMetaData {
-		private String columnName;
-		private int columnType;
+	protected class CallParameterMetaData {
+		private String parameterName;
+		private int parameterType;
 		private int sqlType;
 		private String typeName;
 		private boolean nullable;
 
 
-		public CallColumnMetaData(String columnName, int columnType, int sqlType, String typeName, boolean nullable) {
-			this.columnName = columnName;
-			this.columnType = columnType;
+		public CallParameterMetaData(String columnName, int columnType, int sqlType, String typeName, boolean nullable) {
+			this.parameterName = columnName;
+			this.parameterType = columnType;
 			this.sqlType = sqlType;
 			this.typeName = typeName;
 			this.nullable = nullable;
 		}
 
 
-		public String getColumnName() {
-			return columnName;
+		public String getParameterName() {
+			return parameterName;
 		}
 
-		public int getColumnType() {
-			return columnType;
+		public int getParameterType() {
+			return parameterType;
 		}
 
 		public int getSqlType() {

@@ -122,8 +122,8 @@ public abstract class AbstractJdbcCall {
 		return callString;
 	}
 
-	public AbstractJdbcCall setAccessProcedureColumnMetaData(boolean accessProcedureColumnMetaData) {
-		this.callMetaDataContext.setAccessProcedureColumnMetaData(accessProcedureColumnMetaData);
+	public AbstractJdbcCall setAccessCallParameterMetaData(boolean accessCallParameterMetaData) {
+		this.callMetaDataContext.setAccessCallParameterMetaData(accessCallParameterMetaData);
 		return this;
 	}
 
