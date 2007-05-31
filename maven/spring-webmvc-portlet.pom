@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework</groupId>
-  <artifactId>spring-ibatis</artifactId>
+  <artifactId>spring-webmvc-portlet</artifactId>
   <packaging>jar</packaging>
-  <name>Spring Framework: iBATIS</name>
+  <name>Spring Framework: Web MVC Portlet</name>
   <version>2.1-m2</version>
-  <description>Spring Framework: iBATIS</description>
+  <description>Spring Framework: Web MVC Portlet</description>
   <url>http://www.springframework.org</url>
   <licenses>
     <license>
@@ -28,15 +28,27 @@
   <dependencies>
 <!-- External Dependencies -->
     <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>1.2</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
       <version>1.1</version>
     </dependency>
-<!-- Not currently in ibiblio maven repository -->
     <dependency>
-      <groupId>org.apache.ibatis</groupId>
-      <artifactId>ibatis-sqlmap</artifactId>
-      <version>2.3.0</version>
+      <groupId>javax.portlet</groupId>
+      <artifactId>portlet-api</artifactId>
+      <version>1.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.0</version>
+      <scope>provided</scope>
     </dependency>
 <!-- Spring Dependencies -->
     <dependency>
@@ -46,17 +58,22 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>spring-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>spring-dao</artifactId>
+      <artifactId>spring-web</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>spring-jdbc</artifactId>
+      <artifactId>spring-webmvc</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

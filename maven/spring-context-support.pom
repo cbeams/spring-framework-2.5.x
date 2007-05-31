@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework</groupId>
-  <artifactId>spring-support</artifactId>
+  <artifactId>spring-context-support</artifactId>
   <packaging>jar</packaging>
-  <name>Spring Framework: Support</name>
+  <name>Spring Framework: Context Support</name>
   <version>2.1-m2</version>
-  <description>Spring Framework: Support</description>
+  <description>Spring Framework: Context Support</description>
   <url>http://www.springframework.org</url>
   <licenses>
     <license>
@@ -97,7 +97,6 @@
       <version>1.2.4</version>
       <optional>true</optional>
     </dependency>
-<!-- Not currently in ibiblio maven repository -->
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>oc4j</artifactId>
@@ -158,13 +157,13 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>spring-dao</artifactId>
+      <artifactId>spring-jdbc</artifactId>
       <version>${project.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>spring-jdbc</artifactId>
+      <artifactId>spring-tx</artifactId>
       <version>${project.version}</version>
       <optional>true</optional>
     </dependency>

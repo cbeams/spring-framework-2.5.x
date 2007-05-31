@@ -130,12 +130,12 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>spring-core</artifactId>
+      <artifactId>spring-context-support</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>spring-support</artifactId>
+      <artifactId>spring-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

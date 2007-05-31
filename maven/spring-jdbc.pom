@@ -68,7 +68,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>spring-dao</artifactId>
+      <artifactId>spring-tx</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
