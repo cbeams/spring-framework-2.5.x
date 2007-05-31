@@ -124,7 +124,7 @@ public class SimpleJdbcCallTests extends TestCase {
 		}
 	}
 
-	public void testAddInvoiceWithoutMetaData() throws Exception {
+	public void testAddInvoiceProcWithoutMetaData() throws Exception {
 		final int amount = 1103;
 		final int custid = 3;
 
@@ -176,7 +176,7 @@ public class SimpleJdbcCallTests extends TestCase {
 		assertEquals(4, newId.intValue());
 	}
 
-	public void testAddInvoiceWithMetaData() throws Exception {
+	public void testAddInvoiceProcWithMetaData() throws Exception {
 		final int amount = 1103;
 		final int custid = 3;
 
@@ -274,5 +274,153 @@ public class SimpleJdbcCallTests extends TestCase {
 		ctrlResultSet.verify();
 	}
 
+	public void testAddInvoiceFuncWithoutMetaData() throws Exception {
+		final int amount = 1103;
+		final int custid = 3;
 
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("MyDB");
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("MyDB");
+		mockDatabaseMetaData.getUserName();
+		ctrlDatabaseMetaData.setReturnValue("me");
+		mockDatabaseMetaData.supportsCatalogsInProcedureCalls();
+		ctrlDatabaseMetaData.setReturnValue(false);
+		mockDatabaseMetaData.supportsSchemasInProcedureCalls();
+		ctrlDatabaseMetaData.setReturnValue(false);
+		mockDatabaseMetaData.storesUpperCaseIdentifiers();
+		ctrlDatabaseMetaData.setReturnValue(false);
+		mockDatabaseMetaData.storesLowerCaseIdentifiers();
+		ctrlDatabaseMetaData.setReturnValue(true);
+
+		mockCallable.registerOutParameter(1, 4);
+		ctrlCallable.setVoidCallable();
+		mockCallable.setObject(2, 1103, 4);
+		ctrlCallable.setVoidCallable();
+		mockCallable.setObject(3, 3, 4);
+		ctrlCallable.setVoidCallable();
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
+		mockCallable.getObject(1);
+		ctrlCallable.setReturnValue(new Long(4));
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall(
+			"{? = call add_invoice(?, ?)}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+
+		SimpleJdbcCall adder = new SimpleJdbcCall(mockDataSource).withFunctionName("add_invoice");
+		adder.declareParameters(new SqlOutParameter("return", Types.INTEGER),
+				new SqlParameter("amount", Types.INTEGER),
+				new SqlParameter("custid", Types.INTEGER));
+		Number newId = adder.executeFunction(Number.class, new MapSqlParameterSource()
+				.addValue("amount", amount)
+				.addValue("custid", custid));
+		assertEquals(4, newId.intValue());
+	}
+
+	public void testAddInvoiceFuncWithMetaData() throws Exception {
+		final int amount = 1103;
+		final int custid = 3;
+
+		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
+		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString("COLUMN_NAME");
+		ctrlResultSet.setReturnValue(null);
+		mockResultSet.getInt("COLUMN_TYPE");
+		ctrlResultSet.setReturnValue(5);
+		mockResultSet.getInt("DATA_TYPE");
+		ctrlResultSet.setReturnValue(4);
+		mockResultSet.getString("TYPE_NAME");
+		ctrlResultSet.setReturnValue(null);
+		mockResultSet.getBoolean("NULLABLE");
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString("COLUMN_NAME");
+		ctrlResultSet.setReturnValue("amount");
+		mockResultSet.getInt("COLUMN_TYPE");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getInt("DATA_TYPE");
+		ctrlResultSet.setReturnValue(4);
+		mockResultSet.getString("TYPE_NAME");
+		ctrlResultSet.setReturnValue(null);
+		mockResultSet.getBoolean("NULLABLE");
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString("COLUMN_NAME");
+		ctrlResultSet.setReturnValue("custid");
+		mockResultSet.getInt("COLUMN_TYPE");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getInt("DATA_TYPE");
+		ctrlResultSet.setReturnValue(4);
+		mockResultSet.getString("TYPE_NAME");
+		ctrlResultSet.setReturnValue(null);
+		mockResultSet.getBoolean("NULLABLE");
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("Oracle");
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("Oracle");
+		mockDatabaseMetaData.getUserName();
+		ctrlDatabaseMetaData.setReturnValue("ME");
+		mockDatabaseMetaData.supportsCatalogsInProcedureCalls();
+		ctrlDatabaseMetaData.setReturnValue(false);
+		mockDatabaseMetaData.supportsSchemasInProcedureCalls();
+		ctrlDatabaseMetaData.setReturnValue(false);
+		mockDatabaseMetaData.storesUpperCaseIdentifiers();
+		ctrlDatabaseMetaData.setReturnValue(true);
+		mockDatabaseMetaData.storesLowerCaseIdentifiers();
+		ctrlDatabaseMetaData.setReturnValue(false);
+		mockDatabaseMetaData.getProcedureColumns("", null, "ADD_INVOICE", null);
+		ctrlDatabaseMetaData.setReturnValue(mockResultSet);
+
+		mockCallable.registerOutParameter(1, 4);
+		ctrlCallable.setVoidCallable();
+		mockCallable.setObject(2, 1103, 4);
+		ctrlCallable.setVoidCallable();
+		mockCallable.setObject(3, 3, 4);
+		ctrlCallable.setVoidCallable();
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
+		mockCallable.getObject(1);
+		ctrlCallable.setReturnValue(new Long(4));
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall(
+			"{? = call ADD_INVOICE(?, ?)}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		ctrlResultSet.replay();
+		replay();
+
+		SimpleJdbcCall adder = new SimpleJdbcCall(mockDataSource).withFunctionName("add_invoice");
+		Number newId = adder.executeFunction(Number.class, new MapSqlParameterSource()
+				.addValue("amount", amount)
+				.addValue("custid", custid));
+		assertEquals(4, newId.intValue());
+
+		ctrlResultSet.verify();
+	}
 }

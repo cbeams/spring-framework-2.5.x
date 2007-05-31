@@ -173,7 +173,9 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 		}
 
 		for (CallColumnMetaData meta : callColumnMetaData) {
-			String colNameToCheck = parameterNameToUse(meta.getColumnName()).toLowerCase();
+			String colNameToCheck = null;
+			if (meta.getColumnName() != null)
+				colNameToCheck = parameterNameToUse(meta.getColumnName()).toLowerCase();
 			String colNameToUse = parameterNameToUse(meta.getColumnName());
 			if (!((meta.getColumnType() == DatabaseMetaData.procedureColumnReturn && returnDeclared) ||
 					declaredParameters.containsKey(colNameToCheck))) {
@@ -263,13 +265,12 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 				);
 				callColumnMetaData.add(meta);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Retrieved metadata: " + procs.getString("PROCEDURE_CAT") +
-						" " + procs.getString("PROCEDURE_SCHEM") +
-						" " + procs.getString("COLUMN_NAME") +
-						" " + procs.getString("COLUMN_TYPE") +
-						" " + procs.getInt("DATA_TYPE") +
-						" " + procs.getString("TYPE_NAME") +
-						" " + procs.getString("NULLABLE")
+					logger.debug("Retrieved metadata: "
+						+ meta.getColumnName() +
+						" " + meta.getColumnType() +
+						" " + meta.getSqlType() +
+						" " + meta.getTypeName() +
+						" " + meta.isNullable()
 					);
 				}
 			}
@@ -355,7 +356,7 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 		return matchedParameters;
 	}
 
-	private class CallColumnMetaData {
+	protected class CallColumnMetaData {
 		private String columnName;
 		private int columnType;
 		private int sqlType;
