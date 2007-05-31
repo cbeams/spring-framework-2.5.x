@@ -19,6 +19,8 @@ General
 
 Package org.springframework.aop
 * ReflectiveMethodInvocation always uses a shared user attribute Map in clones (for proper binding of multiple advices)
+* fixed MethodInvocationProceedingJoinPoint to properly pass modified arguments (via proceed) to subsequent aspects
+* fixed AbstractAspectJAdvisorFactory to ignore 'code-style' aspect classes that have been compiled by ajc
 * "aop:aspectj-autoproxy" XML configuration tag detects all aspect beans in case of empty XML body content as well
 * moved "aop:spring-configured" to context namespace ("context:spring-configured") in the 2.1 versions of the XSDs
 
@@ -66,6 +68,7 @@ Package org.springframework.core
 * updated NestedXxxException to build on JDK 1.4 exception chaining, adding extended messages and convenience accessors
 * introduced PriorityOrdered marker interface, with order values automatically applied before any plain Ordered values
 * fixed BridgeMethodResolver to properly detect a method that substitutes a type parameter with an array type
+* fixed BridgeMethodResolver to detect type variables in interface hierarchies with different type variable names
 * added "getClassLoader()" method to ClassPathResource, exposing the ClassLoader used for resource loading
 * PathMatchingResourcePatternResolver avoids full subtree scan through skipping non-matching directory paths early
 * PathMatchingResourcePatternResolver explicitly closes freshly created JarFile handles, to allow for hot redeployment
