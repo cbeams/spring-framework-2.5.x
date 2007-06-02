@@ -74,7 +74,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		mockResultSetMetaData.getColumnCount();
 		ctrlResultSetMetaData.setReturnValue(1, 2);
-		mockResultSetMetaData.getColumnName(1);
+		mockResultSetMetaData.getColumnLabel(1);
 		ctrlResultSetMetaData.setReturnValue("age", 2);
 
 		mockResultSet.getMetaData();
@@ -157,7 +157,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		mockResultSetMetaData.getColumnCount();
 		ctrlResultSetMetaData.setReturnValue(1);
-		mockResultSetMetaData.getColumnName(1);
+		mockResultSetMetaData.getColumnLabel(1);
 		ctrlResultSetMetaData.setReturnValue("age", 1);
 
 		mockResultSet.getMetaData();
@@ -245,7 +245,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		mockResultSetMetaData.getColumnCount();
 		ctrlResultSetMetaData.setReturnValue(1);
-		mockResultSetMetaData.getColumnName(1);
+		mockResultSetMetaData.getColumnLabel(1);
 		ctrlResultSetMetaData.setReturnValue("age", 1);
 
 		mockResultSet.getMetaData();

@@ -18,14 +18,7 @@ package org.springframework.jdbc.support;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
+import java.sql.*;
 
 import javax.sql.DataSource;
 
@@ -34,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Generic utility methods for working with JDBC. Mainly for internal use
@@ -290,6 +284,26 @@ public abstract class JdbcUtils {
 				Types.DOUBLE == sqlType || Types.FLOAT == sqlType || Types.INTEGER == sqlType ||
 				Types.NUMERIC == sqlType || Types.REAL == sqlType || Types.SMALLINT == sqlType ||
 				Types.TINYINT == sqlType;
+	}
+
+	/**
+	 * Determine the column name to use. The column name is determined based on a lookup using ResultSetMetaData.
+	 * <br/>
+	 * This method implementation takes into account recent clarifications expressed in the JDBC 4.0
+	 * specification - <br/>
+	 * <br/><i>columnLabel - the label for the column specified with the SQL AS clause. If the SQL AS clause was not
+	 * specified, then the label is the name of the column</i><br/>
+	 * @return the column name to use
+	 * @param resultSetMetaData the current meta data to use
+	 * @param columnIndex the index of the column for the look up
+	 * @throws java.sql.SQLException
+	 */
+	public static String lookupColumnName(ResultSetMetaData resultSetMetaData, int columnIndex) throws SQLException {
+		String name = resultSetMetaData.getColumnLabel(columnIndex);
+		if (name == null || name.length() < 1) {
+			name = resultSetMetaData.getColumnName(columnIndex);
+		}
+		return name;
 	}
 
 }

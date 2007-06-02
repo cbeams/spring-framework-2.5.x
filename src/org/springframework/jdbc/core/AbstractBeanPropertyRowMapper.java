@@ -24,6 +24,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.util.StringUtils;
+import org.springframework.jdbc.support.JdbcUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -98,15 +99,15 @@ public abstract class AbstractBeanPropertyRowMapper {
 		catch (InstantiationException e) {
 			throw new DataAccessResourceFailureException("Failed to load class " + this.mappedClass.getName(), e);
 		}
-		ResultSetMetaData meta = rs.getMetaData();
-		int columns = meta.getColumnCount();
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columns = rsmd.getColumnCount();
 		for (int i = 1; i <= columns; i++) {
-			String column = meta.getColumnName(i).toLowerCase();
+			String column = JdbcUtils.lookupColumnName(rsmd, i).toLowerCase();
 			PersistentField fieldMeta = (PersistentField) this.mappedFields.get(column);
 			if (fieldMeta != null) {
 				BeanWrapper bw = new BeanWrapperImpl(mappedClass);
 				bw.setWrappedInstance(result);
-				fieldMeta.setSqlType(meta.getColumnType(i));
+				fieldMeta.setSqlType(rsmd.getColumnType(i));
 				Object value = null;
 				Class fieldType = fieldMeta.getJavaType();
 				if (fieldType.equals(String.class)) {

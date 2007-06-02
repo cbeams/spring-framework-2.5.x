@@ -241,7 +241,7 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
 		mockResultSetMetaData.getColumnCount();
 		ctrlResultSetMetaData.setReturnValue(1);
-		mockResultSetMetaData.getColumnName(1);
+		mockResultSetMetaData.getColumnLabel(1);
 		ctrlResultSetMetaData.setReturnValue("1", 2);
 
 		ctrlResultSet = MockControl.createControl(ResultSet.class);

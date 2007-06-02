@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core;
 
+import org.springframework.jdbc.support.JdbcUtils;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -75,7 +77,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 			this.columnNames = new String[this.columnCount];
 			for (int i = 0; i < this.columnCount; i++) {
 				this.columnTypes[i] = rsmd.getColumnType(i + 1);
-				this.columnNames[i] = rsmd.getColumnName(i + 1);
+				this.columnNames[i] = JdbcUtils.lookupColumnName(rsmd, i + 1);
 			}
 			// could also get column names
 		}
