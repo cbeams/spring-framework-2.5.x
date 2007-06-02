@@ -41,9 +41,12 @@ public class CallMetaDataProviderFactory {
 
 	public static final List<String> supportedDatabaseProductsForProcedures = Arrays.asList(
 			"Apache Derby",
+			"DB2",
 			"MySQL",
 			"Microsoft SQL Server",
-			"Oracle"
+			"Oracle",
+			"Sybase",
+			"Adaptive Server Enterprise"
 		);
 	public static final List<String> supportedDatabaseProductsForFunctions = Arrays.asList(
 			"MySQL",
@@ -60,6 +63,8 @@ public class CallMetaDataProviderFactory {
 				public Object processMetaData(DatabaseMetaData databaseMetaData)
 						throws SQLException, MetaDataAccessException {
 					String databaseProductName = databaseMetaData.getDatabaseProductName();
+					if (databaseProductName != null && databaseProductName.startsWith("DB2"))
+						databaseProductName = "DB2";
 					boolean accessProcedureColumnMetaData = context.isAccessCallParameterMetaData();
 					if (context.isFunction()) {
 						if (!supportedDatabaseProductsForFunctions.contains(databaseProductName)) {
@@ -85,6 +90,12 @@ public class CallMetaDataProviderFactory {
 					CallMetaDataProvider provider;
 					if ("Oracle".equals(databaseProductName)) {
 						provider = new OracleCallMetaDataProvider(databaseMetaData);
+					}
+					else if ("DB2".equals(databaseProductName)) {
+						provider = new Db2CallMetaDataProvider((databaseMetaData));
+					}
+					else if ("Adaptive Server Enterprise".equals(databaseProductName) || "Sybase".equals(databaseProductName)) {
+						provider = new SybaseCallMetaDataProvider((databaseMetaData));
 					}
 					else if ("Microsoft SQL Server".equals(databaseProductName)) {
 						provider = new SqlServerCallMetaDataProvider((databaseMetaData));

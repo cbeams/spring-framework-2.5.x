@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.simple.CallMetaDataContext;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -39,13 +40,13 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 
 	private String userName;
 
-	private boolean supportsCatalogsInProcedureCalls;
+	private boolean supportsCatalogsInProcedureCalls = true;
 
-	private boolean supportsSchemasInProcedureCalls;
+	private boolean supportsSchemasInProcedureCalls = true;
 
-	private boolean storesUpperCaseIdentifiers;
+	private boolean storesUpperCaseIdentifiers = true;
 
-	private boolean storesLowerCaseIdentifiers;
+	private boolean storesLowerCaseIdentifiers = false;
 
 	private List<CallParameterMetaData> callParameterMetaData = new ArrayList<CallParameterMetaData>();
 
@@ -55,10 +56,30 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 
 	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 
-		supportsCatalogsInProcedureCalls = databaseMetaData.supportsCatalogsInProcedureCalls();
-		supportsSchemasInProcedureCalls = databaseMetaData.supportsSchemasInProcedureCalls();
-		storesUpperCaseIdentifiers = databaseMetaData.storesUpperCaseIdentifiers();
-		storesLowerCaseIdentifiers = databaseMetaData.storesLowerCaseIdentifiers();
+		try {
+			setSupportsCatalogsInProcedureCalls(databaseMetaData.supportsCatalogsInProcedureCalls());
+		}
+		catch (SQLException se) {
+			logger.warn("Error retrieving 'DatabaseMetaData.supportsCatalogsInProcedureCalls' - " + se.getMessage());
+		}
+		try {
+			setSupportsSchemasInProcedureCalls(databaseMetaData.supportsSchemasInProcedureCalls());
+		}
+		catch (SQLException se) {
+			logger.warn("Error retrieving 'DatabaseMetaData.supportsSchemasInProcedureCalls' - " + se.getMessage());
+		}
+		try {
+			setStoresUpperCaseIdentifiers(databaseMetaData.storesUpperCaseIdentifiers());
+		}
+		catch (SQLException se) {
+			logger.warn("Error retrieving 'DatabaseMetaData.storesUpperCaseIdentifiers' - " + se.getMessage());
+		}
+		try {
+			setStoresLowerCaseIdentifiers(databaseMetaData.storesLowerCaseIdentifiers());
+		}
+		catch (SQLException se) {
+			logger.warn("Error retrieving 'DatabaseMetaData.storesLowerCaseIdentifiers' - " + se.getMessage());
+		}
 
 	}
 
@@ -75,9 +96,9 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 	protected String procedureNameToUse(String procedureName) {
 		if (procedureName == null)
 			return null;
-		else if (storesUpperCaseIdentifiers)
+		else if (isStoresUpperCaseIdentifiers())
 			return procedureName.toUpperCase();
-		else if(storesLowerCaseIdentifiers)
+		else if(isStoresLowerCaseIdentifiers())
 			return procedureName.toLowerCase();
 		else
 			return procedureName;
@@ -86,9 +107,9 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 	protected String catalogNameToUse(String catalogName) {
 		if (catalogName == null)
 			return null;
-		else if (storesUpperCaseIdentifiers)
+		else if (isStoresUpperCaseIdentifiers())
 			return catalogName.toUpperCase();
-		else if(storesLowerCaseIdentifiers)
+		else if(isStoresLowerCaseIdentifiers())
 			return catalogName.toLowerCase();
 		else
 		return catalogName;
@@ -97,23 +118,23 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 	protected String schemaNameToUse(String schemaName) {
 		if (schemaName == null)
 			return null;
-		else if (storesUpperCaseIdentifiers)
+		else if (isStoresUpperCaseIdentifiers())
 			return schemaName.toUpperCase();
-		else if(storesLowerCaseIdentifiers)
+		else if(isStoresLowerCaseIdentifiers())
 			return schemaName.toLowerCase();
 		else
 		return schemaName;
 	}
 
 	protected String metaDataCatalogNameToUse(CallMetaDataContext context) {
-		if (supportsCatalogsInProcedureCalls)
+		if (isSupportsCatalogsInProcedureCalls())
 			return catalogNameToUse(context.getCatalogName());
 		else
 			return null;
 	}
 
 	protected String metaDataSchemaNameToUse(CallMetaDataContext context) {
-		if (supportsSchemasInProcedureCalls)
+		if (isSupportsSchemasInProcedureCalls())
 			return schemaNameToUse(context.getSchemaName());
 		else
 			return null;
@@ -122,9 +143,9 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 	protected String parameterNameToUse(String parameterName) {
 		if (parameterName == null)
 			return null;
-		else if (storesUpperCaseIdentifiers)
+		else if (isStoresUpperCaseIdentifiers())
 			return parameterName.toUpperCase();
-		else if(storesLowerCaseIdentifiers)
+		else if(isStoresLowerCaseIdentifiers())
 			return parameterName.toLowerCase();
 		else
 		return parameterName;
@@ -165,18 +186,22 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 				String parameterNameToMatch = parameterNameToUse(parameter.getName()).toLowerCase();
 				declaredParameters.put(parameterNameToMatch, parameter);
 				if (parameter instanceof SqlOutParameter) {
-					outParameterNames.add(parameterNameToMatch);
-					returnDeclared = true;
+					outParameterNames.add(parameter.getName());
+					if (context.isFunction()) {
+						if (!returnDeclared)
+							context.setFunctionReturnName(parameter.getName());
+						returnDeclared = true;
+					}
 				}
 			}
 		}
+		context.setOutParameterNames(outParameterNames);
 
 		final List<SqlParameter> workParameters = new ArrayList<SqlParameter>();
 		workParameters.addAll(declaredReturnParameters);
 
 		if (!procedureColumnMetaDataUsed) {
 			workParameters.addAll(declaredParameters.values());
-			context.setOutParameterNames(outParameterNames);
 			return workParameters;
 		}
 
@@ -185,20 +210,50 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 			if (meta.getParameterName() != null)
 				parNameToCheck = parameterNameToUse(meta.getParameterName()).toLowerCase();
 			String parNameToUse = parameterNameToUse(meta.getParameterName());
-			if (!((meta.getParameterType() == DatabaseMetaData.procedureColumnReturn && returnDeclared) ||
-					declaredParameters.containsKey(parNameToCheck))) {
+			if (declaredParameters.containsKey(parNameToCheck) ||
+					(meta.getParameterType() == DatabaseMetaData.procedureColumnReturn && returnDeclared)) {
+				SqlParameter parameter;
+				if (meta.getParameterType() == DatabaseMetaData.procedureColumnReturn) {
+					parameter = declaredParameters.get(context.getFunctionReturnName());
+					if (parameter == null && context.getOutParameterNames().size() > 0) {
+						parameter = declaredParameters.get(context.getOutParameterNames().get(0).toLowerCase());
+					}
+					if (parameter == null) {
+						throw new InvalidDataAccessApiUsageException(
+								"Unable to locate declared parameter for function return value - " +
+										" add an SqlOutParameter with name \"" + context.getFunctionReturnName() +"\"");
+					}
+					else {
+						context.setFunctionReturnName(parameter.getName());
+					}
+				}
+				else {
+					parameter = declaredParameters.get(parNameToCheck);
+				}
+				if (parameter != null) {
+					workParameters.add(parameter);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Using declared parameter for: " +
+								(parNameToUse == null ? context.getFunctionReturnName() : parNameToUse));
+					}
+				}
+			}
+			else {
 				if (meta.parameterType == DatabaseMetaData.procedureColumnReturn) {
-					if (!context.isFunction() && byPassReturnParameter(meta.getParameterName())) {
+					if (!context.isFunction() &&
+							!context.isReturnValueRequired() &&
+							byPassReturnParameter(meta.getParameterName())) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Bypassing metadata return parameter for: " + meta.getParameterName());
 						}
 					}
 					else {
-						workParameters.add(new SqlOutParameter(context.getFunctionReturnName(), meta.getSqlType()));
-						outParameterNames.add(context.getFunctionReturnName());
-						context.setFunction(true);
+						String returnNameToUse = meta.getParameterName() == null ? context.getFunctionReturnName() : parNameToUse;
+						workParameters.add(new SqlOutParameter(returnNameToUse, meta.getSqlType()));
+						if (context.isFunction())
+							outParameterNames.add(returnNameToUse);
 						if (logger.isDebugEnabled()) {
-							logger.debug("Added metadata return parameter for: " + context.getFunctionReturnName());
+							logger.debug("Added metadata return parameter for: " + returnNameToUse);
 						}
 					}
 				}
@@ -219,25 +274,7 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 					}
 				}
 			}
-			else {
-				SqlParameter parameter;
-				if (meta.getParameterType() == 5) {
-					parameter = declaredParameters.get(context.getFunctionReturnName());
-				}
-				else {
-					parameter = declaredParameters.get(parNameToCheck);
-				}
-				if (parameter != null) {
-					workParameters.add(parameter);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Using declared parameter for: " +
-								(parNameToUse == null ? context.getFunctionReturnName() : parNameToUse));
-					}
-				}
-			}
 		}
-
-		context.setOutParameterNames(outParameterNames);
 
 		return workParameters;
 	}
@@ -298,7 +335,7 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 		String catalogNameToUse = catalogNameToUse(context.getCatalogName());
 		String schemaNameToUse = schemaNameToUse(context.getSchemaName());
 		String procedureNameToUse = procedureNameToUse(context.getProcedureName());
-		if (context.isFunction()) {
+		if (context.isFunction() || context.isReturnValueRequired()) {
 			callString = "{? = call " +
 					(catalogNameToUse != null && catalogNameToUse.length() > 0 ? catalogNameToUse + "." : "") +
 					(schemaNameToUse != null && schemaNameToUse.length() > 0 ? schemaNameToUse + "." : "") +
@@ -358,6 +395,38 @@ public class AbstractCallMetaDataProvider implements CallMetaDataProvider {
 			logger.debug("Matching " + inParameters + " with " + callParameterNames);
 		}
 		return matchedParameters;
+	}
+
+	protected boolean isSupportsCatalogsInProcedureCalls() {
+		return supportsCatalogsInProcedureCalls;
+	}
+
+	protected void setSupportsCatalogsInProcedureCalls(boolean supportsCatalogsInProcedureCalls) {
+		this.supportsCatalogsInProcedureCalls = supportsCatalogsInProcedureCalls;
+	}
+
+	protected boolean isSupportsSchemasInProcedureCalls() {
+		return supportsSchemasInProcedureCalls;
+	}
+
+	protected void setSupportsSchemasInProcedureCalls(boolean supportsSchemasInProcedureCalls) {
+		this.supportsSchemasInProcedureCalls = supportsSchemasInProcedureCalls;
+	}
+
+	protected boolean isStoresUpperCaseIdentifiers() {
+		return storesUpperCaseIdentifiers;
+	}
+
+	protected void setStoresUpperCaseIdentifiers(boolean storesUpperCaseIdentifiers) {
+		this.storesUpperCaseIdentifiers = storesUpperCaseIdentifiers;
+	}
+
+	protected boolean isStoresLowerCaseIdentifiers() {
+		return storesLowerCaseIdentifiers;
+	}
+
+	protected void setStoresLowerCaseIdentifiers(boolean storesLowerCaseIdentifiers) {
+		this.storesLowerCaseIdentifiers = storesLowerCaseIdentifiers;
 	}
 
 	protected class CallParameterMetaData {

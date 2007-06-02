@@ -62,6 +62,13 @@ public interface SimpleJdbcCallOperations {
 	SimpleJdbcCall withCatalogName(String catalogName);
 
 	/**
+	 * Indicates the procedure's return value should be included in the results returned.
+	 *
+	 * @return the instance of this SimpleJdbcCall
+	 */
+	SimpleJdbcCall withReturnValue();
+
+	/**
 	 * Specify one or more parameters if desired.  These parameters will be supplemented with any
 	 * parameter information retrieved from the database meta data.
 	 *

@@ -92,6 +92,11 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		return this;
 	}
 
+	public SimpleJdbcCall withReturnValue() {
+		setReturnValueRequired(true);
+		return this;
+	}
+
 	public SimpleJdbcCall declareParameters(SqlParameter... sqlParameters) {
 		for (SqlParameter sqlParameter : sqlParameters) {
 			if (sqlParameter != null)

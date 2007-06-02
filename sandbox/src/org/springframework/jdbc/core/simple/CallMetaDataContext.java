@@ -59,6 +59,9 @@ public class CallMetaDataContext {
 	/** indicates whether this is a procedure or a function **/
 	private boolean function;
 
+	/** indicates whether this procedure's return value should be included  **/
+	private boolean returnValueRequired;
+
 	/** the provider of call meta data */
 	private CallMetaDataProvider metaDataProvider;
 
@@ -111,6 +114,14 @@ public class CallMetaDataContext {
 		this.function = function;
 	}
 
+	public boolean isReturnValueRequired() {
+		return returnValueRequired;
+	}
+
+	public void setReturnValueRequired(boolean returnValueRequired) {
+		this.returnValueRequired = returnValueRequired;
+	}
+
 	public boolean isAccessCallParameterMetaData() {
 		return accessCallParameterMetaData;
 	}
@@ -120,6 +131,9 @@ public class CallMetaDataContext {
 	}
 
 	public String getScalarOutParameterName() {
+		logger.warn("****OUTPARAMETERS: " + outParameterNames);
+		logger.warn("****FUNCRETURN   : " + functionReturnName);
+		logger.warn("****IS_FUNCTION  : " + isFunction());
 		if (isFunction()) {
 			return functionReturnName;
 		}
@@ -127,7 +141,10 @@ public class CallMetaDataContext {
 			if (outParameterNames.size() > 1) {
 				logger.warn("Accessing single output value when procedure has more than one output parameter");
 			}
-			return outParameterNames.get(0);
+			if (outParameterNames.size() > 0)
+				return outParameterNames.get(0);
+			else
+				return null;
 		}
 	}
 

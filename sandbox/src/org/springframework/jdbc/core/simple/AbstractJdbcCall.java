@@ -102,6 +102,14 @@ public abstract class AbstractJdbcCall {
 		this.callMetaDataContext.setFunction(b);
 	}
 
+	public boolean isReturnValueRequired() {
+		return callMetaDataContext.isReturnValueRequired();
+	}
+
+	public void setReturnValueRequired(boolean b) {
+		this.callMetaDataContext.setReturnValueRequired(b);
+	}
+
 	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
 	}
