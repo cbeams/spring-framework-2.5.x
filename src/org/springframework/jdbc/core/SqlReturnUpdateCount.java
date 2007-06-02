@@ -3,16 +3,12 @@ package org.springframework.jdbc.core;
 import java.sql.Types;
 
 /**
- * Represents a returned {@link java.sql.ResultSet} from a stored procedure call.
+ * Represents a returned update count from a stored procedure call.
  *
- * <p>A {@link org.springframework.jdbc.core.ResultSetExtractor}, {@link org.springframework.jdbc.core.RowCallbackHandler} or {@link org.springframework.jdbc.core.RowMapper}
- * must be provided to handle any returned rows.
- *
- * <p>Returned {@link java.sql.ResultSet ResultSets} - like all stored procedure
+ * <p>Returned update counts - like all stored procedure
  * parameters - <b>must</b> have names.
  *
  * @author Thomas Risberg
- * @author Juergen Hoeller
  */
 public class SqlReturnUpdateCount extends SqlParameter {
 
@@ -36,7 +32,7 @@ public class SqlReturnUpdateCount extends SqlParameter {
 
 	/**
 	 * Return whether this parameter is an implicit return parameter used during the
-	 * reults preocessing of the CallableStatement.getMoreResults/getUpdateCount.
+	 * results preocessing of the CallableStatement.getMoreResults/getUpdateCount.
 	 * <p>This implementation always returns <code>true</code>.
 	 */
 	public boolean isResultsParameter() {

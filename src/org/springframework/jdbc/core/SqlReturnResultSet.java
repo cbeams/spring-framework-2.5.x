@@ -59,7 +59,7 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 
 	/**
 	 * Return whether this parameter is an implicit return parameter used during the
-	 * reults preocessing of the CallableStatement.getMoreResults/getUpdateCount.
+	 * results preocessing of the CallableStatement.getMoreResults/getUpdateCount.
 	 * <p>This implementation always returns <code>true</code>.
 	 */
 	public boolean isResultsParameter() {
