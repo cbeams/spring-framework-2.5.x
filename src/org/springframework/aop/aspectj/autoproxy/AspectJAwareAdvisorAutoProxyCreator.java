@@ -28,8 +28,10 @@ import org.aspectj.util.PartialOrder.PartialComparable;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AbstractAspectJAdvice;
 import org.springframework.aop.aspectj.AspectJProxyUtils;
+import org.springframework.aop.aspectj.ProxyCreationContext;
 import org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
+import org.springframework.beans.BeansException;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
@@ -40,12 +42,21 @@ import org.springframework.util.ClassUtils;
  *
  * @author Adrian Colyer
  * @author Juergen Hoeller
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator {
 
 	private static final Comparator DEFAULT_PRECEDENCE_COMPARATOR = new AspectJPrecedenceComparator();
 
+	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		try {
+			ProxyCreationContext.notifyProxyCreationStart(beanName);
+			return super.postProcessAfterInitialization(bean, beanName);
+		} finally {
+			ProxyCreationContext.notifyProxyCreationComplete();
+		}
+	}
 
 	/**
 	 * Sort the rest by AspectJ precedence. If two pieces of advice have

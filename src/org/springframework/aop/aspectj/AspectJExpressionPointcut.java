@@ -111,6 +111,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		this.pointcutParser =
 				PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(
 						supportedPrimitives);
+		pointcutParser.registerPointcutDesignatorHandler(new BeanNamePointcutDesignatorHandler());
 	}
 
 	/**
