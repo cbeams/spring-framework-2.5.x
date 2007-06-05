@@ -23,6 +23,8 @@ public interface TableMetaDataProvider {
 
 	String metaDataSchemaNameToUse(String catalogName) ;
 
+ 	boolean isTableColumnMetaDataUsed();
+	
 	List<TableParameterMetaData> getInsertParameterMetaData();
 
 }

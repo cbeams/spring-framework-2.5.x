@@ -2,12 +2,11 @@ package org.springframework.jdbc.core.simple.metadata;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.jdbc.core.simple.TableMetaDataContext;
-import org.springframework.jdbc.core.simple.SimpleJdbcUtils;
-import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.jdbc.support.DatabaseMetaDataCallback;
-import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.core.simple.TableMetaDataContext;
+import org.springframework.jdbc.support.DatabaseMetaDataCallback;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.MetaDataAccessException;
 
 import javax.sql.DataSource;
 import java.sql.DatabaseMetaData;
@@ -29,8 +28,8 @@ public class TableMetaDataProviderFactory {
 
 				public Object processMetaData(DatabaseMetaData databaseMetaData)
 						throws SQLException, MetaDataAccessException {
-					String databaseProductName =
-							SimpleJdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
+//					String databaseProductName =
+//							SimpleJdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
 					boolean accessTableColumnMetaData = context.isAccessCallParameterMetaData();
 					TableMetaDataProvider provider = new GenericTableMetaDataProvider(databaseMetaData);
 					if (logger.isDebugEnabled()) {

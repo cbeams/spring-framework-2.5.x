@@ -19,7 +19,6 @@ package org.springframework.jdbc.core.simple.metadata;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.simple.CallMetaDataContext;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;

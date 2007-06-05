@@ -17,13 +17,10 @@
 package org.springframework.jdbc.core.simple.metadata;
 
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.simple.CallMetaDataContext;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author trisberg

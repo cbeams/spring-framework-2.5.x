@@ -164,6 +164,10 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		this.storesLowerCaseIdentifiers = storesLowerCaseIdentifiers;
 	}
 
+	public boolean isTableColumnMetaDataUsed() {
+		return tableColumnMetaDataUsed;
+	}
+
 	public List<TableParameterMetaData> getInsertParameterMetaData() {
 		return insertParameterMetaData;
 	}

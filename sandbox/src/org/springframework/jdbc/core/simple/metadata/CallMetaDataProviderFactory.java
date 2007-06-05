@@ -16,21 +16,20 @@
 
 package org.springframework.jdbc.core.simple.metadata;
 
-import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.jdbc.support.DatabaseMetaDataCallback;
-import org.springframework.jdbc.support.MetaDataAccessException;
-import org.springframework.jdbc.core.simple.metadata.OracleCallMetaDataProvider;
-import org.springframework.jdbc.core.simple.CallMetaDataContext;
-import org.springframework.jdbc.core.simple.SimpleJdbcUtils;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.core.simple.CallMetaDataContext;
+import org.springframework.jdbc.core.simple.SimpleJdbcUtils;
+import org.springframework.jdbc.support.DatabaseMetaDataCallback;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.MetaDataAccessException;
 
 import javax.sql.DataSource;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author trisberg

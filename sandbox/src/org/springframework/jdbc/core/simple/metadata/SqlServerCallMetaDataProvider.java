@@ -16,8 +16,6 @@
 
 package org.springframework.jdbc.core.simple.metadata;
 
-import org.springframework.jdbc.core.simple.metadata.GenericCallMetaDataProvider;
-
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 

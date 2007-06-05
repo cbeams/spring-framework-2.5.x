@@ -2,17 +2,17 @@ package org.springframework.jdbc.core.simple;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.metadata.TableMetaDataProvider;
 import org.springframework.jdbc.core.simple.metadata.TableMetaDataProviderFactory;
 import org.springframework.jdbc.core.simple.metadata.TableParameterMetaData;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import javax.sql.DataSource;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Class to hold context data for one of the MetaData strategy implementations of MetaDataProvider.
@@ -90,10 +90,10 @@ public class TableMetaDataContext {
 
 	private List<String> reconcileColumnsToUse(List<String> declaredColumns) {
 		if (declaredColumns.size() > 0) {
-			return new ArrayList(declaredColumns);
+			return new ArrayList<String>(declaredColumns);
 		}
 		else {
-			List columns = new ArrayList();
+			List<String> columns = new ArrayList<String>();
 			for (TableParameterMetaData meta : metaDataProvider.getInsertParameterMetaData()) {
 				columns.add(meta.getParameterName());
 			}
@@ -104,19 +104,17 @@ public class TableMetaDataContext {
 	public List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
 		List<Object> values = new ArrayList<Object>();
 		for (String column : insertColumns) {
-			boolean match = false;
 			if (parameterSource.hasValue(column.toLowerCase())) {
 				values.add(parameterSource.getValue(column.toLowerCase()));
-				match = true;
 			}
 			else {
 				String propertyName = SimpleJdbcUtils.convertUnderscoreNameToPropertyName(column);
 				if (parameterSource.hasValue(propertyName)) {
 					values.add(parameterSource.getValue(propertyName));
-					match = true;
 				}
-				if (!match)
+				else {
 					values.add(null);
+				}
 			}
 		}
 		return values;
