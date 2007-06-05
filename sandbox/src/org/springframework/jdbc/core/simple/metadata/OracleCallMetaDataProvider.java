@@ -16,11 +16,10 @@
 
 package org.springframework.jdbc.core.simple.metadata;
 
-import org.springframework.jdbc.core.simple.metadata.AbstractCallMetaDataProvider;
-import org.springframework.jdbc.core.simple.CallMetaDataContext;
-import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.simple.CallMetaDataContext;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -29,7 +28,7 @@ import java.sql.Types;
 /**
  * @author trisberg
  */
-public class OracleCallMetaDataProvider extends AbstractCallMetaDataProvider {
+public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 
 	private static final String REF_CURSOR_NAME = "REF CURSOR";
 
@@ -38,19 +37,19 @@ public class OracleCallMetaDataProvider extends AbstractCallMetaDataProvider {
 	}
 
 	@Override
-	protected String metaDataCatalogNameToUse(CallMetaDataContext context) {
+	public String metaDataCatalogNameToUse(String catalogName) {
 		// Oracle uses catalog name for package name or an empty string if no package
-		return context.getCatalogName() == null ? "" : super.metaDataCatalogNameToUse(context);
+		return catalogName == null ? "" : super.metaDataCatalogNameToUse(catalogName);
 	}
 
 	@Override
-	protected String metaDataSchemaNameToUse(CallMetaDataContext context) {
+	public String metaDataSchemaNameToUse(String schemaName) {
 		// Use current user schema if no schema specified
-		return context.getSchemaName() == null ? getUserName() : super.metaDataSchemaNameToUse(context);
+		return schemaName == null ? getUserName() : super.metaDataSchemaNameToUse(schemaName);
 	}
 
 	@Override
-	protected SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta) {
+	public SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta) {
 		if(meta.getSqlType() == Types.OTHER && REF_CURSOR_NAME.equals(meta.getTypeName()))
 			return new SqlOutParameter(parameterName, -10, new ColumnMapRowMapper());
 		else

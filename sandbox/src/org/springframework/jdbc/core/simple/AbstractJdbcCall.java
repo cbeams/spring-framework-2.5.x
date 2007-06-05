@@ -22,6 +22,9 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.CallableStatementCreatorFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.CallableStatementCreator;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -216,8 +219,44 @@ public abstract class AbstractJdbcCall {
 		}
 	}
 
+	protected Map<String, Object> doExecute(SqlParameterSource parameterSource) {
+		checkCompiled();
+		Map values = null;
+		if (parameterSource instanceof MapSqlParameterSource) {
+			Map<String, Object> sourceValues = ((MapSqlParameterSource)parameterSource).getValues();
+			values = matchInParameterValuesWithCallParameters(sourceValues);
+		}
+		else {
+			values = matchInParameterValuesWithCallParameters(parameterSource);
+		}
+		return executeCall(values);
+	}
+
+	protected Map<String, Object> doExecute(Map<String, Object> args) {
+		checkCompiled();
+		Map values = matchInParameterValuesWithCallParameters(args);
+		return executeCall(values);
+	}
+
+	private Map<String, Object> executeCall(Map values) {
+		CallableStatementCreator csc = getCallableStatementFactory().newCallableStatementCreator(values);
+		if (logger.isDebugEnabled()) {
+			logger.debug("The following parameters are used for call " + getCallString() + " with: " + values);
+			int i = 1;
+			for (SqlParameter p : getCallParameters()) {
+				logger.debug(i++ + ": " +  p.getName() + " SQL Type "+ p.getSqlType() + " Type Name " + p.getTypeName() + " " + p.getClass().getName());
+			}
+		}
+		Map<String, Object> result = getJdbcTemplate().call(csc, getCallParameters());
+		return result;
+	}
+
 	protected String getScalarOutParameterName() {
 		return callMetaDataContext.getScalarOutParameterName();
+	}
+
+	protected Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
+		return callMetaDataContext.matchInParameterValuesWithCallParameters(parameterSource);
 	}
 
 	protected Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> args) {

@@ -21,6 +21,7 @@ import org.springframework.jdbc.support.DatabaseMetaDataCallback;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.jdbc.core.simple.metadata.OracleCallMetaDataProvider;
 import org.springframework.jdbc.core.simple.CallMetaDataContext;
+import org.springframework.jdbc.core.simple.SimpleJdbcUtils;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,8 +46,7 @@ public class CallMetaDataProviderFactory {
 			"MySQL",
 			"Microsoft SQL Server",
 			"Oracle",
-			"Sybase",
-			"Adaptive Server Enterprise"
+			"Sybase"
 		);
 	public static final List<String> supportedDatabaseProductsForFunctions = Arrays.asList(
 			"MySQL",
@@ -54,7 +54,7 @@ public class CallMetaDataProviderFactory {
 			"Oracle"
 		);
 
-	static public CallMetaDataProvider createMetaDataProcessor(DataSource dataSource,
+	static public CallMetaDataProvider createMetaDataProvider(DataSource dataSource,
 															 final CallMetaDataContext context) {
 		try {
 			return (CallMetaDataProvider)JdbcUtils.extractDatabaseMetaData(
@@ -62,9 +62,8 @@ public class CallMetaDataProviderFactory {
 
 				public Object processMetaData(DatabaseMetaData databaseMetaData)
 						throws SQLException, MetaDataAccessException {
-					String databaseProductName = databaseMetaData.getDatabaseProductName();
-					if (databaseProductName != null && databaseProductName.startsWith("DB2"))
-						databaseProductName = "DB2";
+					String databaseProductName =
+							SimpleJdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
 					boolean accessProcedureColumnMetaData = context.isAccessCallParameterMetaData();
 					if (context.isFunction()) {
 						if (!supportedDatabaseProductsForFunctions.contains(databaseProductName)) {
@@ -108,7 +107,7 @@ public class CallMetaDataProviderFactory {
 					}
 					provider.initializeWithMetaData(databaseMetaData);
 					if (accessProcedureColumnMetaData) {
-						provider.initializeWithProcedureColumnMetaData(databaseMetaData, context);
+						provider.initializeWithProcedureColumnMetaData(databaseMetaData, context.getCatalogName(), context.getSchemaName(), context.getProcedureName());
 					}
 					return provider;
 				}

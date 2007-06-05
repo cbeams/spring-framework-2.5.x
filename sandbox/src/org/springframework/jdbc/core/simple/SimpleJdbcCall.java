@@ -20,6 +20,7 @@ import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -142,23 +143,11 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	public Map<String, Object> execute(Map<String, Object> args) {
-		checkCompiled();
-		Map values = matchInParameterValuesWithCallParameters(args);
-		CallableStatementCreator csc = getCallableStatementFactory().newCallableStatementCreator(values);
-		if (logger.isDebugEnabled()) {
-			logger.debug("The following parameters are used for call " + getCallString() + " with: " + values);
-			int i = 1;
-			for (SqlParameter p : getCallParameters()) {
-				logger.debug(i++ + ": " +  p.getName() + " SQL Type "+ p.getSqlType() + " Type Name " + p.getTypeName() + " " + p.getClass().getName());
-			}
-		}
-		Map<String, Object> result = getJdbcTemplate().call(csc, getCallParameters());
-		return result;
+		return doExecute(args);
 	}
 
-	public Map<String, Object> execute(MapSqlParameterSource args) {
-		Map<String, Object> values = args.getValues();
-		return execute(values);
+	public Map<String, Object> execute(SqlParameterSource parameterSource) {
+		return doExecute(parameterSource);
 	}
 
 }

@@ -6,7 +6,7 @@ import java.sql.SQLException;
 /**
  * @author trisberg
  */
-public class SybaseCallMetaDataProvider extends AbstractCallMetaDataProvider {
+public class SybaseCallMetaDataProvider extends GenericCallMetaDataProvider {
 
 	private static final String REMOVABLE_COLUMN_PREFIX = "@";
 	private static final String RETURN_VALUE_NAME = "RETURN_VALUE";
@@ -17,7 +17,7 @@ public class SybaseCallMetaDataProvider extends AbstractCallMetaDataProvider {
 
 
 	@Override
-	protected String parameterNameToUse(String parameterName) {
+	public String parameterNameToUse(String parameterName) {
 		if (parameterName == null)
 			return null;
 		if (parameterName.length() > 1 && parameterName.startsWith(REMOVABLE_COLUMN_PREFIX))
@@ -27,7 +27,7 @@ public class SybaseCallMetaDataProvider extends AbstractCallMetaDataProvider {
 	}
 
 	@Override
-	protected boolean byPassReturnParameter(String parameterName) {
+	public boolean byPassReturnParameter(String parameterName) {
 		if (RETURN_VALUE_NAME.equals(parameterName))
 			return true;
 		else

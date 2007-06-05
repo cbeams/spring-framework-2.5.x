@@ -1,18 +1,12 @@
 package org.springframework.jdbc.core.simple.metadata;
 
-import org.springframework.jdbc.core.simple.CallMetaDataContext;
-import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.SqlOutParameter;
-import org.springframework.jdbc.core.ColumnMapRowMapper;
-
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.sql.Types;
 
 /**
  * @author trisberg
  */
-public class Db2CallMetaDataProvider extends AbstractCallMetaDataProvider {
+public class Db2CallMetaDataProvider extends GenericCallMetaDataProvider {
 
 	public Db2CallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		super(databaseMetaData);

@@ -17,6 +17,7 @@
 package org.springframework.jdbc.core.simple.metadata;
 
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.CallMetaDataContext;
 
 import java.sql.DatabaseMetaData;
@@ -31,11 +32,30 @@ public interface CallMetaDataProvider {
 
 	void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException;
 	 
-	void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, CallMetaDataContext context) throws SQLException;
+	void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String procedureName) throws SQLException;
 
-	List<SqlParameter> reconcileParameters(List<SqlParameter> parameters, CallMetaDataContext context);
+	String procedureNameToUse(String procedureName);
 
-	String createCallString(List<SqlParameter> parameters, CallMetaDataContext context);
+	String catalogNameToUse(String catalogName);
 
-	Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> inParameters, List<SqlParameter> callParameters);
+	String schemaNameToUse(String schemaName);
+
+	String metaDataCatalogNameToUse(String catalogName) ;
+
+	String metaDataSchemaNameToUse(String catalogName) ;
+
+	String parameterNameToUse(String parameterName);
+
+	SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta);
+
+	SqlParameter createDefaultInParameter(String parameterName, CallParameterMetaData meta);
+
+	String getUserName();
+
+	boolean isProcedureColumnMetaDataUsed();
+
+	boolean byPassReturnParameter(String parameterName);
+	
+	List<CallParameterMetaData> getCallParameterMetaData();
+
 }

@@ -18,6 +18,7 @@ package org.springframework.jdbc.core.simple;
 
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 import java.util.Map;
 
@@ -133,8 +134,8 @@ public interface SimpleJdbcCallOperations {
 
 	/**
 	 * Execute the stored procedure and return a map of output params, keyed by name as in parameter declarations..
-	 * @param args MapSqlParameterSource containing the parameter values to be used in the call.
+	 * @param args SqlParameterSource containing the parameter values to be used in the call.
 	 * @return map of output params.
 	 */
-	Map<String, Object> execute(MapSqlParameterSource args);
+	Map<String, Object> execute(SqlParameterSource args);
 }
