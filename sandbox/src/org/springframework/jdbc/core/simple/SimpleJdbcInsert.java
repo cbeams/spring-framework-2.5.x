@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * @author trisberg
  */
-public class SimpleJdbcInsert extends AbstractJdbcInsert {
+public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcInsertOperations {
 
 	/**
 	 * Constructor that takes one parameter with the JDBC DataSource to use when creating the
@@ -67,11 +67,27 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert {
 		return this;
 	}
 
-	public int execute(Map args) {
+	public int execute(Map<String, Object> args) {
 		return doExecute(args);
 	}
 
 	public int execute(SqlParameterSource parameterSource) {
 		return doExecute(parameterSource);
+	}
+
+	public Number executeAndReturnKey(Map<String, Object> args) {
+		return doExecuteAndReturnKey(args);
+	}
+
+	public Number executeAndReturnKey(SqlParameterSource parameterSource) {
+		return doExecuteAndReturnKey(parameterSource);
+	}
+
+	public int[] executeBatch(Map<String, Object>[] batch) {
+		return doExecuteBatch(batch);
+	}
+
+	public int[] executeBatch(SqlParameterSource[] batch) {
+		return doExecuteBatch(batch);
 	}
 }

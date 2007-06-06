@@ -4,10 +4,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.SqlTypeValue;
+import org.springframework.jdbc.core.StatementCreatorUtils;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -77,7 +87,7 @@ public class AbstractJdbcInsert {
 		declaredColumns.addAll(columnNames);
 	}
 
-	public List getColumnNames() {
+	public List<String> getColumnNames() {
 		return Collections.unmodifiableList(declaredColumns);
 	}
 
@@ -165,35 +175,122 @@ public class AbstractJdbcInsert {
 		}
 	}
 
-	public int doExecute(Map args) {
+	public int doExecute(Map<String, Object> args) {
 		checkCompiled();
-		List values = matchInParameterValuesWithInsertColumns(args);
+		List<Object> values = matchInParameterValuesWithInsertColumns(args);
 		return executeInsert(values);
 	}
 
 	public int doExecute(SqlParameterSource parameterSource) {
 		checkCompiled();
-		List values = null;
-		if (parameterSource instanceof MapSqlParameterSource) {
-			values = matchInParameterValuesWithInsertColumns(((MapSqlParameterSource) parameterSource).getValues());
-		}
-		else {
-			values = matchInParameterValuesWithInsertColumns(parameterSource);
-		}
+		List<Object> values = matchInParameterValuesWithInsertColumns(parameterSource);
 		return executeInsert(values);
 	}
 
-	private int executeInsert(List values) {
+	private int executeInsert(List<Object> values) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("The following parameters are used for call " + getInsertString() + " with: " + values);
 		}
-		logger.warn("====>" + getInsertString());
 		int updateCount = jdbcTemplate.update(getInsertString(), values.toArray());
 		return updateCount;
 	}
 
+	public Number doExecuteAndReturnKey(Map<String, Object> args) {
+		checkCompiled();
+		List<Object> values = matchInParameterValuesWithInsertColumns(args);
+		return executeInsertAndReturnKey(values);
+	}
+
+	public Number doExecuteAndReturnKey(SqlParameterSource parameterSource) {
+		checkCompiled();
+		List<Object> values = matchInParameterValuesWithInsertColumns(parameterSource);
+		return executeInsertAndReturnKey(values);
+	}
+
+	private Number executeInsertAndReturnKey(final List<Object> values) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("The following parameters are used for call " + getInsertString() + " with: " + values);
+		}
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		int updateCount = jdbcTemplate.update(
+				new PreparedStatementCreator() {
+					public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+						PreparedStatement ps =
+                        //Option1: connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
+                        //Option2: connection.prepareStatement(INSERT_SQL, new int[] {1});
+                        //Option3: connection.prepareStatement(INSERT_SQL, new String[] {"id"});
+                        con.prepareStatement(getInsertString(), Statement.RETURN_GENERATED_KEYS);
+						int colIndex = 0;
+						for (Object value : values) {
+							colIndex++;
+							StatementCreatorUtils.setParameterValue(ps, colIndex, SqlTypeValue.TYPE_UNKNOWN, value);
+						}
+						return ps;
+					}
+				},
+				keyHolder);
+		if (updateCount > 0) {
+			return keyHolder.getKey();
+		}
+		else {
+			return null;
+		}
+	}
+
+	public int[] doExecuteBatch(Map<String, Object>[] batch) {
+		checkCompiled();
+		List[] batchValues = new ArrayList[batch.length];
+		int i = 0;
+		for (Map<String, Object> args : batch) {
+			List<Object> values = matchInParameterValuesWithInsertColumns(args);
+			batchValues[i++] = values;
+		}
+		return executeBatch(batchValues);
+	}
+
+	public int[] doExecuteBatch(SqlParameterSource[] batch) {
+		checkCompiled();
+		List[] batchValues = new ArrayList[batch.length];
+		int i = 0;
+		for (SqlParameterSource parameterSource : batch) {
+			List<Object> values = matchInParameterValuesWithInsertColumns(parameterSource);
+			batchValues[i++] = values;
+		}
+		return executeBatch(batchValues);
+	}
+
+	private int[] executeBatch(final List[] batchValues) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing statement " + getInsertString() + " with batch of size: " + batchValues.length);
+		}
+		int[] updateCounts = jdbcTemplate.batchUpdate(
+				getInsertString(),
+				new BatchPreparedStatementSetter() {
+
+					public void setValues(PreparedStatement ps, int i) throws SQLException {
+						List values = batchValues[i];
+						int colIndex = 0;
+						for (Object value : values) {
+							colIndex++;
+							StatementCreatorUtils.setParameterValue(ps, colIndex, SqlTypeValue.TYPE_UNKNOWN, value);
+						}
+
+					}
+
+					public int getBatchSize() {
+						return batchValues.length;
+					}
+				});
+		return updateCounts;
+	}
+
 	protected List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
-		return tableMetaDataContext.matchInParameterValuesWithInsertColumns(parameterSource);
+		if (parameterSource instanceof MapSqlParameterSource) {
+			return matchInParameterValuesWithInsertColumns(((MapSqlParameterSource) parameterSource).getValues());
+		}
+		else {
+			return tableMetaDataContext.matchInParameterValuesWithInsertColumns(parameterSource);
+		}
 	}
 
 	protected List<Object> matchInParameterValuesWithInsertColumns(Map<String, Object> args) {
