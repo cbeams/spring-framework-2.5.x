@@ -136,6 +136,10 @@ public class TableMetaDataContext {
 	public String createInsertString() {
 		StringBuilder insertStatement = new StringBuilder();
 		insertStatement.append("INSERT INTO ");
+		if (this.getSchemaName() != null) {
+			insertStatement.append(this.getSchemaName());
+			insertStatement.append(".");
+		}
 		insertStatement.append(this.getTableName());
 		insertStatement.append(" (");
 		int columnCount = 0;

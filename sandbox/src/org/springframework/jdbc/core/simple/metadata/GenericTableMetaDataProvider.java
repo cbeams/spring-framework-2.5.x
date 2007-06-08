@@ -2,12 +2,15 @@ package org.springframework.jdbc.core.simple.metadata;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.dao.DataAccessResourceFailureException;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author trisberg
@@ -53,7 +56,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 		tableColumnMetaDataUsed = true;
 
-		processTableColumns(databaseMetaData, catalogName, schemaName, tableName);
+		locateTableAndProcessMetaData(databaseMetaData, catalogName, schemaName, tableName);
+
 
 	}
 
@@ -96,16 +100,82 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	public String metaDataSchemaNameToUse(String schemaName) {
 		if (schemaName == null) {
-			return userName;
+			return schemaNameToUse(userName);
 		}
 		return schemaNameToUse(schemaName);
 	}
 
-	private void processTableColumns(DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String tableName) {
+	private void locateTableAndProcessMetaData(DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String tableName) {
+
+		Map<String, TableMetaData> tableMeta = new HashMap<String, TableMetaData>();
+
+		ResultSet tables = null;
+
+		try {
+			tables = databaseMetaData.getTables(
+				catalogNameToUse(catalogName),
+				schemaNameToUse(schemaName),
+				tableNameToUse(tableName),
+				null);
+			while (tables != null && tables.next()) {
+				TableMetaData tmd = new TableMetaData();
+				tmd.setCatalogName(tables.getString("TABLE_CAT"));
+				tmd.setSchemaName(tables.getString("TABLE_SCHEM"));
+				tmd.setTableName(tables.getString("TABLE_NAME"));
+				tmd.setType(tables.getString("TABLE_TYPE"));
+				if (tmd.getSchemaName() == null) {
+					tableMeta.put(userName.toUpperCase(), tmd);
+				}
+				else {
+					tableMeta.put(tmd.getSchemaName().toUpperCase(), tmd);
+				}
+			}
+		}
+		catch (SQLException se) {
+			logger.warn("Error while accessing table meta data results" + se.getMessage());
+		}
+		finally {
+			if (tables != null) {
+				try {
+					tables.close();
+				} catch (SQLException e) {
+					logger.warn("Error while closing table meta data reults" + e.getMessage());
+				}
+			}
+		}
+
+		if (tableMeta.size() < 1) {
+			throw new DataAccessResourceFailureException("Unable to locate table meta data for '" + tableName +"'");
+		}
+
+		TableMetaData tmd = null;
+		if (schemaName == null) {
+			tmd = tableMeta.get(userName.toUpperCase());
+			if (tmd == null) {
+				tmd = tableMeta.get("PUBLIC");
+				if (tmd == null) {
+					tmd = tableMeta.get("DBO");
+				}
+				if (tmd == null) {
+					throw new DataAccessResourceFailureException("Unable to locate table meta data for '" + tableName + "' in the default schema");
+				}
+			}
+		}
+		else {
+			tmd = tableMeta.get(schemaName.toUpperCase());
+			if (tmd == null) {
+				throw new DataAccessResourceFailureException("Unable to locate table meta data for '" + tableName + "' in the '" + schemaName + "' schema");
+			}
+		}
+
+		processTableColumns(databaseMetaData, tmd);
+	}
+
+	private void processTableColumns(DatabaseMetaData databaseMetaData, TableMetaData tmd) {
 		ResultSet procs = null;
-		String metaDataCatalogName = metaDataCatalogNameToUse(catalogName);
-		String metaDataSchemaName = metaDataSchemaNameToUse(schemaName);
-		String metaDataTableName = tableNameToUse(tableName);
+		String metaDataCatalogName = metaDataCatalogNameToUse(tmd.getCatalogName());
+		String metaDataSchemaName = metaDataSchemaNameToUse(tmd.getSchemaName());
+		String metaDataTableName = tableNameToUse(tmd.getTableName());
 		if (logger.isDebugEnabled()) {
 			logger.debug("Retrieving metadata for " + metaDataCatalogName + "/" +
 					metaDataSchemaName + "/" + metaDataTableName);
@@ -170,5 +240,45 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	public List<TableParameterMetaData> getInsertParameterMetaData() {
 		return insertParameterMetaData;
+	}
+
+	private class TableMetaData {
+		private String catalogName;
+		private String schemaName;
+		private String tableName;
+		private String type;
+
+
+		public String getCatalogName() {
+			return catalogName;
+		}
+
+		public void setCatalogName(String catalogName) {
+			this.catalogName = catalogName;
+		}
+
+		public String getSchemaName() {
+			return schemaName;
+		}
+
+		public void setSchemaName(String schemaName) {
+			this.schemaName = schemaName;
+		}
+
+		public String getTableName() {
+			return tableName;
+		}
+
+		public void setTableName(String tableName) {
+			this.tableName = tableName;
+		}
+
+		public String getType() {
+			return type;
+		}
+
+		public void setType(String type) {
+			this.type = type;
+		}
 	}
 }

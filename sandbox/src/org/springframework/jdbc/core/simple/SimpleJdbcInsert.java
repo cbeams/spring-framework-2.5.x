@@ -53,12 +53,12 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	public SimpleJdbcInsert withSchemaName(String schemaName) {
-		setTableName(schemaName);
+		setSchemaName(schemaName);
 		return this;
 	}
 
 	public SimpleJdbcInsert withCatalogName(String catalogName) {
-		setTableName(catalogName);
+		setCatalogName(catalogName);
 		return this;
 	}
 
