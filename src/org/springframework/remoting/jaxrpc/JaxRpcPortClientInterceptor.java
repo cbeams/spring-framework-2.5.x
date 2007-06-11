@@ -482,12 +482,10 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	/**
 	 * Prepare the given JAX-RPC port stub, applying properties to it.
-	 * Called by <code>afterPropertiesSet</code>.
-	 * <p>Just applied when actually creating a JAX-RPC port stub,
-	 * in case of a specified JAX-RPC-compliant port interface.
-	 * Else, JAX-RPC dynamic calls will be used.
+	 * Called by {@link #afterPropertiesSet}.
+	 * <p>Just applied when actually creating a JAX-RPC port stub, in case of a
+	 * compliant port interface. Else, JAX-RPC dynamic calls will be used.
 	 * @param stub the current JAX-RPC port stub
-	 * @see #afterPropertiesSet
 	 * @see #setUsername
 	 * @see #setPassword
 	 * @see #setEndpointAddress
@@ -521,14 +519,12 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	}
 
 	/**
-	 * Post-process the given JAX-RPC port stub.
-	 * Default implementation is empty. Called by <code>prepare</code>.
-	 * <p>Just applied when actually creating a JAX-RPC port stub,
-	 * in case of a specified JAX-RPC-compliant port interface.
-	 * Else, JAX-RPC dynamic calls will be used.
+	 * Post-process the given JAX-RPC port stub. Called by {@link #prepare}.
+	 * <p>The default implementation is empty.
+	 * <p>Just applied when actually creating a JAX-RPC port stub, in case of a
+	 * compliant port interface. Else, JAX-RPC dynamic calls will be used.
 	 * @param stub the current JAX-RPC port stub
 	 * (can be cast to an implementation-specific class if necessary)
-	 * @see #prepare
 	 * @see #setPortInterface
 	 * @see #postProcessJaxRpcCall
 	 */
@@ -631,7 +627,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 					reset();
 				}
 				throw RmiClientInterceptorUtils.convertRmiAccessException(
-						invocation.getMethod(), rex, isConnectFailure, portQName.toString());
+						invocation.getMethod(), rex, isConnectFailure, this.portQName.toString());
 			}
 			else if (targetEx instanceof JAXRPCException) {
 				throw new RemoteProxyFailureException("Invalid call on JAX-RPC port stub", targetEx);
@@ -653,8 +649,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	/**
 	 * Perform a JAX-RPC dynamic call for the given AOP method invocation.
-	 * Delegates to <code>prepareJaxRpcCall</code> and
-	 * <code>postProcessJaxRpcCall</code> for setting up the call object.
+	 * Delegates to {@link #prepareJaxRpcCall} and
+	 * {@link #postProcessJaxRpcCall} for setting up the call object.
 	 * <p>Default implementation uses method name as JAX-RPC operation name
 	 * and method arguments as arguments for the JAX-RPC call. Can be
 	 * overridden in subclasses for custom operation names and/or arguments.
@@ -700,13 +696,10 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	}
 
 	/**
-	 * Prepare the given JAX-RPC call, applying properties to it.
-	 * Called by <code>invoke</code>.
-	 * <p>Just applied when actually using JAX-RPC dynamic calls,
-	 * i.e. if no JAX-RPC-compliant port interface was specified.
-	 * Else, a JAX-RPC port stub will be used.
+	 * Prepare the given JAX-RPC call, applying properties to it. Called by {@link #invoke}.
+	 * <p>Just applied when actually using JAX-RPC dynamic calls, i.e. if no compliant
+	 * port interface was specified. Else, a JAX-RPC port stub will be used.
 	 * @param call the current JAX-RPC call object
-	 * @see #invoke
 	 * @see #setUsername
 	 * @see #setPassword
 	 * @see #setEndpointAddress
@@ -740,17 +733,15 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	}
 
 	/**
-	 * Post-process the given JAX-RPC call.
-	 * Default implementation is empty. Called by <code>invoke</code>.
-	 * <p>Just applied when actually using JAX-RPC dynamic calls,
-	 * that is, if no JAX-RPC-compliant port interface was specified.
-	 * Else, a JAX-RPC port stub will be used.
+	 * Post-process the given JAX-RPC call. Called by {@link #invoke}.
+	 * <p>The default implementation is empty.
+	 * <p>Just applied when actually using JAX-RPC dynamic calls, i.e. if no compliant
+	 * port interface was specified. Else, a JAX-RPC port stub will be used.
 	 * @param call the current JAX-RPC call object
 	 * (can be cast to an implementation-specific class if necessary)
 	 * @param invocation the current AOP MethodInvocation that the call was
 	 * created for (can be used to check method name, method parameters
 	 * and/or passed-in arguments)
-	 * @see #invoke
 	 * @see #setPortInterface
 	 * @see #postProcessPortStub
 	 */
