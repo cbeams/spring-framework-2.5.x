@@ -123,7 +123,7 @@ public abstract class GenericCollectionTypeResolver {
 	}
 
 	/**
-	 * Determine the generic key type of the given Map parameter.
+	 * Determine the generic key type of the given Map return type.
 	 * @param method the method to check the return type for
 	 * @return the generic type, or <code>null</code> if none
 	 */
@@ -132,7 +132,7 @@ public abstract class GenericCollectionTypeResolver {
 	}
 
 	/**
-	 * Determine the generic key type of the given Map parameter.
+	 * Determine the generic key type of the given Map return type.
 	 * @param method the method to check the return type for
 	 * @param nestingLevel the nesting level of the target type
 	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
@@ -144,7 +144,7 @@ public abstract class GenericCollectionTypeResolver {
 	}
 
 	/**
-	 * Determine the generic value type of the given Map parameter.
+	 * Determine the generic value type of the given Map return type.
 	 * @param method the method to check the return type for
 	 * @return the generic type, or <code>null</code> if none
 	 */
@@ -153,7 +153,7 @@ public abstract class GenericCollectionTypeResolver {
 	}
 
 	/**
-	 * Determine the generic value type of the given Map parameter.
+	 * Determine the generic value type of the given Map return type.
 	 * @param method the method to check the return type for
 	 * @param nestingLevel the nesting level of the target type
 	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
