@@ -10,15 +10,13 @@
 			<value>inline:
 require 'java'
 
-include_class 'org.springframework.scripting.Calculator'
+class RubyCalculator
+	include org.springframework.scripting.Calculator
 
-class RubyCalculator &lt; Calculator
-
- def add(x, y)
-    x + y
- end
-
-end                                                                                          
+	def add(x, y)
+		x + y
+	end
+end
 			</value>
 		</constructor-arg>
 		<constructor-arg value="org.springframework.scripting.Calculator"/>

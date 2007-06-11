@@ -1,11 +1,9 @@
 require 'java' 
 
-include_class 'org.springframework.scripting.Calculator'
+class RubyCalculator
+	include org.springframework.scripting.Calculator
 
-class RubyCalculator < Calculator
-
- def add(x, y)
-    x + y
- end
-
+	def add(x, y)
+		x + y
+	end
 end

@@ -10,9 +10,8 @@
 			<value><![CDATA[inline:
 require 'java'
 
-include_class 'org.springframework.scripting.jruby.WrapperAdder'
-
-class RubyWrapperAdder < WrapperAdder
+class RubyWrapperAdder
+	include org.springframework.scripting.jruby.WrapperAdder
 
 	def addInts(x, y)
 		x + y

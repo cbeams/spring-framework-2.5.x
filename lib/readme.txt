@@ -306,7 +306,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's XAPoolNativeJdbcExtractor
 
 * jruby/jruby.jar
-- JRuby 0.9.8 (http://jruby.codehaus.org)
+- JRuby 1.0 (http://jruby.codehaus.org)
 - required for building the framework
 - required at runtime when using Spring's JRuby support
 

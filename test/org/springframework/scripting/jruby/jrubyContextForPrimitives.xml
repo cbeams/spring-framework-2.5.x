@@ -10,9 +10,8 @@
 			<value><![CDATA[inline:
 require 'java'
 
-include_class 'org.springframework.scripting.jruby.PrimitiveAdder'
-
-class RubyPrimitiveAdder < PrimitiveAdder
+class RubyPrimitiveAdder
+	include org.springframework.scripting.jruby.PrimitiveAdder
 
 	def addInts(x, y)
 		x + y

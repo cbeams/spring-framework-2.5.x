@@ -1,10 +1,9 @@
 require 'java'
 
-include_class 'org.springframework.scripting.jruby.Printer'
-
-class RubyPrinter < Printer
+class RubyPrinter
+	include org.springframework.scripting.jruby.Printer
 
 	def print(obj)
-	   puts obj.getContent
+		puts obj.getContent
 	end
 end

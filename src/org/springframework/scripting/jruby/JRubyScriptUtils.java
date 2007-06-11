@@ -34,16 +34,21 @@ import org.jruby.ast.Node;
 import org.jruby.exceptions.JumpException;
 import org.jruby.exceptions.RaiseException;
 import org.jruby.javasupport.JavaEmbedUtils;
+import org.jruby.runtime.DynamicScope;
 import org.jruby.runtime.builtin.IRubyObject;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Utility methods for handling JRuby-scripted objects.
  *
- * <p>Note: As of Spring 2.0.4, this class requires JRuby 0.9.8 or higher.
+ * <p>Note: As of Spring 2.0.4, this class requires JRuby 0.9.8 or 0.9.9.
+ * As of Spring 2.0.6 / 2.1, it supports JRuby 1.0 as well.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -51,6 +56,11 @@ import org.springframework.util.ClassUtils;
  * @since 2.0
  */
 public abstract class JRubyScriptUtils {
+
+	// Determine whether the old JRuby 0.9 parse method is available (incompatible with 1.0)
+	private final static Method oldParseMethod = ClassUtils.getMethodIfAvailable(
+			Ruby.class, "parse", new Class[] {String.class, String.class, DynamicScope.class});
+
 
 	/**
 	 * Create a new JRuby-scripted object from the given script source,
@@ -76,7 +86,9 @@ public abstract class JRubyScriptUtils {
 	public static Object createJRubyObject(String scriptSource, Class[] interfaces, ClassLoader classLoader) {
 		Ruby ruby = initializeRuntime();
 
-		Node scriptRootNode = ruby.parse(scriptSource, "", null);
+		Node scriptRootNode = (oldParseMethod != null ?
+				(Node) ReflectionUtils.invokeMethod(oldParseMethod, ruby, new Object[] {scriptSource, "", null}) :
+				ruby.parse(scriptSource, "", null, 0));
 		IRubyObject rubyObject = ruby.eval(scriptRootNode);
 
 		if (rubyObject instanceof RubyNil) {
@@ -167,7 +179,11 @@ public abstract class JRubyScriptUtils {
 				return new Integer(this.rubyObject.hashCode());
 			}
 			if (AopUtils.isToStringMethod(method)) {
-				return "JRuby object [" + this.rubyObject + "]";
+				String toStringResult = this.rubyObject.toString();
+				if (!StringUtils.hasText(toStringResult)) {
+					toStringResult = ObjectUtils.identityToString(this.rubyObject);
+				}
+				return "JRuby object [" + toStringResult + "]";
 			}
 			try {
 				IRubyObject[] rubyArgs = convertToRuby(args);
