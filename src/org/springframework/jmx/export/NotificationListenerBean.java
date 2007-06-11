@@ -33,6 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
  * {@link #setMappedObjectNames mappedObjectNames} property.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class NotificationListenerBean implements InitializingBean {
@@ -121,35 +122,28 @@ public class NotificationListenerBean implements InitializingBean {
 	}
 
 	/**
-	 * Set the {@link javax.management.ObjectName} of the single MBean
+	 * Set the {@link javax.management.ObjectName}-style name of the single MBean
 	 * that the encapsulated {@link #getNotificationFilter() NotificationFilter}
-	 * will be registered with to listen for 
+	 * will be registered with to listen for
 	 * {@link javax.management.Notification Notifications}.
-	 * @param mappedObjectName the {@link javax.management.ObjectName} identifying the
-	 * target MBean that the encapsulated {@link #getNotificationFilter() NotificationFilter}
-	 * is to be registered with
 	 */
 	public void setMappedObjectName(String mappedObjectName) {
 		setMappedObjectNames(mappedObjectName != null ? new String[] {mappedObjectName} : null);
 	}
 
 	/**
-	 * Set the array of {@link javax.management.ObjectName ObjectNames} of the MBeans
+	 * Set an array of {@link javax.management.ObjectName}-style names of the MBeans
 	 * that the encapsulated {@link #getNotificationFilter() NotificationFilter}
 	 * will be registered with to listen for
 	 * {@link javax.management.Notification Notifications}.
-	 * @param mappedObjectNames the array of {@link javax.management.ObjectName ObjectName}
-	 * String representations, identifying the target MBeans that the encapsulated
-	 * {@link #getNotificationFilter() NotificationFilter} is to be registered with
 	 */
 	public void setMappedObjectNames(String[] mappedObjectNames) {
 		this.mappedObjectNames = mappedObjectNames;
 	}
 
 	/**
-	 * Return the list of {@link javax.management.ObjectName ObjectNames} String
-	 * representations for which the encapsulated
-	 * {@link #getNotificationFilter() NotificationFilter} will
+	 * Return the list of {@link javax.management.ObjectName} String representations for
+	 * which the encapsulated {@link #getNotificationFilter() NotificationFilter} will
 	 * be registered as a listener for {@link javax.management.Notification Notifications}.
 	 */
 	public String[] getMappedObjectNames() {

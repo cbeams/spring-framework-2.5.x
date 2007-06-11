@@ -1491,9 +1491,7 @@ public class ConsoleLoggingNotificationListener
                 </constructor-arg>
                 <property name="mappedObjectNames">
                     <list>
-                        <bean class="javax.management.ObjectName">
-                            <constructor-arg value="bean:name=testBean1"/>
-                        </bean>
+                        <value>bean:name=testBean1</value>
                     </list>
                 </property>
             </bean>
@@ -1534,12 +1532,8 @@ public class ConsoleLoggingNotificationListener
                 <property name="mappedObjectNames">
                     <list>
                         ]]><lineannotation>&lt;!-- let's handle notifications from two distinct MBeans --&gt;</lineannotation><![CDATA[
-                        <bean class="javax.management.ObjectName">
-                            <constructor-arg value="bean:name=testBean1"/>
-                        </bean>
-                        <bean class="javax.management.ObjectName">
-                            <constructor-arg value="bean:name=testBean2"/>
-                        </bean>
+                        <value>bean:name=testBean1</value>
+                        <value>bean:name=testBean2</value>
                     </list>
                 </property>
                 <property name="handback">
