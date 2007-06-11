@@ -14,7 +14,7 @@
 	is to put xml-apis.jar and xercesImpl.jar into your "JAVA_HOME/jre/lib/ext" directory.
 -->
 
-<project name="spring-core" default="usage" basedir=".">
+<project name="spring-core" default="usage" basedir="." xmlns:maven="antlib:org.apache.maven.artifact.ant">
 
 	<property file="build.properties"/>
 	<property file="project.properties"/>
@@ -62,6 +62,20 @@
 
 	</path>
 
+	<target name="maventasks">
+		<path id="maven.lib.path">
+			<fileset dir="${basedir}/lib">
+				<include name="maven/maven-ant-tasks.jar"/>
+				<!--include name="aws/spring-aws-ant.jar"/>
+				<include name="jets3t/jets3t.jar"/>
+				<include name="jakarta-commons/commons-codec.jar"/>
+				<include name="jakarta-commons/commons-httpclient.jar"/>
+				<include name="jakarta-commons/commons-logging.jar"/-->
+			</fileset>
+		</path>
+		<taskdef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant"
+			classpathref="maven.lib.path" />
+	</target>
 
 	<target name="usage">
 
@@ -267,11 +281,12 @@
 	<target name="initdist" description="Initialize the distribution directory">
 
 		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${dist.dir}/maven"/>
 		<mkdir dir="${dist.dir}/modules"/>
 		<mkdir dir="${dist.dir}/module-sources"/>
+		<mkdir dir="${dist.dir}/resources"/>
 		<mkdir dir="${dist.dir}/weaving"/>
 		<mkdir dir="${dist.dir}/weaving-sources" />
-		<mkdir dir="${dist.dir}/resources"/>
 
 	</target>
 	
@@ -599,7 +614,7 @@
 		
 		<delete>
 			<fileset dir="${dist.dir}">
-				<include name="modules-sources/*.jar"/>
+				<include name="module-sources/*.jar"/>
 			</fileset>
 		</delete>
 		
@@ -815,17 +830,6 @@
 			</fileset>
 		</delete>
 
-		<jar jarfile="${dist.dir}/weaving/spring-aspects.jar">
-			<fileset dir="${target.classes.dir}">
-				<patternset refid="spring.aspects.packages"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
 		<jar jarfile="${dist.dir}/weaving/spring-agent.jar">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.agent.packages" />
@@ -835,6 +839,17 @@
 				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 				<attribute name="Premain-Class" value="org.springframework.instrument.InstrumentationSavingAgent"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/weaving/spring-aspects.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.aspects.packages"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
 
@@ -901,7 +916,6 @@
 
 	</target>
 
-
 	<target name="distfiles" depends="initdist" description="Copy dtd, xsd, tld, etc files to the dist directory">
 
 		<copy todir="${dist.dir}/resources" flatten="true" preservelastmodified="true">
@@ -916,6 +930,15 @@
 
 	</target>
 
+	<target name="distpoms" depends="initdist" description="Copy all maven POMs to the dist directory">
+
+		<copy todir="${dist.dir}/maven">
+			<fileset dir="${pom.src.dir}">
+				<include name="*.pom"/>
+			</fileset>
+		</copy>
+
+	</target>
 
 	<target name="alljars" depends="fulljar,fullsources,modulejars,modulesources,weavingjars,weavingsources"
 		description="Create all JAR files"/>
@@ -926,6 +949,96 @@
 		made up of the individual targets called, separated by an underscore.
 	-->
 	<target name="clean_alljars" depends="clean,alljars"/>
+
+	<target name="maveninstall" depends="maventasks,alljars"
+			description="Uploads all jars, sources, and POMs to a local m2 repository">
+
+		<maven:install file="${dist.dir}/spring.jar">
+			<pom file="${pom.src.dir}/spring.pom" />
+			<attach file="${dist.dir}/spring-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-aop.jar">
+			<pom file="${pom.src.dir}/spring.pom" />
+			<attach file="${dist.dir}/module-sources/spring-aop-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-beans.jar">
+			<pom file="${pom.src.dir}/spring-beans.pom" />
+			<attach file="${dist.dir}/module-sources/spring-beans-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-context-support.jar">
+			<pom file="${pom.src.dir}/spring-context-support.pom" />
+			<attach file="${dist.dir}/module-sources/spring-context-support-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-context.jar">
+			<pom file="${pom.src.dir}/spring-context.pom" />
+			<attach file="${dist.dir}/module-sources/spring-context-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-core.jar">
+			<pom file="${pom.src.dir}/spring-core.pom" />
+			<attach file="${dist.dir}/module-sources/spring-core-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-jdbc.jar">
+			<pom file="${pom.src.dir}/spring-jdbc.pom" />
+			<attach file="${dist.dir}/module-sources/spring-jdbc-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-jms.jar">
+			<pom file="${pom.src.dir}/spring-jms.pom" />
+			<attach file="${dist.dir}/module-sources/spring-jms-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-mock.jar">
+			<pom file="${pom.src.dir}/spring-mock.pom" />
+			<attach file="${dist.dir}/module-sources/spring-mock-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-orm.jar">
+			<pom file="${pom.src.dir}/spring-orm.pom" />
+			<attach file="${dist.dir}/module-sources/spring-orm-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-tx.jar">
+			<pom file="${pom.src.dir}/spring-tx.pom" />
+			<attach file="${dist.dir}/module-sources/spring-tx-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-web.jar">
+			<pom file="${pom.src.dir}/spring-web.pom" />
+			<attach file="${dist.dir}/module-sources/spring-web-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-webmvc-portlet.jar">
+			<pom file="${pom.src.dir}/spring-webmvc-portlet.pom" />
+			<attach file="${dist.dir}/module-sources/spring-webmvc-portlet-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-webmvc.jar">
+			<pom file="${pom.src.dir}/spring-webmvc.pom" />
+			<attach file="${dist.dir}/module-sources/spring-webmvc-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/weaving/spring-agent.jar">
+			<pom file="${pom.src.dir}/spring-agent.pom" />
+			<attach file="${dist.dir}/weaving-sources/spring-agent-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/weaving/spring-aspects.jar">
+			<pom file="${pom.src.dir}/spring-aspects.pom" />
+			<attach file="${dist.dir}/weaving-sources/spring-aspects-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/weaving/spring-tomcat-weaver.jar">
+			<pom file="${pom.src.dir}/spring-tomcat-weaver.pom" />
+			<attach file="${dist.dir}/weaving-sources/spring-tomcat-weaver-sources.jar" classifier="sources"/>
+		</maven:install>
+
+	</target>
 
 
 	<!--
@@ -1808,7 +1921,7 @@
 	</target>
 
 
-	<target name="release" depends="clean,alljars,distfiles,javadoc,doc.all,releasezips"
+	<target name="release" depends="clean,alljars,distfiles,distpoms,javadoc,doc.all,releasezips"
 			description="Build release distributions from scratch"/>
 
 
