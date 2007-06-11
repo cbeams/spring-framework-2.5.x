@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.Arrays;
 
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
@@ -40,6 +39,7 @@ import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.remoting.support.DefaultRemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Interceptor for accessing RMI services from JNDI.
@@ -480,16 +480,17 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * @return the exception to be thrown to the caller
 	 */
 	private Exception convertCorbaAccessException(SystemException ex, Method method) {
-		if (!Arrays.asList(method.getExceptionTypes()).contains(RemoteException.class)) {
-			if (isConnectFailure(ex)) {
-				return new RemoteConnectFailureException("Cannot connect to CORBA service [" + getJndiName() + "]", ex);
-			}
-			else {
-				return new RemoteAccessException("Cannot access CORBA service [" + getJndiName() + "]", ex);
-			}
+		String message = "Could not connect to CORBA service [" + getJndiName() + "]";
+		if (ReflectionUtils.declaresException(method, RemoteException.class)) {
+			return new RemoteException(message, ex);
 		}
 		else {
-			return ex;
+			if (isConnectFailure(ex)) {
+				return new RemoteConnectFailureException(message, ex);
+			}
+			else {
+				return new RemoteAccessException(message, ex);
+			}
 		}
 	}
 

@@ -27,7 +27,6 @@ import java.rmi.RemoteException;
 import java.rmi.StubNotFoundException;
 import java.rmi.UnknownHostException;
 import java.rmi.UnmarshalException;
-import java.util.Arrays;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
@@ -36,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteProxyFailureException;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Factored-out methods for performing invocations within an RMI client.
@@ -134,11 +134,11 @@ public abstract class RmiClientInterceptorUtils {
 		if (logger.isDebugEnabled()) {
 			logger.debug(message, ex);
 		}
-		if (!Arrays.asList(method.getExceptionTypes()).contains(RemoteException.class)) {
-			return new RemoteAccessException(message, ex);
+		if (ReflectionUtils.declaresException(method, RemoteException.class)) {
+			return new RemoteException(message, ex);
 		}
 		else {
-			return new RemoteException(message, ex);
+			return new RemoteAccessException(message, ex);
 		}
 	}
 
@@ -172,16 +172,16 @@ public abstract class RmiClientInterceptorUtils {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Remote service [" + serviceName + "] threw exception", ex);
 		}
-		if (!Arrays.asList(method.getExceptionTypes()).contains(RemoteException.class)) {
-			if (isConnectFailure) {
-				return new RemoteConnectFailureException("Cannot connect to remote service [" + serviceName + "]", ex);
-			}
-			else {
-				return new RemoteAccessException("Cannot access remote service [" + serviceName + "]", ex);
-			}
+		if (ReflectionUtils.declaresException(method, ex.getClass())) {
+			return ex;
 		}
 		else {
-			return ex;
+			if (isConnectFailure) {
+				return new RemoteConnectFailureException("Could not connect to remote service [" + serviceName + "]", ex);
+			}
+			else {
+				return new RemoteAccessException("Could not access remote service [" + serviceName + "]", ex);
+			}
 		}
 	}
 
