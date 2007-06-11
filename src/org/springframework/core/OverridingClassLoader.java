@@ -56,6 +56,7 @@ public class OverridingClassLoader extends ClassLoader {
 		super(parent);
 		this.excludedPackages.add("java.");
 		this.excludedPackages.add("javax.");
+		this.excludedPackages.add("sun.");
 	}
 
 
