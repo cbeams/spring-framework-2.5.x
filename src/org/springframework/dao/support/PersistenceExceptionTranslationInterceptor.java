@@ -29,6 +29,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * AOP Alliance MethodInterceptor that provides persistence exception translation
@@ -138,13 +139,12 @@ public class PersistenceExceptionTranslationInterceptor
 		}
 		catch (RuntimeException ex) {
 			// Let it throw raw if the type of the exception is on the throws clause of the method.
-			Class[] declaredExceptions = mi.getMethod().getExceptionTypes();
-			for (int i = 0; i < declaredExceptions.length; i++) {
-				if (declaredExceptions[i].isInstance(ex)) {
-					throw ex;
-				}
+			if (ReflectionUtils.declaresException(mi.getMethod(), ex.getClass())) {
+				throw ex;
 			}
-			throw DataAccessUtils.translateIfNecessary(ex, this.persistenceExceptionTranslator);
+			else {
+				throw DataAccessUtils.translateIfNecessary(ex, this.persistenceExceptionTranslator);
+			}
 		}
 	}
 

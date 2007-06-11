@@ -16,8 +16,6 @@
 
 package org.springframework.jca.endpoint;
 
-import java.util.Arrays;
-
 import javax.resource.ResourceException;
 import javax.resource.spi.UnavailableException;
 import javax.resource.spi.endpoint.MessageEndpoint;
@@ -28,6 +26,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Generic implementation of the JCA 1.5
@@ -100,7 +99,7 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 					beforeDelivery(null);
 				}
 				catch (ResourceException ex) {
-					if (Arrays.asList(methodInvocation.getMethod().getExceptionTypes()).contains(ResourceException.class)) {
+					if (ReflectionUtils.declaresException(methodInvocation.getMethod(), ex.getClass())) {
 						throw ex;
 					}
 					else {
@@ -121,7 +120,7 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 						afterDelivery();
 					}
 					catch (ResourceException ex) {
-						if (Arrays.asList(methodInvocation.getMethod().getExceptionTypes()).contains(ResourceException.class)) {
+						if (ReflectionUtils.declaresException(methodInvocation.getMethod(), ex.getClass())) {
 							throw ex;
 						}
 						else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.springframework.util;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.rmi.ConnectException;
+import java.rmi.RemoteException;
+import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +31,7 @@ import org.springframework.beans.TestBean;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class ReflectionUtilsTests extends TestCase {
 
@@ -46,6 +50,20 @@ public class ReflectionUtilsTests extends TestCase {
 
 		ReflectionUtils.invokeMethod(setName, bean, new Object[] { juergen });
 		assertEquals("Incorrect name set", juergen, bean.getName());
+	}
+
+	public void testDeclaresException() throws Exception {
+		Method remoteExMethod = A.class.getDeclaredMethod("foo", new Class[] {Integer.class});
+		assertTrue(ReflectionUtils.declaresException(remoteExMethod, RemoteException.class));
+		assertTrue(ReflectionUtils.declaresException(remoteExMethod, ConnectException.class));
+		assertFalse(ReflectionUtils.declaresException(remoteExMethod, NoSuchMethodException.class));
+		assertFalse(ReflectionUtils.declaresException(remoteExMethod, Exception.class));
+
+		Method illegalExMethod = B.class.getDeclaredMethod("bar", new Class[] {String.class});
+		assertTrue(ReflectionUtils.declaresException(illegalExMethod, IllegalArgumentException.class));
+		assertTrue(ReflectionUtils.declaresException(illegalExMethod, IllegalFormatException.class));
+		assertFalse(ReflectionUtils.declaresException(illegalExMethod, IllegalStateException.class));
+		assertFalse(ReflectionUtils.declaresException(illegalExMethod, Exception.class));
 	}
 
 	public void testCopySrcToDestinationOfIncorrectClass() {
@@ -88,16 +106,6 @@ public class ReflectionUtilsTests extends TestCase {
 		TestBean src = new TestBean();
 		TestBean dest = new TestBean();
 		testValidCopy(src, dest);
-	}
-
-	public static class TestBeanSubclassWithNewField extends TestBean {
-		private int magic;
-
-		protected String prot = "foo";
-	}
-
-	public static class TestBeanSubclassWithFinalField extends TestBean {
-		private final String foo = "will break naive copy that doesn't exclude statics";
 	}
 
 	public void testValidCopyOnSubTypeWithNewField() {
@@ -197,11 +205,31 @@ public class ReflectionUtilsTests extends TestCase {
 	  assertNotNull(ReflectionUtils.findMethod(B.class, "bar", new Class[]{String.class}));
 	  assertNotNull(ReflectionUtils.findMethod(B.class, "foo", new Class[]{Integer.class}));
 	}
-	private static class A {
-		private void foo(Integer i){}
+
+
+	public static class TestBeanSubclassWithNewField extends TestBean {
+
+		private int magic;
+
+		protected String prot = "foo";
 	}
 
-	private static class B extends A{
-		void bar(String s) {}
+
+	public static class TestBeanSubclassWithFinalField extends TestBean {
+
+		private final String foo = "will break naive copy that doesn't exclude statics";
 	}
+
+
+	private static class A {
+
+		private void foo(Integer i) throws RemoteException {}
+	}
+
+
+	private static class B extends A {
+
+		void bar(String s) throws IllegalArgumentException {}
+	}
+
 }
