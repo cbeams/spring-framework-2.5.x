@@ -436,7 +436,7 @@ public abstract class ObjectUtils {
 	 * Return a String representation of an object's overall identity.
 	 * @param obj the object (may be <code>null</code>)
 	 * @return the object's identity as String representation,
-	 * or <code>null</code> if the object was <code>null</code>
+	 * or an empty String if the object was <code>null</code>
 	 */
 	public static String identityToString(Object obj) {
 		if (obj == null) {
