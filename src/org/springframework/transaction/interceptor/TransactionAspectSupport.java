@@ -311,7 +311,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Completing transaction for [" + txInfo.getJoinpointIdentification() + "]");
 			}
-			this.transactionManager.commit(txInfo.getTransactionStatus());
+			getTransactionManager().commit(txInfo.getTransactionStatus());
 		}
 	}
 
@@ -329,7 +329,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 			}
 			if (txInfo.transactionAttribute.rollbackOn(ex)) {
 				try {
-					this.transactionManager.rollback(txInfo.getTransactionStatus());
+					getTransactionManager().rollback(txInfo.getTransactionStatus());
 				}
 				catch (RuntimeException ex2) {
 					logger.error("Application exception overridden by rollback exception", ex);
@@ -344,7 +344,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 				// We don't roll back on this exception.
 				// Will still roll back if TransactionStatus.isRollbackOnly() is true.
 				try {
-					this.transactionManager.commit(txInfo.getTransactionStatus());
+					getTransactionManager().commit(txInfo.getTransactionStatus());
 				}
 				catch (RuntimeException ex2) {
 					logger.error("Application exception overridden by commit exception", ex);
