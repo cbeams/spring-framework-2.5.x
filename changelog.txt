@@ -8,6 +8,18 @@ Changes in version 2.1 M3 (2007-06-18)
 
 Package org.springframework.aop
 * added support for "bean(name)" element in AspectJ pointcut expressions
+* fixed ConfigBeanDefinitionParser to properly handle empty pointcut bean names in a tooling environment
+* ConfigBeanDefinitionParser creates PointcutComponentDefinition for pointcut attribute as well
+
+Package org.springframework.core
+* OverridingClassLoader (and hence SimpleThrowawayClassLoader) exclude classes from the "sun." package
+
+Package org.springframework.remoting
+* RmiClientInterceptor and JaxRpcClientInterceptor propagate any kind of declared RemoteException as-is
+* JndiRmiClientInterceptor wraps CORBA SystemExceptions in RemoteExceptions (if declared)
+
+Package org.springframework.scripting
+* updated JRuby support for JRuby 1.0 compatibility (still compatible with JRuby 0.9.8 / 0.9.9 as well)
 
 
 Changes in version 2.1 M2 (2007-05-31)
