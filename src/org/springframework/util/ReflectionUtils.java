@@ -37,6 +37,73 @@ import java.util.List;
 public abstract class ReflectionUtils {
 
 	/**
+	 * Attempt to find a {@link Method} on the supplied type with the supplied name
+	 * and parameter types. Searches all superclasses up to <code>Object</code>.
+	 * <p>Returns <code>null</code> if no {@link Method} can be found.
+	 * @param clazz the class to introspect
+	 * @param name the name of the method
+	 * @param paramTypes the parameter types of the method
+	 * @return the Method object, or <code>null</code> if none found
+	 */
+	public static Method findMethod(Class clazz, String name, Class[] paramTypes) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(name, "Method name must not be null");
+		Class searchType = clazz;
+		while (!Object.class.equals(searchType) && searchType != null) {
+			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
+			for (int i = 0; i < methods.length; i++) {
+				Method method = methods[i];
+				if (name.equals(method.getName()) && Arrays.equals(paramTypes, method.getParameterTypes())) {
+					return method;
+				}
+			}
+			searchType = searchType.getSuperclass();
+		}
+		return null;
+	}
+
+	/**
+	 * Invoke the specified {@link Method} against the supplied target object
+	 * with no arguments. The target object can be <code>null</code> when
+	 * invoking a static {@link Method}.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
+	 * @param method the method to invoke
+	 * @param target the target object to invoke the method on
+	 * @return the invocation result, if any
+	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeMethod(Method method, Object target) {
+		return invokeMethod(method, target, null);
+	}
+
+	/**
+	 * Invoke the specified {@link Method} against the supplied target object
+	 * with the supplied arguments. The target object can be <code>null</code>
+	 * when invoking a static {@link Method}.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
+	 * @param method the method to invoke
+	 * @param target the target object to invoke the method on
+	 * @param args the invocation arguments (may be <code>null</code>)
+	 * @return the invocation result, if any
+	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeMethod(Method method, Object target, Object[] args) {
+		try {
+			return method.invoke(target, args);
+		}
+		catch (IllegalAccessException ex) {
+			handleReflectionException(ex);
+			throw new IllegalStateException(
+					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		}
+		catch (InvocationTargetException ex) {
+			handleReflectionException(ex);
+			throw new IllegalStateException(
+					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		}
+	}
+
+	/**
 	 * Handle the given reflection exception. Should only be called if
 	 * no checked exception is expected to be thrown by the target method.
 	 * <p>Throws the underlying RuntimeException or Error in case of an
@@ -78,60 +145,26 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Attempt to find a {@link Method} on the supplied type with the supplied name
-	 * and parameter types. Searches all superclasses up to <code>Object</code>.
-	 * Returns <code>null</code> if no {@link Method} can be found.
+	 * Determine whether the given method explicitly declares the given exception
+	 * or one of its superclasses, which means that an exception of that type
+	 * can be propagated as-is within a reflective invocation.
+	 * @param method the declaring method
+	 * @param exceptionType the exception to throw
+	 * @return <code>true</code> if the exception can be thrown as-is;
+	 * <code>false</code> if it needs to be wrapped
 	 */
-	public static Method findMethod(Class type, String name, Class[] paramTypes) {
-		Assert.notNull(type, "'type' cannot be null.");
-		Assert.notNull(name, "'name' cannot be null.");
-		Class searchType = type;
-		while(!Object.class.equals(searchType) && searchType != null) {
-			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
-			for (int i = 0; i < methods.length; i++) {
-				Method method = methods[i];
-				if(name.equals(method.getName()) && Arrays.equals(paramTypes, method.getParameterTypes())) {
-					return method;
-				}
+	public static boolean declaresException(Method method, Class exceptionType) {
+		Assert.notNull(method, "Method must not be null");
+		Class[] declaredExceptions = method.getExceptionTypes();
+		for (int i = 0; i < declaredExceptions.length; i++) {
+			Class declaredException = declaredExceptions[i];
+			if (declaredException.isAssignableFrom(exceptionType)) {
+				return true;
 			}
-			searchType = searchType.getSuperclass();
 		}
-		return null;
+		return false;
 	}
 
-	/**
-	 * Invoke the specified {@link Method} against the supplied target object
-	 * with no arguments. The target object can be <code>null</code> when
-	 * invoking a static {@link Method}.
-	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
-	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
-	 */
-	public static Object invokeMethod(Method method, Object target) {
-		return invokeMethod(method, target, null);
-	}
-
-	/**
-	 * Invoke the specified {@link Method} against the supplied target object
-	 * with the supplied arguments. The target object can be <code>null</code>
-	 * when invoking a static {@link Method}.
-	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
-	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
-	 */
-	public static Object invokeMethod(Method method, Object target, Object[] args) {
-		try {
-			return method.invoke(target, args);
-		}
-		catch (IllegalAccessException ex) {
-			handleReflectionException(ex);
-			throw new IllegalStateException(
-					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
-		}
-		catch (InvocationTargetException ex) {
-			handleReflectionException(ex);
-			throw new IllegalStateException(
-					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
-		}
-	}
 
 	/**
 	 * Determine whether the given field is a "public static final" constant.
@@ -216,8 +249,9 @@ public abstract class ReflectionUtils {
 		return (Method[]) l.toArray(new Method[l.size()]);
 	}
 
+
 	/**
-	 * Invoke the given callback on all private fields in the target class,
+	 * Invoke the given callback on all fields in the target class,
 	 * going up the class hierarchy to get all declared fields.
 	 * @param targetClass the target class to analyze
 	 * @param fc the callback to invoke for each field
@@ -227,7 +261,7 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Invoke the given callback on all private fields in the target class,
+	 * Invoke the given callback on all fields in the target class,
 	 * going up the class hierarchy to get all declared fields.
 	 * @param targetClass the target class to analyze
 	 * @param fc the callback to invoke for each field
