@@ -30,8 +30,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Superclass for transactional aspects, such as the AOP Alliance-compatible
- * <code>TransactionInterceptor</code>, or an AspectJ aspect.
+ * Base class for transactional aspects, such as the AOP Alliance
+ * {@link TransactionInterceptor} or an AspectJ aspect.
  *
  * <p>This enables the underlying Spring transaction infrastructure to be used
  * easily to implement an aspect for any aspect system.
@@ -311,7 +311,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Completing transaction for [" + txInfo.getJoinpointIdentification() + "]");
 			}
-			this.transactionManager.commit(txInfo.getTransactionStatus());
+			getTransactionManager().commit(txInfo.getTransactionStatus());
 		}
 	}
 
@@ -329,7 +329,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 			}
 			if (txInfo.transactionAttribute.rollbackOn(ex)) {
 				try {
-					this.transactionManager.rollback(txInfo.getTransactionStatus());
+					getTransactionManager().rollback(txInfo.getTransactionStatus());
 				}
 				catch (RuntimeException ex2) {
 					logger.error("Application exception overridden by rollback exception", ex);
@@ -344,7 +344,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 				// We don't roll back on this exception.
 				// Will still roll back if TransactionStatus.isRollbackOnly() is true.
 				try {
-					this.transactionManager.commit(txInfo.getTransactionStatus());
+					getTransactionManager().commit(txInfo.getTransactionStatus());
 				}
 				catch (RuntimeException ex2) {
 					logger.error("Application exception overridden by commit exception", ex);
