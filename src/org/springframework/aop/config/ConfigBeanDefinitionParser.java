@@ -19,7 +19,6 @@ package org.springframework.aop.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -463,15 +462,16 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			pointcutDefinition = createPointcutDefinition(expression);
 			pointcutDefinition.setSource(parserContext.extractSource(pointcutElement));
 
-			if (StringUtils.hasText(id)) {
-				parserContext.getRegistry().registerBeanDefinition(id, pointcutDefinition);
+			String pointcutBeanName = id;
+			if (StringUtils.hasText(pointcutBeanName)) {
+				parserContext.getRegistry().registerBeanDefinition(pointcutBeanName, pointcutDefinition);
 			}
 			else {
-				parserContext.getReaderContext().registerWithGeneratedName(pointcutDefinition);
+				pointcutBeanName = parserContext.getReaderContext().registerWithGeneratedName(pointcutDefinition);
 			}
 
 			parserContext.registerComponent(
-					new PointcutComponentDefinition(id, pointcutDefinition, expression));
+					new PointcutComponentDefinition(pointcutBeanName, pointcutDefinition, expression));
 		}
 		finally {
 			this.parseState.pop();
@@ -495,8 +495,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		else if (element.hasAttribute(POINTCUT)) {
 			// Create a pointcut for the anonymous pc and register it.
-			Attr pointcutAttr = element.getAttributeNode(POINTCUT);
-			AbstractBeanDefinition pointcutDefinition = createPointcutDefinition(pointcutAttr.getValue());
+			String expression = element.getAttribute(POINTCUT);
+			AbstractBeanDefinition pointcutDefinition = createPointcutDefinition(expression);
 			pointcutDefinition.setSource(parserContext.extractSource(element));
 			return parserContext.getReaderContext().registerWithGeneratedName(pointcutDefinition);
 		}
