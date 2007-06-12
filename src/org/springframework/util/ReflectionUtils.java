@@ -240,13 +240,13 @@ public abstract class ReflectionUtils {
 	 * Leaf class methods are included first.
 	 */
 	public static Method[] getAllDeclaredMethods(Class leafClass) throws IllegalArgumentException {
-		final List l = new LinkedList();
+		final List list = new LinkedList();
 		doWithMethods(leafClass, new MethodCallback() {
 			public void doWith(Method m) {
-				l.add(m);
+				list.add(m);
 			}
 		});
-		return (Method[]) l.toArray(new Method[l.size()]);
+		return (Method[]) list.toArray(new Method[list.size()]);
 	}
 
 

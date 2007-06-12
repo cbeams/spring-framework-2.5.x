@@ -480,16 +480,17 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * @return the exception to be thrown to the caller
 	 */
 	private Exception convertCorbaAccessException(SystemException ex, Method method) {
-		if (!Arrays.asList(method.getExceptionTypes()).contains(RemoteException.class)) {
-			if (isConnectFailure(ex)) {
-				return new RemoteConnectFailureException("Cannot connect to CORBA service [" + getJndiName() + "]", ex);
-			}
-			else {
-				return new RemoteAccessException("Cannot access CORBA service [" + getJndiName() + "]", ex);
-			}
+		if (Arrays.asList(method.getExceptionTypes()).contains(RemoteException.class)) {
+			// A traditional RMI service: simply propagate CORBA exceptions as-is.
+			return ex;
 		}
 		else {
-			return ex;
+			if (isConnectFailure(ex)) {
+				return new RemoteConnectFailureException("Could not connect to CORBA service [" + getJndiName() + "]", ex);
+			}
+			else {
+				return new RemoteAccessException("Could not access CORBA service [" + getJndiName() + "]", ex);
+			}
 		}
 	}
 
