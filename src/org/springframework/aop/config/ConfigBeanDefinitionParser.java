@@ -181,7 +181,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		try {
 			this.parseState.push(new AdvisorEntry(id));
 			String pointcutBeanName = parsePointcutProperty(advisorElement, parserContext);
-			advisorDef.getPropertyValues().addPropertyValue(POINTCUT, new RuntimeBeanReference(pointcutBeanName));
+			if (pointcutBeanName != null) {
+				advisorDef.getPropertyValues().addPropertyValue(POINTCUT, new RuntimeBeanReference(pointcutBeanName));
+			}
 			String advisorBeanName = id;
 			if (StringUtils.hasText(advisorBeanName)) {
 				parserContext.getRegistry().registerBeanDefinition(advisorBeanName, advisorDef);
@@ -189,9 +191,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			else {
 				advisorBeanName = parserContext.getReaderContext().registerWithGeneratedName(advisorDef);
 			}
-			boolean pointcutRef = advisorElement.hasAttribute(POINTCUT_REF);
 			if (pointcutBeanName != null) {
-				// no errors so fire event
+				// No errors, so fire event...
+				boolean pointcutRef = advisorElement.hasAttribute(POINTCUT_REF);
 				fireAdvisorEvent(advisorBeanName, pointcutBeanName, advisorDef, parserContext, pointcutRef);
 			}
 		}
@@ -503,6 +505,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			if (!StringUtils.hasText(pointcutRef)) {
 				parserContext.getReaderContext().error(
 						"'pointcut-ref' attribute contains empty value.", element, this.parseState.snapshot());
+				return null;
 			}
 			return pointcutRef;
 		}
