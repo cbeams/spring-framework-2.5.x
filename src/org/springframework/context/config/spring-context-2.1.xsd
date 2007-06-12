@@ -151,6 +151,7 @@
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
 					<xsd:enumeration value="annotation"/>
+                    <xsd:enumeration value="aspectj"/>
 					<xsd:enumeration value="assignable"/>
 					<xsd:enumeration value="regex"/>
 				</xsd:restriction>

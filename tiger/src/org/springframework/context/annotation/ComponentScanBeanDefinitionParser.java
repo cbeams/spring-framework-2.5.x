@@ -38,6 +38,7 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.AspectJTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
@@ -196,6 +197,9 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			}
 			else if ("regex".equals(filterType)) {
 				return new RegexPatternTypeFilter(Pattern.compile(expression));
+			}
+			else if ("aspectj".equals(filterType)) {
+				return new AspectJTypeFilter(expression);
 			}
 			else {
 				throw new IllegalArgumentException("Unsupported filter type: " + filterType);
