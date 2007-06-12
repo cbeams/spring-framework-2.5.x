@@ -13,6 +13,7 @@ Package org.springframework.aop
 * ReflectiveMethodInvocation always uses a shared user attribute Map in clones (for proper binding of multiple advices)
 * fixed MethodInvocationProceedingJoinPoint to properly pass modified arguments (via proceed) to subsequent aspects
 * fixed AbstractAspectJAdvisorFactory to ignore 'code-style' aspect classes that have been compiled by ajc
+* fixed ConfigBeanDefinitionParser to properly handle empty pointcut bean names in a tooling environment
 
 Package org.springframework.beans
 * CustomBooleanEditor trims text before comparing against true/false Strings
@@ -26,6 +27,7 @@ Package org.springframework.beans
 Package org.springframework.core
 * fixed BridgeMethodResolver to properly detect a method that substitutes a type parameter with an array type
 * fixed BridgeMethodResolver to detect type variables in interface hierarchies with different type variable names
+* OverridingClassLoader (and hence SimpleThrowawayClassLoader) exclude classes from the "sun." package
 * PathMatchingResourcePatternResolver explicitly closes freshly obtained JarFile objects, to allow for hot redeployment
 
 Package org.springframework.jdbc
@@ -35,6 +37,12 @@ Package org.springframework.jdbc
 
 Package org.springframework.jmx
 * MBeanExporter does not insist of a minimum of 1 bean exposed anymore, also accepting no beans to export in the context
+
+Package org.springframework.remoting
+* RmiClientInterceptor and JaxRpcClientInterceptor propagate any kind of declared RemoteException as-is
+
+Package org.springframework.scripting
+* updated JRuby support for JRuby 1.0 compatibility (still compatible with JRuby 0.9.8 / 0.9.9 as well)
 
 Package org.springframework.web
 * CookieLocaleResolver checks specified "defaultLocale" in case of a setLocale call with null argument
