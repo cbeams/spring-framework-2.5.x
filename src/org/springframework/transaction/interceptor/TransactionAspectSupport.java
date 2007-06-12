@@ -30,8 +30,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Superclass for transactional aspects, such as the AOP Alliance-compatible
- * <code>TransactionInterceptor</code>, or an AspectJ aspect.
+ * Base class for transactional aspects, such as the AOP Alliance
+ * {@link TransactionInterceptor} or an AspectJ aspect.
  *
  * <p>This enables the underlying Spring transaction infrastructure to be used
  * easily to implement an aspect for any aspect system.
