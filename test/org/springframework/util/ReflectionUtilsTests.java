@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +60,7 @@ public class ReflectionUtilsTests extends TestCase {
 
 		Method illegalExMethod = B.class.getDeclaredMethod("bar", new Class[] {String.class});
 		assertTrue(ReflectionUtils.declaresException(illegalExMethod, IllegalArgumentException.class));
-		assertTrue(ReflectionUtils.declaresException(illegalExMethod, IllegalFormatException.class));
+		assertTrue(ReflectionUtils.declaresException(illegalExMethod, NumberFormatException.class));
 		assertFalse(ReflectionUtils.declaresException(illegalExMethod, IllegalStateException.class));
 		assertFalse(ReflectionUtils.declaresException(illegalExMethod, Exception.class));
 	}
