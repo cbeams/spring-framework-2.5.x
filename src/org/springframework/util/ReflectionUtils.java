@@ -265,7 +265,22 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Invoke the given callback on all private fields in the target class,
+	 * Get all declared methods on the leaf class and all superclasses.
+	 * Leaf class methods are included first.
+	 */
+	public static Method[] getAllDeclaredMethods(Class leafClass) throws IllegalArgumentException {
+		final List list = new LinkedList();
+		doWithMethods(leafClass, new MethodCallback() {
+			public void doWith(Method m) {
+				list.add(m);
+			}
+		});
+		return (Method[]) list.toArray(new Method[list.size()]);
+	}
+
+
+	/**
+	 * Invoke the given callback on all fields in the target class,
 	 * going up the class hierarchy to get all declared fields.
 	 * @param targetClass the target class to analyze
 	 * @param fc the callback to invoke for each field
@@ -275,7 +290,7 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Invoke the given callback on all private fields in the target class,
+	 * Invoke the given callback on all fields in the target class,
 	 * going up the class hierarchy to get all declared fields.
 	 * @param targetClass the target class to analyze
 	 * @param fc the callback to invoke for each field
@@ -304,20 +319,6 @@ public abstract class ReflectionUtils {
 			targetClass = targetClass.getSuperclass();
 		}
 		while (targetClass != null && targetClass != Object.class);
-	}
-
-	/**
-	 * Get all declared methods on the leaf class and all superclasses.
-	 * Leaf class methods are included first.
-	 */
-	public static Method[] getAllDeclaredMethods(Class leafClass) throws IllegalArgumentException {
-		final List list = new LinkedList();
-		doWithMethods(leafClass, new MethodCallback() {
-			public void doWith(Method m) {
-				list.add(m);
-			}
-		});
-		return (Method[]) list.toArray(new Method[list.size()]);
 	}
 
 	/**

@@ -474,22 +474,22 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	/**
 	 * Convert the given CORBA SystemException that happened during remote access
 	 * to Spring's RemoteAccessException if the method signature does not declare
-	 * RemoteException. Else, return the original SystemException.
+	 * RemoteException. Else, return the SystemException wrapped in a RemoteException.
 	 * @param method the invoked method
 	 * @param ex the RemoteException that happened
 	 * @return the exception to be thrown to the caller
 	 */
 	private Exception convertCorbaAccessException(SystemException ex, Method method) {
-		String message = "Could not connect to CORBA service [" + getJndiName() + "]";
 		if (ReflectionUtils.declaresException(method, RemoteException.class)) {
-			return new RemoteException(message, ex);
+			// A traditional RMI service: wrap CORBA exceptions in standard RemoteExceptions.
+			return new RemoteException("Failed to access CORBA service [" + getJndiName() + "]", ex);
 		}
 		else {
 			if (isConnectFailure(ex)) {
-				return new RemoteConnectFailureException(message, ex);
+				return new RemoteConnectFailureException("Could not connect to CORBA service [" + getJndiName() + "]", ex);
 			}
 			else {
-				return new RemoteAccessException(message, ex);
+				return new RemoteAccessException("Could not access CORBA service [" + getJndiName() + "]", ex);
 			}
 		}
 	}
