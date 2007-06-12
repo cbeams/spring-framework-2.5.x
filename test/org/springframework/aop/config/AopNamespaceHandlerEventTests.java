@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		assertEquals("aop:config", compositeDef.getName());
 
 		ComponentDefinition[] nestedComponentDefs = compositeDef.getNestedComponents();
-		assertEquals("Incorrect number of inner components", 2, nestedComponentDefs.length);
+		assertEquals("Incorrect number of inner components", 3, nestedComponentDefs.length);
 		AdvisorComponentDefinition acd = null;
 		for (int i = 0; i < nestedComponentDefs.length; i++) {
 			ComponentDefinition componentDefinition = nestedComponentDefs[i];
