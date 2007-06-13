@@ -3,16 +3,24 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M3 (2007-06-18)
+Changes in version 2.1 M3 (2007-06-29)
 --------------------------------------
 
 Package org.springframework.aop
 * added support for "bean(name)" element in AspectJ pointcut expressions
-* fixed ConfigBeanDefinitionParser to properly handle empty pointcut bean names in a tooling environment
+* the pointcut element's "id" attribute is required as of the 2.1 version of the AOP namespace (spring-aop-2.1.xsd)
+* fixed ConfigBeanDefinitionParser to properly handle empty pointcut/advice bean names in a tooling environment
 * ConfigBeanDefinitionParser creates PointcutComponentDefinition for pointcut attribute as well
+
+Package org.springframework.context
+* AspectJWeavingEnabler implements Ordered, exposing HIGHEST_PRECEDENCE (executing before other factory post-processors)
 
 Package org.springframework.core
 * OverridingClassLoader (and hence SimpleThrowawayClassLoader) exclude classes from the "sun." package
+
+Package org.springframework.orm
+* added "prepareTransaction" method to JpaDialect interface, for preparing a JTA-joining EntityManager
+* HibernateJpaDialect switches FlushMode to MANUAL in case of a read-only transaction even for JTA
 
 Package org.springframework.remoting
 * RmiClientInterceptor and JaxRpcClientInterceptor propagate any kind of declared RemoteException as-is
@@ -20,6 +28,12 @@ Package org.springframework.remoting
 
 Package org.springframework.scripting
 * updated JRuby support for JRuby 1.0 compatibility (still compatible with JRuby 0.9.8 / 0.9.9 as well)
+
+Package org.springframework.util
+* DefaultPropertiesPersister detects and uses JDK 1.6's "Properties.load/store" variants with Reader/Writer argument
+
+Package org.springframework.transaction
+* refined TransactionAspectSupport to allow for overriding the "getTransactionManager()" method in subclasses
 
 
 Changes in version 2.1 M2 (2007-05-31)
