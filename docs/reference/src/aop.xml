@@ -1442,12 +1442,10 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
     <section id="aop-schema-pointcuts">
       <title>Declaring a pointcut</title>
 
-	<para>
-	A pointcut can be declared inside an aspect, in which case it is visible only within
-	that aspect. A pointcut can also be declared directly inside an &lt;aop:config&gt;
-	element, enabling the pointcut definition to be shared across several aspects and 
+	<para>A named pointcut can be declared inside an &lt;aop:config&gt; element,
+	enabling the pointcut definition to be shared across several aspects and
 	advisors.</para>
-	
+
 	<para>A pointcut representing the execution of any business service in the service
 	layer could be defined as follows:</para>
 
