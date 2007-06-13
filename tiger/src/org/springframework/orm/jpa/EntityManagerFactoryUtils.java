@@ -175,9 +175,10 @@ public abstract class EntityManagerFactoryUtils {
 				catch (TransactionRequiredException ex) {
 					logger.debug("Could not join JTA transaction because none was active", ex);
 				}
-				emHolder.setSynchronizedWithTransaction(true);
+				Object transactionData = prepareTransaction(emHolder.getEntityManager(), emf);
 				TransactionSynchronizationManager.registerSynchronization(
-						new EntityManagerSynchronization(emHolder, emf, false));
+						new EntityManagerSynchronization(emHolder, emf, transactionData, false));
+				emHolder.setSynchronizedWithTransaction(true);
 			}
 			return emHolder.getEntityManager();
 		}
@@ -197,13 +198,52 @@ public abstract class EntityManagerFactoryUtils {
 			// Use same EntityManager for further JPA actions within the transaction.
 			// Thread object will get removed by synchronization at transaction completion.
 			emHolder = new EntityManagerHolder(em);
-			emHolder.setSynchronizedWithTransaction(true);
+			Object transactionData = prepareTransaction(em, emf);
 			TransactionSynchronizationManager.registerSynchronization(
-					new EntityManagerSynchronization(emHolder, emf, true));
+					new EntityManagerSynchronization(emHolder, emf, transactionData, true));
+			emHolder.setSynchronizedWithTransaction(true);
 			TransactionSynchronizationManager.bindResource(emf, emHolder);
 		}
 
 		return em;
+	}
+
+	/**
+	 * Prepare a transaction on the given EntityManager, if possible.
+	 * @param em the EntityManager to prepare
+	 * @param emf the EntityManagerFactory that the EntityManager has been created with
+	 * @return an arbitrary object that holds transaction data, if any
+	 * (to be passed into cleanupTransaction)
+	 * @see JpaDialect#prepareTransaction
+	 */
+	private static Object prepareTransaction(EntityManager em, EntityManagerFactory emf) {
+		if (emf instanceof EntityManagerFactoryInfo) {
+			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
+			JpaDialect jpaDialect = emfInfo.getJpaDialect();
+			if (jpaDialect != null) {
+				return jpaDialect.prepareTransaction(em,
+						TransactionSynchronizationManager.isCurrentTransactionReadOnly(),
+						TransactionSynchronizationManager.getCurrentTransactionName());
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Prepare a transaction on the given EntityManager, if possible.
+	 * @param transactionData arbitrary object that holds transaction data, if any
+	 * (as returned by prepareTransaction)
+	 * @param emf the EntityManagerFactory that the EntityManager has been created with
+	 * @see JpaDialect#cleanupTransaction
+	 */
+	private static void cleanupTransaction(Object transactionData, EntityManagerFactory emf) {
+		if (emf instanceof EntityManagerFactoryInfo) {
+			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
+			JpaDialect jpaDialect = emfInfo.getJpaDialect();
+			if (jpaDialect != null) {
+				jpaDialect.cleanupTransaction(transactionData);
+			}
+		}
 	}
 
 	/**
@@ -272,14 +312,17 @@ public abstract class EntityManagerFactoryUtils {
 
 		private final EntityManagerFactory entityManagerFactory;
 
+		private final Object transactionData;
+
 		private final boolean newEntityManager;
 
 		private boolean holderActive = true;
 
 		public EntityManagerSynchronization(
-				EntityManagerHolder emHolder, EntityManagerFactory emf, boolean newEntityManager) {
+				EntityManagerHolder emHolder, EntityManagerFactory emf, Object transactionData, boolean newEntityManager) {
 			this.entityManagerHolder = emHolder;
 			this.entityManagerFactory = emf;
+			this.transactionData = transactionData;
 			this.newEntityManager = newEntityManager;
 		}
 
@@ -308,10 +351,13 @@ public abstract class EntityManagerFactoryUtils {
 		}
 
 		public void afterCompletion(int status) {
-			if (!this.newEntityManager && status != STATUS_COMMITTED) {
-				// Clear all pending inserts/updates/deletes in the EntityManager.
-				// Necessary for pre-bound EntityManagers, to avoid inconsistent state.
-				this.entityManagerHolder.getEntityManager().clear();
+			if (!this.newEntityManager) {
+				if (status != STATUS_COMMITTED) {
+					// Clear all pending inserts/updates/deletes in the EntityManager.
+					// Necessary for pre-bound EntityManagers, to avoid inconsistent state.
+					this.entityManagerHolder.getEntityManager().clear();
+				}
+				cleanupTransaction(this.transactionData, this.entityManagerFactory);
 			}
 			this.entityManagerHolder.setSynchronizedWithTransaction(false);
 		}

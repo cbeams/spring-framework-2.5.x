@@ -249,7 +249,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	public void afterPropertiesSet() {
 		if (getEntityManagerFactory() == null) {
-			throw new IllegalArgumentException("entityManagerFactory is required");
+			throw new IllegalArgumentException("Property 'entityManagerFactory' is required");
 		}
 		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) getEntityManagerFactory();

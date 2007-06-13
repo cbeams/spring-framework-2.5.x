@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,12 @@ public class DefaultJpaDialect implements JpaDialect {
 					"use a special JpaDialect for your JPA implementation");
 		}
 		entityManager.getTransaction().begin();
+		return null;
+	}
+
+	public Object prepareTransaction(EntityManager entityManager, boolean readOnly, String name)
+			throws PersistenceException {
+
 		return null;
 	}
 

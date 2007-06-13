@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,14 +102,15 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	/**
 	 * Begin the given JPA transaction, applying the semantics specified by the
 	 * given Spring transaction definition (in particular, an isolation level
-	 * and a timeout). Invoked by JpaTransactionManager on transaction begin.
+	 * and a timeout). Called by JpaTransactionManager on transaction begin.
 	 * <p>An implementation can configure the JPA Transaction object and then
 	 * invoke <code>begin</code>, or invoke a special begin method that takes,
 	 * for example, an isolation level.
-	 * <p>An implementation can also apply read-only flag and isolation level to the
-	 * underlying JDBC Connection before beginning the transaction. In that case,
-	 * a transaction data object can be returned that holds the previous isolation
-	 * level (and possibly other data), to be reset in <code>cleanupTransaction</code>.
+	 * <p>An implementation can apply the read-only flag as flush mode. In that case,
+	 * a transaction data object can be returned that holds the previous flush mode
+	 * (and possibly other data), to be reset in <code>cleanupTransaction</code>.
+	 * It may also apply the read-only flag and isolation level to the underlying
+	 * JDBC Connection before beginning the transaction.
 	 * <p>Implementations can also use the Spring transaction name, as exposed by the
 	 * passed-in TransactionDefinition, to optimize for specific data access use cases
 	 * (effectively using the current transaction name as use case identifier).
@@ -128,13 +129,33 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 			throws PersistenceException, SQLException, TransactionException;
 
 	/**
-	 * Clean up the transaction via the given transaction data.
-	 * Invoked by JpaTransactionManager on transaction cleanup.
+	 * Prepare a JPA transaction, applying the specified semantics. Called by
+	 * EntityManagerFactoryUtils when enlisting an EntityManager in a JTA transaction.
+	 * <p>An implementation can apply the read-only flag as flush mode. In that case,
+	 * a transaction data object can be returned that holds the previous flush mode
+	 * (and possibly other data), to be reset in <code>cleanupTransaction</code>.
+	 * <p>Implementations can also use the Spring transaction name, as exposed by the
+	 * passed-in TransactionDefinition, to optimize for specific data access use cases
+	 * (effectively using the current transaction name as use case identifier).
+	 * @param entityManager the EntityManager to begin a JPA transaction on
+	 * @param readOnly whether the transaction is supposed to be read-only
+	 * @param name the name of the transaction (if any)
+	 * @return an arbitrary object that holds transaction data, if any
+	 * (to be passed into cleanupTransaction)
+	 * @throws javax.persistence.PersistenceException if thrown by JPA methods
+	 * @see #cleanupTransaction
+	 */
+	Object prepareTransaction(EntityManager entityManager, boolean readOnly, String name)
+			throws PersistenceException;
+
+	/**
+	 * Clean up the transaction via the given transaction data. Called by
+	 * JpaTransactionManager and EntityManagerFactoryUtils on transaction cleanup.
 	 * <p>An implementation can, for example, reset read-only flag and
 	 * isolation level of the underlying JDBC Connection. Furthermore,
 	 * an exposed data access use case can be reset here.
 	 * @param transactionData arbitrary object that holds transaction data, if any
-	 * (as returned by beginTransaction)
+	 * (as returned by beginTransaction or prepareTransaction)
 	 * @see #beginTransaction
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#resetConnectionAfterTransaction
 	 */
@@ -160,6 +181,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * Connection. If some other object is needed in <code>releaseJdbcConnection</code>,
 	 * an implementation should use a special handle that references that other object.
 	 * @param entityManager the current JPA EntityManager
+	 * @param readOnly whether the Connection is only needed for read-only purposes
 	 * @return a handle for the JDBC Connection, to be passed into
 	 * <code>releaseJdbcConnection</code>, or <code>null</code>
 	 * if no JDBC Connection can be retrieved
