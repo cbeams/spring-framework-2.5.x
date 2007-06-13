@@ -206,7 +206,7 @@
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
-		<xsd:attribute name="id" type="xsd:ID">
+		<xsd:attribute name="id" type="xsd:ID" use="required">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	The unique identifier for a pointcut.
