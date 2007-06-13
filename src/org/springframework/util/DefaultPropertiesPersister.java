@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,24 +23,24 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
 
 /**
- * Default implementation of the PropertiesPersister interface.
+ * Default implementation of the {@link PropertiesPersister} interface.
  * Follows the native parsing of <code>java.util.Properties</code>.
  *
  * <p>Allows for reading from any Reader and writing to any Writer, for example
  * to specify a charset for a properties file. This is a capability that standard
- * <code>java.util.Properties</code> unfortunately lacks: You can only load files
- * using the ISO-8859-1 charset there.
+ * <code>java.util.Properties</code> unfortunately lacks up until JDK 1.5:
+ * You can only load files using the ISO-8859-1 charset there.
  *
  * <p>Loading from and storing to a stream delegates to <code>Properties.load</code>
  * and <code>Properties.store</code>, respectively, to be fully compatible with
- * the Unicode conversion as implemented by the JDK Properties class.
+ * the Unicode conversion as implemented by the JDK Properties class. On JDK 1.6,
+ * <code>Properties.load/store</code> will also be used for readers/writers,
+ * effectively turning this class into a plain backwards compatibility adapter.
  *
  * <p>The persistence code that works with Reader/Writer follows the JDK's parsing
  * strategy but does not implement Unicode conversion, because the Reader/Writer
@@ -66,11 +66,31 @@ import java.util.Properties;
  */
 public class DefaultPropertiesPersister implements PropertiesPersister {
 
+	// Determine whether Properties.load(Reader) is available (on JDK 1.6+)
+	private static final boolean loadFromReaderAvailable =
+			ClassUtils.hasMethod(Properties.class, "load", new Class[] {Reader.class});
+
+	// Determine whether Properties.store(Writer, String) is available (on JDK 1.6+)
+	private static final boolean storeToWriterAvailable =
+			ClassUtils.hasMethod(Properties.class, "store", new Class[] {Writer.class, String.class});
+
+
 	public void load(Properties props, InputStream is) throws IOException {
 		props.load(is);
 	}
 
 	public void load(Properties props, Reader reader) throws IOException {
+		if (loadFromReaderAvailable) {
+			// On JDK 1.6+
+			props.load(reader);
+		}
+		else {
+			// Fall back to manual parsing.
+			doLoad(props, reader);
+		}
+	}
+
+	protected void doLoad(Properties props, Reader reader) throws IOException {
 		BufferedReader in = new BufferedReader(reader);
 		while (true) {
 			String line = in.readLine();
@@ -142,6 +162,17 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 	}
 
 	public void store(Properties props, Writer writer, String header) throws IOException {
+		if (storeToWriterAvailable) {
+			// On JDK 1.6+
+			props.store(writer, header);
+		}
+		else {
+			// Fall back to manual parsing.
+			doStore(props, writer, header);
+		}
+	}
+
+	protected void doStore(Properties props, Writer writer, String header) throws IOException {
 		BufferedWriter out = new BufferedWriter(writer);
 		if (header != null) {
 			out.write("#" + header);
@@ -197,64 +228,29 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 
 
 	public void loadFromXml(Properties props, InputStream is) throws IOException {
-		// props.loadFromXML(is);
 		try {
-			Method loadMethod = props.getClass().getMethod("loadFromXML", new Class[] {InputStream.class});
-			loadMethod.invoke(props, new Object[] {is});
+			props.loadFromXML(is);
 		}
-		catch (NoSuchMethodException ex) {
-			throw new IOException("Cannot load properties XML file - not running on JDK 1.5+: " + ex.getMessage());
-		}
-		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof IOException) {
-				throw (IOException) ex.getTargetException();
-			}
-			ReflectionUtils.handleInvocationTargetException(ex);
-		}
-		catch (Exception ex) {
-			ReflectionUtils.handleReflectionException(ex);
+		catch (NoSuchMethodError err) {
+			throw new IOException("Cannot load properties XML file - not running on JDK 1.5+: " + err.getMessage());
 		}
 	}
 
 	public void storeToXml(Properties props, OutputStream os, String header) throws IOException {
-		// props.storeToXML(os, header);
 		try {
-			Method storeMethod = props.getClass().getMethod(
-					"storeToXML", new Class[] {OutputStream.class, String.class});
-			storeMethod.invoke(props, new Object[] {os, header});
+			props.storeToXML(os, header);
 		}
-		catch (NoSuchMethodException ex) {
-			throw new IOException("Cannot store properties XML file - not running on JDK 1.5+: " + ex.getMessage());
-		}
-		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof IOException) {
-				throw (IOException) ex.getTargetException();
-			}
-			ReflectionUtils.handleInvocationTargetException(ex);
-		}
-		catch (Exception ex) {
-			ReflectionUtils.handleReflectionException(ex);
+		catch (NoSuchMethodError err) {
+			throw new IOException("Cannot store properties XML file - not running on JDK 1.5+: " + err.getMessage());
 		}
 	}
 
 	public void storeToXml(Properties props, OutputStream os, String header, String encoding) throws IOException {
-		// props.storeToXML(os, header, encoding);
 		try {
-			Method storeMethod = props.getClass().getMethod(
-					"storeToXML", new Class[] {OutputStream.class, String.class, String.class});
-			storeMethod.invoke(props, new Object[] {os, header, encoding});
+			props.storeToXML(os, header, encoding);
 		}
-		catch (NoSuchMethodException ex) {
-			throw new IOException("Cannot store properties XML file - not running on JDK 1.5+: " + ex.getMessage());
-		}
-		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof IOException) {
-				throw (IOException) ex.getTargetException();
-			}
-			ReflectionUtils.handleInvocationTargetException(ex);
-		}
-		catch (Exception ex) {
-			ReflectionUtils.handleReflectionException(ex);
+		catch (NoSuchMethodError err) {
+			throw new IOException("Cannot store properties XML file - not running on JDK 1.5+: " + err.getMessage());
 		}
 	}
 
