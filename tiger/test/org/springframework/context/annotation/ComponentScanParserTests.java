@@ -28,7 +28,7 @@ public class ComponentScanParserTests extends TestCase {
 
 	public void testAspectJTypeFilter() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
-				"org/springframework/context/annotation/aspectJTypeFilterTests.xml");
+				"org/springframework/context/annotation/aspectjTypeFilterTests.xml");
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
 		assertFalse(context.containsBean("scopedProxyTestBean"));
