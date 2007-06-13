@@ -21,6 +21,7 @@ import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.core.Ordered;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.util.Assert;
 
@@ -33,13 +34,17 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.1
  */
-public class AspectJWeavingEnabler implements BeanFactoryPostProcessor, LoadTimeWeaverAware {
+public class AspectJWeavingEnabler implements BeanFactoryPostProcessor, LoadTimeWeaverAware, Ordered {
 
 	private LoadTimeWeaver loadTimeWeaver;
 
 
 	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
 		this.loadTimeWeaver = loadTimeWeaver;
+	}
+
+	public int getOrder() {
+		return HIGHEST_PRECEDENCE;
 	}
 
 
