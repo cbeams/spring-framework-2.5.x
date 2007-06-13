@@ -93,22 +93,38 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	}
 
 	/**
-	 * Set the basename, as defined in the {@link java.util.ResourceBundle}
-	 * documentation.
+	 * Set a single basename, following {@link java.util.ResourceBundle} conventions.
+	 * The default is "views".
 	 * <p><code>ResourceBundle</code> supports different suffixes. For example,
 	 * a base name of "views" might map to <code>ResourceBundle</code> files
 	 * "views", "views_en_au" and "views_de".
-	 * <p>The default is "views".
+	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
+	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
+	 * This means that "test.theme" is effectively equivalent to "test/theme",
+	 * just like it is for programmatic <code>java.util.ResourceBundle</code> usage.
 	 * @see #setBasenames
-	 * @see java.util.ResourceBundle
+	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
 	public void setBasename(String basename) {
 		setBasenames(new String[] {basename});
 	}
 
 	/**
-	 * Set multiple <code>ResourceBundle</code> basenames.
+	 * Set an array of basenames, each following {@link java.util.ResourceBundle}
+	 * conventions. The default is a single basename "views".
+	 * <p><code>ResourceBundle</code> supports different suffixes. For example,
+	 * a base name of "views" might map to <code>ResourceBundle</code> files
+	 * "views", "views_en_au" and "views_de".
+	 * <p>The associated resource bundles will be checked sequentially
+	 * when resolving a message code. Note that message definitions in a
+	 * <i>previous</i> resource bundle will override ones in a later bundle,
+	 * due to the sequential lookup.
+	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
+	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
+	 * This means that "test.theme" is effectively equivalent to "test/theme",
+	 * just like it is for programmatic <code>java.util.ResourceBundle</code> usage.
 	 * @see #setBasename
+	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
 	public void setBasenames(String[] basenames) {
 		this.basenames = basenames;

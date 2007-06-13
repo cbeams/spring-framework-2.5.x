@@ -90,9 +90,12 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * <p>Messages will normally be held in the "/lib" or "/classes" directory of
 	 * a web application's WAR structure. They can also be held in jar files on
 	 * the class path.
-	 * @param basename the single basename
+	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
+	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
+	 * This means that "test.theme" is effectively equivalent to "test/theme",
+	 * just like it is for programmatic <code>java.util.ResourceBundle</code> usage.
 	 * @see #setBasenames
-	 * @see java.util.ResourceBundle
+	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
 	public void setBasename(String basename) {
 		setBasenames(new String[] {basename});
@@ -107,9 +110,12 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * when resolving a message code. Note that message definitions in a
 	 * <i>previous</i> resource bundle will override ones in a later bundle,
 	 * due to the sequential lookup.
-	 * @param basenames an array of basenames
+	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
+	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
+	 * This means that "test.theme" is effectively equivalent to "test/theme",
+	 * just like it is for programmatic <code>java.util.ResourceBundle</code> usage.
 	 * @see #setBasename
-	 * @see java.util.ResourceBundle
+	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
 	public void setBasenames(String[] basenames)  {
 		if (basenames != null) {

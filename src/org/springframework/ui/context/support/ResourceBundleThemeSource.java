@@ -31,9 +31,10 @@ import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 
 /**
- * ThemeSource implementation that looks up an individual ResourceBundle
- * per theme. The theme name gets interpreted as ResourceBundle basename,
- * supporting a common basename prefix for all themes.
+ * {@link ThemeSource} implementation that looks up an individual
+ * {@link java.util.ResourceBundle} per theme. The theme name gets
+ * interpreted as ResourceBundle basename, supporting a common
+ * basename prefix for all themes.
  *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
@@ -74,8 +75,11 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 	 * Set the prefix that gets applied to the ResourceBundle basenames,
 	 * i.e. the theme names.
 	 * E.g.: basenamePrefix="test.", themeName="theme" -> basename="test.theme".
-	 * @param basenamePrefix prefix for ResourceBundle basenames
-	 * @see java.util.ResourceBundle
+	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
+	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
+	 * This means that "test.theme" is effectively equivalent to "test/theme",
+	 * just like it is for programmatic <code>java.util.ResourceBundle</code> usage.
+	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
 	public void setBasenamePrefix(String basenamePrefix) {
 		this.basenamePrefix = (basenamePrefix != null ? basenamePrefix : "");
