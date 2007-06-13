@@ -100,7 +100,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 3000);
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
 	}
 
 	public void testAspectsAndAdvisorNotAppliedToPrototypeIsFastEnough() {
@@ -120,7 +120,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 2500);
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 3000);
 	}
 
 	public void testAspectsAndAdvisorNotAppliedToManySingletonsIsFastEnough() {
@@ -139,7 +139,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		ac.refresh();
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Singleton creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 3000);
+		assertTrue("Singleton creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
 	}
 
 	public void testAspectsAndAdvisorAreAppliedEvenIfComingFromParentFactory() {
