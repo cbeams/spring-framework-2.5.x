@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,8 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 		// no tx active
 		assertNull(EntityManagerFactoryUtils.doGetTransactionalEntityManager(factory, null));
 		mockControl.verify();
+
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 	}
 
 	public void testDoGetEntityManagerWithTx() throws Exception {
@@ -86,6 +88,8 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
 		}
+
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 	}
 	
 	public void testTranslatesIllegalStateException() {

@@ -528,15 +528,14 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		try {
 			TransactionSynchronizationManager.bindResource(mockEmf, new EntityManagerHolder(em));
 			assertNotNull(transactionalField.em.getDelegate());
-
 			emfMc.verify();
 			emC.verify();
 		}
-		catch (IllegalStateException e) {
+		finally {
 			TransactionSynchronizationManager.unbindResource(mockEmf);
 		}
 	}
-	
+
 	public void testPropertiesForSharedEntityManager2() {
 		Properties props = new Properties();
 		props.put("foo", "bar");
@@ -566,11 +565,10 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		try {
 			TransactionSynchronizationManager.bindResource(mockEmf, new EntityManagerHolder(em));
 			assertNotNull(transactionalFieldWithProperties.em.getDelegate());
-
 			emfMc.verify();
 			emC.verify();
 		}
-		catch (IllegalStateException e) {
+		finally {
 			TransactionSynchronizationManager.unbindResource(mockEmf);
 		}
 	}

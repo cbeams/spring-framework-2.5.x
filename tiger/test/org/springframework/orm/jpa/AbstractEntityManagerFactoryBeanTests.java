@@ -23,6 +23,8 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 /**
  * Superclass for unit tests for EntityManagerFactory-creating beans.
  * Note: Subclasses must set expectations on the mock EntityManagerFactory.
@@ -52,6 +54,14 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 		assertSame("Successive invocations of getObject() return same object", emfi, demf.getObject());
 		assertSame(emfi, demf.getObject());
 		assertSame(emfi.getNativeEntityManagerFactory(), mockEmf);
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
 
 

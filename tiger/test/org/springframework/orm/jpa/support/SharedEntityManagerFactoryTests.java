@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,11 @@ import javax.persistence.EntityManagerFactory;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class SharedEntityManagerFactoryTests extends TestCase {
 	
@@ -61,6 +64,8 @@ public class SharedEntityManagerFactoryTests extends TestCase {
 		
 		emfMc.verify();
 		emMc.verify();
+
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 	}
 
 }

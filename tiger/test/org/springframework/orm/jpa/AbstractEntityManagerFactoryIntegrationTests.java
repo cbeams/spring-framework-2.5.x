@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa;
 
 import org.springframework.test.jpa.AbstractJpaTests;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * @author Rod Johnson
@@ -60,15 +61,23 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 	protected String[] getConfigLocations() {
 		Provider provider = getProvider();
 		switch (provider) {
-		case HIBERNATE:
-			return HIBERNATE_CONFIG_LOCATIONS;
-		case TOPLINK:
-			return TOPLINK_CONFIG_LOCATIONS;
-		case OPENJPA:
-			return OPENJPA_CONFIG_LOCATIONS;
-		default:
-			throw new IllegalStateException("Unknown provider: " + provider);
+			case HIBERNATE:
+				return HIBERNATE_CONFIG_LOCATIONS;
+			case TOPLINK:
+				return TOPLINK_CONFIG_LOCATIONS;
+			case OPENJPA:
+				return OPENJPA_CONFIG_LOCATIONS;
+			default:
+				throw new IllegalStateException("Unknown provider: " + provider);
 		}
+	}
+
+	@Override
+	protected void onTearDownAfterTransaction() throws Exception {
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
 
 
