@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,7 @@ public interface JdoDialect {
 	 * Connection. If some other object is needed in <code>releaseJdbcConnection</code>,
 	 * an implementation should use a special handle that references that other object.
 	 * @param pm the current JDO PersistenceManager
+	 * @param readOnly whether the Connection is only needed for read-only purposes
 	 * @return a handle for the JDBC Connection, to be passed into
 	 * <code>releaseJdbcConnection</code>, or <code>null</code>
 	 * if no JDBC Connection can be retrieved
