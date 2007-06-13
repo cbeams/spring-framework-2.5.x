@@ -52,9 +52,9 @@ import org.springframework.util.xml.DomUtils;
  * {@link BeanDefinitionParser} for the <code>&lt;aop:config&gt;</code> tag.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @author Adrian Colyer
  * @author Rod Johnson
- * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.0
  */
@@ -228,13 +228,20 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition advisorDefinition = new RootBeanDefinition(DefaultBeanFactoryPointcutAdvisor.class);
 		advisorDefinition.setSource(parserContext.extractSource(advisorElement));
 
+		String adviceRef = advisorElement.getAttribute(ADVICE_REF);
+		if (!StringUtils.hasText(adviceRef)) {
+			parserContext.getReaderContext().error(
+					"'advice-ref' attribute contains empty value.", advisorElement, this.parseState.snapshot());
+		}
+		else {
+			advisorDefinition.getPropertyValues().addPropertyValue(
+					ADVICE_BEAN_NAME, new RuntimeBeanNameReference(adviceRef));
+		}
+
 		if (advisorElement.hasAttribute(ORDER_PROPERTY)) {
 			advisorDefinition.getPropertyValues().addPropertyValue(
 					ORDER_PROPERTY, advisorElement.getAttribute(ORDER_PROPERTY));
 		}
-
-		advisorDefinition.getPropertyValues().addPropertyValue(
-				ADVICE_BEAN_NAME, new RuntimeBeanNameReference(advisorElement.getAttribute(ADVICE_REF)));
 
 		return advisorDefinition;
 	}
