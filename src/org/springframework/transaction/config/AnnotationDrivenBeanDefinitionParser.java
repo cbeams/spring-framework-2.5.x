@@ -47,10 +47,6 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 	 */
 	private static final String TRANSACTION_INTERCEPTOR = "transactionInterceptor";
 
-	/** The '<code>proxy-target-class</code>' attribute */
-	private static final String PROXY_TARGET_CLASS = "proxy-target-class";
-
-	/** The '<code>order</code>' property/attribute */
 	private static final String ORDER = "order";
 
 
@@ -61,11 +57,6 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 	 */
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext, element);
-
-		boolean proxyTargetClass = Boolean.valueOf(element.getAttribute(PROXY_TARGET_CLASS)).booleanValue();
-		if (proxyTargetClass) {
-			AopNamespaceUtils.forceAutoProxyCreatorToUseClassProxying(parserContext.getRegistry());
-		}
 
 		String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
 		Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();

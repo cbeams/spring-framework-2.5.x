@@ -19,6 +19,8 @@ package org.springframework.aop.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Element;
+
 import org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -45,6 +47,8 @@ import org.springframework.util.ClassUtils;
  * @since 2.0
  */
 public abstract class AopNamespaceUtils {
+
+	public static final String PROXY_TARGET_CLASS_ATTRIBUTE = "proxy-target-class";
 
 	/**
 	 * The bean name of the internally managed auto-proxy creator.
@@ -115,6 +119,14 @@ public abstract class AopNamespaceUtils {
 			BeanComponentDefinition componentDefinition =
 					new BeanComponentDefinition(beanDefinition, AUTO_PROXY_CREATOR_BEAN_NAME);
 			parserContext.registerComponent(componentDefinition);
+		}
+
+		if (sourceElement instanceof Element) {
+			boolean proxyTargetClass = Boolean.valueOf(
+					((Element) sourceElement).getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE)).booleanValue();
+			if (proxyTargetClass) {
+				forceAutoProxyCreatorToUseClassProxying(registry);
+			}
 		}
 	}
 
