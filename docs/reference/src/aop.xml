@@ -1099,7 +1099,7 @@ public void audit(Auditable auditable) {
 	   	
 	   	<section id="aop-ataspectj-advice-proceeding-with-the-call">
 	   	    <title>Proceeding with arguments</title>
-	   	    <para>We remarked earlier that we would describe how to write a proceed call 
+	   	    <para>We remarked earlier that we would describe how to write a proceed call
             <emphasis>with arguments</emphasis> that works consistently across Spring AOP 
             and AspectJ. The solution is simply to ensure that the advice signature binds
             each of the method parameters in order. For example:</para>
@@ -1127,61 +1127,21 @@ throws Throwable {
 	   	(so given two pieces of before advice, the one with highest precedence runs
 	   	first). "On the way out" from a join point, the highest precedence advice runs last
 	   	(so given two pieces of after advice, the one with the highest precedence will run
-	   	second). For advice defined within the same aspect, precedence is established
-	   	by declaration order. Given the aspect:</para>
+	   	second).</para>
 
-		<programlisting><![CDATA[@Aspect
-public class AspectWithMultipleAdviceDeclarations {
+	    <para>When two pieces of advice defined in <emphasis>different</emphasis> aspects both need
+	    to run at the same join point, unless you specify otherwise the order of execution is
+	    undefined. You can control the order of execution by specifying precedence. This is done in
+	    the normal Spring way by either implementing the <interfacename>org.springframework.core.Ordered</interfacename>
+	    interface in the aspect class or annotating it with the <interfacename>Order</interfacename> annotation.
+	    Given two aspects, the aspect returning the lower value from
+	    <literal>Ordered.getValue()</literal> (or the annotation value) has the higher precedence.</para>
 
-  @Pointcut("execution(* foo(..))")
-  public void fooExecution() {}
-  
-  @Before("fooExecution()")
-  public void doBeforeOne() {
-    ]]><lineannotation>// ...</lineannotation><![CDATA[
-  }
-  
-  @Before("fooExecution()")
-  public void doBeforeTwo() {
-    ]]><lineannotation>// ...</lineannotation><![CDATA[
-  }
-  
-  @AfterReturning("fooExecution()")
-  public void doAfterOne() {
-    ]]><lineannotation>// ...</lineannotation><![CDATA[
-  }
-
-  @AfterReturning("fooExecution()")
-  public void doAfterTwo() {
-    ]]><lineannotation>// ...</lineannotation><![CDATA[
-  }
-
-}]]></programlisting>	
-
-	    <para>then for any execution of a method named foo, the <literal>doBeforeOne</literal>,
-	    <literal>doBeforeTwo</literal>, <literal>doAfterOne</literal>, and <literal>doAfterTwo</literal>
-	    advice methods all need to run. The precedence rules are such that the advice will execute
-	    in declaration order. In this case the execution trace would be:</para>
-
-		<programlisting><![CDATA[doBeforeOne
-doBeforeTwo
-foo
-doAfterOne
-doAfterTwo
-]]></programlisting>
-
-        <para>In other words doBeforeOne has precedence over doBeforeTwo, because it was defined
-        before doBeforeTwo, and doAfterTwo has precedence over doAfterOne because it was defined
-        after doAfterOne. It's easiest just to remember that advice runs in declaration order ;) - 
-        see the AspectJ Programming Guide for full details.</para>
-
-        <para>When two pieces of advice defined in <emphasis>different</emphasis> aspects both need
-        to run at the same join point, unless you specify otherwise the order of execution is 
-        undefined. You can control the order of execution by specifying precedence. This is done in 
-        the normal Spring way by either implementing the <interfacename>org.springframework.core.Ordered</interfacename>
-        interface in the aspect class or annotating it with the <interfacename>Order</interfacename> annotation.
-        Given two aspects, the aspect returning the lower value from
-        <literal>Ordered.getValue()</literal> (or the annotation value) has the higher precedence.</para>
+	    <para>When two pieces of advice defined in <emphasis>the same</emphasis> aspect both need
+	    to run at the same join point, the ordering is undefined (since there is no way to retrieve
+	    the declaration order via reflection for javac-compiled classes). Consider collapsing
+	    such advice methods into one advice method per joinpoint in each aspect class, or refactor
+	    the pieces of advice into separate aspect classes - which can be ordered at the aspect level.</para>
 
 	   </section>
 
@@ -1445,7 +1405,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 	<para>A named pointcut can be declared inside an &lt;aop:config&gt; element,
 	enabling the pointcut definition to be shared across several aspects and
 	advisors.</para>
-	
+
 	<para>A pointcut representing the execution of any business service in the service
 	layer could be defined as follows:</para>
 
