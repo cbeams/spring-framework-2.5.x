@@ -110,7 +110,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		assertEquals("aop:config", compositeDef.getName());
 
 		ComponentDefinition[] nestedComponentDefs = compositeDef.getNestedComponents();
-		assertEquals("Incorrect number of inner components", 3, nestedComponentDefs.length);
+		assertEquals("Incorrect number of inner components", 2, nestedComponentDefs.length);
 		AdvisorComponentDefinition acd = null;
 		for (int i = 0; i < nestedComponentDefs.length; i++) {
 			ComponentDefinition componentDefinition = nestedComponentDefs[i];
