@@ -584,20 +584,21 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
             Add for example the following configuration in your <filename>'xfire-servlet.xml'</filename>
             file:</para>
             <programlisting><![CDATA[<beans>
-  <bean name="/Echo" class="org.codehaus.xfire.spring.XFireExporter">
-    <property name="service" ref="echo">
+
+  <bean name="/Echo" class="org.codehaus.xfire.spring.remoting.XFireExporter">
     <property name="serviceInterface" value="org.codehaus.xfire.spring.Echo"/>
-    <property name="serviceBuilder" ref="xfire.serviceBuilder"/>
-    ]]><lineannotation>&lt;!-- the XFire bean is wired up in the xfire.xml file you've linked in earlier --&gt;</lineannotation><![CDATA[
+    <property name="serviceBean">
+    	<bean class="org.codehaus.xfire.spring.EchoImpl"/>
+    </property>
+    ]]><lineannotation>&lt;!-- the XFire bean is defined in the <filename>xfire.xml</filename> file --&gt;</lineannotation><![CDATA[
     <property name="xfire" ref="xfire"/>
   </bean>
 
-  <bean id="echo" class="org.codehaus.xfire.spring.EchoImpl"/>
 </beans>]]></programlisting>
             <para>XFire handles the rest. It introspects your service interface and generates a WSDL from it.
-            Parts of this documentation have been taken from the XFire site. For more detailed information
-            on XFire Spring integration, have a look at the
-            <ulink url="http://docs.codehaus.org/display/XFIRE/Spring">docs.codehaus.org/display/XFIRE/Spring</ulink>.</para>
+            Parts of this documentation have been taken from the XFire site; for more detailed information
+            on XFire Spring integration, navigate to
+            <ulink url="http://docs.codehaus.org/display/XFIRE/Spring">http://docs.codehaus.org/display/XFIRE/Spring</ulink>.</para>
         </section>
 	</section>
 	
