@@ -93,10 +93,6 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 
 		public static AbstractBeanDefinition configureAutoProxyCreator(Element element, ParserContext parserContext) {
 			AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext, element);
-			boolean proxyTargetClass = Boolean.valueOf(element.getAttribute("proxy-target-class")).booleanValue();
-			if (proxyTargetClass) {
-				AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(parserContext.getRegistry());
-			}
 
 			// Create the TransactionInterceptor definition.
 			RootBeanDefinition interceptorDefinition = new RootBeanDefinition(TransactionInterceptor.class);

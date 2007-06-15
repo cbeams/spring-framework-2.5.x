@@ -25,8 +25,6 @@ import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.core.Conventions;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link BeanDefinitionParser} for the <code>aspectj-autoproxy</code> tag,
@@ -39,11 +37,6 @@ import org.springframework.util.StringUtils;
  */
 class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
-	private static final String PROXY_TARGET_ATTRIBUTE = "proxy-target-class";
-
-	private static final String PROXY_TARGET_CLASS = Conventions.attributeNameToPropertyName(PROXY_TARGET_ATTRIBUTE);
-
-
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		AopNamespaceUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(parserContext, element);
 		extendBeanDefinition(element, parserContext);
@@ -53,10 +46,6 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 	private void extendBeanDefinition(Element element, ParserContext parserContext) {
 		BeanDefinition beanDef =
 				parserContext.getRegistry().getBeanDefinition(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
-		String proxyTargetClass = element.getAttribute(PROXY_TARGET_ATTRIBUTE);
-		if (StringUtils.hasText(proxyTargetClass)) {
-			beanDef.getPropertyValues().addPropertyValue(PROXY_TARGET_CLASS, proxyTargetClass);
-		}
 		if (element.hasChildNodes()) {
 			addIncludePatterns(element, parserContext, beanDef);
 		}
