@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.6 (2007-06-15)
+Changes in version 2.0.6 (2007-06-18)
 -------------------------------------
 
 General
@@ -13,7 +13,9 @@ Package org.springframework.aop
 * ReflectiveMethodInvocation always uses a shared user attribute Map in clones (for proper binding of multiple advices)
 * fixed MethodInvocationProceedingJoinPoint to properly pass modified arguments (via proceed) to subsequent aspects
 * fixed AbstractAspectJAdvisorFactory to ignore 'code-style' aspect classes that have been compiled by ajc
-* fixed ConfigBeanDefinitionParser to properly handle empty pointcut bean names in a tooling environment
+* "aop:aspectj-autoproxy" XML configuration tag detects all aspect beans in case of empty XML body content as well
+* ConfigBeanDefinitionParser turns "pointcut" attribute into inner bean definition (instead of ref to an anonymous bean)
+* fixed ConfigBeanDefinitionParser to properly handle empty pointcut/advice bean names in a tooling environment
 
 Package org.springframework.beans
 * CustomBooleanEditor trims text before comparing against true/false Strings
@@ -43,6 +45,9 @@ Package org.springframework.remoting
 
 Package org.springframework.scripting
 * updated JRuby support for JRuby 1.0 compatibility (still compatible with JRuby 0.9.8 / 0.9.9 as well)
+
+Package org.springframework.transaction
+* refined TransactionAspectSupport to allow for overriding the "getTransactionManager()" method in subclasses
 
 Package org.springframework.web
 * CookieLocaleResolver checks specified "defaultLocale" in case of a setLocale call with null argument
