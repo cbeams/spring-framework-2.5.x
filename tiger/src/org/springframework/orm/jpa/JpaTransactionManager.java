@@ -41,8 +41,8 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.ResourceTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -249,7 +249,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	public void afterPropertiesSet() {
 		if (getEntityManagerFactory() == null) {
-			throw new IllegalArgumentException("entityManagerFactory is required");
+			throw new IllegalArgumentException("Property 'entityManagerFactory' is required");
 		}
 		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) getEntityManagerFactory();
