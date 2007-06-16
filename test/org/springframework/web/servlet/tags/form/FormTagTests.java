@@ -23,10 +23,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.AssertThrows;
 
 /**
+ * Unit tests for the {@link FormTag} class.
+ *
  * @author Rob Harrop
  * @author Rick Evans
  */
-public class FormTagTests extends AbstractHtmlElementTagTests {
+public final class FormTagTests extends AbstractHtmlElementTagTests {
 	
 	private static final String REQUEST_URI = "/my/form";
 
@@ -65,6 +67,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String onreset = "onreset";
 		String cssClass = "myClass";
 		String cssStyle = "myStyle";
+		String acceptCharset = "iso-8859-1";
 
 		this.tag.setName(name);
 		this.tag.setCssClass(cssClass);
@@ -75,6 +78,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setMethod(method);
 		this.tag.setOnsubmit(onsubmit);
 		this.tag.setOnreset(onreset);
+		this.tag.setAcceptCharset(acceptCharset);
 
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, result);
@@ -99,6 +103,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(output, "onreset", onreset);
 		assertContainsAttribute(output, "id", commandName);
 		assertContainsAttribute(output, "name", name);
+		assertContainsAttribute(output, FormTag.ACCEPT_CHARSET_ATTRIBUTE, acceptCharset);
 	}
 
 	public void testWithActionFromRequest() throws Exception {

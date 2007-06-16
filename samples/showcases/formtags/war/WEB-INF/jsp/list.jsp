@@ -20,11 +20,11 @@
   <div id="main">
 
     <div id="topmenu">
-      <a href="http://www.interface21.com">Interface21</a><a href="http://www.springframework.org">Spring home</a><a href="http://forum.springframework.org">Spring forum</a><a href="http://www.dzone.com">Dzone.com</a><a href="http://www.infoq.com">Infoq.com</a>
+      <a href="http://www.interface21.com/">Interface21</a><a href="http://www.springframework.org/">Spring home</a><a href="http://forum.springframework.org/">Spring forum</a><a href="http://www.infoq.com/">Infoq.com</a>
     </div>
 
     <div id="header">
-      <span class="title">spring<span class="darktitle">2.0</span> form tags</span><br/>
+      <span class="title">Spring<span class="darktitle">2.0</span> form tags</span><br/>
     </div>
 
 

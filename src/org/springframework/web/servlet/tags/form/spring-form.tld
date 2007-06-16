@@ -161,6 +161,12 @@
 			<rtexprvalue>true</rtexprvalue>
 			<description>HTML Event Attribute</description>
 		</attribute>
+		<attribute>
+			<name>acceptCharset</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Specifies the list of character encodings for input data that is accepted by the server processing this form. The value is a space- and/or comma-delimited list of charset values. The client must interpret this list as an exclusive-or list, i.e., the server is able to accept any single character encoding per entity received.</description>
+		</attribute>
 	</tag>
 
 	<!-- <form:input/> tag -->

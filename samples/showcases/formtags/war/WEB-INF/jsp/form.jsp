@@ -18,7 +18,7 @@
   <div id="main">
 
     <div id="topmenu">
-      <a href="http://www.interface21.com">Interface21</a><a href="http://www.springframework.org">Spring home</a><a href="http://forum.springframework.org">Spring forum</a><a href="http://www.dzone.com">Dzone.com</a><a href="http://www.infoq.com">Infoq.com</a>
+      <a href="http://www.interface21.com/">Interface21</a><a href="http://www.springframework.org/">Spring home</a><a href="http://forum.springframework.org/">Spring forum</a><a href="http://www.infoq.com/">Infoq.com</a>
     </div>
 
     <div id="header">
@@ -28,7 +28,7 @@
     <div id="content">
 	
 	   <h1>Edit apprentice magician <c:out value="${command.firstName}"/> <c:out value="${command.lastName}" /></h1>
-       <form:form>
+	   <form:form acceptCharset="UTF-8">
            <form:errors path="*" cssClass="errorBox" />
 
            <div class="first">

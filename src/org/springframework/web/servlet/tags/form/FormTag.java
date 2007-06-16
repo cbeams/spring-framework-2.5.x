@@ -68,6 +68,8 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	public static final String ENCTYPE_ATTRIBUTE = "enctype";
 
+	public static final String ACCEPT_CHARSET_ATTRIBUTE = "accept-charset";
+
 
 	private TagWriter tagWriter;
 
@@ -84,6 +86,8 @@ public class FormTag extends AbstractHtmlElementTag {
 	private String onsubmit;
 
 	private String onreset;
+
+	private String acceptCharset;
 
 	/** Caching a previous nested path, so that it may be reset */
 	private String previousNestedPath;
@@ -162,6 +166,22 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
+	 * Set the value of the '<code>acceptCharset</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setAcceptCharset(String acceptCharset) {
+		this.acceptCharset = acceptCharset;
+	}
+
+	/**
+	 * Get the value of the '<code>acceptCharset</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getAcceptCharset() {
+		return this.acceptCharset;
+	}
+
+	/**
 	 * Set the value of the '<code>onsubmit</code>' attribute.
 	 * May be a runtime expression.
 	 */
@@ -209,6 +229,7 @@ public class FormTag extends AbstractHtmlElementTag {
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, getEnctype());
 		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, getOnsubmit());
 		writeOptionalAttribute(tagWriter, ONRESET_ATTRIBUTE, getOnreset());
+		writeOptionalAttribute(tagWriter, ACCEPT_CHARSET_ATTRIBUTE, getAcceptCharset());
 
 		this.tagWriter.forceBlock();
 
@@ -340,5 +361,4 @@ public class FormTag extends AbstractHtmlElementTag {
 	public void setCssErrorClass(String cssErrorClass) {
 		throw new UnsupportedOperationException("The 'cssErrorClass' attribute is not supported for forms");
 	}
-
 }
