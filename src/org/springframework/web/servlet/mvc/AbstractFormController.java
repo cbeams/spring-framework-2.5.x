@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import org.springframework.web.servlet.ModelAndView;
  * can be represented and submitted to the controller, by using the notion of
  * a <code>java.beans.PropertyEditor</code>. For more information on that
  * subject, see the workflow of this controller and the explanation of the
- * {@link BaseCommandController BaseCommandController}.</p>
+ * {@link BaseCommandController}.</p>
  *
  * <p><b><a name="workflow">Workflow
  * (<a href="BaseCommandController.html#workflow">and that defined by superclass</a>):</b><br>
@@ -194,34 +194,50 @@ public abstract class AbstractFormController extends BaseCommandController {
 	}
 
 	/**
-	 * Set if request parameters should be bound to the form object
-	 * in case of a non-submitting request, i.e. a new form.
+	 * Set whether request parameters should be bound to the form object
+	 * in case of a non-submitting request, that is, a new form.
 	 */
 	public final void setBindOnNewForm(boolean bindOnNewForm) {
 		this.bindOnNewForm = bindOnNewForm;
 	}
 
 	/**
-	 * Return if request parameters should be bound in case of a new form.
+	 * Return <code>true</code> if request parameters should be bound in case of a new form.
 	 */
 	public final boolean isBindOnNewForm() {
 		return bindOnNewForm;
 	}
 
 	/**
-	 * Activate resp. deactivate session form mode. In session form mode,
+	 * Activate/deactivate session form mode. In session form mode,
 	 * the form is stored in the session to keep the form object instance
 	 * between requests, instead of creating a new one on each request.
 	 * <p>This is necessary for either wizard-style controllers that populate a
 	 * single form object from multiple pages, or forms that populate a persistent
 	 * object that needs to be identical to allow for tracking changes.
+	 * <p>Please note that the {@link AbstractFormController} class (and all
+	 * subclasses of it unless stated to the contrary) do <i>not</i> support
+	 * the notion of a conversation. This is important in the context of this
+	 * property, because it means that there is only <i>one</i> form per session:
+	 * this means that if session form mode is activated and a user opens up
+	 * say two tabs in their browser and attempts to edit two distinct objects
+	 * using the same form, then the <i>shared</i> session state can potentially
+	 * (and most probably will) be overwritten by the last tab to be opened,
+	 * which can lead to errors when either of the forms in each is finally
+	 * submitted.
+	 * <p>If you need to have per-form, per-session state management (that is,
+	 * stateful web conversations), the recommendation is to use
+	 * <a href="http://www.springframework.org/webflow">Spring WebFlow</a>,
+	 * which has full support for conversations and has a much more flexible
+	 * usage model overall.
+	 * @param sessionForm <code>true</code> if session form mode is to be activated
 	 */
 	public final void setSessionForm(boolean sessionForm) {
 		this.sessionForm = sessionForm;
 	}
 
 	/**
-	 * Return if session form mode is activated.
+	 * Return <code>true</code> if session form mode is activated.
 	 */
 	public final boolean isSessionForm() {
 		return sessionForm;
@@ -632,7 +648,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 *   return showNewForm(request, response);
 	 * }</pre>
 	 * You can also show a new form but with special errors registered on it:
-	 * <pre>
+	 * <pre class="code">
 	 * protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response) throws Exception {
 	 *   BindException errors = getErrorsForNewForm(request);
 	 *   errors.reject("duplicateFormSubmission", "Duplicate form submission");
