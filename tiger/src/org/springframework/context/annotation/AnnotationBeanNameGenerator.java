@@ -30,17 +30,18 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link org.springframework.beans.factory.support.BeanNameGenerator} implementation
- * for bean classes annotated with the @Component annotation.
+ * {@link org.springframework.beans.factory.support.BeanNameGenerator}
+ * implementation for bean classes annotated with the
+ * {@link org.springframework.stereotype.Component @Component} annotation.
  *
- * <p>If the annotation's value doesn't indicate a bean name, an appropriate name
- * will be built based on the short name of the class (with the first letter
- * lower-cased). For example:
+ * <p>If the annotation's value doesn't indicate a bean name, an appropriate
+ * name will be built based on the short name of the class (with the first
+ * letter lower-cased). For example:
  *
  * <p><code>com.xyz.FooServiceImpl -&gt; fooServiceImpl</code>
  *
  * <p>Note that generated bean names have to be unique, hence the actual
- * runtime names may have a "#1", "#2", etc suffix appended if the raw
+ * runtime names may have a "#1", "#2", etc. suffix appended if the generated
  * names were not unique already.
  *
  * @author Juergen Hoeller
@@ -54,7 +55,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 		if (definition instanceof AnnotatedBeanDefinition) {
 			String beanName = determineBeanNameFromAnnotation((AnnotatedBeanDefinition) definition);
-			if (beanName != null) {
+			if (StringUtils.hasText(beanName)) {
 				// Explicit bean name found.
 				return beanName;
 			}
@@ -71,10 +72,11 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		return id;
 	}
 
+
 	/**
 	 * Derive a bean name from one of the annotations on the class.
-	 * @param annotatedDef the annotation-aware bean definiton
-	 * @return the bean name, or <code>null</code> if none found
+	 * @param annotatedDef the annotation-aware bean definition
+	 * @return the bean name, or <code>null</code> if none is found
 	 */
 	protected String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
 		Set<String> types = annotatedDef.getMetadata().getAnnotationTypes();
@@ -112,6 +114,9 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * Derive a default bean name from the given bean definition.
 	 * <p>The default implementation simply builds a decapitalized version
 	 * of the short class name: e.g. "mypackage.MyJdbcDao" -> "myJdbcDao".
+	 * <p>Note that inner classes will thus have names of the form
+	 * "outerClassName.innerClassName", which because of the period in the
+	 * name may be an issue if you are autowiring by name.
 	 * @param definition the bean definition to build a bean name for
 	 * @return the default bean name (never <code>null</code>)
 	 */

@@ -21,10 +21,14 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.util.Assert;
 
 /**
- * An implementation of {@link ScopeMetadataResolver} that checks for
- * a {@link Scope} annotation on the bean class.
+ * A {@link ScopeMetadataResolver} implementation that (by default) checks for
+ * the presence of the {@link Scope} annotation on the bean class.
+ *
+ * <p>The exact type of annotation that is checked for is configurable via the
+ * {@link #setScopeAnnotationType(Class)} property.
  * 
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -36,18 +40,36 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 	private Class<? extends Annotation> scopeAnnotationType = Scope.class;
 	
 	private ScopedProxyMode scopedProxyMode;
-	
-	
+
+
+	/**
+	 * Create a new instance of the <code>AnnotationScopeMetadataResolver</code> class.
+	 * @see #AnnotationScopeMetadataResolver(ScopedProxyMode)
+	 * @see ScopedProxyMode#NO
+	 */
 	public AnnotationScopeMetadataResolver() {
 		this(ScopedProxyMode.NO);
 	}
-	
+
+	/**
+	 * Create a new instance of the <code>AnnotationScopeMetadataResolver</code> class.
+	 * @param scopedProxyMode the desired scoped-proxy-mode; must not be <code>null</code>
+	 * @throws IllegalArgumentException if the supplied <code>scopedProxyMode</code> is <code>null</code>.
+	 */
 	public AnnotationScopeMetadataResolver(ScopedProxyMode scopedProxyMode) {
+		Assert.notNull(scopedProxyMode, "'scopedProxyMode' cannot be null.");
 		this.scopedProxyMode = scopedProxyMode;
 	}
 
 
+	/**
+	 * Set the type of annotation that is checked for by this
+	 * {@link AnnotationScopeMetadataResolver}.
+	 * @param scopeAnnotationType the target annotation type; must not be <code>null</code>
+	 * @throws IllegalArgumentException if the supplied <code>scopeAnnotationType</code> is <code>null</code>.
+	 */
 	public void setScopeAnnotationType(Class<? extends Annotation> scopeAnnotationType) {
+		Assert.notNull(scopeAnnotationType, "'scopeAnnotationType' cannot be null.");
 		this.scopeAnnotationType = scopeAnnotationType;
 	}
 	
