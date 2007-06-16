@@ -26,6 +26,9 @@ import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
  * Indicates the name of a scope to use for instances of the annotated class.
+ *
+ * <p>In this context, scope means the lifecycle of an instance, such as
+ * '<code>singleton</code>', '<code>prototype</code>', and so forth.
  * 
  * @author Mark Fisher
  * @since 2.1
@@ -35,6 +38,10 @@ import org.springframework.beans.factory.config.BeanDefinition;
 @Documented
 public @interface Scope {
 
+	/**
+	 * Specifies the scope to use for instances of the annotated class.
+	 * @return the desired scope
+	 */
 	String value() default BeanDefinition.SCOPE_SINGLETON;
 	
 }
