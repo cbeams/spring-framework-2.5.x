@@ -151,15 +151,17 @@
 			application. Typically you will have bean definitions for your service layer
 			objects, your data access objects (DAOs), presentation objects such as Struts
 			<interfacename>Action</interfacename> instances, infrastructure objects such as
-			Hibernate <interfacename>SessionFactory</interfacename> instances, JMS
-			<interfacename>Queue</interfacename> references, etc. (the possibilities are of
-			course endless, and are limited only by the scope and complexity of your application).
-			(Typically one does not configure fine-grained domain objects in the container.)</para>
+			Hibernate <interfacename>SessionFactories</interfacename>, JMS
+			<interfacename>Queues</interfacename>, and so forth. Typically one does not
+			configure fine-grained domain objects in the container, because it is usually ones
+			DAOs and business logic that is responsible for creating domain objects and/or loading
+			them from a database.</para>
 			<para>Find below an example of the basic structure of XML-based configuration metadata.</para>
 			<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
   <bean id="..." class="...">
     ]]><lineannotation>&lt;!-- collaborators and configuration for this bean go here --&gt;</lineannotation><![CDATA[
@@ -1509,7 +1511,8 @@ support=support@somecompany.co.uk]]></programlisting>
 	            	<para><programlisting><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
     
     <bean name="classic" class="com.mycompany.ExampleBean">
         <property name="email" value="foo@bar.com/>
@@ -1531,7 +1534,8 @@ support=support@somecompany.co.uk]]></programlisting>
 					<programlisting><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
     
     <bean name="john-classic" class="com.mycompany.Person">
         <property name="name" value="John Doe"/>
@@ -3539,16 +3543,16 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
     <section id="context-introduction">
         <title>The <interfacename>ApplicationContext</interfacename></title>
         <para>While the <literal>beans</literal> package provides basic
-        functionality for managing and manipulating beans, often in a programmatic
-        way, the <literal>context</literal> package adds
-        <literal><ulink url="http://www.springframework.org/docs/api/org/springframework/context/ApplicationContext.html">ApplicationContext</ulink></literal>,
+        functionality for managing and manipulating beans, including in a programmatic
+        way, the <literal>context</literal> package adds the
+        <ulink url="http://www.springframework.org/docs/api/org/springframework/context/ApplicationContext.html"><interfacename>ApplicationContext</interfacename></ulink> interface,
         which enhances <interfacename>BeanFactory</interfacename> functionality in a more
         <emphasis>framework-oriented style</emphasis>. Many users will use
         <interfacename>ApplicationContext</interfacename> in a completely declarative fashion,
         not even having to create it manually, but instead relying on support classes such as
-        <classname>ContextLoader</classname> to automatically start an <interfacename>ApplicationContext</interfacename> as part of the
-        normal startup process of a J2EE web-app. Of course, it is still possible
-        to programmatically create an ApplicationContext.</para>
+        <classname>ContextLoader</classname> to automatically instantiate an <interfacename>ApplicationContext</interfacename> as part of the
+        normal startup process of a J2EE web-app. (Of course, it is still possible
+        to create an <interfacename>ApplicationContext</interfacename> programmatically.)</para>
         <para>The basis for the context package is the
         <interfacename>ApplicationContext</interfacename> interface, located in the
         <literal>org.springframework.context</literal> package. Deriving from the
@@ -3559,25 +3563,25 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
         <itemizedlist>
                 <listitem>
                     <para><interfacename>MessageSource</interfacename>, providing access to
-                    messages in i18n-style</para>
+                    messages in i18n-style.</para>
                 </listitem>
                 <listitem>
-                    <para><emphasis>Access to resources</emphasis>, such as URLs and files</para>
+                    <para><emphasis>Access to resources</emphasis>, such as URLs and files.</para>
                 </listitem>
                 <listitem>
                     <para><emphasis>Event propagation</emphasis> to beans implementing
-                    the <interfacename>ApplicationListener</interfacename> interface</para>
+                    the <interfacename>ApplicationListener</interfacename> interface.</para>
                 </listitem>
                 <listitem>
                     <para><emphasis>Loading of multiple (hierarchical)
                     contexts</emphasis>, allowing each to be focused on one particular
-                    layer, for example the web layer of an application</para>
+                    layer, for example the web layer of an application.</para>
                 </listitem>
             </itemizedlist>
         <para>As the <interfacename>ApplicationContext</interfacename> includes all functionality of the
         <interfacename>BeanFactory</interfacename>, it is generally recommended that it be used over the
-        <interfacename>BeanFactory</interfacename>, except for a few limited situations such as perhaps in an
-        <classname>Applet</classname>, where memory consumption might be critical, and a few extra
+        <interfacename>BeanFactory</interfacename>, except for a few limited situations such as in an
+        <classname>Applet</classname>, where memory consumption might be critical and a few extra
         kilobytes might make a difference. The following sections describe
         functionality that <interfacename>ApplicationContext</interfacename> adds to basic <interfacename>BeanFactory</interfacename>
         capabilities.</para>
@@ -3889,17 +3893,15 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
             <para>A bean deployed into the application context may implement the
 			special marker interface, <interfacename>ResourceLoaderAware</interfacename>, to be
 			automatically called back at initialization time with the application
-			context itself passed in as the <interfacename>ResourceLoader</interfacename>.</para>
-            <para>
-				A bean may also expose properties of type
-				<interfacename>Resource</interfacename>, to be used to access static resources, and
-				expect that they will be injected into it like any other properties. The
-				person deploying the bean may specify those <interfacename>Resource</interfacename>
-				properties as simple String paths, and rely on a special JavaBean
-				<interfacename>PropertyEditor</interfacename> that is automatically registered
-				by the context, to convert those text strings to actual <interfacename>Resource</interfacename>
-				objects.
-			</para>
+			context itself passed in as the <interfacename>ResourceLoader</interfacename>.
+			A bean may also expose properties of type
+			<interfacename>Resource</interfacename>, to be used to access static resources, and
+			expect that they will be injected into it like any other properties. The
+			person deploying the bean may specify those <interfacename>Resource</interfacename>
+			properties as simple String paths, and rely on a special JavaBean
+			<interfacename>PropertyEditor</interfacename> that is automatically registered
+			by the context, to convert those text strings to actual <interfacename>Resource</interfacename>
+			objects.</para>
             <para>The location path or paths supplied to an <interfacename>ApplicationContext</interfacename>
 			constructor are actually resource strings, and in simple form are
 			treated appropriately to the specific context implementation (
@@ -4070,7 +4072,6 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
     public void setMovieFinder(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
-    
 }]]></programlisting>
             <para>The annotation may also be applied to methods with arbitrary names and/or 
             multiple arguments:</para>
@@ -4085,7 +4086,6 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
         this.movieCatalog = movieCatalog;
         this.customerPreferenceDao = customerPreferenceDao;
     }
-    
 }]]></programlisting>
             <para>The annotation may even be applied on constructors and fields:</para>
             <programlisting><![CDATA[public class MovieRecommender {
@@ -4099,7 +4099,6 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
     public MovieRecommender(CustomerPreferenceDao customerPreferenceDao) {
         this.customerPreferenceDao = customerPreferenceDao;
     }
-    
 }]]></programlisting>
             <para>By default, the autowiring will fail whenever <emphasis>zero</emphasis> 
             candidate beans are available; the default behavior is to treat 
@@ -4114,7 +4113,6 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
     public void setMovieFinder(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
-    
 }]]></programlisting>
             <note>
                 <para>Only <emphasis>one annotated constructor per-class</emphasis> may be marked as
@@ -4139,7 +4137,6 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
     public void setMovieFinder(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
-    
 }]]></programlisting>
             <note>
                 <para>The name provided with the annotation will be resolved as a bean name by the 
@@ -4176,7 +4173,6 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
     public void clearMovieCache() {
         ]]><lineannotation>// clears the movie cache upon destruction...</lineannotation><![CDATA[
     }
-    
 }]]></programlisting>
         </section>
     </section>
@@ -4212,13 +4208,11 @@ public class SimpleMovieLister {
     public void setMovieFinder(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
-    
 }]]></programlisting>
         <programlisting><![CDATA[@Repository
 public class JpaMovieFinder implements MovieFinder {
 
     ]]><lineannotation>// implementation elided for clarity</lineannotation><![CDATA[
-
 }]]></programlisting>
             <para>To autodetect these classes and register the corresponding beans
             requires the inclusion of the following element in XML where 'basePackage' would
@@ -4269,13 +4263,13 @@ public class JpaMovieFinder implements MovieFinder {
                         <row>
                             <entry>annotation</entry>
                             <entry>
-                                <para>org.example.SomeAnnotation</para>
+                                <para><classname>org.example.SomeAnnotation</classname></para>
                             </entry>
                         </row>
                         <row>
                             <entry>assignable</entry>
                             <entry>
-                                <para>org.example.SomeClass</para>
+                                <para><classname>org.example.SomeClass</classname></para>
                             </entry>
                         </row>
                         <row>
@@ -4315,11 +4309,11 @@ public class JpaMovieFinder implements MovieFinder {
             beans were detected, the names would be 'myMovieLister' and 'movieFinderImpl':</para>
             <programlisting><![CDATA[@Component("myMovieLister")
 public class SimpleMovieLister {
-    ...
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
 }]]></programlisting>
         <programlisting><![CDATA[@Repository
 public class MovieFinderImpl implements MovieFinder {
-    ...
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
 }]]></programlisting>
             <note>If you don't want to rely on that default bean-naming strategy, you may provide a custom
             bean-naming strategy. First, implement the 
@@ -4330,7 +4324,7 @@ public class MovieFinderImpl implements MovieFinder {
                
      <context:component-scan base-package="org.example"
                              name-generator="org.example.MyNameGenerator" />
-     
+
 </beans>]]></programlisting>
             </note>
             <para>As a general rule, consider specifying the name with the annotation whenever
@@ -4348,7 +4342,6 @@ public class MovieFinderImpl implements MovieFinder {
 public class MovieFinderImpl implements MovieFinder {
 
     ]]><lineannotation>// ...</lineannotation><![CDATA[
-
 }]]></programlisting>
             <note>If you would like to provide a custom strategy for scope resolution rather
             than relying on the annotation-based approach, implement the 
