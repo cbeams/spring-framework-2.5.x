@@ -31,8 +31,8 @@ import java.lang.annotation.Target;
  * period, then the test is to be considered failed.
  *
  * @author Rod Johnson
- * @see AbstractAnnotationAwareTransactionalTests
  * @since 2.0
+ * @see AbstractAnnotationAwareTransactionalTests
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

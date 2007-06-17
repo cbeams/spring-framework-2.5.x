@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 	 * Return the custom context class.
 	 */
 	public Class getContextClass() {
-		return contextClass;
+		return this.contextClass;
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 	 * Return the explicit context config location, if any.
 	 */
 	public String getContextConfigLocation() {
-		return contextConfigLocation;
+		return this.contextConfigLocation;
 	}
 
 
@@ -262,7 +262,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 	 * Return the Struts ModuleConfig that this PlugIn is associated with.
 	 */
 	public final ModuleConfig getModuleConfig() {
-		return moduleConfig;
+		return this.moduleConfig;
 	}
 
 	/**
@@ -275,18 +275,17 @@ public class ContextLoaderPlugIn implements PlugIn {
 
 	/**
 	 * Initialize and publish the WebApplicationContext for the ActionServlet.
-	 * Delegates to createWebApplicationContext for actual creation.
-	 * <p>Can be overridden in subclasses. Call <code>getActionServlet</code>
-	 * and/or <code>getModuleConfig</code> to access the Struts configuration
+	 * <p>Delegates to {@link #createWebApplicationContext} for actual creation.
+	 * <p>Can be overridden in subclasses. Call <code>getActionServlet()</code>
+	 * and/or <code>getModuleConfig()</code> to access the Struts configuration
 	 * that this PlugIn is associated with.
 	 * @throws org.springframework.beans.BeansException if the context couldn't be initialized
 	 * @throws IllegalStateException if there is already a context for the Struts ActionServlet
-	 * @see #createWebApplicationContext
-	 * @see #getActionServlet
-	 * @see #getServletName
-	 * @see #getServletContext
-	 * @see #getModuleConfig
-	 * @see #getModulePrefix
+	 * @see #getActionServlet()
+	 * @see #getServletName()
+	 * @see #getServletContext()
+	 * @see #getModuleConfig()
+	 * @see #getModulePrefix()
 	 */
 	protected WebApplicationContext initWebApplicationContext() throws BeansException, IllegalStateException {
 		getServletContext().log("Initializing WebApplicationContext for Struts ActionServlet '" +
@@ -311,8 +310,8 @@ public class ContextLoaderPlugIn implements PlugIn {
 
 	/**
 	 * Instantiate the WebApplicationContext for the ActionServlet, either a default
-	 * XmlWebApplicationContext or a custom context class if set. This implementation
-	 * expects custom contexts to implement ConfigurableWebApplicationContext.
+	 * XmlWebApplicationContext or a custom context class if set.
+	 * <p>This implementation expects custom contexts to implement ConfigurableWebApplicationContext.
 	 * Can be overridden in subclasses.
 	 * @throws org.springframework.beans.BeansException if the context couldn't be initialized
 	 * @see #setContextClass
@@ -358,9 +357,9 @@ public class ContextLoaderPlugIn implements PlugIn {
 
 	/**
 	 * Return the ServletContext attribute name for this PlugIn's WebApplicationContext.
-	 * Default implementation returns SERVLET_CONTEXT_PREFIX + module prefix.
+	 * <p>The default implementation returns SERVLET_CONTEXT_PREFIX + module prefix.
 	 * @see #SERVLET_CONTEXT_PREFIX
-	 * @see #getModulePrefix
+	 * @see #getModulePrefix()
 	 */
 	public String getServletContextAttributeName() {
 		return SERVLET_CONTEXT_PREFIX + getModulePrefix();
@@ -383,7 +382,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 
 	/**
 	 * Close the WebApplicationContext of the ActionServlet.
-	 * @see org.springframework.context.ConfigurableApplicationContext#close
+	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
 	public void destroy() {
 		getServletContext().log("Closing WebApplicationContext of Struts ActionServlet '" +
