@@ -1069,11 +1069,12 @@ public class DefaultFooService implements FooService {
             </tip>
             <sidebar>
                 <title>Method visibility and <interfacename>@Transactional</interfacename></title>
-                <para>The <interfacename>@Transactional</interfacename> annotation should only be
-                applied to methods with <emphasis>public</emphasis> visibility. If you do
-                annotate protected, private or package-visible methods with the
+                <para>When using proxies, the <interfacename>@Transactional</interfacename> annotation
+                should only be applied to methods with <emphasis>public</emphasis> visibility.
+                If you do annotate protected, private or package-visible methods with the
                 <interfacename>@Transactional</interfacename> annotation, no error will be raised,
-                but the annotated method will not exhibit the configured transactional settings.</para>
+                but the annotated method will not exhibit the configured transactional settings.
+                Consider the use of AspectJ (see below) if you need to annotate non-public methods.</para>
             </sidebar>
             <para>The <interfacename>@Transactional</interfacename> annotation may be placed
             before an interface definition, a method on an interface, a class definition, or a
@@ -1519,18 +1520,15 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></pr
 	        </note>
 	        
 	        <para>The <interfacename>@Transactional</interfacename> annotation on a class specifies
-	        the default transaction semantics for the execution of any <emphasis>public</emphasis>
-	        method in the class.</para>
+	        the default transaction semantics for the execution of any method in the class.</para>
 	        <para>The <interfacename>@Transactional</interfacename> annotation on a method within
-			the class overrides the default transaction semantics given by the class annotation
-			(if present). Any method may be annotated, regardless of visibility: annotating
-			non-public methods directly is the only way to get transaction demarcation for the
-			execution of such methods.</para>
-            <para>To weave your applications with the <classname>AnnotationTransactionAspect</classname>
-            you must either build your application with AspectJ (see the
-            <ulink url="http://www.eclipse.org/aspectj/doc/ released/devguide/index.html">AspectJ Development Guide</ulink>)
-            or use load-time weaving. See the section entitled <xref linkend="aop-aj-ltw"/> for a
-            discussion of load-time weaving with AspectJ.</para>
+	        the class overrides the default transaction semantics given by the class annotation
+	        (if present). Any method may be annotated, regardless of visibility.</para>
+	        <para>To weave your applications with the <classname>AnnotationTransactionAspect</classname>
+	        you must either build your application with AspectJ (see the
+	        <ulink url="http://www.eclipse.org/aspectj/doc/released/devguide/index.html">AspectJ Development Guide</ulink>)
+	        or use load-time weaving. See the section entitled <xref linkend="aop-aj-ltw"/> for a
+	        discussion of load-time weaving with AspectJ.</para>
         </section>
     </section>
     <section id="transaction-programmatic">
@@ -1547,8 +1545,8 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></pr
         </itemizedlist>
         <para>If you are going to use programmatic transaction management, the Spring
         team generally recommend, namely that of using the <classname>TransactionTemplate</classname>).
-		The second approach is similar to using the JTA <interfacename>UserTransaction</interfacename>
-		API (although exception handling is less cumbersome).</para>
+	      The second approach is similar to using the JTA <interfacename>UserTransaction</interfacename>
+	      API (although exception handling is less cumbersome).</para>
         <section id="tx-prog-template">
             <title>Using the <classname>TransactionTemplate</classname></title>
             <para>The <classname>TransactionTemplate</classname> adopts the same
@@ -1556,8 +1554,8 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager); ]]></pr
             <classname>JdbcTemplate</classname>. It uses a callback approach, to
             free application code from having to do the boilerplate acquisition 
             and release of transactional resources, and results in code that is
-			intention driven, in that the code that is written focuses solely
-			on what the developer wants to do.</para>
+            intention driven, in that the code that is written focuses solely
+            on what the developer wants to do.</para>
 			<note>
 				<para>As you will immediately see in the examples that follow, using
 				the <classname>TransactionTemplate</classname> absolutely
