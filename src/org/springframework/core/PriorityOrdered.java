@@ -24,7 +24,7 @@ package org.springframework.core;
  * <p>This is primarily a special-purpose interface, used for objects
  * where it is particularly important to determine 'prioritized'
  * objects first, without even obtaining the remaining objects.
- * A typical example: Prioritited post-processors in a Spring
+ * A typical example: Prioritized post-processors in a Spring
  * {@link org.springframework.context.ApplicationContext}.
  *
  * @author Juergen Hoeller
