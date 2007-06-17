@@ -1314,11 +1314,11 @@ public class DefaultFooService implements FooService {
         <section id="transaction-declarative-applying-more-than-just-tx-advice">
             <title>Advising transactional operations</title>
             
-            <para>Consider the situation where you have an instance of a class, and
-            you would like to execute <emphasis>both</emphasis> transactional
-            <emphasis>and</emphasis> (to keep things simple) some basic profiling
-            advice. So how do you effect this in the context of using
-            <literal>&lt;tx:annotation-driven/&gt;</literal>?</para>
+            <para>Consider the situation where you would like to execute
+			<emphasis>both</emphasis> transactional <emphasis>and</emphasis>
+			(to keep things simple) some basic profiling advice. Hhow do you
+			effect this in the context of using
+			<literal>&lt;tx:annotation-driven/&gt;</literal>?</para>
             <para>What we want to see when we invoke the <methodname>updateFoo(Foo)</methodname>
             method is:</para>
 
@@ -1346,10 +1346,9 @@ public class DefaultFooService implements FooService {
                 <xref linkend="aop"/> for detailed coverage of the various bits and pieces
                 of the following AOP configuration (and AOP in general).</para>
             </note>
-            <para>Here is the code for a simple profiling aspect. (The
+            <para>Here is the code for a simple profiling aspect. The
             ordering of advice is controlled via the <interfacename>Ordered</interfacename>
-            interface. For full details on advice ordering, see the section entitled
-            <xref linkend="aop-ataspectj-advice-ordering"/>.)</para>
+            interface. For full details on advice ordering, see <xref linkend="aop-ataspectj-advice-ordering"/>.</para>
             <programlisting><![CDATA[package x.y;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -1399,10 +1398,10 @@ public class SimpleProfiler implements Ordered {
     ]]><lineannotation>&lt;!-- this is the aspect --&gt;</lineannotation><![CDATA[
     <bean id="profiler" class="x.y.SimpleProfiler">
         ]]><lineannotation>&lt;!-- execute before the transactional advice (hence the lower order number) --&gt;</lineannotation><![CDATA[
-        <property name="order" value="1"/>
+        <property name="order" ]]><emphasis role="bold">order="1"</emphasis><![CDATA[/>
     </bean>
     
-    <tx:annotation-driven transaction-manager="txManager"/>
+    <tx:annotation-driven transaction-manager="txManager" ]]><emphasis role="bold">order="200"</emphasis><![CDATA[/>
 
     <aop:config>
         ]]><lineannotation>&lt;!-- this advice will execute <emphasis role="bold">around</emphasis> the transactional advice --&gt;</lineannotation><![CDATA[
@@ -1484,7 +1483,7 @@ public class SimpleProfiler implements Ordered {
             <emphasis>before</emphasis> the transactional advice on the way out, then we would
             simply swap the value of the profiling aspect bean's <literal>'order'</literal>
             property such that it was higher than the transactional advice's order value.</para>
-            <para>The configuration of any number of additional aspects is effected in a
+            <para>The configuration of any number of additional aspects is achieved in a
             similar fashion.</para>
         </section>
         <section id="transaction-declarative-aspectj">

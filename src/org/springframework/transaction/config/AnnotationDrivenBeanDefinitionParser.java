@@ -18,7 +18,6 @@ package org.springframework.transaction.config;
 
 import org.w3c.dom.Element;
 
-import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -34,13 +33,15 @@ import org.springframework.transaction.interceptor.TransactionAttributeSourceAdv
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 /**
- * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} implementation that
- * allows users to easily configure all the infrastructure beans required to enable
- * annotation-driven transaction demarcation.
+ * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
+ * implementation that allows users to easily configure all the infrastructure
+ * beans required to enable annotation-driven transaction demarcation.
  *
- * <p>By default, all proxies are created as JDK proxies. This may cause some problems if
- * you are injecting objects as concrete classes rather than interfaces. To overcome this
- * restriction you can set the '<code>proxy-target-class</code>' attribute to '<code>true</code>'.
+ * <p>By default, all proxies are created as JDK proxies. This may cause some
+ * problems if you are injecting objects as concrete classes rather than
+ * interfaces. To overcome this restriction you can set the
+ * '<code>proxy-target-class</code>' attribute to '<code>true</code>', which
+ * will result in class-based proxies being created.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
