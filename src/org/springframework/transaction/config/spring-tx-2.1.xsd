@@ -28,7 +28,7 @@
 	That is, this advice element is where the transactional semantics of
 	any	number of methods are defined (where transactional semantics
 	includes the propagation settings, the isolation level, the rollback
-	rules, etc).
+	rules, and suchlike).
 				]]></xsd:documentation>
 				<xsd:appinfo>
 					<tool:annotation>
