@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,27 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
-* Test annotation to indicate that a test
-* method should be invoked repeatedly.
-* 
-* @author Rod Johnson
-* @since 2.0
-*/
+ * Test-specific annotation to indicate that a test method has to finish
+ * execution in a {@link #millis() specified time period}.
+ *
+ * <p>If the text execution time takes longer than the specified time
+ * period, then the test is to be considered failed.
+ *
+ * @author Rod Johnson
+ * @since 2.0
+ * @see AbstractAnnotationAwareTransactionalTests
+ */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
 public @interface Timed {
-	
+
+	/**
+	 * The maximum amount of time (in milliseconds) that a test execution
+	 * can take without being marked as failed due to taking too long.
+	 * @return said maximum time
+	 */
 	long millis();
 
 }
