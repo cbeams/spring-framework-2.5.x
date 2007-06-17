@@ -326,8 +326,23 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 							getContextConfigLocation(), ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
 		wac.addApplicationListener(this);
+
+		postProcessWebApplicationContext(wac);
 		wac.refresh();
+
 		return wac;
+	}
+
+	/**
+	 * Post-process the given WebApplicationContext before it is refreshed
+	 * and activated as context for this servlet.
+	 * <p>The default implementation is empty. <code>refresh()</code> will
+	 * be called automatically after this method returns.
+	 * @param wac the configured WebApplicationContext (not refreshed yet)
+	 * @see #createWebApplicationContext
+	 * @see ConfigurableWebApplicationContext#refresh()
+	 */
+	protected void postProcessWebApplicationContext(ConfigurableWebApplicationContext wac) {
 	}
 
 	/**
@@ -494,11 +509,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/**
 	 * Determine the username for the given request.
-	 * Default implementation takes the name of the UserPrincipal, if any.
+	 * <p>The default implementation takes the name of the UserPrincipal, if any.
 	 * Can be overridden in subclasses.
 	 * @param request current HTTP request
-	 * @return the username, or <code>null</code> if none
-	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal
+	 * @return the username, or <code>null</code> if none found
+	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
 	 */
 	protected String getUsernameForRequest(HttpServletRequest request) {
 		Principal userPrincipal = request.getUserPrincipal();
@@ -527,8 +542,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
 	public void destroy() {
-		getServletContext().log(
-				"Destroying Spring FrameworkServlet '" + getServletName() + "'");
+		getServletContext().log("Destroying Spring FrameworkServlet '" + getServletName() + "'");
 		if (this.webApplicationContext instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) this.webApplicationContext).close();
 		}

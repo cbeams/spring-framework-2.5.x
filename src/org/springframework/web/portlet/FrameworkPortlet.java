@@ -255,10 +255,11 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	 * have been set. Creates this portlet's ApplicationContext.
 	 */
 	protected final void initPortletBean() throws PortletException, BeansException {
-		long startTime = System.currentTimeMillis();
+		getPortletContext().log("Initializing Spring FrameworkPortlet '" + getPortletName() + "'");
 		if (logger.isInfoEnabled()) {
 			logger.info("FrameworkPortlet '" + getPortletName() + "': initialization started");
 		}
+		long startTime = System.currentTimeMillis();
 
 		try {
 			this.portletApplicationContext = initPortletApplicationContext();
@@ -280,16 +281,13 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	}
 
 	/**
-	 * Initialize and publish the PortletApplicationContext for this portlet.
-	 * Delegates to createPortletApplicationContext for actual creation.
+	 * Initialize and publish the Portlet ApplicationContext for this portlet.
+	 * <p>Delegates to {@link #createPortletApplicationContext} for actual creation.
 	 * Can be overridden in subclasses.
-	 * @return the Portlet ApplicationContext for this portlet
+	 * @return the ApplicationContext for this portlet
 	 * @throws BeansException if the context couldn't be initialized
-	 * @see #createPortletApplicationContext
 	 */
 	protected ApplicationContext initPortletApplicationContext() throws BeansException {
-		getPortletContext().log("Loading PortletApplicationContext for Spring FrameworkPortlet '" + getPortletName() + "'");
-
 		ApplicationContext parent = PortletApplicationContextUtils.getWebApplicationContext(getPortletContext());
 		ApplicationContext pac = createPortletApplicationContext(parent);
 
@@ -304,7 +302,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 			String attName = getPortletContextAttributeName();
 			getPortletContext().setAttribute(attName, pac);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Published PortletApplicationContext of portlet '" + getPortletName() +
+				logger.debug("Published ApplicationContext of portlet '" + getPortletName() +
 						"' as PortletContext attribute with name [" + attName + "]");
 			}
 		}
@@ -312,10 +310,10 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 	}
 
 	/**
-	 * Instantiate the PortletApplicationContext for this portlet, either a default
-	 * XmlPortletApplicationContext or a custom context class if set. This implementation
-	 * expects custom contexts to implement ConfigurablePortletApplicationContext.
-	 * Can be overridden in subclasses.
+	 * Instantiate the Portlet ApplicationContext for this portlet, either a default
+	 * XmlPortletApplicationContext or a custom context class if set.
+	 * <p>This implementation expects custom contexts to implement
+	 * ConfigurablePortletApplicationContext. Can be overridden in subclasses.
 	 * @param parent the parent ApplicationContext to use, or null if none
 	 * @return the Portlet ApplicationContext for this portlet
 	 * @throws BeansException if the context couldn't be initialized
@@ -327,12 +325,12 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Portlet with name '" + getPortletName() +
-					"' will try to create custom PortletApplicationContext context of class '" +
+					"' will try to create custom ApplicationContext context of class '" +
 					getContextClass().getName() + "'" + ", using parent context [" + parent + "]");
 		}
 		if (!ConfigurablePortletApplicationContext.class.isAssignableFrom(getContextClass())) {
 			throw new ApplicationContextException("Fatal initialization error in portlet with name '" + getPortletName() +
-					"': custom PortletApplicationContext class [" + getContextClass().getName() +
+					"': custom ApplicationContext class [" + getContextClass().getName() +
 					"] is not of type ConfigurablePortletApplicationContext");
 		}
 
@@ -347,13 +345,28 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 					ConfigurablePortletApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
 		pac.addApplicationListener(new SourceFilteringListener(pac, this));
+
+		postProcessPortletApplicationContext(pac);
 		pac.refresh();
+
 		return pac;
 	}
 
 	/**
-	 * Return the PortletContext attribute name for this portlets's PortletApplicationContext.
-	 * Default implementation returns PORTLET_CONTEXT_PREFIX + portlet name.
+	 * Post-process the given Portlet ApplicationContext before it is refreshed
+	 * and activated as context for this portlet.
+	 * <p>The default implementation is empty. <code>refresh()</code> will
+	 * be called automatically after this method returns.
+	 * @param pac the configured Portlet ApplicationContext (not refreshed yet)
+	 * @see #createPortletApplicationContext
+	 * @see ConfigurableApplicationContext#refresh()
+	 */
+	protected void postProcessPortletApplicationContext(ConfigurableApplicationContext pac) {
+	}
+
+	/**
+	 * Return the PortletContext attribute name for this portlets's ApplicationContext.
+	 * <p>The default implementation returns PORTLET_CONTEXT_PREFIX + portlet name.
 	 * @see #PORTLET_CONTEXT_PREFIX
 	 * @see #getPortletName
 	 */
@@ -371,8 +384,9 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 
 	/**
 	 * This method will be invoked after any bean properties have been set and
-	 * the PortletApplicationContext has been loaded. The default implementation is empty;
-	 * subclasses may override this method to perform any initialization they require.
+	 * the ApplicationContext has been loaded.
+	 * <p>The default implementation is empty; subclasses may override this method
+	 * to perform any initialization they require.
 	 * @throws PortletException in case of an initialization exception
 	 * @throws BeansException if thrown by ApplicationContext methods
 	 */
@@ -496,18 +510,18 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 
 	/**
 	 * Determine the username for the given request.
-	 * Default implementation first tries the UserPrincipal.
+	 * <p>The default implementation first tries the UserPrincipal.
 	 * If that does not exist, then it checks the USER_INFO map.
 	 * Can be overridden in subclasses.
 	 * @param request current portlet request
-	 * @return the username, or null if none
-	 * @see javax.portlet.PortletRequest#getUserPrincipal
-	 * @see javax.portlet.PortletRequest#getRemoteUser
+	 * @return the username, or <code>null</code> if none found
+	 * @see javax.portlet.PortletRequest#getUserPrincipal()
+	 * @see javax.portlet.PortletRequest#getRemoteUser()
 	 * @see javax.portlet.PortletRequest#USER_INFO
-	 * @see #setUserinfoUsernameAttributes(String[])
+	 * @see #setUserinfoUsernameAttributes
 	 */
 	protected String getUsernameForRequest(PortletRequest request) {
-		// Try the Principal.
+		// Try the principal.
 		Principal userPrincipal = request.getUserPrincipal();
 		if (userPrincipal != null) {
 			return userPrincipal.getName();
@@ -564,12 +578,11 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 
 
 	/**
-	 * Close the PortletApplicationContext of this portlet.
-	 * @see org.springframework.context.ConfigurableApplicationContext#close
+	 * Close the ApplicationContext of this portlet.
+	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
 	public void destroy() {
-		// Close the portlet application context of this portlet.
-		getPortletContext().log("Closing PortletApplicationContext of Spring FrameworkPortlet '" + getPortletName() + "'");
+		getPortletContext().log("Destroying Spring FrameworkPortlet '" + getPortletName() + "'");
 		if (this.portletApplicationContext instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) this.portletApplicationContext).close();
 		}
