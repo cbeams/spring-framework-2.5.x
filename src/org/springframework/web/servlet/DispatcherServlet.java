@@ -1033,9 +1033,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * No handler found -> set appropriate HTTP response status.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @throws IOException if thrown by the HttpServletResponse
+	 * @throws Exception if preparing the response failed
 	 */
-	protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (pageNotFoundLogger.isWarnEnabled()) {
 			String requestUri = new UrlPathHelper().getRequestUri(request);
 			pageNotFoundLogger.warn("No mapping for [" + requestUri +

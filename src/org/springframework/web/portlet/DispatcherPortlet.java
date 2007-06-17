@@ -914,8 +914,9 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * No handler found -> throw appropriate exception.
 	 * @param request current portlet request
 	 * @param response current portlet response
+	 * @throws Exception if preparing the response failed
 	 */
-	protected void noHandlerFound(PortletRequest request, PortletResponse response) throws PortletException {
+	protected void noHandlerFound(PortletRequest request, PortletResponse response) throws Exception {
 		if (pageNotFoundLogger.isWarnEnabled()) {
 			pageNotFoundLogger.warn("No mapping found for current request " +
 					"in DispatcherPortlet with name '" + getPortletName() + "'" +
