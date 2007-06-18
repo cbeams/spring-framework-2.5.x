@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.jdbc.core.simple;
 
 import org.apache.commons.logging.Log;
@@ -45,6 +61,8 @@ public class AbstractJdbcInsert {
 	private boolean compiled = false;
 
 	private String insertString;
+
+	private int[] insertTypes;
 
 	private TableMetaDataContext tableMetaDataContext = new TableMetaDataContext();
 
@@ -96,6 +114,10 @@ public class AbstractJdbcInsert {
 		return insertString;
 	}
 
+	public int[] getInsertTypes() {
+		return insertTypes;
+	}
+
 	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
 	}
@@ -138,6 +160,8 @@ public class AbstractJdbcInsert {
 		tableMetaDataContext.processMetaData(getJdbcTemplate().getDataSource(), getColumnNames());
 
 		insertString = tableMetaDataContext.createInsertString();
+
+		insertTypes = tableMetaDataContext.createInsertTypes();
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Compiled JdbcInsert. Insert string is [" + getInsertString() + "]");
@@ -263,6 +287,7 @@ public class AbstractJdbcInsert {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing statement " + getInsertString() + " with batch of size: " + batchValues.length);
 		}
+		final int[] columnTypes = getInsertTypes();
 		int[] updateCounts = jdbcTemplate.batchUpdate(
 				getInsertString(),
 				new BatchPreparedStatementSetter() {
@@ -272,7 +297,7 @@ public class AbstractJdbcInsert {
 						int colIndex = 0;
 						for (Object value : values) {
 							colIndex++;
-							StatementCreatorUtils.setParameterValue(ps, colIndex, SqlTypeValue.TYPE_UNKNOWN, value);
+							StatementCreatorUtils.setParameterValue(ps, colIndex, columnTypes[colIndex - 1], value);
 						}
 
 					}
