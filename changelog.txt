@@ -8,6 +8,7 @@ Changes in version 2.0.6 (2007-06-18)
 
 General
 * fixed contents of spring-remoting.jar: does not include RemoteInvocationUtilsTests anymore
+* various documentation refinements
 
 Package org.springframework.aop
 * ReflectiveMethodInvocation always uses a shared user attribute Map in clones (for proper binding of multiple advices)
@@ -50,6 +51,7 @@ Package org.springframework.transaction
 * refined TransactionAspectSupport to allow for overriding the "getTransactionManager()" method in subclasses
 
 Package org.springframework.web
+* added "postProcessWeb/PortletApplicationContext" method to FrameworkServlet/Portlet
 * CookieLocaleResolver checks specified "defaultLocale" in case of a setLocale call with null argument
 * RequestContext uses a shared default Theme instance as fallback, avoiding the recreating of empty Theme instances
 * MultiActionController explicitly disallows direct invocation of exception handler methods (as handler methods)
