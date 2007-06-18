@@ -18,7 +18,9 @@
 			<emphasis>and</emphasis> it provides the supporting infrastructure to
 			enable <emphasis>lots</emphasis> of enterprise-specific features such
 			as transactions and AOP.</para>
-			<para><emphasis>In short, favor the use of an <interfacename>ApplicationContext</interfacename>.</emphasis></para>
+			<para><emphasis role="bold">In short, favor the use of an <interfacename>ApplicationContext</interfacename>.</emphasis></para>
+			<para>(For the specific details behind this recommendation, see
+			<link linkend="context-introduction-ctx-vs-beanfactory">this section</link>.)</para>
         </sidebar>
 		<para>The <literal>org.springframework.beans</literal> and
         <literal>org.springframework.context</literal> packages provide the basis
@@ -3540,9 +3542,12 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
             <interfacename>FactoryBean</interfacename> instance itself.</para>
         </section>
     </section>
-    <section id="context-introduction">
-        <title>The <interfacename>ApplicationContext</interfacename></title>
-        <para>While the <literal>beans</literal> package provides basic
+
+	<section id="context-introduction">
+
+		<title>The <interfacename>ApplicationContext</interfacename></title>
+
+		<para>While the <literal>beans</literal> package provides basic
         functionality for managing and manipulating beans, including in a programmatic
         way, the <literal>context</literal> package adds the
         <ulink url="http://www.springframework.org/docs/api/org/springframework/context/ApplicationContext.html"><interfacename>ApplicationContext</interfacename></ulink> interface,
@@ -3553,93 +3558,146 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
         <classname>ContextLoader</classname> to automatically instantiate an <interfacename>ApplicationContext</interfacename> as part of the
         normal startup process of a J2EE web-app. (Of course, it is still possible
         to create an <interfacename>ApplicationContext</interfacename> programmatically.)</para>
-        <para>The basis for the context package is the
-        <interfacename>ApplicationContext</interfacename> interface, located in the
-        <literal>org.springframework.context</literal> package. Deriving from the
-        <interfacename>BeanFactory</interfacename> interface, it provides all the functionality of
+        <para>The basis for the context package is the <interfacename>ApplicationContext</interfacename>
+		interface, located in the <literal>org.springframework.context</literal> package. Deriving from
+		the <interfacename>BeanFactory</interfacename> interface, it provides all the functionality of
         <interfacename>BeanFactory</interfacename>. To allow working in a more framework-oriented
         fashion, using layering and hierarchical contexts, the context package also provides the
         following functionality:</para>
-        <itemizedlist>
-                <listitem>
-                    <para><interfacename>MessageSource</interfacename>, providing access to
-                    messages in i18n-style.</para>
-                </listitem>
-                <listitem>
-                    <para><emphasis>Access to resources</emphasis>, such as URLs and files.</para>
-                </listitem>
-                <listitem>
-                    <para><emphasis>Event propagation</emphasis> to beans implementing
-                    the <interfacename>ApplicationListener</interfacename> interface.</para>
-                </listitem>
-                <listitem>
-                    <para><emphasis>Loading of multiple (hierarchical)
-                    contexts</emphasis>, allowing each to be focused on one particular
-                    layer, for example the web layer of an application.</para>
-                </listitem>
-            </itemizedlist>
-        <para>As the <interfacename>ApplicationContext</interfacename> includes all functionality of the
-        <interfacename>BeanFactory</interfacename>, it is generally recommended that it be used over the
-        <interfacename>BeanFactory</interfacename>, except for a few limited situations such as in an
-        <classname>Applet</classname>, where memory consumption might be critical and a few extra
-        kilobytes might make a difference. The following sections describe
-        functionality that <interfacename>ApplicationContext</interfacename> adds to basic <interfacename>BeanFactory</interfacename>
-        capabilities.</para>
+
+		<itemizedlist>
+			<listitem>
+				<para><interfacename>MessageSource</interfacename>, providing access to messages in i18n-style.</para>
+			</listitem>
+			<listitem>
+				<para><emphasis>Access to resources</emphasis>, such as URLs and files.</para>
+			</listitem>
+			<listitem>
+				<para><emphasis>Event propagation</emphasis> to beans implementing
+				the <interfacename>ApplicationListener</interfacename> interface.</para>
+			</listitem>
+			<listitem>
+				<para><emphasis>Loading of multiple (hierarchical) contexts</emphasis>, allowing each
+				to be focused on one particular layer, for example the web layer of an application.</para>
+			</listitem>
+		</itemizedlist>
+
+		<section id="context-introduction-ctx-vs-beanfactory">
+			<title><interfacename>BeanFactory</interfacename> or <interfacename>ApplicationContext</interfacename>?</title>
+
+			<para>Short version: <emphasis>use an <interfacename>ApplicationContext</interfacename> unless you have
+			a really good reason for not doing so. For those of you that are looking for slightly more depth as to the
+			'but why' of the above recommendation, keep reading.</emphasis></para>
+
+			<para>As the <interfacename>ApplicationContext</interfacename> includes all functionality of the
+        	<interfacename>BeanFactory</interfacename>, it is generally recommended that it be used in preference
+			to the <interfacename>BeanFactory</interfacename>, except for a few limited situations such as in an
+        	<classname>Applet</classname>, where memory consumption might be critical and a few extra kilobytes
+			might make a difference. However, for most 'typical' enterprise applications and systems, the
+			<interfacename>ApplicationContext</interfacename> is what you will want to use. Versions of
+			Spring 2.0 and above make <emphasis>heavy</emphasis> use of the
+			<link linkend="beans-factory-extension-bpp"><interfacename>BeanPostProcessor</interfacename> extension point</link>
+			(to effect proxying and suchlike), and if you are using just a plain <interfacename>BeanFactory</interfacename>
+			then a fair amount of support such as transactions and AOP will not take effect (at least not without some
+			extra steps on your part), which could be confusing because nothing will actually be wrong with the
+			configuration.</para>
+
+			<para>Find below a feature matrix that lists what features are provided by the
+			<interfacename>BeanFactory</interfacename> and <interfacename>ApplicationContext</interfacename>
+			interfaces (and attendant implementations). (The following sections describe functionality that
+			<interfacename>ApplicationContext</interfacename> adds to the basic <interfacename>BeanFactory</interfacename>
+			capabilities in a lot more depth than the said feature matrix.)</para>
+
+			<table pgwide="1" id="context-introduction-ctx-vs-beanfactory-feature-matrix">
+				<title>Feature Matrix</title>
+				<tgroup cols="3">
+					<colspec align="left"/>
+					<thead>
+						<row>
+							<entry align="center">Feature</entry>
+							<entry align="center"><interfacename>BeanFactory</interfacename></entry>
+							<entry align="center"><interfacename>ApplicationContext</interfacename></entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry><para>Bean instantiation/wiring</para></entry>
+							<entry align="center"><para>Yes</para></entry>
+							<entry align="center"><para>Yes</para></entry>
+						</row>
+						<row>
+							<entry><para>Automatic <interfacename>BeanPostProcessor</interfacename> registration</para></entry>
+							<entry align="center"><para>No</para></entry>
+							<entry align="center"><para>Yes</para></entry>
+						</row>
+						<row>
+							<entry><para>Automatic <interfacename>BeanFactoryPostProcessor</interfacename> registration</para></entry>
+							<entry align="center"><para>No</para></entry>
+							<entry align="center"><para>Yes</para></entry>
+						</row>
+						<row>
+							<entry><para>Convenient <interfacename>MessageSource</interfacename> access (for i18n)</para></entry>
+							<entry align="center"><para>No</para></entry>
+							<entry align="center"><para>Yes</para></entry>
+						</row>
+						<row>
+							<entry><para><interfacename>ApplicationEvent</interfacename> publication</para></entry>
+							<entry align="center"><para>No</para></entry>
+							<entry align="center"><para>Yes</para></entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+
+		</section>
+
         <section id="context-functionality-messagesource">
             <title>Internationalization using <literal>MessageSources</literal></title>
             <para>The <interfacename>ApplicationContext</interfacename> interface extends an interface called
-            <interfacename>MessageSource</interfacename>, and therefore provides messaging (i18n
-            or internationalization) functionality. Together with the
-            <classname>HierarchicalMessageSource</classname>, capable of resolving
-            hierarchical messages, these are the basic interfaces Spring provides to
-            do message resolution. Let's quickly review the methods defined there:</para>
+            <interfacename>MessageSource</interfacename>, and therefore provides messaging (i18n or internationalization)
+			functionality. Together with the <classname>HierarchicalMessageSource</classname>, capable of resolving
+            hierarchical messages, these are the basic interfaces Spring provides to do message resolution. Let's
+			quickly review the methods defined there:</para>
             <itemizedlist>
-                    <listitem>
-                        <para><literal>String getMessage(String code, Object[] args,
-                        String default, Locale loc)</literal>: the basic method used to
-                        retrieve a message from the <interfacename>MessageSource</interfacename>. When no message is
-                        found for the specified locale, the default message is used. Any
-                        arguments passed in are used as replacement values, using the
-                        <literal>MessageFormat</literal> functionality provided by the
-                        standard library.</para>
-                    </listitem>
-                    <listitem>
-                        <para><literal>String getMessage(String code, Object[] args,
-                        Locale loc)</literal>: essentially the same as the previous
-                        method, but with one difference: no default message can be
-                        specified; if the message cannot be found, a
-                        <classname>NoSuchMessageException</classname> is thrown.</para>
-                    </listitem>
-                    <listitem>
-                        <para><literal>String getMessage(MessageSourceResolvable
-						resolvable, Locale locale)</literal>: all properties used in the
-						methods above are also wrapped in a class named
-						<interfacename>MessageSourceResolvable</interfacename>, which you can use via
-						this method.</para>
-                    </listitem>
-                </itemizedlist>
+				<listitem>
+					<para><methodname>String getMessage(String code, Object[] args, String default, Locale loc)</methodname>:
+					the basic method used to retrieve a message from the <interfacename>MessageSource</interfacename>.
+					When no message is found for the specified locale, the default message is used. Any arguments
+					passed in are used as replacement values, using the <interfacename>MessageFormat</interfacename>
+					functionality provided by the standard library.</para>
+				</listitem>
+				<listitem>
+					<para><methodname>String getMessage(String code, Object[] args, Locale loc)</methodname>:
+					essentially the same as the previous method, but with one difference: no default message
+					can be specified; if the message cannot be found, a <classname>NoSuchMessageException</classname>
+					is thrown.</para>
+				</listitem>
+				<listitem>
+					<para><methodname>String getMessage(MessageSourceResolvable resolvable, Locale locale)</methodname>:
+					all properties used in the methods above are also wrapped in a class named
+					<interfacename>MessageSourceResolvable</interfacename>, which you can use via this method.</para>
+				</listitem>
+			</itemizedlist>
             <para>
 				When an <interfacename>ApplicationContext</interfacename> gets loaded, it automatically searches
 				for a <interfacename>MessageSource</interfacename> bean defined in the context. The bean has to have
-				the name <literal>messageSource</literal>. If such a bean is found, all
-				calls to the methods described above will be delegated to the message
-				source that was found. If no message source was found, the
-				<interfacename>ApplicationContext</interfacename> attempts to see if it has a parent containing a bean
-				with the same name. If so, it uses that bean as the <interfacename>MessageSource</interfacename>. If it
-				can't find any source for messages, an empty
-				<classname>StaticMessageSource</classname> will be instantiated in order to
-				be able to accept calls to the methods defined above.
+				the name <literal>messageSource</literal>. If such a bean is found, all calls to the methods
+				described above will be delegated to the message source that was found. If no message source was
+				found, the <interfacename>ApplicationContext</interfacename> attempts to see if it has a parent
+				containing a bean with the same name. If so, it uses that bean as the
+				<interfacename>MessageSource</interfacename>. If it can't find any source for messages, an empty
+				<classname>StaticMessageSource</classname> will be instantiated in order to be able to accept calls
+				to the methods defined above.
 			</para>
             <para>
 				Spring currently provides two <interfacename>MessageSource</interfacename>
-				implementations. These are the
-				<classname>ResourceBundleMessageSource</classname> and the
+				implementations. These are the <classname>ResourceBundleMessageSource</classname> and the
 				<classname>StaticMessageSource</classname>. Both implement
 				<classname>NestingMessageSource</classname> in order to do nested messaging.
 				The <classname>StaticMessageSource</classname> is hardly ever used but provides programmatic
 				ways to add messages to the source. The <classname>ResourceBundleMessageSource</classname> is
 				more interesting and is the one we will provide an example for:
-      </para>
+      		</para>
       <programlisting><![CDATA[<beans>
   <bean id="messageSource"
         class="org.springframework.context.support.ResourceBundleMessageSource">
@@ -3719,7 +3777,7 @@ argument.required=The '{0}' argument is required.]]></programlisting>
             <programlisting><![CDATA[The 'userDao' argument is required.]]></programlisting>
             <para>With regard to internationalization (i18n), Spring's various
         <classname>MessageResource</classname> implementations follow the same locale resolution
-        and fallback rules as the standard JDK ResourceBundle. In short, and continuing with
+        and fallback rules as the standard JDK <classname>ResourceBundle</classname>. In short, and continuing with
         the example <literal>'messageSource'</literal> defined previously, if you want to resolve
         messages against the British (en-GB) locale, you would create files called
         <literal>format_en_GB.properties</literal>, <literal>exceptions_en_GB.properties</literal>,
