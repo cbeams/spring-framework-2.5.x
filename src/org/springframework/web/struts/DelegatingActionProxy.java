@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,20 @@ import org.springframework.beans.BeansException;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Proxy for a Spring-managed Struts Action that's defined in
- * ContextLoaderPlugIn's WebApplicationContext.
+ * Proxy for a Spring-managed Struts <code>Action</code> that is defined in
+ * {@link ContextLoaderPlugIn ContextLoaderPlugIn's}
+ * {@link WebApplicationContext}.
  *
  * <p>The proxy is defined in the Struts config file, specifying this
- * class as action class. It will delegate to a Struts Action bean
- * in the ContextLoaderPlugIn context.
+ * class as the action class. This class will delegate to a Struts
+ * <code>Action</code> bean in the <code>ContextLoaderPlugIn</code> context.
  *
- * <pre>
- * &lt;action path="/login" type="org.springframework.web.struts.DelegatingActionProxy"/&gt;</pre>
+ * <pre class="code">&lt;action path="/login" type="org.springframework.web.struts.DelegatingActionProxy"/&gt;</pre>
  *
- * The name of the Action bean in the WebApplicationContext will be
- * determined from the mapping path and module prefix. This can be
- * customized by overriding the <code>determineActionBeanName</code> method.
+ * The name of the <code>Action</code> bean in the
+ * <code>WebApplicationContext</code> will be determined from the mapping
+ * path and module prefix. This can be customized by overriding the
+ * <code>determineActionBeanName</code> method.
  *
  * <p>Example:
  * <ul>
@@ -51,38 +52,41 @@ import org.springframework.web.context.WebApplicationContext;
  * bean name "/mymodule/login"
  * </ul>
  *
- * <p>A corresponding bean definition in the ContextLoaderPlugin
- * context looks as follows, being able to fully leverage
- * Spring's configuration facilities:
+ * <p>A corresponding bean definition in the <code>ContextLoaderPlugin</code>
+ * context would look as follows; notice that the <code>Action</code> is now
+ * able to leverage fully Spring's configuration facilities:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean name="/login" class="myapp.MyAction"&gt;
  *   &lt;property name="..."&gt;...&lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
- * Note that you can use a single ContextLoaderPlugIn for all Struts modules.
- * That context can in turn be loaded from multiple XML files, for example split
- * according to Struts modules. Alternatively, define one ContextLoaderPlugIn per
- * Struts module, specifying appropriate "contextConfigLocation" parameters.
- * In both cases, the Spring bean name has to include the module prefix.
+ * Note that you can use a single <code>ContextLoaderPlugIn</code> for all
+ * Struts modules. That context can in turn be loaded from multiple XML files,
+ * for example split according to Struts modules. Alternatively, define one
+ * <code>ContextLoaderPlugIn</code> per Struts module, specifying appropriate
+ * "contextConfigLocation" parameters. In both cases, the Spring bean name
+ * has to include the module prefix.
  *
- * <p>If you want to avoid having to specify DelegatingActionProxy as Action
- * type in your struts-config, for example to be able to generate your
- * Struts config file with XDoclet, consider
+ * <p>If you want to avoid having to specify <code>DelegatingActionProxy</code>
+ * as the <code>Action</code> type in your struts-config file (for example to
+ * be able to generate your Struts config file with XDoclet) consider using the
  * {@link DelegatingRequestProcessor DelegatingRequestProcessor}.
  * The latter's disadvantage is that it might conflict with the need
- * for a different RequestProcessor subclass.
+ * for a different <code>RequestProcessor</code> subclass.
  *
- * <p>The default implementation delegates to the DelegatingActionUtils
- * class as fas as possible, to reuse as much code as possible with
- * DelegatingRequestProcessor and DelegatingTilesRequestProcessor.
+ * <p>The default implementation delegates to the {@link DelegatingActionUtils}
+ * class as much as possible, to reuse as much code as possible with
+ * <code>DelegatingRequestProcessor</code> and
+ * {@link DelegatingTilesRequestProcessor}.
  *
  * <p>Note: The idea of delegating to Spring-managed Struts Actions originated in
  * Don Brown's <a href="http://struts.sourceforge.net/struts-spring">Spring Struts Plugin</a>.
- * ContextLoaderPlugIn and DelegatingActionProxy constitute a clean-room
- * implementation of the same idea, essentially superseding the original plugin.
- * Many thanks to Don Brown and Matt Raible for the original work and for the
- * agreement to reimplement the idea in Spring proper!
+ * <code>ContextLoaderPlugIn</code> and <code>DelegatingActionProxy</code>
+ * constitute a clean-room implementation of the same idea, essentially
+ * superseding the original plugin. Many thanks to Don Brown and Matt Raible
+ * for the original work and for the agreement to reimplement the idea in
+ * Spring proper!
  *
  * @author Juergen Hoeller
  * @since 1.0.1
@@ -95,7 +99,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class DelegatingActionProxy extends Action {
 
 	/**
-	 * Pass the execute call on to the Spring-managed delegate Action.
+	 * Pass the execute call on to the Spring-managed delegate <code>Action</code>.
 	 * @see #getDelegateAction
 	 */
 	public ActionForward execute(
@@ -106,14 +110,15 @@ public class DelegatingActionProxy extends Action {
 		return delegateAction.execute(mapping, form, request, response);
 	}
 
+
 	/**
-	 * Return the delegate Action for the given mapping.
+	 * Return the delegate <code>Action</code> for the given <code>mapping</code>.
 	 * <p>The default implementation determines a bean name from the
-	 * given ActionMapping and looks up the corresponding bean in the
-	 * WebApplicationContext.
-	 * @param mapping the Struts ActionMapping
-	 * @return the delegate Action
-	 * @throws BeansException if thrown by WebApplicationContext methods
+	 * given <code>ActionMapping</code> and looks up the corresponding bean in
+	 * the {@link WebApplicationContext}.
+	 * @param mapping the Struts <code>ActionMapping</code>
+	 * @return the delegate <code>Action</code>
+	 * @throws BeansException if thrown by <code>WebApplicationContext</code> methods
 	 * @see #determineActionBeanName
 	 */
 	protected Action getDelegateAction(ActionMapping mapping) throws BeansException {
@@ -123,13 +128,15 @@ public class DelegatingActionProxy extends Action {
 	}
 
 	/**
-	 * Fetch ContextLoaderPlugIn's WebApplicationContext from the ServletContext,
-	 * falling back to the root WebApplicationContext. This context is supposed
-	 * to contain the Struts Action beans to delegate to.
-	 * @param actionServlet the associated ActionServlet
-	 * @param moduleConfig the associated ModuleConfig
-	 * @return the WebApplicationContext
-	 * @throws IllegalStateException if no WebApplicationContext could be found
+	 * Fetch ContextLoaderPlugIn's {@link WebApplicationContext} from the
+	 * <code>ServletContext</code>, falling back to the root
+	 * <code>WebApplicationContext</code>.
+	 * <p>This context is supposed to contain the Struts <code>Action</code>
+	 * beans to delegate to.
+	 * @param actionServlet the associated <code>ActionServlet</code>
+	 * @param moduleConfig the associated <code>ModuleConfig</code>
+	 * @return the <code>WebApplicationContext</code>
+	 * @throws IllegalStateException if no <code>WebApplicationContext</code> could be found
 	 * @see DelegatingActionUtils#findRequiredWebApplicationContext
 	 * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
 	 */
@@ -140,11 +147,14 @@ public class DelegatingActionProxy extends Action {
 	}
 
 	/**
-	 * Determine the name of the Action bean, to be looked up in
-	 * the WebApplicationContext.
-	 * <p>The default implementation takes the mapping path and
-	 * prepends the module prefix, if any.
-	 * @param mapping the Struts ActionMapping
+	 * Determine the name of the <code>Action</code> bean, to be looked up in
+	 * the <code>WebApplicationContext</code>.
+	 * <p>The default implementation takes the
+	 * {@link org.apache.struts.action.ActionMapping#getPath mapping path} and
+	 * prepends the
+	 * {@link org.apache.struts.config.ModuleConfig#getPrefix module prefix},
+	 * if any.
+	 * @param mapping the Struts <code>ActionMapping</code>
 	 * @return the name of the Action bean
 	 * @see DelegatingActionUtils#determineActionBeanName
 	 * @see org.apache.struts.action.ActionMapping#getPath
