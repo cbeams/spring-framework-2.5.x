@@ -80,6 +80,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 		this.namedParameterJdbcOperations = namedParameterJdbcTemplate;
 	}
 
+
 	/**
 	 * Expose the classic Spring JdbcTemplate to allow invocation of
 	 * less commonly used methods.
@@ -93,7 +94,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	 * less commonly used methods.
 	 */
 	public NamedParameterJdbcOperations getNamedParameterJdbcOperations() {
-		return namedParameterJdbcOperations;
+		return this.namedParameterJdbcOperations;
 	}
 
 

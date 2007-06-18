@@ -87,6 +87,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		this.classicJdbcTemplate = classicJdbcTemplate;
 	}
 
+
 	/**
 	 * Expose the classic Spring JdbcTemplate to allow invocation of
 	 * less commonly used methods.

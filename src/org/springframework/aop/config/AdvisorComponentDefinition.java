@@ -20,15 +20,14 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.parsing.AbstractComponentDefinition;
-import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.util.Assert;
 
 /**
- * A component definition that bridges the gap between the advisor bean definition
- * configured by the <code>&lt;aop:advisor&gt;</code> tag and the component definition
+ * {@link org.springframework.beans.factory.parsing.ComponentDefinition}
+ * that bridges the gap between the advisor bean definition configured
+ * by the <code>&lt;aop:advisor&gt;</code> tag and the component definition
  * infrastructure.
- * 
- * @see ComponentDefinition
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0

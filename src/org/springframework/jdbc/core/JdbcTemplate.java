@@ -90,8 +90,11 @@ import org.springframework.util.Assert;
  * @see org.springframework.jdbc.support.SQLExceptionTranslator
  */
 public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
+
 	private static final String RETURN_RESULT_SET_PREFIX = "#result-set-";
+
 	private static final String RETURN_UPDATE_COUNT_PREFIX = "#update-count-";
+
 
 	/** Custom NativeJdbcExtractor */
 	private NativeJdbcExtractor nativeJdbcExtractor;
@@ -955,7 +958,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @param resultSetParameters Parameter list of declared resturn resultSet parameters for the stored procedure
 	 * @return Map that contains returned results
 	 */
-	protected Map extractReturnedResults(CallableStatement cs, List updateCountParameters, List resultSetParameters, int updateCount)
+	protected Map extractReturnedResults(
+			CallableStatement cs, List updateCountParameters, List resultSetParameters, int updateCount)
 			throws SQLException {
 
 		Map returnedResults = new HashMap();

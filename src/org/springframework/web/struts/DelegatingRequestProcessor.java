@@ -42,7 +42,7 @@ import org.springframework.web.context.WebApplicationContext;
  * <code>Action</code> class at all. In any case, Struts will delegate to an
  * <code>Action</code> bean in the <code>ContextLoaderPlugIn</code> context.
  *
- * <pre clas="code">&lt;action path="/login" type="myapp.MyAction"/&gt;</pre>
+ * <pre class="code">&lt;action path="/login" type="myapp.MyAction"/&gt;</pre>
  *
  * or
  *
@@ -115,7 +115,6 @@ public class DelegatingRequestProcessor extends RequestProcessor {
 		}
 	}
 
-
 	/**
 	 * Fetch ContextLoaderPlugIn's {@link WebApplicationContext} from the
 	 * <code>ServletContext</code>, falling back to the root
@@ -131,6 +130,7 @@ public class DelegatingRequestProcessor extends RequestProcessor {
 	 */
 	protected WebApplicationContext initWebApplicationContext(
 			ActionServlet actionServlet, ModuleConfig moduleConfig) throws IllegalStateException {
+
 		return DelegatingActionUtils.findRequiredWebApplicationContext(actionServlet, moduleConfig);
 	}
 
@@ -139,7 +139,7 @@ public class DelegatingRequestProcessor extends RequestProcessor {
 	 * delegates to.
 	 */
 	protected final WebApplicationContext getWebApplicationContext() {
-		return webApplicationContext;
+		return this.webApplicationContext;
 	}
 
 
