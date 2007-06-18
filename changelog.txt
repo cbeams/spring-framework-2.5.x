@@ -9,8 +9,9 @@ Changes in version 2.1 M3 (2007-06-29)
 Package org.springframework.aop
 * added support for "bean(name)" element in AspectJ pointcut expressions
 * the pointcut element's "id" attribute is required as of the 2.1 version of the AOP namespace (spring-aop-2.1.xsd)
+* aop:aspectj-autoproxy's "proxy-target-class" attribute properly escalates class proxying (not overriding the setting)
+* ConfigBeanDefinitionParser turns "pointcut" attribute into inner bean definition (instead of ref to an anonymous bean)
 * fixed ConfigBeanDefinitionParser to properly handle empty pointcut/advice bean names in a tooling environment
-* ConfigBeanDefinitionParser creates PointcutComponentDefinition for pointcut attribute as well
 
 Package org.springframework.context
 * AspectJWeavingEnabler implements Ordered, exposing HIGHEST_PRECEDENCE (executing before other factory post-processors)
@@ -34,6 +35,10 @@ Package org.springframework.util
 
 Package org.springframework.transaction
 * refined TransactionAspectSupport to allow for overriding the "getTransactionManager()" method in subclasses
+
+Package org.springframework.web
+* added "postProcessWeb/PortletApplicationContext" method to FrameworkServlet/Portlet
+* DispatcherServlet/Portlet's "noHandlerFound" declares Exception instead of just IOException/PortletException
 
 
 Changes in version 2.1 M2 (2007-05-31)
@@ -242,7 +247,7 @@ Package org.springframework.web
 * removed deprecated BindInitializer and BindUtils from the "bind" package
 * removed deprecated "setFilterConfig" method from GenericFilterBean (no WebLogic 6.1 compatibility necessary anymore)
 * removed CosMultipartResolver (as part of generally removing COS support from the Spring codebase)
-* introduced explicit JSF 1.2 support (web.jsf.el): DelegatingFacedELResolver and WebApplicationContextFacesELResolver
+* introduced explicit JSF 1.2 support (web.jsf.el): DelegatingFacesELResolver and WebApplicationContextFacesELResolver
 * JSP InputTag, SelectTag etc support expressions as "disabled" and "readonly" attribute values
 
 
