@@ -308,8 +308,8 @@
     </dependency>
     <dependency>
       <groupId>jruby</groupId>
-      <artifactId>jruby</artifactId>
-      <version>0.9.8</version>
+      <artifactId>jruby-bin</artifactId>
+      <version>1.0.0</version>
       <optional>true</optional>
     </dependency>
     <dependency>
