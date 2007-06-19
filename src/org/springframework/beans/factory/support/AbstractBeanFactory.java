@@ -1116,8 +1116,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * and storing the resolved Class in the bean definition for further use.
 	 * @param mbd the merged bean definition to determine the class for
 	 * @param beanName the name of the bean (for error handling purposes)
-	 * @param typeMatchOnly whether the predicated is only used for internal
-	 * type matching purposes (i.e. never exposed to application code)
+	 * @param typeMatchOnly whether the returned {@link Class} is only used
+	 * for internal type matching purposes (that is, never exposed to application code)
 	 * @return the resolved bean class (or <code>null</code> if none)
 	 * @throws CannotLoadBeanClassException if we failed to load the class
 	 */
