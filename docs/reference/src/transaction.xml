@@ -198,8 +198,9 @@
                 exists: for example, simply continue running in the existing transaction
                 (the common case); or suspending the existing transaction and creating
                 a new transaction. <emphasis>Spring offers all of the transaction propagation
-                options familiar from EJB CMT</emphasis>.</para>
-            </listitem>
+                options familiar from EJB CMT</emphasis>. (Some details regarding the semantics of transaction
+				propagation in Spring can be found in the section entitled <xref linkend="tx-propagation"/>.</para>
+			</listitem>
             <listitem>
                 <para><emphasis role="bold">Timeout</emphasis>: how long
                 this transaction may run before timing out (and automatically being
@@ -454,12 +455,11 @@ xsi:schemaLocation="
                 management other than <methodname>setRollbackOnly()</methodname>.</para>
             </listitem>
             <listitem>
-                <para>The Spring Framework does not support propagation of transaction contexts
-                across remote calls, as do high-end application servers. If you need
-                this feature, we recommend that you use EJB. However, consider carefully before
-                using such a feature. Normally, we do not want transactions to span remote
-                calls.</para>
-            </listitem>
+                <para>The Spring Framework does not support propagation of transaction contexts across remote calls, as
+				do high-end application servers. If you need this feature, we recommend that you use EJB. However,
+				consider carefully before using such a feature, because normally, one does not want transactions to
+				span remote calls.</para>
+			</listitem>
         </itemizedlist>
         <sidebar>
 		<title>Where is <classname>TransactionProxyFactoryBean</classname>?</title>
@@ -468,7 +468,7 @@ xsi:schemaLocation="
             that there is no longer any need to configure
             <classname>TransactionProxyFactoryBean</classname> beans.</para>
             <para>The old, pre-Spring 2.0 configuration style is still 100% 
-            valid configuration; under the covers think of the new <literal>&lt;tx:tags/&gt;</literal>
+            valid configuration; think of the new <literal>&lt;tx:tags/&gt;</literal>
             as simply defining <classname>TransactionProxyFactoryBean</classname> beans
             on your behalf.</para>
         </sidebar>
@@ -501,12 +501,6 @@ xsi:schemaLocation="
 			inner workings of the Spring Framework's declarative transaction infrastructure to
 			help you navigate your way back upstream to calmer waters in the event of
 			transaction-related issues.</para>
-            <tip>
-                <para>Looking at the Spring Framework source code is a good way to get a real
-				understanding of the transaction support. We also suggest turning the logging
-				level to <literal>'DEBUG'</literal> during development to better see what goes
-				on under the hood.</para>
-            </tip>
             <para>The most important concepts to grasp with regard to the Spring Framework's
 			declarative transaction support are that this support is enabled
             <link linkend="aop-understanding-aop-proxies"><emphasis>via AOP proxies</emphasis></link>,
@@ -894,7 +888,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             <para>
                 <itemizedlist>
                     <listitem>
-                        <para>The propagation setting is <literal>REQUIRED</literal></para>
+                        <para>The <link linkend="tx-propagation">propagation setting</link> is <literal>REQUIRED</literal></para>
                     </listitem>
                     <listitem>
                         <para>The isolation level is <literal>DEFAULT</literal></para>
@@ -913,7 +907,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
                     </listitem>
                 </itemizedlist>
             </para>
-            <para>These default settings can, of course, be changed; the various
+            <para>These default settings can be changed; the various
             attributes of the <literal>&lt;tx:method/&gt;</literal> tags that are nested within
             <literal>&lt;tx:advice/&gt;</literal> and <literal>&lt;tx:attributes/&gt;</literal>
             tags are summarized below:</para>
@@ -1218,7 +1212,7 @@ public class DefaultFooService implements FooService {
                         will not</para>
                     </listitem>
                 </itemizedlist>
-                <para>These default settings can, of course, be changed; the various
+                <para>These default settings can be changed; the various
                 properties of the <interfacename>@Transactional</interfacename> annotation
                 are summarized in the following table:</para>
                 <para>
@@ -1235,7 +1229,7 @@ public class DefaultFooService implements FooService {
                             <tbody>
                                 <row>
                                     <entry>
-                                        <literal>propagation</literal>
+                                        <literal><link linkend="tx-propagation">propagation</link></literal>
                                     </entry>
                                     <entry>enum: <classname>Propagation</classname></entry>
                                     <entry>optional propagation setting</entry>
@@ -1301,17 +1295,89 @@ public class DefaultFooService implements FooService {
                         </tgroup>
                     </table>
                 </para>
-				<para>At the time of writing it is not possible to have explicit
-				control over the name of a transaction, where 'name' means the
-				transaction name that will be shown in a transaction monitor, if
-				applicable (for example, WebLogic's transaction monitor), and in
-				logging output. For declarative transactions, the transaction
-				name is always the fully-qualified class name + "." + method name
-				of the transactionally-advised class. For example
-				<literal>'com.foo.BusinessService.handlePayment'</literal>.</para>
-            </section>
+				<para>Currently it is not possible to have explicit control over the name of a transaction, where
+				'name' means the transaction name that will be shown in a transaction monitor, if applicable (for
+				example, WebLogic's transaction monitor), and in logging output. For declarative transactions, the
+				transaction name is always the fully-qualified class name + "." + method name of the
+				transactionally-advised class. For example, if the <methodname>handlePayment(..)</methodname>
+				method of the <classname>BusinessService</classname> class started a transaction, the name of the
+				transaction would be:</para>
+				<programlisting><![CDATA[com.foo.BusinessService.handlePayment]]></programlisting>
+			</section>
         </section>
-        <section id="transaction-declarative-applying-more-than-just-tx-advice">
+
+
+        <section id="tx-propagation">
+            <title>Transaction propagation</title>
+			<para><emphasis>Please note that this section of the Spring reference documentation is
+			<emphasis>not</emphasis> an introduction to transaction propagation proper; rather it details some of the
+			semantics regarding transaction propagation in Spring.</emphasis></para>
+			<para>In the case of Spring-managed transactions, please be aware of the difference between
+			<emphasis>physical</emphasis> and <emphasis>logical</emphasis> transactions, and how the propagation
+			setting applies to this difference.</para>
+
+			<section id="tx-propagation-required">
+				<title>Required</title>
+				<para>
+					<mediaobject>
+						<imageobject>
+							<imagedata fileref="images/tx_prop_required.png" format="PNG" align="center"/>
+						</imageobject>
+						<caption>
+							<para>PROPAGATION_REQUIRED</para>
+						</caption>
+					</mediaobject>
+				</para>
+				<para>When the propagation setting is <literal>PROPAGATION_REQUIRED</literal>, a
+				<emphasis>logical</emphasis> transaction scope is created for each method that it gets applied to. Each
+				such logical transaction scope can individually decide on rollback-only status, with an outer
+				transaction scope being logically independent from the inner transaction scope. Of course, in case of
+				standard <literal>PROPAGATION_REQUIRED</literal> behavior, they will be mapped to the same physical
+				transaction. So a rollback-only marker set in the inner transaction scope does affect the outer
+				transactions chance to actually commit (as you would expect it to).</para>
+				<para>However, in the case where an inner transaction scopes sets the rollback-only marker, the outer
+				transaction itself has not decided on the rollback itself, and so the rollback (silently triggered by
+				the inner transaction scope) is unexpected: a corresponding
+				<classname>UnexpectedRollbackException</classname> will be thrown at that point. This is
+				<emphasis>expected behavior</emphasis> so that the caller of a transaction can never be misled to assume
+				that a commit was performed when it really was not. So if an inner transaction (that the outer caller is
+				not aware of) silently marks a transaction as rollback-only, the outer caller would still innocently
+				call commit - and needs to receive an <classname>UnexpectedRollbackException</classname> to indicate
+				clearly that a rollback was performed instead.</para>
+			</section>
+
+			<section id="tx-propagation-requires_new">
+				<title>RequiresNew</title>
+				<para>
+					<mediaobject>
+						<imageobject>
+							<imagedata fileref="images/tx_prop_requires_new.png" format="PNG" align="center"/>
+						</imageobject>
+						<caption>
+							<para>PROPAGATION_REQUIRES_NEW</para>
+						</caption>
+					</mediaobject>
+				</para>
+				<para><literal>PROPAGATION_REQUIRES_NEW</literal>, in contrast, uses a <emphasis>completely</emphasis>
+				independent transaction for each affected transaction scope. In that case, the underlying physical
+				transactions will be different and hence can commit or rollback independently, with an outer transaction
+				not affected by an inner transaction's rollback status.</para>
+			</section>
+
+			<section id="tx-propagation-nested">
+				<title>Nested</title>
+				<para><literal>PROPAGATION_NESTED</literal> is different again in that it uses a
+				<emphasis>single</emphasis> physical transaction with multiple savepoints that it can roll back to.
+				Such partial rollbacks allow an inner transaction scope to trigger a rollback
+				<emphasis>for its scope</emphasis>, with the outer transaction being able to continue the physical
+				transaction despite some operations having been rolled back. This is typically mapped onto JDBC
+				savepoints, so will only work with JDBC resource transactions (see Spring's
+				<classname>DataSourceTransactionManager</classname>).</para>
+			</section>
+
+		</section>
+
+		<section id="transaction-declarative-applying-more-than-just-tx-advice">
             <title>Advising transactional operations</title>
             
             <para>Consider the situation where you would like to execute
@@ -1710,13 +1776,13 @@ txManager.commit(status);]]></programlisting>
     </section>
     <section id="transaction-application-server-integration">
         <title>Application server-specific integration</title>
-        <para>Spring's transaction abstraction is generally application server
+        <para>Spring's transaction abstraction generally is application server
         agnostic. Additionally, Spring's <classname>JtaTransactionManager</classname> class,
         which can optionally perform a JNDI lookup for the JTA
         <interfacename>UserTransaction</interfacename> and
-        <literal>TransactionManager</literal> objects, can be set to autodetect
+        <interfacename>TransactionManager</interfacename> objects, can be set to autodetect
         the location for the latter object, which varies by application server. Having
-        access to the <literal>TransactionManager</literal> instance does allow
+        access to the <interfacename>TransactionManager</interfacename> instance does allow
         enhanced transaction semantics. Please see the
         <classname>JtaTransactionManager</classname> Javadocs for more details.</para>
         <section id="transaction-application-server-integration-weblogic">
@@ -1725,18 +1791,17 @@ txManager.commit(status);]]></programlisting>
             prefer to use <classname>WebLogicJtaTransactionManager</classname> instead
             of the stock <classname>JtaTransactionManager</classname> class. This
             special WebLogic-specific subclass of the normal
-            <classname>JtaTransactionManager</classname>. It supports the full power of
-            Spring's transaction definitions in a WebLogic managed transaction
+            <classname>JtaTransactionManager</classname> supports the full power of
+            Spring's transaction definitions in a WebLogic-managed transaction
             environment, beyond standard JTA semantics: features include transaction
-            names, per-transaction isolation levels, and proper resuming of
-            transactions in all cases.</para>
+            names, per-transaction isolation levels, and proper resuming of transactions in all cases.</para>
         </section>
         <section id="transaction-application-server-integration-websphere">
             <title>IBM WebSphere</title>
             <para>In a WebSphere 5.1, 5.0 and 4 environment, you may wish to use
             Spring's <classname>WebSphereTransactionManagerFactoryBean</classname>
             class. This is a factory bean which retrieves the JTA
-            <literal>TransactionManager</literal> in a WebSphere environment, which
+            <interfacename>TransactionManager</interfacename> in a WebSphere environment, which
             is done via WebSphere's <literal>static</literal> access methods.
             (These methods are different for each version of WebSphere.)
             Once the JTA <interfacename>TransactionManager</interfacename> instance has
@@ -1751,20 +1816,18 @@ txManager.commit(status);]]></programlisting>
         <title>Solutions to common problems</title>
         <section id="transaction-solutions-to-common-problems-wrong-ptm">
             <title>Use of the wrong transaction manager for a specific <interfacename>DataSource</interfacename></title>
-            <para>You should take care to use the correct
-            <emphasis><interfacename>PlatformTransactionManager</interfacename></emphasis>
-            implementation for their requirements. It is important to understand
-            how the the Spring Framework's transaction abstraction works with JTA global
-			transactions. Used properly, there is no conflict here: the Spring Framework
+            <para>You should take care to use the <emphasis>correct</emphasis>
+            <interfacename>PlatformTransactionManager</interfacename>
+            implementation for their requirements. Used properly, the Spring Framework
 			merely provides a straightforward and portable abstraction. If you are using
 			global transactions, you <emphasis>must</emphasis> use the
             <classname>org.springframework.transaction.jta.JtaTransactionManager</classname> class
             (or an
-            <link linkend="transaction-application-server-integration"> application server-specific subclass</link>
+            <link linkend="transaction-application-server-integration">application server-specific subclass</link>
              of it) for all your transactional operations. Otherwise the transaction infrastructure
 			 will attempt to perform local transactions on resources such as container
              <interfacename>DataSource</interfacename> instances. Such local transactions
-             don't make sense, and a good application server will treat them as errors.</para>
+             do not make sense, and a good application server will treat them as errors.</para>
         </section>
     </section>
     <section id="transaction-resources">
@@ -1772,11 +1835,10 @@ txManager.commit(status);]]></programlisting>
 		<para>Find below links to further resources about the Spring Framework's transaction support.</para>
 		<itemizedlist>
 			<listitem>
-				<para>This book,
-				<ulink url="http://www.infoq.com/minibooks/JTDS">Java Transaction Design Strategies</ulink>
-				from <ulink url="http://www.infoq.com/">InfoQ</ulink> is a well-paced introduction
-				to transactions in the Java space. It also includes side-by-side examples of how to
-				configure and use transactions in both the Spring Framework and EJB3.</para>
+				<para><ulink url="http://www.infoq.com/minibooks/JTDS">Java Transaction Design Strategies</ulink>
+				is a book available from <ulink url="http://www.infoq.com/">InfoQ</ulink> that provides a well-paced
+				introduction to transactions in Java. It also includes side-by-side examples of how to configure and use
+				transactions using both the Spring Framework and EJB3.</para>
 			</listitem>
 		</itemizedlist>
     </section>
