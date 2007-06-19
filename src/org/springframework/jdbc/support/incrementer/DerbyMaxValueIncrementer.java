@@ -89,6 +89,7 @@ public class DerbyMaxValueIncrementer extends AbstractDataFieldMaxValueIncrement
 		setDataSource(ds);
 		setIncrementerName(incrementerName);
 		this.columnName = columnName;
+		this.dummyName = dummyName;
 		afterPropertiesSet();
 	}
 
