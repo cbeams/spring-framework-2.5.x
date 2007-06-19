@@ -35,9 +35,9 @@ import java.sql.Statement;
  * numbering is consequently the value of cacheSize.
  *
  * <b>NOTE:</b>  Since Derby supports the JDBC 3.0 method getGeneratedKeys it's recommended to
- * use IDENTITY columns directly in the tables and utilizing a {@link org.springframework.jdbc.support.KeyHolder}
- * via the using the {@link org.springframework.jdbc.core.JdbcTemplate} and the
- * update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder) method.
+ * use IDENTITY columns directly in the tables and then utilizing a {@link org.springframework.jdbc.support.KeyHolder}
+ * when calling the with the update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder) method of
+ * the {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
  * @author Thomas Risberg
  * @since 2.1
