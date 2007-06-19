@@ -3454,7 +3454,7 @@ jdbc.password=root]]></programlisting>
 
 <bean id="serviceStrategy" class="${custom.strategy.class}"/>]]></programlisting>
 					<para>If the class is unable to be resolved at runtime to a valid class,
-					resolution of the the bean will fail once it is about to be created
+					resolution of the bean will fail once it is about to be created
 					(which is during the <methodname>preInstantiateSingletons()</methodname>
 					phase of an <interfacename>ApplicationContext</interfacename> for a
 					non-lazy-init bean.)</para>
