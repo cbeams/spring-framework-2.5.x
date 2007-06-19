@@ -34,6 +34,7 @@ import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
+import org.springframework.core.JdkVersion;
 
 /**
  * Implementation of SQLExceptionTranslator that analyzes vendor-specific error codes.
@@ -43,6 +44,9 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * <ul>
  * <li>Try custom translation implemented by any subclass. Note that this class is
  * concrete and is typically used itself, in which case this rule doesn't apply.
+ * <li>Use subclass translator. Java 6 introduces its own SQLException hierarchy
+ * and in a Java 6 or later environment we will attempt a translation based on the
+ * subclass of the exception.
  * <li>Apply error code matching. Error codes are obtained from the SQLErrorCodesFactory
  * by default. This factory loads a "sql-error-codes.xml" file from the class path,
  * defining error code mappings for database names from database metadata.
@@ -76,6 +80,9 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	private SQLErrorCodes sqlErrorCodes;
 	
 	/** Fallback translator to use if SQL error code matching doesn't work */
+	private SQLExceptionTranslator subclassTranslator = null;
+
+	/** Fallback translator to use if SQL error code matching doesn't work */
 	private SQLExceptionTranslator fallbackTranslator = new SQLStateSQLExceptionTranslator();
 
 
@@ -84,6 +91,9 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	 * The SqlErrorCodes or DataSource property must be set.
 	 */
 	public SQLErrorCodeSQLExceptionTranslator() {
+		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_16) {
+			this.subclassTranslator = new SQLExceptionSubclassTranslator();
+		}
 	}
 
 	/**
@@ -95,6 +105,7 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	 * @see SQLErrorCodesFactory
 	 */
 	public SQLErrorCodeSQLExceptionTranslator(DataSource dataSource) {
+		this();
 		setDataSource(dataSource);
 	}
 
@@ -107,6 +118,7 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
 	 */
 	public SQLErrorCodeSQLExceptionTranslator(String dbName) {
+		this();
 		setDatabaseProductName(dbName);
 	}
 
@@ -116,7 +128,8 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	 * @param sec error codes
 	 */
 	public SQLErrorCodeSQLExceptionTranslator(SQLErrorCodes sec) {
-		this.sqlErrorCodes = sec;		
+		this();
+		this.sqlErrorCodes = sec;
 	}
 
 
@@ -163,6 +176,22 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 	}
 
 	/**
+	 * Override the default SQLException subclass translator.  This is only used for JAva 6.
+	 * @param subclassTranslator custom subclass exception translator to use
+	 * @see java.sql.SQLException
+	 */
+	public void setSubclassTranslator(SQLExceptionTranslator subclassTranslator) {
+		this.subclassTranslator = subclassTranslator;
+	}
+
+	/**
+	 * Return the subclass exception translator.
+	 */
+	public SQLExceptionTranslator getSubclassTranslator() {
+		return subclassTranslator;
+	}
+
+	/**
 	 * Override the default SQL state fallback translator.
 	 * @param fallback custom fallback exception translator to use if error code
 	 * translation fails
@@ -192,6 +221,14 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 		DataAccessException dex = customTranslate(task, sql, sqlEx);
 		if (dex != null) {
 			return dex;
+		}
+
+		// Second, try subclass translation - if we are in Java 6 or later then we should have one of these.
+		if (subclassTranslator != null) {
+			dex = subclassTranslator.translate(task, sql, sqlEx);
+			if (dex != null) {
+				return dex;
+			}
 		}
 
 		// Check SQLErrorCodes with corresponding error code, if available.

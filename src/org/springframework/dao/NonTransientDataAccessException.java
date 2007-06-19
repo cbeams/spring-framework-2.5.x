@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,30 @@
 package org.springframework.dao;
 
 /**
- * Root for exceptions thrown when we use a data access resource incorrectly.
- * Thrown for example on specifying bad SQL when using a RDBMS.
- * Resource-specific subclasses are supplied by concrete data access packages.
+ * Root of the hierarchy of data access exceptions that are considered non-transient - where a retry of the same
+ * operation would fail unless the cause of the Exception is corrected.
  *
- * @author Rod Johnson
+ * @author Thomas Risberg
+ * @since 2.1
+ * @see java.sql.SQLNonTransientException
  */
-public class InvalidDataAccessResourceUsageException extends NonTransientDataAccessException {
-	
+public abstract class NonTransientDataAccessException extends DataAccessException {
+
 	/**
-	 * Constructor for InvalidDataAccessResourceUsageException.
+	 * Constructor for NonTransientDataAccessException.
 	 * @param msg the detail message
 	 */
-	public InvalidDataAccessResourceUsageException(String msg) {
+	public NonTransientDataAccessException(String msg) {
 		super(msg);
 	}
-	
+
 	/**
-	 * Constructor for InvalidDataAccessResourceUsageException.
+	 * Constructor for NonTransientDataAccessException.
 	 * @param msg the detail message
-	 * @param cause the root cause from the data access API in use
+	 * @param cause the root cause (usually from using a underlying
+	 * data access API such as JDBC)
 	 */
-	public InvalidDataAccessResourceUsageException(String msg, Throwable cause) {
+	public NonTransientDataAccessException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
 

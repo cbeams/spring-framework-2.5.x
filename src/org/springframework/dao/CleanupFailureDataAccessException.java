@@ -29,7 +29,7 @@ package org.springframework.dao;
  *
  * @author Rod Johnson
  */
-public class CleanupFailureDataAccessException extends DataAccessException {
+public class CleanupFailureDataAccessException extends NonTransientDataAccessException {
 
 	/**
 	 * Constructor for CleanupFailureDataAccessException.

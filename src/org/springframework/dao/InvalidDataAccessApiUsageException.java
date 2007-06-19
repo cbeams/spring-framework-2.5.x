@@ -25,7 +25,7 @@ package org.springframework.dao;
  *
  * @author Rod Johnson
  */
-public class InvalidDataAccessApiUsageException extends DataAccessException {
+public class InvalidDataAccessApiUsageException extends NonTransientDataAccessException {
 
 	/**
 	 * Constructor for InvalidDataAccessApiUsageException.

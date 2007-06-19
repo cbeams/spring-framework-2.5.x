@@ -29,7 +29,7 @@ package org.springframework.dao;
  * @see CannotAcquireLockException
  * @see DeadlockLoserDataAccessException
  */
-public class ConcurrencyFailureException extends DataAccessException {
+public class ConcurrencyFailureException extends TransientDataAccessException {
 
 	/**
 	 * Constructor for ConcurrencyFailureException.

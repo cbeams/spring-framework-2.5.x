@@ -23,7 +23,7 @@ package org.springframework.dao;
  *
  * @author Rod Johnson
  */
-public abstract class UncategorizedDataAccessException extends DataAccessException {
+public abstract class UncategorizedDataAccessException extends NonTransientDataAccessException {
 
 	/**
 	 * Constructor for UncategorizedDataAccessException.

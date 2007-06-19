@@ -24,7 +24,7 @@ package org.springframework.dao;
  * @author Juergen Hoeller
  * @since 13.10.2003
  */
-public class DataRetrievalFailureException extends DataAccessException {
+public class DataRetrievalFailureException extends NonTransientDataAccessException {
 
 	/**
 	 * Constructor for DataRetrievalFailureException.

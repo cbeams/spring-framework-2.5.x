@@ -16,7 +16,7 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.NonTransientDataAccessException;
 
 /**
  * Exception to be thrown by a DataSourceLookup implementation,
@@ -25,7 +25,7 @@ import org.springframework.dao.DataAccessException;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class DataSourceLookupFailureException extends DataAccessException {
+public class DataSourceLookupFailureException extends NonTransientDataAccessException {
 
 	/**
 	 * Constructor for DataSourceLookupFailureException.

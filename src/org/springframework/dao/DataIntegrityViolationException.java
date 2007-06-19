@@ -24,7 +24,7 @@ package org.springframework.dao;
  *
  * @author Rod Johnson
  */
-public class DataIntegrityViolationException extends DataAccessException {
+public class DataIntegrityViolationException extends NonTransientDataAccessException {
 
 	/**
 	 * Constructor for DataIntegrityViolationException.

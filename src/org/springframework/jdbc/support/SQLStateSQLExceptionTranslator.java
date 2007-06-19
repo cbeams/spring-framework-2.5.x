@@ -68,10 +68,11 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 
 	// Populate reference data.
 	static {
-		BAD_SQL_CODES.add("07");
-		BAD_SQL_CODES.add("37");
-		BAD_SQL_CODES.add("42");
-		BAD_SQL_CODES.add("2A");
+		BAD_SQL_CODES.add("07");	// Dynamic SQL error
+		BAD_SQL_CODES.add("21");	// Cardinality violation
+		BAD_SQL_CODES.add("37");	// Syntax error dynamic SQL
+		BAD_SQL_CODES.add("42");	// Syntax error
+		BAD_SQL_CODES.add("2A");	// Syntax error direct SQL
 		BAD_SQL_CODES.add("65");	// Oracle throws this on unknown identifier
 		BAD_SQL_CODES.add("S0");	// MySQL uses this - from ODBC error codes?
 

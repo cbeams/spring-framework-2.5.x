@@ -23,7 +23,7 @@ package org.springframework.dao;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class PermissionDeniedDataAccessException extends DataAccessException {
+public class PermissionDeniedDataAccessException extends NonTransientDataAccessException {
 
 	/**
 	 * Constructor for PermissionDeniedDataAccessException.

@@ -21,11 +21,12 @@ package org.springframework.dao;
  * for example, if we can't connect to a database using JDBC.
  *
  * @author Rod Johnson
+ * @author Thomas Risberg
  */
-public class DataAccessResourceFailureException extends DataAccessException {
+public class DataAccessResourceFailureException extends NonTransientDataAccessResourceException {
 
 	/**
-	 * Constructor for ResourceFailureDataAccessException.
+	 * Constructor for DataAccessResourceFailureException.
 	 * @param msg the detail message
 	 */
 	public DataAccessResourceFailureException(String msg) {
@@ -33,7 +34,7 @@ public class DataAccessResourceFailureException extends DataAccessException {
 	}
 
 	/**
-	 * Constructor for ResourceFailureDataAccessException.
+	 * Constructor for DataAccessResourceFailureException.
 	 * @param msg the detail message
 	 * @param cause the root cause from the data access API in use
 	 */
