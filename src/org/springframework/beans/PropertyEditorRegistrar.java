@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 package org.springframework.beans;
 
 /**
- * Interface for strategies that register custom property editors with a
- * property editor registry. This is particularly useful when you need to use
- * the same set of property editors in several different situations: write
- * a corresponding registrar and reuse that in each case.
+ * Interface for strategies that register custom
+ * {@link java.beans.PropertyEditor property editors} with a
+ * {@link org.springframework.beans.PropertyEditorRegistry property editor registry}.
+ *
+ * <p>This is particularly useful when you need to use the same set of
+ * property editors in several different situations: write a corresponding
+ * registrar and reuse that in each case.
  *
  * @author Juergen Hoeller
  * @since 1.2.6
@@ -30,12 +33,15 @@ package org.springframework.beans;
 public interface PropertyEditorRegistrar {
 	
 	/**
-	 * Register custom PropertyEditors with the given PropertyEditorRegistry.
-	 * The passed-in registry will usually be a BeanWrapper or a DataBinder.
-	 * @param registry the PropertyEditorRegistry to register the custom
-	 * PropertyEditors with
-	 * @see BeanWrapper
-	 * @see org.springframework.validation.DataBinder
+	 * Register custom {@link java.beans.PropertyEditor PropertyEditors} with
+	 * the given <code>PropertyEditorRegistry</code>.
+	 * <p>The passed-in registry will usually be a {@link BeanWrapper} or a
+	 * {@link org.springframework.validation.DataBinder DataBinder}.
+	 * <p>It is expected that implementations will create brand new
+	 * <code>PropertyEditors</code> instances for each invocation of this
+	 * method (since <code>PropertyEditors</code> are not threadsafe).
+	 * @param registry the <code>PropertyEditorRegistry</code> to register the
+	 * custom <code>PropertyEditors</code> with
 	 */
 	void registerCustomEditors(PropertyEditorRegistry registry);
 
