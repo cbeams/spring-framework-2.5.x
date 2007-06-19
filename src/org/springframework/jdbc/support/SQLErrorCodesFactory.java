@@ -205,7 +205,8 @@ public class SQLErrorCodesFactory {
 			SQLErrorCodes sec = (SQLErrorCodes) this.dataSourceCache.get(dataSource);
 			if (sec != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("SQLErrorCodes found in cache for DataSource [" + dataSource + "]");
+					logger.debug("SQLErrorCodes found in cache for DataSource [" +
+							dataSource.getClass().getName() + '@' + Integer.toHexString(dataSource.hashCode()) + "]");
 				}
 				return sec;
 			}
@@ -215,7 +216,8 @@ public class SQLErrorCodesFactory {
 						JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
 				if (dbName != null) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Database product name cached for DataSource [" + dataSource +
+						logger.debug("Database product name cached for DataSource [" +
+								dataSource.getClass().getName() + '@' + Integer.toHexString(dataSource.hashCode()) +
 								"]: name is '" + dbName + "'");
 					}
 					sec = getErrorCodes(dbName);
