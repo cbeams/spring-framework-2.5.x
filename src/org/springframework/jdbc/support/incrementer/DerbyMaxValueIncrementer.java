@@ -15,6 +15,7 @@ import java.sql.Statement;
  * Class to increment maximum value of a given Derby table with the equivalent
  * of an auto-increment column. Note: If you use this class, your Derby key
  * column should <i>NOT</i> be defined as an IDENTITY column, as the sequence table does the job.
+ * Thanks to Endre St¿lsvik for the suggestion!
  *
  * <p>The sequence is kept in a table. There should be one sequence table per
  * table that needs an auto-generated key.
@@ -34,7 +35,7 @@ import java.sql.Statement;
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
  *
- * <b>NOTE:</b>  Since Derby supports the JDBC 3.0 method getGeneratedKeys it's recommended to
+ * <b>HINT:</b>  Since Derby supports the JDBC 3.0 method getGeneratedKeys it's recommended to
  * use IDENTITY columns directly in the tables and then utilizing a {@link org.springframework.jdbc.support.KeyHolder}
  * when calling the with the update(PreparedStatementCreator psc, KeyHolder generatedKeyHolder) method of
  * the {@link org.springframework.jdbc.core.JdbcTemplate}.

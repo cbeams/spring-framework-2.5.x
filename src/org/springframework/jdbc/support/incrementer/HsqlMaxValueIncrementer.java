@@ -47,9 +47,12 @@ import org.springframework.jdbc.support.JdbcUtils;
  * is rolled back, the unused values will never be served. The maximum hole size in
  * numbering is consequently the value of cacheSize.
  *
+ * NOTE: HSQL now supports sequences and you should consider using them instead.
+ *
  * @author Jean-Pierre Pawlak
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @see org.springframework.jdbc.support.incrementer.HsqlSequenceMaxValueIncrementer
  */
 public class HsqlMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
 
