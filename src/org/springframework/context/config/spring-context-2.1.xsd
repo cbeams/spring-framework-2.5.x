@@ -13,8 +13,8 @@
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[
 	Defines the configuration elements for the Spring Framework's application
-	context support. Allows to activate various configuration styles for the
-	containing Spring ApplicationContext.
+	context support. Effects the activation of various configuration styles
+	for the containing Spring ApplicationContext.
 		]]></xsd:documentation>
 	</xsd:annotation>
 
@@ -91,7 +91,7 @@
 	<xsd:element name="load-time-weaver">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Activates a Spring LoadTimeWeaver for this application context, available as bean with name
+	Activates a Spring LoadTimeWeaver for this application context, available as a bean with name
 	"loadTimeWeaver". Any bean that implements the LoadTimeWeaverAware interface will then
 	receive the LoadTimeWeaver reference automatically; e.g. Spring's JPA bootstrap support.
 
