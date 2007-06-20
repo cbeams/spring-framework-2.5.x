@@ -66,11 +66,6 @@
 		<path id="maven.lib.path">
 			<fileset dir="${basedir}/lib">
 				<include name="maven/maven-ant-tasks.jar"/>
-				<!--include name="aws/spring-aws-ant.jar"/>
-				<include name="jets3t/jets3t.jar"/>
-				<include name="jakarta-commons/commons-codec.jar"/>
-				<include name="jakarta-commons/commons-httpclient.jar"/>
-				<include name="jakarta-commons/commons-logging.jar"/-->
 			</fileset>
 		</path>
 		<taskdef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant"
@@ -959,7 +954,7 @@
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-aop.jar">
-			<pom file="${pom.src.dir}/spring.pom" />
+			<pom file="${pom.src.dir}/spring-aop.pom" />
 			<attach file="${dist.dir}/module-sources/spring-aop-sources.jar" classifier="sources"/>
 		</maven:install>
 
