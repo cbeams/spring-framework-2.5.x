@@ -477,11 +477,21 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <section id="xsd-config-body-schemas-jee-jndi-lookup">
                 <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (simple)</title>
                 <para>Before...</para>
-                <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
+                <programlisting><![CDATA[<bean id="]]><emphasis role="bold"><![CDATA[dataSource]]></emphasis><![CDATA[" class="org.springframework.jndi.JndiObjectFactoryBean">
     <property name="jndiName" value="jdbc/MyDataSource"/>
+</bean>
+
+<bean id="userDao" class="com.foo.JdbcUserDao">
+    ]]><lineannotation>&lt;!-- Spring will do the cast automatically (as usual) --&gt;</lineannotation><![CDATA[
+    <property name="dataSource" ref="]]><emphasis role="bold">dataSource</emphasis>"/><![CDATA[
 </bean>]]></programlisting>
                 <para>After...</para>
-                <programlisting><![CDATA[<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource"/>]]></programlisting>
+                <programlisting><![CDATA[<jee:jndi-lookup id="]]><emphasis role="bold"><![CDATA[dataSource]]></emphasis><![CDATA[" jndi-name="jdbc/MyDataSource"/>
+
+<bean id="userDao" class="com.foo.JdbcUserDao">
+    ]]><lineannotation>&lt;!-- Spring will do the cast automatically (as usual) --&gt;</lineannotation><![CDATA[
+    <property name="dataSource" ref="]]><emphasis role="bold">dataSource</emphasis>"/><![CDATA[
+</bean>]]></programlisting>
             </section>
             <section id="xsd-config-body-schemas-jee-jndi-lookup-environment-single">
                 <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (with single JNDI environment setting)</title>
