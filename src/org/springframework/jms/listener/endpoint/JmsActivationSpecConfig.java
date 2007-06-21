@@ -20,11 +20,11 @@ import javax.jms.Session;
 
 /**
  * Common configuration object for activating a JMS message endpoint.
- * Gets converted into a provided-specific JCA 1.5 ActivationSpec
+ * Gets converted into a provider-specific JCA 1.5 ActivationSpec
  * object for activating the endpoint.
  *
  * <p>Typically used in combination with {@link JmsMessageEndpointManager},
- * but not tied it.
+ * but not tied to it.
  *
  * @author Juergen Hoeller
  * @since 2.1
