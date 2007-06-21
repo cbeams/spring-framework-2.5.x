@@ -117,7 +117,7 @@ import org.springframework.context.Lifecycle;
  * &lt;bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</pre>
  *
  * Alternatively, check out your resource provider's ActivationSpec object,
- * which should support local transactions through a provided-specific config flag,
+ * which should support local transactions through a provider-specific config flag,
  * e.g. ActiveMQActivationSpec's "useRAManagedTransaction" bean property.
  *
  * <pre class="code">

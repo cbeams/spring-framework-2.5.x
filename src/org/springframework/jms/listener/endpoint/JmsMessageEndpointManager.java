@@ -27,7 +27,7 @@ import org.springframework.jca.endpoint.GenericMessageEndpointManager;
  * adding JMS-specific support for ActivationSpec configuration.
  *
  * <p>Allows for defining a common {@link JmsActivationSpecConfig} object
- * that gets converted into a provided-specific JCA 1.5 ActivationSpec
+ * that gets converted into a provider-specific JCA 1.5 ActivationSpec
  * object for activating the endpoint.
  *
  * <p><b>NOTE:</b> This JCA-based endpoint manager supports standard JMS
@@ -66,14 +66,14 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager {
 	}
 
 	/**
-	 * Set the the XA transaction manager to use for wrapping endpoint
+	 * Set the XA transaction manager to use for wrapping endpoint
 	 * invocations, enlisting the endpoint resource in each such transaction.
 	 * <p>The passed-in object may be a transaction manager which implements
 	 * Spring's {@link org.springframework.transaction.jta.TransactionFactory}
-	 * interface, or a plan {@link javax.transaction.TransactionManager}.
+	 * interface, or a plain {@link javax.transaction.TransactionManager}.
 	 * <p>If no transaction manager is specified, the endpoint invocation
-	 * will simply not be wrapped in an XA transaction. Check out your
-	 * resource provider's ActivationSpec documentation for local
+	 * will simply not be wrapped in an XA transaction. Consult your
+	 * resource provider's ActivationSpec documentation for the local
 	 * transaction options of your particular provider.
 	 * <p>This is a shortcut for configuring a dedicated JmsMessageEndpointFactory.
 	 * @see JmsMessageEndpointFactory#setTransactionManager
