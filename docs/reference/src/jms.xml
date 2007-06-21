@@ -719,7 +719,206 @@ public interface SessionAwareMessageListener {
   <property name="messageListener" ref="messageListener" />
   ]]><emphasis role="bold"><![CDATA[<property name="transactionManager" ref="transactionManager" />]]></emphasis><![CDATA[
 </bean>]]></programlisting>
-  	</section>  	
+  	</section>
+
+  </section>
+  
+  <section id="jms-namespace">
+    <title>JMS Namespace Support</title>
+    
+    <para>Spring 2.1 introduces a namespace for simplifying JMS configuration. The 
+    namespace consists of two top-level elements: <literal>listener-container</literal>
+    and <literal>jca-listener-container</literal> both of which may contain one or more 
+    <literal>listener</literal> child elements. Here is an example of a basic configuration
+    for two listeners.</para>
+
+    <programlisting><![CDATA[<jms:listener-container>
+  <jms:listener destination="queue.orders" ref="orderService" method="placeOrder"/>
+  <jms:listener destination="queue.confirmations" ref="confirmationLogger" method="log"/>
+</jms:listener-container>]]></programlisting>
+
+    <para>The example above is equivalent to creating two distinct listener container bean
+    definitions and two distinct <classname>MessageListenerAdapter</classname> bean 
+    definitions as demonstrated in the section entitled
+    <xref linkend="jms-receiving-async-message-listener-adapter"/>. In addition to the
+    attributes shown above, the <literal>listener</literal> element may contain several
+    optional ones. The following table describes all available attributes:</para>
+    
+    <table id="jms-namespace-listener-tbl">
+        <title>Atrributes of the JMS <literal>listener</literal> element</title>
+        <tgroup cols="2">
+            <colspec colname="c1" colwidth="2*" />
+            <colspec colname="c2" colwidth="4*" />
+            <thead>
+                <row>
+                    <entry>Attribute</entry>
+                    <entry>Description</entry>
+                </row>
+            </thead>
+            <tbody>
+                <row>
+                    <entry>id</entry>
+                    <entry>
+                        <para>A bean name for the hosting listener container. If not
+                        specified, a bean name will be automatically generated.</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>destination <emphasis role="bold">(required)</emphasis></entry>
+                    <entry>
+                        <para>The destination name for this listener, resolved through the 
+                        <interfacename>DestinationResolver</interfacename> strategy.</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>ref <emphasis role="bold">(required)</emphasis></entry>
+                    <entry>
+                        <para>The bean name of the handler object.</para> 
+                    </entry>
+                </row>
+                <row>
+                    <entry>method</entry>
+                    <entry>
+                        <para>The name of the handler method to invoke. If the 
+                        <literal>ref</literal> points to a 
+                        <interfacename>MessageListener</interfacename> or Spring
+                        <interfacename>SessionAwareMessageListener</interfacename>,
+                        this attribute may be omitted.</para> 
+                    </entry>
+                </row>
+                <row>
+                    <entry>subscription</entry>
+                    <entry>
+                        <para>The name of the durable subscription, if any.</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>selector</entry>
+                    <entry>
+                        <para>An optional message selector for this listener.</para> 
+                    </entry>
+                </row>
+            </tbody>
+        </tgroup>
+    </table>
+    
+    <para>The <literal>listener-container</literal> element also accepts several optional
+    attributes. This allows for customization of the various strategies (e.g.
+    <property>taskExecutor</property> and <property>destinationResolver</property>) as well as
+    basic JMS settings and resource references. With these attributes, it is possible to define
+    highly-customized listener containers while still benefiting from the convenience of the
+    namespace.</para>
+    
+    <programlisting><![CDATA[<jms:listener-container connection-factory="myConnectionFactory"
+                        task-executor="myTaskExecutor"
+                        destination-resolver="myDestinationResolver"
+                        transaction-manager="myTransactionManager"
+                        concurrency="10">
+  <jms:listener destination="queue.orders" ref="orderService" method="placeOrder"/>
+  <jms:listener destination="queue.confirmations" ref="confirmationLogger" method="log"/>
+</jms:listener-container>]]></programlisting>
+
+    <para>The following table describes all available attributes. Consult the javadoc of the
+    <classname>AbstractMessageListenerContainer</classname> and its concrete subclasses for
+    more detail on the individual properties. The javadoc also provides a discussion of
+    transaction choices and message redelivery scenarios.</para>
+    
+    <table id="jms-namespace-listener-container-tbl">
+        <title>Atrributes of the JMS <literal>listener-container</literal> element</title>
+        <tgroup cols="2">
+            <colspec colname="c1" colwidth="2*" />
+            <colspec colname="c2" colwidth="4*" />
+            <thead>
+                <row>
+                    <entry>Attribute</entry>
+                    <entry>Description</entry>
+                </row>
+            </thead>
+            <tbody>
+                <row>
+                    <entry>container-type</entry>
+                    <entry>
+                        <para>The type of this listener container. Available options are: 
+                        <literal>default</literal>, <literal>simple</literal>,
+                        <literal>default102</literal>, or <literal>simple102</literal>
+                        (the default value is <literal>'default'</literal>).</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>connection-factory</entry>
+                    <entry>
+                        <para>A reference to the JMS
+                        <interfacename>ConnectionFactory</interfacename> bean (the default bean
+                        name is <literal>'connectionFactory'</literal>).</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>task-executor</entry>
+                    <entry>
+                        <para>A reference to the Spring <interfacename>TaskExecutor</interfacename>
+                        for the JMS listener invokers.</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>destination-resolver</entry>
+                    <entry>
+                        <para>A reference to the <interfacename>DestinationResolver</interfacename>
+                        strategy for resolving JMS <interfacename>Destinations</interfacename>.
+                        </para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>destination-type</entry>
+                    <entry>
+                        <para>The JMS destination type for this listener. Valid options include
+                        <literal>queue</literal>, <literal>topic</literal>, or
+                        <literal>durableTopic</literal> (the default is
+                        <literal>'queue'</literal>).</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>client-id</entry>
+                    <entry>
+                        <para>The JMS client id for this listener container.</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>acknowledge</entry>
+                    <entry>
+                        <para>The native JMS acknowledge mode. Valid options include:
+                        <literal>auto</literal>, <literal>client</literal>,
+                        <literal>dups-ok</literal>, or <literal>transacted</literal>
+                        (the default is <literal>'auto'</literal>). A value of
+                        <literal>'transacted'</literal> activates a locally transacted Session.
+                        As an alternative, specify the <literal>transaction-manager</literal>
+                        attribute described below.</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>transaction-manager</entry>
+                    <entry>
+                        <para>A reference to a Spring
+                        <interfacename>PlatformTransactionManager</interfacename>.</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>concurrency</entry>
+                    <entry>
+                        <para>The maximum number of concurrent sessions/consumers to start for
+                        each listener.</para>
+                    </entry>
+                </row>
+                <row>
+                    <entry>prefetch</entry>
+                    <entry>
+                        <para>The maximum number of messages to load into a single session.
+                        Note that raising this number might lead to starvation of concurrent
+                        consumers!</para>
+                    </entry>
+                </row>
+            </tbody>
+        </tgroup>
+    </table>	
   	
   </section>
 
