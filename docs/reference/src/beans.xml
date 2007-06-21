@@ -3427,6 +3427,10 @@ cfg.postProcessBeanFactory(factory);]]></programlisting>
 jdbc.url=jdbc:hsqldb:hsql://production:9002
 jdbc.username=sa
 jdbc.password=root]]></programlisting>
+                <para>With the <literal>context</literal> namespace introduced in Spring 2.1,
+                it is possible to configure property placeholders with a single element (and
+                multiple locations may be provided as a comma-separated list):</para>
+                <programlisting><![CDATA[<context:property-placeholder location="classpath:com/foo/jdbc.properties"/>]]></programlisting>
                 <para>The <classname>PropertyPlaceholderConfigurer</classname> doesn't only
 				look for properties in the <classname>Properties</classname> file you
 				specify, but also checks against the Java <classname>System</classname>
@@ -4305,7 +4309,7 @@ public class JpaMovieFinder implements MovieFinder {
             custom filters. These can be added as either <emphasis>include-filter</emphasis>
             or <emphasis>exclude-filter</emphasis> sub-elements of the 'component-scan'
             element. Each filter element requires the 'type' and 'expression' attributes. 
-            Currently, three filtering options exist as described below.</para>
+            Four filtering options exist as described below.</para>
             <table id="beans-scanning-filters-tbl">
                 <title>Filter Types</title>
                 <tgroup cols="2">
@@ -4334,6 +4338,12 @@ public class JpaMovieFinder implements MovieFinder {
                             <entry>regex</entry>
                             <entry>
                                 <para>org\.example\.Default.*</para>
+                            </entry>
+                        </row>
+                        <row>
+                            <entry>aspectj</entry>
+                            <entry>
+                                <para><interfacename>org.example..*Service+</interfacename></para>
                             </entry>
                         </row>
                     </tbody>
