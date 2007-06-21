@@ -201,7 +201,6 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	protected RemoteInvocationResult executeRequest(RemoteInvocation invocation) throws JMSException {
 		QueueConnection con = getConnectionFactory().createQueueConnection();
 		QueueSession session = null;
-		QueueRequestor requestor = null;
 		try {
 			session = con.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
 			Queue queueToUse = resolveQueue(session);
@@ -211,7 +210,6 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 			return extractInvocationResult(responseMessage);
 		}
 		finally {
-			JmsUtils.closeQueueRequestor(requestor);
 			JmsUtils.closeSession(session);
 			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory(), true);
 		}
@@ -276,8 +274,14 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	protected Message doExecuteRequest(
 			QueueSession session, Queue queue, Message requestMessage) throws JMSException {
 
-		QueueRequestor requestor = new QueueRequestor(session, queue);
-		return requestor.request(requestMessage);
+		QueueRequestor requestor = null;
+		try {
+			requestor = new QueueRequestor(session, queue);
+			return requestor.request(requestMessage);
+		}
+		finally {
+			JmsUtils.closeQueueRequestor(requestor);
+		}
 	}
 
 	/**
