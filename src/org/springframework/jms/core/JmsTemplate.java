@@ -74,13 +74,18 @@ import org.springframework.util.Assert;
  * @see javax.jms.MessageConsumer
  */
 public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations {
+	
+	/**
+	 * Timeout value indicating that a receive operation should
+	 * check if a message is immediately available without blocking.
+	 */
+	public static final long RECEIVE_TIMEOUT_NO_WAIT = -1;
 
 	/**
-	 * Default timeout for receive operations:
-	 * -1 indicates a blocking receive without timeout.
+	 * Timeout value indicating a blocking receive without timeout.
 	 */
-	public static final long DEFAULT_RECEIVE_TIMEOUT = -1;
-
+	public static final long RECEIVE_TIMEOUT_INDEFINITE_WAIT = 0;
+	
 
 	private final JmsTemplateResourceFactory transactionalResourceFactory =
 			new JmsTemplateResourceFactory();
@@ -97,7 +102,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	private boolean pubSubNoLocal = false;
 
-	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
+	private long receiveTimeout = RECEIVE_TIMEOUT_INDEFINITE_WAIT;
 
 
 	private boolean explicitQosEnabled = false;
@@ -262,9 +267,13 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	/**
 	 * Set the timeout to use for receive calls.
-	 * The default is -1, which means no timeout.
+	 * <p>The default is {@link #RECEIVE_TIMEOUT_INDEFINITE_WAIT}, which indicates
+	 * a blocking receive without timeout.
+	 * <p>Specify {@link #RECEIVE_TIMEOUT_NO_WAIT} to inidicate that a receive operation
+	 * should check if a message is immediately available without blocking.
 	 * @see javax.jms.MessageConsumer#receive(long)
 	 * @see javax.jms.MessageConsumer#receive()
+	 * @see javax.jms.MessageConsumer#receiveNoWait()
 	 */
 	public void setReceiveTimeout(long receiveTimeout) {
 		this.receiveTimeout = receiveTimeout;
@@ -692,8 +701,18 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			if (resourceHolder != null && resourceHolder.hasTimeout()) {
 				timeout = resourceHolder.getTimeToLiveInMillis();
 			}
-			Message message = (timeout >= 0) ?
-					consumer.receive(timeout) : consumer.receive();
+			
+			Message message = null;
+			if (timeout == RECEIVE_TIMEOUT_NO_WAIT) {
+				message = consumer.receiveNoWait();
+			}
+			else if (timeout > 0) {
+				message = consumer.receive(timeout);
+			}
+			else {
+				message = consumer.receive();
+			}
+
 			if (session.getTransacted()) {
 				// Commit necessary - but avoid commit call within a JTA transaction.
 				if (isSessionLocallyTransacted(session)) {

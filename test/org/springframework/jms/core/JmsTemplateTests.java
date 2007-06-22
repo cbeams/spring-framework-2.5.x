@@ -544,76 +544,76 @@ public class JmsTemplateTests extends TestCase {
 	}
 
 	public void testReceiveDefaultDestination() throws Exception {
-		doTestReceive(true, true, false, false, false, false, false);
+		doTestReceive(true, true, false, false, false, false, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testReceiveDefaultDestinationName() throws Exception {
-		doTestReceive(false, true, false, false, false, false, false);
+		doTestReceive(false, true, false, false, false, false, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testReceiveDestination() throws Exception {
-		doTestReceive(true, false, false, false, false, true, false);
+		doTestReceive(true, false, false, false, false, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testReceiveDestinationWithClientAcknowledge() throws Exception {
-		doTestReceive(true, false, false, true, false, false, true);
+		doTestReceive(true, false, false, true, false, false, 1000);
 	}
 
 	public void testReceiveDestinationName() throws Exception {
-		doTestReceive(false, false, false, false, false, true, true);
+		doTestReceive(false, false, false, false, false, true, 1000);
 	}
 
 	public void testReceiveDefaultDestinationWithSelector() throws Exception {
-		doTestReceive(true, true, false, false, true, true, true);
+		doTestReceive(true, true, false, false, true, true, 1000);
 	}
 
 	public void testReceiveDefaultDestinationNameWithSelector() throws Exception {
-		doTestReceive(false, true, false, false, true, true, true);
+		doTestReceive(false, true, false, false, true, true, JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT);
 	}
 
 	public void testReceiveDestinationWithSelector() throws Exception {
-		doTestReceive(true, false, false, false, true, false, true);
+		doTestReceive(true, false, false, false, true, false, 1000);
 	}
 
 	public void testReceiveDestinationWithClientAcknowledgeWithSelector() throws Exception {
-		doTestReceive(true, false, false, true, true, true, false);
+		doTestReceive(true, false, false, true, true, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testReceiveDestinationNameWithSelector() throws Exception {
-		doTestReceive(false, false, false, false, true, false, false);
+		doTestReceive(false, false, false, false, true, false, JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT);
 	}
 
 	public void testReceiveAndConvertDefaultDestination() throws Exception {
-		doTestReceive(true, true, true, false, false, false, true);
+		doTestReceive(true, true, true, false, false, false, 1000);
 	}
 
 	public void testReceiveAndConvertDefaultDestinationName() throws Exception {
-		doTestReceive(false, true, true, false, false, false, true);
+		doTestReceive(false, true, true, false, false, false, 1000);
 	}
 
 	public void testReceiveAndConvertDestinationName() throws Exception {
-		doTestReceive(false, false, true, false, false, true, false);
+		doTestReceive(false, false, true, false, false, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testReceiveAndConvertDestination() throws Exception {
-		doTestReceive(true, false, true, false, false, true, true);
+		doTestReceive(true, false, true, false, false, true, 1000);
 	}
 
 	public void testReceiveAndConvertDefaultDestinationWithSelector() throws Exception {
-		doTestReceive(true, true, true, false, true, true, true);
+		doTestReceive(true, true, true, false, true, true, JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT);
 	}
 
 	public void testReceiveAndConvertDestinationNameWithSelector() throws Exception {
-		doTestReceive(false, false, true, false, true, true, false);
+		doTestReceive(false, false, true, false, true, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testReceiveAndConvertDestinationWithSelector() throws Exception {
-		doTestReceive(true, false, true, false, true, false, true);
+		doTestReceive(true, false, true, false, true, false, 1000);
 	}
 
 	private void doTestReceive(
 			boolean explicitDestination, boolean useDefaultDestination, boolean testConverter,
-			boolean clientAcknowledge, boolean messageSelector, boolean noLocal, boolean timeout)
+			boolean clientAcknowledge, boolean messageSelector, boolean noLocal, long timeout)
 			throws Exception {
 
 		JmsTemplate template = createTemplate();
@@ -632,9 +632,7 @@ public class JmsTemplateTests extends TestCase {
 		if (noLocal) {
 			template.setPubSubNoLocal(true);
 		}
-		if (timeout) {
-			template.setReceiveTimeout(1000);
-		}
+		template.setReceiveTimeout(timeout);
 
 		mockConnection.start();
 		connectionControl.setVoidCallable(1);
@@ -681,12 +679,16 @@ public class JmsTemplateTests extends TestCase {
 		connectionControl.replay();
 		messageControl.replay();
 
-		if (timeout) {
-			mockMessageConsumer.receive(1000);
+		if (timeout == JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT) {
+			mockMessageConsumer.receiveNoWait();
 		}
-		else {
+		else if (timeout == JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT) {
 			mockMessageConsumer.receive();
 		}
+		else {
+			mockMessageConsumer.receive(timeout);
+		}
+
 		messageConsumerControl.setReturnValue(mockMessage);
 		mockMessageConsumer.close();
 		messageConsumerControl.setVoidCallable(1);

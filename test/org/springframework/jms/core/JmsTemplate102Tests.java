@@ -754,121 +754,121 @@ public class JmsTemplate102Tests extends TestCase {
 	}
 
 	public void testQueueReceiveDefaultDestination() throws Exception {
-		doTestReceive(false, false, true, false, false, false, false, false);
+		doTestReceive(false, false, true, false, false, false, false, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testQueueReceiveDestination() throws Exception {
-		doTestReceive(false, true, false, false, false, false, true, false);
+		doTestReceive(false, true, false, false, false, false, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testQueueReceiveDestinationWithClientAcknowledge() throws Exception {
-		doTestReceive(false, true, false, false, true, false, false, true);
+		doTestReceive(false, true, false, false, true, false, false, 1000);
 	}
 
 	public void testQueueReceiveStringDestination() throws Exception {
-		doTestReceive(false, false, false, false, false, false, true, true);
+		doTestReceive(false, false, false, false, false, false, true, JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT);
 	}
 
 	public void testQueueReceiveDefaultDestinationWithSelector() throws Exception {
-		doTestReceive(false, false, true, false, false, true, true, true);
+		doTestReceive(false, false, true, false, false, true, true, 1000);
 	}
 
 	public void testQueueReceiveDestinationWithSelector() throws Exception {
-		doTestReceive(false, true, false, false, false, true, false, true);
+		doTestReceive(false, true, false, false, false, true, false, JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT);
 	}
 
 	public void testQueueReceiveDestinationWithClientAcknowledgeWithSelector() throws Exception {
-		doTestReceive(false, true, false, false, true, true, true, false);
+		doTestReceive(false, true, false, false, true, true, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testQueueReceiveStringDestinationWithSelector() throws Exception {
-		doTestReceive(false, false, false, false, false, true, false, false);
+		doTestReceive(false, false, false, false, false, true, false, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testQueueReceiveAndConvertDefaultDestination() throws Exception {
-		doTestReceive(false, false, true, true, false, false, false, true);
+		doTestReceive(false, false, true, true, false, false, false, 1000);
 	}
 
 	public void testQueueReceiveAndConvertStringDestination() throws Exception {
-		doTestReceive(false, false, false, true, false, false, true, false);
+		doTestReceive(false, false, false, true, false, false, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testQueueReceiveAndConvertDestination() throws Exception {
-		doTestReceive(false, true, false, true, false, false, true, true);
+		doTestReceive(false, true, false, true, false, false, true, 1000);
 	}
 
 	public void testQueueReceiveAndConvertDefaultDestinationWithSelector() throws Exception {
-		doTestReceive(false, false, true, true, false, true, true, true);
+		doTestReceive(false, false, true, true, false, true, true, JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT);
 	}
 
 	public void testQueueReceiveAndConvertStringDestinationWithSelector() throws Exception {
-		doTestReceive(false, false, false, true, false, true, true, false);
+		doTestReceive(false, false, false, true, false, true, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testQueueReceiveAndConvertDestinationWithSelector() throws Exception {
-		doTestReceive(false, true, false, true, false, true, false, true);
+		doTestReceive(false, true, false, true, false, true, false, 1000);
 	}
 
 	public void testTopicReceiveDefaultDestination() throws Exception {
-		doTestReceive(true, false, true, false, false, false, false, false);
+		doTestReceive(true, false, true, false, false, false, false, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testTopicReceiveDestination() throws Exception {
-		doTestReceive(true, true, false, false, false, false, true, false);
+		doTestReceive(true, true, false, false, false, false, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testTopicReceiveDestinationWithClientAcknowledge() throws Exception {
-		doTestReceive(true, true, false, false, true, false, false, true);
+		doTestReceive(true, true, false, false, true, false, false, 1000);
 	}
 
 	public void testTopicReceiveStringDestination() throws Exception {
-		doTestReceive(true, false, false, false, false, false, true, true);
+		doTestReceive(true, false, false, false, false, false, true, JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT);
 	}
 
 	public void testTopicReceiveDefaultDestinationWithSelector() throws Exception {
-		doTestReceive(true, false, true, false, false, true, true, true);
+		doTestReceive(true, false, true, false, false, true, true, 1000);
 	}
 
 	public void testTopicReceiveDestinationWithSelector() throws Exception {
-		doTestReceive(true, true, false, false, false, true, false, true);
+		doTestReceive(true, true, false, false, false, true, false, 1000);
 	}
 
 	public void testTopicReceiveDestinationWithClientAcknowledgeWithSelector() throws Exception {
-		doTestReceive(true, true, false, false, true, true, true, false);
+		doTestReceive(true, true, false, false, true, true, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testTopicReceiveStringDestinationWithSelector() throws Exception {
-		doTestReceive(true, false, false, false, false, true, false, false);
+		doTestReceive(true, false, false, false, false, true, false, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testTopicReceiveAndConvertDefaultDestination() throws Exception {
-		doTestReceive(true, false, true, true, false, false, false, true);
+		doTestReceive(true, false, true, true, false, false, false, 1000);
 	}
 
 	public void testTopicReceiveAndConvertStringDestination() throws Exception {
-		doTestReceive(true, false, false, true, false, false, true, false);
+		doTestReceive(true, false, false, true, false, false, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testTopicReceiveAndConvertDestination() throws Exception {
-		doTestReceive(true, true, false, true, false, false, true, true);
+		doTestReceive(true, true, false, true, false, false, true, 1000);
 	}
 
 	public void testTopicReceiveAndConvertDefaultDestinationWithSelector() throws Exception {
-		doTestReceive(true, false, true, true, false, true, true, true);
+		doTestReceive(true, false, true, true, false, true, true, JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT);
 	}
 
 	public void testTopicReceiveAndConvertStringDestinationWithSelector() throws Exception {
-		doTestReceive(true, false, false, true, false, true, true, false);
+		doTestReceive(true, false, false, true, false, true, true, JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT);
 	}
 
 	public void testTopicReceiveAndConvertDestinationWithSelector() throws Exception {
-		doTestReceive(true, true, false, true, false, true, false, true);
+		doTestReceive(true, true, false, true, false, true, false, 1000);
 	}
 
 	private void doTestReceive(
 			boolean pubSub,
 			boolean explicitDestination, boolean useDefaultDestination, boolean testConverter,
-			boolean clientAcknowledge, boolean messageSelector, boolean noLocal, boolean timeout)
+			boolean clientAcknowledge, boolean messageSelector, boolean noLocal, long timeout)
 			throws Exception {
 
 		JmsTemplate102 template = createTemplate();
@@ -915,9 +915,7 @@ public class JmsTemplate102Tests extends TestCase {
 		if (noLocal) {
 			template.setPubSubNoLocal(true);
 		}
-		if (timeout) {
-			template.setReceiveTimeout(1000);
-		}
+		template.setReceiveTimeout(timeout);
 
 		if (pubSub) {
 			mockTopicConnection.start();
@@ -993,11 +991,14 @@ public class JmsTemplate102Tests extends TestCase {
 		}
 		messageControl.replay();
 
-		if (timeout) {
-			mockMessageConsumer.receive(1000);
+		if (timeout == JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT) {
+			mockMessageConsumer.receiveNoWait();
+		}
+		else if (timeout == JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT) {
+			mockMessageConsumer.receive();
 		}
 		else {
-			mockMessageConsumer.receive();
+			mockMessageConsumer.receive(timeout);
 		}
 		messageConsumerControl.setReturnValue(mockMessage);
 		mockMessageConsumer.close();
