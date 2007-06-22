@@ -86,6 +86,11 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	public static final long RECEIVE_TIMEOUT_INDEFINITE_WAIT = 0;
 	
+	/**
+	 * Default timeout value for receive operations.
+	 */
+	public static final long DEFAULT_RECEIVE_TIMEOUT = RECEIVE_TIMEOUT_INDEFINITE_WAIT;
+	
 
 	private final JmsTemplateResourceFactory transactionalResourceFactory =
 			new JmsTemplateResourceFactory();
