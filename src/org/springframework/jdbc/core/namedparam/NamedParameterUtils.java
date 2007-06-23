@@ -119,7 +119,11 @@ public abstract class NamedParameterUtils {
 	/**
 	 * Parse the SQL statement and locate any placeholders or named parameters.
 	 * Named parameters are substituted for a JDBC placeholder and any select list
-	 * is expanded to the required number of placeholders.
+	 * is expanded to the required number of placeholders.  Select lists may contain
+	 * an array of objects and in that case the placeholders will be grouped and
+	 * enclosed with parantheses.  This allows for the use of "expression lists" in
+	 * the SQL statement like:<br/>
+	 * select id, name, state from table where (name, age) in (('John', 35), ('Ann', 50))
 	 * <p>The parameter values passed in are used to determine the number of
 	 * placeholder to be used for a select list. Select lists should be limited
 	 * to 100 or fewer elements. A larger number of elements is not guaramteed to
@@ -143,12 +147,28 @@ public abstract class NamedParameterUtils {
 			if (paramSource != null && paramSource.hasValue(paramName)) {
 				Object value = paramSource.getValue(paramName);
 				if (value instanceof Collection) {
-					Collection entries = (Collection) value;
-					for (int k = 0; k < entries.size(); k++) {
+					Iterator entryIter = ((Collection) value).iterator();
+					int k = 0;
+					while (entryIter.hasNext()) {
 						if (k > 0) {
 							actualSql.append(", ");
 						}
-						actualSql.append("?");
+						k++;
+						Object entryItem = entryIter.next();
+						if (entryItem instanceof Object[]) {
+							Object[] expressionList = (Object[]) entryItem;
+							actualSql.append("(");
+							for (int m = 0; m < expressionList.length; m++) {
+								if (m > 0) {
+									actualSql.append(", ");
+								}
+								actualSql.append("?");
+							}
+							actualSql.append(")");
+						}
+						else {
+							actualSql.append("?");
+						}
 					}
 				}
 				else {

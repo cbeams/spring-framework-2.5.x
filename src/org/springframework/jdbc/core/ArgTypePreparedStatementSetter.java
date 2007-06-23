@@ -61,7 +61,16 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter, Paramet
 					Collection entries = (Collection) arg;
 					for (Iterator it = entries.iterator(); it.hasNext();) {
 						Object entry = it.next();
-						StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], entry);
+						if (entry instanceof Object[]) {
+							Object[] valueArray = ((Object[])entry);
+							for (int k = 0; k < valueArray.length; k++) {
+								Object argValue = valueArray[k];
+								StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], argValue);
+							}
+						}
+						else {
+							StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], entry);
+						}
 					}
 				}
 				else {

@@ -266,7 +266,16 @@ public class PreparedStatementCreatorFactory {
 					Collection entries = (Collection) in;
 					for (Iterator it = entries.iterator(); it.hasNext();) {
 						Object entry = it.next();
-						StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx++, declaredParameter, entry);
+						if (entry instanceof Object[]) {
+							Object[] valueArray = ((Object[])entry);
+							for (int k = 0; k < valueArray.length; k++) {
+								Object argValue = valueArray[k];
+								StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx++, declaredParameter, argValue);
+							}
+						}
+						else {
+							StatementCreatorUtils.setParameterValue(psToUse, sqlColIndx++, declaredParameter, entry);
+						}
 					}
 				}
 				else {

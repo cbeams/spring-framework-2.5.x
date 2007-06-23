@@ -20,10 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 import org.easymock.MockControl;
 
@@ -448,6 +445,58 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		parms.addValue("ids", Arrays.asList(new Object[] {new Integer(3), new Integer(4)}));
+
+		Object o = template.queryForObject(sql, parms, Integer.class);
+		assertTrue("Correct result type", o instanceof Integer);
+	}
+
+	public void testQueryForObjectWithParamMapAndListOfExpressionLists() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE (ID, NAME) IN (:multiExpressionList)";
+		String sqlToUse = "SELECT AGE FROM CUSTMR WHERE (ID, NAME) IN ((?, ?), (?, ?))";
+
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt(1);
+		ctrlResultSet.setReturnValue(22);
+		mockResultSet.wasNull();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockPreparedStatement.setObject(1, new Integer(3));
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setString(2, "Rod");
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setObject(3, new Integer(4));
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setString(4, "Juergen");
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(sqlToUse);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+
+		replay();
+
+		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
+
+		MapSqlParameterSource parms = new MapSqlParameterSource();
+		List l1 = new ArrayList();
+		l1.add(new Object[] {new Integer(3), "Rod"});
+		l1.add(new Object[] {new Integer(4), "Juergen"});
+		parms.addValue("multiExpressionList", l1);
 
 		Object o = template.queryForObject(sql, parms, Integer.class);
 		assertTrue("Correct result type", o instanceof Integer);
