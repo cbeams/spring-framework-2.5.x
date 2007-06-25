@@ -1128,7 +1128,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				return mbd.getBeanClass();
 			}
 			if (typeMatchOnly && getTempClassLoader() != null) {
-				return ClassUtils.forName(mbd.getBeanClassName(), getTempClassLoader());
+				String className = mbd.getBeanClassName();
+				return (className != null ? ClassUtils.forName(className, getTempClassLoader()) : null);
 			}
 			return mbd.resolveBeanClass(getBeanClassLoader());
 		}
