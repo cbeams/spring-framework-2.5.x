@@ -30,6 +30,7 @@
       <groupId>aopalliance</groupId>
       <artifactId>aopalliance</artifactId>
       <version>1.0</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
