@@ -2,6 +2,7 @@ Export-Package: org.springframework*;version=${spring-version}
 Import-Package: org.apache.commons.logging*, org.springframework.dao*;version=${spring-version}, *;resolution:=optional
 Bundle-Version: ${spring-version}
 Bundle-Description: ${spring-title}
+Bundle-Name: spring-jdbc
 
 
 
