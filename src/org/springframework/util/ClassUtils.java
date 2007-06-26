@@ -36,6 +36,9 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.JdkVersion;
+
 /**
  * Miscellaneous class utility methods. Mainly for internal use within the
  * framework; consider Jakarta's Commons Lang for a more comprehensive suite
@@ -44,6 +47,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Keith Donald
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Ramnivas Laddad
  * @since 1.1
  */
 public abstract class ClassUtils {
@@ -497,6 +501,12 @@ public abstract class ClassUtils {
 		if (method != null && targetClass != null) {
 			try {
 				method = targetClass.getMethod(method.getName(), method.getParameterTypes());
+
+				// If we are dealing with method with generic parameters, find the actual method that will be invoked
+				// See SPR-3556
+				if (JdkVersion.isAtLeastJava15()) {
+					method = BridgeMethodResolver.findBridgedMethod(method);
+				}
 			}
 			catch (NoSuchMethodException ex) {
 				// Perhaps the target class doesn't implement this method:
