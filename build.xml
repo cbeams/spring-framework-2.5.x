@@ -61,6 +61,9 @@
 		</fileset>
 
 	</path>
+	
+	<!-- BND tool taskdef (required for the OSGi manifest entries -->
+	<taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="${lib.dir}/bnd/bnd.jar" />
 
 	<target name="maventasks">
 		<path id="maven.lib.path">
@@ -296,7 +299,6 @@
 	</patternset>
 
 	<target name="fulljar" depends="build,initdist" description="Create JAR file with all core Spring classes">
-
 		<delete file="${dist.dir}/spring.jar"/>
 
 		<jar jarfile="${dist.dir}/spring.jar">
@@ -313,6 +315,11 @@
 			</manifest>
 		</jar>
 
+		<bndwrap definitions="${basedir}/osgi/bnd" output="${dist.dir}">
+			<fileset dir="${dist.dir}" includes="spring.jar" />
+		</bndwrap>
+
+		<move file="${dist.dir}/spring.bar" tofile="${dist.dir}/spring.jar"/>
 	</target>
 	
 	<target name="fullsources" depends="initdist" description="Create source JAR file with all core Spring classes">
@@ -603,10 +610,21 @@
 			</manifest>
 		</jar>
 
+		<!-- osgi wrapper -->
+		<bndwrap definitions="${basedir}/osgi/bnd" output="${dist.dir}/modules">
+			<fileset dir="${dist.dir}/modules" includes="*.jar" />
+		</bndwrap>
+		
+		<move todir="${dist.dir}/modules">
+			<fileset dir="${dist.dir}/modules">
+		      <include name="*.bar"/>
+		    </fileset>
+			<mapper type="glob" from="*.bar" to="*.jar"/>
+		</move>
+		
 	</target>
 	
 	<target name="modulesources" depends="initdist" description="Create module-specific source JAR files">
-		
 		<delete>
 			<fileset dir="${dist.dir}">
 				<include name="module-sources/*.jar"/>
@@ -1864,6 +1882,7 @@
 				<include name="lib/axis/**"/>
 				<include name="lib/aopalliance/**"/>
 				<include name="lib/bsh/**"/>
+				<include name="lib/bnd/**"/>
 				<include name="lib/c3p0/**"/>
 				<include name="lib/caucho/**"/>
 				<include name="lib/cglib/**"/>

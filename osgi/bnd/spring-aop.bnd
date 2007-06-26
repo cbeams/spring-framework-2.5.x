@@ -1,0 +1,8 @@
+Export-Package: org.springframework*;version=${spring-version}
+Import-Package: org.apache.commons.logging*,*;resolution:=optional
+Dynamic-Import: *
+Bundle-Version: ${spring-version}
+Bundle-Description: ${spring-title}
+
+
+
