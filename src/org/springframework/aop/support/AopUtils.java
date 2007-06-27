@@ -34,6 +34,8 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetClassAware;
+import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.JdkVersion;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -149,7 +151,13 @@ public abstract class AopUtils {
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
 	 */
 	public static Method getMostSpecificMethod(Method method, Class targetClass) {
-		return ClassUtils.getMostSpecificMethod(method, targetClass);
+		Method resolvedMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
+		// If we are dealing with method with generic parameters, find the actual method
+		// that will be invoked.
+		if (JdkVersion.isAtLeastJava15()) {
+			resolvedMethod = BridgeMethodResolver.findBridgedMethod(resolvedMethod);
+		}
+		return resolvedMethod;
 	}
 
 
