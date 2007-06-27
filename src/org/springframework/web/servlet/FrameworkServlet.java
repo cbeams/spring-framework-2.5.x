@@ -31,6 +31,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.SourceFilteringListener;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
@@ -325,7 +326,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			    StringUtils.tokenizeToStringArray(
 							getContextConfigLocation(), ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
-		wac.addApplicationListener(this);
+		wac.addApplicationListener(new SourceFilteringListener(wac, this));
 
 		postProcessWebApplicationContext(wac);
 		wac.refresh();
