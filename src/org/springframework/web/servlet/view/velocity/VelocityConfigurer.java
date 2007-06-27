@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,10 +81,15 @@ public class VelocityConfigurer extends VelocityEngineFactory
 
 	private VelocityEngine velocityEngine;
 
+
 	/**
 	 * Set a preconfigured VelocityEngine to use for the Velocity web config, e.g.
 	 * a shared one for web and email usage, set up via VelocityEngineFactoryBean.
-	 * If this is not set, VelocityEngineFactory's properties (inherited by this
+	 * <p>Note that the Spring macros will <i>not</i> be enabled automatically in
+	 * case of an external VelocityEngine passed in here. Make sure to include
+	 * <code>spring.vm</code> in your template loader path in such a scenario
+	 * (if there is an actual need to use those macros).
+	 * <p>If this is not set, VelocityEngineFactory's properties (inherited by this
 	 * class) have to be specified.
 	 * @see org.springframework.ui.velocity.VelocityEngineFactoryBean
 	 */
