@@ -268,11 +268,11 @@
 			<programlisting><![CDATA[<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn"/>]]></programlisting>
 			<para>
 				The location of the context configuration files can be customized using the
-				<literal>contextConfigLocation</literal> property.
+				'<literal>contextConfigLocation</literal>' property.
             </para>
             <programlisting><![CDATA[<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn">
   <set-property property="contextConfigLocation"
-      value="/WEB-INF/action-servlet.xml.xml,/WEB-INF/applicationContext.xml"/>
+      value="/WEB-INF/action-servlet.xml,/WEB-INF/applicationContext.xml"/>
 </plug-in>]]></programlisting>
 			<para>
 				It is possible to use this plugin to load all your context files, which can be
@@ -280,7 +280,7 @@
 				<classname>MockStrutsTestCase</classname> won't initialize Listeners on startup
 				so putting all your context files in the plugin is a workaround. (A 
 				<ulink url="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1088866&amp;group_id=39190&amp;atid=424562">
-				bug has been filed</ulink> for this issue, but has been closed as a 'Wont Fix').
+				bug has been filed</ulink> for this issue, but has been closed as 'Wont Fix').
 			</para>
 			<para>
 				After configuring this plug-in in <emphasis>struts-config.xml</emphasis>, you can
