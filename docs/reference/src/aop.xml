@@ -2140,21 +2140,19 @@ public @interface Idempotent {
     
     <itemizedlist>
       <listitem>
-        <para><literal>final</literal> methods cannot be advised, as they cannot
-        be overriden.</para>
+        <para><literal>final</literal> methods cannot be advised, as they cannot be overriden.</para>
       </listitem>
       <listitem>
-        <para>You will need the CGLIB 2 binaries on your classpath, whereas
-        dynamic proxies are available with the JDK. Spring will automatically
-        warn you when it needs CGLIB but it isn't available on the classpath.
-        </para>
+        <para>You will need the CGLIB 2 binaries on your classpath, whereas dynamic proxies are available with the JDK.
+		Spring will automatically warn you when it needs CGLIB and the CGLIB library classes are not found on the
+		classpath.</para>
       </listitem>
       <listitem>
-      	<para>The constructor of your proxied object will be called twice. This is a natural consequence of the CGLIB proxy model
-      	whereby a subclass is generated for each proxied object. For each proxied instance, two objects are created: the actual proxied
-      	object and an instance of the subclass that implements the advice. This behavior does not show when using JDK proxies.
-      	Usually, calling the constructor of the proxied type twice, is not a huge problem, as there are usually only assignments taking
-      	place and no real logic is (and probably should be) implemented in the constructor.</para>
+      	<para>The constructor of your proxied object will be called twice. This is a natural consequence of the CGLIB
+		proxy model whereby a subclass is generated for each proxied object. For each proxied instance, two objects are
+		created: the actual proxied object and an instance of the subclass that implements the advice. This behavior
+		is not exhibited when using JDK proxies. Usually, calling the constructor of the proxied type twice, is not an
+		issue, as there are usually only assignments taking place and no real logic is implemented in the constructor.</para>
       </listitem>
     </itemizedlist>
     
@@ -2164,9 +2162,7 @@ public @interface Idempotent {
 	</para>
     
 	<programlisting><![CDATA[<aop:config ]]><emphasis role="bold">proxy-target-class="true"</emphasis><![CDATA[>
-	
-	]]><lineannotation>&lt;!-- other beans defined here... --&gt;</lineannotation><![CDATA[
-	
+    ]]><lineannotation>&lt;!-- other beans defined here... --&gt;</lineannotation><![CDATA[
 </aop:config>]]></programlisting>
 	
   	<para>To force CGLIB proxying when using the @AspectJ autoproxy support, set the 
@@ -2175,7 +2171,19 @@ public @interface Idempotent {
   	</para>
   	
 	<programlisting><![CDATA[<aop:aspectj-autoproxy ]]><emphasis role="bold">proxy-target-class="true"</emphasis><![CDATA[/>]]></programlisting>
-	
+
+    <note>
+		<para>Multiple <literal>&lt;aop:config/&gt;</literal> sections are collapsed into a single unified auto-proxy
+		creator at runtime, which applies the <emphasis>strongest</emphasis> proxy settings that any of the
+		<literal>&lt;aop:config/&gt;</literal> sections (typically from different XML bean definition files) specified.
+		This also applies to the <literal>&lt;tx:annotation-driven/&gt;</literal> and
+		<literal>&lt;aop:aspectj-autoproxy/&gt;</literal> elements.</para>
+		<para>To be clear: using '<literal>proxy-target-class="true"</literal>' on
+		<literal>&lt;tx:annotation-driven/&gt;</literal>, <literal>&lt;aop:aspectj-autoproxy/&gt;</literal> or
+		<literal>&lt;aop:config/&gt;</literal> elements will force the use of CGLIB proxies
+		<emphasis>for all three of them</emphasis>.</para>
+	</note>
+
   <section id="aop-understanding-aop-proxies">
     <title>Understanding AOP proxies</title>
     <para>Spring AOP is <emphasis>proxy-based</emphasis>. It is vitally important that you grasp
@@ -2186,7 +2194,7 @@ public @interface Idempotent {
     <programlisting><![CDATA[public class SimplePojo implements Pojo {
 
    public void foo() {
-      ]]><lineannotation>// this is a <emphasis role="bold">direct</emphasis> method call on the 'this' reference</lineannotation><![CDATA[
+      ]]><lineannotation>// this next method invocation is a <emphasis role="bold">direct</emphasis> call on the 'this' reference</lineannotation><![CDATA[
       this.bar();
    }
    
