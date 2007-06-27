@@ -3,6 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0.7 (2007-07-30)
+-------------------------------------
+
+Package org.springframework.aop
+* fixed AspectJ pointcut handling to resolve bridge methods before matching
+
+Package org.springframework.web
+* fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
+
+
 Changes in version 2.0.6 (2007-06-18)
 -------------------------------------
 

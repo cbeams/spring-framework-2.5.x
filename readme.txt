@@ -1,4 +1,4 @@
-THE SPRING FRAMEWORK, release 2.0.6 (June 2007)
+THE SPRING FRAMEWORK, release 2.0.7 (July 2007)
 -----------------------------------------------
 http://www.springframework.org
 
