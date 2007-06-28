@@ -62,32 +62,33 @@ public class GenericBridgeMethodMatchingTests extends AbstractDependencyInjectio
 		testBean.genericBaseInterfaceMethod("");
 		assertEquals(1, counterAspect.count);
 	}
-}
 
-interface BaseInterface<T> {
-	public void genericBaseInterfaceMethod(T t);
-}
-
-interface DerivedInterface<T> extends BaseInterface<T> {
-	public void genericDerivedInterfaceMethod(T t);
-}
-
-class DerivedStringParametarizedClass implements DerivedInterface<String> {
-	public void genericDerivedInterfaceMethod(String t) {
+	public static interface BaseInterface<T> {
+		public void genericBaseInterfaceMethod(T t);
 	}
 
-	public void genericBaseInterfaceMethod(String t) {
+	public static interface DerivedInterface<T> extends BaseInterface<T> {
+		public void genericDerivedInterfaceMethod(T t);
+	}
+
+	public static class DerivedStringParametarizedClass implements DerivedInterface<String> {
+		public void genericDerivedInterfaceMethod(String t) {
+		}
+
+		public void genericBaseInterfaceMethod(String t) {
+		}
+	}
+
+	@Aspect
+	public static class CounterAspect {
+		int count;
+		
+		@Before("execution(* org.springframework.aop.aspectj.generic.GenericBridgeMethodMatchingTests.BaseInterface+.*(..))")
+		public void increment() {
+			count++;
+		}
 	}
 }
 
-@Aspect
-class CounterAspect {
-	int count;
-	
-	@Before("execution(* org.springframework.aop.aspectj.generic.BaseInterface+.*(..))")
-	public void increment() {
-		count++;
-	}
-}
 
  

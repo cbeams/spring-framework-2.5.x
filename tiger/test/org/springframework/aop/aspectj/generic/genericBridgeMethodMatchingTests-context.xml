@@ -6,7 +6,7 @@
 	   					   http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 	<aop:aspectj-autoproxy proxy-target-class="false"/>
 	
-	<bean id="counterAspect" class="org.springframework.aop.aspectj.generic.CounterAspect"/>
+	<bean id="counterAspect" class="org.springframework.aop.aspectj.generic.GenericBridgeMethodMatchingTests$CounterAspect"/>
 	
-	<bean id="testBean" class="org.springframework.aop.aspectj.generic.DerivedStringParametarizedClass"/>
+	<bean id="testBean" class="org.springframework.aop.aspectj.generic.GenericBridgeMethodMatchingTests$DerivedStringParametarizedClass"/>
 </beans>
