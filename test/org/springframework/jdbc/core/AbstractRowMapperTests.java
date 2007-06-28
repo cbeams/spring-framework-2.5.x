@@ -71,7 +71,7 @@ public abstract class AbstractRowMapperTests extends TestCase {
 		rsmd.getColumnLabel(3);
 		rsmdControl.setReturnValue("birth_date", 1);
 		rsmd.getColumnType(3);
-		rsmdControl.setReturnValue(Types.DATE, 1);
+		rsmdControl.setReturnValue(Types.TIMESTAMP, 1);
 		rsmd.getColumnLabel(4);
 		rsmdControl.setReturnValue("balance", 1);
 		rsmd.getColumnType(4);
@@ -88,8 +88,10 @@ public abstract class AbstractRowMapperTests extends TestCase {
 		rsControl.setReturnValue("Bubba", 1);
 		rs.getLong("age");
 		rsControl.setReturnValue(22, 1);
-		rs.getDate("birth_date");
-		rsControl.setReturnValue(new java.sql.Date(1221222L), 1);
+		rs.findColumn("birth_date");
+		rsControl.setReturnValue(3, 1);
+		rs.getObject(3);
+		rsControl.setReturnValue(new java.sql.Timestamp(1221222L), 1);
 		rs.getBigDecimal("balance");
 		rsControl.setReturnValue(new BigDecimal("1234.56"), 1);
 		rs.next();

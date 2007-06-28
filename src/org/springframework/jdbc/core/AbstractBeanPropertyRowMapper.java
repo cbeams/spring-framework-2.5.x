@@ -135,28 +135,14 @@ public abstract class AbstractBeanPropertyRowMapper {
 				else if (fieldType.equals(BigDecimal.class)) {
 					value = rs.getBigDecimal(column);
 				}
-				else if (fieldType.equals(Number.class)) {
-					value = rs.getObject(column);
-				}
 				else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
 					value = (rs.getBoolean(column)) ? Boolean.TRUE : Boolean.FALSE;
 				}
-				else if (fieldType.equals(java.util.Date.class)) {
-					if (fieldMeta.getSqlType() == Types.DATE) {
-						value = rs.getDate(column);
-					}
-					else if (fieldMeta.getSqlType() == Types.TIME) {
-						value = rs.getTime(column);
-					}
-					else {
-						value = rs.getTimestamp(column);
-					}
-				}
-				else if (fieldType.equals(java.sql.Timestamp.class)) {
-					value = rs.getTimestamp(column);
-				}
-				else if (fieldType.equals(java.sql.Time.class)) {
-					value = rs.getTime(column);
+				else if (fieldType.equals(java.util.Date.class) ||
+						fieldType.equals(java.sql.Timestamp.class) ||
+						fieldType.equals(java.sql.Time.class) ||
+						fieldType.equals(Number.class)) {
+					value = JdbcUtils.getResultSetValue(rs, rs.findColumn(column));
 				}
 				if (value != null) {
 					if (bw.isWritableProperty(fieldMeta.getFieldName())) {
