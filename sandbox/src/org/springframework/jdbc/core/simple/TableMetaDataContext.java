@@ -94,26 +94,34 @@ public class TableMetaDataContext {
 		return insertColumns;
 	}
 
-	public void processMetaData(DataSource dataSource, List<String> declaredColumns) {
+	public boolean isGeneratedKeysColumnNameArraySupported() {
+		return metaDataProvider.isGeneratedKeysColumnNameArraySupported();
+	}
+
+	public void processMetaData(DataSource dataSource, List<String> declaredColumns, String[] generatedKeyNames) {
 
 		metaDataProvider =
 				TableMetaDataProviderFactory.createMetaDataProvider(dataSource, this);
 
-		insertColumns = reconcileColumnsToUse(declaredColumns);
+		insertColumns = reconcileColumnsToUse(declaredColumns, generatedKeyNames);
 
 	}
 
-	private List<String> reconcileColumnsToUse(List<String> declaredColumns) {
+	private List<String> reconcileColumnsToUse(List<String> declaredColumns, String[] generatedKeyNames) {
 		if (declaredColumns.size() > 0) {
 			return new ArrayList<String>(declaredColumns);
 		}
-		else {
-			List<String> columns = new ArrayList<String>();
-			for (TableParameterMetaData meta : metaDataProvider.getInsertParameterMetaData()) {
+		HashSet keys = new HashSet(generatedKeyNames.length);
+		for (String key : generatedKeyNames) {
+			keys.add(key.toUpperCase());
+		}
+		List<String> columns = new ArrayList<String>();
+		for (TableParameterMetaData meta : metaDataProvider.getInsertParameterMetaData()) {
+			if (!keys.contains(meta.getParameterName().toUpperCase())) {
 				columns.add(meta.getParameterName());
 			}
-			return columns;
 		}
+		return columns;
 	}
 
 	public List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
@@ -148,7 +156,11 @@ public class TableMetaDataContext {
 	}
 
 
-	public String createInsertString() {
+	public String createInsertString(String[] generatedKeyNames) {
+		HashSet keys = new HashSet(generatedKeyNames.length);
+		for (String key : generatedKeyNames) {
+			keys.add(key.toUpperCase());
+		}
 		StringBuilder insertStatement = new StringBuilder();
 		insertStatement.append("INSERT INTO ");
 		if (this.getSchemaName() != null) {
@@ -159,11 +171,13 @@ public class TableMetaDataContext {
 		insertStatement.append(" (");
 		int columnCount = 0;
 		for (String columnName : this.getInsertColumns()) {
-			columnCount++;
-			if (columnCount > 1) {
-				insertStatement.append(", ");
+			if (!keys.contains(columnName.toUpperCase())) {
+				columnCount++;
+				if (columnCount > 1) {
+					insertStatement.append(", ");
+				}
+				insertStatement.append(columnName);
 			}
-			insertStatement.append(columnName);
 		}
 		insertStatement.append(") VALUES(");
 		if (columnCount < 1) {

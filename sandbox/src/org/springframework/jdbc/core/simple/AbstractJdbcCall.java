@@ -46,7 +46,6 @@ public abstract class AbstractJdbcCall {
 	/** List of SqlParameter objects */
 	private final List<SqlParameter> declaredParameters = new ArrayList<SqlParameter>();
 
-
 	/**
 	 * Has this operation been compiled? Compilation means at
 	 * least checking that a DataSource and sql have been provided,
@@ -54,8 +53,10 @@ public abstract class AbstractJdbcCall {
 	 */
 	private boolean compiled = false;
 
+	/** the generated string used for call statement */
 	private String callString;
 
+	/** context used to retrieve and manage database metadata */
 	private CallMetaDataContext callMetaDataContext = new CallMetaDataContext();
 
 	/**

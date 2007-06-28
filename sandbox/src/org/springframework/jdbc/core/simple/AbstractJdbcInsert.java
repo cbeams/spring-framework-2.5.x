@@ -60,10 +60,16 @@ public class AbstractJdbcInsert {
 	 */
 	private boolean compiled = false;
 
+	/** the generated string used for insert statement */
 	private String insertString;
 
+	/** the SQL Type information for the insert columns */
 	private int[] insertTypes;
 
+	/** the names of the columns holding the generated key */
+	private String[] generatedKeyNames = new String[] {};
+
+	/** context used to retrieve and manage database metadata */
 	private TableMetaDataContext tableMetaDataContext = new TableMetaDataContext();
 
 
@@ -109,6 +115,17 @@ public class AbstractJdbcInsert {
 		return Collections.unmodifiableList(declaredColumns);
 	}
 
+	public String[] getGeneratedKeyNames() {
+		return generatedKeyNames;
+	}
+
+	public void setGeneratedKeyNames(String[] generatedKeyNames) {
+		this.generatedKeyNames = generatedKeyNames;
+	}
+
+	public void setGeneratedKeyName(String generatedKeyName) {
+		this.generatedKeyNames = new String[] {generatedKeyName};
+	}
 
 	public String getInsertString() {
 		return insertString;
@@ -145,7 +162,7 @@ public class AbstractJdbcInsert {
 			this.compiled = true;
 
 			if (logger.isDebugEnabled()) {
-				logger.debug("SqlInsert for table [" + getTableName() + "] compiled");
+				logger.debug("JdbcInsert for table [" + getTableName() + "] compiled");
 			}
 		}
 	}
@@ -157,9 +174,9 @@ public class AbstractJdbcInsert {
 	 */
 	protected final void compileInternal() {
 
-		tableMetaDataContext.processMetaData(getJdbcTemplate().getDataSource(), getColumnNames());
+		tableMetaDataContext.processMetaData(getJdbcTemplate().getDataSource(), getColumnNames(), getGeneratedKeyNames());
 
-		insertString = tableMetaDataContext.createInsertString();
+		insertString = tableMetaDataContext.createInsertString(getGeneratedKeyNames());
 
 		insertTypes = tableMetaDataContext.createInsertTypes();
 
@@ -231,7 +248,29 @@ public class AbstractJdbcInsert {
 		return executeInsertAndReturnKey(values);
 	}
 
+	public KeyHolder doExecuteAndReturnKeyHolder(Map<String, Object> args) {
+		checkCompiled();
+		List<Object> values = matchInParameterValuesWithInsertColumns(args);
+		return executeInsertAndReturnKeyHolder(values);
+	}
+
+	public KeyHolder doExecuteAndReturnKeyHolder(SqlParameterSource parameterSource) {
+		checkCompiled();
+		List<Object> values = matchInParameterValuesWithInsertColumns(parameterSource);
+		return executeInsertAndReturnKeyHolder(values);
+	}
+
 	private Number executeInsertAndReturnKey(final List<Object> values) {
+		KeyHolder kh = executeInsertAndReturnKeyHolder(values);
+		if (kh != null) {
+			return kh.getKey();
+		}
+		else {
+			return null;
+		}
+	}
+
+	private KeyHolder executeInsertAndReturnKeyHolder(final List<Object> values) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("The following parameters are used for call " + getInsertString() + " with: " + values);
 		}
@@ -239,11 +278,7 @@ public class AbstractJdbcInsert {
 		int updateCount = jdbcTemplate.update(
 				new PreparedStatementCreator() {
 					public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-						PreparedStatement ps =
-                        //Option1: connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
-                        //Option2: connection.prepareStatement(INSERT_SQL, new int[] {1});
-                        //Option3: connection.prepareStatement(INSERT_SQL, new String[] {"id"});
-                        con.prepareStatement(getInsertString(), Statement.RETURN_GENERATED_KEYS);
+						PreparedStatement ps = prepareStatementForGeneratedKeys(con);
 						int colIndex = 0;
 						for (Object value : values) {
 							colIndex++;
@@ -253,12 +288,28 @@ public class AbstractJdbcInsert {
 					}
 				},
 				keyHolder);
-		if (updateCount > 0) {
-			return keyHolder.getKey();
+		return keyHolder;
+	}
+
+	private PreparedStatement prepareStatementForGeneratedKeys(Connection con) throws SQLException {
+		if (getGeneratedKeyNames().length < 1) {
+			throw new InvalidDataAccessApiUsageException("Generated Key Name(s) not specificed. " +
+					"Using the generated keys features requires specifying the name(s) of the generated column(s)");
+		}
+		PreparedStatement ps;
+		if (this.tableMetaDataContext.isGeneratedKeysColumnNameArraySupported()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using generated keys support with array of column names.");
+			}
+			ps = con.prepareStatement(getInsertString(), getGeneratedKeyNames());
 		}
 		else {
-			return null;
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using generated keys support with Statement.RETURN_GENERATED_KEYS.");
+			}
+			ps = con.prepareStatement(getInsertString(), Statement.RETURN_GENERATED_KEYS);
 		}
+		return ps;
 	}
 
 	public int[] doExecuteBatch(Map<String, Object>[] batch) {

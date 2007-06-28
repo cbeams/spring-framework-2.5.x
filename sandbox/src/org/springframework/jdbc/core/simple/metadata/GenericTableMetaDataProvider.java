@@ -7,10 +7,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author trisberg
@@ -28,6 +25,10 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	private boolean storesLowerCaseIdentifiers = false;
 
+	private boolean generatedKeysColumnNameArraySupported = true;
+
+	private List productsNotSupportingGeneratedKeysColumnNameArray = Arrays.asList(new String[] {"Apache Derby"});
+
 	private List<TableParameterMetaData> insertParameterMetaData = new ArrayList<TableParameterMetaData>();
 
 	protected GenericTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
@@ -36,6 +37,20 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 
+		try {
+			String databaseProductName = databaseMetaData.getDatabaseProductName();
+			if (productsNotSupportingGeneratedKeysColumnNameArray.contains(databaseProductName)) {
+				logger.debug("GeneratedKeysColumnNameArray is not supported for " + databaseProductName);
+				setGeneratedKeysColumnNameArraySupported(false);
+			}
+			else {
+				logger.debug("GeneratedKeysColumnNameArray is supported for " + databaseProductName);
+				setGeneratedKeysColumnNameArraySupported(true);
+			}
+		}
+		catch (SQLException se) {
+			logger.warn("Error retrieving 'DatabaseMetaData.getDatabaseProductName' - " + se.getMessage());
+		}
 		try {
 			setStoresUpperCaseIdentifiers(databaseMetaData.storesUpperCaseIdentifiers());
 		}
@@ -105,6 +120,15 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		return schemaNameToUse(schemaName);
 	}
 
+
+	public boolean isGeneratedKeysColumnNameArraySupported() {
+		return generatedKeysColumnNameArraySupported;
+	}
+
+	public void setGeneratedKeysColumnNameArraySupported(boolean generatedKeysColumnNameArraySupported) {
+		this.generatedKeysColumnNameArraySupported = generatedKeysColumnNameArraySupported;
+	}
+
 	private void locateTableAndProcessMetaData(DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String tableName) {
 
 		Map<String, TableMetaData> tableMeta = new HashMap<String, TableMetaData>();
@@ -172,7 +196,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 	private void processTableColumns(DatabaseMetaData databaseMetaData, TableMetaData tmd) {
-		ResultSet procs = null;
+		ResultSet tableColumns = null;
 		String metaDataCatalogName = metaDataCatalogNameToUse(tmd.getCatalogName());
 		String metaDataSchemaName = metaDataSchemaNameToUse(tmd.getSchemaName());
 		String metaDataTableName = tableNameToUse(tmd.getTableName());
@@ -181,16 +205,17 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 					metaDataSchemaName + "/" + metaDataTableName);
 		}
 		try {
-			procs = databaseMetaData.getColumns(
+			tableColumns = databaseMetaData.getColumns(
 					metaDataCatalogName,
 					metaDataSchemaName,
 					metaDataTableName,
 					null);
-			while (procs.next()) {
+			while (tableColumns.next()) {
 				TableParameterMetaData meta = new TableParameterMetaData(
-						procs.getString("COLUMN_NAME"),
-						procs.getInt("DATA_TYPE"),
-						procs.getBoolean("NULLABLE")
+						tableColumns.getString("COLUMN_NAME"),
+						tableColumns.getInt("DATA_TYPE"),
+						false,
+						tableColumns.getBoolean("NULLABLE")
 				);
 				insertParameterMetaData.add(meta);
 				if (logger.isDebugEnabled()) {
@@ -207,8 +232,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 		finally {
 			try {
-				if (procs != null)
-					procs.close();
+				if (tableColumns != null)
+					tableColumns.close();
 			}
 			catch (SQLException se) {
 				logger.warn("Problem closing resultset for procedure column metadata " + se.getMessage());

@@ -25,6 +25,8 @@ public interface TableMetaDataProvider {
 
  	boolean isTableColumnMetaDataUsed();
 	
+ 	boolean isGeneratedKeysColumnNameArraySupported();
+
 	List<TableParameterMetaData> getInsertParameterMetaData();
 
 }

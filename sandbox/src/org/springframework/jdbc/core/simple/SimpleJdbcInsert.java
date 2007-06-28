@@ -18,6 +18,7 @@ package org.springframework.jdbc.core.simple;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
@@ -67,6 +68,11 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 		return this;
 	}
 
+	public SimpleJdbcInsert usingGeneratedKeyColumns(String... columnNames) {
+		setGeneratedKeyNames(columnNames);
+		return this;
+	}
+
 	public int execute(Map<String, Object> args) {
 		return doExecute(args);
 	}
@@ -81,6 +87,14 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 
 	public Number executeAndReturnKey(SqlParameterSource parameterSource) {
 		return doExecuteAndReturnKey(parameterSource);
+	}
+
+	public KeyHolder executeAndReturnKeyHolder(Map<String, Object> args) {
+		return doExecuteAndReturnKeyHolder(args);
+	}
+
+	public KeyHolder executeAndReturnKeyHolder(SqlParameterSource parameterSource) {
+		return doExecuteAndReturnKeyHolder(parameterSource);
 	}
 
 	public int[] executeBatch(Map<String, Object>[] batch) {
