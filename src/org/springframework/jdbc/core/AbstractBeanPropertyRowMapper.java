@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,25 @@ package org.springframework.jdbc.core;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.NotWritablePropertyException;
-import org.springframework.util.StringUtils;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Field;
-import java.util.Map;
-import java.util.HashMap;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.ResultSetMetaData;
-import java.sql.Types;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Abstract base class for BeanPropertyRowMapper implementations. Provides initialization of mapped/persistent fields
@@ -134,6 +135,9 @@ public abstract class AbstractBeanPropertyRowMapper {
 				else if (fieldType.equals(BigDecimal.class)) {
 					value = rs.getBigDecimal(column);
 				}
+				else if (fieldType.equals(Number.class)) {
+					value = rs.getObject(column);
+				}
 				else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
 					value = (rs.getBoolean(column)) ? Boolean.TRUE : Boolean.FALSE;
 				}
@@ -148,18 +152,29 @@ public abstract class AbstractBeanPropertyRowMapper {
 						value = rs.getTimestamp(column);
 					}
 				}
+				else if (fieldType.equals(java.sql.Timestamp.class)) {
+					value = rs.getTimestamp(column);
+				}
+				else if (fieldType.equals(java.sql.Time.class)) {
+					value = rs.getTime(column);
+				}
 				if (value != null) {
-					try {
-						if (logger.isDebugEnabled() && rowNumber == 0) {
-							logger.debug(
-									"Mapping column named \"" + column + "\"" +
-									" containing values of SQL type " + fieldMeta.getSqlType() +
-									" to property \"" + fieldMeta.getFieldName() + "\"" +
-									" of type " + fieldMeta.getJavaType());
+					if (bw.isWritableProperty(fieldMeta.getFieldName())) {
+						try {
+							if (logger.isDebugEnabled() && rowNumber == 0) {
+								logger.debug(
+										"Mapping column named \"" + column + "\"" +
+										" containing values of SQL type " + fieldMeta.getSqlType() +
+										" to property \"" + fieldMeta.getFieldName() + "\"" +
+										" of type " + fieldMeta.getJavaType());
+							}
+							bw.setPropertyValue(fieldMeta.getFieldName(), value);
 						}
-						bw.setPropertyValue(fieldMeta.getFieldName(), value);
+						catch (NotWritablePropertyException ex) {
+							throw new DataRetrievalFailureException("Unable to map column " + column + " to property " + fieldMeta.getFieldName(), ex);							
+						}
 					}
-					catch (NotWritablePropertyException ignore) {
+					else {
 						if (rowNumber == 0)
 						{
 							logger.warn("Unable to access the setter for " + fieldMeta.getFieldName() +
