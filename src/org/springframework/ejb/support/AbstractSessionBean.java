@@ -19,19 +19,17 @@ package org.springframework.ejb.support;
 import javax.ejb.SessionContext;
 
 /**
- * Superclass for all session beans. Not intended for direct client subclassing;
- * derive from {@link AbstractStatelessSessionBean} or {@link AbstractStatefulSessionBean}
- * instead.
+ * Base class for all Spring-based EJB session beans. Not intended for direct
+ * subclassing: Extend {@link AbstractStatelessSessionBean} or
+ * {@link AbstractStatefulSessionBean} instead.
  *
  * <p>This class saves the session context provided by the EJB container in an
  * instance variable and exposes it through the {@link SmartSessionBean} interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see AbstractStatelessSessionBean
- * @see AbstractStatefulSessionBean
  */
-abstract class AbstractSessionBean extends AbstractEnterpriseBean implements SmartSessionBean {
+public abstract class AbstractSessionBean extends AbstractEnterpriseBean implements SmartSessionBean {
 
 	/** The SessionContext passed to this object */
 	private SessionContext sessionContext;
