@@ -36,12 +36,14 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.MethodMatchers;
 import org.springframework.aop.support.StaticMethodMatcher;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.GenericUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -52,6 +54,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Adrian Colyer
  * @author Juergen Hoeller
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedenceInformation {
@@ -138,6 +141,10 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	private boolean argumentsIntrospected = false;
 
+	// The actual type is java.lang.reflect.Type, but for JDK14 compatibility we use Object as the static type
+	private Object discoveredReturningGenericType;
+	// Note: Unlike return type, no such generic information is needed for the throwing type, since Java doesn't allow
+	// exception types to be parameterized.
 
 	/**
 	 * Create a new AbstractAspectJAdvice for the given advice method.
@@ -265,6 +272,10 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	protected Class getDiscoveredReturningType() {
 		return this.discoveredReturningType;
+	}
+
+	protected Object getDiscoveredReturningGenericType() {
+		return this.discoveredReturningGenericType;
 	}
 
 	public void setThrowingName(String name) {
@@ -446,6 +457,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			else {
 				Integer index = (Integer) this.argumentBindings.get(this.returningName);
 				this.discoveredReturningType = this.aspectJAdviceMethod.getParameterTypes()[index.intValue()];
+				if(JdkVersion.isAtLeastJava15()) {
+					this.discoveredReturningGenericType = GenericUtils.getGenericParameterTypes(this.aspectJAdviceMethod)[index.intValue()];
+				}
 			}
 		}
 		if (this.throwingName != null) {

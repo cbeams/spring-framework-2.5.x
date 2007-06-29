@@ -20,13 +20,16 @@ import java.lang.reflect.Method;
 
 import org.springframework.aop.AfterAdvice;
 import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.core.JdkVersion;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.GenericUtils;
 
 /**
  * Spring AOP advice wrapping an AspectJ after-returning advice method.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implements AfterReturningAdvice, AfterAdvice {
@@ -50,7 +53,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 	}
 
 	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
-		if (shouldInvokeOnReturnValueOf(returnValue)) {
+		if (shouldInvokeOnReturnValueOf(method, returnValue)) {
 			invokeAdviceMethod(getJoinPointMatch(), returnValue, null);
 		}
 	}
@@ -58,12 +61,23 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 	/**
 	 * Following AspectJ semantics, if a returning clause was specified, then the
 	 * advice is only invoked if the returned value is an instance of the given
-	 * returning type. If the returning type is Object, the advice is *always* invoked.
+	 * returning type and genetic type parameters, if any, match the assignment
+	 * rules. If the returning type is Object, the advice is *always* invoked.
 	 * @param returnValue the return value of the target method
 	 * @return whether to invoke the advice method for the given return value
 	 */
-	private boolean shouldInvokeOnReturnValueOf(Object returnValue) {
-		return ClassUtils.isAssignableValue(getDiscoveredReturningType(), returnValue);
+	private boolean shouldInvokeOnReturnValueOf(Method method, Object returnValue) {
+		Class discoveredReturningType = getDiscoveredReturningType();
+		Object discoveredReturningGenericType = getDiscoveredReturningGenericType();
+		if (ClassUtils.isAssignableValue(discoveredReturningType, returnValue)) {
+			// We are using Java 5 and above and we aren't dealing with a raw type, check if 
+			// generic parameters are assignable
+			if (JdkVersion.isAtLeastJava15() && (discoveredReturningType != discoveredReturningGenericType)) {
+				return GenericUtils.isAssignable(discoveredReturningGenericType, method);
+			}
+			return true;
+		}
+		return false;
 	}
 
 }
