@@ -497,7 +497,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			// All MBeans are now registered successfully - go ahead and register the notification listeners.
 			registerNotificationListeners();
 		}
-		catch (MBeanExportException ex) {
+		catch (RuntimeException ex) {
 			// Unregister beans already registered by this exporter.
 			unregisterBeans();
 			throw ex;
