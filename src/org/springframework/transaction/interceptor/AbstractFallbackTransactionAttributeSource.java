@@ -28,6 +28,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.JdkVersion;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -142,6 +144,10 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		// The method may be on an interface, but we need attributes from the target class.
 		// If the target class is null, the method will be unchanged.
 		Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
+		// If we are dealing with method with generic parameters, find the original method.
+		if (JdkVersion.isAtLeastJava15()) {
+			specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
+		}
 
 		// First try is the method in the target class.
 		TransactionAttribute txAtt = findTransactionAttribute(findAllAttributes(specificMethod));

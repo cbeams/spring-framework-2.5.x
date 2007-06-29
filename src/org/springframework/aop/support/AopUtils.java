@@ -143,6 +143,9 @@ public abstract class AopUtils {
 	 * is one. E.g. the method may be <code>IFoo.bar()</code> and the target class
 	 * may be <code>DefaultFoo</code>. In this case, the method may be
 	 * <code>DefaultFoo.bar()</code>. This enables attributes on that method to be found.
+	 * <p><b>NOTE:</b> In contrast to {@link org.springframework.util.ClassUtils#getMostSpecificMethod},
+	 * this method resolves Java 5 bridge methods in order to retrieve attributes
+	 * from the <i>original</i> method definition.
 	 * @param method the method to be invoked, which may come from an interface
 	 * @param targetClass the target class for the current invocation.
 	 * May be <code>null</code> or may not even implement the method.
@@ -152,8 +155,7 @@ public abstract class AopUtils {
 	 */
 	public static Method getMostSpecificMethod(Method method, Class targetClass) {
 		Method resolvedMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
-		// If we are dealing with method with generic parameters, find the actual method
-		// that will be invoked.
+		// If we are dealing with method with generic parameters, find the original method.
 		if (JdkVersion.isAtLeastJava15()) {
 			resolvedMethod = BridgeMethodResolver.findBridgedMethod(resolvedMethod);
 		}
