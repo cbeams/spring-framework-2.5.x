@@ -36,7 +36,7 @@ import org.springframework.util.WeakReferenceMonitor;
  * is to use a {@link org.springframework.context.access.ContextJndiBeanFactoryLocator},
  * which will initialize an XML ApplicationContext from the class path (based on a JNDI
  * name specified). For a different locator strategy, <code>setBeanFactoryLocator</code>
- * may be called (<i>before</i> your EJB's <code>ejbCreate method</code> is invoked,
+ * may be called (<i>before</i> your EJB's <code>ejbCreate</code> method is invoked,
  * e.g. in <code>setSessionContext</code>). For use of a shared ApplicationContext between
  * multiple EJBs, where the container class loader setup supports this visibility, you may
  * instead use a {@link org.springframework.context.access.ContextSingletonBeanFactoryLocator}.

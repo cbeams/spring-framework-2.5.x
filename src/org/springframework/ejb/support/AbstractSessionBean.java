@@ -31,24 +31,21 @@ import javax.ejb.SessionContext;
  */
 public abstract class AbstractSessionBean extends AbstractEnterpriseBean implements SmartSessionBean {
 
-	/** The SessionContext passed to this object */
+	/** The SessionContext passed to this EJB */
 	private SessionContext sessionContext;
 
 
 	/**
-	 * Set the session context.
-	 * <p><b>If overriding this method, be sure to invoke this form of it first.</b>
-	 * @param sessionContext the SessionContext for this EJB
+	 * Set the session context for this EJB.
+	 * <p><b>When overriding this method, be sure to invoke this form of it first.</b>
 	 */
 	public void setSessionContext(SessionContext sessionContext) {
 		this.sessionContext = sessionContext;
 	}
 
 	/**
-	 * Convenience method for subclasses.
-	 * Return the EJB context saved on initialization.
-	 * @return the SessionContext saved on initialization by this class's
-	 * implementation of the <code>setSessionContext</code> method
+	 * Convenience method for subclasses, returning the EJB session context
+	 * saved on initialization ({@link #setSessionContext}).
 	 */
 	public final SessionContext getSessionContext() {
 		return this.sessionContext;
