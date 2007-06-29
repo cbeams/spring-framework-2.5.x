@@ -27,30 +27,32 @@ import org.springframework.context.access.ContextJndiBeanFactoryLocator;
 import org.springframework.util.WeakReferenceMonitor;
 
 /**
- * Superclass for all EJBs. Package-visible: not intended for direct subclassing. Provides
- * a standard way of loading a BeanFactory. Subclasses act as a facade, with the business
- * logic deferred to beans in the BeanFactory.
+ * Base class for all Spring-based EJBs. Not intended for direct subclassing:
+ * Extend {@link AbstractStatelessSessionBean}, {@link AbstractStatefulSessionBean}
+ * or {@link AbstractMessageDrivenBean} instead.
  *
- * <p>Default is to use a ContextJndiBeanFactoryLocator, which will initialize an XML
- * ApplicationContext from the class path (based on a JNDI name specified). For a
- * different locator strategy, <code>setBeanFactoryLocator</code> may be called
- * (<i>before</i> your EJB's <code>ejbCreate method</code> is invoked, for example,
- * in <code>setSessionContext</code>). For use of a shared ApplicationContext between
- * multiple EJBs, where the container class loader setup supports this visibility,
- * you may instead use a ContextSingletonBeanFactoryLocator. Alternately,
- * <code>setBeanFactoryLocator</code> may be called with a completely custom
- * implementation of the BeanFactoryLocator interface.
+ * <p>Provides a standard way of loading a Spring BeanFactory. Subclasses act as a
+ * facade, with the business logic deferred to beans in the BeanFactory. Default
+ * is to use a {@link org.springframework.context.access.ContextJndiBeanFactoryLocator},
+ * which will initialize an XML ApplicationContext from the class path (based on a JNDI
+ * name specified). For a different locator strategy, <code>setBeanFactoryLocator</code>
+ * may be called (<i>before</i> your EJB's <code>ejbCreate</code> method is invoked,
+ * e.g. in <code>setSessionContext</code>). For use of a shared ApplicationContext between
+ * multiple EJBs, where the container class loader setup supports this visibility, you may
+ * instead use a {@link org.springframework.context.access.ContextSingletonBeanFactoryLocator}.
+ * Alternatively, {@link #setBeanFactoryLocator} may be called with a custom implementation
+ * of the {@link org.springframework.beans.factory.access.BeanFactoryLocator} interface.
  *
- * <p>Note that we cannot use final for our implementation of EJB lifecycle methods,
- * as this violates the EJB specification.
+ * <p>Note that we cannot use <code>final</code> for our implementation of EJB lifecycle
+ * methods, as this would violate the EJB specification.
  *
  * @author Rod Johnson
  * @author Colin Sampaleanu
- * @see #setBeanFactoryLocator
+ * @author Juergen Hoeller
  * @see org.springframework.context.access.ContextJndiBeanFactoryLocator
  * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
  */
-abstract class AbstractEnterpriseBean implements EnterpriseBean {
+public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 
 	public static final String BEAN_FACTORY_PATH_ENVIRONMENT_KEY = "java:comp/env/ejb/BeanFactoryPath";
 

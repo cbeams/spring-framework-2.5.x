@@ -19,38 +19,33 @@ package org.springframework.ejb.support;
 import javax.ejb.SessionContext;
 
 /**
- * Superclass for all session beans. Not intended for direct client subclassing;
- * derive from {@link AbstractStatelessSessionBean} or {@link AbstractStatefulSessionBean}
- * instead.
+ * Base class for all Spring-based EJB session beans. Not intended for direct
+ * subclassing: Extend {@link AbstractStatelessSessionBean} or
+ * {@link AbstractStatefulSessionBean} instead.
  *
  * <p>This class saves the session context provided by the EJB container in an
  * instance variable and exposes it through the {@link SmartSessionBean} interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see AbstractStatelessSessionBean
- * @see AbstractStatefulSessionBean
  */
-abstract class AbstractSessionBean extends AbstractEnterpriseBean implements SmartSessionBean {
+public abstract class AbstractSessionBean extends AbstractEnterpriseBean implements SmartSessionBean {
 
-	/** The SessionContext passed to this object */
+	/** The SessionContext passed to this EJB */
 	private SessionContext sessionContext;
 
 
 	/**
-	 * Set the session context.
-	 * <p><b>If overriding this method, be sure to invoke this form of it first.</b>
-	 * @param sessionContext the SessionContext for this EJB
+	 * Set the session context for this EJB.
+	 * <p><b>When overriding this method, be sure to invoke this form of it first.</b>
 	 */
 	public void setSessionContext(SessionContext sessionContext) {
 		this.sessionContext = sessionContext;
 	}
 
 	/**
-	 * Convenience method for subclasses.
-	 * Return the EJB context saved on initialization.
-	 * @return the SessionContext saved on initialization by this class's
-	 * implementation of the <code>setSessionContext</code> method
+	 * Convenience method for subclasses, returning the EJB session context
+	 * saved on initialization ({@link #setSessionContext}).
 	 */
 	public final SessionContext getSessionContext() {
 		return this.sessionContext;
