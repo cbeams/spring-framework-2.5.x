@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
 import javax.management.MBeanException;
+import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotificationFilter;
@@ -87,6 +88,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Mark Fisher
  * @since 1.2
  * @see #setBeans
  * @see #setAutodetect
@@ -315,8 +317,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	/**
 	 * Set the {@link NotificationListener NotificationListeners} to register with the
 	 * {@link javax.management.MBeanServer}. The key of each entry in the <code>Map</code> is
-	 * a String representation of the {@link javax.management.ObjectName} of the MBean the
-	 * listener should be registered for. Specifying an asterisk (<code>*</code>) will cause
+	 * a String representation of the {@link javax.management.ObjectName} or the bean name of the
+	 * MBean the listener should be registered for. Specifying an asterisk (<code>*</code>) will cause
 	 * the listener to be associated with all MBeans registered by this class at startup time.
 	 * <p>The value of each entry is the {@link javax.management.NotificationListener} to register.
 	 * For more advanced options such as registering
@@ -497,7 +499,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			// All MBeans are now registered successfully - go ahead and register the notification listeners.
 			registerNotificationListeners();
 		}
-		catch (MBeanExportException ex) {
+		catch (RuntimeException ex) {
 			// Unregister beans already registered by this exporter.
 			unregisterBeans();
 			throw ex;
@@ -553,21 +555,72 @@ public class MBeanExporter extends MBeanRegistrationSupport
 				}
 				String beanName = (String) mapValue;
 				if (isBeanDefinitionLazyInit(this.beanFactory, beanName)) {
-					return registerLazyInit(beanName, beanKey);
+					ObjectName objectName = registerLazyInit(beanName, beanKey);
+					replaceNotificationListenerBeanNameMappingKeysIfNecessary(beanName, objectName);
+					return objectName;
 				}
 				else {
 					Object bean = this.beanFactory.getBean(beanName);
-					return registerBeanInstance(bean, beanKey);
+					ObjectName objectName = registerBeanInstance(bean, beanKey);
+					replaceNotificationListenerBeanNameMappingKeysIfNecessary(beanName, objectName);
+					return objectName;
 				}
 			}
 			else {
 				// Plain bean instance -> register it directly.
+				if (this.beanFactory != null) {
+					Map beansOfSameType = this.beanFactory.getBeansOfType(mapValue.getClass(), false, false);
+					for (Iterator iterator = beansOfSameType.entrySet().iterator(); iterator.hasNext();) {
+						Map.Entry entry = (Map.Entry) iterator.next();
+						if (entry.getValue() == mapValue) {
+							String beanName = (String) entry.getKey();
+							ObjectName objectName = registerBeanInstance(mapValue, beanKey);
+							replaceNotificationListenerBeanNameMappingKeysIfNecessary(beanName, objectName);
+							return objectName;
+						}
+					}
+				}
 				return registerBeanInstance(mapValue, beanKey);
 			}
 		}
 		catch (JMException ex) {
 			throw new UnableToRegisterMBeanException(
 					"Unable to register MBean [" + mapValue + "] with key '" + beanKey + "'", ex);
+		}
+	}
+	
+	/**
+	 * Replaces any bean names used as keys in the <code>NotificationListener</code>
+	 * mappings with their corresponding <code>ObjectName</code> values.
+	 * @param beanName the name of the bean to be registered
+	 * @param objectName the <code>ObjectName</code> under which the bean will be registered
+	 * with the <code>MBeanServer</code>
+	 */
+	private void replaceNotificationListenerBeanNameMappingKeysIfNecessary(String beanName, ObjectName objectName) {
+		Set mappedListeners = new HashSet();
+		String objectNameString = objectName.getCanonicalName();
+		for (int i = 0; i < notificationListeners.length; i++) {
+			NotificationListenerBean bean = notificationListeners[i];
+			NotificationListener listener = bean.getNotificationListener();
+			Set newMappedNames = new HashSet();
+			String[] mappedNames = bean.getMappedObjectNames();
+			for (int j = 0; j < mappedNames.length; j++) {
+				String mappedName = mappedNames[j];
+				if (mappedName.equals(beanName)) {
+					mappedName = objectNameString;
+				}
+				if (mappedName.equals(objectNameString)) {
+					// avoid duplicate mappings on beanName and objectName
+					if (!mappedListeners.contains(listener)) {
+						newMappedNames.add(mappedName);
+						mappedListeners.add(listener);
+					}
+				}
+				else {
+					newMappedNames.add(mappedName);
+				}
+			}
+			bean.setMappedObjectNames((String[]) newMappedNames.toArray(new String[newMappedNames.size()]));
 		}
 	}
 

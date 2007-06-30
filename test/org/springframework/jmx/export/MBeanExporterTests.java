@@ -54,6 +54,7 @@ import org.springframework.jmx.support.ObjectNameManager;
  * @author Rob Harrop
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Mark Fisher
  */
 public class MBeanExporterTests extends AbstractMBeanServerTests {
 
@@ -550,6 +551,40 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
         adaptor.destroy();
         assertEquals("Listener should not have been invoked (MBean previously unregistered by external agent)", 0, listener.getUnregistered().size());
     }
+
+    /*
+     * SPR-3625
+     */
+    public void testMBeanIsUnregisteredForRuntimeExceptionDuringInitialization() throws Exception {
+		BeanDefinitionBuilder builder1 = BeanDefinitionBuilder.rootBeanDefinition(Person.class);
+		BeanDefinitionBuilder builder2 = BeanDefinitionBuilder.rootBeanDefinition(RuntimeExceptionThrowingConstructorBean.class);
+		
+		String objectName1 = "spring:test=bean1";
+		String objectName2 = "spring:test=bean2";
+		
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition(objectName1, builder1.getBeanDefinition());
+		factory.registerBeanDefinition(objectName2, builder2.getBeanDefinition());
+		
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		Map beansToExport = new HashMap();
+		beansToExport.put(objectName1, objectName1);
+		beansToExport.put(objectName2, objectName2);
+		exporter.setBeans(beansToExport);
+		exporter.setBeanFactory(factory);
+		try {
+			exporter.afterPropertiesSet();
+			fail("Should have failed during creation of RuntimeExceptionThrowingConstructorBean");
+		}
+		catch (RuntimeException ex) {
+			// expected
+		}
+		assertIsNotRegistered("Should have unregistered all previously registered MBeans due to RuntimeException",
+				ObjectNameManager.getInstance(objectName1));
+		assertIsNotRegistered("Should have never registered this MBean due to RuntimeException",
+				ObjectNameManager.getInstance(objectName2));
+    }
 	
 
 	private Map getBeanMap() {
@@ -632,6 +667,12 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+	}
+	
+	private static class RuntimeExceptionThrowingConstructorBean {
+		public RuntimeExceptionThrowingConstructorBean() {
+			throw new RuntimeException();
 		}
 	}
 	

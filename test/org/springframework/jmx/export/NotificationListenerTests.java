@@ -21,17 +21,21 @@ import java.util.Map;
 
 import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
+import javax.management.MalformedObjectNameException;
 import javax.management.Notification;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.JmxTestBean;
+import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.support.ObjectNameManager;
 
 /**
  * @author Rob Harrop
+ * @author Mark Fisher
  */
 public class NotificationListenerTests extends AbstractMBeanServerTests {
 
@@ -191,8 +195,168 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		catch (IllegalArgumentException expected) {
 		}
 	}
+	
+    public void testRegisterNotificationListenerWithBeanNameAndBeanNameInBeansMap() throws Exception {
+    	String beanName = "testBean";
+		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 
+		SelfNamingTestBean testBean = new SelfNamingTestBean();
+		testBean.setObjectName(objectName);
 
+    	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerSingleton(beanName, testBean);
+
+		Map beans = new HashMap();
+		beans.put(beanName, beanName);
+
+		Map listenerMappings = new HashMap();
+		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
+		listenerMappings.put(beanName, listener);
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(beans);
+		exporter.setNotificationListenerMappings(listenerMappings);
+		exporter.setBeanFactory(factory);
+		exporter.afterPropertiesSet();
+		assertIsRegistered("Should have registered MBean", objectName);
+
+		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
+		assertEquals("Listener not notified", 1, listener.getCount("Age"));
+    }
+    
+    public void testRegisterNotificationListenerWithBeanNameAndBeanInstanceInBeansMap() throws Exception {
+    	String beanName = "testBean";
+		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
+
+		SelfNamingTestBean testBean = new SelfNamingTestBean();
+		testBean.setObjectName(objectName);
+
+    	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerSingleton(beanName, testBean);
+
+		Map beans = new HashMap();
+		beans.put(beanName, testBean);
+
+		Map listenerMappings = new HashMap();
+		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
+		listenerMappings.put(beanName, listener);
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(beans);
+		exporter.setNotificationListenerMappings(listenerMappings);
+		exporter.setBeanFactory(factory);
+		exporter.afterPropertiesSet();
+		assertIsRegistered("Should have registered MBean", objectName);
+
+		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
+		assertEquals("Listener not notified", 1, listener.getCount("Age"));
+    }
+    
+    public void testRegisterNotificationListenerWithBeanNameBeforeObjectNameMappedToSameBeanInstance() throws Exception {
+    	String beanName = "testBean";
+		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
+
+		SelfNamingTestBean testBean = new SelfNamingTestBean();
+		testBean.setObjectName(objectName);
+
+    	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerSingleton(beanName, testBean);
+
+		Map beans = new HashMap();
+		beans.put(beanName, testBean);
+
+		Map listenerMappings = new HashMap();
+		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
+		listenerMappings.put(beanName, listener);
+		listenerMappings.put(objectName, listener);
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(beans);
+		exporter.setNotificationListenerMappings(listenerMappings);
+		exporter.setBeanFactory(factory);
+		exporter.afterPropertiesSet();
+		assertIsRegistered("Should have registered MBean", objectName);
+
+		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
+		assertEquals("Listener should have been notified exactly once", 1, listener.getCount("Age"));
+    }
+
+    public void testRegisterNotificationListenerWithObjectNameBeforeBeanNameMappedToSameBeanInstance() throws Exception {
+    	String beanName = "testBean";
+		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
+
+		SelfNamingTestBean testBean = new SelfNamingTestBean();
+		testBean.setObjectName(objectName);
+
+    	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerSingleton(beanName, testBean);
+
+		Map beans = new HashMap();
+		beans.put(beanName, testBean);
+
+		Map listenerMappings = new HashMap();
+		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
+		listenerMappings.put(objectName, listener);
+		listenerMappings.put(beanName, listener);
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(beans);
+		exporter.setNotificationListenerMappings(listenerMappings);
+		exporter.setBeanFactory(factory);
+		exporter.afterPropertiesSet();
+		assertIsRegistered("Should have registered MBean", objectName);
+
+		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
+		assertEquals("Listener should have been notified exactly once", 1, listener.getCount("Age"));
+    }
+
+    public void testRegisterNotificationListenerWithTwoBeanNamesMappedToDifferentBeanInstances() throws Exception {
+		String beanName1 = "testBean1";
+		String beanName2 = "testBean2";
+
+		ObjectName objectName1 = ObjectName.getInstance("spring:name=Test1");
+		ObjectName objectName2 = ObjectName.getInstance("spring:name=Test2");
+
+		SelfNamingTestBean testBean1 = new SelfNamingTestBean();
+		testBean1.setObjectName(objectName1);
+
+		SelfNamingTestBean testBean2 = new SelfNamingTestBean();
+		testBean2.setObjectName(objectName2);
+
+    	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerSingleton(beanName1, testBean1);
+		factory.registerSingleton(beanName2, testBean2);
+
+		Map beans = new HashMap();
+		beans.put(beanName1, testBean1);
+		beans.put(beanName2, testBean2);
+
+		Map listenerMappings = new HashMap();
+		CountingAttributeChangeNotificationListener listener = new CountingAttributeChangeNotificationListener();
+		listenerMappings.put(beanName1, listener);
+		listenerMappings.put(beanName2, listener);
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(server);
+		exporter.setBeans(beans);
+		exporter.setNotificationListenerMappings(listenerMappings);
+		exporter.setBeanFactory(factory);
+		exporter.afterPropertiesSet();
+		assertIsRegistered("Should have registered MBean", objectName1);
+		assertIsRegistered("Should have registered MBean", objectName2);
+
+		server.setAttribute(ObjectNameManager.getInstance(objectName1), new Attribute("Age", new Integer(77)));
+		assertEquals("Listener not notified for testBean1", 1, listener.getCount("Age"));
+
+		server.setAttribute(ObjectNameManager.getInstance(objectName2), new Attribute("Age", new Integer(33)));
+		assertEquals("Listener not notified for testBean2", 2, listener.getCount("Age"));
+    }
+
+    
 	private static class CountingAttributeChangeNotificationListener implements NotificationListener {
 
 		private Map attributeCounts = new HashMap();
@@ -225,6 +389,29 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		public Object getLastHandback(String attributeName) {
 			return this.attributeHandbacks.get(attributeName);
+		}
+	}
+	
+	public class SelfNamingTestBean implements SelfNaming {
+
+		private ObjectName objectName;
+
+		private int age;
+		
+		public void setObjectName(ObjectName objectName) {
+			this.objectName = objectName;
+		}
+		
+		public ObjectName getObjectName() throws MalformedObjectNameException {
+			return this.objectName;
+		}
+		
+		public void setAge(int age) {
+			this.age = age;
+		}
+		
+		public int getAge() {
+			return this.age;
 		}
 	}
 
