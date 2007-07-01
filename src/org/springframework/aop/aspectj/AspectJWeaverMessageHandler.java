@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,18 @@ import org.aspectj.bridge.IMessage.Kind;
 import org.aspectj.bridge.IMessageHandler;
 
 /**
- * Implementation of AspectJ's IMessageHandler interface that routes
- * AspectJ weaving messages through the same logging system as the
+ * Implementation of AspectJ's {@link IMessageHandler} interface that
+ * routes AspectJ weaving messages through the same logging system as the
  * regular Spring messages.
  * 
- * Pass the option 
- * "-XmessageHandlerClass:org.springframework.aop.aspectj.AspectJWeaverMessageHandler"
- * to the weaver (for example, using &lt;weaver options="..."/&gt in a
- * "META-INF/aop.xml" file).
+ * <p>Pass the option...
+ *
+ * <p><code class="code">-XmessageHandlerClass:org.springframework.aop.aspectj.AspectJWeaverMessageHandler</code>
+ *
+ * <p>to the weaver; for example, specifying the following in a
+ * "<code>META-INF/aop.xml</code> file:
+ *
+ * <p><code class="code">&lt;weaver options="..."/&gt;</code>
  *
  * @author Adrian Colyer
  * @author Juergen Hoeller
@@ -41,43 +45,43 @@ public class AspectJWeaverMessageHandler implements IMessageHandler {
 
 	private static final String AJ_ID = "[AspectJ] ";
 	
-	private static final Log logger = LogFactory.getLog("AspectJ Weaver");
+	private static final Log LOGGER = LogFactory.getLog("AspectJ Weaver");
 	
 
 	public boolean handleMessage(IMessage message) throws AbortException {
 		Kind messageKind = message.getKind();
 
-		if (logger.isDebugEnabled() || logger.isTraceEnabled()) {
+		if (LOGGER.isDebugEnabled() || LOGGER.isTraceEnabled()) {
 			if (messageKind == IMessage.DEBUG) {
-				logger.debug(makeMessageFor(message));
+				LOGGER.debug(makeMessageFor(message));
 				return true;
 			}
 		} 
 		
-		if (logger.isInfoEnabled()) {
+		if (LOGGER.isInfoEnabled()) {
 			if ((messageKind == IMessage.INFO) || (messageKind == IMessage.WEAVEINFO)) {
-				logger.info(makeMessageFor(message));
+				LOGGER.info(makeMessageFor(message));
 				return true;
 			}
 		} 
 		
-		if (logger.isWarnEnabled()) {
+		if (LOGGER.isWarnEnabled()) {
 			if (messageKind == IMessage.WARNING) {
-				logger.warn(makeMessageFor(message));
+				LOGGER.warn(makeMessageFor(message));
 				return true;
 			}
 		}
 		
-		if (logger.isErrorEnabled()) {
+		if (LOGGER.isErrorEnabled()) {
 			if (messageKind == IMessage.ERROR) {
-				logger.error(makeMessageFor(message));
+				LOGGER.error(makeMessageFor(message));
 				return true;
 			}
 		}
 		
-		if (logger.isFatalEnabled()) {
+		if (LOGGER.isFatalEnabled()) {
 			if (messageKind == IMessage.ABORT) {
-				logger.fatal(makeMessageFor(message));
+				LOGGER.fatal(makeMessageFor(message));
 				return true;
 			}
 		}
