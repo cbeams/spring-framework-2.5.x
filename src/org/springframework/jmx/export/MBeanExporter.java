@@ -28,7 +28,6 @@ import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
 import javax.management.MBeanException;
-import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotificationFilter;
@@ -197,8 +196,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * Set whether to autodetect MBeans in the bean factory that this exporter
 	 * runs in. Will also ask an <code>AutodetectCapableMBeanInfoAssembler</code>
 	 * if available.
-	 * <p>This feature is turned off by default. Explicitly specify "true" here
-	 * to enable autodetection.
+	 * <p>This feature is turned off by default. Explicitly specify
+	 * <code>true</code> here to enable autodetection.
 	 * @see #setAssembler
 	 * @see AutodetectCapableMBeanInfoAssembler
 	 * @see #isMBean
@@ -295,7 +294,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Indicates whether or not the managed resource should be exposed as the
+	 * Indicates whether or not the managed resource should be exposed on the
 	 * {@link Thread#getContextClassLoader() thread context ClassLoader} before allowing
 	 * any invocations on the MBean to occur. Default value is <code>false</code>.
 	 */
@@ -304,9 +303,10 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Set the {@link NotificationListenerBean NotificationListenerBeans} containing the
-	 * {@link javax.management.NotificationListener NotificationListeners} that will be registered
-	 * with the {@link MBeanServer}.
+	 * Set the {@link NotificationListenerBean NotificationListenerBeans}
+	 * containing the
+	 * {@link javax.management.NotificationListener NotificationListeners}
+	 * that will be registered with the {@link MBeanServer}.
 	 * @see #setNotificationListenerMappings(java.util.Map)
 	 * @see NotificationListenerBean
 	 */
@@ -315,18 +315,22 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Set the {@link NotificationListener NotificationListeners} to register with the
-	 * {@link javax.management.MBeanServer}. The key of each entry in the <code>Map</code> is
-	 * a String representation of the {@link javax.management.ObjectName} or the bean name of the
-	 * MBean the listener should be registered for. Specifying an asterisk (<code>*</code>) will cause
-	 * the listener to be associated with all MBeans registered by this class at startup time.
-	 * <p>The value of each entry is the {@link javax.management.NotificationListener} to register.
-	 * For more advanced options such as registering
+	 * Set the {@link NotificationListener NotificationListeners} to register
+	 * with the {@link javax.management.MBeanServer}.
+	 * <P>The key of each entry in the <code>Map</code> is a {@link String}
+	 * representation of the {@link javax.management.ObjectName} or the bean
+	 * name of the MBean the listener should be registered for. Specifying an
+	 * asterisk (<code>*</code>) for a key will cause the listener to be
+	 * associated with all MBeans registered by this class at startup time.
+	 * <p>The value of each entry is the
+	 * {@link javax.management.NotificationListener} to register. For more
+	 * advanced options such as registering
 	 * {@link javax.management.NotificationFilter NotificationFilters} and
 	 * handback objects see {@link #setNotificationListeners(NotificationListenerBean[])}.
+	 * @throws IllegalArgumentException if the supplied <code>listeners</code> {@link Map} is <code>null</code>.
 	 */
 	public void setNotificationListenerMappings(Map listeners) {
-		Assert.notNull(listeners, "Property 'notificationListenerMappings' must not be null");
+		Assert.notNull(listeners, "'listeners' must not be null");
 		List notificationListeners = new ArrayList(listeners.size());
 
 		for (Iterator iterator = listeners.entrySet().iterator(); iterator.hasNext();) {
@@ -359,12 +363,13 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * This callback is only required for resolution of bean names in the "beans"
-	 * <code>Map</code> and for autodetection of MBeans (in the latter case,
-	 * a <code>ListableBeanFactory</code> is required).
+	 * This callback is only required for resolution of bean names in the
+	 * {@link #setBeans(java.util.Map) "beans"} {@link Map} and for
+	 * autodetection of MBeans (in the latter case, a
+	 * <code>ListableBeanFactory</code> is required).
 	 * @see #setBeans
 	 * @see #setAutodetect
-	 * @see org.springframework.beans.factory.ListableBeanFactory
+	 * @throws IllegalArgumentException if the supplied <code>beanFactory</code> is not a {@link ListableBeanFactory}.
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ListableBeanFactory) {
@@ -444,16 +449,17 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	//---------------------------------------------------------------------
 
 	/**
-	 * Registers the defined beans with the <code>MBeanServer</code>. Each bean is exposed
-	 * to the <code>MBeanServer</code> via a <code>ModelMBean</code>. The actual implemetation
-	 * of the <code>ModelMBean</code> interface used depends on the implementation of the
-	 * <code>ModelMBeanProvider</code> interface that is configured. By default the
-	 * <code>RequiredModelMBean</code> class that is supplied with all JMX implementations
-	 * is used.
+	 * Registers the defined beans with the {@link MBeanServer}.
+	 * <p>Each bean is exposed to the <code>MBeanServer</code> via a
+	 * <code>ModelMBean</code>. The actual implemetation of the
+	 * <code>ModelMBean</code> interface used depends on the implementation of
+	 * the <code>ModelMBeanProvider</code> interface that is configured. By
+	 * default the <code>RequiredModelMBean</code> class that is supplied with
+	 * all JMX implementations is used.
 	 * <p>The management interface produced for each bean is dependent on the
-	 * <code>MBeanInfoAssembler</code> implementation being used.
-	 * The <code>ObjectName</code> given to each bean is dependent on the implementation
-	 * of the <code>ObjectNamingStrategy</code> interface being used.
+	 * <code>MBeanInfoAssembler</code> implementation being used. The
+	 * <code>ObjectName</code> given to each bean is dependent on the
+	 * implementation of the <code>ObjectNamingStrategy</code> interface being used.
 	 */
 	protected void registerBeans() {
 		// If no server was provided then try to find one.
@@ -477,7 +483,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 
 			if (isAutodetectModeEnabled(AUTODETECT_MBEAN)) {
 				// Autodetect any beans that are already MBeans.
-				logger.info("Autodetecting user-defined JMX MBeans");
+				this.logger.info("Autodetecting user-defined JMX MBeans");
 				autodetectMBeans();
 			}
 
@@ -528,18 +534,19 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Registers an individual bean with the <code>MBeanServer</code>. This method
-	 * is responsible for deciding <strong>how</strong> a bean should be exposed
-	 * to the <code>MBeanServer</code>. Specifically, if the <code>mapValue</code>
-	 * is the name of a bean that is configured for lazy initialization, then
-	 * a proxy to the resource is registered with the <code>MBeanServer</code>
-	 * so that the the lazy load behavior is honored. If the bean is already an
-	 * MBean then it will be registered directly with the <code>MBeanServer</code>
-	 * without any intervention. For all other beans or bean names, the resource
-	 * itself is registered with the <code>MBeanServer</code> directly.
+	 * Registers an individual bean with the {@link #setServer MBeanServer}.
+	 * <p>This method is responsible for deciding <strong>how</strong> a bean
+	 * should be exposed to the <code>MBeanServer</code>. Specifically, if the
+	 * supplied <code>mapValue</code> is the name of a bean that is configured
+	 * for lazy initialization, then a proxy to the resource is registered with
+	 * the <code>MBeanServer</code> so that the the lazy load behavior is
+	 * honored. If the bean is already an MBean then it will be registered
+	 * directly with the <code>MBeanServer</code> without any intervention. For
+	 * all other beans or bean names, the resource itself is registered with
+	 * the <code>MBeanServer</code> directly.
+	 * @param mapValue the value configured for this bean in the beans map;
+	 * may be either the <code>String</code> name of a bean, or the bean itself
 	 * @param beanKey the key associated with this bean in the beans map
-	 * @param mapValue the value configured for this bean in the beans map.
-	 * May be either the <code>String</code> name of a bean, or the bean itself.
 	 * @return the <code>ObjectName</code> under which the resource was registered
 	 * @throws MBeanExportException if the export failed
 	 * @see #setBeans

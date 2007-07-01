@@ -102,8 +102,7 @@ public class NotificationListenerBean implements InitializingBean {
 	 * Set the (arbitrary) object that will be 'handed back' as-is by an
 	 * {@link javax.management.NotificationBroadcaster} when notifying
 	 * any {@link javax.management.NotificationListener}.
-	 * <p>May be <code>null</code>.
-	 * @param handback the handback object.
+	 * @param handback the handback object (can be <code>null</code>)
 	 * @see javax.management.NotificationListener#handleNotification(javax.management.Notification, Object)
 	 */
 	public void setHandback(Object handback) {
@@ -114,7 +113,7 @@ public class NotificationListenerBean implements InitializingBean {
 	 * Return the (arbitrary) object that will be 'handed back' as-is by an
 	 * {@link javax.management.NotificationBroadcaster} when notifying
 	 * any {@link javax.management.NotificationListener}.
-	 * @return the handback object
+	 * @return the handback object (may be <code>null</code>)
 	 * @see javax.management.NotificationListener#handleNotification(javax.management.Notification, Object)
 	 */
 	public Object getHandback() {

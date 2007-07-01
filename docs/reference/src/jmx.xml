@@ -1379,11 +1379,9 @@ public class AnnotationTestBean implements IJmxTestBean {
       <classname>NotificationListeners</classname> with any number of MBeans
       (this includes MBeans exported by Spring's
       <classname>MBeanExporter</classname> and MBeans registered via some
-      other mechanism). An example will best illustrate how simple it is to
-      effect the registration of <classname>NotificationListeners</classname>.
-      Consider the scenario where one would like to be informed (via a
-      <classname>Notification</classname>) each and every time an attribute of
-      a target MBean changes.</para>
+      other mechanism). By way of an example, consider the scenario where one
+	  would like to be informed (via a <classname>Notification</classname>)
+	  each and every time an attribute of a target MBean changes.</para>
 
       <programlisting><![CDATA[package com.example;
 
@@ -1414,11 +1412,11 @@ public class ConsoleLoggingNotificationListener
       </map>
     </property>
     <property name="notificationListenerMappings">
-        <map>
-            <entry key="bean:name=testBean1">
-                <bean class="com.example.ConsoleLoggingNotificationListener"/>
-            </entry>
-        </map>
+      <map>
+        <entry key="bean:name=testBean1">
+          <bean class="com.example.ConsoleLoggingNotificationListener"/>
+        </entry>
+      </map>
     </property>
   </bean>
 
@@ -1429,32 +1427,58 @@ public class ConsoleLoggingNotificationListener
 
 </beans>]]></programlisting>
 
-      <para>With the above configuration in place, every time a JMX
-      <classname>Notification</classname> is broadcast from the target MBean
-      (<literal>bean:name=testBean1</literal>), the
-      <classname>ConsoleLoggingNotificationListener</classname> bean that was
-      registered as a listener via the
-      <literal>notificationListenerMappings</literal> property will be
-      notified. The <classname>ConsoleLoggingNotificationListener</classname>
-      bean can then take whatever action it deems appropriate in response to
-      the <classname>Notification</classname>.</para>
+		<para>With the above configuration in place, every time a JMX
+		<classname>Notification</classname> is broadcast from the target MBean
+		(<literal>bean:name=testBean1</literal>), the
+		<classname>ConsoleLoggingNotificationListener</classname> bean that was
+		registered as a listener via the
+		<literal>notificationListenerMappings</literal> property will be
+		notified. The <classname>ConsoleLoggingNotificationListener</classname>
+		bean can then take whatever action it deems appropriate in response to
+		the <classname>Notification</classname>.</para>
 
-      <para>If one wants to register a single
-      <classname>NotificationListener</classname> instance for all of the
-      beans that the enclosing <classname>MBeanExporter</classname> is
-      exporting, one can use the special wildcard <literal>'*'</literal> (sans
-      quotes) as the key for an entry in the
-      <literal>notificationListenerMappings</literal> property map; for example:</para>
+		<para>You can also use straight bean names as the link between exported beans
+		and listeners:</para>
 
-      <programlisting><![CDATA[    <property name="notificationListenerMappings">
-        <map>
-            <entry key="*">
-                <bean class="com.example.ConsoleLoggingNotificationListener"/>
-            </entry>
-        </map>
-    </property>]]></programlisting>
+		<programlisting><![CDATA[<beans>
 
-      <para>If one needs to do the inverse (i.e. register a number of distinct
+  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    <property name="beans">
+      <map>
+        <entry key="bean:name=testBean1" value-ref="testBean"/>
+      </map>
+    </property>
+    <property name="notificationListenerMappings">
+      <map>
+        <entry key="]]><emphasis role="bold">testBean</emphasis><![CDATA[">
+          <bean class="com.example.ConsoleLoggingNotificationListener"/>
+        </entry>
+      </map>
+    </property>
+  </bean>
+
+  <bean id="]]><emphasis role="bold">testBean</emphasis><![CDATA[" class="org.springframework.jmx.JmxTestBean">
+    <property name="name" value="TEST"/>
+    <property name="age" value="100"/>
+  </bean>
+
+</beans>]]></programlisting>
+
+		<para>If one wants to register a single <classname>NotificationListener</classname>
+		instance for all of the beans that the enclosing <classname>MBeanExporter</classname>
+		is exporting, one can use the special wildcard <literal>'*'</literal> (sans quotes)
+		as the key for an entry in the <literal>notificationListenerMappings</literal>
+		property map; for example:</para>
+
+		<programlisting><![CDATA[<property name="notificationListenerMappings">
+  <map>
+    <entry key="*">
+      <bean class="com.example.ConsoleLoggingNotificationListener"/>
+    </entry>
+  </map>
+</property>]]></programlisting>
+
+      <para>If one needs to do the inverse (that is, register a number of distinct
       listeners against an MBean), then one has to use the
       <literal>notificationListeners</literal> list property instead (and in
       preference to the <literal>notificationListenerMappings</literal>
@@ -1531,7 +1555,7 @@ public class ConsoleLoggingNotificationListener
                 <constructor-arg ref="customerNotificationListener"/>
                 <property name="mappedObjectNames">
                     <list>
-                        ]]><lineannotation>&lt;!-- let's handle notifications from two distinct MBeans --&gt;</lineannotation><![CDATA[
+                        ]]><lineannotation>&lt;!-- handles notifications from two distinct MBeans --&gt;</lineannotation><![CDATA[
                         <value>bean:name=testBean1</value>
                         <value>bean:name=testBean2</value>
                     </list>
@@ -1547,7 +1571,7 @@ public class ConsoleLoggingNotificationListener
     </property>
   </bean>
   
-  ]]><lineannotation>&lt;!-- implements both the 'NotificationListener' and 'NotificationFilter' interfaces --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- implements both the <interfacename>NotificationListener</interfacename> and <interfacename>NotificationFilter</interfacename> interfaces --&gt;</lineannotation><![CDATA[
   <bean id="customerNotificationListener" class="com.example.ConsoleLoggingNotificationListener"/>
 
   <bean id="testBean1" class="org.springframework.jmx.JmxTestBean">
@@ -1574,8 +1598,7 @@ public class ConsoleLoggingNotificationListener
         <para>Please note that this section is really only relevant to Spring
         managed beans that have been exposed as MBeans via an
         <classname>MBeanExporter</classname>; any existing, user-defined
-        MBeans should use the standard JMX APIs for notification
-        publication.</para>
+        MBeans should use the standard JMX APIs for notification publication.</para>
       </note>
 
       <para>The key interface in Spring's JMX notification publication support
@@ -1611,11 +1634,11 @@ public class ConsoleLoggingNotificationListener
       appropriate <classname>Notification</classname> subclass), populates
       the notification with the data pertinent to the event that is to be
       published, and one then invokes the
-      <literal>sendNotification(Notification)</literal> on the
+      <methodname>sendNotification(Notification)</methodname> on the
       <classname>NotificationPublisher</classname> instance, passing in the
       <classname>Notification</classname>.</para>
 
-      <para>Let's look at a simple example... in this scenario, exported
+      <para>Find below a simple example... in this scenario, exported
       instances of the <classname>JmxTestBean</classname> are going to publish
       a <classname>NotificationEvent</classname> every time the
       <literal>add(int, int)</literal> operation is invoked.</para>

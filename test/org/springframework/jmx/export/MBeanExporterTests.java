@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import javax.management.Attribute;
 import javax.management.InstanceNotFoundException;
@@ -37,7 +38,9 @@ import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
@@ -235,7 +238,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		factory.setInterfaces(new Class[]{IJmxTestBean.class});
 
 		IJmxTestBean proxy = (IJmxTestBean) factory.getProxy();
-		String name = "bean:proxy=true";
+		String name = "bean:mmm=whatever";
 
 		Map beans = new HashMap();
 		beans.put(name, proxy);
@@ -541,18 +544,43 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
     public void testMBeanIsNotUnregisteredSpuriouslyIfSomeExternalProcessHasUnregisteredMBean() throws Exception {
 		MBeanExporter adaptor = new MBeanExporter();
 		adaptor.setBeans(getBeanMap());
-		adaptor.setServer(server);
+		adaptor.setServer(this.server);
         MockMBeanExporterListener listener = new MockMBeanExporterListener();
         adaptor.setListeners(new MBeanExporterListener[]{listener});
         adaptor.afterPropertiesSet();
 		assertIsRegistered("The bean was not registered with the MBeanServer", ObjectNameManager.getInstance(OBJECT_NAME));
         
-        server.unregisterMBean(new ObjectName(OBJECT_NAME));
+        this.server.unregisterMBean(new ObjectName(OBJECT_NAME));
         adaptor.destroy();
         assertEquals("Listener should not have been invoked (MBean previously unregistered by external agent)", 0, listener.getUnregistered().size());
     }
 
-    /*
+	/**
+	 * SPR-3302
+	 */
+	public void testBeanNameCanBeUsedInNotificationListenersMap() throws Exception {
+		final String beanName = "charlesDexterWard";
+		BeanDefinitionBuilder testBean = BeanDefinitionBuilder.rootBeanDefinition(JmxTestBean.class);
+
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition(beanName, testBean.getBeanDefinition());
+		factory.preInstantiateSingletons();
+		Object testBeanInstance = factory.getBean(beanName);
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		Map beansToExport = new HashMap();
+		final String objectName = "test:what=ever";
+		beansToExport.put(objectName, testBeanInstance);
+		exporter.setBeans(beansToExport);
+		exporter.setBeanFactory(factory);
+		StubNotificationListener listener = new StubNotificationListener();
+		exporter.setNotificationListenerMappings(Collections.singletonMap(beanName, listener));
+
+		exporter.afterPropertiesSet();
+	}
+
+	/*
      * SPR-3625
      */
     public void testMBeanIsUnregisteredForRuntimeExceptionDuringInitialization() throws Exception {
@@ -573,16 +601,16 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		beansToExport.put(objectName2, objectName2);
 		exporter.setBeans(beansToExport);
 		exporter.setBeanFactory(factory);
+
 		try {
 			exporter.afterPropertiesSet();
-			fail("Should have failed during creation of RuntimeExceptionThrowingConstructorBean");
+			fail("Must have failed during creation of RuntimeExceptionThrowingConstructorBean");
 		}
-		catch (RuntimeException ex) {
-			// expected
-		}
-		assertIsNotRegistered("Should have unregistered all previously registered MBeans due to RuntimeException",
+		catch (RuntimeException expected) {}
+
+		assertIsNotRegistered("Must have unregistered all previously registered MBeans due to RuntimeException",
 				ObjectNameManager.getInstance(objectName1));
-		assertIsNotRegistered("Should have never registered this MBean due to RuntimeException",
+		assertIsNotRegistered("Must have never registered this MBean due to RuntimeException",
 				ObjectNameManager.getInstance(objectName2));
     }
 	
@@ -669,15 +697,33 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 			this.name = name;
 		}
 	}
-	
+
+
+	public static final class StubNotificationListener implements NotificationListener {
+
+		private List notifications = new ArrayList();
+
+		public void handleNotification(Notification notification, Object handback) {
+			this.notifications.add(notification);
+		}
+
+		public List getNotifications() {
+			return this.notifications;
+		}
+	}
+
+
 	private static class RuntimeExceptionThrowingConstructorBean {
+
 		public RuntimeExceptionThrowingConstructorBean() {
 			throw new RuntimeException();
 		}
 	}
-	
 
-	private static final class NamedBeanAutodetectCapableMBeanInfoAssemblerStub extends SimpleReflectiveMBeanInfoAssembler implements AutodetectCapableMBeanInfoAssembler {
+
+	private static final class NamedBeanAutodetectCapableMBeanInfoAssemblerStub
+			extends SimpleReflectiveMBeanInfoAssembler
+			implements AutodetectCapableMBeanInfoAssembler {
 		
 		private String namedBean;
 
