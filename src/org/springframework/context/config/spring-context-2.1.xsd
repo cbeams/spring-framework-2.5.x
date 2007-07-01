@@ -91,18 +91,20 @@
 	<xsd:element name="load-time-weaver">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Activates a Spring LoadTimeWeaver for this application context, available as a bean with name
-	"loadTimeWeaver". Any bean that implements the LoadTimeWeaverAware interface will then
-	receive the LoadTimeWeaver reference automatically; e.g. Spring's JPA bootstrap support.
+	Activates a Spring LoadTimeWeaver for this application context, available as
+	a bean with the name "loadTimeWeaver". Any bean that implements the
+	LoadTimeWeaverAware interface will then receive the LoadTimeWeaver reference
+	automatically; for example, Spring's JPA bootstrap support.
 
-	The default weaver is determined automatically. As of Spring 2.1: detecting Sun's
-	GlassFish, Oracle's OC4J, Spring's VM agent and any ClassLoader supported by Spring's
-	ReflectiveLoadTimeWeaver (e.g. the TomcatInstrumentableClassLoader).
+	The default weaver is determined automatically. As of Spring 2.1: detecting
+	Sun's GlassFish, Oracle's OC4J, Spring's VM agent and any ClassLoader
+	supported by Spring's ReflectiveLoadTimeWeaver (for example, the
+	TomcatInstrumentableClassLoader).
 
-	Allows for activating AspectJ load-time weaving through a simple boolean flag,
-	with the AspectJ class transformer registered through Spring's LoadTimeWeaver.
-	AspectJ weaving will be activated by default if a "META-INF/aop.xml" resource
-	is present in the classpath.
+	The activation of AspectJ load-time weaving is specified via a simple flag
+	(the 'aspectj-weaving' attribute), with the AspectJ class transformer
+	registered through Spring's LoadTimeWeaver. AspectJ weaving will be activated
+	by default if a "META-INF/aop.xml" resource is present in the classpath.
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
@@ -113,6 +115,9 @@
 		<xsd:complexType>
 			<xsd:attribute name="weaver-class" type="xsd:string">
 				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The fully-qualified classname of the LoadTimeWeaver that is to be activated.
+					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation>
 							<tool:expected-type type="java.lang.Class"/>
@@ -124,9 +129,29 @@
 			<xsd:attribute name="aspectj-weaving" default="autodetect">
 				<xsd:simpleType>
 					<xsd:restriction base="xsd:string">
-						<xsd:enumeration value="on"/>
-						<xsd:enumeration value="off"/>
-						<xsd:enumeration value="autodetect"/>
+						<xsd:enumeration value="on">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Switches AspectJ load-time weaving on.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:enumeration>
+						<xsd:enumeration value="off">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Switches AspectJ load-time weaving off.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:enumeration>
+						<xsd:enumeration value="autodetect">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Switches AspectJ load-time weaving on if a "META-INF/aop.xml" resource
+	is present in the classpath. If there is no such resource, then AspectJ
+	load-time weaving will be switched off.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:enumeration>
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>
@@ -137,7 +162,7 @@
 		<xsd:annotation>
 			<xsd:documentation source="java:org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"><![CDATA[
 	Signals the current application context to apply dependency injection
-	to non-managed objects that are instantiated outside of the Spring bean
+	to non-managed classes that are instantiated outside of the Spring bean
 	factory (typically classes annotated with the @Configurable annotation).
 			]]></xsd:documentation>
 		</xsd:annotation>
