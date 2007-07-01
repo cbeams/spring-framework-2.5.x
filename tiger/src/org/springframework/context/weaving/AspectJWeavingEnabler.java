@@ -50,7 +50,7 @@ public class AspectJWeavingEnabler implements BeanFactoryPostProcessor, LoadTime
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		Assert.state(this.loadTimeWeaver != null,
-				"LoadTimeWeaver must be available - typically autodetected as bean with name 'loadTimeWeaver'");
+				"LoadTimeWeaver must be available - typically autodetected as a bean with the name 'loadTimeWeaver'");
 		this.loadTimeWeaver.addTransformer(new ClassPreProcessorAgentAdapter());
 	}
 
