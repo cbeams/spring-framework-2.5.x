@@ -10,8 +10,8 @@
 	</context-param>
 
 	<filter>
-		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
 		<filter-name>characterEncodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
 	</filter>
 
 	<filter-mapping>
