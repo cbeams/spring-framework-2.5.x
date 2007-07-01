@@ -233,7 +233,8 @@
 		<xsd:attribute name="class" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation source="java:java.lang.Class"><![CDATA[
-	The fully qualified name of the bean's class, except if it pure serves as parent for child bean definitions.
+	The fully qualified name of the bean's class, except if it serves only
+	as a parent definition for child bean definitions.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>

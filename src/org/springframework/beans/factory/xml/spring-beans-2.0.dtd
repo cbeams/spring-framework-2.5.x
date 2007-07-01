@@ -139,7 +139,7 @@
 
 <!--
 	Each bean definition must specify the fully qualified name of the class,
-	except if it pure serves as parent for child bean definitions.
+	except if it serves only as a parent definition for child bean definitions.
 -->
 <!ATTLIST bean class CDATA #IMPLIED>
 
