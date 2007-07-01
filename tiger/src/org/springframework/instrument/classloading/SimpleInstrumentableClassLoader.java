@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import java.lang.instrument.ClassFileTransformer;
 import org.springframework.core.OverridingClassLoader;
 
 /**
- * Simplistic implementation of an instrumentable ClassLoader.
- * Usable in tests and standalone environments.
+ * Simplistic implementation of an instrumentable <code>ClassLoader</code>.
+ *
+ * <p>Usable in tests and standalone environments.
  *
  * @author Rod Johnson
  * @author Costin Leau
@@ -34,9 +35,10 @@ public class SimpleInstrumentableClassLoader extends OverridingClassLoader  {
 
 
 	/**
-	 * Create a new SimpleLoadTimeWeaver for the given class loader.
-	 * @param parent the ClassLoader to build an simple instrumentable
-	 * ClassLoader for
+	 * Create a new <code>SimpleLoadTimeWeaver</code> for the given
+	 * <code>ClassLoader</code>.
+	 * @param parent the <code>ClassLoader</code> to build a simple
+	 * instrumentable <code>ClassLoader</code> for
 	 */
 	public SimpleInstrumentableClassLoader(ClassLoader parent) {
 		super(parent);
@@ -45,8 +47,9 @@ public class SimpleInstrumentableClassLoader extends OverridingClassLoader  {
 
 
 	/**
-	 * Add a class file transformer to be applied by this ClassLoader.
-	 * @param transformer the class file transformer to register
+	 * Add a <code>ClassFileTransformer</code> to be applied by this
+	 * <code>ClassLoader</code>.
+	 * @param transformer the <code>ClassFileTransformer</code> to register
 	 */
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.weavingTransformer.addTransformer(transformer);
