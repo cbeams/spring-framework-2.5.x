@@ -20,7 +20,7 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
 
 /**
  * Interface to be implemented by any object that wishes to be notified
- * of the application context's default LoadTimeWeaver.
+ * of the application context's default {@link LoadTimeWeaver}.
  *
  * @author Juergen Hoeller
  * @since 2.1
@@ -29,16 +29,20 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
 public interface LoadTimeWeaverAware {
 
 	/**
-	 * Set the LoadTimeWeaver of this object's containing application context.
-	 * <p>Invoked after population of normal bean properties but before an init
-	 * callback like InitializingBean's <code>afterPropertiesSet</code> or a
-	 * custom init-method. Invoked after ApplicationContextAware's
-	 * <code>setApplicationContext</code>.
+	 * Set the {@link LoadTimeWeaver} of this object's containing
+	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
+	 * <p>Invoked after the population of normal bean properties but before an
+	 * initialization callback like
+	 * {@link org.springframework.beans.factory.InitializingBean InitializingBean's}
+	 * {@link org.springframework.beans.factory.InitializingBean#afterPropertiesSet() afterPropertiesSet()}
+	 * or a custom init-method. Invoked after
+	 * {@link org.springframework.context.ApplicationContextAware ApplicationContextAware's}
+	 * {@link org.springframework.context.ApplicationContextAware#setApplicationContext setApplicationContext(..)}.
 	 * <p><b>NOTE:</b> This method will only be called if there actually is a
-	 * default LoadTimeWeaver available in the application context. If there is none,
-	 * the method will simply not get invoked, assuming that the implementing object
-	 * is able to deactivate its weaving dependency accordingly.
-	 * @param loadTimeWeaver the LoadTimeWeaver instance
+	 * <code>LoadTimeWeaver</code> available in the application context. If
+	 * there is none, the method will simply not get invoked, assuming that the
+	 * implementing object is able to activate its weaving dependency accordingly.
+	 * @param loadTimeWeaver the <code>LoadTimeWeaver</code> instance (never <code>null</code>)
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext
 	 */

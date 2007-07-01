@@ -27,15 +27,19 @@ import org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWe
 import org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver;
 
 /**
- * Default LoadTimeWeaver bean for use in an application context, decorating an
- * automatically detected internal LoadTimeWeaver. Typically registered for
- * the default bean name "loadTimeWeaver"; the most convenient way to achieve
- * this is Spring's <code>&lt;context:load-time-weaver&gt;</code> XML tag.
+ * Default {@link LoadTimeWeaver} bean for use in an application context,
+ * decorating an automatically detected internal <code>LoadTimeWeaver</code>.
+ *
+ * <p>Typically registered for the default bean name
+ * "<code>loadTimeWeaver</code>"; the most convenient way to achieve this is
+ * Spring's <code>&lt;context:load-time-weaver&gt;</code> XML tag.
  *
  * <p>This class implements a runtime environment check for obtaining the
- * appropriate weaver implementation: As of Spring 2.1, it detects Sun's GlassFish,
- * Oracle's OC4J, Spring's VM agent and any ClassLoader supported by Spring's
- * ReflectiveLoadTimeWeaver (e.g. the TomcatInstrumentableClassLoader).
+ * appropriate weaver implementation: As of Spring 2.1, it detects Sun's
+ * GlassFish, Oracle's OC4J,
+ * {@link InstrumentationSavingAgent Spring's VM agent} and any
+ * {@link ClassLoader} supported by Spring's {@link ReflectiveLoadTimeWeaver}
+ * (for example the <code>TomcatInstrumentableClassLoader</code>).
  *
  * @author Juergen Hoeller
  * @since 2.1

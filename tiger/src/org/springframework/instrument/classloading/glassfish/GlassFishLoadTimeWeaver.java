@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link LoadTimeWeaver} implementation for GlassFish's instrumentable ClassLoader.
+ * {@link LoadTimeWeaver} implementation for GlassFish's
+ * {@link InstrumentableClassLoader}.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -37,10 +38,21 @@ public class GlassFishLoadTimeWeaver implements LoadTimeWeaver {
 	private final InstrumentableClassLoader classLoader;
 
 
+	/**
+	 * Create a new instance of the <code>GlassFishLoadTimeWeaver</code> class
+	 * using the default {@link ClassLoader}.
+	 * @see #GlassFishLoadTimeWeaver(ClassLoader)
+	 */
 	public GlassFishLoadTimeWeaver() {
 		this(ClassUtils.getDefaultClassLoader());
 	}
 
+	/**
+	 * Create a new instance of the <code>GlassFishLoadTimeWeaver</code> class.
+	 * @param classLoader the specific {@link ClassLoader} to use; must not be <code>null</code>
+	 * @throws IllegalArgumentException if the supplied <code>classLoader</code> is <code>null</code>;
+	 * or if the supplied <code>classLoader</code> is not an {@link InstrumentableClassLoader}
+	 */
 	public GlassFishLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 		InstrumentableClassLoader icl = determineClassLoader(classLoader);
@@ -52,9 +64,10 @@ public class GlassFishLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 	/**
-	 * Determine the GlassFish InstrumentableClassLoader for the given ClassLoader.
-	 * @param classLoader the ClassLoader to check
-	 * @return the InstrumentableClassLoader, or <code>null</code> if none found
+	 * Determine the GlassFish {@link InstrumentableClassLoader} for the given
+	 * {@link ClassLoader}.
+	 * @param classLoader the <code>ClassLoader</code> to check
+	 * @return the <code>InstrumentableClassLoader</code>, or <code>null</code> if none found
 	 */
 	protected InstrumentableClassLoader determineClassLoader(ClassLoader classLoader) {
 		// Detect transformation-aware ClassLoader by traversing the hierarchy

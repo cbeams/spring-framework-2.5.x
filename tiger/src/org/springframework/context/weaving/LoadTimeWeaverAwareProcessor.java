@@ -26,12 +26,15 @@ import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor}
- * implementation that passes the context's default LoadTimeWeaver
+ * implementation that passes the context's default {@link LoadTimeWeaver}
  * to beans that implement the {@link LoadTimeWeaverAware} interface.
  *
- * <p>Application contexts will automatically register this with their
- * underlying bean factory, provided that a default LoadTimeWeaver is
- * actually available. Applications do not use this directly.
+ * <p>{@link org.springframework.context.ApplicationContext Application contexts}
+ * will automatically register this with their underlying
+ * {@link BeanFactory bean factory}, provided that a default
+ * <code>LoadTimeWeaver</code> is actually available.
+ *
+ * <p>Applications should not use this class directly.
  *
  * @author Juergen Hoeller
  * @since 2.1
@@ -46,15 +49,22 @@ public class LoadTimeWeaverAwareProcessor implements BeanPostProcessor, BeanFact
 
 
 	/**
-	 * Create a new LoadTimeWeaverAwareProcessor that will auto-retrieve
-	 * the weaver from the containing BeanFactory, expecting a bean named
-	 * "loadTimeWeaver."
+	 * Create a new <code>LoadTimeWeaverAwareProcessor</code> that will
+	 * auto-retrieve the {@link LoadTimeWeaver} from the containing
+	 * {@link BeanFactory}, expecting a bean named
+	 * {@link ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME "loadTimeWeaver"}.
 	 */
 	public LoadTimeWeaverAwareProcessor() {
 	}
 
 	/**
-	 * Create a new LoadTimeWeaverAwareProcessor for the given weaver.
+	 * Create a new <code>LoadTimeWeaverAwareProcessor</code> for the given
+	 * {@link LoadTimeWeaver}.
+	 * <p>If the given <code>loadTimeWeaver</code> is <code>null</code>, then a
+	 * <code>LoadTimeWeaver</code> will be auto-retrieved from the containing
+	 * {@link BeanFactory}, expecting a bean named
+	 * {@link ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME "loadTimeWeaver"}.
+	 * @param loadTimeWeaver the specific <code>LoadTimeWeaver</code> that is to be used; can be <code>null</code>
 	 */
 	public LoadTimeWeaverAwareProcessor(LoadTimeWeaver loadTimeWeaver) {
 		this.loadTimeWeaver = loadTimeWeaver;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.instrument;
 import java.lang.instrument.Instrumentation;
 
 /**
- * Java agent that saves the Instrumentation interface
- * from the JVM for later use.
+ * Java agent that saves the {@link Instrumentation} interface from the JVM for
+ * later use.
  *
  * @author Rod Johnson
  * @since 2.0
@@ -32,7 +32,7 @@ public class InstrumentationSavingAgent {
 
 
 	/**
-	 * Save the Instrumentation interface exposed by the JVM.
+	 * Save the {@link Instrumentation} interface exposed by the JVM.
 	 */
 	public static void premain(String agentArgs, Instrumentation inst) {
 		instrumentation = inst;
@@ -40,7 +40,11 @@ public class InstrumentationSavingAgent {
 
 
 	/**
-	 * Return the Instrumentation interface exposed by the JVM.
+	 * Return the {@link Instrumentation} interface exposed by the JVM.
+    * @return the <code>Instrumentation</code> instance previously saved when
+    * the {@link #premain} method was called by the JVM; will be
+    * <code>null</code> if this class was not used as the Java agent when this
+    * JVM was started.
 	 */
 	public static Instrumentation getInstrumentation() {
 		return instrumentation;

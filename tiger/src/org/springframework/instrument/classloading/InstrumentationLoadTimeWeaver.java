@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,19 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Load time weaver relying on Instrumentation.
- * Start with java agent, with JVM options like:
- * <code>
- * -javaagent:path/to/spring-agent.jar
- * </code>
- * where <code>spring-agent.jar</code> is a JAR file
- * containing the InstrumentationSavingAgent class.
+ * Load time weaver relying on {@link Instrumentation}.
  *
- * <p>In Eclipse, for example, set the Run configuration's JVM
- * args to be of the form:
- * <code>
- * -javaagent:${project_loc}/lib/spring-agent.jar
- * </code>
+ * <p>Start the JVM specifying the java agent to be used, like so:
+ *
+ * <p><code class="code">-javaagent:path/to/spring-agent.jar</code>
+ *
+ * <p>where <code>spring-agent.jar</code> is a JAR file containing the
+ * {@link InstrumentationSavingAgent} class.
+ *
+ * <p>In Eclipse, for example, set the Run configuration's JVM args to be of
+ * the form:
+ *
+ * <p><code class="code">-javaagent:${project_loc}/lib/spring-agent.jar</code>
  *
  * @author Rod Johnson
  * @since 2.0
@@ -64,8 +64,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 	/**
-	 * This implementation always returns a SimpleThrowawayClassLoader.
-	 * @see SimpleThrowawayClassLoader
+	 * This implementation always returns a {@link SimpleThrowawayClassLoader}.
 	 */
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
