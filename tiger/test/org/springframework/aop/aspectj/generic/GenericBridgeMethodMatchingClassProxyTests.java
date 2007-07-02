@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj.generic;
 
 /**
  * Tests for AspectJ pointcut expression matching when working with bridge methods.
- * 
- * This class focuses on class proxy.
- * 
- * See GenericBridgeMethodMatchingTests for more details.
- * 
+ *
+ * <p>This class focuses on class proxying.
+ *
+ * <p>See GenericBridgeMethodMatchingTests for more details.
+ *
  * @author Ramnivas Laddad
- * @since 2.1
  */
-
 public class GenericBridgeMethodMatchingClassProxyTests extends GenericBridgeMethodMatchingTests {
 
 	@Override
@@ -34,12 +33,13 @@ public class GenericBridgeMethodMatchingClassProxyTests extends GenericBridgeMet
 	}
 
 	public void testGenericDerivedInterfaceMethodThroughClass() {
-		((DerivedStringParametarizedClass)testBean).genericDerivedInterfaceMethod("");
+		((DerivedStringParameterizedClass) testBean).genericDerivedInterfaceMethod("");
 		assertEquals(1, counterAspect.count);
 	}
 
 	public void testGenericBaseInterfaceMethodThroughClass() {
-		((DerivedStringParametarizedClass)testBean).genericBaseInterfaceMethod("");
+		((DerivedStringParameterizedClass) testBean).genericBaseInterfaceMethod("");
 		assertEquals(1, counterAspect.count);
 	}
+
 }
