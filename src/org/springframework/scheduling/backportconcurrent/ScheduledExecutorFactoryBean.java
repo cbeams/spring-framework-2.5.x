@@ -79,6 +79,8 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 
 	private boolean continueScheduledExecutionAfterException = false;
 
+	private boolean waitForTasksToCompleteOnShutdown = true;
+
 	private String beanName;
 
 	private ScheduledExecutorService executor;
@@ -147,6 +149,19 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 	 */
 	public void setContinueScheduledExecutionAfterException(boolean continueScheduledExecutionAfterException) {
 		this.continueScheduledExecutionAfterException = continueScheduledExecutionAfterException;
+	}
+
+	/**
+	 * Set whether to wait for scheduled tasks to complete on shutdown.
+	 * <p>Default is "true". Switch this to "false" if you prefer
+	 * a shorter shutdown phase over fully completed tasks.
+	 * <p><b>NOTE:</b> The default will change to "false" as of Spring 2.1,
+	 * for consistency with the defaults in the Quartz support.
+	 * @see edu.emory.mathcs.backport.java.util.concurrent.ScheduledExecutorService#shutdown()
+	 * @see edu.emory.mathcs.backport.java.util.concurrent.ScheduledExecutorService#shutdownNow()
+	 */
+	public void setWaitForTasksToCompleteOnShutdown(boolean waitForJobsToCompleteOnShutdown) {
+		this.waitForTasksToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
 	}
 
 	public void setBeanName(String name) {
@@ -258,7 +273,12 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 			logger.info("Shutting down ScheduledExecutorService" +
 					(this.beanName != null ? " '" + this.beanName + "'" : ""));
 		}
-		this.executor.shutdown();
+		if (this.waitForTasksToCompleteOnShutdown) {
+			this.executor.shutdown();
+		}
+		else {
+			this.executor.shutdownNow();
+		}
 	}
 
 }
