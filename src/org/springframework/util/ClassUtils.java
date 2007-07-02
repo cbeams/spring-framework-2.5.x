@@ -44,8 +44,9 @@ import org.apache.commons.logging.LogFactory;
  * @author Keith Donald
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @author Ramnivas Laddad
  * @since 1.1
+ * @see TypeUtils
+ * @see ReflectionUtils
  */
 public abstract class ClassUtils {
 
