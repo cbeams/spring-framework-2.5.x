@@ -17,14 +17,13 @@
 package org.springframework.aop.framework;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.WeakHashMap;
 
 import net.sf.cglib.core.CodeGenerationException;
 import net.sf.cglib.proxy.Callback;
@@ -88,7 +87,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 	protected final static Log logger = LogFactory.getLog(Cglib2AopProxy.class);
 
 	/** Keeps track of the Classes that we have validated for final methods */
-	private static final Set validatedClasses = new HashSet();
+	private static final Map validatedClasses = new WeakHashMap();
 
 
 	/** The configuration used to configure this proxy */
@@ -231,9 +230,9 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 	private void validateClassIfNecessary(Class proxySuperClass) {
 		if (logger.isWarnEnabled()) {
 			synchronized (validatedClasses) {
-				if (!validatedClasses.contains(proxySuperClass)) {
+				if (!validatedClasses.containsKey(proxySuperClass)) {
 					doValidateClass(proxySuperClass);
-					validatedClasses.add(proxySuperClass);
+					validatedClasses.put(proxySuperClass, Boolean.TRUE);
 				}
 			}
 		}
@@ -300,7 +299,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		if (isStatic && isFrozen) {
 			Method[] methods = rootClass.getMethods();
 			Callback[] fixedCallbacks = new Callback[methods.length];
-			this.fixedInterceptorMap = new HashMap(methods.length);
+			this.fixedInterceptorMap = new WeakHashMap(methods.length);
 
 			// TODO: small memory optimisation here (can skip creation for
 			// methods with no advice)
@@ -703,16 +702,20 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 	 */
 	private static class ProxyCallbackFilter implements CallbackFilter {
 
-		private final AdvisedSupport advised;
+		private final WeakReference advised;
 
 		private final Map fixedInterceptorMap;
 
 		private final int fixedInterceptorOffset;
 
 		public ProxyCallbackFilter(AdvisedSupport advised, Map fixedInterceptorMap, int fixedInterceptorOffset) {
-			this.advised = advised;
+			this.advised = new WeakReference(advised);
 			this.fixedInterceptorMap = fixedInterceptorMap;
 			this.fixedInterceptorOffset = fixedInterceptorOffset;
+		}
+
+		protected final AdvisedSupport getAdvised() {
+			return (AdvisedSupport) this.advised.get();
 		}
 
 		/**
@@ -756,7 +759,9 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 				logger.debug("Found finalize() method - using NO_OVERRIDE");
 				return NO_OVERRIDE;
 			}
-			if (!this.advised.opaque && method.getDeclaringClass().isInterface() &&
+			AdvisedSupport advised = getAdvised();
+			Assert.state(advised != null, "AOP proxy has already been cleaned up");
+			if (!advised.isOpaque() && method.getDeclaringClass().isInterface() &&
 					method.getDeclaringClass().isAssignableFrom(Advised.class)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Method is declared on Advised interface: " + method);
@@ -773,13 +778,13 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 				logger.debug("Found 'hashCode' method: " + method);
 				return INVOKE_HASHCODE;
 			}
-			Class targetClass = this.advised.getTargetClass();
+			Class targetClass = advised.getTargetClass();
 			// Proxy is not yet available, but that shouldn't matter.
-			List chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
+			List chain = advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 			boolean haveAdvice = !chain.isEmpty();
-			boolean exposeProxy = this.advised.isExposeProxy();
-			boolean isStatic = this.advised.getTargetSource().isStatic();
-			boolean isFrozen = this.advised.isFrozen();
+			boolean exposeProxy = advised.isExposeProxy();
+			boolean isStatic = advised.getTargetSource().isStatic();
+			boolean isFrozen = advised.isFrozen();
 			if (haveAdvice || !isFrozen) {
 				// If exposing the proxy, then AOP_PROXY must be used.
 				if (exposeProxy) {
@@ -851,23 +856,27 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 				return false;
 			}
 			ProxyCallbackFilter otherCallbackFilter = (ProxyCallbackFilter) other;
-			if (this.advised.isFrozen() != otherCallbackFilter.advised.isFrozen()) {
+			AdvisedSupport advised = getAdvised();
+			AdvisedSupport otherAdvised = otherCallbackFilter.getAdvised();
+			if (advised == null || otherAdvised == null) {
 				return false;
 			}
-			if (this.advised.isExposeProxy() != otherCallbackFilter.advised.isExposeProxy()) {
+			if (advised.isFrozen() != otherAdvised.isFrozen()) {
 				return false;
 			}
-			if (this.advised.getTargetSource().isStatic() !=
-					otherCallbackFilter.advised.getTargetSource().isStatic()) {
+			if (advised.isExposeProxy() != otherAdvised.isExposeProxy()) {
 				return false;
 			}
-			if (!AopProxyUtils.equalsProxiedInterfaces(this.advised, otherCallbackFilter.advised)) {
+			if (advised.getTargetSource().isStatic() != otherAdvised.getTargetSource().isStatic()) {
+				return false;
+			}
+			if (!AopProxyUtils.equalsProxiedInterfaces(advised, otherAdvised)) {
 				return false;
 			}
 			// Advice instance identity is unimportant to the proxy class:
 			// All that matters is type and ordering.
-			Advisor[] thisAdvisors = this.advised.getAdvisors();
-			Advisor[] thatAdvisors = otherCallbackFilter.advised.getAdvisors();
+			Advisor[] thisAdvisors = advised.getAdvisors();
+			Advisor[] thatAdvisors = otherAdvised.getAdvisors();
 			if (thisAdvisors.length != thatAdvisors.length) {
 				return false;
 			}
@@ -900,17 +909,20 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 
 		public int hashCode() {
 			int hashCode = 0;
-			Advisor[] advisors = this.advised.getAdvisors();
-			for (int i = 0; i < advisors.length; i++) {
-				Advice advice = advisors[i].getAdvice();
-				if (advice != null) {
-					hashCode = 13 * hashCode + advice.getClass().hashCode();
+			AdvisedSupport advised = getAdvised();
+			if (advised != null) {
+				Advisor[] advisors = advised.getAdvisors();
+				for (int i = 0; i < advisors.length; i++) {
+					Advice advice = advisors[i].getAdvice();
+					if (advice != null) {
+						hashCode = 13 * hashCode + advice.getClass().hashCode();
+					}
 				}
+				hashCode = 13 * hashCode + (advised.isFrozen() ? 1 : 0);
+				hashCode = 13 * hashCode + (advised.isExposeProxy() ? 1 : 0);
+				hashCode = 13 * hashCode + (advised.isOptimize() ? 1 : 0);
+				hashCode = 13 * hashCode + (advised.isOpaque() ? 1 : 0);
 			}
-			hashCode = 13 * hashCode + (this.advised.isFrozen() ? 1 : 0);
-			hashCode = 13 * hashCode + (this.advised.isExposeProxy() ? 1 : 0);
-			hashCode = 13 * hashCode + (this.advised.isOptimize() ? 1 : 0);
-			hashCode = 13 * hashCode + (this.advised.isOpaque() ? 1 : 0);
 			return hashCode;
 		}
 	}
