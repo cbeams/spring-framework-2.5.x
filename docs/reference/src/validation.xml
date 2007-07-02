@@ -567,7 +567,7 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
 
 
         <section id="beans-beans-conversion-customeditor-registration">
-            <title>Registering additional custom <literal>PropertyEditors</literal></title>
+            <title>Registering additional custom <interfacename>PropertyEditors</interfacename></title>
 
 			<para>When setting bean properties as a string value, a Spring IoC container
             ultimately uses standard JavaBeans <literal>PropertyEditors</literal> to convert these
@@ -662,6 +662,9 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
   </property>
 </bean>]]></programlisting>
 
+			<section id="beans-beans-conversion-customeditor-registration-per">
+				<title>Using <interfacename>PropertyEditorRegistrars</interfacename></title>
+
 			<para>Another mechanism for registering property editors with the Spring container is to create and use
 			a <interfacename>PropertyEditorRegistrar</interfacename>. This interface is particularly useful when you
 			need to use the same set of property editors in several different situations: write a corresponding
@@ -735,6 +738,8 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
 			implementation of <methodname>initBinder(..)</methodname> is just one line long!), and allows common
 			<interfacename>PropertyEditor</interfacename> registration code to be encapsulated in a class and then
 			shared amongst as many <interfacename>Controllers</interfacename> as needed.</para>
+
+			</section>
 
 		</section>
 
