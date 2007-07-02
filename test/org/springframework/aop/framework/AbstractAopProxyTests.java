@@ -69,13 +69,13 @@ import org.springframework.util.StopWatch;
  */
 public abstract class AbstractAopProxyTests extends TestCase {
 
-	protected MockTargetSource mockTargetSource = new MockTargetSource();
+	protected final MockTargetSource mockTargetSource = new MockTargetSource();
+
 
 	/**
 	 * Make a clean target source available if code wants to use it.
 	 * The target must be set. Verification will be automatic in tearDown
 	 * to ensure that it was used appropriately by code.
-	 * @see junit.framework.TestCase#setUp()
 	 */
 	protected void setUp() {
 		mockTargetSource.reset();
@@ -84,6 +84,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	protected void tearDown() {
 		mockTargetSource.verify();
 	}
+
 
 	/**
 	 * Set in CGLIB or JDK mode.
@@ -98,6 +99,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	protected boolean requiresTarget() {
 		return false;
 	}
+
 
 	public void testNoInterceptorsAndNoTarget() {
 		AdvisedSupport pc =
@@ -143,13 +145,11 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	public void testManyProxies() {
 		int howMany = 10000;
 		StopWatch sw = new StopWatch();
-		sw.start(getClass() + "." + getName() + ": create " + howMany + " proxies");
+		sw.start("Create " + howMany + " proxies");
 		testManyProxies(howMany);
 		sw.stop();
-		System.out.println(sw);
-		// Set a performance benchmark.
-		// It's pretty generous so as not to cause failures on slow machines.
-		assertTrue("Proxy creation was too slow",  sw.getTotalTimeSeconds() < 25);
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Proxy creation was too slow",  sw.getTotalTimeMillis() < 5000);
 	}
 
 	private void testManyProxies(int howMany) {
