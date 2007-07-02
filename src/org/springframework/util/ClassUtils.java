@@ -45,6 +45,8 @@ import org.apache.commons.logging.LogFactory;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.1
+ * @see TypeUtils
+ * @see ReflectionUtils
  */
 public abstract class ClassUtils {
 
@@ -487,11 +489,17 @@ public abstract class ClassUtils {
 	 * if there is one. E.g. the method may be <code>IFoo.bar()</code> and the
 	 * target class may be <code>DefaultFoo</code>. In this case, the method may be
 	 * <code>DefaultFoo.bar()</code>. This enables attributes on that method to be found.
+	 * <p><b>NOTE:</b> In contrast to {@link org.springframework.aop.support.AopUtils#getMostSpecificMethod},
+	 * this method does <i>not</i> resolve Java 5 bridge methods automatically.
+	 * Call {@link org.springframework.core.BridgeMethodResolver#findBridgedMethod}
+	 * if bridge method resolution is desirable (e.g. for obtaining metadata from
+	 * the original method definition).
 	 * @param method the method to be invoked, which may come from an interface
 	 * @param targetClass the target class for the current invocation.
 	 * May be <code>null</code> or may not even implement the method.
 	 * @return the specific target method, or the original method if the
 	 * <code>targetClass</code> doesn't implement it or is <code>null</code>
+	 * @see org.springframework.aop.support.AopUtils#getMostSpecificMethod
 	 */
 	public static Method getMostSpecificMethod(Method method, Class targetClass) {
 		if (method != null && targetClass != null) {
@@ -575,18 +583,19 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Determine if the given target type is assignable from the given value
+	 * Check if the right-hand side type may be assigned to the left-hand side
 	 * type, assuming setting by reflection. Considers primitive wrapper
 	 * classes as assignable to the corresponding primitive types.
-	 * @param targetType the target type
-	 * @param valueType	the value type that should be assigned to the target type
+	 * @param lhsType the target type
+	 * @param rhsType	the value type that should be assigned to the target type
 	 * @return if the target type is assignable from the value type
+	 * @see TypeUtils#isAssignable
 	 */
-	public static boolean isAssignable(Class targetType, Class valueType) {
-		Assert.notNull(targetType, "Target type must not be null");
-		Assert.notNull(valueType, "Value type must not be null");
-		return (targetType.isAssignableFrom(valueType) ||
-				targetType.equals(primitiveWrapperTypeMap.get(valueType)));
+	public static boolean isAssignable(Class lhsType, Class rhsType) {
+		Assert.notNull(lhsType, "Left-hand side type must not be null");
+		Assert.notNull(rhsType, "Right-hand side type must not be null");
+		return (lhsType.isAssignableFrom(rhsType) ||
+				lhsType.equals(primitiveWrapperTypeMap.get(rhsType)));
 	}
 
 	/**

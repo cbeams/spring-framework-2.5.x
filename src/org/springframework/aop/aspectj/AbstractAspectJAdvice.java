@@ -37,6 +37,7 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.MethodMatchers;
 import org.springframework.aop.support.StaticMethodMatcher;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
@@ -52,6 +53,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Adrian Colyer
  * @author Juergen Hoeller
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedenceInformation {
@@ -137,6 +139,12 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	private Map argumentBindings = null;
 
 	private boolean argumentsIntrospected = false;
+
+	// The actual type is java.lang.reflect.Type,
+	// but for JDK 1.4 compatibility we use Object as the static type.
+	private Object discoveredReturningGenericType;
+	// Note: Unlike return type, no such generic information is needed for the throwing type,
+	// since Java doesn't allow exception types to be parameterized.
 
 
 	/**
@@ -265,6 +273,10 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	protected Class getDiscoveredReturningType() {
 		return this.discoveredReturningType;
+	}
+
+	protected Object getDiscoveredReturningGenericType() {
+		return this.discoveredReturningGenericType;
 	}
 
 	public void setThrowingName(String name) {
@@ -430,6 +442,10 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			else {
 				Integer index = (Integer) this.argumentBindings.get(this.returningName);
 				this.discoveredReturningType = this.aspectJAdviceMethod.getParameterTypes()[index.intValue()];
+				if (JdkVersion.isAtLeastJava15()) {
+					this.discoveredReturningGenericType =
+							this.aspectJAdviceMethod.getGenericParameterTypes()[index.intValue()];
+				}
 			}
 		}
 		if (this.throwingName != null) {
@@ -485,12 +501,13 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	/**
 	 * Take the arguments at the method execution join point and output a set of arguments
 	 * to the advice method
+	 * @param jp the current JoinPoint
 	 * @param jpMatch the join point match that matched this execution join point
 	 * @param returnValue the return value from the method execution (may be null)
-	 * @param t the exception thrown by the method execution (may be null)
+	 * @param ex the exception thrown by the method execution (may be null)
 	 * @return the empty array if there are no arguments
 	 */
-	protected Object[] argBinding(JoinPoint jp, JoinPointMatch jpMatch, Object returnValue, Throwable t) {
+	protected Object[] argBinding(JoinPoint jp, JoinPointMatch jpMatch, Object returnValue, Throwable ex) {
 		calculateArgumentBindings();
 
 		// AMC start
@@ -527,7 +544,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			// binding from thrown exception
 			if (this.throwingName != null) {
 				Integer index = (Integer) this.argumentBindings.get(this.throwingName);
-				adviceInvocationArgs[index.intValue()] = t;
+				adviceInvocationArgs[index.intValue()] = ex;
 				numBound++;
 			}
 		}
