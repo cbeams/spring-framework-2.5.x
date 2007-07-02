@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.test.jpa;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.springframework.instrument.classloading.ResourceOverridingShadowingClassLoader;
 
 /**
@@ -30,6 +27,7 @@ import org.springframework.instrument.classloading.ResourceOverridingShadowingCl
  *
  * @author Rod Johnson
  * @author Adrian Colyer
+ * @author Juergen Hoeller
  * @since 2.0
  */
 class OrmXmlOverridingShadowingClassLoader extends ResourceOverridingShadowingClassLoader {
@@ -41,37 +39,17 @@ class OrmXmlOverridingShadowingClassLoader extends ResourceOverridingShadowingCl
 	public static final String DEFAULT_ORM_XML_LOCATION = "META-INF/orm.xml";
 
 
-	private final List<String> providerPrefixes = new LinkedList<String>();
+	public OrmXmlOverridingShadowingClassLoader(ClassLoader loader, String realOrmXmlLocation) {
+		super(loader);
 
-	{
 		// Automatically exclude classes from these well-known persistence providers.
-		this.providerPrefixes.add("oracle.toplink.essentials");
-		
 		// Do NOT exclude Hibernate classes --
 		// this causes class casts due to use of CGLIB by Hibernate.
 		// Same goes for OpenJPA which will not enhance the domain classes.
-	}
-	
+		excludePackage("oracle.toplink.essentials");
+		excludePackage("junit");
 
-	public OrmXmlOverridingShadowingClassLoader(ClassLoader loader, String realOrmXmlLocation) {
-		super(loader);
 		override(DEFAULT_ORM_XML_LOCATION, realOrmXmlLocation);
 	}
-	
-	@Override
-	protected boolean isClassNameExcludedFromShadowing(String className) {
-		for (String providerPrefix : providerPrefixes) {
-			if (className.startsWith(providerPrefix)) {
-				return true;
-			}
-		}
-		
-		// Also do not shadow JUnit infrastructure.
-		if (className.startsWith("junit")) {
-			return true;
-		}
-		
-		return false;
-	}
-	
+
 }

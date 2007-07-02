@@ -21,11 +21,15 @@ import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -41,7 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  * @see #addTransformer
- * @see #isClassNameExcludedFromShadowing(String)
+ * @see org.springframework.core.OverridingClassLoader
  */
 public class ShadowingClassLoader extends ClassLoader {
 
@@ -51,6 +55,10 @@ public class ShadowingClassLoader extends ClassLoader {
 
 
 	private final ClassLoader enclosingClassLoader;
+
+	private final Set excludedPackages = Collections.synchronizedSet(new HashSet());
+
+	private final Set excludedClasses = Collections.synchronizedSet(new HashSet());
 
 	private final List<ClassFileTransformer> classFileTransformers = new LinkedList<ClassFileTransformer>();
 
@@ -64,8 +72,33 @@ public class ShadowingClassLoader extends ClassLoader {
 	public ShadowingClassLoader(ClassLoader enclosingClassLoader) {
 		Assert.notNull(enclosingClassLoader, "Enclosing ClassLoader must not be null");
 		this.enclosingClassLoader = enclosingClassLoader;
+		for (int i = 0; i < DEFAULT_EXCLUDED_PACKAGES.length; i++) {
+			this.excludedPackages.add(DEFAULT_EXCLUDED_PACKAGES[i]);
+		}
 	}
 
+
+	/**
+	 * Add a package name to exclude from shadowing.
+	 * <p>Any class whose fully-qualified name starts with the name registered
+	 * here will be handled by the enclosing ClassLoader in the usual fashion.
+	 * @param packageName the package name to exclude
+	 */
+	public void excludePackage(String packageName) {
+		Assert.notNull(packageName, "Package name must not be null");
+		this.excludedPackages.add(packageName);
+	}
+
+	/**
+	 * Add a class name to exclude from shadowing.
+	 * <p>Any class name registered here will be handled by
+	 * the enclosing ClassLoader in the usual fashion.
+	 * @param className the class name to exclude
+	 */
+	public void excludeClass(String className) {
+		Assert.notNull(className, "Class name must not be null");
+		this.excludedClasses.add(className);
+	}
 
 	/**
 	 * Add the given ClassFileTransformer to the list of transformers that this
@@ -108,21 +141,29 @@ public class ShadowingClassLoader extends ClassLoader {
 	 */
 	private boolean shouldShadow(String className) {
 		return (!className.equals(getClass().getName()) && !className.endsWith("ShadowingClassLoader")
-				&& !isExcludedPackage(className) && !isClassNameExcludedFromShadowing(className));
+				&& isEligibleForShadowing(className) && !isClassNameExcludedFromShadowing(className));
 	}
 
 	/**
-	 * Determine whether the given class is defined in an excluded package.
-	 * @param className the name of the class
-	 * @return whether the specified package is excluded
+	 * Determine whether the specified class is eligible for shadowing
+	 * by this class loader.
+	 * <p>The default implementation checks against excluded packages and classes.
+	 * @param className the class name to check
+	 * @return whether the specified class is eligible
+	 * @see #excludePackage
+	 * @see #excludeClass
 	 */
-	private boolean isExcludedPackage(String className) {
-		for (int i = 0; i < DEFAULT_EXCLUDED_PACKAGES.length; i++) {
-			if (className.startsWith(DEFAULT_EXCLUDED_PACKAGES[i])) {
-				return true;
+	protected boolean isEligibleForShadowing(String className) {
+		if (this.excludedClasses.contains(className)) {
+			return false;
+		}
+		for (Iterator it = this.excludedPackages.iterator(); it.hasNext();) {
+			String packageName = (String) it.next();
+			if (className.startsWith(packageName)) {
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	/**
@@ -130,6 +171,7 @@ public class ShadowingClassLoader extends ClassLoader {
 	 * particular class should be excluded from shadowing.
 	 * @param className the class name to test
 	 * @return whether the specified class is excluded
+	 * @deprecated in favor of {@link #isEligibleForShadowing}
 	 */
 	protected boolean isClassNameExcludedFromShadowing(String className) {
 		return false;
