@@ -1201,13 +1201,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected void invokeInitMethods(String beanName, Object bean, RootBeanDefinition mbd)
 			throws Throwable {
 
-		if (bean instanceof InitializingBean) {
+		boolean isInitializingBean = (bean instanceof InitializingBean);
+		if (isInitializingBean) {
 			((InitializingBean) bean).afterPropertiesSet();
 		}
 
-		if (mbd != null && mbd.getInitMethodName() != null) {
-			invokeCustomInitMethod(
-					beanName, bean, mbd.getInitMethodName(), mbd.isEnforceInitMethod());
+		String initMethodName = (mbd != null ? mbd.getInitMethodName() : null);
+		if (initMethodName != null && !(isInitializingBean && "afterPropertiesSet".equals(initMethodName))) {
+			invokeCustomInitMethod(beanName, bean, initMethodName, mbd.isEnforceInitMethod());
 		}
 	}
 

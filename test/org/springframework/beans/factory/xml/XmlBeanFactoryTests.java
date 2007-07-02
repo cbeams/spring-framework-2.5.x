@@ -581,8 +581,24 @@ public class XmlBeanFactoryTests extends TestCase {
 	}
 
 	/**
-	 * Check that InitializingBean method is called first.
+	 * Check that InitializingBean method is not called twice.
 	 */
+	public void testInitializingBeanAndSameInitMethod() throws Exception {
+		InitAndIB.constructed = false;
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("initializers.xml", getClass()));
+		assertFalse(InitAndIB.constructed);
+		xbf.preInstantiateSingletons();
+		assertFalse(InitAndIB.constructed);
+		InitAndIB iib = (InitAndIB) xbf.getBean("ib-same-init");
+		assertTrue(InitAndIB.constructed);
+		assertTrue(iib.afterPropertiesSetInvoked && !iib.initMethodInvoked);
+		assertTrue(!iib.destroyed && !iib.customDestroyed);
+		xbf.destroySingletons();
+		assertTrue(iib.destroyed && !iib.customDestroyed);
+		xbf.destroySingletons();
+		assertTrue(iib.destroyed && !iib.customDestroyed);
+	}
+
 	public void testDefaultLazyInit() throws Exception {
 		InitAndIB.constructed = false;
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("default-lazy-init.xml", getClass()));
@@ -1324,6 +1340,9 @@ public class XmlBeanFactoryTests extends TestCase {
 			if (this.initMethodInvoked) {
 				fail();
 			}
+			if (this.afterPropertiesSetInvoked) {
+				throw new IllegalStateException("Already initialized");
+			}
 			this.afterPropertiesSetInvoked = true;
 		}
 
@@ -1331,6 +1350,9 @@ public class XmlBeanFactoryTests extends TestCase {
 		public void customInit() throws ServletException {
 			if (!this.afterPropertiesSetInvoked) {
 				fail();
+			}
+			if (this.initMethodInvoked) {
+				throw new IllegalStateException("Already customInitialized");
 			}
 			this.initMethodInvoked = true;
 		}
