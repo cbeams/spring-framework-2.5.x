@@ -152,7 +152,7 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, BeanNameAware,
 	/**
 	 * Set whether to wait for scheduled tasks to complete on shutdown.
 	 * <p>Default is "false". Switch this to "true" if you prefer
-	 * fully completed jobs at the expense of a longer shutdown phase.
+	 * fully completed tasks at the expense of a longer shutdown phase.
 	 * @see java.util.concurrent.ScheduledExecutorService#shutdown()
 	 * @see java.util.concurrent.ScheduledExecutorService#shutdownNow()
 	 */
