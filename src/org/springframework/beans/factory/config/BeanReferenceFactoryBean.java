@@ -101,4 +101,8 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 		return this.beanFactory.isPrototype(this.targetBeanName);
 	}
 
+	public boolean isEagerInit() {
+		return false;
+	}
+
 }

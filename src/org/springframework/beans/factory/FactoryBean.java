@@ -24,10 +24,13 @@ package org.springframework.beans.factory;
  *
  * <p><b>NB: A bean that implements this interface cannot be used as a
  * normal bean.</b> A FactoryBean is defined in a bean style, but the
- * object exposed for bean references is always the object that it creates.
+ * object exposed for bean references ({@link #getObject()} is always
+ * the object that it creates.
  *
  * <p>FactoryBeans can support singletons and prototypes, and can
  * either create objects lazily on demand or eagerly on startup.
+ * The {@link SmartFactoryBean} interface allows for exposing
+ * more fine-grained behavioral metadata.
  *
  * <p>This interface is heavily used within the framework itself, for
  * example for the AOP {@link org.springframework.aop.framework.ProxyFactoryBean}
@@ -103,7 +106,7 @@ public interface FactoryBean {
 	 * implementations which do not implement this extended interface are
 	 * simply assumed to always return independent instances if the
 	 * <code>isSingleton()</code> implementation returns <code>false</code>.
-	 * @return if the exposed object is a singleton
+	 * @return whether the exposed object is a singleton
 	 * @see #getObject()
 	 * @see SmartFactoryBean#isPrototype()
 	 */
