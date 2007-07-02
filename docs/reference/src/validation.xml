@@ -674,6 +674,85 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
     </map>
   </property>
 </bean>]]></programlisting>
+
+			<section id="beans-beans-conversion-customeditor-registration-per">
+				<title>Using <interfacename>PropertyEditorRegistrars</interfacename></title>
+
+			<para>Another mechanism for registering property editors with the Spring container is to create and use
+			a <interfacename>PropertyEditorRegistrar</interfacename>. This interface is particularly useful when you
+			need to use the same set of property editors in several different situations: write a corresponding
+			registrar and reuse that in each case. <literal>PropertyEditorRegistrars</literal> work in conjunction
+			with an interface called <interfacename>PropertyEditorRegistry</interfacename>, an interface
+			that is implemented by the Spring <interfacename>BeanWrapper</interfacename> (and
+			<interfacename>DataBinder</interfacename>). <literal>PropertyEditorRegistrars</literal> are particularly
+			convenient when used in conjunction with the <classname>CustomEditorConfigurer</classname>
+			(introduced <link linkend="beans-beans-conversion-customeditor-registration">here</link>), which exposes a
+			property called <methodname>setPropertyEditorRegistrars(..)</methodname>:
+			<literal>PropertyEditorRegistrars</literal> added to a <classname>CustomEditorConfigurer</classname> in this
+			fashion can easily be shared with <interfacename>DataBinder</interfacename> and Spring MVC
+			<interfacename>Controllers</interfacename>. Furthermore, it avoids the need for synchronization on custom
+			editors: a <interfacename>PropertyEditorRegistrar</interfacename> is expected to create fresh
+			<interfacename>PropertyEditor</interfacename> instances for each bean creation attempt.</para>
+			<para>Using a <interfacename>PropertyEditorRegistrar</interfacename> is perhaps best illustrated with an
+			example. First off, you need to create your own <interfacename>PropertyEditorRegistrar</interfacename>
+			implementation:</para>
+
+			<programlisting><![CDATA[package com.foo.editors.spring;
+
+public final class CustomPropertyEditorRegistrar implements PropertyEditorRegistrar {
+
+    public void registerCustomEditors(PropertyEditorRegistry registry) {
+
+        ]]><lineannotation>// it is expected that new <interfacename>PropertyEditor</interfacename> instances are created</lineannotation><![CDATA[
+        registry.registerCustomEditor(ExoticType.class, new ExoticTypeEditor());
+
+        ]]><lineannotation>// you could register as many custom property editors as are required here...</lineannotation><![CDATA[
+    }
+}]]></programlisting>
+			<para>See also the <classname>org.springframework.beans.support.ResourceEditorRegistrar</classname> for an
+			example <interfacename>PropertyEditorRegistrar</interfacename> implementation. Notice how in its
+			implementation of the <methodname>registerCustomEditors(..)</methodname> method it creates new instances
+			of each property editor.</para>
+			<para>Next we configure a <classname>CustomEditorConfigurer</classname> and inject an
+			instance of our <classname>CustomPropertyEditorRegistrar</classname> into it:</para>
+			<programlisting><![CDATA[<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+    <property name="propertyEditorRegistrars">
+        <list>
+            <ref bean="customPropertyEditorRegistrar"/>
+        </list>
+    </property>
+</bean>
+
+<bean id="customPropertyEditorRegistrar" class="com.foo.editors.spring.CustomPropertyEditorRegistrar"/>]]></programlisting>
+
+			<para>Finally, and in a bit of a departure from the focus of this chapter, for those of you using
+			<link linkend="mvc">Spring's MVC web framework</link>, using <interfacename>PropertyEditorRegistrars</interfacename>
+			in conjunction with data-binding <interfacename>Controllers</interfacename> (such as
+			<classname>SimpleFormController</classname>) can be very convenient. Find below an example of using a
+			<interfacename>PropertyEditorRegistrar</interfacename> in the implementation of an <methodname>initBinder(..)</methodname>
+			method:</para>
+
+			<programlisting><![CDATA[public final class RegisterUserController extends SimpleFormController {
+
+    private final PropertyEditorRegistrar customPropertyEditorRegistrar;
+
+    public RegisterUserController(PropertyEditorRegistrar propertyEditorRegistrar) {
+        this.customPropertyEditorRegistrar = propertyEditorRegistrar;
+    }
+
+    protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) throws Exception {
+        ]]><emphasis role="bold">this.customPropertyEditorRegistrar.registerCustomEditors(binder);</emphasis><![CDATA[
+    }
+
+    ]]><lineannotation>// other methods to do with registering a <classname>User</classname></lineannotation><![CDATA[
+}]]></programlisting>
+
+			<para>This style of <interfacename>PropertyEditor</interfacename> registration can lead to concise code (the
+			implementation of <methodname>initBinder(..)</methodname> is just one line long!), and allows common
+			<interfacename>PropertyEditor</interfacename> registration code to be encapsulated in a class and then
+			shared amongst as many <interfacename>Controllers</interfacename> as needed.</para>
+
+			</section>
         </section>
 
     </section>
