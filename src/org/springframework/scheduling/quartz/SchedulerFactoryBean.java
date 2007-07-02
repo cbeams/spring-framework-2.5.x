@@ -534,7 +534,8 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Set whether to wait for running jobs to complete on shutdown.
-	 * Default is "false".
+	 * <p>Default is "false". Switch this to "true" if you prefer
+	 * fully completed jobs at the expense of a longer shutdown phase.
 	 * @see org.quartz.Scheduler#shutdown(boolean)
 	 */
 	public void setWaitForJobsToCompleteOnShutdown(boolean waitForJobsToCompleteOnShutdown) {
