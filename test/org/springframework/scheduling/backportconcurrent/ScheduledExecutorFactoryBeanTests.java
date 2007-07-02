@@ -45,6 +45,27 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		}
 	}
 
+	public void testShutdownNowIsPropagatedToTheExecutorOnDestroy() throws Exception {
+		MockControl mockScheduledExecutorService = MockControl.createNiceControl(ScheduledExecutorService.class);
+		final ScheduledExecutorService executor = (ScheduledExecutorService) mockScheduledExecutorService.getMock();
+		executor.shutdownNow();
+		mockScheduledExecutorService.setReturnValue(null);
+		mockScheduledExecutorService.replay();
+
+		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
+			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
+				return executor;
+			}
+		};
+		factory.setScheduledExecutorTasks(new ScheduledExecutorTask[]{
+			new NoOpScheduledExecutorTask()
+		});
+		factory.afterPropertiesSet();
+		factory.destroy();
+
+		mockScheduledExecutorService.verify();
+	}
+
 	public void testShutdownIsPropagatedToTheExecutorOnDestroy() throws Exception {
 		MockControl mockScheduledExecutorService = MockControl.createNiceControl(ScheduledExecutorService.class);
 		final ScheduledExecutorService executor = (ScheduledExecutorService) mockScheduledExecutorService.getMock();
@@ -60,6 +81,7 @@ public class ScheduledExecutorFactoryBeanTests extends TestCase {
 		factory.setScheduledExecutorTasks(new ScheduledExecutorTask[]{
 			new NoOpScheduledExecutorTask()
 		});
+		factory.setWaitForTasksToCompleteOnShutdown(true);
 		factory.afterPropertiesSet();
 		factory.destroy();
 
