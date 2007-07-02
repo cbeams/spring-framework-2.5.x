@@ -582,18 +582,19 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Determine if the given target type is assignable from the given value
+	 * Check if the right-hand side type may be assigned to the left-hand side
 	 * type, assuming setting by reflection. Considers primitive wrapper
 	 * classes as assignable to the corresponding primitive types.
-	 * @param targetType the target type
-	 * @param valueType	the value type that should be assigned to the target type
+	 * @param lhsType the target type
+	 * @param rhsType	the value type that should be assigned to the target type
 	 * @return if the target type is assignable from the value type
+	 * @see TypeUtils#isAssignable
 	 */
-	public static boolean isAssignable(Class targetType, Class valueType) {
-		Assert.notNull(targetType, "Target type must not be null");
-		Assert.notNull(valueType, "Value type must not be null");
-		return (targetType.isAssignableFrom(valueType) ||
-				targetType.equals(primitiveWrapperTypeMap.get(valueType)));
+	public static boolean isAssignable(Class lhsType, Class rhsType) {
+		Assert.notNull(lhsType, "Left-hand side type must not be null");
+		Assert.notNull(rhsType, "Right-hand side type must not be null");
+		return (lhsType.isAssignableFrom(rhsType) ||
+				lhsType.equals(primitiveWrapperTypeMap.get(rhsType)));
 	}
 
 	/**

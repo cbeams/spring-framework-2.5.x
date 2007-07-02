@@ -13,89 +13,54 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.util;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 
 /**
- * Utility to work with generic type parameters. Mainly for internal use within
- * the framework.
- * 
- * <p>
- * Only usable on JDK 1.5 and higher. Use an appropriate {@link JdkVersion}
- * check before calling this class, if a fallback for JDK 1.4 is desirable.
- * 
+ * Utility to work with Java 5 generic type parameters.
+ * Mainly for internal use within the framework.
+ *
  * @author Ramnivas Laddad
- * @since 2.1
+ * @author Juergen Hoeller
+ * @since 2.0.7
  */
-public abstract class GenericUtils {
-	/**
-	 * Check if the return value of the right hand side method may be assigned
-	 * to the left hand side type following the Java generics rules.
-	 * 
-	 * This is a convenience method that extracts the return type from a method
-	 * that will be on the right hand side of an assignment. It also accepts
-	 * lhsType as Object to allow working with Java version prior to Java 5.
-	 * 
-	 * @param lhsType left hand side of assignement
-	 * @param rhsType right hand side of assingment
-	 * @return true if rhs is assiganble to lhs
-	 */
-	public static boolean isAssignable(Object lhsType, Method rhsMethod) {
-		return isAssignable((Type) lhsType, rhsMethod.getGenericReturnType());
-	}
+public abstract class TypeUtils {
 
 	/**
-	 * Check if the right hand side type may be assigned to the left hand side
+	 * Check if the right-hand side type may be assigned to the left-hand side
 	 * type following the Java generics rules.
-	 * 
-	 * @param lhsType left hand side of assignement
-	 * @param rhsType right hand side of assingment
+	 * @param lhsType the target type
+	 * @param rhsType	the value type that should be assigned to the target type
 	 * @return true if rhs is assiganble to lhs
 	 */
 	public static boolean isAssignable(Type lhsType, Type rhsType) {
-		if (lhsType == rhsType) {
+		Assert.notNull(lhsType, "Left-hand side type must not be null");
+		Assert.notNull(rhsType, "Right-hand side type must not be null");
+		if (lhsType.equals(rhsType)) {
 			return true;
 		}
-
-		if ((lhsType instanceof Class) && (rhsType instanceof Class)) {
+		if (lhsType instanceof Class && rhsType instanceof Class) {
 			return ClassUtils.isAssignable((Class) lhsType, (Class) rhsType);
 		}
-
-		if ((lhsType instanceof ParameterizedType) && (rhsType instanceof ParameterizedType)) {
+		if (lhsType instanceof ParameterizedType && rhsType instanceof ParameterizedType) {
 			return isAssignable((ParameterizedType) lhsType, (ParameterizedType) rhsType);
 		}
-
 		if (lhsType instanceof WildcardType) {
 			return isAssignable((WildcardType) lhsType, rhsType);
 		}
-		return true;
-	}
-
-	/**
-	 * Get generic parameter types.
-	 * 
-	 * This method's sole purpose is to make client code work with Java versions
-	 * prior to Java 5.
-	 * 
-	 * @param method method for which generic parameters are sought
-	 * @return array containing generic paramters types
-	 */
-	public static Object[] getGenericParameterTypes(Method method) {
-		return method.getGenericParameterTypes();
+		return false;
 	}
 
 	private static boolean isAssignable(ParameterizedType lhsType, ParameterizedType rhsType) {
 		Type[] lhsTypeArguments = lhsType.getActualTypeArguments();
 		Type[] rhsTypeArguments = rhsType.getActualTypeArguments();
-
 		if (lhsTypeArguments.length != rhsTypeArguments.length) {
 			return false;
 		}
-
 		for (int size = lhsTypeArguments.length, i = 0; i < size; ++i) {
 			if (lhsTypeArguments != rhsTypeArguments) {
 				if (!isAssignable(lhsTypeArguments[i], rhsTypeArguments[i])) {
@@ -109,13 +74,11 @@ public abstract class GenericUtils {
 	private static boolean isAssignable(WildcardType lhsType, Type rhsType) {
 		Type[] upperBounds = lhsType.getUpperBounds();
 		Type[] lowerBounds = lhsType.getLowerBounds();
-
 		for (int size = upperBounds.length, i = 0; i < size; ++i) {
 			if (!ClassUtils.isAssignable((Class) upperBounds[i], (Class) rhsType)) {
 				return false;
 			}
 		}
-
 		for (int size = lowerBounds.length, i = 0; i < size; ++i) {
 			if (!ClassUtils.isAssignable((Class) rhsType, (Class) lowerBounds[i])) {
 				return false;
@@ -123,4 +86,5 @@ public abstract class GenericUtils {
 		}
 		return true;
 	}
+
 }

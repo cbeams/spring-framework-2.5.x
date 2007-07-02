@@ -17,12 +17,12 @@
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import org.springframework.aop.AfterAdvice;
 import org.springframework.aop.AfterReturningAdvice;
-import org.springframework.core.JdkVersion;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.GenericUtils;
+import org.springframework.util.TypeUtils;
 
 /**
  * Spring AOP advice wrapping an AspectJ after-returning advice method.
@@ -67,17 +67,22 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 	 * @return whether to invoke the advice method for the given return value
 	 */
 	private boolean shouldInvokeOnReturnValueOf(Method method, Object returnValue) {
-		Class discoveredReturningType = getDiscoveredReturningType();
-		Object discoveredReturningGenericType = getDiscoveredReturningGenericType();
-		if (ClassUtils.isAssignableValue(discoveredReturningType, returnValue)) {
-			// We are using Java 5 and above and we aren't dealing with a raw type, check if 
-			// generic parameters are assignable
-			if (JdkVersion.isAtLeastJava15() && (discoveredReturningType != discoveredReturningGenericType)) {
-				return GenericUtils.isAssignable(discoveredReturningGenericType, method);
-			}
-			return true;
+		Class type = getDiscoveredReturningType();
+		Object genericType = getDiscoveredReturningGenericType();
+		// If we aren't dealing with a raw type, check if  generic parameters are assignable.
+		return (ClassUtils.isAssignableValue(type, returnValue) &&
+				(genericType == null || genericType == type || GenericTypeMatcher.isAssignable(genericType, method)));
+	}
+
+
+	/**
+	 * Inner class to avoid static JDK 1.5 dependency for generic type matching.
+	 */
+	private static class GenericTypeMatcher {
+
+		public static boolean isAssignable(Object genericType, Method method) {
+			return TypeUtils.isAssignable((Type) genericType, method.getGenericReturnType());
 		}
-		return false;
 	}
 
 }

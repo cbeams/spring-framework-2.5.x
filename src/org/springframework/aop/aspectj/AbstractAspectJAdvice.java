@@ -43,7 +43,6 @@ import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.GenericUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -141,10 +140,12 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	private boolean argumentsIntrospected = false;
 
-	// The actual type is java.lang.reflect.Type, but for JDK14 compatibility we use Object as the static type
+	// The actual type is java.lang.reflect.Type,
+	// but for JDK 1.4 compatibility we use Object as the static type.
 	private Object discoveredReturningGenericType;
-	// Note: Unlike return type, no such generic information is needed for the throwing type, since Java doesn't allow
-	// exception types to be parameterized.
+	// Note: Unlike return type, no such generic information is needed for the throwing type,
+	// since Java doesn't allow exception types to be parameterized.
+
 
 	/**
 	 * Create a new AbstractAspectJAdvice for the given advice method.
@@ -457,8 +458,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			else {
 				Integer index = (Integer) this.argumentBindings.get(this.returningName);
 				this.discoveredReturningType = this.aspectJAdviceMethod.getParameterTypes()[index.intValue()];
-				if(JdkVersion.isAtLeastJava15()) {
-					this.discoveredReturningGenericType = GenericUtils.getGenericParameterTypes(this.aspectJAdviceMethod)[index.intValue()];
+				if (JdkVersion.isAtLeastJava15()) {
+					this.discoveredReturningGenericType =
+							this.aspectJAdviceMethod.getGenericParameterTypes()[index.intValue()];
 				}
 			}
 		}
