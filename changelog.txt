@@ -3,21 +3,34 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M3 (2007-06-29)
+Changes in version 2.1 M3 (2007-07-07)
 --------------------------------------
 
 Package org.springframework.aop
+* Cglib2AopProxy uses weak references for advised object, interceptors and validated classes (avoiding a memory leak)
+* fixed AspectJ pointcut handling to resolve bridge methods before matching
+* fixed AspectJ pointcut handling to correctly match generic return types
 * added support for "bean(name)" element in AspectJ pointcut expressions
 * the pointcut element's "id" attribute is required as of the 2.1 version of the AOP namespace (spring-aop-2.1.xsd)
 * aop:aspectj-autoproxy's "proxy-target-class" attribute properly escalates class proxying (not overriding the setting)
 * ConfigBeanDefinitionParser turns "pointcut" attribute into inner bean definition (instead of ref to an anonymous bean)
 * fixed ConfigBeanDefinitionParser to properly handle empty pointcut/advice bean names in a tooling environment
 
+Package org.springframework.beans
+* fixed AbstractBeanFactory to correctly handle factory-bean references in case of a temporary ClassLoader being used
+* DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
+* added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
+* BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
+
 Package org.springframework.context
 * AspectJWeavingEnabler implements Ordered, exposing HIGHEST_PRECEDENCE (executing before other factory post-processors)
 
 Package org.springframework.core
 * OverridingClassLoader (and hence SimpleThrowawayClassLoader) exclude classes from the "sun." package
+* PathMatchingResourcePatternResolver uses a static Log instance in order to avoid repeated synchronization overhead
+
+Package org.springframework.ejb
+* turned visibility of AbstractEnterpriseBean and AbstractSessionBean to public (showing up in the javadoc now)
 
 Package org.springframework.jdbc
 * added exception translation based on SQLException sub-classes introduced in Java 6
@@ -27,6 +40,12 @@ Package org.springframework.jdbc
 * added HsqlSequenceMaxValueIncrementer to support sequences now added to HSQL
 * added H2SequenceMaxValueIncrementer to support sequences in H2 Database
 
+Package org.springframework.instrument
+* added "excludePackage" and "excludeClass" methods to ShadowingClassLoader, analogous to OverridingClassLoader
+
+Package org.springframework.jmx
+* MBeanExporter unregisters its MBeans in case of any kind of registration failure
+
 Package org.springframework.orm
 * added "prepareTransaction" method to JpaDialect interface, for preparing a JTA-joining EntityManager
 * HibernateJpaDialect switches FlushMode to MANUAL in case of a read-only transaction even for JTA
@@ -35,16 +54,21 @@ Package org.springframework.remoting
 * RmiClientInterceptor and JaxRpcClientInterceptor propagate any kind of declared RemoteException as-is
 * JndiRmiClientInterceptor wraps CORBA SystemExceptions in RemoteExceptions (if declared)
 
+Package org.springframework.scheduling
+* added "waitForTasksToCompleteOnShutdown" property to ScheduledExecutorFactoryBean
+* changed ScheduledExecutorFactoryBean's default behavior to shutdown immediately, not waiting for scheduled tasks
+
 Package org.springframework.scripting
 * updated JRuby support for JRuby 1.0 compatibility (still compatible with JRuby 0.9.8 / 0.9.9 as well)
-
-Package org.springframework.util
-* DefaultPropertiesPersister detects and uses JDK 1.6's "Properties.load/store" variants with Reader/Writer argument
 
 Package org.springframework.transaction
 * refined TransactionAspectSupport to allow for overriding the "getTransactionManager()" method in subclasses
 
+Package org.springframework.util
+* DefaultPropertiesPersister detects and uses JDK 1.6's "Properties.load/store" variants with Reader/Writer argument
+
 Package org.springframework.web
+* fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
 * added "postProcessWeb/PortletApplicationContext" method to FrameworkServlet/Portlet
 * DispatcherServlet/Portlet's "noHandlerFound" declares Exception instead of just IOException/PortletException
 
