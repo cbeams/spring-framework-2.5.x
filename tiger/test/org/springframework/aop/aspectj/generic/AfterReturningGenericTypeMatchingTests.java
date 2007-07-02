@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.aop.aspectj.generic;
 
 import java.util.ArrayList;
@@ -6,6 +22,7 @@ import java.util.Collection;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+
 import org.springframework.beans.Employee;
 import org.springframework.beans.TestBean;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
@@ -13,16 +30,17 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 /**
  * Tests ensuring that after-returning advice for generic parameters bound to
  * the advice and the return type follow AspectJ semantics.
- * <p>
- * See SPR-3628 for more details.
- * 
+ *
+ * <p>See SPR-3628 for more details.
+ *
  * @author Ramnivas Laddad
- * 
  */
 public class AfterReturningGenericTypeMatchingTests extends AbstractDependencyInjectionSpringContextTests {
+
 	protected GenericReturnTypeVariationClass testBean;
 
 	protected CounterAspect counterAspect;
+
 
 	public AfterReturningGenericTypeMatchingTests() {
 		setPopulateProtectedVariables(true);
@@ -61,12 +79,12 @@ public class AfterReturningGenericTypeMatchingTests extends AbstractDependencyIn
 		assertEquals(1, counterAspect.getRawsInvocationsCount);
 	}
 
-	public void testReturnTypeUpperBoundeMatching() {
+	public void testReturnTypeUpperBoundMatching() {
 		testBean.getIntegers();
 		assertEquals(1, counterAspect.getNumbersInvocationsCount);
 	}
 
-	public void testReturnTypeLowerBoundeMatching() {
+	public void testReturnTypeLowerBoundMatching() {
 		testBean.getTestBeans();
 		assertEquals(1, counterAspect.getTestBeanInvocationsCount);
 
@@ -76,7 +94,9 @@ public class AfterReturningGenericTypeMatchingTests extends AbstractDependencyIn
 		assertEquals(0, counterAspect.getTestBeanInvocationsCount);
 	}
 
+
 	public static class GenericReturnTypeVariationClass {
+
 		public Collection<String> getStrings() {
 			return new ArrayList<String>();
 		}
@@ -94,8 +114,10 @@ public class AfterReturningGenericTypeMatchingTests extends AbstractDependencyIn
 		}
 	}
 
+
 	@Aspect
 	public static class CounterAspect {
+
 		private int getRawsInvocationsCount;
 
 		private int getStringsInvocationsCount;
@@ -143,4 +165,5 @@ public class AfterReturningGenericTypeMatchingTests extends AbstractDependencyIn
 			getTestBeanInvocationsCount = 0;
 		}
 	}
+
 }
