@@ -1124,6 +1124,45 @@
 	</target>
 
 
+	<!--
+		Work in progress: see SPR-2513
+	-->
+	<target name="ajdoc" description="Generate Ajdoc documentation for aspects">
+
+		<delete dir="${aj-javadoc.dir}" failonerror="false"/>
+		<mkdir dir="${aj-javadoc.dir}"/>
+
+		<java classname="org.aspectj.tools.ajdoc.Main" fork="true">
+			<classpath>
+				<pathelement location="${lib.dir}/aspectj/aspectjtools.jar"/>
+				<pathelement location="${java.home}/lib/tools.jar"/>
+				<path refid="all-libs"/>
+				<path location="${target.classes.dir}"/>
+			</classpath>
+			<jvmarg line="-Xmx256m"/>
+			<jvmarg line="-XX:MaxPermSize=128m"/>
+			<jvmarg value="-Dhttp.proxyHost=${javadoc.proxyhost}"/>
+			<jvmarg value="-Dhttp.proxyPort=${javadoc.proxyport}"/>
+			<arg line="-d ${aj-javadoc.dir}"/>
+			<arg line="-source 1.5"/>
+			<arg line="-package"/>
+			<arg line="-author"/>
+			<arg line="-version"/>
+			<!--<arg line="-use"/>-->
+			<!--<arg line="-overview ${doc.dir}/overview.html"/>-->
+			<!--<arg line="-windowtitle Spring Framework API 2.1"/>-->
+			<!--<arg line="-doctitle &lt;h1&gt;Spring Framework API 2.1&lt;/h1&gt;"/>-->
+			<!--<arg line="-breakiterator"/>-->
+			<!--<arg line="-stylesheetfile ${doc.dir}/stylesheet.css"/>-->
+			<arg line="-sourcepath ${src.dir};${tiger.src.dir};${aspectj.src.dir}"/>
+			<arg line="@package-list"/>
+			<arg line="org.springframework.beans.factory.aspectj"/>
+			<arg line="org.springframework.transaction.aspectj"/>
+		</java>
+
+	</target>
+
+
 	<target name="compiletestattr" description="Apply Commons Attributes compiler to test source files">
 
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
