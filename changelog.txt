@@ -3,11 +3,34 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.7 (2007-07-30)
+Changes in version 2.0.7 (2007-07-31)
 -------------------------------------
 
 Package org.springframework.aop
+* Cglib2AopProxy uses weak references for advised object, interceptors and validated classes (avoiding a memory leak)
 * fixed AspectJ pointcut handling to resolve bridge methods before matching
+* fixed AspectJ pointcut handling to correctly match generic return types
+
+Package org.springframework.beans
+* DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
+* added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
+* BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
+
+Package org.springframework.core
+* fixed PathMatchingResourcePatternResolver to build correct JarFile URLs on WebSphere
+* PathMatchingResourcePatternResolver uses a static Log instance in order to avoid repeated synchronization overhead
+
+Package org.springframework.ejb
+* turned visibility of AbstractEnterpriseBean and AbstractSessionBean to public (showing up in the javadoc now)
+
+Package org.springframework.instrument
+* added "excludePackage" and "excludeClass" methods to ShadowingClassLoader, analogous to OverridingClassLoader
+
+Package org.springframework.jmx
+* MBeanExporter unregisters its MBeans in case of any kind of registration failure
+
+Package org.springframework.scheduling
+* added "waitForTasksToCompleteOnShutdown" property to ScheduledExecutorFactoryBean
 
 Package org.springframework.web
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
