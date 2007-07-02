@@ -1201,6 +1201,22 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.preInstantiateSingletons();
 	}
 
+	public void testLazyInitFactory() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(LazyInitFactory.class));
+		lbf.preInstantiateSingletons();
+		LazyInitFactory factory = (LazyInitFactory) lbf.getBean("&test");
+		assertFalse(factory.initialized);
+	}
+
+	public void testSmartInitFactory() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(EagerInitFactory.class));
+		lbf.preInstantiateSingletons();
+		EagerInitFactory factory = (EagerInitFactory) lbf.getBean("&test");
+		assertTrue(factory.initialized);
+	}
+
 	public void testPrototypeFactoryBeanNotEagerlyCalledInCaseOfBeanClassName() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.registerBeanDefinition("test",
@@ -1767,6 +1783,52 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 		public boolean isSingleton() {
 			return false;
+		}
+	}
+
+
+	public static class LazyInitFactory implements FactoryBean {
+
+		public boolean initialized = false;
+
+		public Object getObject() throws Exception {
+			this.initialized = true;
+			return "";
+		}
+
+		public Class getObjectType() {
+			return String.class;
+		}
+
+		public boolean isSingleton() {
+			return true;
+		}
+	}
+
+
+	public static class EagerInitFactory implements SmartFactoryBean {
+
+		public boolean initialized = false;
+
+		public Object getObject() throws Exception {
+			this.initialized = true;
+			return "";
+		}
+
+		public Class getObjectType() {
+			return String.class;
+		}
+
+		public boolean isSingleton() {
+			return true;
+		}
+
+		public boolean isPrototype() {
+			return false;
+		}
+
+		public boolean isEagerInit() {
+			return true;
 		}
 	}
 

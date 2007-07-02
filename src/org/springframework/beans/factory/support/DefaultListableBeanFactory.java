@@ -31,6 +31,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -281,7 +282,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 					Class beanClass = resolveBeanClass(bd, beanName, true);
 					if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
-						getBean(FACTORY_BEAN_PREFIX + beanName);
+						FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+						if (factory instanceof SmartFactoryBean && ((SmartFactoryBean) factory).isEagerInit()) {
+							getBean(beanName);
+						}
 					}
 					else {
 						getBean(beanName);
