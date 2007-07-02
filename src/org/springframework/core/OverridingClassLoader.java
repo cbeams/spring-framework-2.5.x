@@ -40,6 +40,10 @@ import org.springframework.util.FileCopyUtils;
  */
 public class OverridingClassLoader extends ClassLoader {
 
+	/** Packages that are excluded by default */
+	public static final String[] DEFAULT_EXCLUDED_PACKAGES = new String[] {"java.", "javax.", "sun."};
+
+
 	private static final String CLASS_FILE_SUFFIX = ".class";
 
 
@@ -54,9 +58,9 @@ public class OverridingClassLoader extends ClassLoader {
 	 */
 	public OverridingClassLoader(ClassLoader parent) {
 		super(parent);
-		this.excludedPackages.add("java.");
-		this.excludedPackages.add("javax.");
-		this.excludedPackages.add("sun.");
+		for (int i = 0; i < DEFAULT_EXCLUDED_PACKAGES.length; i++) {
+			this.excludedPackages.add(DEFAULT_EXCLUDED_PACKAGES[i]);
+		}
 	}
 
 
