@@ -17,6 +17,7 @@
 package org.springframework.aop.framework;
 
 import java.io.Serializable;
+import java.lang.reflect.Modifier;
 
 import net.sf.cglib.core.CodeGenerationException;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -81,7 +82,7 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		}
 	}
 
-	public void testProtectedMethodInvocation() throws Throwable {
+	public void testProtectedMethodInvocation() {
 		ProtectedMethodTestBean bean = new ProtectedMethodTestBean();
 		mockTargetSource.setTarget(bean);
 
@@ -91,11 +92,10 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		AopProxy aop = new Cglib2AopProxy(as);
 
 		Object proxy = aop.getProxy();
-
-		assertTrue("CGLIB proxy not generated", AopUtils.isCglibProxy(proxy));
+		assertTrue(AopUtils.isCglibProxy(proxy));
 	}
 
-	public void testProxyCanBeClassNotInterface() throws Throwable {
+	public void testProxyCanBeClassNotInterface() throws Exception {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
 		mockTargetSource.setTarget(raw);
@@ -104,11 +104,12 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		AopProxy aop = new Cglib2AopProxy(pc);
 
 		Object proxy = aop.getProxy();
-		assertTrue("Proxy is CGLIB enhanced", AopUtils.isCglibProxy(proxy));
+		assertTrue(AopUtils.isCglibProxy(proxy));
 		assertTrue(proxy instanceof ITestBean);
 		assertTrue(proxy instanceof TestBean);
+
 		TestBean tb = (TestBean) proxy;
-		assertEquals("Correct age", 32, tb.getAge());
+		assertEquals(32, tb.getAge());
 	}
 
 	public void testCglibProxyingGivesMeaningfulExceptionIfAskedToProxyNonvisibleClass() {
@@ -243,8 +244,8 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 
 	public void testProxyAProxyWithAdditionalInterface() {
 		ITestBean target = new TestBean();
-
 		mockTargetSource.setTarget(target);
+
 		AdvisedSupport as = new AdvisedSupport(new Class[]{});
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
@@ -265,7 +266,6 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 
 	public void testExceptionHandling() {
 		ExceptionThrower bean = new ExceptionThrower();
-
 		mockTargetSource.setTarget(bean);
 
 		AdvisedSupport as = new AdvisedSupport(new Class[]{});

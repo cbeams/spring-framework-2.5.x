@@ -102,14 +102,14 @@ public abstract class AbstractAopProxyTests extends TestCase {
 
 
 	public void testNoInterceptorsAndNoTarget() {
-		AdvisedSupport pc =
-			new AdvisedSupport(new Class[] { ITestBean.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
 		// Add no interceptors
 		try {
 			AopProxy aop = createAopProxy(pc);
 			aop.getProxy();
 			fail("Shouldn't allow no interceptors");
-		} catch (AopConfigException ex) {
+		}
+		catch (AopConfigException ex) {
 			// Ok
 		}
 	}
@@ -127,7 +127,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		ProxyFactory pf1 = new ProxyFactory(target1);
 		pf1.addAdvisor(new DefaultPointcutAdvisor(new NopInterceptor()));
 		pf1.addAdvisor(new DefaultPointcutAdvisor(new TimestampIntroductionInterceptor()));
-		ITestBean tb = target1;
+		ITestBean tb = (ITestBean) pf1.getProxy();
 
 		assertEquals(age1, tb.getAge());
 		tb.setAge(age2);
