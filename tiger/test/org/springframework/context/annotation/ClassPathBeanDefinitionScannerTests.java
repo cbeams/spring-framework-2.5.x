@@ -20,7 +20,6 @@ import junit.framework.TestCase;
 import org.aspectj.lang.annotation.Aspect;
 
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.annotation.AnnotationConfigUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -41,7 +40,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(11, beanCount);
+		assertEquals(12, beanCount);
 		assertTrue(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
@@ -131,7 +130,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, false);
 		scanner.addIncludeFilter(new AnnotationTypeFilter(CustomComponent.class));
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(4, beanCount);
+		assertEquals(5, beanCount);
 		assertTrue(context.containsBean("messageBean"));
 		assertTrue(context.containsBean(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
@@ -143,7 +142,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, false);
 		scanner.addIncludeFilter(new AnnotationTypeFilter(CustomComponent.class));
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(4, beanCount);
+		assertEquals(5, beanCount);
 		assertTrue(context.containsBean("messageBean"));
 		assertFalse(context.containsBean("serviceInvocationCounter"));
 		assertFalse(context.containsBean("fooServiceImpl"));
@@ -160,7 +159,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, true);
 		scanner.addIncludeFilter(new AnnotationTypeFilter(CustomComponent.class));
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(12, beanCount);
+		assertEquals(13, beanCount);
 		assertTrue(context.containsBean("messageBean"));
 		assertTrue(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("fooServiceImpl"));
@@ -177,7 +176,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, true);
 		scanner.addExcludeFilter(new AnnotationTypeFilter(Aspect.class));
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(10, beanCount);
+		assertEquals(11, beanCount);
 		assertFalse(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("stubFooDao"));
@@ -193,7 +192,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, true);
 		scanner.addExcludeFilter(new AssignableTypeFilter(FooService.class));
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(10, beanCount);
+		assertEquals(11, beanCount);
 		assertFalse(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("stubFooDao"));
@@ -227,7 +226,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		scanner.addExcludeFilter(new AssignableTypeFilter(FooService.class));
 		scanner.addExcludeFilter(new AnnotationTypeFilter(Aspect.class));
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(9, beanCount);
+		assertEquals(10, beanCount);
 		assertFalse(context.containsBean("fooServiceImpl"));
 		assertFalse(context.containsBean("serviceInvocationCounter"));
 		assertTrue(context.containsBean("stubFooDao"));
@@ -243,7 +242,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setBeanNameGenerator(new TestBeanNameGenerator());
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(11, beanCount);
+		assertEquals(12, beanCount);
 		assertFalse(context.containsBean("fooServiceImpl"));
 		assertTrue(context.containsBean("fooService"));
 		assertTrue(context.containsBean("serviceInvocationCounter"));
@@ -261,7 +260,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		GenericApplicationContext multiPackageContext = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner multiPackageScanner = new ClassPathBeanDefinitionScanner(multiPackageContext);
 		int singlePackageBeanCount = singlePackageScanner.scan(BASE_PACKAGE);
-		assertEquals(11, singlePackageBeanCount);
+		assertEquals(12, singlePackageBeanCount);
 		int multiPackageBeanCount = multiPackageScanner.scan(
 				BASE_PACKAGE, "org.springframework.dao.annotation");
 		assertTrue(multiPackageBeanCount > singlePackageBeanCount);
@@ -271,7 +270,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(11, beanCount);
+		assertEquals(12, beanCount);
 		assertEquals(beanCount, context.getBeanDefinitionCount());
 		int addedBeanCount = scanner.scan("org.springframework.aop.aspectj.annotation");
 		assertEquals(beanCount + addedBeanCount, context.getBeanDefinitionCount());
@@ -282,7 +281,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setBeanNameGenerator(new TestBeanNameGenerator());
 		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(11, beanCount);
+		assertEquals(12, beanCount);
 		context.refresh();
 		FooService fooService = (FooService) context.getBean("fooService");
 		assertTrue(fooService.isInitCalled());

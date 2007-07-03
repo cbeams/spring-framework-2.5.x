@@ -27,7 +27,6 @@ import org.w3c.dom.NodeList;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.annotation.AnnotationConfigUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;

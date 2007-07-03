@@ -39,16 +39,13 @@
 	<xsd:element name="annotation-config">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Activates various annotations to be detected in bean classes: Spring's @Autowired and
-	@Required, as well as JSR 250's @PostConstruct, @PreDestroy and @Resource. Alternatively,
+	Activates various annotations to be detected in bean classes: Spring's @Required and
+	@Autowired, as well as JSR 250's @PostConstruct, @PreDestroy and @Resource (if available)
+	and JPA's @PersistenceContext and @PersistenceUnit (if available). Alternatively,
 	you can choose to activate the individual BeanPostProcessors for those annotations.
 
-	Note: This generic configuration tag does NOT activate JPA's @PersistenceContext and
-	@PersistenceUnit annotations. The provided PersistenceAnnotationBeanPostProcessor
-	(in the org.springframework.orm.jpa.support package) needs to be defined explicitly
-	in order to activate automatic injection for those persistence annotations.
-	Likewise, this tag does not activate processing of Spring's @Transactional annotation
-	either; consider the use of the <tx:annotation-driven> tag for that purpose.
+	Note: This tag does not activate processing of Spring's @Transactional annotation.
+	Consider the use of the <tx:annotation-driven> tag for that purpose.
 			]]></xsd:documentation>
 		</xsd:annotation>
 	</xsd:element>
@@ -59,11 +56,12 @@
 	Scans the classpath for annotated components that will be auto-registered as Spring beans.
 	By default, the Spring-provided @Component and @Repository stereotypes will be detected.
 
-	Note: This tag implies the effects of the 'annotation-config' tag, activating @Autowired,
-	@Required, @PostConstruct, @PreDestroy and @Resource annotations in the component classes,
-	which is usually desired for autodetected components (without external configuration).
-	Turn off the 'annotation-config' attribute to deactivate this default behavior, for example
-	in order to use custom BeanPostProcessor definitions for handling those annotations.
+	Note: This tag implies the effects of the 'annotation-config' tag, activating @Required,
+	@Autowired, @PostConstruct, @PreDestroy, @Resource, @PersistenceContext and @PersistenceUnit
+	annotations in the component classes, which is usually desired for autodetected components
+	(without external configuration). Turn off the 'annotation-config' attribute to deactivate
+	this default behavior, for example in order to use custom BeanPostProcessor definitions
+	for handling those annotations.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>

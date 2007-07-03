@@ -18,7 +18,6 @@ package org.springframework.context.annotation;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.annotation.AnnotationConfigUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -29,7 +28,7 @@ import org.springframework.beans.factory.xml.ParserContext;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.1
- * @see org.springframework.beans.factory.annotation.AnnotationConfigUtils
+ * @see AnnotationConfigUtils
  */
 public class AnnotationConfigBeanDefinitionParser implements BeanDefinitionParser {
 
