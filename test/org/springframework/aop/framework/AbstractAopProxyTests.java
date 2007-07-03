@@ -102,14 +102,14 @@ public abstract class AbstractAopProxyTests extends TestCase {
 
 
 	public void testNoInterceptorsAndNoTarget() {
-		AdvisedSupport pc =
-			new AdvisedSupport(new Class[] { ITestBean.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
 		// Add no interceptors
 		try {
 			AopProxy aop = createAopProxy(pc);
 			aop.getProxy();
 			fail("Shouldn't allow no interceptors");
-		} catch (AopConfigException ex) {
+		}
+		catch (AopConfigException ex) {
 			// Ok
 		}
 	}
@@ -127,7 +127,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		ProxyFactory pf1 = new ProxyFactory(target1);
 		pf1.addAdvisor(new DefaultPointcutAdvisor(new NopInterceptor()));
 		pf1.addAdvisor(new DefaultPointcutAdvisor(new TimestampIntroductionInterceptor()));
-		ITestBean tb = target1;
+		ITestBean tb = (ITestBean) pf1.getProxy();
 
 		assertEquals(age1, tb.getAge());
 		tb.setAge(age2);
@@ -389,7 +389,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 				return s;
 			}
 		};
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
 		if (context) {
 			pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		}
@@ -422,30 +422,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertTrue("this return is wrapped in proxy", tb.getSpouse() == tb);
 	}
 
-/*
-	public void testCanAttach() throws Throwable {
-		final TrapInterceptor tii = new TrapInvocationInterceptor();
-
-		ProxyConfig pc = new ProxyConfigSupport(new Class[] { ITestBean.class }, false);
-		pc.addAdvice(tii);
-		pc.addAdvice(new MethodInterceptor() {
-			public Object invoke(MethodInvocation invocation) throws Throwable {
-				assertTrue("Saw same interceptor", invocation == tii.invocation);
-				return null;
-			}
-		});
-		AopProxy aop = new AopProxy(pc, new MethodInvocationFactorySupport());
-
-		ITestBean tb = (ITestBean) aop.getProxy();
-		tb.getSpouse();
-		assertTrue(tii.invocation != null);
-		
-		// TODO strengthen this
-	//	assertTrue(tii.invocation.getProxy() == tb);
-		assertTrue(tii.invocation.getThis() == null);
-	}
-*/
-
 	public void testDeclaredException() throws Throwable {
 		final Exception expectedException = new Exception();
 		// Test return value
@@ -454,7 +430,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 				throw expectedException;
 			}
 		};
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		pc.addAdvice(mi);
 
@@ -487,7 +463,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 				throw unexpectedException;
 			}
 		};
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		pc.addAdvice(mi);
 
@@ -521,7 +497,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 				throw unexpectedException;
 			}
 		};
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		pc.addAdvice(mi);
 
@@ -551,7 +527,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	 */
 	public void testTargetCanGetInvocationEvenIfNoAdviceChain() throws Throwable {
 		NeedsToSeeProxy target = new NeedsToSeeProxy();
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { INeedsToSeeProxy.class } );
+		AdvisedSupport pc = new AdvisedSupport(new Class[] {INeedsToSeeProxy.class});
 		pc.setTarget(target);
 		pc.setExposeProxy(true);
 
@@ -565,7 +541,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	public void testTargetCanGetInvocation() throws Throwable {
 		final InvocationCheckExposedInvocationTestBean expectedTarget = new InvocationCheckExposedInvocationTestBean();
 
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class, IOther.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class, IOther.class});
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		TrapTargetInterceptor tii = new TrapTargetInterceptor() {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -609,7 +585,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	 */
 	public void testMixinWithIntroductionAdvisor() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] { ITestBean.class });
+		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
 		pc.addAdvisor(new LockMixinAdvisor());
 		pc.setTarget(tb);
 
@@ -618,7 +594,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 
 	public void testMixinWithIntroductionInfo() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] { ITestBean.class });
+		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
 		// We don't use an IntroductionAdvisor, we can just add an advice that implements IntroductionInfo
 		pc.addAdvice(new LockMixin());
 		pc.setTarget(tb);
@@ -656,7 +632,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 
 	public void testReplaceArgument() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] { ITestBean.class });
+		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
 		pc.setTarget(tb);
 		pc.addAdvisor(new StringSetterNullReplacementAdvice());
 
@@ -931,7 +907,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	public void testProxyConfigString() {
 		TestBean target = new TestBean();
 		ProxyFactory pc = new ProxyFactory(target);
-		pc.setInterfaces(new Class[] { ITestBean.class } );
+		pc.setInterfaces(new Class[] {ITestBean.class});
 		pc.addAdvice(new NopInterceptor());
 		MethodBeforeAdvice mba = new CountingBeforeAdvice();
 		Advisor advisor = new DefaultPointcutAdvisor(new NameMatchMethodPointcut(), mba);
@@ -946,7 +922,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	public void testCanPreventCastToAdvisedUsingOpaque() {
 		TestBean target = new TestBean();
 		ProxyFactory pc = new ProxyFactory(target);
-		pc.setInterfaces(new Class[] { ITestBean.class } );
+		pc.setInterfaces(new Class[] {ITestBean.class});
 		pc.addAdvice(new NopInterceptor());
 		CountingBeforeAdvice mba = new CountingBeforeAdvice();
 		Advisor advisor = new DefaultPointcutAdvisor(new NameMatchMethodPointcut().addMethodName("setAge"), mba);
@@ -1042,75 +1018,9 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(tb2.getAge(), proxy.getAge());
 	}
 
-
-	public static class CountingAdvisorListener implements AdvisedSupportListener {
-
-		public int adviceChanges;
-		public int activates;
-		private AdvisedSupport expectedSource;
-
-		public CountingAdvisorListener(AdvisedSupport expectedSource) {
-			this.expectedSource = expectedSource;
-		}
-
-		public void activated(AdvisedSupport advised) {
-			assertEquals(expectedSource, advised);
-			++activates;
-		}
-
-		public void adviceChanged(AdvisedSupport advised) {
-			assertEquals(expectedSource, advised);
-			++adviceChanges;
-		}
-	}
-
-
-	public static class RefreshCountingAdvisorChainFactory implements AdvisedSupportListener {
-
-		public int refreshes;
-
-		public void activated(AdvisedSupport advised) {
-			++refreshes;
-		}
-
-		public void adviceChanged(AdvisedSupport advised) {
-			++refreshes;
-		}
-	}
-
-
-	/**
-	 * Fires on setter methods that take a string. Replaces null arg with "".
-	 */
-	public static class StringSetterNullReplacementAdvice extends DynamicMethodMatcherPointcutAdvisor {
-
-		private static MethodInterceptor cleaner = new MethodInterceptor() {
-			public Object invoke(MethodInvocation mi) throws Throwable {
-				// We know it can only be invoked if there's a single parameter of type string
-				mi.getArguments()[0] = "";
-				return mi.proceed();
-			}
-		};
-
-		public StringSetterNullReplacementAdvice() {
-			super(cleaner);
-		}
-
-		public boolean matches(Method m, Class targetClass, Object[] args){//, AttributeRegistry attributeRegistry) {
-			return args[0] == null;
-		}
-
-		public boolean matches(Method m, Class targetClass){//, AttributeRegistry attributeRegistry) {
-			return m.getName().startsWith("set") &&
-				m.getParameterTypes().length == 1 &&
-				m.getParameterTypes()[0].equals(String.class);
-		}
-	}
-
-
 	public void testDynamicMethodPointcutThatAlwaysAppliesStatically() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] { ITestBean.class });
+		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
 		TestDynamicPointcutAdvice dp = new TestDynamicPointcutAdvice(new NopInterceptor(), "getAge");
 		pc.addAdvisor(dp);
 		pc.setTarget(tb);
@@ -1125,7 +1035,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 
 	public void testDynamicMethodPointcutThatAppliesStaticallyOnlyToSetters() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] { ITestBean.class });
+		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
 		// Could apply dynamically to getAge/setAge but not to getName
 		TestDynamicPointcutAdvice dp = new TestDynamicPointcutForSettersOnly(new NopInterceptor(), "Age");
 		pc.addAdvisor(dp);
@@ -1146,7 +1056,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 
 	public void testStaticMethodPointcut() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] { ITestBean.class });
+		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
 		NopInterceptor di = new NopInterceptor();
 		TestStaticPointcutAdvice sp = new TestStaticPointcutAdvice(di, "getAge");
 		pc.addAdvisor(sp);
@@ -1246,26 +1156,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		assertEquals(2, saver.names.size());
 		assertEquals(name2, saver.names.get(0));
 		assertEquals(name1, saver.names.get(1));
-	}
-
-	public static interface IOverloads {
-		void overload();
-		int overload(int i);
-		String overload(String foo);
-		void noAdvice();
-	}
-
-	public static class Overloads implements IOverloads {
-		public void overload() {
-		}
-		public int overload(int i) {
-			return i;
-		}
-		public String overload(String s) {
-			return s;
-		}
-		public void noAdvice() {
-		}
 	}
 
 	public void testOverloadedMethodsWithDifferentAdvice() throws Throwable {
@@ -1385,8 +1275,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	}
 	
 	public void testUserAttributes() throws Throwable {
-		final Exception unexpectedException = new Exception();
-		
 		class MapAwareMethodInterceptor implements MethodInterceptor {
 			private final Map expectedValues;
 			private final Map valuesToAdd;
@@ -1404,7 +1292,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 				return invocation.proceed();
 			}
 		};
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
 		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap(), new HashMap());
 		Map firstValuesToAdd = new HashMap();
 		firstValuesToAdd.put("test", "");
@@ -1782,14 +1670,6 @@ public abstract class AbstractAopProxyTests extends TestCase {
 	}
 
 
-	private static class EqualsTestBean extends TestBean {
-
-		public ITestBean getSpouse() {
-			return this;
-		}
-	}
-
-
 	public static class AllInstancesAreEqual implements IOther {
 
 		public boolean equals(Object other) {
@@ -1850,6 +1730,101 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		protected void checkAdvised(Advised advised) {
 			// TODO replace this check: no longer possible
 			//assertEquals(advised.getTarget(), this);
+		}
+	}
+
+
+	public static class CountingAdvisorListener implements AdvisedSupportListener {
+
+		public int adviceChanges;
+		public int activates;
+		private AdvisedSupport expectedSource;
+
+		public CountingAdvisorListener(AdvisedSupport expectedSource) {
+			this.expectedSource = expectedSource;
+		}
+
+		public void activated(AdvisedSupport advised) {
+			assertEquals(expectedSource, advised);
+			++activates;
+		}
+
+		public void adviceChanged(AdvisedSupport advised) {
+			assertEquals(expectedSource, advised);
+			++adviceChanges;
+		}
+	}
+
+
+	public static class RefreshCountingAdvisorChainFactory implements AdvisedSupportListener {
+
+		public int refreshes;
+
+		public void activated(AdvisedSupport advised) {
+			++refreshes;
+		}
+
+		public void adviceChanged(AdvisedSupport advised) {
+			++refreshes;
+		}
+	}
+
+
+	/**
+	 * Fires on setter methods that take a string. Replaces null arg with "".
+	 */
+	public static class StringSetterNullReplacementAdvice extends DynamicMethodMatcherPointcutAdvisor {
+
+		private static MethodInterceptor cleaner = new MethodInterceptor() {
+			public Object invoke(MethodInvocation mi) throws Throwable {
+				// We know it can only be invoked if there's a single parameter of type string
+				mi.getArguments()[0] = "";
+				return mi.proceed();
+			}
+		};
+
+		public StringSetterNullReplacementAdvice() {
+			super(cleaner);
+		}
+
+		public boolean matches(Method m, Class targetClass, Object[] args)  {
+			return args[0] == null;
+		}
+
+		public boolean matches(Method m, Class targetClass) {
+			return m.getName().startsWith("set") &&
+				m.getParameterTypes().length == 1 &&
+				m.getParameterTypes()[0].equals(String.class);
+		}
+	}
+
+
+	public static interface IOverloads {
+
+		void overload();
+
+		int overload(int i);
+
+		String overload(String foo);
+
+		void noAdvice();
+	}
+
+
+	public static class Overloads implements IOverloads {
+
+		public void overload() {
+		}
+
+		public int overload(int i) {
+			return i;
+		}
+
+		public String overload(String s) {
+			return s;
+		}
+
+		public void noAdvice() {
 		}
 	}
 
