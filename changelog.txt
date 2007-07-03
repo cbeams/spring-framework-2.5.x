@@ -45,6 +45,7 @@ Package org.springframework.instrument
 
 Package org.springframework.jmx
 * MBeanExporter unregisters its MBeans in case of any kind of registration failure
+* MBeanExporter accepts bean name keys in NotificationListener mappings (in addition to ObjectName strings)
 
 Package org.springframework.orm
 * added "prepareTransaction" method to JpaDialect interface, for preparing a JTA-joining EntityManager
