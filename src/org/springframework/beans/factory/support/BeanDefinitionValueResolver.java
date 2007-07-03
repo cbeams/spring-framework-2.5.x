@@ -213,9 +213,7 @@ class BeanDefinitionValueResolver {
 				actualInnerBeanName = adaptInnerBeanName(innerBeanName);
 			}
 			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mbd, null);
-			if (mbd.isSingleton()) {
-				this.beanFactory.registerDependentBean(actualInnerBeanName, this.beanName);
-			}
+			this.beanFactory.registerDependentBean(actualInnerBeanName, this.beanName);
 			return this.beanFactory.getObjectForBeanInstance(innerBean, actualInnerBeanName, mbd);
 		}
 		catch (BeansException ex) {
@@ -259,9 +257,7 @@ class BeanDefinitionValueResolver {
 			}
 			else {
 				Object bean = this.beanFactory.getBean(ref.getBeanName());
-				if (this.beanDefinition.isSingleton()) {
-					this.beanFactory.registerDependentBean(ref.getBeanName(), this.beanName);
-				}
+				this.beanFactory.registerDependentBean(ref.getBeanName(), this.beanName);
 				return bean;
 			}
 		}

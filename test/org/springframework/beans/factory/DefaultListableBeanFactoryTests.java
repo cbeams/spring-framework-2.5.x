@@ -17,6 +17,7 @@
 package org.springframework.beans.factory;
 
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -52,6 +53,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.test.AssertThrows;
 import org.springframework.util.StopWatch;
 
@@ -825,6 +828,82 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertTrue(lbf.getBean("testBean") instanceof TestBean);
 		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(NestedTestBean.class));
 		assertTrue(lbf.getBean("testBean") instanceof NestedTestBean);
+	}
+
+	public void testArrayPropertyWithAutowiring() throws MalformedURLException {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
+		bf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
+
+		RootBeanDefinition rbd = new RootBeanDefinition(ArrayBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
+		bf.registerBeanDefinition("arrayBean", rbd);
+		ArrayBean ab = (ArrayBean) bf.getBean("arrayBean");
+
+		assertEquals(new UrlResource("http://localhost:8080"), ab.getResourceArray()[0]);
+		assertEquals(new UrlResource("http://localhost:9090"), ab.getResourceArray()[1]);
+	}
+
+	public void testArrayPropertyWithOptionalAutowiring() throws MalformedURLException {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+
+		RootBeanDefinition rbd = new RootBeanDefinition(ArrayBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
+		bf.registerBeanDefinition("arrayBean", rbd);
+		ArrayBean ab = (ArrayBean) bf.getBean("arrayBean");
+
+		assertNull(ab.getResourceArray());
+	}
+
+	public void testArrayConstructorWithAutowiring() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("integer1", new Integer(4));
+		bf.registerSingleton("integer2", new Integer(5));
+
+		RootBeanDefinition rbd = new RootBeanDefinition(ArrayBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("arrayBean", rbd);
+		ArrayBean ab = (ArrayBean) bf.getBean("arrayBean");
+
+		assertEquals(new Integer(4), ab.getIntegerArray()[0]);
+		assertEquals(new Integer(5), ab.getIntegerArray()[1]);
+	}
+
+	public void testArrayConstructorWithOptionalAutowiring() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+
+		RootBeanDefinition rbd = new RootBeanDefinition(ArrayBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("arrayBean", rbd);
+		ArrayBean ab = (ArrayBean) bf.getBean("arrayBean");
+
+		assertNull(ab.getIntegerArray());
+	}
+
+	public void testDoubleArrayConstructorWithAutowiring() throws MalformedURLException {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("integer1", new Integer(4));
+		bf.registerSingleton("integer2", new Integer(5));
+		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
+		bf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
+
+		RootBeanDefinition rbd = new RootBeanDefinition(ArrayBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("arrayBean", rbd);
+		ArrayBean ab = (ArrayBean) bf.getBean("arrayBean");
+
+		assertEquals(new Integer(4), ab.getIntegerArray()[0]);
+		assertEquals(new Integer(5), ab.getIntegerArray()[1]);
+		assertEquals(new UrlResource("http://localhost:8080"), ab.getResourceArray()[0]);
+		assertEquals(new UrlResource("http://localhost:9090"), ab.getResourceArray()[1]);
+	}
+
+	public void testDoubleArrayConstructorWithOptionalAutowiring() throws MalformedURLException {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
+		bf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
+
+		RootBeanDefinition rbd = new RootBeanDefinition(ArrayBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		bf.registerBeanDefinition("arrayBean", rbd);
+		ArrayBean ab = (ArrayBean) bf.getBean("arrayBean");
+
+		assertNull(ab.getIntegerArray());
+		assertNull(ab.getResourceArray());
 	}
 
 	public void testAutowireWithNoDependencies() {
@@ -1847,6 +1926,38 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 		public TestBean createTestBeanNonStatic() {
 			return new TestBean();
+		}
+	}
+
+
+	public static class ArrayBean {
+
+		private Integer[] integerArray;
+
+		private Resource[] resourceArray;
+
+		public ArrayBean() {
+		}
+
+		public ArrayBean(Integer[] integerArray) {
+			this.integerArray = integerArray;
+		}
+
+		public ArrayBean(Integer[] integerArray, Resource[] resourceArray) {
+			this.integerArray = integerArray;
+			this.resourceArray = resourceArray;
+		}
+
+		public Integer[] getIntegerArray() {
+			return integerArray;
+		}
+
+		public void setResourceArray(Resource[] resourceArray) {
+			this.resourceArray = resourceArray;
+		}
+
+		public Resource[] getResourceArray() {
+			return resourceArray;
 		}
 	}
 

@@ -18,15 +18,22 @@ package org.springframework.beans.factory.annotation;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -35,9 +42,13 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.propertyeditors.CustomCollectionEditor;
+import org.springframework.core.CollectionFactory;
+import org.springframework.core.GenericCollectionTypeResolver;
+import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -76,13 +87,15 @@ import org.springframework.util.ReflectionUtils;
 public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
 		implements BeanFactoryAware {
 
+	protected final Log logger = LogFactory.getLog(AutowiredAnnotationBeanPostProcessor.class);
+
 	private Class<? extends Annotation> autowiredAnnotationType = Autowired.class;
 	
 	private String requiredParameterName = "required";
 	
 	private boolean requiredParameterValue = true;
 
-	private ListableBeanFactory beanFactory;
+	private ConfigurableListableBeanFactory beanFactory;
 
 	private transient final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
 			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
@@ -130,10 +143,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (!(beanFactory instanceof ListableBeanFactory)) {
-			throw new IllegalArgumentException("AutowiredAnnotationBeanPostProcessor requires a ListableBeanFactory");
+		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
+			throw new IllegalArgumentException(
+					"AutowiredAnnotationBeanPostProcessor requires a ConfigurableListableBeanFactory");
 		}
-		this.beanFactory = (ListableBeanFactory) beanFactory;
+		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 	}
 
 
@@ -185,7 +199,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 		InjectionMetadata metadata = findAutowiringMetadata(bean.getClass());
 		try {
-			metadata.injectFields(bean);
+			metadata.injectFields(bean, beanName);
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "Autowiring of fields failed", ex);
@@ -198,7 +212,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		InjectionMetadata metadata = findAutowiringMetadata(bean.getClass());
 		try {
-			metadata.injectMethods(bean, pvs);
+			metadata.injectMethods(bean, beanName, pvs);
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "Autowiring of methods failed", ex);
@@ -246,21 +260,17 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	/**
-	 * Obtain a unique bean of the given type.
+	 * Obtain all beans of the given type as autowire candidates.
 	 * @param type the type of the bean
-	 * @return the target bean or <code>null</code> if no bean of this type is found
-	 * @throws BeansException if multiple beans are available
+	 * @return the target beans, or an empty Collection if no bean of this type is found
+	 * @throws BeansException if bean retrieval failed
 	 */
-	protected Object getBeanOfType(Class type) throws BeansException {
+	protected Map findAutowireCandidates(Class type) throws BeansException {
 		if (this.beanFactory == null) {
 			throw new IllegalStateException("No BeanFactory configured - " +
 					"override the getBeanOfType method or specify the 'beanFactory' property");
 		}
-		Map beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.beanFactory, type);
-		if (beansOfType.size() > 1) {
-			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
-		}
-		return beansOfType.size() == 0 ? null : beansOfType.values().iterator().next();
+		return BeanFactoryUtils.beansOfTypeIncludingAncestors(this.beanFactory, type);
 	}
 
 	/**
@@ -300,17 +310,20 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			this.pd = pd;
 		}
 
-		protected void inject(Object bean, PropertyValues pvs) throws Throwable {
-			if (this.member instanceof Field) {
+		@Override
+		protected void inject(Object bean, String beanName, PropertyValues pvs) throws Throwable {
+			Set autowiredBeanNames = CollectionFactory.createLinkedSetIfPossible(4);
+
+			if (this.isField) {
 				Field field = (Field) this.member;
 				try {
-					Object argument = resolveDependency(field.getType());
+					Object argument = resolveDependency(field.getType(), 0, autowiredBeanNames);
 					if (argument != null) {
 						ReflectionUtils.makeAccessible(field);
 						field.set(bean, argument);
 					}
 				}
-				catch (BeansException ex) {
+				catch (Exception ex) {
 					throw new BeanCreationException("Could not autowire field: " + field, ex);
 				}
 			}
@@ -325,7 +338,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				try {
 					boolean shouldInvoke = true; 
 					for (int i = 0; i < arguments.length; i++) {
-						arguments[i] = resolveDependency(paramTypes[i]);
+						arguments[i] = resolveDependency(paramTypes[i], i, autowiredBeanNames);
 						if (arguments[i] == null) {
 							shouldInvoke = false;
 						}
@@ -335,22 +348,86 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						method.invoke(bean, arguments);
 					}
 				}
-				catch (BeansException ex) {
-					throw new BeanCreationException("Could not autowire method: " + method, ex);
-				}
 				catch (InvocationTargetException ex) {
 					throw ex.getTargetException();
 				}
+				catch (Exception ex) {
+					throw new BeanCreationException("Could not autowire method: " + method, ex);
+				}
+			}
+
+			for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
+				String autowiredBeanName = (String) it.next();
+				beanFactory.registerDependentBean(autowiredBeanName, beanName);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Autowiring by type from bean name '" + beanName + "' via " +
+							(this.isField ? "field" : "configuration method") + " to bean named '" + autowiredBeanName + "'");
+				}
 			}
 		}
-		
-		private Object resolveDependency(Class type) {
-			Object bean = getBeanOfType(type);
-			if (this.required && bean == null) {
-				throw new NoSuchBeanDefinitionException(type, "expected single bean but found 0");
+
+		private Object resolveDependency(Class type, int parameterIndex, Set autowiredBeanNames) {
+			if (type.isArray()) {
+				Class componentType = type.getComponentType();
+				Map matchingBeans = findAutowireCandidates(componentType);
+				if (matchingBeans.isEmpty()) {
+					if (this.required) {
+						throw new NoSuchBeanDefinitionException(type,
+								"Unsatisfied dependency of type [" + componentType + "]: expected at least 1 matching bean");
+					}
+					return null;
+				}
+				autowiredBeanNames.addAll(matchingBeans.keySet());
+				return convertToArray(matchingBeans.values(), componentType);
 			}
-			return bean;
+			else if (Collection.class.isAssignableFrom(type)) {
+				Class elementType = (this.isField ?
+						GenericCollectionTypeResolver.getCollectionFieldType((Field) this.member) :
+						GenericCollectionTypeResolver.getCollectionParameterType(
+								MethodParameter.forMethodOrConstructor(this.member, parameterIndex)));
+				if (elementType == null) {
+					throw new IllegalStateException("No element type declared for collection");
+				}
+				Map matchingBeans = findAutowireCandidates(elementType);
+				if (matchingBeans.isEmpty()) {
+					if (this.required) {
+						throw new NoSuchBeanDefinitionException(type,
+								"Unsatisfied dependency of type [" + elementType.getName() + "]: expected at least 1 matching bean");
+					}
+					return null;
+				}
+				autowiredBeanNames.addAll(matchingBeans.keySet());
+				return convertToCollection(matchingBeans.values(), type);
+			}
+			else {
+				Map matchingBeans = findAutowireCandidates(type);
+				if (matchingBeans.size() > 1 || (this.required && matchingBeans.isEmpty())) {
+					throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + matchingBeans.size());
+				}
+				if (matchingBeans.isEmpty()) {
+					return null;
+				}
+				Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
+				autowiredBeanNames.add(entry.getKey());
+				return entry.getValue();
+			}
 		}
+
+		private Object convertToArray(Collection values, Class componentType) {
+			Object result = Array.newInstance(componentType, values.size());
+			int i = 0;
+			for (Iterator it = values.iterator(); it.hasNext(); i++) {
+				Array.set(result, i, it.next());
+			}
+			return result;
+		}
+
+		private Collection convertToCollection(Collection values, Class collectionType) {
+			CustomCollectionEditor editor = new CustomCollectionEditor(collectionType);
+			editor.setValue(values);
+			return (Collection) editor.getValue();
+		}
+
 	}
 
 }

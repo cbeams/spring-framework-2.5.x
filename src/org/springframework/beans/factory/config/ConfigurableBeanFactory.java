@@ -225,6 +225,14 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	boolean isCurrentlyInCreation(String beanName);
 
 	/**
+	 * Register a dependent bean for the given bean,
+	 * to be destroyed before the given bean is destroyed.
+	 * @param beanName the name of the bean
+	 * @param dependentBeanName the name of the dependent bean
+	 */
+	void registerDependentBean(String beanName, String dependentBeanName);
+
+	/**
 	 * Destroy the given bean instance (usually a prototype instance
 	 * obtained from this factory) according to its bean definition.
 	 * <p>Any exception that arises during destruction should be caught

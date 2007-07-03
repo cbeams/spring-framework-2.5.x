@@ -43,6 +43,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.InjectionMetadata;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
@@ -267,7 +268,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 		InjectionMetadata metadata = findPersistenceMetadata(bean.getClass());
 		try {
-			metadata.injectFields(bean);
+			metadata.injectFields(bean, beanName);
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "Injection of persistence fields failed", ex);
@@ -280,7 +281,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 
 		InjectionMetadata metadata = findPersistenceMetadata(bean.getClass());
 		try {
-			metadata.injectMethods(bean, pvs);
+			metadata.injectMethods(bean, beanName, pvs);
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "Injection of persistence methods failed", ex);
@@ -402,10 +403,13 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	 * application context, falling back to a single default EntityManagerFactory
 	 * (if any) in case of no unit name specified.
 	 * @param unitName the name of the persistence unit (may be <code>null</code> or empty)
+	 * @param requestingBeanName the name of the requesting bean
 	 * @return the EntityManagerFactory
 	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory in the context
 	 */
-	protected EntityManagerFactory findEntityManagerFactory(String unitName) throws NoSuchBeanDefinitionException {
+	protected EntityManagerFactory findEntityManagerFactory(String unitName, String requestingBeanName)
+			throws NoSuchBeanDefinitionException {
+
 		if (this.beanFactory == null) {
 			throw new IllegalStateException("ListableBeanFactory required for EntityManagerFactory lookup");
 		}
@@ -414,10 +418,10 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 			unitNameForLookup = this.defaultPersistenceUnitName;
 		}
 		if (!"".equals(unitNameForLookup)) {
-			return findNamedEntityManagerFactory(unitNameForLookup);
+			return findNamedEntityManagerFactory(unitNameForLookup, requestingBeanName);
 		}
 		else {
-			return findDefaultEntityManagerFactory();
+			return findDefaultEntityManagerFactory(requestingBeanName);
 		}
 	}
 
@@ -425,12 +429,16 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	 * Find an EntityManagerFactory with the given name in the current
 	 * Spring application context.
 	 * @param unitName the name of the persistence unit (never empty)
+	 * @param requestingBeanName the name of the requesting bean
 	 * @return the EntityManagerFactory
 	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory in the context
 	 */
-	protected EntityManagerFactory findNamedEntityManagerFactory(String unitName)
+	protected EntityManagerFactory findNamedEntityManagerFactory(String unitName, String requestingBeanName)
 			throws NoSuchBeanDefinitionException {
 
+		if (this.beanFactory instanceof ConfigurableBeanFactory) {
+			((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(unitName, requestingBeanName);
+		}
 		return EntityManagerFactoryUtils.findEntityManagerFactory(this.beanFactory, unitName);
 	}
 
@@ -439,9 +447,22 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	 * @return the default EntityManagerFactory
 	 * @throws NoSuchBeanDefinitionException if there is no single EntityManagerFactory in the context
 	 */
-	protected EntityManagerFactory findDefaultEntityManagerFactory() {
-		return (EntityManagerFactory) BeanFactoryUtils.beanOfTypeIncludingAncestors(
-				this.beanFactory, EntityManagerFactory.class);
+	protected EntityManagerFactory findDefaultEntityManagerFactory(String requestingBeanName)
+			throws NoSuchBeanDefinitionException{
+
+		Map matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.beanFactory, EntityManagerFactory.class);
+		if (matchingBeans.size() == 1) {
+			Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
+			String unitName = (String) entry.getKey();
+			if (this.beanFactory instanceof ConfigurableBeanFactory) {
+				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(unitName, requestingBeanName);
+			}
+			return (EntityManagerFactory) entry.getValue();
+		}
+		else {
+			throw new NoSuchBeanDefinitionException(
+					EntityManagerFactory.class, "expected single bean but found " + matchingBeans.size());
+		}
 	}
 
 
@@ -491,29 +512,30 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 		/**
 		 * Resolve the object against the application context.
 		 */
-		protected Object getResourceToInject() {
+		@Override
+		protected Object getResourceToInject(String requestingBeanName) {
 			// Resolves to EntityManagerFactory or EntityManager.
 			if (this.type != null) {
 				return (this.type == PersistenceContextType.EXTENDED ?
-						resolveExtendedEntityManager() : resolveEntityManager());
+						resolveExtendedEntityManager(requestingBeanName) : resolveEntityManager(requestingBeanName));
 			}
 			else {
 				// OK, so we need an EntityManagerFactory...
-				return resolveEntityManagerFactory();
+				return resolveEntityManagerFactory(requestingBeanName);
 			}
 		}
 
-		private EntityManagerFactory resolveEntityManagerFactory() {
+		private EntityManagerFactory resolveEntityManagerFactory(String requestingBeanName) {
 			// Obtain EntityManagerFactory from JNDI?
 			EntityManagerFactory emf = getPersistenceUnit(this.unitName);
 			if (emf == null) {
 				// Need to search for EntityManagerFactory beans.
-				emf = findEntityManagerFactory(this.unitName);
+				emf = findEntityManagerFactory(this.unitName, requestingBeanName);
 			}
 			return emf;
 		}
 
-		private EntityManager resolveEntityManager() {
+		private EntityManager resolveEntityManager(String requestingBeanName) {
 			// Obtain EntityManager reference from JNDI?
 			EntityManager em = getPersistenceContext(this.unitName, false);
 			if (em == null) {
@@ -522,7 +544,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 				EntityManagerFactory emf = getPersistenceUnit(this.unitName);
 				if (emf == null) {
 					// Need to search for EntityManagerFactory beans.
-					emf = findEntityManagerFactory(this.unitName);
+					emf = findEntityManagerFactory(this.unitName, requestingBeanName);
 				}
 				// Inject a shared transactional EntityManager proxy.
 				if (emf instanceof EntityManagerFactoryInfo &&
@@ -539,7 +561,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 			return em;
 		}
 
-		private EntityManager resolveExtendedEntityManager() {
+		private EntityManager resolveExtendedEntityManager(String requestingBeanName) {
 			// Obtain EntityManager reference from JNDI?
 			EntityManager em = getPersistenceContext(this.unitName, true);
 			if (em == null) {
@@ -548,7 +570,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 				EntityManagerFactory emf = getPersistenceUnit(this.unitName);
 				if (emf == null) {
 					// Need to search for EntityManagerFactory beans.
-					emf = findEntityManagerFactory(this.unitName);
+					emf = findEntityManagerFactory(this.unitName, requestingBeanName);
 				}
 				// Inject a container-managed extended EntityManager.
 				em = ExtendedEntityManagerCreator.createContainerManagedEntityManager(emf, this.properties);

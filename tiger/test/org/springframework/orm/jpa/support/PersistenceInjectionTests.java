@@ -29,7 +29,6 @@ import javax.persistence.PersistenceUnit;
 
 import org.easymock.MockControl;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
@@ -574,10 +573,10 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
-	private class MockPersistenceAnnotationBeanPostProcessor extends PersistenceAnnotationBeanPostProcessor {
+	private static class MockPersistenceAnnotationBeanPostProcessor extends PersistenceAnnotationBeanPostProcessor {
 
 		@Override
-		protected EntityManagerFactory findEntityManagerFactory(String emfName) throws NoSuchBeanDefinitionException {
+		protected EntityManagerFactory findEntityManagerFactory(String emfName, String requestingBeanName) {
 			return mockEmf;
 		}
 	}

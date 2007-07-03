@@ -20,10 +20,12 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
@@ -102,15 +104,55 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(OptionalResourceInjectionBean.class));
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
-		NestedTestBean ntb = new NestedTestBean();
-		bf.registerSingleton("nestedTestBean", ntb);
+		IndexedTestBean itb = new IndexedTestBean();
+		bf.registerSingleton("indexedTestBean", itb);
+		NestedTestBean ntb1 = new NestedTestBean();
+		bf.registerSingleton("nestedTestBean1", ntb1);
+		NestedTestBean ntb2 = new NestedTestBean();
+		bf.registerSingleton("nestedTestBean2", ntb2);
 
 		OptionalResourceInjectionBean bean = (OptionalResourceInjectionBean) bf.getBean("annotatedBean");
 		assertSame(tb, bean.getTestBean());
 		assertSame(tb, bean.getTestBean2());
 		assertSame(tb, bean.getTestBean3());
 		assertSame(tb, bean.getTestBean4());
-		assertSame(ntb, bean.getNestedTestBean());
+		assertSame(itb, bean.getIndexedTestBean());
+		assertEquals(2, bean.getNestedTestBeans().length);
+		assertSame(ntb1, bean.getNestedTestBeans()[0]);
+		assertSame(ntb2, bean.getNestedTestBeans()[1]);
+		assertEquals(2, bean.nestedTestBeansField.length);
+		assertSame(ntb1, bean.nestedTestBeansField[0]);
+		assertSame(ntb2, bean.nestedTestBeansField[1]);
+		bf.destroySingletons();
+	}
+
+	public void testOptionalCollectionResourceInjection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(OptionalCollectionResourceInjectionBean.class));
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		IndexedTestBean itb = new IndexedTestBean();
+		bf.registerSingleton("indexedTestBean", itb);
+		NestedTestBean ntb1 = new NestedTestBean();
+		bf.registerSingleton("nestedTestBean1", ntb1);
+		NestedTestBean ntb2 = new NestedTestBean();
+		bf.registerSingleton("nestedTestBean2", ntb2);
+
+		OptionalCollectionResourceInjectionBean bean = (OptionalCollectionResourceInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tb, bean.getTestBean());
+		assertSame(tb, bean.getTestBean2());
+		assertSame(tb, bean.getTestBean3());
+		assertSame(tb, bean.getTestBean4());
+		assertSame(itb, bean.getIndexedTestBean());
+		assertEquals(2, bean.getNestedTestBeans().size());
+		assertSame(ntb1, bean.getNestedTestBeans().get(0));
+		assertSame(ntb2, bean.getNestedTestBeans().get(1));
+		assertEquals(2, bean.nestedTestBeansField.size());
+		assertSame(ntb1, bean.nestedTestBeansField.get(0));
+		assertSame(ntb2, bean.nestedTestBeansField.get(1));
 		bf.destroySingletons();
 	}
 
@@ -128,7 +170,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(tb, bean.getTestBean2());
 		assertSame(tb, bean.getTestBean3());
 		assertNull(bean.getTestBean4());
-		assertNull(bean.getNestedTestBean());
+		assertNull(bean.getNestedTestBeans());
 		bf.destroySingletons();
 	}
 
@@ -144,7 +186,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertNull(bean.getTestBean2());
 		assertNull(bean.getTestBean3());
 		assertNull(bean.getTestBean4());
-		assertNull(bean.getNestedTestBean());
+		assertNull(bean.getNestedTestBeans());
 		bf.destroySingletons();
 	}
 
@@ -176,13 +218,39 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorsResourceInjectionBean.class));
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
-		NestedTestBean ntb = new NestedTestBean();
-		bf.registerSingleton("nestedTestBean", ntb);
+		NestedTestBean ntb1 = new NestedTestBean();
+		bf.registerSingleton("nestedTestBean1", ntb1);
+		NestedTestBean ntb2 = new NestedTestBean();
+		bf.registerSingleton("nestedTestBean2", ntb2);
 
 		ConstructorsResourceInjectionBean bean = (ConstructorsResourceInjectionBean) bf.getBean("annotatedBean");
 		assertNull(bean.getTestBean3());
 		assertSame(tb, bean.getTestBean4());
-		assertSame(ntb, bean.getNestedTestBean());
+		assertEquals(2, bean.getNestedTestBeans().length);
+		assertSame(ntb1, bean.getNestedTestBeans()[0]);
+		assertSame(ntb2, bean.getNestedTestBeans()[1]);
+		bf.destroySingletons();
+	}
+
+	public void testConstructorResourceInjectionWithMultipleCandidatesAsCollection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ConstructorsCollectionResourceInjectionBean.class));
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		NestedTestBean ntb1 = new NestedTestBean();
+		bf.registerSingleton("nestedTestBean1", ntb1);
+		NestedTestBean ntb2 = new NestedTestBean();
+		bf.registerSingleton("nestedTestBean2", ntb2);
+
+		ConstructorsCollectionResourceInjectionBean bean = (ConstructorsCollectionResourceInjectionBean) bf.getBean("annotatedBean");
+		assertNull(bean.getTestBean3());
+		assertSame(tb, bean.getTestBean4());
+		assertEquals(2, bean.getNestedTestBeans().size());
+		assertSame(ntb1, bean.getNestedTestBeans().get(0));
+		assertSame(ntb2, bean.getNestedTestBeans().get(1));
 		bf.destroySingletons();
 	}
 
@@ -542,12 +610,14 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		@Autowired(required=false)
 		protected ITestBean testBean3;
 
-		private NestedTestBean nestedTestBean;
+		private IndexedTestBean indexedTestBean;
+
+		private NestedTestBean[] nestedTestBeans;
+
+		@Autowired(required=false)
+		public NestedTestBean[] nestedTestBeansField;
 
 		private ITestBean testBean4;
-
-		public OptionalResourceInjectionBean() {
-		}
 
 		@Autowired(required=false)
 		public void setTestBean2(TestBean testBean2) {
@@ -555,9 +625,10 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 
 		@Autowired(required=false)
-		private void inject(ITestBean testBean4, NestedTestBean nestedTestBean) {
+		private void inject(ITestBean testBean4, NestedTestBean[] nestedTestBeans, IndexedTestBean indexedTestBean) {
 			this.testBean4 = testBean4;
-			this.nestedTestBean = nestedTestBean;
+			this.indexedTestBean = indexedTestBean;
+			this.nestedTestBeans = nestedTestBeans;
 		}
 
 		public ITestBean getTestBean3() {
@@ -568,8 +639,56 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 			return testBean4;
 		}
 
-		public NestedTestBean getNestedTestBean() {
-			return nestedTestBean;
+		public IndexedTestBean getIndexedTestBean() {
+			return indexedTestBean;
+		}
+
+		public NestedTestBean[] getNestedTestBeans() {
+			return nestedTestBeans;
+		}
+	}
+
+
+	public static class OptionalCollectionResourceInjectionBean extends ResourceInjectionBean {
+
+		@Autowired(required=false)
+		protected ITestBean testBean3;
+
+		private IndexedTestBean indexedTestBean;
+
+		private List<NestedTestBean> nestedTestBeans;
+
+		@Autowired(required=false)
+		public List<NestedTestBean> nestedTestBeansField;
+
+		private ITestBean testBean4;
+
+		@Autowired(required=false)
+		public void setTestBean2(TestBean testBean2) {
+			super.setTestBean2(testBean2);
+		}
+
+		@Autowired(required=false)
+		private void inject(ITestBean testBean4, List<NestedTestBean> nestedTestBeans, IndexedTestBean indexedTestBean) {
+			this.testBean4 = testBean4;
+			this.indexedTestBean = indexedTestBean;
+			this.nestedTestBeans = nestedTestBeans;
+		}
+
+		public ITestBean getTestBean3() {
+			return testBean3;
+		}
+
+		public ITestBean getTestBean4() {
+			return testBean4;
+		}
+
+		public IndexedTestBean getIndexedTestBean() {
+			return indexedTestBean;
+		}
+
+		public List<NestedTestBean> getNestedTestBeans() {
+			return nestedTestBeans;
 		}
 	}
 
@@ -630,7 +749,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 		private ITestBean testBean4;
 
-		private NestedTestBean nestedTestBean;
+		private NestedTestBean[] nestedTestBeans;
 
 		public ConstructorsResourceInjectionBean() {
 		}
@@ -641,9 +760,9 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 
 		@Autowired(required=false)
-		public ConstructorsResourceInjectionBean(ITestBean testBean4, NestedTestBean nestedTestBean) {
+		public ConstructorsResourceInjectionBean(ITestBean testBean4, NestedTestBean[] nestedTestBeans) {
 			this.testBean4 = testBean4;
-			this.nestedTestBean = nestedTestBean;
+			this.nestedTestBeans = nestedTestBeans;
 		}
 
 		public ConstructorsResourceInjectionBean(NestedTestBean nestedTestBean) {
@@ -662,8 +781,52 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 			return testBean4;
 		}
 
-		public NestedTestBean getNestedTestBean() {
-			return nestedTestBean;
+		public NestedTestBean[] getNestedTestBeans() {
+			return nestedTestBeans;
+		}
+	}
+
+
+	public static class ConstructorsCollectionResourceInjectionBean {
+
+		protected ITestBean testBean3;
+
+		private ITestBean testBean4;
+
+		private List<NestedTestBean> nestedTestBeans;
+
+		public ConstructorsCollectionResourceInjectionBean() {
+		}
+
+		@Autowired(required=false)
+		public ConstructorsCollectionResourceInjectionBean(ITestBean testBean3) {
+			this.testBean3 = testBean3;
+		}
+
+		@Autowired(required=false)
+		public ConstructorsCollectionResourceInjectionBean(ITestBean testBean4, List<NestedTestBean> nestedTestBeans) {
+			this.testBean4 = testBean4;
+			this.nestedTestBeans = nestedTestBeans;
+		}
+
+		public ConstructorsCollectionResourceInjectionBean(NestedTestBean nestedTestBean) {
+			throw new UnsupportedOperationException();
+		}
+
+		public ConstructorsCollectionResourceInjectionBean(ITestBean testBean3, ITestBean testBean4, NestedTestBean nestedTestBean) {
+			throw new UnsupportedOperationException();
+		}
+
+		public ITestBean getTestBean3() {
+			return testBean3;
+		}
+
+		public ITestBean getTestBean4() {
+			return testBean4;
+		}
+
+		public List<NestedTestBean> getNestedTestBeans() {
+			return nestedTestBeans;
 		}
 	}
 

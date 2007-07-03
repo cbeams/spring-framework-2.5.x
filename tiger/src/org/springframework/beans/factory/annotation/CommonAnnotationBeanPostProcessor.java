@@ -36,6 +36,7 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -130,7 +131,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 		InjectionMetadata metadata = findResourceMetadata(bean.getClass());
 		try {
-			metadata.injectFields(bean);
+			metadata.injectFields(bean, beanName);
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "Injection of resource fields failed", ex);
@@ -143,7 +144,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		InjectionMetadata metadata = findResourceMetadata(bean.getClass());
 		try {
-			metadata.injectMethods(bean, pvs);
+			metadata.injectMethods(bean, beanName, pvs);
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "Injection of resource methods failed", ex);
@@ -192,13 +193,19 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * @param type the type of the target resource
 	 * @param shareable whether the target resource is shareable
 	 * (as defined in the @Resource annotation)
+	 * @param requestingBeanName the name of the requesting bean
 	 * @return the resource object (never <code>null</code>)
 	 * @throws BeansException if we failed to obtain the target resource
 	 */
-	protected Object getResource(String name, Class type, boolean shareable) throws BeansException {
+	protected Object getResource(String name, Class type, boolean shareable, String requestingBeanName)
+			throws BeansException {
+
 		if (this.resourceFactory == null) {
 			throw new IllegalStateException("No resource factory configured - " +
 					"override the getResource method or specify the 'resourceFactory' property");
+		}
+		if (this.resourceFactory instanceof ConfigurableBeanFactory) {
+			((ConfigurableBeanFactory) this.resourceFactory).registerDependentBean(name, requestingBeanName);
 		}
 		return this.resourceFactory.getBean(name, type);
 	}
@@ -240,8 +247,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			this.shareable = resource.shareable();
 		}
 
-		protected Object getResourceToInject() {
-			return getResource(this.name, this.type, this.shareable);
+		@Override
+		protected Object getResourceToInject(String requestingBeanName) {
+			return getResource(this.name, this.type, this.shareable, requestingBeanName);
 		}
 	}
 

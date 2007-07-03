@@ -17,6 +17,7 @@
 package org.springframework.core;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -70,6 +71,69 @@ public abstract class GenericCollectionTypeResolver {
 	 */
 	public static Class getMapValueType(Class mapClass) {
 		return extractTypeFromClass(mapClass, Map.class, 1);
+	}
+
+	/**
+	 * Determine the generic element type of the given Collection field.
+	 * @param collectionField the collection field to introspect
+	 * @return the generic type, or <code>null</code> if none
+	 */
+	public static Class getCollectionFieldType(Field collectionField) {
+		return getGenericFieldType(collectionField, Collection.class, 0, 1);
+	}
+
+	/**
+	 * Determine the generic element type of the given Collection field.
+	 * @param collectionField the collection field to introspect
+	 * @param nestingLevel the nesting level of the target type
+	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
+	 * nested List, whereas 2 would indicate the element of the nested List)
+	 * @return the generic type, or <code>null</code> if none
+	 */
+	public static Class getCollectionFieldType(Field collectionField, int nestingLevel) {
+		return getGenericFieldType(collectionField, Collection.class, 0, nestingLevel);
+	}
+
+	/**
+	 * Determine the generic element type of the given Map field.
+	 * @param mapField the map field to introspect
+	 * @return the generic type, or <code>null</code> if none
+	 */
+	public static Class getMapKeyFieldType(Field mapField) {
+		return getGenericFieldType(mapField, Map.class, 0, 1);
+	}
+
+	/**
+	 * Determine the generic element type of the given Map field.
+	 * @param mapField the map field to introspect
+	 * @param nestingLevel the nesting level of the target type
+	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
+	 * nested List, whereas 2 would indicate the element of the nested List)
+	 * @return the generic type, or <code>null</code> if none
+	 */
+	public static Class getMapKeyFieldType(Field mapField, int nestingLevel) {
+		return getGenericFieldType(mapField, Map.class, 0, nestingLevel);
+	}
+
+	/**
+	 * Determine the generic element type of the given Map field.
+	 * @param mapField the map field to introspect
+	 * @return the generic type, or <code>null</code> if none
+	 */
+	public static Class getMapValueFieldType(Field mapField) {
+		return getGenericFieldType(mapField, Map.class, 1, 1);
+	}
+
+	/**
+	 * Determine the generic element type of the given Map field.
+	 * @param mapField the map field to introspect
+	 * @param nestingLevel the nesting level of the target type
+	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
+	 * nested List, whereas 2 would indicate the element of the nested List)
+	 * @return the generic type, or <code>null</code> if none
+	 */
+	public static Class getMapValueFieldType(Field mapField, int nestingLevel) {
+		return getGenericFieldType(mapField, Map.class, 1, nestingLevel);
 	}
 
 	/**
@@ -194,6 +258,19 @@ public abstract class GenericCollectionTypeResolver {
 				return methodParam.getMethod().getGenericReturnType();
 			}
 		}
+	}
+
+	/**
+	 * Extract the generic type from the given field.
+	 * @param field the field to check the type for
+	 * @param source the source class/interface defining the generic parameter types
+	 * @param typeIndex the index of the type (e.g. 0 for Collections,
+	 * 0 for Map keys, 1 for Map values)
+	 * @param nestingLevel the nesting level of the target type
+	 * @return the generic type, or <code>null</code> if none
+	 */
+	private static Class getGenericFieldType(Field field, Class source, int typeIndex, int nestingLevel) {
+		return extractType(null, field.getGenericType(), source, typeIndex, nestingLevel, 1);
 	}
 
 	/**

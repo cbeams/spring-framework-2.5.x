@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -34,6 +35,9 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.core.CollectionFactory;
+import org.springframework.core.GenericCollectionTypeResolver;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -402,12 +406,14 @@ abstract class ConstructorResolver {
 
 		ArgumentsHolder args = new ArgumentsHolder(paramTypes.length);
 		Set usedValueHolders = new HashSet(paramTypes.length);
+		Set autowiredBeanNames = CollectionFactory.createLinkedSetIfPossible(4);
 		boolean resolveNecessary = false;
 
-		for (int index = 0; index < paramTypes.length; index++) {
+		for (int paramIndex = 0; paramIndex < paramTypes.length; paramIndex++) {
+			Class paramType = paramTypes[paramIndex];
 			// Try to find matching constructor argument value, either indexed or generic.
 			ConstructorArgumentValues.ValueHolder valueHolder =
-					resolvedValues.getArgumentValue(index, paramTypes[index], usedValueHolders);
+					resolvedValues.getArgumentValue(paramIndex, paramType, usedValueHolders);
 			// If we couldn't find a direct match and are not supposed to autowire,
 			// let's try the next generic, untyped argument value as fallback:
 			// it could match after type conversion (for example, String -> int).
@@ -418,37 +424,37 @@ abstract class ConstructorResolver {
 				// We found a potential match - let's give it a try.
 				// Do not consider the same value definition multiple times!
 				usedValueHolders.add(valueHolder);
-				args.rawArguments[index] = valueHolder.getValue();
+				args.rawArguments[paramIndex] = valueHolder.getValue();
 				if (valueHolder.isConverted()) {
 					Object convertedValue = valueHolder.getConvertedValue();
-					args.arguments[index] = convertedValue;
-					args.preparedArguments[index] = convertedValue;
+					args.arguments[paramIndex] = convertedValue;
+					args.preparedArguments[paramIndex] = convertedValue;
 				}
 				else {
 					try {
 						Object originalValue = valueHolder.getValue();
-						Object convertedValue = bw.convertIfNecessary(originalValue, paramTypes[index],
-								MethodParameter.forMethodOrConstructor(methodOrCtor, index));
-						args.arguments[index] = convertedValue;
+						Object convertedValue = bw.convertIfNecessary(originalValue, paramType,
+								MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex));
+						args.arguments[paramIndex] = convertedValue;
 						ConstructorArgumentValues.ValueHolder sourceHolder =
 								(ConstructorArgumentValues.ValueHolder) valueHolder.getSource();
 						Object sourceValue = sourceHolder.getValue();
 						if (originalValue == sourceValue || sourceValue instanceof TypedStringValue) {
 							// Either a converted value or still the original one: store converted value.
 							sourceHolder.setConvertedValue(convertedValue);
-							args.preparedArguments[index] = convertedValue;
+							args.preparedArguments[paramIndex] = convertedValue;
 						}
 						else {
 							resolveNecessary = true;
-							args.preparedArguments[index] = sourceValue;
+							args.preparedArguments[paramIndex] = sourceValue;
 						}
 					}
 					catch (TypeMismatchException ex) {
 						throw new UnsatisfiedDependencyException(
-								mbd.getResourceDescription(), beanName, index, paramTypes[index],
+								mbd.getResourceDescription(), beanName, paramIndex, paramType,
 								"Could not convert " + methodType + " argument value of type [" +
 								ObjectUtils.nullSafeClassName(valueHolder.getValue()) +
-								"] to required type [" + paramTypes[index].getName() + "]: " + ex.getMessage());
+								"] to required type [" + paramType.getName() + "]: " + ex.getMessage());
 					}
 				}
 			}
@@ -457,31 +463,23 @@ abstract class ConstructorResolver {
 				// have to fail creating an argument array for the given constructor.
 				if (!autowiring) {
 					throw new UnsatisfiedDependencyException(
-							mbd.getResourceDescription(), beanName, index, paramTypes[index],
+							mbd.getResourceDescription(), beanName, paramIndex, paramType,
 							"Ambiguous " + methodType + " argument types - " +
 							"did you specify the correct bean references as " + methodType + " arguments?");
 				}
-				Map matchingBeans = findAutowireCandidates(beanName, paramTypes[index]);
-				if (matchingBeans.size() != 1) {
-					throw new UnsatisfiedDependencyException(
-							mbd.getResourceDescription(), beanName, index, paramTypes[index],
-							"There are " + matchingBeans.size() + " beans of type [" + paramTypes[index].getName() +
-							"] available for autowiring: " + matchingBeans.keySet() +
-							". There should have been exactly 1 to be able to autowire " +
-							methodType + " of bean '" + beanName + "'.");
-				}
-				Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
-				String autowiredBeanName = (String) entry.getKey();
-				Object autowiredBean = entry.getValue();
-				args.rawArguments[index] = autowiredBean;
-				args.arguments[index] = autowiredBean;
-				if (mbd.isSingleton()) {
-					this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
-				}
-				if (this.beanFactory.logger.isDebugEnabled()) {
-					this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName +
-							"' via " + methodType + " to bean named '" + autowiredBeanName + "'");
-				}
+				Object autowiredArgument = resolveAutowiredArgument(
+						beanName, mbd, bw, methodOrCtor, methodType, paramType, paramIndex, autowiredBeanNames);
+				args.rawArguments[paramIndex] = autowiredArgument;
+				args.arguments[paramIndex] = autowiredArgument;
+			}
+		}
+
+		for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
+			String autowiredBeanName = (String) it.next();
+			this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
+			if (this.beanFactory.logger.isDebugEnabled()) {
+				this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName +
+						"' via " + methodType + " to bean named '" + autowiredBeanName + "'");
 			}
 		}
 
@@ -492,6 +490,58 @@ abstract class ConstructorResolver {
 			mbd.resolvedConstructorArguments = args.arguments;
 		}
 		return args;
+	}
+
+	/**
+	 * Resolve the specified argument which is supposed to be autowired.
+	 * Suppots arrays and collections as well.
+	 */
+	private Object resolveAutowiredArgument(String beanName, RootBeanDefinition mbd, BeanWrapper bw,
+			Object methodOrCtor, String methodType, Class paramType, int paramIndex, Set autowiredBeanNames)
+			throws UnsatisfiedDependencyException {
+
+		if (paramType.isArray()) {
+			Class componentType = paramType.getComponentType();
+			Map beans = findAutowireCandidates(beanName, componentType);
+			if (beans.isEmpty()) {
+				throw new UnsatisfiedDependencyException(
+						mbd.getResourceDescription(), beanName, paramIndex, paramType, "expected at least 1 matching bean");
+			}
+			autowiredBeanNames.addAll(beans.keySet());
+			return bw.convertIfNecessary(beans.values(), paramType);
+		}
+		else if (Collection.class.isAssignableFrom(paramType)) {
+			Class elementType = null;
+			if (JdkVersion.isAtLeastJava15()) {
+				elementType = GenericCollectionTypeResolver.getCollectionParameterType(
+						MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex));
+			}
+			if (elementType == null) {
+				throw new UnsatisfiedDependencyException(
+						mbd.getResourceDescription(), beanName, paramIndex, paramType, "no element type declared");
+			}
+			Map beans = findAutowireCandidates(beanName, elementType);
+			if (beans.isEmpty()) {
+				throw new UnsatisfiedDependencyException(
+						mbd.getResourceDescription(), beanName, paramIndex, paramType, "expected at least 1 matching bean");
+			}
+			autowiredBeanNames.addAll(beans.keySet());
+			return bw.convertIfNecessary(beans.values(), paramType);
+		}
+		else {
+			Map matchingBeans = findAutowireCandidates(beanName, paramType);
+			if (matchingBeans.size() != 1) {
+				throw new UnsatisfiedDependencyException(
+						mbd.getResourceDescription(), beanName, paramIndex, paramType,
+						"There are " + matchingBeans.size() + " beans of type [" + paramType.getName() +
+						"] available for autowiring: " + matchingBeans.keySet() +
+						". There should have been exactly 1 to be able to autowire " +
+						methodType + " of bean '" + beanName + "'.");
+			}
+			Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
+			autowiredBeanNames.add(entry.getKey());
+			return entry.getValue();
+		}
 	}
 
 

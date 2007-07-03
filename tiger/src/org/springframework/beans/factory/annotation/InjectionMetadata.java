@@ -56,17 +56,17 @@ public class InjectionMetadata {
 	}
 
 
-	public void injectFields(Object target) throws Throwable {
+	public void injectFields(Object target, String beanName) throws Throwable {
 		for (Iterator it = this.resourceFields.iterator(); it.hasNext();) {
 			InjectedElement element = (InjectedElement) it.next();
-			element.inject(target, null);
+			element.inject(target, beanName, null);
 		}
 	}
 
-	public void injectMethods(Object target, PropertyValues pvs) throws Throwable {
+	public void injectMethods(Object target, String beanName, PropertyValues pvs) throws Throwable {
 		for (Iterator it = this.resourceMethods.iterator(); it.hasNext();) {
 			InjectedElement element = (InjectedElement) it.next();
-			element.inject(target, pvs);
+			element.inject(target, beanName, pvs);
 		}
 	}
 
@@ -75,25 +75,28 @@ public class InjectionMetadata {
 
 		protected final Member member;
 
+		protected final boolean isField;
+
 		private PropertyDescriptor pd;
 
 		protected InjectedElement(Member member) {
 			this.member = member;
+			this.isField = (member instanceof Field);
 		}
 
 		protected InjectedElement(Member member, PropertyDescriptor pd) {
-			this.member = member;
+			this(member);
 			this.pd = pd;
 		}
 
 		protected final Class getResourceType() {
-			return (this.member instanceof Field ?
+			return (this.isField ?
 					((Field) this.member).getType() : ((Method) this.member).getParameterTypes()[0]);
 		}
 
 		protected final void checkResourceType(Class resourceType) {
-			if (this.member instanceof Field) {
-				Class fieldType = ((Field) member).getType();
+			if (this.isField) {
+				Class fieldType = ((Field) this.member).getType();
 				if (!fieldType.isAssignableFrom(resourceType)) {
 					throw new IllegalStateException("Specified resource type [" + resourceType.getName() +
 							"] is not assignable to field type [" + fieldType + "]");
@@ -111,11 +114,11 @@ public class InjectionMetadata {
 		/**
 		 * Either this or {@link #getResourceToInject} needs to be overridden.
 		 */
-		protected void inject(Object target, PropertyValues pvs) throws Throwable {
-			if (this.member instanceof Field) {
+		protected void inject(Object target, String requestingBeanName, PropertyValues pvs) throws Throwable {
+			if (this.isField) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
-				field.set(target, getResourceToInject());
+				field.set(target, getResourceToInject(requestingBeanName));
 			}
 			else {
 				if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
@@ -125,7 +128,7 @@ public class InjectionMetadata {
 				try {
 					Method method = (Method) this.member;
 					ReflectionUtils.makeAccessible(method);
-					method.invoke(target, getResourceToInject());
+					method.invoke(target, getResourceToInject(requestingBeanName));
 				}
 				catch (InvocationTargetException ex) {
 					throw ex.getTargetException();
@@ -136,7 +139,7 @@ public class InjectionMetadata {
 		/**
 		 * Either this or {@link #inject} needs to be overridden.
 		 */
-		protected Object getResourceToInject() {
+		protected Object getResourceToInject(String requestingBeanName) {
 			return null;
 		}
 
@@ -148,7 +151,7 @@ public class InjectionMetadata {
 				return false;
 			}
 			InjectedElement otherElement = (InjectedElement) other;
-			if (this.member instanceof Field) {
+			if (this.isField) {
 				return this.member.equals(otherElement.member);
 			}
 			else {
