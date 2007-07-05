@@ -20,7 +20,10 @@ public class SimpleJdbcUtils {
 		StringBuffer result = new StringBuffer();
 		boolean nextIsUpper = false;
 		if (name != null && name.length() > 0) {
-			result.append(name.substring(0, 1).toLowerCase());
+			if (name.length() > 1 && name.substring(1,2).equals("_"))
+				result.append(name.substring(0, 1).toUpperCase());
+			else
+				result.append(name.substring(0, 1).toLowerCase());
 			for (int i = 1; i < name.length(); i++) {
 				String s = name.substring(i, i + 1);
 				if (s.equals("_")) {
