@@ -318,7 +318,6 @@
 		<bndwrap definitions="${basedir}/osgi/bnd" output="${dist.dir}">
 			<fileset dir="${dist.dir}" includes="spring.jar" />
 		</bndwrap>
-
 		<move file="${dist.dir}/spring.bar" tofile="${dist.dir}/spring.jar"/>
 	</target>
 	

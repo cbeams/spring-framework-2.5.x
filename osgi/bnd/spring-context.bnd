@@ -1,5 +1,8 @@
 Export-Package: org.springframework*;version=${spring-version}
-Import-Package: org.apache.commons.logging*,org.springframework.beans*;version=${spring-version}, *;resolution:=optional
+Import-Package: org.apache.commons.logging*, \
+  org.springframework.beans*;version=${spring-version},  \
+  org.objectweb.asm*;version=${asm-version}; resolution:=optional, \
+  *;resolution:=optional
 Bundle-Version: ${spring-version}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-context

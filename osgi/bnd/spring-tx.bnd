@@ -1,5 +1,7 @@
 Export-Package: org.springframework*;version=${spring-version}
-Import-Package: org.apache.commons.logging*,*;resolution:=optional
+Import-Package: org.apache.commons.logging*, \
+   javax.transaction*;version=${tx-version};resolution:=optional, \
+   *;resolution:=optional
 Bundle-Version: ${spring-version}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-tx
