@@ -37,25 +37,38 @@ package org.springframework.aop.aspectj;
  * @see BeanNamePointcutDesignatorHandler
  */
 public class ProxyCreationContext {
-	private static final ThreadLocal proxyCreationInProgress = new ThreadLocal();
-
-	private static final ThreadLocal nameHolder = new ThreadLocal();
-
-	public static void notifyProxyCreationStart(String beanName) {
-		proxyCreationInProgress.set(Boolean.TRUE);
-		nameHolder.set(beanName);
+	private static final ThreadLocal proxyCreationInfoHolder = new ThreadLocal();
+	
+	public static void notifyProxyCreationStart(String beanName, boolean isInnerBean) {
+		ProxyCreationInfo info = new ProxyCreationInfo(beanName, isInnerBean);
+		proxyCreationInfoHolder.set(info);
 	}
 
 	public static void notifyProxyCreationComplete() {
-		proxyCreationInProgress.set(Boolean.FALSE);
-		nameHolder.set(null);
+		proxyCreationInfoHolder.set(null);
 	}
 
 	public static boolean isProxyCreationInProgress() {
-		return ((Boolean) proxyCreationInProgress.get()).booleanValue();
+		return proxyCreationInfoHolder.get() != null;
 	}
 
 	public static String getCurrentProxyingBeanName() {
-		return (String) nameHolder.get();
+		ProxyCreationInfo info = (ProxyCreationInfo) proxyCreationInfoHolder.get();
+		return info == null ? null : info.beanName;
+	}
+
+	public static boolean isCurrentProxyingBeanAnInnerBean() {
+		ProxyCreationInfo info = (ProxyCreationInfo) proxyCreationInfoHolder.get();
+		return info == null ? false : info.isInnerBean;
+	}
+	
+	private static class ProxyCreationInfo {
+		private String beanName;
+		private boolean isInnerBean;
+
+		public ProxyCreationInfo(String beanName, boolean isInnerBean) {
+			this.beanName = beanName;
+			this.isInnerBean = isInnerBean;
+		}
 	}
 }

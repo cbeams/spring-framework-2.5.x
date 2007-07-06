@@ -28,6 +28,7 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 public class BeanNamePointcutTests extends AbstractDependencyInjectionSpringContextTests {
 	protected ITestBean testBean1;
 	protected ITestBean testBean2;	
+	protected ITestBean testBeanContainingNestedBean;
 	protected Counter counterAspect;
 	
 	public BeanNamePointcutTests() {
@@ -55,5 +56,9 @@ public class BeanNamePointcutTests extends AbstractDependencyInjectionSpringCont
 		assertFalse(testBean2 instanceof Advised);
 		testBean2.setAge(20);
 		assertEquals(0, counterAspect.getCount());
+	}
+	
+	public void testNonMatchingNestedBeanName() {
+		assertFalse(testBeanContainingNestedBean.getDoctor() instanceof Advised);
 	}
 }

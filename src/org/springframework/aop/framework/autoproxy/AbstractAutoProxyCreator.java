@@ -129,7 +129,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	private BeanFactory beanFactory;
+	protected BeanFactory beanFactory;
 
 	/**
 	 * Set of bean name Strings, referring to all beans that this auto-proxy creator

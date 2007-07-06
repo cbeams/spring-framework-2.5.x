@@ -118,7 +118,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 */
 	private void addAdvisorsFromAspectInstanceFactory(MetadataAwareAspectInstanceFactory instanceFactory) {
 		try {
-			ProxyCreationContext.notifyProxyCreationStart(null);
+			ProxyCreationContext.notifyProxyCreationStart(null, false);
 			List advisors = this.aspectFactory.getAdvisors(instanceFactory);
 			advisors = AopUtils.findAdvisorsThatCanApply(advisors, getTargetClass());
 			this.addAllAdvisors((Advisor[]) advisors.toArray(new Advisor[advisors.size()]));

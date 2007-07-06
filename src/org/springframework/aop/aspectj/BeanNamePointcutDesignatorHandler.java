@@ -74,22 +74,26 @@ public class BeanNamePointcutDesignatorHandler implements PointcutDesignatorHand
 		private boolean contextMatch() {
 			if (ProxyCreationContext.isProxyCreationInProgress()) {
 				String advisedBeanName = ProxyCreationContext.getCurrentProxyingBeanName();
-				return beanNameMatch(advisedBeanName);
+				boolean isInnerBean = ProxyCreationContext.isCurrentProxyingBeanAnInnerBean();
+				return beanNameMatch(advisedBeanName, isInnerBean);
 			}
 			/*
 			 * If postprocessing for autoproxying purpose isn't going on, just
-			 * declare it as a match. the bean() is a statically-determinable
+			 * declare it as a match. The bean() PCD is a statically-determinable
 			 * PCD. Therefore, we need matching process only during proxy
 			 * creation. If a match is declared during that process, no further
 			 * decision needs to be made. If a match is not declared, the
 			 * corresponding advisor will no be considered eligible and
-			 * therefore we will not be asked again.
+			 * therefore matching logic will not be triggered again.
 			 */
 			return true;
 		}
 
-		private boolean beanNameMatch(String beanName) {
-			return beanName == null ? false : expressionPattern.matches(beanName);
+		private boolean beanNameMatch(String beanName, boolean isInnerBean) {
+			if ((beanName == null) || isInnerBean) {
+				return false;
+			}
+			return expressionPattern.matches(beanName);
 		}
 	}
 }

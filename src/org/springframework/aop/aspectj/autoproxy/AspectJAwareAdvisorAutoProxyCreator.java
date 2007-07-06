@@ -51,7 +51,7 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		try {
-			ProxyCreationContext.notifyProxyCreationStart(beanName);
+			ProxyCreationContext.notifyProxyCreationStart(beanName, !beanFactory.containsBean(beanName));
 			return super.postProcessAfterInitialization(bean, beanName);
 		} finally {
 			ProxyCreationContext.notifyProxyCreationComplete();

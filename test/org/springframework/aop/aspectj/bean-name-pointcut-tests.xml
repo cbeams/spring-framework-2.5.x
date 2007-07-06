@@ -8,13 +8,22 @@
 	
 	<aop:config>
 		<aop:aspect id="beanNameMatchingTest" ref="counterAspect">
-		  <aop:pointcut id="setAge" expression="execution(* setAge(..)) and bean(testBean1)"/>
-		  <aop:before pointcut-ref="setAge" method="increment()"/>
+		  <aop:pointcut id="bean1Operation" expression="execution(* setAge(..)) and bean(testBean1)"/>
+		  <aop:before pointcut-ref="bean1Operation" method="increment()"/>
+
+		  <aop:pointcut id="nestedBeanOperation" expression="execution(* getCompany(..)) and bean(*)"/>
+		  <aop:before pointcut-ref="nestedBeanOperation" method="increment()"/>
 		</aop:aspect>
 	</aop:config>
 	
 	<bean id="testBean1" class="org.springframework.beans.TestBean"/>
 	<bean id="testBean2" class="org.springframework.beans.TestBean"/>	
+
+	<bean id="testBeanContainingNestedBean" class="org.springframework.beans.TestBean">
+		<property name="doctor">
+			<bean class="org.springframework.beans.NestedTestBean"/>
+		</property>
+	</bean>
 
 	<bean id="counterAspect" class="org.springframework.aop.aspectj.Counter"/>
 </beans>

@@ -70,7 +70,7 @@ public class BeanNamePointcutMatchingTests extends TestCase {
 	
 	private boolean matches(String beanName, String pcExpression) {
 		try {
-			ProxyCreationContext.notifyProxyCreationStart(beanName);
+			ProxyCreationContext.notifyProxyCreationStart(beanName, false);
 			AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
 			pointcut.setExpression(pcExpression);
 			return pointcut.matches(TestBean.class);
