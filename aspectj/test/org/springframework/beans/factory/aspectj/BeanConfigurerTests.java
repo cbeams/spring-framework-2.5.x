@@ -151,6 +151,16 @@ public class BeanConfigurerTests extends TestCase {
 		assertEquals("Property injected more than once", 1, deserializedSubBean.setterCount);
 	}
 	
+	public void testPreConstuctionConfiguredBean() {
+		PreConstuctionConfiguredBean bean = new PreConstuctionConfiguredBean();
+		assertTrue("Injection didn't occur before construction", bean.preConstructionConfigured);
+	}
+	
+	public void testPostConstuctionConfiguredBean() {
+		PostConstuctionConfiguredBean bean = new PostConstuctionConfiguredBean();
+		assertFalse("Injection occurred before construction", bean.preConstructionConfigured);
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T> T serializeAndDeserialize(T serializable) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -364,4 +374,27 @@ public class BeanConfigurerTests extends TestCase {
 
 	}
 
+	
+	@Configurable
+	private static class PreOrPostConstuctionConfiguredBean {
+		private String name;
+		protected boolean preConstructionConfigured;
+
+		public PreOrPostConstuctionConfiguredBean() {
+			preConstructionConfigured = name != null ? true : false;  
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+	}
+
+	@Configurable(preConstruction=true)
+	private static class PreConstuctionConfiguredBean extends PreOrPostConstuctionConfiguredBean {
+	}
+
+	@Configurable(preConstruction=false)
+	private static class PostConstuctionConfiguredBean extends PreOrPostConstuctionConfiguredBean {
+	}
+	
 }

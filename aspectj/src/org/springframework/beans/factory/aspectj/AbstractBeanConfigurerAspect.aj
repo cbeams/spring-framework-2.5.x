@@ -20,33 +20,63 @@ import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
 
 /**
- * Abstract superaspect for AspectJ aspects that can perform Dependency Injection on
- * objects, however they may be created. Define the beanCreation() pointcut
- * in subaspects.
-
- * <p>Subaspects may also need a metadata resolution strategy, in the BeanWiringInfoResolver
- * interface. The default implementation looks for a bean with the same name as the
- * FQN. This is the default name of the bean in a Spring XML file if the id
- * attribute is not used.
-
+ * Abstract superaspect for AspectJ aspects that can perform Dependency
+ * Injection on objects, however they may be created. Define the beanCreation()
+ * pointcut in subaspects.
+ * 
+ * <p>
+ * Subaspects may also need a metadata resolution strategy, in the
+ * BeanWiringInfoResolver interface. The default implementation looks for a bean
+ * with the same name as the FQN. This is the default name of the bean in a
+ * Spring XML file if the id attribute is not used.
+ * 
  * @author Rob Harrop
  * @author Rod Johnson
  * @author Adrian Colyer
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 public abstract aspect AbstractBeanConfigurerAspect extends BeanConfigurerSupport {
-
 	/**
-	 * All beans should be configured after construction.
+	 * Configured bean before construction.
 	 */
 	@SuppressAjWarnings("adviceDidNotMatch")
-	after(Object beanInstance) returning : beanCreation(beanInstance) {
-		configureBean(beanInstance);
+	before(Object beanInstance) : beanInitialization(beanInstance) {
+		if (preConstructionConfiguration(beanInstance)) {
+			configureBean(beanInstance);
+		}
 	}
 
 	/**
-	 * The creation of a new bean (an object with the @Configurable annotation)
+	 * Configured bean after construction.
+	 */
+	@SuppressAjWarnings("adviceDidNotMatch")
+	after(Object beanInstance) returning : beanCreation(beanInstance) {
+		if (!preConstructionConfiguration(beanInstance)) {
+			configureBean(beanInstance);
+		}
+	}
+
+	/**
+	 * The creation of a new bean (an object with the &#64;Configurable
+	 * annotation)
 	 */
 	protected abstract pointcut beanCreation(Object beanInstance);
 
+	/**
+	 * The initialization of a new bean (an object with the &#64;Configurable
+	 * annotation)
+	 * 
+	 * WARNING: Although this pointcut is non-abstract for backwards
+	 * compatibility reasons, it is meant to be overridden to select
+	 * initialization of any configurable bean.
+	 */
+	protected pointcut beanInitialization(Object beanInstance);
+
+	/**
+	 * Should dependency injection prior to object construction?
+	 */
+	protected boolean preConstructionConfiguration(Object beanInstance) {
+		return false; // matching the default in &#64;Configurable
+	}
 }

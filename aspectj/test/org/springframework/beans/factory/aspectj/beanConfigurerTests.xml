@@ -38,5 +38,12 @@
 	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$ArbitraryExistingPojo">
 		<property name="friend" ref="ramnivas"/>
 	</bean>
+	
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$PreConstuctionConfiguredBean">
+		<property name="name" value="ramnivas"/>
+	</bean>
 
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$PostConstuctionConfiguredBean">
+		<property name="name" value="ramnivas"/>
+	</bean>
 </beans>

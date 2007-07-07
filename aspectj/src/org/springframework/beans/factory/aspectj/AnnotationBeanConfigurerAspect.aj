@@ -94,9 +94,32 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspec
 		 && this(beanInstance);
 
 	/**
+	 * The initialization of a new bean (an object with the
+	 * &#64;Configurable annotation). 
+	 * 
+	 * This pointcut selects the initialization corresponding to
+	 * a constrcutor of the top-most class that has &#64;Configurable. 
+	 * Any constructor of such base class will not have properties
+	 * injected to be used in the constructor. This design decision is 
+	 * guided by the fact that such base class' constructors shouldn't be 
+	 * expecting injected since, a non &#64;Configurable subtype
+	 * will easily invalidate such expectation.
+	 */
+	protected pointcut beanInitialization(Object beanInstance) :
+		initialization((@Configurable *)+.new(..)) && this(beanInstance); 
+
+	/**
+	 * Should dependency injection prior to object construction? 
+	 */
+	protected boolean preConstructionConfiguration(Object beanInstance) {
+		Configurable configurable = beanInstance.getClass().getAnnotation(Configurable.class);
+		return configurable.preConstruction();
+	}
+	
+	/**
 	 * Matches the most-specific initialization join point 
 	 * (most concrete class) for the initialization of an instance
-	 * of an @Configurable type.
+	 * of an &#64;Configurable type.
 	 */
 	private pointcut mostSpecificInitializer() :
 		initialization((@Configurable *)+.new(..)) && 
@@ -104,7 +127,7 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspec
 	
 	/**
 	 * Matches the readResolve execution join point for a serializable
-	 * type that is also @Configurable.
+	 * type that is also &#64;Configurable.
 	 */
 	private pointcut configurableObjectResolution() :
 		execution(Object Serializable+.readResolve() throws ObjectStreamException) &&
@@ -112,7 +135,7 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspec
 		
 	/**
 	 * Declare any class implementing Serializable annotated with
-	 * @Configurable as also implementing ConfigurableDeserializationSupport. 
+	 * &#64;Configurable as also implementing ConfigurableDeserializationSupport. 
 	 * This allows us to introduce the readResolve() method and select it with the 
 	 * beanCreation() pointcut.
 	 * 
@@ -137,7 +160,7 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspec
 	 * the beans
 	 * 
 	 * Note if a method with the same signature already exists in a Serializable
-	 * class annotated with @Configurable, that implementation will take precedence 
+	 * class annotated with &#64;Configurable, that implementation will take precedence 
 	 * (a good thing, since we are merely interested in an opportunity to detect
 	 * deserialization.)
 	 */

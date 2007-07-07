@@ -31,6 +31,7 @@ import java.lang.annotation.Target;
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Adrian Colyer
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -53,5 +54,10 @@ public @interface Configurable {
 	 * Is dependency checking to be performed for configured objects?
 	 */
 	boolean dependencyCheck() default false;
+	
+	/**
+	 * Should dependencies be injected prior to an object construction? 
+	 */
+	boolean preConstruction() default false;
 
 }
