@@ -1368,7 +1368,7 @@
 		<junit dir="${basedir}" forkmode="${test.fork.mode}" printsummary="yes" haltonfailure="no" haltonerror="no">
 
 			<jvmarg line="-Djava.awt.headless=true"/>
-			<jvmarg line="-XX:MaxPermSize=96m"/>
+			<jvmarg line="-XX:MaxPermSize=128m"/>
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.tigertestclasses.dir}"/>
