@@ -2448,16 +2448,17 @@ public class Account {
 		Development Environment Guide</ulink>) or load-time weaving (see <xref linkend="aop-aj-ltw"/>).
 		The <classname>AnnotationBeanConfigurerAspect</classname> itself needs
 		configuring by Spring (in order to obtain a reference to the bean factory that
-		is to be used to configure new objects). The Spring AOP namespace defines a convenient tag
+		is to be used to configure new objects). The Spring
+		<link linkend="xsd-config-body-schemas-context"><literal>context</literal> namespace</link> defines a convenient tag
 		for doing this: just include the following in your application context configuration:</para>
 		  
-		<programlisting><![CDATA[<aop:spring-configured/>]]></programlisting>
+		<programlisting><![CDATA[<context:spring-configured/>]]></programlisting>
 		  
 		<para>If you are using the DTD instead of schema, the equivalent definition is:</para>
 
   		<programlisting><![CDATA[<bean 
-  class="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"
-  factory-method="aspectOf"/>]]></programlisting>
+      class="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"
+      factory-method="aspectOf"/>]]></programlisting>
 		
 		<para>Instances of <interfacename>@Configurable</interfacename> objects created <emphasis>before</emphasis>
 		the aspect has been configured will result in a warning being issued to the
