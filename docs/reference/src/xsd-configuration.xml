@@ -75,9 +75,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 but can be included to reference a local copy of a schema (which can be useful
                 during development).</para>
             </note>
-            <para>The above Spring XML configuration fragment is can pretty much be considered
-            boilerplate; you can simply use this and continue to write <literal>&lt;bean/&gt;</literal>
-            definitions like you have always done. However, the entire point of switching over is to
+            <para>The above Spring XML configuration fragment is boilerplate that you can copy and paste
+			(!) and then plug <literal>&lt;bean/&gt;</literal> definitions into like you have always
+			done. However, the entire point of switching over is to
             take advantage of the new Spring 2.0 XML tags since they make configuration easier. The
             section entitled <xref linkend="xsd-config-body-schemas-util"/> demonstrates how you can
             start immediately by using some of the more common utility tags.</para>
