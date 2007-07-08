@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,10 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
  * Injection on objects, however they may be created. Define the beanCreation()
  * pointcut in subaspects.
  * 
- * <p>
- * Subaspects may also need a metadata resolution strategy, in the
- * BeanWiringInfoResolver interface. The default implementation looks for a bean
- * with the same name as the FQN. This is the default name of the bean in a
- * Spring XML file if the id attribute is not used.
+ * <p>Subaspects may also need a metadata resolution strategy, in the
+ * <code>BeanWiringInfoResolver</code> interface. The default implementation
+ * looks for a bean with the same name as the FQN. This is the default name
+ * of a bean in a Spring container if the id value is not supplied explicitly.
  * 
  * @author Rob Harrop
  * @author Rod Johnson
@@ -37,8 +36,9 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
  * @since 2.0
  */
 public abstract aspect AbstractBeanConfigurerAspect extends BeanConfigurerSupport {
+
 	/**
-	 * Configured bean before construction.
+	 * Configured bean before initialization.
 	 */
 	@SuppressAjWarnings("adviceDidNotMatch")
 	before(Object beanInstance) : beanInitialization(beanInstance) {
@@ -57,26 +57,27 @@ public abstract aspect AbstractBeanConfigurerAspect extends BeanConfigurerSuppor
 		}
 	}
 
-	/**
-	 * The creation of a new bean (an object with the &#64;Configurable
-	 * annotation)
-	 */
-	protected abstract pointcut beanCreation(Object beanInstance);
 
 	/**
-	 * The initialization of a new bean (an object with the &#64;Configurable
-	 * annotation)
+	 * The initialization of a new object.
 	 * 
-	 * WARNING: Although this pointcut is non-abstract for backwards
+	 * <p>WARNING: Although this pointcut is non-abstract for backwards
 	 * compatibility reasons, it is meant to be overridden to select
 	 * initialization of any configurable bean.
 	 */
 	protected pointcut beanInitialization(Object beanInstance);
 
 	/**
-	 * Should dependency injection prior to object construction?
+	 * The creation of a new object.
+	 */
+	protected abstract pointcut beanCreation(Object beanInstance);
+
+
+	/**
+	 * Are dependencies to be injected prior to the construction of an object?
 	 */
 	protected boolean preConstructionConfiguration(Object beanInstance) {
-		return false; // matching the default in &#64;Configurable
+		return false; // matches the default in the @Configurable annotation
 	}
+
 }

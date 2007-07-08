@@ -2358,16 +2358,15 @@ MyInterfaceType proxy = factory.getProxy();]]></programlisting>
 		  a <emphasis>pre-existing</emphasis> object given the name of a bean definition 
 		  containing the configuration to be applied. The <filename class="libraryfile">spring-aspects.jar</filename>
 		  contains an annotation-driven aspect that exploits this capability to allow dependency-injection
-		  of any object. The support is intended to be used for objects created 
+		  of <emphasis>any object</emphasis>. The support is intended to be used for objects created
 		  <emphasis>outside of the control of any container</emphasis>. Domain objects
-		  often fall into this category: they may be created programmatically using the
+		  often fall into this category because they are often created programmatically using the
 		  <literal>new</literal> operator, or by an ORM tool as a result of a database query.
 		</para>
 		  
 		<para>
 		  The <interfacename>@Configurable</interfacename> annotation marks a class as eligible for
-		  Spring-driven configuration. In the simplest case it can be used just as a 
-		  marker annotation:
+		  Spring-driven configuration. In the simplest case it can be used just as a marker annotation:
 		</para>
 
 	<programlisting><![CDATA[package com.xyz.myapp.domain;
@@ -2376,13 +2375,14 @@ import org.springframework.beans.factory.annotation.Configurable;
 
 @Configurable
 public class Account {
-   ...
+
+   ]]><lineannotation>// ...</lineannotation><![CDATA[
 }]]></programlisting>
 		  
 		<para>
 			When used as a marker interface in this way, Spring will configure
 			new instances of the annotated type (<classname>Account</classname> in this case) using a 
-			prototypical bean definition with the same name as the fully-qualified
+			prototype-scoped bean definition with the same name as the fully-qualified
 			type name (<classname>com.xyz.myapp.domain.Account</classname>). Since the
 			default name for a bean is the fully-qualified name of its type, a 
 			convenient way to declare the prototype definition is simply to omit the
@@ -2390,7 +2390,6 @@ public class Account {
 		  
 	<programlisting><![CDATA[<bean class="com.xyz.myapp.domain.Account" scope="prototype">
   <property name="fundsTransferService" ref="fundsTransferService"/>
-  ...
 </bean>]]></programlisting>
 		  
 		<para>If you want to explicitly specify the name of the prototype bean 
@@ -2402,45 +2401,55 @@ import org.springframework.beans.factory.annotation.Configurable;
 
 @Configurable("account")
 public class Account {
-   ...
+
+   ]]><lineannotation>// ...</lineannotation><![CDATA[
 }]]></programlisting>
 		  
-		<para>Spring will now look for a bean definition named "account" and 
-		use that as a prototypical definition to configure new <classname>Account</classname>
-		instances.</para>
+		<para>Spring will now look for a bean definition named "<literal>account</literal>" and 
+		use that as the definition to configure new <classname>Account</classname> instances.</para>
 		  
-		<para>You can also use autowiring to avoid having to specify a prototypical
+		<para>You can also use autowiring to avoid having to specify a prototype-scoped
 		bean definition at all. To have Spring apply autowiring use the 
-		autowire property of the <interfacename>@Configurable</interfacename> annotation: specify either
-		<literal>@Configurable(autowire=Autowire.BY_TYPE)</literal> or
-		<literal>@Configurable(autowire=Autowire.BY_NAME</literal> for autowiring
-		by type or by name respectively.</para>
+		'<literal>autowire</literal>' property of the <interfacename>@Configurable</interfacename>
+		annotation: specify either <literal>@Configurable(autowire=Autowire.BY_TYPE)</literal> or
+		<literal>@Configurable(autowire=Autowire.BY_NAME</literal> for autowiring by type or by name
+		respectively.</para>
 		  
 		<para>Finally you can enable Spring dependency checking for the object references
 		in the newly created and configured object by using the <literal>dependencyCheck</literal>
-		attribute (for example: 
-			<literal>@Configurable(autowire=Autowire.BY_NAME,dependencyCheck=true)</literal> ).
+		attribute (for example: <literal>@Configurable(autowire=Autowire.BY_NAME,dependencyCheck=true)</literal>).
 		If this attribute is set to true, then Spring will validate after configuration that all properties
-		(<emphasis>that are not primitives or collections</emphasis>) have been set.
-		</para>
+		(<emphasis>that are not primitives or collections</emphasis>) have been set.</para>
 		  
-		<para>Using the annotation on its own does nothing of course. It's the 
-		<literal>AnnotationBeanConfigurerAspect</literal> in <filename class="libraryfile">spring-aspects.jar</filename> that 
+		<para>Using the annotation on its own does nothing of course. It is the 
+		<classname>AnnotationBeanConfigurerAspect</classname> in <filename class="libraryfile">spring-aspects.jar</filename> that
 		acts on the presence of the annotation. In essence the aspect says "after 
 		returning from the initialization of a new object of a type with the 
-		<interfacename>@Configurable</interfacename> annotation, configure the newly created object using Spring
-		in accordance with the properties of the annotation". For this to work the
-		annotated types must be woven with the AspectJ weaver - you can either 
-		use a build-time ant or maven task to do this (see for example the
+		<interfacename>@Configurable</interfacename> annotation, configure the newly created object
+		using Spring in accordance with the properties of the annotation".</para>
+		<note>
+			<para>One of the key phrases in that last sentence was '<emphasis>in essence</emphasis>'.
+			For most cases, the exact semantics of '<emphasis>after returning from the initialization
+			of a new object</emphasis>' will be fine... in this context, '<emphasis>after initialization</emphasis>'
+			means that the dependencies will be injected <emphasis>after</emphasis> the object has been
+			constructed - this means that the dependencies will not be available for use in the constructor
+			bodies of the class. If you want the dependencies to be injected <emphasis>before</emphasis>
+			the constructor bodies execute, and thus be available for use in the body of the constructors,
+			then you need to define this on the <interfacename>@Configurable</interfacename> declaration like so:</para>
+			<programlisting><![CDATA[@Configurable(preConstruction=true)]]></programlisting>
+			<para>You can find out more information about the language semantics of the various
+			pointcut types in AspectJ
+			<ulink url="http://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html">in this appendix</ulink>
+			 of the <ulink url="http://www.eclipse.org/aspectj/doc/next/progguide/index.html">AspectJ Programming Guide</ulink>.</para>
+		</note>
+		<para>For this to work the annotated types must be woven with the AspectJ weaver - you can either
+		use a build-time Ant or Maven task to do this (see for example the
 		<ulink url="http://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html">AspectJ 
 		Development Environment Guide</ulink>) or load-time weaving (see <xref linkend="aop-aj-ltw"/>).
-		</para>
-		  
-		<para>The <classname>AnnotationBeanConfigurerAspect</classname> itself needs
+		The <classname>AnnotationBeanConfigurerAspect</classname> itself needs
 		configuring by Spring (in order to obtain a reference to the bean factory that
-		is to be used to configure new objects). The Spring AOP namespace defines a
-		convenient tag for doing this. Simply include the following in your
-		application context configuration:</para>
+		is to be used to configure new objects). The Spring AOP namespace defines a convenient tag
+		for doing this: just include the following in your application context configuration:</para>
 		  
 		<programlisting><![CDATA[<aop:spring-configured/>]]></programlisting>
 		  
@@ -2450,7 +2459,7 @@ public class Account {
   class="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"
   factory-method="aspectOf"/>]]></programlisting>
 		
-		<para>Instances of @Configurable objects created <emphasis>before</emphasis>
+		<para>Instances of <interfacename>@Configurable</interfacename> objects created <emphasis>before</emphasis>
 		the aspect has been configured will result in a warning being issued to the
 		log and no configuration of the object taking place. An example might be 
 		a bean in the Spring configuration that creates domain objects when it is 
@@ -2461,7 +2470,9 @@ public class Account {
   		<programlisting><![CDATA[<bean id="myService"
   class="com.xzy.myapp.service.MyService"
   depends-on="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect">
-  ...
+
+  ]]><lineannotation>&lt;!-- ... --&gt;</lineannotation><![CDATA[
+
 </bean>]]></programlisting>
 		
 	  <section id="aop-configurable-testing">

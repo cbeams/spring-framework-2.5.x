@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,26 +23,29 @@ import org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoReso
 import org.springframework.beans.factory.annotation.Configurable;
 
 /**
- * Concrete aspect that uses the Configurable annotation to identify which
- * classes need autowiring. The bean name to look up will be taken from the
- * Configurable annotation if specified, otherwise the default will be the FQN
- * of the class being configured.
+ * Concrete aspect that uses the {@link Configurable }
+ * annotation to identify which classes need autowiring.
+ *
+ * <p>The bean name to look up will be taken from the
+ * <code>&#64;Configurable</code> annotation if specified, otherwise the
+ * default bean name to look up will be the FQN of the class being configured.
  * 
- * <p>
- * <b>Implementation details:</b> 
- * This aspect advises object creation for &#64;Configurable class instances. 
- * There are two cases that needs to be handled:
+ * <h2>Implementation details:</h2> 
+ *
+ * <p>This aspect advises object creation for <code>&#64;Configurable</code>
+ * class instances. There are two cases that needs to be handled:
+ *
  * <ol>
- *   <li>Normal object creation through 'new': This is taken care of by advising
- *       initialization() join points.</li>
- *   <li>Object creation through deserialization: Since no constructor is invoked
- *       during deserialzation, the aspect needs to advise a method that a
- *       deserialization mechanism is going to invoke. Ideally, we shouldn't require
- *       user classes to implement any specific method. This implies that we need
- *       to <i>introduce</i> the chosen method. We should also handle the cases
+ *   <li>Normal object creation via the '<code>new</code>' operator: this is
+ *       taken care of by advising <code>initialization()</code> join points.</li>
+ *   <li>Object creation through deserialization: since no constructor is
+ *       invoked during deserialzation, the aspect needs to advise a method that a
+ *       deserialization mechanism is going to invoke. Ideally, we should not
+ *       require user classes to implement any specific method. This implies that
+ *       we need to <i>introduce</i> the chosen method. We should also handle the cases
  *       where the chosen method is already implemented in classes (in which case,
- *       the user's implementation for that method should take precedence over the 
- *       ITDed implementation). There are a few choices for the chosen method:
+ *       the users implementation for that method should take precedence over the 
+ *       introduced implementation). There are a few choices for the chosen method:
  *       <ul>
  *       <li>readObject(ObjectOutputStream): Java requires that the method must be
  *           <code>private</p>. Since aspects cannot introduce a private member, 
@@ -52,14 +55,15 @@ import org.springframework.beans.factory.annotation.Configurable;
  *           that if a user class already has this method, that method must be 
  *           <code>public</code>. However, this shouldn't be a big burden, since
  *           use cases that need classes to implement readResolve() (custom enums, 
- *           for example) are unlikely to be marked as &#64;Configurable</li>, and in any case
- *           asking to make that method public shouldn't pose undue burden. 
+ *           for example) are unlikely to be marked as &#64;Configurable</li>, and
+ *           in any case asking to make that method <code>public</code> should not
+ *           pose any undue burden. 
  *       </ul>
- * The minor collaboration needed by user classes (implementation of readResolve(), 
- * if any, must be public) can be lifted as well if we were to use experimental feature 
- * in AspectJ -- the hasmethod() PCD.
+ *       The minor collaboration needed by user classes (the implementation of
+ *       <code>readResolve()</code>, if any, must be <code>public</code>) can be
+ *       lifted as well if we were to use experimental feature in AspectJ - the
+ *       <code>hasmethod()</code> PCD.
  * </ol>
- * </p>
  *
  * @author Rod Johnson
  * @author Ramnivas Laddad
@@ -70,23 +74,30 @@ import org.springframework.beans.factory.annotation.Configurable;
  */
 public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspect {
 
+	/**
+	 * Create a new instance of the <code>AnnotationBeanConfigurerAspect</code>
+	 * aspect that uses an {@link AnnotationBeanWiringInfoResolver}.
+	 */
 	public AnnotationBeanConfigurerAspect() {
 		setBeanWiringInfoResolver(new AnnotationBeanWiringInfoResolver());
 	}
 
+
 	/**
-	 * The creation of a new bean (an object with the
-	 * &#64;Configurable annotation)
+	 * The initialization of a new object where the class of the object
+	 * to be constructed is annotated with the <code>&#64;Configurable</code>
+	 * annotation.
 	 * 
-	 * Besides selecting the normal construction using initialize(), it also
-	 * selects the readResolve() method in Serializable+.
+	 * <p>Besides selecting the normal construction using <code>initialize()</code>,
+	 * it also picks out the <code>readResolve()</code> method in <code>Serializable+</code>.
 	 * 
-	 * It filters out any creation that doesn't corresponds to the most specific
-	 * class of the object (and not any of the base classes in the hierarchy).
-	 * This avoids multiple configuration of a bean with a base type
-	 * carrying &#64;Configurable (see SPR-2485)
+	 * <p>Additionally, this pointcut filters out any creation that does not
+	 * correspond to the most specific class of the object (and not any of the
+	 * base classes in the hierarchy). This avoids repeated re-configuration of
+	 * a bean with a base type that is also annotated with the
+	 * <code>&#64;Configurable</code> annotation (see SPR-2485).
 	 *  
-	 * See implementation detail in aspect's documentation
+	 * <p>See implementation detail in aspect's documentation.
 	 */
 	protected pointcut beanCreation(Object beanInstance) :
 		 ( mostSpecificInitializer() ||
@@ -94,22 +105,23 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspec
 		 && this(beanInstance);
 
 	/**
-	 * The initialization of a new bean (an object with the
-	 * &#64;Configurable annotation). 
+	 * The initialization of a new object where the class of the object
+	 * to be constructed is annotated with the <code>&#64;Configurable</code>
+	 * annotation.
 	 * 
-	 * This pointcut selects the initialization corresponding to
-	 * a constrcutor of the top-most class that has &#64;Configurable. 
+	 * <p>This pointcut selects the initialization corresponding to
+	 * a constructor of the top-most class that has <code>&#64;Configurable</code>.
 	 * Any constructor of such base class will not have properties
 	 * injected to be used in the constructor. This design decision is 
-	 * guided by the fact that such base class' constructors shouldn't be 
-	 * expecting injected since, a non &#64;Configurable subtype
-	 * will easily invalidate such expectation.
+	 * guided by the fact that such base class' constructors should not be
+	 * expecting to be injected since a non-<code>&#64;Configurable</code> subtype
+	 * will easily invalidate any such expectation.
 	 */
 	protected pointcut beanInitialization(Object beanInstance) :
 		initialization((@Configurable *)+.new(..)) && this(beanInstance); 
 
 	/**
-	 * Should dependency injection prior to object construction? 
+	 * Are dependencies to be injected prior to the construction of an object?
 	 */
 	protected boolean preConstructionConfiguration(Object beanInstance) {
 		Configurable configurable = beanInstance.getClass().getAnnotation(Configurable.class);
@@ -119,7 +131,7 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspec
 	/**
 	 * Matches the most-specific initialization join point 
 	 * (most concrete class) for the initialization of an instance
-	 * of an &#64;Configurable type.
+	 * of an <code>&#64;Configurable</code> type.
 	 */
 	private pointcut mostSpecificInitializer() :
 		initialization((@Configurable *)+.new(..)) && 
@@ -127,7 +139,7 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspec
 	
 	/**
 	 * Matches the readResolve execution join point for a serializable
-	 * type that is also &#64;Configurable.
+	 * type that is also <code>&#64;Configurable</code>.
 	 */
 	private pointcut configurableObjectResolution() :
 		execution(Object Serializable+.readResolve() throws ObjectStreamException) &&
@@ -135,36 +147,41 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspec
 		
 	/**
 	 * Declare any class implementing Serializable annotated with
-	 * &#64;Configurable as also implementing ConfigurableDeserializationSupport. 
+	 * <code>&#64;Configurable</code> as also implementing ConfigurableDeserializationSupport.
 	 * This allows us to introduce the readResolve() method and select it with the 
 	 * beanCreation() pointcut.
 	 * 
-	 * Here is an improved version that uses the hasmethod() pointcut and lifts
+	 * <p>Here is an improved version that uses the hasmethod() pointcut and lifts
 	 * even the minor requirement on user classes:
-	 * declare parents: &#64;Configurable Serializable+ 
+	 *
+	 * <pre class="code">declare parents: &#64;Configurable Serializable+
 	 *		            && !hasmethod(Object readResolve() throws ObjectStreamException) 
 	 *		            implements ConfigurableDeserializationSupport;
+	 * </pre>
      *
 	 */
 	declare parents: @Configurable Serializable+ 
 			       implements ConfigurableDeserializationSupport;
 
+
 	/**
-	 * A marker interface to which the readResolve() is introduced
+	 * A marker interface to which the <code>readResolve()</code> is introduced.
 	 */
 	interface ConfigurableDeserializationSupport extends Serializable {
 	}
 
+
 	/**
-	 * Introduce the readResolve() method so that we can advise its execution to configure
-	 * the beans
+	 * Introduce the <code>readResolve()</code> method so that we can advise its
+	 * execution to configure the object.
 	 * 
-	 * Note if a method with the same signature already exists in a Serializable
-	 * class annotated with &#64;Configurable, that implementation will take precedence 
-	 * (a good thing, since we are merely interested in an opportunity to detect
-	 * deserialization.)
+	 * <p>Note if a method with the same signature already exists in a
+	 * <code>Serializable</code> class annotated with <code>&#64;Configurable</code>,
+	 * that implementation will take precedence (a good thing, since we are
+	 * merely interested in an opportunity to detect deserialization.)
 	 */
 	public Object ConfigurableDeserializationSupport.readResolve() throws ObjectStreamException {
 		return this;
 	}
+
 }
