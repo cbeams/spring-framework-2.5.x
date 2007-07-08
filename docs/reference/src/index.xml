@@ -105,10 +105,6 @@
 				<firstname>Costin</firstname>
 				<surname>Leau</surname>
 			</author>
-			<author>
-				<firstname>Rick</firstname>
-				<surname>Evans</surname>
-			</author>
             <author>
                 <firstname>Mark</firstname>
                 <surname>Fisher</surname>
@@ -128,7 +124,7 @@
 	&whats-new-in-2.0;
 	<part id="spring-core">
 		<title>Core Technologies</title>
-		<partintro id="spring-core">
+		<partintro id="spring-core-intro">
 			<para>
 				This initial part of the reference documentation covers
 				all of those technologies that are absolutely integral
@@ -166,22 +162,22 @@
 			</para>
 			<itemizedlist>
 				<listitem>
-					<xref linkend="beans" />
+					<para><xref linkend="beans"/></para>
 				</listitem>
 				<listitem>
-					<xref linkend="resources" />
+					<para><xref linkend="resources" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="validation" />
+					<para><xref linkend="validation" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="aop" />
+					<para><xref linkend="aop" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="aop-api" />
+					<para><xref linkend="aop-api" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="testing" />
+					<para><xref linkend="testing" /></para>
 				</listitem>
 			</itemizedlist>
 		</partintro>
@@ -208,16 +204,16 @@
 			</para>
 			<itemizedlist>
 				<listitem>
-					<xref linkend="transaction" />
+					<para><xref linkend="transaction" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="dao" />
+					<para><xref linkend="dao" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="jdbc" />
+					<para><xref linkend="jdbc" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="orm" />
+					<para><xref linkend="orm" /></para>
 				</listitem>
 			</itemizedlist>
 		</partintro>
@@ -249,16 +245,16 @@
 			</para>
 			<itemizedlist>
 				<listitem>
-					<xref linkend="mvc" />
+					<para><xref linkend="mvc" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="view" />
+					<para><xref linkend="view" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="webintegration" />
+					<para><xref linkend="webintegration" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="portlet" />
+					<para><xref linkend="portlet" /></para>
 				</listitem>
 			</itemizedlist>
 		</partintro>
@@ -277,31 +273,31 @@
 			</para>
 			<itemizedlist>
 				<listitem>
-					<xref linkend="remoting" />
+					<para><xref linkend="remoting" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="ejb" />
+					<para><xref linkend="ejb" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="jms" />
+					<para><xref linkend="jms" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="jmx" />
+					<para><xref linkend="jmx" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="cci" />
+					<para><xref linkend="cci" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="mail" />
+					<para><xref linkend="mail" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="scheduling" />
+					<para><xref linkend="scheduling" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="dynamic-language" />
+					<para><xref linkend="dynamic-language" /></para>
 				</listitem>
 				<listitem>
-					<xref linkend="metadata" />
+					<para><xref linkend="metadata" /></para>
 				</listitem>
 			</itemizedlist>
 		</partintro>
