@@ -3,8 +3,6 @@
 	<title>Dynamic language support</title>
     <section id="dynamic-language-introduction">
 		<title>Introduction</title>
-		<para>Spring 2.0 introduces comprehensive support for using classes and objects that have
-		been defined using a dynamic language (such as JRuby) with Spring.</para>
         <sidebar>
 			<title>Why only these languages?</title>
             <para>
@@ -21,11 +19,11 @@
                 page (or implement such support yourself).
             </para>
         </sidebar>
-		<para>
-            This support allows you to write any number of classes in a supported dynamic
-            language, and have the Spring container transparently instantiate, configure
-            and dependency inject the resulting objects.
-        </para>
+		<para>Spring 2.0 introduces comprehensive support for using classes and objects that have
+		been defined using a dynamic language (such as JRuby) with Spring.
+		This support allows you to write any number of classes in a supported dynamic language,
+		and have the Spring container transparently instantiate, configure and dependency inject the
+		resulting objects.</para>
 		<para>The dynamic languages currently supported are:</para>
 		<itemizedlist>
 			<listitem>
@@ -55,20 +53,18 @@
 			This bulk of this chapter is concerned with describing the dynamic language support
 			in detail. Before diving into all of the ins and outs of the dynamic language support,
 			let's look at a quick example of a bean defined in a dynamic language.
-		</para>
-		<para>
             The dynamic language for this first bean is Groovy (the basis of this example
             was taken from the Spring test suite, so if you want to see equivalent examples
-            in any of the other supported languages, take a look in the source code).
+            in any of the other supported languages, take a look at the source code).
         </para>
 		<para>
-            Let's look at the <interfacename>Messenger</interfacename> interface that the
-            Groovy bean is going to be implementing. Note that this interface is defined
+            Find below the <interfacename>Messenger</interfacename> interface that the
+            Groovy bean is going to be implementing, and note that this interface is defined
             in plain Java. Dependent objects that are injected with a reference to the
             <interfacename>Messenger</interfacename> won't know that the underlying
             implementation is a Groovy script.
         </para>
-		<programlisting><![CDATA[package org.springframework.scripting;
+		<programlisting source="java"><![CDATA[package org.springframework.scripting;
 
 public interface Messenger {
 
@@ -78,7 +74,7 @@ public interface Messenger {
             Here is the definition of a class that has a dependency on the
             <interfacename>Messenger</interfacename> interface.
         </para>
-		<programlisting><![CDATA[package org.springframework.scripting;
+		<programlisting source="java"><![CDATA[package org.springframework.scripting;
 
 public class DefaultBookingService implements BookingService {
 
@@ -89,18 +85,18 @@ public class DefaultBookingService implements BookingService {
     }
 
     public void processBooking() {
-        ]]><lineannotation>// use the injected <interfacename>Messenger</interfacename> object...</lineannotation><![CDATA[
+        // use the injected Messenger object...
     }
 }]]></programlisting>
 		<para>Here is an implementation of the <interfacename>Messenger</interfacename> interface
 		in Groovy.</para>
-		<programlisting><lineannotation>// from the file 'Messenger.groovy'</lineannotation><![CDATA[
+		<programlisting source="java"><![CDATA[// from the file 'Messenger.groovy'
 package org.springframework.scripting.groovy;
 
-]]><lineannotation>// import the Messenger interface (written in Java) that is to be implemented</lineannotation><![CDATA[
+// import the Messenger interface (written in Java) that is to be implemented
 import org.springframework.scripting.Messenger
 
-]]><lineannotation>// define the implementation in Groovy</lineannotation><![CDATA[
+// define the implementation in Groovy
 class GroovyMessenger implements Messenger {
 
     String message
@@ -317,7 +313,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
 		        call is only there so that the execution of the program pauses while I (the author)
 		        go off and edit the underlying dynamic language source file so that the refresh will
 		        trigger on the dynamic-language-backed bean when the program resumes execution.</para>
-				<programlisting><![CDATA[import org.springframework.context.ApplicationContext;
+				<programlisting source="java"><![CDATA[import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.scripting.Messenger;
 
@@ -327,8 +323,8 @@ public final class Boot {
 
         ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
         Messenger messenger = (Messenger) ctx.getBean("messenger");
-        System.out.println(messenger.getMessage());]]>
-        <lineannotation>// pause execution while I go off and make changes to the source file...</lineannotation><![CDATA[
+        System.out.println(messenger.getMessage());
+        // pause execution while I go off and make changes to the source file...
         System.in.read();
         System.out.println(messenger.getMessage());
     }
@@ -340,14 +336,14 @@ public final class Boot {
 		        Below are the changes that I (the author) make to the
 		        <filename>Messenger.groovy</filename> source file when the execution of
 		        the program is paused.</para>
-				<programlisting><![CDATA[package org.springframework.scripting
+				<programlisting source="java"><![CDATA[package org.springframework.scripting
 
 class GroovyMessenger implements Messenger {
 
     private String message = "Bingo"
 
     public String getMessage() {
-     ]]><lineannotation>   // change the implementation to surround the message in quotes</lineannotation><![CDATA[
+        // change the implementation to surround the message in quotes
         return "'" + this.message + "'"
     }
 
@@ -460,7 +456,7 @@ end
 		            properties 100% clear, the following mixture of code and configuration
 		            will <emphasis>not</emphasis> work.
 				</para>
-				<programlisting><lineannotation>// from the file 'Messenger.groovy'</lineannotation><![CDATA[
+				<programlisting source="java"><![CDATA[// from the file 'Messenger.groovy'
 package org.springframework.scripting.groovy;
 
 import org.springframework.scripting.Messenger
@@ -469,7 +465,7 @@ class GroovyMessenger implements Messenger {
 
     GroovyMessenger() {}
 
-    ]]><lineannotation>// this constructor is <emphasis role="bold">not</emphasis> available for Constructor Injection...</lineannotation><![CDATA[
+    // this constructor is not available for Constructor Injection
     GroovyMessenger(String message) {
         this.message = message;
     }
@@ -544,13 +540,13 @@ class GroovyMessenger implements Messenger {
 	            interface that was defined earlier in this chapter (for your convenience it
 	            is repeated below).
 			</para>
-			<programlisting><![CDATA[package org.springframework.scripting;
+			<programlisting source="ruby"><![CDATA[package org.springframework.scripting;
 
 public interface Messenger {
 
     String getMessage();
 }]]></programlisting>
-			<programlisting><![CDATA[require 'java'
+			<programlisting source="ruby"><![CDATA[require 'java'
 
 include_class 'org.springframework.scripting.Messenger'
 
@@ -566,7 +562,8 @@ class RubyMessenger < Messenger
 
 end
 
-RubyMessenger.new]]><lineannotation> # this last line is not essential (but see below)</lineannotation></programlisting>
+# this last line is not essential (but see below)
+RubyMessenger.new]]></programlisting>
 			<para>
 	            And here is the Spring XML that defines an instance of the
 	            <classname>RubyMessenger</classname> JRuby bean.
@@ -586,13 +583,13 @@ RubyMessenger.new]]><lineannotation> # this last line is not essential (but see 
 				can achieve this by simply instantiating a new instance of your JRuby class on the last
 				line of the source file like so:
 	        </para>
-			<programlisting><![CDATA[require 'java'
+			<programlisting source="ruby"><![CDATA[require 'java'
 
 include_class 'org.springframework.scripting.Messenger'
 
-]]><lineannotation># class definition same as above...</lineannotation><![CDATA[
+# class definition same as above...
 
-]]><lineannotation># instantiate and return a new instance of the <literal>RubyMessenger</literal> class</lineannotation><![CDATA[
+# instantiate and return a new instance of the RubyMessenger class
 RubyMessenger.new]]></programlisting>
 			<para>
 				If you forget to do this, it is not the end of the world; this will however result in
@@ -609,7 +606,7 @@ RubyMessenger.new]]></programlisting>
 				and the following text is there in the corresponding stacktrace, this will hopefully
 				allow you to identify and then easily rectify the issue):
 			</para>
-			<programlisting><![CDATA[org.springframework.scripting.ScriptCompilationException: Compilation of JRuby script returned '']]></programlisting>
+			<computeroutput><![CDATA[org.springframework.scripting.ScriptCompilationException: Compilation of JRuby script returned '']]></computeroutput>
 			<para>
 	            To rectify this, simply instantiate a new instance of whichever class
 	            you want to expose as a JRuby-dynamic-language-backed bean (as shown above). Please
@@ -658,7 +655,7 @@ RubyMessenger.new]]></programlisting>
 			<note>
 				<para>Groovy itself requires JDK 1.4+.</para>
 			</note>
-			<programlisting><![CDATA[package org.springframework.scripting;
+			<programlisting source="java"><![CDATA[package org.springframework.scripting;
 
 public interface Calculator {
 
@@ -668,7 +665,7 @@ public interface Calculator {
                 Here is an implementation of the <interfacename>Calculator</interfacename>
                 interface in Groovy.
             </para>
-			<programlisting><lineannotation>// from the file 'calculator.groovy'</lineannotation><![CDATA[
+			<programlisting source="java"><lineannotation>// from the file 'calculator.groovy'</lineannotation><![CDATA[
 package org.springframework.scripting.groovy
 
 class GroovyCalculator implements Calculator {
@@ -684,7 +681,7 @@ class GroovyCalculator implements Calculator {
 			<para>
 				Lastly, here is a small application to exercise the above configuration.
 			</para>
-			<programlisting><![CDATA[package org.springframework.scripting;
+			<programlisting source="java"><![CDATA[package org.springframework.scripting;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -722,7 +719,7 @@ public class Main {
 					any required initialization method(s), or set some default property
 					values, or specify a custom <classname>MetaClass</classname>.
 				</para>
-				<programlisting><![CDATA[public interface GroovyObjectCustomizer {
+				<programlisting source="java"><![CDATA[public interface GroovyObjectCustomizer {
 
    void customize(GroovyObject goo);
 }]]></programlisting>
@@ -736,7 +733,7 @@ public class Main {
 					folks will want to do with this callback, and you can see an example
 					of doing that below.
 				</para>
-				<programlisting><![CDATA[public final class SimpleMethodTracingCustomizer implements GroovyObjectCustomizer {
+				<programlisting source="java"><![CDATA[public final class SimpleMethodTracingCustomizer implements GroovyObjectCustomizer {
 
    public void customize(GroovyObject goo) {
       DelegatingMetaClass metaClass = new DelegatingMetaClass(goo.getMetaClass()) {
@@ -826,7 +823,7 @@ public class Main {
 	            that was defined earlier in this chapter (repeated below for your
 	            convenience).
 			</para>
-			<programlisting><![CDATA[package org.springframework.scripting;
+			<programlisting source="java"><![CDATA[package org.springframework.scripting;
 
 public interface Messenger {
 
@@ -834,7 +831,7 @@ public interface Messenger {
 }]]></programlisting>
 			<para>Here is the BeanShell 'implementation' (the term is used loosely here) of the
 	        <interfacename>Messenger</interfacename> interface.</para>
-			<programlisting><![CDATA[String message;
+			<programlisting source="java"><![CDATA[String message;
 
 String getMessage() {
     return message;
@@ -910,7 +907,7 @@ void setMessage(String aMessage) {
 	            <filename class="directory">'samples/showcases/dynamvc/'</filename> directory
 	            of the Spring distribution.
 			</para>
-			<programlisting><lineannotation>// from the file '<filename>/WEB-INF/groovy/FortuneController.groovy</filename>'</lineannotation><![CDATA[
+			<programlisting source="java"><![CDATA[// from the file '/WEB-INF/groovy/FortuneController.groovy'
 package org.springframework.showcase.fortune.web
 
 import org.springframework.showcase.fortune.service.FortuneService
@@ -970,7 +967,7 @@ class FortuneController implements Controller {
 	            <xref linkend="validator"/> for a discussion of the
 	            <interfacename>Validator</interfacename> interface.)
 			</para>
-			<programlisting><![CDATA[import org.springframework.validation.Validator
+			<programlisting source="java"><![CDATA[import org.springframework.validation.Validator
 import org.springframework.validation.Errors
 import org.springframework.beans.TestBean
 
@@ -984,7 +981,7 @@ class TestBeanValidator implements Validator {
         if(bean.name?.trim()?.size() > 0) {
             return
         }
-	errors.reject("whitespace", "Cannot be composed wholly of whitespace.")
+        errors.reject("whitespace", "Cannot be composed wholly of whitespace.")
     }
 }]]></programlisting>
 		</section>
