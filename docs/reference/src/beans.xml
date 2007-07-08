@@ -173,23 +173,16 @@
     ]]><lineannotation>&lt;!-- collaborators and configuration for this bean go here --&gt;</lineannotation><![CDATA[
   </bean>
 
-  ]]><lineannotation>&lt;!-- more bean definitions go here... --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- more bean definitions go here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
 			<section id="beans-factory-instantiation">
 				<title>Instantiating a container</title>
-				<para>Instantiating a Spring IoC container is easy; find below some examples of how
-				to do just that:</para>
-				<programlisting><![CDATA[Resource resource = new FileSystemResource("beans.xml");
-BeanFactory factory = new XmlBeanFactory(resource);]]></programlisting>
-				<para>... or...</para>
-				<programlisting><![CDATA[ClassPathResource resource = new ClassPathResource("beans.xml");
-BeanFactory factory = new XmlBeanFactory(resource);]]></programlisting>
-			    <para>... or...</para>
+				<para>Instantiating a Spring IoC container is straightforward.</para>
 				<programlisting><![CDATA[ApplicationContext context = new ClassPathXmlApplicationContext(
-        new String[] {"applicationContext.xml", "applicationContext-part2.xml"});
+        new String[] {"services.xml", "daos.xml"});
 
-]]><lineannotation>// of course, an <interfacename>ApplicationContext</interfacename> is just a <interfacename>BeanFactory</interfacename></lineannotation><![CDATA[
+]]><lineannotation>// an <interfacename>ApplicationContext</interfacename> is also a <interfacename>BeanFactory</interfacename> (via inheritance)</lineannotation><![CDATA[
 BeanFactory factory = (BeanFactory) context;]]></programlisting>
                 <section id="beans-factory-xml-import">
                     <title>Composing XML-based configuration metadata</title>
@@ -217,9 +210,8 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
 
 </beans>]]></programlisting>
                 <para>In this example, external bean definitions are being loaded from 3
-			    files, <literal>services.xml</literal>,
-			    <literal>messageSource.xml</literal>, and
-			    <literal>themeSource.xml</literal>. All location paths are considered
+			    files, <literal>services.xml</literal>, <literal>messageSource.xml</literal>,
+				and <literal>themeSource.xml</literal>. All location paths are considered
 			    relative to the definition file doing the importing, so
 			    <literal>services.xml</literal> in this case must be in the same directory
 			    or classpath location as the file doing the importing, while
@@ -228,9 +220,8 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
 			    <literal>resources</literal> location below the location of the importing
 			    file. As you can see, a leading slash is actually ignored, but given that
 			    these are considered relative paths, it is probably better form not to use
-			    the slash at all.</para>
-                <para>The contents of the files being imported must be fully valid XML
-			    bean definition files according to the Schema or DTD, including the
+			    the slash at all. The contents of the files being imported must be valid XML
+			    bean definition files according to the Spring Schema or DTD, including the
 			    top level <literal>&lt;beans/&gt;</literal> element.</para>
             </section>
         </section>
@@ -637,15 +628,37 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 			<para>
 				It becomes evident upon usage that code gets much cleaner when the DI
 				principle is applied, and reaching a higher grade of decoupling is much
-				easier when beans do not look up their dependencies, but are provided
+				easier when objects do not look up their dependencies, but are provided
 				with them (and additionally do not even know where the dependencies are
-				located and of what actual class they are).
+				located and of what concrete class they are). DI exists in two major variants,
+				namely <link linkend="beans-constructor-injection">Constructor Injection</link>
+				and <link linkend="beans-setter-injection">Setter Injection</link>.
 			</para>
-            <para>
-				As touched on in the previous paragraph, DI exists in two major variants,
-				namely <link linkend="beans-setter-injection">Setter Injection</link>, and
-				<link linkend="beans-constructor-injection">Constructor Injection</link>.
-			</para>
+			<section id="beans-constructor-injection">
+				<title>Constructor Injection</title>
+                <para>
+					<emphasis>Constructor-based</emphasis> DI is realized by invoking a constructor
+					with a number of arguments, each representing a collaborator. Additionally,
+					calling a <literal>static</literal> factory method with specific arguments to
+					construct the bean, can be considered almost equivalent, and the rest of this
+					text will consider arguments to a constructor and arguments to a
+					<literal>static</literal> factory method similarly.	Find below an example of a class
+					that could only be dependency injected using constructor injection. Notice that there
+					is nothing <emphasis>special</emphasis> about this class.
+				</para>
+				<programlisting><![CDATA[public class SimpleMovieLister {
+
+    ]]><lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on the <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
+    private MovieFinder movieFinder;
+
+    ]]><lineannotation>// a constructor so that the Spring container can 'inject' a <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
+    public SimpleMovieLister(MovieFinder movieFinder) {
+        this.movieFinder = movieFinder;
+    }
+    
+    ]]><lineannotation>// business logic that actually 'uses' the injected <interfacename>MovieFinder</interfacename> is omitted...</lineannotation><![CDATA[
+}]]></programlisting>
+			</section>
 			<section id="beans-setter-injection">
 				<title>Setter Injection</title>
                 <para>
@@ -667,36 +680,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
     public void setMovieFinder(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
-    
-    ]]><lineannotation>// business logic that actually 'uses' the injected <interfacename>MovieFinder</interfacename> is omitted...</lineannotation><![CDATA[
-}]]></programlisting>
-			</section>
-			<section id="beans-constructor-injection">
-				<title>Constructor Injection</title>
-                <para>
-					<emphasis>Constructor-based</emphasis> DI
-					is realized by invoking a constructor with a number of arguments,
-					each representing a collaborator. Additionally,
-					calling a <literal>static</literal> factory method with specific
-					arguments to construct the bean, can be considered almost equivalent,
-					and the rest of this text will consider arguments to a constructor and
-					arguments to a <literal>static</literal> factory method similarly.
-				</para>
-				<para>
-					Find below an example of a class that could only be dependency injected
-					using constructor injection. Again, note that there is nothing
-					<emphasis>special</emphasis> about this class.
-				</para>
-				<programlisting><![CDATA[public class SimpleMovieLister {
 
-    ]]><lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on the <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
-    private MovieFinder movieFinder;
-
-    ]]><lineannotation>// a constructor so that the Spring container can 'inject' a <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
-    public SimpleMovieLister(MovieFinder movieFinder) {
-        this.movieFinder = movieFinder;
-    }
-    
     ]]><lineannotation>// business logic that actually 'uses' the injected <interfacename>MovieFinder</interfacename> is omitted...</lineannotation><![CDATA[
 }]]></programlisting>
 			</section>
@@ -1487,30 +1471,30 @@ support=support@somecompany.co.uk]]></programlisting>
 </entry>]]></programlisting>
 	                <para>is equivalent to:</para>
 	                <programlisting><![CDATA[<entry key-ref="myKeyBean" value-ref="myValueBean"/>]]></programlisting>
-	                <para>Again, the shortcut form is equivalent to a
-	                <literal>&lt;ref bean="xxx"&gt;</literal> element; there is no shortcut for
-	                <literal>&lt;ref local="xxx"</literal>&gt;.</para>
+	                <para>Again, the shortcut form is equivalent to a <literal>&lt;ref bean="xxx"&gt;</literal> element;
+					there is no shortcut for <literal>&lt;ref local="xxx"</literal>&gt;.</para>
 	            </section>
 	            <section id="beans-p-namespace">
 	            	<title>The p-namespace and how to use it to configure properties</title>
 	            	<para>
-	            		The second option you have to limit the amount of XML you have to write to configure your components
-	            		is to use the special "p-namespace". Spring 2.0 and later features support for extensible configuration
-	            		formats <link linkend="xsd-config">using namespaces</link>. Those namespaces are
-	            		all based on an XML Schema definition. In fact, the <literal>beans</literal> configuration format that you've been
-	            		reading about is defined in an XML Schema document.</para>
+	            		The second option you have to limit the amount of XML you have to write to configure your
+						components is to use the special "p-namespace". Spring 2.0 and later features support for
+						extensible configuration formats <link linkend="xsd-config">using namespaces</link>. Those
+						namespaces are all based on an XML Schema definition. In fact, the <literal>beans</literal>
+						configuration format that you've been reading about is defined in an XML Schema document.</para>
 	            	<para>
-	            		One special namespace is not defined in an XSD file, and only exists in the core of Spring itself. The so-called
-	            		p-namespace doesn't need a schema definition and is an alternative way of configuring your properties differently
-	            		than the way you have seen so far. Instead of using <emphasis role="bold">nested</emphasis> <literal>property</literal>
-	            		elements, using the p-namespace you can use attributes as part of the <literal>bean</literal> element that
-	            		describe your property values. The values of the attributes will be taken as the values for your properties.
+	            		One special namespace is not defined in an XSD file, and only exists in the core of Spring
+						itself. The so-called p-namespace doesn't need a schema definition and is an alternative way
+						of configuring your properties differently than the way you have seen so far. Instead of using
+						nested <literal>&lt;property/&gt;</literal> elements, using the p-namespace you can use
+						attributes as part of the <literal>bean</literal> element that describe your property values.
+						The values of the attributes will be taken as the values for your properties.
 	            	</para>
 	            	<para>
-	            		The following two XML snippets boil down to the same thing in the end: the first is using the format
-						you're familiar with (the <literal>property</literal> elements) whereas the second example is using the p-namespace</para>
-	            		
-	            	<para><programlisting><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
+	            		The following two XML snippets boil down to the same thing in the end: the first is using the
+						standard XML format whereas the second example is using the p-namespace.
+					</para>
+	            	<programlisting><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
@@ -1520,15 +1504,14 @@ support=support@somecompany.co.uk]]></programlisting>
         <property name="email" value="foo@bar.com/>
     </bean>
     
-    <bean name="p-namespace" 
-        class="com.mycompany.ExampleBean"
-        p:email="foo@bar.com"/>
-</beans>]]></programlisting></para>
-
+    <bean name="p-namespace" class="com.mycompany.ExampleBean"
+          p:email="foo@bar.com"/>
+</beans>]]></programlisting>
 					<para>
-						As you can see, we are including an attribute from the p-namespace called email in the bean definition. This is telling
-						Spring that it should include a property declaration. As previously mentioned, the p-namespace doesn't have a schema
-						definition, so the name of the attribute can be set to whatever name your property has.
+						As you can see, we are including an attribute in the p-namespace called email in the bean
+						definition - this is telling Spring that it should include a property declaration. As previously
+						mentioned, the p-namespace doesn't have a schema definition, so the name of the attribute can be
+						set to whatever name your property has.
 					</para>
 					<para>
 						This next example includes two more bean definitions that both have a reference to another bean:
@@ -1554,39 +1537,42 @@ support=support@somecompany.co.uk]]></programlisting>
     </bean>
 </beans>]]></programlisting>
 					<para>
-						As you can see, this example doesn't only include a property value using the p-namespace, but also uses a special
-						format to declare property references. Whereas the first bean definition uses <literal>&lt;property name="spouse" ref="jane"/&gt;</literal>
-						to create a reference from bean john to bean jane, the second bean definition uses
-						<literal>p:spouse-ref="jane"</literal> as an attribute to do the exact same thing. In this case <emphasis role="bold">spouse</emphasis>
-						is the property name whereas the <literal>-ref</literal> part tells Spring this is not a value but a bean reference.
+						As you can see, this example doesn't only include a property value using the p-namespace, but
+						also uses a special format to declare property references. Whereas the first bean definition
+						uses <literal>&lt;property name="spouse" ref="jane"/&gt;</literal> to create a reference from
+						bean <literal>john</literal> to bean <literal>jane</literal>, the second bean definition uses
+						<literal>p:spouse-ref="jane"</literal> as an attribute to do the exact same thing. In this case
+						'<literal>spouse</literal>' is the property name whereas the '<literal>-ref</literal>' part
+						indicates that this is not a straight value but rather a reference to another bean.
 					</para>
 					<note>
-						<para>Note that we recommend you to choose carefully which approach you are going to use in your project.
-						You should also communicate this to your team members so you won't end up with XML documents using all
-						three approaches at the same time. This will prevent people from not understanding
-						the application because of different ways of configuring it, and will add to the
-						consistency of your codebase. Also note that this functionality is only available as of Spring 2.0.
-						</para>
+					<para>
+						Please note that the p-namespace is not quite as flexible as the standard XML format - for
+						example particular, the 'special' format used to declare property references will clash with
+						properties that end in '<literal>Ref</literal>', whereas the standard XML format would have no
+						problem there. We recommend that you choose carefully which approach you are going to use in
+						your projects. You should also communicate this to your team members so you won't end up with
+						XML documents using all three approaches at the same time. This will prevent people from not
+						understanding the application because of different ways of configuring it, and will add to
+						the overall consistency of your codebase.
+					</para>
 					</note>
 				</section>
             </section>
             <section id="beans-compound-property-names">
                 <title>Compound property names</title>
-                <para>Compound or nested property names are perfectly legal
-                when setting bean properties, as long as all components of the path
-                except the final property name are not null. For example, in this bean
-                definition:</para>
+                <para>Compound or nested property names are perfectly legal when setting bean properties, as long as all
+				components of the path except the final property name are not <literal>null</literal>. Consider the
+				following bean definition...</para>
                 <programlisting><![CDATA[<bean id="foo" class="foo.Bar">
   <property name="fred.bob.sammy" value="123" />
 </bean>]]></programlisting>
-                <para>The <literal>foo</literal> bean has a <literal>fred</literal> property
-                which has a <literal>bob</literal> property, which has a 
-                <literal>sammy</literal> property, and that final <literal>sammy</literal>
-                property is being set to the value <literal>123</literal>. In order
-                for this to work, the <literal>fred</literal> property of <literal>foo</literal>,
-                and the <literal>bob</literal> property of <literal>fred</literal> must both
-                be non-null after the bean is constructed, or a
-                <exceptionname>NullPointerException</exceptionname> will be thrown.</para>
+                <para>The <literal>foo</literal> bean has a <literal>fred</literal> property which has a
+				<literal>bob</literal> property, which has a <literal>sammy</literal> property, and that final
+				<literal>sammy</literal> property is being set to the value <literal>123</literal>. In order for this to
+				work, the <literal>fred</literal> property of <literal>foo</literal>, and the <literal>bob</literal>
+				property of <literal>fred</literal> must not be <literal>null</literal> be non-null after the bean is
+				constructed, or a <exceptionname>NullPointerException</exceptionname> will be thrown.</para>
             </section>
         </section>
         <section id="beans-factory-dependson">
