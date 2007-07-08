@@ -107,95 +107,64 @@
     Spring environment. It also features two web tier versions: one based on
     Spring Web MVC, one based on Struts.</para>
 
-    <para>Beyond the samples shipped with Spring, there is a variety of
+    <para>Beyond the samples shipped with Spring, there are a variety of
     Spring-based O/R mapping samples provided by specific vendors: for
     example, the JDO implementations JPOX (<ulink url="http://www.jpox.org/"></ulink>)
-    and Kodo (<ulink url="http://www.bea.com/kodo"></ulink>).</para>
+    and Kodo (<ulink url="http://www.bea.com/kodo/"></ulink>).</para>
   </section>
 
-  <section id="orm-hibernate">
+	<section id="orm-hibernate">
     <title>Hibernate</title>
 
-    <para>We will start with a coverage of <ulink url="http://www.hibernate.org/">Hibernate</ulink>
-    in a Spring environment, using it to demonstrate the approach that Spring takes towards
-    integrating O/R mappers. This section will cover many issues in detail and show different
-    variations of DAO implementations and transaction demarcations. Most of
-    these patterns can be directly translated to all other supported O/R
-    mapping tools. The following sections in this chapter will then cover the
-    other O/R mappers, showing briefer examples there.</para>
+    <para>We will start with a coverage of <ulink url="http://www.hibernate.org/">Hibernate (3)</ulink> in a Spring
+	environment, using it to demonstrate the approach that Spring takes towards integrating O/R mappers. This section
+	will cover many issues in detail and show different variations of DAO implementations and transaction demarcations.
+	Most of these patterns can be directly translated to all other supported ORM tools. The following sections in this
+	chapter will then cover the other ORM technologies, showing briefer examples there.</para>
 
-    <para>The following discussion focuses on Hibernate 3: this is the current
-    major production ready version of Hibernate. Hibernate 2.x, which has been
-    supported in Spring since its inception continues to be supported... it is
-    just that the following examples all use the Hibernate 3 classes and
-    configuration. All of this can (pretty much) be applied to Hibernate 2.x
-    as-is, using the analogous Hibernate 2.x support package:
-    <literal>org.springframework.orm.hibernate</literal>, mirroring
-    <literal>org.springframework.orm.hibernate3</literal> with analogous
-    support classes for Hibernate 2.x. Furthermore, all references to the
-    <literal>org.hibernate</literal> package need to be replaced with
-    <literal>net.sf.hibernate</literal>, following the root package change in
-    Hibernate 3. Simply adapt the package names (as used in the examples)
-    accordingly.</para>
+	<section id="orm-resource-mngmnt">
+		<title>Resource management</title>
 
-    <section id="orm-resource-mngmnt">
-      <title>Resource management</title>
+		<para>Typical business applications are often cluttered with repetitive resource management code. Many projects
+		try to invent their own solutions for this issue, sometimes sacrificing proper handling of failures for
+		programming convenience. Spring advocates strikingly simple solutions for proper resource handling, namely IoC
+		via templating; for example infrastructure classes with callback interfaces, or applying AOP interceptors. The
+		infrastructure cares for proper resource handling, and for appropriate conversion of specific API exceptions to
+		an unchecked infrastructure exception hierarchy. Spring introduces a DAO exception hierarchy, applicable to any
+		data access strategy. For direct JDBC, the <classname>JdbcTemplate</classname> class mentioned in a previous
+		section cares for connection handling, and for proper conversion of <classname>SQLException</classname> to the
+		<classname>DataAccessException</classname> hierarchy, including translation of database-specific SQL error codes
+		to meaningful exception classes. It supports both JTA and JDBC transactions, via respective Spring transaction
+		managers.</para>
 
-      <para>Typical business applications are often cluttered with repetitive
-      resource management code. Many projects try to invent their own
-      solutions for this issue, sometimes sacrificing proper handling of
-      failures for programming convenience. Spring advocates strikingly simple
-      solutions for proper resource handling, namely IoC via
-      templating; for example infrastructure classes with callback interfaces, or
-      applying AOP interceptors. The infrastructure cares for proper resource
-      handling, and for appropriate conversion of specific API exceptions to
-      an unchecked infrastructure exception hierarchy. Spring introduces a DAO
-      exception hierarchy, applicable to any data access strategy. For direct
-      JDBC, the <classname>JdbcTemplate</classname> class mentioned in a
-      previous section cares for connection handling, and for proper
-      conversion of <classname>SQLException</classname> to the
-      <classname>DataAccessException</classname> hierarchy, including
-      translation of database-specific SQL error codes to meaningful exception
-      classes. It supports both JTA and JDBC transactions, via respective
-      Spring transaction managers.</para>
-
-      <para>Spring also offers Hibernate and JDO support, consisting of a
-      <classname>HibernateTemplate</classname> /
-      <classname>JdoTemplate</classname> analogous to
-      <classname>JdbcTemplate</classname>, a
-      <classname>HibernateInterceptor</classname> /
-      <classname>JdoInterceptor</classname>, and a Hibernate / JDO transaction
-      manager. The major goal is to allow for clear application layering, with
-      any data access and transaction technology, and for loose coupling of
-      application objects. No more business service dependencies on the data
-      access or transaction strategy, no more hard-coded resource lookups, no
-      more hard-to-replace singletons, no more custom service registries. One
-      simple and consistent approach to wiring up application objects, keeping
-      them as reusable and free from container dependencies as possible. All
-      the individual data access features are usable on their own but
-      integrate nicely with Spring's application context concept, providing
-      XML-based configuration and cross-referencing of plain JavaBean
-      instances that don't need to be Spring-aware. In a typical Spring app,
-      many important objects are JavaBeans: data access templates, data access
-      objects (that use the templates), transaction managers, business
-      services (that use the data access objects and transaction managers),
-      web view resolvers, web controllers (that use the business services),and so on.</para>
+		<para>Spring also offers Hibernate and JDO support, consisting of a <classname>HibernateTemplate</classname> /
+		<classname>JdoTemplate</classname> analogous to <classname>JdbcTemplate</classname>, a
+		<classname>HibernateInterceptor</classname> / <classname>JdoInterceptor</classname>, and a Hibernate / JDO
+		transaction manager. The major goal is to allow for clear application layering, with any data access and
+		transaction technology, and for loose coupling of application objects. No more business service dependencies on
+		the data access or transaction strategy, no more hard-coded resource lookups, no more hard-to-replace
+		singletons, no more custom service registries. One simple and consistent approach to wiring up application
+		objects, keeping them as reusable and free from container dependencies as possible. All the individual data
+		access features are usable on their own but integrate nicely with Spring's application context concept,
+		providing XML-based configuration and cross-referencing of plain JavaBean instances that don't need to be
+		Spring-aware. In a typical Spring application, many important objects are JavaBeans: data access templates,
+		data access objects (that use the templates), transaction managers, business services (that use the data access
+		objects and transaction managers), web view resolvers, web controllers (that use the business services),and
+		so on.</para>
     </section>
 
-    <section id="orm-session-factory-setup">
-      <title><interfacename>SessionFactory</interfacename> setup in a Spring container</title>
+	<section id="orm-session-factory-setup">
+		<title><interfacename>SessionFactory</interfacename> setup in a Spring container</title>
 
-      <para>To avoid tying application objects to hard-coded resource lookups,
-      Spring allows you to define resources like a JDBC <interfacename>DataSource</interfacename> or a
-      Hibernate <interfacename>SessionFactory</interfacename> as beans in an
-      application context. Application objects that need to access resources
-      just receive references to such pre-defined instances via bean
-      references (the DAO definition in the next section illustrates this).
-      The following excerpt from an XML application context definition shows
-      how to set up a JDBC <classname>DataSource</classname> and a Hibernate
-      <interfacename>SessionFactory</interfacename> on top of it:</para>
+		<para>To avoid tying application objects to hard-coded resource lookups, Spring allows you to define resources
+		such as a JDBC <interfacename>DataSource</interfacename> or a Hibernate
+		<interfacename>SessionFactory</interfacename> as beans in the Spring container. Application objects that need to
+		access resources just receive references to such pre-defined instances via bean references (the DAO definition
+		in the next section illustrates this). The following excerpt from an XML application context definition shows
+		how to set up a JDBC <classname>DataSource</classname> and a Hibernate
+		<interfacename>SessionFactory</interfacename> on top of it:</para>
 
-      <programlisting><![CDATA[<beans>
+		<programlisting><![CDATA[<beans>
 
   <bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
     <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
@@ -220,12 +189,11 @@
 
 </beans>]]></programlisting>
 
-      <para>Note that switching from a local Jakarta Commons DBCP
-      <classname>BasicDataSource</classname> to a JNDI-located
-      <interfacename>DataSource</interfacename> (usually managed by an
-      application server) is just a matter of configuration:</para>
+		<para>Note that switching from a local Jakarta Commons DBCP <classname>BasicDataSource</classname> to a
+		JNDI-located <interfacename>DataSource</interfacename> (usually managed by an application server) is just a
+		matter of configuration:</para>
 
-      <programlisting><![CDATA[<beans>
+		<programlisting><![CDATA[<beans>
 
   <bean id="myDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
     <property name="jndiName" value="java:comp/env/jdbc/myds"/>
@@ -233,25 +201,22 @@
 
 </beans>]]></programlisting>
 
-      <para>You can also access a JNDI-located <interfacename>SessionFactory</interfacename>,
-      using Spring's <classname>JndiObjectFactoryBean</classname> to retrieve and expose it.
-      However, that is typically not common outside of an EJB context.</para>
-    </section>
+		<para>You can also access a JNDI-located <interfacename>SessionFactory</interfacename>, using Spring's
+		<classname>JndiObjectFactoryBean</classname> to retrieve and expose it. However, that is typically not common
+		outside of an EJB context.</para>
+
+	</section>
 
     <section id="orm-hibernate-template">
-      <title>The <classname>HibernateTemplate</classname></title>
+		<title>The <classname>HibernateTemplate</classname></title>
 
-      <para>The basic programming model for templating looks as follows, for
-      methods that can be part of any custom data access object or business
-      service. There are no restrictions on the implementation of the
-      surrounding object at all, it just needs to provide a Hibernate
-      <interfacename>SessionFactory</interfacename>. It can get the latter
-      from anywhere, but preferably as bean reference from a Spring
-      IoC container - via a simple
-      <methodname>setSessionFactory(..)</methodname> bean property setter. The
-      following snippets show a DAO definition in a Spring container, referencing the
-      above defined <interfacename>SessionFactory</interfacename>, and an example
-      for a DAO method implementation.</para>
+		<para>The basic programming model for templating looks as follows, for methods that can be part of any custom
+		data access object or business service. There are no restrictions on the implementation of the surrounding
+		object at all, it just needs to provide a Hibernate <interfacename>SessionFactory</interfacename>. It can get
+		the latter from anywhere, but preferably as bean reference from a Spring IoC container - via a simple
+		<methodname>setSessionFactory(..)</methodname> bean property setter. The following snippets show a DAO
+		definition in a Spring container, referencing the above defined <interfacename>SessionFactory</interfacename>,
+		and an example for a DAO method implementation.</para>
 
       <programlisting><![CDATA[<beans>
 
@@ -274,14 +239,13 @@
     }
 }]]></programlisting>
 
-	  <para>The <classname>HibernateTemplate</classname> class provides many methods
-	  that mirror the methods exposed on the Hibernate <interfacename>Session</interfacename>
-	  interface, in addition to a number of convenience methods such as the one shown above.
-	  If you need access to the <interfacename>Session</interfacename> to invoke
-	  methods that are not exposed on the <classname>HibernateTemplate</classname>, you
-	  can always drop down to a callback-based approach like so.</para>
+		<para>The <classname>HibernateTemplate</classname> class provides many methods that mirror the methods exposed
+		on the Hibernate <interfacename>Session</interfacename> interface, in addition to a number of convenience
+		methods such as the one shown above. If you need access to the <interfacename>Session</interfacename> to invoke
+		methods that are not exposed on the <classname>HibernateTemplate</classname>, you can always drop down to a
+		callback-based approach like so.</para>
 
-      <programlisting><![CDATA[public class ProductDaoImpl implements ProductDao {
+		<programlisting><![CDATA[public class ProductDaoImpl implements ProductDao {
 
     private HibernateTemplate hibernateTemplate;
 
@@ -291,6 +255,7 @@
 
     public Collection loadProductsByCategory(final String category) throws DataAccessException {
         return this.hibernateTemplate.execute(new HibernateCallback() {
+
             public Object doInHibernate(Session session) {
                 Criteria criteria = session.createCriteria(Product.class);
                 criteria.add(Expression.eq("category", category));
@@ -301,25 +266,19 @@
     }
 }]]></programlisting>
 
-	  <para>A callback implementation effectively can be used for any
-      Hibernate data access. <classname>HibernateTemplate</classname> will
-      ensure that <interfacename>Session</interfacename> instances are
-      properly opened and closed, and automatically participate in
-      transactions. The template instances are thread-safe and reusable, they
-      can thus be kept as instance variables of the surrounding class. For
-      simple single step actions like a single find, load, saveOrUpdate, or
-      delete call, <classname>HibernateTemplate</classname> offers alternative
-      convenience methods that can replace such one line callback
-      implementations. Furthermore, Spring provides a convenient
-      <classname>HibernateDaoSupport</classname> base class that provides a
-      <methodname>setSessionFactory(..)</methodname> method for receiving a
-      <interfacename>SessionFactory</interfacename>, and
-      <methodname>getSessionFactory()</methodname> and
-      <methodname>getHibernateTemplate()</methodname>for use by subclasses. In
-      combination, this allows for very simple DAO implementations for typical
-      requirements:</para>
+		<para>A callback implementation effectively can be used for any Hibernate data access.
+		<classname>HibernateTemplate</classname> will ensure that <interfacename>Session</interfacename> instances are
+		properly opened and closed, and automatically participate in transactions. The template instances are
+		thread-safe and reusable, they can thus be kept as instance variables of the surrounding class. For simple
+		single step actions like a single find, load, saveOrUpdate, or delete call,
+		<classname>HibernateTemplate</classname> offers alternative convenience methods that can replace such one line
+		callback implementations. Furthermore, Spring provides a convenient <classname>HibernateDaoSupport</classname>
+		base class that provides a <methodname>setSessionFactory(..)</methodname> method for receiving a
+		<interfacename>SessionFactory</interfacename>, and <methodname>getSessionFactory()</methodname> and
+		<methodname>getHibernateTemplate()</methodname>for use by subclasses. In combination, this allows for very
+		simple DAO implementations for typical requirements:</para>
 
-      <programlisting><![CDATA[public class ProductDaoImpl extends HibernateDaoSupport implements ProductDao {
+		<programlisting><![CDATA[public class ProductDaoImpl extends HibernateDaoSupport implements ProductDao {
 
     public Collection loadProductsByCategory(String category) throws DataAccessException {
         return this.getHibernateTemplate().find(
