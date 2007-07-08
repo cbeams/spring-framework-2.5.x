@@ -485,7 +485,7 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
 				    will be described shortly.</para>
                 </section>
                 <section id="beans-factory-class-static-factory-method">
-                    <title>Instantiation using a <literal>static</literal> factory method</title>
+                    <title>Instantiation using a static factory method</title>
                     <para>
 					    When defining a bean which is to be created using a static
 					    factory method, along with the <literal>class</literal> attribute
@@ -509,36 +509,47 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
 				    <programlisting><![CDATA[<bean id="exampleBean"
       class="examples.ExampleBean2"
       factory-method="createInstance"/>]]></programlisting>
-                    <para>The mechanism for supplying (optional) arguments to the factory
-				    method, or setting properties of the object instance after it has been
-				    returned from the factory, will be described shortly.</para>
+                    <para>The mechanism for supplying (optional) arguments to the factory method, or setting properties
+					of the object instance after it has been returned from the factory, will be
+					<link linkend="beans-factory-properties-detailed">described shortly</link>.</para>
                 </section>
                 <section id="beans-factory-class-instance-factory-method">
                     <title>Instantiation using an instance factory method</title>
                     <para>In a fashion similar to instantiation via a
                     <link linkend="beans-factory-class-static-factory-method">static factory method</link>,
-                    instantiation using an instance factory method is where the factory method of an
-                    existing bean from the container is invoked to create the new bean.</para>
-                    <para>To use this mechanism, the <literal>'class'</literal> attribute
-				    must be left empty, and the <literal>'factory-bean'</literal> attribute
-				    must specify the name of a bean in the current (or parent/ancestor) container
-				    that contains the factory method. The factory method itself must still be set
-				    via the <literal>'factory-method'</literal> attribute (as seen in the example
-				    below).</para>
-                    <programlisting><lineannotation>&lt;!-- the factory bean, which contains a method called <methodname>createInstance()</methodname> --&gt;</lineannotation><![CDATA[
-<bean id="myFactoryBean" class="...">
-  ...
+                    instantiation using an instance factory method is where a non-static method of an
+                    existing bean from the container is invoked to create a new bean. To use this mechanism,
+					the <literal>'class'</literal> attribute must be left empty, and the
+					<literal>'factory-bean'</literal> attribute must specify the name of a bean in the current
+					(or parent/ancestor) container that contains the instance method that is to be invoked to
+					create the object. The name of the factory method itself must be set using the
+					<literal>'factory-method'</literal> attribute.</para>
+
+					<programlisting><lineannotation>&lt;!-- the factory bean, which contains a method called <methodname>createInstance()</methodname> --&gt;</lineannotation><![CDATA[
+<bean id="serviceLocator" class="com.foo.DefaultServiceLocator">
+  ]]><lineannotation>&lt;!-- inject any dependencies required by this locator bean --&gt;</lineannotation><![CDATA[
 </bean>
 
 ]]><lineannotation>&lt;!-- the bean to be created via the factory bean --&gt;</lineannotation><![CDATA[
 <bean id="exampleBean"
-      factory-bean="myFactoryBean"
-      factory-method="createInstance"/>]]></programlisting>
-                    <para>Although the mechanisms for setting bean properties are still to
-				    be discussed, one implication of this approach is that the factory
-				    bean itself can be managed and configured via DI.</para>
+      factory-bean="serviceLocator"
+      factory-method="createService"/>]]></programlisting>
+
+					<para>Although the mechanisms for
+					<link linkend="beans-factory-properties-detailed">setting bean properties</link> are still to be
+					discussed, one implication of this approach is that the factory bean itself can be managed and
+					configured via DI.</para>
                 </section>
-            </section>
+				<note>
+					<para>When the Spring documentation makes mention of a 'factory bean', this will be a
+					reference to a bean that is configured in the Spring container that will create objects
+					via an <link linkend="beans-factory-class-instance-factory-method">instance</link> or
+					<link linkend="beans-factory-class-static-factory-method">static</link> factory method. When
+					the documentation mentions a <interfacename>FactoryBean</interfacename> (notice the
+					capitalization) this is a reference to a Spring-specific
+					<link linkend="beans-factory-extension-factorybean"><interfacename>FactoryBean</interfacename></link>.</para>
+				</note>
+			</section>
         </section>
         <section id="beans-factory-client">
             <title>Using the container</title>
@@ -548,57 +559,15 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
             enables you to read bean definitions and access them using the bean factory.
             When using just the <interfacename>BeanFactory</interfacename> you would create
             one and read in some bean definitions in the XML format as follows:</para>
-            <programlisting><![CDATA[InputStream is = new FileInputStream("beans.xml");
+
+			<programlisting><![CDATA[InputStream is = new FileInputStream("beans.xml");
 BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
-            <para>Basically that's all there is to it. Using <methodname>getBean(String)</methodname>
-            you can retrieve instances of your beans; the client-side view of the
-            <interfacename>BeanFactory</interfacename> is surprisingly simple. The
-            <interfacename>BeanFactory</interfacename> interface has only six methods for
-            client code to call:</para>
-            <itemizedlist>
-                <listitem>
-                    <para><methodname>boolean containsBean(String)</methodname>: returns true
-                    if the <interfacename>BeanFactory</interfacename> contains a bean
-                    definition or bean instance that matches the given name</para>
-                </listitem>
-                <listitem>
-                    <para><methodname>Object getBean(String)</methodname>: returns an instance
-                    of the bean registered under the given name. Depending on how the
-                    bean was configured by the <interfacename>BeanFactory</interfacename> configuration, either a
-                    singleton and thus shared instance or a newly created bean will be
-                    returned. A <exceptionname>BeansException</exceptionname> will be thrown when
-                    either the bean could not be found (in which case it'll be a
-                    <exceptionname>NoSuchBeanDefinitionException</exceptionname>), or an exception
-                    occurred while instantiating and preparing the bean</para>
-                </listitem>
-                <listitem>
-                    <para><methodname>Object getBean(String, Class)</methodname>: returns a
-                    bean, registered under the given name. The bean returned will be
-                    cast to the given Class. If the bean could not be cast,
-                    corresponding exceptions will be thrown
-                    (<exceptionname>BeanNotOfRequiredTypeException</exceptionname>). Furthermore,
-                    all rules of the <methodname>getBean(String)</methodname> method apply (see above)</para>
-                </listitem>
-                <listitem>
-                    <para><methodname>Class getType(String name)</methodname>: returns the
-                    <classname>Class</classname> of the bean with the given name. If no bean
-                    corresponding to the given name could be found, a
-                    <exceptionname>NoSuchBeanDefinitionException</exceptionname> will be thrown</para>
-                </listitem>
-                <listitem>
-                    <para><methodname>boolean isSingleton(String)</methodname>: determines
-                    whether or not the bean definition or bean instance registered under
-                    the given name is a singleton (bean scopes such as singleton are explained
-                    <link linkend="beans-factory-scopes">later</link>). If no bean corresponding
-                    to the given name could be found, a
-                    <exceptionname>NoSuchBeanDefinitionException</exceptionname> will be thrown</para>
-                </listitem>
-                <listitem>
-                    <para><methodname>String[] getAliases(String)</methodname>: Return the
-                    aliases for the given bean name, if any were defined in the bean
-                    definition</para>
-                </listitem>
-            </itemizedlist>
+
+			<para>Basically that is all there is to it. Using <methodname>getBean(String)</methodname> you can retrieve
+			instances of your beans; the client-side view of the <interfacename>BeanFactory</interfacename> is
+			simple. The <interfacename>BeanFactory</interfacename> interface has just a few other methods, but ideally
+			your application code should never use them... indeed, your application code should have no calls to the
+			<methodname>getBean(String)</methodname> method at all, and thus no dependency on Spring APIs at all.</para>
         </section>
     </section>
     <section id="beans-dependencies">
@@ -658,6 +627,89 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
     
     ]]><lineannotation>// business logic that actually 'uses' the injected <interfacename>MovieFinder</interfacename> is omitted...</lineannotation><![CDATA[
 }]]></programlisting>
+
+				<section id="beans-factory-ctor-arguments-resolution">
+					<title>Constructor Argument Resolution</title>
+					<para>
+						Constructor argument resolution matching occurs using the
+						argument's type. If there is no potential for ambiguity in
+						the constructor arguments of a bean definition, then the order
+						in which the constructor arguments are defined in a bean definition
+						is the order in which those arguments will be supplied to the
+						appropriate constructor when it is being instantiated. Consider the
+						following class:
+					</para>
+					<programlisting><![CDATA[package x.y;
+
+public class Foo {
+
+    public Foo(Bar bar, Baz baz) {
+        ]]><lineannotation>// ...</lineannotation><![CDATA[
+    }
+}]]></programlisting>
+					<para>
+						There is no potential for ambiguity here (assuming of course that <classname>Bar</classname>
+						and <classname>Baz</classname> classes are not related in an inheritance hierarchy).
+						Thus the following configuration will work just fine, and you do not need to
+						specify the constructor argument indexes and / or types explicitly.
+					</para>
+					<programlisting><![CDATA[<beans>
+    <bean name="foo" class="x.y.Foo">
+        <constructor-arg>
+            <bean class="x.y.Bar"/>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="x.y.Baz"/>
+        </constructor-arg>
+    </bean>
+</beans>]]></programlisting>
+					<para>
+						When another bean is referenced, the type is known, and
+						matching can occur (as was the case with the preceding example).
+						When a simple type is used, such as
+						<literal>&lt;value&gt;true&lt;value&gt;</literal>, Spring cannot
+						determine the type of the value, and so cannot match by type without
+						help. Consider the following class:
+					</para>
+					<programlisting><![CDATA[package examples;
+
+public class ExampleBean {
+
+    ]]><lineannotation>// No. of years to the calculate the Ultimate Answer</lineannotation><![CDATA[
+    private int years;
+
+    ]]><lineannotation>// The Answer to Life, the Universe, and Everything</lineannotation><![CDATA[
+    private String ultimateAnswer;
+
+    public ExampleBean(int years, String ultimateAnswer) {
+        this.years = years;
+        this.ultimateAnswer = ultimateAnswer;
+    }
+}]]></programlisting>
+					<section id="beans-factory-ctor-arguments-type">
+						<title>Constructor Argument Type Matching</title>
+						<para>The above scenario <emphasis>can</emphasis> use type matching
+						with simple types by explicitly specifying the type of the constructor
+						argument using the <literal>'type'</literal> attribute. For example:</para>
+						<programlisting><![CDATA[<bean id="exampleBean" class="examples.ExampleBean">
+  <constructor-arg type="int" value="7500000"/>
+  <constructor-arg type="java.lang.String" value="42"/>
+</bean>]]></programlisting>
+					</section>
+					<section id="beans-factory-ctor-arguments-index">
+						<title>Constructor Argument Index</title>
+						<para>Constructor arguments can have their index specified explicitly by use of
+						the <literal>index</literal> attribute. For example:</para>
+						<programlisting><![CDATA[<bean id="exampleBean" class="examples.ExampleBean">
+  <constructor-arg index="0" value="7500000"/>
+  <constructor-arg index="1" value="42"/>
+</bean>]]></programlisting>
+					<para>As well as solving the ambiguity problem of multiple simple values, specifying
+					an index also solves the problem of	ambiguity where a constructor may have two
+					arguments of the same type.	Note that the <emphasis>index is 0 based</emphasis>.</para>
+				</section>
+			</section>
+
 			</section>
 			<section id="beans-setter-injection">
 				<title>Setter Injection</title>
@@ -867,13 +919,13 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
     }    
 }]]></programlisting>
 			<para>As you can see, setters have been declared to match against the properties
-			specified in the XML file.</para>
-            <para>Now, an example of using constructor-based DI. Find below a snippet from an XML
-            configuration that specifies constructor arguments, and the corresponding Java class.</para>
+			specified in the XML file. Find below an example of using constructor-based DI.</para>
 			<programlisting><![CDATA[<bean id="exampleBean" class="examples.ExampleBean">
 
   ]]><lineannotation>&lt;!-- constructor injection using the nested <literal>&lt;ref/&gt;</literal> element --&gt;</lineannotation><![CDATA[
-  <constructor-arg><ref bean="anotherExampleBean"/></constructor-arg>
+  <constructor-arg>
+    <ref bean="anotherExampleBean"/>
+  </constructor-arg>
   
   ]]><lineannotation>&lt;!-- constructor injection using the neater 'ref' attribute --&gt;</lineannotation><![CDATA[
   <constructor-arg ref="yetAnotherBean"/>
@@ -935,7 +987,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 }]]></programlisting>
             <para>
 				Note that arguments to the <literal>static</literal> factory method
-				are supplied via <literal>constructor-arg</literal> elements, exactly
+				are supplied via <literal>&lt;constructor-arg/&gt;</literal> elements, exactly
 				the same as if a constructor had actually been used. Also, it is
 				important to realize that the type of the class being returned by
 				the factory method does not have to be of the same type as the class
@@ -947,89 +999,8 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 			</para>
         </section>
 		</section>
-        <section id="beans-factory-ctor-arguments-resolution">
-            <title>Constructor Argument Resolution</title>
-            <para>
-				Constructor argument resolution matching occurs using the
-				argument's type. If there is no potential for ambiguity in
-				the constructor arguments of a bean definition, then the order
-				in which the constructor arguments are defined in a bean definition
-				is the order in which those arguments will be supplied to the
-				appropriate constructor when it is being instantiated. Consider the
-				following class:
-			</para>
-			<programlisting><![CDATA[package x.y;
-
-public class Foo {
-
-    public Foo(Bar bar, Baz baz) {
-        ]]><lineannotation>// ...</lineannotation><![CDATA[
-    }
-}]]></programlisting>
-			<para>
-				There is no potential for ambiguity here (assuming of course that <classname>Bar</classname>
-				and <classname>Baz</classname> classes are not related in an inheritance hierarchy).
-				Thus the following configuration will work just fine, and you do not need to
-				specify the constructor argument indexes and / or types explicitly.
-			</para>
-			<programlisting><![CDATA[<beans>
-    <bean name="foo" class="x.y.Foo">
-        <constructor-arg>
-            <bean class="x.y.Bar"/>
-        </constructor-arg>
-        <constructor-arg>
-            <bean class="x.y.Baz"/>
-        </constructor-arg>
-    </bean>
-</beans>]]></programlisting>
-			<para>
-				When another bean is referenced, the type is known, and
-				matching can occur (as was the case with the preceding example).
-				When a simple type is used, such as
-				<literal>&lt;value&gt;true&lt;value&gt;</literal>, Spring cannot
-				determine the type of the value, and so cannot match by type without
-				help. Consider the following class:
-			</para>
-			<programlisting><![CDATA[package examples;
-
-public class ExampleBean {
-
-    ]]><lineannotation>// No. of years to the calculate the Ultimate Answer</lineannotation><![CDATA[
-    private int years;
-    
-    ]]><lineannotation>// The Answer to Life, the Universe, and Everything</lineannotation><![CDATA[
-    private String ultimateAnswer;
-
-    public ExampleBean(int years, String ultimateAnswer) {
-        this.years = years;
-        this.ultimateAnswer = ultimateAnswer;
-    }
-}]]></programlisting>
-            <section id="beans-factory-ctor-arguments-type">
-                <title>Constructor Argument Type Matching</title>
-                <para>The above scenario <emphasis>can</emphasis> use type matching
-				with simple types by explicitly specifying the type of the constructor
-				argument using the <literal>'type'</literal> attribute. For example:</para>
-				<programlisting><![CDATA[<bean id="exampleBean" class="examples.ExampleBean">
-  <constructor-arg type="int" value="7500000"/>
-  <constructor-arg type="java.lang.String" value="42"/>
-</bean>]]></programlisting>
-            </section>
-            <section id="beans-factory-ctor-arguments-index">
-                <title>Constructor Argument Index</title>
-                <para>Constructor arguments can have their index specified explicitly by use of
-                the <literal>index</literal> attribute. For example:</para>
-				<programlisting><![CDATA[<bean id="exampleBean" class="examples.ExampleBean">
-  <constructor-arg index="0" value="7500000"/>
-  <constructor-arg index="1" value="42"/>
-</bean>]]></programlisting>
-				<para>As well as solving the ambiguity problem of multiple simple values, specifying
-				an index also solves the problem of	ambiguity where a constructor may have two
-				arguments of the same type.	Note that the <emphasis>index is 0 based</emphasis>.</para>
-            </section>
-        </section>
         <section id="beans-factory-properties-detailed">
-            <title>Bean properties and constructor arguments detailed</title>
+            <title>Dependencies and configuration in detail</title>
             <para>As mentioned in the previous section, bean properties and
             constructor arguments can be defined as either references to other
             managed beans (collaborators), or values defined inline. Spring's XML-based
