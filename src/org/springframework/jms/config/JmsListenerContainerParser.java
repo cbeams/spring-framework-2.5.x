@@ -136,4 +136,8 @@ public class JmsListenerContainerParser extends AbstractListenerContainerParser 
 		return containerDef;
 	}
 
+	protected boolean indicatesJms102(BeanDefinition containerDef) {
+		return containerDef.getBeanClassName().endsWith("102");
+	}
+
 }

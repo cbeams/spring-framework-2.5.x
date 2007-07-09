@@ -28,6 +28,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
+import org.springframework.jms.listener.adapter.MessageListenerAdapter102;
 import org.springframework.util.StringUtils;
 
 /**
@@ -95,7 +96,7 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 	}
 
 	private void parseListener(Element listenerEle, Element containerEle, ParserContext parserContext) {
-		RootBeanDefinition listenerDef = new RootBeanDefinition(MessageListenerAdapter.class);
+		RootBeanDefinition listenerDef = new RootBeanDefinition();
 
 		String handlerBean = listenerEle.getAttribute(HANDLER_BEAN_ATTRIBUTE);
 		if (!StringUtils.hasText(handlerBean)) {
@@ -115,6 +116,9 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 		listenerDef.getPropertyValues().addPropertyValue("defaultListenerMethod", handlerMethod);
 
 		BeanDefinition containerDef = parseContainer(listenerEle, containerEle, parserContext);
+		// Remain JMS 1.0.2 compatible for the adapter if the container class indicates this.
+		boolean jms102 = indicatesJms102(containerDef);
+		listenerDef.setBeanClass(jms102 ? MessageListenerAdapter102.class : MessageListenerAdapter.class);
 		containerDef.getPropertyValues().addPropertyValue("messageListener", listenerDef);
 
 		String containerBeanName = listenerEle.getAttribute(ID_ATTRIBUTE);
@@ -126,8 +130,13 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 		}
 	}
 
+
 	protected abstract BeanDefinition parseContainer(
 			Element listenerEle, Element containerEle, ParserContext parserContext);
+
+	protected boolean indicatesJms102(BeanDefinition containerDef) {
+		return false;
+	}
 
 
 	protected void parseListenerConfiguration(Element ele, ParserContext parserContext, BeanDefinition configDef) {
