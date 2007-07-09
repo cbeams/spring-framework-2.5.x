@@ -35,6 +35,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -44,6 +45,7 @@ import org.w3c.dom.Node;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 import org.springframework.util.xml.SimpleTransformErrorListener;
 import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.util.NestedServletException;
@@ -89,6 +91,8 @@ public abstract class AbstractXsltView extends AbstractView {
 
 	private boolean customContentTypeSet = false;
 
+	private Class transformerFactoryClass;
+
 	private Resource stylesheetLocation;
 
 	private String root = DEFAULT_ROOT;
@@ -125,6 +129,16 @@ public abstract class AbstractXsltView extends AbstractView {
 	public void setContentType(String contentType) {
 		super.setContentType(contentType);
 		this.customContentTypeSet = true;
+	}
+
+	/**
+	 * Specify the XSLT TransformerFactory class to use.
+	 * <p>The default constructor of the specified class will be called
+	 * to build the TransformerFactory for this view.
+	 */
+	public void setTransformerFactoryClass(Class transformerFactoryClass) {
+		Assert.isAssignable(TransformerFactory.class, transformerFactoryClass);
+		this.transformerFactoryClass = transformerFactoryClass;
 	}
 
 	/**
@@ -243,7 +257,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * {@link org.springframework.context.ApplicationContext} to do it.
 	 */
 	protected final void initApplicationContext() throws ApplicationContextException {
-		this.transformerFactory = TransformerFactory.newInstance();
+		this.transformerFactory = newTransformerFactory(this.transformerFactoryClass);
 		this.transformerFactory.setErrorListener(this.errorListener);
 		if (this.uriResolver != null) {
 			this.transformerFactory.setURIResolver(this.uriResolver);
@@ -258,6 +272,34 @@ public abstract class AbstractXsltView extends AbstractView {
 		}
 		catch (TransformerConfigurationException ex) {
 			throw new ApplicationContextException("Cannot load stylesheet for XSLT view '" + getBeanName() + "'", ex);
+		}
+	}
+
+	/**
+	 * Instantiate a new TransformerFactory for this view.
+	 * <p>The default implementation simply calls
+	 * {@link javax.xml.transform.TransformerFactory#newInstance()}.
+	 * If a {@link #setTransformerFactoryClass "transformerFactoryClass"}
+	 * has been specified explicitly, the default constructor of the
+	 * specified class will be called instead.
+	 * <p>Can be overridden in subclasses.
+	 * @param transformerFactoryClass the specified factory class (if any)
+	 * @return the new TransactionFactory instance
+	 * @throws TransformerFactoryConfigurationError in case of instantiation failure
+	 * @see #setTransformerFactoryClass
+	 * @see #getTransformerFactory()
+	 */
+	protected TransformerFactory newTransformerFactory(Class transformerFactoryClass) {
+		if (transformerFactoryClass != null) {
+			try {
+				return (TransformerFactory) transformerFactoryClass.newInstance();
+			}
+			catch (Exception ex) {
+				throw new TransformerFactoryConfigurationError(ex, "Could not instantiate TransformerFactory");
+			}
+		}
+		else {
+			return TransformerFactory.newInstance();
 		}
 	}
 

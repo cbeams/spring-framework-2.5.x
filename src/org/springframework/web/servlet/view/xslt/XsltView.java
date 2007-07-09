@@ -34,6 +34,7 @@ import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -45,6 +46,7 @@ import org.w3c.dom.Node;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -73,7 +75,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class XsltView extends AbstractUrlBasedView {
 
-	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	private Class transformerFactoryClass;
 
 	private String sourceKey;
 
@@ -87,8 +89,20 @@ public class XsltView extends AbstractUrlBasedView {
 
 	private boolean cacheTemplates = true;
 
+	private TransformerFactory transformerFactory;
+
 	private Templates cachedTemplates;
 
+
+	/**
+	 * Specify the XSLT TransformerFactory class to use.
+	 * <p>The default constructor of the specified class will be called
+	 * to build the TransformerFactory for this view.
+	 */
+	public void setTransformerFactoryClass(Class transformerFactoryClass) {
+		Assert.isAssignable(TransformerFactory.class, transformerFactoryClass);
+		this.transformerFactoryClass = transformerFactoryClass;
+	}
 
 	/**
 	 * Set the name of the model attribute that represents the XSLT Source.
@@ -159,22 +173,40 @@ public class XsltView extends AbstractUrlBasedView {
 	 * Initialize this XsltView's TransformerFactory.
 	 */
 	protected void initApplicationContext() throws BeansException {
+		this.transformerFactory = newTransformerFactory(this.transformerFactoryClass);
 		this.transformerFactory.setErrorListener(this.errorListener);
-
 		if (this.uriResolver != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Using custom URIResolver '" + this.uriResolver
-								+ "' in XSLT view with URL '" + getUrl() + "'");
-			}
 			this.transformerFactory.setURIResolver(this.uriResolver);
 		}
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("URL in view is '" + getUrl() + "'");
-		}
-
 		if (this.cacheTemplates) {
 			this.cachedTemplates = loadTemplates();
+		}
+	}
+
+	/**
+	 * Instantiate a new TransformerFactory for this view.
+	 * <p>The default implementation simply calls
+	 * {@link javax.xml.transform.TransformerFactory#newInstance()}.
+	 * If a {@link #setTransformerFactoryClass "transformerFactoryClass"}
+	 * has been specified explicitly, the default constructor of the
+	 * specified class will be called instead.
+	 * <p>Can be overridden in subclasses.
+	 * @param transformerFactoryClass the specified factory class (if any)
+	 * @return the new TransactionFactory instance
+	 * @see #setTransformerFactoryClass
+	 * @see #getTransformerFactory()
+	 */
+	protected TransformerFactory newTransformerFactory(Class transformerFactoryClass) {
+		if (transformerFactoryClass != null) {
+			try {
+				return (TransformerFactory) transformerFactoryClass.newInstance();
+			}
+			catch (Exception ex) {
+				throw new TransformerFactoryConfigurationError(ex, "Could not instantiate TransformerFactory");
+			}
+		}
+		else {
+			return TransformerFactory.newInstance();
 		}
 	}
 
@@ -400,6 +432,8 @@ public class XsltView extends AbstractUrlBasedView {
 	 * <p>The default implementation simply calls {@link Templates#newTransformer()}, and
 	 * configures the {@link Transformer} with the custom {@link URIResolver} if specified.
 	 * @param templates the XSLT Templates instance to create a Transformer for
+	 * @return the Transformer object
+	 * @throws TransformerConfigurationException in case of creation failure
 	 */
 	protected Transformer createTransformer(Templates templates) throws TransformerConfigurationException {
 		Transformer transformer = templates.newTransformer();
@@ -411,6 +445,7 @@ public class XsltView extends AbstractUrlBasedView {
 
 	/**
 	 * Get the XSLT {@link Source} for the XSLT template under the {@link #setUrl configured URL}.
+	 * @return the Source object
 	 */
 	protected Source getStylesheetSource() {
 		String url = getUrl();
