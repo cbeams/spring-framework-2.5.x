@@ -380,8 +380,15 @@ class TypeConverterDelegate {
 		Collection convertedCopy = null;
 		Iterator it = null;
 		try {
-			convertedCopy = CollectionFactory.createApproximateCollection(original, original.size());
 			it = original.iterator();
+			if (it == null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Collection of type [" + original.getClass().getName() +
+							"] returned null Iterator - injecting original Collection as-is");
+				}
+				return original;
+			}
+			convertedCopy = CollectionFactory.createApproximateCollection(original, original.size());
 		}
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
@@ -424,8 +431,14 @@ class TypeConverterDelegate {
 		Map convertedCopy = null;
 		Iterator it = null;
 		try {
-			convertedCopy = CollectionFactory.createApproximateMap(original, original.size());
 			it = original.entrySet().iterator();
+			if (it == null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Map of type [" + original.getClass().getName() +
+							"] returned null Iterator - injecting original Map as-is");
+				}
+			}
+			convertedCopy = CollectionFactory.createApproximateMap(original, original.size());
 		}
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
