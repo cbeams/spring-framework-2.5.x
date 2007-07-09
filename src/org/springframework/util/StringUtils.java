@@ -167,6 +167,23 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Trim all occurences of the supplied leading character from the given String.
+	 * @param str the String to check
+	 * @param leadingCharacter the leading character to be trimmed
+	 * @return the trimmed String
+	 */
+	public static String trimLeadingCharacter(String str, char leadingCharacter) {
+		if (!hasLength(str)) {
+			return str;
+		}
+		StringBuffer buf = new StringBuffer(str);
+		while (buf.length() > 0 && buf.charAt(0) == leadingCharacter) {
+			buf.deleteCharAt(0);
+		}
+		return buf.toString();
+	}
+
+	/**
 	 * Trim trailing whitespace from the given String.
 	 * @param str the String to check
 	 * @return the trimmed String
@@ -543,18 +560,28 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Parse the given locale string into a <code>java.util.Locale</code>.
-	 * This is the inverse operation of Locale's <code>toString</code>.
-	 * @param localeString the locale string, following
-	 * <code>java.util.Locale</code>'s toString format ("en", "en_UK", etc).
-	 * Also accepts spaces as separators, as alternative to underscores.
-	 * @return a corresponding Locale instance
+	 * Parse the given <code>localeString</code> into a {@link Locale}.
+	 * <p>This is the inverse operation of {@link Locale#toString Locale's toString}.
+	 * @param localeString the locale string, following <code>Locale's</code>
+	 * <code>toString()</code> format ("en", "en_UK", etc);
+	 * also accepts spaces as separators, as an alternative to underscores
+	 * @return a corresponding <code>Locale</code> instance
 	 */
 	public static Locale parseLocaleString(String localeString) {
 		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
 		String language = (parts.length > 0 ? parts[0] : "");
 		String country = (parts.length > 1 ? parts[1] : "");
-		String variant = (parts.length > 2 ? parts[2] : "");
+		String variant = "";
+		if (parts.length >= 2) {
+			// there is definitely a variant, and it is everything after the country
+			// code sans the separator between the country code and the variant
+			int endIndexOfCountryCode = localeString.indexOf(country) + country.length();
+			// strip off any leading '_' and whitespace, what's left is the variant
+			variant = StringUtils.trimLeadingWhitespace(localeString.substring(endIndexOfCountryCode));
+			if (variant.startsWith("_")) {
+				variant = StringUtils.trimLeadingCharacter(variant, '_');
+			}
+		}
 		return (language.length() > 0 ? new Locale(language, country, variant) : null);
 	}
 
