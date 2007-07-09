@@ -29,22 +29,26 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 /**
- * Miscellaneous string utility methods. Mainly for internal use
- * within the framework; consider Jakarta's Commons Lang for a more
- * comprehensive suite of string utilities.
+ * Miscellaneous {@link String} utility methods.
+ *
+ * <p>Mainly for internal use within the framework; consider
+ * <a href="http://jakarta.apache.org/commons/lang/">Jakarta's Commons Lang</a>
+ * for a more comprehensive suite of
+ * {@link org.apache.commons.lang.StringUtils string utilities}.
  *
  * <p>This class delivers some simple functionality that should really
- * be provided by the core Java String and StringBuffer classes, such
- * as the ability to replace all occurrences of a given substring in a
- * target string. It also provides easy-to-use methods to convert between
- * delimited strings, such as CSV strings, and collections and arrays.
+ * be provided by the core Java <code>String</code> and {@link StringBuffer}
+ * classes, such as the ability to {@link #replace} all occurrences of a given
+ * substring in a target string. It also provides easy-to-use methods to
+ * convert between delimited strings, such as CSV strings, and collections and
+ * arrays.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Keith Donald
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 16 April 2001
- * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
 
@@ -161,6 +165,23 @@ public abstract class StringUtils {
 		}
 		StringBuffer buf = new StringBuffer(str);
 		while (buf.length() > 0 && Character.isWhitespace(buf.charAt(0))) {
+			buf.deleteCharAt(0);
+		}
+		return buf.toString();
+	}
+
+	/**
+	 * Trim all occurences of the supplied leading character from the given String.
+	 * @param str the String to check
+	 * @param leadingCharacter the leading character to be trimmed
+	 * @return the trimmed String
+	 */
+	public static String trimLeadingCharacter(String str, char leadingCharacter) {
+		if (!hasLength(str)) {
+			return str;
+		}
+		StringBuffer buf = new StringBuffer(str);
+		while (buf.length() > 0 && buf.charAt(0) == leadingCharacter) {
 			buf.deleteCharAt(0);
 		}
 		return buf.toString();
@@ -534,8 +555,8 @@ public abstract class StringUtils {
 
 	/**
 	 * Compare two paths after normalization of them.
-	 * @param path1 First path for comparizon
-	 * @param path2 Second path for comparizon
+	 * @param path1 first path for comparison
+	 * @param path2 second path for comparison
 	 * @return whether the two paths are equivalent after normalization
 	 */
 	public static boolean pathEquals(String path1, String path2) {
@@ -543,18 +564,28 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Parse the given locale string into a <code>java.util.Locale</code>.
-	 * This is the inverse operation of Locale's <code>toString</code>.
-	 * @param localeString the locale string, following
-	 * <code>java.util.Locale</code>'s toString format ("en", "en_UK", etc).
-	 * Also accepts spaces as separators, as alternative to underscores.
-	 * @return a corresponding Locale instance
+	 * Parse the given <code>localeString</code> into a {@link Locale}.
+	 * <p>This is the inverse operation of {@link Locale#toString Locale's toString}.
+	 * @param localeString the locale string, following <code>Locale's</code>
+	 * <code>toString()</code> format ("en", "en_UK", etc);
+	 * also accepts spaces as separators, as an alternative to underscores
+	 * @return a corresponding <code>Locale</code> instance
 	 */
 	public static Locale parseLocaleString(String localeString) {
 		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
 		String language = (parts.length > 0 ? parts[0] : "");
 		String country = (parts.length > 1 ? parts[1] : "");
-		String variant = (parts.length > 2 ? parts[2] : "");
+		String variant = "";
+		if (parts.length >= 2) {
+			// there is definitely a variant, and it is everything after the country
+			// code sans the separator between the country code and the variant
+			int endIndexOfCountryCode = localeString.indexOf(country) + country.length();
+			// strip off any leading '_' and whitespace, what's left is the variant
+			variant = StringUtils.trimLeadingWhitespace(localeString.substring(endIndexOfCountryCode));
+			if (variant.startsWith("_")) {
+				variant = StringUtils.trimLeadingCharacter(variant, '_');
+			}
+		}
 		return (language.length() > 0 ? new Locale(language, country, variant) : null);
 	}
 

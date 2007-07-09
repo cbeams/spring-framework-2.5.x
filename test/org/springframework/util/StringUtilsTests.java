@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -534,6 +534,56 @@ public class StringUtilsTests extends TestCase {
 	public void testParseLocaleStringWithEmptyLocaleStringYieldsNullLocale() throws Exception {
 		Locale locale = StringUtils.parseLocaleString("");
 		assertNull("When given an empty Locale string, must return null.", locale);
+	}
+
+	/**
+	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3671">See SPR-3671</a>.
+	 */
+	public void testParseLocaleWithMultiValuedVariant() throws Exception {
+		final String variant = "proper_northern";
+		final String localeString = "en_GB_" + variant;
+		Locale locale = StringUtils.parseLocaleString(localeString);
+		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+	}
+
+	/**
+	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3671">See SPR-3671</a>.
+	 */
+	public void testParseLocaleWithMultiValuedVariantUsingSpacesAsSeparators() throws Exception {
+		final String variant = "proper northern";
+		final String localeString = "en GB " + variant;
+		Locale locale = StringUtils.parseLocaleString(localeString);
+		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+	}
+
+	/**
+	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3671">See SPR-3671</a>.
+	 */
+	public void testParseLocaleWithMultiValuedVariantUsingMixtureOfUnderscoresAndSpacesAsSeparators() throws Exception {
+		final String variant = "proper northern";
+		final String localeString = "en_GB_" + variant;
+		Locale locale = StringUtils.parseLocaleString(localeString);
+		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+	}
+
+	/**
+	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3671">See SPR-3671</a>.
+	 */
+	public void testParseLocaleWithMultiValuedVariantUsingSpacesAsSeparatorsWithLotsOfLeadingWhitespace() throws Exception {
+		final String variant = "proper northern";
+		final String localeString = "en GB            " + variant; // lots of whitespace
+		Locale locale = StringUtils.parseLocaleString(localeString);
+		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+	}
+
+	/**
+	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3671">See SPR-3671</a>.
+	 */
+	public void testParseLocaleWithMultiValuedVariantUsingUnderscoresAsSeparatorsWithLotsOfLeadingWhitespace() throws Exception {
+		final String variant = "proper_northern";
+		final String localeString = "en_GB_____" + variant; // lots of underscores
+		Locale locale = StringUtils.parseLocaleString(localeString);
+		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
 }
