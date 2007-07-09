@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M3 (2007-07-07)
+Changes in version 2.1 M3 (2007-07-12)
 --------------------------------------
 
 Package org.springframework.aop
@@ -17,6 +17,9 @@ Package org.springframework.aop
 * fixed ConfigBeanDefinitionParser to properly handle empty pointcut/advice bean names in a tooling environment
 
 Package org.springframework.beans
+* URIEditor trims whitespace before parsing the URI (allowing for XML formatting with whitespace)
+* TypeConverterDelegate protects its collection conversion process against misbehaving Collections with a null Iterator
+* TypeConverterDelegate only attempts to convert well-known collection types (skips custom types in the first place)
 * fixed AbstractBeanFactory to correctly handle factory-bean references in case of a temporary ClassLoader being used
 * DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
 * BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
@@ -24,6 +27,7 @@ Package org.springframework.beans
 * exposed "registerDependentBean" method on ConfigurableBeanFactory interface
 * added autowiring by type for arrays and collections (available for @Autowired, 'constructor' and 'byType' autowiring)
 * Autowired/CommonAnnotationBeanPostProcessor registers autowired beans as dependent on their injected target bean
+* changed visibility of BeanDefinitionParserDelegate's "buildTypedStringValue(ForMap)" methods to protected
 
 Package org.springframework.context
 * AspectJWeavingEnabler implements Ordered, exposing HIGHEST_PRECEDENCE (executing before other factory post-processors)
@@ -31,6 +35,7 @@ Package org.springframework.context
 * "context:annotation-config" XML tag activates JPA's @PersistenceContext and @PersistenceUnit as well (if available)
 
 Package org.springframework.core
+* added "isAtLeastJava16()" convenience method to JdkVersion class
 * OverridingClassLoader (and hence SimpleThrowawayClassLoader) exclude classes from the "sun." package
 * PathMatchingResourcePatternResolver uses a static Log instance in order to avoid repeated synchronization overhead
 
@@ -48,6 +53,10 @@ Package org.springframework.jdbc
 Package org.springframework.instrument
 * added "excludePackage" and "excludeClass" methods to ShadowingClassLoader, analogous to OverridingClassLoader
 
+Package org.springframework.jms
+* SingleConnectionFactory sets client ID before ExceptionListener (for providers with strict Connection state handling)
+* listener-container type "default102"/"simple102" leads to the implicit choice of MessageListenerAdapter102
+
 Package org.springframework.jmx
 * MBeanExporter unregisters its MBeans in case of any kind of registration failure
 * MBeanExporter accepts bean name keys in NotificationListener mappings (in addition to ObjectName Strings)
@@ -56,6 +65,7 @@ Package org.springframework.orm
 * added "prepareTransaction" method to JpaDialect interface, for preparing a JTA-joining EntityManager
 * HibernateJpaDialect switches FlushMode to MANUAL in case of a read-only transaction even for JTA
 * PersistenceAnnotationBeanPostProcessor registers autowired beans as dependent on their EntityManagerFactory
+* ExtendedEntityManagerCreator's "joinTransaction()" checks whether there is an externally managed local transaction
 
 Package org.springframework.remoting
 * RmiClientInterceptor and JaxRpcClientInterceptor propagate any kind of declared RemoteException as-is
@@ -78,6 +88,7 @@ Package org.springframework.web
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
 * added "postProcessWeb/PortletApplicationContext" method to FrameworkServlet/Portlet
 * DispatcherServlet/Portlet's "noHandlerFound" declares Exception instead of just IOException/PortletException
+* added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
 
 
 Changes in version 2.1 M2 (2007-05-31)
