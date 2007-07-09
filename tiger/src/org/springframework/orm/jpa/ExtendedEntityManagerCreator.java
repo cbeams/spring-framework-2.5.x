@@ -367,7 +367,8 @@ public abstract class ExtendedEntityManagerCreator {
 			}
 			else {
 				if (TransactionSynchronizationManager.isSynchronizationActive()) {
-					if (!TransactionSynchronizationManager.hasResource(this.target)) {
+					if (!TransactionSynchronizationManager.hasResource(this.target) &&
+							!this.target.getTransaction().isActive()) {
 						enlistInCurrentTransaction();
 					}
 					logger.debug("Joined local transaction");

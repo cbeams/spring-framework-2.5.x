@@ -53,12 +53,12 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 	public void testValidPersistenceUnit() throws Exception {
 		parseValidPersistenceUnit();
 	}
-	
+
 	public void testExceptionTranslationWithNoDialect() throws Exception {
 		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 		EntityManagerFactory emf = cefb.getObject();
 		assertNull("No dialect set", cefb.getJpaDialect());
-		
+
 		RuntimeException in1 = new RuntimeException("in1");
 		PersistenceException in2 = new PersistenceException();
 		assertNull("No translation here", cefb.translateExceptionIfPossible(in1));
@@ -66,7 +66,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		assertNotNull(dex);
 		assertSame(in2, dex.getCause());
 	}
-	
+
 	public void testEntityManagerFactoryIsProxied() throws Exception {
 		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 		EntityManagerFactory emf = cefb.getObject();
@@ -74,56 +74,50 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		
 		assertNotSame("EMF must be proxied", mockEmf, emf);
 	}
-	
+
 	public void testApplicationManagedEntityManagerWithoutTransaction() throws Exception {
 		Object testEntity = new Object();
-		
+
 		MockControl emMc = MockControl.createControl(EntityManager.class);
 		EntityManager mockEm = (EntityManager) emMc.getMock();
 		mockEm.contains(testEntity);
 		emMc.setReturnValue(false);
 		emMc.replay();
-		
+
 		// finish recording mock calls
 		mockEmf.createEntityManager();
 		emfMc.setReturnValue(mockEm);
 		mockEmf.close();
 		emfMc.setVoidCallable();
 		emfMc.replay();
-		
+
 		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 		EntityManagerFactory emf = cefb.getObject();
 		assertSame("EntityManagerFactory reference must be cached after init", emf, cefb.getObject());
-		
+
 		assertNotSame("EMF must be proxied", mockEmf, emf);
 		EntityManager em = emf.createEntityManager();
 		assertFalse(em.contains(testEntity));
-		
+
 		cefb.destroy();
-		
+
 		emfMc.verify();
 		emMc.verify();
 	}
 
 	public void testApplicationManagedEntityManagerWithTransaction() throws Exception {
 		Object testEntity = new Object();
-		
+
 		MockControl tmMc = MockControl.createControl(EntityTransaction.class);
 		EntityTransaction mockTx = (EntityTransaction) tmMc.getMock();
+		mockTx.isActive();
+		tmMc.setReturnValue(false);
 		mockTx.begin();
 		tmMc.setVoidCallable();
 		mockTx.commit();
 		tmMc.setVoidCallable();
 		tmMc.replay();
-		
-		MockControl emMc = MockControl.createControl(EntityManager.class);
-		EntityManager mockEm = (EntityManager) emMc.getMock();
-		mockEm.getTransaction();
-		emMc.setReturnValue(mockTx, 2);
-		mockEm.contains(testEntity);
-		emMc.setReturnValue(false);
-		emMc.replay();
-		
+
 		// This one's for the tx (shared)
 		MockControl sharedEmMc = MockControl.createControl(EntityManager.class);
 		EntityManager sharedEm = (EntityManager) sharedEmMc.getMock();
@@ -134,33 +128,41 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		sharedEmMc.replay();
 		mockEmf.createEntityManager();
 		emfMc.setReturnValue(sharedEm);
-		
+
 		// This is the application-specific one
+		MockControl emMc = MockControl.createControl(EntityManager.class);
+		EntityManager mockEm = (EntityManager) emMc.getMock();
+		mockEm.getTransaction();
+		emMc.setReturnValue(mockTx, 3);
+		mockEm.contains(testEntity);
+		emMc.setReturnValue(false);
+		emMc.replay();
+
 		mockEmf.createEntityManager();
 		emfMc.setReturnValue(mockEm);
 		mockEmf.close();
 		emfMc.setVoidCallable();
 		emfMc.replay();
-		
+
 		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
-		
+
 		JpaTransactionManager jpatm = new JpaTransactionManager();
 		jpatm.setEntityManagerFactory(cefb.getObject());
-		
+
 		TransactionStatus txStatus = jpatm.getTransaction(new DefaultTransactionAttribute());
-		
+
 		EntityManagerFactory emf = cefb.getObject();
 		assertSame("EntityManagerFactory reference must be cached after init", emf, cefb.getObject());
-		
+
 		assertNotSame("EMF must be proxied", mockEmf, emf);
 		EntityManager em = emf.createEntityManager();
 		em.joinTransaction();
 		assertFalse(em.contains(testEntity));
-		
+
 		jpatm.commit(txStatus);
-		
+
 		cefb.destroy();
-		
+
 		emfMc.verify();
 		emMc.verify();
 		tmMc.verify();
@@ -171,19 +173,13 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 		MockControl tmMc = MockControl.createControl(EntityTransaction.class);
 		EntityTransaction mockTx = (EntityTransaction) tmMc.getMock();
+		mockTx.isActive();
+		tmMc.setReturnValue(false);
 		mockTx.begin();
 		tmMc.setVoidCallable();
 		mockTx.commit();
 		tmMc.setThrowable(new OptimisticLockException());
 		tmMc.replay();
-
-		MockControl emMc = MockControl.createControl(EntityManager.class);
-		EntityManager mockEm = (EntityManager) emMc.getMock();
-		mockEm.getTransaction();
-		emMc.setReturnValue(mockTx, 2);
-		mockEm.contains(testEntity);
-		emMc.setReturnValue(false);
-		emMc.replay();
 
 		// This one's for the tx (shared)
 		MockControl sharedEmMc = MockControl.createControl(EntityManager.class);
@@ -197,6 +193,14 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		emfMc.setReturnValue(sharedEm);
 
 		// This is the application-specific one
+		MockControl emMc = MockControl.createControl(EntityManager.class);
+		EntityManager mockEm = (EntityManager) emMc.getMock();
+		mockEm.getTransaction();
+		emMc.setReturnValue(mockTx, 3);
+		mockEm.contains(testEntity);
+		emMc.setReturnValue(false);
+		emMc.replay();
+
 		mockEmf.createEntityManager();
 		emfMc.setReturnValue(mockEm);
 		mockEmf.close();
@@ -236,16 +240,6 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 	public void testApplicationManagedEntityManagerWithJtaTransaction() throws Exception {
 		Object testEntity = new Object();
 
-		MockControl emMc = MockControl.createControl(EntityManager.class);
-		EntityManager mockEm = (EntityManager) emMc.getMock();
-		mockEm.joinTransaction();
-		emMc.setVoidCallable(1);
-		mockEm.contains(testEntity);
-		emMc.setReturnValue(false);
-		emMc.replay();
-
-		// finish recording mock calls
-
 		// This one's for the tx (shared)
 		MockControl sharedEmMc = MockControl.createControl(EntityManager.class);
 		EntityManager sharedEm = (EntityManager) sharedEmMc.getMock();
@@ -258,6 +252,14 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		emfMc.setReturnValue(sharedEm);
 
 		// This is the application-specific one
+		MockControl emMc = MockControl.createControl(EntityManager.class);
+		EntityManager mockEm = (EntityManager) emMc.getMock();
+		mockEm.joinTransaction();
+		emMc.setVoidCallable(1);
+		mockEm.contains(testEntity);
+		emMc.setReturnValue(false);
+		emMc.replay();
+
 		mockEmf.createEntityManager();
 		emfMc.setReturnValue(mockEm);
 		mockEmf.close();
@@ -387,7 +389,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		}
 
 		public boolean isActive() {
-			return true;
+			return false;
 		}
 	}
 
