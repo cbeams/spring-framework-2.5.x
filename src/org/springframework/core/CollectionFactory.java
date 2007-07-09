@@ -20,11 +20,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -65,6 +68,24 @@ public abstract class CollectionFactory {
 	private static final boolean backportConcurrentAvailable =
 			ClassUtils.isPresent("edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap",
 					CollectionFactory.class.getClassLoader());
+
+
+	private static final Set approximableCollectionTypes = new HashSet(5);
+
+	private static final Set approximableMapTypes = new HashSet(3);
+
+	static {
+		approximableCollectionTypes.add(Collection.class);
+		approximableCollectionTypes.add(List.class);
+		approximableCollectionTypes.add(Set.class);
+		approximableCollectionTypes.add(SortedSet.class);
+		approximableMapTypes.add(Map.class);
+		approximableMapTypes.add(SortedMap.class);
+		if (JdkVersion.isAtLeastJava16()) {
+			approximableCollectionTypes.add(NavigableSet.class);
+			approximableMapTypes.add(NavigableMap.class);
+		}
+	}
 
 
 	/**
@@ -143,6 +164,17 @@ public abstract class CollectionFactory {
 
 
 	/**
+	 * Determine whether the given collection type is an approximable type,
+	 * i.e. a type that {@link #createApproximateCollection} can approximate.
+	 * @param collectionType the collection type to check
+	 * @return <code>true</code> if the type is approximable,
+	 * <code>false</code> if it is not
+	 */
+	public static boolean isApproximableCollectionType(Class collectionType) {
+		return (collectionType != null && approximableCollectionTypes.contains(collectionType));
+	}
+
+	/**
 	 * Create the most approximate collection for the given collection.
 	 * <p>Creates an ArrayList, TreeSet or linked Set for a List, SortedSet
 	 * or Set, respectively.
@@ -163,6 +195,17 @@ public abstract class CollectionFactory {
 		else {
 			return createLinkedSetIfPossible(initialCapacity);
 		}
+	}
+
+	/**
+	 * Determine whether the given map type is an approximable type,
+	 * i.e. a type that {@link #createApproximateMap} can approximate.
+	 * @param mapType the map type to check
+	 * @return <code>true</code> if the type is approximable,
+	 * <code>false</code> if it is not
+	 */
+	public static boolean isApproximableMapType(Class mapType) {
+		return (mapType != null && approximableMapTypes.contains(mapType));
 	}
 
 	/**
