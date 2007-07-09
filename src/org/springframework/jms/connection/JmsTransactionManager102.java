@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,14 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 
 /**
- * A subclass of JmsTransactionManager that uses the JMS 1.0.2 specification,
- * rather than the JMS 1.1 methods used by JmsTransactionManager itself.
+ * A subclass of {@link JmsTransactionManager} for the JMS 1.0.2 specification,
+ * not relying on JMS 1.1 methods like JmsTransactionManager itself.
  * This class can be used for JMS 1.0.2 providers, offering the same API as
  * JmsTransactionManager does for JMS 1.1 providers.
  *
- * <p>You need to set the pubSubDomain property accordingly, as this
- * class will always create either QueueConnections/QueueSessions or
- * TopicConnections/TopicSessions.
+ * <p>You need to set the {@link #setPubSubDomain "pubSubDomain" property},
+ * since this class will always explicitly differentiate between a
+ * {@link javax.jms.QueueConnection} and a {@link javax.jms.TopicConnection}.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -71,11 +71,12 @@ public class JmsTransactionManager102 extends JmsTransactionManager {
 
 
 	/**
-	 * Configure the JmsTransactionManager102 with knowledge of the JMS domain used.
+	 * Configure the transaction manager with knowledge of the JMS domain used.
 	 * This tells the JMS 1.0.2 provider which class hierarchy to use for creating
-	 * Connections and Sessions. Default is Point-to-Point (Queues).
-	 * @param pubSubDomain true for Publish/Subscribe domain (Topics),
-	 * false for Point-to-Point domain (Queues)
+	 * Connections and Sessions.
+	 * <p>Default is Point-to-Point (Queues).
+	 * @param pubSubDomain <code>true</code> for Publish/Subscribe domain (Topics),
+	 * <code>false</code> for Point-to-Point domain (Queues)
 	 */
 	public void setPubSubDomain(boolean pubSubDomain) {
 		this.pubSubDomain = pubSubDomain;
@@ -86,7 +87,7 @@ public class JmsTransactionManager102 extends JmsTransactionManager {
 	 * Otherwise, the Point-to-Point domain (Queues) is used.
 	 */
 	public boolean isPubSubDomain() {
-		return pubSubDomain;
+		return this.pubSubDomain;
 	}
 
 

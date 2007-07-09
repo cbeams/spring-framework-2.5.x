@@ -22,6 +22,7 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.TransactionRolledBackException;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
@@ -29,16 +30,19 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.SmartTransactionObject;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.ResourceTransactionManager;
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
  * for a single JMS {@link javax.jms.ConnectionFactory}. Binds a JMS
  * Connection/Session pair from the specified ConnectionFactory to the thread,
  * potentially allowing for one thread-bound Session per ConnectionFactory.
+ *
+ * <p><b>NOTE:</b> This class requires a JMS 1.1+ provider because it builds on
+ * the domain-independent API. <b>Use the {@link JmsTransactionManager102} subclass
+ * for a JMS 1.0.2 provider, e.g. when running on a J2EE 1.3 server.</b>
  *
  * <p>This local strategy is an alternative to executing JMS operations within
  * JTA transactions. Its advantage is that it is able to work in any environment,

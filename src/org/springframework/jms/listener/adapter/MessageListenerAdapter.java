@@ -46,6 +46,10 @@ import org.springframework.util.ObjectUtils;
  * Allows listener methods to operate on message content types, completely
  * independent from the JMS API.
  *
+ * <p><b>NOTE:</b> This class requires a JMS 1.1+ provider, because it builds
+ * on the domain-independent API. <b>Use the {@link MessageListenerAdapter102
+ * MessageListenerAdapter102} subclass for JMS 1.0.2 providers.</b>
+ *
  * <p>By default, the content of incoming JMS messages gets extracted before
  * being passed into the target listener method, to let the target method
  * operate on message content types such as String or byte array instead of
@@ -67,10 +71,6 @@ import org.springframework.util.ObjectUtils;
  * using the {@link SessionAwareMessageListener} entry point (typically through a
  * Spring message listener container). Usage as standard JMS {@link MessageListener}
  * does <i>not</i> support the generation of response messages.
- *
- * <p>This class requires a JMS 1.1+ provider, because it builds on the
- * domain-independent API. <b>Use the {@link MessageListenerAdapter102
- * MessageListenerAdapter102} subclass for JMS 1.0.2 providers.</b>
  *
  * <p>Find below some examples of method signatures compliant with this
  * adapter class. This first example handles all <code>Message</code> types
@@ -165,6 +165,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 
 	/**
 	 * Create a new {@link MessageListenerAdapter} for the given delegate.
+	 * @param delegate the delegate object
 	 */
 	public MessageListenerAdapter(Object delegate) {
 		initDefaultStrategies();

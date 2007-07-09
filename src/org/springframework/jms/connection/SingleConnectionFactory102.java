@@ -23,13 +23,14 @@ import javax.jms.QueueConnectionFactory;
 import javax.jms.TopicConnectionFactory;
 
 /**
- * A subclass of SingleConnectionFactory that uses the JMS 1.0.2 specification,
- * rather than the JMS 1.1 methods used by SingleConnectionFactory itself.
+ * A subclass of {@link SingleConnectionFactory} for the JMS 1.0.2 specification,
+ * not relying on JMS 1.1 methods like SingleConnectionFactory itself.
  * This class can be used for JMS 1.0.2 providers, offering the same API as
  * SingleConnectionFactory does for JMS 1.1 providers.
  *
- * <p>You need to set the "pubSubDomain" property accordingly, as this class
- * will always create either a QueueConnection or a TopicConnection.
+ * <p>You need to set the {@link #setPubSubDomain "pubSubDomain" property},
+ * since this class will always explicitly differentiate between a
+ * {@link javax.jms.QueueConnection} and a {@link javax.jms.TopicConnection}.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -65,10 +66,11 @@ public class SingleConnectionFactory102 extends SingleConnectionFactory {
 
 	/**
 	 * Configure the factory with knowledge of the JMS domain used.
-	 * This tells the JMS 1.0.2 provider which class hierarchy to use
-	 * for creating Connections. Default is Point-to-Point (Queues).
-	 * @param pubSubDomain true for Publish/Subscribe domain (Topics),
-	 * false for Point-to-Point domain (Queues)
+	 * This tells the JMS 1.0.2 provider which class hierarchy to use for creating
+	 * Connections and Sessions.
+	 * <p>Default is Point-to-Point (Queues).
+	 * @param pubSubDomain <code>true</code> for Publish/Subscribe domain (Topics),
+	 * <code>false</code> for Point-to-Point domain (Queues)
 	 */
 	public void setPubSubDomain(boolean pubSubDomain) {
 		this.pubSubDomain = pubSubDomain;
