@@ -12,11 +12,15 @@ Package org.springframework.aop
 * fixed AspectJ pointcut handling to correctly match generic return types
 
 Package org.springframework.beans
+* URIEditor trims whitespace before parsing the URI (allowing for XML formatting with whitespace)
+* TypeConverterDelegate protects its collection conversion process against misbehaving Collections with a null Iterator
 * DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
 * added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
 * BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
+* changed visibility of BeanDefinitionParserDelegate's "buildTypedStringValue(ForMap)" methods to protected
 
 Package org.springframework.core
+* added "isAtLeastJava16()" convenience method to JdkVersion class
 * fixed PathMatchingResourcePatternResolver to build correct JarFile URLs on WebSphere
 * PathMatchingResourcePatternResolver uses a static Log instance in order to avoid repeated synchronization overhead
 
@@ -26,14 +30,21 @@ Package org.springframework.ejb
 Package org.springframework.instrument
 * added "excludePackage" and "excludeClass" methods to ShadowingClassLoader, analogous to OverridingClassLoader
 
+Package org.springframework.jms
+* SingleConnectionFactory sets client ID before ExceptionListener (for providers with strict Connection state handling)
+
 Package org.springframework.jmx
 * MBeanExporter unregisters its MBeans in case of any kind of registration failure
+
+Package org.springframework.orm
+* ExtendedEntityManagerCreator's "joinTransaction()" checks whether there is an externally managed local transaction
 
 Package org.springframework.scheduling
 * added "waitForTasksToCompleteOnShutdown" property to ScheduledExecutorFactoryBean
 
 Package org.springframework.web
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
+* added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
 
 
 Changes in version 2.0.6 (2007-06-18)
