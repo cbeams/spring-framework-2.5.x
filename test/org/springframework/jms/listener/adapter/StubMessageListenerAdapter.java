@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,21 +23,20 @@ package org.springframework.jms.listener.adapter;
  */
 public class StubMessageListenerAdapter extends MessageListenerAdapter {
 
-    private boolean wasCalled;
+	private boolean wasCalled;
 
 
-    public boolean wasCalled() {
-        return this.wasCalled;
-    }
+	public boolean wasCalled() {
+		return this.wasCalled;
+	}
 
 
-    public void handleMessage(String message) {
-        this.wasCalled = true;
-    }
+	public void handleMessage(String message) {
+		this.wasCalled = true;
+	}
 
-    
-    protected void handleListenerException(Throwable ex) {
-        System.out.println(ex);
+	protected void handleListenerException(Throwable ex) {
+		System.out.println(ex);
 	}
 
 }
