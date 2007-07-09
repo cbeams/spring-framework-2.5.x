@@ -66,10 +66,11 @@ public class SingleConnectionFactory102 extends SingleConnectionFactory {
 
 	/**
 	 * Configure the factory with knowledge of the JMS domain used.
-	 * This tells the JMS 1.0.2 provider which class hierarchy to use
-	 * for creating Connections. Default is Point-to-Point (Queues).
-	 * @param pubSubDomain true for Publish/Subscribe domain (Topics),
-	 * false for Point-to-Point domain (Queues)
+	 * This tells the JMS 1.0.2 provider which class hierarchy to use for creating
+	 * Connections and Sessions.
+	 * <p>Default is Point-to-Point (Queues).
+	 * @param pubSubDomain <code>true</code> for Publish/Subscribe domain (Topics),
+	 * <code>false</code> for Point-to-Point domain (Queues)
 	 */
 	public void setPubSubDomain(boolean pubSubDomain) {
 		this.pubSubDomain = pubSubDomain;

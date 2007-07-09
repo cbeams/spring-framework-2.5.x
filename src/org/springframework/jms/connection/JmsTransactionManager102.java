@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,11 +71,12 @@ public class JmsTransactionManager102 extends JmsTransactionManager {
 
 
 	/**
-	 * Configure the JmsTransactionManager102 with knowledge of the JMS domain used.
+	 * Configure the transaction manager with knowledge of the JMS domain used.
 	 * This tells the JMS 1.0.2 provider which class hierarchy to use for creating
-	 * Connections and Sessions. Default is Point-to-Point (Queues).
-	 * @param pubSubDomain true for Publish/Subscribe domain (Topics),
-	 * false for Point-to-Point domain (Queues)
+	 * Connections and Sessions.
+	 * <p>Default is Point-to-Point (Queues).
+	 * @param pubSubDomain <code>true</code> for Publish/Subscribe domain (Topics),
+	 * <code>false</code> for Point-to-Point domain (Queues)
 	 */
 	public void setPubSubDomain(boolean pubSubDomain) {
 		this.pubSubDomain = pubSubDomain;
@@ -86,7 +87,7 @@ public class JmsTransactionManager102 extends JmsTransactionManager {
 	 * Otherwise, the Point-to-Point domain (Queues) is used.
 	 */
 	public boolean isPubSubDomain() {
-		return pubSubDomain;
+		return this.pubSubDomain;
 	}
 
 
