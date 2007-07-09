@@ -40,27 +40,32 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
- * A JMS ConnectionFactory adapter that returns the same Connection on all
- * <code>createConnection</code> calls, and ignores calls to
- * <code>Connection.close()</code>. According to the JMS Connection model,
- * this is even thread-safe.
+ * A JMS ConnectionFactory adapter that returns the same Connection
+ * from all {@link #createConnection()} calls, and ignores calls to
+ * {@link javax.jms.Connection#close()}. According to the JMS Connection
+ * model, this is perfectly thread-safe (in contrast to e.g. JDBC).
  *
- * <p>Useful for testing and standalone environments, to keep using the same
- * Connection for multiple JmsTemplate calls, without having a pooling
- * ConnectionFactory, also spanning any number of transactions.
- *
- * <p>You can either pass in a JMS Connection directly, or let this
+ * <p>You can either pass in a specific JMS Connection directly or let this
  * factory lazily create a Connection via a given target ConnectionFactory.
  * In the latter case, this factory just works with JMS 1.1; use
  * {@link SingleConnectionFactory102} for JMS 1.0.2.
  *
+ * <p>Useful for testing and standalone environments in order to keep using the
+ * same Connection for multiple {@link org.springframework.jms.core.JmsTemplate}
+ * calls, without having a pooling ConnectionFactory underneath. This may span
+ * any number of transactions, even concurrently executing transactions.
+ *
+ * <p>Note that Spring's message listener containers support the use of
+ * a shared Connection within each listener container instance. Using
+ * SingleConnectionFactory in combination only really makes sense for
+ * sharing a single JMS Connection <i>across multiple listener containers</i>.
+ *
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @since 1.1
- * @see #createConnection()
- * @see javax.jms.Connection#close()
- * @see SingleConnectionFactory102
  * @see org.springframework.jms.core.JmsTemplate
+ * @see org.springframework.jms.listener.SimpleMessageListenerContainer
+ * @see org.springframework.jms.listener.DefaultMessageListenerContainer#setCacheLevel
  */
 public class SingleConnectionFactory
 		implements ConnectionFactory, QueueConnectionFactory, TopicConnectionFactory, ExceptionListener,
@@ -320,15 +325,15 @@ public class SingleConnectionFactory
 	 * @see #setReconnectOnException
 	 */
 	protected void prepareConnection(Connection con) throws JMSException {
+		if (getClientId() != null) {
+			con.setClientID(getClientId());
+		}
 		if (getExceptionListener() != null || isReconnectOnException()) {
 			ExceptionListener listenerToUse = getExceptionListener();
 			if (isReconnectOnException()) {
 				listenerToUse = new InternalChainedExceptionListener(this, listenerToUse);
 			}
 			con.setExceptionListener(listenerToUse);
-		}
-		if (getClientId() != null) {
-			con.setClientID(getClientId());
 		}
 	}
 
@@ -394,17 +399,17 @@ public class SingleConnectionFactory
 				// Use hashCode of Connection proxy.
 				return new Integer(hashCode());
 			}
-			else if (method.getName().equals("setExceptionListener")) {
-				// Handle setExceptionListener method: throw exception.
-				throw new javax.jms.IllegalStateException(
-						"setExceptionListener call not supported on proxy for shared Connection. " +
-						"Set the 'exceptionListener' property on the SingleConnectionFactory instead.");
-			}
 			else if (method.getName().equals("setClientID")) {
 				// Handle setExceptionListener method: throw exception.
 				throw new javax.jms.IllegalStateException(
 						"setClientID call not supported on proxy for shared Connection. " +
 						"Set the 'clientId' property on the SingleConnectionFactory instead.");
+			}
+			else if (method.getName().equals("setExceptionListener")) {
+				// Handle setExceptionListener method: throw exception.
+				throw new javax.jms.IllegalStateException(
+						"setExceptionListener call not supported on proxy for shared Connection. " +
+						"Set the 'exceptionListener' property on the SingleConnectionFactory instead.");
 			}
 			else if (method.getName().equals("stop")) {
 				// Handle stop method: don't pass the call on.
