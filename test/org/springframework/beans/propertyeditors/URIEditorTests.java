@@ -26,7 +26,7 @@ import org.springframework.util.ClassUtils;
 /**
  * @author Juergen Hoeller
  */
-public final class URIEditorTests extends TestCase {
+public class URIEditorTests extends TestCase {
 
 	public void testStandardURI() throws Exception {
 		PropertyEditor uriEditor = new URIEditor();
@@ -46,10 +46,30 @@ public final class URIEditorTests extends TestCase {
 		assertEquals(uri.toString(), uriEditor.getAsText());
 	}
 
+	public void testStandardURLWithWhitespace() throws Exception {
+		PropertyEditor uriEditor = new URIEditor();
+		uriEditor.setAsText("  http://www.springframework.org  ");
+		Object value = uriEditor.getValue();
+		assertTrue(value instanceof URI);
+		URI uri = (URI) value;
+		assertEquals(uri.toString(), uriEditor.getAsText());
+	}
+
 	public void testClasspathURL() throws Exception {
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class");
+		Object value = uriEditor.getValue();
+		assertTrue(value instanceof URI);
+		URI uri = (URI) value;
+		assertEquals(uri.toString(), uriEditor.getAsText());
+		assertTrue(!uri.getScheme().startsWith("classpath"));
+	}
+
+	public void testClasspathURLWithWidespace() throws Exception {
+		PropertyEditor uriEditor = new URIEditor();
+		uriEditor.setAsText("  classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
+				"/" + ClassUtils.getShortName(getClass()) + ".class  ");
 		Object value = uriEditor.getValue();
 		assertTrue(value instanceof URI);
 		URI uri = (URI) value;
