@@ -869,7 +869,11 @@ public class BeanDefinitionParserDelegate {
 		return null;
 	}
 
-	private Object buildTypedStringValue(String value, String targetTypeName, Element ele)
+	/**
+	 * Build a typed String value Object for the given raw value.
+	 * @see org.springframework.beans.factory.config.TypedStringValue
+	 */
+	protected Object buildTypedStringValue(String value, String targetTypeName, Element ele)
 			throws ClassNotFoundException {
 
 		ClassLoader classLoader = this.readerContext.getBeanClassLoader();
@@ -1032,7 +1036,11 @@ public class BeanDefinitionParserDelegate {
 		return map;
 	}
 
-	private Object buildTypedStringValueForMap(String value, String defaultTypeClassName, Element entryEle) {
+	/**
+	 * Build a typed String value Object for the given raw value.
+	 * @see org.springframework.beans.factory.config.TypedStringValue
+	 */
+	protected final Object buildTypedStringValueForMap(String value, String defaultTypeClassName, Element entryEle) {
 		try {
 			return buildTypedStringValue(value, defaultTypeClassName, entryEle);
 		}
