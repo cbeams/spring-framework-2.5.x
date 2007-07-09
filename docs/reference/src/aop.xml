@@ -2842,7 +2842,7 @@ public final class Main {
 
 				<para>The structure and contents of this file is detailed in the main AspectJ reference documentation,
 				and the interested reader is
-				<link linkend="http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html">referred to that resource</link>.
+				<ulink url="http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html">referred to that resource</ulink>.
 				(I appreciate that this section is brief, but the '<filename>aop.xml</filename>' file is 100% AspectJ
 				- there is no Spring-specific information or semantics that apply to it, and so there is no extra value
 				that I can contribute either as a result), so rather than rehash the quite satisfactory section that the
