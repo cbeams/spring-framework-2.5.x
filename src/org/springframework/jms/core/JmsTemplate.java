@@ -39,9 +39,9 @@ import org.springframework.util.Assert;
 /**
  * Helper class that simplifies synchronous JMS access code.
  *
- * <p>This class requires a JMS 1.1+ provider, because it builds on the
- * domain-independent API. <b>Use the {@link JmsTemplate102 JmsTemplate102}
- * subclass for JMS 1.0.2 providers.</b>
+ * <p><b>NOTE:</b> This class requires a JMS 1.1+ provider because it builds
+ * on the domain-independent API. <b>Use the {@link JmsTemplate102} subclass
+ * for a JMS 1.0.2 provider, e.g. when running on a J2EE 1.3 server.</b>
  *
  * <p>If you want to use dynamic destination creation, you must specify
  * the type of JMS destination to create, using the "pubSubDomain" property.

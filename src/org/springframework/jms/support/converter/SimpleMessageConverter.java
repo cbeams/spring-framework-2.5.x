@@ -52,7 +52,6 @@ import org.springframework.util.ObjectUtils;
  * @since 1.1
  * @see org.springframework.jms.core.JmsTemplate#convertAndSend
  * @see org.springframework.jms.core.JmsTemplate#receiveAndConvert
- * @see SimpleMessageConverter102
  */
 public class SimpleMessageConverter implements MessageConverter {
 

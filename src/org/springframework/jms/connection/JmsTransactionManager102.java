@@ -26,14 +26,14 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 
 /**
- * A subclass of JmsTransactionManager that uses the JMS 1.0.2 specification,
- * rather than the JMS 1.1 methods used by JmsTransactionManager itself.
+ * A subclass of {@link JmsTransactionManager} for the JMS 1.0.2 specification,
+ * not relying on JMS 1.1 methods like JmsTransactionManager itself.
  * This class can be used for JMS 1.0.2 providers, offering the same API as
  * JmsTransactionManager does for JMS 1.1 providers.
  *
- * <p>You need to set the pubSubDomain property accordingly, as this
- * class will always create either QueueConnections/QueueSessions or
- * TopicConnections/TopicSessions.
+ * <p>You need to set the {@link #setPubSubDomain "pubSubDomain" property},
+ * since this class will always explicitly differentiate between a
+ * {@link javax.jms.QueueConnection} and a {@link javax.jms.TopicConnection}.
  *
  * @author Juergen Hoeller
  * @since 1.1

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,10 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 
 /**
- * A subclass of ServerSessionMessageListenerContainer that uses the JMS 1.0.2 specification,
- * rather than the JMS 1.1 methods used by ServerSessionMessageListenerContainer itself.
- * This class can be used for JMS 1.0.2 providers, offering the same facility as
+ * A subclass of {@link ServerSessionMessageListenerContainer} for the JMS 1.0.2 specification,
+ * not relying on JMS 1.1 methods like ServerSessionMessageListenerContainer itself.
+ *
+ * <p>This class can be used for JMS 1.0.2 providers, offering the same facility as
  * ServerSessionMessageListenerContainer does for JMS 1.1 providers.
  *
  * @author Juergen Hoeller

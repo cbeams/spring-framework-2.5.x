@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 
 /**
- * A subclass of SimpleMessageConverter that uses the JMS 1.0.2 specification,
- * rather than the JMS 1.1 methods used by SimpleMessageConverter itself.
+ * A subclass of {@link SimpleMessageConverter} for the JMS 1.0.2 specification,
+ * not relying on JMS 1.1 methods like SimpleMessageConverter itself.
  * This class can be used for JMS 1.0.2 providers, offering the same functionality
  * as SimpleMessageConverter does for JMS 1.1 providers.
  *

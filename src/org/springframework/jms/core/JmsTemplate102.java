@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,21 +39,24 @@ import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.support.converter.SimpleMessageConverter102;
 
 /**
- * A subclass of JmsTemplate that uses the JMS 1.0.2 specification, rather than
- * the JMS 1.1 methods used by JmsTemplate itself. This class can be used for JMS
+ * A subclass of {@link JmsTemplate} for the JMS 1.0.2 specification, not relying
+ * on JMS 1.1 methods like JmsTemplate itself. This class can be used for JMS
  * 1.0.2 providers, offering the same API as JmsTemplate does for JMS 1.1 providers.
  *
- * <p>You must specify the domain or style of messaging to be either
+ * <p>You must specify the domain (or style) of messaging to be either
  * Point-to-Point (Queues) or Publish/Subscribe (Topics), using the
- * "pubSubDomain" property. Point-to-Point (Queues) is the default domain.
+ * {@link #setPubSubDomain "pubSubDomain" property}.
+ * Point-to-Point (Queues) is the default domain.
  *
  * <p>The "pubSubDomain" property is an important setting due to the use of similar
  * but separate class hierarchies in the JMS 1.0.2 API. JMS 1.1 provides a new
  * domain-independent API that allows for easy mix-and-match use of Point-to-Point
- * and Publish/Subscribe domain.
+ * and Publish/Subscribe styles.
  *
- * <p>This template uses a DynamicDestinationResolver and a SimpleMessageConverter102
- * as default strategies for resolving a destination name or converting a message,
+ * <p>This template uses a
+ * {@link org.springframework.jms.support.destination.DynamicDestinationResolver}
+ * and a {@link org.springframework.jms.support.converter.SimpleMessageConverter102}
+ * as default strategies for resolving a destination name and converting a message,
  * respectively.
  *
  * @author Mark Pollack
@@ -61,9 +64,6 @@ import org.springframework.jms.support.converter.SimpleMessageConverter102;
  * @since 1.1
  * @see #setConnectionFactory
  * @see #setPubSubDomain
- * @see JmsTemplate
- * @see org.springframework.jms.support.destination.DynamicDestinationResolver
- * @see org.springframework.jms.support.converter.SimpleMessageConverter102
  * @see javax.jms.Queue
  * @see javax.jms.Topic
  * @see javax.jms.QueueSession

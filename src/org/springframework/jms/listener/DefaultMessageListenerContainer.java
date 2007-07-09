@@ -44,6 +44,10 @@ import org.springframework.util.ClassUtils;
  * Designed to work in a native JMS environment as well as in a J2EE environment,
  * with only minimal differences in configuration.
  *
+ * <p><b>NOTE:</b> This class requires a JMS 1.1+ provider, because it builds on
+ * the domain-independent API. <b>Use the {@link DefaultMessageListenerContainer102}
+ * subclass for a JMS 1.0.2 provider, e.g. when running on a J2EE 1.3 server.</b>
+ *
  * <p>This is a simple but nevertheless powerful form of message listener container.
  * On startup, it obtains a fixed number of JMS Sessions to invoke the listener,
  * and optionally allows for dynamic adaptation at runtime (up until a maximum number).
@@ -101,10 +105,6 @@ import org.springframework.util.ClassUtils;
  * as well as the {@link AbstractPollingMessageListenerContainer} javadoc
  * for details on configuring an external transaction manager.
  *
- * <p>This class requires a JMS 1.1+ provider, because it builds on the
- * domain-independent API. <b>Use the {@link DefaultMessageListenerContainer102}
- * subclass for JMS 1.0.2 providers.</b>
- *
  * @author Juergen Hoeller
  * @since 2.0
  * @see #setTransactionManager
@@ -112,7 +112,6 @@ import org.springframework.util.ClassUtils;
  * @see javax.jms.MessageConsumer#receive(long)
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
- * @see DefaultMessageListenerContainer102
  */
 public class DefaultMessageListenerContainer extends AbstractPollingMessageListenerContainer {
 

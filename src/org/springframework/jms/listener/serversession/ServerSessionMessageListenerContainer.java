@@ -35,7 +35,11 @@ import org.springframework.jms.support.JmsUtils;
  * SPI, creating JMS ServerSession instances through a pluggable
  * {@link ServerSessionFactory}.
  *
- * <p>Note that the default ServerSessionFactory is a {@link SimpleServerSessionFactory},
+ * <p><b>NOTE:</b> This class requires a JMS 1.1+ provider, because it builds on the
+ * domain-independent API. <b>Use the {@link ServerSessionMessageListenerContainer102}
+ * subclass for a JMS 1.0.2 provider, e.g. when running on a J2EE 1.3 server.</b>
+ *
+ * <p>The default ServerSessionFactory is a {@link SimpleServerSessionFactory},
  * which will create a new ServerSession for each listener execution.
  * Consider specifying a {@link CommonsPoolServerSessionFactory} to reuse JMS
  * Sessions and/or to limit the number of concurrent ServerSession executions.
@@ -43,21 +47,17 @@ import org.springframework.jms.support.JmsUtils;
  * <p>See the {@link AbstractMessageListenerContainer} javadoc for details
  * on acknowledge modes and other configuration options.
  *
- * <p>For a simpler message listener container, in particular when using
+ * <p><b>This is an 'advanced' (special-purpose) message listener container.</b>
+ * For a simpler message listener container, in particular when using
  * a JMS provider without ServerSessionPool support, consider using
  * {@link org.springframework.jms.listener.SimpleMessageListenerContainer}.
  * For a general one-stop shop that is nevertheless very flexible, consider
  * {@link org.springframework.jms.listener.DefaultMessageListenerContainer}.
  *
- * <p>This class requires a JMS 1.1+ provider, because it builds on the
- * domain-independent API. <b>Use the {@link ServerSessionMessageListenerContainer102}
- * subclass for JMS 1.0.2 providers.</b>
- *
  * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.jms.listener.SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.DefaultMessageListenerContainer
- * @see ServerSessionMessageListenerContainer102
  */
 public class ServerSessionMessageListenerContainer extends AbstractMessageListenerContainer
 		implements ListenerSessionManager {
