@@ -50,7 +50,7 @@ public abstract class JdkVersion {
 	public static final int JAVA_16 = 3;
 
 	/**
-	 * Constant identifying the 1.7 JVM.
+	 * Constant identifying the 1.7 JVM (Java 7).
 	 */
 	public static final int JAVA_17 = 4;
 
@@ -129,6 +129,18 @@ public abstract class JdkVersion {
 	 */
 	public static boolean isAtLeastJava15() {
 		return getMajorJavaVersion() >= JAVA_15;
+	}
+
+	/**
+	 * Convenience method to determine if the current JVM is at least
+	 * Java 1.6 (Java ).
+	 * @return <code>true</code> if the current JVM is at least Java 1.6
+	 * @see #getMajorJavaVersion()
+	 * @see #JAVA_16
+	 * @see #JAVA_17
+	 */
+	public static boolean isAtLeastJava16() {
+		return getMajorJavaVersion() >= JAVA_16;
 	}
 
 }
