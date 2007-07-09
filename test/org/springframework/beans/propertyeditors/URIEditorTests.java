@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.ClassUtils;
 /**
  * @author Juergen Hoeller
  */
-public final class URIEditorTests extends TestCase {
+public class URIEditorTests extends TestCase {
 
 	public void testStandardURI() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
@@ -53,6 +53,18 @@ public final class URIEditorTests extends TestCase {
 		assertEquals(uri.toString(), uriEditor.getAsText());
 	}
 
+	public void testStandardURLWithWhitespace() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+		PropertyEditor uriEditor = new URIEditor();
+		uriEditor.setAsText("  http://www.springframework.org  ");
+		Object value = uriEditor.getValue();
+		assertTrue(value instanceof URI);
+		URI uri = (URI) value;
+		assertEquals(uri.toString(), uriEditor.getAsText());
+	}
+
 	public void testClasspathURL() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
@@ -60,6 +72,20 @@ public final class URIEditorTests extends TestCase {
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class");
+		Object value = uriEditor.getValue();
+		assertTrue(value instanceof URI);
+		URI uri = (URI) value;
+		assertEquals(uri.toString(), uriEditor.getAsText());
+		assertTrue(!uri.getScheme().startsWith("classpath"));
+	}
+
+	public void testClasspathURLWithWidespace() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+		PropertyEditor uriEditor = new URIEditor();
+		uriEditor.setAsText("  classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
+				"/" + ClassUtils.getShortName(getClass()) + ".class  ");
 		Object value = uriEditor.getValue();
 		assertTrue(value instanceof URI);
 		URI uri = (URI) value;

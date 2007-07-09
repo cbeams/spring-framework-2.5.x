@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Editor for <code>java.net.URI</code>, to directly populate a URI property
@@ -69,29 +70,32 @@ public class URIEditor extends PropertyEditorSupport {
 
 
 	public void setAsText(String text) throws IllegalArgumentException {
-		if (text == null) {
-			setValue(null);
-		}
-		else if (text.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
-			ClassPathResource resource =
-					new ClassPathResource(text.substring(ResourceUtils.CLASSPATH_URL_PREFIX.length()), this.classLoader);
-			try {
-				setValue(new URI(resource.getURL().toString()));
+		if (StringUtils.hasText(text)) {
+			String uri = text.trim();
+			if (uri.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
+				ClassPathResource resource =
+						new ClassPathResource(uri.substring(ResourceUtils.CLASSPATH_URL_PREFIX.length()), this.classLoader);
+				try {
+					setValue(new URI(resource.getURL().toString()));
+				}
+				catch (IOException ex) {
+					throw new IllegalArgumentException("Could not retrieve URI for " + resource + ": " + ex.getMessage());
+				}
+				catch (URISyntaxException ex) {
+					throw new IllegalArgumentException("Invalid URI syntax: " + ex);
+				}
 			}
-			catch (IOException ex) {
-				throw new IllegalArgumentException("Could not retrieve URI for " + resource + ": " + ex.getMessage());
-			}
-			catch (URISyntaxException ex) {
-				throw new IllegalArgumentException("Invalid URI syntax: " + ex);
+			else {
+				try {
+					setValue(new URI(uri));
+				}
+				catch (URISyntaxException ex) {
+					throw new IllegalArgumentException("Invalid URI syntax: " + ex);
+				}
 			}
 		}
 		else {
-			try {
-				setValue(new URI(text));
-			}
-			catch (URISyntaxException ex) {
-				throw new IllegalArgumentException("Invalid URI syntax: " + ex);
-			}
+			setValue(null);
 		}
 	}
 
