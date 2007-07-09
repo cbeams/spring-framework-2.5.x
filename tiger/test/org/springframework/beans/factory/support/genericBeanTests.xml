@@ -33,4 +33,14 @@
 		<property name="targetMapClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlMap"/>
 	</bean>
 
+	<bean class="org.springframework.beans.factory.support.BeanFactoryGenericsTests$CollectionDependentBean">
+		<constructor-arg ref="list"/>
+		<constructor-arg ref="set"/>
+		<constructor-arg ref="map"/>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.support.BeanFactoryGenericsTests$CollectionDependentBean"
+			autowire="constructor">
+	</bean>
+
 </beans>

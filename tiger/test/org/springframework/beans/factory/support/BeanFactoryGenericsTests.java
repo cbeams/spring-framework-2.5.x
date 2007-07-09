@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -536,6 +536,16 @@ public class BeanFactoryGenericsTests extends TestCase {
 
 
 	public static class NamedUrlMap extends HashMap<Integer, URL> {
+	}
+
+
+	public static class CollectionDependentBean {
+
+		public CollectionDependentBean(NamedUrlList list, NamedUrlSet set, NamedUrlMap map) {
+			assertEquals(1, list.size());
+			assertEquals(1, set.size());
+			assertEquals(1, map.size());
+		}
 	}
 
 }
