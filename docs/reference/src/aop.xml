@@ -5,131 +5,124 @@
   <section id="aop-introduction">
     <title>Introduction</title>
 
-    <para><emphasis>Aspect-Oriented Programming</emphasis>
-    (<emphasis>AOP</emphasis>) complements Object-Oriented Programming (OOP)
-    by providing another way of thinking about program structure. In addition
-    to classes, AOP gives you <emphasis>aspects</emphasis>. Aspects
-    enable modularization of concerns such as transaction management that
-    cut across multiple types and objects. (Such concerns are often
-    termed <emphasis>crosscutting</emphasis> concerns.)</para>
+    <para><emphasis>Aspect-Oriented Programming</emphasis> (AOP) complements Object-Oriented Programming (OOP)
+    by providing another way of thinking about program structure. The key unit of modularity in OOP is the class,
+	whereas in AOP the unit of modularity is the <emphasis>aspect</emphasis>. Aspects enable the modularization of
+	concerns such as transaction management that cut across multiple types and objects. (Such concerns are often
+    termed <emphasis>crosscutting</emphasis> concerns in AOP literature.)</para>
 
-    <para>One of the key components of Spring is the <emphasis>AOP
-    framework</emphasis>. While the Spring IoC container does not depend on AOP,
-    meaning you don't need to use AOP if you don't want to, AOP complements
-    Spring IoC to provide a very capable middleware solution.</para>
+    <para>One of the key components of Spring is the <emphasis>AOP framework</emphasis>. While the Spring IoC container
+	does not depend on AOP, meaning you do not need to use AOP if you don't want to, AOP complements Spring IoC to
+	provide a very capable middleware solution.</para>
 
     <sidebar>
         <title>Spring 2.0 AOP</title>
-        <para>Spring 2.0 introduces a simpler and more powerful
-        way of writing custom aspects using either a schema-based approach
-        or the @AspectJ annotation style. Both of these styles offer fully
-        typed advice and use of the AspectJ pointcut language, while still using
-        Spring AOP for weaving.</para>
-        <para>The Spring 2.0 schema and @AspectJ based AOP support is discussed in
-		this chapter. Spring 2.0 AOP remains fully backwards compatible with
-		Spring 1.2 AOP, and the lower-level AOP support offered by the Spring 1.2 APIs
+        <para>Spring 2.0 introduces a simpler and more powerful way of writing custom aspects using either a
+		<link linkend="aop-schema">schema-based approach</link> or the
+		<link linkend="aop-ataspectj">@AspectJ annotation style</link>. Both of these styles offer fully typed advice
+		and use of the AspectJ pointcut language, while still using Spring AOP for weaving.</para>
+        <para>The Spring 2.0 schema- and @AspectJ-based AOP support is discussed in this chapter. Spring 2.0 AOP remains
+		fully backwards compatible with Spring 1.2 AOP, and the lower-level AOP support offered by the Spring 1.2 APIs
 		is discussed in	<link linkend="aop-api">the following chapter</link>.</para>
     </sidebar>
 
-    <para>AOP is used in the Spring Framework:</para>
+    <para>AOP is used in the Spring Framework to...</para>
 
     <itemizedlist>
       <listitem>
-        <para>To provide declarative enterprise services, especially as a
-        replacement for EJB declarative services. The most important such
-        service is
-        <link linkend="transaction-declarative"><emphasis>declarative transaction management</emphasis></link>,
-        which builds on the Spring Framework's transaction abstraction.</para>
+        <para>... provide declarative enterprise services, especially as a replacement for EJB declarative services. The
+		most important such service is
+        <link linkend="transaction-declarative"><emphasis>declarative transaction management</emphasis></link>.</para>
       </listitem>
 
       <listitem>
-        <para>To allow users to implement custom aspects, complementing their
-        use of OOP with AOP.</para>
+        <para>... allow users to implement custom aspects, complementing their use of OOP with AOP.</para>
       </listitem>
     </itemizedlist>
 
-    <remark>If you are interested only in generic declarative services or
-    other pre-packaged declarative middleware services such as pooling, you
-    don't need to work directly with Spring AOP, and can skip most of this
-    chapter.</remark>
+    <remark>
+		<para>If you are interested only in generic declarative services or other pre-packaged declarative middleware
+		services such as pooling, you do not need to work directly with Spring AOP, and can skip most of this chapter.
+		</para>
+	</remark>
 
-    <section id="aop-introduction-defn">
-      <title>AOP concepts</title>
+	<section id="aop-introduction-defn">
+		<title>AOP concepts</title>
 
-      <para>Let us begin by defining some central AOP concepts. These terms
-      are not Spring-specific. Unfortunately, AOP terminology is not
-      particularly intuitive; however, it would be even more confusing if
-      Spring used its own terminology.</para>
+		<para>Let us begin by defining some central AOP concepts and terminology. These terms are not Spring-specific...
+		unfortunately, AOP terminology is not particularly intuitive; however, it would be even more confusing if
+		Spring used its own terminology.</para>
 
-      <itemizedlist>
-        <listitem>
-          <para><emphasis>Aspect</emphasis>: A modularization of a concern 
-          that cuts across multiple objects. Transaction management is a good example 
-		  of a crosscutting concern in J2EE applications. In Spring AOP, aspects are 
-		  implemented using regular classes (the schema-based approach) or regular
-		  classes annotated with the <interfacename>@Aspect</interfacename> annotation
-		  (<interfacename>@AspectJ</interfacename> style).</para>
-        </listitem>
+		<itemizedlist>
+			<listitem>
+				<para><emphasis>Aspect</emphasis>: a modularization of a concern that cuts across multiple classes.
+				Transaction management is a good example of a crosscutting concern in J2EE applications. In Spring AOP,
+				aspects are implemented using regular classes (the
+				<link linkend="aop-schema">schema-based approach</link>) or regular classes annotated with the
+				<interfacename>@Aspect</interfacename> annotation (the
+				<link linkend="aop-ataspectj"><interfacename>@AspectJ</interfacename> style</link>).</para>
+			</listitem>
 
-        <listitem>
-          <para><emphasis>Join point</emphasis>: A point during the execution of
-          a program, such as the execution of a method or the handling of 
-          an exception. In Spring AOP, a join point <emphasis>always</emphasis> represents
-          a method execution. Join point information is available in advice
-          bodies by declaring a parameter of type <interfacename>org.aspectj.lang.JoinPoint</interfacename>.
-          </para>
-        </listitem>
+			<listitem>
+				<para>
+					<emphasis>Join point</emphasis>: a point during the execution of a program, such as the execution of
+					a method or the handling of an exception. In Spring AOP, a join point <emphasis>always</emphasis>
+					represents a method execution.
+				</para>
+			</listitem>
 
-        <listitem>
-          <para><emphasis>Advice</emphasis>: Action taken by an aspect
-          at a particular join point. Different types of advice include
-          "around," "before" and "after" advice. Advice types are discussed
-          below. Many AOP frameworks, including Spring, model an advice as an
-          <emphasis>interceptor</emphasis>, maintaining a chain of
-          interceptors "around" the join point.</para>
-        </listitem>
+			<listitem>
+				<para>
+					<emphasis>Advice</emphasis>: action taken by an aspect at a particular join point. Different types
+					of advice include "around," "before" and "after" advice. (Advice types are discussed below.) Many
+					AOP frameworks, including Spring, model an advice as an <emphasis>interceptor</emphasis>,
+					maintaining a chain of interceptors <emphasis>around</emphasis> the join point.
+				</para>
+			</listitem>
 
-        <listitem>
-          <para><emphasis>Pointcut</emphasis>: A predicate that matches join points.
-          Advice is associated with a pointcut expression and runs at any join
-          point matched by the pointcut (for example, the execution of a method with
-          a certain name). The concept of join points as matched by pointcut
-		  expressions is central to AOP: Spring uses the AspectJ pointcut language by default.</para>
-        </listitem>
+			<listitem>
+				<para>
+					<emphasis>Pointcut</emphasis>: a predicate that matches join points. Advice is associated with a
+					pointcut expression and runs at any join point matched by the pointcut (for example, the execution
+					of a method with a certain name). The concept of join points as matched by pointcut expressions is
+					central to AOP, and Spring uses the AspectJ pointcut expression language by default.
+				</para>
+			</listitem>
 
-        <listitem>
-          <para><emphasis>Introduction</emphasis>: (Also known as an 
-          inter-type declaration). Declaring additional methods or fields on
-          behalf of a type. Spring AOP allows you to introduce new interfaces
-		  (and a corresponding implementation) to any proxied object. For example,
-		  you could use an introduction to make a bean implement an
-		  <interfacename>IsModified</interfacename> interface, to simplify caching.</para>
-        </listitem>
+			<listitem>
+				<para>
+					<emphasis>Introduction</emphasis>: declaring additional methods or fields on behalf of a type.
+					Spring AOP allows you to introduce new interfaces (and a corresponding implementation) to any
+					advised object. For example, you could use an introduction to make a bean implement an
+					<interfacename>IsModified</interfacename> interface, to simplify caching. (An introduction is known
+					as an inter-type declaration in the AspectJ community.) 
+				</para>
+			</listitem>
 
-        <listitem>
-          <para><emphasis>Target object</emphasis>: Object being advised
-          by one or more aspects. Also referred to as the <emphasis>advised</emphasis>
-		  object. Since Spring AOP is implemented using runtime proxies, this object
-		  will always be a <emphasis>proxied</emphasis> object.</para>
-        </listitem>
+			<listitem>
+				<para>
+					<emphasis>Target object</emphasis>: object being advised by one or more aspects. Also referred to as
+					the <emphasis>advised</emphasis> object. Since Spring AOP is implemented using runtime proxies, this
+					object will always be a <emphasis>proxied</emphasis> object.
+				</para>
+			</listitem>
 
-        <listitem>
-          <para><emphasis>AOP proxy</emphasis>: An object created by the AOP
-          framework in order to implement the aspect contracts (advise method
-          executions and so on). In the Spring Framework, an AOP proxy will be a JDK
-          dynamic proxy or a CGLIB proxy. <emphasis>Proxy creation is
-		  transparent to users of the schema-based and @AspectJ styles of
-		  aspect declaration introduced in Spring 2.0.</emphasis></para>
-        </listitem>
+			<listitem>
+				<para>
+					<emphasis>AOP proxy</emphasis>: an object created by the AOP framework in order to implement the
+					aspect contracts (advise method executions and so on). In the Spring Framework, an AOP proxy will be
+					a JDK dynamic proxy or a CGLIB proxy.
+				</para>
+			</listitem>
 
-        <listitem>
-			<para><emphasis>Weaving</emphasis>: Linking aspects with other
-			application types or objects to create an advised object. This
-			can be done at compile time (using the AspectJ compiler, for
-			example), load time, or at runtime. Spring AOP, like other pure
-			Java AOP frameworks, performs weaving at runtime.</para>
-        </listitem>
-      </itemizedlist>
+			<listitem>
+				<para>
+					<emphasis>Weaving</emphasis>: linking aspects with other application types or objects to create an
+					advised object. This can be done at compile time (using the AspectJ compiler, for example), load
+					time, or at runtime. Spring AOP, like other pure Java AOP frameworks, performs weaving at runtime.
+				</para>
+			</listitem>
+		</itemizedlist>
 
       <para>Types of advice:</para>
 
@@ -1993,7 +1986,7 @@ public @interface Idempotent {
 }</programlisting>
        
        <para>and using the annotation to annotate the implementation of service operations.
-       The change to the aspect to only retry idempotent operations simply involves
+       The change to the aspect to retry only idempotent operations simply involves
        refining the pointcut expression so that only <interfacename>@Idempotent</interfacename> operations match:</para>
 
 	<programlisting><![CDATA[  <aop:pointcut id="idempotentOperation"
@@ -2007,67 +2000,52 @@ public @interface Idempotent {
   <section id="aop-choosing">
     <title>Choosing which AOP declaration style to use</title>
   
-    <para>
-    Once you have decided that an aspect is the best approach for implementing a 
-    given requirement, how do you decide between using Spring AOP or AspectJ, 
-    and between the Aspect language (code) style, @AspectJ annotation style, and
-	the XML style? These decisions are influenced by a number of factors including
-	application requirements, development tools, and team familiarity with AOP. 
-    </para>
-    
-    <section id="aop-spring-or-aspectj">
-    	<title>Spring AOP or full AspectJ?</title>
-    	
-    	<para>Use the simplest thing that can work. Spring AOP is simpler than using 
-    	full AspectJ as there is no requirement to introduce the AspectJ 
-    	compiler / weaver into your development and build processes. 
-    	If you only need to advise the execution of operations on Spring beans, 
-    	then Spring AOP is the right choice. If you need to advise domain objects, 
-    	or any other object not managed by the Spring container, then you will 
-    	need to use AspectJ. You will also need to use AspectJ if you wish to 
-    	advise join points other than simple method executions (for example, call 
-    	join points, field get or set join points, and so on).</para>
-    	
-    	<para>When using AspectJ, you have the choice of the AspectJ language syntax 
-    	(also known as the "code style") or the @AspectJ annotation style. 
-    	If aspects play a large role in your design, and you are able to use the 
-    	<ulink url="http://www.eclipse.org/ajdt/">AspectJ Development Tools (AJDT)</ulink>
-		in Eclipse, then the AspectJ language syntax is the preferred option: it is cleaner
-		and simpler because the language was purposefully designed for writing aspects.
-		If you are not using Eclipse, or have only a few aspects that do not play a
-		major role in your application, then you may want to consider using the @AspectJ
-		style and sticking with a regular Java compilation in your IDE, and adding an aspect
-    	weaving (linking) phase to your build scripts.</para>
-    	
-    </section>
-    <section id="aop-ataspectj-or-xml">
-    	<title>@AspectJ or XML for Spring AOP?</title>
-    	<para>
-			The XML style will be most familiar to existing Spring users. It can be
-			used with any JDK level (referring to named pointcuts from within
-			pointcut expressions does still require Java 5 though) and is backed
-			by genuine POJOs. When using AOP as a tool to configure enterprise
-			services (a good test is whether you consider the pointcut expression
-			to be a part of your configuration you might want to change independently)
-			then XML can be a good choice. With the XML style it is arguably
-			clearer from your configuration what aspects are present in the system.
-    	</para>
-    	<para>
-			The XML style has two disadvantages. Firstly it does not fully encapsulate
-			the implementation of the requirement it addresses in a single place.
-			The DRY principle says that there should be a single, unambiguous, authoritative
-			representation of any piece of knowledge within a system. When using the
-			XML style, the knowledge of how a requirement is implemented is split across
-			the declaration of the backing bean class, and the XML in the configuration
-			file. When using the @AspectJ style there is a single module - the aspect - in
-			which this information is encapsulated. Secondly, the XML style is more
-			limited in what in can express than the @AspectJ style: only the "singleton"
-			aspect instantiation model is supported, and it is not possible to combine
-			named pointcuts declared in XML. For example, in the @AspectJ style we
-			can write something like:
-    	</para>
+    <para>Once you have decided that an aspect is the best approach for implementing a given requirement, how do you
+	decide between using Spring AOP or AspectJ, and between the Aspect language (code) style, @AspectJ annotation style,
+	or the Spring XML style? These decisions are influenced by a number of factors including application requirements,
+	development tools, and team familiarity with AOP.</para>
 
-	<programlisting><![CDATA[  @Pointcut(execution(* get*()))
+	<section id="aop-spring-or-aspectj">
+		<title>Spring AOP or full AspectJ?</title>
+		<para>Use the simplest thing that can work. Spring AOP is simpler than using full AspectJ as there is no
+		requirement to introduce the AspectJ compiler / weaver into your development and build processes. If you only
+		need to advise the execution of operations on Spring beans, then Spring AOP is the right choice. If you need to
+		advise objects not managed by the Spring container (such as domain objects typically), then you will need to use
+		AspectJ. You will also need to use AspectJ if you wish to advise join points other than simple method executions
+		(for example, field get or set join points, and so on).</para>
+		
+		<para>When using AspectJ, you have the choice of the AspectJ language syntax (also known as the "code style") or
+		the @AspectJ annotation style. Clearly, if you are not using Java5+ then the choice has been made for you...
+		use the code style. If aspects play a large role in your design, and you are able to use the
+		<ulink url="http://www.eclipse.org/ajdt/">AspectJ Development Tools (AJDT)</ulink> plugin for Eclipse, then the
+		AspectJ language syntax is the preferred option: it is cleaner and simpler because the language was purposefully
+		designed for writing aspects. If you are not using Eclipse, or have only a few aspects that do not play a major
+		role in your application, then you may want to consider using the @AspectJ style and sticking with a regular
+		Java compilation in your IDE, and adding an aspect weaving phase to your build script. </para>
+	</section>
+
+	<section id="aop-ataspectj-or-xml">
+		<title>@AspectJ or XML for Spring AOP?</title>
+		<para>If you have chosen to use Spring AOP, then you have a choice of @AspectJ or XML style. Clearly if you are
+		not running on Java5+, then the XML style is the best choice; for Java5 projects there are various trade offs to
+		consider.</para>
+		<para>The XML style will be most familiar to existing Spring users. It can be used with any JDK level (referring
+		to named pointcuts from within pointcut expressions does still require Java5+ though) and is backed by genuine
+		POJOs. When using AOP as a tool to configure enterprise services then XML can be a good choice (a good test is
+		whether you consider the pointcut expression to be a part of your configuration you might want to change
+		independently). With the XML style arguably it is clearer from your configuration what aspects are present in
+		the system.</para>
+		<para>The XML style has two disadvantages. Firstly it does not fully encapsulate the implementation of the
+		requirement it addresses in a single place. The DRY principle says that there should be a single, unambiguous,
+		authoritative representation of any piece of knowledge within a system. When using the XML style, the knowledge
+		of <emphasis>how</emphasis> a requirement is implemented is split across the declaration of the backing bean
+		class, and the XML in the configuration file. When using the @AspectJ style there is a single module -
+		the aspect - in which this information is encapsulated. Secondly, the XML style is slightly more limited in what
+		it can express than the @AspectJ style: only the "singleton" aspect instantiation model is supported, and it is
+		not possible to combine named pointcuts declared in XML. For example, in the @AspectJ style you can write
+		something like:</para>
+
+		<programlisting><![CDATA[  @Pointcut(execution(* get*()))
   public void propertyAccess() {}
 
   @Pointcut(execution(org.xyz.Account+ *(..))
@@ -2075,39 +2053,26 @@ public @interface Idempotent {
 
   @Pointcut(propertyAccess() && operationReturningAnAccount())
   public void accountPropertyAccess() {}]]></programlisting>
-  
-  	<para>In the XML style I certainly can declare the first two pointcuts:</para>
-  	
-	<programlisting><![CDATA[  <aop:pointcut id="propertyAccess" 
+
+		<para>In the XML style I can declare the first two pointcuts:</para>
+		<programlisting><![CDATA[  <aop:pointcut id="propertyAccess"
       expression="execution(* get*())"/>
 
-  <aop:pointcut id="operationReturningAnAccount" 
+  <aop:pointcut id="operationReturningAnAccount"
       expression="execution(org.xyz.Account+ *(..))"/>]]></programlisting>
 
-	<para>
-		The downside of the XML approach becomes evident in this case because I
-		cannot define the '<literal>accountPropertyAccess</literal>' pointcut by
-		combining these definitions.
-	</para>
-	
-	<para>
-		The @AspectJ style supports additional instantiation models, and richer
-		pointcut composition. It has the advantage of keeping the aspect as a
-		modular unit. It also has the advantage the @AspectJ aspects can be
-		understood both by Spring AOP and by AspectJ - so if you later decide
-		you need the capabilities of AspectJ to implement additional requirements
-		then it is very easy to migrate to an AspectJ based approach.
-	</para>
+		<para>The downside of the XML approach is that you cannot define the '<literal>accountPropertyAccess</literal>'
+		pointcut by combining these definitions.</para>
 
-	<para>So much for the pros and cons of each style then: which is best? If you are not using Java5
-	(or above) then clearly the XML-style is the best because it is the only option available to you.
-	If you are using Java5+, then you really will have to come to your own decision as to which style suits
-	you best. In the experience of the Spring team, we advocate the use of the @AspectJ style whenever
-	there are aspects that do more than simple "configuration" of enterprise services. If you are writing,
-	have written, or have access to an aspect that is not part of the business contract of a particular
-	class (such as a tracing aspect), then the XML-style is better.</para>
+		<para>The @AspectJ style supports additional instantiation models, and richer pointcut composition. It has the
+		advantage of keeping the aspect as a modular unit. It also has the advantage the @AspectJ aspects can be
+		understood (and thus consumed) both by Spring AOP and by AspectJ - so if you later decide you need the
+		capabilities of AspectJ to implement additional requirements then it is very easy to migrate to an
+		AspectJ-based approach. On balance the Spring team prefer the @AspectJ style whenever you have aspects that do
+		more than simple "configuration" of enterprise services.</para>
 
 	</section>
+
   </section>
   
   <section id="aop-mixing-styles">
@@ -2875,20 +2840,19 @@ public final class Main {
 				'<filename>META-INF/aop.xml</filename>' files, that are on the Java
 				classpath (either directly, or more typically in jar files).</para>
 
-				<para>The structure and contents of this file is detailed in the
-				main AspectJ reference documentation, and the interested reader is
-				referred to that resource. (I appreciate that this section is brief,
-				but the '<filename>aop.xml</filename>' file is 100% AspectJ - there
-				is no Spring-specific information or semantics that apply to it (and
-				so there is no extra value that I can contribute either as a result),
-				so rather than rehash the quite satisfactory section that the AspectJ
-				developers wrote, I am just directing you there.)</para>
+				<para>The structure and contents of this file is detailed in the main AspectJ reference documentation,
+				and the interested reader is
+				<link linkend="http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html">referred to that resource</link>.
+				(I appreciate that this section is brief, but the '<filename>aop.xml</filename>' file is 100% AspectJ
+				- there is no Spring-specific information or semantics that apply to it, and so there is no extra value
+				that I can contribute either as a result), so rather than rehash the quite satisfactory section that the
+				AspectJ developers wrote, I am just directing you there.)</para>
 			</section>
 
-			<section id="aop-aj-ltw-libaries">
-				<title>Required libaries (JARS)</title>
-				<para>At a minimum you will need the following libraries to
-				use the Spring Framework's support for AspectJ LTW:</para>
+			<section id="aop-aj-ltw-libraries">
+				<title>Required libraries (JARS)</title>
+				<para>At a minimum you will need the following libraries to use the Spring Framework's support for
+				AspectJ LTW:</para>
 				<orderedlist>
 					<listitem>
 						<para><filename class="libraryfile">spring.jar</filename> (version 2.1 or later)</para>
@@ -3118,24 +3082,22 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 
 			<section id="aop-aj-ltw-agents">
 				<title>Agents</title>
-				<para>[TODO - Work in Progress]</para>
+				<para><ulink url="http://opensource.atlassian.com/projects/spring/browse/SPR-3062">[TODO - Work in Progress]</ulink></para>
 			</section>
 
 			<section id="aop-aj-ltw-environments">
 				<title>Environment-specific configuration</title>
-				<para>This last section contains any additional settings
-				and configuration that you will need when using Spring's
-				LTW support in environments such as application- and
-				web-servers.</para>
+				<para>This last section contains any additional settings and configuration that you will need when using
+				Spring's LTW support in environments such as application- and web-servers.</para>
 
 				<section id="aop-aj-ltw-environments-tomcat">
 					<title>Tomcat</title>
-					<para>[TODO - Work in Progress]</para>
+					<para><ulink url="http://opensource.atlassian.com/projects/spring/browse/SPR-3062">[TODO - Work in Progress]</ulink></para>
 				</section>
 
 				<section id="aop-aj-ltw-environments-glassfish">
 					<title>GlassFish</title>
-					<para>[TODO - Work in Progress]</para>
+					<para><ulink url="http://opensource.atlassian.com/projects/spring/browse/SPR-3062">[TODO - Work in Progress]</ulink></para>
 				</section>
 
 			</section>

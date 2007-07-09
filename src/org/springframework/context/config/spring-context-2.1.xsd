@@ -130,14 +130,14 @@
 						<xsd:enumeration value="on">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
-	Switches AspectJ load-time weaving on.
+	Switches Spring-based AspectJ load-time weaving on.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:enumeration>
 						<xsd:enumeration value="off">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
-	Switches AspectJ load-time weaving off.
+	Switches Spring-based AspectJ load-time weaving off.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:enumeration>

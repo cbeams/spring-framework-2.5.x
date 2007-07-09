@@ -113,36 +113,32 @@
 					metadata. It is <emphasis>not</emphasis> however the only form of
 					configuration metadata that is allowed. The Spring IoC container itself
 					is <emphasis>totally</emphasis> decoupled from the format in which this
-					configuration metadata is actually written.
-					At the time of writing, you can supply this configuration metadata
-					using either XML, the Java properties format, or programmatically (using
-					Spring's public API). The XML-based configuration metadata format really is
-					simple though, and so the remainder of this chapter will use the XML format
-					to convey key concepts and features of the Spring IoC container.</para>
+					configuration metadata is actually written. The XML-based configuration metadata
+					format really is simple though, and so the majority of this chapter will use the
+					XML format to convey key concepts and features of the Spring IoC container.</para>
+					<para>You can find details of another form of metadata that the Spring container
+					can consume in the section entitled <xref linkend="beans-annotation-config"/></para>
 				</note>
 			</section>
 				<sidebar>
 					<title>Resources</title>
 					<para>
-						Once you have learned the basics of the IoC container (this chapter),
-						it will also be useful to learn about Spring's
-						<interfacename>Resource</interfacename> abstraction, as described in
-						<xref linkend="resources" />.
-					</para>
-					<para>
-						The location path or paths supplied to
-						an <interfacename>ApplicationContext</interfacename> constructor are
-						actually resource strings that allow the container to load
+						The location path or paths supplied to an <interfacename>ApplicationContext</interfacename>
+						constructor are actually resource strings that allow the container to load
 						configuration metadata from a variety of external resources such
 						as the local file system, from the Java <literal>CLASSPATH</literal>, etc.
 					</para>
+					<para>
+						Once you have learned about Spring's IoC container, you may wish to learn
+						a little more about Spring's <interfacename>Resource</interfacename>
+						abstraction, as described in the chapter entitled <xref linkend="resources" />.
+					</para>
 				</sidebar>
-				<para>Please be advised that in the vast majority of application scenarios,
-				explicit user code is not required to instantiate one or more instances
-				of a Spring IoC container. For example, in a web application scenario, a simple
-				eight (or so) lines of absolutely boilerplate J2EE web descriptor XML in the
-				<literal>web.xml</literal> file of the application will typically suffice
-				(see <xref linkend="context-create" />).</para>
+				<para>In the vast majority of application scenarios, explicit user code is not
+				required to instantiate one or more instances of a Spring IoC container. For
+				example, in a web application scenario, a simple eight (or so) lines of
+				boilerplate J2EE web descriptor XML in the <literal>web.xml</literal> file of the
+				application will typically suffice (see <xref linkend="context-create" />).</para>
 			</section>
             <para>Spring configuration consists of at least one bean definition that the
 			container must manage, but typically there will be more than one bean definition.
@@ -155,9 +151,8 @@
 			<interfacename>Action</interfacename> instances, infrastructure objects such as
 			Hibernate <interfacename>SessionFactories</interfacename>, JMS
 			<interfacename>Queues</interfacename>, and so forth. Typically one does not
-			configure fine-grained domain objects in the container, because it is usually ones
-			DAOs and business logic that is responsible for creating domain objects and/or loading
-			them from a database.</para>
+			configure fine-grained domain objects in the container, because it is usually the
+			responsibility of DAOs and business logic to create/load domain objects.</para>
 			<para>Find below an example of the basic structure of XML-based configuration metadata.</para>
 			<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -227,39 +222,34 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
         </section>
         <section id="beans-definition">
             <title>The beans</title>
-            <para>As mentioned previously, a Spring IoC container manages one or more
-            <emphasis>beans</emphasis>. These beans are created using the instructions
-            defined in the configuration metadata that has been supplied to the container
-            (typically in the form of XML <literal>&lt;bean/&gt;</literal> definitions).</para>
+            <para>A Spring IoC container manages one or more <emphasis>beans</emphasis>.
+			These beans are created using the configuration metadata that has been supplied
+			to the container (typically in the form of XML <literal>&lt;bean/&gt;</literal>
+			definitions).</para>
             <para>Within the container itself, these bean definitions are represented as
             <interfacename>BeanDefinition</interfacename> objects, which contain (among other
             information) the following metadata:</para>
 			<itemizedlist>
                 <listitem>
-                    <para><emphasis>a package-qualified class name:</emphasis> this is
-					normally the actual implementation class of the bean being defined.
-					However, if the bean is to be instantiated by invoking a
-					<literal>static</literal> <emphasis>factory</emphasis> method
-					instead of using a normal constructor, this will actually be the
-					class name of the factory class.</para>
+                    <para><emphasis>a package-qualified class name:</emphasis> typically
+					this is the actual implementation class of the bean being defined.</para>
                 </listitem>
                 <listitem>
                     <para>bean behavioral configuration elements, which state how the
-					bean should behave in the container (prototype or singleton,
-					autowiring mode, initialization and destruction callbacks, and so forth).</para>
+					bean should behave in the container (scope, lifecycle callbacks, and
+					so forth).</para>
                 </listitem>
                 <listitem>
-                    <para>constructor arguments and property values to set in the
-					newly created bean. An example would be the number of connections
-					to use in a bean that manages a connection pool (either specified
-					as a property or as a constructor argument), or the pool size
-					limit.</para>
+                    <para>references to other beans which are needed for the bean to do its work;
+					these references are also called <emphasis>collaborators</emphasis> or
+					<emphasis>dependencies</emphasis>.</para>
                 </listitem>
                 <listitem>
-                    <para>other beans which are needed for the bean to do its work, that is
-                    <emphasis>collaborators</emphasis> (also called dependencies).</para>
+                    <para>other configuration settings to set in the newly created object.
+					An example would be the number of connections to use in a bean that manages
+					a connection pool, or the size limit of the pool.</para>
                 </listitem>
-            </itemizedlist>
+			</itemizedlist>
             <para>The concepts listed above directly translate to a set of properties
 			that each bean definition consists of. Some of these properties are listed
 			below, along with a link to further documentation about each of them.</para>
@@ -343,8 +333,9 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
 			implementations also permit the registration of existing objects that have
 			been created outside the factory (by user code). The
 			<classname>DefaultListableBeanFactory</classname> class supports this
-			through the <methodname>registerSingleton(..)</methodname> method. Typical applications
-			solely work with beans defined through metadata bean definitions, though.</para>
+			through the <methodname>registerSingleton(..)</methodname> method.
+			(Typical applications solely work with beans defined through metadata bean
+			definitions though.)</para>
             <section id="beans-beanname">
                 <title>Naming beans</title>
                 <sidebar>
@@ -354,7 +345,7 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
 				    That is, bean names start with a lowercase letter, and are camel-cased
 				    from then on. Examples of such names would be (without quotes)
 				    <literal>'accountManager'</literal>, <literal>'accountService'</literal>,
-				    <literal>'userDao'</literal>, <literal>'loginController'</literal>, etc.</para>
+				    <literal>'userDao'</literal>, <literal>'loginController'</literal>, and so forth.</para>
 				    <para>Adopting a consistent way of naming your beans will go a long way towards
 				    making your configuration easier to read and understand; adopting such
 				    naming standards is not hard to do, and if you are using Spring AOP it
@@ -378,7 +369,7 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
 				separated by a comma (<literal>,</literal>), semicolon (<literal>;</literal>), or
 				whitespace in the <literal>'name'</literal> attribute.</para>
                 <para>Please note that you are not required to supply a name for a bean. If
-				no name is supplied explicitly, the container will generate a (unique) name
+				no name is supplied explicitly, the container will generate a unique name
 				for that bean. The motivations for not supplying a name for a bean will be
 				discussed later (one use case is <link linkend="beans-inner-beans">inner beans</link>).</para>
                 <section id="beans-beanname-alias">
@@ -394,8 +385,8 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
                     <para>Having to specify all aliases when the bean is actually defined is not
                     always adequate however. It is sometimes desirable to introduce an alias
                     for a bean which is defined elsewhere. In XML-based configuration metadata
-                    this may be accomplished via the use of the standalone
-                    <literal>&lt;alias/&gt;</literal> element. For example:</para>
+                    this may be accomplished via the use of the <literal>&lt;alias/&gt;</literal>
+					element.</para>
                     <programlisting><![CDATA[<alias name="fromName" alias="toName"/>]]></programlisting>
                     <para>In this case, a bean in the same container which is named
                     <literal>'fromName'</literal>, may also after the use of this alias
@@ -434,8 +425,8 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
                     <para>Notice the use of the <literal>$</literal> character in the name to
                     separate the inner class name from the outer class name.</para>
                 </sidebar>
-                <para>A bean definition can be seen as a recipe for creating one or more
-				actual objects. The container looks at the recipe for a named bean when
+                <para>A bean definition essentially is a recipe for creating one or more
+				objects. The container looks at the recipe for a named bean when
 				asked, and uses the configuration metadata encapsulated by that bean
 				definition to create (or acquire) an actual object.</para>
                 <para>If you are using XML-based configuration metadata, you can specify
@@ -447,7 +438,7 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
                 mandatory (see <xref linkend="beans-factory-class-instance-factory-method" /> and
 			    <xref linkend="beans-child-bean-definitions" /> for the two exceptions)
 			    and is used for one of two purposes. The class property specifies the
-			    class of the bean to be constructed in the much more common case where the
+			    class of the bean to be constructed in the common case where the
 			    container itself directly creates the bean by calling its constructor
 			    reflectively (somewhat equivalent to Java code using the
 			    <emphasis>'new'</emphasis> operator). In the less common case where the
@@ -482,7 +473,7 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
 <bean name="anotherExample" class="examples.ExampleBeanTwo"/>]]></programlisting>
                     <para>The mechanism for supplying arguments to the constructor (if required),
 				    or setting properties of the object instance after it has been constructed,
-				    will be described shortly.</para>
+				    <link linkend="beans-factory-collaborators">is described shortly</link>.</para>
                 </section>
                 <section id="beans-factory-class-static-factory-method">
                     <title>Instantiation using a static factory method</title>
@@ -606,8 +597,8 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 			<section id="beans-constructor-injection">
 				<title>Constructor Injection</title>
                 <para>
-					<emphasis>Constructor-based</emphasis> DI is realized by invoking a constructor
-					with a number of arguments, each representing a collaborator. Additionally,
+					<emphasis>Constructor-based</emphasis> DI is effected by invoking a constructor
+					with a number of arguments, each representing a dependency. Additionally,
 					calling a <literal>static</literal> factory method with specific arguments to
 					construct the bean, can be considered almost equivalent, and the rest of this
 					text will consider arguments to a constructor and arguments to a
@@ -617,7 +608,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 				</para>
 				<programlisting><![CDATA[public class SimpleMovieLister {
 
-    ]]><lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on the <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
+    ]]><lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on a <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
     private MovieFinder movieFinder;
 
     ]]><lineannotation>// a constructor so that the Spring container can 'inject' a <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
@@ -4005,7 +3996,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 		using beans in the Spring IoC container such as a Hibernate
 		<interfacename>SessionFactory</interfacename>) for each bean to use its own, non-singleton
 		Spring IoC container.</para>
-        <para>As another example, in a complex J2EE apps with multiple layers
+        <para>As another example, in complex J2EE apps with multiple layers
         (various JAR files, EJBs, and WAR files packaged as an EAR),
         with each layer having its own Spring IoC container definition
         (effectively forming a hierarchy), the preferred approach when
@@ -4019,7 +4010,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
         which consists of mostly identical bean definitions from lower layers,
         as there may be issues due to increased memory usage, issues with
         creating multiple copies of beans which take a long time to initialize
-        (e.g. a Hibernate <interfacename>SessionFactory</interfacename>), and
+        (for example a Hibernate <interfacename>SessionFactory</interfacename>), and
         possible issues due to side-effects. As an alternative, classes such as
         <literal><ulink url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink></literal>
         or
@@ -4414,61 +4405,7 @@ public class MovieFinderImpl implements MovieFinder {
         <link linkend="orm-jpa">Spring's JPA support</link> where load-time weaving may be
         necessary for JPA class transformation. Consult the
         <classname>LocalContainerEntityManagerFactoryBean</classname> javadoc for more detail.
-        The <literal>load-time-weaver</literal> element accepts the following attributes:</para>
-
-        <table id="context-load-time-weaver-attributes-tbl">
-            <title>Attributes of the <literal>load-time-weaver</literal> element</title>
-            <tgroup cols="2">
-                <colspec colname="c1" colwidth="2*" />
-                <colspec colname="c2" colwidth="4*" />
-                <thead>
-                    <row>
-                        <entry>Attributes</entry>
-                        <entry>Description</entry>
-                    </row>
-                </thead>
-                <tbody>
-                    <row>
-                        <entry>
-                            <para>weaver-class</para>
-                        </entry>
-                        <entry>
-                            <para>Fully-qualified class name of a
-                            <interfacename>LoadTimeWeaver</interfacename> implementation.
-                            If not specified, the weaver will be automatically determined
-                            based upon the <interfacename>ClassLoader</interfacename> used
-                            by the <interfacename>ApplicationContext</interfacename>.</para>
-                        </entry>
-                    </row>
-                    <row>
-                        <entry>
-                            <para>aspectj-weaving</para>
-                        </entry>
-                        <entry>
-                            <para><literal>'on'</literal> to enable, <literal>'off'</literal> to
-                            disable, or <literal>'auto'</literal> (the default) to decide based
-                            upon the presence of a <literal>META-INF/aop.xml</literal> resource.
-                            </para>
-                        </entry>
-                    </row>
-                </tbody>
-            </tgroup>
-        </table>
-
-        <note><para>Spring's <classname>DefaultContextLoadTimeWeaver</classname> is capable of
-        detecting Sun's GlassFish, Oracle's OC4J, Spring's VM agent, or any
-        <interfacename>ClassLoader</interfacename> supported by Spring's
-        <classname>ReflectiveLoadTimeWeaver</classname> (e.g. the
-        <classname>TomcatInstrumentableClassLoader</classname>).</para></note>
-
-        <para>With AspectJ load-time weaving enabled, the AspectJ class transformer will be
-        registered with Spring's <interfacename>LoadTimeWeaver</interfacename>. This behavior can
-        alternatively be effected through direct configuration of
-        <classname>ApsectJWeavingEnabler</classname> which is a
-        <interfacename>BeanFactoryPostProcessor</interfacename>. In either case, AspectJ's
-        <classname>ClassPreProcessorAgentAdapter</classname> is added to the
-        <property>classFileTransformers</property> of the load-time weaver. For more on
-        AspectJ load-time weaving, see the section entitled 
+        For more on AspectJ load-time weaving, see the section entitled 
         <xref linkend="aop-aj-ltw"/>.</para>
     </section>
     
