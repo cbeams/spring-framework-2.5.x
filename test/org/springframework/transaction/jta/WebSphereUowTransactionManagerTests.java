@@ -313,9 +313,10 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 	}
 
 	public void testNewTransactionWithCommitException() {
+		final RollbackException rex = new RollbackException();
 		MockUOWManager manager = new MockUOWManager() {
 			public void runUnderUOW(int type, boolean join, UOWAction action) throws UOWException {
-				throw new UOWException(new RollbackException());
+				throw new UOWException(rex);
 			}
 		};
 		WebSphereUowTransactionManager ptm = new WebSphereUowTransactionManager(manager);
@@ -338,6 +339,9 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 		}
 		catch (TransactionSystemException ex) {
 			// expected
+			assertTrue(ex.getCause() instanceof UOWException);
+			assertSame(rex, ex.getRootCause());
+			assertSame(rex, ex.getMostSpecificCause());
 		}
 
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
