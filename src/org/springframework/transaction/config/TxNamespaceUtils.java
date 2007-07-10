@@ -49,7 +49,7 @@ class TxNamespaceUtils {
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException("Unable to load Java 1.5 dependent class [" +
-					ANNOTATION_TRANSACTION_ATTRIBUTE_SOURCE_CLASS_NAME + "].", ex);
+					ANNOTATION_TRANSACTION_ATTRIBUTE_SOURCE_CLASS_NAME + "]", ex);
 		}
 	}
 
