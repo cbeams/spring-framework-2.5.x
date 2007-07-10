@@ -81,7 +81,7 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	public Throwable getRootCause() {
 		Throwable rootCause = getCause();
 		if (rootCause != null) {
-			while (rootCause.getCause() != null) {
+			while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
 				rootCause = rootCause.getCause();
 			}
 		}
