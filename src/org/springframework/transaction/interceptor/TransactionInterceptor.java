@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,14 @@ import org.springframework.transaction.support.CallbackPreferringPlatformTransac
 import org.springframework.transaction.support.TransactionCallback;
 
 /**
- * AOP Alliance MethodInterceptor providing declarative transaction
- * management using the common Spring transaction infrastructure.
+ * AOP Alliance MethodInterceptor for declarative transaction
+ * management using the common Spring transaction infrastructure
+ * ({@link org.springframework.transaction.PlatformTransactionManager}).
  *
- * <p>Derives from the TransactionAspectSupport class. That class contains
- * the necessary calls into Spring's underlying transaction API:
- * subclasses such as this are responsible for calling superclass methods
- * such as <code>createTransactionIfNecessary</code> in the correct order,
- * in the event of normal invocation return or an exception.
+ * <p>Derives from the {@link TransactionAspectSupport} class which
+ * contains the integration with Spring's underlying transaction API.
+ * TransactionInterceptor simply calls the relevant superclass methods
+ * such as {@link #createTransactionIfNecessary} in the correct order.
  *
  * <p>TransactionInterceptors are thread-safe.
  *
@@ -46,14 +46,13 @@ import org.springframework.transaction.support.TransactionCallback;
  * @author Juergen Hoeller
  * @see TransactionProxyFactoryBean
  * @see org.springframework.aop.framework.ProxyFactoryBean
- * @see org.springframework.transaction.interceptor.TransactionAspectSupport
- * @see org.springframework.transaction.PlatformTransactionManager
+ * @see org.springframework.aop.framework.ProxyFactory
  */
 public class TransactionInterceptor extends TransactionAspectSupport implements MethodInterceptor, Serializable {
 
 	/**
 	 * Create a new TransactionInterceptor.
-	 * Transaction manager and transaction attributes still need to be set.
+	 * <p>Transaction manager and transaction attributes still need to be set.
 	 * @see #setTransactionManager
 	 * @see #setTransactionAttributes(java.util.Properties)
 	 * @see #setTransactionAttributeSource(TransactionAttributeSource)
@@ -131,7 +130,12 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 								catch (Throwable ex) {
 									if (txAttr.rollbackOn(ex)) {
 										// A RuntimeException: will lead to a rollback.
-										throw new ThrowableHolderException(ex);
+										if (ex instanceof RuntimeException) {
+											throw (RuntimeException) ex;
+										}
+										else {
+											throw new ThrowableHolderException(ex);
+										}
 									}
 									else {
 										// A normal return value: will lead to a commit.
@@ -153,7 +157,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 				}
 			}
 			catch (ThrowableHolderException ex) {
-				throw ex.getThrowable();
+				throw ex.getCause();
 			}
 		}
 	}
@@ -196,8 +200,8 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 			this.throwable = throwable;
 		}
 
-		public Throwable getThrowable() {
-			return throwable;
+		public final Throwable getThrowable() {
+			return this.throwable;
 		}
 	}
 
@@ -215,8 +219,8 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 			this.throwable = throwable;
 		}
 
-		public Throwable getThrowable() {
-			return throwable;
+		public final Throwable getCause() {
+			return this.throwable;
 		}
 
 		public String toString() {
