@@ -17,6 +17,7 @@ Package org.springframework.beans
 * DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
 * added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
 * BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
+* PropertyPathFactoryBean supports a null property value (removed historic restriction there)
 * changed visibility of BeanDefinitionParserDelegate's "buildTypedStringValue(ForMap)" methods to protected
 
 Package org.springframework.core
@@ -35,12 +36,16 @@ Package org.springframework.jms
 
 Package org.springframework.jmx
 * MBeanExporter unregisters its MBeans in case of any kind of registration failure
+* revised reflective class loading to always use the correct ClassLoader
 
 Package org.springframework.orm
 * ExtendedEntityManagerCreator's "joinTransaction()" checks whether there is an externally managed local transaction
 
 Package org.springframework.scheduling
 * added "waitForTasksToCompleteOnShutdown" property to ScheduledExecutorFactoryBean
+
+Package org.springframework.transaction
+* TransactionInterceptor only uses ThrowableHolderException if necessary and makes sure to expose the cause in any case
 
 Package org.springframework.web
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
