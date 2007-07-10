@@ -15,6 +15,8 @@ Package org.springframework.aop
 * aop:aspectj-autoproxy's "proxy-target-class" attribute properly escalates class proxying (not overriding the setting)
 * ConfigBeanDefinitionParser turns "pointcut" attribute into inner bean definition (instead of ref to an anonymous bean)
 * fixed ConfigBeanDefinitionParser to properly handle empty pointcut/advice bean names in a tooling environment
+* added "getAspectClassLoader()" method to AspectInstanceFactory interface
+* revised reflective class loading to use the correct ClassLoader according to the OSGi bundle structure (if any)
 
 Package org.springframework.beans
 * URIEditor trims whitespace before parsing the URI (allowing for XML formatting with whitespace)
@@ -25,6 +27,7 @@ Package org.springframework.beans
 * BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
 * added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
 * exposed "registerDependentBean" method on ConfigurableBeanFactory interface
+* PropertyPathFactoryBean supports a null property value (removed historic restriction there)
 * added autowiring by type for arrays and collections (available for @Autowired, 'constructor' and 'byType' autowiring)
 * Autowired/CommonAnnotationBeanPostProcessor registers autowired beans as dependent on their injected target bean
 * changed visibility of BeanDefinitionParserDelegate's "buildTypedStringValue(ForMap)" methods to protected
@@ -33,6 +36,7 @@ Package org.springframework.context
 * AspectJWeavingEnabler implements Ordered, exposing HIGHEST_PRECEDENCE (executing before other factory post-processors)
 * moved AnnotationConfigUtils to "context.annotation" package (post-processor beans are a context-specific feature)
 * "context:annotation-config" XML tag activates JPA's @PersistenceContext and @PersistenceUnit as well (if available)
+* revised reflective class loading to use the correct ClassLoader according to the OSGi bundle structure (if any)
 
 Package org.springframework.core
 * added "isAtLeastJava16()" convenience method to JdkVersion class
@@ -42,6 +46,9 @@ Package org.springframework.core
 Package org.springframework.ejb
 * turned visibility of AbstractEnterpriseBean and AbstractSessionBean to public (showing up in the javadoc now)
 
+Package org.springframework.instrument
+* added "excludePackage" and "excludeClass" methods to ShadowingClassLoader, analogous to OverridingClassLoader
+
 Package org.springframework.jdbc
 * added exception translation based on SQLException sub-classes introduced in Java 6
 * added additional exceptions to divide hierarchy into Recoverable, Transient and NonTransient exceptions
@@ -50,9 +57,6 @@ Package org.springframework.jdbc
 * added HsqlSequenceMaxValueIncrementer to support sequences now added to HSQL
 * added H2SequenceMaxValueIncrementer to support sequences in H2 Database
 
-Package org.springframework.instrument
-* added "excludePackage" and "excludeClass" methods to ShadowingClassLoader, analogous to OverridingClassLoader
-
 Package org.springframework.jms
 * SingleConnectionFactory sets client ID before ExceptionListener (for providers with strict Connection state handling)
 * listener-container type "default102"/"simple102" leads to the implicit choice of MessageListenerAdapter102
@@ -60,6 +64,7 @@ Package org.springframework.jms
 Package org.springframework.jmx
 * MBeanExporter unregisters its MBeans in case of any kind of registration failure
 * MBeanExporter accepts bean name keys in NotificationListener mappings (in addition to ObjectName Strings)
+* revised reflective class loading to use the correct ClassLoader according to the OSGi bundle structure (if any)
 
 Package org.springframework.orm
 * added "prepareTransaction" method to JpaDialect interface, for preparing a JTA-joining EntityManager
@@ -80,6 +85,7 @@ Package org.springframework.scripting
 
 Package org.springframework.transaction
 * refined TransactionAspectSupport to allow for overriding the "getTransactionManager()" method in subclasses
+* TransactionInterceptor only uses ThrowableHolderException if necessary and makes sure to expose the cause in any case
 
 Package org.springframework.util
 * DefaultPropertiesPersister detects and uses JDK 1.6's "Properties.load/store" variants with Reader/Writer argument
