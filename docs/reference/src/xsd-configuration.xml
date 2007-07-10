@@ -906,14 +906,30 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 comes with your XML editor plugin (good luck there) and figure it out for yourself.</para>
             </step>
             <step>
-                <title>Step Three</title>
-                <para>However, if you are using the Web Tools Platform (WTP) for Eclipse, you don't need to
+                <title>Spring IDE</title>
+                <para>There is a dedicated Spring Framework plugin for Eclipse called
+				<ulink url="http://springide.org/blog/">Spring IDE</ulink> and it is pretty darn cool. (There's a
+				considered and non-biased opinion for you!) This plugin makes using Spring even easier, and it has more
+				than just support for the core Spring Framework... Spring WebFlow is supported too. Details of how to
+				install Spring IDE can be found on the
+				<ulink url="http://springide.org/project/wiki/SpringideInstall">Spring IDE installation page</ulink>.</para>
+		        <para>
+			        <mediaobject>
+				        <imageobject role="fo">
+					        <imagedata fileref="images/eclipse-setup-3.png" format="PNG" align="center" />
+				        </imageobject>
+				        <imageobject role="html">
+					        <imagedata fileref="images/eclipse-setup-3.png" format="PNG" align="center" />
+				        </imageobject>
+			        </mediaobject>
+		        </para>
+			</step>
+            <step>
+                <title>Web Tools Platform (WTP) for Eclipse</title>
+                <para>If you are using the Web Tools Platform (WTP) for Eclipse, you don't need to
                 do anything other than open a Spring XML configuration file using the WTP platform's
                 XML editor. As can be seen in the screenshot below, you immediately get some slick
-                IDE-level support for autocompleting tags and suchlike. The moral of this story
-                is... download and install the <ulink url="http://www.eclipse.org/webtools/">WTP</ulink>,
-                because (quite simply, and to paraphrase one of the Spring-WebFlow developers)...
-                <quote><emphasis>[WTP] rocks!</emphasis></quote></para>
+                IDE-level support for autocompleting tags and suchlike.</para>
 		        <para>
 			        <mediaobject>
 				        <imageobject role="fo">

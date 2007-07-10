@@ -41,15 +41,18 @@
                             <fo:block font-family="Helvetica" font-size="22pt" padding-before="10mm">
                                 <xsl:value-of select="bookinfo/subtitle"/> 
                             </fo:block>
-                            <fo:block font-family="Helvetica" font-size="12pt" padding="10mm">
-                                <xsl:value-of select="bookinfo/releaseinfo"/>  
+                            <fo:block font-family="Helvetica" font-size="14pt" padding="10mm">
+                                <xsl:value-of select="bookinfo/title"/>
+                            </fo:block>
+							<fo:block font-family="Helvetica" font-size="12pt" padding="10mm">
+                                <xsl:text>Version </xsl:text><xsl:value-of select="bookinfo/releaseinfo"/>  
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>
                     <fo:table-row>
                         <fo:table-cell text-align="center">
                             <fo:block font-family="Helvetica" font-size="14pt" padding="10mm">
-                                <xsl:value-of select="bookinfo/pubdate"/> 
+                                <xsl:value-of select="bookinfo/pubdate"/>
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>
