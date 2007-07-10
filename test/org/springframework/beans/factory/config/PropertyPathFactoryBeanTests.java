@@ -60,6 +60,12 @@ public class PropertyPathFactoryBeanTests extends TestCase {
 		assertTrue(result2 != result3);
 	}
 
+	public void testPropertyPathFactoryBeanWithNullResult() {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("propertyPath.xml", getClass()));
+		assertNull(xbf.getType("tb.spouse.spouse"));
+		assertNull(xbf.getBean("tb.spouse.spouse"));
+	}
+
 	public void testPropertyPathFactoryBeanAsInnerBean() {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("propertyPath.xml", getClass()));
 		TestBean spouse = (TestBean) xbf.getBean("otb.spouse");

@@ -19,7 +19,6 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -152,20 +151,20 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 		this.beanFactory = beanFactory;
 
 		if (this.targetBeanWrapper != null && this.targetBeanName != null) {
-			throw new IllegalArgumentException("Specify either targetObject or targetBeanName, not both");
+			throw new IllegalArgumentException("Specify either 'targetObject' or 'targetBeanName', not both");
 		}
 
 		if (this.targetBeanWrapper == null && this.targetBeanName == null) {
 			if (this.propertyPath != null) {
 				throw new IllegalArgumentException(
-				    "Specify targetObject or targetBeanName in combination with propertyPath");
+				    "Specify 'targetObject' or 'targetBeanName' in combination with 'propertyPath'");
 			}
 
 			// No other properties specified: check bean name.
 			int dotIndex = this.beanName.indexOf('.');
 			if (dotIndex == -1) {
 				throw new IllegalArgumentException(
-				    "Neither targetObject nor targetBeanName specified, and PropertyPathFactoryBean " +
+				    "Neither 'targetObject' nor 'targetBeanName' specified, and PropertyPathFactoryBean " +
 				    "bean name '" + this.beanName + "' does not follow 'beanName.property' syntax");
 			}
 			this.targetBeanName = this.beanName.substring(0, dotIndex);
@@ -174,7 +173,7 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 
 		else if (this.propertyPath == null) {
 			// either targetObject or targetBeanName specified
-			throw new IllegalArgumentException("propertyPath is required");
+			throw new IllegalArgumentException("'propertyPath' is required");
 		}
 
 		if (this.targetBeanWrapper == null && this.beanFactory.isSingleton(this.targetBeanName)) {
@@ -191,13 +190,7 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 			// Fetch prototype target bean...
 			target = new BeanWrapperImpl(this.beanFactory.getBean(this.targetBeanName));
 		}
-
-		Object value = target.getPropertyValue(this.propertyPath);
-		if (value == null) {
-			throw new FatalBeanException("PropertyPathFactoryBean is not allowed to return null, " +
-			    "but property value for path '" + this.propertyPath + "' is null");
-		}
-		return value;
+		return target.getPropertyValue(this.propertyPath);
 	}
 
 	public Class getObjectType() {
