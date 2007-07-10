@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.easymock.MockControl;
 
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.MockCallbackPreferringTransactionManager;
 import org.springframework.transaction.NoTransactionException;
@@ -135,6 +136,31 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 
 		checkTransactionStatus(false);
 		itb.getName();
+		checkTransactionStatus(false);
+
+		assertSame(txatt, ptm.getDefinition());
+		assertFalse(ptm.getStatus().isRollbackOnly());
+	}
+
+	public void testTransactionExceptionPropagatedWithCallbackPreference() throws Throwable {
+		TransactionAttribute txatt = new DefaultTransactionAttribute();
+
+		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
+		tas.register(exceptionalMethod, txatt);
+
+		MockCallbackPreferringTransactionManager ptm = new MockCallbackPreferringTransactionManager();
+
+		TestBean tb = new TestBean();
+		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
+
+		checkTransactionStatus(false);
+		try {
+			itb.exceptional(new OptimisticLockingFailureException(""));
+			fail("Should have thrown OptimisticLockingFailureException");
+		}
+		catch (OptimisticLockingFailureException ex) {
+			// expected
+		}
 		checkTransactionStatus(false);
 
 		assertSame(txatt, ptm.getDefinition());
