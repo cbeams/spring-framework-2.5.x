@@ -145,11 +145,25 @@ public abstract class JmxUtils {
 	 * @throws ClassNotFoundException if a parameter type could not be resolved
 	 */
 	public static Class[] parameterInfoToTypes(MBeanParameterInfo[] paramInfo) throws ClassNotFoundException {
+		return parameterInfoToTypes(paramInfo, ClassUtils.getDefaultClassLoader());
+	}
+
+	/**
+	 * Convert an array of <code>MBeanParameterInfo</code> into an array of
+	 * <code>Class</code> instances corresponding to the parameters.
+	 * @param paramInfo the JMX parameter info
+	 * @param classLoader the ClassLoader to use for loading parameter types
+	 * @return the parameter types as classes
+	 * @throws ClassNotFoundException if a parameter type could not be resolved
+	 */
+	public static Class[] parameterInfoToTypes(MBeanParameterInfo[] paramInfo, ClassLoader classLoader)
+			throws ClassNotFoundException {
+
 		Class[] types = null;
 		if (paramInfo != null && paramInfo.length > 0) {
 			types = new Class[paramInfo.length];
 			for (int x = 0; x < paramInfo.length; x++) {
-				types[x] = ClassUtils.forName(paramInfo[x].getType());
+				types[x] = ClassUtils.forName(paramInfo[x].getType(), classLoader);
 			}
 		}
 		return types;

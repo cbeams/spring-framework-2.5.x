@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.transaction.config;
 
 import org.springframework.core.Conventions;
+import org.springframework.core.JdkVersion;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -38,13 +39,17 @@ class TxNamespaceUtils {
 
 
 	public static Class getAnnotationTransactionAttributeSourceClass() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			throw new IllegalStateException(
+					"AnnotationTransactionAttributeSource is only available on Java 1.5 and higher");
+		}
 		try {
-			return ClassUtils.forName(ANNOTATION_TRANSACTION_ATTRIBUTE_SOURCE_CLASS_NAME);
+			return ClassUtils.forName(
+					ANNOTATION_TRANSACTION_ATTRIBUTE_SOURCE_CLASS_NAME, TxNamespaceUtils.class.getClassLoader());
 		}
 		catch (Throwable ex) {
-			throw new IllegalStateException(
-					"Unable to load class [" + ANNOTATION_TRANSACTION_ATTRIBUTE_SOURCE_CLASS_NAME +
-					"]. Are you running on Java 1.5+? Root cause: " + ex);
+			throw new IllegalStateException("Unable to load Java 1.5 dependent class [" +
+					ANNOTATION_TRANSACTION_ATTRIBUTE_SOURCE_CLASS_NAME + "].", ex);
 		}
 	}
 

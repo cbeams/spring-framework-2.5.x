@@ -25,7 +25,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.jndi.JndiLocatorSupport;
-import org.springframework.util.ClassUtils;
 
 /**
  * FactoryBean that obtains a specified WebLogic {@link javax.management.MBeanServer}
@@ -91,7 +90,7 @@ public class WebLogicJndiMBeanServerFactoryBean extends JndiLocatorSupport
 				/*
 				 * jndiName = MBeanHome.LOCAL_JNDI_NAME;
 				 */
-				Class mbeanHomeClass = ClassUtils.forName(WEBLOGIC_MBEAN_HOME_CLASS);
+				Class mbeanHomeClass = getClass().getClassLoader().loadClass(WEBLOGIC_MBEAN_HOME_CLASS);
 				jndiName = (String) mbeanHomeClass.getField(LOCAL_JNDI_NAME_FIELD).get(null);
 			}
 			Object mbeanHome = lookup(jndiName);

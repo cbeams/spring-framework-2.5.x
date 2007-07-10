@@ -50,10 +50,11 @@ public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 		BeanDefinitionParser parser = null;
 		if (JdkVersion.isAtLeastJava15()) {
 			try {
-				parser = (BeanDefinitionParser) ClassUtils.forName(parserClassName).newInstance();
+				Class parserClass = ClassUtils.forName(parserClassName, getClass().getClassLoader());
+				parser = (BeanDefinitionParser) parserClass.newInstance();
 			}
-			catch (Exception ex) {
-				throw new IllegalStateException("Unable to create JDK 1.5 dependent parser: " + parserClassName, ex);
+			catch (Throwable ex) {
+				throw new IllegalStateException("Unable to create Java 1.5 dependent parser: " + parserClassName, ex);
 			}
 		}
 		else {

@@ -129,7 +129,8 @@ public abstract class AopConfigUtils {
 
 	private static Class getAspectJAnnotationAutoProxyCreatorClassIfPossible() {
 		try {
-			return ClassUtils.forName(ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME);
+			return ClassUtils.forName(
+					ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME, AopConfigUtils.class.getClassLoader());
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException(
