@@ -1,11 +1,11 @@
-Export-Package: org.springframework*;version=${spring-version}
+Export-Package: org.springframework*;version=${spring-version-osgi}
 Import-Package: org.apache.commons.logging*, \
   javax.transaction*;version=${tx-version};resolution:=optional, \
   org.objectweb.asm*;version=${asm-version};resolution:=optional, \
   *;resolution:=optional
 
 Dynamic-Import: *
-Bundle-Version: ${spring-version}
+Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 
 

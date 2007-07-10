@@ -1,9 +1,9 @@
-Export-Package: org.springframework*;version=${spring-version}
+Export-Package: org.springframework*;version=${spring-version-osgi}
 Import-Package: org.apache.commons.logging*, \
-  org.springframework.dao*;version=${spring-version}, \
+  org.springframework.dao*;version=${spring-version-osgi}, \
   javax.transaction*;version=${tx-version};resolution:=optional, \
   *;resolution:=optional
-Bundle-Version: ${spring-version}
+Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-jdbc
 
