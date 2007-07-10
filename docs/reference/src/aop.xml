@@ -3035,7 +3035,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 				summarised below, with the default value if the attribute is not
 				present being ' <literal>autodetect</literal>'</para>
 
-				<table pgwide="1" id="aop-aj-ltw-spring-env-impls">
+				<table pgwide="1" id="aop-aj-ltw-ltw-tag-attrs">
 					<title>'<literal>aspectj-weaving</literal>' attribute values</title>
 					<tgroup cols="2">
 						<colspec align="left"/>
