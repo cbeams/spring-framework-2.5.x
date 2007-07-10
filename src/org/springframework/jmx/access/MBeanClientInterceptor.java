@@ -46,11 +46,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.util.ClassUtils;
 
 /**
  * <code>MethodInterceptor</code> implementation that routes calls to an MBean
@@ -76,7 +78,8 @@ import org.springframework.jmx.support.ObjectNameManager;
  * @see MBeanProxyFactoryBean
  * @see #setConnectOnStartup
  */
-public class MBeanClientInterceptor implements MethodInterceptor, InitializingBean, DisposableBean {
+public class MBeanClientInterceptor
+		implements MethodInterceptor, BeanClassLoaderAware, InitializingBean, DisposableBean {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -92,6 +95,8 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	private ObjectName objectName;
 
 	private boolean useStrictCasing = true;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private JMXConnector connector;
 
@@ -156,6 +161,9 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 		this.useStrictCasing = useStrictCasing;
 	}
 
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
+	}
 
 	/**
 	 * Ensures that an <code>MBeanServerConnection</code> is configured and attempts to
@@ -236,9 +244,8 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 
 			for (int x = 0; x < operationInfo.length; x++) {
 				MBeanOperationInfo opInfo = operationInfo[x];
-				this.allowedOperations.put(
-						new MethodCacheKey(
-								opInfo.getName(), JmxUtils.parameterInfoToTypes(opInfo.getSignature())), opInfo);
+				Class[] paramTypes = JmxUtils.parameterInfoToTypes(opInfo.getSignature(), this.beanClassLoader);
+				this.allowedOperations.put(new MethodCacheKey(opInfo.getName(), paramTypes), opInfo);
 			}
 		}
 		catch (ClassNotFoundException ex) {
@@ -387,31 +394,19 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	 */
 	private static class MethodCacheKey {
 
-		/**
-		 * the name of the method
-		 */
 		private final String name;
 
-		/**
-		 * the arguments in the method signature.
-		 */
-		private final Class[] parameters;
+		private final Class[] parameterTypes;
 
 		/**
 		 * Create a new instance of <code>MethodCacheKey</code> with the supplied
 		 * method name and parameter list.
-		 *
-		 * @param name the name of the method.
-		 * @param parameters the arguments in the method signature.
+		 * @param name the name of the method
+		 * @param parameterTypes the arguments in the method signature
 		 */
-		public MethodCacheKey(String name, Class[] parameters) {
+		public MethodCacheKey(String name, Class[] parameterTypes) {
 			this.name = name;
-			if (parameters == null) {
-				this.parameters = new Class[]{};
-			}
-			else {
-				this.parameters = parameters;
-			}
+			this.parameterTypes = (parameterTypes != null ? parameterTypes : new Class[0]);
 		}
 
 		public boolean equals(Object other) {
@@ -424,7 +419,7 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 			MethodCacheKey otherKey = null;
 			if (other instanceof MethodCacheKey) {
 				otherKey = (MethodCacheKey) other;
-				return this.name.equals(otherKey.name) && Arrays.equals(this.parameters, otherKey.parameters);
+				return this.name.equals(otherKey.name) && Arrays.equals(this.parameterTypes, otherKey.parameterTypes);
 			}
 			else {
 				return false;

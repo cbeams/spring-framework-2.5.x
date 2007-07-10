@@ -28,6 +28,7 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -138,17 +139,21 @@ public abstract class AopNamespaceUtils {
 	}
 
 	private static Class getAspectJAutoProxyCreatorClassIfPossible() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			throw new IllegalStateException(
+					"AnnotationAwareAspectJAutoProxyCreator is only available on Java 1.5 and higher");
+		}
 		try {
-			return ClassUtils.forName(ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME);
+			return ClassUtils.forName(
+					ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME, AopNamespaceUtils.class.getClassLoader());
 		}
 		catch (Throwable ex) {
-			throw new IllegalStateException(
-					"Unable to load class [" + ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME +
-					"]. Are you running on Java 1.5+? Root cause: " + ex);
+			throw new IllegalStateException("Unable to load Java 1.5 dependent class [" +
+					ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME + "]", ex);
 		}
 	}
 
-	private static final int findPriorityForClass(String className) {
+	private static int findPriorityForClass(String className) {
 		Assert.notNull(className, "Class name must not be null");
 		for (int i = 0; i < APC_PRIORITY_LIST.size(); i++) {
 			String str = (String) APC_PRIORITY_LIST.get(i);
