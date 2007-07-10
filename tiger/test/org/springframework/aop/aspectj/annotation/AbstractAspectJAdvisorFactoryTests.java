@@ -677,21 +677,25 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 
 		private int count;
 
+		public int getInstantiationCount() {
+			return this.count;
+		}
+
 		public Object getAspectInstance() {
-			++count;
+			++this.count;
 			return new PerTypeWithinAspect();
 		}
 
-		public int getInstantiationCount() {
-			return count;
-		}
-
-		public int getOrder() {
-			return Ordered.LOWEST_PRECEDENCE;
+		public ClassLoader getAspectClassLoader() {
+			return PerTypeWithinAspect.class.getClassLoader();
 		}
 
 		public AspectMetadata getAspectMetadata() {
 			return new AspectMetadata(PerTypeWithinAspect.class, "perTypeWithin");
+		}
+
+		public int getOrder() {
+			return Ordered.LOWEST_PRECEDENCE;
 		}
 	}
 

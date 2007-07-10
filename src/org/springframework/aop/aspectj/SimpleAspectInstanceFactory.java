@@ -61,6 +61,10 @@ public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
 		}
 	}
 
+	public ClassLoader getAspectClassLoader() {
+		return this.aspectClass.getClassLoader();
+	}
+
 	/**
 	 * Determine the order for this factory's aspect instance,
 	 * either an instance-specific order expressed through implementing

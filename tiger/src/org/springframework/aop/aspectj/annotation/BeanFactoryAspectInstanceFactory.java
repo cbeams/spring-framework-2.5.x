@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.aop.aspectj.annotation;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.util.ClassUtils;
 
 /**
  * AspectInstanceFactory backed by a Spring
@@ -72,6 +74,15 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 
 	public Object getAspectInstance() {
 		return this.beanFactory.getBean(this.name);
+	}
+
+	public ClassLoader getAspectClassLoader() {
+		if (this.beanFactory instanceof ConfigurableBeanFactory) {
+			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
+		}
+		else {
+			return ClassUtils.getDefaultClassLoader();
+		}
 	}
 
 	public AspectMetadata getAspectMetadata() {

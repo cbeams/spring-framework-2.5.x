@@ -48,6 +48,10 @@ public class SingletonAspectInstanceFactory implements AspectInstanceFactory {
 		return this.aspectInstance;
 	}
 
+	public ClassLoader getAspectClassLoader() {
+		return this.aspectInstance.getClass().getClassLoader();
+	}
+
 	/**
 	 * Determine the order for this factory's aspect instance,
 	 * either an instance-specific order expressed through implementing

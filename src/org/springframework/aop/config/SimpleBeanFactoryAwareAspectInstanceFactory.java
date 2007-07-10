@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package org.springframework.aop.config;
 import org.springframework.aop.aspectj.AspectInstanceFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.Ordered;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -48,7 +50,7 @@ public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstan
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 		if (!StringUtils.hasText(this.aspectBeanName)) {
-			throw new IllegalArgumentException("aspectBeanName is required");
+			throw new IllegalArgumentException("'aspectBeanName' is required");
 		}
 	}
 
@@ -59,6 +61,15 @@ public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstan
 	 */
 	public Object getAspectInstance() {
 		return this.beanFactory.getBean(this.aspectBeanName);
+	}
+
+	public ClassLoader getAspectClassLoader() {
+		if (this.beanFactory instanceof ConfigurableBeanFactory) {
+			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
+		}
+		else {
+			return ClassUtils.getDefaultClassLoader();
+		}
 	}
 
 	public int getOrder() {

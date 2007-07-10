@@ -198,6 +198,13 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		return this.aspectInstanceFactory;
 	}
 
+	/**
+	 * Return the ClassLoader for aspect instances.
+	 */
+	public final ClassLoader getAspectClassLoader() {
+		return this.aspectInstanceFactory.getAspectClassLoader();
+	}
+
 	public int getOrder() {
 		return this.aspectInstanceFactory.getOrder();
 	}
@@ -261,7 +268,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		else {
 			// assume a type
 			try {
-				this.discoveredReturningType = ClassUtils.forName(name);
+				this.discoveredReturningType = ClassUtils.forName(name, getAspectClassLoader());
 			}
 			catch (Throwable ex) {
 				throw new IllegalArgumentException("Returning name '" + name  +
@@ -295,7 +302,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		else {
 			// assume a type
 			try {
-				this.discoveredThrowingType = ClassUtils.forName(name);
+				this.discoveredThrowingType = ClassUtils.forName(name, getAspectClassLoader());
 			}
 			catch (Throwable ex) {
 				throw new IllegalArgumentException("Throwing name '" + name  +
