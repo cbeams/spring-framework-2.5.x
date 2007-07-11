@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.springframework.util.StringUtils;
  * Utility class offering convenient methods for invoking a {@link Validator}
  * and for rejecting empty fields.
  * 
- * <p>Checks for an empty field in <code>Validator</code> implementations
- * can thus become one-liners.
+ * <p>Checks for an empty field in <code>Validator</code> implementations can become
+ * one-liners when using {@link #rejectIfEmpty} or {@link #rejectIfEmptyOrWhitespace}.
  *
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
@@ -57,8 +57,8 @@ public abstract class ValidationUtils {
 			logger.debug("Invoking validator [" + validator + "]");
 		}
 		if (obj != null && !validator.supports(obj.getClass())) {
-			throw new IllegalArgumentException("Validator " + validator.getClass() +
-					" does not support " + obj.getClass());
+			throw new IllegalArgumentException(
+					"Validator [" + validator.getClass() + "] does not support [" + obj.getClass() + "]");
 		}
 		validator.validate(obj, errors);
 		if (logger.isDebugEnabled()) {
@@ -70,7 +70,8 @@ public abstract class ValidationUtils {
 			}
 		}
 	}
-	
+
+
 	/**
 	 * Reject the given field with the given error code if the value is empty.
 	 * <p>An 'empty' value in this context means either <code>null</code> or
@@ -101,6 +102,24 @@ public abstract class ValidationUtils {
 	 */
 	public static void rejectIfEmpty(Errors errors, String field, String errorCode, String defaultMessage) {
 		rejectIfEmpty(errors, field, errorCode, null, defaultMessage);
+	}
+
+	/**
+	 * Reject the given field with the given error codea nd error arguments
+	 * if the value is empty.
+	 * <p>An 'empty' value in this context means either <code>null</code> or
+	 * the empty string "".
+	 * <p>The object whose field is being validated does not need to be passed
+	 * in because the {@link Errors} instance can resolve field values by itself
+	 * (it will usually hold an internal reference to the target object).
+	 * @param errors the <code>Errors</code> instance to register errors on
+	 * @param field the field name to check
+	 * @param errorCode the error code, interpretable as message key
+	 * @param errorArgs the error arguments, for argument binding via MessageFormat
+	 * (can be <code>null</code>)
+	 */
+	public static void rejectIfEmpty(Errors errors, String field, String errorCode, Object[] errorArgs) {
+		rejectIfEmpty(errors, field, errorCode, errorArgs, null);
 	}
 
 	/**
@@ -161,6 +180,26 @@ public abstract class ValidationUtils {
 			Errors errors, String field, String errorCode, String defaultMessage) {
 
 		rejectIfEmptyOrWhitespace(errors, field, errorCode, null, defaultMessage);
+	}
+
+	/**
+	 * Reject the given field with the given error code and error arguments
+	 * if the value is empty or just contains whitespace.
+	 * <p>An 'empty' value in this context means either <code>null</code>,
+	 * the empty string "", or consisting wholly of whitespace.
+	 * <p>The object whose field is being validated does not need to be passed
+	 * in because the {@link Errors} instance can resolve field values by itself
+	 * (it will usually hold an internal reference to the target object).
+	 * @param errors the <code>Errors</code> instance to register errors on
+	 * @param field the field name to check
+	 * @param errorCode the error code, interpretable as message key
+	 * @param errorArgs the error arguments, for argument binding via MessageFormat
+	 * (can be <code>null</code>)
+	 */
+	public static void rejectIfEmptyOrWhitespace(
+			Errors errors, String field, String errorCode, Object[] errorArgs) {
+
+		rejectIfEmptyOrWhitespace(errors, field, errorCode, errorArgs, null);
 	}
 
 	/**
