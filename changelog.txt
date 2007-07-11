@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M3 (2007-07-12)
+Changes in version 2.1 M3 (2007-07-16)
 --------------------------------------
 
 Package org.springframework.aop
@@ -30,12 +30,15 @@ Package org.springframework.beans
 * PropertyPathFactoryBean supports a null property value (removed historic restriction there)
 * added autowiring by type for arrays and collections (available for @Autowired, 'constructor' and 'byType' autowiring)
 * Autowired/CommonAnnotationBeanPostProcessor registers autowired beans as dependent on their injected target bean
+* added "registerBeanComponent" convenience method to ParserContext
 * changed visibility of BeanDefinitionParserDelegate's "buildTypedStringValue(ForMap)" methods to protected
 
 Package org.springframework.context
 * AspectJWeavingEnabler implements Ordered, exposing HIGHEST_PRECEDENCE (executing before other factory post-processors)
 * moved AnnotationConfigUtils to "context.annotation" package (post-processor beans are a context-specific feature)
 * "context:annotation-config" XML tag activates JPA's @PersistenceContext and @PersistenceUnit as well (if available)
+* AnnotationConfig/ComponentScanBeanDefinitionParser sends component registration for each registered BeanPostProcessor
+* "context:spring-configured" registers its bean configurer aspect with a fixed internal bean name
 * revised reflective class loading to use the correct ClassLoader according to the OSGi bundle structure (if any)
 
 Package org.springframework.core
@@ -74,6 +77,7 @@ Package org.springframework.orm
 
 Package org.springframework.remoting
 * RmiClientInterceptor and JaxRpcClientInterceptor propagate any kind of declared RemoteException as-is
+* (Jndi)RmiClientInterceptor resets stub before a refresh attempt, avoiding race condition in case of registry restart
 * JndiRmiClientInterceptor wraps CORBA SystemExceptions in RemoteExceptions (if declared)
 
 Package org.springframework.scheduling
@@ -86,14 +90,19 @@ Package org.springframework.scripting
 Package org.springframework.transaction
 * refined TransactionAspectSupport to allow for overriding the "getTransactionManager()" method in subclasses
 * TransactionInterceptor only uses ThrowableHolderException if necessary and makes sure to expose the cause in any case
+* "tx:annotation-driven" registers its transaction aspect with a fixed internal bean name
 
 Package org.springframework.util
 * DefaultPropertiesPersister detects and uses JDK 1.6's "Properties.load/store" variants with Reader/Writer argument
+
+Package org.springframework.validation
+* added overloaded "rejectIfEmpty(OrWhitespace)" methods with args but without default message to ValidationUtils
 
 Package org.springframework.web
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
 * added "postProcessWeb/PortletApplicationContext" method to FrameworkServlet/Portlet
 * DispatcherServlet/Portlet's "noHandlerFound" declares Exception instead of just IOException/PortletException
+* AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
 
 
