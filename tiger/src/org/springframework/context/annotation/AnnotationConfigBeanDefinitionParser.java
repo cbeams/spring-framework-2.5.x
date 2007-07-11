@@ -16,9 +16,13 @@
 
 package org.springframework.context.annotation;
 
+import java.util.Set;
+
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 
@@ -33,8 +37,11 @@ import org.springframework.beans.factory.xml.ParserContext;
 public class AnnotationConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(
+		Set<BeanDefinitionHolder> beanDefinitions = AnnotationConfigUtils.registerAnnotationConfigProcessors(
 				parserContext.getRegistry(), parserContext.extractSource(element));
+		for (BeanDefinitionHolder beanDefinition : beanDefinitions) {
+			parserContext.registerComponent(new BeanComponentDefinition(beanDefinition));
+		}
 		return null;
 	}
 
