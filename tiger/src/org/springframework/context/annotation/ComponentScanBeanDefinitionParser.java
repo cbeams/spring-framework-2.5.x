@@ -155,7 +155,11 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 		// Register annotation config processors, if necessary.
 		if (annotationConfig) {
-			AnnotationConfigUtils.registerAnnotationConfigProcessors(parserContext.getRegistry(), source);
+			Set<BeanDefinitionHolder> processorDefinitions =
+					AnnotationConfigUtils.registerAnnotationConfigProcessors(parserContext.getRegistry(), source);
+			for (BeanDefinitionHolder processorDefinition : processorDefinitions) {
+				parserContext.registerComponent(new BeanComponentDefinition(processorDefinition));
+			}
 		}
 
 		return null;
