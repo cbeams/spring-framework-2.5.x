@@ -19,7 +19,8 @@ package org.springframework.context.config;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 
@@ -28,24 +29,27 @@ import org.springframework.beans.factory.xml.ParserContext;
  * <code>&lt;context:spring-configured/&gt;</code> tag.
  *
  * @author Juergen Hoeller
- * @author Rob Harrop
  * @since 2.1
  */
 class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
-	private static final String BEAN_CONFIGURER_CLASS_NAME =
-			"org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect";
+	/**
+	 * The bean name of the internally managed bean configurer aspect.
+	 */
+	public static final String BEAN_CONFIGURER_ASPECT_BEAN_NAME =
+			"org.springframework.context.config.internalBeanConfigurerAspect";
 
-	private boolean registered;
+	private static final String BEAN_CONFIGURER_ASPECT_CLASS_NAME =
+			"org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect";
 
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		if (!this.registered) {
-			BeanDefinitionBuilder builder =
-					BeanDefinitionBuilder.rootBeanDefinition(BEAN_CONFIGURER_CLASS_NAME, "aspectOf");
-			builder.setSource(parserContext.extractSource(element));
-			parserContext.getReaderContext().registerWithGeneratedName(builder.getBeanDefinition());
-			this.registered = true;
+		if (!parserContext.getRegistry().containsBeanDefinition(BEAN_CONFIGURER_ASPECT_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition();
+			def.setBeanClassName(BEAN_CONFIGURER_ASPECT_CLASS_NAME);
+			def.setFactoryMethodName("aspectOf");
+			def.setSource(parserContext.extractSource(element));
+			parserContext.registerBeanComponent(new BeanComponentDefinition(def, BEAN_CONFIGURER_ASPECT_BEAN_NAME));
 		}
 		return null;
 	}

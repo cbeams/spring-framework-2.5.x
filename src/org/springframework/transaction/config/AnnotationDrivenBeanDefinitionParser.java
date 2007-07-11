@@ -21,10 +21,9 @@ import org.w3c.dom.Element;
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
@@ -40,39 +39,56 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  * '<code>proxy-target-class</code>' attribute to '<code>true</code>', which
  * will result in class-based proxies being created.
  *
- * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 2.0
  */
-class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser {
+class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
+
+	/**
+	 * The bean name of the internally managed transaction advisor (mode="proxy").
+	 */
+	public static final String TRANSACTION_ADVISOR_BEAN_NAME =
+			"org.springframework.transaction.config.internalTransactionAdvisor";
+
+	/**
+	 * The bean name of the internally managed transaction aspect (mode="aspectj").
+	 */
+	public static final String TRANSACTION_ASPECT_BEAN_NAME =
+			"org.springframework.transaction.config.internalTransactionAspect";
 
 	private static final String TRANSACTION_ASPECT_CLASS_NAME =
 			"org.springframework.transaction.aspectj.AnnotationTransactionAspect";
 
 
 	/**
-	 * Parses the '<code>&lt;tx:annotation-driven/&gt;</code>' tag.
-	 * <p>Will {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary register an AutoProxyCreator}
+	 * Parses the '<code>&lt;tx:annotation-driven/>&gt;</code>' tag. Will
+	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary register an AutoProxyCreator}
 	 * with the container as necessary.
 	 */
-	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		String mode = element.getAttribute("mode");
 		if ("aspectj".equals(mode)) {
-			BeanDefinitionBuilder builder =
-					BeanDefinitionBuilder.rootBeanDefinition(TRANSACTION_ASPECT_CLASS_NAME, "aspectOf");
-			String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
-			builder.addPropertyValue(
-					TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
-			return builder.getBeanDefinition();
+			// mode="aspectj"
+			registerTransactionAspect(element, parserContext);
 		}
 		else {
 			// mode="proxy"
-			return AopAutoProxyConfigurer.configureAutoProxyCreator(element, parserContext);
+			AopAutoProxyConfigurer.configureAutoProxyCreator(element, parserContext);
 		}
+		return null;
 	}
 
-	protected boolean shouldGenerateId() {
-		return true;
+	private void registerTransactionAspect(Element element, ParserContext parserContext) {
+		if (!parserContext.getRegistry().containsBeanDefinition(TRANSACTION_ASPECT_BEAN_NAME)) {
+			RootBeanDefinition def = new RootBeanDefinition();
+			def.setBeanClassName(TRANSACTION_ASPECT_CLASS_NAME);
+			def.setFactoryMethodName("aspectOf");
+			String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
+			def.getPropertyValues().addPropertyValue(
+					TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
+			parserContext.registerBeanComponent(new BeanComponentDefinition(def, TRANSACTION_ASPECT_BEAN_NAME));
+		}
 	}
 
 
@@ -81,29 +97,32 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 	 */
 	private static class AopAutoProxyConfigurer {
 
-		public static AbstractBeanDefinition configureAutoProxyCreator(Element element, ParserContext parserContext) {
+		public static void configureAutoProxyCreator(Element element, ParserContext parserContext) {
 			AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext, element);
 
-			// Create the TransactionInterceptor definition.
-			RootBeanDefinition interceptorDefinition = new RootBeanDefinition(TransactionInterceptor.class);
-			interceptorDefinition.setSource(parserContext.extractSource(element));
-			interceptorDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
-			interceptorDefinition.getPropertyValues().addPropertyValue(
-					TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
-			Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();
-			interceptorDefinition.getPropertyValues().addPropertyValue(
-					TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(sourceClass));
+			if (!parserContext.getRegistry().containsBeanDefinition(TRANSACTION_ADVISOR_BEAN_NAME)) {
+				// Create the TransactionInterceptor definition.
+				RootBeanDefinition interceptorDef = new RootBeanDefinition(TransactionInterceptor.class);
+				interceptorDef.setSource(parserContext.extractSource(element));
+				interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+				String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
+				interceptorDef.getPropertyValues().addPropertyValue(
+						TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
+				Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();
+				interceptorDef.getPropertyValues().addPropertyValue(
+						TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(sourceClass));
 
-			// Create the TransactionAttributeSourceAdvisor definition.
-			RootBeanDefinition advisorDefinition = new RootBeanDefinition(TransactionAttributeSourceAdvisor.class);
-			advisorDefinition.setSource(parserContext.extractSource(element));
-			advisorDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			advisorDefinition.getPropertyValues().addPropertyValue("transactionInterceptor", interceptorDefinition);
-			if (element.hasAttribute("order")) {
-				advisorDefinition.getPropertyValues().addPropertyValue("order", element.getAttribute("order"));
+				// Create the TransactionAttributeSourceAdvisor definition.
+				RootBeanDefinition advisorDef = new RootBeanDefinition(TransactionAttributeSourceAdvisor.class);
+				advisorDef.setSource(parserContext.extractSource(element));
+				advisorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+				advisorDef.getPropertyValues().addPropertyValue("transactionInterceptor", interceptorDef);
+				if (element.hasAttribute("order")) {
+					advisorDef.getPropertyValues().addPropertyValue("order", element.getAttribute("order"));
+				}
+
+				parserContext.registerBeanComponent(new BeanComponentDefinition(advisorDef, TRANSACTION_ADVISOR_BEAN_NAME));
 			}
-			return advisorDefinition;
 		}
 	}
 
