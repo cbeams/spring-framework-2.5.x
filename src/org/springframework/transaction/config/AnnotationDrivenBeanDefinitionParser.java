@@ -19,13 +19,10 @@ package org.springframework.transaction.config;
 import org.w3c.dom.Element;
 
 import org.springframework.aop.config.AopNamespaceUtils;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -52,14 +49,6 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 	private static final String TRANSACTION_ASPECT_CLASS_NAME =
 			"org.springframework.transaction.aspectj.AnnotationTransactionAspect";
 
-
-	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) throws BeanDefinitionStoreException {
-		return super.resolveId(element, definition, parserContext);
-	}
-
-	protected void registerBeanDefinition(BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
-		super.registerBeanDefinition(definition, registry);
-	}
 
 	/**
 	 * Parses the '<code>&lt;tx:annotation-driven/>&gt;</code>' tag. Will
