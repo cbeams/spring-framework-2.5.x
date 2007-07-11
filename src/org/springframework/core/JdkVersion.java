@@ -130,7 +130,7 @@ public abstract class JdkVersion {
 
 	/**
 	 * Convenience method to determine if the current JVM is at least
-	 * Java 1.6 (Java ).
+	 * Java 1.6 (Java 6).
 	 * @return <code>true</code> if the current JVM is at least Java 1.6
 	 * @see #getMajorJavaVersion()
 	 * @see #JAVA_16
