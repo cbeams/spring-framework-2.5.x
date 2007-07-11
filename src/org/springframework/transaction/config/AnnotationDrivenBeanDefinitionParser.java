@@ -51,9 +51,9 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 
 
 	/**
-	 * Parses the '<code>&lt;tx:annotation-driven/>&gt;</code>' tag. Will
-	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary register an AutoProxyCreator} in
-	 * the container as necessary.
+	 * Parses the '<code>&lt;tx:annotation-driven/&gt;</code>' tag.
+	 * <p>Will {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary register an AutoProxyCreator}
+	 * with the container as necessary.
 	 */
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		String mode = element.getAttribute("mode");
