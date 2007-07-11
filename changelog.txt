@@ -41,14 +41,21 @@ Package org.springframework.jmx
 Package org.springframework.orm
 * ExtendedEntityManagerCreator's "joinTransaction()" checks whether there is an externally managed local transaction
 
+Package org.springframework.remoting
+* (Jndi)RmiClientInterceptor resets stub before a refresh attempt, avoiding race condition in case of registry restart
+
 Package org.springframework.scheduling
 * added "waitForTasksToCompleteOnShutdown" property to ScheduledExecutorFactoryBean
 
 Package org.springframework.transaction
 * TransactionInterceptor only uses ThrowableHolderException if necessary and makes sure to expose the cause in any case
 
+Package org.springframework.validation
+* added overloaded "rejectIfEmpty(OrWhitespace)" methods with args but without default message to ValidationUtils
+
 Package org.springframework.web
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
+* AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
 
 
