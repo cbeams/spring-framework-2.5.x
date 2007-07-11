@@ -360,6 +360,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
 		Remote freshStub = null;
 		synchronized (this.stubMonitor) {
+			this.cachedStub = null;
 			try {
 				freshStub = lookupStub();
 			}
