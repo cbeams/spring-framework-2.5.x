@@ -37,10 +37,10 @@ import org.springframework.beans.factory.xml.ParserContext;
 public class AnnotationConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		Set<BeanDefinitionHolder> beanDefinitions = AnnotationConfigUtils.registerAnnotationConfigProcessors(
+		Set<BeanDefinitionHolder> processorDefinitions = AnnotationConfigUtils.registerAnnotationConfigProcessors(
 				parserContext.getRegistry(), parserContext.extractSource(element));
-		for (BeanDefinitionHolder beanDefinition : beanDefinitions) {
-			parserContext.registerComponent(new BeanComponentDefinition(beanDefinition));
+		for (BeanDefinitionHolder processorDefinition : processorDefinitions) {
+			parserContext.registerComponent(new BeanComponentDefinition(processorDefinition));
 		}
 		return null;
 	}
