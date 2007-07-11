@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,7 +162,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see #getViewName(PortletRequest, Object, int)
 	 */
 	public final String[] getPages() {
-		return pages;
+		return this.pages;
 	}
 
 	/**
@@ -193,7 +193,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Return the name of the page attribute in the model.
 	 */
 	public final String getPageAttribute() {
-		return pageAttribute;
+		return this.pageAttribute;
 	}
 
 	/**
@@ -209,7 +209,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Return whether "dirty back" is allowed.
 	 */
 	public final boolean isAllowDirtyBack() {
-		return allowDirtyBack;
+		return this.allowDirtyBack;
 	}
 
 	/**
@@ -225,7 +225,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Return whether "dirty forward" is allowed.
 	 */
 	public final boolean isAllowDirtyForward() {
-		return allowDirtyForward;
+		return this.allowDirtyForward;
 	}
 
 
@@ -313,9 +313,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 
 	/**
-	 * Show first page as form view.
+	 * Show the first page as form view.
+	 * <p>This can be overridden in subclasses, e.g. to prepare wizard-specific
+	 * error views in case of an Exception.
 	 */
-	protected final ModelAndView showForm(
+	protected ModelAndView showForm(
 			RenderRequest request, RenderResponse response, BindException errors) throws Exception {
 
 		return showPage(request, errors, getInitialPage(request, errors.getTarget()));
