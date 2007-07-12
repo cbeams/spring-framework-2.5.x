@@ -173,41 +173,59 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Create a new AbstractBeanDefinition as deep copy of the given
 	 * bean definition.
 	 * @param original the original bean definition to copy from
+	 * @deprecated in favor of {@link #AbstractBeanDefinition(BeanDefinition)} as of Spring 2.1
 	 */
 	protected AbstractBeanDefinition(AbstractBeanDefinition original) {
-		if (original.hasBeanClass()) {
-			setBeanClass(original.getBeanClass());
-		}
-		else {
-			setBeanClassName(original.getBeanClassName());
-		}
+		this((BeanDefinition) original);
+	}
 
+	/**
+	 * Create a new AbstractBeanDefinition as deep copy of the given
+	 * bean definition.
+	 * @param original the original bean definition to copy from
+	 */
+	protected AbstractBeanDefinition(BeanDefinition original) {
+		setParentName(original.getParentName());
+		setBeanClassName(original.getBeanClassName());
+		setFactoryBeanName(original.getFactoryBeanName());
+		setFactoryMethodName(original.getFactoryMethodName());
 		setScope(original.getScope());
 		setAbstract(original.isAbstract());
 		setLazyInit(original.isLazyInit());
-
-		setAutowireCandidate(original.isAutowireCandidate());
-		setAutowireMode(original.getAutowireMode());
-		setDependencyCheck(original.getDependencyCheck());
-		setDependsOn(original.getDependsOn());
-
 		setConstructorArgumentValues(new ConstructorArgumentValues(original.getConstructorArgumentValues()));
 		setPropertyValues(new MutablePropertyValues(original.getPropertyValues()));
-		setMethodOverrides(new MethodOverrides(original.getMethodOverrides()));
-
-		setFactoryBeanName(original.getFactoryBeanName());
-		setFactoryMethodName(original.getFactoryMethodName());
-		setInitMethodName(original.getInitMethodName());
-		setEnforceInitMethod(original.isEnforceInitMethod());
-		setDestroyMethodName(original.getDestroyMethodName());
-		setEnforceDestroyMethod(original.isEnforceDestroyMethod());
-
-		setSynthetic(original.isSynthetic());
 		setResourceDescription(original.getResourceDescription());
 		setSource(original.getSource());
 		setRole(original.getRole());
-
 		copyAttributesFrom(original);
+
+		if (original instanceof AbstractBeanDefinition) {
+			AbstractBeanDefinition originalAbd = (AbstractBeanDefinition) original;
+			if (originalAbd.hasBeanClass()) {
+				setBeanClass(originalAbd.getBeanClass());
+			}
+			setAutowireCandidate(originalAbd.isAutowireCandidate());
+			setAutowireMode(originalAbd.getAutowireMode());
+			setDependencyCheck(originalAbd.getDependencyCheck());
+			setDependsOn(originalAbd.getDependsOn());
+			setInitMethodName(originalAbd.getInitMethodName());
+			setEnforceInitMethod(originalAbd.isEnforceInitMethod());
+			setDestroyMethodName(originalAbd.getDestroyMethodName());
+			setEnforceDestroyMethod(originalAbd.isEnforceDestroyMethod());
+			setMethodOverrides(new MethodOverrides(originalAbd.getMethodOverrides()));
+			setSynthetic(originalAbd.isSynthetic());
+		}
+	}
+
+
+	/**
+	 * Override settings in this bean definition (assumably a copied parent
+	 * from a parent-child inheritance relationship) from the given bean
+	 * definition (assumably the child).
+	 * @deprecated in favor of {@link #overrideFrom(BeanDefinition)} as of Spring 2.1
+	 */
+	public void overrideFrom(AbstractBeanDefinition other) {
+		overrideFrom((BeanDefinition) other);
 	}
 
 	/**
@@ -226,45 +244,46 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * in the given bean definition.
 	 * </ul>
 	 */
-	public void overrideFrom(AbstractBeanDefinition other) {
-		if (other.beanClass != null) {
-			this.beanClass = other.beanClass;
+	public void overrideFrom(BeanDefinition other) {
+		if (other.getBeanClassName() != null) {
+			setBeanClassName(other.getBeanClassName());
 		}
-
-		setScope(other.getScope());
-		setAbstract(other.isAbstract());
-		setLazyInit(other.isLazyInit());
-
-		setAutowireCandidate(other.isAutowireCandidate());
-		setAutowireMode(other.getAutowireMode());
-		setDependencyCheck(other.getDependencyCheck());
-		setDependsOn(other.getDependsOn());
-
-		getConstructorArgumentValues().addArgumentValues(other.getConstructorArgumentValues());
-		getPropertyValues().addPropertyValues(other.getPropertyValues());
-		getMethodOverrides().addOverrides(other.getMethodOverrides());
-
 		if (other.getFactoryBeanName() != null) {
 			setFactoryBeanName(other.getFactoryBeanName());
 		}
 		if (other.getFactoryMethodName() != null) {
 			setFactoryMethodName(other.getFactoryMethodName());
 		}
-		if (other.getInitMethodName() != null) {
-			setInitMethodName(other.getInitMethodName());
-			setEnforceInitMethod(other.isEnforceInitMethod());
-		}
-		if (other.getDestroyMethodName() != null) {
-			setDestroyMethodName(other.getDestroyMethodName());
-			setEnforceDestroyMethod(other.isEnforceDestroyMethod());
-		}
-
-		setSynthetic(other.isSynthetic());
+		setScope(other.getScope());
+		setAbstract(other.isAbstract());
+		setLazyInit(other.isLazyInit());
+		getConstructorArgumentValues().addArgumentValues(other.getConstructorArgumentValues());
+		getPropertyValues().addPropertyValues(other.getPropertyValues());
 		setResourceDescription(other.getResourceDescription());
 		setSource(other.getSource());
 		setRole(other.getRole());
-
 		copyAttributesFrom(other);
+
+		if (other instanceof AbstractBeanDefinition) {
+			AbstractBeanDefinition otherAbd = (AbstractBeanDefinition) other;
+			if (otherAbd.hasBeanClass()) {
+				setBeanClass(otherAbd.getBeanClass());
+			}
+			setAutowireCandidate(otherAbd.isAutowireCandidate());
+			setAutowireMode(otherAbd.getAutowireMode());
+			setDependencyCheck(otherAbd.getDependencyCheck());
+			setDependsOn(otherAbd.getDependsOn());
+			if (otherAbd.getInitMethodName() != null) {
+				setInitMethodName(otherAbd.getInitMethodName());
+				setEnforceInitMethod(otherAbd.isEnforceInitMethod());
+			}
+			if (otherAbd.getDestroyMethodName() != null) {
+				setDestroyMethodName(otherAbd.getDestroyMethodName());
+				setEnforceDestroyMethod(otherAbd.isEnforceDestroyMethod());
+			}
+			getMethodOverrides().addOverrides(otherAbd.getMethodOverrides());
+			setSynthetic(otherAbd.isSynthetic());
+		}
 	}
 
 
@@ -585,36 +604,18 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	}
 
 
-	/**
-	 * Specify the factory bean to use, if any.
-	 */
 	public void setFactoryBeanName(String factoryBeanName) {
 		this.factoryBeanName = factoryBeanName;
 	}
 
-	/**
-	 * Returns the factory bean name, if any.
-	 */
 	public String getFactoryBeanName() {
 		return this.factoryBeanName;
 	}
 
-	/**
-	 * Specify a factory method, if any. This method will be invoked with
-	 * constructor arguments, or with no arguments if none are specified.
-	 * The static method will be invoked on the specifed factory bean,
-	 * if any, or on the local bean class else.
-	 * @param factoryMethodName static factory method name, or <code>null</code> if
-	 * normal constructor creation should be used
-	 * @see #getBeanClass
-	 */
 	public void setFactoryMethodName(String factoryMethodName) {
 		this.factoryMethodName = factoryMethodName;
 	}
 
-	/**
-	 * Return a factory method, if any.
-	 */
 	public String getFactoryMethodName() {
 		return this.factoryMethodName;
 	}

@@ -77,11 +77,11 @@ public class BeanDefinitionBuilder  {
 
 	/**
 	 * Create a new <code>BeanDefinitionBuilder</code> used to construct a {@link ChildBeanDefinition}.
-	 * @param parentBeanName the name of the parent bean
+	 * @param parentName the name of the parent bean
 	 */
-	public static BeanDefinitionBuilder childBeanDefinition(String parentBeanName) {
+	public static BeanDefinitionBuilder childBeanDefinition(String parentName) {
 		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
-		builder.beanDefinition = new ChildBeanDefinition(parentBeanName);
+		builder.beanDefinition = new ChildBeanDefinition(parentName);
 		return builder;
 	}
 

@@ -20,10 +20,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
  * Default implementation of the {@link BeanNameGenerator} interface, delegating to
- * {@link BeanDefinitionReaderUtils#generateBeanName(AbstractBeanDefinition, BeanDefinitionRegistry)}.
- *
- * <p>Note: This implementation is only able to handle {@link AbstractBeanDefinition}
- * subclasses such as {@link RootBeanDefinition} and {@link ChildBeanDefinition}.
+ * {@link BeanDefinitionReaderUtils#generateBeanName(BeanDefinition, BeanDefinitionRegistry)}.
  *
  * @author Juergen Hoeller
  * @since 2.0.3
@@ -31,11 +28,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 public class DefaultBeanNameGenerator implements BeanNameGenerator {
 
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
-		if (!(definition instanceof AbstractBeanDefinition)) {
-			throw new IllegalArgumentException(
-					"DefaultBeanNameGenerator is only able to handle AbstractBeanDefinition subclasses: " + definition);
-		}
-		return BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) definition, registry);
+		return BeanDefinitionReaderUtils.generateBeanName(definition, registry);
 	}
 
 }

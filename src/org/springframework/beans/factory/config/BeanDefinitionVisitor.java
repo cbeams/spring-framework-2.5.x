@@ -74,12 +74,25 @@ public class BeanDefinitionVisitor {
 	 * @see #resolveStringValue(String)
 	 */
 	public void visitBeanDefinition(BeanDefinition beanDefinition) {
+		visitParentName(beanDefinition);
 		visitBeanClassName(beanDefinition);
+		visitFactoryBeanName(beanDefinition);
+		visitFactoryMethodName(beanDefinition);
 		visitScope(beanDefinition);
 		visitPropertyValues(beanDefinition.getPropertyValues());
 		ConstructorArgumentValues cas = beanDefinition.getConstructorArgumentValues();
 		visitIndexedArgumentValues(cas.getIndexedArgumentValues());
 		visitGenericArgumentValues(cas.getGenericArgumentValues());
+	}
+
+	protected void visitParentName(BeanDefinition beanDefinition) {
+		String parentName = beanDefinition.getParentName();
+		if (parentName != null) {
+			String resolvedName = resolveStringValue(parentName);
+			if (!parentName.equals(resolvedName)) {
+				beanDefinition.setParentName(resolvedName);
+			}
+		}
 	}
 
 	protected void visitBeanClassName(BeanDefinition beanDefinition) {
@@ -88,6 +101,26 @@ public class BeanDefinitionVisitor {
 			String resolvedName = resolveStringValue(beanClassName);
 			if (!beanClassName.equals(resolvedName)) {
 				beanDefinition.setBeanClassName(resolvedName);
+			}
+		}
+	}
+
+	protected void visitFactoryBeanName(BeanDefinition beanDefinition) {
+		String factoryBeanName = beanDefinition.getFactoryBeanName();
+		if (factoryBeanName != null) {
+			String resolvedName = resolveStringValue(factoryBeanName);
+			if (!factoryBeanName.equals(resolvedName)) {
+				beanDefinition.setFactoryBeanName(resolvedName);
+			}
+		}
+	}
+
+	protected void visitFactoryMethodName(BeanDefinition beanDefinition) {
+		String factoryMethodName = beanDefinition.getFactoryBeanName();
+		if (factoryMethodName != null) {
+			String resolvedName = resolveStringValue(factoryMethodName);
+			if (!factoryMethodName.equals(resolvedName)) {
+				beanDefinition.setFactoryMethodName(resolvedName);
 			}
 		}
 	}

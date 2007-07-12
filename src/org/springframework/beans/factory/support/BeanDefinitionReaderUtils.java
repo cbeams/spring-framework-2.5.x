@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.util.ClassUtils;
@@ -45,10 +46,10 @@ public class BeanDefinitionReaderUtils {
 
 
 	/**
-	 * Create a new RootBeanDefinition or ChildBeanDefinition for the given
+	 * Create a new GenericBeanDefinition for the given
 	 * class name, parent, constructor arguments, and property values.
 	 * @param className the name of the bean class, if any
-	 * @param parent the name of the parent bean, if any
+	 * @param parentName the name of the parent bean, if any
 	 * @param cargs the constructor arguments, if any
 	 * @param pvs the property values, if any
 	 * @param classLoader the ClassLoader to use for loading bean classes
@@ -59,19 +60,19 @@ public class BeanDefinitionReaderUtils {
 	 * @see #createBeanDefinition(String, String, ClassLoader)
 	 */
 	public static AbstractBeanDefinition createBeanDefinition(
-			String className, String parent, ConstructorArgumentValues cargs,
+			String className, String parentName, ConstructorArgumentValues cargs,
 			MutablePropertyValues pvs, ClassLoader classLoader) throws ClassNotFoundException {
 
-		AbstractBeanDefinition bd = createBeanDefinition(parent, className, classLoader);
+		AbstractBeanDefinition bd = createBeanDefinition(parentName, className, classLoader);
 		bd.setConstructorArgumentValues(cargs);
 		bd.setPropertyValues(pvs);
 		return bd;
 	}
 
 	/**
-	 * Create a new RootBeanDefinition or ChildBeanDefinition for the given
-	 * class name, parent, constructor arguments, and property values.
-	 * @param parent the name of the parent bean, if any
+	 * Create a new GenericBeanDefinition for the given parent name and class name,
+	 * eagerly loading the bean class if a ClassLoader has been specified.
+	 * @param parentName the name of the parent bean, if any
 	 * @param className the name of the bean class, if any
 	 * @param classLoader the ClassLoader to use for loading bean classes
 	 * (can be <code>null</code> to just register bean classes by name)
@@ -79,15 +80,10 @@ public class BeanDefinitionReaderUtils {
 	 * @throws ClassNotFoundException if the bean class could not be loaded
 	 */
 	public static AbstractBeanDefinition createBeanDefinition(
-			String parent, String className, ClassLoader classLoader) throws ClassNotFoundException {
+			String parentName, String className, ClassLoader classLoader) throws ClassNotFoundException {
 
-		AbstractBeanDefinition bd = null;
-		if (parent != null) {
-			bd = new ChildBeanDefinition(parent);
-		}
-		else {
-			bd = new RootBeanDefinition();
-		}
+		GenericBeanDefinition bd = new GenericBeanDefinition();
+		bd.setParentName(parentName);
 		if (className != null) {
 			if (classLoader != null) {
 				bd.setBeanClass(ClassUtils.forName(className, classLoader));
@@ -113,13 +109,13 @@ public class BeanDefinitionReaderUtils {
 	 * for the given bean definition
 	 */
 	public static String generateBeanName(
-			AbstractBeanDefinition definition, BeanDefinitionRegistry registry, boolean isInnerBean)
+			BeanDefinition definition, BeanDefinitionRegistry registry, boolean isInnerBean)
 			throws BeanDefinitionStoreException {
 
 		String generatedBeanName = definition.getBeanClassName();
 		if (generatedBeanName == null) {
-			if (definition instanceof ChildBeanDefinition) {
-				generatedBeanName = ((ChildBeanDefinition) definition).getParentName() + "$child";
+			if (definition.getParentName() != null) {
+				generatedBeanName = definition.getParentName() + "$child";
 			}
 			else if (definition.getFactoryBeanName() != null) {
 				generatedBeanName = definition.getFactoryBeanName() + "$created";
@@ -157,8 +153,7 @@ public class BeanDefinitionReaderUtils {
 	 * @throws BeanDefinitionStoreException if no unique name can be generated
 	 * for the given bean definition
 	 */
-	public static String generateBeanName(
-			AbstractBeanDefinition beanDefinition, BeanDefinitionRegistry registry)
+	public static String generateBeanName(BeanDefinition beanDefinition, BeanDefinitionRegistry registry)
 			throws BeanDefinitionStoreException {
 
 		return generateBeanName(beanDefinition, registry, false);

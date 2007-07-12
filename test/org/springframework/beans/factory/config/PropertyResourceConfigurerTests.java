@@ -206,8 +206,8 @@ public class PropertyResourceConfigurerTests extends TestCase {
 			pvs2.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
 
 			RootBeanDefinition parent = new RootBeanDefinition(TestBean.class, pvs1);
-			ChildBeanDefinition bd = new ChildBeanDefinition("parent", pvs2);
-			ac.getDefaultListableBeanFactory().registerBeanDefinition("parent", parent);
+			ChildBeanDefinition bd = new ChildBeanDefinition("${parent}", pvs2);
+			ac.getDefaultListableBeanFactory().registerBeanDefinition("parent1", parent);
 			ac.getDefaultListableBeanFactory().registerBeanDefinition("tb1", bd);
 		}
 		else {
@@ -249,7 +249,7 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		ac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=mykey4");
+		pvs.addPropertyValue("properties", "age=98\nvar=${m}var\nref=tb2\nm=my\nkey4=mykey4\nparent=parent1");
 		ac.registerSingleton("configurer", PropertyPlaceholderConfigurer.class, pvs);
 		ac.refresh();
 

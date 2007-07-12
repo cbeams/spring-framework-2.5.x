@@ -164,12 +164,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// Only consider bean as eligible if the bean name
 			// is not defined as alias for some other bean.
 			if (!isAlias(beanName)) {
-				RootBeanDefinition mbd = getMergedBeanDefinition(beanName, false);
-				// Only check bean definition if it is complete.
-				if (!mbd.isAbstract() &&
-						(allowEagerInit || mbd.hasBeanClass() || !mbd.isLazyInit() || this.allowEagerClassLoading)) {
-					// In case of FactoryBean, match object created by FactoryBean.
-					try {
+				try {
+					RootBeanDefinition mbd = getMergedBeanDefinition(beanName, false);
+					// Only check bean definition if it is complete.
+					if (!mbd.isAbstract() &&
+							(allowEagerInit || mbd.hasBeanClass() || !mbd.isLazyInit() || this.allowEagerClassLoading)) {
+						// In case of FactoryBean, match object created by FactoryBean.
 						boolean isFactoryBean = isBeanClassMatch(beanName, mbd, FactoryBean.class);
 						boolean matchFound =
 								(allowEagerInit || !requiresEagerInitForType(beanName, isFactoryBean, mbd.getFactoryBeanName())) &&
@@ -183,11 +183,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							result.add(beanName);
 						}
 					}
-					catch (CannotLoadBeanClassException ex) {
-						// Probably contains a placeholder: let's ignore it for type matching purposes.
-						if (logger.isDebugEnabled()) {
-							logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
-						}
+				}
+				catch (CannotLoadBeanClassException ex) {
+					if (allowEagerInit) {
+						throw ex;
+					}
+					// Probably contains a placeholder: let's ignore it for type matching purposes.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
+					}
+				}
+				catch (BeanDefinitionStoreException ex) {
+					if (allowEagerInit) {
+						throw ex;
+					}
+					// Probably contains a placeholder: let's ignore it for type matching purposes.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
 					}
 				}
 			}

@@ -80,6 +80,16 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 
 	/**
+	 * Return the name of the parent definition of this bean definition, if any.
+	 */
+	String getParentName();
+
+	/**
+	 * Set the name of the parent definition of this bean definition, if any.
+	 */
+	void setParentName(String parentName);
+
+	/**
 	 * Return the current bean class name of this bean definition.
 	 * <p>Note that this does not have to be the actual class name used at runtime, in
 	 * case of a child definition overriding/inheriting the class name from its parent.
@@ -94,6 +104,45 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * typically replacing the original class name with a parsed variant of it.
 	 */
 	void setBeanClassName(String beanClassName);
+
+	/**
+	 * Return the factory bean name, if any.
+	 */
+	String getFactoryBeanName();
+
+	/**
+	 * Specify the factory bean to use, if any.
+	 */
+	void setFactoryBeanName(String factoryBeanName);
+
+	/**
+	 * Return a factory method, if any.
+	 */
+	String getFactoryMethodName();
+
+	/**
+	 * Specify a factory method, if any. This method will be invoked with
+	 * constructor arguments, or with no arguments if none are specified.
+	 * The method will be invoked on the specifed factory bean, if any,
+	 * or as static method on the local bean class else.
+	 * @param factoryMethodName static factory method name,
+	 * or <code>null</code> if normal constructor creation should be used
+	 * @see #getBeanClassName()
+	 */
+	void setFactoryMethodName(String factoryMethodName);
+
+	/**
+	 * Return the name of the current target scope for this bean.
+	 */
+	String getScope();
+
+	/**
+	 * Override the target scope of this bean, specifying a new scope name.
+	 * @see #SCOPE_SINGLETON
+	 * @see #SCOPE_PROTOTYPE
+	 */
+	void setScope(String scope);
+
 
 	/**
 	 * Return the constructor argument values for this bean.
@@ -111,18 +160,6 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 
 	/**
-	 * Return the name of the current target scope for this bean.
-	 */
-	String getScope();
-
-	/**
-	 * Override the target scope of this bean, specifying a new scope name.
-	 * @see #SCOPE_SINGLETON
-	 * @see #SCOPE_PROTOTYPE
-	 */
-	void setScope(String scope);
-
-	/**
 	 * Return whether this a <b>Singleton</b>, with a single, shared instance
 	 * returned on all calls.
 	 */
@@ -138,7 +175,6 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * eagerly instantiated on startup.
 	 */
 	boolean isLazyInit();
-
 
 	/**
 	 * Return a description of the resource that this bean definition

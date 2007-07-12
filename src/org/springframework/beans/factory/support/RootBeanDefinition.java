@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 
 /** 
@@ -163,7 +164,27 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param original the original bean definition to copy from
 	 */
 	public RootBeanDefinition(RootBeanDefinition original) {
+		super((BeanDefinition) original);
+	}
+
+	/**
+	 * Create a new RootBeanDefinition as deep copy of the given
+	 * bean definition.
+	 * @param original the original bean definition to copy from
+	 */
+	RootBeanDefinition(BeanDefinition original) {
 		super(original);
+	}
+
+
+	public String getParentName() {
+		return null;
+	}
+
+	public void setParentName(String parentName) {
+		if (parentName != null) {
+			throw new IllegalArgumentException("Root bean cannot be changed into a child bean with parent reference");
+		}
 	}
 
 

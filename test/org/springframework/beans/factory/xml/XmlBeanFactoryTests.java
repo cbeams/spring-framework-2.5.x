@@ -978,7 +978,6 @@ public class XmlBeanFactoryTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		reader.setBeanClassLoader(null);
 		reader.loadBeanDefinitions(new ClassPathResource("classNotFound.xml", getClass()));
-		assertTrue(bf.getBeanDefinition("classNotFound") instanceof RootBeanDefinition);
 		assertEquals("WhatALotOfRubbish", bf.getBeanDefinition("classNotFound").getBeanClassName());
 	}
 

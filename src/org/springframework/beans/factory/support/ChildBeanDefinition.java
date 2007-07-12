@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.util.ObjectUtils;
 
@@ -42,7 +43,7 @@ import org.springframework.util.ObjectUtils;
  */
 public class ChildBeanDefinition extends AbstractBeanDefinition {
 
-	private final String parentName;
+	private String parentName;
 
 
 	/**
@@ -124,14 +125,14 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	 * @param original the original bean definition to copy from
 	 */
 	public ChildBeanDefinition(ChildBeanDefinition original) {
-		super(original);
-		this.parentName = original.getParentName();
+		super((BeanDefinition) original);
 	}
 
 
-	/**
-	 * Return the name of the parent definition of this bean definition.
-	 */
+	public void setParentName(String parentName) {
+		this.parentName = parentName;
+	}
+
 	public String getParentName() {
 		return this.parentName;
 	}

@@ -995,19 +995,17 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				if (containingBd == null) {
 					mbd = (RootBeanDefinition) this.mergedBeanDefinitions.get(beanName);
 				}
+
 				if (mbd == null) {
-
-					if (bd instanceof RootBeanDefinition) {
+					if (bd.getParentName() == null) {
 						// Use copy of given root bean definition.
-						mbd = new RootBeanDefinition((RootBeanDefinition) bd);
+						mbd = new RootBeanDefinition(bd);
 					}
-
-					else if (bd instanceof ChildBeanDefinition) {
+					else {
 						// Child bean definition: needs to be merged with parent.
-						ChildBeanDefinition cbd = (ChildBeanDefinition) bd;
 						RootBeanDefinition pbd = null;
 						try {
-							String parentBeanName = transformedBeanName(cbd.getParentName());
+							String parentBeanName = transformedBeanName(bd.getParentName());
 							if (!beanName.equals(parentBeanName)) {
 								pbd = getMergedBeanDefinition(parentBeanName, true);
 							}
@@ -1017,25 +1015,19 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 									pbd = parentFactory.getMergedBeanDefinition(parentBeanName, true);
 								}
 								else {
-									throw new NoSuchBeanDefinitionException(cbd.getParentName(),
-											"Parent name '" + cbd.getParentName() + "' is equal to bean name '" + beanName +
+									throw new NoSuchBeanDefinitionException(bd.getParentName(),
+											"Parent name '" + bd.getParentName() + "' is equal to bean name '" + beanName +
 											"': cannot be resolved without an AbstractBeanFactory parent");
 								}
 							}
 						}
 						catch (NoSuchBeanDefinitionException ex) {
-							throw new BeanDefinitionStoreException(cbd.getResourceDescription(), beanName,
-									"Could not resolve parent bean definition '" + cbd.getParentName() + "'", ex);
+							throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanName,
+									"Could not resolve parent bean definition '" + bd.getParentName() + "'", ex);
 						}
-
 						// Deep copy with overridden values.
 						mbd = new RootBeanDefinition(pbd);
-						mbd.overrideFrom(cbd);
-					}
-
-					else {
-						throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanName,
-								"Definition is neither a RootBeanDefinition nor a ChildBeanDefinition: " + bd);
+						mbd.overrideFrom(bd);
 					}
 
 					// A bean contained in a non-singleton bean cannot be a singleton itself.
