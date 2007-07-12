@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc;
+package org.springframework.web.servlet.mvc.multiaction;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -38,11 +38,6 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
-import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
-import org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver;
-import org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver;
 
 /**
  * @author Rod Johnson
@@ -102,8 +97,7 @@ public class MultiActionControllerTests extends TestCase {
 			mnr.getHandlerMethodName(request);
 			fail("Should have thrown NoSuchRequestHandlingMethodException");
 		}
-		catch (NoSuchRequestHandlingMethodException ex) {
-			// expected
+		catch (NoSuchRequestHandlingMethodException expected) {
 		}
 
 		request = new MockHttpServletRequest("GET", "/foo.html");
@@ -112,8 +106,7 @@ public class MultiActionControllerTests extends TestCase {
 			mnr.getHandlerMethodName(request);
 			fail("Should have thrown NoSuchRequestHandlingMethodException");
 		}
-		catch (NoSuchRequestHandlingMethodException ex) {
-			// expected
+		catch (NoSuchRequestHandlingMethodException expected) {
 		}
 
 		request = new MockHttpServletRequest("GET", "/foo.html");
@@ -122,8 +115,7 @@ public class MultiActionControllerTests extends TestCase {
 			mnr.getHandlerMethodName(request);
 			fail("Should have thrown NoSuchRequestHandlingMethodException");
 		}
-		catch (NoSuchRequestHandlingMethodException ex) {
-			// expected
+		catch (NoSuchRequestHandlingMethodException expected) {
 		}
 	}
 
@@ -245,8 +237,7 @@ public class MultiActionControllerTests extends TestCase {
 		try {
 			mv = mc.handleRequest(request, response);
 		}
-		catch (Exception e) {
-			// expected
+		catch (Exception expected) {
 		}
 		assertFalse("Not invoking welcome method", mc.wasInvoked("welcome"));
 		assertTrue("No method invoked", mc.getInvokedMethods() == 0);
@@ -278,10 +269,9 @@ public class MultiActionControllerTests extends TestCase {
 		try {
 
 			mc.handleRequest(request, response);
-			fail("Should have rejected request without session");
+			fail("Must have rejected request without session");
 		}
-		catch (ServletException ex) {
-			//OK
+		catch (ServletException expected) {
 		}
 	}
 
@@ -295,16 +285,7 @@ public class MultiActionControllerTests extends TestCase {
 		assertTrue("Invoked commandNoSession method", mc.wasInvoked("commandNoSession"));
 		assertTrue("view name is commandNoSession", mv.getViewName().equals("commandNoSession"));
 		assertTrue("Only one method invoked", mc.getInvokedMethods() == 1);
-
-		//		mc = new TestMaController();
-		//		request = new MockHttpServletRequest("GET", "/subdir/test.html");
-		//		response = new MockHttpServletResponse();
-		//		mv = mc.handleRequest(request, response);
-		//		assertTrue("Invoked subdir_test method", mc.wasInvoked("subdir_test"));
-		//		assertTrue("view name is subdir_test", mv.getViewName().equals("subdir_test"));
-		//		assertTrue("Only one method invoked", mc.getInvokedMethods() == 1);
 	}
-
 
 	public void testInvokesCommandMethodWithSession() throws Exception {
 		TestMaController mc = new TestMaController();
@@ -324,10 +305,9 @@ public class MultiActionControllerTests extends TestCase {
 		try {
 
 			mc.handleRequest(request, response);
-			fail("Should have rejected request without session");
+			fail("Must have rejected request without session");
 		}
-		catch (ServletException ex) {
-			//OK
+		catch (ServletException expected) {
 		}
 	}
 
@@ -369,7 +349,7 @@ public class MultiActionControllerTests extends TestCase {
 	public void testExceptionNoHandler() throws Exception {
 		testExceptionNoHandler(new Exception());
 
-		// Should go straight through
+		// must go straight through
 		testExceptionNoHandler(new ServletException());
 
 		// subclass of servlet exception
@@ -396,8 +376,7 @@ public class MultiActionControllerTests extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest("GET", "/testException.html");
 		request.setAttribute(TestMaController.THROWABLE_ATT, t);
 		HttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = mc.handleRequest(request, response);
-		return mv;
+		return mc.handleRequest(request, response);
 	}
 
 	public void testHandlerCaughtException() throws Exception {
