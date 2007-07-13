@@ -339,7 +339,7 @@ public abstract class StringUtils {
 	 * E.g. "az\n" will delete 'a's, 'z's and new lines.
 	 */
 	public static String deleteAny(String inString, String charsToDelete) {
-		if (inString == null || charsToDelete == null) {
+		if (!hasLength(inString) || !hasLength(charsToDelete)) {
 			return inString;
 		}
 		StringBuffer out = new StringBuffer();
@@ -846,6 +846,23 @@ public abstract class StringUtils {
 	 * @see #tokenizeToStringArray
 	 */
 	public static String[] delimitedListToStringArray(String str, String delimiter) {
+		return delimitedListToStringArray(str, delimiter, null);
+	}
+
+	/**
+	 * Take a String which is a delimited list and convert it to a String array.
+	 * <p>A single delimiter can consists of more than one character: It will still
+	 * be considered as single delimiter string, rather than as bunch of potential
+	 * delimiter characters - in contrast to <code>tokenizeToStringArray</code>.
+	 * @param str the input String
+	 * @param delimiter the delimiter between elements (this is a single delimiter,
+	 * rather than a bunch individual delimiter characters)
+	 * @param charsToDelete a set of characters to delete. Useful for deleting unwanted
+	 * line breaks: e.g. "\r\n\f" will delete all new lines and line feeds in a String.
+	 * @return an array of the tokens in the list
+	 * @see #tokenizeToStringArray
+	 */
+	public static String[] delimitedListToStringArray(String str, String delimiter, String charsToDelete) {
 		if (str == null) {
 			return new String[0];
 		}
@@ -855,19 +872,19 @@ public abstract class StringUtils {
 		List result = new ArrayList();
 		if ("".equals(delimiter)) {
 			for (int i = 0; i < str.length(); i++) {
-				result.add(str.substring(i, i + 1));
+				result.add(deleteAny(str.substring(i, i + 1), charsToDelete));
 			}
 		}
 		else {
 			int pos = 0;
 			int delPos = 0;
 			while ((delPos = str.indexOf(delimiter, pos)) != -1) {
-				result.add(str.substring(pos, delPos));
+				result.add(deleteAny(str.substring(pos, delPos), charsToDelete));
 				pos = delPos + delimiter.length();
 			}
 			if (str.length() > 0 && pos <= str.length()) {
 				// Add rest of String, but not in case of empty input.
-				result.add(str.substring(pos));
+				result.add(deleteAny(str.substring(pos), charsToDelete));
 			}
 		}
 		return toStringArray(result);
