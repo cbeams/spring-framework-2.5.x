@@ -29,22 +29,26 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 /**
- * Miscellaneous string utility methods. Mainly for internal use
- * within the framework; consider Jakarta's Commons Lang for a more
- * comprehensive suite of string utilities.
+ * Miscellaneous {@link String} utility methods.
+ *
+ * <p>Mainly for internal use within the framework; consider
+ * <a href="http://jakarta.apache.org/commons/lang/">Jakarta's Commons Lang</a>
+ * for a more comprehensive suite of
+ * {@link org.apache.commons.lang.StringUtils String utilities}.
  *
  * <p>This class delivers some simple functionality that should really
- * be provided by the core Java String and StringBuffer classes, such
- * as the ability to replace all occurrences of a given substring in a
- * target string. It also provides easy-to-use methods to convert between
- * delimited strings, such as CSV strings, and collections and arrays.
+ * be provided by the core Java <code>String</code> and {@link StringBuffer}
+ * classes, such as the ability to {@link #replace} all occurrences of a given
+ * substring in a target string. It also provides easy-to-use methods to
+ * convert between delimited strings, such as CSV strings, and collections and
+ * arrays.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Keith Donald
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 16 April 2001
- * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
 
@@ -82,7 +86,7 @@ public abstract class StringUtils {
 
 	/**
 	 * Check whether the given String has actual text.
-	 * More specifically, returns <code>true</code> if the string not <code>null<code>,
+	 * More specifically, returns <code>true</code> if the string not <code>null</code>,
 	 * its length is greater than 0, and it contains at least one non-whitespace character.
 	 * <p><pre>
 	 * StringUtils.hasText(null) = false
@@ -93,7 +97,7 @@ public abstract class StringUtils {
 	 * </pre>
 	 * @param str the String to check (may be <code>null</code>)
 	 * @return <code>true</code> if the String is not <code>null</code>, its length is
-	 * greater than 0, and is does not contain whitespace only
+	 * greater than 0, and it does not contain whitespace only
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static boolean hasText(String str) {
@@ -335,7 +339,7 @@ public abstract class StringUtils {
 	 * E.g. "az\n" will delete 'a's, 'z's and new lines.
 	 */
 	public static String deleteAny(String inString, String charsToDelete) {
-		if (inString == null || charsToDelete == null) {
+		if (!hasLength(inString) || !hasLength(charsToDelete)) {
 			return inString;
 		}
 		StringBuffer out = new StringBuffer();
@@ -551,8 +555,8 @@ public abstract class StringUtils {
 
 	/**
 	 * Compare two paths after normalization of them.
-	 * @param path1 First path for comparizon
-	 * @param path2 Second path for comparizon
+	 * @param path1 first path for comparison
+	 * @param path2 second path for comparison
 	 * @return whether the two paths are equivalent after normalization
 	 */
 	public static boolean pathEquals(String path1, String path2) {
@@ -573,10 +577,10 @@ public abstract class StringUtils {
 		String country = (parts.length > 1 ? parts[1] : "");
 		String variant = "";
 		if (parts.length >= 2) {
-			// there is definitely a variant, and it is everything after the country
-			// code sans the separator between the country code and the variant
+			// There is definitely a variant, and it is everything after the country
+			// code sans the separator between the country code and the variant.
 			int endIndexOfCountryCode = localeString.indexOf(country) + country.length();
-			// strip off any leading '_' and whitespace, what's left is the variant
+			// Strip off any leading '_' and whitespace, what's left is the variant.
 			variant = StringUtils.trimLeadingWhitespace(localeString.substring(endIndexOfCountryCode));
 			if (variant.startsWith("_")) {
 				variant = StringUtils.trimLeadingCharacter(variant, '_');
@@ -842,6 +846,23 @@ public abstract class StringUtils {
 	 * @see #tokenizeToStringArray
 	 */
 	public static String[] delimitedListToStringArray(String str, String delimiter) {
+		return delimitedListToStringArray(str, delimiter, null);
+	}
+
+	/**
+	 * Take a String which is a delimited list and convert it to a String array.
+	 * <p>A single delimiter can consists of more than one character: It will still
+	 * be considered as single delimiter string, rather than as bunch of potential
+	 * delimiter characters - in contrast to <code>tokenizeToStringArray</code>.
+	 * @param str the input String
+	 * @param delimiter the delimiter between elements (this is a single delimiter,
+	 * rather than a bunch individual delimiter characters)
+	 * @param charsToDelete a set of characters to delete. Useful for deleting unwanted
+	 * line breaks: e.g. "\r\n\f" will delete all new lines and line feeds in a String.
+	 * @return an array of the tokens in the list
+	 * @see #tokenizeToStringArray
+	 */
+	public static String[] delimitedListToStringArray(String str, String delimiter, String charsToDelete) {
 		if (str == null) {
 			return new String[0];
 		}
@@ -851,19 +872,19 @@ public abstract class StringUtils {
 		List result = new ArrayList();
 		if ("".equals(delimiter)) {
 			for (int i = 0; i < str.length(); i++) {
-				result.add(str.substring(i, i + 1));
+				result.add(deleteAny(str.substring(i, i + 1), charsToDelete));
 			}
 		}
 		else {
 			int pos = 0;
 			int delPos = 0;
 			while ((delPos = str.indexOf(delimiter, pos)) != -1) {
-				result.add(str.substring(pos, delPos));
+				result.add(deleteAny(str.substring(pos, delPos), charsToDelete));
 				pos = delPos + delimiter.length();
 			}
 			if (str.length() > 0 && pos <= str.length()) {
 				// Add rest of String, but not in case of empty input.
-				result.add(str.substring(pos));
+				result.add(deleteAny(str.substring(pos), charsToDelete));
 			}
 		}
 		return toStringArray(result);
