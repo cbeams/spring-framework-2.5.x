@@ -20,8 +20,9 @@ import junit.framework.TestCase;
 
 /**
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class StringArrayPropertyEditorTests extends TestCase {
+public class StringArrayPropertyEditorTests extends TestCase {
 
 	public void testWithDefaultSeparator() throws Exception {
 		StringArrayPropertyEditor editor = new StringArrayPropertyEditor();

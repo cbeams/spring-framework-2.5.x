@@ -34,7 +34,7 @@ import java.util.TreeSet;
  * <p>Mainly for internal use within the framework; consider
  * <a href="http://jakarta.apache.org/commons/lang/">Jakarta's Commons Lang</a>
  * for a more comprehensive suite of
- * {@link org.apache.commons.lang.StringUtils string utilities}.
+ * {@link org.apache.commons.lang.StringUtils String utilities}.
  *
  * <p>This class delivers some simple functionality that should really
  * be provided by the core Java <code>String</code> and {@link StringBuffer}
@@ -577,10 +577,10 @@ public abstract class StringUtils {
 		String country = (parts.length > 1 ? parts[1] : "");
 		String variant = "";
 		if (parts.length >= 2) {
-			// there is definitely a variant, and it is everything after the country
-			// code sans the separator between the country code and the variant
+			// There is definitely a variant, and it is everything after the country
+			// code sans the separator between the country code and the variant.
 			int endIndexOfCountryCode = localeString.indexOf(country) + country.length();
-			// strip off any leading '_' and whitespace, what's left is the variant
+			// Strip off any leading '_' and whitespace, what's left is the variant.
 			variant = StringUtils.trimLeadingWhitespace(localeString.substring(endIndexOfCountryCode));
 			if (variant.startsWith("_")) {
 				variant = StringUtils.trimLeadingCharacter(variant, '_');
