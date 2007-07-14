@@ -88,7 +88,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter} /
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
  *
- * <p>Requires Hibernate 3.1 or later. Note that this factory will use
+ * <p><b>Requires Hibernate 3.1 or later.</b> Note that this factory will use
  * "on_close" as default Hibernate connection release mode, unless in the
  * case of a "jtaTransactionManager" specified, for the reason that
  * this is appropriate for most Spring-based applications (in particular when
@@ -521,8 +521,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 				// Set Hibernate 3.1 CurrentSessionContext implementation,
 				// providing the Spring-managed Session as current Session.
 				// Can be overridden by a custom value for the corresponding Hibernate property.
-				config.setProperty(Environment.CURRENT_SESSION_CONTEXT_CLASS,
-						"org.springframework.orm.hibernate3.SpringSessionContext");
+				config.setProperty(Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
 			}
 
 			if (this.entityInterceptor != null) {

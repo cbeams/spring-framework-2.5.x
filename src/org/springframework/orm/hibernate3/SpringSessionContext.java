@@ -26,8 +26,8 @@ import org.hibernate.engine.SessionFactoryImplementor;
  * that delegates to Spring's SessionFactoryUtils for providing a
  * Spring-managed current Session.
  *
- * <p>Used by Spring's LocalSessionFactoryBean if told to expose a
- * transaction-aware SessionFactory.
+ * <p>Used by Spring's {@link LocalSessionFactoryBean} when told to
+ * expose a transaction-aware SessionFactory.
  *
  * <p>This CurrentSessionContext implementation can also be specified in custom
  * SessionFactory setup through the "hibernate.current_session_context_class"
@@ -50,6 +50,7 @@ public class SpringSessionContext implements CurrentSessionContext {
 	public SpringSessionContext(SessionFactoryImplementor sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
+
 
 	/**
 	 * Retrieve the Spring-managed Session for the current thread, if any.
