@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M3 (2007-07-16)
+Changes in version 2.1 M3 (2007-07-17)
 --------------------------------------
 
 Package org.springframework.aop
@@ -19,6 +19,7 @@ Package org.springframework.aop
 * revised reflective class loading to use the correct ClassLoader according to the OSGi bundle structure (if any)
 
 Package org.springframework.beans
+* added "charsToDelete" and "emptyArrayAsNull" options to StringArrayPropertyEditor
 * URIEditor trims whitespace before parsing the URI (allowing for XML formatting with whitespace)
 * TypeConverterDelegate protects its collection conversion process against misbehaving Collections with a null Iterator
 * TypeConverterDelegate only attempts to convert well-known collection types (skips custom types in the first place)
@@ -28,6 +29,14 @@ Package org.springframework.beans
 * added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
 * exposed "registerDependentBean" method on ConfigurableBeanFactory interface
 * PropertyPathFactoryBean supports a null property value (removed historic restriction there)
+* exposed "parentName", "factoryBeanName" and "factoryMethodName" properties in BeanDefinition interface
+* added "visitParentName", "visitFactoryBeanName" and "visitFactoryMethodName" callbacks to BeanDefinitionVisitor
+* PropertyPlaceholderConfigurer resolves placeholders in parent, factory-bean and factory-method values as well
+* DefaultListableBeanFactory ignores invalid parent bean names when matching beans by type with allowEagerInit=false
+* DefaultListableBeanFactory only ignores invalid bean class names when matching beans by type with allowEagerInit=false
+* AbstractBeanFactory supports any BeanDefinition implementation (does not require AbstractBeanDefintion anymore)
+* introduced GenericBeanDefinition as one-stop shop for standard bean definition purposes (with configurable parent)
+* DefaultBeanNameGenerator does not require an AbstractBeanDefinition implementation for bean name generation anymore
 * added autowiring by type for arrays and collections (available for @Autowired, 'constructor' and 'byType' autowiring)
 * Autowired/CommonAnnotationBeanPostProcessor registers autowired beans as dependent on their injected target bean
 * added "registerBeanComponent" convenience method to ParserContext
@@ -70,6 +79,7 @@ Package org.springframework.jmx
 * revised reflective class loading to use the correct ClassLoader according to the OSGi bundle structure (if any)
 
 Package org.springframework.orm
+* HibernateTemplate delegates to "SessionFactory.getCurrentSession()" when "allowCreate" has been set to "false"
 * added "prepareTransaction" method to JpaDialect interface, for preparing a JTA-joining EntityManager
 * HibernateJpaDialect switches FlushMode to MANUAL in case of a read-only transaction even for JTA
 * PersistenceAnnotationBeanPostProcessor registers autowired beans as dependent on their EntityManagerFactory
@@ -93,12 +103,14 @@ Package org.springframework.transaction
 * "tx:annotation-driven" registers its transaction aspect with a fixed internal bean name
 
 Package org.springframework.util
+* fixed "StringUtils.parseLocaleString" to parse multiple variants correctly
 * DefaultPropertiesPersister detects and uses JDK 1.6's "Properties.load/store" variants with Reader/Writer argument
 
 Package org.springframework.validation
 * added overloaded "rejectIfEmpty(OrWhitespace)" methods with args but without default message to ValidationUtils
 
 Package org.springframework.web
+* factored out "invokeDelegate" template method in DelegatingFilterProxy
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
 * added "postProcessWeb/PortletApplicationContext" method to FrameworkServlet/Portlet
 * DispatcherServlet/Portlet's "noHandlerFound" declares Exception instead of just IOException/PortletException
