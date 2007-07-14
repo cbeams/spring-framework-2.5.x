@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * Return the name of the target bean in the Spring application context.
 	 */
 	protected String getTargetBeanName() {
-		return targetBeanName;
+		return this.targetBeanName;
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * <code>Filter.destroy</code> lifecycle methods on the target bean.
 	 */
 	protected boolean isTargetFilterLifecycle() {
-		return targetFilterLifecycle;
+		return this.targetFilterLifecycle;
 	}
 
 
@@ -134,8 +134,8 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 			this.delegate = initDelegate(wac);
 		}
 
-		// Let the delegate perform the actual doFilter opeation.
-		this.delegate.doFilter(request, response, filterChain);
+		// Let the delegate perform the actual doFilter operation.
+		invokeDelegate(this.delegate, request, response, filterChain);
 	}
 
 	public void destroy() {
@@ -168,6 +168,22 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	}
 
 	/**
+	 * Actually invoke the delegate Filter with the given request and response.
+	 * @param delegate the delegate Filter
+	 * @param request the current HTTP request
+	 * @param response the current HTTP response
+	 * @param filterChain the current FilterChain
+	 * @throws ServletException if thrown by the Filter
+	 * @throws IOException if thrown by the Filter
+	 */
+	protected void invokeDelegate(
+			Filter delegate, ServletRequest request, ServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+
+		delegate.doFilter(request, response, filterChain);
+	}
+
+	/**
 	 * Destroy the Filter delegate.
 	 * Default implementation simply calls <code>Filter.destroy</code> on it.
 	 * @param delegate the Filter delegate (never <code>null</code>)
@@ -176,7 +192,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 */
 	protected void destroyDelegate(Filter delegate) {
 		if (isTargetFilterLifecycle()) {
-			this.delegate.destroy();
+			delegate.destroy();
 		}
 	}
 
