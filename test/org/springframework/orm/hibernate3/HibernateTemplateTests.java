@@ -186,47 +186,42 @@ public class HibernateTemplateTests extends TestCase {
 	}
 
 	public void testExecuteWithNotAllowCreate() {
+		sf.getCurrentSession();
+		sfControl.setThrowable(new HibernateException(""));
+		sfControl.replay();
+
 		HibernateTemplate ht = new HibernateTemplate();
 		ht.setSessionFactory(sf);
 		ht.setAllowCreate(false);
 		try {
 			ht.execute(new HibernateCallback() {
-				public Object doInHibernate(org.hibernate.Session session) throws HibernateException{
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					return null;
 				}
 			});
-			fail("Should have thrown IllegalStateException");
+			fail("Should have thrown DataAccessException");
 		}
-		catch (IllegalStateException ex) {
+		catch (DataAccessResourceFailureException ex) {
 			// expected
 		}
 	}
 
 	public void testExecuteWithNotAllowCreateAndThreadBound() {
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 1);
+		sf.getCurrentSession();
+		sfControl.setReturnValue(session);
 		sfControl.replay();
-		sessionControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.setAllowCreate(false);
 
-		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
-		try {
-			final List l = new ArrayList();
-			l.add("test");
-			List result = ht.executeFind(new HibernateCallback() {
-				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
-					return l;
-				}
-			});
-			assertTrue("Correct result list", result == l);
-		}
-		finally {
-			TransactionSynchronizationManager.unbindResource(sf);
-		}
+		final List l = new ArrayList();
+		l.add("test");
+		List result = ht.executeFind(new HibernateCallback() {
+			public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+				return l;
+			}
+		});
+		assertTrue("Correct result list", result == l);
 	}
 
 	public void testExecuteWithThreadBoundAndFlushEager() throws HibernateException {
@@ -243,7 +238,6 @@ public class HibernateTemplateTests extends TestCase {
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.setFlushModeName("FLUSH_EAGER");
-		ht.setAllowCreate(false);
 
 		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
 		try {
@@ -274,7 +268,6 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		ht.setAllowCreate(false);
 		ht.setFilterName("myFilter");
 
 		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
@@ -310,7 +303,6 @@ public class HibernateTemplateTests extends TestCase {
 		sessionControl.replay();
 
 		HibernateTemplate ht = new HibernateTemplate(sf);
-		ht.setAllowCreate(false);
 		ht.setFilterNames(new String[] {"myFilter", "yourFilter"});
 
 		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));

@@ -41,6 +41,7 @@ import org.hibernate.criterion.Example;
 import org.hibernate.engine.SessionImplementor;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.util.Assert;
 
@@ -48,13 +49,6 @@ import org.springframework.util.Assert;
  * Helper class that simplifies Hibernate data access code. Automatically
  * converts HibernateExceptions into DataAccessExceptions, following the
  * <code>org.springframework.dao</code> exception hierarchy.
- *
- * <p><b>NOTE: As of Hibernate 3.0.1, transactional Hibernate access code can
- * also be coded in plain Hibernate style. Hence, for newly started projects,
- * consider adopting the standard Hibernate3 style of coding data access objects
- * instead, based on <code>SessionFactory.getCurrentSession()</code>.</b>
- * (Spring's LocalSessionFactoryBean automatically supports Spring transaction
- * management for the Hibernate3 <code>getCurrentSession()</code> method.)
  *
  * <p>The central method is <code>execute</code>, supporting Hibernate access code
  * implementing the {@link HibernateCallback} interface. It provides Hibernate Session
@@ -69,19 +63,18 @@ import org.springframework.util.Assert;
  * always be configured as bean in the application context, in the first case
  * given to the service directly, in the second case to the prepared template.
  *
+ * <p><b>NOTE: As of Hibernate 3.0.1, transactional Hibernate access code can
+ * also be coded in plain Hibernate style. Hence, for newly started projects,
+ * consider adopting the standard Hibernate3 style of coding data access objects
+ * instead, based on {@link org.hibernate.SessionFactory#getCurrentSession()}.</b>
+ *
  * <p>This class can be considered as direct alternative to working with the raw
  * Hibernate3 Session API (through <code>SessionFactory.getCurrentSession()</code>).
- * The major advantage is its automatic conversion to DataAccessExceptions, the
- * major disadvantage that no checked application exceptions can get thrown from
- * within data access code. Corresponding checks and the actual throwing of such
- * exceptions can often be deferred to after callback execution, though.
- *
- * <p>Note that even if {@link HibernateTransactionManager} is used for transaction
- * demarcation in higher-level services, all those services above the data
- * access layer don't need to be Hibernate-aware. Setting such a special
- * PlatformTransactionManager is a configuration issue: For example,
- * switching to JTA is just a matter of Spring configuration (use
- * JtaTransactionManager instead) that does not affect application code.
+ * The major advantage is its automatic conversion to DataAccessExceptions as well
+ * as its capability to fall back to 'auto-commit' style behavior when used outside
+ * of transactions. <b>Note that HibernateTemplate will perform its own Session
+ * management, not participating in a custom Hibernate CurrentSessionContext
+ * unless you explicitly switch {@link #setAllowCreate "allowCreate"} to "false".</b>
  *
  * <p>{@link LocalSessionFactoryBean} is the preferred way of obtaining a reference
  * to a specific Hibernate SessionFactory, at least in a non-EJB environment.
@@ -102,7 +95,6 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 1.2
- * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see #setSessionFactory
  * @see HibernateCallback
  * @see org.hibernate.Session
@@ -162,7 +154,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	/**
 	 * Set if a new {@link Session} should be created when no transactional
 	 * <code>Session</code> can be found for the current thread.
-	 * The default value is "<code>true</code>".
+	 * The default value is <code>true</code>.
 	 * <p><code>HibernateTemplate</code> is aware of a corresponding
 	 * <code>Session</code> bound to the current thread, for example when using
 	 * {@link HibernateTransactionManager}. If <code>allowCreate</code> is
@@ -170,6 +162,14 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * created if none is found, which needs to be closed at the end of the operation.
 	 * If <code>false</code>, an {@link IllegalStateException} will get thrown in
 	 * this case.
+	 * <p><b>NOTE: As of Spring 2.1, switching <code>allowCreate</code>
+	 * to <code>false</code> will delegate to Hibernate's
+	 * {@link org.hibernate.SessionFactory#getCurrentSession()} method,</b>
+	 * which - with Spring-based setup - will by default delegate to Spring's
+	 * <code>SessionFactoryUtils.getSession(sessionFactory, false)</code>.
+	 * This mode also allows for custom Hibernate CurrentSessionContext strategies
+	 * to be plugged in, whereas <code>allowCreate</code> set to <code>true</code>
+	 * will always use a Spring-managed Hibernate Session.
 	 * @see SessionFactoryUtils#getSession(SessionFactory, boolean)
 	 */
 	public void setAllowCreate(boolean allowCreate) {
@@ -359,7 +359,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		Assert.notNull(action, "Callback object must not be null");
 
 		Session session = getSession();
-		boolean existingTransaction = SessionFactoryUtils.isSessionTransactional(session, getSessionFactory());
+		boolean existingTransaction = (!isAlwaysUseNewSession() &&
+				(!isAllowCreate() || SessionFactoryUtils.isSessionTransactional(session, getSessionFactory())));
 		if (existingTransaction) {
 			logger.debug("Found thread-bound Session for HibernateTemplate");
 		}
@@ -419,12 +420,17 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		if (isAlwaysUseNewSession()) {
 			return SessionFactoryUtils.getNewSession(getSessionFactory(), getEntityInterceptor());
 		}
-		else if (!isAllowCreate()) {
-			return SessionFactoryUtils.getSession(getSessionFactory(), false);
-		}
-		else {
+		else if (isAllowCreate()) {
 			return SessionFactoryUtils.getSession(
 					getSessionFactory(), getEntityInterceptor(), getJdbcExceptionTranslator());
+		}
+		else {
+			try {
+				return getSessionFactory().getCurrentSession();
+			}
+			catch (HibernateException ex) {
+				throw new DataAccessResourceFailureException("Could not obtain current Hibernate Session", ex);
+			}
 		}
 	}
 
