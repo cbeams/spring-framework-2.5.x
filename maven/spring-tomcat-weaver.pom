@@ -1,42 +1,45 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.springframework</groupId>
-  <artifactId>spring-tomcat-weaver</artifactId>
-  <packaging>jar</packaging>
-  <name>Spring Framework: Tomcat Weaver</name>
-  <version>2.1-m2-SNAPSHOT</version>
-  <description>Spring Framework: Tomcat Weaver</description>
-  <url>http://www.springframework.org</url>
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <scm>
-    <connection>scm:cvs:pserver:anonymous:@springframework.cvs.sourceforge.net:/cvsroot/springframework/spring</connection>
-    <developerConnection>scm:cvs:ext:username@springframework.cvs.sourceforge.net:/cvsroot/springframework/spring</developerConnection>
-    <url>http://springframework.cvs.sourceforge.net/springframework/</url>
-  </scm>
-  <organization>
-    <name>Spring Framework</name>
-    <url>http://www.springframework.org/</url>
-  </organization>
-  <dependencies>
+<project
+		xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-tomcat-weaver</artifactId>
+	<packaging>jar</packaging>
+	<name>Spring Framework: Tomcat Weaver</name>
+	<version>2.1-m3-SNAPSHOT</version>
+	<description>Spring Framework: Tomcat Weaver</description>
+	<url>http://www.springframework.org</url>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<scm>
+		<connection>scm:cvs:pserver:anonymous:@springframework.cvs.sourceforge.net:/cvsroot/springframework/spring</connection>
+		<developerConnection>scm:cvs:ext:username@springframework.cvs.sourceforge.net:/cvsroot/springframework/spring</developerConnection>
+		<url>http://springframework.cvs.sourceforge.net/springframework/</url>
+	</scm>
+	<organization>
+		<name>Spring Framework</name>
+		<url>http://www.springframework.org/</url>
+	</organization>
+	<dependencies>
 <!-- External Dependencies -->
-<!-- Not currently in ibiblio maven repository -->
-    <dependency>
-      <groupId>tomcat</groupId>
-      <artifactId>catalina</artifactId>
-      <version>5.5.23</version>
-    </dependency>
+		<dependency>
+			<groupId>tomcat</groupId>
+			<artifactId>catalina</artifactId>
+			<version>5.5.23</version>
+		</dependency>
 <!-- Spring Dependencies -->
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-  </dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 </project>
