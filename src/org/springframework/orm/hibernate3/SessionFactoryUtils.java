@@ -49,7 +49,6 @@ import org.hibernate.WrongClassException;
 import org.hibernate.connection.ConnectionProvider;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.exception.ConstraintViolationException;
-import org.hibernate.exception.DataException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
@@ -612,7 +611,7 @@ public abstract class SessionFactoryUtils {
 		if (ex instanceof SQLGrammarException) {
 			return new InvalidDataAccessResourceUsageException(ex.getMessage(), ex);
 		}
-		if (ex instanceof DataException) {
+		if (ex != null && "org.hibernate.exception.DataException".equals(ex.getClass().getName())) {
 			return new InvalidDataAccessResourceUsageException(ex.getMessage(), ex);
 		}
 		if (ex instanceof LockAcquisitionException) {
