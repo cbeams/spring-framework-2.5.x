@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,18 @@ public class ManagedAttribute extends AbstractJmxAttribute {
 	private int persistPeriod = -1;
 
 
+	/**
+	 * Set the default value of this attribute.
+	 */
 	public void setDefaultValue(Object defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 
+	/**
+	 * Return the default value of this attribute.
+	 */
 	public Object getDefaultValue() {
-		return defaultValue;
+		return this.defaultValue;
 	}
 
 	public void setPersistPolicy(String persistPolicy) {
@@ -50,7 +56,7 @@ public class ManagedAttribute extends AbstractJmxAttribute {
 	}
 
 	public String getPersistPolicy() {
-		return persistPolicy;
+		return this.persistPolicy;
 	}
 
 	public void setPersistPeriod(int persistPeriod) {
@@ -58,7 +64,7 @@ public class ManagedAttribute extends AbstractJmxAttribute {
 	}
 
 	public int getPersistPeriod() {
-		return persistPeriod;
+		return this.persistPeriod;
 	}
 
 }
