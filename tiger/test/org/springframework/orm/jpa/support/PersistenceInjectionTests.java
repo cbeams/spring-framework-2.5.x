@@ -16,6 +16,10 @@
 
 package org.springframework.orm.jpa.support;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -34,9 +38,11 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.orm.jpa.AbstractEntityManagerFactoryBeanTests;
+import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * Unit tests for persistence context and persistence unit injection.
@@ -60,9 +66,9 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		assertNotNull(bean.em);
 	}
 
-	public void testPublicExtendedPersistenceContextSetter() {
-		mockEmf.createEntityManager();
+	public void testPublicExtendedPersistenceContextSetter() throws Exception {
 		Object mockEm = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
+		mockEmf.createEntityManager();
 		emfMc.setReturnValue(mockEm, 1);
 		emfMc.replay();
 
@@ -77,6 +83,58 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		DefaultPublicPersistenceContextSetter bean = (DefaultPublicPersistenceContextSetter) gac.getBean(
 				DefaultPublicPersistenceContextSetter.class.getName());
 		assertNotNull(bean.em);
+		emfMc.verify();
+	}
+
+	public void testPublicExtendedPersistenceContextSetterWithSerialization() throws Exception {
+		Object mockEm = (EntityManager) Proxy.newProxyInstance(
+				getClass().getClassLoader(), new Class[] {EntityManager.class}, new DummyInvocationHandler());
+		mockEmf.createEntityManager();
+		emfMc.setReturnValue(mockEm, 1);
+		emfMc.replay();
+
+		GenericApplicationContext gac = new GenericApplicationContext();
+		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
+		gac.registerBeanDefinition("annotationProcessor",
+				new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
+		gac.registerBeanDefinition(DefaultPublicPersistenceContextSetter.class.getName(),
+				new RootBeanDefinition(DefaultPublicPersistenceContextSetter.class));
+		gac.refresh();
+
+		DefaultPublicPersistenceContextSetter bean = (DefaultPublicPersistenceContextSetter) gac.getBean(
+				DefaultPublicPersistenceContextSetter.class.getName());
+		assertNotNull(bean.em);
+		assertNotNull(SerializationTestUtils.serializeAndDeserialize(bean.em));
+		emfMc.verify();
+	}
+
+	public void testPublicExtendedPersistenceContextSetterWithEntityManagerInfoAndSerialization() throws Exception {
+		Object mockEm = (EntityManager) Proxy.newProxyInstance(
+				getClass().getClassLoader(), new Class[] {EntityManager.class}, new DummyInvocationHandler());
+		MockControl emfMc = MockControl.createControl(EntityManagerFactoryWithInfo.class);
+		EntityManagerFactoryWithInfo mockEmf = (EntityManagerFactoryWithInfo) emfMc.getMock();
+		mockEmf.getNativeEntityManagerFactory();
+		emfMc.setReturnValue(mockEmf);
+		mockEmf.getPersistenceUnitInfo();
+		emfMc.setReturnValue(null);
+		mockEmf.getJpaDialect();
+		emfMc.setReturnValue(new DefaultJpaDialect());
+		mockEmf.createEntityManager();
+		emfMc.setReturnValue(mockEm, 1);
+		emfMc.replay();
+
+		GenericApplicationContext gac = new GenericApplicationContext();
+		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
+		gac.registerBeanDefinition("annotationProcessor",
+				new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
+		gac.registerBeanDefinition(DefaultPublicPersistenceContextSetter.class.getName(),
+				new RootBeanDefinition(DefaultPublicPersistenceContextSetter.class));
+		gac.refresh();
+
+		DefaultPublicPersistenceContextSetter bean = (DefaultPublicPersistenceContextSetter) gac.getBean(
+				DefaultPublicPersistenceContextSetter.class.getName());
+		assertNotNull(bean.em);
+		assertNotNull(SerializationTestUtils.serializeAndDeserialize(bean.em));
 		emfMc.verify();
 	}
 
@@ -700,6 +758,17 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 	private interface EntityManagerFactoryWithInfo extends EntityManagerFactory, EntityManagerFactoryInfo {
 
+	}
+
+
+	private static class DummyInvocationHandler implements InvocationHandler, Serializable {
+
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			if ("toString".equals(method.getName())) {
+				return "";
+			}
+			throw new IllegalStateException();
+		}
 	}
 
 }

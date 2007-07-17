@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -258,8 +259,8 @@ public abstract class ExtendedEntityManagerCreator {
 	/**
 	 * InvocationHandler for extended EntityManagers as defined in the JPA spec.
 	 */
-	private static class ExtendedEntityManagerInvocationHandler implements InvocationHandler {
-		
+	private static class ExtendedEntityManagerInvocationHandler implements InvocationHandler, Serializable {
+
 		private static final Log logger = LogFactory.getLog(ExtendedEntityManagerInvocationHandler.class);
 
 		private final EntityManager target;
@@ -297,10 +298,6 @@ public abstract class ExtendedEntityManagerCreator {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on EntityManager interface coming in...
 
-			if (method.getDeclaringClass().equals(EntityManagerPlusOperations.class)) {
-				return method.invoke(this.plusOperations, args);
-			}
-
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.
 				return (proxy == args[0]);
@@ -331,13 +328,18 @@ public abstract class ExtendedEntityManagerCreator {
 			}
 
 			// Do automatic joining if required.
-			if (this.containerManaged) {
+			if (this.containerManaged && method.getDeclaringClass().isInterface()) {
 				doJoinTransaction(false);
 			}
 
 			// Invoke method on current EntityManager.
 			try {
-				return method.invoke(this.target, args);
+				if (method.getDeclaringClass().equals(EntityManagerPlusOperations.class)) {
+					return method.invoke(this.plusOperations, args);
+				}
+				else {
+					return method.invoke(this.target, args);
+				}
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
