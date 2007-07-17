@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans.factory.aspectj;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
@@ -29,6 +28,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -136,7 +136,6 @@ public class BeanConfigurerTests extends TestCase {
 		assertEquals("Dependency injected on deserialization","Anonymous",deserializedDomainObject.getName());
 	}
 	
-	
 	public void testSubBeanConfiguredOnlyOnce() throws Exception {
 		SubBean subBean = new SubBean();
 		assertEquals("Property injected more than once", 1, subBean.setterCount);
@@ -172,6 +171,7 @@ public class BeanConfigurerTests extends TestCase {
 		return (T)ois.readObject();
 	}
 	
+
 	@Configurable("beanOne")
 	private static class ShouldBeConfiguredBySpring implements Serializable {
 
@@ -185,6 +185,7 @@ public class BeanConfigurerTests extends TestCase {
 			return this.name;
 		}
 	}
+
 
 	@Configurable("beanOne")
 	private static class ShouldBeConfiguredBySpringContainsPublicReadResolve implements Serializable {
@@ -207,6 +208,7 @@ public class BeanConfigurerTests extends TestCase {
 		}
 	}
 
+
 // 	Won't work until we use hasmethod() experimental pointcut in AspectJ.
 //	@Configurable("beanOne")
 //	private static class ShouldBeConfiguredBySpringContainsPrivateReadResolve implements Serializable {
@@ -226,6 +228,7 @@ public class BeanConfigurerTests extends TestCase {
 //		}
 //	}
 
+
 	private static class ShouldNotBeConfiguredBySpring {
 
 		private String name;
@@ -239,6 +242,7 @@ public class BeanConfigurerTests extends TestCase {
 		}
 	}
 
+
 	private static class SerializableThatShouldNotBeConfiguredBySpring implements Serializable {
 
 		private String name;
@@ -251,6 +255,7 @@ public class BeanConfigurerTests extends TestCase {
 			return this.name;
 		}
 	}
+
 
 	@Configurable
 	private static class ShouldBeConfiguredBySpringUsingTypeNameAsBeanName {
@@ -322,8 +327,30 @@ public class BeanConfigurerTests extends TestCase {
 	}
 
 
+	public static class CircularFactoryBean implements FactoryBean{
+
+		public CircularFactoryBean() {
+			ValidAutowireByName autowired = new ValidAutowireByName();
+			assertNull(autowired.getRamnivas());
+		}
+
+		public Object getObject() throws Exception {
+			return new TestBean();
+		}
+
+		public Class getObjectType() {
+			return TestBean.class;
+		}
+
+		public boolean isSingleton() {
+			return false;
+		}
+	}
+
+
 	@Configurable
 	private static class BaseBean {
+
 		public int setterCount;
 
 		private String name;
@@ -333,12 +360,15 @@ public class BeanConfigurerTests extends TestCase {
 			setterCount++;
 		}
 	}
+
 
 	private static class SubBean extends BaseBean {
 	} 
 	
+
 	@Configurable
 	private static class BaseSerializableBean implements Serializable {
+
 		public int setterCount;
 
 		private String name;
@@ -349,8 +379,10 @@ public class BeanConfigurerTests extends TestCase {
 		}
 	}
 
+
 	private static class SubSerializableBean extends BaseSerializableBean {
 	} 
+
 
 	@Aspect
 	private static class WireArbitraryExistingPojo extends AbstractBeanConfigurerAspect {
@@ -377,11 +409,12 @@ public class BeanConfigurerTests extends TestCase {
 	
 	@Configurable
 	private static class PreOrPostConstuctionConfiguredBean {
+
 		private String name;
 		protected boolean preConstructionConfigured;
 
 		public PreOrPostConstuctionConfiguredBean() {
-			preConstructionConfigured = name != null ? true : false;  
+			preConstructionConfigured = (this.name != null);
 		}
 		
 		public void setName(String name) {
@@ -389,9 +422,11 @@ public class BeanConfigurerTests extends TestCase {
 		}
 	}
 
+
 	@Configurable(preConstruction=true)
 	private static class PreConstuctionConfiguredBean extends PreOrPostConstuctionConfiguredBean {
 	}
+
 
 	@Configurable(preConstruction=false)
 	private static class PostConstuctionConfiguredBean extends PreOrPostConstuctionConfiguredBean {

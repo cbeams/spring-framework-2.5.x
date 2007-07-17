@@ -19,12 +19,14 @@ package org.springframework.beans.factory.wiring;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Convenient superclass for configurers that can perform Dependency Injection
@@ -64,7 +66,6 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 	 * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
 	 */
 	public void setBeanWiringInfoResolver(BeanWiringInfoResolver beanWiringInfoResolver) {
-		Assert.notNull(beanWiringInfoResolver, "'beanWiringInfoResolver' cannot be null.");
 		this.beanWiringInfoResolver = beanWiringInfoResolver;
 	}
 
@@ -110,12 +111,9 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 	 */
 	protected void configureBean(Object beanInstance) {
 		if (this.beanWiringInfoResolver == null) {
-			if(logger.isWarnEnabled()) {
-				logger.warn("[" + getClass().getName() + "] has not been configured by Spring " +
-					"and is unable to configure bean instances. Object with identity " +
-					"hashcode " + System.identityHashCode(beanInstance) + " has not been configured: " +
-					"Make sure this configurer runs in a Spring container. " +
-					"For example, add it to a Spring application context as an XML bean definition.");
+			if (logger.isWarnEnabled()) {
+				logger.warn(ClassUtils.getShortName(getClass()) + " has not been set up " +
+					"and is unable to configure bean instances. Proceeding without injection.");
 			}
 			return;
 		}
@@ -127,25 +125,46 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 		}
 
 		if (this.beanFactory == null) {
-			if(logger.isWarnEnabled()) {
-				logger.warn("BeanFactory has not been set on [" + getClass().getName() + "]: " +
-					"Make sure this configurer runs in a Spring container. " +
-					"For example, add it to a Spring application context as an XML bean definition.");
+			if (logger.isWarnEnabled()) {
+				logger.warn("BeanFactory has not been set on " + ClassUtils.getShortName(getClass()) + ": " +
+						"Make sure this configurer runs in a Spring container. Proceeding without injection.");
 			}
 			return;
 		}
 
-		if (bwi.indicatesAutowiring() ||
-				(bwi.isDefaultBeanName() && !this.beanFactory.containsBeanDefinition(bwi.getBeanName()))) {
-			// Perform autowiring (also applying standard factory / post-processor callbacks).
-			this.beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
-			Object result = this.beanFactory.initializeBean(beanInstance, bwi.getBeanName());
-			checkExposedObject(result, beanInstance);
+		try {
+			if (bwi.indicatesAutowiring() ||
+					(bwi.isDefaultBeanName() && !this.beanFactory.containsBeanDefinition(bwi.getBeanName()))) {
+				// Perform autowiring (also applying standard factory / post-processor callbacks).
+				this.beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
+				Object result = this.beanFactory.initializeBean(beanInstance, bwi.getBeanName());
+				checkExposedObject(result, beanInstance);
+			}
+			else {
+				// Perform explicit wiring based on the specified bean definition.
+				Object result = this.beanFactory.configureBean(beanInstance, bwi.getBeanName());
+				checkExposedObject(result, beanInstance);
+			}
 		}
-		else {
-			// Perform explicit wiring based on the specified bean definition.
-			Object result = this.beanFactory.configureBean(beanInstance, bwi.getBeanName());
-			checkExposedObject(result, beanInstance);
+		catch (BeanCreationException ex) {
+			Throwable rootCause = ex.getMostSpecificCause();
+			if (rootCause instanceof BeanCurrentlyInCreationException) {
+				BeanCreationException bce = (BeanCreationException) rootCause;
+				if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
+					String msg = ClassUtils.getShortName(getClass()) + " failed to create target bean '" +
+							bce.getBeanName() + "' while configuring object of type [" +
+							beanInstance.getClass().getName() + "] (probably due to a circular reference). " +
+							"Proceeding without injection.";
+					if (logger.isDebugEnabled()) {
+						logger.debug(msg, ex);
+					}
+					else if (logger.isInfoEnabled()) {
+						logger.info(msg);
+					}
+					return;
+				}
+			}
+			throw ex;
 		}
 	}
 
