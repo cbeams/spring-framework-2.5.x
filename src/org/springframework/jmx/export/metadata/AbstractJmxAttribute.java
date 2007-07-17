@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,20 +29,32 @@ public class AbstractJmxAttribute {
 	private int currencyTimeLimit = -1;
 
 
+	/**
+	 * Set a description for this attribute.
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * Return a description for this attribute.
+	 */
 	public String getDescription() {
 		return this.description;
 	}
 
+	/**
+	 * Set a currency time limit for this attribute.
+	 */
 	public void setCurrencyTimeLimit(int currencyTimeLimit) {
 		this.currencyTimeLimit = currencyTimeLimit;
 	}
 
+	/**
+	 * Return a currency time limit for this attribute.
+	 */
 	public int getCurrencyTimeLimit() {
-		return currencyTimeLimit;
+		return this.currencyTimeLimit;
 	}
 
 }

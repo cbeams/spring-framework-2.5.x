@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,35 +34,53 @@ public class ManagedNotification {
 
 
 	/**
-	 * Set a single notification type, or a list of notifcation types
+	 * Set a single notification type, or a list of notification types
 	 * as comma-delimited String.
 	 */
 	public void setNotificationType(String notificationType) {
 		this.notificationTypes = StringUtils.commaDelimitedListToStringArray(notificationType);
 	}
 
+	/**
+	 * Set a list of notification types.
+	 */
 	public void setNotificationTypes(String[] notificationTypes) {
 		this.notificationTypes = notificationTypes;
 	}
 
+	/**
+	 * Return the list of notification types.
+	 */
 	public String[] getNotificationTypes() {
-		return notificationTypes;
+		return this.notificationTypes;
 	}
 
+	/**
+	 * Set the name of this notification.
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Return the name of this notification.
+	 */
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
+	/**
+	 * Set a description for this notification.
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * Return a description for this notification.
+	 */
 	public String getDescription() {
-		return description;
+		return this.description;
 	}
 
 }

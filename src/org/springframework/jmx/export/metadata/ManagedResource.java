@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,16 @@ public class ManagedResource extends AbstractJmxAttribute {
 	private String persistLocation;
 
 
+	/**
+	 * Set the JMX ObjectName of this managed resource.
+	 */
 	public void setObjectName(String objectName) {
 		this.objectName = objectName;
 	}
 
+	/**
+	 * Return the JMX ObjectName of this managed resource.
+	 */
 	public String getObjectName() {
 		return this.objectName;
 	}
@@ -57,7 +63,7 @@ public class ManagedResource extends AbstractJmxAttribute {
 	}
 
 	public boolean isLog() {
-		return log;
+		return this.log;
 	}
 
 	public void setLogFile(String logFile) {
@@ -65,7 +71,7 @@ public class ManagedResource extends AbstractJmxAttribute {
 	}
 
 	public String getLogFile() {
-		return logFile;
+		return this.logFile;
 	}
 
 	public void setPersistPolicy(String persistPolicy) {
@@ -73,7 +79,7 @@ public class ManagedResource extends AbstractJmxAttribute {
 	}
 
 	public String getPersistPolicy() {
-		return persistPolicy;
+		return this.persistPolicy;
 	}
 
 	public void setPersistPeriod(int persistPeriod) {
@@ -81,7 +87,7 @@ public class ManagedResource extends AbstractJmxAttribute {
 	}
 
 	public int getPersistPeriod() {
-		return persistPeriod;
+		return this.persistPeriod;
 	}
 
 	public void setPersistName(String persistName) {
@@ -89,7 +95,7 @@ public class ManagedResource extends AbstractJmxAttribute {
 	}
 
 	public String getPersistName() {
-		return persistName;
+		return this.persistName;
 	}
 
 	public void setPersistLocation(String persistLocation) {
@@ -97,7 +103,7 @@ public class ManagedResource extends AbstractJmxAttribute {
 	}
 
 	public String getPersistLocation() {
-		return persistLocation;
+		return this.persistLocation;
 	}
 
 }
