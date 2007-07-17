@@ -22,9 +22,11 @@ import javax.jms.MessageFormatException;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueRequestor;
+import javax.jms.QueueReceiver;
+import javax.jms.QueueSender;
 import javax.jms.QueueSession;
 import javax.jms.Session;
+import javax.jms.TemporaryQueue;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -76,6 +78,8 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	private RemoteInvocationFactory remoteInvocationFactory = new DefaultRemoteInvocationFactory();
 
 	private MessageConverter messageConverter = new SimpleMessageConverter();
+
+	private long receiveTimeout = 0;
 
 
 	/**
@@ -146,6 +150,25 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
 		this.messageConverter = (messageConverter != null ? messageConverter : new SimpleMessageConverter());
+	}
+
+	/**
+	 * Set the timeout to use for receiving the response message for a request
+	 * (in milliseconds).
+	 * <p>The default is 0, which indicates a blocking receive without timeout.
+	 * @see javax.jms.MessageConsumer#receive(long)
+	 * @see javax.jms.MessageConsumer#receive()
+	 */
+	public void setReceiveTimeout(long receiveTimeout) {
+		this.receiveTimeout = receiveTimeout;
+	}
+
+	/**
+	 * Return the timeout to use for receiving the response message for a request
+	 * (in milliseconds).
+	 */
+	protected long getReceiveTimeout() {
+		return this.receiveTimeout;
 	}
 
 
@@ -263,8 +286,8 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	/**
 	 * Actually execute the given request, sending the invoker request message
 	 * to the specified target queue and waiting for a corresponding response.
-	 * <p>The default implementation is based on a standard JMS
-	 * {@link javax.jms.QueueRequestor}, using a freshly obtained JMS Session.
+	 * <p>The default implementation is based on standard JMS send/receive,
+	 * using a {@link javax.jms.TemporaryQueue} for receiving the response.
 	 * @param session the JMS Session to use
 	 * @param queue the resolved target Queue to send to
 	 * @param requestMessage the JMS Message to send
@@ -274,13 +297,24 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	protected Message doExecuteRequest(
 			QueueSession session, Queue queue, Message requestMessage) throws JMSException {
 
-		QueueRequestor requestor = null;
+		TemporaryQueue responseQueue = null;
+		QueueSender sender = null;
+		QueueReceiver receiver = null;
 		try {
-			requestor = new QueueRequestor(session, queue);
-			return requestor.request(requestMessage);
+			responseQueue = session.createTemporaryQueue();
+			sender = session.createSender(queue);
+			receiver = session.createReceiver(responseQueue);
+			requestMessage.setJMSReplyTo(responseQueue);
+			sender.send(requestMessage);
+			long timeout = getReceiveTimeout();
+			return (timeout > 0 ? receiver.receive(timeout) : receiver.receive());
 		}
 		finally {
-			JmsUtils.closeQueueRequestor(requestor);
+			JmsUtils.closeMessageConsumer(receiver);
+			JmsUtils.closeMessageProducer(sender);
+			if (responseQueue != null) {
+				responseQueue.delete();
+			}
 		}
 	}
 
