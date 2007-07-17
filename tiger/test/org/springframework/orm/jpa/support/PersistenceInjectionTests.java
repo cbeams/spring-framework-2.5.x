@@ -553,8 +553,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 	/**
 	 * Binds an EMF to the thread and tests if EM with different properties
-	 * generate new EMs or not
-	 * 
+	 * generate new EMs or not.
 	 */
 	public void testPropertiesForSharedEntityManager1() {
 		Properties props = new Properties();
