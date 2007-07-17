@@ -266,7 +266,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	/**
-	 * Set the timeout to use for receive calls.
+	 * Set the timeout to use for receive calls (in milliseconds).
 	 * <p>The default is {@link #RECEIVE_TIMEOUT_INDEFINITE_WAIT}, which indicates
 	 * a blocking receive without timeout.
 	 * <p>Specify {@link #RECEIVE_TIMEOUT_NO_WAIT} to inidicate that a receive operation
@@ -280,7 +280,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	/**
-	 * Return the timeout to use for receive calls.
+	 * Return the timeout to use for receive calls (in milliseconds).
 	 */
 	public long getReceiveTimeout() {
 		return this.receiveTimeout;
