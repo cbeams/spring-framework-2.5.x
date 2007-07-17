@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa;
 
+import java.io.Serializable;
 import java.sql.SQLException;
 
 import javax.persistence.EntityManager;
@@ -29,18 +30,18 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * Default implementation of the JpaDialect interface.
- * Used as default dialect by JpaAccessor and JpaTransactionManager.
+ * Default implementation of the {@link JpaDialect} interface.
+ * Used as default dialect by {@link JpaAccessor} and {@link JpaTransactionManager}.
  *
- * <p>Simply begins a standard JPA transaction in <code>beginTransaction</code>
- * and performs standard exception translation through EntityManagerFactoryUtils.
+ * <p>Simply begins a standard JPA transaction in {@link #beginTransaction}
+ * and performs standard exception translation through {@link EntityManagerFactoryUtils}.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see JpaAccessor#setJpaDialect
  * @see JpaTransactionManager#setJpaDialect
  */
-public class DefaultJpaDialect implements JpaDialect {
+public class DefaultJpaDialect implements JpaDialect, Serializable {
 
 	//-------------------------------------------------------------------------
 	// Hooks for transaction management (used by JpaTransactionManager)
