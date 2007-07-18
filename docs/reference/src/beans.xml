@@ -4097,7 +4097,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
         this.customerPreferenceDao = customerPreferenceDao;
     }
 }]]></programlisting>
-            <para>The annotation may even be applied on constructors and fields:</para>
+            <para>The <interfacename>@Autowired</interfacename> annotation
+            may even be applied on constructors and fields:</para>
             <programlisting><![CDATA[public class MovieRecommender {
 
     @Autowired
@@ -4108,6 +4109,25 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
     @Autowired
     public MovieRecommender(CustomerPreferenceDao customerPreferenceDao) {
         this.customerPreferenceDao = customerPreferenceDao;
+    }
+}]]></programlisting>
+            <para>It is also possible to provide <emphasis>all</emphasis> beans of a particular
+            type from the <interfacename>ApplicationContext</interfacename> by adding the annotation
+            to a field or method that expects an array of that type:</para>
+            <programlisting><![CDATA[public class MovieRecommender {
+
+    @Autowired
+    private MovieCatalog[] movieCatalogs;
+    
+}]]></programlisting>
+            <para>If you are using at least Java 5, then the same applies for typed collections:</para>
+            <programlisting><![CDATA[public class MovieRecommender {
+
+    private Set<MovieCatalog> movieCatalogs;
+    
+    @Autowired
+    public void setMovieCatalogs(Set<MovieCatalog> movieCatalogs) {
+        this.movieCatalogs = movieCatalogs;
     }
 }]]></programlisting>
             <para>By default, the autowiring will fail whenever <emphasis>zero</emphasis> 
