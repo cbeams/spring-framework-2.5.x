@@ -436,9 +436,34 @@ public class XmlBeanFactoryTests extends TestCase {
 		TestBean jenny = (TestBean) xbf.getBean("jenny");
 		TestBean david = (TestBean) xbf.getBean("david");
 		TestBean ego = (TestBean) xbf.getBean("ego");
+		TestBean complexInnerEgo = (TestBean) xbf.getBean("complexInnerEgo");
+		TestBean complexEgo = (TestBean) xbf.getBean("complexEgo");
 		assertTrue("Correct circular reference", jenny.getSpouse() == david);
 		assertTrue("Correct circular reference", david.getSpouse() == jenny);
 		assertTrue("Correct circular reference", ego.getSpouse() == ego);
+		assertTrue("Correct circular reference", complexInnerEgo.getSpouse().getSpouse() == complexInnerEgo);
+		assertTrue("Correct circular reference", complexEgo.getSpouse().getSpouse() == complexEgo);
+	}
+
+	public void testCircularReferenceWithFactoryBeanFirst() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
+		TestBean egoBridge = (TestBean) xbf.getBean("egoBridge");
+		TestBean complexEgo = (TestBean) xbf.getBean("complexEgo");
+		assertTrue("Correct circular reference", complexEgo.getSpouse().getSpouse() == complexEgo);
+	}
+
+	public void testCircularReferenceWithTwoFactoryBeans() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
+		TestBean ego1 = (TestBean) xbf.getBean("ego1");
+		assertTrue("Correct circular reference", ego1.getSpouse().getSpouse() == ego1);
+		TestBean ego3 = (TestBean) xbf.getBean("ego3");
+		assertTrue("Correct circular reference", ego3.getSpouse().getSpouse() == ego3);
 	}
 
 	public void testCircularReferencesWithNotAllowed() {

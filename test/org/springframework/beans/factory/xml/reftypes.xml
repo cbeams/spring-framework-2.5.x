@@ -38,6 +38,42 @@
 		<property name="spouse" ref="ego"/>
 	</bean>
 
+	<bean id="complexInnerEgo" class="org.springframework.beans.TestBean">
+		<property name="name" value="ego"/>
+		<property name="age" value="1"/>
+		<property name="spouse">
+			<bean class="org.springframework.beans.factory.DummyFactory">
+				<property name="otherTestBean" ref="complexInnerEgo"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="complexEgo" class="org.springframework.beans.TestBean">
+		<property name="name" value="ego"/>
+		<property name="age" value="1"/>
+		<property name="spouse" ref="egoBridge"/>
+	</bean>
+
+	<bean id="egoBridge" class="org.springframework.beans.factory.DummyFactory">
+		<property name="otherTestBean" ref="complexEgo"/>
+	</bean>
+
+	<bean id="ego1" class="org.springframework.beans.factory.DummyFactory">
+		<property name="otherTestBean" ref="ego2"/>
+	</bean>
+
+	<bean id="ego2" class="org.springframework.beans.factory.DummyFactory">
+		<property name="otherTestBean" ref="ego1"/>
+	</bean>
+
+	<bean id="ego3" class="org.springframework.beans.factory.DummyFactory">
+		<property name="otherTestBean">
+			<bean class="org.springframework.beans.factory.DummyFactory">
+				<property name="otherTestBean" ref="ego3"/>
+			</bean>
+		</property>
+	</bean>
+
 	<!-- This bean must not conflict with the actual inner beans named "innerBean" -->
 	<bean id="innerBean" class="org.springframework.beans.TestBean" destroy-method="destroy">
 		<constructor-arg><value>outer</value></constructor-arg>
