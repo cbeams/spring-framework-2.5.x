@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M3 (2007-07-17)
+Changes in version 2.1 M3 (2007-07-20)
 --------------------------------------
 
 Package org.springframework.aop
@@ -21,6 +21,7 @@ Package org.springframework.aop
 Package org.springframework.beans
 * added "charsToDelete" and "emptyArrayAsNull" options to StringArrayPropertyEditor
 * URIEditor trims whitespace before parsing the URI (allowing for XML formatting with whitespace)
+* BeanWrapperImpl lazily performs JavaBeans introspection (avoiding introspection failure for non-visible target class)
 * TypeConverterDelegate protects its collection conversion process against misbehaving Collections with a null Iterator
 * TypeConverterDelegate only attempts to convert well-known collection types (skips custom types in the first place)
 * fixed AbstractBeanFactory to correctly handle factory-bean references in case of a temporary ClassLoader being used
@@ -34,11 +35,13 @@ Package org.springframework.beans
 * PropertyPlaceholderConfigurer resolves placeholders in parent, factory-bean and factory-method values as well
 * DefaultListableBeanFactory ignores invalid parent bean names when matching beans by type with allowEagerInit=false
 * DefaultListableBeanFactory only ignores invalid bean class names when matching beans by type with allowEagerInit=false
-* AbstractBeanFactory supports any BeanDefinition implementation (does not require AbstractBeanDefintion anymore)
+* introduced "removeBeanDefinition" method in BeanDefinitionRegistry interface and DefaultListableBeanFactory class
+* AbstractBeanFactory supports any BeanDefinition implementation (does not require AbstractBeanDefinition anymore)
 * introduced GenericBeanDefinition as one-stop shop for standard bean definition purposes (with configurable parent)
 * DefaultBeanNameGenerator does not require an AbstractBeanDefinition implementation for bean name generation anymore
 * added autowiring by type for arrays and collections (available for @Autowired, 'constructor' and 'byType' autowiring)
 * Autowired/CommonAnnotationBeanPostProcessor registers autowired beans as dependent on their injected target bean
+* AnnotationBeanConfigurerAspect proceeds without injection in case of a circular reference problem, logging a warning
 * added "registerBeanComponent" convenience method to ParserContext
 * changed visibility of BeanDefinitionParserDelegate's "buildTypedStringValue(ForMap)" methods to protected
 
@@ -71,6 +74,7 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * SingleConnectionFactory sets client ID before ExceptionListener (for providers with strict Connection state handling)
+* added "receiveTimeout" property to JmsInvokerClientInterceptor/ProxyFactoryBean (with reimplemented request execution)
 * listener-container type "default102"/"simple102" leads to the implicit choice of MessageListenerAdapter102
 
 Package org.springframework.jmx
@@ -80,10 +84,12 @@ Package org.springframework.jmx
 
 Package org.springframework.orm
 * HibernateTemplate delegates to "SessionFactory.getCurrentSession()" when "allowCreate" has been set to "false"
+* fixed Hibernate/JpaTransactionManager to clean up properly in case of transaction begin failure on pre-bound resource
 * added "prepareTransaction" method to JpaDialect interface, for preparing a JTA-joining EntityManager
 * HibernateJpaDialect switches FlushMode to MANUAL in case of a read-only transaction even for JTA
 * PersistenceAnnotationBeanPostProcessor registers autowired beans as dependent on their EntityManagerFactory
 * ExtendedEntityManagerCreator's "joinTransaction()" checks whether there is an externally managed local transaction
+* ExtendedEntityManagerCreator's EntityManager proxies are serializable now
 
 Package org.springframework.remoting
 * RmiClientInterceptor and JaxRpcClientInterceptor propagate any kind of declared RemoteException as-is
