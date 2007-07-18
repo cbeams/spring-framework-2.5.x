@@ -358,6 +358,29 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
+	public void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
+		Assert.hasText(beanName, "'beanName' must not be empty");
+
+		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.remove(beanName);
+		if (bd == null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("No bean named '" + beanName + "' found in " + this);
+			}
+			throw new NoSuchBeanDefinitionException(beanName);
+		}
+		this.beanDefinitionNames.remove(beanName);
+
+		// Remove the merged bean definition for the given bean, if already created.
+		clearMergedBeanDefinition(beanName);
+
+		// Remove corresponding bean from singleton cache, if any. Shouldn't usually
+		// be necessary, rather just meant for overriding a context's default beans
+		// (e.g. the default StaticMessageSource in a StaticApplicationContext).
+		synchronized (getSingletonMutex()) {
+			removeSingleton(beanName);
+		}
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of superclass abstract methods

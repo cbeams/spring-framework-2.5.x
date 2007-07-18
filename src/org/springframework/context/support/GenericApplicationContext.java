@@ -18,7 +18,8 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -241,15 +242,21 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	// Implementation of BeanDefinitionRegistry
 	//---------------------------------------------------------------------
 
-	public BeanDefinition getBeanDefinition(String beanName) throws BeansException {
-		return this.beanFactory.getBeanDefinition(beanName);
-	}
+	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
+			throws BeanDefinitionStoreException {
 
-	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeansException {
 		this.beanFactory.registerBeanDefinition(beanName, beanDefinition);
 	}
 
-	public void registerAlias(String beanName, String alias) throws BeansException {
+	public void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
+		this.beanFactory.removeBeanDefinition(beanName);
+	}
+
+	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
+		return this.beanFactory.getBeanDefinition(beanName);
+	}
+
+	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
 		this.beanFactory.registerAlias(beanName, alias);
 	}
 
