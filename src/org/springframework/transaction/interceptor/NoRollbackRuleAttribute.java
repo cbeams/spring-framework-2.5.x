@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.transaction.interceptor;
 
 /**
- * Tag subclass of RollbackRule. Its class name means that it has the
- * opposite behavior to the RollbackRule superclass.
+ * Tag subclass of {@link RollbackRuleAttribute} that has the opposite behavior
+ * to the <code>RollbackRuleAttribute</code> superclass.
  *
  * @author Rod Johnson
  * @since 09.04.2003
@@ -26,19 +26,20 @@ package org.springframework.transaction.interceptor;
 public class NoRollbackRuleAttribute extends RollbackRuleAttribute {
 	
 	/**
-	 * Construct a new NoRollbackRule for the given throwable class.
-	 * @param clazz throwable class
+	 * Create a new instance of the <code>NoRollbackRuleAttribute</code> class
+	 * for the supplied {@link Throwable} class.
+	 * @param clazz the <code>Throwable</code> class
+	 * @see #RollbackRuleAttribute(Class)
 	 */
 	public NoRollbackRuleAttribute(Class clazz) {
 		super(clazz);
 	}
 
 	/**
-	 * Construct a new NoRollbackRule for the given exception name.
-	 * This can be a substring, with no wildcard support at present.
-	 * A value of "ServletException" would match ServletException and
-	 * subclasses, for example.
-	 * @param exceptionName the exception pattern
+	 * Create a new instance of the <code>NoRollbackRuleAttribute</code> class
+	 * for the supplied <code>exceptionName</code>.
+	 * @param exceptionName the exception name pattern
+	 * @see #RollbackRuleAttribute(String) 
 	 */
 	public NoRollbackRuleAttribute(String exceptionName) {
 		super(exceptionName);
@@ -47,6 +48,5 @@ public class NoRollbackRuleAttribute extends RollbackRuleAttribute {
 	public String toString() {
 		return "No" + super.toString();
 	}
-	
-	// rely on superclass equals and hashCode methods
+
 }

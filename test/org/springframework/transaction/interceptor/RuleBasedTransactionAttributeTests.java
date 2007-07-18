@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.transaction.TransactionDefinition;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 09.04.2003
  */
 public class RuleBasedTransactionAttributeTests extends TestCase {
@@ -39,8 +40,8 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute();
 		assertTrue(rta.rollbackOn(new RuntimeException()));
 		assertTrue(rta.rollbackOn(new MailSendException("")));
-		assertTrue(!rta.rollbackOn(new Exception()));
-		assertTrue(!rta.rollbackOn(new ServletException()));
+		assertFalse(rta.rollbackOn(new Exception()));
+		assertFalse(rta.rollbackOn(new ServletException()));
 	}
 	
 	/**
@@ -53,7 +54,7 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 		
 		assertTrue(rta.rollbackOn(new RuntimeException()));
 		assertTrue(rta.rollbackOn(new MailSendException("")));
-		assertTrue(!rta.rollbackOn(new Exception()));
+		assertFalse(rta.rollbackOn(new Exception()));
 		// Check that default behaviour is overridden
 		assertTrue(rta.rollbackOn(new ServletException()));
 	}
@@ -66,8 +67,8 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 		
 		assertTrue(rta.rollbackOn(new RuntimeException()));
 		// Check default behaviour is overridden
-		assertTrue(!rta.rollbackOn(new MailSendException("")));
-		assertTrue(!rta.rollbackOn(new Exception()));
+		assertFalse(rta.rollbackOn(new MailSendException("")));
+		assertFalse(rta.rollbackOn(new Exception()));
 		// Check that default behaviour is overridden
 		assertTrue(rta.rollbackOn(new ServletException()));
 	}
@@ -88,7 +89,7 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 	private void doTestRuleForSelectiveRollbackOnChecked(RuleBasedTransactionAttribute rta) {
 		assertTrue(rta.rollbackOn(new RuntimeException()));
 		// Check default behaviour is overridden
-		assertTrue(!rta.rollbackOn(new Exception()));
+		assertFalse(rta.rollbackOn(new Exception()));
 		// Check that default behaviour is overridden
 		assertTrue(rta.rollbackOn(new RemoteException()));
 	}
@@ -110,17 +111,17 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 		// Check that default behaviour is overridden
 		assertFalse(rta.rollbackOn(new ServletException()));
 	}
-	
+
 	public void testRollbackNever() {
 		List list = new LinkedList();
 		list.add(new NoRollbackRuleAttribute("Throwable"));
 		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
 	
-		assertTrue(!rta.rollbackOn(new Throwable()));
-		assertTrue(!rta.rollbackOn(new RuntimeException()));
-		assertTrue(!rta.rollbackOn(new MailSendException("")));
-		assertTrue(!rta.rollbackOn(new Exception()));
-		assertTrue(!rta.rollbackOn(new ServletException()));
+		assertFalse(rta.rollbackOn(new Throwable()));
+		assertFalse(rta.rollbackOn(new RuntimeException()));
+		assertFalse(rta.rollbackOn(new MailSendException("")));
+		assertFalse(rta.rollbackOn(new Exception()));
+		assertFalse(rta.rollbackOn(new ServletException()));
 	}
 
 	public void testToStringMatchesEditor() {
@@ -132,11 +133,30 @@ public class RuleBasedTransactionAttributeTests extends TestCase {
 		tae.setAsText(rta.toString());
 		rta = (RuleBasedTransactionAttribute) tae.getValue();
 
-		assertTrue(!rta.rollbackOn(new Throwable()));
-		assertTrue(!rta.rollbackOn(new RuntimeException()));
-		assertTrue(!rta.rollbackOn(new MailSendException("")));
-		assertTrue(!rta.rollbackOn(new Exception()));
-		assertTrue(!rta.rollbackOn(new ServletException()));
+		assertFalse(rta.rollbackOn(new Throwable()));
+		assertFalse(rta.rollbackOn(new RuntimeException()));
+		assertFalse(rta.rollbackOn(new MailSendException("")));
+		assertFalse(rta.rollbackOn(new Exception()));
+		assertFalse(rta.rollbackOn(new ServletException()));
 	}
+
+	/**
+	 * See <a href="http://forum.springframework.org/showthread.php?t=41350">this forum post</a>.
+	 */
+	public void testConflictingRulesToDetermineExactContract() {
+		List list = new LinkedList();
+		list.add(new NoRollbackRuleAttribute(MyBusinessWarningException.class));
+		list.add(new RollbackRuleAttribute(MyBusinessException.class));
+		RuleBasedTransactionAttribute rta = new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED, list);
+
+		assertTrue(rta.rollbackOn(new MyBusinessException()));
+		assertFalse(rta.rollbackOn(new MyBusinessWarningException()));
+	}
+
+
+	public static class MyBusinessException extends Exception {}
+
+
+	public static final class MyBusinessWarningException extends MyBusinessException {}
 
 }

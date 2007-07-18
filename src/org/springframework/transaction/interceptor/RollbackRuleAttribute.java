@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,27 @@
 
 package org.springframework.transaction.interceptor;
 
+import org.springframework.util.Assert;
+
 import java.io.Serializable;
 
 /**
- * Rule determining whether or not a given exception (and any subclasses) should
- * cause a rollback. Multiple such rules can be applied to determine whether a
- * transaction should commit or rollback after an exception has been thrown.
+ * Rule determining whether or not a given exception (and any subclasses)
+ * should cause a rollback.
+ *
+ * <p>Multiple such rules can be applied to determine whether a transaction
+ * should commit or rollback after an exception has been thrown.
  *
  * @author Rod Johnson
  * @since 09.04.2003
  * @see NoRollbackRuleAttribute
  */
 public class RollbackRuleAttribute implements Serializable{
-	
+
+	/**
+	 * The {@link RollbackRuleAttribute rollback rule} for
+	 * {@link RuntimeException RuntimeExceptions}.
+	 */
 	public static final RollbackRuleAttribute ROLLBACK_ON_RUNTIME_EXCEPTIONS =
 			new RollbackRuleAttribute(RuntimeException.class);
 
@@ -42,11 +50,16 @@ public class RollbackRuleAttribute implements Serializable{
 
 
 	/**
-	 * Preferred way to construct a RollbackRule, matching the exception class and
-	 * subclasses. The exception class must be Throwable or a subclass of Throwable.
-	 * @param clazz throwable class
+	 * Create a new instance of the <code>RollbackRuleAttribute</code> class.
+	 * <p>This is the preferred way to construct a rollback rule that matches
+	 * the supplied {@link Exception} class (and subclasses).
+	 * @param clazz throwable class; must be {@link Throwable} or a subclass
+	 * of <code>Throwable</code>
+	 * @throws IllegalArgumentException if the supplied <code>clazz</code> is
+	 * not a <code>Throwable</code> type or is <code>null</code>
 	 */
 	public RollbackRuleAttribute(Class clazz) {
+		Assert.notNull(clazz, "'clazz' cannot be null.");
 		if (!Throwable.class.isAssignableFrom(clazz)) {
 			throw new IllegalArgumentException(
 					"Cannot construct rollback rule from [" + clazz.getName() + "]: it's not a Throwable");
@@ -55,20 +68,25 @@ public class RollbackRuleAttribute implements Serializable{
 	}
 
 	/**
-	 * Construct a new RollbackRule for the given exception name.
-	 * This can be a substring, with no wildcard support at present.
-	 * A value of "ServletException" would match
+	 * Create a new instance of the <code>RollbackRuleAttribute</code> class
+	 * for the given <code>exceptionName</code>.
+	 * <p>This can be a substring, with no wildcard support at present. A value
+	 * of "ServletException" would match
 	 * <code>javax.servlet.ServletException</code> and subclasses, for example.
-	 * <p><b>NB:</b> Consider carefully how specific the pattern is, and whether
-	 * to include package information (which isn't mandatory). For example,
-	 * "Exception" will match nearly anything, and will probably hide other rules.
-	 * "java.lang.Exception" would be correct if "Exception" was meant to define
-	 * a rule for all checked exceptions. With more unusual exception names such
-	 * as "BaseBusinessException" there's no need to use a FQN.
-	 * @param exceptionName the exception pattern
-	 * (can also be a fully qualified class name)
+	 * <p><b>NB:</b> Consider carefully how specific the pattern is, and
+	 * whether to include package information (which is not mandatory). For
+	 * example, "Exception" will match nearly anything, and will probably hide
+	 * other rules. "java.lang.Exception" would be correct if "Exception" was
+	 * meant to define a rule for all checked exceptions. With more unusual
+	 * exception names such as "BaseBusinessException" there's no need to use a
+	 * fully package-qualified name.
+	 * @param exceptionName the exception name pattern; can also be a fully
+	 * package-qualified class name
+	 * @throws IllegalArgumentException if the supplied
+	 * <code>exceptionName</code> is <code>null</code> or empty
 	 */
 	public RollbackRuleAttribute(String exceptionName) {
+		Assert.hasText(exceptionName, "'exceptionName' cannot be null or empty.");
 		this.exceptionName = exceptionName;
 	}
 
@@ -81,13 +99,15 @@ public class RollbackRuleAttribute implements Serializable{
 	}
 
 	/**
-	 * Return the depth to the superclass matching.
-	 * 0 means ex matches exactly. Returns -1 if there's no match.
-	 * Otherwise, returns depth. Lowest depth wins.
+	 * Return the depth of the superclass matching.
+	 * <p><code>0</code> means <code>ex</code> matches exactly. Returns
+	 * <code>-1</code> if there is no match. Otherwise, returns depth with the
+	 * lowest depth winning.
 	 */
 	public int getDepth(Throwable ex) {
 		return getDepth(ex.getClass(), 0);
 	}
+
 
 	private int getDepth(Class exceptionClass, int depth) {
 		if (exceptionClass.getName().indexOf(this.exceptionName) != -1) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,10 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.mail.MailSendException;
 
 /**
+ * Unit tests for the {@link RollbackRuleAttribute} class.
+ *
  * @author Rod Johnson
+ * @author Rick Evans
  * @since 09.04.2003
  */
 public class RollbackRuleTests extends TestCase {
@@ -50,21 +53,38 @@ public class RollbackRuleTests extends TestCase {
 		assertTrue(rr.getDepth(new MailSendException("")) == 4);
 	}
 
-	public void testAlwaysTrue() {
+	public void testAlwaysTrueForThrowable() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute("java.lang.Throwable");
 		assertTrue(rr.getDepth(new MailSendException("")) > 0);
 		assertTrue(rr.getDepth(new ServletException()) > 0);
 		assertTrue(rr.getDepth(new FatalBeanException(null,null)) > 0);
 		assertTrue(rr.getDepth(new RuntimeException()) > 0);
 	}
-	
-	public void testConstructorArgMustBeAThrowableClass() {
+
+	public void testCtorArgMustBeAThrowableClassWithNonThrowableType() {
 		try {
 			new RollbackRuleAttribute(StringBuffer.class);
-			fail("Can't construct a RollbackRuleAttribute without a throwable");
+			fail("Cannot construct a RollbackRuleAttribute with a non-Throwable type");
 		}
-		catch (IllegalArgumentException ex) {
-			// OK
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testCtorArgMustBeAThrowableClassWithNullThrowableType() {
+		try {
+			new RollbackRuleAttribute((Class) null);
+			fail("Cannot construct a RollbackRuleAttribute with a null-Throwable type");
+		}
+		catch (IllegalArgumentException expected) {
+		}
+	}
+
+	public void testCtorArgExceptionStringNameVersionWithNull() {
+		try {
+			new RollbackRuleAttribute((String) null);
+			fail("Cannot construct a RollbackRuleAttribute with a null-Throwable type");
+		}
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
