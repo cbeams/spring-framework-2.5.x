@@ -142,6 +142,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		afterPropertiesSet();
 	}
 
+
 	/**
 	 * Set the PersistenceManagerFactory that this instance should manage transactions for.
 	 * <p>The PersistenceManagerFactory specified here should be the target
@@ -322,7 +323,6 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 				txObject.setPersistenceManagerHolder(new PersistenceManagerHolder(newPm), true);
 			}
 
-			txObject.getPersistenceManagerHolder().setSynchronizedWithTransaction(true);
 			pm = txObject.getPersistenceManagerHolder().getPersistenceManager();
 
 			// Delegate to JdoDialect for actual transaction begin.
@@ -362,6 +362,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 				TransactionSynchronizationManager.bindResource(
 						getPersistenceManagerFactory(), txObject.getPersistenceManagerHolder());
 			}
+			txObject.getPersistenceManagerHolder().setSynchronizedWithTransaction(true);
 		}
 
 		catch (TransactionException ex) {
