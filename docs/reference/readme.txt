@@ -22,4 +22,4 @@ Then, the targets should work.
 Thanks to Hibernate, for providing the skeleton for
 DocBook documentation!
 
-alef@jteam.nl
+alef@interface21.com
