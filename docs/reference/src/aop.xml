@@ -401,21 +401,18 @@ private void anyOldTransfer() {}]]><lineannotation>// the pointcut signature</li
 	<section id="aop-pointcuts-designators"> 
 	  <title>Supported Pointcut Designators</title>
 
-	  <para>Spring AOP supports the following AspectJ pointcut designators for use in pointcut
-	  expressions:</para>
+	  <para>Spring AOP supports the following AspectJ pointcut designators (PCD) for use in pointcut expressions:</para>
 
       <sidebar>
           <title>Other pointcut types</title>       	  
 	      <para>The full AspectJ pointcut language supports additional pointcut designators
-	      that are not supported in Spring. These are: <literal>call, initialization,
-	      preinitialization, staticinitialization, get, set, handler, adviceexecution,
+	      that are not supported in Spring. These are: <literal>call, get, set,
+	      preinitialization, staticinitialization, initialization, handler, adviceexecution,
 	      withincode, cflow, cflowbelow, if, @this</literal>, and <literal>@withincode</literal>.
 	      Use of these pointcut designators in pointcut expressions interpreted by Spring AOP
 	      will result in an <classname>IllegalArgumentException</classname> being thrown.</para>
 	  	  <para>The set of pointcut designators supported by Spring AOP may be extended in
- 	      future releases both to support more of the AspectJ pointcut designators (e.g. "if"),
-	      and potentially to support Spring specific designators such as "bean" (matching on
-	      bean name).</para>
+ 	      future releases both to support more of the AspectJ pointcut designators.</para>
       </sidebar>
 
 	  <itemizedlist>
@@ -466,13 +463,29 @@ private void anyOldTransfer() {}]]><lineannotation>// the pointcut signature</li
 	    </listitem>
 	  </itemizedlist>
 
-   	  <remark>Because Spring AOP limits matching to only method execution join points, the
-	    discussion of the pointcut designators above gives a narrower definition than you will
-	    find in the AspectJ programming guide. In addition, AspectJ itself has type-based
-	    semantics and at an execution join point both 'this' and 'target' refer to the same
-	    object - the object executing the method. Spring AOP is a proxy based system and
-	    differentiates between the proxy object itself (bound to 'this') and the target
-	    object behind the proxy (bound to 'target').</remark>
+		<para>Spring AOP also supports an additional PCD named '<literal>bean</literal>'. This PCD allows you to limit
+		the matching of join points to a particular named Spring bean, or to a set of named Spring beans (when using
+		wildcards). The '<literal>bean</literal>' PCD has the following form:</para>
+		<programlisting><![CDATA[bean(idOrNameOfBean)]]></programlisting>
+		<para>The '<literal>idOrNameOfBean</literal>' toekn can be the name of
+		any Spring bean: limited wildcard support using the '<literal>*</literal>'
+		character is supported too, so if you establish some naming conventions for
+		your Spring beans you can quite easily write a '<literal>bean</literal>' PCD
+		expression to pick them out. As is the case with other pointcut designators, the
+		'<literal>bean</literal>' PCD can be &amp;&amp;'ed, ||'ed, and ! (negated) too.</para>
+
+		<note>
+			<para>In the interests of being totally clear and unambiguous, please note that the
+			'<literal>bean</literal>' PCD is <emphasis>only</emphasis> supported in Spring AOP - and
+			<emphasis>not</emphasis> in AspectJ.</para>
+		</note>
+
+		<remark>Because Spring AOP limits matching to only method execution join points, the discussion of the pointcut
+		designators above gives a narrower definition than you will find in the AspectJ programming guide. In addition,
+		AspectJ itself has type-based semantics and at an execution join point both '<literal>this</literal>' and
+		'<literal>target</literal>' refer to the same object - the object executing the method. Spring AOP is a
+		proxy-based system and differentiates between the proxy object itself (bound to '<literal>this</literal>') and
+		the target object behind the proxy (bound to '<literal>target</literal>').</remark>
 		
     </section>
     
@@ -528,7 +541,7 @@ public class SystemArchitecture {
 
   ]]><lineannotation>/**
    * A join point is in the service layer if the method is defined
-   * in a type in the com.xyz.someapp.service package or any sub-package
+   * in a type in the <literal>com.xyz.someapp.service</literal> package or any sub-package
    * under that.
    */</lineannotation><![CDATA[
   @Pointcut("within(com.xyz.someapp.service..*)")
@@ -536,7 +549,7 @@ public class SystemArchitecture {
 
   ]]><lineannotation>/**
    * A join point is in the data access layer if the method is defined
-   * in a type in the com.xyz.someapp.dao package or any sub-package
+   * in a type in the <literal>com.xyz.someapp.dao</literal> package or any sub-package
    * under that.
    */</lineannotation><![CDATA[
   @Pointcut("within(com.xyz.someapp.dao..*)")
@@ -548,9 +561,13 @@ public class SystemArchitecture {
    * "service" package, and that implementation types are in sub-packages.
    * 
    * If you group service interfaces by functional area (for example, 
-   * in packages com.xyz.someapp.abc.service and com.xyz.def.service) then
-   * the pointcut expression "execution(* com.xyz.someapp..service.*.*(..))"
+   * in packages <literal>com.xyz.someapp.abc.service</literal> and <literal>com.xyz.def.service</literal>) then
+   * the pointcut expression "<literal>execution(* com.xyz.someapp..service.*.*(..))</literal>"
    * could be used instead.
+   *
+   * Alternatively, you can write the expression using the '<literal>bean</literal>'
+   * PCD, like so "<literal>bean(*Service)</literal>". (This assumes that you have
+   * named your Spring service beans in a consistent fashion.)
    */</lineannotation><![CDATA[
   @Pointcut("execution(* com.xyz.someapp.service.*.*(..))")
   public void businessService() {}
@@ -558,7 +575,7 @@ public class SystemArchitecture {
   ]]><lineannotation>/**
    * A data access operation is the execution of any method defined on a 
    * dao interface. This definition assumes that interfaces are placed in the
-   * "dao" package, and that implementation types are in sub-packages.
+   * "<literal>dao</literal>" package, and that implementation types are in sub-packages.
    */</lineannotation><![CDATA[
   @Pointcut("execution(* com.xyz.someapp.dao.*.*(..))")
   public void dataAccessOperation() {}
@@ -576,14 +593,14 @@ public class SystemArchitecture {
 </aop:config>
 
 <tx:advice id="tx-advice">
-<tx:attributes>
+  <tx:attributes>
     <tx:method name="*" propagation="REQUIRED"/>
   </tx:attributes>
 </tx:advice>]]></programlisting>
    
         <para>The <literal>&lt;aop:config&gt;</literal> and <literal>&lt;aop:advisor&gt;</literal>
-        tags are discussed in the section entitled <xref linkend="aop-schema" />. The transaction
-        tags are discussed in the chapter entitled <xref linkend="transaction"/>.</para>
+        elements are discussed in <xref linkend="aop-schema" />. The transaction
+        elements are discussed in <xref linkend="transaction"/>.</para>
    
     </section>
 
@@ -655,15 +672,15 @@ public class SystemArchitecture {
      <listitem>
      <para>any join point (method execution only in Spring AOP) where the proxy implements the <interfacename>AccountService</interfacename> interface:</para>
      <programlisting><![CDATA[this(com.xyz.service.AccountService)]]></programlisting>
-     <remark>'this' is more commonly used in a binding form :- see the following section
-     on advice for how to make the proxy object available in the advice body.</remark>
+     <remark><para>'this' is more commonly used in a binding form :- see the following section
+     on advice for how to make the proxy object available in the advice body.</para></remark>
      </listitem>
 	
      <listitem>
      <para>any join point (method execution only in Spring AOP) where the target object implements the <interfacename>AccountService</interfacename> interface:</para>
      <programlisting><![CDATA[target(com.xyz.service.AccountService)]]></programlisting>
-     <remark>'target' is more commonly used in a binding form :- see the following section
-     on advice for how to make the target object available in the advice body.</remark>
+     <remark><para>'target' is more commonly used in a binding form :- see the following section
+     on advice for how to make the target object available in the advice body.</para></remark>
      </listitem>
      
      <listitem>
@@ -680,30 +697,41 @@ public class SystemArchitecture {
      <listitem>
      <para>any join point (method execution only in Spring AOP) where the target object has an <interfacename>@Transactional</interfacename> annotation:</para>
      <programlisting><![CDATA[@target(org.springframework.transaction.annotation.Transactional)]]></programlisting>
-     <remark>'@target' can also be used in a binding form :- see the following section
-     on advice for how to make the annotation object available in the advice body.</remark>
+     <remark><para>'@target' can also be used in a binding form :- see the following section
+     on advice for how to make the annotation object available in the advice body.</para></remark>
      </listitem>
 
      <listitem>
      <para>any join point (method execution only in Spring AOP) where the declared type of the target object has an <interfacename>@Transactional</interfacename> annotation:</para>
      <programlisting><![CDATA[@within(org.springframework.transaction.annotation.Transactional)]]></programlisting>
-     <remark>'@within' can also be used in a binding form :- see the following section
-     on advice for how to make the annotation object available in the advice body.</remark>
+     <remark><para>'@within' can also be used in a binding form :- see the following section
+     on advice for how to make the annotation object available in the advice body.</para></remark>
      </listitem>
 
      <listitem>
      <para>any join point (method execution only in Spring AOP) where the executing method has an <interfacename>@Transactional</interfacename> annotation:</para>
      <programlisting><![CDATA[@annotation(org.springframework.transaction.annotation.Transactional)]]></programlisting>
-     <remark>'@annotation' can also be used in a binding form :- see the following section
-     on advice for how to make the annotation object available in the advice body.</remark>
+     <remark><para>'@annotation' can also be used in a binding form :- see the following section
+     on advice for how to make the annotation object available in the advice body.</para></remark>
      </listitem>
 
      <listitem>
      <para>any join point (method execution only in Spring AOP) which takes a single parameter, and where the
      runtime type of the argument passed has the <interfacename>@Classified</interfacename> annotation:</para>
      <programlisting><![CDATA[@args(com.xyz.security.Classified)]]></programlisting>
-     <remark>'@args' can also be used in a binding form :- see the following section
-     on advice for how to make the annotation object(s) available in the advice body.</remark>
+     <remark><para>'@args' can also be used in a binding form :- see the following section
+     on advice for how to make the annotation object(s) available in the advice body.</para></remark>
+     </listitem>
+
+     <listitem>
+     <para>any join point (method execution only in Spring AOP) on a Spring bean named '<literal>tradeService</literal>':</para>
+     <programlisting><![CDATA[bean(tradeService)]]></programlisting>
+     </listitem>
+
+     <listitem>
+     <para>any join point (method execution only in Spring AOP) on Spring beans having names that match the wildcard
+	 expression '<literal>*Service</literal>':</para>
+     <programlisting><![CDATA[bean(*Service)]]></programlisting>
      </listitem>
 
      </itemizedlist>
