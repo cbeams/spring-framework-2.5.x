@@ -170,6 +170,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		afterPropertiesSet();
 	}
 
+
 	/**
 	 * Set the SessionFactory that this instance should manage transactions for.
 	 */
@@ -230,7 +231,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Set whether to autodetect a JDBC DataSource used by the Hibernate SessionFactory,
 	 * if set via LocalSessionFactoryBean's <code>setDataSource</code>. Default is "true".
-	 * <p>Can be turned off to deliberately ignore an available DataSource,
+	 * <p>Can be turned off to deliberately ignore an available DataSource, in order
 	 * to not expose Hibernate transactions as JDBC transactions for that DataSource.
 	 * @see #setDataSource
 	 * @see LocalSessionFactoryBean#setDataSource
@@ -432,7 +433,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				txObject.setSessionHolder(new SessionHolder(newSession), true);
 			}
 
-			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
 			session = txObject.getSessionHolder().getSession();
 
 			if (this.prepareConnection && isSameConnectionForEntireSession(session)) {
@@ -511,10 +511,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (txObject.isNewSessionHolder()) {
 				TransactionSynchronizationManager.bindResource(getSessionFactory(), txObject.getSessionHolder());
 			}
+			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
 		}
 
 		catch (Exception ex) {
-			SessionFactoryUtils.closeSession(session);
+			if (txObject.isNewSessionHolder()) {
+				SessionFactoryUtils.closeSession(session);
+			}
 			throw new CannotCreateTransactionException("Could not open Hibernate Session for transaction", ex);
 		}
 	}

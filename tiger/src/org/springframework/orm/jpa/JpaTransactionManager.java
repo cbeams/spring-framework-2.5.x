@@ -41,8 +41,8 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.ResourceTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -130,6 +130,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		this.entityManagerFactory = emf;
 		afterPropertiesSet();
 	}
+
 
 	/**
 	 * Set the EntityManagerFactory that this instance should manage transactions for.
@@ -319,7 +320,6 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 				txObject.setEntityManagerHolder(new EntityManagerHolder(newEm), true);
 			}
 
-			txObject.getEntityManagerHolder().setSynchronizedWithTransaction(true);
 			em = txObject.getEntityManagerHolder().getEntityManager();
 
 			// Delegate to JpaDialect for actual transaction begin.
@@ -359,16 +359,17 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 				TransactionSynchronizationManager.bindResource(
 						getEntityManagerFactory(), txObject.getEntityManagerHolder());
 			}
+			txObject.getEntityManagerHolder().setSynchronizedWithTransaction(true);
 		}
 
 		catch (TransactionException ex) {
-			if (em != null) {
+			if (txObject.isNewEntityManagerHolder()) {
 				em.close();
 			}
 			throw ex;
 		}
 		catch (Exception ex) {
-			if (em != null) {
+			if (txObject.isNewEntityManagerHolder()) {
 				em.close();
 			}
 			throw new CannotCreateTransactionException("Could not open JPA EntityManager for transaction", ex);

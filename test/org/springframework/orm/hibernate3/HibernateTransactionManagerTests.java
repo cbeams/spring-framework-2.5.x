@@ -42,7 +42,6 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.GenericJDBCException;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.core.JdkVersion;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -1477,6 +1476,55 @@ public class HibernateTransactionManagerTests extends TestCase {
 		}
 		catch (CannotCreateTransactionException ex) {
 			// expected
+		}
+
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+	}
+
+	public void testTransactionCommitWithPreBoundSessionAndNonExistingDatabase() throws Exception {
+		final DriverManagerDataSource ds = new DriverManagerDataSource();
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
+		lsfb.setDataSource(ds);
+		Properties props = new Properties();
+		props.setProperty("hibernate.dialect", HSQLDialect.class.getName());
+		props.setProperty("hibernate.cache.provider_class", NoCacheProvider.class.getName());
+		lsfb.setHibernateProperties(props);
+		lsfb.afterPropertiesSet();
+		final SessionFactory sf = (SessionFactory) lsfb.getObject();
+
+		HibernateTransactionManager tm = new HibernateTransactionManager();
+		tm.setSessionFactory(sf);
+		tm.afterPropertiesSet();
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
+		tt.setTimeout(10);
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		Session session = sf.openSession();
+		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
+		try {
+			tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
+					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+					HibernateTemplate ht = new HibernateTemplate(sf);
+					return ht.find("from java.lang.Object");
+				}
+			});
+			fail("Should have thrown CannotCreateTransactionException");
+		}
+		catch (CannotCreateTransactionException ex) {
+			// expected
+			SessionHolder holder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
+			assertFalse(holder.isSynchronizedWithTransaction());
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(sf);
+			session.close();
 		}
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
