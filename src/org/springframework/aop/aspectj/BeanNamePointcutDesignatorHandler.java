@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj;
 
 import org.aspectj.weaver.patterns.NamePattern;
@@ -22,19 +23,21 @@ import org.aspectj.weaver.tools.MatchingContext;
 import org.aspectj.weaver.tools.PointcutDesignatorHandler;
 
 /**
- * Handler for the Spring-spefic bean() pointcut designator extension to
- * AspectJ.
- * <p>
- * This handler needs to be added to each pointcut object that needs to handle
- * the bean() PCD. Matching context is automatically obtained by examining a
- * thread local variable and therefore a matching context need not be set on the
- * pointcut.
- * 
+ * Handler for the Spring-specific <code>bean()</code> pointcut designator
+ * extension to AspectJ.
+ *
+ * <p>This handler must be added to each pointcut object that needs to
+ * handle the <code>bean()</code> PCD. Matching context is obtained
+ * automatically by examining a thread local variable and therefore a matching
+ * context need not be set on the pointcut.
+ *
  * @author Ramnivas Laddad
  * @since 2.1
  */
 public class BeanNamePointcutDesignatorHandler implements PointcutDesignatorHandler {
+
 	private static final String BEAN_DESIGNATOR_NAME = "bean";
+
 
 	public String getDesignatorName() {
 		return BEAN_DESIGNATOR_NAME;
@@ -44,12 +47,16 @@ public class BeanNamePointcutDesignatorHandler implements PointcutDesignatorHand
 		return new BeanNameContextMatcher(expression);
 	}
 
-	private static class BeanNameContextMatcher implements ContextBasedMatcher {
-		private NamePattern expressionPattern;
+
+	private static final class BeanNameContextMatcher implements ContextBasedMatcher {
+
+		private final NamePattern expressionPattern;
+
 
 		public BeanNameContextMatcher(String expression) {
-			expressionPattern = new NamePattern(expression);
+			this.expressionPattern = new NamePattern(expression);
 		}
+
 
 		public boolean couldMatchJoinPointsInType(Class someClass) {
 			return true;
@@ -71,6 +78,7 @@ public class BeanNamePointcutDesignatorHandler implements PointcutDesignatorHand
 			return false;
 		}
 
+
 		private boolean contextMatch() {
 			if (ProxyCreationContext.isProxyCreationInProgress()) {
 				String advisedBeanName = ProxyCreationContext.getCurrentProxyingBeanName();
@@ -83,17 +91,19 @@ public class BeanNamePointcutDesignatorHandler implements PointcutDesignatorHand
 			 * PCD. Therefore, we need matching process only during proxy
 			 * creation. If a match is declared during that process, no further
 			 * decision needs to be made. If a match is not declared, the
-			 * corresponding advisor will no be considered eligible and
+			 * corresponding advisor will not be considered eligible and
 			 * therefore matching logic will not be triggered again.
 			 */
 			return true;
 		}
 
 		private boolean beanNameMatch(String beanName, boolean isInnerBean) {
-			if ((beanName == null) || isInnerBean) {
+			if (beanName == null || isInnerBean) {
 				return false;
 			}
-			return expressionPattern.matches(beanName);
+			return this.expressionPattern.matches(beanName);
 		}
+
 	}
+
 }

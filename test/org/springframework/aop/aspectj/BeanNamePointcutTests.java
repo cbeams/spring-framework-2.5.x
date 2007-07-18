@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj;
 
 import org.springframework.aop.framework.Advised;
@@ -21,44 +22,50 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
  * Test for correct application of the bean() PCD for XML-based AspectJ aspects.
- * 
- * @author Ramnivas Laddad
  *
+ * @author Ramnivas Laddad
  */
 public class BeanNamePointcutTests extends AbstractDependencyInjectionSpringContextTests {
+
 	protected ITestBean testBean1;
-	protected ITestBean testBean2;	
+
+	protected ITestBean testBean2;
+
 	protected ITestBean testBeanContainingNestedBean;
+
 	protected Counter counterAspect;
-	
+
+
 	public BeanNamePointcutTests() {
 		setPopulateProtectedVariables(true);
 	}
-	
+
+
 	protected String getConfigPath() {
 		return "bean-name-pointcut-tests.xml";
 	}
-	
+
 	protected void onSetUp() throws Exception {
-		counterAspect.reset();
+		this.counterAspect.reset();
 		super.onSetUp();
 	}
 
 	// We don't need to test all combination of pointcuts due to BeanNamePointcutMatchingTests
-	
+
 	public void testMatchingBeanName() {
-		assertTrue(testBean1 instanceof Advised);
-		testBean1.setAge(20);
-		assertEquals(1, counterAspect.getCount());
+		assertTrue("Matching bean must be advised (proxied).", this.testBean1 instanceof Advised);
+		this.testBean1.setAge(20);
+		assertEquals("Advice not executed: must have been.", 1, this.counterAspect.getCount());
 	}
 
 	public void testNonMatchingBeanName() {
-		assertFalse(testBean2 instanceof Advised);
-		testBean2.setAge(20);
-		assertEquals(0, counterAspect.getCount());
+		assertFalse("Non-matching bean must *not* be advised (proxied).", this.testBean2 instanceof Advised);
+		this.testBean2.setAge(20);
+		assertEquals("Advice must *not* have been executed.", 0, this.counterAspect.getCount());
 	}
-	
+
 	public void testNonMatchingNestedBeanName() {
-		assertFalse(testBeanContainingNestedBean.getDoctor() instanceof Advised);
+		assertFalse("Non-matching bean must *not* be advised (proxied)", this.testBeanContainingNestedBean.getDoctor() instanceof Advised);
 	}
+
 }

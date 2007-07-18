@@ -13,32 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj;
 
 /**
  * Context related to the current bean that is being proxied.
- * <p>
- * This context is used to implement the bean() PCD in AspectJ expression.
- * <p>
- * The caller must follow "resource allocation" pattern to ensure that the
- * context is reset after proxy creation is complete. This can be accomplished 
- * by code pattern such as this
- * <pre>
+ *
+ * <p>This context is used to implement the <code>bean()</code> PCD in an
+ * AspectJ expression.
+ *
+ * <p>The caller must follow a "resource allocation" pattern to ensure that the
+ * context is reset after proxy creation is complete. This can be accomplished
+ * by following a code pattern such as:
+ *
+ * <pre class="code">
  * try {
- *     ProxyCreationContext.notifyProxyCreationStart(beanName);
- *     ... proxy creation logic
+ *     ProxyCreationContext.notifyProxyCreationStart(beanName, true);
+ *     // ... proxy creation logic
  * } finally {
  *     ProxyCreationContext.notifyProxyCreationComplete();
  * }
  * </pre>
- * 
+ *
  * @author Ramnivas Laddad
- * @since 2.1
  * @see BeanNamePointcutDesignatorHandler
+ * @since 2.1
  */
 public class ProxyCreationContext {
+
 	private static final ThreadLocal proxyCreationInfoHolder = new ThreadLocal();
-	
+
+
 	public static void notifyProxyCreationStart(String beanName, boolean isInnerBean) {
 		ProxyCreationInfo info = new ProxyCreationInfo(beanName, isInnerBean);
 		proxyCreationInfoHolder.set(info);
@@ -59,16 +64,20 @@ public class ProxyCreationContext {
 
 	public static boolean isCurrentProxyingBeanAnInnerBean() {
 		ProxyCreationInfo info = (ProxyCreationInfo) proxyCreationInfoHolder.get();
-		return info == null ? false : info.isInnerBean;
+		return info != null && info.isInnerBean;
 	}
-	
-	private static class ProxyCreationInfo {
-		private String beanName;
-		private boolean isInnerBean;
+
+
+	private static final class ProxyCreationInfo {
+
+		private final String beanName;
+
+		private final boolean isInnerBean;
 
 		public ProxyCreationInfo(String beanName, boolean isInnerBean) {
 			this.beanName = beanName;
 			this.isInnerBean = isInnerBean;
 		}
 	}
+
 }

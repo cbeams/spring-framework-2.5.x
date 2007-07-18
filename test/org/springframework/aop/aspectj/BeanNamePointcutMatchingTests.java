@@ -13,51 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj;
 
 import junit.framework.TestCase;
-
 import org.springframework.beans.TestBean;
 
 /**
  * Tests for matching of bean() pointcut designator.
- * 
- * @author Ramnivas Laddad
  *
+ * @author Ramnivas Laddad
  */
 public class BeanNamePointcutMatchingTests extends TestCase {
 
 	public void testMatchingPointcuts() {
 		assertMatch("someName", "bean(someName)");
-		
+
 		// Spring beans are less restrictive 
 		assertMatch("someName/someOtherName", "bean(someName/someOtherName)"); // MVC Controller-kind 
 		assertMatch("service:name=traceService", "bean(service:name=traceService)"); // JMX-kind
-		
+
 		// Wildcards
 		assertMatch("someName", "bean(*someName)");
-		assertMatch("someName", "bean(*Name)");		
+		assertMatch("someName", "bean(*Name)");
 		assertMatch("someName", "bean(*)");
-		assertMatch("someName", "bean(someName*)");		
-		assertMatch("someName", "bean(some*)");		
+		assertMatch("someName", "bean(someName*)");
+		assertMatch("someName", "bean(some*)");
 		assertMatch("someName", "bean(some*Name)");
 		assertMatch("someName", "bean(*some*Name*)");
 		assertMatch("someName", "bean(*s*N*)");
-		
+
 		// Or, not expressions
 		assertMatch("someName", "bean(someName) || bean(someOtherName)");
 		assertMatch("someName", "!bean(someOtherName)");
 	}
-	
+
 	public void testNonMatchingPointcuts() {
 		assertMisMatch("someName", "bean(someNamex)");
-		assertMisMatch("someName", "bean(someX*Name)");		
-		
+		assertMisMatch("someName", "bean(someX*Name)");
+
 		// And, not expressions
 		assertMisMatch("someName", "bean(someName) && bean(someOtherName)");
 		assertMisMatch("someName", "!bean(someName)");
 	}
-	
+
 	private void assertMatch(String beanName, String pcExpression) {
 		assertTrue("Unexpected mismatch for bean \"" + beanName + "\" for pcExpression \"" + pcExpression + "\"",
 				matches(beanName, pcExpression));
@@ -67,8 +66,8 @@ public class BeanNamePointcutMatchingTests extends TestCase {
 		assertFalse("Unexpected match for bean \"" + beanName + "\" for pcExpression \"" + pcExpression + "\"",
 				matches(beanName, pcExpression));
 	}
-	
-	private boolean matches(String beanName, String pcExpression) {
+
+	private static boolean matches(String beanName, String pcExpression) {
 		try {
 			ProxyCreationContext.notifyProxyCreationStart(beanName, false);
 			AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
