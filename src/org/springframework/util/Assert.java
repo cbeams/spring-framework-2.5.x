@@ -120,13 +120,14 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is <code>null</code>
 	 */
 	public static void notNull(Object object) {
-		notNull(object, "[Assertion failed] - this argument is required; it must not null");
+		notNull(object, "[Assertion failed] - this argument is required; it must not be null");
 	}
 
 	/**
-	 * Assert that a string is not empty; that is, it must not be <code>null</code> and not empty.
+	 * Assert that the given String is not empty; that is,
+	 * it must not be <code>null</code> and not the empty String.
 	 * <pre class="code">Assert.hasLength(name, "Name must not be empty");</pre>
-	 * @param text the string to check
+	 * @param text the String to check
 	 * @param message the exception message to use if the assertion fails
 	 * @see StringUtils#hasLength
 	 */
@@ -137,9 +138,10 @@ public abstract class Assert {
 	}
 
 	/**
-	 * Assert that a string is not empty; that is, it must not be <code>null</code> and not empty.
+	 * Assert that the given String is not empty; that is,
+	 * it must not be <code>null</code> and not the empty String.
 	 * <pre class="code">Assert.hasLength(name);</pre>
-	 * @param text the string to check
+	 * @param text the String to check
 	 * @see StringUtils#hasLength
 	 */
 	public static void hasLength(String text) {
@@ -148,10 +150,10 @@ public abstract class Assert {
 	}
 
 	/**
-	 * Assert that a string has valid text content; that is, it must not be <code>null</code>
-	 * and must contain at least one non-whitespace character.
+	 * Assert that the given String has valid text content; that is, it must not
+	 * be <code>null</code> and must contain at least one non-whitespace character.
 	 * <pre class="code">Assert.hasText(name, "'name' must not be empty");</pre>
-	 * @param text the string to check
+	 * @param text the String to check
 	 * @param message the exception message to use if the assertion fails
 	 * @see StringUtils#hasText
 	 */
@@ -162,10 +164,10 @@ public abstract class Assert {
 	}
 
 	/**
-	 * Assert that a string has valid text content; that is, it must not be <code>null</code>
-	 * and must contain at least one non-whitespace character.
+	 * Assert that the given String has valid text content; that is, it must not
+	 * be <code>null</code> and must contain at least one non-whitespace character.
 	 * <pre class="code">Assert.hasText(name, "'name' must not be empty");</pre>
-	 * @param text the string to check
+	 * @param text the String to check
 	 * @see StringUtils#hasText
 	 */
 	public static void hasText(String text) {
