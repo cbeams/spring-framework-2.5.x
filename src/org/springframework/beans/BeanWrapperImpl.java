@@ -231,16 +231,27 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * @param clazz the class to introspect
 	 */
 	protected void setIntrospectionClass(Class clazz) {
-		if (this.cachedIntrospectionResults == null ||
-				!this.cachedIntrospectionResults.getBeanClass().equals(clazz)) {
-			this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(clazz);
+		if (this.cachedIntrospectionResults != null &&
+				!clazz.equals(this.cachedIntrospectionResults.getBeanClass())) {
+			this.cachedIntrospectionResults = null;
 		}
+	}
+
+	/**
+	 * Obtain a lazily initializted CachedIntrospectionResults instance
+	 * for the wrapped object.
+	 */
+	private CachedIntrospectionResults getCachedIntrospectionResults() {
+		Assert.state(this.object != null, "BeanWrapper does not hold a bean instance");
+		if (this.cachedIntrospectionResults == null) {
+			this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(getWrappedClass());
+		}
+		return this.cachedIntrospectionResults;
 	}
 
 
 	public PropertyDescriptor[] getPropertyDescriptors() {
-		Assert.state(this.cachedIntrospectionResults != null, "BeanWrapper does not hold a bean instance");
-		return this.cachedIntrospectionResults.getBeanInfo().getPropertyDescriptors();
+		return getCachedIntrospectionResults().getBeanInfo().getPropertyDescriptors();
 	}
 
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
@@ -261,10 +272,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * @throws BeansException in case of introspection failure
 	 */
 	protected PropertyDescriptor getPropertyDescriptorInternal(String propertyName) throws BeansException {
-		Assert.state(this.cachedIntrospectionResults != null, "BeanWrapper does not hold a bean instance");
 		Assert.notNull(propertyName, "Property name must not be null");
 		BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
-		return nestedBw.cachedIntrospectionResults.getPropertyDescriptor(getFinalPath(nestedBw, propertyName));
+		return nestedBw.getCachedIntrospectionResults().getPropertyDescriptor(getFinalPath(nestedBw, propertyName));
 	}
 
 	public Class getPropertyType(String propertyName) throws BeansException {
@@ -371,7 +381,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * @throws TypeMismatchException if type conversion failed
 	 */
 	public Object convertForProperty(Object value, String propertyName) throws TypeMismatchException {
-		PropertyDescriptor pd = this.cachedIntrospectionResults.getPropertyDescriptor(propertyName);
+		PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(propertyName);
 		if (pd == null) {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"No property '" + propertyName + "' found");
@@ -529,7 +539,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	private Object getPropertyValue(PropertyTokenHolder tokens) throws BeansException {
 		String propertyName = tokens.canonicalName;
 		String actualName = tokens.actualName;
-		PropertyDescriptor pd = this.cachedIntrospectionResults.getPropertyDescriptor(actualName);
+		PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
 		if (pd == null || pd.getReadMethod() == null) {
 			throw new NotReadablePropertyException(getRootClass(), this.nestedPath + propertyName);
 		}
@@ -699,7 +709,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 			}
 			else if (propValue instanceof List) {
-				PropertyDescriptor pd = this.cachedIntrospectionResults.getPropertyDescriptor(actualName);
+				PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
 				Class requiredType = null;
 				if (JdkVersion.isAtLeastJava15()) {
 					requiredType = GenericCollectionTypeResolver.getCollectionReturnType(
@@ -739,7 +749,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 			}
 			else if (propValue instanceof Map) {
-				PropertyDescriptor pd = this.cachedIntrospectionResults.getPropertyDescriptor(actualName);
+				PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
 				Class mapKeyType = null;
 				Class mapValueType = null;
 				if (JdkVersion.isAtLeastJava15()) {
@@ -787,7 +797,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		}
 
 		else {
-			PropertyDescriptor pd = this.cachedIntrospectionResults.getPropertyDescriptor(actualName);
+			PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
 			if (pd == null || pd.getWriteMethod() == null) {
 				PropertyMatches matches = PropertyMatches.forProperty(propertyName, getRootClass());
 				throw new NotWritablePropertyException(
