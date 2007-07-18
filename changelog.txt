@@ -41,7 +41,9 @@ Package org.springframework.jmx
 
 Package org.springframework.orm
 * restored compatibility with Hibernate 3.0.x through reflectively checking for DataException in SessionFactoryUtils
+* fixed Hibernate/JpaTransactionManager to clean up properly in case of transaction begin failure on pre-bound resource
 * ExtendedEntityManagerCreator's "joinTransaction()" checks whether there is an externally managed local transaction
+* ExtendedEntityManagerCreator's EntityManager proxies are serializable now
 
 Package org.springframework.remoting
 * (Jndi)RmiClientInterceptor resets stub before a refresh attempt, avoiding race condition in case of registry restart
