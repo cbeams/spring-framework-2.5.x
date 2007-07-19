@@ -442,9 +442,10 @@ xsi:schemaLocation="
 				to be applied to any class, not merely special classes such as EJBs.</para>
             </listitem>
             <listitem>
-                <para>The Spring Framework offers declarative <emphasis>rollback rules</emphasis>:
-				a feature with no EJB equivalent, which we'll discuss below. Rollback
-                can be controlled declaratively, not merely programmatically.</para>
+                <para>The Spring Framework offers declarative
+				<link linkend="transaction-declarative-rolling-back"><emphasis>rollback rules</emphasis>:</link> this is
+				a feature with no EJB equivalent. Both programmatic and declarative support for rollback rules is
+				provided.</para>
             </listitem>
             <listitem>
                 <para>The Spring Framework gives you an opportunity to customize transactional
@@ -744,7 +745,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             transaction infrastructure code will catch any unhandled
 			<exceptionname>Exception</exceptionname> as it bubbles up the call stack, and will
 			mark the transaction for rollback.</para>
-            <para>However, please note that the Spring Framework's transaction infrastructure
+            <para>Note however that the Spring Framework's transaction infrastructure
 			code will, by default, <emphasis>only</emphasis> mark a transaction for rollback in
 			the case of runtime, unchecked exceptions; that is, when the thrown exception is an
 			instance or subclass of <exceptionname>RuntimeException</exceptionname>.
@@ -757,16 +758,34 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 			<exceptionname>Exception</exceptionname> type.</para>
             <programlisting><![CDATA[<tx:advice id="txAdvice" transaction-manager="txManager">
   <tx:attributes>
-	 <tx:method name="get*" read-only="false" ]]><lineannotation><emphasis role="bold">rollback-for="NoProductInStockException"</emphasis></lineannotation><![CDATA[/>
-	 <tx:method name="*"/>
+    <tx:method name="get*" read-only="true" ]]><lineannotation><emphasis role="bold">rollback-for="NoProductInStockException"</emphasis></lineannotation><![CDATA[/>
+    <tx:method name="*"/>
   </tx:attributes>
 </tx:advice>]]></programlisting>
-            <para>The second way to indicate to the transaction infrastructure that a
-			rollback is required is to do so <emphasis>programmatically</emphasis>.
-            Although very simple, this way is quite invasive, and tightly couples your
-			code to the Spring Framework's transaction infrastructure. Find below a
-			snippet of code that does programmatic rollback of a
-			Spring Framework-managed transaction:</para>
+			<para>It is also possible to specify 'no rollback rules', for those times when you do
+			<emphasis>not</emphasis> want a transaction to be marked for rollback when an exception is thrown.
+			In the example configuration below, we effectively are telling the Spring Framework's transaction
+			infrastructure to commit the attendant transaction even in the face of an unhandled
+			<exceptionname>InstrumentNotFoundException</exceptionname>.</para>
+            <programlisting><![CDATA[<tx:advice id="txAdvice">
+  <tx:attributes>
+    <tx:method name="updateStock" ]]><lineannotation><emphasis role="bold">no-rollback-for="InstrumentNotFoundException"</emphasis></lineannotation><![CDATA[/>
+    <tx:method name="*"/>
+  </tx:attributes>
+</tx:advice>]]></programlisting>
+			<para>When the Spring Framework's transaction infrastructure has caught an exception and is consulting
+			any configured rollback rules to determine whether or not to mark the transaction for rollback, the
+			<emphasis>strongest</emphasis> matching rule wins. So in the case of the following configuration,
+			any exception other than an <exceptionname>InstrumentNotFoundException</exceptionname> would result in the
+			attendant transaction being marked for rollback.</para>
+            <programlisting><![CDATA[<tx:advice id="txAdvice">
+  <tx:attributes>
+    <tx:method name="*" rollback-for="Throwable" no-rollback-for="InstrumentNotFoundException"/>
+  </tx:attributes>
+</tx:advice>]]></programlisting>
+			<para>The second way to indicate that a rollback is required is to do so
+			<emphasis>programmatically</emphasis>. Although very simple, this way is quite invasive, and tightly couples
+			your code to the Spring Framework's transaction infrastructure, as can be seen below:</para>
             <programlisting><![CDATA[public void resolvePosition() {
     try {
         ]]><lineannotation>// some business logic...</lineannotation><![CDATA[
@@ -775,9 +794,9 @@ Exception in thread "main" java.lang.UnsupportedOperationException
         TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
     }
 }]]></programlisting>
-            <para>You are strongly encouraged to use the declarative approach to rollback if at
-            all possible. Programmatic rollback is available should you need it, but its usage
-			flies in the face of achieving a clean POJO-based application model.</para>
+            <para>You are strongly encouraged to use the declarative approach to rollback if at all possible.
+			Programmatic rollback is available should you absolutely need it, but its usage flies in the face of
+			achieving a nice, clean POJO-based architecture.</para>
         </section>
         <section id="transaction-declarative-diff-tx">
             <title>Configuring different transactional semantics for different beans</title>
