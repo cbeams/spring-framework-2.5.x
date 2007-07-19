@@ -82,7 +82,7 @@ blockquote {
     margin-right: 0;
 }
 
-h1, h2, h3, h4, h6, H6    {
+h1, h2, h3, h4, h6 {
     color: #000000;
     font-weight: 500;
     margin-top: 0;
@@ -116,7 +116,7 @@ table {
 }
 
 div.table {
-	margin: 30px 0 30px 0;
+	margin: 30px 0 10px 0;
 	border: 1px dashed gray;
 	padding: 10px;
 }
