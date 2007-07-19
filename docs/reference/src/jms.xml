@@ -726,15 +726,32 @@ public interface SessionAwareMessageListener {
   <section id="jms-namespace">
     <title>JMS Namespace Support</title>
     
-    <para>Spring 2.1 introduces a namespace for simplifying JMS configuration. The 
-    namespace consists of two top-level elements: <literal>listener-container</literal>
-    and <literal>jca-listener-container</literal> both of which may contain one or more 
-    <literal>listener</literal> child elements. Here is an example of a basic configuration
+    <para>Spring 2.1 introduces a namespace for simplifying JMS configuration. To use the
+	JMS namespace elements you will need to reference the JMS schema:</para>
+
+	<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       ]]><emphasis role="bold">xmlns:jms="http://www.springframework.org/schema/jms"</emphasis><![CDATA[
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-2.1.xsd"</emphasis><![CDATA[>
+
+]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+
+</beans>]]></programlisting>
+
+	<para>The namespace consists of two top-level elements: <literal>&lt;listener-container/&gt;</literal>
+    and <literal>&lt;jca-listener-container/&gt;</literal> both of which may contain one or more 
+    <literal>&lt;listener/&gt;</literal> child elements. Here is an example of a basic configuration
     for two listeners.</para>
 
     <programlisting><![CDATA[<jms:listener-container>
-  <jms:listener destination="queue.orders" ref="orderService" method="placeOrder"/>
-  <jms:listener destination="queue.confirmations" ref="confirmationLogger" method="log"/>
+
+    <jms:listener destination="queue.orders" ref="orderService" method="placeOrder"/>
+
+    <jms:listener destination="queue.confirmations" ref="confirmationLogger" method="log"/>
+
 </jms:listener-container>]]></programlisting>
 
     <para>The example above is equivalent to creating two distinct listener container bean
@@ -802,10 +819,10 @@ public interface SessionAwareMessageListener {
         </tgroup>
     </table>
     
-    <para>The <literal>listener-container</literal> element also accepts several optional
-    attributes. This allows for customization of the various strategies (e.g.
+    <para>The <literal>&lt;listener-container/&gt;</literal> element also accepts several optional
+    attributes. This allows for customization of the various strategies (for example,
     <property>taskExecutor</property> and <property>destinationResolver</property>) as well as
-    basic JMS settings and resource references. With these attributes, it is possible to define
+    basic JMS settings and resource references. Using these attributes, it is possible to define
     highly-customized listener containers while still benefiting from the convenience of the
     namespace.</para>
     
@@ -814,17 +831,20 @@ public interface SessionAwareMessageListener {
                         destination-resolver="myDestinationResolver"
                         transaction-manager="myTransactionManager"
                         concurrency="10">
-  <jms:listener destination="queue.orders" ref="orderService" method="placeOrder"/>
-  <jms:listener destination="queue.confirmations" ref="confirmationLogger" method="log"/>
+
+    <jms:listener destination="queue.orders" ref="orderService" method="placeOrder"/>
+
+    <jms:listener destination="queue.confirmations" ref="confirmationLogger" method="log"/>
+
 </jms:listener-container>]]></programlisting>
 
-    <para>The following table describes all available attributes. Consult the javadoc of the
-    <classname>AbstractMessageListenerContainer</classname> and its concrete subclasses for
-    more detail on the individual properties. The javadoc also provides a discussion of
-    transaction choices and message redelivery scenarios.</para>
+    <para>The following table describes all available attributes. Consult the class-level
+	Javadoc of the <classname>AbstractMessageListenerContainer</classname> and its
+	concrete subclasses for more detail on the individual properties. The Javadoc also
+	provides a discussion of transaction choices and message redelivery scenarios.</para>
     
     <table id="jms-namespace-listener-container-tbl">
-        <title>Atrributes of the JMS <literal>listener-container</literal> element</title>
+        <title>Atrributes of the JMS <literal>&lt;listener-container/&gt;</literal> element</title>
         <tgroup cols="2">
             <colspec colname="c1" colwidth="2*" />
             <colspec colname="c2" colwidth="4*" />
