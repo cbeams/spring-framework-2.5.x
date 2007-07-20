@@ -43,11 +43,11 @@
 		<property name="friend" ref="ramnivas"/>
 	</bean>
 	
-	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$PreConstuctionConfiguredBean">
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$PreConstructionConfiguredBean">
 		<property name="name" value="ramnivas"/>
 	</bean>
 
-	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$PostConstuctionConfiguredBean">
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$PostConstructionConfiguredBean">
 		<property name="name" value="ramnivas"/>
 	</bean>
 

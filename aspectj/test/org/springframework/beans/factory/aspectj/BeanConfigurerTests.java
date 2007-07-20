@@ -150,13 +150,13 @@ public class BeanConfigurerTests extends TestCase {
 		assertEquals("Property injected more than once", 1, deserializedSubBean.setterCount);
 	}
 	
-	public void testPreConstuctionConfiguredBean() {
-		PreConstuctionConfiguredBean bean = new PreConstuctionConfiguredBean();
+	public void testPreConstructionConfiguredBean() {
+		PreConstructionConfiguredBean bean = new PreConstructionConfiguredBean();
 		assertTrue("Injection didn't occur before construction", bean.preConstructionConfigured);
 	}
 	
-	public void testPostConstuctionConfiguredBean() {
-		PostConstuctionConfiguredBean bean = new PostConstuctionConfiguredBean();
+	public void testPostConstructionConfiguredBean() {
+		PostConstructionConfiguredBean bean = new PostConstructionConfiguredBean();
 		assertFalse("Injection occurred before construction", bean.preConstructionConfigured);
 	}
 
@@ -408,12 +408,12 @@ public class BeanConfigurerTests extends TestCase {
 
 	
 	@Configurable
-	private static class PreOrPostConstuctionConfiguredBean {
+	private static class PreOrPostConstructionConfiguredBean {
 
 		private String name;
 		protected boolean preConstructionConfigured;
 
-		public PreOrPostConstuctionConfiguredBean() {
+		public PreOrPostConstructionConfiguredBean() {
 			preConstructionConfigured = (this.name != null);
 		}
 		
@@ -424,12 +424,12 @@ public class BeanConfigurerTests extends TestCase {
 
 
 	@Configurable(preConstruction=true)
-	private static class PreConstuctionConfiguredBean extends PreOrPostConstuctionConfiguredBean {
+	private static class PreConstructionConfiguredBean extends PreOrPostConstructionConfiguredBean {
 	}
 
 
 	@Configurable(preConstruction=false)
-	private static class PostConstuctionConfiguredBean extends PreOrPostConstuctionConfiguredBean {
+	private static class PostConstructionConfiguredBean extends PreOrPostConstructionConfiguredBean {
 	}
 	
 }

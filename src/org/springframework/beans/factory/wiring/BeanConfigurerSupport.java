@@ -113,11 +113,11 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 		if (this.beanWiringInfoResolver == null) {
 			if (logger.isWarnEnabled()) {
 				logger.warn(ClassUtils.getShortName(getClass()) + " has not been set up " +
-					"and is unable to configure bean instances. Proceeding without injection.");
+						"and is unable to configure bean instances. Proceeding without injection.");
 			}
 			return;
 		}
-		
+
 		BeanWiringInfo bwi = this.beanWiringInfoResolver.resolveWiringInfo(beanInstance);
 		if (bwi == null) {
 			// Skip the bean if no wiring info given.
@@ -170,8 +170,9 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 
 	private void checkExposedObject(Object exposedObject, Object originalBeanInstance) {
 		if (exposedObject != originalBeanInstance) {
-			throw new IllegalStateException("Post-processor tried to replace bean instance [" + originalBeanInstance +
-					"] with (proxy) object [" + exposedObject + "] - not supported for aspect-configured classes!");
+			throw new IllegalStateException("Post-processor tried to replace bean instance of type [" +
+					originalBeanInstance.getClass().getName() + "] with (proxy) object of type [" +
+					exposedObject.getClass().getName() + "] - not supported for aspect-configured classes!");
 		}
 	}
 
