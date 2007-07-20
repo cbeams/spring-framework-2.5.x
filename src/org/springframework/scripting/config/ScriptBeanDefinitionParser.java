@@ -57,7 +57,8 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 * The unique name under which the internally managed {@link ScriptFactoryPostProcessor} is
 	 * registered in the {@link BeanDefinitionRegistry}.
 	 */
-	private static final String SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME = ".scriptFactoryPostProcessor";
+	private static final String SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME =
+			"org.springframework.scripting.config.scriptFactoryPostProcessor";
 
 	private static final String SCRIPT_SOURCE_ATTRIBUTE = "script-source";
 
