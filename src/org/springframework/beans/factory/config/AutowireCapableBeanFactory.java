@@ -56,8 +56,8 @@ import org.springframework.beans.factory.BeanFactory;
 public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
-	 * Constant that indicates no autowiring at all
-	 * (other than callbacks such as BeanFactoryAware).
+	 * Constant that indicates no externally defined autowiring. Note that
+	 * BeanFactoryAware etc and annotation-driven injection will still be applied.
 	 * @see #createBean
 	 * @see #autowire
 	 * @see #autowireBeanProperties
@@ -65,7 +65,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	int AUTOWIRE_NO = 0;
 
 	/**
-	 * Constant that indicates autowiring bean properties by name.
+	 * Constant that indicates autowiring bean properties by name
+	 * (applying to all bean property setters).
 	 * @see #createBean
 	 * @see #autowire
 	 * @see #autowireBeanProperties
@@ -73,7 +74,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	int AUTOWIRE_BY_NAME = 1;
 
 	/**
-	 * Constant that indicates autowiring bean properties by type.
+	 * Constant that indicates autowiring bean properties by type
+	 * (applying to all bean property setters).
 	 * @see #createBean
 	 * @see #autowire
 	 * @see #autowireBeanProperties
@@ -81,7 +83,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	int AUTOWIRE_BY_TYPE = 2;
 
 	/**
-	 * Constant that indicates autowiring a constructor.
+	 * Constant that indicates autowiring the greediest constructor that
+	 * can be satisfied (involves resolving the appropriate constructor).
 	 * @see #createBean
 	 * @see #autowire
 	 */
@@ -120,6 +123,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	/**
 	 * Instantiate a new bean instance of the given class with the specified autowire
 	 * strategy. All constants defined in this interface are supported here.
+	 * Can also be invoked with <code>AUTOWIRE_NO</code> in order to just apply
+	 * before-instantiation callbacks (e.g. for annotation-driven injection).
 	 * <p>Does <i>not</i> apply standard {@link BeanPostProcessor BeanPostProcessors}
 	 * callbacks or perform any further initialization of the bean. This interface
 	 * offers distinct, fine-grained operations for those purposes, for example
@@ -146,6 +151,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
 	 * Autowire the bean properties of the given bean instance by name or type.
+	 * Can also be invoked with <code>AUTOWIRE_NO</code> in order to just apply
+	 * before-instantiation callbacks (e.g. for annotation-driven injection).
 	 * <p>Does <i>not</i> apply standard {@link BeanPostProcessor BeanPostProcessors}
 	 * callbacks or perform any further initialization of the bean. This interface
 	 * offers distinct, fine-grained operations for those purposes, for example
@@ -158,6 +165,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @throws BeansException if wiring failed
 	 * @see #AUTOWIRE_BY_NAME
 	 * @see #AUTOWIRE_BY_TYPE
+	 * @see #AUTOWIRE_NO
 	 */
 	void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck)
 			throws BeansException;
@@ -187,9 +195,10 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException;
 
 	/**
-	 * Configure the given bean instance: autowiring bean properties, applying
+	 * Configure the given raw bean: autowiring bean properties, applying
 	 * bean property values, applying factory callbacks such as <code>setBeanName</code>
-	 * and <code>setBeanFactory</code>, and also applying all bean post processors.
+	 * and <code>setBeanFactory</code>, and also applying all bean post processors
+	 * (including ones which might wrap the given raw bean).
 	 * <p>This is effectively a superset of what {@link #initializeBean} provides,
 	 * fully applying the configuration specified by the corresponding bean definition.
 	 * <b>Note: This method requires a bean definition for the given name!</b>
@@ -205,9 +214,10 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	Object configureBean(Object existingBean, String beanName) throws BeansException;
 
 	/**
-	 * Initialize the given bean instance, applying factory callbacks
+	 * Initialize the given raw bean, applying factory callbacks
 	 * such as <code>setBeanName</code> and <code>setBeanFactory</code>,
-	 * also applying all bean post processors.
+	 * also applying all bean post processors (including ones which
+	 * might wrap the given raw bean).
 	 * <p>Note that no bean definition of the given name has to exist
 	 * in the bean factory. The passed-in bean name will simply be used
 	 * for callbacks but not checked against the registered bean definitions.
