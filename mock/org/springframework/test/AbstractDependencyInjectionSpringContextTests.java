@@ -175,10 +175,9 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 			}
 			populateProtectedVariables();
 		}
-		else if (getAutowireMode() != AUTOWIRE_NO) {
-			getApplicationContext().getBeanFactory().autowireBeanProperties(
-					this, getAutowireMode(), isDependencyCheck());
-		}
+
+		getApplicationContext().getBeanFactory().autowireBeanProperties(
+				this, getAutowireMode(), isDependencyCheck());
 	}
 
 	private void initManagedVariableNames() throws IllegalAccessException {
