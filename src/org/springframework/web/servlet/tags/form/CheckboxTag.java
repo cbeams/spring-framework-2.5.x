@@ -21,7 +21,6 @@ import java.util.Collection;
 import javax.servlet.jsp.JspException;
 
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.WebDataBinder;
 
 /**
@@ -98,10 +97,10 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 			}
 			Object resolvedValue = (value instanceof String ? evaluate("value", (String) value) : value);
 			if (boundValue != null && boundValue.getClass().isArray()) {
-				renderFromCollection(resolvedValue, CollectionUtils.arrayToList(boundValue), tagWriter);
+				renderFromCollection(resolvedValue, tagWriter);
 			}
 			else if (boundValue instanceof Collection) {
-				renderFromCollection(resolvedValue, (Collection) boundValue, tagWriter);
+				renderFromCollection(resolvedValue, tagWriter);
 			}
 			else {
 				renderSingleValue(resolvedValue, tagWriter);
@@ -128,7 +127,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	 * bound value.
 	 */
 	private void renderSingleValue(Object resolvedValue, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", getDisplayString(resolvedValue));
+		tagWriter.writeAttribute("value", getDisplayString(resolvedValue, getPropertyEditor()));
 		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
 			tagWriter.writeAttribute("checked", "checked");
 		}
@@ -139,8 +138,8 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	 * the '<code>input</code>' element as 'checked' if the supplied value is
 	 * present in the bound Collection value.
 	 */
-	private void renderFromCollection(Object resolvedValue, Collection boundValue, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", getDisplayString(resolvedValue));
+	private void renderFromCollection(Object resolvedValue, TagWriter tagWriter) throws JspException {
+		tagWriter.writeAttribute("value", getDisplayString(resolvedValue, getPropertyEditor()));
 		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
 			tagWriter.writeAttribute("checked", "checked");
 		} 
