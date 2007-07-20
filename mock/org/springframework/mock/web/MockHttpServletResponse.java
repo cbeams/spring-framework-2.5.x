@@ -490,6 +490,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			setCommittedIfBufferSizeExceeded();
 		}
 
+		public void write(int c) {
+			super.write(c);
+			super.flush();
+			setCommittedIfBufferSizeExceeded();
+		}
+
 		public void flush() {
 			super.flush();
 			setCommitted(true);

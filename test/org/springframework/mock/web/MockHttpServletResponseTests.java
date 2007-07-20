@@ -29,7 +29,7 @@ import org.springframework.web.util.WebUtils;
  * @author Rick Evans
  * @since 19.02.2006
  */
-public final class MockHttpServletResponseTests extends TestCase {
+public class MockHttpServletResponseTests extends TestCase {
 
 	public void testSetContentTypeWithNoEncoding() {
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -66,6 +66,16 @@ public final class MockHttpServletResponseTests extends TestCase {
 		assertEquals(size + 1, response.getContentAsByteArray().length);
 	}
 
+	public void testServletOutputStreamCommittedOnFlushBuffer() throws IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		assertFalse(response.isCommitted());
+		response.getOutputStream().write('X');
+		assertFalse(response.isCommitted());
+		response.flushBuffer();
+		assertTrue(response.isCommitted());
+		assertEquals(1, response.getContentAsByteArray().length);
+	}
+
 	public void testServletWriterCommittedWhenBufferSizeExceeded() throws IOException {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		assertFalse(response.isCommitted());
@@ -99,14 +109,22 @@ public final class MockHttpServletResponseTests extends TestCase {
 		assertEquals(1, response.getContentAsByteArray().length);
 	}
 
-	public void testServletOutputStreamCommittedOnFlushBuffer() throws IOException {
+	public void testServletWriterAutoFlushedForString() throws IOException {
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		assertFalse(response.isCommitted());
-		response.getOutputStream().write('X');
-		assertFalse(response.isCommitted());
-		response.flushBuffer();
-		assertTrue(response.isCommitted());
-		assertEquals(1, response.getContentAsByteArray().length);
+		response.getWriter().write("X");
+		assertEquals("X", response.getContentAsString());
+	}
+
+	public void testServletWriterAutoFlushedForChar() throws IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.getWriter().write('X');
+		assertEquals("X", response.getContentAsString());
+	}
+
+	public void testServletWriterAutoFlushedForCharArray() throws IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.getWriter().write("XY".toCharArray());
+		assertEquals("XY", response.getContentAsString());
 	}
 
 }
