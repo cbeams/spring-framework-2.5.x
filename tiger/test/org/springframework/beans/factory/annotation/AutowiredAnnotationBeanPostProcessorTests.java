@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -279,6 +280,96 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		ConstructorsResourceInjectionBean bean = (ConstructorsResourceInjectionBean) bf.getBean("annotatedBean");
 		assertNull(bean.getTestBean3());
 		assertNull(bean.getTestBean4());
+		bf.destroySingletons();
+	}
+	
+	public void testConstructorInjectionWithMap() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapConstructorInjectionBean.class));
+		TestBean tb1 = new TestBean();
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean1", tb1);
+		bf.registerSingleton("testBean2", tb1);
+		
+		MapConstructorInjectionBean bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertEquals(2, bean.getTestBeanMap().size());
+		assertTrue(bean.getTestBeanMap().keySet().contains("testBean1"));
+		assertTrue(bean.getTestBeanMap().keySet().contains("testBean2"));
+		assertTrue(bean.getTestBeanMap().values().contains(tb1));
+		assertTrue(bean.getTestBeanMap().values().contains(tb2));
+	}
+
+	public void testFieldInjectionWithMap() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapFieldInjectionBean.class));
+		TestBean tb1 = new TestBean();
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean1", tb1);
+		bf.registerSingleton("testBean2", tb1);
+		
+		MapFieldInjectionBean bean = (MapFieldInjectionBean) bf.getBean("annotatedBean");
+		assertEquals(2, bean.getTestBeanMap().size());
+		assertTrue(bean.getTestBeanMap().keySet().contains("testBean1"));
+		assertTrue(bean.getTestBeanMap().keySet().contains("testBean2"));
+		assertTrue(bean.getTestBeanMap().values().contains(tb1));
+		assertTrue(bean.getTestBeanMap().values().contains(tb2));
+		bf.destroySingletons();
+	}
+
+	public void testMethodInjectionWithMap() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		
+		MapMethodInjectionBean bean = (MapMethodInjectionBean) bf.getBean("annotatedBean");
+		assertEquals(1, bean.getTestBeanMap().size());
+		assertTrue(bean.getTestBeanMap().keySet().contains("testBean"));
+		assertTrue(bean.getTestBeanMap().values().contains(tb));
+		assertSame(tb, bean.getTestBean());
+		bf.destroySingletons();
+	}
+
+	public void testMethodInjectionWithMapAndMultipleMatches() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
+		TestBean tb1 = new TestBean();
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean1", tb1);
+		bf.registerSingleton("testBean2", tb1);
+		
+		try {
+			MapMethodInjectionBean bean = (MapMethodInjectionBean) bf.getBean("annotatedBean");
+			fail("should have failed, more than one bean of type");
+		}
+		catch (BeanCreationException e) {
+			// expected
+		}
+		bf.destroySingletons();
+	}
+	
+	public void testMethodInjectionWithMapAndNoMatches() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
+		
+		MapMethodInjectionBean bean = (MapMethodInjectionBean) bf.getBean("annotatedBean");
+		assertNull(bean.getTestBeanMap());
+		assertNull(bean.getTestBean());
 		bf.destroySingletons();
 	}
 
@@ -827,6 +918,54 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 		public List<NestedTestBean> getNestedTestBeans() {
 			return nestedTestBeans;
+		}
+	}
+	
+	
+	public static class MapConstructorInjectionBean {
+		
+		private Map<String,TestBean> testBeanMap;
+		
+		@Autowired
+		public MapConstructorInjectionBean(Map<String,TestBean> testBeanMap) {
+			this.testBeanMap = testBeanMap;
+		}
+		
+		public Map<String,TestBean> getTestBeanMap() {
+			return this.testBeanMap;
+		}
+	}
+
+
+	public static class MapFieldInjectionBean {
+
+		@Autowired
+		private Map<String,TestBean> testBeanMap;
+
+		public Map<String,TestBean> getTestBeanMap() {
+			return this.testBeanMap;
+		}
+	}
+
+
+	public static class MapMethodInjectionBean {
+
+		private TestBean testBean;
+		
+		private Map<String,TestBean> testBeanMap;
+
+		@Autowired(required=false)
+		public void setTestBeanMap(TestBean testBean, Map<String,TestBean> testBeanMap) {
+			this.testBean = testBean;
+			this.testBeanMap = testBeanMap;
+		}
+
+		public TestBean getTestBean() {
+			return this.testBean;
+		}
+
+		public Map<String,TestBean> getTestBeanMap() {
+			return this.testBeanMap;
 		}
 	}
 

@@ -51,6 +51,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Mark Fisher
  * @since 2.0
  * @see #autowireConstructor
  * @see #instantiateUsingFactoryMethod
@@ -510,7 +511,31 @@ abstract class ConstructorResolver {
 			autowiredBeanNames.addAll(beans.keySet());
 			return bw.convertIfNecessary(beans.values(), paramType);
 		}
-		else if (Collection.class.isAssignableFrom(paramType)) {
+		else if (Map.class.isAssignableFrom(paramType) && paramType.isInterface()) {
+			Class keyType = null;
+			Class valueType = null;
+			if (JdkVersion.isAtLeastJava15()) {
+				MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex);
+				keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParameter);
+				valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParameter);
+			}
+			if (keyType == null || !String.class.isAssignableFrom(keyType)) {
+				throw new UnsatisfiedDependencyException(
+						mbd.getResourceDescription(), beanName, paramIndex, paramType, 
+								"key type must be assignable to [" + String.class.getName() + "]");					
+			}
+			if (valueType == null) {
+				throw new UnsatisfiedDependencyException(
+						mbd.getResourceDescription(), beanName, paramIndex, paramType, "no value type declared");				
+			}
+			Map beans = findAutowireCandidates(beanName, valueType);
+			if (beans.isEmpty()) {
+				throw new UnsatisfiedDependencyException(
+						mbd.getResourceDescription(), beanName, paramIndex, paramType, "expected at least 1 matching bean");
+			}
+			return beans;
+		}
+		else if (Collection.class.isAssignableFrom(paramType) && paramType.isInterface()) {
 			Class elementType = null;
 			if (JdkVersion.isAtLeastJava15()) {
 				elementType = GenericCollectionTypeResolver.getCollectionParameterType(

@@ -380,7 +380,32 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				autowiredBeanNames.addAll(matchingBeans.keySet());
 				return convertToArray(matchingBeans.values(), componentType);
 			}
-			else if (Collection.class.isAssignableFrom(type)) {
+			else if (Map.class.isAssignableFrom(type) && type.isInterface()) {
+				Class keyType = (this.isField ?
+						GenericCollectionTypeResolver.getMapKeyFieldType((Field) this.member) :
+						GenericCollectionTypeResolver.getMapKeyParameterType(
+								MethodParameter.forMethodOrConstructor(this.member, parameterIndex)));
+				if (keyType == null || !String.class.isAssignableFrom(keyType)) {
+					throw new IllegalStateException("Map key type must be assignable to [" + String.class.getName() + "]");
+				}
+				Class valueType = (this.isField ?
+						GenericCollectionTypeResolver.getMapValueFieldType((Field) this.member) :
+						GenericCollectionTypeResolver.getMapValueParameterType(
+								MethodParameter.forMethodOrConstructor(this.member, parameterIndex)));
+				if (valueType == null) {
+					throw new IllegalStateException("No value type declared for map");
+				}
+				Map matchingBeans = findAutowireCandidates(valueType);
+				if (matchingBeans.isEmpty()) {
+					if (this.required) {
+						throw new NoSuchBeanDefinitionException(type,
+								"Unsatisfied dependency of type [" + valueType.getName() + "]: expected at least 1 matching bean");
+					}
+					return null;
+				}
+				return matchingBeans;
+			}
+			else if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
 				Class elementType = (this.isField ?
 						GenericCollectionTypeResolver.getCollectionFieldType((Field) this.member) :
 						GenericCollectionTypeResolver.getCollectionParameterType(
