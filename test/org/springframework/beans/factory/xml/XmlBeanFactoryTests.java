@@ -861,8 +861,14 @@ public class XmlBeanFactoryTests extends TestCase {
 		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
 		TestBean kerry2 = (TestBean) xbf.getBean("kerry2");
 
-		//ConstructorDependenciesBean rod9 = (ConstructorDependenciesBean) xbf.getBean("rod9");
-		//assertEquals(99, rod9.getAge());
+		ConstructorDependenciesBean rod9 = (ConstructorDependenciesBean) xbf.getBean("rod9");
+		assertEquals(99, rod9.getAge());
+		ConstructorDependenciesBean rod9a = (ConstructorDependenciesBean) xbf.getBean("rod9", new Object[] {new Integer(98)});
+		assertEquals(98, rod9a.getAge());
+		ConstructorDependenciesBean rod9b = (ConstructorDependenciesBean) xbf.getBean("rod9", new Object[] {"myName"});
+		assertEquals("myName", rod9b.getName());
+		ConstructorDependenciesBean rod9c = (ConstructorDependenciesBean) xbf.getBean("rod9", new Object[] {new Integer(97)});
+		assertEquals(97, rod9c.getAge());
 
 		ConstructorDependenciesBean rod10 = (ConstructorDependenciesBean) xbf.getBean("rod10");
 		assertEquals(null, rod10.getName());
@@ -1229,19 +1235,6 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(SerializationTestUtils.isSerializable(s));
 		s = (SerializableMethodReplacerCandidate) SerializationTestUtils.serializeAndDeserialize(s);
 		assertEquals("Method replace still works after serialization and deserialization", backwards, s.replaceMe(forwards));
-	}
-
-	public void testCannotSpecifyFactoryMethodArgumentsExceptWithFactoryMethod() {
-		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
-		try {
-			xbf.getBean("overrideOnPrototype", new Object[]{new TestBean()});
-			fail("Shouldn't allow args to be passed to a Setter-Injected object");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			// OK
-		}
 	}
 
 	public void testInnerBeanInheritsScopeFromConcreteChildDefinition() {

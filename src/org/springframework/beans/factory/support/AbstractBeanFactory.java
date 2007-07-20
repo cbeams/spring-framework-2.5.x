@@ -168,14 +168,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		return getBean(name, requiredType, null);
 	}
 
-	/**
-	 * Return an instance, which may be shared or independent, of the specified bean.
-	 * @param name the name of the bean to retrieve
-	 * @param args arguments to use if creating a prototype using explicit arguments to a
-	 * static factory method. It is invalid to use a non-null args value in any other case.
-	 * @return an instance of the bean
-	 * @throws BeansException if the bean could not be created
-	 */
 	public Object getBean(String name, Object[] args) throws BeansException {
 		return getBean(name, null, args);
 	}
@@ -1068,15 +1060,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 		// Check validity of the usage of the args parameter. This can
 		// only be used for prototypes constructed via a factory method.
-		if (args != null) {
-			if (mbd.isSingleton()) {
-				throw new BeanDefinitionStoreException(
-						"Cannot specify arguments in the getBean() method when referring to a singleton bean definition");
-			}
-			else if (mbd.getFactoryMethodName() == null) {
-				throw new BeanDefinitionStoreException(
-						"Can only specify arguments in the getBean() method in conjunction with a factory method");
-			}
+		if (args != null && !mbd.isPrototype()) {
+			throw new BeanDefinitionStoreException(
+					"Can only specify arguments for the getBean method when referring to a prototype bean definition");
 		}
 	}
 

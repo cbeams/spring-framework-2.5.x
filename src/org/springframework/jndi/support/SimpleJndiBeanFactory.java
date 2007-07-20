@@ -96,7 +96,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 
 
 	public Object getBean(String name) throws BeansException {
-		return getBean(name, null);
+		return getBean(name, (Class) null);
 	}
 
 	public Object getBean(String name, Class requiredType) throws BeansException {
@@ -117,6 +117,14 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		catch (NamingException ex) {
 			throw new BeanDefinitionStoreException("JNDI environment", name, "JNDI lookup failed", ex);
 		}
+	}
+
+	public Object getBean(String name, Object[] args) throws BeansException {
+		if (args != null) {
+			throw new UnsupportedOperationException(
+					"SimpleJndiBeanFactory does not support explicit bean creation arguments)");
+		}
+		return getBean(name);
 	}
 
 	public boolean containsBean(String name) {

@@ -830,6 +830,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().getBean(name, requiredType);
 	}
 
+	public Object getBean(String name, Object[] args) throws BeansException {
+		return getBeanFactory().getBean(name, args);
+	}
+
 	public boolean containsBean(String name) {
 		return getBeanFactory().containsBean(name);
 	}

@@ -76,8 +76,8 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	public Object getBean(String name) throws BeansException {
 		String beanName = BeanFactoryUtils.transformedBeanName(name);
-
 		Object bean = this.beans.get(beanName);
+
 		if (bean == null) {
 			throw new NoSuchBeanDefinitionException(beanName,
 					"Defined beans are [" + StringUtils.collectionToCommaDelimitedString(this.beans.keySet()) + "]");
@@ -106,6 +106,14 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
 		}
 		return bean;
+	}
+
+	public Object getBean(String name, Object[] args) throws BeansException {
+		if (args != null) {
+			throw new UnsupportedOperationException(
+					"StaticListableBeanFactory does not support explicit bean creation arguments)");
+		}
+		return getBean(name);
 	}
 
 	public boolean containsBean(String name) {

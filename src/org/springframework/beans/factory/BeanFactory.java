@@ -143,11 +143,27 @@ public interface BeanFactory {
 	 * is <code>Object.class</code>, this method will succeed whatever the class of the
 	 * returned instance.
 	 * @return an instance of the bean
-	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
 	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
+	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
 	 * @throws BeansException if the bean could not be created
 	 */
 	Object getBean(String name, Class requiredType) throws BeansException;
+
+	/**
+	 * Return an instance, which may be shared or independent, of the specified bean.
+	 * <p>Allows for specifying explicit constructor arguments / factory method arguments,
+	 * overriding the specified default arguments (if any) in the bean definition.
+	 * @param name the name of the bean to retrieve
+	 * @param args arguments to use if creating a prototype using explicit arguments to a
+	 * static factory method. It is invalid to use a non-null args value in any other case.
+	 * @return an instance of the bean
+	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
+	 * @throws BeanDefinitionStoreException if arguments have been given but
+	 * the affected bean isn't a prototype
+	 * @throws BeansException if the bean could not be created
+	 * @since 2.1
+	 */
+	Object getBean(String name, Object[] args) throws BeansException;
 
 	/**
 	 * Does this bean factory contain a bean with the given name? More specifically,

@@ -64,6 +64,7 @@ import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -258,7 +259,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
 		bd.setSingleton(false);
 		if (bd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR) {
-			return autowireConstructor(beanClass.getName(), bd, null).getWrappedInstance();
+			return autowireConstructor(beanClass.getName(), bd, null, null).getWrappedInstance();
 		}
 		else {
 			Object bean = getInstantiationStrategy().instantiate(bd, null, this);
@@ -700,8 +701,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Constructor[] ctors = determineConstructorsFromBeanPostProcessors(mbd.getBeanClass(), beanName);
 		if (ctors != null ||
 				mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
-				mbd.hasConstructorArgumentValues())  {
-			return autowireConstructor(beanName, mbd, ctors);
+				mbd.hasConstructorArgumentValues() || !ObjectUtils.isEmpty(args))  {
+			return autowireConstructor(beanName, mbd, ctors, args);
 		}
 
 		// No special handling: simply use no-arg constructor.
@@ -748,17 +749,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Instantiate the bean using a named factory method. The method may be static, if the
-	 * mbd parameter specifies a class, rather than a factoryBean, or
-	 * an instance variable on a factory object itself configured using Dependency Injection.
-	 * <p>Implementation requires iterating over the static or instance methods with the
-	 * name specified in the RootBeanDefinition (the method may be overloaded) and trying
-	 * to match with the parameters. We don't have the types attached to constructor args,
-	 * so trial and error is the only way to go here. The explicitArgs array may contain
-	 * argument values passed in programmatically via the corresponding getBean method.
+	 * mbd parameter specifies a class, rather than a factoryBean, or an instance variable
+	 * on a factory object itself configured using Dependency Injection.
 	 * @param beanName the name of the bean
 	 * @param mbd the bean definition for the bean
-	 * @param explicitArgs argument values passed in programmatically via the getBean
-	 * method, or <code>null</code> if none (-> use constructor argument values from bean definition)
+	 * @param explicitArgs argument values passed in programmatically via the getBean method,
+	 * or <code>null</code> if none (-> use constructor argument values from bean definition)
 	 * @return BeanWrapper for the new instance
 	 * @see #getBean(String, Object[])
 	 */
@@ -779,11 +775,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param beanName the name of the bean
 	 * @param mbd the bean definition for the bean
 	 * @param ctors the chosen candidate constructors
+	 * @param explicitArgs argument values passed in programmatically via the getBean method,
+	 * or <code>null</code> if none (-> use constructor argument values from bean definition)
 	 * @return BeanWrapper for the new instance
 	 */
-	protected BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd, Constructor[] ctors) {
+	protected BeanWrapper autowireConstructor(
+			String beanName, RootBeanDefinition mbd, Constructor[] ctors, Object[] explicitArgs) {
+
 		ConstructorResolver constructorResolver = new ConstructorResolverAdapter();
-		return constructorResolver.autowireConstructor(beanName, mbd, ctors);
+		return constructorResolver.autowireConstructor(beanName, mbd, ctors, explicitArgs);
 	}
 
 	/**

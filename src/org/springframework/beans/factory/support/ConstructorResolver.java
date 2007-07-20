@@ -85,44 +85,61 @@ abstract class ConstructorResolver {
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
 	 * @param chosenCtors chosen candidate constructors (or <code>null</code> if none)
+	 * @param explicitArgs argument values passed in programmatically via the getBean method,
+	 * or <code>null</code> if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
-	protected BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd, Constructor[] chosenCtors) {
+	protected BeanWrapper autowireConstructor(
+			String beanName, RootBeanDefinition mbd, Constructor[] chosenCtors, Object[] explicitArgs) {
+
 		BeanWrapper bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
-		Constructor constructorToUse = (Constructor) mbd.resolvedConstructorOrFactoryMethod;
+		Constructor constructorToUse = null;
 		Object[] argsToUse = null;
 
-		if (constructorToUse != null) {
-			// Found a cached constructor...
-			argsToUse = mbd.resolvedConstructorArguments;
-			if (argsToUse == null) {
-				Class[] paramTypes = constructorToUse.getParameterTypes();
-				Object[] argsToResolve = mbd.preparedConstructorArguments;
-				BeanDefinitionValueResolver valueResolver =
-						new BeanDefinitionValueResolver(this.beanFactory, beanName, mbd, bw);
-				argsToUse = new Object[argsToResolve.length];
-				for (int i = 0; i < argsToResolve.length; i++) {
-					Object argValue = argsToResolve[i];
-					if (argValue instanceof BeanMetadataElement) {
-						String argName = "constructor argument with index " + i;
-						argValue = valueResolver.resolveValueIfNecessary(argName, argValue);
+		if (explicitArgs != null) {
+			argsToUse = explicitArgs;
+		}
+		else {
+			constructorToUse = (Constructor) mbd.resolvedConstructorOrFactoryMethod;
+			if (constructorToUse != null) {
+				// Found a cached constructor...
+				argsToUse = mbd.resolvedConstructorArguments;
+				if (argsToUse == null) {
+					Class[] paramTypes = constructorToUse.getParameterTypes();
+					Object[] argsToResolve = mbd.preparedConstructorArguments;
+					BeanDefinitionValueResolver valueResolver =
+							new BeanDefinitionValueResolver(this.beanFactory, beanName, mbd, bw);
+					argsToUse = new Object[argsToResolve.length];
+					for (int i = 0; i < argsToResolve.length; i++) {
+						Object argValue = argsToResolve[i];
+						if (argValue instanceof BeanMetadataElement) {
+							String argName = "constructor argument with index " + i;
+							argValue = valueResolver.resolveValueIfNecessary(argName, argValue);
+						}
+						argsToUse[i] = bw.convertIfNecessary(argValue, paramTypes[i],
+								new MethodParameter(constructorToUse, i));
 					}
-					argsToUse[i] = bw.convertIfNecessary(argValue, paramTypes[i],
-							new MethodParameter(constructorToUse, i));
 				}
 			}
 		}
 
-		else {
+		if (constructorToUse == null) {
 			// Need to resolve the constructor.
 			boolean autowiring = (chosenCtors != null ||
 					mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+			ConstructorArgumentValues resolvedValues = null;
 
-			ConstructorArgumentValues cargs = mbd.getConstructorArgumentValues();
-			ConstructorArgumentValues resolvedValues = new ConstructorArgumentValues();
-			int minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
+			int minNrOfArgs = 0;
+			if (explicitArgs != null) {
+				minNrOfArgs = explicitArgs.length;
+			}
+			else {
+				ConstructorArgumentValues cargs = mbd.getConstructorArgumentValues();
+				resolvedValues = new ConstructorArgumentValues();
+				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
+			}
 
 			// Take specified constructors, if any.
 			Constructor[] candidates =
@@ -146,29 +163,43 @@ abstract class ConstructorResolver {
 							"(hint: specify index and/or type arguments for simple parameters to avoid type ambiguities)");
 				}
 
-				// Try to resolve arguments for current constructor.
-				try {
-					ArgumentsHolder args = createArgumentArray(
-							beanName, mbd, resolvedValues, bw, paramTypes, candidate, autowiring);
-					int typeDiffWeight = args.getTypeDifferenceWeight(paramTypes);
-					// Choose this constructor if it represents the closest match.
-					if (typeDiffWeight < minTypeDiffWeight) {
-						constructorToUse = candidate;
-						argsToUse = args.arguments;
-						minTypeDiffWeight = typeDiffWeight;
+				ArgumentsHolder args = null;
+
+				if (resolvedValues != null) {
+					// Try to resolve arguments for current constructor.
+					try {
+						args = createArgumentArray(
+								beanName, mbd, resolvedValues, bw, paramTypes, candidate, autowiring);
+					}
+					catch (UnsatisfiedDependencyException ex) {
+						if (this.beanFactory.logger.isTraceEnabled()) {
+							this.beanFactory.logger.trace(
+									"Ignoring constructor [" + candidate + "] of bean '" + beanName + "': " + ex);
+						}
+						if (i == candidates.length - 1 && constructorToUse == null) {
+							throw ex;
+						}
+						else {
+							// Swallow and try next constructor.
+							continue;
+						}
 					}
 				}
-				catch (UnsatisfiedDependencyException ex) {
-					if (this.beanFactory.logger.isTraceEnabled()) {
-						this.beanFactory.logger.trace(
-								"Ignoring constructor [" + candidate + "] of bean '" + beanName + "': " + ex);
+
+				else {
+					// Explicit arguments given -> arguments length must match exactly.
+					if (paramTypes.length != explicitArgs.length) {
+						continue;
 					}
-					if (i == candidates.length - 1 && constructorToUse == null) {
-						throw ex;
-					}
-					else {
-						// Swallow and try next constructor.
-					}
+					args = new ArgumentsHolder(explicitArgs);
+				}
+
+				int typeDiffWeight = args.getTypeDifferenceWeight(paramTypes);
+				// Choose this constructor if it represents the closest match.
+				if (typeDiffWeight < minTypeDiffWeight) {
+					constructorToUse = candidate;
+					argsToUse = args.arguments;
+					minTypeDiffWeight = typeDiffWeight;
 				}
 			}
 
@@ -177,7 +208,9 @@ abstract class ConstructorResolver {
 						mbd.getResourceDescription(), beanName, "Could not resolve matching constructor");
 			}
 
-			mbd.resolvedConstructorOrFactoryMethod = constructorToUse;
+			if (explicitArgs == null) {
+				mbd.resolvedConstructorOrFactoryMethod = constructorToUse;
+			}
 		}
 
 		Object beanInstance = this.instantiationStrategy.instantiate(
@@ -219,15 +252,16 @@ abstract class ConstructorResolver {
 			factoryClass = mbd.getBeanClass();
 		}
 
-		Method factoryMethodToUse = (Method) mbd.resolvedConstructorOrFactoryMethod;
+		Method factoryMethodToUse = null;
 		Object[] argsToUse = null;
 
-		if (factoryMethodToUse != null) {
-			// Found a cached factory method...
-			if (explicitArgs != null) {
-				argsToUse = explicitArgs;
-			}
-			else {
+		if (explicitArgs != null) {
+			argsToUse = explicitArgs;
+		}
+		else {
+			factoryMethodToUse = (Method) mbd.resolvedConstructorOrFactoryMethod;
+			if (factoryMethodToUse != null) {
+				// Found a cached factory method...
 				argsToUse = mbd.resolvedConstructorArguments;
 				if (argsToUse == null) {
 					Class[] paramTypes = factoryMethodToUse.getParameterTypes();
@@ -248,7 +282,7 @@ abstract class ConstructorResolver {
 			}
 		}
 
-		else {
+		if (factoryMethodToUse == null) {
 			// Need to determine the factory method...
 			// Try all methods with this name to see if they match the given arguments.
 			Method[] candidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
@@ -323,7 +357,10 @@ abstract class ConstructorResolver {
 						 "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
 						"factory method '" + mbd.getFactoryMethodName() + "'");
 			}
-			mbd.resolvedConstructorOrFactoryMethod = factoryMethodToUse;
+
+			if (explicitArgs == null) {
+				mbd.resolvedConstructorOrFactoryMethod = factoryMethodToUse;
+			}
 		}
 
 		Object beanInstance = this.instantiationStrategy.instantiate(
