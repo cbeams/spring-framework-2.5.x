@@ -850,6 +850,7 @@
 			]]></xsd:documentation>
 		</xsd:annotation>
 	</xsd:element>
+
 	<xsd:element name="set" type="listOrSetType">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
@@ -866,6 +867,7 @@
 			]]></xsd:documentation>
 		</xsd:annotation>
 	</xsd:element>
+
 	<xsd:element name="entry" type="entryType">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
@@ -874,6 +876,7 @@
 			]]></xsd:documentation>
 		</xsd:annotation>
 	</xsd:element>
+
 	<xsd:element name="props" type="propsType">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[

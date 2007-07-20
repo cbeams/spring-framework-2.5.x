@@ -72,12 +72,12 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 	/**
 	 * Set the {@link BeanFactory} in which this aspect must configure beans.
 	 * @throws IllegalArgumentException if the supplied <code>beanFactory</code> is
-	 * not an {@link ConfigurableListableBeanFactory}
+	 * not a {@link ConfigurableListableBeanFactory}
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
 			throw new IllegalArgumentException(
-				 "Bean configurer aspect needs to run in an ConfigurableListableBeanFactory: " + beanFactory);
+				 "Bean configurer aspect needs to run in a ConfigurableListableBeanFactory: " + beanFactory);
 		}
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 	}
