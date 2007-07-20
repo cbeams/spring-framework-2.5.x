@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M3 (2007-07-20)
+Changes in version 2.1 M3 (2007-07-23)
 --------------------------------------
 
 Package org.springframework.aop
@@ -24,22 +24,25 @@ Package org.springframework.beans
 * BeanWrapperImpl lazily performs JavaBeans introspection (avoiding introspection failure for non-visible target class)
 * TypeConverterDelegate protects its collection conversion process against misbehaving Collections with a null Iterator
 * TypeConverterDelegate only attempts to convert well-known collection types (skips custom types in the first place)
-* fixed AbstractBeanFactory to correctly handle factory-bean references in case of a temporary ClassLoader being used
-* DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
 * BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
 * added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
 * exposed "registerDependentBean" method on ConfigurableBeanFactory interface
+* exposed "getBean(name, args)" method on BeanFactory interface
+* passing in explicit arguments for bean creation is supported for constructors as well (not just for factory methods)
+* passing in different combinations of explicit arguments is supported for overloaded factory methods and constructors
 * PropertyPathFactoryBean supports a null property value (removed historic restriction there)
 * exposed "parentName", "factoryBeanName" and "factoryMethodName" properties in BeanDefinition interface
 * added "visitParentName", "visitFactoryBeanName" and "visitFactoryMethodName" callbacks to BeanDefinitionVisitor
 * PropertyPlaceholderConfigurer resolves placeholders in parent, factory-bean and factory-method values as well
 * DefaultListableBeanFactory ignores invalid parent bean names when matching beans by type with allowEagerInit=false
 * DefaultListableBeanFactory only ignores invalid bean class names when matching beans by type with allowEagerInit=false
+* fixed AbstractBeanFactory to correctly handle factory-bean references in case of a temporary ClassLoader being used
+* DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
 * introduced "removeBeanDefinition" method in BeanDefinitionRegistry interface and DefaultListableBeanFactory class
 * AbstractBeanFactory supports any BeanDefinition implementation (does not require AbstractBeanDefinition anymore)
 * introduced GenericBeanDefinition as one-stop shop for standard bean definition purposes (with configurable parent)
 * DefaultBeanNameGenerator does not require an AbstractBeanDefinition implementation for bean name generation anymore
-* added autowiring by type for arrays and collections (available for @Autowired, 'constructor' and 'byType' autowiring)
+* added autowiring by type for arrays, collections, maps (available for @Autowired, 'constructor', 'byType' autowiring)
 * Autowired/CommonAnnotationBeanPostProcessor registers autowired beans as dependent on their injected target bean
 * AnnotationBeanConfigurerAspect proceeds without injection in case of a circular reference problem, logging a warning
 * added "registerBeanComponent" convenience method to ParserContext
@@ -91,6 +94,9 @@ Package org.springframework.orm
 * ExtendedEntityManagerCreator's "joinTransaction()" checks whether there is an externally managed local transaction
 * ExtendedEntityManagerCreator's EntityManager proxies are serializable now
 
+Package org.springframework.mock
+* MockHttpServletResponse automatically flushes the Writer in case of a "write(int)" call too
+
 Package org.springframework.remoting
 * RmiClientInterceptor and JaxRpcClientInterceptor propagate any kind of declared RemoteException as-is
 * (Jndi)RmiClientInterceptor resets stub before a refresh attempt, avoiding race condition in case of registry restart
@@ -102,6 +108,15 @@ Package org.springframework.scheduling
 
 Package org.springframework.scripting
 * updated JRuby support for JRuby 1.0 compatibility (still compatible with JRuby 0.9.8 / 0.9.9 as well)
+
+Package org.springframework.test
+* AbstractDependencyInjectionSpringContextTests allows for annotation-driven autowiring (even in case of AUTOWIRE_NO)
+
+Package org.springframework.scheduling
+* Quartz SchedulerFactoryBean does not set default AdaptableJobFactory in case of RemoteScheduler (not supported there)
+
+Package org.springframework.scripting
+* "lang:*" configuration elements create their implicit ScriptFactoryPostProcessor under a fully qualified bean name
 
 Package org.springframework.transaction
 * refined TransactionAspectSupport to allow for overriding the "getTransactionManager()" method in subclasses
@@ -122,6 +137,7 @@ Package org.springframework.web
 * DispatcherServlet/Portlet's "noHandlerFound" declares Exception instead of just IOException/PortletException
 * AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
+* fixed CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
 
 
 Changes in version 2.1 M2 (2007-05-31)
