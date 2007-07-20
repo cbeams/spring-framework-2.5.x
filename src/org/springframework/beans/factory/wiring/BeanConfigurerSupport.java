@@ -24,7 +24,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Convenient superclass for configurers that can perform Dependency Injection
@@ -64,7 +64,6 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 	 * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
 	 */
 	public void setBeanWiringInfoResolver(BeanWiringInfoResolver beanWiringInfoResolver) {
-		Assert.notNull(beanWiringInfoResolver, "'beanWiringInfoResolver' cannot be null.");
 		this.beanWiringInfoResolver = beanWiringInfoResolver;
 	}
 
@@ -76,7 +75,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof AutowireCapableBeanFactory)) {
 			throw new IllegalArgumentException(
-				 "Bean configurer aspect needs to run in an AutowireCapableBeanFactory, not in [" + beanFactory + "]");
+				 "Bean configurer aspect needs to run in an AutowireCapableBeanFactory: " + beanFactory);
 		}
 		this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
 	}
@@ -110,16 +109,13 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 	 */
 	protected void configureBean(Object beanInstance) {
 		if (this.beanWiringInfoResolver == null) {
-			if(logger.isWarnEnabled()) {
-				logger.warn("[" + getClass().getName() + "] has not been configured by Spring " +
-					"and is unable to configure bean instances. Object with identity " +
-					"hashcode " + System.identityHashCode(beanInstance) + " has not been configured: " +
-					"Make sure this configurer runs in a Spring container. " +
-					"For example, add it to a Spring application context as an XML bean definition.");
+			if (logger.isWarnEnabled()) {
+				logger.warn(ClassUtils.getShortName(getClass()) + " has not been set up " +
+						"and is unable to configure bean instances. Proceeding without injection.");
 			}
 			return;
 		}
-		
+
 		BeanWiringInfo bwi = this.beanWiringInfoResolver.resolveWiringInfo(beanInstance);
 		if (bwi == null) {
 			// Skip the bean if no wiring info given.
@@ -127,10 +123,9 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 		}
 
 		if (this.beanFactory == null) {
-			if(logger.isWarnEnabled()) {
-				logger.warn("BeanFactory has not been set on [" + getClass().getName() + "]: " +
-					"Make sure this configurer runs in a Spring container. " +
-					"For example, add it to a Spring application context as an XML bean definition.");
+			if (logger.isWarnEnabled()) {
+				logger.warn("BeanFactory has not been set on " + ClassUtils.getShortName(getClass()) + ": " +
+						"Make sure this configurer runs in a Spring container. Proceeding without injection.");
 			}
 			return;
 		}
