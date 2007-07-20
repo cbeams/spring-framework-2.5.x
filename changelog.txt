@@ -45,10 +45,14 @@ Package org.springframework.orm
 * ExtendedEntityManagerCreator's "joinTransaction()" checks whether there is an externally managed local transaction
 * ExtendedEntityManagerCreator's EntityManager proxies are serializable now
 
+Package org.springframework.mock
+* MockHttpServletResponse automatically flushes the Writer in case of a "write(int)" call too
+
 Package org.springframework.remoting
 * (Jndi)RmiClientInterceptor resets stub before a refresh attempt, avoiding race condition in case of registry restart
 
 Package org.springframework.scheduling
+* Quartz SchedulerFactoryBean does not set default AdaptableJobFactory in case of RemoteScheduler (not supported there)
 * added "waitForTasksToCompleteOnShutdown" property to ScheduledExecutorFactoryBean
 
 Package org.springframework.transaction
@@ -65,6 +69,7 @@ Package org.springframework.web
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
 * AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
+* fixed CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
 
 
 Changes in version 2.0.6 (2007-06-18)
