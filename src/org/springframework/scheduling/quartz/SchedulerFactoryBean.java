@@ -39,6 +39,7 @@ import org.quartz.SchedulerFactory;
 import org.quartz.SchedulerListener;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
+import org.quartz.impl.RemoteScheduler;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.simpl.SimpleThreadPool;
 import org.quartz.spi.JobFactory;
@@ -180,7 +181,9 @@ public class SchedulerFactoryBean
 
 	private String applicationContextSchedulerContextKey;
 
-	private JobFactory jobFactory = new AdaptableJobFactory();
+	private JobFactory jobFactory;
+
+	private boolean jobFactorySet = false;
 
 
 	private boolean overwriteExistingJobs = false;
@@ -370,16 +373,18 @@ public class SchedulerFactoryBean
 	 * Set the Quartz JobFactory to use for this Scheduler.
 	 * <p>Default is Spring's {@link AdaptableJobFactory}, which supports
 	 * {@link java.lang.Runnable} objects as well as standard Quartz
-	 * {@link org.quartz.Job} instances.
+	 * {@link org.quartz.Job} instances. Note that this default only applies
+	 * to a <i>local</i> Scheduler, not to a RemoteScheduler (where setting
+	 * a custom JobFactory is not supported by Quartz).
 	 * <p>Specify an instance of Spring's {@link SpringBeanJobFactory} here
-	 * (typically as an inner bean definition) to automatically populate a
-	 * job's bean properties from the specified job data map and scheduler
-	 * context.
+	 * (typically as an inner bean definition) to automatically populate a job's
+	 * bean properties from the specified job data map and scheduler context.
 	 * @see AdaptableJobFactory
 	 * @see SpringBeanJobFactory
 	 */
 	public void setJobFactory(JobFactory jobFactory) {
 		this.jobFactory = jobFactory;
+		this.jobFactorySet = true;
 	}
 
 
@@ -575,6 +580,11 @@ public class SchedulerFactoryBean
 		// Get Scheduler instance from SchedulerFactory.
 		try {
 			this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
+			if (!this.jobFactorySet && !(this.scheduler instanceof RemoteScheduler)) {
+				// Use AdaptableJobFactory as default for a local Scheduler, unless when
+				// explicitly given a null value through the "jobFactory" bean property.
+				this.jobFactory = new AdaptableJobFactory();
+			}
 			if (this.jobFactory != null) {
 				if (this.jobFactory instanceof SchedulerContextAware) {
 					((SchedulerContextAware) this.jobFactory).setSchedulerContext(this.scheduler.getContext());
