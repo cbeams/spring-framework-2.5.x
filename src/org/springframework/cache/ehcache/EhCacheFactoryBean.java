@@ -51,7 +51,7 @@ import org.springframework.util.Assert;
  *
  * <p>Note: As of Spring 2.0, this FactoryBean is based on EHCache 1.2's API (in particular
  * the Ehcache interface and the extended Cache constructor). It is not compatible with
- * EHCache 1.1 anymore; please upgrade to EHCache 1.2.3 or higher.
+ * EHCache 1.1 anymore; please upgrade to EHCache 1.2.4 or higher.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
@@ -69,6 +69,8 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 	private String cacheName;
 
 	private int maxElementsInMemory = 10000;
+
+	private int maxElementsOnDisk = 10000000;
 
 	private MemoryStoreEvictionPolicy memoryStoreEvictionPolicy = MemoryStoreEvictionPolicy.LRU;
 
@@ -124,6 +126,14 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 	 */
 	public void setMaxElementsInMemory(int maxElementsInMemory) {
 		this.maxElementsInMemory = maxElementsInMemory;
+	}
+
+	/**
+	 * Specify the maximum number of cached objects on disk.
+	 * Default is 10000000 elements.
+	 */
+	public void setMaxElementsOnDisk(int maxElementsOnDisk) {
+		this.maxElementsOnDisk = maxElementsOnDisk;
 	}
 
 	/**
@@ -276,7 +286,7 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 		return new Cache(
 				this.cacheName, this.maxElementsInMemory, this.memoryStoreEvictionPolicy,
 				this.overflowToDisk, this.diskStorePath, this.eternal, this.timeToLive, this.timeToIdle,
-				this.diskPersistent, this.diskExpiryThreadIntervalSeconds, null);
+				this.diskPersistent, this.diskExpiryThreadIntervalSeconds, null, null, this.maxElementsOnDisk);
 	}
 
 	/**
