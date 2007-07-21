@@ -42,12 +42,6 @@ import org.springframework.util.StringUtils;
  * Helper class that simplifies TopLink data access code, and converts
  * TopLinkExceptions into unchecked DataAccessExceptions, following the
  * <code>org.springframework.dao</code> exception hierarchy.
- * Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
- *
- * <p>Typically used to implement data access or business logic services that use
- * TopLink within their implementation but are TopLink-agnostic in their interface.
- * The latter or code calling the latter only have to deal with business
- * objects, query objects, and <code>org.springframework.dao</code> exceptions.
  *
  * <p>The central method is <code>execute</code>, supporting TopLink access code
  * implementing the {@link TopLinkCallback} interface. It provides TopLink Session
@@ -68,14 +62,6 @@ import org.springframework.util.StringUtils;
  * major disadvantage that no checked application exceptions can get thrown from
  * within data access code. Corresponding checks and the actual throwing of such
  * exceptions can often be deferred to after callback execution, though.
- *
- * <p>Note that even if {@link TopLinkTransactionManager} is used for transaction
- * demarcation in higher-level services, all those services above the data
- * access layer don't need to be TopLink-aware. Setting such a special
- * PlatformTransactionManager is a configuration issue, without introducing
- * code dependencies. For example, switching to JTA is just a matter of Spring
- * configuration (use JtaTransactionManager instead) and TopLink session
- * configuration, neither affecting application code.
  *
  * <p>{@link LocalSessionFactoryBean} is the preferred way of obtaining a reference
  * to a specific TopLink SessionFactory. It will usually be configured to
@@ -143,7 +129,7 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 	 * Return if a new Session should be created if no thread-bound found.
 	 */
 	public boolean isAllowCreate() {
-		return allowCreate;
+		return this.allowCreate;
 	}
 
 

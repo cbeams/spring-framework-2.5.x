@@ -66,14 +66,6 @@ import org.springframework.util.ReflectionUtils;
  * within data access code. Corresponding checks and the actual throwing of such
  * exceptions can often be deferred to after callback execution, though.
  *
- * <p>Note that even if {@link JdoTransactionManager} is used for transaction
- * demarcation in higher-level services, all those services above the data
- * access layer don't need to be JDO-aware. Setting such a special
- * PlatformTransactionManager is a configuration issue, without introducing
- * code dependencies: For example, switching to JTA is just a matter of
- * Spring configuration (use JtaTransactionManager instead) and JDO provider
- * configuration, neither affecting application code.
- *
  * <p>{@link LocalPersistenceManagerFactoryBean} is the preferred way of obtaining
  * a reference to a specific PersistenceManagerFactory, at least in a non-EJB
  * environment. The Spring application context will manage its lifecycle,
@@ -97,9 +89,7 @@ import org.springframework.util.ReflectionUtils;
  * @see #setPersistenceManagerFactory
  * @see JdoCallback
  * @see javax.jdo.PersistenceManager
- * @see JdoInterceptor
  * @see LocalPersistenceManagerFactoryBean
- * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see JdoTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewFilter
@@ -196,7 +186,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * Return if a new PersistenceManager should be created if no thread-bound found.
 	 */
 	public boolean isAllowCreate() {
-		return allowCreate;
+		return this.allowCreate;
 	}
 
 	/**
@@ -222,7 +212,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * code, or rather a PersistenceManager proxy.
 	 */
 	public boolean isExposeNativePersistenceManager() {
-		return exposeNativePersistenceManager;
+		return this.exposeNativePersistenceManager;
 	}
 
 

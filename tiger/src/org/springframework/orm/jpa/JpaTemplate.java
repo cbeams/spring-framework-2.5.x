@@ -40,14 +40,6 @@ import org.springframework.util.ClassUtils;
  * Automatically converts PersistenceExceptions into Spring DataAccessExceptions,
  * following the <code>org.springframework.dao</code> exception hierarchy.
  *
- * <p><b>NOTE: JpaTemplate mainly exists as a sibling of JdoTemplate and
- * HibernateTemplate, to offer the same style for people used to it. For newly
- * started projects, consider adopting the standard JPA style of coding data
- * access objects instead, based on a "shared EntityManager" reference injected
- * via a Spring bean definition or the JPA PersistenceContext annotation.</b>
- * (Using Spring's SharedEntityManagerBean / PersistenceAnnotationBeanPostProcessor,
- * or using a direct JNDI lookup for an EntityManager on a Java EE 5 server.)
- *
  * <p>The central method is of this template is "execute", supporting JPA access code
  * implementing the {@link JpaCallback} interface. It provides JPA EntityManager
  * handling such that neither the JpaCallback implementation nor the calling code
@@ -60,18 +52,19 @@ import org.springframework.util.ClassUtils;
  * always be configured as bean in the application context, in the first case
  * given to the service directly, in the second case to the prepared template.
  *
+ * <p><b>NOTE: JpaTemplate mainly exists as a sibling of JdoTemplate and
+ * HibernateTemplate, to offer the same style for people used to it. For newly
+ * started projects, consider adopting the standard JPA style of coding data
+ * access objects instead, based on a "shared EntityManager" reference injected
+ * via a Spring bean definition or the JPA PersistenceContext annotation.</b>
+ * (Using Spring's SharedEntityManagerBean / PersistenceAnnotationBeanPostProcessor,
+ * or using a direct JNDI lookup for an EntityManager on a Java EE 5 server.)
+ *
  * <p>JpaTemplate can be considered as direct alternative to working with the
  * raw JPA EntityManager API (through a shared EntityManager reference,
  * as outlined above). The major advantage is its automatic conversion to
  * DataAccessExceptions, the major disadvantage is that it introduces
  * another thin layer on top of the target API.
- *
- * <p>Note that even if {@link JpaTransactionManager} is used for transaction
- * demarcation in higher-level services, all those services above the data
- * access layer don't need to be JPA-aware. Setting such a special
- * PlatformTransactionManager is a configuration issue: For example,
- * switching to JTA is just a matter of Spring configuration (use
- * JtaTransactionManager instead) that does not affect application code.
  *
  * <p>{@link LocalContainerEntityManagerFactoryBean} is the preferred way of
  * obtaining a reference to an EntityManagerFactory, at least outside of a full
@@ -83,16 +76,15 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.orm.jdo.JdoTemplate
- * @see org.springframework.orm.hibernate3.HibernateTemplate
- * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
- * @see org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor
  * @see #setEntityManagerFactory
- * @see #execute(JpaCallback)
+ * @see JpaCallback
  * @see javax.persistence.EntityManager
  * @see LocalEntityManagerFactoryBean
  * @see LocalContainerEntityManagerFactoryBean
- * @see org.springframework.jndi.JndiObjectFactoryBean
+ * @see JpaTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
+ * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor
  */
 public class JpaTemplate extends JpaAccessor implements JpaOperations {
 
