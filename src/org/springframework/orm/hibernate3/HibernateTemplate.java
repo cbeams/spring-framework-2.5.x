@@ -994,16 +994,26 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	}
 
 	public List findByExample(Object exampleEntity) throws DataAccessException {
-		return findByExample(exampleEntity, -1, -1);
+		return findByExample(null, exampleEntity, -1, -1);
 	}
 
-	public List findByExample(final Object exampleEntity, final int firstResult, final int maxResults)
+	public List findByExample(String entityName, Object exampleEntity) throws DataAccessException {
+		return findByExample(entityName, exampleEntity, -1, -1);
+	}
+
+	public List findByExample(Object exampleEntity, int firstResult, int maxResults) throws DataAccessException {
+		return findByExample(null, exampleEntity, firstResult, maxResults);
+	}
+
+	public List findByExample(
+			final String entityName, final Object exampleEntity, final int firstResult, final int maxResults)
 			throws DataAccessException {
 
 		Assert.notNull(exampleEntity, "Example entity must not be null");
 		return (List) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) throws HibernateException {
-				Criteria executableCriteria = session.createCriteria(exampleEntity.getClass());
+				Criteria executableCriteria = (entityName != null ?
+						session.createCriteria(entityName) : session.createCriteria(exampleEntity.getClass()));
 				executableCriteria.add(Example.create(exampleEntity));
 				prepareCriteria(executableCriteria);
 				if (firstResult >= 0) {

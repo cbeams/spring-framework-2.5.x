@@ -143,7 +143,7 @@ public interface HibernateOperations {
 	 * {@link org.hibernate.Session#get(String, java.io.Serializable)} for convenience.
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
-	 * @param entityName the name of a persistent entity
+	 * @param entityName the name of the persistent entity
 	 * @param id the identifier of the persistent instance
 	 * @return the persistent instance, or <code>null</code> if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -159,7 +159,7 @@ public interface HibernateOperations {
 	 * {@link org.hibernate.Session#get(String, java.io.Serializable, LockMode)} for convenience.
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
-	 * @param entityName the name of a persistent entity
+	 * @param entityName the name of the persistent entity
 	 * @param id the identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
 	 * @return the persistent instance, or <code>null</code> if not found
@@ -211,7 +211,7 @@ public interface HibernateOperations {
 	 * {@link org.hibernate.Session#load(String, java.io.Serializable)} for convenience.
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
-	 * @param entityName the name of a persistent entity
+	 * @param entityName the name of the persistent entity
 	 * @param id the identifier of the persistent instance
 	 * @return the persistent instance
 	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
@@ -228,7 +228,7 @@ public interface HibernateOperations {
 	 * {@link org.hibernate.Session#load(String, java.io.Serializable, LockMode)} for convenience.
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
-	 * @param entityName the name of a persistent entity
+	 * @param entityName the name of the persistent entity
 	 * @param id the identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
 	 * @return the persistent instance
@@ -338,7 +338,7 @@ public interface HibernateOperations {
 	/**
 	 * Obtain the specified lock level upon the given object, implicitly
 	 * checking whether the corresponding database entry still exists.
-	 * @param entityName the name of a persistent entity
+	 * @param entityName the name of the persistent entity
 	 * @param entity the persistent instance to lock
 	 * @param lockMode the lock mode to obtain
 	 * @throws org.springframework.orm.ObjectOptimisticLockingFailureException if not found
@@ -358,7 +358,7 @@ public interface HibernateOperations {
 
 	/**
 	 * Persist the given transient instance.
-	 * @param entityName the name of a persistent entity
+	 * @param entityName the name of the persistent entity
 	 * @param entity the transient instance to persist
 	 * @return the generated identifier
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -391,7 +391,7 @@ public interface HibernateOperations {
 	/**
 	 * Update the given persistent instance,
 	 * associating it with the current Hibernate {@link org.hibernate.Session}.
-	 * @param entityName the name of a persistent entity
+	 * @param entityName the name of the persistent entity
 	 * @param entity the persistent instance to update
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#update(String, Object)
@@ -403,7 +403,7 @@ public interface HibernateOperations {
 	 * associating it with the current Hibernate {@link org.hibernate.Session}.
 	 * <p>Obtains the specified lock mode if the instance exists, implicitly
 	 * checking whether the corresponding database entry still exists.
-	 * @param entityName the name of a persistent entity
+	 * @param entityName the name of the persistent entity
 	 * @param entity the persistent instance to update
 	 * @param lockMode the lock mode to obtain
 	 * @throws org.springframework.orm.ObjectOptimisticLockingFailureException if not found
@@ -427,7 +427,7 @@ public interface HibernateOperations {
 	 * Save or update the given persistent instance,
 	 * according to its id (matching the configured "unsaved-value"?).
 	 * Associates the instance with the current Hibernate <code>Session</code>.
-	 * @param entityName the name of a persistent entity
+	 * @param entityName the name of the persistent entity
 	 * @param entity the persistent instance to save or update
 	 * (to be associated with the Hibernate <code>Session</code>)
 	 * @throws DataAccessException in case of Hibernate errors
@@ -442,7 +442,8 @@ public interface HibernateOperations {
 	 * @param entities the persistent instances to save or update
 	 * (to be associated with the Hibernate <code>Session</code>)
 	 * @throws DataAccessException in case of Hibernate errors
-	 * @see org.hibernate.Session#saveOrUpdate(Object)
+	 * @deprecated as of Spring 2.1, in favor of individual
+	 * <code>saveOrUpdate</code> or <code>merge</code> usage
 	 */
 	void saveOrUpdateAll(Collection entities) throws DataAccessException;
 
@@ -450,6 +451,7 @@ public interface HibernateOperations {
 	 * Persist the state of the given detached instance according to the
 	 * given replication mode, reusing the current identifier value.
 	 * @param entity the persistent object to replicate
+	 * @param replicationMode the Hibernate ReplicationMode
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#replicate(Object, org.hibernate.ReplicationMode)
 	 */
@@ -458,8 +460,9 @@ public interface HibernateOperations {
 	/**
 	 * Persist the state of the given detached instance according to the
 	 * given replication mode, reusing the current identifier value.
-	 * @param entityName the name of a persistent entity
+	 * @param entityName the name of the persistent entity
 	 * @param entity the persistent object to replicate
+	 * @param replicationMode the Hibernate ReplicationMode
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#replicate(String, Object, org.hibernate.ReplicationMode)
 	 */
@@ -480,7 +483,7 @@ public interface HibernateOperations {
 	 * Persist the given transient instance. Follows JSR-220 semantics.
 	 * <p>Similar to <code>save</code>, associating the given object
 	 * with the current Hibernate {@link org.hibernate.Session}.
-	 * @param entityName the name of a persistent entity
+	 * @param entityName the name of the persistent entity
 	 * @param entity the persistent instance to persist
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#persist(String, Object)
@@ -519,7 +522,7 @@ public interface HibernateOperations {
 	 * registering Spring's <code>IdTransferringMergeEventListener</code>
 	 * if you would like to have newly assigned ids transferred to the
 	 * original object graph too.
-	 * @param entityName the name of a persistent entity
+	 * @param entityName the name of the persistent entity
 	 * @param entity the object to merge with the corresponding persistence instance
 	 * @return the updated, registered persistent instance
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -774,6 +777,17 @@ public interface HibernateOperations {
 	List findByExample(Object exampleEntity) throws DataAccessException;
 
 	/**
+	 * Execute a query based on the given example entity object.
+	 * @param entityName the name of the persistent entity
+	 * @param exampleEntity an instance of the desired entity,
+	 * serving as example for "query-by-example"
+	 * @return a {@link List} containing 0 or more persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.criterion.Example#create(Object)
+	 */
+	List findByExample(String entityName, Object exampleEntity) throws DataAccessException;
+
+	/**
 	 * Execute a query based on a given example entity object.
 	 * @param exampleEntity an instance of the desired entity,
 	 * serving as example for "query-by-example"
@@ -788,6 +802,24 @@ public interface HibernateOperations {
 	 * @see org.hibernate.Criteria#setMaxResults(int)
 	 */
 	List findByExample(Object exampleEntity, int firstResult, int maxResults) throws DataAccessException;
+
+	/**
+	 * Execute a query based on a given example entity object.
+	 * @param entityName the name of the persistent entity
+	 * @param exampleEntity an instance of the desired entity,
+	 * serving as example for "query-by-example"
+	 * @param firstResult the index of the first result object to be retrieved
+	 * (numbered from 0)
+	 * @param maxResults the maximum number of result objects to retrieve
+	 * (or <=0 for no limit)
+	 * @return a {@link List} containing 0 or more persistent instances
+	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
+	 * @see org.hibernate.criterion.Example#create(Object)
+	 * @see org.hibernate.Criteria#setFirstResult(int)
+	 * @see org.hibernate.Criteria#setMaxResults(int)
+	 */
+	List findByExample(String entityName, Object exampleEntity, int firstResult, int maxResults)
+			throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
