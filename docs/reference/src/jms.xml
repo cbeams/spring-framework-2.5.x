@@ -9,7 +9,7 @@
     <para>JMS can be roughly divided into two areas of functionality, namely the
     production and consumption of messages. The <classname>JmsTemplate</classname>
     class is used for message production and synchronous message reception. For
-    asynchronous reception similar to Java EE's message-driven bean style, Spring
+    asynchronous reception similar to J2EE's message-driven bean style, Spring
     provides a number of message listener containers that are used to create
     Message-Driven POJOs (MDPs).</para>
 
@@ -28,10 +28,10 @@
         message from one domain and produce a message on the other using the same
         <literal>Session</literal>.</para>
 
-        <para>The JMS 1.1 specification was released in April 2002 and
-        incorporated as part of Java EE 1.4 in November 2003. As a result, most
-        application servers that are currently in use are only required to support
-        JMS 1.0.2.</para>
+        <para>Note: The JMS 1.1 specification was released in April 2002 and
+        incorporated as part of J2EE 1.4 in November 2003. As a result, common
+        J2EE 1.3 application servers which are still in widespread use (such as
+				BEA WebLogic 8.1 and IBM WebSphere 5.1) are based on JMS 1.0.2.</para>
     </sidebar>
 
     <para>The package <literal>org.springframework.jms.core</literal> provides
@@ -114,7 +114,7 @@
 
 		<note>
 		    <para>Instances of the <classname>JmsTemplate</classname> class are
-			<emphasis>threadsafe once configured</emphasis>. This is important because
+			<emphasis>thread-safe once configured</emphasis>. This is important because
 			it means that you can configure a single instance of a
 			<classname>JmsTemplate</classname> and then safely inject this
 			<emphasis>shared</emphasis> reference into multiple collaborators. To be
@@ -138,7 +138,7 @@
       	<para>When using JMS inside an EJB, the vendor provides implementations
       	of the JMS interfaces so that they can participate in declarative
       	transaction management and perform pooling of connections and session.
-      	In order to use this implementation, Java EE containers typically require
+      	In order to use this implementation, J2EE containers typically require
       	that you declare a JMS connection factory as a
       	<property>resource-ref</property> inside the EJB or servlet deployment
       	descriptors. To ensure the use of these features with the
@@ -227,109 +227,112 @@
   	<section id="jms-mdp">
   		<title>Message Listener Containers</title>
   		
-  		<para>One of the most common uses of JMS messages in the EJB world is to
-		drive message-driven beans (MDBs). Spring offers a solution to create
-		message-driven POJOs (MDPs) in a way that does not tie a user to an EJB
-		container. (See the section entitled <xref linkend="jms-asynchronousMessageReception"/>
-		for detailed coverage of Spring's MDP support.)</para>
+			<para>One of the most common uses of JMS messages in the EJB world is to
+			drive message-driven beans (MDBs). Spring offers a solution to create
+			message-driven POJOs (MDPs) in a way that does not tie a user to an EJB
+			container. (See the section entitled <xref linkend="jms-asynchronousMessageReception"/>
+			for detailed coverage of Spring's MDP support.)</para>
 		
-        <para>A subclass of <classname>AbstractMessageListenerContainer</classname>
-        is used to receive messages from a JMS message queue and drive
-        the MDPs that are injected into it. The
-        <classname>AbstractMessageListenerContainer</classname> is responsible
-        for all threading of message reception and dispatch into the MDPs
-        for processing. A message listener container is the intermediary between an
-        MDP and a messaging provider, and takes care of registering to receive messages,
-        participating in transactions, resource acquisition and release, exception
-        conversion and suchlike. This allows you as an application developer to write
-        the (posssibly complex) business logic associated with receiving a message
-        (and possibly responding to it), and delegates boilerplate JMS
-        infrastructure concerns to the framework.</para>
+			<para>A message listener container is used to receive messages
+			from a JMS message queue and drive the MessageListener that is
+			injected into it. The listener container is responsible for all
+			threading of message reception and dispatches into the listener
+			for processing. A message listener container is the intermediary between an
+			MDP and a messaging provider, and takes care of registering to receive messages,
+			participating in transactions, resource acquisition and release, exception
+			conversion and suchlike. This allows you as an application developer to write
+			the (possibly complex) business logic associated with receiving a message
+			(and possibly responding to it), and delegates boilerplate JMS
+			infrastructure concerns to the framework.</para>
 		
-		<para>There are three subclasses of
-		<classname>AbstractMessageListenerContainer</classname> packaged
-		with Spring, each with its specialised feature set.</para>
+			<para>There are three standard JMS message listener containers packaged
+			with Spring, each with its specialised feature set.</para>
 		
-		<section id="jms-mdp-simple">
-			<title><classname>SimpleMessageListenerContainer</classname></title>
-			
-			<para>This message listener container is the simplest of the
-			three subclasses.  It simply creates a fixed number of JMS
-			sessions at startup and uses them throughout the lifespan of
-			the container.  This subclass doesn't allow for dynamic adaption to
-			runtime demands or participate in transactional reception of
-			messages.  However, it does have the fewest requirements on 
-			the JMS provider.  This subclass only requires simple JMS API
-			behaviors.</para>
-		</section>
-		
-		<section id="jms-mdp-default">
-			<title><classname>DefaultMessageListenerContainer</classname></title>
-			
-			<para>This message listener container is the one used in most
-			cases. As with the <classname>SimpleMessageListenerContainer</classname>
-			this subclass does not allow for dynamic adaption to runtime
-			demands. However, this flavor does participate in transactions.
-			Each received message is registered with an XA transaction
-			(when configured) and can take advantage of XA transation
-			semantics. This subclass strikes a good balance between low
-			requirements on the JMS provider and good functionality including
-			transaction participation.</para>
-		</section>
-		
-		<section id="jms-mdp-server-session">
-			<title><classname>ServerSessionMessageListenerContainer</classname></title>
-			
-			<para>This subclass is the most powerful of the three.  It
-			leverages the JMS ServerSessionPool SPI to allow for dynamic
-			management of JMS sessions.  This implementation also participates
-			in transactions.  The use of this variety of message listener
-			container enables powerful runtime tuning but places a larger
-			set of requirements (ServerSessionPool SPI) on the JMS
-			provider being used.  If there is no need for runtime performance
-			tuning, look to the <classname>DefaultMessageListenerContainer</classname>
-			or the <classname>SimpleMessageListenerContainer</classname>.</para>
-		</section>
+			<section id="jms-mdp-simple">
+				<title><classname>SimpleMessageListenerContainer</classname></title>
+
+				<para>This message listener container is the simplest of the three
+				standard flavors. It simply creates a fixed number of JMS sessions
+				at startup and uses them throughout the lifespan of the container.
+				This container doesn't allow for dynamic adaption to runtime demands
+				or participate in externally managed transactions. However,
+				it does have the fewest requirements on the JMS provider: This
+				listener container only requires simple JMS API compliance.</para>
+			</section>
+
+			<section id="jms-mdp-default">
+				<title><classname>DefaultMessageListenerContainer</classname></title>
+
+				<para>This message listener container is the one used in most cases.
+				In contrast to <classname>SimpleMessageListenerContainer</classname>,
+				this container variant does allow for dynamic adaption to runtime
+				demands and is able to participate in externally managed transactions.
+				Each received message is registered with an XA transaction
+				(when configured with a <classname>JtaTransactionManager</classname>);
+				processing can take advantage of XA transation semantics.
+				This listener container strikes a good balance between low
+				requirements on the JMS provider and good functionality including
+				transaction participation.</para>
+			</section>
+
+			<section id="jms-mdp-server-session">
+				<title><classname>ServerSessionMessageListenerContainer</classname></title>
+
+				<para>This listener container leverages the JMS ServerSessionPool SPI
+				to allow for dynamic management of JMS sessions. The use of this variety
+				of message listener container enables the provider to perform dynamic
+				runtime tuning but, at the expense of requiring the JMS provider to support
+				the ServerSessionPool SPI. If there is no need for provider-driven runtime
+				tuning, look at the <classname>DefaultMessageListenerContainer</classname>
+				or the <classname>SimpleMessageListenerContainer</classname> instead.</para>
+			</section>
   	</section>
   	
-  	<section id="jms-tx">
-  		<title>Transaction management</title>
+		<section id="jms-tx">
+			<title>Transaction management</title>
   		
-  		<para>Spring provides a <classname>JmsTransactionManager</classname>
-        that manages transactions for a single JMS
-        <classname>ConnectionFactory</classname>. This allows JMS applications
-        to leverage the managed transaction features of Spring as described in
-        <xref linkend="transaction" />. The
-        <classname>JmsTransactionManager</classname> binds a Connection/Session
-        pair from the specified <classname>ConnectionFactory</classname> to the
-        thread. However, in a Java EE environment the
-        <classname>ConnectionFactory</classname> will pool connections and
-        sessions, so the instances that are bound to the thread depend on the
-        pooling behavior. In a standalone environment, using Spring's
-        <classname>SingleConnectionFactory</classname> will result in a using a
-        single JMS <classname>Connection</classname> with each transaction having
-        its own <classname>Session</classname>. The
-        <classname>JmsTemplate</classname> can also be used with the
-        <classname>JtaTransactionManager</classname> and an XA-capable JMS
-        <classname>ConnectionFactory</classname> for performing distributed
-        transactions.</para>
+			<para>Spring provides a <classname>JmsTransactionManager</classname>
+			that manages transactions for a single JMS
+			<classname>ConnectionFactory</classname>. This allows JMS applications
+			to leverage the managed transaction features of Spring as described in
+			<xref linkend="transaction"/>. The <classname>JmsTransactionManager</classname>
+			performs local resource transactions, binding a JMS Connection/Session
+			pair from the specified <classname>ConnectionFactory</classname> to the
+			thread. <classname>JmsTemplate</classname> automatically detects such
+			transactional resources and operates on them accordingly.</para>
 
-        <para>Reusing code across a managed and unmanaged transactional
-        environment can be confusing when using the JMS API to create a
-        <classname>Session</classname> from a <classname>Connection</classname>.
-        This is because the JMS API only has only one factory method to create a
-        <classname>Session</classname> and it requires values for the
-        transaction and acknowledgement modes. In a managed environment, setting
-        these values is the responsibility of the environment's transactional
-        infrastructure, so these values are ignored by the vendor's wrapper to
-        the JMS Connection. When using the <classname>JmsTemplate</classname> in
-        an unmanaged environment you can specify these values through the use of
-        the properties <classname>SessionTransacted</classname> and
-        <classname>SessionAcknowledgeMode</classname>. When using a
-        <classname>PlatformTransactionManager</classname> with
-        <classname>JmsTemplate</classname>, the template will always be given a
-        transactional JMS <classname>Session</classname>.</para>
-  	</section>
+			<para>In a J2EE environment, the <classname>ConnectionFactory</classname>
+			will pool Connections and Sessions, so those resources are efficiently
+			reused across transactions. In a standalone environment, using Spring's
+			<classname>SingleConnectionFactory</classname> will result in a shared
+			JMS <classname>Connection</classname>, with each transaction having its
+			own independent <classname>Session</classname>. Alternatively, consider
+			the use of a provider-specific pooling adapter such as ActiveMQ's
+			<classname>PooledConnectionFactory</classname> class.</para>
+
+			<para><classname>JmsTemplate</classname> can also be used with the
+			<classname>JtaTransactionManager</classname> and an XA-capable JMS
+			<classname>ConnectionFactory</classname> for performing distributed
+			transactions. Note that this requires the use of a JTA transaction
+			manager as well as a properly XA-configured ConnectionFactory!
+			(Check your J2EE server's / JMS provider's documentation.)</para>
+
+			<para>Reusing code across a managed and unmanaged transactional
+			environment can be confusing when using the JMS API to create a
+			<classname>Session</classname> from a <classname>Connection</classname>.
+			This is because the JMS API has only one factory method to create a
+			<classname>Session</classname> and it requires values for the
+			transaction and acknowledgement modes. In a managed environment, setting
+			these values is the responsibility of the environment's transactional
+			infrastructure, so these values are ignored by the vendor's wrapper to
+			the JMS Connection. When using the <classname>JmsTemplate</classname> in
+			an unmanaged environment you can specify these values through the use of
+			the properties <literal>sessionTransacted</literal> and
+			<literal>sessionAcknowledgeMode</literal>. When using a
+			<classname>PlatformTransactionManager</classname> with
+			<classname>JmsTemplate</classname>, the template will always be given a
+			transactional JMS <classname>Session</classname>.</para>
+		</section>
   </section>
   
   <section id="jms-sending">
@@ -542,11 +545,9 @@ public class ExampleListener implements MessageListener {
 <![CDATA[<bean id="messageListener" class="jmsexample.ExampleListener" />
 
 ]]><lineannotation>&lt;!-- and this is the message listener container --&gt;</lineannotation><![CDATA[
-<bean id="listenerContainer"
-  class="org.springframework.jms.listener.DefaultMessageListenerContainer">
-  <property name="concurrentConsumers" value="5"/>
-  <property name="connectionFactory" ref="connectionFactory" />
-  <property name="destination" ref="destination" />
+<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+  <property name="connectionFactory" ref="connectionFactory"/>
+  <property name="destination" ref="destination"/>
   ]]><emphasis role="bold"><![CDATA[<property name="messageListener" ref="messageListener" />]]></emphasis><![CDATA[
 </bean>]]></programlisting>
         <para>Please refer to the Spring Javadoc of the various message
@@ -628,11 +629,9 @@ public interface SessionAwareMessageListener {
 </bean>]]></emphasis>
 
 <lineannotation>&lt;!-- and this is the message listener container... --&gt;</lineannotation><![CDATA[
-<bean id="listenerContainer"
-  class="org.springframework.jms.listener.DefaultMessageListenerContainer">
-  <property name="concurrentConsumers" value="5"/>
-  <property name="connectionFactory" ref="connectionFactory" />
-  <property name="destination" ref="destination" />
+<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+  <property name="connectionFactory" ref="connectionFactory"/>
+  <property name="destination" ref="destination"/>
   ]]><emphasis role="bold"><![CDATA[<property name="messageListener" ref="messageListener" />]]></emphasis><![CDATA[
 </bean>]]></programlisting>
         <para>Below is an example of another MDP that can only handle the receiving of
@@ -693,30 +692,55 @@ public interface SessionAwareMessageListener {
   	</section>
   	
   	<section id="jms-tx-participation">
-  		<title>Participating in transactions</title>
+			<title>Processing messages within transactions</title>
   	
-  		<para>Participation in transactions requires only a couple of minor
-  		changes. You will need to create a transaction manager
-  		and register that transaction manager with one of the subclasses
-  		that can participate in transactions (<classname>DefaultMessageListenerContainer</classname>
-  		or <classname>ServerSessionMessageListenerContainer</classname>).</para>
-  		
-  		<para>To create the transaction manager, you'll want to create an
-  		instance of <classname>JmsTransactionManager</classname> and give
-  		it an XA transaction-capable connection factory.</para>
-  		
-  		<programlisting><![CDATA[<bean id="transactionManager" class="org.springframework.jms.connection.JmsTransactionManager">
-  <property name="connectionFactory" ref="connectionFactory" />
+  		<para>Invoking a message listener within a transaction only requires
+			reconfiguration of the listener container.</para>
+			
+			<para>Local resource transactions can simply be activated through the
+			<literal>sessionTransacted</literal> flag on the listener container
+			definition. Each message listener invocation will then operate within
+			an active JMS transaction, with message reception rolled back in case
+			of listener execution failure. Sending a response message
+			(via <interfacename>SessionAwareMessageListener</interfacename>)
+			will be part of the same local transaction, but any other resource
+			operations (such as database access) will operate independently.
+			This usually requires duplicate message detection in the listener
+			implementation, covering the case where database processing has
+			committed but message processing failed to commit.</para>
+
+			<programlisting><![CDATA[<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+  <property name="connectionFactory" ref="connectionFactory"/>
+  <property name="destination" ref="destination"/>
+  <property name="messageListener" ref="messageListener"/>
+  ]]><emphasis role="bold"><![CDATA[<property name="sessionTransacted" value="true"/>]]></emphasis><![CDATA[
 </bean>]]></programlisting>
 
-		<para>Then you just need to add it to our earlier container configuration. The
-		container will take care of the rest.</para>
+			<para>For participating in an externally managed transaction,
+			you will need to configured a transaction manager and use a listener
+			container which supports externally managed transactions: typically
+			<classname>DefaultMessageListenerContainer</classname>.</para>
+  		
+			<para>To configure a message listener container for XA transaction
+			participation, you'll want to configure a <classname>JtaTransactionManager</classname>
+			(which, by default, delegates to the J2EE server's transaction subsystem).
+			Note that the underlying JMS ConnectionFactory needs to be XA-capable
+			and properly registered with your JTA transaction coordinator!
+			(Check your J2EE server's configuration of JNDI resources.)
+			This allows message recepton as well as e.g. database access to be
+			part of the same transaction (with unified commit semantics,
+			at the expense of XA transaction log overhead).</para>
+  		
+  		<programlisting><![CDATA[<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
+]]></programlisting>
+
+			<para>Then you just need to add it to our earlier container configuration. The
+			container will take care of the rest.</para>
 		
-		<programlisting><![CDATA[<bean id="listenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
-  <property name="concurrentConsumers" value="5" />
-  <property name="connectionFactory" ref="connectionFactory" />
-  <property name="destination" ref="destination" />
-  <property name="messageListener" ref="messageListener" />
+			<programlisting><![CDATA[<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+  <property name="connectionFactory" ref="connectionFactory"/>
+  <property name="destination" ref="destination"/>
+  <property name="messageListener" ref="messageListener"/>
   ]]><emphasis role="bold"><![CDATA[<property name="transactionManager" ref="transactionManager" />]]></emphasis><![CDATA[
 </bean>]]></programlisting>
   	</section>
@@ -844,7 +868,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	provides a discussion of transaction choices and message redelivery scenarios.</para>
     
     <table id="jms-namespace-listener-container-tbl">
-        <title>Atrributes of the JMS <literal>&lt;listener-container/&gt;</literal> element</title>
+        <title>Attributes of the JMS <literal>&lt;listener-container/&gt;</literal> element</title>
         <tgroup cols="2">
             <colspec colname="c1" colwidth="2*" />
             <colspec colname="c2" colwidth="4*" />
