@@ -73,10 +73,10 @@
   
   <section id="jms-using">
   	<title>Using Spring JMS</title>
-  	
+
 		<section id="jms-jmstemplate">
 			<title><classname>JmsTemplate</classname></title>
-  		
+
 			<para>There are two variants of the functionality offered by the
 			<classname>JmsTemplate</classname>: the <classname>JmsTemplate</classname>
 			uses the JMS 1.1 API, and the subclass <classname>JmsTemplate102</classname>
@@ -113,18 +113,18 @@
 			the boolean property <property>isExplicitQosEnabled</property>
 			to <literal>true</literal>.</para>
 
-		<note>
-			<para>Instances of the <classname>JmsTemplate</classname> class are
-			<emphasis>thread-safe once configured</emphasis>. This is important because
-			it means that you can configure a single instance of a
-			<classname>JmsTemplate</classname> and then safely inject this
-			<emphasis>shared</emphasis> reference into multiple collaborators. To be
-			clear, the <classname>JmsTemplate</classname> is stateful, in that it
-			maintains a reference to a <interfacename>ConnectionFactory</interfacename>,
-			but this state is <emphasis>not</emphasis> conversational state.</para>
-		</note>
-	</section>
-  	
+			<note>
+				<para>Instances of the <classname>JmsTemplate</classname> class are
+				<emphasis>thread-safe once configured</emphasis>. This is important because
+				it means that you can configure a single instance of a
+				<classname>JmsTemplate</classname> and then safely inject this
+				<emphasis>shared</emphasis> reference into multiple collaborators. To be
+				clear, the <classname>JmsTemplate</classname> is stateful, in that it
+				maintains a reference to a <interfacename>ConnectionFactory</interfacename>,
+				but this state is <emphasis>not</emphasis> conversational state.</para>
+			</note>
+		</section>
+
   	<section id="jms-connections">
   		<title>Connections</title>
   		
