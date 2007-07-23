@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.StringUtils;
 
 /**
- * PortletContext-aware subclass of PathMatchingResourcePatternResolver,
+ * PortletContext-aware subclass of {@link PathMatchingResourcePatternResolver},
  * able to find matching resources below the web application root directory
  * via Portlet API's <code>PortletContext.getResourcePaths</code>.
  * Falls back to the superclass' file system checking for other resources.
@@ -61,6 +61,7 @@ public class PortletContextResourcePatternResolver extends PathMatchingResourceP
 	public PortletContextResourcePatternResolver(ResourceLoader resourceLoader) {
 		super(resourceLoader);
 	}
+
 
 	/**
 	 * Overridden version which checks for PortletContextResource
@@ -105,7 +106,7 @@ public class PortletContextResourcePatternResolver extends PathMatchingResourceP
 				String currPath = (String) it.next();
 				if (currPath.endsWith("/") &&
 						(dirDepthNotFixed ||
-						StringUtils.countOccurrencesOf(currPath, "/") < StringUtils.countOccurrencesOf(fullPattern, "/"))) {
+						StringUtils.countOccurrencesOf(currPath, "/") <= StringUtils.countOccurrencesOf(fullPattern, "/"))) {
 					doRetrieveMatchingPortletContextResources(portletContext, fullPattern, currPath, result);
 				}
 				if (getPathMatcher().match(fullPattern, currPath)) {
