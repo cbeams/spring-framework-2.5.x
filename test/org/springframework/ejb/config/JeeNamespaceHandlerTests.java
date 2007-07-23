@@ -19,10 +19,12 @@ package org.springframework.ejb.config;
 import junit.framework.TestCase;
 
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean;
 import org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean;
 import org.springframework.jndi.JndiObjectFactoryBean;
@@ -33,24 +35,27 @@ import org.springframework.jndi.JndiObjectFactoryBean;
  */
 public class JeeNamespaceHandlerTests extends TestCase {
 
-	private DefaultListableBeanFactory beanFactory;
+	private ConfigurableListableBeanFactory beanFactory;
 
 	protected void setUp() throws Exception {
-		this.beanFactory = (DefaultListableBeanFactory)
-				new ClassPathXmlApplicationContext("jeeNamespaceHandlerTests.xml", getClass()).getBeanFactory();
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(
+				new ClassPathResource("jeeNamespaceHandlerTests.xml", getClass()));
+		ctx.refresh();
+		this.beanFactory = ctx.getBeanFactory();
 		this.beanFactory.getBeanNamesForType(ITestBean.class);
 	}
 
 	public void testSimpleDefinition() throws Exception {
-		RootBeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simple");
-		assertEquals(JndiObjectFactoryBean.class, beanDefinition.getBeanClass());
+		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simple");
+		assertEquals(JndiObjectFactoryBean.class.getName(), beanDefinition.getBeanClassName());
 		assertPropertyValue(beanDefinition, "jndiName", "jdbc/MyDataSource");
 		assertNull("Property resourceRef should not have been set", beanDefinition.getPropertyValues().getPropertyValue("resourceRef"));
 	}
 
 	public void testComplexDefinition() throws Exception {
-		RootBeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complex");
-		assertEquals(JndiObjectFactoryBean.class, beanDefinition.getBeanClass());
+		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complex");
+		assertEquals(JndiObjectFactoryBean.class.getName(), beanDefinition.getBeanClassName());
 		assertPropertyValue(beanDefinition, "jndiName", "jdbc/MyDataSource");
 		assertPropertyValue(beanDefinition, "resourceRef", "true");
 		assertPropertyValue(beanDefinition, "cache", "true");
@@ -60,33 +65,33 @@ public class JeeNamespaceHandlerTests extends TestCase {
 	}
 
 	public void testWithEnvironment() throws Exception {
-		RootBeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("withEnvironment");
+		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("withEnvironment");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
 	}
 
 	public void testWithReferencedEnvironment() throws Exception {
-		RootBeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("withReferencedEnvironment");
+		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("withReferencedEnvironment");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", new RuntimeBeanReference("myEnvironment"));
 		assertFalse(beanDefinition.getPropertyValues().contains("environmentRef"));
 	}
 
 	public void testSimpleLocalSlsb() throws Exception {
-		RootBeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleLocalEjb");
-		assertEquals(LocalStatelessSessionProxyFactoryBean.class, beanDefinition.getBeanClass());
+		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleLocalEjb");
+		assertEquals(LocalStatelessSessionProxyFactoryBean.class.getName(), beanDefinition.getBeanClassName());
 		assertPropertyValue(beanDefinition, "businessInterface", ITestBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyLocalBean");
 	}
 
 	public void testSimpleRemoteSlsb() throws Exception {
-		RootBeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleRemoteEjb");
-		assertEquals(SimpleRemoteStatelessSessionProxyFactoryBean.class, beanDefinition.getBeanClass());
+		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleRemoteEjb");
+		assertEquals(SimpleRemoteStatelessSessionProxyFactoryBean.class.getName(), beanDefinition.getBeanClassName());
 		assertPropertyValue(beanDefinition, "businessInterface", ITestBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyRemoteBean");
 	}
 
 	public void testComplexLocalSlsb() throws Exception {
-		RootBeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexLocalEjb");
-		assertEquals(LocalStatelessSessionProxyFactoryBean.class, beanDefinition.getBeanClass());
+		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexLocalEjb");
+		assertEquals(LocalStatelessSessionProxyFactoryBean.class.getName(), beanDefinition.getBeanClassName());
 		assertPropertyValue(beanDefinition, "businessInterface", ITestBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyLocalBean");
 		assertPropertyValue(beanDefinition, "cacheHome", "true");
@@ -96,8 +101,8 @@ public class JeeNamespaceHandlerTests extends TestCase {
 	}
 
 	public void testComplexRemoteSlsb() throws Exception {
-		RootBeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexRemoteEjb");
-		assertEquals(SimpleRemoteStatelessSessionProxyFactoryBean.class, beanDefinition.getBeanClass());
+		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexRemoteEjb");
+		assertEquals(SimpleRemoteStatelessSessionProxyFactoryBean.class.getName(), beanDefinition.getBeanClassName());
 		assertPropertyValue(beanDefinition, "businessInterface", ITestBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyRemoteBean");
 		assertPropertyValue(beanDefinition, "cacheHome", "true");
@@ -106,7 +111,7 @@ public class JeeNamespaceHandlerTests extends TestCase {
 		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
 	}
 
-	private void assertPropertyValue(RootBeanDefinition beanDefinition, String propertyName, Object expectedValue) {
+	private void assertPropertyValue(BeanDefinition beanDefinition, String propertyName, Object expectedValue) {
 		assertEquals("Property '" + propertyName + "' incorrect",
 				expectedValue, beanDefinition.getPropertyValues().getPropertyValue(propertyName).getValue());
 	}

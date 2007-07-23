@@ -23,6 +23,7 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -219,8 +220,28 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void resolveAliases(StringValueResolver valueResolver);
 
 	/**
-	 * Return whether the specified bean is currently in creation.
+	 * Return a merged BeanDefinition for the given bean name,
+	 * merging a child bean definition with its parent if necessary.
+	 * Considers bean definitions in ancestor factories as well.
+	 * @param beanName the name of the bean to retrieve the merged definition for
+	 * @return a (potentially merged) BeanDefinition for the given bean
+	 * @throws NoSuchBeanDefinitionException if there is no bean definition with the given name
+	 */
+	BeanDefinition getMergedBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
+
+	/**
+	 * Determine whether the bean with the given name is a FactoryBean.
+	 * @param name the name of the bean to check
+	 * @return whether the bean is a FactoryBean
+	 * (<code>false</code> means the bean exists but is not a FactoryBean)
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 */
+	boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException;
+
+	/**
+	 * Determine whether the specified bean is currently in creation.
 	 * @param beanName the name of the bean
+	 * @return whether the bean is currently in creation
 	 */
 	boolean isCurrentlyInCreation(String beanName);
 

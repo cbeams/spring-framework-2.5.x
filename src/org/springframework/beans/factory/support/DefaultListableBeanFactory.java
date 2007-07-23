@@ -283,6 +283,30 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of ConfigurableListableBeanFactory interface
 	//---------------------------------------------------------------------
 
+	public boolean isAutowireCandidate(String beanName) throws NoSuchBeanDefinitionException {
+		if (!containsBeanDefinition(beanName)) {
+			if (containsSingleton(beanName)) {
+				return true;
+			}
+			else if (getParentBeanFactory() instanceof ConfigurableListableBeanFactory) {
+				// No bean definition found in this factory -> delegate to parent.
+				return ((ConfigurableListableBeanFactory) getParentBeanFactory()).isAutowireCandidate(beanName);
+			}
+		}
+		return getMergedBeanDefinition(beanName, false).isAutowireCandidate();
+	}
+
+	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
+		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.get(beanName);
+		if (bd == null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("No bean named '" + beanName + "' found in " + this);
+			}
+			throw new NoSuchBeanDefinitionException(beanName);
+		}
+		return bd;
+	}
+
 	public void preInstantiateSingletons() throws BeansException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Pre-instantiating singletons in " + this);
@@ -386,24 +410,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of superclass abstract methods
 	//---------------------------------------------------------------------
 
-	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
-		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.get(beanName);
-		if (bd == null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No bean named '" + beanName + "' found in " + this);
-			}
-			throw new NoSuchBeanDefinitionException(beanName);
-		}
-		return bd;
-	}
-
 	protected Map findAutowireCandidates(String beanName, Class requiredType) {
 		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType);
 		Map result = CollectionFactory.createLinkedMapIfPossible(candidateNames.length);
 		for (int i = 0; i < candidateNames.length; i++) {
 			String candidateName = candidateNames[i];
-			if (!candidateName.equals(beanName) &&
-					(!containsBeanDefinition(candidateName) || getMergedBeanDefinition(candidateName).isAutowireCandidate())) {
+			if (!candidateName.equals(beanName) && isAutowireCandidate(candidateName)) {
 				result.put(candidateName, getBean(candidateName));
 			}
 		}

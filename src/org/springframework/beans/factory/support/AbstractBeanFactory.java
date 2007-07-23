@@ -220,17 +220,13 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// Not found -> check parent.
 				String nameToLookup = originalBeanName(name);
-				if (parentBeanFactory instanceof AbstractBeanFactory) {
-					// Delegation to parent with args only possible for AbstractBeanFactory.
-					return ((AbstractBeanFactory) parentBeanFactory).getBean(nameToLookup, requiredType, args);
-				}
-				else if (args == null) {
-					// No args -> delegate to standard getBean method.
-					return parentBeanFactory.getBean(nameToLookup, requiredType);
+				if (args != null) {
+					// Delegation to parent with explicit args.
+					return parentBeanFactory.getBean(nameToLookup, args);
 				}
 				else {
-					throw new NoSuchBeanDefinitionException(beanName,
-							"Cannot delegate to parent BeanFactory because it does not supported passed-in arguments");
+					// No args -> delegate to standard getBean method.
+					return parentBeanFactory.getBean(nameToLookup, requiredType);
 				}
 			}
 
@@ -728,6 +724,20 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	/**
+	 * Return a RootBeanDefinition for the given bean name,
+	 * merging a child bean definition with its parent if necessary.
+	 * <p>This <code>getMergedBeanDefinition</code> considers bean definition
+	 * in ancestors as well.
+	 * @param beanName the name of the bean to retrieve the merged definition for
+	 * @return a (potentially merged) RootBeanDefinition for the given bean
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
+	 */
+	public BeanDefinition getMergedBeanDefinition(String beanName) throws BeansException {
+		return getMergedBeanDefinition(beanName, true);
+	}
+
+	/**
 	 * Callback before prototype creation.
 	 * <p>The default implementation register the prototype as currently in creation.
 	 * @param beanName the name of the prototype about to be created
@@ -786,7 +796,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	public void destroyBean(String beanName, Object beanInstance) {
-		destroyBean(beanName, beanInstance, getMergedBeanDefinition(beanName));
+		destroyBean(beanName, beanInstance, getMergedBeanDefinition(beanName, false));
 	}
 
 	/**
@@ -801,7 +811,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	public void destroyScopedBean(String beanName) {
-		RootBeanDefinition mbd = getMergedBeanDefinition(beanName);
+		RootBeanDefinition mbd = getMergedBeanDefinition(beanName, false);
 		if (mbd.isSingleton() || mbd.isPrototype()) {
 			throw new IllegalArgumentException(
 					"Bean name '" + beanName + "' does not correspond to an object in a Scope");
@@ -913,18 +923,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 
 	/**
-	 * Return a RootBeanDefinition for the given bean name,
-	 * merging a child bean definition with its parent if necessary.
-	 * @param beanName the name of the bean to retrieve the merged definition for
-	 * @return a (potentially merged) RootBeanDefinition for the given bean
-	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
-	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
-	 */
-	public RootBeanDefinition getMergedBeanDefinition(String beanName) throws BeansException {
-		return getMergedBeanDefinition(beanName, false);
-	}
-
-	/**
 	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a
 	 * child definition. Can ask the parent bean factory if not found in this instance.
 	 * @param beanName the name of the bean to retrieve the merged definition for
@@ -939,8 +937,14 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 		// Efficiently check whether bean definition exists in this factory.
 		if (includingAncestors && !containsBeanDefinition(beanName) &&
-				getParentBeanFactory() instanceof AbstractBeanFactory) {
-			return ((AbstractBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName, true);
+				getParentBeanFactory() instanceof ConfigurableBeanFactory) {
+			BeanDefinition bd = ((ConfigurableBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName);
+			if (bd instanceof RootBeanDefinition) {
+				return (RootBeanDefinition) bd;
+			}
+			else {
+				new RootBeanDefinition(bd);
+			}
 		}
 
 		// Resolve merged bean definition locally.
@@ -995,16 +999,15 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 					}
 					else {
 						// Child bean definition: needs to be merged with parent.
-						RootBeanDefinition pbd = null;
+						BeanDefinition pbd = null;
 						try {
 							String parentBeanName = transformedBeanName(bd.getParentName());
 							if (!beanName.equals(parentBeanName)) {
 								pbd = getMergedBeanDefinition(parentBeanName, true);
 							}
 							else {
-								if (getParentBeanFactory() instanceof AbstractBeanFactory) {
-									AbstractBeanFactory parentFactory = (AbstractBeanFactory) getParentBeanFactory();
-									pbd = parentFactory.getMergedBeanDefinition(parentBeanName, true);
+								if (getParentBeanFactory() instanceof ConfigurableBeanFactory) {
+									pbd = ((ConfigurableBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(parentBeanName);
 								}
 								else {
 									throw new NoSuchBeanDefinitionException(bd.getParentName(),
@@ -1315,13 +1318,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		return object;
 	}
 
-	/**
-	 * Determine whether the bean with the given name is a FactoryBean.
-	 * @param name the name of the bean to check
-	 * @return whether the bean is a FactoryBean
-	 * (<code>false</code> means the bean exists but is not a FactoryBean)
-	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
-	 */
 	public boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 
@@ -1331,9 +1327,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		}
 
 		// No singleton instance found -> check bean definition.
-		if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof AbstractBeanFactory) {
+		if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof ConfigurableBeanFactory) {
 			// No bean definition found in this factory -> delegate to parent.
-			return ((AbstractBeanFactory) getParentBeanFactory()).isFactoryBean(name);
+			return ((ConfigurableBeanFactory) getParentBeanFactory()).isFactoryBean(name);
 		}
 
 		RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);

@@ -39,10 +39,11 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
-import org.springframework.beans.factory.support.AbstractBeanFactory;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.Conventions;
 import org.springframework.core.Ordered;
@@ -156,7 +157,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	private AbstractBeanFactory beanFactory;
+	private ConfigurableBeanFactory beanFactory;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
@@ -183,11 +184,11 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (!(beanFactory instanceof AbstractBeanFactory)) {
-			throw new IllegalStateException(
-					"ScriptFactoryPostProcessor must run in AbstractBeanFactory, not in " + beanFactory);
+		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
+			throw new IllegalStateException("ScriptFactoryPostProcessor doesn't work with a BeanFactory " +
+					"which does not implement ConfigurableBeanFactory: " + beanFactory.getClass());
 		}
-		this.beanFactory = (AbstractBeanFactory) beanFactory;
+		this.beanFactory = (ConfigurableBeanFactory) beanFactory;
 
 		// Required so that references (up container hierarchies) are correctly resolved.
 		this.scriptBeanFactory.setParentBeanFactory(this.beanFactory);
@@ -220,7 +221,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			return null;
 		}
 
-		RootBeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
+		BeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
 		String scriptFactoryBeanName = SCRIPT_FACTORY_NAME_PREFIX + beanName;
 		String scriptedObjectBeanName = SCRIPTED_OBJECT_NAME_PREFIX + beanName;
 		prepareScriptBeans(bd, scriptFactoryBeanName, scriptedObjectBeanName);
@@ -263,7 +264,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			return null;
 		}
 
-		RootBeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
+		BeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
 		String scriptFactoryBeanName = SCRIPT_FACTORY_NAME_PREFIX + beanName;
 		String scriptedObjectBeanName = SCRIPTED_OBJECT_NAME_PREFIX + beanName;
 		prepareScriptBeans(bd, scriptFactoryBeanName, scriptedObjectBeanName);
@@ -294,7 +295,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @param scriptedObjectBeanName the name of the internal scripted object bean
 	 */
 	protected void prepareScriptBeans(
-			RootBeanDefinition bd, String scriptFactoryBeanName, String scriptedObjectBeanName) {
+			BeanDefinition bd, String scriptFactoryBeanName, String scriptedObjectBeanName) {
 
 		// Avoid recreation of the script bean definition in case of a prototype.
 		synchronized (this.scriptBeanFactory) {
@@ -314,11 +315,11 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 					scriptedInterfaces = (Class[]) ObjectUtils.addObjectToArray(interfaces, configInterface);
 				}
 
-				RootBeanDefinition objectBd = createScriptedObjectBeanDefinition(
+				BeanDefinition objectBd = createScriptedObjectBeanDefinition(
 						bd, scriptFactoryBeanName, scriptSource, scriptedInterfaces);
 				long refreshCheckDelay = resolveRefreshCheckDelay(bd);
 				if (refreshCheckDelay >= 0) {
-					objectBd.setSingleton(false);
+					objectBd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 				}
 
 				this.scriptBeanFactory.registerBeanDefinition(scriptedObjectBeanName, objectBd);
@@ -361,8 +362,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @return the extracted ScriptFactory bean definition
 	 * @see org.springframework.scripting.ScriptFactory
 	 */
-	protected RootBeanDefinition createScriptFactoryBeanDefinition(RootBeanDefinition bd) {
-		RootBeanDefinition scriptBd = new RootBeanDefinition();
+	protected BeanDefinition createScriptFactoryBeanDefinition(BeanDefinition bd) {
+		GenericBeanDefinition scriptBd = new GenericBeanDefinition();
 		scriptBd.setBeanClassName(bd.getBeanClassName());
 		scriptBd.getConstructorArgumentValues().addArgumentValues(bd.getConstructorArgumentValues());
 		return scriptBd;
@@ -419,7 +420,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @see net.sf.cglib.proxy.InterfaceMaker
 	 * @see org.springframework.beans.BeanUtils#findPropertyType
 	 */
-	protected Class createConfigInterface(RootBeanDefinition bd, Class[] interfaces) {
+	protected Class createConfigInterface(BeanDefinition bd, Class[] interfaces) {
 		InterfaceMaker maker = new InterfaceMaker();
 		PropertyValue[] pvs = bd.getPropertyValues().getPropertyValues();
 		for (int i = 0; i < pvs.length; i++) {
@@ -429,13 +430,16 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			Signature signature = new Signature(setterName, Type.VOID_TYPE, new Type[] {Type.getType(propertyType)});
 			maker.add(signature, new Type[0]);
 		}
-		if (bd.getInitMethodName() != null) {
-			Signature signature = new Signature(bd.getInitMethodName(), Type.VOID_TYPE, new Type[0]);
-			maker.add(signature, new Type[0]);
-		}
-		if (bd.getDestroyMethodName() != null) {
-			Signature signature = new Signature(bd.getDestroyMethodName(), Type.VOID_TYPE, new Type[0]);
-			maker.add(signature, new Type[0]);
+		if (bd instanceof AbstractBeanDefinition) {
+			AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
+			if (abd.getInitMethodName() != null) {
+				Signature signature = new Signature(abd.getInitMethodName(), Type.VOID_TYPE, new Type[0]);
+				maker.add(signature, new Type[0]);
+			}
+			if (abd.getDestroyMethodName() != null) {
+				Signature signature = new Signature(abd.getDestroyMethodName(), Type.VOID_TYPE, new Type[0]);
+				maker.add(signature, new Type[0]);
+			}
 		}
 		return maker.create();
 	}
@@ -464,10 +468,10 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @return the extracted ScriptFactory bean definition
 	 * @see org.springframework.scripting.ScriptFactory#getScriptedObject
 	 */
-	protected RootBeanDefinition createScriptedObjectBeanDefinition(
-			RootBeanDefinition bd, String scriptFactoryBeanName, ScriptSource scriptSource, Class[] interfaces) {
+	protected BeanDefinition createScriptedObjectBeanDefinition(
+			BeanDefinition bd, String scriptFactoryBeanName, ScriptSource scriptSource, Class[] interfaces) {
 
-		RootBeanDefinition objectBd = new RootBeanDefinition(bd);
+		GenericBeanDefinition objectBd = new GenericBeanDefinition(bd);
 		objectBd.setFactoryBeanName(scriptFactoryBeanName);
 		objectBd.setFactoryMethodName("getScriptedObject");
 		objectBd.getConstructorArgumentValues().clear();

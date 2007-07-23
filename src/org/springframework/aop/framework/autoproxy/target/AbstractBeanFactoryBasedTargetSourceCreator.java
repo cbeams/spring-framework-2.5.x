@@ -25,9 +25,10 @@ import org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.support.AbstractBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 
 /**
  * Convenient superclass for
@@ -52,18 +53,17 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private AbstractBeanFactory beanFactory;
+	private ConfigurableBeanFactory beanFactory;
 
 	private DefaultListableBeanFactory internalBeanFactory;
 
 
 	public final void setBeanFactory(BeanFactory beanFactory) {
-		if (!(beanFactory instanceof AbstractBeanFactory)) {
-			throw new IllegalArgumentException(
-					"Cannot do auto-TargetSource creation with a BeanFactory that doesn't extend AbstractBeanFactory: " +
-					beanFactory);
+		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
+			throw new IllegalStateException("Cannot do auto-TargetSource creation with a BeanFactory " +
+					"that doesn't implement ConfigurableBeanFactory: " + beanFactory.getClass());
 		}
-		this.beanFactory = (AbstractBeanFactory) beanFactory;
+		this.beanFactory = (ConfigurableBeanFactory) beanFactory;
 		this.internalBeanFactory = new DefaultListableBeanFactory(beanFactory);
 	}
 
@@ -95,10 +95,12 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 		// We need to override just this bean definition, as it may reference other beans
 		// and we're happy to take the parent's definition for those.
-		// Always use a prototype.
-		RootBeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
-		RootBeanDefinition bdCopy = new RootBeanDefinition(bd);
-		bdCopy.setSingleton(!isPrototypeBased());
+		// Always use prototype scope if demanded.
+		BeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
+		GenericBeanDefinition bdCopy = new GenericBeanDefinition(bd);
+		if (isPrototypeBased()) {
+			bdCopy.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		}
 		this.internalBeanFactory.registerBeanDefinition(beanName, bdCopy);
 
 		// Complete configuring the PrototypeTargetSource.
@@ -110,7 +112,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	/**
 	 * Return whether this TargetSourceCreator is prototype-based.
-	 * The "singleton" flag of the target bean definition will be set accordingly.
+	 * The scope of the target bean definition will be set accordingly.
 	 * <p>Default is "true".
 	 * @see org.springframework.beans.factory.config.BeanDefinition#isSingleton()
 	 */

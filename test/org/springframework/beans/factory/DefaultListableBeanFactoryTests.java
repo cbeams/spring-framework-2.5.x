@@ -38,6 +38,7 @@ import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
@@ -1714,7 +1715,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		factory.registerBeanDefinition("parent", parent);
 		factory.registerBeanDefinition("child", child);
 
-		RootBeanDefinition def = factory.getMergedBeanDefinition("child");
+		BeanDefinition def = factory.getMergedBeanDefinition("child");
 		assertTrue("Child 'scope' not overriding parent scope (it must).", def.isSingleton());
 	}
 
