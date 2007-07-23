@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.context.support;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -355,7 +356,6 @@ public class ServletContextSupportTests extends TestCase {
 		};
 
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
-
 		Resource[] found = rpr.getResources("/WEB-INF/*.xml");
 		Set foundPaths = new HashSet();
 		for (int i = 0; i < found.length; i++) {
@@ -364,6 +364,76 @@ public class ServletContextSupportTests extends TestCase {
 		assertEquals(2, foundPaths.size());
 		assertTrue(foundPaths.contains("/WEB-INF/context1.xml"));
 		assertTrue(foundPaths.contains("/WEB-INF/context2.xml"));
+	}
+
+	public void testServletContextResourcePatternResolverWithPatternPath() throws IOException {
+		final Set dirs = new HashSet();
+		dirs.add("/WEB-INF/mydir1/");
+		dirs.add("/WEB-INF/mydir2/");
+
+		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
+			public Set getResourcePaths(String path) {
+				if ("/WEB-INF/".equals(path)) {
+					return dirs;
+				}
+				if ("/WEB-INF/mydir1/".equals(path)) {
+					return Collections.singleton("/WEB-INF/mydir1/context1.xml");
+				}
+				if ("/WEB-INF/mydir2/".equals(path)) {
+					return Collections.singleton("/WEB-INF/mydir2/context2.xml");
+				}
+				return null;
+			}
+		};
+
+		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
+		Resource[] found = rpr.getResources("/WEB-INF/*/*.xml");
+		Set foundPaths = new HashSet();
+		for (int i = 0; i < found.length; i++) {
+			foundPaths.add(((ServletContextResource) found[i]).getPath());
+		}
+		assertEquals(2, foundPaths.size());
+		assertTrue(foundPaths.contains("/WEB-INF/mydir1/context1.xml"));
+		assertTrue(foundPaths.contains("/WEB-INF/mydir2/context2.xml"));
+	}
+
+	public void testServletContextResourcePatternResolverWithUnboundedPatternPath() throws IOException {
+		final Set dirs = new HashSet();
+		dirs.add("/WEB-INF/mydir1/");
+		dirs.add("/WEB-INF/mydir2/");
+
+		final Set paths = new HashSet();
+		paths.add("/WEB-INF/mydir2/context2.xml");
+		paths.add("/WEB-INF/mydir2/mydir3/");
+
+		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
+			public Set getResourcePaths(String path) {
+				if ("/WEB-INF/".equals(path)) {
+					return dirs;
+				}
+				if ("/WEB-INF/mydir1/".equals(path)) {
+					return Collections.singleton("/WEB-INF/mydir1/context1.xml");
+				}
+				if ("/WEB-INF/mydir2/".equals(path)) {
+					return paths;
+				}
+				if ("/WEB-INF/mydir2/mydir3/".equals(path)) {
+					return Collections.singleton("/WEB-INF/mydir2/mydir3/context3.xml");
+				}
+				return null;
+			}
+		};
+
+		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
+		Resource[] found = rpr.getResources("/WEB-INF/**/*.xml");
+		Set foundPaths = new HashSet();
+		for (int i = 0; i < found.length; i++) {
+			foundPaths.add(((ServletContextResource) found[i]).getPath());
+		}
+		assertEquals(3, foundPaths.size());
+		assertTrue(foundPaths.contains("/WEB-INF/mydir1/context1.xml"));
+		assertTrue(foundPaths.contains("/WEB-INF/mydir2/context2.xml"));
+		assertTrue(foundPaths.contains("/WEB-INF/mydir2/mydir3/context3.xml"));
 	}
 
 	public void testServletContextResourcePatternResolverWithAbsolutePaths() throws IOException {
@@ -382,7 +452,6 @@ public class ServletContextSupportTests extends TestCase {
 		};
 
 		ServletContextResourcePatternResolver rpr = new ServletContextResourcePatternResolver(sc);
-
 		Resource[] found = rpr.getResources("/WEB-INF/*.xml");
 		Set foundPaths = new HashSet();
 		for (int i = 0; i < found.length; i++) {

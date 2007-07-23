@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.StringUtils;
 
 /**
- * ServletContext-aware subclass of PathMatchingResourcePatternResolver,
+ * ServletContext-aware subclass of {@link PathMatchingResourcePatternResolver},
  * able to find matching resources below the web application root directory
  * via Servlet 2.3's <code>ServletContext.getResourcePaths</code>.
  * Falls back to the superclass' file system checking for other resources.
@@ -62,6 +62,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 	public ServletContextResourcePatternResolver(ResourceLoader resourceLoader) {
 		super(resourceLoader);
 	}
+
 
 	/**
 	 * Overridden version which checks for ServletContextResource
@@ -118,7 +119,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 				}
 				if (currPath.endsWith("/") &&
 						(dirDepthNotFixed ||
-						StringUtils.countOccurrencesOf(currPath, "/") < StringUtils.countOccurrencesOf(fullPattern, "/"))) {
+						StringUtils.countOccurrencesOf(currPath, "/") <= StringUtils.countOccurrencesOf(fullPattern, "/"))) {
 					// Search subdirectories recursively: ServletContext.getResourcePaths
 					// only returns entries for one directory level.
 					doRetrieveMatchingServletContextResources(servletContext, fullPattern, currPath, result);
