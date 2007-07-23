@@ -285,7 +285,6 @@ public class DispatcherServletTests extends TestCase {
 		    complexDispatcherServlet.getWebApplicationContext().getBean("multipartResolver");
 		MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
 		complexDispatcherServlet.service(multipartRequest, response);
-		//System.out.println(response.getForwardedUrl());
 		multipartResolver.cleanupMultipart(multipartRequest);
 		assertNotNull(request.getAttribute("cleanedUp"));
 	}
@@ -498,7 +497,7 @@ public class DispatcherServletTests extends TestCase {
 
 	public void testHandlerNotMappedWithAutodetect() throws ServletException, IOException {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
-		// No parent
+		// no parent
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
 		complexDispatcherServlet.setNamespace("test");
 		complexDispatcherServlet.init(new MockServletConfig(getServletContext(), "complex"));
@@ -511,7 +510,7 @@ public class DispatcherServletTests extends TestCase {
 	}
 
 	public void testDetectHandlerMappingFromParent() throws ServletException, IOException {
-		// Create a parent context that includes a mapping
+		// create a parent context that includes a mapping
 		StaticWebApplicationContext parent = new StaticWebApplicationContext();
 		parent.setServletContext(servletConfig.getServletContext());
 		parent.registerSingleton("parentHandler", ControllerFromParent.class, new MutablePropertyValues());
@@ -523,7 +522,7 @@ public class DispatcherServletTests extends TestCase {
 		parent.refresh();
 
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
-		// Will have parent
+		// will have parent
 		complexDispatcherServlet.setContextClass(ComplexWebApplicationContext.class);
 		complexDispatcherServlet.setNamespace("test");
 		
@@ -632,6 +631,7 @@ public class DispatcherServletTests extends TestCase {
 		assertEquals("value1", request.getAttribute("test1"));
 		assertEquals("value2", request.getAttribute("test2"));
 		assertEquals(wac, request.getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE));
+		assertNull(request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 		assertNull(request.getAttribute("command"));
 	}
 
