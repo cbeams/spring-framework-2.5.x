@@ -661,9 +661,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			}
 
 			// Apply preHandle methods of registered interceptors.
-			if (mappedHandler.getInterceptors() != null) {
-				for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
-					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+			HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
+			if (interceptors != null) {
+				for (int i = 0; i < interceptors.length; i++) {
+					HandlerInterceptor interceptor = interceptors[i];
 					if (!interceptor.preHandleAction(processedRequest, response, mappedHandler.getHandler())) {
 						triggerAfterActionCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 						return;
@@ -772,9 +773,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 				}
 
 				// Apply preHandle methods of registered interceptors.
-				if (mappedHandler.getInterceptors() != null) {
-					for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
-						HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+				HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
+				if (interceptors != null) {
+					for (int i = 0; i < interceptors.length; i++) {
+						HandlerInterceptor interceptor = interceptors[i];
 						if (!interceptor.preHandleRender(processedRequest, response, mappedHandler.getHandler())) {
 							triggerAfterRenderCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 							return;
@@ -788,9 +790,9 @@ public class DispatcherPortlet extends FrameworkPortlet {
 				mv = ha.handleRender(processedRequest, response, mappedHandler.getHandler());
 
 				// Apply postHandle methods of registered interceptors.
-				if (mappedHandler.getInterceptors() != null) {
-					for (int i = mappedHandler.getInterceptors().length - 1; i >= 0; i--) {
-						HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+				if (interceptors != null) {
+					for (int i = interceptors.length - 1; i >= 0; i--) {
+						HandlerInterceptor interceptor = interceptors[i];
 						interceptor.postHandleRender(processedRequest, response, mappedHandler.getHandler(), mv);
 					}
 				}
@@ -995,9 +997,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 		// Apply afterCompletion methods of registered interceptors.
 		if (mappedHandler != null) {
-			if (mappedHandler.getInterceptors() != null) {
+			HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
+			if (interceptors != null) {
 				for (int i = interceptorIndex; i >= 0; i--) {
-					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+					HandlerInterceptor interceptor = interceptors[i];
 					try {
 						interceptor.afterActionCompletion(request, response, mappedHandler.getHandler(), ex);
 					}
@@ -1117,9 +1120,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 		// Apply afterCompletion methods of registered interceptors.
 		if (mappedHandler != null) {
-			if (mappedHandler.getInterceptors() != null) {
+			HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
+			if (interceptors != null) {
 				for (int i = interceptorIndex; i >= 0; i--) {
-					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+					HandlerInterceptor interceptor = interceptors[i];
 					try {
 						interceptor.afterRenderCompletion(request, response, mappedHandler.getHandler(), ex);
 					}

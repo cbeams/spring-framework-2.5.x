@@ -198,8 +198,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Look up a handler for the given request, returning <code>null</code> if no
-	 * specific one is found. This method is called by <code>getHandler<code>;
+	 * specific one is found. This method is called by {@link #getHandler};
 	 * a <code>null</code> return value will lead to the default handler, if one is set.
+	 * <p>Note: This method may also return a pre-built {@link HandlerExecutionChain},
+	 * combining a handler object with dynamically determined interceptors.
+	 * Statically specified interceptors will get merged into such an existing chain.
 	 * @param request current HTTP request
 	 * @return the corresponding handler instance, or <code>null</code> if none found
 	 * @throws Exception if there is an internal error
@@ -211,13 +214,25 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * <p>The default implementation simply builds a standard HandlerExecutionChain with
 	 * the given handler and this handler mapping's common interceptors. Subclasses may
 	 * override this in order to extend/rearrange the list of interceptors.
+	 * <p><b>NOTE:</b> The passed-in handler object may be a raw handler or a pre-built
+	 * HandlerExecutionChain. This method should handle those two cases explicitly,
+	 * either building a new HandlerExecutionChain or extending the existing chain.
+	 * <p>For simply adding an interceptor, consider calling <code>super.getHandlerExecutionChain</code>
+	 * and invoking {@link HandlerExecutionChain#addInterceptor} on the returned chain object.
 	 * @param handler the resolved handler instance (never <code>null</code>)
 	 * @param request current HTTP request
 	 * @return the HandlerExecutionChain (never <code>null</code>)
 	 * @see #getAdaptedInterceptors()
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
-		return new HandlerExecutionChain(handler, getAdaptedInterceptors());
+		if (handler instanceof HandlerExecutionChain) {
+			HandlerExecutionChain chain = (HandlerExecutionChain) handler;
+			chain.addInterceptors(getAdaptedInterceptors());
+			return chain;
+		}
+		else {
+			return new HandlerExecutionChain(handler, getAdaptedInterceptors());
+		}
 	}
 
 }

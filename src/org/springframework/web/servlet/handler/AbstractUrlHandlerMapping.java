@@ -22,11 +22,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -153,14 +155,15 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
 			// expose the PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for it as well.
+			Object rawHandler = null;
 			if ("/".equals(lookupPath)) {
-				handler = getRootHandler();
+				rawHandler = getRootHandler();
 			}
-			if (handler == null) {
-				handler = getDefaultHandler();
+			if (rawHandler == null) {
+				rawHandler = getDefaultHandler();
 			}
-			if (handler != null) {
-				exposePathWithinMapping(lookupPath, request);
+			if (rawHandler != null) {
+				handler = buildPathExposingHandler(rawHandler, lookupPath);
 			}
 		}
 		return handler;
@@ -183,8 +186,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		// Direct match?
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler != null) {
-			exposePathWithinMapping(urlPath, request);
-			return handler;
+			return buildPathExposingHandler(handler, urlPath);
 		}
 		// Pattern match?
 		String bestPathMatch = null;
@@ -197,9 +199,32 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 		if (bestPathMatch != null) {
 			handler = this.handlerMap.get(bestPathMatch);
-			exposePathWithinMapping(this.pathMatcher.extractPathWithinPattern(bestPathMatch, urlPath), request);
+			String pathWithinMapping = this.pathMatcher.extractPathWithinPattern(bestPathMatch, urlPath);
+			return buildPathExposingHandler(handler, pathWithinMapping);
 		}
-		return handler;
+		// No handler found...
+		return null;
+	}
+
+	/**
+	 * Build a handler object for the given raw handler, exposing the actual
+	 * handler as well as the {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE}
+	 * before executing the handler.
+	 * <p>The default implementation builds a {@link HandlerExecutionChain}
+	 * with a special interceptor that exposes the path attribute.
+	 * @param rawHandler the raw handler to expose
+	 * @param pathWithinMapping the path to expose before executing the handler
+	 * @return the final handler object
+	 */
+	protected Object buildPathExposingHandler(Object rawHandler, String pathWithinMapping) {
+		// Bean name or resolved handler?
+		if (rawHandler instanceof String) {
+			String handlerName = (String) rawHandler;
+			rawHandler = getApplicationContext().getBean(handlerName);
+		}
+		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
+		chain.addInterceptor(new PathExposingHandlerInterceptor(pathWithinMapping));
+		return chain;
 	}
 
 	/**
@@ -283,6 +308,26 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	public final Map getHandlerMap() {
 		return Collections.unmodifiableMap(this.handlerMap);
+	}
+
+
+	/**
+	 * Special interceptor for exposing the
+	 * {@link AbstractUrlHandlerMapping#PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE} attribute.
+	 * @link AbstractUrlHandlerMapping#exposePathWithinMapping
+	 */
+	private class PathExposingHandlerInterceptor extends HandlerInterceptorAdapter {
+
+		private final String pathWithinMapping;
+
+		public PathExposingHandlerInterceptor(String pathWithinMapping) {
+			this.pathWithinMapping = pathWithinMapping;
+		}
+
+		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+			exposePathWithinMapping(this.pathWithinMapping, request);
+			return true;
+		}
 	}
 
 }

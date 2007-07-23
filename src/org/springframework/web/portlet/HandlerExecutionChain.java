@@ -16,6 +16,11 @@
 
 package org.springframework.web.portlet;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.util.CollectionUtils;
+
 /**
  * Handler execution chain, consisting of handler object and any handler interceptors.
  * Returned by HandlerMapping's {@link HandlerMapping#getHandler} method.
@@ -27,9 +32,11 @@ package org.springframework.web.portlet;
  */
 public class HandlerExecutionChain {
 
-	private Object handler;
+	private final Object handler;
 
 	private HandlerInterceptor[] interceptors;
+
+	private List interceptorList;
 
 
 	/**
@@ -37,7 +44,7 @@ public class HandlerExecutionChain {
 	 * @param handler the handler object to execute
 	 */
 	public HandlerExecutionChain(Object handler) {
-		this.handler = handler;
+		this(handler, null);
 	}
 
 	/**
@@ -47,17 +54,52 @@ public class HandlerExecutionChain {
 	 * (in the given order) before the handler itself executes
 	 */
 	public HandlerExecutionChain(Object handler, HandlerInterceptor[] interceptors) {
-		this.handler = handler;
-		this.interceptors = interceptors;
+		if (handler instanceof HandlerExecutionChain) {
+			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
+			this.handler = originalChain.getHandler();
+			this.interceptorList = new ArrayList();
+			CollectionUtils.mergeArrayIntoCollection(originalChain.getInterceptors(), this.interceptorList);
+			CollectionUtils.mergeArrayIntoCollection(interceptors, this.interceptorList);
+		}
+		else {
+			this.handler = handler;
+			this.interceptors = interceptors;
+		}
 	}
 
 
 	/**
 	 * Return the handler object to execute.
-	 * @return the handler object (never <code>null</code>)
+	 * @return the handler object
 	 */
 	public Object getHandler() {
 		return this.handler;
+	}
+
+	public void addInterceptor(HandlerInterceptor interceptor) {
+		initInterceptorList();
+		this.interceptorList.add(interceptor);
+	}
+
+	public void addInterceptors(HandlerInterceptor[] interceptors) {
+		if (interceptors != null) {
+			initInterceptorList();
+			for (int i = 0; i < interceptors.length; i++) {
+				this.interceptorList.add(interceptors[i]);
+			}
+		}
+	}
+
+	private void initInterceptorList() {
+		if (this.interceptorList == null) {
+			this.interceptorList = new ArrayList();
+		}
+		if (this.interceptors != null) {
+			for (int i = 0; i < this.interceptors.length; i++) {
+				this.interceptorList.add(this.interceptors[i]);
+			}
+			this.interceptors = null;
+		}
 	}
 
 	/**
@@ -65,6 +107,10 @@ public class HandlerExecutionChain {
 	 * @return the array of HandlerInterceptors instances (may be <code>null</code>)
 	 */
 	public HandlerInterceptor[] getInterceptors() {
+		if (this.interceptors == null && this.interceptorList != null) {
+			this.interceptors = (HandlerInterceptor[])
+					this.interceptorList.toArray(new HandlerInterceptor[this.interceptorList.size()]);
+		}
 		return this.interceptors;
 	}
 
