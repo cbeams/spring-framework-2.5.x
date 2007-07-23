@@ -841,9 +841,10 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Apply preHandle methods of registered interceptors.
-				if (mappedHandler.getInterceptors() != null) {
-					for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
-						HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+				HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
+				if (interceptors != null) {
+					for (int i = 0; i < interceptors.length; i++) {
+						HandlerInterceptor interceptor = interceptors[i];
 						if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
 							triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 							return;
@@ -857,9 +858,9 @@ public class DispatcherServlet extends FrameworkServlet {
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				// Apply postHandle methods of registered interceptors.
-				if (mappedHandler.getInterceptors() != null) {
-					for (int i = mappedHandler.getInterceptors().length - 1; i >= 0; i--) {
-						HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+				if (interceptors != null) {
+					for (int i = interceptors.length - 1; i >= 0; i--) {
+						HandlerInterceptor interceptor = interceptors[i];
 						interceptor.postHandle(processedRequest, response, mappedHandler.getHandler(), mv);
 					}
 				}
@@ -1033,7 +1034,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * No handler found -> set appropriate HTTP response status.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @throws IOException if thrown by the HttpServletResponse
+	 * @throws IOException if preparing the response failed
 	 */
 	protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		if (pageNotFoundLogger.isWarnEnabled()) {
@@ -1199,9 +1200,10 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Apply afterCompletion methods of registered interceptors.
 		if (mappedHandler != null) {
-			if (mappedHandler.getInterceptors() != null) {
+			HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
+			if (interceptors != null) {
 				for (int i = interceptorIndex; i >= 0; i--) {
-					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+					HandlerInterceptor interceptor = interceptors[i];
 					try {
 						interceptor.afterCompletion(request, response, mappedHandler.getHandler(), ex);
 					}
