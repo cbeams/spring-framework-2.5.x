@@ -3,8 +3,11 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M3 (2007-07-23)
+Changes in version 2.1 M3 (2007-07-24)
 --------------------------------------
+
+General
+* fixed and updated reference documentation on JMS listener container configuration and transaction participation
 
 Package org.springframework.aop
 * Cglib2AopProxy uses weak references for advised object, interceptors and validated classes (avoiding a memory leak)
@@ -26,20 +29,23 @@ Package org.springframework.beans
 * TypeConverterDelegate only attempts to convert well-known collection types (skips custom types in the first place)
 * BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
 * added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
-* exposed "registerDependentBean" method on ConfigurableBeanFactory interface
 * exposed "getBean(name, args)" method on BeanFactory interface
+* exposed "BeanDefinition getMergedBeanDefinition(beanName)" method on ConfigurableBeanFactory interface
+* exposed "isFactoryBean" and "registerDependentBean" methods on ConfigurableBeanFactory interface
+* introduced "isAutowireCandidate" method on ConfigurableListableBeanFactory interface
 * passing in explicit arguments for bean creation is supported for constructors as well (not just for factory methods)
 * passing in different combinations of explicit arguments is supported for overloaded factory methods and constructors
 * PropertyPathFactoryBean supports a null property value (removed historic restriction there)
 * exposed "parentName", "factoryBeanName" and "factoryMethodName" properties in BeanDefinition interface
 * added "visitParentName", "visitFactoryBeanName" and "visitFactoryMethodName" callbacks to BeanDefinitionVisitor
 * PropertyPlaceholderConfigurer resolves placeholders in parent, factory-bean and factory-method values as well
+* fixed AbstractBeanFactory to correctly handle factory-bean references in case of a temporary ClassLoader being used
 * DefaultListableBeanFactory ignores invalid parent bean names when matching beans by type with allowEagerInit=false
 * DefaultListableBeanFactory only ignores invalid bean class names when matching beans by type with allowEagerInit=false
-* fixed AbstractBeanFactory to correctly handle factory-bean references in case of a temporary ClassLoader being used
 * DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
 * introduced "removeBeanDefinition" method in BeanDefinitionRegistry interface and DefaultListableBeanFactory class
 * AbstractBeanFactory supports any BeanDefinition implementation (does not require AbstractBeanDefinition anymore)
+* reworked AbstractBeanFactory's bean definition merging for less coupling to RootBeanDefinition as merge result
 * introduced GenericBeanDefinition as one-stop shop for standard bean definition purposes (with configurable parent)
 * DefaultBeanNameGenerator does not require an AbstractBeanDefinition implementation for bean name generation anymore
 * added autowiring by type for arrays, collections, maps (available for @Autowired, 'constructor', 'byType' autowiring)
@@ -56,9 +62,13 @@ Package org.springframework.context
 * "context:spring-configured" registers its bean configurer aspect with a fixed internal bean name
 * revised reflective class loading to use the correct ClassLoader according to the OSGi bundle structure (if any)
 
+Package org.springframework.cache
+* added "maxElementsOnDisk" bean property to EhCacheFactoryBean, supporting EHCache 1.2.4's extended Cache constructor
+
 Package org.springframework.core
 * added "isAtLeastJava16()" convenience method to JdkVersion class
 * OverridingClassLoader (and hence SimpleThrowawayClassLoader) exclude classes from the "sun." package
+* fixed PathMatchingResourcePatternResolver to build correct JarFile URLs on WebLogic and WebSphere
 * PathMatchingResourcePatternResolver uses a static Log instance in order to avoid repeated synchronization overhead
 
 Package org.springframework.ejb
@@ -87,6 +97,8 @@ Package org.springframework.jmx
 
 Package org.springframework.orm
 * HibernateTemplate delegates to "SessionFactory.getCurrentSession()" when "allowCreate" has been set to "false"
+* added overloaded "findByExample" methods with entityName argument to HibernateOperations/HibernateTemplate
+* deprecated HibernateTemplate's "saveOrUpdateAll" method in favor of individual "saveOrUpdate"/"merge" usage
 * fixed Hibernate/JpaTransactionManager to clean up properly in case of transaction begin failure on pre-bound resource
 * added "prepareTransaction" method to JpaDialect interface, for preparing a JTA-joining EntityManager
 * HibernateJpaDialect switches FlushMode to MANUAL in case of a read-only transaction even for JTA
@@ -132,9 +144,12 @@ Package org.springframework.validation
 
 Package org.springframework.web
 * factored out "invokeDelegate" template method in DelegatingFilterProxy
+* fixed Servlet/PortletContextResourcePatternResolver to correctly match bounded patterns
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
 * added "postProcessWeb/PortletApplicationContext" method to FrameworkServlet/Portlet
 * DispatcherServlet/Portlet's "noHandlerFound" declares Exception instead of just IOException/PortletException
+* added "addInterceptor" and "addInterceptors" methods to Servlet/Portlet HandlerExecutionChain
+* AbstractUrlHandlerMapping exposes "path within mapping" attribute through an interceptor (for proper include cleanup)
 * AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
 * fixed CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
