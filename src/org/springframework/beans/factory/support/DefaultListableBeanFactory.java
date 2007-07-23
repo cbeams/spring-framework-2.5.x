@@ -165,7 +165,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// is not defined as alias for some other bean.
 			if (!isAlias(beanName)) {
 				try {
-					RootBeanDefinition mbd = getMergedBeanDefinition(beanName, false);
+					RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 					// Only check bean definition if it is complete.
 					if (!mbd.isAbstract() &&
 							(allowEagerInit || mbd.hasBeanClass() || !mbd.isLazyInit() || this.allowEagerClassLoading)) {
@@ -293,7 +293,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return ((ConfigurableListableBeanFactory) getParentBeanFactory()).isAutowireCandidate(beanName);
 			}
 		}
-		return getMergedBeanDefinition(beanName, false).isAutowireCandidate();
+		return getMergedLocalBeanDefinition(beanName).isAutowireCandidate();
 	}
 
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
@@ -314,7 +314,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
 			String beanName = (String) it.next();
 			if (!containsSingleton(beanName) && containsBeanDefinition(beanName)) {
-				RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+				RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 				if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 					Class beanClass = resolveBeanClass(bd, beanName, true);
 					if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {

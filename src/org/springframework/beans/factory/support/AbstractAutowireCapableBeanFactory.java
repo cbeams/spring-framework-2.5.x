@@ -54,6 +54,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
@@ -248,7 +249,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
-		bd.setSingleton(false);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		return createBean(beanClass.getName(), bd, null);
 	}
 
@@ -257,7 +258,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
-		bd.setSingleton(false);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		if (bd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR) {
 			return autowireConstructor(beanClass.getName(), bd, null, null).getWrappedInstance();
 		}
@@ -277,23 +278,28 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd =
 				new RootBeanDefinition(ClassUtils.getUserClass(existingBean), autowireMode, dependencyCheck);
-		bd.setSingleton(false);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		populateBean(bd.getBeanClass().getName(), bd, new BeanWrapperImpl(existingBean));
 	}
 
 	public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
-		RootBeanDefinition bd = getMergedBeanDefinition(beanName, true);
+		BeanDefinition bd = getMergedBeanDefinition(beanName);
 		BeanWrapper bw = new BeanWrapperImpl(existingBean);
 		initBeanWrapper(bw);
 		applyPropertyValues(beanName, bd, bw, bd.getPropertyValues());
 	}
 
 	public Object configureBean(Object existingBean, String beanName) throws BeansException {
-		RootBeanDefinition bd = getMergedBeanDefinition(beanName, true);
+		BeanDefinition bd = getMergedBeanDefinition(beanName);
+		if (!(bd instanceof AbstractBeanDefinition)) {
+			throw new BeanDefinitionStoreException(
+					"configureBean only supported for a BeanDefinition that extends AbstractBeanDefinition");
+		}
+		AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
 		BeanWrapper bw = new BeanWrapperImpl(existingBean);
 		initBeanWrapper(bw);
-		populateBean(beanName, bd, bw);
-		return initializeBean(beanName, existingBean, bd);
+		populateBean(beanName, abd, bw);
+		return initializeBean(beanName, existingBean, abd);
 	}
 
 	public Object initializeBean(Object existingBean, String beanName) {
@@ -793,7 +799,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mbd the bean definition for the bean
 	 * @param bw BeanWrapper with bean instance
 	 */
-	protected void populateBean(String beanName, RootBeanDefinition mbd, BeanWrapper bw) {
+	protected void populateBean(String beanName, AbstractBeanDefinition mbd, BeanWrapper bw) {
 		// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the
 		// state of the bean before properties are set. This can be used, for example,
 		// to support styles of field injection.
@@ -880,7 +886,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param pvs the PropertyValues to register wired objects with
 	 */
 	protected void autowireByName(
-			String beanName, RootBeanDefinition mbd, BeanWrapper bw, MutablePropertyValues pvs) {
+			String beanName, AbstractBeanDefinition mbd, BeanWrapper bw, MutablePropertyValues pvs) {
 
 		String[] propertyNames = unsatisfiedNonSimpleProperties(mbd, bw);
 		for (int i = 0; i < propertyNames.length; i++) {
@@ -915,7 +921,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param pvs the PropertyValues to register wired objects with
 	 */
 	protected void autowireByType(
-			String beanName, RootBeanDefinition mbd, BeanWrapper bw, MutablePropertyValues pvs) {
+			String beanName, AbstractBeanDefinition mbd, BeanWrapper bw, MutablePropertyValues pvs) {
 
 		Set autowiredBeanNames = CollectionFactory.createLinkedSetIfPossible(4);
 		String[] propertyNames = unsatisfiedNonSimpleProperties(mbd, bw);
@@ -943,7 +949,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Suppots arrays and collections as well.
 	 */
 	private Object resolveAutowiredArgument(
-			String beanName, RootBeanDefinition mbd, BeanWrapper bw, String propertyName, Set autowiredBeanNames)
+			String beanName, AbstractBeanDefinition mbd, BeanWrapper bw, String propertyName, Set autowiredBeanNames)
 			throws UnsatisfiedDependencyException {
 
 		PropertyDescriptor pd = bw.getPropertyDescriptor(propertyName);
@@ -1003,7 +1009,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @return an array of bean property names
 	 * @see org.springframework.beans.BeanUtils#isSimpleProperty
 	 */
-	protected String[] unsatisfiedNonSimpleProperties(RootBeanDefinition mbd, BeanWrapper bw) {
+	protected String[] unsatisfiedNonSimpleProperties(AbstractBeanDefinition mbd, BeanWrapper bw) {
 		Set result = new TreeSet();
 		PropertyValues pvs = mbd.getPropertyValues();
 		PropertyDescriptor[] pds = bw.getPropertyDescriptors();
@@ -1070,7 +1076,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #isExcludedFromDependencyCheck(java.beans.PropertyDescriptor)
 	 */
 	protected void checkDependencies(
-			String beanName, RootBeanDefinition mbd, PropertyDescriptor[] pds, PropertyValues pvs)
+			String beanName, AbstractBeanDefinition mbd, PropertyDescriptor[] pds, PropertyValues pvs)
 			throws UnsatisfiedDependencyException {
 
 		int dependencyCheck = mbd.getDependencyCheck();
@@ -1098,9 +1104,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param bw the BeanWrapper wrapping the target object
 	 * @param pvs the new property values
 	 */
-	protected void applyPropertyValues(
-			String beanName, RootBeanDefinition mbd, BeanWrapper bw, PropertyValues pvs) {
-
+	protected void applyPropertyValues(String beanName, BeanDefinition mbd, BeanWrapper bw, PropertyValues pvs) {
 		if (pvs == null || pvs.isEmpty()) {
 			return;
 		}
@@ -1195,7 +1199,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #invokeInitMethods
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
-	protected Object initializeBean(String beanName, Object bean, RootBeanDefinition mbd) {
+	protected Object initializeBean(String beanName, Object bean, AbstractBeanDefinition mbd) {
 		if (bean instanceof BeanNameAware) {
 			((BeanNameAware) bean).setBeanName(beanName);
 		}
@@ -1240,7 +1244,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @throws Throwable if thrown by init methods or by the invocation process
 	 * @see #invokeCustomInitMethod
 	 */
-	protected void invokeInitMethods(String beanName, Object bean, RootBeanDefinition mbd)
+	protected void invokeInitMethods(String beanName, Object bean, AbstractBeanDefinition mbd)
 			throws Throwable {
 
 		boolean isInitializingBean = (bean instanceof InitializingBean);

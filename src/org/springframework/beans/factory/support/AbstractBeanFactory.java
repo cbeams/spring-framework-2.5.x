@@ -200,7 +200,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				}
 			}
 			if (containsBeanDefinition(beanName)) {
-				RootBeanDefinition mbd = getMergedBeanDefinition(beanName, false);
+				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 				bean = getObjectForBeanInstance(sharedInstance, name, mbd);
 			}
 			else {
@@ -232,7 +232,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 			this.alreadyCreated.add(beanName);
 
-			final RootBeanDefinition mbd = getMergedBeanDefinition(beanName, false);
+			final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 			checkMergedBeanDefinition(mbd, beanName, args);
 
 			// Create bean instance.
@@ -339,7 +339,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				return parentBeanFactory.isSingleton(originalBeanName(name));
 			}
 
-			RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 
 			// In case of FactoryBean, return singleton status of created object if not a dereference.
 			if (bd.isSingleton()) {
@@ -369,7 +369,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			return parentBeanFactory.isPrototype(originalBeanName(name));
 		}
 
-		RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+		RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 
 		// In case of FactoryBean, return singleton status of created object if not a dereference.
 		if (bd.isPrototype()) {
@@ -419,7 +419,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				return parentBeanFactory.isTypeMatch(originalBeanName(name), targetType);
 			}
 
-			RootBeanDefinition mbd = getMergedBeanDefinition(beanName, false);
+			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 			Class beanClass = predictBeanType(beanName, mbd, true);
 
 			if (beanClass == null) {
@@ -466,7 +466,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				return parentBeanFactory.getType(originalBeanName(name));
 			}
 
-			RootBeanDefinition mbd = getMergedBeanDefinition(beanName, false);
+			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 			Class beanClass = predictBeanType(beanName, mbd, false);
 
 			// Check bean class whether we're dealing with a FactoryBean.
@@ -734,7 +734,12 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
 	public BeanDefinition getMergedBeanDefinition(String beanName) throws BeansException {
-		return getMergedBeanDefinition(beanName, true);
+		// Efficiently check whether bean definition exists in this factory.
+		if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof ConfigurableBeanFactory) {
+			return ((ConfigurableBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName);
+		}
+		// Resolve merged bean definition locally.
+		return getMergedLocalBeanDefinition(beanName);
 	}
 
 	/**
@@ -796,7 +801,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	public void destroyBean(String beanName, Object beanInstance) {
-		destroyBean(beanName, beanInstance, getMergedBeanDefinition(beanName, false));
+		destroyBean(beanName, beanInstance, getMergedLocalBeanDefinition(beanName));
 	}
 
 	/**
@@ -811,7 +816,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	public void destroyScopedBean(String beanName) {
-		RootBeanDefinition mbd = getMergedBeanDefinition(beanName, false);
+		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 		if (mbd.isSingleton() || mbd.isPrototype()) {
 			throw new IllegalArgumentException(
 					"Bean name '" + beanName + "' does not correspond to an object in a Scope");
@@ -923,31 +928,14 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 
 	/**
-	 * Return a RootBeanDefinition, even by traversing parent if the parameter is a
-	 * child definition. Can ask the parent bean factory if not found in this instance.
+	 * Return a merged RootBeanDefinition, traversing the parent bean definition
+	 * if the specified bean corresponds to a child bean definition.
 	 * @param beanName the name of the bean to retrieve the merged definition for
-	 * @param includingAncestors whether to ask the parent bean factory if not found
-	 * in this instance
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
-	protected RootBeanDefinition getMergedBeanDefinition(String beanName, boolean includingAncestors)
-	    throws BeansException {
-
-		// Efficiently check whether bean definition exists in this factory.
-		if (includingAncestors && !containsBeanDefinition(beanName) &&
-				getParentBeanFactory() instanceof ConfigurableBeanFactory) {
-			BeanDefinition bd = ((ConfigurableBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName);
-			if (bd instanceof RootBeanDefinition) {
-				return (RootBeanDefinition) bd;
-			}
-			else {
-				new RootBeanDefinition(bd);
-			}
-		}
-
-		// Resolve merged bean definition locally.
+	protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName) throws BeansException {
 		return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
 	}
 
@@ -1003,7 +991,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 						try {
 							String parentBeanName = transformedBeanName(bd.getParentName());
 							if (!beanName.equals(parentBeanName)) {
-								pbd = getMergedBeanDefinition(parentBeanName, true);
+								pbd = getMergedBeanDefinition(parentBeanName);
 							}
 							else {
 								if (getParentBeanFactory() instanceof ConfigurableBeanFactory) {
@@ -1332,7 +1320,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			return ((ConfigurableBeanFactory) getParentBeanFactory()).isFactoryBean(name);
 		}
 
-		RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+		RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 		return isBeanClassMatch(beanName, bd, FactoryBean.class);
 	}
 
