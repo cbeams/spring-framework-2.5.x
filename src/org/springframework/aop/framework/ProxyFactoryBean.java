@@ -40,6 +40,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.OrderComparator;
 import org.springframework.util.ClassUtils;
@@ -290,7 +291,11 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			this.targetSource = freshTargetSource();
 			if (this.autodetectInterfaces && getProxiedInterfaces().length == 0 && !isProxyTargetClass()) {
 				// Rely on AOP infrastructure to tell us what interfaces to proxy.
-				setInterfaces(ClassUtils.getAllInterfacesForClass(this.targetSource.getTargetClass()));
+				Class targetClass = getTargetClass();
+				if (targetClass == null) {
+					throw new FactoryBeanNotInitializedException("Cannot determine target class for proxy at this point");
+				}
+				setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass));
 			}
 			// Initialize the shared singleton instance.
 			super.setFrozen(this.freezeProxy);
