@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,33 +103,37 @@ public class PropertyBatchUpdateException extends BeansException {
 	}
 
 	public void printStackTrace(PrintStream ps) {
-		ps.println(getClass().getName() + "; nested PropertyAccessException details (" +
-				getExceptionCount() + ") are:");
-		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
-			ps.println("PropertyAccessException " + (i + 1) + ":");
-			this.propertyAccessExceptions[i].printStackTrace(ps);
+		synchronized (ps) {
+			ps.println(getClass().getName() + "; nested PropertyAccessException details (" +
+					getExceptionCount() + ") are:");
+			for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
+				ps.println("PropertyAccessException " + (i + 1) + ":");
+				this.propertyAccessExceptions[i].printStackTrace(ps);
+			}
 		}
 	}
 
 	public void printStackTrace(PrintWriter pw) {
-		pw.println(getClass().getName() + "; nested PropertyAccessException details (" +
-				getExceptionCount() + ") are:");
-		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
-			pw.println("PropertyAccessException " + (i + 1) + ":");
-			this.propertyAccessExceptions[i].printStackTrace(pw);
+		synchronized (pw) {
+			pw.println(getClass().getName() + "; nested PropertyAccessException details (" +
+					getExceptionCount() + ") are:");
+			for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
+				pw.println("PropertyAccessException " + (i + 1) + ":");
+				this.propertyAccessExceptions[i].printStackTrace(pw);
+			}
 		}
 	}
 
-	public boolean contains(Class exClass) {
-		if (exClass == null) {
+	public boolean contains(Class exType) {
+		if (exType == null) {
 			return false;
 		}
-		if (exClass.isInstance(this)) {
+		if (exType.isInstance(this)) {
 			return true;
 		}
 		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
 			PropertyAccessException pae = this.propertyAccessExceptions[i];
-			if (pae.contains(exClass)) {
+			if (pae.contains(exType)) {
 				return true;
 			}
 		}
