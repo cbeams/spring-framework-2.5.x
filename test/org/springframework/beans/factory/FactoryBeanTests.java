@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,15 @@ public class FactoryBeanTests extends TestCase {
 	}
 
 	public void testFactoryBeansWithAutowiring() throws Exception {
+		XmlBeanFactory factory = new XmlBeanFactory(new ClassPathResource("factoryBeansWithAutowiring.xml", getClass()));
+		Alpha alpha = (Alpha) factory.getBean("alpha");
+		Beta beta = (Beta) factory.getBean("beta");
+		Gamma gamma = (Gamma) factory.getBean("gamma");
+		assertSame(beta, alpha.beta);
+		assertSame(gamma, beta.gamma);
+	}
+
+	public void testFactoryBeansWithIntermediateFactoryBeanAutowiringFailure() throws Exception {
 		XmlBeanFactory factory = new XmlBeanFactory(new ClassPathResource("factoryBeansWithAutowiring.xml", getClass()));
 		factory.preInstantiateSingletons();
 		Alpha alpha = (Alpha) factory.getBean("alpha");
@@ -92,7 +101,7 @@ public class FactoryBeanTests extends TestCase {
 		}
 
 		public void afterPropertiesSet() {
-			Assert.notNull(beta);
+			Assert.notNull(beta, "'beta' property is required");
 		}
 	}
 
@@ -106,7 +115,7 @@ public class FactoryBeanTests extends TestCase {
 		}
 
 		public void afterPropertiesSet() {
-			Assert.notNull(gamma);
+			Assert.notNull(gamma, "'gamma' property is required");
 		}
 	}
 

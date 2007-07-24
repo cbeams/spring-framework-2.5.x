@@ -53,6 +53,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
@@ -241,7 +242,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
-		bd.setSingleton(false);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		return createBean(beanClass.getName(), bd, null);
 	}
 
@@ -250,7 +251,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass, autowireMode, dependencyCheck);
-		bd.setSingleton(false);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		if (bd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR) {
 			return autowireConstructor(beanClass.getName(), bd, null).getWrappedInstance();
 		}
@@ -269,7 +270,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(existingBean.getClass(), autowireMode, dependencyCheck);
-		bd.setSingleton(false);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		populateBean(existingBean.getClass().getName(), bd, new BeanWrapperImpl(existingBean));
 	}
 
@@ -441,12 +442,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return bean;
 		}
 
-		catch (BeanCreationException ex) {
-			throw ex;
-		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(
-					mbd.getResourceDescription(), beanName, errorMessage, ex);
+			if (ex instanceof BeanCreationException && beanName.equals(((BeanCreationException) ex).getBeanName())) {
+				throw (BeanCreationException) ex;
+			}
+			else {
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName, errorMessage, ex);
+			}
 		}
 	}
 
@@ -551,16 +553,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (fb != null) {
 			// Try to obtain the FactoryBean's object type from this early stage of the instance.
-			try {
-				Class type = fb.getObjectType();
-				if (type != null) {
-					return type;
-				}
-			}
-			catch (Throwable ex) {
-				// Thrown from the FactoryBean's getObjectType implementation.
-				logger.warn("FactoryBean threw exception from getObjectType, despite the contract saying " +
-						"that it should return null if the type of its object cannot be determined yet", ex);
+			Class objectType = getTypeForFactoryBean(fb);
+			if (objectType != null) {
+				return objectType;
 			}
 		}
 
