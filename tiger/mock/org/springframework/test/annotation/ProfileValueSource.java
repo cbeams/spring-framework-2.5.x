@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.test.annotation;
 
+/**
+ * Strategy interface for retrieving <em>profile values</em> for a given
+ * testing environment.
+ * 
+ * <p>
+ * Spring provides the following out-of-the-box implementations:
+ * </p>
+ * 
+ * <ul>
+ * <li>{@link SystemProfileValueSource}</li>
+ * </ul>
+ * 
+ * @author Rod Johnson
+ * @author Sam Brannen
+ * @since 2.0
+ * @see AbstractAnnotationAwareTransactionalTests
+ */
 public interface ProfileValueSource {
-	
+
+	/**
+	 * Gets the <em>profile value</em> indicated by the specified key.
+	 * 
+	 * @param key The name of the <em>profile value</em>.
+	 * 
+	 * @return The string value of the <em>profile value</em>, or
+	 * <code>null</code> if there is no <em>profile value</em> with that
+	 * key.
+	 * 
+	 * @exception IllegalArgumentException if <code>key</code> is
+	 * <code>null</code> or empty.
+	 */
 	String get(String key);
 
 }

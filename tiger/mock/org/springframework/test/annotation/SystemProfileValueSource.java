@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.test.annotation;
 
+import org.springframework.util.Assert;
+
 /**
+ * Implementation of {@link ProfileValueSource} which uses system properties as
+ * the underlying source.
+ * 
+ * @see #get(String)
  * 
  * @author Rod Johnson
+ * @author Sam Brannen
  * @since 2.0
  */
 public class SystemProfileValueSource implements ProfileValueSource {
-	
+
 	private static final SystemProfileValueSource INSTANCE = new SystemProfileValueSource();
 
 	public static final SystemProfileValueSource getInstance() {
 		return INSTANCE;
 	}
-	
+
 	private SystemProfileValueSource() {
 	}
 
+	/**
+	 * Gets the <em>profile value</em> indicated by the specified key from the
+	 * system properties.
+	 * 
+	 * @see System#getProperty(String)
+	 * @see org.springframework.test.annotation.ProfileValueSource#get(java.lang.String)
+	 */
 	public String get(String key) {
+		Assert.hasText(key, "'key' must not be empty.");
 		return System.getProperty(key);
 	}
 
