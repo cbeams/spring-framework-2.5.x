@@ -293,7 +293,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				// Rely on AOP infrastructure to tell us what interfaces to proxy.
 				Class targetClass = getTargetClass();
 				if (targetClass == null) {
-					throw new FactoryBeanNotInitializedException("Cannot determine target class for proxy at this point");
+					throw new FactoryBeanNotInitializedException("Cannot determine target class for proxy");
 				}
 				setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass));
 			}
