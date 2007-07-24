@@ -181,6 +181,7 @@ abstract class ConstructorResolver {
 						}
 						else {
 							// Swallow and try next constructor.
+							this.beanFactory.onSuppressedException(ex);
 							continue;
 						}
 					}
@@ -328,6 +329,7 @@ abstract class ConstructorResolver {
 							}
 							else {
 								// Swallow and try next overloaded factory method.
+								this.beanFactory.onSuppressedException(ex);
 								continue;
 							}
 						}

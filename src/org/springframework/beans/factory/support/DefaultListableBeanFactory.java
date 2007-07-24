@@ -192,6 +192,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					if (logger.isDebugEnabled()) {
 						logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
 					}
+					onSuppressedException(ex);
 				}
 				catch (BeanDefinitionStoreException ex) {
 					if (allowEagerInit) {
@@ -201,6 +202,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					if (logger.isDebugEnabled()) {
 						logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
 					}
+					onSuppressedException(ex);
 				}
 			}
 		}
@@ -267,6 +269,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						if (logger.isDebugEnabled()) {
 							logger.debug("Ignoring match to currently created bean '" + beanName + "': " + ex.getMessage());
 						}
+						onSuppressedException(ex);
 						// Ignore: indicates a circular reference when autowiring constructors.
 						// We want to find matches other than the currently created bean itself.
 						continue;

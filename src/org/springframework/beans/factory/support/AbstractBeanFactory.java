@@ -1180,6 +1180,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		catch (BeanCreationException ex) {
 			// Can only happen when getting a FactoryBean.
 			logger.debug("Ignoring bean creation exception on FactoryBean type check", ex);
+			onSuppressedException(ex);
 			return null;
 		}
 	}

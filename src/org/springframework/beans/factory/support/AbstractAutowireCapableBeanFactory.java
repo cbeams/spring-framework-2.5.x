@@ -435,12 +435,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return bean;
 		}
 
-		catch (BeanCreationException ex) {
-			throw ex;
-		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(
-					mbd.getResourceDescription(), beanName, errorMessage, ex);
+			if (ex instanceof BeanCreationException && beanName.equals(((BeanCreationException) ex).getBeanName())) {
+				throw (BeanCreationException) ex;
+			}
+			else {
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName, errorMessage, ex);
+			}
 		}
 	}
 
@@ -545,16 +546,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (fb != null) {
 			// Try to obtain the FactoryBean's object type from this early stage of the instance.
-			try {
-				Class type = fb.getObjectType();
-				if (type != null) {
-					return type;
-				}
-			}
-			catch (Throwable ex) {
-				// Thrown from the FactoryBean's getObjectType implementation.
-				logger.warn("FactoryBean threw exception from getObjectType, despite the contract saying " +
-						"that it should return null if the type of its object cannot be determined yet", ex);
+			Class objectType = getTypeForFactoryBean(fb);
+			if (objectType != null) {
+				return objectType;
 			}
 		}
 

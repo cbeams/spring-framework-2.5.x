@@ -20,12 +20,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCreationNotAllowedException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.DisposableBean;
@@ -86,6 +89,9 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
 	/** Names of beans that are currently in creation */
 	private final Set singletonsCurrentlyInCreation = Collections.synchronizedSet(new HashSet());
+
+	/** List of suppressed Exceptions, available for associating related causes */
+	private List suppressedExceptions;
 
 	/** Flag that indicates whether we're currently within destroySingletons */
 	private boolean singletonsCurrentlyInDestruction = false;
@@ -152,15 +158,41 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
 				beforeSingletonCreation(beanName);
+				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
+				if (recordSuppressedExceptions) {
+					this.suppressedExceptions = new LinkedList();
+				}
 				try {
 					singletonObject = singletonFactory.getObject();
 				}
+				catch (BeanCreationException ex) {
+					for (Iterator it = this.suppressedExceptions.iterator(); it.hasNext();) {
+						ex.addRelatedCause((Exception) it.next());
+					}
+					throw ex;
+				}
 				finally {
+					if (recordSuppressedExceptions) {
+						this.suppressedExceptions = null;
+					}
 					afterSingletonCreation(beanName);
 				}
 				addSingleton(beanName, singletonObject);
 			}
 			return (singletonObject != NULL_OBJECT ? singletonObject : null);
+		}
+	}
+
+	/**
+	 * Register an Exception that happened to get suppressed during the creation of a
+	 * singleton bean instance, e.g. a temporary circular reference resolution problem.
+	 * @param ex the Exception to register
+	 */
+	protected void onSuppressedException(Exception ex) {
+		synchronized (this.singletonObjects) {
+			if (this.suppressedExceptions != null) {
+				this.suppressedExceptions.add(ex);
+			}
 		}
 	}
 

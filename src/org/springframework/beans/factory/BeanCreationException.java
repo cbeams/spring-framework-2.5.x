@@ -16,7 +16,14 @@
 
 package org.springframework.beans.factory;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.springframework.beans.FatalBeanException;
+import org.springframework.core.NestedRuntimeException;
 
 /**
  * Exception thrown when a BeanFactory encounters an error when
@@ -29,6 +36,8 @@ public class BeanCreationException extends FatalBeanException {
 	private String beanName;
 
 	private String resourceDescription;
+
+	private List relatedCauses;
 
 
 	/**
@@ -109,6 +118,85 @@ public class BeanCreationException extends FatalBeanException {
 	 */
 	public String getResourceDescription() {
 		return this.resourceDescription;
+	}
+
+	/**
+	 * Add a related cause to this bean creation exception,
+	 * not being a direct cause of the failure but having occured
+	 * earlier in the creation of the same bean instance.
+	 * @param ex the related cause to add
+	 */
+	public void addRelatedCause(Throwable ex) {
+		if (this.relatedCauses == null) {
+			this.relatedCauses = new LinkedList();
+		}
+		this.relatedCauses.add(ex);
+	}
+
+	/**
+	 * Return the related causes, if any.
+	 * @return the array of related causes, or <code>null</code> if none
+	 */
+	public Throwable[] getRelatedCauses() {
+		if (this.relatedCauses == null) {
+			return null;
+		}
+		return (Throwable[]) this.relatedCauses.toArray(new Throwable[this.relatedCauses.size()]);
+	}
+
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer(super.toString());
+		if (this.relatedCauses != null) {
+			for (Iterator it = this.relatedCauses.iterator(); it.hasNext();) {
+				Throwable relatedCause = (Throwable) it.next();
+				sb.append("\nRelated cause: ");
+				sb.append(relatedCause);
+			}
+		}
+		return sb.toString();
+	}
+
+	public void printStackTrace(PrintStream ps) {
+		synchronized (ps) {
+			super.printStackTrace(ps);
+			if (this.relatedCauses != null) {
+				for (Iterator it = this.relatedCauses.iterator(); it.hasNext();) {
+					Throwable relatedCause = (Throwable) it.next();
+					ps.println("Related cause:");
+					relatedCause.printStackTrace(ps);
+				}
+			}
+		}
+	}
+
+	public void printStackTrace(PrintWriter pw) {
+		synchronized (pw) {
+			super.printStackTrace(pw);
+			if (this.relatedCauses != null) {
+				for (Iterator it = this.relatedCauses.iterator(); it.hasNext();) {
+					Throwable relatedCause = (Throwable) it.next();
+					pw.println("Related cause:");
+					relatedCause.printStackTrace(pw);
+				}
+			}
+		}
+	}
+
+	public boolean contains(Class exClass) {
+		if (super.contains(exClass)) {
+			return true;
+		}
+		if (this.relatedCauses != null) {
+			for (Iterator it = this.relatedCauses.iterator(); it.hasNext();) {
+				Throwable relatedCause = (Throwable) it.next();
+				if (relatedCause instanceof NestedRuntimeException &&
+						((NestedRuntimeException) relatedCause).contains(exClass)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }
