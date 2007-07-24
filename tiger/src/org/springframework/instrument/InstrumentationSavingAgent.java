@@ -27,8 +27,8 @@ import java.lang.instrument.Instrumentation;
  * @see org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver
  */
 public class InstrumentationSavingAgent {
-	
-	private static Instrumentation instrumentation;
+
+	private static volatile Instrumentation instrumentation;
 
 
 	/**
@@ -41,10 +41,9 @@ public class InstrumentationSavingAgent {
 
 	/**
 	 * Return the {@link Instrumentation} interface exposed by the JVM.
-    * @return the <code>Instrumentation</code> instance previously saved when
-    * the {@link #premain} method was called by the JVM; will be
-    * <code>null</code> if this class was not used as the Java agent when this
-    * JVM was started.
+   * @return the <code>Instrumentation</code> instance previously saved when
+   * the {@link #premain} method was called by the JVM; will be <code>null</code>
+	 * if this class was not used as Java agent when this JVM was started.
 	 */
 	public static Instrumentation getInstrumentation() {
 		return instrumentation;
