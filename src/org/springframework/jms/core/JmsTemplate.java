@@ -74,7 +74,7 @@ import org.springframework.util.Assert;
  * @see javax.jms.MessageConsumer
  */
 public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations {
-	
+
 	/**
 	 * Timeout value indicating that a receive operation should
 	 * check if a message is immediately available without blocking.
@@ -85,10 +85,10 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Timeout value indicating a blocking receive without timeout.
 	 */
 	public static final long RECEIVE_TIMEOUT_INDEFINITE_WAIT = 0;
-	
 
-	private final JmsTemplateResourceFactory transactionalResourceFactory =
-			new JmsTemplateResourceFactory();
+
+	/** Internal ResourceFactory adapter for interacting with ConnectionFactoryUtils */
+	private final JmsTemplateResourceFactory transactionalResourceFactory = new JmsTemplateResourceFactory();
 
 
 	private Object defaultDestination;
