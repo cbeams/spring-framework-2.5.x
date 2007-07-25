@@ -82,8 +82,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	public static final long DEFAULT_RECEIVE_TIMEOUT = -1;
 
 
-	private final JmsTemplateResourceFactory transactionalResourceFactory =
-			new JmsTemplateResourceFactory();
+	/** Internal ResourceFactory adapter for interacting with ConnectionFactoryUtils */
+	private final JmsTemplateResourceFactory transactionalResourceFactory = new JmsTemplateResourceFactory();
 
 
 	private Object defaultDestination;
@@ -261,8 +261,9 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	/**
-	 * Set the timeout to use for receive calls.
-	 * The default is -1, which means no timeout.
+	 * Set the timeout to use for receive calls (in milliseconds).
+	 * <p>The default is <code>-1</code>, which indicates a blocking receive
+	 * without timeout.
 	 * @see javax.jms.MessageConsumer#receive(long)
 	 * @see javax.jms.MessageConsumer#receive()
 	 */
@@ -271,7 +272,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	/**
-	 * Return the timeout to use for receive calls.
+	 * Return the timeout to use for receive calls (in milliseconds).
 	 */
 	public long getReceiveTimeout() {
 		return this.receiveTimeout;
@@ -400,8 +401,9 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * <p>Use <code>execute(SessionCallback)</code> for the general case.
 	 * Starting the JMS Connection is just necessary for receiving messages,
 	 * which is preferably achieved through the <code>receive</code> methods.
-	 * @param action callback object that exposes the session
-	 * @return the result object from working with the session
+	 * @param action callback object that exposes the Session
+	 * @param startConnection whether to start the Connection
+	 * @return the result object from working with the Session
 	 * @throws JmsException if there is any problem
 	 * @see #execute(SessionCallback)
 	 * @see #receive
@@ -668,6 +670,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @param session the JMS Session to operate on
 	 * @param destination the JMS Destination to receive from
 	 * @param messageSelector the message selector for this consumer (can be <code>null</code>)
+	 * @return the JMS Message received, or <code>null</code> if none
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected Message doReceive(Session session, Destination destination, String messageSelector)

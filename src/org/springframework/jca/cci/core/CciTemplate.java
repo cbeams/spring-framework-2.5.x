@@ -67,9 +67,6 @@ import org.springframework.util.Assert;
  * @since 1.2
  * @see RecordCreator
  * @see RecordExtractor
- * @see org.springframework.dao
- * @see org.springframework.jca.cci.connection
- * @see org.springframework.jca.cci.object
  */
 public class CciTemplate implements CciOperations {
 
@@ -156,7 +153,7 @@ public class CciTemplate implements CciOperations {
 	 * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, Record, Record)
 	 */
 	public void setOutputRecordCreator(RecordCreator creator) {
-		outputRecordCreator = creator;
+		this.outputRecordCreator = creator;
 	}
 
 	/**

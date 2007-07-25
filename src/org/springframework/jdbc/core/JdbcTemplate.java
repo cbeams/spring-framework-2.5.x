@@ -73,7 +73,8 @@ import org.springframework.util.Assert;
  * the {@link org.springframework.jdbc.support.SQLExceptionTranslator}
  * interface, there should be no need to subclass it.
  *
- * <p>All operations performed by this class are logged at debug level.
+ * <p>All SQL operations performed by this class are logged at debug level,
+ * using "org.springframework.jdbc.core.JdbcTemplate" as log category.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -1186,7 +1187,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 
-
 	/**
 	 * Simple adapter for PreparedStatementCreator, allowing to use a plain SQL statement.
 	 */
@@ -1228,7 +1228,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		public String getSql() {
 			return this.callString;
 		}
-
 	}
 
 
