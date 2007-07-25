@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,6 +116,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		afterPropertiesSet();
 	}
 
+
 	/**
 	 * Set the iBATIS Database Layer SqlMapClient that defines the mapped statements.
 	 */
@@ -127,12 +128,12 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	 * Return the iBATIS Database Layer SqlMapClient that this template works with.
 	 */
 	public SqlMapClient getSqlMapClient() {
-		return sqlMapClient;
+		return this.sqlMapClient;
 	}
 
 	/**
 	 * If no DataSource specified, use SqlMapClient's DataSource.
-	 * @see com.ibatis.sqlmap.client.SqlMapClient#getDataSource
+	 * @see com.ibatis.sqlmap.client.SqlMapClient#getDataSource()
 	 */
 	public DataSource getDataSource() {
 		DataSource ds = super.getDataSource();
@@ -141,7 +142,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 	public void afterPropertiesSet() {
 		if (this.sqlMapClient == null) {
-			throw new IllegalArgumentException("sqlMapClient is required");
+			throw new IllegalArgumentException("Property 'sqlMapClient' is required");
 		}
 		if (this.sqlMapClient instanceof ExtendedSqlMapClient) {
 			// Check whether iBATIS lazy loading is available, that is,
