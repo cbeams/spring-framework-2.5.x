@@ -95,7 +95,7 @@ public abstract class GenericCollectionTypeResolver {
 	}
 
 	/**
-	 * Determine the generic element type of the given Map field.
+	 * Determine the generic key type of the given Map field.
 	 * @param mapField the map field to introspect
 	 * @return the generic type, or <code>null</code> if none
 	 */
@@ -104,7 +104,7 @@ public abstract class GenericCollectionTypeResolver {
 	}
 
 	/**
-	 * Determine the generic element type of the given Map field.
+	 * Determine the generic key type of the given Map field.
 	 * @param mapField the map field to introspect
 	 * @param nestingLevel the nesting level of the target type
 	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
@@ -116,7 +116,7 @@ public abstract class GenericCollectionTypeResolver {
 	}
 
 	/**
-	 * Determine the generic element type of the given Map field.
+	 * Determine the generic value type of the given Map field.
 	 * @param mapField the map field to introspect
 	 * @return the generic type, or <code>null</code> if none
 	 */
@@ -125,7 +125,7 @@ public abstract class GenericCollectionTypeResolver {
 	}
 
 	/**
-	 * Determine the generic element type of the given Map field.
+	 * Determine the generic value type of the given Map field.
 	 * @param mapField the map field to introspect
 	 * @param nestingLevel the nesting level of the target type
 	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
