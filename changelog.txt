@@ -20,6 +20,7 @@ Package org.springframework.aop
 * fixed ConfigBeanDefinitionParser to properly handle empty pointcut/advice bean names in a tooling environment
 * added "getAspectClassLoader()" method to AspectInstanceFactory interface
 * revised reflective class loading to use the correct ClassLoader according to the OSGi bundle structure (if any)
+* declare-parents allows specifying "delegate-ref" to delgate introductions to a bean as an alternative to "default-impl"
 
 Package org.springframework.beans
 * added "charsToDelete" and "emptyArrayAsNull" options to StringArrayPropertyEditor

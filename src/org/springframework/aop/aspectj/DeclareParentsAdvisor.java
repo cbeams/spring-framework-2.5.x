@@ -22,12 +22,14 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.support.ClassFilters;
 import org.springframework.aop.support.DelegatePerTargetObjectIntroductionInterceptor;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 
 /**
  * Introduction advisor delegating to the given object.
  * Implements AspectJ annotation-style behavior for the DeclareParents annotation.
  *
  * @author Rod Johnson
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 public class DeclareParentsAdvisor implements IntroductionAdvisor {
@@ -40,12 +42,15 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 
 
 	/**
-	 * Create a new advisor for this DeclareParents field.
+	 * Private constructor to share common code between impl-based delegate and reference-based delegate
+	 * (cannot use method such as init() to share common code, due the the use of final fields)
+	 * 
 	 * @param interfaceType static field defining the introduction
 	 * @param typePattern type pattern the introduction is restricted to
-	 * @param defaultImpl default implementation class
+	 * @param implementationClass implementation class
+	 * @param advice delegation advice
 	 */
-	public DeclareParentsAdvisor(Class interfaceType, String typePattern, Class defaultImpl) {
+	private DeclareParentsAdvisor(Class interfaceType, String typePattern, Class implementationClass, Advice advice) {
 		this.introducedInterface = interfaceType;
 		ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
 
@@ -57,9 +62,30 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 		};
 
 		this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
-		this.advice = new DelegatePerTargetObjectIntroductionInterceptor(defaultImpl, interfaceType);
+		this.advice = advice;
+	}
+	
+	/**
+	 * Create a new advisor for this DeclareParents field.
+	 * @param interfaceType static field defining the introduction
+	 * @param typePattern type pattern the introduction is restricted to
+	 * @param defaultImpl default implementation class
+	 */
+	public DeclareParentsAdvisor(Class interfaceType, String typePattern, Class defaultImpl) {
+		this(interfaceType, typePattern, defaultImpl, 
+			 new DelegatePerTargetObjectIntroductionInterceptor(defaultImpl, interfaceType));
 	}
 
+	/**
+	 * Create a new advisor for this DeclareParents field.
+	 * @param interfaceType static field defining the introduction
+	 * @param typePattern type pattern the introduction is restricted to
+	 * @param defaultImpl default implementation class
+	 */
+	public DeclareParentsAdvisor(Class interfaceType, String typePattern, Object delegateRef) {
+		this(interfaceType, typePattern, delegateRef.getClass(), 
+			 new DelegatingIntroductionInterceptor(delegateRef));
+	}
 
 	public ClassFilter getClassFilter() {
 		return this.typePatternClassFilter;

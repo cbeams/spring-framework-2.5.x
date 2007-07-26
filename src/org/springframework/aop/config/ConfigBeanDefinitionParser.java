@@ -56,6 +56,7 @@ import org.springframework.util.xml.DomUtils;
  * @author Adrian Colyer
  * @author Rod Johnson
  * @author Mark Fisher
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 class ConfigBeanDefinitionParser implements BeanDefinitionParser {
@@ -85,6 +86,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final String TYPE_PATTERN = "types-matching";
 
 	private static final String DEFAULT_IMPL = "default-impl";
+	
+	private static final String DELEGATE_REF = "delegate-ref";
 
 	private static final String IMPLEMENT_INTERFACE = "implement-interface";
 
@@ -310,7 +313,20 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(DeclareParentsAdvisor.class);
 		builder.addConstructorArg(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE));
 		builder.addConstructorArg(declareParentsElement.getAttribute(TYPE_PATTERN));
-		builder.addConstructorArg(declareParentsElement.getAttribute(DEFAULT_IMPL));
+		
+		String defaultImpl = declareParentsElement.getAttribute(DEFAULT_IMPL);
+		String delegateRef = declareParentsElement.getAttribute(DELEGATE_REF);
+		
+		if (StringUtils.hasText(defaultImpl) && !StringUtils.hasText(delegateRef)) {
+			builder.addConstructorArg(defaultImpl);
+		} else if (StringUtils.hasText(delegateRef) && !StringUtils.hasText(defaultImpl)) {
+			builder.addConstructorArgReference(delegateRef);
+		} else {
+			parserContext.getReaderContext().error(
+					"Exactly one of the " + DEFAULT_IMPL + " or " + DELEGATE_REF + " attributes must be specified",
+					declareParentsElement, this.parseState.snapshot());
+		}
+
 		builder.setSource(parserContext.extractSource(declareParentsElement));
 		AbstractBeanDefinition definition = builder.getBeanDefinition();
 		parserContext.getReaderContext().registerWithGeneratedName(definition);

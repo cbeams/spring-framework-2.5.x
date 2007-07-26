@@ -255,12 +255,23 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="default-impl" type="xsd:string" use="required">
+		<xsd:attribute name="default-impl" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation source="java:java.lang.Class"><![CDATA[
 	The fully qualified name of the class that will be instantiated to serve
 	as the default implementation of the introduced interface. 
 				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="delegate-ref" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	A reference to the bean that will serve 
+	as the default implementation of the introduced interface.
+				]]></xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation kind="ref"/>
+				</xsd:appinfo>
 			</xsd:annotation>
 		</xsd:attribute>
 	</xsd:complexType>
