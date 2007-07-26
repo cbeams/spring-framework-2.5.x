@@ -312,7 +312,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		TestBean tb2 = new TestBean();
 		bf.registerSingleton("testBean1", tb1);
 		bf.registerSingleton("testBean2", tb1);
-		
+
 		MapFieldInjectionBean bean = (MapFieldInjectionBean) bf.getBean("annotatedBean");
 		assertEquals(2, bean.getTestBeanMap().size());
 		assertTrue(bean.getTestBeanMap().keySet().contains("testBean1"));
@@ -345,11 +345,9 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
-		TestBean tb1 = new TestBean();
-		TestBean tb2 = new TestBean();
-		bf.registerSingleton("testBean1", tb1);
-		bf.registerSingleton("testBean2", tb1);
-		
+		bf.registerBeanDefinition("testBean1", new RootBeanDefinition(TestBean.class));
+		bf.registerBeanDefinition("testBean2", new RootBeanDefinition(TestBean.class));
+
 		try {
 			MapMethodInjectionBean bean = (MapMethodInjectionBean) bf.getBean("annotatedBean");
 			fail("should have failed, more than one bean of type");
@@ -359,7 +357,27 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 		bf.destroySingletons();
 	}
-	
+
+	public void testMethodInjectionWithMapAndMultipleMatchesButOnlyOneAutowireCandidate() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(MapMethodInjectionBean.class));
+		bf.registerBeanDefinition("testBean1", new RootBeanDefinition(TestBean.class));
+		RootBeanDefinition rbd2 = new RootBeanDefinition(TestBean.class);
+		rbd2.setAutowireCandidate(false);
+		bf.registerBeanDefinition("testBean2", rbd2);
+
+		MapMethodInjectionBean bean = (MapMethodInjectionBean) bf.getBean("annotatedBean");
+		TestBean tb = (TestBean) bf.getBean("testBean1");
+		assertEquals(1, bean.getTestBeanMap().size());
+		assertTrue(bean.getTestBeanMap().keySet().contains("testBean1"));
+		assertTrue(bean.getTestBeanMap().values().contains(tb));
+		assertSame(tb, bean.getTestBean());
+		bf.destroySingletons();
+	}
+
 	public void testMethodInjectionWithMapAndNoMatches() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();

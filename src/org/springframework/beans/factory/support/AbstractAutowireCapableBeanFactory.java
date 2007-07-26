@@ -24,7 +24,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,6 +42,8 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.SimpleTypeConverter;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -52,17 +53,17 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.CollectionFactory;
-import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -326,6 +327,103 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			result = beanProcessor.postProcessAfterInitialization(result, beanName);
 		}
 		return result;
+	}
+
+	public Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException {
+		return resolveDependency(descriptor, beanName, null, null);
+	}
+
+	public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
+			Set autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
+
+		Class type = descriptor.getDependencyType();
+		if (type.isArray()) {
+			Class componentType = type.getComponentType();
+			Map matchingBeans = findAutowireCandidates(beanName, componentType, descriptor);
+			if (matchingBeans.isEmpty()) {
+				if (descriptor.isRequired()) {
+					throw new NoSuchBeanDefinitionException(componentType,
+							"Unsatisfied dependency of type [" + componentType + "]: expected at least 1 matching bean");
+				}
+				return null;
+			}
+			if (autowiredBeanNames != null) {
+				autowiredBeanNames.addAll(matchingBeans.keySet());
+			}
+			TypeConverter converterToUse = typeConverter;
+			if (converterToUse == null) {
+				converterToUse = new SimpleTypeConverter();
+			}
+			return converterToUse.convertIfNecessary(matchingBeans.values(), type);
+		}
+		else if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
+			Class elementType = descriptor.getCollectionType();
+			if (elementType == null) {
+				if (descriptor.isRequired()) {
+					throw new FatalBeanException("No element type declared for collection");
+				}
+				return null;
+			}
+			Map matchingBeans = findAutowireCandidates(beanName, elementType, descriptor);
+			if (matchingBeans.isEmpty()) {
+				if (descriptor.isRequired()) {
+					throw new NoSuchBeanDefinitionException(elementType,
+							"Unsatisfied dependency of type [" + elementType.getName() + "]: expected at least 1 matching bean");
+				}
+				return null;
+			}
+			if (autowiredBeanNames != null) {
+				autowiredBeanNames.addAll(matchingBeans.keySet());
+			}
+			TypeConverter converterToUse = typeConverter;
+			if (converterToUse == null) {
+				converterToUse = new SimpleTypeConverter();
+			}
+			return converterToUse.convertIfNecessary(matchingBeans.values(), type);
+		}
+		else if (Map.class.isAssignableFrom(type) && type.isInterface()) {
+			Class keyType = descriptor.getMapKeyType();
+			if (keyType == null || !String.class.isAssignableFrom(keyType)) {
+				if (descriptor.isRequired()) {
+					throw new FatalBeanException("Map key type must be assignable to [" + String.class.getName() + "]");
+				}
+				return null;
+			}
+			Class valueType = descriptor.getMapValueType();
+			if (valueType == null) {
+				if (descriptor.isRequired()) {
+					throw new FatalBeanException("No value type declared for map");
+				}
+				return null;
+			}
+			Map matchingBeans = findAutowireCandidates(beanName, valueType, descriptor);
+			if (matchingBeans.isEmpty()) {
+				if (descriptor.isRequired()) {
+					throw new NoSuchBeanDefinitionException(valueType,
+							"Unsatisfied dependency of type [" + valueType.getName() + "]: expected at least 1 matching bean");
+				}
+				return null;
+			}
+			if (autowiredBeanNames != null) {
+				autowiredBeanNames.addAll(matchingBeans.keySet());
+			}
+			return matchingBeans;
+		}
+		else {
+			Map matchingBeans = findAutowireCandidates(beanName, type, descriptor);
+			if (matchingBeans.size() > 1 || (descriptor.isRequired() && matchingBeans.isEmpty())) {
+				throw new NoSuchBeanDefinitionException(type,
+						"expected single matching bean but found " + matchingBeans.size() + ": " + matchingBeans.keySet());
+			}
+			if (matchingBeans.isEmpty()) {
+				return null;
+			}
+			Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
+			if (autowiredBeanNames != null) {
+				autowiredBeanNames.add(entry.getKey());
+			}
+			return entry.getValue();
+		}
 	}
 
 
@@ -921,78 +1019,31 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		String[] propertyNames = unsatisfiedNonSimpleProperties(mbd, bw);
 		for (int i = 0; i < propertyNames.length; i++) {
 			String propertyName = propertyNames[i];
-			Object autowiredArgument = resolveAutowiredArgument(beanName, mbd, bw, propertyName, autowiredBeanNames);
-			if (autowiredArgument != null) {
-				pvs.addPropertyValue(propertyName, autowiredArgument);
-			}
-			for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
-				String autowiredBeanName = (String) it.next();
-				registerDependentBean(autowiredBeanName, beanName);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Autowiring by type from bean name '" + beanName + "' via property '" +
-							propertyName + "' to bean named '" + autowiredBeanName + "'");
+			try {
+				PropertyDescriptor pd = bw.getPropertyDescriptor(propertyName);
+				Object autowiredArgument = resolveDependency(
+						new DependencyDescriptor(new MethodParameter(pd.getWriteMethod(), 0), false),
+						beanName, autowiredBeanNames, bw);
+				if (autowiredArgument != null) {
+					pvs.addPropertyValue(propertyName, autowiredArgument);
 				}
-			}
-			autowiredBeanNames.clear();
-		}
-	}
-
-
-	/**
-	 * Resolve the specified argument which is supposed to be autowired.
-	 * Suppots arrays and collections as well.
-	 */
-	private Object resolveAutowiredArgument(
-			String beanName, AbstractBeanDefinition mbd, BeanWrapper bw, String propertyName, Set autowiredBeanNames)
-			throws UnsatisfiedDependencyException {
-
-		PropertyDescriptor pd = bw.getPropertyDescriptor(propertyName);
-		Class paramType = pd.getPropertyType();
-		if (paramType.isArray()) {
-			Class componentType = paramType.getComponentType();
-			Map beans = findAutowireCandidates(beanName, componentType);
-			if (!beans.isEmpty()) {
-				autowiredBeanNames.addAll(beans.keySet());
-				return bw.convertIfNecessary(beans.values(), paramType);
-			}
-		}
-		else if (Collection.class.isAssignableFrom(paramType)) {
-			if (JdkVersion.isAtLeastJava15()) {
-				Class elementType =
-						GenericCollectionTypeResolver.getCollectionParameterType(new MethodParameter(pd.getWriteMethod(), 0));
-				// Ignore untyped collections...
-				if (elementType != null) {
-					Map beans = findAutowireCandidates(beanName, elementType);
-					if (!beans.isEmpty()) {
-						autowiredBeanNames.addAll(beans.keySet());
-						return bw.convertIfNecessary(beans.values(), paramType);
+				for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
+					String autowiredBeanName = (String) it.next();
+					registerDependentBean(autowiredBeanName, beanName);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Autowiring by type from bean name '" + beanName + "' via property '" +
+								propertyName + "' to bean named '" + autowiredBeanName + "'");
 					}
 				}
+				autowiredBeanNames.clear();
 			}
-		}
-		else {
-			Map matchingBeans = findAutowireCandidates(beanName, paramType);
-			if (matchingBeans.size() > 1) {
+			catch (BeansException ex) {
 				throw new UnsatisfiedDependencyException(
-						mbd.getResourceDescription(), beanName, propertyName,
-						"There are " + matchingBeans.size() + " beans of type [" + paramType.getName() +
-						"] available for autowiring by type: " + matchingBeans.keySet() +
-						". There should have been exactly 1 to be able to autowire property '" +
-						propertyName + "' of bean '" + beanName + "'. Consider using autowiring by name instead.");
-			}
-			else if (!matchingBeans.isEmpty()) {
-				Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
-				autowiredBeanNames.add(entry.getKey());
-				return entry.getValue();
+						mbd.getResourceDescription(), beanName, propertyName, ex.getMessage());
 			}
 		}
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Not autowiring property '" + propertyName + "' of bean '" + beanName +
-					"' by type: no matching bean found");
-		}
-		return null;
 	}
+
 
 	/**
 	 * Return an array of non-simple bean properties that are unsatisfied.
@@ -1316,29 +1367,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * <p>If a subclass cannot obtain information about bean names by type,
 	 * a corresponding exception should be thrown.
 	 * @param beanName the name of the bean that is about to be wired
-	 * @param requiredType the type of the autowired property or argument
+	 * @param requiredType the actual type of bean to look for
+	 * (may be an array component type or collection element type)
+	 * @param descriptor the descriptor of the dependency to resolve
 	 * @return a Map of candidate names and candidate instances that match
 	 * the required type (never <code>null</code>)
 	 * @throws BeansException in case of errors
 	 * @see #autowireByType
 	 * @see #autowireConstructor
 	 */
-	protected Map findAutowireCandidates(String beanName, Class requiredType) throws BeansException {
-		Map result = findMatchingBeans(requiredType);
-		return (result != null ? result : Collections.EMPTY_MAP);
-	}
-
-	/**
-	 * Find bean instances that match the required type. Called by autowiring.
-	 * @param requiredType the type of the beans to look up
-	 * @return a Map of bean names and bean instances that match the required type,
-	 * or <code>null</code> if none found
-	 * @throws BeansException in case of errors
-	 * @deprecated as of Spring 2.0.1: Override <code>findAutowireCandidates</code> instead
-	 */
-	protected Map findMatchingBeans(Class requiredType) throws BeansException {
-		throw new FatalBeanException("Bean lookup by type not supported by this factory");
-	}
+	protected abstract Map findAutowireCandidates(
+			String beanName, Class requiredType, DependencyDescriptor descriptor)
+			throws BeansException;
 
 
 	//---------------------------------------------------------------------
@@ -1355,8 +1395,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			super(AbstractAutowireCapableBeanFactory.this, getInstantiationStrategy());
 		}
 
-		protected Map findAutowireCandidates(String beanName, Class requiredType) throws BeansException {
-			return AbstractAutowireCapableBeanFactory.this.findAutowireCandidates(beanName, requiredType);
+		protected Object resolveAutowiredArgument(String beanName, BeanWrapper bw, MethodParameter param, Set autowiredBeanNames) {
+			return resolveDependency(new DependencyDescriptor(param, true), beanName, autowiredBeanNames, bw);
 		}
 	}
 

@@ -16,7 +16,10 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.Set;
+
 import org.springframework.beans.BeansException;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
@@ -254,5 +257,29 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 */
 	Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException;
+
+
+	/**
+	 * Resolve the specified dependency against the beans defined in this factory.
+	 * @param descriptor the descriptor for the dependency
+	 * @param beanName the name of the bean which declares the present dependency
+	 * @return the resolved object, or <code>null</code> if none found
+	 * @throws BeansException in dependency resolution failed
+	 */
+	Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException;
+
+	/**
+	 * Resolve the specified dependency against the beans defined in this factory.
+	 * @param descriptor the descriptor for the dependency
+	 * @param beanName the name of the bean which declares the present dependency
+	 * @param autowiredBeanNames a Set that all names of autowired beans (used for
+	 * resolving the present dependency) are supposed to be added to
+	 * @param typeConverter the TypeConverter to use for populating arrays and
+	 * collections
+	 * @return the resolved object, or <code>null</code> if none found
+	 * @throws BeansException in dependency resolution failed
+	 */
+	Object resolveDependency(DependencyDescriptor descriptor, String beanName,
+			Set autowiredBeanNames, TypeConverter typeConverter) throws BeansException;
 
 }

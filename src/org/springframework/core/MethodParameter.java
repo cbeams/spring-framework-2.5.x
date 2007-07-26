@@ -107,7 +107,7 @@ public class MethodParameter {
 
 
 	/**
-	 * Return the Method held, if any.
+	 * Return the wrapped Method, if any.
 	 * <p>Note: Either Method or Constructor is available.
 	 * @return the Method, or <code>null</code> if none
 	 */
@@ -116,7 +116,7 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Return the Constructor held, if any.
+	 * Return the wrapped Constructor, if any.
 	 * <p>Note: Either Method or Constructor is available.
 	 * @return the Constructor, or <code>null</code> if none
 	 */
@@ -130,6 +130,30 @@ public class MethodParameter {
 	 */
 	public int getParameterIndex() {
 		return this.parameterIndex;
+	}
+
+	/**
+	 * Return the type of the method/constructor parameter.
+	 * @return the parameter type (never <code>null</code>)
+	 */
+	public Class getParameterType() {
+		return (this.method != null ?
+				this.method.getParameterTypes()[this.parameterIndex] :
+				this.constructor.getParameterTypes()[this.parameterIndex]);
+	}
+
+	/**
+	 * Return the annotations associated with the method/constructor parameter.
+	 * @return the parameter annotations, or <code>null</code> if there is
+	 * no annotation support (on JDK < 1.5).
+	 */
+	public Object[] getParameterAnnotations() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			return null;
+		}
+		return (this.method != null ?
+				this.method.getParameterAnnotations()[this.parameterIndex] :
+				this.constructor.getParameterAnnotations()[this.parameterIndex]);
 	}
 
 

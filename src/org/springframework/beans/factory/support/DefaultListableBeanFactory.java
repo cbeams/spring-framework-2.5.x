@@ -35,6 +35,7 @@ import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -286,17 +287,30 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of ConfigurableListableBeanFactory interface
 	//---------------------------------------------------------------------
 
-	public boolean isAutowireCandidate(String beanName) throws NoSuchBeanDefinitionException {
+	public boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor)
+			throws NoSuchBeanDefinitionException {
+
 		if (!containsBeanDefinition(beanName)) {
 			if (containsSingleton(beanName)) {
 				return true;
 			}
 			else if (getParentBeanFactory() instanceof ConfigurableListableBeanFactory) {
 				// No bean definition found in this factory -> delegate to parent.
-				return ((ConfigurableListableBeanFactory) getParentBeanFactory()).isAutowireCandidate(beanName);
+				return ((ConfigurableListableBeanFactory) getParentBeanFactory()).isAutowireCandidate(beanName, descriptor);
 			}
 		}
-		return getMergedLocalBeanDefinition(beanName).isAutowireCandidate();
+		return isAutowireCandidate(getMergedLocalBeanDefinition(beanName), descriptor);
+	}
+
+	/**
+	 * Determine whether the specified bean definition qualifies as an autowire candidate,
+	 * to be injected into other beans which declare a dependency of matching type.
+	 * @param mbd the merged bean definition to check
+	 * @param descriptor the descriptor of the dependency to resolve
+	 * @return whether the bean should be considered as autowire candidate
+	 */
+	protected boolean isAutowireCandidate(RootBeanDefinition mbd, DependencyDescriptor descriptor) {
+		return mbd.isAutowireCandidate();
 	}
 
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
@@ -413,13 +427,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of superclass abstract methods
 	//---------------------------------------------------------------------
 
-	protected Map findAutowireCandidates(String beanName, Class requiredType) {
+	protected Map findAutowireCandidates(String beanName, Class requiredType, DependencyDescriptor descriptor) {
 		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType);
 		Map result = CollectionFactory.createLinkedMapIfPossible(candidateNames.length);
+		// Try with specific descriptor first.
 		for (int i = 0; i < candidateNames.length; i++) {
 			String candidateName = candidateNames[i];
-			if (!candidateName.equals(beanName) && isAutowireCandidate(candidateName)) {
+			if (!candidateName.equals(beanName) && isAutowireCandidate(candidateName, descriptor)) {
 				result.put(candidateName, getBean(candidateName));
+			}
+		}
+		if (result.isEmpty() && descriptor.isRequired()) {
+			// None found for specific descriptor - try general type match.
+			for (int i = 0; i < candidateNames.length; i++) {
+				String candidateName = candidateNames[i];
+				if (!candidateName.equals(beanName) && isAutowireCandidate(candidateName, null)) {
+					result.put(candidateName, getBean(candidateName));
+				}
 			}
 		}
 		return result;

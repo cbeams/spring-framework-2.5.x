@@ -19,7 +19,6 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -36,8 +35,6 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.CollectionFactory;
-import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -507,10 +504,16 @@ abstract class ConstructorResolver {
 							"Ambiguous " + methodType + " argument types - " +
 							"did you specify the correct bean references as " + methodType + " arguments?");
 				}
-				Object autowiredArgument = resolveAutowiredArgument(
-						beanName, mbd, bw, methodOrCtor, methodType, paramType, paramIndex, autowiredBeanNames);
-				args.rawArguments[paramIndex] = autowiredArgument;
-				args.arguments[paramIndex] = autowiredArgument;
+				try {
+					Object autowiredArgument = resolveAutowiredArgument(
+							beanName, bw, MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex), autowiredBeanNames);
+					args.rawArguments[paramIndex] = autowiredArgument;
+					args.arguments[paramIndex] = autowiredArgument;
+				}
+				catch (BeansException ex) {
+					throw new UnsatisfiedDependencyException(
+							mbd.getResourceDescription(), beanName, paramIndex, paramType, ex.getMessage());
+				}
 			}
 		}
 
@@ -533,95 +536,11 @@ abstract class ConstructorResolver {
 	}
 
 	/**
-	 * Resolve the specified argument which is supposed to be autowired.
-	 * Suppots arrays and collections as well.
+	 * Template method for resolving the specified argument which is supposed to be autowired.
 	 */
-	private Object resolveAutowiredArgument(String beanName, RootBeanDefinition mbd, BeanWrapper bw,
-			Object methodOrCtor, String methodType, Class paramType, int paramIndex, Set autowiredBeanNames)
-			throws UnsatisfiedDependencyException {
-
-		if (paramType.isArray()) {
-			Class componentType = paramType.getComponentType();
-			Map beans = findAutowireCandidates(beanName, componentType);
-			if (beans.isEmpty()) {
-				throw new UnsatisfiedDependencyException(
-						mbd.getResourceDescription(), beanName, paramIndex, paramType, "expected at least 1 matching bean");
-			}
-			autowiredBeanNames.addAll(beans.keySet());
-			return bw.convertIfNecessary(beans.values(), paramType);
-		}
-		else if (Map.class.isAssignableFrom(paramType) && paramType.isInterface()) {
-			Class keyType = null;
-			Class valueType = null;
-			if (JdkVersion.isAtLeastJava15()) {
-				MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex);
-				keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParameter);
-				valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParameter);
-			}
-			if (keyType == null || !String.class.isAssignableFrom(keyType)) {
-				throw new UnsatisfiedDependencyException(
-						mbd.getResourceDescription(), beanName, paramIndex, paramType, 
-								"key type must be assignable to [" + String.class.getName() + "]");					
-			}
-			if (valueType == null) {
-				throw new UnsatisfiedDependencyException(
-						mbd.getResourceDescription(), beanName, paramIndex, paramType, "no value type declared");				
-			}
-			Map beans = findAutowireCandidates(beanName, valueType);
-			if (beans.isEmpty()) {
-				throw new UnsatisfiedDependencyException(
-						mbd.getResourceDescription(), beanName, paramIndex, paramType, "expected at least 1 matching bean");
-			}
-			return beans;
-		}
-		else if (Collection.class.isAssignableFrom(paramType) && paramType.isInterface()) {
-			Class elementType = null;
-			if (JdkVersion.isAtLeastJava15()) {
-				elementType = GenericCollectionTypeResolver.getCollectionParameterType(
-						MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex));
-			}
-			if (elementType == null) {
-				throw new UnsatisfiedDependencyException(
-						mbd.getResourceDescription(), beanName, paramIndex, paramType, "no element type declared");
-			}
-			Map beans = findAutowireCandidates(beanName, elementType);
-			if (beans.isEmpty()) {
-				throw new UnsatisfiedDependencyException(
-						mbd.getResourceDescription(), beanName, paramIndex, paramType, "expected at least 1 matching bean");
-			}
-			autowiredBeanNames.addAll(beans.keySet());
-			return bw.convertIfNecessary(beans.values(), paramType);
-		}
-		else {
-			Map matchingBeans = findAutowireCandidates(beanName, paramType);
-			if (matchingBeans.size() != 1) {
-				throw new UnsatisfiedDependencyException(
-						mbd.getResourceDescription(), beanName, paramIndex, paramType,
-						"There are " + matchingBeans.size() + " beans of type [" + paramType.getName() +
-						"] available for autowiring: " + matchingBeans.keySet() +
-						". There should have been exactly 1 to be able to autowire " +
-						methodType + " of bean '" + beanName + "'.");
-			}
-			Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
-			autowiredBeanNames.add(entry.getKey());
-			return entry.getValue();
-		}
-	}
-
-
-	/**
-	 * Find bean instances that match the required type.
-	 * Called during autowiring for the specified bean.
-	 * <p>If a subclass cannot obtain information about bean names by type,
-	 * a corresponding exception should be thrown.
-	 * @param beanName the name of the bean that is about to be wired
-	 * @param requiredType the type of the autowired constructor argument
-	 * @return a Map of candidate names and candidate instances that match
-	 * the required type (never <code>null</code>)
-	 * @throws BeansException in case of errors
-	 * @see #autowireConstructor
-	 */
-	protected abstract Map findAutowireCandidates(String beanName, Class requiredType) throws BeansException;
+	protected abstract Object resolveAutowiredArgument(
+			String beanName, BeanWrapper bw, MethodParameter param, Set autowiredBeanNames)
+			throws BeansException;
 
 
 	/**
