@@ -43,11 +43,12 @@ import org.springframework.util.StringUtils;
  * Bean definition reader for a simple properties format.
  *
  * <p>Provides bean definition registration methods for Map/Properties and
- * ResourceBundle. Typically applied to a DefaultListableBeanFactory.
+ * ResourceBundle. Typically applied to a DefaultListableBeanFactory.</p>
  *
  * <p><b>Example:</b>
  *
- * <pre class="code">employee.(class)=MyClass       // bean is of class MyClass
+ * <pre class="code">
+ * employee.(class)=MyClass       // bean is of class MyClass
  * employee.(abstract)=true       // this bean can't be instantiated directly
  * employee.group=Insurance       // real property
  * employee.usesDialUp=false      // real property (potentially overridden)
@@ -61,17 +62,19 @@ import org.springframework.util.StringUtils;
  * techie.(singleton)=false       // bean is a prototype (not a shared instance)
  * techie.manager(ref)=jeff       // reference to another bean
  * techie.department=Engineering  // real property
- * techie.usesDialUp=true         // real property (overriding parent value)</pre>
+ * techie.usesDialUp=true         // real property (overriding parent value)
  *
  * ceo.$0(ref)=secretary          // inject 'secretary' bean as 0th constructor arg
  * ceo.$1=1000000                 // inject value '1000000' at 1st constructor arg
- *
+ *</pre>
+ * 
  * <em><b>Note:</b> As of Spring 1.2.6, the use of <code>class</code> and
  * <code>parent</code> has been deprecated in favor of <code>(class)</code> and
  * <code>(parent)</code>, for consistency with all other special properties.
  * Users should note that support for <code>class</code> and <code>parent</code>
  * as special properties rather then actual bean properties will be removed in a
  * future version.</em>
+ * </p>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
