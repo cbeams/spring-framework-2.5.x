@@ -297,7 +297,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * Return if request parameters should be bound in case of a new form.
 	 */
 	public final boolean isBindOnNewForm() {
-		return bindOnNewForm;
+		return this.bindOnNewForm;
 	}
 
 	/**
@@ -316,7 +316,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * Return if session form mode is activated.
 	 */
 	public final boolean isSessionForm() {
-		return sessionForm;
+		return this.sessionForm;
 	}
 
 	/**
@@ -338,7 +338,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * expected to be called in the action phase.
 	 */
 	public boolean isRedirectAction() {
-		return redirectAction;
+		return this.redirectAction;
 	}
 
 	/**
@@ -359,7 +359,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #passRenderParameters
 	 */
 	public String[] getRenderParameters() {
-		return renderParameters;
+		return this.renderParameters;
 	}
 
 

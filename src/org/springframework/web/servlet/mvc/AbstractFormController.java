@@ -205,7 +205,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * Return <code>true</code> if request parameters should be bound in case of a new form.
 	 */
 	public final boolean isBindOnNewForm() {
-		return bindOnNewForm;
+		return this.bindOnNewForm;
 	}
 
 	/**
@@ -240,7 +240,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * Return <code>true</code> if session form mode is activated.
 	 */
 	public final boolean isSessionForm() {
-		return sessionForm;
+		return this.sessionForm;
 	}
 
 

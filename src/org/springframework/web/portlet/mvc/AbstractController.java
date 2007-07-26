@@ -157,7 +157,7 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	 * Return whether controller execution should be synchronized on the session.
 	 */
 	public final boolean isSynchronizeOnSession() {
-		return synchronizeOnSession;
+		return this.synchronizeOnSession;
 	}
 
 	/**
@@ -174,7 +174,7 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	 * Return whether controller will render when portlet is minimized.
 	 */
 	public boolean isRenderWhenMinimized() {
-		return renderWhenMinimized;
+		return this.renderWhenMinimized;
 	}
 
 
