@@ -39,14 +39,13 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * when the <code>sessionForm</code> property has been set to
  * <code>true</code>.</p>
  *
- * <p>This class is the base class for both framework subclasses like
- * {@link SimpleFormController SimpleFormController} and
- * {@link AbstractWizardFormController AbstractWizardFormController}, and
- * custom form controllers you can provide yourself.</p>
+ * <p>This class is the base class for both framework subclasses such as
+ * {@link SimpleFormController} and {@link AbstractWizardFormController}
+ * and custom form controllers that you may provide yourself.</p>
  *
- * <p>Both form-input-views and after-submission-views have to be provided
+ * <p>A form-input view and an after-submission view have to be provided
  * programmatically. To provide those views using configuration properties,
- * use the {@link SimpleFormController SimpleFormController}.</p>
+ * use the {@link SimpleFormController}.</p>
  *
  * <p>Subclasses need to override <code>showForm</code> to prepare the form view,
  * <code>processFormSubmission</code> to handle submit requests, and
@@ -66,15 +65,14 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * subject, see the workflow of this controller and the explanation of the
  * {@link BaseCommandController BaseCommandController}.</p>
  *
- * This controller is different from it's servlet counterpart in that it must take
-
+ * <p>This controller is different from it's servlet counterpart in that it must take
  * into account the two phases of a portlet request: the action phase and the render
- * phase.  See the JSR-168 spec for more details on these two phases.
+ * phase. See the JSR-168 spec for more details on these two phases.
  * Be especially aware that the action phase is called only once, but that the
- * render phase will be called repeatedly by the portal -- it does this every time
+ * render phase will be called repeatedly by the portal; it does this every time
  * the page containing the portlet is updated, even if the activity is in some other
- * portlet.  (This is not quite true, the portal can also be told to cache the results of
- * the render for a period of time, but assume it is true for programming purposes.)
+ * portlet. (This is not quite true, the portal can also be told to cache the results of
+ * the render for a period of time, but assume it is true for programming purposes.)</p>
  *
  * <p><b><a name="workflow">Workflow
  * (<a href="BaseCommandController.html#workflow">and that defined by superclass</a>):</b><br>
@@ -166,12 +164,12 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * submissions. The form object in the session can be considered a transaction token
  * in that case.</p>
  *
- * Make sure that any URLs that take you to your form controller are Render URLs, so
- * that it will not try to treat the initial call as a form submission.  If you use
- * Action URLs to link to your controller, you will need to override the
+ * <p>Make sure that any URLs that take you to your form controller are Render URLs,
+ * so that it will not try to treat the initial call as a form submission.
+ * If you use action URLs to link to your controller, you will need to override the
  * {@link #isFormSubmission isFormSubmission} method to use a different mechanism for
- * determining whether a form has been submitted.  Make sure this method will work for
- * both the ActionRequest and the RenderRequest objects.
+ * determining whether a form has been submitted. Make sure this method will work for
+ * both the ActionRequest and the RenderRequest objects.</p>
  *
  * <p>Note that views should never retrieve form beans from the session but always
  * from the request, as prepared by the form controller. Remember that some view

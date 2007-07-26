@@ -34,14 +34,13 @@ import org.springframework.web.servlet.ModelAndView;
  * This, either using a new bean instance per request, or using the same bean
  * when the <code>sessionForm</code> property has been set to <code>true</code>.</p>
  *
- * <p>This class is the base class for both framework subclasses like
- * {@link SimpleFormController SimpleFormController} and
- * {@link AbstractWizardFormController AbstractWizardFormController}, and
- * custom form controllers you can provide yourself.</p>
+ * <p>This class is the base class for both framework subclasses such as
+ * {@link SimpleFormController} and {@link AbstractWizardFormController}
+ * and custom form controllers that you may provide yourself.</p>
  *
- * <p>Both form-input views and after-submission views have to be provided
+ * <p>A form-input view and an after-submission view have to be provided
  * programmatically. To provide those views using configuration properties,
- * use the {@link SimpleFormController SimpleFormController}.</p>
+ * use the {@link SimpleFormController}.</p>
  *
  * <p>Subclasses need to override <code>showForm</code> to prepare the form view,
  * and <code>processFormSubmission</code> to handle submit requests. For the latter,
