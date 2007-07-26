@@ -211,7 +211,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Return the Validators for this controller.
 	 */
 	public final Validator[] getValidators() {
-		return validators;
+		return this.validators;
 	}
 
 	/**
@@ -225,7 +225,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Return if the Validator should get applied when binding.
 	 */
 	public final boolean isValidateOnBinding() {
-		return validateOnBinding;
+		return this.validateOnBinding;
 	}
 
 	/**
@@ -244,7 +244,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Return the strategy to use for resolving errors into message codes.
 	 */
 	public final MessageCodesResolver getMessageCodesResolver() {
-		return messageCodesResolver;
+		return this.messageCodesResolver;
 	}
 
 	/**
@@ -263,7 +263,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Return the strategy to use for processing binding errors.
 	 */
 	public final BindingErrorProcessor getBindingErrorProcessor() {
-		return bindingErrorProcessor;
+		return this.bindingErrorProcessor;
 	}
 
 	/**
@@ -293,7 +293,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * to every DataBinder that this controller uses.
 	 */
 	public final PropertyEditorRegistrar[] getPropertyEditorRegistrars() {
-		return propertyEditorRegistrars;
+		return this.propertyEditorRegistrars;
 	}
 
 

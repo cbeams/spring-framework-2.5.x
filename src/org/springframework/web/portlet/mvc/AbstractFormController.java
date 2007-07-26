@@ -164,12 +164,12 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * submissions. The form object in the session can be considered a transaction token
  * in that case.</p>
  *
- * Make sure that any URLs that take you to your form controller are Render URLs, so
- * that it will not try to treat the initial call as a form submission.  If you use
- * Action URLs to link to your controller, you will need to override the
+ * <p>Make sure that any URLs that take you to your form controller are Render URLs,
+ * so that it will not try to treat the initial call as a form submission.
+ * If you use action URLs to link to your controller, you will need to override the
  * {@link #isFormSubmission isFormSubmission} method to use a different mechanism for
- * determining whether a form has been submitted.  Make sure this method will work for
- * both the ActionRequest and the RenderRequest objects.
+ * determining whether a form has been submitted. Make sure this method will work for
+ * both the ActionRequest and the RenderRequest objects.</p>
  *
  * <p>Note that views should never retrieve form beans from the session but always
  * from the request, as prepared by the form controller. Remember that some view

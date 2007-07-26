@@ -51,9 +51,9 @@ import org.springframework.web.util.WebUtils;
  * image buttons too (via "_finish.x", "_abort.x", or "_target1.x").
  *
  * <p>The current page number will be stored in the session. It can also be
- * specified as request parameter PARAM_PAGE, to properly handle usage of
- * the back button in a browser: In this case, a submission always contains
- * the correct page number, even if the user submitted from an old view.
+ * specified as request parameter PARAM_PAGE ("_page") in order to properly handle
+ * usage of the back button in a browser: In this case, a submission will always
+ * contain the correct page number, even if the user submitted from an old view.
  *
  * <p>The page can only be changed if it validates correctly, except if a
  * "dirty back" or "dirty forward" is allowed. At finish, all pages get
@@ -378,6 +378,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * for dynamically defined pages.
 	 * @param request current HTTP request
 	 * @param command the command object as returned by formBackingObject
+	 * @param page the current page number
 	 * @return the current page count
 	 * @see #getPageCount
 	 */
@@ -521,11 +522,12 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
-	 * Return the current page number. Used by processFormSubmission.
+	 * Return the current page number. Used by {@link #processFormSubmission}.
 	 * <p>The default implementation checks the page session attribute.
 	 * Subclasses can override this for customized page determination.
-	 * @see #processFormSubmission
-	 * @see #getPageSessionAttributeName
+	 * @param request current HTTP request
+	 * @return the current page number
+	 * @see #getPageSessionAttributeName()
 	 */
 	protected int getCurrentPage(HttpServletRequest request) {
 		// Check for overriding attribute in request.
@@ -560,6 +562,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * <p>The parameter is recognized both when sent as a plain parameter
 	 * ("_finish") or when triggered by an image button ("_finish.x").
 	 * @param request current HTTP request
+	 * @return whether the request indicates to finish form processing
 	 * @see #PARAM_FINISH
 	 */
 	protected boolean isFinishRequest(HttpServletRequest request) {
@@ -575,6 +578,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * to provide custom logic to detect a cancel request.
 	 * <p>The parameter is recognized both when sent as a plain parameter
 	 * ("_cancel") or when triggered by an image button ("_cancel.x").
+	 * @return whether the request indicates to cancel form processing
 	 * @param request current HTTP request
 	 * @see #PARAM_CANCEL
 	 */
