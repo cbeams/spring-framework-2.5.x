@@ -230,8 +230,9 @@ class TypeConverterDelegate {
 				// Definitely doesn't match: throw IllegalArgumentException.
 				throw new IllegalArgumentException("Cannot convert value of type [" +
 						(newValue != null ? ClassUtils.getQualifiedName(newValue.getClass()) : null) +
-						"] to required type [" + ClassUtils.getQualifiedName(requiredType) + "] for property '" +
-						propertyName + "': no matching editors or conversion strategy found");
+						"] to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" +
+						(propertyName != null ? " for property '" + propertyName + "'" : "") +
+						": no matching editors or conversion strategy found");
 			}
 		}
 
