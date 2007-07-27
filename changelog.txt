@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M3 (2007-07-24)
+Changes in version 2.1 M3 (2007-07-30)
 --------------------------------------
 
 General
@@ -11,6 +11,7 @@ General
 
 Package org.springframework.aop
 * Cglib2AopProxy uses weak references for advised object, interceptors and validated classes (avoiding a memory leak)
+* ProxyFactoryBean avoids NPE in case of target class being null (due to misconfiguration)
 * fixed AspectJ pointcut handling to resolve bridge methods before matching
 * fixed AspectJ pointcut handling to correctly match generic return types
 * added support for "bean(name)" element in AspectJ pointcut expressions
@@ -20,7 +21,7 @@ Package org.springframework.aop
 * fixed ConfigBeanDefinitionParser to properly handle empty pointcut/advice bean names in a tooling environment
 * added "getAspectClassLoader()" method to AspectInstanceFactory interface
 * revised reflective class loading to use the correct ClassLoader according to the OSGi bundle structure (if any)
-* declare-parents allows specifying "delegate-ref" to delgate introductions to a bean as an alternative to "default-impl"
+* declare-parents allows specifying "delegate-ref" to delegate introductions to a bean as alternative to "default-impl"
 
 Package org.springframework.beans
 * added "charsToDelete" and "emptyArrayAsNull" options to StringArrayPropertyEditor
@@ -28,6 +29,7 @@ Package org.springframework.beans
 * BeanWrapperImpl lazily performs JavaBeans introspection (avoiding introspection failure for non-visible target class)
 * TypeConverterDelegate protects its collection conversion process against misbehaving Collections with a null Iterator
 * TypeConverterDelegate only attempts to convert well-known collection types (skips custom types in the first place)
+* PropertyBatchUpdateException synchronizes on PrintStream/PrintWriter (like the JDK 1.6 Throwable class does)
 * BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
 * added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
 * exposed "getBean(name, args)" method on BeanFactory interface
@@ -44,11 +46,16 @@ Package org.springframework.beans
 * DefaultListableBeanFactory ignores invalid parent bean names when matching beans by type with allowEagerInit=false
 * DefaultListableBeanFactory only ignores invalid bean class names when matching beans by type with allowEagerInit=false
 * DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
+* DefaultListableBeanFactory allows for concurrent "registerBeanDefinition" calls after the configuration phase
+* bean creation records suppressed exceptions, exposing them as related causes in a subsequent BeanCreationException
+* added "setTypeConverter" method to ConfigurableBeanFactory, allowing to override the default PropertyEditor mechanism
 * introduced "removeBeanDefinition" method in BeanDefinitionRegistry interface and DefaultListableBeanFactory class
 * AbstractBeanFactory supports any BeanDefinition implementation (does not require AbstractBeanDefinition anymore)
 * reworked AbstractBeanFactory's bean definition merging for less coupling to RootBeanDefinition as merge result
 * introduced GenericBeanDefinition as one-stop shop for standard bean definition purposes (with configurable parent)
 * DefaultBeanNameGenerator does not require an AbstractBeanDefinition implementation for bean name generation anymore
+* added "resolveDependency" methods to AutowireCapableBeanFactory interface
+* @Autowired annotation ignores target beans marked as autowire-candidate="false" (analogous to standard autowiring)
 * added autowiring by type for arrays, collections, maps (available for @Autowired, 'constructor', 'byType' autowiring)
 * Autowired/CommonAnnotationBeanPostProcessor registers autowired beans as dependent on their injected target bean
 * AnnotationBeanConfigurerAspect proceeds without injection in case of a circular reference problem, logging a warning
