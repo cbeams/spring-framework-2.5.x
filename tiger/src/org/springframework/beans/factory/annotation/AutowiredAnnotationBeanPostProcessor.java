@@ -36,7 +36,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
@@ -311,7 +310,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		@Override
 		protected void inject(Object bean, String beanName, PropertyValues pvs) throws Throwable {
 			Set autowiredBeanNames = CollectionFactory.createLinkedSetIfPossible(4);
-			TypeConverter typeConverter = new SimpleTypeConverter();
+			TypeConverter typeConverter = beanFactory.getTypeConverter();
 
 			if (this.isField) {
 				Field field = (Field) this.member;
