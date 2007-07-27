@@ -161,7 +161,7 @@ class BeanDefinitionValueResolver {
 			try {
 				Class resolvedTargetType = resolveTargetType(typedStringValue);
 				if (resolvedTargetType != null) {
-					return this.typeConverter.convertIfNecessary(typedStringValue.getValue(), resolvedTargetType, null);
+					return this.typeConverter.convertIfNecessary(typedStringValue.getValue(), resolvedTargetType);
 				}
 				else {
 					// No target type specified - no conversion necessary...

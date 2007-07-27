@@ -19,6 +19,7 @@ package org.springframework.beans.factory;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +38,8 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.TypeConverter;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -54,6 +57,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.test.AssertThrows;
@@ -736,13 +740,28 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testCustomEditor() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		NumberFormat nf = NumberFormat.getInstance(Locale.UK);
+		NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
 		lbf.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("myFloat", "1.1");
+		pvs.addPropertyValue("myFloat", "1,1");
 		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, pvs));
 		TestBean testBean = (TestBean) lbf.getBean("testBean");
-		//System.out.println(testBean.getMyFloat().floatValue());
+		assertTrue(testBean.getMyFloat().floatValue() == 1.1f);
+	}
+
+	public void testCustomTypeConverter() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
+		lbf.setTypeConverter(new CustomTypeConverter(nf));
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("myFloat", "1,1");
+		ConstructorArgumentValues cav = new ConstructorArgumentValues();
+		cav.addIndexedArgumentValue(0, "myName");
+		cav.addIndexedArgumentValue(1, "myAge");
+		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, cav, pvs));
+		TestBean testBean = (TestBean) lbf.getBean("testBean");
+		assertEquals("myName", testBean.getName());
+		assertEquals(5, testBean.getAge());
 		assertTrue(testBean.getMyFloat().floatValue() == 1.1f);
 	}
 
@@ -1970,6 +1989,37 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 		public Resource[] getResourceArray() {
 			return resourceArray;
+		}
+	}
+
+
+	private static class CustomTypeConverter implements TypeConverter {
+
+		private final NumberFormat numberFormat;
+
+		public CustomTypeConverter(NumberFormat numberFormat) {
+			this.numberFormat = numberFormat;
+		}
+
+		public Object convertIfNecessary(Object value, Class requiredType) {
+			return convertIfNecessary(value, requiredType, null);
+		}
+
+		public Object convertIfNecessary(Object value, Class requiredType, MethodParameter methodParam) {
+			if (value instanceof String && Float.class.isAssignableFrom(requiredType)) {
+				try {
+					return new Float(this.numberFormat.parse((String) value).floatValue());
+				}
+				catch (ParseException ex) {
+					throw new TypeMismatchException(value, requiredType, ex);
+				}
+			}
+			else if (value instanceof String && int.class.isAssignableFrom(requiredType)) {
+				return new Integer(5);
+			}
+			else {
+				return value;
+			}
 		}
 	}
 

@@ -145,8 +145,20 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
 
 	/**
-	 * Obtain a type converter as used by this BeanFactory. This is typically a fresh
+	 * Set a custom type converter that this BeanFactory should use for converting
+	 * bean property values, constructor argument values, etc.
+	 * <p>This will override the default PropertyEditor mechanism and hence make
+	 * any custom editors or custom editor registrars irrelevant.
+	 * @see #addPropertyEditorRegistrar
+	 * @see #registerCustomEditor
+	 */
+	void setTypeConverter(TypeConverter typeConverter);
+
+	/**
+	 * Obtain a type converter as used by this BeanFactory. This may be a fresh
 	 * instance for each call, since TypeConverters are usually <i>not</i> thread-safe.
+	 * <p>If the default PropertyEditor mechanism is active, the returned
+	 * TypeConverter will be aware of all custom editors that have been registered.
 	 */
 	TypeConverter getTypeConverter();
 

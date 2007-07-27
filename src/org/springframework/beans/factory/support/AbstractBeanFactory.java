@@ -112,6 +112,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	/** Custom PropertyEditorRegistrars to apply to the beans of this factory */
 	private final Set propertyEditorRegistrars = CollectionFactory.createLinkedSetIfPossible(16);
 
+	/** A custom TypeConverter to use, overriding the default PropertyEditor mechanism */
+	private TypeConverter typeConverter;
+
 	/** BeanPostProcessors to apply in createBean */
 	private final List beanPostProcessors = new ArrayList();
 
@@ -594,10 +597,29 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		return this.customEditors;
 	}
 
+	public void setTypeConverter(TypeConverter typeConverter) {
+		this.typeConverter = typeConverter;
+	}
+
+	/**
+	 * Return the custom TypeConverter to use, if any.
+	 * @return the custom TypeConverter, or <code>null</code> if none specified
+	 */
+	protected TypeConverter getCustomTypeConverter() {
+		return this.typeConverter;
+	}
+
 	public TypeConverter getTypeConverter() {
-		SimpleTypeConverter typeConverter = new SimpleTypeConverter();
-		registerCustomEditors(typeConverter);
-		return typeConverter;
+		TypeConverter customConverter = getCustomTypeConverter();
+		if (customConverter != null) {
+			return customConverter;
+		}
+		else {
+			// Build default TypeConverter, registering custom editors.
+			SimpleTypeConverter typeConverter = new SimpleTypeConverter();
+			registerCustomEditors(typeConverter);
+			return typeConverter;
+		}
 	}
 
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {

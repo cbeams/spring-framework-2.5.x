@@ -28,6 +28,7 @@ import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -60,15 +61,21 @@ abstract class ConstructorResolver {
 
 	private final InstantiationStrategy instantiationStrategy;
 
+	private final TypeConverter typeConverter;
+
 
 	/**
 	 * Create a new ConstructorResolver for the given factory and instantiation strategy.
 	 * @param beanFactory the BeanFactory to work with
 	 * @param instantiationStrategy the instantiate strategy for creating bean instances
+	 * @param typeConverter the TypeConverter to use (or <code>null</code> for using the default)
 	 */
-	public ConstructorResolver(AbstractBeanFactory beanFactory, InstantiationStrategy instantiationStrategy) {
+	public ConstructorResolver(
+			AbstractBeanFactory beanFactory, InstantiationStrategy instantiationStrategy, TypeConverter typeConverter) {
+
 		this.beanFactory = beanFactory;
 		this.instantiationStrategy = instantiationStrategy;
+		this.typeConverter = typeConverter;
 	}
 
 
@@ -106,8 +113,9 @@ abstract class ConstructorResolver {
 				if (argsToUse == null) {
 					Class[] paramTypes = constructorToUse.getParameterTypes();
 					Object[] argsToResolve = mbd.preparedConstructorArguments;
+					TypeConverter converter = (this.typeConverter != null ? this.typeConverter : bw);
 					BeanDefinitionValueResolver valueResolver =
-							new BeanDefinitionValueResolver(this.beanFactory, beanName, mbd, bw);
+							new BeanDefinitionValueResolver(this.beanFactory, beanName, mbd, converter);
 					argsToUse = new Object[argsToResolve.length];
 					for (int i = 0; i < argsToResolve.length; i++) {
 						Object argValue = argsToResolve[i];
@@ -115,7 +123,7 @@ abstract class ConstructorResolver {
 							String argName = "constructor argument with index " + i;
 							argValue = valueResolver.resolveValueIfNecessary(argName, argValue);
 						}
-						argsToUse[i] = bw.convertIfNecessary(argValue, paramTypes[i],
+						argsToUse[i] = converter.convertIfNecessary(argValue, paramTypes[i],
 								new MethodParameter(constructorToUse, i));
 					}
 				}
@@ -264,8 +272,9 @@ abstract class ConstructorResolver {
 				if (argsToUse == null) {
 					Class[] paramTypes = factoryMethodToUse.getParameterTypes();
 					Object[] argsToResolve = mbd.preparedConstructorArguments;
+					TypeConverter converter = (this.typeConverter != null ? this.typeConverter : bw);
 					BeanDefinitionValueResolver valueResolver =
-							new BeanDefinitionValueResolver(this.beanFactory, beanName, mbd, bw);
+							new BeanDefinitionValueResolver(this.beanFactory, beanName, mbd, converter);
 					argsToUse = new Object[argsToResolve.length];
 					for (int i = 0; i < argsToResolve.length; i++) {
 						Object argValue = argsToResolve[i];
@@ -273,7 +282,7 @@ abstract class ConstructorResolver {
 							String argName = "factory method argument with index " + i;
 							argValue = valueResolver.resolveValueIfNecessary(argName, argValue);
 						}
-						argsToUse[i] = bw.convertIfNecessary(argValue, paramTypes[i],
+						argsToUse[i] = converter.convertIfNecessary(argValue, paramTypes[i],
 								new MethodParameter(factoryMethodToUse, i));
 					}
 				}
@@ -381,8 +390,9 @@ abstract class ConstructorResolver {
 			String beanName, RootBeanDefinition mbd, BeanWrapper bw,
 			ConstructorArgumentValues cargs, ConstructorArgumentValues resolvedValues) {
 
+		TypeConverter converterToUse = (this.typeConverter != null ? this.typeConverter : bw);
 		BeanDefinitionValueResolver valueResolver =
-				new BeanDefinitionValueResolver(this.beanFactory, beanName, mbd, bw);
+				new BeanDefinitionValueResolver(this.beanFactory, beanName, mbd, converterToUse);
 
 		int minNrOfArgs = cargs.getArgumentCount();
 
@@ -440,6 +450,7 @@ abstract class ConstructorResolver {
 			throws UnsatisfiedDependencyException {
 
 		String methodType = (methodOrCtor instanceof Constructor ? "constructor" : "factory method");
+		TypeConverter converter = (this.typeConverter != null ? this.typeConverter : bw);
 
 		ArgumentsHolder args = new ArgumentsHolder(paramTypes.length);
 		Set usedValueHolders = new HashSet(paramTypes.length);
@@ -470,7 +481,7 @@ abstract class ConstructorResolver {
 				else {
 					try {
 						Object originalValue = valueHolder.getValue();
-						Object convertedValue = bw.convertIfNecessary(originalValue, paramType,
+						Object convertedValue = converter.convertIfNecessary(originalValue, paramType,
 								MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex));
 						args.arguments[paramIndex] = convertedValue;
 						ConstructorArgumentValues.ValueHolder sourceHolder =
@@ -505,8 +516,8 @@ abstract class ConstructorResolver {
 							"did you specify the correct bean references as " + methodType + " arguments?");
 				}
 				try {
-					Object autowiredArgument = resolveAutowiredArgument(
-							beanName, bw, MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex), autowiredBeanNames);
+					MethodParameter param = MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex);
+					Object autowiredArgument = resolveAutowiredArgument(param, beanName, autowiredBeanNames, converter);
 					args.rawArguments[paramIndex] = autowiredArgument;
 					args.arguments[paramIndex] = autowiredArgument;
 				}
@@ -539,7 +550,7 @@ abstract class ConstructorResolver {
 	 * Template method for resolving the specified argument which is supposed to be autowired.
 	 */
 	protected abstract Object resolveAutowiredArgument(
-			String beanName, BeanWrapper bw, MethodParameter param, Set autowiredBeanNames)
+			MethodParameter param, String beanName, Set autowiredBeanNames, TypeConverter typeConverter)
 			throws BeansException;
 
 

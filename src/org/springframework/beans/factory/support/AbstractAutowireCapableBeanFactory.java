@@ -42,7 +42,6 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
@@ -350,11 +349,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (autowiredBeanNames != null) {
 				autowiredBeanNames.addAll(matchingBeans.keySet());
 			}
-			TypeConverter converterToUse = typeConverter;
-			if (converterToUse == null) {
-				converterToUse = new SimpleTypeConverter();
-			}
-			return converterToUse.convertIfNecessary(matchingBeans.values(), type);
+			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
+			return converter.convertIfNecessary(matchingBeans.values(), type);
 		}
 		else if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
 			Class elementType = descriptor.getCollectionType();
@@ -375,11 +371,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (autowiredBeanNames != null) {
 				autowiredBeanNames.addAll(matchingBeans.keySet());
 			}
-			TypeConverter converterToUse = typeConverter;
-			if (converterToUse == null) {
-				converterToUse = new SimpleTypeConverter();
-			}
-			return converterToUse.convertIfNecessary(matchingBeans.values(), type);
+			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
+			return converter.convertIfNecessary(matchingBeans.values(), type);
 		}
 		else if (Map.class.isAssignableFrom(type) && type.isInterface()) {
 			Class keyType = descriptor.getMapKeyType();
@@ -1015,6 +1008,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected void autowireByType(
 			String beanName, AbstractBeanDefinition mbd, BeanWrapper bw, MutablePropertyValues pvs) {
 
+		TypeConverter converter = getCustomTypeConverter();
+		if (converter == null) {
+			converter = bw;
+		}
 		Set autowiredBeanNames = CollectionFactory.createLinkedSetIfPossible(4);
 		String[] propertyNames = unsatisfiedNonSimpleProperties(mbd, bw);
 		for (int i = 0; i < propertyNames.length; i++) {
@@ -1023,7 +1020,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				PropertyDescriptor pd = bw.getPropertyDescriptor(propertyName);
 				Object autowiredArgument = resolveDependency(
 						new DependencyDescriptor(new MethodParameter(pd.getWriteMethod(), 0), false),
-						beanName, autowiredBeanNames, bw);
+						beanName, autowiredBeanNames, converter);
 				if (autowiredArgument != null) {
 					pvs.addPropertyValue(propertyName, autowiredArgument);
 				}
@@ -1176,11 +1173,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			original = Arrays.asList(pvs.getPropertyValues());
 		}
 
-		BeanDefinitionValueResolver valueResolver =
-				new BeanDefinitionValueResolver(this, beanName, mbd, bw);
+		TypeConverter converter = getCustomTypeConverter();
+		if (converter == null) {
+			converter = bw;
+		}
+		BeanDefinitionValueResolver valueResolver = new BeanDefinitionValueResolver(this, beanName, mbd, converter);
 
 		// Create a deep copy, resolving any references for values.
-		BeanWrapperImpl bwi = (bw instanceof BeanWrapperImpl ? (BeanWrapperImpl) bw : null);
 		List deepCopy = new ArrayList(original.size());
 		boolean resolveNecessary = false;
 		for (Iterator it = original.iterator(); it.hasNext();) {
@@ -1196,14 +1195,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// Possibly store converted value in merged bean definition,
 				// in order to avoid re-conversion for every created bean instance.
 				if (resolvedValue == originalValue) {
-					if (bwi != null && !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName)) {
-						pv.setConvertedValue(bwi.convertForProperty(resolvedValue, propertyName));
+					if (!PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName)) {
+						pv.setConvertedValue(convertForProperty(resolvedValue, propertyName, bw, converter));
 					}
 					deepCopy.add(pv);
 				}
 				else if (originalValue instanceof TypedStringValue &&
-						bwi != null && !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName)) {
-					pv.setConvertedValue(bwi.convertForProperty(resolvedValue, propertyName));
+						!PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName)) {
+					pv.setConvertedValue(convertForProperty(resolvedValue, propertyName, bw, converter));
 					deepCopy.add(pv);
 				}
 				else {
@@ -1223,6 +1222,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		catch (BeansException ex) {
 			throw new BeanCreationException(
 					mbd.getResourceDescription(), beanName, "Error setting property values", ex);
+		}
+	}
+
+	/**
+	 * Convert the given value for the specified target property.
+	 */
+	private Object convertForProperty(Object value, String propertyName, BeanWrapper bw, TypeConverter converter) {
+		if (converter instanceof BeanWrapperImpl) {
+			return ((BeanWrapperImpl) converter).convertForProperty(value, propertyName);
+		}
+		else {
+			PropertyDescriptor descriptor = bw.getPropertyDescriptor(propertyName);
+			return converter.convertIfNecessary(
+					value, descriptor.getPropertyType(), new MethodParameter(descriptor.getWriteMethod(), 0));
 		}
 	}
 
@@ -1392,11 +1405,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private class ConstructorResolverAdapter extends ConstructorResolver {
 
 		public ConstructorResolverAdapter() {
-			super(AbstractAutowireCapableBeanFactory.this, getInstantiationStrategy());
+			super(AbstractAutowireCapableBeanFactory.this, getInstantiationStrategy(), getCustomTypeConverter());
 		}
 
-		protected Object resolveAutowiredArgument(String beanName, BeanWrapper bw, MethodParameter param, Set autowiredBeanNames) {
-			return resolveDependency(new DependencyDescriptor(param, true), beanName, autowiredBeanNames, bw);
+		protected Object resolveAutowiredArgument(
+				MethodParameter param, String beanName, Set autowiredBeanNames, TypeConverter typeConverter) {
+			return resolveDependency(new DependencyDescriptor(param, true), beanName, autowiredBeanNames, typeConverter);
 		}
 	}
 
