@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.support;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +79,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private boolean allowEagerClassLoading = true;
 
 	/** Map of bean definition objects, keyed by bean name */
-	private final Map beanDefinitionMap = new HashMap();
+	private final Map beanDefinitionMap = CollectionFactory.createConcurrentMapIfPossible(16);
 
 	/** List of bean definition names, in registration order */
 	private final List beanDefinitionNames = new ArrayList();
@@ -149,7 +148,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	public String[] getBeanDefinitionNames() {
-		return StringUtils.toStringArray(this.beanDefinitionNames);
+		synchronized (this.beanDefinitionMap) {
+			return StringUtils.toStringArray(this.beanDefinitionNames);
+		}
 	}
 
 	public String[] getBeanNamesForType(Class type) {
@@ -160,8 +161,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		List result = new ArrayList();
 
 		// Check all bean definitions.
-		for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
-			String beanName = (String) it.next();
+		String[] beanDefinitionNames = null;
+		synchronized (this.beanDefinitionMap) {
+			beanDefinitionNames = StringUtils.toStringArray(this.beanDefinitionNames);
+		}
+		for (int i = 0; i < beanDefinitionNames.length; i++) {
+			String beanName = beanDefinitionNames[i];
 			// Only consider bean as eligible if the bean name
 			// is not defined as alias for some other bean.
 			if (!isAlias(beanName)) {
@@ -328,20 +333,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (logger.isInfoEnabled()) {
 			logger.info("Pre-instantiating singletons in " + this);
 		}
-		for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
-			String beanName = (String) it.next();
-			if (!containsSingleton(beanName) && containsBeanDefinition(beanName)) {
-				RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
-				if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
-					Class beanClass = resolveBeanClass(bd, beanName, true);
-					if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
-						FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
-						if (factory instanceof SmartFactoryBean && ((SmartFactoryBean) factory).isEagerInit()) {
+
+		synchronized (this.beanDefinitionMap) {
+			for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
+				String beanName = (String) it.next();
+				if (!containsSingleton(beanName) && containsBeanDefinition(beanName)) {
+					RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+					if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+						Class beanClass = resolveBeanClass(bd, beanName, true);
+						if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
+							FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+							if (factory instanceof SmartFactoryBean && ((SmartFactoryBean) factory).isEagerInit()) {
+								getBean(beanName);
+							}
+						}
+						else {
 							getBean(beanName);
 						}
-					}
-					else {
-						getBean(beanName);
 					}
 				}
 			}
@@ -369,56 +377,62 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
-		Object oldBeanDefinition = this.beanDefinitionMap.get(beanName);
-		if (oldBeanDefinition != null) {
-			if (!this.allowBeanDefinitionOverriding) {
-				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
-						"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
-						"': There is already [" + oldBeanDefinition + "] bound.");
-			}
-			else {
-				if (logger.isInfoEnabled()) {
-					logger.info("Overriding bean definition for bean '" + beanName +
-							"': replacing [" + oldBeanDefinition + "] with [" + beanDefinition + "]");
+		synchronized (this.beanDefinitionMap) {
+			Object oldBeanDefinition = this.beanDefinitionMap.get(beanName);
+			if (oldBeanDefinition != null) {
+				if (!this.allowBeanDefinitionOverriding) {
+					throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
+							"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
+							"': There is already [" + oldBeanDefinition + "] bound.");
+				}
+				else {
+					if (logger.isInfoEnabled()) {
+						logger.info("Overriding bean definition for bean '" + beanName +
+								"': replacing [" + oldBeanDefinition + "] with [" + beanDefinition + "]");
+					}
 				}
 			}
-		}
-		else {
-			this.beanDefinitionNames.add(beanName);
-		}
-		this.beanDefinitionMap.put(beanName, beanDefinition);
+			else {
+				this.beanDefinitionNames.add(beanName);
+			}
+			this.beanDefinitionMap.put(beanName, beanDefinition);
 
-		// Remove the merged bean definition for the given bean, if already created.
-		clearMergedBeanDefinition(beanName);
+			// Remove the merged bean definition for the given bean, if already created.
+			clearMergedBeanDefinition(beanName);
 
-		// Remove corresponding bean from singleton cache, if any. Shouldn't usually
-		// be necessary, rather just meant for overriding a context's default beans
-		// (e.g. the default StaticMessageSource in a StaticApplicationContext).
-		synchronized (getSingletonMutex()) {
-			removeSingleton(beanName);
+			if (oldBeanDefinition == null) {
+				// Remove corresponding bean from singleton cache, if any. Shouldn't usually
+				// be necessary, rather just meant for overriding a context's default beans
+				// (e.g. the default StaticMessageSource in a StaticApplicationContext).
+				synchronized (getSingletonMutex()) {
+					removeSingleton(beanName);
+				}
+			}
 		}
 	}
 
 	public void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		Assert.hasText(beanName, "'beanName' must not be empty");
 
-		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.remove(beanName);
-		if (bd == null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No bean named '" + beanName + "' found in " + this);
+		synchronized (this.beanDefinitionMap) {
+			BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.remove(beanName);
+			if (bd == null) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("No bean named '" + beanName + "' found in " + this);
+				}
+				throw new NoSuchBeanDefinitionException(beanName);
 			}
-			throw new NoSuchBeanDefinitionException(beanName);
-		}
-		this.beanDefinitionNames.remove(beanName);
+			this.beanDefinitionNames.remove(beanName);
 
-		// Remove the merged bean definition for the given bean, if already created.
-		clearMergedBeanDefinition(beanName);
+			// Remove the merged bean definition for the given bean, if already created.
+			clearMergedBeanDefinition(beanName);
 
-		// Remove corresponding bean from singleton cache, if any. Shouldn't usually
-		// be necessary, rather just meant for overriding a context's default beans
-		// (e.g. the default StaticMessageSource in a StaticApplicationContext).
-		synchronized (getSingletonMutex()) {
-			removeSingleton(beanName);
+			// Remove corresponding bean from singleton cache, if any. Shouldn't usually
+			// be necessary, rather just meant for overriding a context's default beans
+			// (e.g. the default StaticMessageSource in a StaticApplicationContext).
+			synchronized (getSingletonMutex()) {
+				removeSingleton(beanName);
+			}
 		}
 	}
 

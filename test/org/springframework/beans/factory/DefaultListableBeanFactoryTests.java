@@ -662,7 +662,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	public void testBeanDefinitionOverriding() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
-		lbf.preInstantiateSingletons();
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
 		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
 	}
@@ -855,9 +854,9 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testReregisterBeanDefinition() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, false));
 		assertTrue(lbf.getBean("testBean") instanceof TestBean);
-		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(NestedTestBean.class));
+		lbf.registerBeanDefinition("testBean", new RootBeanDefinition(NestedTestBean.class, false));
 		assertTrue(lbf.getBean("testBean") instanceof NestedTestBean);
 	}
 
