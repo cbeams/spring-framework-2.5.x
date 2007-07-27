@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 
 /**
  * Descriptor for a specific dependency that is about to be injected.
- * Wraps a constructor parameter, a method parameter of a field,
+ * Wraps a constructor parameter, a method parameter or a field,
  * allowing unified access to their metadata.
  *
  * @author Juergen Hoeller
@@ -139,7 +139,9 @@ public class DependencyDescriptor {
 	/**
 	 * Obtain the annotations associated with the wrapped parameter/field, if any.
 	 * @return the parameter/field annotations, or <code>null</code> if there is
-	 * no annotation support (on JDK < 1.5).
+	 * no annotation support (on JDK < 1.5). The return value is an Object array
+	 * instead of an Annotation array simply for compatibility with older JDKs;
+	 * feel free to cast it to <code>Annotation[]</code> on JDK 1.5 or higher.
 	 */
 	public Object[] getAnnotations() {
 		if (this.field != null) {

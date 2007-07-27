@@ -145,7 +145,9 @@ public class MethodParameter {
 	/**
 	 * Return the annotations associated with the method/constructor parameter.
 	 * @return the parameter annotations, or <code>null</code> if there is
-	 * no annotation support (on JDK < 1.5).
+	 * no annotation support (on JDK < 1.5). The return value is an Object array
+	 * instead of an Annotation array simply for compatibility with older JDKs;
+	 * feel free to cast it to <code>Annotation[]</code> on JDK 1.5 or higher.
 	 */
 	public Object[] getParameterAnnotations() {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
