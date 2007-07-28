@@ -62,18 +62,147 @@
 
 	</path>
 	
+
+	<patternset id="spring.full.packages">
+		<include name="META-INF/**"/>
+		<include name="org/springframework/**"/>
+		<!-- exclude content of spring-aspects.jar -->
+		<exclude name="META-INF/aop.xml"/>
+		<exclude name="org/springframework/beans/factory/aspectj/**"/>
+		<exclude name="org/springframework/transaction/aspectj/**"/>
+		<exclude name="org/springframework/web/portlet/**"/>
+	</patternset>
+
+
+	<patternset id="spring.aop.packages">
+		<include name="org/springframework/aop/**"/>
+		<include name="org/springframework/metadata/**"/>
+	</patternset>
+
+	<patternset id="spring.beans.packages">
+		<include name="org/springframework/beans/**"/>
+		<!-- exclude content of spring-aspects.jar -->
+		<exclude name="org/springframework/beans/factory/aspectj/**"/>
+	</patternset>
+
+	<patternset id="spring.context.packages">
+		<include name="org/springframework/context/**"/>
+		<include name="org/springframework/ejb/**"/>
+		<include name="org/springframework/instrument/classloading/**"/>
+		<exclude name="org/springframework/instrument/classloading/glassfish/**"/>
+		<exclude name="org/springframework/instrument/classloading/oc4j/**"/>
+		<exclude name="org/springframework/instrument/classloading/tomcat/**"/>
+		<include name="org/springframework/jmx/**"/>
+		<include name="org/springframework/jndi/**"/>
+		<include name="org/springframework/remoting/**"/>
+		<exclude name="org/springframework/remoting/caucho/**"/>
+		<exclude name="org/springframework/remoting/httpinvoker/**"/>
+		<exclude name="org/springframework/remoting/jaxrpc/**"/>
+		<include name="org/springframework/scheduling/**"/>
+		<exclude name="org/springframework/scheduling/commonj/**"/>
+		<exclude name="org/springframework/scheduling/quartz/**"/>
+		<include name="org/springframework/scripting/**"/>
+		<include name="org/springframework/stereotype/**"/>
+		<include name="org/springframework/ui/**"/>
+		<exclude name="org/springframework/ui/velocity/**"/>
+		<exclude name="org/springframework/ui/freemarker/**"/>
+		<exclude name="org/springframework/ui/jasperreports/**"/>
+		<include name="org/springframework/validation/**"/>
+	</patternset>
+
+	<patternset id="spring.context.support.packages">
+		<include name="org/springframework/cache/**"/>
+		<include name="org/springframework/instrument/classloading/glassfish/**"/>
+		<include name="org/springframework/instrument/classloading/oc4j/**"/>
+		<include name="org/springframework/mail/**"/>
+		<include name="org/springframework/remoting/caucho/**"/>
+		<exclude name="org/springframework/remoting/caucho/*ServiceExporter.*"/>
+		<include name="org/springframework/remoting/httpinvoker/**"/>
+		<exclude name="org/springframework/remoting/httpinvoker/*ServiceExporter.*"/>
+		<include name="org/springframework/remoting/jaxrpc/**"/>
+		<exclude name="org/springframework/remoting/jaxrpc/ServletEndpoint*.*"/>
+		<exclude name="org/springframework/remoting/jaxrpc/support/**"/>
+		<include name="org/springframework/scheduling/commonj/**"/>
+		<include name="org/springframework/scheduling/quartz/**"/>
+		<include name="org/springframework/ui/velocity/**"/>
+		<include name="org/springframework/ui/freemarker/**"/>
+		<include name="org/springframework/ui/jasperreports/**"/>
+	</patternset>
+
+	<patternset id="spring.core.packages">
+		<include name="org/springframework/core/**"/>
+		<include name="org/springframework/util/**"/>
+	</patternset>
+
+	<patternset id="spring.jdbc.packages">
+		<include name="org/springframework/jdbc/**"/>
+	</patternset>
+
+	<patternset id="spring.jms.packages">
+		<include name="org/springframework/jms/**"/>
+	</patternset>
+
+	<patternset id="spring.orm.packages">
+		<include name="org/springframework/orm/**"/>
+		<exclude name="org/springframework/orm/jdo/support/Open*InView*.*"/>
+		<exclude name="org/springframework/orm/jpa/support/Open*InView*.*"/>
+		<exclude name="org/springframework/orm/hibernate3/support/Open*InView*.*"/>
+	</patternset>
+
+	<patternset id="spring.mock.packages">
+		<include name="META-INF/**"/>
+		<include name="org/springframework/**"/>
+	</patternset>
+
+	<patternset id="spring.tx.packages">
+		<include name="org/springframework/dao/**"/>
+		<include name="org/springframework/jca/**"/>
+		<include name="org/springframework/transaction/**"/>
+		<!-- exclude content of spring-aspects.jar -->
+		<exclude name="org/springframework/transaction/aspectj/**"/>
+	</patternset>
+
+	<patternset id="spring.web.packages">
+		<include name="org/springframework/web/**"/>
+		<exclude name="org/springframework/web/servlet/**"/>
+		<exclude name="org/springframework/web/portlet/**"/>
+		<include name="org/springframework/orm/jdo/support/Open*InView*.*"/>
+		<include name="org/springframework/orm/jpa/support/Open*InView*.*"/>
+		<include name="org/springframework/orm/hibernate3/support/Open*InView*.*"/>
+		<include name="org/springframework/remoting/caucho/*ServiceExporter.*"/>
+		<include name="org/springframework/remoting/httpinvoker/*ServiceExporter.*"/>
+		<include name="org/springframework/remoting/jaxrpc/ServletEndpoint*.*"/>
+		<include name="org/springframework/remoting/jaxrpc/support/**"/>
+	</patternset>
+
+	<patternset id="spring.webmvc.packages">
+		<include name="META-INF/*.tld"/>
+		<include name="org/springframework/web/servlet/**"/>
+	</patternset>
+
+	<patternset id="spring.webmvc.portlet.packages">
+		<include name="org/springframework/web/portlet/**"/>
+	</patternset>
+
+	<patternset id="spring.aspects.packages">
+		<include name="META-INF/aop.xml"/>
+		<include name="org/springframework/beans/factory/aspectj/**"/>
+		<include name="org/springframework/transaction/aspectj/**"/>
+	</patternset>
+
+	<patternset id="spring.agent.packages">
+		<include name="org/springframework/instrument/InstrumentationSavingAgent.*"/>
+	</patternset>
+
+	<patternset id="spring.tomcat.weaver.packages">
+		<include name="org/springframework/instrument/classloading/WeavingTransformer.*"/>
+		<include name="org/springframework/instrument/classloading/tomcat/**"/>
+	</patternset>
+
+
 	<!-- BND tool taskdef (required for the OSGi manifest entries -->
 	<taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="${lib.dir}/bnd/bnd.jar" />
 
-	<target name="maventasks">
-		<path id="maven.lib.path">
-			<fileset dir="${basedir}/lib">
-				<include name="maven/maven-ant-tasks.jar"/>
-			</fileset>
-		</path>
-		<taskdef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant"
-			classpathref="maven.lib.path" />
-	</target>
 
 	<target name="usage">
 
@@ -288,17 +417,9 @@
 
 	</target>
 	
-	<patternset id="spring.full.packages">
-		<include name="META-INF/**"/>
-		<include name="org/springframework/**"/>
-		<!-- exclude content of spring-aspects.jar -->
-		<exclude name="META-INF/aop.xml"/>
-		<exclude name="org/springframework/beans/factory/aspectj/**"/>
-		<exclude name="org/springframework/transaction/aspectj/**"/>
-		<exclude name="org/springframework/web/portlet/**"/>
-	</patternset>
 
 	<target name="fulljar" depends="build,initdist" description="Create JAR file with all core Spring classes">
+
 		<delete file="${dist.dir}/spring.jar"/>
 
 		<jar jarfile="${dist.dir}/spring.jar">
@@ -316,11 +437,13 @@
 		</jar>
 
 		<bndwrap definitions="${basedir}/osgi/bnd" output="${dist.dir}">
-			<fileset dir="${dist.dir}" includes="spring.jar" />
+			<fileset dir="${dist.dir}" includes="spring.jar"/>
 		</bndwrap>
 		<move file="${dist.dir}/spring.bar" tofile="${dist.dir}/spring.jar"/>
+
 	</target>
 	
+
 	<target name="fullsources" depends="initdist" description="Create source JAR file with all core Spring classes">
 
 		<delete file="${dist.dir}/spring-sources.jar"/>
@@ -343,115 +466,6 @@
 		</jar>
 	</target>
 	
-	<patternset id="spring.aop.packages">
-		<include name="org/springframework/aop/**"/>
-		<include name="org/springframework/metadata/**"/>
-	</patternset>
-	
-	<patternset id="spring.beans.packages">
-		<include name="org/springframework/beans/**"/>
-		<!-- exclude content of spring-aspects.jar -->
-		<exclude name="org/springframework/beans/factory/aspectj/**"/>
-	</patternset>
-	
-	<patternset id="spring.context.packages">
-		<include name="org/springframework/context/**"/>
-		<include name="org/springframework/ejb/**"/>
-		<include name="org/springframework/instrument/classloading/**"/>
-		<exclude name="org/springframework/instrument/classloading/glassfish/**"/>
-		<exclude name="org/springframework/instrument/classloading/oc4j/**"/>
-		<exclude name="org/springframework/instrument/classloading/tomcat/**"/>
-		<include name="org/springframework/jmx/**"/>
-		<include name="org/springframework/jndi/**"/>
-		<include name="org/springframework/remoting/**"/>
-		<exclude name="org/springframework/remoting/caucho/**"/>
-		<exclude name="org/springframework/remoting/httpinvoker/**"/>
-		<exclude name="org/springframework/remoting/jaxrpc/**"/>
-		<include name="org/springframework/scheduling/**"/>
-		<exclude name="org/springframework/scheduling/commonj/**"/>
-		<exclude name="org/springframework/scheduling/quartz/**"/>
-		<include name="org/springframework/scripting/**"/>
-		<include name="org/springframework/stereotype/**"/>
-		<include name="org/springframework/ui/**"/>
-		<exclude name="org/springframework/ui/velocity/**"/>
-		<exclude name="org/springframework/ui/freemarker/**"/>
-		<exclude name="org/springframework/ui/jasperreports/**"/>
-		<include name="org/springframework/validation/**"/>
-	</patternset>
-
-	<patternset id="spring.context.support.packages">
-		<include name="org/springframework/cache/**"/>
-		<include name="org/springframework/instrument/classloading/glassfish/**"/>
-		<include name="org/springframework/instrument/classloading/oc4j/**"/>
-		<include name="org/springframework/mail/**"/>
-		<include name="org/springframework/remoting/caucho/**"/>
-		<exclude name="org/springframework/remoting/caucho/*ServiceExporter.*"/>
-		<include name="org/springframework/remoting/httpinvoker/**"/>
-		<exclude name="org/springframework/remoting/httpinvoker/*ServiceExporter.*"/>
-		<include name="org/springframework/remoting/jaxrpc/**"/>
-		<exclude name="org/springframework/remoting/jaxrpc/ServletEndpoint*.*"/>
-		<exclude name="org/springframework/remoting/jaxrpc/support/**"/>
-		<include name="org/springframework/scheduling/commonj/**"/>
-		<include name="org/springframework/scheduling/quartz/**"/>
-		<include name="org/springframework/ui/velocity/**"/>
-		<include name="org/springframework/ui/freemarker/**"/>
-		<include name="org/springframework/ui/jasperreports/**"/>
-	</patternset>
-	
-	<patternset id="spring.core.packages">
-		<include name="org/springframework/core/**"/>
-		<include name="org/springframework/util/**"/>
-	</patternset>
-	
-	<patternset id="spring.jdbc.packages">
-		<include name="org/springframework/jdbc/**"/>
-	</patternset>
-	
-	<patternset id="spring.jms.packages">
-		<include name="org/springframework/jms/**"/>
-	</patternset>
-	
-	<patternset id="spring.orm.packages">
-		<include name="org/springframework/orm/**"/>
-		<exclude name="org/springframework/orm/jdo/support/Open*InView*.*"/>
-		<exclude name="org/springframework/orm/jpa/support/Open*InView*.*"/>
-		<exclude name="org/springframework/orm/hibernate3/support/Open*InView*.*"/>
-	</patternset>
-	
-	<patternset id="spring.mock.packages">
-		<include name="META-INF/**"/>
-		<include name="org/springframework/**"/>
-	</patternset>
-	
-	<patternset id="spring.tx.packages">
-		<include name="org/springframework/dao/**"/>
-		<include name="org/springframework/jca/**"/>
-		<include name="org/springframework/transaction/**"/>
-		<!-- exclude content of spring-aspects.jar -->
-		<exclude name="org/springframework/transaction/aspectj/**"/>
-	</patternset>
-	
-	<patternset id="spring.web.packages">
-		<include name="org/springframework/web/**"/>
-		<exclude name="org/springframework/web/servlet/**"/>
-		<exclude name="org/springframework/web/portlet/**"/>
-		<include name="org/springframework/orm/jdo/support/Open*InView*.*"/>
-		<include name="org/springframework/orm/jpa/support/Open*InView*.*"/>
-		<include name="org/springframework/orm/hibernate3/support/Open*InView*.*"/>
-		<include name="org/springframework/remoting/caucho/*ServiceExporter.*"/>
-		<include name="org/springframework/remoting/httpinvoker/*ServiceExporter.*"/>
-		<include name="org/springframework/remoting/jaxrpc/ServletEndpoint*.*"/>
-		<include name="org/springframework/remoting/jaxrpc/support/**"/>
-	</patternset>
-	
-	<patternset id="spring.webmvc.packages">
-		<include name="META-INF/*.tld"/>
-		<include name="org/springframework/web/servlet/**"/>
-	</patternset>
-	
-	<patternset id="spring.webmvc.portlet.packages">
-		<include name="org/springframework/web/portlet/**"/>
-	</patternset>
 
 	<target name="modulejars" depends="build,initdist" description="Create module-specific JAR files">
 
@@ -611,7 +625,7 @@
 
 		<!-- osgi wrapper -->
 		<bndwrap definitions="${basedir}/osgi/bnd" output="${dist.dir}/modules">
-			<fileset dir="${dist.dir}/modules" includes="*.jar" />
+			<fileset dir="${dist.dir}/modules" includes="*.jar"/>
 		</bndwrap>
 		
 		<move todir="${dist.dir}/modules">
@@ -623,6 +637,7 @@
 		
 	</target>
 	
+
 	<target name="modulesources" depends="initdist" description="Create module-specific source JAR files">
 		<delete>
 			<fileset dir="${dist.dir}">
@@ -819,20 +834,6 @@
 
 	</target>
 	
-	<patternset id="spring.aspects.packages">
-		<include name="META-INF/aop.xml"/>
-		<include name="org/springframework/beans/factory/aspectj/**"/>
-		<include name="org/springframework/transaction/aspectj/**"/>
-	</patternset>
-	
-	<patternset id="spring.agent.packages">
-		<include name="org/springframework/instrument/InstrumentationSavingAgent.*"/>
-	</patternset>
-	
-	<patternset id="spring.tomcat.weaver.packages">
-		<include name="org/springframework/instrument/classloading/WeavingTransformer.*"/>
-		<include name="org/springframework/instrument/classloading/tomcat/**"/>
-	</patternset>
 
 	<target name="weavingjars" depends="build,initdist" description="Create weaver JAR files (for specific platforms)">
 
@@ -878,6 +879,7 @@
 
 	</target>
 	
+
 	<target name="weavingsources" depends="initdist" description="Create weaver source JAR files (for specific platforms)">
 		
 		<delete>
@@ -928,6 +930,7 @@
 
 	</target>
 
+
 	<target name="distfiles" depends="initdist" description="Copy dtd, xsd, tld, etc files to the dist directory">
 
 		<copy todir="${dist.dir}/resources" flatten="true" preservelastmodified="true">
@@ -942,6 +945,7 @@
 
 	</target>
 
+
 	<target name="distpoms" depends="initdist" description="Copy all maven POMs to the dist directory">
 
 		<copy todir="${dist.dir}/maven">
@@ -952,8 +956,9 @@
 
 	</target>
 
+
 	<target name="alljars" depends="fulljar,fullsources,modulejars,modulesources,weavingjars,weavingsources"
-		description="Create all JAR files"/>
+			description="Create all JAR files"/>
 
 
 	<!--
@@ -961,6 +966,21 @@
 		made up of the individual targets called, separated by an underscore.
 	-->
 	<target name="clean_alljars" depends="clean,alljars"/>
+
+
+	<target name="maventasks">
+
+		<path id="maven.lib.path">
+			<fileset dir="${basedir}/lib">
+				<include name="maven/maven-ant-tasks.jar"/>
+			</fileset>
+		</path>
+
+		<taskdef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant"
+				classpathref="maven.lib.path" />
+
+	</target>
+
 
 	<target name="maveninstall" depends="maventasks,alljars"
 			description="Uploads all jars, sources, and POMs to a local m2 repository">
