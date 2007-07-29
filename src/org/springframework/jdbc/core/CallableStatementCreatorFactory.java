@@ -194,7 +194,12 @@ public class CallableStatementCreatorFactory {
 								cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType(), declaredParameter.getTypeName());
 							}
 							else {
-								cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType());
+								if (declaredParameter.getScale() != null) {
+									cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType(), declaredParameter.getScale().intValue());
+								}
+								else {
+									cs.registerOutParameter(sqlColIndx, declaredParameter.getSqlType());
+								}
 							}
 							if ((declaredParameter).isInputValueProvided() || inValue != null) {
 								StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParameter, inValue);

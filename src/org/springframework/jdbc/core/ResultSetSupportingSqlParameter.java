@@ -45,6 +45,17 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	 * Create a new ResultSetSupportingSqlParameter.
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
+	 * @param scale the number of digits after the decimal point
+	 * (for DECIMAL and NUMERIC types)
+	 */
+	public ResultSetSupportingSqlParameter(String name, int sqlType, int scale) {
+		super(name, sqlType, scale);
+	}
+
+	/**
+	 * Create a new ResultSetSupportingSqlParameter.
+	 * @param name name of the parameter, as used in input and output maps
+	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param typeName the type name of the parameter (optional)
 	 */
 	public ResultSetSupportingSqlParameter(String name, int sqlType, String typeName) {

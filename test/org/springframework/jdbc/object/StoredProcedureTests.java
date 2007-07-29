@@ -24,6 +24,7 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.math.BigDecimal;
 
 import javax.sql.DataSource;
 
@@ -482,6 +483,32 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		assertEquals("OK", out.get("out"));
 	}
 
+	public void testNumericWithScale() throws Exception {
+		mockCallable.getConnection();
+		ctrlCallable.setDefaultReturnValue(mockConnection);
+		mockCallable.registerOutParameter(1, Types.DECIMAL, 4);
+		ctrlCallable.setVoidCallable();
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
+		mockCallable.getObject(1);
+		ctrlCallable.setReturnValue(new BigDecimal("12345.6789"));
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall(
+			"{call " + NumericWithScaleStoredProcedure.SQL + "(?)}");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		replay();
+		NumericWithScaleStoredProcedure nwssp = new NumericWithScaleStoredProcedure(mockDataSource);
+		Map out = nwssp.executeTest();
+		assertEquals(new BigDecimal("12345.6789"), out.get("out"));
+	}
+
 
 	private static class StoredProcedureConfiguredViaJdbcTemplate extends StoredProcedure {
 
@@ -698,6 +725,25 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 					return inValue;
 				}
 			});
+			Map out = null;
+			out = execute(in);
+			return out;
+		}
+	}
+
+	private static class NumericWithScaleStoredProcedure extends StoredProcedure {
+
+		public static final String SQL = "numeric_with_scale_sp";
+
+		public NumericWithScaleStoredProcedure(DataSource ds) {
+			setDataSource(ds);
+			setSql(SQL);
+			declareParameter(new SqlOutParameter("out", Types.DECIMAL, 4));
+			compile();
+		}
+
+		public Map executeTest() {
+			Map in = new HashMap(1);
 			Map out = null;
 			out = execute(in);
 			return out;
