@@ -134,7 +134,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 
 		try {
 			if (bwi.indicatesAutowiring() ||
-					(bwi.isDefaultBeanName() && !this.beanFactory.containsBeanDefinition(bwi.getBeanName()))) {
+					(bwi.isDefaultBeanName() && !this.beanFactory.containsBean(bwi.getBeanName()))) {
 				// Perform autowiring (also applying standard factory / post-processor callbacks).
 				this.beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
 				Object result = this.beanFactory.initializeBean(beanInstance, bwi.getBeanName());
