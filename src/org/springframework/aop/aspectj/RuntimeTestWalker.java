@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.aspectj.weaver.ast.Or;
 import org.aspectj.weaver.ast.Test;
 import org.aspectj.weaver.internal.tools.MatchingContextBasedTest;
 import org.aspectj.weaver.reflect.ReflectionVar;
-import org.aspectj.weaver.reflect.ReflectionWorld;
 import org.aspectj.weaver.reflect.ShadowMatchImpl;
 import org.aspectj.weaver.tools.ShadowMatch;
 
@@ -45,7 +44,7 @@ import org.aspectj.weaver.tools.ShadowMatch;
  * migrate to ShadowMatch.getVariablesInvolvedInRuntimeTest() or some similar
  * operation. 
  *
- * <p>See https://bugs.eclipse.org/bugs/show_bug.cgi?id=151593
+ * <p>See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=151593"/>.
  *
  * @author Adrian Colyer
  * @author Ramnivas Laddad
@@ -53,8 +52,9 @@ import org.aspectj.weaver.tools.ShadowMatch;
  */
 public class RuntimeTestWalker {
 
-	private Test runtimeTest;
+	private final Test runtimeTest;
 	
+
 	public RuntimeTestWalker(ShadowMatch shadowMatch) {
 		ShadowMatchImpl shadowMatchImplementation = (ShadowMatchImpl) shadowMatch;
 		try {
@@ -68,11 +68,12 @@ public class RuntimeTestWalker {
 					"'runtimeTest' is not present on ShadowMatchImpl class");
 		}
 		catch (IllegalAccessException illegalAccessEx) {
-			// famous last words... but I don't see how this can happen given the
+			// Famous last words... but I don't see how this can happen given the
 			// setAccessible call above
 			throw new IllegalStateException("Unable to access ShadowMatchImpl.runtimeTest field.");
 		}
 	}
+
 
 	/**
 	 * If the test uses any of the this, target, at_this, at_target, and at_annotation vars,
@@ -87,6 +88,7 @@ public class RuntimeTestWalker {
 	}
 
 	private static class TestVisitorAdapter implements ITestVisitor {
+
 		protected static final int THIS_VAR = 0;
 		protected static final int AT_THIS_VAR = 3;
 		protected static final int AT_TARGET_VAR = 4;
@@ -95,7 +97,6 @@ public class RuntimeTestWalker {
 		public void visit(And e) {
 			e.getLeft().accept(this);
 			e.getRight().accept(this);
-
 		}
 
 		public void visit(Or e) {
@@ -130,29 +131,29 @@ public class RuntimeTestWalker {
 				Field varTypeField = ReflectionVar.class.getDeclaredField("varType");
 				varTypeField.setAccessible(true);
 				Integer varTypeValue = (Integer) varTypeField.get(v);
-				int varType = varTypeValue.intValue();
-				return varType;
+				return varTypeValue.intValue();
 			}
-			catch(NoSuchFieldException noSuchFieldEx) {
+			catch (NoSuchFieldException noSuchFieldEx) {
 				throw new IllegalStateException("the version of aspectjtools.jar / aspectjweaver.jar " +
 						"on the classpath is incompatible with this version of Spring:- expected field " +
 						"'varType' is not present on ReflectionVar class");
 			}
-			catch(IllegalAccessException illegalAccessEx) {
-				// famous last words... but I don't see how this can happen given the setAccessible call
-				// above
+			catch (IllegalAccessException illegalAccessEx) {
+				// Famous last words... but I don't see how this can happen given the
+				// makeAccessible call above
 				throw new IllegalStateException("Unable to access ReflectionVar.varType field.");
 			}
 		}
 	}
 
+
 	/**
-	 * 
 	 * Check if residue of this(TYPE) kind. See SPR-2979 for more details.
-	 *
 	 */
 	private static class ThisInstanceOfResidueTestVisitor extends TestVisitorAdapter {
+
 		private Object thiz;
+
 		private boolean matches = true;
 		
 		public ThisInstanceOfResidueTestVisitor(Object thiz) {
@@ -167,26 +168,27 @@ public class RuntimeTestWalker {
 		public void visit(Instanceof i) {
 			ResolvedType type = (ResolvedType)i.getType();
 			int varType = getVarType((ReflectionVar)i.getVar());
-			// We are concerned only about this() pointcut
-			// TODO: Optimization: Process only if this() specifies a type and not identifier
-			if(varType != THIS_VAR) {
+			// We are concerned only about this() pointcut.
+			// TODO: Optimization: Process only if this() specifies a type and not identifier.
+			if (varType != THIS_VAR) {
 				return;
 			}
-			
 			try {
 				Class typeClass = Class.forName(type.getName());
 				// Don't use ReflectionType.isAssignableFrom() as it won't be aware of (Spring) mixins
-				if(!typeClass.isAssignableFrom(thiz.getClass())) {
-					matches = false;
+				if (!typeClass.isAssignableFrom(thiz.getClass())) {
+					this.matches = false;
 				}
-			} catch (ClassNotFoundException ex) {
-				matches = false;
+			}
+			catch (ClassNotFoundException ex) {
+				this.matches = false;
 			}
 		}
-
 	}
-	
+
+
 	private static class SubtypeSensitiveVarTypeTestVisitor extends TestVisitorAdapter {
+
 		private final Object thisObj = new Object();
 		private final Object targetObj = new Object();
 		private final Object[] argsObjs = new Object[0];
@@ -207,15 +209,13 @@ public class RuntimeTestWalker {
 		}
 
 		public void visit(HasAnnotation hasAnn) {
-			// if you thought things were bad before, now we sink to new levels
-			// of horror...
+			// If you thought things were bad before, now we sink to new levels of horror...
 			ReflectionVar v = (ReflectionVar) hasAnn.getVar();
 			int varType = getVarType(v);
-				if ((varType == AT_THIS_VAR) 
-					|| (varType == AT_TARGET_VAR) 
-					|| (varType == AT_ANNOTATION_VAR)) {
+				if ((varType == AT_THIS_VAR) || (varType == AT_TARGET_VAR) || (varType == AT_ANNOTATION_VAR)) {
 				this.testsSubtypeSensitiveVars = true;
 			}
 		}
 	}
+
 }
