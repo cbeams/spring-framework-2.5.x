@@ -52,7 +52,7 @@ import org.springframework.aop.support.AopUtils;
  * @see #setUserAttribute
  * @see #getUserAttribute
  */
-public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Cloneable {
+class ReflectiveMethodInvocation implements ProxyMethodInvocation, Cloneable {
 
 	protected final Object proxy;
 

@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * @since 2.0.2
  * @see AbstractAdvisorAutoProxyCreator
  */
-public class BeanFactoryAdvisorRetrievalHelper {
+class BeanFactoryAdvisorRetrievalHelper {
 
 	private static final Log logger = LogFactory.getLog(BeanFactoryAdvisorRetrievalHelper.class);
 

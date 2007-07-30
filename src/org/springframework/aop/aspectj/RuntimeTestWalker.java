@@ -46,13 +46,13 @@ import org.springframework.util.ReflectionUtils;
  * migrate to ShadowMatch.getVariablesInvolvedInRuntimeTest() or some similar
  * operation. 
  *
- * <p>See https://bugs.eclipse.org/bugs/show_bug.cgi?id=151593
+ * <p>See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=151593"/>.
  *
  * @author Adrian Colyer
  * @author Ramnivas Laddad
  * @since 2.0
  */
-public class RuntimeTestWalker {
+class RuntimeTestWalker {
 
 	private final Test runtimeTest;
 	
@@ -99,7 +99,6 @@ public class RuntimeTestWalker {
 		public void visit(And e) {
 			e.getLeft().accept(this);
 			e.getRight().accept(this);
-
 		}
 
 		public void visit(Or e) {
@@ -134,17 +133,16 @@ public class RuntimeTestWalker {
 				Field varTypeField = ReflectionVar.class.getDeclaredField("varType");
 				ReflectionUtils.makeAccessible(varTypeField);
 				Integer varTypeValue = (Integer) varTypeField.get(v);
-				int varType = varTypeValue.intValue();
-				return varType;
+				return varTypeValue.intValue();
 			}
-			catch(NoSuchFieldException noSuchFieldEx) {
+			catch (NoSuchFieldException noSuchFieldEx) {
 				throw new IllegalStateException("the version of aspectjtools.jar / aspectjweaver.jar " +
 						"on the classpath is incompatible with this version of Spring:- expected field " +
 						"'varType' is not present on ReflectionVar class");
 			}
-			catch(IllegalAccessException illegalAccessEx) {
-				// famous last words... but I don't see how this can happen given the setAccessible call
-				// above
+			catch (IllegalAccessException illegalAccessEx) {
+				// Famous last words... but I don't see how this can happen given the
+				// makeAccessible call above
 				throw new IllegalStateException("Unable to access ReflectionVar.varType field.");
 			}
 		}
@@ -172,12 +170,11 @@ public class RuntimeTestWalker {
 		public void visit(Instanceof i) {
 			ResolvedType type = (ResolvedType)i.getType();
 			int varType = getVarType((ReflectionVar)i.getVar());
-			// We are concerned only about this() pointcut
-			// TODO: Optimization: Process only if this() specifies a type and not identifier
+			// We are concerned only about this() pointcut.
+			// TODO: Optimization: Process only if this() specifies a type and not identifier.
 			if (varType != THIS_VAR) {
 				return;
 			}
-			
 			try {
 				Class typeClass = Class.forName(type.getName());
 				// Don't use ReflectionType.isAssignableFrom() as it won't be aware of (Spring) mixins
@@ -214,15 +211,13 @@ public class RuntimeTestWalker {
 		}
 
 		public void visit(HasAnnotation hasAnn) {
-			// if you thought things were bad before, now we sink to new levels
-			// of horror...
+			// If you thought things were bad before, now we sink to new levels of horror...
 			ReflectionVar v = (ReflectionVar) hasAnn.getVar();
 			int varType = getVarType(v);
-				if ((varType == AT_THIS_VAR) 
-					|| (varType == AT_TARGET_VAR) 
-					|| (varType == AT_ANNOTATION_VAR)) {
+				if ((varType == AT_THIS_VAR) || (varType == AT_TARGET_VAR) || (varType == AT_ANNOTATION_VAR)) {
 				this.testsSubtypeSensitiveVars = true;
 			}
 		}
 	}
+
 }

@@ -16,7 +16,9 @@
 
 package org.springframework.remoting.rmi;
 
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.rmi.ConnectException;
 import java.rmi.ConnectIOException;
 import java.rmi.MarshalException;
@@ -26,12 +28,10 @@ import java.rmi.RemoteException;
 import java.rmi.StubNotFoundException;
 import java.rmi.UnknownHostException;
 import java.rmi.UnmarshalException;
-import java.util.ArrayList;
 
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInvocation;
 
-import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteProxyFailureException;
@@ -346,11 +346,26 @@ public class RmiSupportTests extends TestCase {
 	public void testRemoteInvocation() throws NoSuchMethodException {
 		// let's see if the remote invocation object works
 
-		RemoteBean rb = new RemoteBean();
+		final RemoteBean rb = new RemoteBean();
+		final Method setNameMethod = rb.getClass().getDeclaredMethod("setName", new Class[] {String.class});
 
-		MethodInvocation mi = new ReflectiveMethodInvocation(
-				rb, rb, rb.getClass().getDeclaredMethod("setName", new Class[] {String.class}),
-		    new Object[] { "bla" }, RemoteBean.class, new ArrayList());
+		MethodInvocation mi = new MethodInvocation() {
+			public Method getMethod() {
+				return setNameMethod;
+			}
+			public Object[] getArguments() {
+				return new Object[] {"bla"};
+			}
+			public Object proceed() throws Throwable {
+				throw new UnsupportedOperationException();
+			}
+			public Object getThis() {
+				return rb;
+			}
+			public AccessibleObject getStaticPart() {
+				return setNameMethod;
+			}
+		};
 
 		RemoteInvocation inv = new RemoteInvocation(mi);
 
