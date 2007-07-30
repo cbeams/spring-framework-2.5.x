@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,13 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Abstract implementation of the HierarchicalMessageSource interface,
+ * Abstract implementation of the {@link HierarchicalMessageSource} interface,
  * implementing common handling of message variants, making it easy
  * to implement a specific strategy for a concrete MessageSource.
  *
- * <p>Subclasses must implement the abstract <code>resolveCode</code>
+ * <p>Subclasses must implement the abstract {@link #resolveCode}
  * method. For efficient resolution of messages without arguments, the
- * <code>resolveCodeWithoutArguments</code> method should be overridden
+ * {@link #resolveCodeWithoutArguments} method should be overridden
  * as well, resolving messages without a MessageFormat being involved.
  *
  * <p><b>Note:</b> By default, message texts are only parsed through
@@ -89,7 +89,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	}
 
 	public MessageSource getParentMessageSource() {
-		return parentMessageSource;
+		return this.parentMessageSource;
 	}
 
 	/**
@@ -123,7 +123,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * @see #getDefaultMessage(String)
 	 */
 	protected boolean isUseCodeAsDefaultMessage() {
-		return useCodeAsDefaultMessage;
+		return this.useCodeAsDefaultMessage;
 	}
 
 	/**
@@ -149,7 +149,7 @@ public abstract class AbstractMessageSource implements HierarchicalMessageSource
 	 * messages without arguments.
 	 */
 	protected boolean isAlwaysUseMessageFormat() {
-		return alwaysUseMessageFormat;
+		return this.alwaysUseMessageFormat;
 	}
 
 
