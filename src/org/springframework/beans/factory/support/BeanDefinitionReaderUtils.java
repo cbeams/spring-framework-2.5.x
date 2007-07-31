@@ -132,10 +132,10 @@ public class BeanDefinitionReaderUtils {
 			id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(definition);
 		}
 		else {
-			// Top-level bean: use plain class name. If not already unique,
-			// add counter - increasing the counter until the name is unique.
-			int counter = 0;
-			while (registry.containsBeanDefinition(id)) {
+			// Top-level bean: use plain class name.
+			// Increase counter until the id is unique.
+			int counter = -1;
+			while (counter == -1 || registry.containsBeanDefinition(id)) {
 				counter++;
 				id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + counter;
 			}

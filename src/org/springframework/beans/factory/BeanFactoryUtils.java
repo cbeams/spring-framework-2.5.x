@@ -77,6 +77,19 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
+	 * Return whether the given name is a bean name which has been generated
+	 * by the default naming strategy (containing a "#..." part).
+	 * @param name the name of the bean
+	 * @return whether the given name is a generated bean name
+	 * @see #GENERATED_BEAN_NAME_SEPARATOR
+	 * @see org.springframework.beans.factory.support.BeanDefinitionReaderUtils#generateBeanName
+	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator
+	 */
+	public static boolean isGeneratedBeanName(String name) {
+		return (name != null && name.indexOf(GENERATED_BEAN_NAME_SEPARATOR) != -1);
+	}
+
+	/**
 	 * Extract the "raw" bean name from the given (potentially generated) bean name,
 	 * excluding any "#..." suffixes which might have been added for uniqueness.
 	 * @param name the potentially generated bean name

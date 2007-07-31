@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class BeanNameGenerationTests extends TestCase {
 
@@ -39,10 +40,11 @@ public class BeanNameGenerationTests extends TestCase {
 	public void testNaming() {
 		String className = GeneratedNameBean.class.getName();
 
-		GeneratedNameBean topLevel1 = (GeneratedNameBean) beanFactory.getBean(className);
+		String targetName = className + BeanDefinitionReaderUtils.GENERATED_BEAN_NAME_SEPARATOR + "0";
+		GeneratedNameBean topLevel1 = (GeneratedNameBean) beanFactory.getBean(targetName);
 		assertNotNull(topLevel1);
 
-		String targetName = className + BeanDefinitionReaderUtils.GENERATED_BEAN_NAME_SEPARATOR + 1;
+		targetName = className + BeanDefinitionReaderUtils.GENERATED_BEAN_NAME_SEPARATOR + "1";
 		GeneratedNameBean topLevel2 = (GeneratedNameBean) beanFactory.getBean(targetName);
 		assertNotNull(topLevel2);
 

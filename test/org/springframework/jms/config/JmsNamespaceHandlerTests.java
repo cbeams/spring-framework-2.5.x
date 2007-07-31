@@ -113,7 +113,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		control3.expectAndReturn(message3.getText(), "Test3");
 		control3.replay();
 
-		MessageListener listener3 = getListener(DefaultMessageListenerContainer.class.getName());
+		MessageListener listener3 = getListener(DefaultMessageListenerContainer.class.getName() + "#0");
 		listener3.onMessage(message3);
 		assertSame(message3, testBean3.message);
 		control3.verify();

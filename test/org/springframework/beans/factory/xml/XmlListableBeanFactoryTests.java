@@ -154,12 +154,12 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		assertFalse(beanNames.contains("aliasWithoutId2"));
 		assertFalse(beanNames.contains("aliasWithoutId3"));
 
-		TestBean tb4 = (TestBean) getBeanFactory().getBean(TestBean.class.getName());
+		TestBean tb4 = (TestBean) getBeanFactory().getBean(TestBean.class.getName() + "#0");
 		assertEquals(null, tb4.getName());
 
 		Map drs = getListableBeanFactory().getBeansOfType(DummyReferencer.class, false, false);
 		assertEquals(5, drs.size());
-		assertTrue(drs.containsKey(DummyReferencer.class.getName()));
+		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#0"));
 		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#1"));
 		assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#2"));
 	}
