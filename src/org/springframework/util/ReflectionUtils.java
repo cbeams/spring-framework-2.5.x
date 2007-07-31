@@ -326,7 +326,7 @@ public abstract class ReflectionUtils {
 
 		/**
 		 * Perform an operation using the given method.
-		 * @param method the method which will have been made accessible before this invocation
+		 * @param method the method to operate on
 		 */
 		void doWith(Method method) throws IllegalArgumentException, IllegalAccessException;
 	}
@@ -352,7 +352,7 @@ public abstract class ReflectionUtils {
 
 		/**
 		 * Perform an operation using the given field.
-		 * @param field the field which will have been made accessible before this invocation
+		 * @param field the field to operate on
 		 */
 		void doWith(Field field) throws IllegalArgumentException, IllegalAccessException;
 	}
