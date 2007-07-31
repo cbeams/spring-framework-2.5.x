@@ -28,6 +28,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
@@ -49,14 +50,6 @@ import org.springframework.core.CollectionFactory;
  * @see AbstractAutowireCapableBeanFactory
  */
 class BeanDefinitionValueResolver {
-
-	/**
-	 * Separator for generated bean names. If a class name or parent name is not
-	 * unique, "#1", "#2" etc will be appended, until the name becomes unique.
-	 */
-	public static final String GENERATED_BEAN_NAME_SEPARATOR =
-			BeanDefinitionReaderUtils.GENERATED_BEAN_NAME_SEPARATOR;
-
 
 	private final AbstractBeanFactory beanFactory;
 
@@ -236,7 +229,7 @@ class BeanDefinitionValueResolver {
 		int counter = 0;
 		while (this.beanFactory.isBeanNameInUse(actualInnerBeanName)) {
 			counter++;
-			actualInnerBeanName = innerBeanName + GENERATED_BEAN_NAME_SEPARATOR + counter;
+			actualInnerBeanName = innerBeanName + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR + counter;
 		}
 		return actualInnerBeanName;
 	}
