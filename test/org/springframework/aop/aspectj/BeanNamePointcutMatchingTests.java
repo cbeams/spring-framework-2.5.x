@@ -17,6 +17,7 @@
 package org.springframework.aop.aspectj;
 
 import junit.framework.TestCase;
+
 import org.springframework.beans.TestBean;
 
 /**
@@ -67,14 +68,13 @@ public class BeanNamePointcutMatchingTests extends TestCase {
 				matches(beanName, pcExpression));
 	}
 
-	private static boolean matches(String beanName, String pcExpression) {
-		try {
-			ProxyCreationContext.notifyProxyCreationStart(beanName, false);
-			AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
-			pointcut.setExpression(pcExpression);
-			return pointcut.matches(TestBean.class);
-		} finally {
-			ProxyCreationContext.notifyProxyCreationComplete();
-		}
+	private static boolean matches(final String beanName, String pcExpression) {
+		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut() {
+			protected String getCurrentProxiedBeanName() {
+				return beanName;
+			}
+		};
+		pointcut.setExpression(pcExpression);
+		return pointcut.matches(TestBean.class);
 	}
 }

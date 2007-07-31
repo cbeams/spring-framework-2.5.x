@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.ITestBean;
@@ -25,28 +27,31 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
  * Test for correct application of the bean() PCD for &#64;AspectJ-based aspects.
- * 
- * @author Ramnivas Laddad
  *
+ * @author Ramnivas Laddad
+ * @author Juergen Hoeller
  */
 public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSpringContextTests {
+
 	protected ITestBean testBean1;
-	protected ITestBean testBean2;	
+	protected ITestBean testBean2;
 	protected CounterAspect counterAspect;
-	
+
+
 	public BeanNamePointcutAtAspectTests() {
 		setPopulateProtectedVariables(true);
 	}
-	
+
 	protected String getConfigPath() {
 		return "bean-name-pointcut-atAspect-tests.xml";
 	}
-	
+
 	protected void onSetUp() throws Exception {
 		counterAspect.count = 0;
 		super.onSetUp();
 	}
-	
+
+
 	public void testMatchingBeanName() {
 		assertTrue("Expected a proxy", testBean1 instanceof Advised);
 		testBean1.setAge(20);
@@ -58,26 +63,27 @@ public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSp
 		testBean2.setAge(20);
 		assertEquals(0, counterAspect.count);
 	}
-	
-	public void testProgrammaticProxyCreattion() {
+
+	public void testProgrammaticProxyCreation() {
 		ITestBean testBean = new TestBean();
 
 		AspectJProxyFactory factory = new AspectJProxyFactory();
-        factory.setTarget(testBean);
+		factory.setTarget(testBean);
 
-        CounterAspect myCounterAspect = new CounterAspect();
-        factory.addAspect(myCounterAspect);
+		CounterAspect myCounterAspect = new CounterAspect();
+		factory.addAspect(myCounterAspect);
 
-        ITestBean proxyTestBean = factory.getProxy();
+		ITestBean proxyTestBean = factory.getProxy();
 
 		assertTrue("Expected a proxy", proxyTestBean instanceof Advised);
 		proxyTestBean.setAge(20);
 		assertEquals("Programmatically created proxy shouldn't match bean()", 0, myCounterAspect.count);
 	}
 
-	
+
 	@Aspect
 	public static class CounterAspect {
+
 		int count;
 
 		@Before("execution(* setAge(..)) && bean(testBean1)")
@@ -101,4 +107,5 @@ public class BeanNamePointcutAtAspectTests extends AbstractDependencyInjectionSp
 //			count++;
 //		}
 	}
+
 }

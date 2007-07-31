@@ -162,9 +162,9 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 	}
 
 	protected void testAspectsAndAdvisorAreApplied(ApplicationContext ac, ITestBean shouldBeWeaved) {
-		TestBeanAdvisor tba = (TestBeanAdvisor) ac.getBean(TestBeanAdvisor.class.getName());
+		TestBeanAdvisor tba = (TestBeanAdvisor) ac.getBean("advisor");
 
-		MultiplyReturnValue mrv = (MultiplyReturnValue) ac.getBean(MultiplyReturnValue.class.getName());
+		MultiplyReturnValue mrv = (MultiplyReturnValue) ac.getBean("aspect");
 		assertEquals(3, mrv.getMultiple());
 
 		tba.count = 0;
@@ -246,8 +246,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/" + location);
 
-		boolean aspectSingleton = bf.isSingleton(AbstractAspectJAdvisorFactoryTests.TwoAdviceAspect.class.getName());
-
+		boolean aspectSingleton = bf.isSingleton("aspect");
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
 		testPrototype(adrian1, 0);
 		ITestBean adrian2 = (ITestBean) bf.getBean("adrian");
@@ -261,7 +260,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
 		adrian1.getAge();
-		AdviceUsingThisJoinPoint aspectInstance = (AdviceUsingThisJoinPoint) bf.getBean(AdviceUsingThisJoinPoint.class.getName());
+		AdviceUsingThisJoinPoint aspectInstance = (AdviceUsingThisJoinPoint) bf.getBean("aspect");
 		//(AdviceUsingThisJoinPoint) Aspects.aspectOf(AdviceUsingThisJoinPoint.class);
 		//assertEquals("method-execution(int TestBean.getAge())",aspectInstance.getLastMethodEntered());		
 		assertTrue(aspectInstance.getLastMethodEntered().indexOf("TestBean.getAge())") != 0);

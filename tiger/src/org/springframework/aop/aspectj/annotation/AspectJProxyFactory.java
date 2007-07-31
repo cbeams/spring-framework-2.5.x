@@ -24,7 +24,6 @@ import org.aspectj.lang.reflect.PerClauseKind;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJProxyUtils;
-import org.springframework.aop.aspectj.ProxyCreationContext;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyCreatorSupport;
 import org.springframework.aop.support.AopUtils;
@@ -117,15 +116,10 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * @see #makeAdvisorChainAspectJCapableIfNecessary()
 	 */
 	private void addAdvisorsFromAspectInstanceFactory(MetadataAwareAspectInstanceFactory instanceFactory) {
-		try {
-			ProxyCreationContext.notifyProxyCreationStart(null, false);
-			List advisors = this.aspectFactory.getAdvisors(instanceFactory);
-			advisors = AopUtils.findAdvisorsThatCanApply(advisors, getTargetClass());
-			this.addAllAdvisors((Advisor[]) advisors.toArray(new Advisor[advisors.size()]));
-			makeAdvisorChainAspectJCapableIfNecessary();
-		} finally {
-			ProxyCreationContext.notifyProxyCreationComplete();
-		}
+		List advisors = this.aspectFactory.getAdvisors(instanceFactory);
+		advisors = AopUtils.findAdvisorsThatCanApply(advisors, getTargetClass());
+		addAllAdvisors((Advisor[]) advisors.toArray(new Advisor[advisors.size()]));
+		makeAdvisorChainAspectJCapableIfNecessary();
 	}
 
 	/**

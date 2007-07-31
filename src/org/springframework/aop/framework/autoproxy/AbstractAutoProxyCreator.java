@@ -129,7 +129,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	protected BeanFactory beanFactory;
+	private BeanFactory beanFactory;
 
 	/**
 	 * Set of bean name Strings, referring to all beans that this auto-proxy creator
@@ -426,6 +426,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		customizeProxyFactory(proxyFactory);
 
 		proxyFactory.setFrozen(this.freezeProxy);
+		if (advisorsPreFiltered()) {
+			proxyFactory.setPreFiltered(true);
+		}
+
 		return proxyFactory.getProxy(this.beanClassLoader);
 	}
 
@@ -444,6 +448,20 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		return (isProxyTargetClass() ||
 				(this.beanFactory instanceof ConfigurableListableBeanFactory &&
 						AutoProxyUtils.shouldProxyTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName)));
+	}
+
+	/**
+	 * Return whether the Advisors returned by the subclass are pre-filtered
+	 * to match the bean's target class already, allowing the ClassFilter check
+	 * to be skipped when building advisors chains for AOP invocations.
+	 * <p>Default is <code>false</code>. Subclasses may override this if they
+	 * will always return pre-filtered Advisors.
+	 * @return whether the Advisors are pre-filtered
+	 * @see #getAdvicesAndAdvisorsForBean
+	 * @see org.springframework.aop.framework.Advised#setPreFiltered
+	 */
+	protected boolean advisorsPreFiltered() {
+		return false;
 	}
 
 	/**

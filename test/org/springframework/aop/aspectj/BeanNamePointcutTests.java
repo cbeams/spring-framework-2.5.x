@@ -28,18 +28,14 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 public class BeanNamePointcutTests extends AbstractDependencyInjectionSpringContextTests {
 
 	protected ITestBean testBean1;
-
 	protected ITestBean testBean2;
-
 	protected ITestBean testBeanContainingNestedBean;
-
 	protected Counter counterAspect;
 
 
 	public BeanNamePointcutTests() {
 		setPopulateProtectedVariables(true);
 	}
-
 
 	protected String getConfigPath() {
 		return "bean-name-pointcut-tests.xml";
@@ -50,18 +46,19 @@ public class BeanNamePointcutTests extends AbstractDependencyInjectionSpringCont
 		super.onSetUp();
 	}
 
+
 	// We don't need to test all combination of pointcuts due to BeanNamePointcutMatchingTests
 
 	public void testMatchingBeanName() {
-		assertTrue("Matching bean must be advised (proxied).", this.testBean1 instanceof Advised);
+		assertTrue("Matching bean must be advised (proxied)", this.testBean1 instanceof Advised);
 		this.testBean1.setAge(20);
-		assertEquals("Advice not executed: must have been.", 1, this.counterAspect.getCount());
+		assertEquals("Advice not executed: must have been", 1, this.counterAspect.getCount());
 	}
 
 	public void testNonMatchingBeanName() {
-		assertFalse("Non-matching bean must *not* be advised (proxied).", this.testBean2 instanceof Advised);
+		assertFalse("Non-matching bean must *not* be advised (proxied)", this.testBean2 instanceof Advised);
 		this.testBean2.setAge(20);
-		assertEquals("Advice must *not* have been executed.", 0, this.counterAspect.getCount());
+		assertEquals("Advice must *not* have been executed", 0, this.counterAspect.getCount());
 	}
 
 	public void testNonMatchingNestedBeanName() {

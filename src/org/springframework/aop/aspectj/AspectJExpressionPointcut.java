@@ -26,8 +26,13 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.weaver.BCException;
+import org.aspectj.weaver.patterns.NamePattern;
 import org.aspectj.weaver.reflect.ReflectionWorld;
+import org.aspectj.weaver.tools.ContextBasedMatcher;
+import org.aspectj.weaver.tools.FuzzyBoolean;
 import org.aspectj.weaver.tools.JoinPointMatch;
+import org.aspectj.weaver.tools.MatchingContext;
+import org.aspectj.weaver.tools.PointcutDesignatorHandler;
 import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutParameter;
 import org.aspectj.weaver.tools.PointcutParser;
@@ -38,9 +43,11 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAwareMethodMatcher;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.ProxyMethodInvocation;
+import org.springframework.aop.framework.autoproxy.ProxyCreationContext;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AbstractExpressionPointcut;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -111,7 +118,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		this.pointcutParser =
 				PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(
 						supportedPrimitives);
-		pointcutParser.registerPointcutDesignatorHandler(new BeanNamePointcutDesignatorHandler());
+		this.pointcutParser.registerPointcutDesignatorHandler(new BeanNamePointcutDesignatorHandler());
 	}
 
 	/**
@@ -317,6 +324,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 
+	protected String getCurrentProxiedBeanName() {
+		return ProxyCreationContext.getCurrentProxiedBeanName();
+	}
+
+
 	/**
 	 * A match test returned maybe - if there are any subtype sensitive variables
 	 * involved in the test (this, target, at_this, at_target, at_annotation) then
@@ -404,6 +416,68 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			sb.append("<pointcut expression not set>");
 		}
 		return sb.toString();
+	}
+
+
+	/**
+	 * Handler for the Spring-specific <code>bean()</code> pointcut designator
+	 * extension to AspectJ.
+	 * <p>This handler must be added to each pointcut object that needs to
+	 * handle the <code>bean()</code> PCD. Matching context is obtained
+	 * automatically by examining a thread local variable and therefore a matching
+	 * context need not be set on the pointcut.
+	 */
+	private class BeanNamePointcutDesignatorHandler implements PointcutDesignatorHandler {
+
+		private static final String BEAN_DESIGNATOR_NAME = "bean";
+
+		public String getDesignatorName() {
+			return BEAN_DESIGNATOR_NAME;
+		}
+
+		public ContextBasedMatcher parse(String expression) {
+			return new BeanNameContextMatcher(expression);
+		}
+	}
+
+
+	/**
+	 * Matcher class for the BeanNamePointcutDesignatorHandler.
+	 */
+	private class BeanNameContextMatcher implements ContextBasedMatcher {
+
+		private final NamePattern expressionPattern;
+
+		public BeanNameContextMatcher(String expression) {
+			this.expressionPattern = new NamePattern(expression);
+		}
+
+		public boolean couldMatchJoinPointsInType(Class someClass) {
+			return true;
+		}
+
+		public boolean couldMatchJoinPointsInType(Class someClass, MatchingContext context) {
+			return contextMatch();
+		}
+
+		public boolean matchesDynamically(MatchingContext context) {
+			return contextMatch();
+		}
+
+		public FuzzyBoolean matchesStatically(MatchingContext context) {
+			return FuzzyBoolean.fromBoolean(contextMatch());
+		}
+
+		public boolean mayNeedDynamicTest() {
+			return false;
+		}
+
+		private boolean contextMatch() {
+			String advisedBeanName = getCurrentProxiedBeanName();
+			return (advisedBeanName != null &&
+					!BeanFactoryUtils.isGeneratedBeanName(advisedBeanName) &&
+					this.expressionPattern.matches(advisedBeanName));
+		}
 	}
 
 }
