@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,30 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 
 
 	/**
+	 * Create a new advisor for this DeclareParents field.
+	 * @param interfaceType static field defining the introduction
+	 * @param typePattern type pattern the introduction is restricted to
+	 * @param defaultImpl the default implementation class
+	 */
+	public DeclareParentsAdvisor(Class interfaceType, String typePattern, Class defaultImpl) {
+		this(interfaceType, typePattern, defaultImpl, 
+			 new DelegatePerTargetObjectIntroductionInterceptor(defaultImpl, interfaceType));
+	}
+
+	/**
+	 * Create a new advisor for this DeclareParents field.
+	 * @param interfaceType static field defining the introduction
+	 * @param typePattern type pattern the introduction is restricted to
+	 * @param delegateRef the delegate implementation object
+	 */
+	public DeclareParentsAdvisor(Class interfaceType, String typePattern, Object delegateRef) {
+		this(interfaceType, typePattern, delegateRef.getClass(), 
+			 new DelegatingIntroductionInterceptor(delegateRef));
+	}
+
+	/**
 	 * Private constructor to share common code between impl-based delegate and reference-based delegate
 	 * (cannot use method such as init() to share common code, due the the use of final fields)
-	 * 
 	 * @param interfaceType static field defining the introduction
 	 * @param typePattern type pattern the introduction is restricted to
 	 * @param implementationClass implementation class
@@ -64,28 +85,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 		this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
 		this.advice = advice;
 	}
-	
-	/**
-	 * Create a new advisor for this DeclareParents field.
-	 * @param interfaceType static field defining the introduction
-	 * @param typePattern type pattern the introduction is restricted to
-	 * @param defaultImpl default implementation class
-	 */
-	public DeclareParentsAdvisor(Class interfaceType, String typePattern, Class defaultImpl) {
-		this(interfaceType, typePattern, defaultImpl, 
-			 new DelegatePerTargetObjectIntroductionInterceptor(defaultImpl, interfaceType));
-	}
 
-	/**
-	 * Create a new advisor for this DeclareParents field.
-	 * @param interfaceType static field defining the introduction
-	 * @param typePattern type pattern the introduction is restricted to
-	 * @param defaultImpl default implementation class
-	 */
-	public DeclareParentsAdvisor(Class interfaceType, String typePattern, Object delegateRef) {
-		this(interfaceType, typePattern, delegateRef.getClass(), 
-			 new DelegatingIntroductionInterceptor(delegateRef));
-	}
 
 	public ClassFilter getClassFilter() {
 		return this.typePatternClassFilter;
@@ -100,7 +100,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	}
 
 	public Advice getAdvice() {
-		return advice;
+		return this.advice;
 	}
 
 	public Class[] getInterfaces() {

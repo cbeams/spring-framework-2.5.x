@@ -24,12 +24,12 @@ package org.springframework.transaction.interceptor;
  * @since 09.04.2003
  */
 public class NoRollbackRuleAttribute extends RollbackRuleAttribute {
-	
+
 	/**
 	 * Create a new instance of the <code>NoRollbackRuleAttribute</code> class
 	 * for the supplied {@link Throwable} class.
 	 * @param clazz the <code>Throwable</code> class
-	 * @see #RollbackRuleAttribute(Class)
+	 * @see RollbackRuleAttribute#RollbackRuleAttribute(Class)
 	 */
 	public NoRollbackRuleAttribute(Class clazz) {
 		super(clazz);
@@ -39,12 +39,12 @@ public class NoRollbackRuleAttribute extends RollbackRuleAttribute {
 	 * Create a new instance of the <code>NoRollbackRuleAttribute</code> class
 	 * for the supplied <code>exceptionName</code>.
 	 * @param exceptionName the exception name pattern
-	 * @see #RollbackRuleAttribute(String) 
+	 * @see RollbackRuleAttribute#RollbackRuleAttribute(String)
 	 */
 	public NoRollbackRuleAttribute(String exceptionName) {
 		super(exceptionName);
 	}
-	
+
 	public String toString() {
 		return "No" + super.toString();
 	}
