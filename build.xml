@@ -1910,7 +1910,10 @@
 		<delete file="${target.release.dir}/${release-with-dependencies.zip}"/>
 
 		<fileset id="main" dir=".">
-			<include name="dist/**"/>
+			<include name="dist/*.*"/>
+			<include name="dist/modules/*.*"/>
+			<include name="dist/resources/*.*"/>
+			<include name="dist/weaving/*.*"/>
 			<include name="docs/reference/pdf/*.pdf"/>
 			<include name="*.txt"/>
 		</fileset>
