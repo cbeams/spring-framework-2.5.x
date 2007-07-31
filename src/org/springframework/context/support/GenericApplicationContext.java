@@ -260,4 +260,8 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		this.beanFactory.registerAlias(beanName, alias);
 	}
 
+	public boolean isBeanNameInUse(String beanName) {
+		return this.beanFactory.isBeanNameInUse(beanName);
+	}
+
 }

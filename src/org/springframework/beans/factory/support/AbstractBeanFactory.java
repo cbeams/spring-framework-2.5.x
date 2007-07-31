@@ -746,16 +746,19 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	/**
-	 * Return a RootBeanDefinition for the given bean name,
+	 * Return a 'merged' BeanDefinition for the given bean name,
 	 * merging a child bean definition with its parent if necessary.
 	 * <p>This <code>getMergedBeanDefinition</code> considers bean definition
 	 * in ancestors as well.
-	 * @param beanName the name of the bean to retrieve the merged definition for
+	 * @param name the name of the bean to retrieve the merged definition for
+	 * (may be an alias)
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
-	public BeanDefinition getMergedBeanDefinition(String beanName) throws BeansException {
+	public BeanDefinition getMergedBeanDefinition(String name) throws BeansException {
+		String beanName = transformedBeanName(name);
+
 		// Efficiently check whether bean definition exists in this factory.
 		if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof ConfigurableBeanFactory) {
 			return ((ConfigurableBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName);
@@ -1350,11 +1353,11 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 	/**
 	 * Determine whether the given bean name is already in use within this factory,
-	 * that is, whether there is a local bean registered under this name or
-	 * an inner bean created with this name.
+	 * i.e. whether there is a local bean registered under this name or an inner
+	 * bean created with this name.
 	 * @param beanName the name to check
 	 */
-	protected boolean isBeanNameInUse(String beanName) {
+	public boolean isBeanNameInUse(String beanName) {
 		return containsLocalBean(beanName) || hasDependentBean(beanName);
 	}
 
