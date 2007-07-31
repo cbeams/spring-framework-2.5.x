@@ -69,14 +69,16 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		context.registerBeanDefinition("stubFooDao", new RootBeanDefinition(TestBean.class));
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
-		int beanCount = scanner.scan(BASE_PACKAGE);
-		assertEquals(8, beanCount);
-		assertEquals(9, context.getBeanDefinitionCount());
-		assertTrue(context.containsBean("serviceInvocationCounter"));
-		assertTrue(context.containsBean("fooServiceImpl"));
-		assertTrue(context.containsBean("stubFooDao"));
-		assertTrue(context.containsBean("myNamedComponent"));
-		assertTrue(context.containsBean("myNamedDao"));
+		try {
+			scanner.scan(BASE_PACKAGE);
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+			assertTrue(ex.getMessage().indexOf("stubFooDao") != -1);
+			assertTrue(ex.getMessage().indexOf(TestBean.class.getName()) != -1);
+			assertTrue(ex.getMessage().indexOf(StubFooDao.class.getName()) != -1);
+		}
 	}
 
 	public void testSimpleScanWithDefaultFiltersAndOverriddenEqualNamedBean() {

@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.util.ClassUtils;
@@ -39,10 +38,6 @@ import org.springframework.util.StringUtils;
  * letter lower-cased). For example:
  *
  * <p><code>com.xyz.FooServiceImpl -&gt; fooServiceImpl</code>
- *
- * <p>Note that generated bean names have to be unique, hence the actual
- * runtime names may have a "#1", "#2", etc. suffix appended if the generated
- * names were not unique already.
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
@@ -62,14 +57,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		}
 
 		// Generate a unique default bean name.
-		String rawBeanName = buildDefaultBeanName(definition);
-		String id = rawBeanName;
-		int counter = 0;
-		while (registry.containsBeanDefinition(id)) {
-			counter++;
-			id = rawBeanName + BeanDefinitionReaderUtils.GENERATED_BEAN_NAME_SEPARATOR + counter;
-		}
-		return id;
+		return buildDefaultBeanName(definition);
 	}
 
 
