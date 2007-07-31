@@ -224,13 +224,11 @@ public abstract class AopUtils {
 	public static boolean canApply(Advisor advisor, Class targetClass) {
 		return canApply(advisor, targetClass, false);
 	}
-	
+
 	/**
 	 * Can the given advisor apply at all on the given class?
-	 * This is an important test as it can be used to optimize
-	 * out a advisor for a class.
-	 * This version also takes into account introductions, for
-	 * IntroductionAwareMethodMatchers
+	 * <p>This is an important test as it can be used to optimize out a advisor for a class.
+	 * This version also takes into account introductions (for IntroductionAwareMethodMatchers).
 	 * @param advisor the advisor to check
 	 * @param targetClass class we're testing
 	 * @param hasIntroductions whether or not the advisor chain for this bean includes
@@ -246,7 +244,7 @@ public abstract class AopUtils {
 			return canApply(pca.getPointcut(), targetClass, hasIntroductions);
 		}
 		else {
-			// It doesn't have a pointcut so we assume it applies
+			// It doesn't have a pointcut so we assume it applies.
 			return true;
 		}
 	}
