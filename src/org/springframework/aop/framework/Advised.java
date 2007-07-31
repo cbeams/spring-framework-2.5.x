@@ -91,6 +91,22 @@ public interface Advised extends TargetClassAware {
 	 */
 	boolean isExposeProxy();
 
+	/**
+	 * Set whether this proxy configuration is pre-filtered so that it only
+	 * contains applicable advisors (matching this proxy's target class).
+	 * <p>Default is "false". Set this to "true" if the advisors have been
+	 * pre-filtered already, meaning that the ClassFilter check can be skipped
+	 * when building the actual advisor chain for proxy invocations.
+	 * @see org.springframework.aop.ClassFilter
+	 */
+	void setPreFiltered(boolean preFiltered);
+
+	/**
+	 * Return whether this proxy configuration is pre-filtered so that it only
+	 * contains applicable advisors (matching this proxy's target class).
+	 */
+	boolean isPreFiltered();
+
 
 	/**
 	 * Return the advisors applying to this proxy.

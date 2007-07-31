@@ -71,6 +71,9 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/** Package-protected to allow direct access for efficiency */
 	TargetSource targetSource = EMPTY_TARGET_SOURCE;
 
+	/** Whether the Advisors are already filtered for the specific target class */
+	private boolean preFiltered = false;
+
 	/** The AdvisorChainFactory to use */
 	transient AdvisorChainFactory advisorChainFactory;
 
@@ -158,6 +161,14 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	public Class getTargetClass() {
 		return this.targetSource.getTargetClass();
+	}
+
+	public void setPreFiltered(boolean preFiltered) {
+		this.preFiltered = preFiltered;
+	}
+
+	public boolean isPreFiltered() {
+		return this.preFiltered;
 	}
 
 	/**
@@ -451,7 +462,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			List cached = (List) this.methodCache.get(method);
 			if (cached == null) {
 				cached = this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
-						this, null, method, targetClass);
+						this, method, targetClass);
 				this.methodCache.put(method, cached);
 			}
 			return cached;

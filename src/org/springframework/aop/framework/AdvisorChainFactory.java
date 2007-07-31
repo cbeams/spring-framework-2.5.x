@@ -28,14 +28,13 @@ import java.util.List;
 public interface AdvisorChainFactory {
 
 	/**
-	 * Determine a list of {@link org.aopalliance.intercept.MethodInterceptor} objects.
+	 * Determine a list of {@link org.aopalliance.intercept.MethodInterceptor} objects
+	 * for the given advisor chain configuration.
 	 * @param config the AOP configuration in the form of an Advised object
-	 * @param proxy the proxy object (currently always <code>null</code>;
-	 * this argument will be removed in Spring 2.1!)
 	 * @param method the proxied method
 	 * @param targetClass the target class
 	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
-	List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy, Method method, Class targetClass);
+	List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, Class targetClass);
 
 }

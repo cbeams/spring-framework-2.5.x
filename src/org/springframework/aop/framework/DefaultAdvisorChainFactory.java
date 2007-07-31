@@ -44,9 +44,7 @@ import org.springframework.aop.support.MethodMatchers;
  */
 public class DefaultAdvisorChainFactory implements AdvisorChainFactory {
 
-	public List getInterceptorsAndDynamicInterceptionAdvice(
-			Advised config, Object proxy, Method method, Class targetClass) {
-
+	public List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, Class targetClass) {
 		// This is somewhat tricky... we have to process introductions first,
 		// but we need to preserve order in the ultimate list.
 		List interceptorList = new ArrayList(config.getAdvisors().length);
@@ -58,7 +56,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory {
 			if (advisor instanceof PointcutAdvisor) {
 				// Add it conditionally.
 				PointcutAdvisor pointcutAdvisor = (PointcutAdvisor) advisor;
-				if (pointcutAdvisor.getPointcut().getClassFilter().matches(targetClass)) {
+				if (config.isPreFiltered() || pointcutAdvisor.getPointcut().getClassFilter().matches(targetClass)) {
 					MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
 					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
 					if (MethodMatchers.matches(mm, method, targetClass, hasIntroductions)) {
@@ -77,10 +75,14 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory {
 			}
 			else if (advisor instanceof IntroductionAdvisor) {
 				IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
-				if (ia.getClassFilter().matches(targetClass)) {
+				if (config.isPreFiltered() || ia.getClassFilter().matches(targetClass)) {
 					Interceptor[] interceptors = registry.getInterceptors(advisor);
 					interceptorList.addAll(Arrays.asList(interceptors));
 				}
+			}
+			else {
+				Interceptor[] interceptors = registry.getInterceptors(advisor);
+				interceptorList.addAll(Arrays.asList(interceptors));
 			}
 		}
 		return interceptorList;
