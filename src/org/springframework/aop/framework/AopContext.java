@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public abstract class AopContext {
 	 * @return the old proxy, which may be <code>null</code> if none was bound
 	 * @see #currentProxy()
 	 */
-	public static Object setCurrentProxy(Object proxy) {
+	static Object setCurrentProxy(Object proxy) {
 		Object old = currentProxy.get();
 		currentProxy.set(proxy);
 		return old;
