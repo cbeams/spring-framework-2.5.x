@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.annotation;
 
 import java.lang.annotation.Documented;
@@ -28,23 +29,18 @@ import java.lang.annotation.Target;
  * {@link #value() value} for the provided {@link #name() name}, the test will
  * be enabled. This annotation can be applied at the class-level or
  * method-level.
- * 
- * <p>
- * Example: when using {@link SystemProfileValueSource} as the
+ *
+ * <p>Example: when using {@link SystemProfileValueSource} as the
  * {@link ProfileValueSource} implementation, you could configure a JUnit 4 test
  * method to run only on Java VMs from Sun Microsystems as follows:
- * </p>
- * 
- * <code>
- * <pre>
+ *
+ * <pre class="code">
  * &#064;IfProfileValue(name=&quot;java.vendor&quot;, value=&quot;Sun Microsystems Inc.&quot;)
  * &#064;Test 
  * testSomething() {
  *     // ...
- * }
- * </pre>
- * </code>
- * 
+ * }</pre>
+ *
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
@@ -58,8 +54,7 @@ import java.lang.annotation.Target;
 public @interface IfProfileValue {
 
 	/**
-	 * The <code>name</code> of the <em>profile value</em> against which to
-	 * test.
+	 * The <code>name</code> of the <em>profile value</em> against which to test.
 	 */
 	String name();
 

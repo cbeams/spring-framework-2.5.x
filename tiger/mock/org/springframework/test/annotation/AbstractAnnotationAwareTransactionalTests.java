@@ -46,11 +46,11 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
  */
 public abstract class AbstractAnnotationAwareTransactionalTests
 		extends AbstractTransactionalDataSourceSpringContextTests {
-	
+
 	protected SimpleJdbcTemplate simpleJdbcTemplate;
-	
+
 	private TransactionAttributeSource transactionAttributeSource = new AnnotationTransactionAttributeSource();
-	
+
 	protected ProfileValueSource profileValueSource = SystemProfileValueSource.getInstance();
 
 
@@ -61,8 +61,6 @@ public abstract class AbstractAnnotationAwareTransactionalTests
 		this.simpleJdbcTemplate = new SimpleJdbcTemplate(this.jdbcTemplate);
 	}
 
-	// TODO code to try to load (and cache!) ProfileValueSource
-	// from a given URL? It's easy enough to do, of course.
 	protected void findUniqueProfileValueSourceFromContext(ApplicationContext ac) {
 		Map beans = ac.getBeansOfType(ProfileValueSource.class);
 		if (beans.size() == 1) {
@@ -82,19 +80,19 @@ public abstract class AbstractAnnotationAwareTransactionalTests
 			super.runBare();
 			return;
 		}
-		
+
 		// Use same algorithm as JUnit itself to retrieve the test method
 		// about to be executed (the method name is returned by getName).
 		// It has to be public so we can retrieve it
 		final Method testMethod = getClass().getMethod(getName(), (Class[]) null);
-		
+
 		if (isDisabledInThisEnvironment(testMethod)) {
 			logger.info("**** " + getClass().getName() + "." + getName() + " disabled in this environment: " +
 					"Total disabled tests=" + getDisabledTestCount());
 			recordDisabled();
 			return;
 		} 
-		
+
 		TransactionDefinition explicitTransactionDefinition =
 				this.transactionAttributeSource.getTransactionAttribute(testMethod, getClass());
 		if (explicitTransactionDefinition != null) {
@@ -105,7 +103,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests
 			// Don't have any transaction...
 			preventTransaction();
 		}
-		
+
 		// Let JUnit handle execution. We're just changing the state of the
 		// test class first.
 		runTestTimed(
@@ -115,9 +113,8 @@ public abstract class AbstractAnnotationAwareTransactionalTests
 							AbstractAnnotationAwareTransactionalTests.super.runBare();
 						}
 						finally {
-							// Mark the context to be blown
-							// away if the test was annotated to result
-							// in setDirty being invoked automatically
+							// Mark the context to be blown away if the test was annotated to result
+							// in setDirty being invoked automatically.
 							if (testMethod.isAnnotationPresent(DirtiesContext.class)) {
 								AbstractAnnotationAwareTransactionalTests.this.setDirty();
 							}
@@ -169,9 +166,8 @@ public abstract class AbstractAnnotationAwareTransactionalTests
 	private static void runTest(TestExecutionCallback tec, Method testMethod, Log logger) throws Throwable {
 		ExpectedException ee = testMethod.getAnnotation(ExpectedException.class);
 		Repeat repeat = testMethod.getAnnotation(Repeat.class);
-		
+
 		int runs = (repeat != null) ? repeat.value() : 1;
-		
 		for (int i = 0; i < runs; i++) {
 			try {
 				if (i > 0 && logger != null) {
@@ -182,17 +178,17 @@ public abstract class AbstractAnnotationAwareTransactionalTests
 					fail("Expected throwable of class " + ee.value());
 				}
 			}
-			catch (Throwable t) {
+			catch (Throwable ex) {
 				if (ee == null) {
-					throw t;
+					throw ex;
 				}
-				if (ee.value().isAssignableFrom(t.getClass())) {
-					// Ok
+				if (ee.value().isAssignableFrom(ex.getClass())) {
+					// OK
 				}
 				else {
-					//fail("Expected throwable of class " + ee.value() + "; got " + t);
+					// fail("Expected throwable of class " + ee.value() + "; got " + t);
 					// Throw the unexpected problem throwable
-					throw t;
+					throw ex;
 				}
 			}
 		}
