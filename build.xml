@@ -1087,7 +1087,7 @@
 				overview="${doc.dir}/overview.html"
 				header='&lt;a href=\"http://www.springframework.org/\" target=\"_top\"&gt;The Spring Framework&lt;/a&gt;'>
 			<arg value="-breakiterator"/>
-			<arg value="-J-Xmx128m"/>
+			<arg value="-J-Xmx256m"/>
 			<arg value="-J-XX:MaxPermSize=128m"/>
 			<arg value="-J-Dhttp.proxyHost=${javadoc.proxyhost}"/>
 			<arg value="-J-Dhttp.proxyPort=${javadoc.proxyport}"/>
@@ -1593,6 +1593,7 @@
 				</fileset>
 			</classpath>
 			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
 			<arg value="-o"/>
 			<arg value="${basedir}/${dist.ref.dir}/pdf/docbook_fop.tmp"/>
 			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
@@ -1729,6 +1730,7 @@
 				</fileset>
 			</classpath>
 			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
 			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
 			<arg value="${basedir}/${doc.ref.dir}/styles/html_chunk.xsl"/>
 		</java>
@@ -1757,6 +1759,7 @@
 				</fileset>
 			</classpath>
 			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
 			<arg value="-o"/>
 			<arg value="${basedir}/${dist.ref.dir}/html_single/index.html"/>
 			<arg value="${basedir}/${doc.ref.dir}/src/index.xml"/>
@@ -1812,6 +1815,7 @@
 				</fileset>
 			</classpath>
 			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
 			<arg value="-o"/>
 			<arg value="${basedir}/${dist.mvcstep.dir}/pdf/docbook_fop.tmp"/>
 			<arg value="${basedir}/${doc.mvcstep.dir}/src/index.xml"/>
@@ -1854,6 +1858,7 @@
 				</fileset>
 			</classpath>
 			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
 			<arg value="${basedir}/${doc.mvcstep.dir}/src/index.xml"/>
 			<arg value="${basedir}/${doc.mvcstep.dir}/styles/html_chunk.xsl"/>
 		</java>
@@ -1881,6 +1886,7 @@
 				</fileset>
 			</classpath>
 			<jvmarg value="-Xmx256M"/>
+			<jvmarg value="-XX:MaxPermSize=128m"/>
 			<arg value="-o"/>
 			<arg value="${basedir}/${dist.mvcstep.dir}/html_single/index.html"/>
 			<arg value="${basedir}/${doc.mvcstep.dir}/src/index.xml"/>
