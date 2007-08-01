@@ -4,7 +4,7 @@ Import-Package: org.apache.commons.logging*, \
   org.objectweb.asm*;version=${asm-version};resolution:=optional, \
   *;resolution:=optional
 
-Dynamic-Import: *
+DynamicImport-Package: *
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 
