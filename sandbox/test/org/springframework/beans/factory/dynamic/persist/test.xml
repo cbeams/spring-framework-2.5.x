@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!--
   - Application context definition for Petclinic on JDBC.
 	-->
 <beans>
-	
+
 	<bean id="persistent1"
 		class="org.springframework.beans.factory.dynamic.persist.PersistentProxyFactoryBean" >
 		<property name="targetSource">
@@ -16,13 +16,13 @@
 			</bean>
 		</property>
 	</bean>
-	
-	
-	 
+
+
+
 	<bean id="tb" class="org.springframework.beans.TestBean" >
-		<property name="name"><value>Tony</value>			
+		<property name="name"><value>Tony</value>
 		</property>
 	</bean>
 
-	
+
 </beans>

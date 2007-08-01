@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd"
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd"
 >
 
 <beans>
 
 	<description>
-		Generic autoproxy definitions enabling declarative transaction management, 
+		Generic autoproxy definitions enabling declarative transaction management,
 		based on Commons Attributes attributes. The application context must define
 		a single PlatformTransactionManager for autoproxying to work.
-		
+
 		This file is generic, and not specific to JPetStore. You can use it unchanged
 		as an application context definition file for your own applications to get
 		attribute-driven declarative transaction management.
-		
+
 		The power of this approach is more apparent when you have many transactional
 		business objects, not just one as in this simple application.
-		
+
 		Add more Advisor definitions if you want, for additional declarative services.
 	</description>
 
@@ -23,7 +23,7 @@
 		This bean is a postprocessor that will automatically apply relevant advisors
 		to any bean in child factories.
 	-->
-	<bean id="autoproxy" 
+	<bean id="autoproxy"
 		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
 	</bean>
 
@@ -31,12 +31,12 @@
 		class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource"
 		autowire="constructor">
 	</bean>
-	
+
 	<bean id="transactionInterceptor"
 		class="org.springframework.transaction.interceptor.TransactionInterceptor"
 		autowire="byType">
 	</bean>
-	
+
 	<!--
 		AOP advisor that will provide declarative transaction management
 		based on attributes.
@@ -47,7 +47,7 @@
 		class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"
 		autowire="constructor" >
 	</bean>
-	
+
 	<!--
 		Commons Attributes Attributes implementation. Replace with another
 		implementation of org.springframework.metadata.Attributes to source
@@ -56,5 +56,5 @@
 	<bean id="attributes"
 		class="org.springframework.metadata.commons.CommonsAttributes"
 	/>
-	
+
 </beans>
