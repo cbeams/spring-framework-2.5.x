@@ -15,6 +15,8 @@
  */
 package org.springframework.test;
 
+import java.io.Serializable;
+
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.ContextConfiguration;
@@ -34,10 +36,10 @@ import org.springframework.test.annotation.ContextConfiguration;
  *
  * @see ContextConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.2
  */
-public interface ContextConfigurationAttributes {
+public interface ContextConfigurationAttributes extends Serializable {
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|

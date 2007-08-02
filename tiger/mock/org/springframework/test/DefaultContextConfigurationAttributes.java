@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  *
  * @see #constructAttributes(Class)
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.2
  */
 public class DefaultContextConfigurationAttributes implements ContextConfigurationAttributes {
@@ -53,6 +53,9 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
+
+	/** serialVersionUID. */
+	private static final long serialVersionUID = -1748862298523840362L;
 
 	/** Class Logger. */
 	private static final Log LOG = LogFactory.getLog(DefaultContextConfigurationAttributes.class);
