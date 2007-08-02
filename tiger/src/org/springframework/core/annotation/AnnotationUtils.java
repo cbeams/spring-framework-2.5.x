@@ -132,7 +132,13 @@ public abstract class AnnotationUtils {
 	 * specified <code>clazz</code> (including the specified
 	 * <code>clazz</code> itself) which declares an annotation for the
 	 * specified <code>annotationType</code>, or <code>null</code> if not
-	 * found.
+	 * found. If the supplied <code>clazz</code> is <code>null</code>,
+	 * <code>null</code> will be returned.
+	 * </p>
+	 * <p>
+	 * If the supplied <code>clazz</code> is an interface, only the interface
+	 * itself will be checked; the inheritance hierarchy for interfaces will not
+	 * be traversed.
 	 * </p>
 	 * <p>
 	 * The standard {@link Class} API does not provide a mechanism for
@@ -145,24 +151,23 @@ public abstract class AnnotationUtils {
 	 * @param annotationType the Class object corresponding to the annotation
 	 *        type
 	 * @param clazz the Class object corresponding to the class on which to
-	 *        check for the annotation
+	 *        check for the annotation, or <code>null</code>.
 	 * @return the first {@link Class} in the inheritance hierarchy of the
 	 *         specified <code>clazz</code> which declares an annotation for
 	 *         the specified <code>annotationType</code>, or
 	 *         <code>null</code> if not found.
-	 * @throws IllegalArgumentException if a supplied argument is
+	 * @throws IllegalArgumentException if the supplied annotationType is
 	 *         <code>null</code>.
 	 */
 	public static Class<?> findAnnotationDeclaringClass(final Class<? extends Annotation> annotationType,
 			final Class<?> clazz) throws IllegalArgumentException {
 
 		Assert.notNull(annotationType, "annotationType can not be null.");
-		Assert.notNull(clazz, "clazz can not be null.");
 
-		if (Object.class.equals(clazz)) {
+		if ((clazz == null) || clazz.equals(Object.class)) {
 			return null;
 		}
-
+		// else...
 		return (isAnnotationDeclaredLocally(annotationType, clazz)) ? clazz : findAnnotationDeclaringClass(
 				annotationType, clazz.getSuperclass());
 	}
@@ -171,7 +176,8 @@ public abstract class AnnotationUtils {
 	 * <p>
 	 * Returns <code>true</code> if an annotation for the specified
 	 * <code>annotationType</code> is declared locally on the supplied
-	 * <code>clazz</code>, else <code>false</code>.
+	 * <code>clazz</code>, else <code>false</code>. The supplied
+	 * {@link Class} object may represent any type.
 	 * </p>
 	 * <p>
 	 * Note: this method does <strong>not</strong> determine if the annotation
@@ -215,6 +221,14 @@ public abstract class AnnotationUtils {
 	 * <code>clazz</code> and is
 	 * {@link java.lang.annotation.Inherited inherited} (i.e., not declared
 	 * locally for the class), else <code>false</code>.
+	 * </p>
+	 * <p>
+	 * If the supplied <code>clazz</code> is an interface, only the interface
+	 * itself will be checked. In accord with standard meta-annotation
+	 * semantics, the inheritance hierarchy for interfaces will not be
+	 * traversed. See the {@link java.lang.annotation.Inherited JavaDoc} for the
+	 * &#064;Inherited meta-annotation for further details regarding annotation
+	 * inheritance.
 	 * </p>
 	 *
 	 * @param annotationType the Class object corresponding to the annotation
