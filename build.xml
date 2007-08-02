@@ -1929,6 +1929,9 @@
 				<include name="*.xml"/>
 				<include name="*.properties"/>
 				<exclude name="junit*.properties"/>
+				<include name="dist/maven/*.*"/>
+				<include name="dist/module-sources/*.*"/>
+				<include name="dist/weaving-sources/*.*"/>
 				<include name="docs/reference/html_single/**"/>
 				<include name="docs/reference/images/admons/*.png"/>
 				<include name="docs/reference/images/admons/*.gif"/>
