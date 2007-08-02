@@ -38,7 +38,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.2
  */
 @RunWith(Suite.class)
@@ -55,7 +55,7 @@ AbsolutePathSpringJUnit4ClassRunnerAppCtxTests.class,
 
 RelativePathSpringJUnit4ClassRunnerAppCtxTests.class,
 
-InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,
+InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class
 
 })
 public class SpringJUnit4SuiteTests {
