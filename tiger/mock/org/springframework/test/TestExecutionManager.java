@@ -21,7 +21,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -31,13 +30,13 @@ import org.springframework.util.ClassUtils;
  * <p>
  * TestExecutionManager is the central entry point into the Spring testing
  * support API, which serves as a facade and encapsulates support for loading
- * and accessing {@link ApplicationContext application contexts}, dependency
+ * and accessing {@link ConfigurableApplicationContext application contexts}, dependency
  * injection of test classes, and {@link Transactional transactional} execution
  * of test methods.
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.2
  */
 public class TestExecutionManager<T> {
@@ -53,6 +52,13 @@ public class TestExecutionManager<T> {
 	// --- STATIC VARIABLES ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
+	/**
+	 * Cache of Spring application contexts. This needs to be static, as tests
+	 * may be destroyed and recreated between running individual test methods,
+	 * for example with JUnit.
+	 */
+	private static final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> contextCache = new ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext>();
+
 	// ------------------------------------------------------------------------|
 	// --- STATIC INITIALIZATION ----------------------------------------------|
 	// ------------------------------------------------------------------------|
@@ -60,8 +66,6 @@ public class TestExecutionManager<T> {
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
-
-	private ConfigurableApplicationContext applicationContext;
 
 	private final ContextConfigurationAttributes configurationAttributes;
 
@@ -97,7 +101,7 @@ public class TestExecutionManager<T> {
 
 	/**
 	 * <p>
-	 * Builds and configures an {@link ApplicationContext} based on the supplied
+	 * Builds and configures a {@link ConfigurableApplicationContext} based on the supplied
 	 * {@link ContextConfigurationAttributes}.
 	 * </p>
 	 *
@@ -187,34 +191,33 @@ public class TestExecutionManager<T> {
 
 	/**
 	 * <p>
-	 * Gets the {@link ApplicationContext} for the managed
-	 * {@link #getTestClass() test class}.
-	 * </p>
-	 * <p>
-	 * Currently performs lazy initialization but does not perform any caching!
+	 * Gets the {@link ConfigurableApplicationContext application context} for the managed
+	 * {@link #getTestClass() test class}, possibly cached.
 	 * </p>
 	 *
-	 * @return Returns the application context.
+	 * @return The application context.
 	 * @throws Exception if an error occurs while retrieving the application
 	 *         context.
 	 */
 	public ConfigurableApplicationContext getApplicationContext() throws Exception {
 
-		// TODO Extract ApplicationContext processing and caching into a new
-		// class hierarchy. Cache context using configurationAttributes as key!
-
-		// Lazy load for the time being...
-		if (this.applicationContext == null) {
-			this.applicationContext = buildApplicationContext(getConfigurationAttributes());
+		if (!getContextCache().hasCachedContext(getConfigurationAttributes())) {
+			getContextCache().addContext(getConfigurationAttributes(),
+					buildApplicationContext(getConfigurationAttributes()));
 		}
 
-		return this.applicationContext;
+		return getContextCache().getContext(getConfigurationAttributes());
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @return Returns the configurationAttributes.
+	 * <p>
+	 * Gets the {@link ContextConfigurationAttributes configuration attributes}
+	 * for the managed {@link #getTestClass() test class}.
+	 * </p>
+	 *
+	 * @return The configuration attributes.
 	 */
 	public ContextConfigurationAttributes getConfigurationAttributes() {
 
@@ -224,7 +227,21 @@ public class TestExecutionManager<T> {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @return Returns the testClass.
+	 * @return the context cache.
+	 */
+	protected ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> getContextCache() {
+
+		return TestExecutionManager.contextCache;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Gets the managed {@link Class test class}.
+	 * </p>
+	 *
+	 * @return The test class.
 	 */
 	public Class<T> getTestClass() {
 
@@ -252,37 +269,45 @@ public class TestExecutionManager<T> {
 	 *
 	 * @param testInstance the object into which dependencies should be
 	 *        injected.
-	 * @param configurationAttributes the configuration attributes which define
-	 *        dependency injection guidelines.
-	 * @param context the application context from which the test instance's
-	 *        dependencies should be injected.
 	 * @throws Exception in case of dependency injection failure
 	 */
-	protected void injectDependencies(final T testInstance,
-			final ContextConfigurationAttributes configurationAttributes, final ConfigurableApplicationContext context)
-			throws Exception {
+	protected void injectDependencies(final T testInstance) throws Exception {
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Dependency injecting test instance [" + testInstance + "] based on configuration attributes ["
-					+ configurationAttributes + "].");
+					+ getConfigurationAttributes() + "].");
 		}
-		context.getBeanFactory().autowireBeanProperties(testInstance,
-				configurationAttributes.getAutowireMode().value(), configurationAttributes.isDependencyCheckEnabled());
+		getApplicationContext().getBeanFactory().autowireBeanProperties(testInstance,
+				getConfigurationAttributes().getAutowireMode().value(),
+				getConfigurationAttributes().isDependencyCheckEnabled());
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Call this method to signal that the {@link ConfigurableApplicationContext application context} associated
+	 * with this {@link TestExecutionManager} is <em>dirty</em> and should be
+	 * reloaded. Do this if a test has modified the context (for example, by
+	 * replacing a bean definition).
+	 */
+	public void markApplicationContextDirty() {
+
+		getContextCache().setDirty(getConfigurationAttributes());
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
-	 * Prepares the supplied test instance (e.g., injecting dependencies, etc.)
+	 * Prepares the supplied test instance (e.g., injecting dependencies, etc.).
 	 * </p>
 	 *
-	 * @param testInstance the test object to prepare.
+	 * @param testInstance The test object to prepare.
 	 * @throws Exception if an error occurs while preparing the test instance.
 	 */
 	public void prepareTestInstance(final T testInstance) throws Exception {
 
-		injectDependencies(testInstance, getConfigurationAttributes(), getApplicationContext());
+		injectDependencies(testInstance);
 		if (!getApplicationContext().isActive()) {
 			getApplicationContext().refresh();
 		}
