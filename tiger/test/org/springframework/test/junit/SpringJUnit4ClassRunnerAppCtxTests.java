@@ -17,14 +17,15 @@ package org.springframework.test.junit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import junit.framework.JUnit4TestAdapter;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -44,20 +45,19 @@ import org.springframework.test.annotation.ContextConfiguration;
  * is left set to its default value of <code>true</code>, this test class's
  * dependencies will be injected via
  * {@link Autowired annotation-based autowiring} from beans defined in the
- * {@link ApplicationContext} loaded from the default classpath resource:
- * &quot;<code>/org/springframework/test/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml</code>&quot;.
+ * {@link ApplicationContext} loaded from the default classpath resource: &quot;<code>/org/springframework/test/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml</code>&quot;.
  * </p>
  *
  * @see AbsolutePathSpringJUnit4ClassRunnerAppCtxTests
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.2
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration()
-public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAware {
+public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAware, InitializingBean {
 
 	// ------------------------------------------------------------------------|
 	// --- CLASS VARIABLES ----------------------------------------------------|
@@ -79,6 +79,8 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 
 	private ApplicationContext applicationContext;
 
+	private boolean beanInitialized = false;
+
 	private Employee employee;
 
 	@Autowired
@@ -89,8 +91,16 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @return Returns the applicationContext.
+	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
 	 */
+	@Override
+	public void afterPropertiesSet() throws Exception {
+
+		this.beanInitialized = true;
+	}
+
+	// ------------------------------------------------------------------------|
+
 	protected ApplicationContext getApplicationContext() {
 
 		return this.applicationContext;
@@ -112,6 +122,13 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 
 	// ------------------------------------------------------------------------|
 
+	protected boolean isBeanInitialized() {
+
+		return this.beanInitialized;
+	}
+
+	// ------------------------------------------------------------------------|
+
 	/**
 	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
 	 */
@@ -123,9 +140,6 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 
 	// ------------------------------------------------------------------------|
 
-	/**
-	 * @param employee The employee to set.
-	 */
 	@Autowired
 	protected void setEmployee(final Employee employee) {
 
@@ -134,15 +148,20 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 
 	// ------------------------------------------------------------------------|
 
-	@Ignore
 	@Test
 	public void verifyApplicationContext() {
 
-		// TODO Determine if we want to support ApplicationContextAware and
-		// other bean lifecycle methods out-of-the-box for test classes.
-
-		assertNotNull("The application context should have been set due to ApplicationContextAware.",
+		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
 				getApplicationContext());
+	}
+
+	// ------------------------------------------------------------------------|
+
+	@Test
+	public void verifyBeanInitialized() {
+
+		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
+				isBeanInitialized());
 	}
 
 	// ------------------------------------------------------------------------|

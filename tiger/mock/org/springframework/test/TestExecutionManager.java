@@ -30,13 +30,13 @@ import org.springframework.util.ClassUtils;
  * <p>
  * TestExecutionManager is the central entry point into the Spring testing
  * support API, which serves as a facade and encapsulates support for loading
- * and accessing {@link ConfigurableApplicationContext application contexts}, dependency
- * injection of test classes, and {@link Transactional transactional} execution
- * of test methods.
+ * and accessing {@link ConfigurableApplicationContext application contexts},
+ * dependency injection of test classes, and {@link Transactional transactional}
+ * execution of test methods.
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.2
  */
 public class TestExecutionManager<T> {
@@ -101,8 +101,8 @@ public class TestExecutionManager<T> {
 
 	/**
 	 * <p>
-	 * Builds and configures a {@link ConfigurableApplicationContext} based on the supplied
-	 * {@link ContextConfigurationAttributes}.
+	 * Builds and configures a {@link ConfigurableApplicationContext} based on
+	 * the supplied {@link ContextConfigurationAttributes}.
 	 * </p>
 	 *
 	 * @param configAttributes the context configuration attributes to use to
@@ -191,8 +191,8 @@ public class TestExecutionManager<T> {
 
 	/**
 	 * <p>
-	 * Gets the {@link ConfigurableApplicationContext application context} for the managed
-	 * {@link #getTestClass() test class}, possibly cached.
+	 * Gets the {@link ConfigurableApplicationContext application context} for
+	 * the managed {@link #getTestClass() test class}, possibly cached.
 	 * </p>
 	 *
 	 * @return The application context.
@@ -280,12 +280,14 @@ public class TestExecutionManager<T> {
 		getApplicationContext().getBeanFactory().autowireBeanProperties(testInstance,
 				getConfigurationAttributes().getAutowireMode().value(),
 				getConfigurationAttributes().isDependencyCheckEnabled());
+		getApplicationContext().getBeanFactory().initializeBean(testInstance, null);
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Call this method to signal that the {@link ConfigurableApplicationContext application context} associated
+	 * Call this method to signal that the
+	 * {@link ConfigurableApplicationContext application context} associated
 	 * with this {@link TestExecutionManager} is <em>dirty</em> and should be
 	 * reloaded. Do this if a test has modified the context (for example, by
 	 * replacing a bean definition).
