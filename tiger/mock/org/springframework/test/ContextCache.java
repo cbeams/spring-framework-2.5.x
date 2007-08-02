@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.2
  */
 public class ContextCache<KEY extends Serializable, CONTEXT extends ConfigurableApplicationContext> {
@@ -82,15 +82,17 @@ public class ContextCache<KEY extends Serializable, CONTEXT extends Configurable
 	/**
 	 * <p>
 	 * Explicitly add a ConfigurableApplicationContext instance to the cache
-	 * under a given key.
+	 * under the given key.
 	 * </p>
 	 *
-	 * @param key the context key
-	 * @param context the ConfigurableApplicationContext instance
+	 * @param key The context key, not <code>null</code>.
+	 * @param context The ConfigurableApplicationContext instance, not
+	 *        <code>null</code>.
 	 */
 	public final void addContext(final KEY key, final CONTEXT context) {
 
-		Assert.notNull(context, "ConfigurableApplicationContext must not be null");
+		Assert.notNull(key, "Key must not be null.");
+		Assert.notNull(context, "ConfigurableApplicationContext must not be null.");
 		this.contextKeyToContextMap.put(key, context);
 	}
 
@@ -101,11 +103,12 @@ public class ContextCache<KEY extends Serializable, CONTEXT extends Configurable
 	 * Return whether there is a cached context for the given key.
 	 * </p>
 	 *
-	 * @param contextKey the context key
+	 * @param key The context key, not <code>null</code>.
 	 */
-	public final boolean hasCachedContext(final KEY contextKey) {
+	public final boolean hasCachedContext(final KEY key) {
 
-		return this.contextKeyToContextMap.containsKey(contextKey);
+		Assert.notNull(key, "Key must not be null.");
+		return this.contextKeyToContextMap.containsKey(key);
 	}
 
 	// ------------------------------------------------------------------------|
@@ -115,12 +118,13 @@ public class ContextCache<KEY extends Serializable, CONTEXT extends Configurable
 	 * Obtain a cached ConfigurableApplicationContext for the given key.
 	 * </p>
 	 *
-	 * @param key the context key
+	 * @param key The context key, not <code>null</code>.
 	 * @return the corresponding ConfigurableApplicationContext instance, or
 	 *         <code>null</code> if not found in the cache.
 	 */
 	public final CONTEXT getContext(final KEY key) throws Exception {
 
+		Assert.notNull(key, "Key must not be null.");
 		return this.contextKeyToContextMap.get(key);
 	}
 
@@ -137,13 +141,14 @@ public class ContextCache<KEY extends Serializable, CONTEXT extends Configurable
 	 * potentially affecting future interaction with the context.
 	 * </p>
 	 *
-	 * @param key the context key
+	 * @param key The context key, not <code>null</code>.
 	 */
 	public final void setDirty(final KEY key) {
 
-		final CONTEXT ctx = this.contextKeyToContextMap.remove(key);
-		if (ctx != null) {
-			ctx.close();
+		Assert.notNull(key, "Key must not be null.");
+		final CONTEXT context = this.contextKeyToContextMap.remove(key);
+		if (context != null) {
+			context.close();
 		}
 	}
 
