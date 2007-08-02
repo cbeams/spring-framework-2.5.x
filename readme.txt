@@ -68,9 +68,10 @@ Contents of the "-with-dependencies" distribution (~60 MB):
 * "docs" contains the Spring reference documentation in PDF and HTML format, as well as the complete API javadocs
 * "lib" contains all third-party libraries needed for building the framework and/or running the samples
 * "src" contains the general Java source files for the framework
-* "mock" contains the general Java source files for Spring's mock and test classes
+* "mock" contains the general Java source files for Spring's mock and testing support classes
 * "test" contains the general Java source files for Spring's test suite
 * "tiger/src" contains the JDK-1.5-specific Java source files for the framework
+* "tiger/mock" contains the JDK-1.5-specific Java source files for Spring's mock and testing support classes
 * "tiger/test" contains the JDK-1.5-specific Java source files for Spring's test suite
 * "aspectj/src" contains the AspectJ-specific source files for the framework
 * "aspectj/test" contains the AspectJ-specific source files for Spring's test suite
@@ -203,4 +204,3 @@ it illustrates remoting via 5 different strategies: Hessian, Burlap, HTTP invoke
 The Image Database sample is a simple one-screen image management web app that illustrates various
 Spring-integrated technologies: C3P0 as connection pool, BLOB/CLOB handling with MySQL and Oracle,
 Velocity and FreeMarker for web views, scheduling via Quartz and Timer, and mail sending via JavaMail.
-
