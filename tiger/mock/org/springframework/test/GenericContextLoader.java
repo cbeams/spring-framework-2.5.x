@@ -31,7 +31,7 @@ import org.springframework.context.support.GenericApplicationContext;
  *
  * @see #loadContext()
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.2
  */
 public class GenericContextLoader implements ContextLoader {
@@ -87,8 +87,9 @@ public class GenericContextLoader implements ContextLoader {
 	 * <p>
 	 * The default implementation creates a standard GenericApplicationContext
 	 * instance, populates it from the specified config locations through an
-	 * {@link XmlBeanDefinitionReader}, and calls {@link #customizeBeanFactory}
-	 * to allow for customizing the context's DefaultListableBeanFactory.
+	 * {@link XmlBeanDefinitionReader}, calls {@link #customizeBeanFactory} to
+	 * allow for customizing the context's DefaultListableBeanFactory, and
+	 * finally registers a JVM shutdown hook for itself
 	 * </p>
 	 * <p>
 	 * Note: the returned context will already have been
@@ -112,6 +113,7 @@ public class GenericContextLoader implements ContextLoader {
 		new XmlBeanDefinitionReader(context).loadBeanDefinitions(this.configAttributes.getLocations());
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
 		context.refresh();
+		context.registerShutdownHook();
 		return context;
 	}
 
