@@ -35,10 +35,10 @@ import org.springframework.test.TestExecutionManager;
  * associated support classes and annotations.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.2
  */
-public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
+public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|
@@ -59,7 +59,7 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final TestExecutionManager testExecutionManager;
+	private final TestExecutionManager<T> testExecutionManager;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -77,7 +77,7 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	 * @param clazz
 	 * @throws InitializationError
 	 */
-	public SpringJUnit4ClassRunner(final Class<?> clazz) throws InitializationError {
+	public SpringJUnit4ClassRunner(final Class<T> clazz) throws InitializationError {
 
 		super(clazz);
 
@@ -86,7 +86,7 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 		}
 
 		try {
-			this.testExecutionManager = new TestExecutionManager(clazz);
+			this.testExecutionManager = new TestExecutionManager<T>(clazz);
 		}
 		catch (final Exception e) {
 			LOG.error("Caught an exception while attempting to instantiate a new TestExecutionManager for test class ["
@@ -119,7 +119,8 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 		// Note: 'method' is currently not used but will likely be necessary for
 		// future functionality (e.g., @Transactional, etc.).
 
-		final Object testInstance = super.createTest();
+		@SuppressWarnings("unchecked")
+		final T testInstance = (T) super.createTest();
 
 		this.testExecutionManager.prepareTestInstance(testInstance);
 

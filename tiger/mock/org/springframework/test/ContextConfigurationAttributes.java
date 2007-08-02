@@ -20,13 +20,21 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.ContextConfiguration;
 
 /**
- * Strategy interface for accessing configuration attributes for a configured
+ * <p>
+ * Strategy interface for configuration attributes for a configured
  * {@link ApplicationContext}.
+ * </p>
+ * <p>
+ * Note: concrete implementations <strong>must</strong> implement sensible
+ * {@link Object#equals(Object) equals()} and
+ * {@link Object#hashCode() hashCode()} methods for caching purposes, etc. In
+ * addition, concrete implementations <em>should</em> provide a sensible
+ * {@link Object#toString() toString()} implementation.
+ * </p>
  *
  * @see ContextConfiguration
- *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.2
  */
 public interface ContextConfigurationAttributes {

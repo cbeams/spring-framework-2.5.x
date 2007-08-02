@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.ContextLoader;
-import org.springframework.test.GenericXmlContextLoader;
+import org.springframework.test.GenericContextLoader;
 
 /**
  * ContextConfiguration defines class-level metadata which can be used to
@@ -35,7 +35,7 @@ import org.springframework.test.GenericXmlContextLoader;
  * @see ContextLoader
  * @see ApplicationContext
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.2
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -77,12 +77,12 @@ public @interface ContextConfiguration {
 
 	/**
 	 * The {@link ContextLoader} type to use for loading the
-	 * {@link ApplicationContext}. Defaults to {@link GenericXmlContextLoader}.
+	 * {@link ApplicationContext}. Defaults to {@link GenericContextLoader}.
 	 *
 	 * @see #locations()
 	 * @see #generateDefaultLocations()
 	 */
-	Class<? extends ContextLoader> contextLoaderClass() default GenericXmlContextLoader.class;
+	Class<? extends ContextLoader> contextLoaderClass() default GenericContextLoader.class;
 
 	/**
 	 * Are dependencies to be injected via autowiring? Defaults to

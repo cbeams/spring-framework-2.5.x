@@ -21,24 +21,27 @@ import org.junit.runner.RunWith;
 import org.springframework.test.annotation.ContextConfiguration;
 
 /**
- * Simple unit test to verify that the {@link SpringJUnit4ClassRunner} does not
- * hinder correct functionality of standard JUnit 4.4+ testing features.
+ * Extension of {@link SpringJUnit4ClassRunnerAppCtxTests}, which
+ * verifies that we can specify an explicit, <em>absolute path</em> location
+ * for our application context.
  *
- * @see StandardJUnit4FeaturesTests
+ * @see SpringJUnit4ClassRunnerAppCtxTests
+ * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
  * @version $Revision: 1.1 $
  * @since 2.2
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(generateDefaultLocations = false)
-public class StandardJUnit4FeaturesWithSpringRunnerTests extends StandardJUnit4FeaturesTests {
+@ContextConfiguration(locations = { "/org/springframework/test/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml" })
+public class AbsolutePathSpringJUnit4ClassRunnerAppCtxTests extends
+		SpringJUnit4ClassRunnerAppCtxTests {
 
 	/* all tests are in the parent class. */
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
 	public static junit.framework.Test suite() {
 
-		return new JUnit4TestAdapter(StandardJUnit4FeaturesWithSpringRunnerTests.class);
+		return new JUnit4TestAdapter(AbsolutePathSpringJUnit4ClassRunnerAppCtxTests.class);
 	}
 
 }

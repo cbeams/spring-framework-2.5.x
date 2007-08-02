@@ -37,10 +37,10 @@ import org.springframework.util.ClassUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.2
  */
-public class TestExecutionManager {
+public class TestExecutionManager<T> {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|
@@ -65,7 +65,7 @@ public class TestExecutionManager {
 
 	private final ContextConfigurationAttributes configurationAttributes;
 
-	private final Class<?> testClass;
+	private final Class<T> testClass;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -85,7 +85,7 @@ public class TestExecutionManager {
 	 *        managed.
 	 * @throws Exception if an error occurs while processing the test class
 	 */
-	public TestExecutionManager(final Class<?> testClass) throws Exception {
+	public TestExecutionManager(final Class<T> testClass) throws Exception {
 
 		this.testClass = testClass;
 		this.configurationAttributes = parseConfigurationAttributes(testClass);
@@ -164,7 +164,7 @@ public class TestExecutionManager {
 	 * </p>
 	 *
 	 * @param clazz
-	 * @return
+	 * @return TODO Document return value!
 	 * @throws IllegalArgumentException if any of the supplied arguments is
 	 *         <code>null</code>.
 	 */
@@ -189,7 +189,7 @@ public class TestExecutionManager {
 	 * {@link #getTestClass() test class}.
 	 * </p>
 	 * <p>
-	 * Currently performs lazy initialization but not perform any caching!
+	 * Currently performs lazy initialization but does not perform any caching!
 	 * </p>
 	 *
 	 * @return Returns the applicationContext.
@@ -223,7 +223,7 @@ public class TestExecutionManager {
 	/**
 	 * @return Returns the testClass.
 	 */
-	public Class<?> getTestClass() {
+	public Class<T> getTestClass() {
 
 		return this.testClass;
 	}
@@ -252,7 +252,7 @@ public class TestExecutionManager {
 	 * @param context
 	 * @throws Exception in case of dependency injection failure
 	 */
-	protected void injectDependencies(final Object testInstance,
+	protected void injectDependencies(final T testInstance,
 			final ContextConfigurationAttributes configurationAttributes, final ConfigurableApplicationContext context)
 			throws Exception {
 
@@ -260,7 +260,6 @@ public class TestExecutionManager {
 			LOG.debug("Dependency injecting test instance [" + testInstance + "] based on configuration attributes ["
 					+ configurationAttributes + "].");
 		}
-
 		context.getBeanFactory().autowireBeanProperties(testInstance,
 				configurationAttributes.getAutowireMode().value(), configurationAttributes.isDependencyCheckEnabled());
 	}
@@ -275,9 +274,12 @@ public class TestExecutionManager {
 	 * @param testInstance
 	 * @throws Exception
 	 */
-	public void prepareTestInstance(final Object testInstance) throws Exception {
+	public void prepareTestInstance(final T testInstance) throws Exception {
 
 		injectDependencies(testInstance, getConfigurationAttributes(), getApplicationContext());
+		if (!getApplicationContext().isActive()) {
+			getApplicationContext().refresh();
+		}
 	}
 
 	// ------------------------------------------------------------------------|

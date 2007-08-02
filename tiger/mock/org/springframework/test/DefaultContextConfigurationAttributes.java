@@ -30,6 +30,8 @@ import org.springframework.test.annotation.ContextConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the {@link ContextConfigurationAttributes}
@@ -39,7 +41,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @see #constructAttributes(Class)
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.2
  */
 public class DefaultContextConfigurationAttributes implements ContextConfigurationAttributes {
@@ -61,12 +63,15 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 
 	private final Autowire autowireMode;
 
+	// XXX Do we really want/need contextResourceSuffix in config attributes?
 	private final String contextResourceSuffix;
 
+	// XXX Do we really want/need contextLoaderClass in config attributes?
 	private final Class<? extends ContextLoader> contextLoaderClass;
 
 	private final boolean dependencyCheckEnabled;
 
+	// XXX Do we really want/need generateDefaultLocations in config attributes?
 	private final boolean generateDefaultLocations;
 
 	private final String[] locations;
@@ -85,7 +90,8 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	 *
 	 * @param contextLoaderClass
 	 * @param locations
-	 * @param clazz
+	 * @param clazz Class object representing the class with which
+	 *        <em>locations</em> are associated
 	 * @param generateDefaultLocations
 	 * @param contextResourceSuffix
 	 * @param autowireMode
@@ -104,16 +110,11 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 		Assert.notNull(autowireMode, "autowireMode can not be null.");
 
 		this.contextLoaderClass = contextLoaderClass;
+		this.locations = generateLocations(locations, clazz, generateDefaultLocations, contextResourceSuffix);
+		this.generateDefaultLocations = generateDefaultLocations;
 		this.contextResourceSuffix = contextResourceSuffix;
 		this.autowireMode = autowireMode;
 		this.dependencyCheckEnabled = dependencyCheckEnabled;
-		this.generateDefaultLocations = generateDefaultLocations;
-
-		// Note: generateDefaultLocations(Class) requires that the
-		// contextResourceSuffix already be set. Thus, the locations must be set
-		// after contextResourceSuffix.
-		this.locations = (ArrayUtils.isEmpty(locations) && generateDefaultLocations) ? generateDefaultLocations(clazz)
-				: locations;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -122,8 +123,8 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 
 	/**
 	 * Constructs a new {@link DefaultContextConfigurationAttributes} instance
-	 * based on the supplied <code>clazz</code> which must declare or inherit
-	 * a {@link ContextConfiguration} annotation.
+	 * based on the supplied {@link Class} which must declare or inherit a
+	 * {@link ContextConfiguration} annotation.
 	 *
 	 * @param clazz The class for which the
 	 *        {@link ContextConfigurationAttributes} should be constructed.
@@ -196,24 +197,103 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Generates the default locations array based on the supplied class. For
-	 * example, if the supplied class is <code>com.example.MyTest</code>, the
-	 * generated locations will contain a single string with a value of
-	 * &quot;com/example/MyTest<code>&lt;suffix&gt;</code>&quot;, where
-	 * <code>&lt;suffix&gt;</code> is the value returned by
-	 * {@link #getContextResourceSuffix()}.
+	 * <p>
+	 * Generates application context configuration locations. If the supplied
+	 * <code>locations</code> are <code>null</code> or <em>empty</em> and
+	 * <code>generateDefaultLocations</code> is <code>true</code>, default
+	 * locations will be
+	 * {@link #generateDefaultLocations(Class, String) generated} for the
+	 * specified {@link Class} and <code>contextResourcesSuffix</code>;
+	 * otherwise, the supplied <code>locations</code> will be
+	 * {@link #modifyLocations(String[], Class) modified} if necessary and
+	 * returned.
+	 * </p>
+	 *
+	 * @see #generateDefaultLocations(Class, String)
+	 * @see #modifyLocations(String[], Class)
+	 * @param locations
+	 * @param clazz
+	 * @param generateDefaultLocations
+	 * @param contextResourceSuffix
+	 * @return an array of config locations
+	 * @see #getConfigPaths()
+	 * @see org.springframework.core.io.ResourceLoader#getResource(String)
+	 */
+	protected final String[] generateLocations(final String[] locations, final Class<?> clazz,
+			final boolean generateDefaultLocations, final String contextResourceSuffix) {
+
+		return (ArrayUtils.isEmpty(locations) && generateDefaultLocations) ? generateDefaultLocations(clazz,
+				contextResourceSuffix) : modifyLocations(locations, clazz);
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Generates the default classpath-based locations array based on the
+	 * supplied class. For example, if the supplied class is
+	 * <code>com.example.MyTest</code>, the generated locations will contain
+	 * a single string with a value of &quot;classpath:/com/example/MyTest<code>&lt;suffix&gt;</code>&quot;,
+	 * where <code>&lt;suffix&gt;</code> is the value of the supplied
+	 * <code>contextResourceSuffix</code> string.
+	 * </p>
+	 * <p>
+	 * Subclasses can override this method to implement a different
+	 * <em>default location generation</em> strategy.
+	 * </p>
 	 *
 	 * @param clazz
+	 * @param contextResourceSuffix
 	 * @return
 	 */
-	protected String[] generateDefaultLocations(final Class<?> clazz) {
+	protected String[] generateDefaultLocations(final Class<?> clazz, final String contextResourceSuffix) {
 
 		Assert.notNull(clazz, "clazz can not be null.");
-		Assert.state(
-				getContextResourceSuffix() != null,
-				"getContextResourceSuffix() returned null: the contextResourceSuffix must be initialized prior to calling generateDefaultLocations(Class<?>).");
+		Assert.hasText(contextResourceSuffix, "contextResourceSuffix can not be empty.");
 
-		return new String[] { ClassUtils.convertClassNameToResourcePath(clazz.getName()) + getContextResourceSuffix() };
+		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + "/"
+				+ ClassUtils.convertClassNameToResourcePath(clazz.getName()) + contextResourceSuffix };
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Generates a modified version of the supplied locations and returns it.
+	 * </p>
+	 * <p>
+	 * A plain path will be treated as a classpath location, e.g.:
+	 * "org/springframework/whatever/foo.xml". Note however that you may prefix
+	 * path locations with standard Spring resource prefixes. Therefore, a
+	 * config location path prefixed with "classpath:" with behave the same as a
+	 * plain path, but a config location such as
+	 * "file:/some/path/path/location/appContext.xml" will be treated as a
+	 * filesystem location.
+	 * </p>
+	 * <p>
+	 * Subclasses can override this method to implement a different
+	 * <em>location modification</em> strategy.
+	 * </p>
+	 *
+	 * @param locations
+	 * @param clazz
+	 * @return an array of modified config locations
+	 */
+	protected String[] modifyLocations(final String[] locations, final Class<?> clazz) {
+
+		final String[] modifiedLocations = new String[locations.length];
+
+		for (int i = 0; i < locations.length; i++) {
+			final String path = locations[i];
+			if (path.startsWith("/")) {
+				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
+			}
+			else {
+				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX
+						+ StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + "/" + path);
+			}
+		}
+		return modifiedLocations;
 	}
 
 	// ------------------------------------------------------------------------|

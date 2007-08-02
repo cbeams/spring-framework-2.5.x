@@ -43,9 +43,9 @@ import org.junit.Test;
  * {@link org.junit.AfterClass @AfterClass} and {@link org.junit.After @After}.
  * </p>
  *
- * @see StandardJUnit4FeaturesWithSpringRunnerTests
+ * @see StandardJUnit4FeaturesSpringRunnerTests
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.2
  */
 public class StandardJUnit4FeaturesTests {

@@ -25,7 +25,7 @@
 	*
 	* Module:       JUnit 4 - Testing Support
 	*
-	* File:         $Source: /var/local/springframework.cvs.sourceforge.net/spring/tiger/test/org/springframework/test/junit/SpringJUnit4ClassRunnerApplicationContextTests-context.xml,v $
+	* File:         $Source: /var/local/springframework.cvs.sourceforge.net/spring/tiger/test/org/springframework/test/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml,v $
 	*
 	* Description:  Simple application context for testing DI support for tests.
 	*
@@ -37,7 +37,7 @@
 	*
 	* Modified By: $Author: sbrannen $
 	*
-	* Modified On: $Date: 2007-08-01 21:43:56 $
+	* Modified On: $Date: 2007-08-02 12:29:11 $
 	*
 	\**************************************************************************/
 -->

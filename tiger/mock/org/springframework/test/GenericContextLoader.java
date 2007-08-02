@@ -17,28 +17,31 @@ package org.springframework.test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
+ * <p>
  * Concrete implementation of the {@link ContextLoader} strategy which loads a
  * {@link GenericApplicationContext} from the <em>locations</em> in the
  * supplied {@link ContextConfigurationAttributes configuration attributes}.
- * The locations must refer to XML based configuration files.
+ * </p>
  *
+ * @see #loadContext()
  * @author Sam Brannen
  * @version $Revision: 1.1 $
  * @since 2.2
  */
-public class GenericXmlContextLoader implements ContextLoader {
+public class GenericContextLoader implements ContextLoader {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	/** Class Logger. */
-	protected static final Log LOG = LogFactory.getLog(GenericXmlContextLoader.class);
+	protected static final Log LOG = LogFactory.getLog(GenericContextLoader.class);
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC INITIALIZATION ----------------------------------------------|
@@ -62,7 +65,7 @@ public class GenericXmlContextLoader implements ContextLoader {
 	// --- CONSTRUCTORS -------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	public GenericXmlContextLoader(final ContextConfigurationAttributes configAttributes) {
+	public GenericContextLoader(final ContextConfigurationAttributes configAttributes) {
 
 		this.configAttributes = configAttributes;
 	}
@@ -76,13 +79,27 @@ public class GenericXmlContextLoader implements ContextLoader {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Loads a {@link GenericApplicationContext} from the <em>locations</em>
-	 * provided by the
+	 * <p>
+	 * Loads a Spring ApplicationContext from the <em>locations</em> defined
+	 * in the supplied
 	 * {@link ContextConfigurationAttributes configuration attributes}.
+	 * </p>
+	 * <p>
+	 * The default implementation creates a standard GenericApplicationContext
+	 * instance, populates it from the specified config locations through an
+	 * {@link XmlBeanDefinitionReader}, and calls {@link #customizeBeanFactory}
+	 * to allow for customizing the context's DefaultListableBeanFactory.
+	 * </p>
+	 * <p>
+	 * Note: the returned context will already have been
+	 * {@link ConfigurableApplicationContext#refresh() refreshed}.
+	 * </p>
 	 *
 	 * @see org.springframework.test.ContextLoader#loadContext()
 	 * @see GenericApplicationContext
 	 * @see XmlBeanDefinitionReader
+	 * @see #customizeBeanFactory
+	 * @return
 	 */
 	@Override
 	public ConfigurableApplicationContext loadContext() throws Exception {
@@ -93,10 +110,36 @@ public class GenericXmlContextLoader implements ContextLoader {
 
 		final GenericApplicationContext context = new GenericApplicationContext();
 		new XmlBeanDefinitionReader(context).loadBeanDefinitions(this.configAttributes.getLocations());
+		customizeBeanFactory(context.getDefaultListableBeanFactory());
 		context.refresh();
-
 		return context;
 	}
 
 	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Customize the internal bean factory of the ApplicationContext created by
+	 * this ContextLoader.
+	 * </p>
+	 * <p>
+	 * The default implementation is empty. Can be overridden in subclasses to
+	 * customize DefaultListableBeanFactory's standard settings.
+	 * </p>
+	 *
+	 * @param beanFactory the newly created bean factory for this context
+	 * @see #loadContextLocations
+	 * @see #createApplicationContext
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowEagerClassLoading
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
+	 */
+	protected void customizeBeanFactory(final DefaultListableBeanFactory beanFactory) {
+
+		/* no-op */
+	}
+
+	// ------------------------------------------------------------------------|
+
 }
