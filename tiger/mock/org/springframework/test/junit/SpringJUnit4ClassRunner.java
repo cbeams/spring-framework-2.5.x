@@ -35,7 +35,7 @@ import org.springframework.test.TestExecutionManager;
  * associated support classes and annotations.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.2
  */
 public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
@@ -117,7 +117,7 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 	protected Object createTest(final Method method) throws Exception {
 
 		// Note: 'method' is currently not used but will likely be necessary for
-		// future functionality (e.g., @Transactional, etc.).
+		// future functionality (e.g., @Transactional, @DirtiesContext, etc.).
 
 		@SuppressWarnings("unchecked")
 		final T testInstance = (T) super.createTest();
@@ -142,6 +142,8 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Invoking test method [" + method.toGenericString() + "].");
 		}
+
+		// TODO Add test support for @Transactional & @DirtiesContext.
 
 		// ---------------------------------------------------------------------
 		// XXX Optional: create a custom MethodRoadie extension that ...
