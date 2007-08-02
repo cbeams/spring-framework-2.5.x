@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.1 M3 (July 2007)
-------------------------------------------------
+THE SPRING FRAMEWORK, release 2.1 M4 (August 2007)
+--------------------------------------------------
 http://www.springframework.org
 
 
