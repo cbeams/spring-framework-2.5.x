@@ -37,7 +37,7 @@ import org.springframework.util.ClassUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.2
  */
 public class TestExecutionManager<T> {
@@ -135,7 +135,7 @@ public class TestExecutionManager<T> {
 	 * @param configAttributes the context configuration attributes to use to
 	 *        determine the type of ContextLoader to instantiate.
 	 * @return a new ContextLoader
-	 * @throws Exception
+	 * @throws Exception if an error occurs while creating the context loader.
 	 */
 	protected static ContextLoader createContextLoader(final ContextConfigurationAttributes configAttributes)
 			throws Exception {
@@ -149,8 +149,8 @@ public class TestExecutionManager<T> {
 		final Constructor<? extends ContextLoader> constructor = ClassUtils.getConstructorIfAvailable(
 				contextLoaderClass, new Class[] { ContextConfigurationAttributes.class });
 		Assert.state(constructor != null, "The configured ContextLoader class [" + contextLoaderClass
-				+ "] must have a constructor which accepts an instance of"
-				+ "ContextConfigurationAttributes as its lone argument.");
+				+ "] must have a constructor which accepts an instance of "
+				+ "ContextConfigurationAttributes as its only argument.");
 
 		return constructor.newInstance(configAttributes);
 	}
@@ -163,15 +163,17 @@ public class TestExecutionManager<T> {
 	 * {@link Class}.
 	 * </p>
 	 *
-	 * @param clazz
-	 * @return TODO Document return value!
+	 * @param clazz the Class object corresponding to the test class from which
+	 *        the configuration attributes should be parsed.
+	 * @return a new ContextConfigurationAttributes instance for the specified
+	 *         class.
 	 * @throws IllegalArgumentException if any of the supplied arguments is
 	 *         <code>null</code>.
 	 */
 	protected static ContextConfigurationAttributes parseConfigurationAttributes(final Class<?> clazz)
 			throws IllegalArgumentException {
 
-		Assert.notNull(clazz, "clazz can not be null.");
+		Assert.notNull(clazz, "Can not parse context configuration attributes for a NULL class.");
 		final ContextConfigurationAttributes configAttributes = DefaultContextConfigurationAttributes.constructAttributes(clazz);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Parsed configuration attributes [" + configAttributes + "].");
@@ -192,8 +194,9 @@ public class TestExecutionManager<T> {
 	 * Currently performs lazy initialization but does not perform any caching!
 	 * </p>
 	 *
-	 * @return Returns the applicationContext.
-	 * @throws Exception
+	 * @return Returns the application context.
+	 * @throws Exception if an error occurs while retrieving the application
+	 *         context.
 	 */
 	public ConfigurableApplicationContext getApplicationContext() throws Exception {
 
@@ -247,9 +250,12 @@ public class TestExecutionManager<T> {
 	 * injected into the test instance.
 	 * </p>
 	 *
-	 * @param testInstance
-	 * @param configurationAttributes
-	 * @param context
+	 * @param testInstance the object into which dependencies should be
+	 *        injected.
+	 * @param configurationAttributes the configuration attributes which define
+	 *        dependency injection guidelines.
+	 * @param context the application context from which the test instance's
+	 *        dependencies should be injected.
 	 * @throws Exception in case of dependency injection failure
 	 */
 	protected void injectDependencies(final T testInstance,
@@ -271,8 +277,8 @@ public class TestExecutionManager<T> {
 	 * Prepares the supplied test instance (e.g., injecting dependencies, etc.)
 	 * </p>
 	 *
-	 * @param testInstance
-	 * @throws Exception
+	 * @param testInstance the test object to prepare.
+	 * @throws Exception if an error occurs while preparing the test instance.
 	 */
 	public void prepareTestInstance(final T testInstance) throws Exception {
 

@@ -32,14 +32,20 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * <p>
  * Default implementation of the {@link ContextConfigurationAttributes}
  * interface, which also provides a static factory method for
  * {@link #constructAttributes(Class) constructing configuration attributes} for
  * a specified class.
+ * </p>
+ * <p>
+ * Note that the default implementations consider all configuration locations to
+ * be classpath resources.
+ * </p>
  *
  * @see #constructAttributes(Class)
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.2
  */
 public class DefaultContextConfigurationAttributes implements ContextConfigurationAttributes {
@@ -86,14 +92,19 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	 * Constructs a new {@link DefaultContextConfigurationAttributes} instance
 	 * from the supplied arguments.
 	 *
-	 * @param contextLoaderClass
-	 * @param locations
+	 * @param contextLoaderClass The type of ContextLoader to use for loading
+	 *        the application context.
+	 * @param locations The classpath resource locations to use for loading the
+	 *        application context.
 	 * @param clazz Class object representing the class with which
 	 *        <em>locations</em> are associated
-	 * @param generateDefaultLocations
-	 * @param contextResourceSuffix
-	 * @param autowireMode
-	 * @param dependencyCheckEnabled
+	 * @param generateDefaultLocations Whether or not default locations should
+	 *        be generated if no locations are explicitly defined.
+	 * @param contextResourceSuffix The suffix to append to application context
+	 *        resource paths when generating default locations.
+	 * @param autowireMode The mode to use when autowiring dependencies.
+	 * @param dependencyCheckEnabled Whether or not to perform dependency
+	 *        checking when autowiring dependencies.
 	 * @throws IllegalArgumentException if the supplied
 	 *         <code>contextLoaderClass</code>,
 	 *         <code>contextResourceSuffix</code>, or
@@ -198,13 +209,15 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	 *
 	 * @see #generateDefaultLocations(Class, String)
 	 * @see #modifyLocations(String[], Class)
-	 * @param locations
-	 * @param clazz
-	 * @param generateDefaultLocations
-	 * @param contextResourceSuffix
-	 * @return an array of config locations
-	 * @see #getConfigPaths()
-	 * @see org.springframework.core.io.ResourceLoader#getResource(String)
+	 * @param locations The unmodified locations to use for loading the
+	 *        application context; can be <code>null</code> or empty.
+	 * @param clazz The class with which the locations are associated: to be
+	 *        used when generating default locations.
+	 * @param generateDefaultLocations Whether or not default locations should
+	 *        be generated if no locations are explicitly defined.
+	 * @param contextResourceSuffix The suffix to append to application context
+	 *        resource paths when generating default locations.
+	 * @return An array of config locations
 	 */
 	protected final String[] generateLocations(final String[] locations, final Class<?> clazz,
 			final boolean generateDefaultLocations, final String contextResourceSuffix) {
@@ -217,10 +230,13 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 
 	/**
 	 * <p>
-	 * Generates the default classpath-based locations array based on the
-	 * supplied class. For example, if the supplied class is
-	 * <code>com.example.MyTest</code>, the generated locations will contain
-	 * a single string with a value of &quot;classpath:/com/example/MyTest<code>&lt;suffix&gt;</code>&quot;,
+	 * Generates the default classpath resource locations array based on the
+	 * supplied class.
+	 * </p>
+	 * <p>
+	 * For example, if the supplied class is <code>com.example.MyTest</code>,
+	 * the generated locations will contain a single string with a value of
+	 * &quot;classpath:/com/example/MyTest<code>&lt;suffix&gt;</code>&quot;,
 	 * where <code>&lt;suffix&gt;</code> is the value of the supplied
 	 * <code>contextResourceSuffix</code> string.
 	 * </p>
@@ -229,9 +245,11 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	 * <em>default location generation</em> strategy.
 	 * </p>
 	 *
-	 * @param clazz
-	 * @param contextResourceSuffix
-	 * @return
+	 * @param clazz The class for which the default locations are to be
+	 *        generated.
+	 * @param contextResourceSuffix The suffix to append to application context
+	 *        resource paths when generating the default locations.
+	 * @return An array of default config locations.
 	 */
 	protected String[] generateDefaultLocations(final Class<?> clazz, final String contextResourceSuffix) {
 
@@ -246,25 +264,24 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 
 	/**
 	 * <p>
-	 * Generates a modified version of the supplied locations and returns it.
+	 * Generates a modified version of the supplied locations array and returns
+	 * it.
 	 * </p>
 	 * <p>
-	 * A plain path will be treated as a classpath location, e.g.:
-	 * "org/springframework/whatever/foo.xml". Note however that you may prefix
-	 * path locations with standard Spring resource prefixes. Therefore, a
-	 * config location path prefixed with "classpath:" with behave the same as a
-	 * plain path, but a config location such as
-	 * "file:/some/path/path/location/appContext.xml" will be treated as a
-	 * filesystem location.
+	 * A plain path, e.g. &quot;context.xml&quot;, will be treated as a
+	 * classpath resource from the same package in which the specified class is
+	 * defined. A path starting with a slash is treated as a fully qualified
+	 * class path location, e.g.:
+	 * &quot;/org/springframework/whatever/foo.xml&quot;.
 	 * </p>
 	 * <p>
 	 * Subclasses can override this method to implement a different
 	 * <em>location modification</em> strategy.
 	 * </p>
 	 *
-	 * @param locations
-	 * @param clazz
-	 * @return an array of modified config locations
+	 * @param locations The resource locations to be modified.
+	 * @param clazz The class with which the locations are associated.
+	 * @return An array of modified config locations.
 	 */
 	protected String[] modifyLocations(final String[] locations, final Class<?> clazz) {
 
@@ -296,9 +313,7 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Gets the suffix to append to context configuration files.
-	 *
-	 * @return Returns the contextResourceSuffix.
+	 * @see org.springframework.test.ContextConfigurationAttributes#getContextResourceSuffix()
 	 */
 	public final String getContextResourceSuffix() {
 
