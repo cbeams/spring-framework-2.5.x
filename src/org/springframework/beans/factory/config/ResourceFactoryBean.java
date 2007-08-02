@@ -33,6 +33,8 @@ import org.springframework.core.io.Resource;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @since 28.12.2003
+ * @deprecated in favor of implicit String-to-Resource conversion through the
+ * automatically registered {@link org.springframework.core.io.ResourceEditor}
  * @see org.springframework.context.ApplicationContext#getResource
  */
 public class ResourceFactoryBean implements FactoryBean, InitializingBean {
@@ -52,7 +54,7 @@ public class ResourceFactoryBean implements FactoryBean, InitializingBean {
 
 	public void afterPropertiesSet() {
 		if (this.resource == null) {
-			throw new IllegalArgumentException("'location' is required");
+			throw new IllegalArgumentException("Property 'location' is required");
 		}
 	}
 
