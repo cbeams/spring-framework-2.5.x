@@ -16,8 +16,6 @@
 package org.springframework.test;
 
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
-import static org.springframework.core.annotation.AnnotationUtils.isAnnotationDeclaredLocally;
-import static org.springframework.core.annotation.AnnotationUtils.isAnnotationInherited;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -41,7 +39,7 @@ import org.springframework.util.StringUtils;
  *
  * @see #constructAttributes(Class)
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.2
  */
 public class DefaultContextConfigurationAttributes implements ContextConfigurationAttributes {
@@ -136,27 +134,16 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	public static ContextConfigurationAttributes constructAttributes(final Class<?> clazz) {
 
 		Assert.notNull(clazz, "clazz can not be null.");
-
 		final Class<ContextConfiguration> annotationType = ContextConfiguration.class;
 		final Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, clazz);
 		final ContextConfiguration contextConfiguration = clazz.getAnnotation(annotationType);
-
-		Assert.isTrue(contextConfiguration != null,
-				"A ContextConfiguration annotation must be present for the supplied class [" + clazz + "].");
-		Assert.state(declaringClass != null, "Could not find an 'annotation declaring class' for annotation type ["
+		Assert.notNull(contextConfiguration, "@ContextConfiguration must be present for class [" + clazz + "].");
+		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
 				+ annotationType + "] and class [" + clazz + "].");
 
-		// XXX Remove debug code once AnnotationUtils are properly unit tested.
 		if (LOG.isDebugEnabled()) {
-			final boolean declaredLocally = isAnnotationDeclaredLocally(annotationType, clazz);
-			final boolean inherited = isAnnotationInherited(annotationType, clazz);
-			final String nl = System.getProperty("line.separator");
-			final StringBuilder builder = new StringBuilder("ContextConfiguration:").append(nl);
-			builder.append("\tTest class                     [").append(clazz).append("].").append(nl);
-			builder.append("\tAnnotation declaring class     [").append(declaringClass).append("].").append(nl);
-			builder.append("\tAnnotation is declared locally [").append(declaredLocally).append("].").append(nl);
-			builder.append("\tAnnotation is inherited        [").append(inherited).append("].").append(nl);
-			LOG.debug(builder);
+			LOG.debug("ContextConfiguration: test class [" + clazz + "], annotation declaring class [" + declaringClass
+					+ "].");
 		}
 
 		return new DefaultContextConfigurationAttributes(contextConfiguration.contextLoaderClass(),
