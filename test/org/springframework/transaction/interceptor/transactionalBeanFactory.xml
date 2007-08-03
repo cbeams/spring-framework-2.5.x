@@ -91,17 +91,13 @@
 		</property>
 	</bean>
 
-	<bean name="cglibNoInterfaces"
-		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-
+	<bean name="cglibNoInterfaces" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager"><ref local="mockMan"/></property>
-
 		<property name="target">
 			<bean class="org.springframework.transaction.interceptor.ImplementsNoInterfaces">
 				<property name="dependency"><ref local="targetDependency"/></property>
 			</bean>
 		</property>
-
 		<property name="transactionAttributes">
 			<props>
 				<prop key="*">PROPAGATION_REQUIRED</prop>
@@ -132,8 +128,7 @@
 	</bean>
 
 	<bean id="txnInvocationCounterPointcut"
-		class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterPointcut"
-	/>
+			class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterPointcut"/>
 
 	<bean id="preInvocationCounterInterceptor" class="org.springframework.transaction.interceptor.BeanFactoryTransactionTests$InvocationCounterInterceptor"/>
 
