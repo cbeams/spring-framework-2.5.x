@@ -16,15 +16,12 @@
 package org.springframework.test;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.util.Assert;
 
 /**
  * <p>
- * Generic cache for Spring
+ * Caching strategy for Spring
  * {@link ConfigurableApplicationContext ConfigurableApplicationContexts}.
  * </p>
  * <p>
@@ -35,49 +32,18 @@ import org.springframework.util.Assert;
  * LocalSessionFactoryBean for working with Hibernate, may take some time to
  * initialize. Hence it often makes sense to do that initializing once.
  * </p>
+ * <p>
+ * Implementations should be thread-safe.
+ * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.2
+ * @param <KEY> {@link Serializable serializable} context key type
+ * @param <CONTEXT> {@link ConfigurableApplicationContext application context}
+ *        type
  */
-public class ContextCache<KEY extends Serializable, CONTEXT extends ConfigurableApplicationContext> {
-
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC INITIALIZATION ----------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * Map of context keys to Spring application contexts.
-	 */
-	private final Map<KEY, CONTEXT> contextKeyToContextMap = new HashMap<KEY, CONTEXT>();
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE INITIALIZATION --------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- CONSTRUCTORS -------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
+public interface ContextCache<KEY extends Serializable, CONTEXT extends ConfigurableApplicationContext> {
 
 	/**
 	 * <p>
@@ -89,14 +55,7 @@ public class ContextCache<KEY extends Serializable, CONTEXT extends Configurable
 	 * @param context The ConfigurableApplicationContext instance, not
 	 *        <code>null</code>.
 	 */
-	public final void addContext(final KEY key, final CONTEXT context) {
-
-		Assert.notNull(key, "Key must not be null.");
-		Assert.notNull(context, "ConfigurableApplicationContext must not be null.");
-		this.contextKeyToContextMap.put(key, context);
-	}
-
-	// ------------------------------------------------------------------------|
+	public abstract void addContext(final KEY key, final CONTEXT context);
 
 	/**
 	 * <p>
@@ -105,13 +64,7 @@ public class ContextCache<KEY extends Serializable, CONTEXT extends Configurable
 	 *
 	 * @param key The context key, not <code>null</code>.
 	 */
-	public final boolean hasCachedContext(final KEY key) {
-
-		Assert.notNull(key, "Key must not be null.");
-		return this.contextKeyToContextMap.containsKey(key);
-	}
-
-	// ------------------------------------------------------------------------|
+	public abstract boolean hasCachedContext(final KEY key);
 
 	/**
 	 * <p>
@@ -122,13 +75,7 @@ public class ContextCache<KEY extends Serializable, CONTEXT extends Configurable
 	 * @return the corresponding ConfigurableApplicationContext instance, or
 	 *         <code>null</code> if not found in the cache.
 	 */
-	public final CONTEXT getContext(final KEY key) throws Exception {
-
-		Assert.notNull(key, "Key must not be null.");
-		return this.contextKeyToContextMap.get(key);
-	}
-
-	// ------------------------------------------------------------------------|
+	public abstract CONTEXT getContext(final KEY key) throws Exception;
 
 	/**
 	 * <p>
@@ -143,15 +90,6 @@ public class ContextCache<KEY extends Serializable, CONTEXT extends Configurable
 	 *
 	 * @param key The context key, not <code>null</code>.
 	 */
-	public final void setDirty(final KEY key) {
-
-		Assert.notNull(key, "Key must not be null.");
-		final CONTEXT context = this.contextKeyToContextMap.remove(key);
-		if (context != null) {
-			context.close();
-		}
-	}
-
-	// ------------------------------------------------------------------------|
+	public abstract void setDirty(final KEY key);
 
 }

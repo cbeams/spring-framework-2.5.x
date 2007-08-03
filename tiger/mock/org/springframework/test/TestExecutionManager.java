@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -36,7 +37,7 @@ import org.springframework.util.ClassUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.2
  */
 public class TestExecutionManager<T> {
@@ -57,7 +58,7 @@ public class TestExecutionManager<T> {
 	 * may be destroyed and recreated between running individual test methods,
 	 * for example with JUnit.
 	 */
-	private static final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> contextCache = new ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext>();
+	private static final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> contextCache = new MapBackedContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext>();
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC INITIALIZATION ----------------------------------------------|
@@ -199,14 +200,16 @@ public class TestExecutionManager<T> {
 	 * @throws Exception if an error occurs while retrieving the application
 	 *         context.
 	 */
-	public ConfigurableApplicationContext getApplicationContext() throws Exception {
+	public synchronized ConfigurableApplicationContext getApplicationContext() throws Exception {
 
-		if (!getContextCache().hasCachedContext(getConfigurationAttributes())) {
-			getContextCache().addContext(getConfigurationAttributes(),
-					buildApplicationContext(getConfigurationAttributes()));
+		ConfigurableApplicationContext context = getContextCache().getContext(getConfigurationAttributes());
+
+		if (context == null) {
+			context = buildApplicationContext(getConfigurationAttributes());
+			getContextCache().addContext(getConfigurationAttributes(), context);
 		}
 
-		return getContextCache().getContext(getConfigurationAttributes());
+		return context;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -277,10 +280,10 @@ public class TestExecutionManager<T> {
 			LOG.debug("Dependency injecting test instance [" + testInstance + "] based on configuration attributes ["
 					+ getConfigurationAttributes() + "].");
 		}
-		getApplicationContext().getBeanFactory().autowireBeanProperties(testInstance,
-				getConfigurationAttributes().getAutowireMode().value(),
+		final ConfigurableListableBeanFactory beanFactory = getApplicationContext().getBeanFactory();
+		beanFactory.autowireBeanProperties(testInstance, getConfigurationAttributes().getAutowireMode().value(),
 				getConfigurationAttributes().isDependencyCheckEnabled());
-		getApplicationContext().getBeanFactory().initializeBean(testInstance, null);
+		beanFactory.initializeBean(testInstance, null);
 	}
 
 	// ------------------------------------------------------------------------|
@@ -307,7 +310,7 @@ public class TestExecutionManager<T> {
 	 * @param testInstance The test object to prepare.
 	 * @throws Exception if an error occurs while preparing the test instance.
 	 */
-	public void prepareTestInstance(final T testInstance) throws Exception {
+	public synchronized void prepareTestInstance(final T testInstance) throws Exception {
 
 		injectDependencies(testInstance);
 		if (!getApplicationContext().isActive()) {
