@@ -29,13 +29,13 @@ import org.junit.runner.notification.RunNotifier;
 import org.springframework.test.TestExecutionManager;
 
 /**
- * SpringJUnit4ClassRunner is a custom extension of
- * {@link SpringJUnit4ClassRunner} which provides Spring testing functionality
- * to standard JUnit tests by means of the {@link TestExecutionManager} and
- * associated support classes and annotations.
+ * SpringJUnit4ClassRunner is a custom extension of {@link JUnit4ClassRunner}
+ * which provides Spring testing functionality to standard JUnit tests by means
+ * of the {@link TestExecutionManager} and associated support classes and
+ * annotations.
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.2
  */
 public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
@@ -104,26 +104,22 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Overloads JUnit 4.4's {@link JUnit4ClassRunner#createTest() createTest()}
-	 * method with a {@link Method} argument. Delegates to a
-	 * {@link TestExecutionManager} to prepare the test instance for Spring
-	 * testing functionality.
+	 * Delegates to {@link JUnit4ClassRunner#createTest()} to create the test
+	 * instance and then to a {@link TestExecutionManager} to prepare the test
+	 * instance for Spring testing functionality.
 	 *
-	 * @param method
 	 * @see JUnit4ClassRunner#createTest()
-	 * @return
-	 * @throws Exception
+	 * @see TestExecutionManager#prepareTestInstance(Object)
+	 * @return A new test instance.
+	 * @throws Exception if an error occurs while creating or preparing the test
+	 *         instance.
 	 */
-	protected Object createTest(final Method method) throws Exception {
-
-		// Note: 'method' is currently not used but will likely be necessary for
-		// future functionality (e.g., @Transactional, @DirtiesContext, etc.).
+	@Override
+	protected Object createTest() throws Exception {
 
 		@SuppressWarnings("unchecked")
 		final T testInstance = (T) super.createTest();
-
 		this.testExecutionManager.prepareTestInstance(testInstance);
-
 		return testInstance;
 	}
 
@@ -132,9 +128,8 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 	/**
 	 * Overrides invokeTestMethod().
 	 *
-	 * @see #createTest(Method)
-	 * @see org.junit.internal.runners.JUnit4ClassRunner#invokeTestMethod(java.lang.reflect.Method,
-	 *      org.junit.runner.notification.RunNotifier)
+	 * @see #createTest()
+	 * @see JUnit4ClassRunner#invokeTestMethod(Method, RunNotifier)
 	 */
 	@Override
 	protected void invokeTestMethod(final Method method, final RunNotifier notifier) {
@@ -143,31 +138,36 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 			LOG.debug("Invoking test method [" + method.toGenericString() + "].");
 		}
 
-		// TODO Add test support for @Transactional & @DirtiesContext.
+		// TODO Add test support for @DirtiesContext
+		// TODO Add test support for @Transactional and @NotTransactional
+
+		// XXX Optional: add test support for @IfProfileValue & @Repeat
+		// XXX Optional: add test support for @Timed & @ExpectedException
 
 		// ---------------------------------------------------------------------
-		// XXX Optional: create a custom MethodRoadie extension that ...
-		//
-		// 1) overrides run(): by calling a custom runWithTimeout() method; also
-		// need to provide support for Spring's @Repeat.
-		//
-		// 2) overrides runWithTimeout(): by reimplementing (copy-n-paste) to
-		// provide support for Spring's @Timed.
-
+		// --- DEVELOPMENT NOTES -----------------------------------------------
 		// ---------------------------------------------------------------------
-		// XXX Optional: create a custom TestMethod extension that ...
+		// create a custom MethodRoadie that ...
 		//
-		// 1) overrides expectsException(): by adding support for Spring's
+		// 1) overrides run(): by adding support for Spring's @Repeat.
+		//
+		// ---------------------------------------------------------------------
+		// create a custom TestMethod that ...
+		//
+		// 1) overrides getExpectedException(): by adding support for Spring's
 		// @ExpectedException.
+		//
+		// 2) overrides getTimeout(): by detecting Spring's @Timed and handling
+		// it the same as the standard JUnit @Test(timeout=1) feature.
 
 		// ---------------------------------------------------------------------
 		// The following is a direct copy of the original JUnit 4.4 code, except
-		// that we call createTest(Method) instead of createTest().
+		// that we ... ??? (currently do nothing special)
 
 		final Description description = methodDescription(method);
 		Object test;
 		try {
-			test = createTest(method);
+			test = createTest();
 		}
 		catch (final InvocationTargetException e) {
 			notifier.testAborted(description, e.getCause());
