@@ -1,8 +1,4 @@
-package org.springframework.jdbc.core;
-
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+package org.springframework.jdbc.core.namedparam;
 
 import java.util.Map;
 
