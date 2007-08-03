@@ -28,6 +28,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -1919,6 +1920,53 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		// verify confirms if test is successful by checking if close() called
 		ctrlResultSet.verify();
+		ctrlCallable.verify();
+	}
+
+	public void testCaseInsensitiveResultsMap() throws Exception {
+
+		MockControl ctrlCallable;
+		CallableStatement mockCallable;
+
+		ctrlCallable = MockControl.createControl(CallableStatement.class);
+		mockCallable = (CallableStatement) ctrlCallable.getMock();
+		mockCallable.execute();
+		ctrlCallable.setReturnValue(false);
+		mockCallable.getUpdateCount();
+		ctrlCallable.setReturnValue(-1);
+		mockCallable.getObject(1);
+		ctrlCallable.setReturnValue("X");
+		mockCallable.getWarnings();
+		ctrlCallable.setReturnValue(null);
+		mockCallable.close();
+		ctrlCallable.setVoidCallable();
+
+		mockConnection.prepareCall("my query");
+		ctrlConnection.setReturnValue(mockCallable);
+
+		ctrlCallable.replay();
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		assertTrue("default should have been NOT case insensitive", !template.isResultsMapCaseInsensitive());
+
+		template.setResultsMapCaseInsensitive(true);
+		assertTrue("now it should have been set to case insensitive", template.isResultsMapCaseInsensitive());
+		
+		List params = new ArrayList();
+		params.add(new SqlOutParameter("a", 12));
+
+		Map out = template.call(new CallableStatementCreator() {
+			public CallableStatement createCallableStatement(Connection conn)
+				throws SQLException {
+				return conn.prepareCall("my query");
+			}
+		}, params);
+		assertTrue("this should have been an Apache Commons Collections class",
+				out.getClass().getName().startsWith("org.apache.commons.collections.map"));
+		assertNotNull("we should have gotten the result with upper case", out.get("A"));
+		assertNotNull("we should have gotten the result with lower case", out.get("a"));
+
 		ctrlCallable.verify();
 	}
 

@@ -46,6 +46,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.Assert;
+import org.springframework.core.CollectionFactory;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
@@ -127,6 +128,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * JDBC drivers like 10.1.0.2.
 	 */
 	private boolean skipResultsProcessing = false;
+
+	/**
+	 * If this variable is set to true then execution of a CallableStatement will return the results in a Map
+	 * that uses case insensitive names for the parameters if Commons Collections are available on the classpath.
+	 */
+	private boolean resultsMapCaseInsensitive = false;
 
 
 	/**
@@ -270,6 +277,22 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 */
 	public boolean isSkipResultsProcessing() {
 		return this.skipResultsProcessing;
+	}
+
+	/**
+	 * Return whether execution of a CallableStatement will return the results in a Map
+	 * that uses case insensitive names for the parameters.
+	 */
+	public boolean isResultsMapCaseInsensitive() {
+		return resultsMapCaseInsensitive;
+	}
+
+	/*
+	 * Set whether execution of a CallableStatement will return the results in a Map
+	 * that uses case insensitive names for the parameters.
+	 */
+	public void setResultsMapCaseInsensitive(boolean resultsMapCaseInsensitive) {
+		this.resultsMapCaseInsensitive = resultsMapCaseInsensitive;
 	}
 
 
@@ -942,7 +965,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					logger.debug("CallableStatement.execute() returned '" + retVal + "'");
 					logger.debug("CallableStatement.getUpdateCount() returned " + updateCount);
 				}
-				Map returnedResults = new HashMap();
+				Map returnedResults = createResultsMap();
 				if (retVal || updateCount != -1) {
 					returnedResults.putAll(extractReturnedResults(cs, updateCountParameters, resultSetParameters, updateCount));
 				}
@@ -1289,4 +1312,17 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 	}
 
+	/**
+	 * Create a Map instance to be used as results map.
+	 * <p>If "isResultsMapCaseInsensitive" has been set to true, a linked case-insensitive Map 
+     * will be created if possible, else a plain HashMap (see Spring's CollectionFactory).
+	 * @return the new Map instance
+	 * @see org.springframework.core.CollectionFactory#createLinkedCaseInsensitiveMapIfPossible
+	 */
+	protected Map createResultsMap() {
+		if (isResultsMapCaseInsensitive())
+			return CollectionFactory.createLinkedCaseInsensitiveMapIfPossible(10);
+		else
+			return new HashMap();
+	}
 }
