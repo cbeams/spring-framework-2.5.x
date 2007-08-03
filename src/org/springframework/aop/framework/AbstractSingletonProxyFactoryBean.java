@@ -16,6 +16,9 @@
 
 package org.springframework.aop.framework;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
@@ -51,7 +54,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	/** Default is global AdvisorAdapterRegistry */
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private transient ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private Object proxy;
 
@@ -120,7 +123,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 
 	public void afterPropertiesSet() {
 		if (this.target == null) {
-			throw new IllegalArgumentException("'target' is required");
+			throw new IllegalArgumentException("Property 'target' is required");
 		}
 		if (this.target instanceof String) {
 			throw new IllegalArgumentException("'target' needs to be a bean reference, not a bean name as value");

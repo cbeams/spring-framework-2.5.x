@@ -16,6 +16,8 @@
 
 package org.springframework.aop.framework;
 
+import java.io.Serializable;
+
 import org.springframework.aop.SpringProxy;
 import org.springframework.util.ClassUtils;
 
@@ -44,7 +46,7 @@ import org.springframework.util.ClassUtils;
  * @see AdvisedSupport#setProxyTargetClass
  * @see AdvisedSupport#setInterfaces
  */
-public class DefaultAopProxyFactory implements AopProxyFactory {
+public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 	/** Whether the CGLIB2 library is present on the classpath */
 	private static final boolean cglibAvailable =

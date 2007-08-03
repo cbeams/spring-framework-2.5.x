@@ -16,7 +16,11 @@
 
 package org.springframework.aop.framework;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -112,13 +116,13 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 */
 	private boolean freezeProxy = false;
 
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private transient ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/**
 	 * Owning bean factory, which cannot be changed after this
 	 * object is initialized.
 	 */
-	private BeanFactory beanFactory;
+	private transient BeanFactory beanFactory;
 
 	/** Whether the advisor chain has already been initialized */
 	private boolean advisorChainInitialized = false;
@@ -402,6 +406,11 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 		if (!ObjectUtils.isEmpty(this.interceptorNames)) {
 
+			if (this.beanFactory == null) {
+				throw new IllegalStateException("No BeanFactory available anymore (probably due to serialization) " +
+						"- cannot resolve interceptor names " + Arrays.asList(this.interceptorNames));
+			}
+
 			// Globals can't be last unless we specified a targetSource using the property...
 			if (this.interceptorNames[this.interceptorNames.length - 1].endsWith(GLOBAL_SUFFIX) &&
 					this.targetName == null && this.targetSource == EMPTY_TARGET_SOURCE) {
@@ -435,7 +444,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 					else {
 						// It's a prototype Advice or Advisor: replace with a prototype.
 						// Avoid unnecessary creation of prototype bean just for advisor chain initialization.
-						advice = new PrototypePlaceholderAdvisor(interceptorNames[i]);
+						advice = new PrototypePlaceholderAdvisor(this.interceptorNames[i]);
 					}
 					addAdvisorOnChainCreation(advice, this.interceptorNames[i]);
 				}
@@ -463,6 +472,10 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				}
 				// Replace the placeholder with a fresh prototype instance resulting
 				// from a getBean() lookup
+				if (this.beanFactory == null) {
+					throw new IllegalStateException("No BeanFactory available anymore (probably due to serialization) " +
+							"- cannot resolve prototype advisor '" + pa.getBeanName() + "'");
+				}
 				Object bean = this.beanFactory.getBean(pa.getBeanName());
 				Advisor refreshedAdvisor = namedBeanToAdvisor(bean);
 				freshAdvisors.add(refreshedAdvisor);
@@ -540,6 +553,10 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			return this.targetSource;
 		}
 		else {
+			if (this.beanFactory == null) {
+				throw new IllegalStateException("No BeanFactory available anymore (probably due to serialization) " +
+						"- cannot resolve target with name '" + this.targetName + "'");
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Refreshing target with name '" + this.targetName + "'");
 			}
@@ -579,11 +596,24 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 
+	//---------------------------------------------------------------------
+	// Serialization support
+	//---------------------------------------------------------------------
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization; just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Initialize transient fields.
+		this.beanClassLoader = ClassUtils.getDefaultClassLoader();
+	}
+
+
 	/**
 	 * Used in the interceptor chain where we need to replace a bean with a prototype
 	 * on creating a proxy.
 	 */
-	private static class PrototypePlaceholderAdvisor implements Advisor {
+	private static class PrototypePlaceholderAdvisor implements Advisor, Serializable {
 
 		private final String beanName;
 

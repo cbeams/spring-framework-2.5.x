@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework.adapter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +35,9 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  *
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
-public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry {
+public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Serializable {
 
 	private final List adapters = new ArrayList(3);
 

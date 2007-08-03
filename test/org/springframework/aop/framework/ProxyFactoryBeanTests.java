@@ -56,6 +56,7 @@ import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 13.03.2003
  */
 public class ProxyFactoryBeanTests extends TestCase {
@@ -507,7 +508,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		catch (ClassCastException ex) {
 		}
 	}
-	
+
 	public void testSerializableSingletonProxy() throws Exception {
 		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("serializationTests.xml", getClass()));
 		Person p = (Person) bf.getBean("serializableSingleton");
@@ -528,7 +529,7 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertTrue(((Advised) p).removeAdvice(nop));
 		assertTrue("Serializable again because offending interceptor was removed", SerializationTestUtils.isSerializable(p));	
 	}
-	
+
 	public void testSerializablePrototypeProxy() throws Exception {
 		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("serializationTests.xml", getClass()));
 		Person p = (Person) bf.getBean("serializablePrototype");
@@ -538,7 +539,18 @@ public class ProxyFactoryBeanTests extends TestCase {
 		assertNotSame(p, p2);
 		assertEquals("serializablePrototype", p2.getName());
 	}
-	
+
+	public void testSerializableSingletonProxyFactoryBean() throws Exception {
+		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("serializationTests.xml", getClass()));
+		Person p = (Person) bf.getBean("serializableSingleton");
+		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&serializableSingleton");
+		ProxyFactoryBean pfb2 = (ProxyFactoryBean) SerializationTestUtils.serializeAndDeserialize(pfb);
+		Person p2 = (Person) pfb2.getObject();
+		assertEquals(p, p2);
+		assertNotSame(p, p2);
+		assertEquals("serializableSingleton", p2.getName());
+	}
+
 	public void testProxyNotSerializableBecauseOfAdvice() throws Exception {
 		BeanFactory bf = new XmlBeanFactory(new ClassPathResource("serializationTests.xml", getClass()));
 		Person p = (Person) bf.getBean("interceptorNotSerializableSingleton");

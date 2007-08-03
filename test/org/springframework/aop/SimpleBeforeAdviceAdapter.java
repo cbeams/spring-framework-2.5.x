@@ -16,6 +16,8 @@
 
 package org.springframework.aop;
 
+import java.io.Serializable;
+
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 
@@ -24,7 +26,7 @@ import org.springframework.aop.framework.adapter.AdvisorAdapter;
 /**
  * @author Dmitriy Kopylenko
  */
-public class SimpleBeforeAdviceAdapter implements AdvisorAdapter {
+public class SimpleBeforeAdviceAdapter implements AdvisorAdapter, Serializable {
 
 	public boolean supportsAdvice(Advice advice) {
 		return (advice instanceof SimpleBeforeAdvice);

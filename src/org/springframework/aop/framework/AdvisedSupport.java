@@ -16,6 +16,8 @@
 
 package org.springframework.aop.framework;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -75,7 +77,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private boolean preFiltered = false;
 
 	/** The AdvisorChainFactory to use */
-	transient AdvisorChainFactory advisorChainFactory;
+	AdvisorChainFactory advisorChainFactory = new DefaultAdvisorChainFactory();
 
 	/** Cache with Method as key and advisor chain List as value */
 	private transient Map methodCache;
@@ -103,7 +105,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * No-arg constructor for use as a JavaBean.
 	 */
 	public AdvisedSupport() {
-		initDefaultAdvisorChainFactory();
+		initMethodCache();
 	}
 
 	/**
@@ -116,10 +118,9 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Initialize the default AdvisorChainFactory.
+	 * Initialize the method cache.
 	 */
-	private void initDefaultAdvisorChainFactory() {
-		setAdvisorChainFactory(new DefaultAdvisorChainFactory());
+	private void initMethodCache() {
 		this.methodCache = CollectionFactory.createIdentityMapIfPossible(32);
 	}
 
@@ -516,29 +517,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	// Serialization support
 	//---------------------------------------------------------------------
 
-	/**
-	 * Serializes a copy of the state of this class, ignoring subclass state.
-	 */
-	protected Object writeReplace() {
-		// Copy state to avoid dependencies on BeanFactory etc that subclasses may have.
-		AdvisedSupport copy = this;
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization; just initialize state after deserialization.
+		ois.defaultReadObject();
 
-		// If we're in a non-serializable subclass, copy into an AdvisedSupport object.
-		if (!getClass().equals(AdvisedSupport.class)) {
-			copy = new AdvisedSupport();
-			copy.copyConfigurationFrom(this);
-		}
-
-		// May return this.
-		return copy;
-	}
-
-	/**
-	 * Initializes transient fields.
-	 */
-	private Object readResolve() {
-		initDefaultAdvisorChainFactory();
-		return this;
+		// Initialize transient fields.
+		initMethodCache();
 	}
 
 

@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +43,7 @@ import org.springframework.aop.support.MethodMatchers;
  * @author Adrian Colyer
  * @since 2.0.3
  */
-public class DefaultAdvisorChainFactory implements AdvisorChainFactory {
+public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializable {
 
 	public List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, Class targetClass) {
 		// This is somewhat tricky... we have to process introductions first,
