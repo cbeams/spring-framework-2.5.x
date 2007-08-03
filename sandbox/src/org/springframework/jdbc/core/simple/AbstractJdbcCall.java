@@ -19,17 +19,12 @@ package org.springframework.jdbc.core.simple;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.core.CallableStatementCreator;
-import org.springframework.jdbc.core.CallableStatementCreatorFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 
@@ -45,6 +40,9 @@ public abstract class AbstractJdbcCall {
 
 	/** List of SqlParameter objects */
 	private final List<SqlParameter> declaredParameters = new ArrayList<SqlParameter>();
+
+	/** List of RefCursor/ResultSet RowMapper objects */
+	private final Map<String, ParameterizedRowMapper> declaredRowMappers = new LinkedHashMap<String, ParameterizedRowMapper>();
 
 	/**
 	 * Has this operation been compiled? Compilation means at
@@ -129,7 +127,14 @@ public abstract class AbstractJdbcCall {
 			logger.debug("Added declared parameter for [" + getProcedureName() + "]: " + parameter.getName());
 		}
 	}
-	
+
+	public void addDeclaredRowMapper(String parameterName, ParameterizedRowMapper rowMapper) {
+		this.declaredRowMappers.put(parameterName, rowMapper);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Added row mapper for [" + getProcedureName() + "]: " + parameterName);
+		}
+	}
+
 	public String getCallString() {
 		return callString;
 	}
@@ -174,7 +179,16 @@ public abstract class AbstractJdbcCall {
 	 */
 	protected final void compileInternal() {
 
-		callMetaDataContext.processMetaData(getJdbcTemplate().getDataSource(), declaredParameters);
+		callMetaDataContext.initializeMetaData(getJdbcTemplate().getDataSource());
+
+		// iterate over the declared RowMappers and register the corresponding SqlParameter
+		for (Map.Entry<String, ParameterizedRowMapper> entry : declaredRowMappers.entrySet()) {
+			SqlParameter resultSetParameter =
+					callMetaDataContext.createReturnResultSetParameter(entry.getKey(), entry.getValue());
+			declaredParameters.add(resultSetParameter);
+		}
+
+		callMetaDataContext.processParameters(declaredParameters);
 
 		callString = callMetaDataContext.createCallString();
 		

@@ -18,6 +18,7 @@ package org.springframework.jdbc.core.simple;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.SqlReturnResultSet;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
@@ -110,6 +111,11 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	public SimpleJdbcCall useOutParameterNames(String... inParameterNames) {
+		return this;
+	}
+
+	public SimpleJdbcCall returningResultSet(String parameterName, ParameterizedRowMapper rowMapper) {
+		addDeclaredRowMapper(parameterName, rowMapper);
 		return this;
 	}
 

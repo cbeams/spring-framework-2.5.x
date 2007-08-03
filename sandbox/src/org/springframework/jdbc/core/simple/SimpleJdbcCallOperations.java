@@ -17,6 +17,7 @@
 package org.springframework.jdbc.core.simple;
 
 import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
@@ -78,11 +79,14 @@ public interface SimpleJdbcCallOperations {
 	 */
 	SimpleJdbcCall declareParameters(SqlParameter... sqlParameters);
 
-	/** Not uesed yet */
+	/** Not used yet */
 	SimpleJdbcCall useInParameterNames(String... inParameterNames);
 
-	/** Not uesed yet */
+	/** Not used yet */
 	SimpleJdbcCall useOutParameterNames(String... inParameterNames);
+
+	/** Not used yet */
+	SimpleJdbcCall returningResultSet(String parameterName, ParameterizedRowMapper rowMapper);
 
 	/**
 	 * Turn off any processing of parameter mete data information obtained via JDBC.
@@ -138,4 +142,5 @@ public interface SimpleJdbcCallOperations {
 	 * @return map of output params.
 	 */
 	Map<String, Object> execute(SqlParameterSource args);
+
 }

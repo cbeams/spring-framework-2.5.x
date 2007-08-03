@@ -36,6 +36,21 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 	}
 
 	@Override
+	public boolean isReturnResultSetSupported() {
+		return false;
+	}
+	
+	@Override
+	public boolean isRefCursorSupported() {
+		return true;
+	}
+
+	@Override
+	public int getRefCursorSqlType() {
+		return -10;
+	}
+
+	@Override
 	public String metaDataCatalogNameToUse(String catalogName) {
 		// Oracle uses catalog name for package name or an empty string if no package
 		return catalogName == null ? "" : super.metaDataCatalogNameToUse(catalogName);
@@ -50,7 +65,7 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 	@Override
 	public SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta) {
 		if(meta.getSqlType() == Types.OTHER && REF_CURSOR_NAME.equals(meta.getTypeName()))
-			return new SqlOutParameter(parameterName, -10, new ColumnMapRowMapper());
+			return new SqlOutParameter(parameterName, getRefCursorSqlType(), new ColumnMapRowMapper());
 		else
 			return super.createDefaultOutParameter(parameterName, meta);
 	}

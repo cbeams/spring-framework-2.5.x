@@ -49,6 +49,12 @@ public interface CallMetaDataProvider {
 
 	String getUserName();
 
+	boolean isReturnResultSetSupported();
+
+	boolean isRefCursorSupported();
+
+	int getRefCursorSqlType();
+
 	boolean isProcedureColumnMetaDataUsed();
 
 	boolean byPassReturnParameter(String parameterName);

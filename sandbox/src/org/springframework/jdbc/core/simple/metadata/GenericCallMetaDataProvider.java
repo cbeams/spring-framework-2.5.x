@@ -24,6 +24,7 @@ import org.springframework.jdbc.core.SqlParameter;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -168,6 +169,18 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
 	public String getUserName() {
 		return userName;
+	}
+
+	public boolean isReturnResultSetSupported() {
+		return true;
+	}
+
+	public boolean isRefCursorSupported() {
+		return false;
+	}
+
+	public int getRefCursorSqlType() {
+		return Types.OTHER;
 	}
 
 	public boolean isProcedureColumnMetaDataUsed() {

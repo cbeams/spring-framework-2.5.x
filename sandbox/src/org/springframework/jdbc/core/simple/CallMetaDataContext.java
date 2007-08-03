@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlReturnResultSet;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.metadata.CallMetaDataProvider;
 import org.springframework.jdbc.core.simple.metadata.CallMetaDataProviderFactory;
@@ -135,6 +136,20 @@ public class CallMetaDataContext {
 		this.accessCallParameterMetaData = accessCallParameterMetaData;
 	}
 
+	public SqlParameter createReturnResultSetParameter(String parameterName, ParameterizedRowMapper rowMapper) {
+		if (this.metaDataProvider.isReturnResultSetSupported()) {
+			return new SqlReturnResultSet(parameterName, rowMapper);
+		}
+		else {
+			if (this.metaDataProvider.isRefCursorSupported()) {
+				return new SqlOutParameter(parameterName, this.metaDataProvider.getRefCursorSqlType(), rowMapper);
+			}
+			else {
+				throw new InvalidDataAccessApiUsageException("Return of a ResultSet from a stored procedure is not supported.");
+			}
+		}
+	}
+
 	public String getScalarOutParameterName() {
 		if (isFunction()) {
 			return functionReturnName;
@@ -154,10 +169,14 @@ public class CallMetaDataContext {
 		return callParameters;
 	}
 
-	public void processMetaData(DataSource dataSource, List<SqlParameter> parameters) {
+	public void initializeMetaData(DataSource dataSource) {
 
 		metaDataProvider =
 				CallMetaDataProviderFactory.createMetaDataProvider(dataSource, this);
+
+	}
+
+	public void processParameters(List<SqlParameter> parameters) {
 
 		callParameters = reconcileParameters(parameters);
 

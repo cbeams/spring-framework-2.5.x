@@ -92,7 +92,7 @@ public class CallMetaDataProviderFactory {
 					else if ("DB2".equals(databaseProductName)) {
 						provider = new Db2CallMetaDataProvider((databaseMetaData));
 					}
-					else if ("Adaptive Server Enterprise".equals(databaseProductName) || "Sybase".equals(databaseProductName)) {
+					else if ("Sybase".equals(databaseProductName)) {
 						provider = new SybaseCallMetaDataProvider((databaseMetaData));
 					}
 					else if ("Microsoft SQL Server".equals(databaseProductName)) {
