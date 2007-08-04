@@ -1,1 +1,0 @@
-The current version of junit.jar in this directory is JUnit 4.4

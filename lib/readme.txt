@@ -314,8 +314,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JRuby support
 
-* junit/junit.jar
-- JUnit 3.8.1 (http://www.junit.org)
+* junit/junit-3.8.2.jar, junit/junit-4.4.jar
+- JUnit 3.8.2 / 4.4 (http://www.junit.org)
 - required for building the framework's test suite
 
 * log4j/log4j-1.2.14.jar
