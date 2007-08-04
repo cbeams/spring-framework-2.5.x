@@ -435,7 +435,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 					else {
 						// It's a prototype Advice or Advisor: replace with a prototype.
 						// Avoid unnecessary creation of prototype bean just for advisor chain initialization.
-						advice = new PrototypePlaceholderAdvisor(interceptorNames[i]);
+						advice = new PrototypePlaceholderAdvisor(this.interceptorNames[i]);
 					}
 					addAdvisorOnChainCreation(advice, this.interceptorNames[i]);
 				}
