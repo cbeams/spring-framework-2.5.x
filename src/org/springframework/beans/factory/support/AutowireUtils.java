@@ -20,11 +20,9 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.core.JdkVersion;
@@ -40,6 +38,10 @@ import org.springframework.util.ClassUtils;
  * @see AbstractAutowireCapableBeanFactory
  */
 abstract class AutowireUtils {
+
+	private static final String QUALIFIED_ANNOTATION_AUTOWIRE_CANDIDATE_RESOLVER_CLASS_NAME =
+			"org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver";
+
 
 	/**
 	 * Sort the given constructors, preferring public constructors and "greedy" ones
@@ -151,21 +153,19 @@ abstract class AutowireUtils {
 	 */
 	public static AutowireCandidateResolver createAutowireCandidateResolver() {
 		if (JdkVersion.isAtLeastJava15()) {
-			String annotationPackage = "org.springframework.beans.factory.annotation";
-			ClassLoader classLoader = AutowireUtils.class.getClassLoader();
-			List qualifierTypes = new ArrayList();
 			try {
-				qualifierTypes.add(ClassUtils.forName(annotationPackage + ".Qualifier", classLoader));
-				Class resolver = ClassUtils.forName(
-						annotationPackage + ".QualifierAnnotationAutowireCandidateResolver", classLoader);
-				Constructor ctor = ClassUtils.getConstructorIfAvailable(resolver, new Class[] { List.class });
-				return (AutowireCandidateResolver) ctor.newInstance(new Object[] { qualifierTypes });
+				Class resolverClass = ClassUtils.forName(
+						QUALIFIED_ANNOTATION_AUTOWIRE_CANDIDATE_RESOLVER_CLASS_NAME, AutowireUtils.class.getClassLoader());
+				return (AutowireCandidateResolver) resolverClass.newInstance();
 			}
-			catch (Exception e) {
-				// will use the default
+			catch (Throwable ex) {
+				throw new IllegalStateException("Unable to load Java 1.5 dependent class [" +
+						QUALIFIED_ANNOTATION_AUTOWIRE_CANDIDATE_RESOLVER_CLASS_NAME + "]", ex);
 			}
 		}
-		return new DefaultAutowireCandidateResolver();
+		else {
+			return new DefaultAutowireCandidateResolver();
+		}
 	}
 
 }

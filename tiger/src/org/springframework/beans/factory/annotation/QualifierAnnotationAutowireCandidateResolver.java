@@ -17,9 +17,10 @@
 package org.springframework.beans.factory.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.config.AutowireCandidateQualifier;
@@ -28,29 +29,39 @@ import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;;
+import org.springframework.util.ClassUtils;
 
 /**
  * Autowire candidate resolver that matches bean definition qualifiers
  * against qualifier annotations on the field or parameter to be autowired.
  * 
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 2.1
  * @see Qualifier
  */
 public class QualifierAnnotationAutowireCandidateResolver implements AutowireCandidateResolver {
 
-	private List<Class<? extends Annotation>> qualifierTypes;
+	private final Set<Class<? extends Annotation>> qualifierTypes;
 
 
-	public QualifierAnnotationAutowireCandidateResolver(List<Class<? extends Annotation>> qualifierTypes) {
+	public QualifierAnnotationAutowireCandidateResolver() {
+		this(Qualifier.class);
+	}
+
+	public QualifierAnnotationAutowireCandidateResolver(Class<? extends Annotation> qualifierType) {
+		this.qualifierTypes = new HashSet();
+		this.qualifierTypes.add(qualifierType);
+	}
+
+	public QualifierAnnotationAutowireCandidateResolver(Set<Class<? extends Annotation>> qualifierTypes) {
 		Assert.notNull(qualifierTypes, "qualifierTypes must not be null");
 		this.qualifierTypes = qualifierTypes;
 	}
 
+
 	/**
 	 * Determine if the provided bean definition is an autowire candidate.
-	 * 
 	 * <p>To be considered a candidate the bean's <em>autowire-candidate</em>
 	 * attribute must not have been set to 'false'. Also any annotations
 	 * on the field or parameter to be autowired that are recognized by
@@ -112,7 +123,7 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	 * Checks if an annotation type is a recognized qualifier type
 	 */
 	private boolean isQualifier(Class<? extends Annotation> annotationType) {
-		for (Class<? extends Annotation> qualifierType : qualifierTypes) {
+		for (Class<? extends Annotation> qualifierType : this.qualifierTypes) {
 			if (annotationType.equals(qualifierType) || annotationType.isAnnotationPresent(qualifierType)) {
 				return true;
 			}
