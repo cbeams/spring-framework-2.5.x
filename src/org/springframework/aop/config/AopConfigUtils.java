@@ -41,7 +41,7 @@ import org.springframework.util.ClassUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Mark Fisher
- * @since 2.0
+ * @since 2.1
  */
 public abstract class AopConfigUtils {
 

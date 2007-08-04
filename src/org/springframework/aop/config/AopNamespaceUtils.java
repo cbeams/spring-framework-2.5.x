@@ -42,6 +42,9 @@ import org.springframework.beans.factory.xml.ParserContext;
  */
 public abstract class AopNamespaceUtils {
 
+	/**
+	 * The <code>proxy-target-class</code> attribute as found on AOP-related XML tags.
+	 */
 	public static final String PROXY_TARGET_CLASS_ATTRIBUTE = "proxy-target-class";
 
 
