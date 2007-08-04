@@ -84,6 +84,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** List of bean definition names, in registration order */
 	private final List beanDefinitionNames = new ArrayList();
 
+	/** Resolver to use for checking if a bean definition is an autowire candidate */
+	private AutowireCandidateResolver autowireCandidateResolver = AutowireUtils.createAutowireCandidateResolver();
+
 
 	/**
 	 * Create a new DefaultListableBeanFactory.
@@ -315,7 +318,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @return whether the bean should be considered as autowire candidate
 	 */
 	protected boolean isAutowireCandidate(RootBeanDefinition mbd, DependencyDescriptor descriptor) {
-		return mbd.isAutowireCandidate();
+		return autowireCandidateResolver.isAutowireCandidate(mbd, descriptor, getTypeConverter());
 	}
 
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
@@ -444,20 +447,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	protected Map findAutowireCandidates(String beanName, Class requiredType, DependencyDescriptor descriptor) {
 		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType);
 		Map result = CollectionFactory.createLinkedMapIfPossible(candidateNames.length);
-		// Try with specific descriptor first.
 		for (int i = 0; i < candidateNames.length; i++) {
 			String candidateName = candidateNames[i];
 			if (!candidateName.equals(beanName) && isAutowireCandidate(candidateName, descriptor)) {
 				result.put(candidateName, getBean(candidateName));
-			}
-		}
-		if (result.isEmpty() && descriptor.isRequired()) {
-			// None found for specific descriptor - try general type match.
-			for (int i = 0; i < candidateNames.length; i++) {
-				String candidateName = candidateNames[i];
-				if (!candidateName.equals(beanName) && isAutowireCandidate(candidateName, null)) {
-					result.put(candidateName, getBean(candidateName));
-				}
 			}
 		}
 		return result;

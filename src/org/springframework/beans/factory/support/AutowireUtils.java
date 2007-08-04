@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,14 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
+import org.springframework.core.JdkVersion;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -32,6 +35,7 @@ import org.springframework.util.ClassUtils;
  * the implementation of autowire-capable bean factories.
  *
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 1.1.2
  * @see AbstractAutowireCapableBeanFactory
  */
@@ -139,6 +143,29 @@ abstract class AutowireUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * If at least Java 1.5, this will return an annotation-aware resolver.
+	 * Otherwise it returns a resolver that checks the bean definition only.
+	 */
+	public static AutowireCandidateResolver createAutowireCandidateResolver() {
+		if (JdkVersion.isAtLeastJava15()) {
+			String annotationPackage = "org.springframework.beans.factory.annotation";
+			ClassLoader classLoader = AutowireUtils.class.getClassLoader();
+			List qualifierTypes = new ArrayList();
+			try {
+				qualifierTypes.add(ClassUtils.forName(annotationPackage + ".Qualifier", classLoader));
+				Class resolver = ClassUtils.forName(
+						annotationPackage + ".QualifierAnnotationAutowireCandidateResolver", classLoader);
+				Constructor ctor = ClassUtils.getConstructorIfAvailable(resolver, new Class[] { List.class });
+				return (AutowireCandidateResolver) ctor.newInstance(new Object[] { qualifierTypes });
+			}
+			catch (Exception e) {
+				// will use the default
+			}
+		}
+		return new DefaultAutowireCandidateResolver();
 	}
 
 }

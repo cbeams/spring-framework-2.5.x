@@ -19,6 +19,8 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
@@ -44,6 +46,7 @@ import org.springframework.util.Assert;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Mark Fisher
  * @since 2.0
  * @see java.lang.reflect.Method#getAnnotations()
  * @see java.lang.reflect.Method#getAnnotation(Class)
@@ -251,6 +254,41 @@ public abstract class AnnotationUtils {
 		Assert.notNull(clazz, "clazz can not be null.");
 
 		return (clazz.isAnnotationPresent(annotationType) && !isAnnotationDeclaredLocally(annotationType, clazz));
+	}
+
+	/**
+	 * Retrieve an Annotation's attributes as a Map.
+	 */
+	public static Map<String, Object> getAnnotationAttributes(Annotation annotation) {
+		Map<String, Object> attrs = new HashMap<String, Object>();
+		Method[] methods = annotation.annotationType().getDeclaredMethods();
+		for (int j = 0; j < methods.length; j++) {
+			Method method = methods[j];
+			if (method.getParameterTypes().length == 0 && method.getReturnType() != void.class) {
+				try {
+					attrs.put(method.getName(), method.invoke(annotation));
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException("Could not obtain annotation attribute values", ex);
+				}
+			}
+		}
+		return attrs;
+	}
+
+	/**
+	 * Retrieve the default value for an Annotation attribute. 
+	 */
+	public static Object getDefaultValue(Annotation annotation, String attributeName) {
+		Object defaultValue = null;
+		try {
+			Method method = annotation.annotationType().getDeclaredMethod(attributeName, new Class[] {});
+			defaultValue = method.getDefaultValue();
+		}
+		catch (Exception ex) {
+			// will return null
+		}
+		return defaultValue;
 	}
 
 }

@@ -17,11 +17,11 @@
 package org.springframework.core.type;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * @author Juergen Hoeller
@@ -58,20 +58,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		for (int i = 0; i < anns.length; i++) {
 			Annotation ann = anns[i];
 			if (ann.annotationType().getName().equals(annotationType)) {
-				Map<String, Object> attrs = new HashMap<String, Object>();
-				Method[] methods = ann.annotationType().getDeclaredMethods();
-				for (int j = 0; j < methods.length; j++) {
-					Method method = methods[j];
-					if (method.getParameterTypes().length == 0 && method.getReturnType() != void.class) {
-						try {
-							attrs.put(method.getName(), method.invoke(ann));
-						}
-						catch (Exception ex) {
-							throw new IllegalStateException("Could not obtain annotation attribute values", ex);
-						}
-					}
-				}
-				return attrs;
+				return AnnotationUtils.getAnnotationAttributes(ann);
 			}
 		}
 		return null;

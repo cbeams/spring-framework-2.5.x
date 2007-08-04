@@ -17,10 +17,15 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.AutowireCandidateQualifier;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -42,6 +47,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Mark Fisher
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
@@ -119,6 +125,8 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	private boolean lazyInit = false;
 
 	private boolean autowireCandidate = true;
+
+	private Map qualifiers = new HashMap();
 
 	private int autowireMode = AUTOWIRE_NO;
 
@@ -206,6 +214,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 			}
 			setAutowireCandidate(originalAbd.isAutowireCandidate());
 			setAutowireMode(originalAbd.getAutowireMode());
+			setQualifiers(originalAbd.getQualifiers());
 			setDependencyCheck(originalAbd.getDependencyCheck());
 			setDependsOn(originalAbd.getDependsOn());
 			setInitMethodName(originalAbd.getInitMethodName());
@@ -271,6 +280,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 			}
 			setAutowireCandidate(otherAbd.isAutowireCandidate());
 			setAutowireMode(otherAbd.getAutowireMode());
+			setQualifiers(otherAbd.getQualifiers());
 			setDependencyCheck(otherAbd.getDependencyCheck());
 			setDependsOn(otherAbd.getDependsOn());
 			if (otherAbd.getInitMethodName() != null) {
@@ -462,6 +472,61 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 */
 	public boolean isAutowireCandidate() {
 		return this.autowireCandidate;
+	}
+
+	/**
+	 * Add a qualifier to be used for autowire candidate resolution.
+	 * 
+	 * <p>Use this version when the qualifier has no attributes.</p>
+	 */
+	public void addQualifier(String typeName) {
+		this.qualifiers.put(typeName, new AutowireCandidateQualifier(typeName));
+	}
+
+	/**
+	 * Add a qualifier to be used for autowire candidate resolution.
+	 * 
+	 * <p>Use this version when the qualifier has a single attribute named "value".</p>
+	 */
+	public void addQualifier(String typeName, Object value) {
+		this.qualifiers.put(typeName, new AutowireCandidateQualifier(typeName, value));
+	}
+
+	/**
+	 * Add a qualifier to be used for autowire candidate resolution.
+	 * 
+	 * <p>Use this version when the qualifier has one or more named attributes.</p>
+	 */
+	public void addQualifier(String typeName, Map attributes) {
+		this.qualifiers.put(typeName, new AutowireCandidateQualifier(typeName, attributes));
+	}
+
+	/**
+	 * Return whether this bean has the specified qualifier.
+	 */
+	public boolean hasQualifier(String typeName) {
+		return this.qualifiers.keySet().contains(typeName);
+	}
+
+	/**
+	 * Return the qualifier mapped to the provided type name.
+	 */
+	public AutowireCandidateQualifier getQualifier(String typeName) {
+		return (AutowireCandidateQualifier) this.qualifiers.get(typeName);
+	}
+
+	/**
+	 * Set the qualifiers to be used for autowire candidate resolution.
+	 */
+	private void setQualifiers(Map qualifiers) {
+		this.qualifiers = (qualifiers == null) ? new HashMap() : qualifiers;
+	}
+
+	/**
+	 * Return the qualifiers to be used for autowire candidate resolution.
+	 */
+	private Map getQualifiers() {
+		return this.qualifiers;
 	}
 
 	/**
