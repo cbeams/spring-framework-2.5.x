@@ -55,15 +55,17 @@ public abstract class JstlUtils {
 	public static MessageSource getJstlAwareMessageSource(
 			ServletContext servletContext, MessageSource messageSource) {
 
-		String jstlInitParam = servletContext.getInitParameter(Config.FMT_LOCALIZATION_CONTEXT);
-		if (jstlInitParam != null) {
-			// Create a ResourceBundleMessageSource for the specified resource bundle
-			// basename in the JSTL context-param in web.xml, wiring it with the given
-			// Spring-defined MessageSource as parent.
-			ResourceBundleMessageSource jstlBundleWrapper = new ResourceBundleMessageSource();
-			jstlBundleWrapper.setBasename(jstlInitParam);
-			jstlBundleWrapper.setParentMessageSource(messageSource);
-			return jstlBundleWrapper;
+		if (servletContext != null) {
+			String jstlInitParam = servletContext.getInitParameter(Config.FMT_LOCALIZATION_CONTEXT);
+			if (jstlInitParam != null) {
+				// Create a ResourceBundleMessageSource for the specified resource bundle
+				// basename in the JSTL context-param in web.xml, wiring it with the given
+				// Spring-defined MessageSource as parent.
+				ResourceBundleMessageSource jstlBundleWrapper = new ResourceBundleMessageSource();
+				jstlBundleWrapper.setBasename(jstlInitParam);
+				jstlBundleWrapper.setParentMessageSource(messageSource);
+				return jstlBundleWrapper;
+			}
 		}
 		return messageSource;
 	}

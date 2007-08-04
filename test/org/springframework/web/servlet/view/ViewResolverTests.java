@@ -89,13 +89,13 @@ public class ViewResolverTests extends TestCase {
 
 	public void testUrlBasedViewResolverWithoutPrefixes() throws Exception {
 		UrlBasedViewResolver vr = new UrlBasedViewResolver();
-		vr.setViewClass(InternalResourceView.class);
+		vr.setViewClass(JstlView.class);
 		doTestUrlBasedViewResolverWithoutPrefixes(vr);
 	}
 
 	public void testUrlBasedViewResolverWithPrefixes() throws Exception {
 		UrlBasedViewResolver vr = new UrlBasedViewResolver();
-		vr.setViewClass(InternalResourceView.class);
+		vr.setViewClass(JstlView.class);
 		doTestUrlBasedViewResolverWithPrefixes(vr);
 	}
 
@@ -116,12 +116,12 @@ public class ViewResolverTests extends TestCase {
 		vr.setRequestContextAttribute("rc");
 
 		View view = vr.resolveViewName("example1", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "example1", ((InternalResourceView) view).getUrl());
 		assertEquals("Correct contentType", "myContentType", ((InternalResourceView) view).getContentType());
 
 		view = vr.resolveViewName("example2", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "example2", ((InternalResourceView) view).getUrl());
 		assertEquals("Correct contentType", "myContentType", ((InternalResourceView) view).getContentType());
 
@@ -155,11 +155,11 @@ public class ViewResolverTests extends TestCase {
 		vr.setApplicationContext(wac);
 
 		View view = vr.resolveViewName("example1", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "/WEB-INF/example1.jsp", ((InternalResourceView) view).getUrl());
 
 		view = vr.resolveViewName("example2", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "/WEB-INF/example2.jsp", ((InternalResourceView) view).getUrl());
 
 		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
@@ -186,14 +186,14 @@ public class ViewResolverTests extends TestCase {
 		vr.setApplicationContext(wac);
 
 		View view = vr.resolveViewName("example1", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "example1", ((InternalResourceView) view).getUrl());
 		Map attributes = ((InternalResourceView) view).getStaticAttributes();
 		assertEquals("value1", attributes.get("key1"));
 		assertEquals(new Integer(2), attributes.get("key2"));
 
 		view = vr.resolveViewName("example2", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "example2", ((InternalResourceView) view).getUrl());
 		attributes = ((InternalResourceView) view).getStaticAttributes();
 		assertEquals("value1", attributes.get("key1"));
