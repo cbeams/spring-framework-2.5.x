@@ -49,20 +49,23 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class AopNamespaceUtils {
 
+	/**
+	 * The <code>proxy-target-class</code> attribute as found on AOP-related XML tags.
+	 */
 	public static final String PROXY_TARGET_CLASS_ATTRIBUTE = "proxy-target-class";
 
 	/**
 	 * The bean name of the internally managed auto-proxy creator.
 	 */
 	public static final String AUTO_PROXY_CREATOR_BEAN_NAME =
-					"org.springframework.aop.config.internalAutoProxyCreator";
+			"org.springframework.aop.config.internalAutoProxyCreator";
 
 	/**
-	 * The class name of the '<code>AnnotationAwareAspectJAutoProxyCreator</code>' class.
+	 * The class name of the <code>AnnotationAwareAspectJAutoProxyCreator</code> class.
 	 * Only available with AspectJ and Java 5.
 	 */
 	public static final String ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME =
-					"org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator";
+			"org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator";
 
 
 	/**
