@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.7 (2007-07-31)
+Changes in version 2.0.7 (2007-08-15)
 -------------------------------------
 
 General
@@ -19,6 +19,7 @@ Package org.springframework.beans
 * added "charsToDelete" and "emptyArrayAsNull" options to StringArrayPropertyEditor
 * URIEditor trims whitespace before parsing the URI (allowing for XML formatting with whitespace)
 * TypeConverterDelegate protects its collection conversion process against misbehaving Collections with a null Iterator
+* deprecated superseded ResourceFactoryBean (String-to-Resource conversion has been implicitly available for years)
 * DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
 * DefaultListableBeanFactory logs FactoryBean type matching failures at warn level (except for circular references)
 * added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
@@ -37,6 +38,9 @@ Package org.springframework.ejb
 Package org.springframework.instrument
 * added "excludePackage" and "excludeClass" methods to ShadowingClassLoader, analogous to OverridingClassLoader
 
+Package org.springframework.jdbc
+* strengthened SQLExceptionTranslator's contract to define root cause handling for returned DataAccessExceptions
+
 Package org.springframework.jms
 * SingleConnectionFactory sets client ID before ExceptionListener (for providers with strict Connection state handling)
 
@@ -46,6 +50,7 @@ Package org.springframework.jmx
 
 Package org.springframework.orm
 * restored compatibility with Hibernate 3.0.x through reflectively checking for DataException in SessionFactoryUtils
+* Hibernate3 HibernateJdbcException extracts the SQL statement and explicitly builds it into the exception message
 * fixed Hibernate/JpaTransactionManager to clean up properly in case of transaction begin failure on pre-bound resource
 * ExtendedEntityManagerCreator's "joinTransaction()" checks whether there is an externally managed local transaction
 * ExtendedEntityManagerCreator's EntityManager proxies are serializable now
@@ -75,6 +80,7 @@ Package org.springframework.web
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
 * AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
+* JstlView properly allows for programmatic usage (added overloaded constructors; exposing a MessageSource is optional)
 * fixed CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
 
 
