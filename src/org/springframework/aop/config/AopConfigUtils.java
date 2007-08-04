@@ -49,14 +49,14 @@ public abstract class AopConfigUtils {
 	 * The bean name of the internally managed auto-proxy creator.
 	 */
 	public static final String AUTO_PROXY_CREATOR_BEAN_NAME =
-					"org.springframework.aop.config.internalAutoProxyCreator";
+			"org.springframework.aop.config.internalAutoProxyCreator";
 
 	/**
-	 * The class name of the '<code>AnnotationAwareAspectJAutoProxyCreator</code>' class.
+	 * The class name of the <code>AnnotationAwareAspectJAutoProxyCreator</code> class.
 	 * Only available with AspectJ and Java 5.
 	 */
-	public static final String ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME =
-					"org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator";
+	private static final String ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME =
+			"org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator";
 
 
 	/**
