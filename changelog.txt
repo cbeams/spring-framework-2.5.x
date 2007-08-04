@@ -3,6 +3,25 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.1 M4 (2007-08-17)
+--------------------------------------
+
+Package org.springframework.aop
+* ProxyFactoryBean and AbstractSingletonProxyFactoryBean are serializable if their target and interceptors are
+
+Package org.springframework.beans
+* removed superseded ResourceFactoryBean (String-to-Resource conversion has been implicitly available for years)
+
+Package org.springframework.jdbc
+* strengthened SQLExceptionTranslator's contract to define root cause handling for returned DataAccessExceptions
+
+Package org.springframework.orm
+* HibernateJdbcException extracts the SQL statement and explicitly builds it into the exception message
+
+Package org.springframework.web
+* JstlView properly allows for programmatic usage (added overloaded constructors; exposing a MessageSource is optional)
+
+
 Changes in version 2.1 M3 (2007-07-31)
 --------------------------------------
 
