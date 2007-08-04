@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,7 +45,6 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
-import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 
@@ -252,9 +251,9 @@ public class ViewResolverTests extends TestCase {
 		assertTrue("Correct JSTL attributes",
 				locale.equals(request.getAttribute(Config.FMT_LOCALE)));
 		assertTrue("Correct JSTL attributes",
-				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + JstlUtils.REQUEST_SCOPE_SUFFIX) instanceof LocalizationContext);
+				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + ".request") instanceof LocalizationContext);
 		assertTrue("Correct JSTL attributes",
-				locale.equals(request.getAttribute(Config.FMT_LOCALE + JstlUtils.REQUEST_SCOPE_SUFFIX)));
+				locale.equals(request.getAttribute(Config.FMT_LOCALE + ".request")));
 
 		LocalizationContext lc = (LocalizationContext) request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT);
 		assertEquals("messageX", lc.getResourceBundle().getString("code1"));
@@ -298,9 +297,9 @@ public class ViewResolverTests extends TestCase {
 		assertTrue("Correct JSTL attributes",
 				locale.equals(request.getAttribute(Config.FMT_LOCALE)));
 		assertTrue("Correct JSTL attributes",
-				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + JstlUtils.REQUEST_SCOPE_SUFFIX) instanceof LocalizationContext);
+				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + ".request") instanceof LocalizationContext);
 		assertTrue("Correct JSTL attributes",
-				locale.equals(request.getAttribute(Config.FMT_LOCALE + JstlUtils.REQUEST_SCOPE_SUFFIX)));
+				locale.equals(request.getAttribute(Config.FMT_LOCALE + ".request")));
 
 		LocalizationContext lc = (LocalizationContext) request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT);
 		assertEquals("message1", lc.getResourceBundle().getString("code1"));
