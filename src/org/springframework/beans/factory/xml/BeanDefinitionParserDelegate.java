@@ -18,6 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.springframework.beans.factory.parsing.BeanEntry;
 import org.springframework.beans.factory.parsing.ConstructorArgumentEntry;
 import org.springframework.beans.factory.parsing.ParseState;
 import org.springframework.beans.factory.parsing.PropertyEntry;
+import org.springframework.beans.factory.parsing.QualifierEntry;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.LookupOverride;
@@ -70,6 +72,7 @@ import org.springframework.util.xml.DomUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Mark Fisher
  * @since 2.0
  * @see ParserContext
  * @see DefaultBeanDefinitionDocumentReader
@@ -201,6 +204,10 @@ public class BeanDefinitionParserDelegate {
 	public static final String PROP_ELEMENT = "prop";
 
 	public static final String MERGE_ATTRIBUTE = "merge";
+
+	public static final String QUALIFIER_ELEMENT = "qualifier";
+
+	public static final String QUALIFIER_ATTRIBUTE_ELEMENT = "attribute";
 
 	public static final String DEFAULT_LAZY_INIT_ATTRIBUTE = "default-lazy-init";
 
@@ -501,6 +508,7 @@ public class BeanDefinitionParserDelegate {
 
 			parseConstructorArgElements(ele, bd);
 			parsePropertyElements(ele, bd);
+			parseQualifierElements(ele, bd);
 
 			bd.setResourceDescription(this.readerContext.getResource().getDescription());
 			bd.setSource(extractSource(ele));
@@ -591,6 +599,19 @@ public class BeanDefinitionParserDelegate {
 			Node node = nl.item(i);
 			if (node instanceof Element && DomUtils.nodeNameEquals(node, PROPERTY_ELEMENT)) {
 				parsePropertyElement((Element) node, bd);
+			}
+		}
+	}
+
+	/**
+	 * Parse qualifier sub-elements of the given bean element.
+	 */
+	public void parseQualifierElements(Element beanEle, BeanDefinition bd) {
+		NodeList nl = beanEle.getChildNodes();
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node node = nl.item(i);
+			if (node instanceof Element && DomUtils.nodeNameEquals(node, QUALIFIER_ELEMENT)) {
+				parseQualifierElement((Element) node, bd);
 			}
 		}
 	}
@@ -706,6 +727,56 @@ public class BeanDefinitionParserDelegate {
 			parseMetaElements(ele, pv);
 			pv.setSource(extractSource(ele));
 			bd.getPropertyValues().addPropertyValue(pv);
+		}
+		finally {
+			this.parseState.pop();
+		}
+	}
+
+	/**
+	 * Parse a qualifier element.
+	 */
+	public void parseQualifierElement(Element ele, BeanDefinition bd) {
+		String typeName = ele.getAttribute(TYPE_ATTRIBUTE);
+		if (!StringUtils.hasLength(typeName)) {
+			error("Tag 'qualifier' must have a 'type' attribute", ele);
+			return;
+		}
+		this.parseState.push(new QualifierEntry(typeName));
+		try {
+			String value = ele.getAttribute(VALUE_ATTRIBUTE);
+			Map attributes = new HashMap();
+			NodeList nl = ele.getChildNodes();
+			for (int i = 0; i < nl.getLength(); i++) {
+				Node node = nl.item(i);
+				if (node instanceof Element && DomUtils.nodeNameEquals(node, QUALIFIER_ATTRIBUTE_ELEMENT)) {
+					Element attributeEle = (Element) node;
+					String attributeName = attributeEle.getAttribute(NAME_ATTRIBUTE);
+					String attributeValue = attributeEle.getAttribute(VALUE_ATTRIBUTE);
+					if (StringUtils.hasLength(attributeName) && StringUtils.hasLength(attributeValue)) {
+						attributes.put(attributeName, attributeValue);
+					}
+					else {
+						error("Qualifier 'attribute' tag must have a 'name' and 'value'", attributeEle);
+						return;
+					}
+				}
+			}
+			if (bd instanceof AbstractBeanDefinition) {
+				AbstractBeanDefinition abd = ((AbstractBeanDefinition) bd);
+				if (attributes.size() > 0) {
+					if (StringUtils.hasLength(value)) {
+						attributes.put("value", value);
+					}
+					abd.addQualifier(typeName, attributes);
+				}
+				else if (StringUtils.hasLength(value)) {
+					abd.addQualifier(typeName, value);
+				}
+				else {
+					abd.addQualifier(typeName);
+				}
+			}
 		}
 		finally {
 			this.parseState.pop();
