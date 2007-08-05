@@ -6,11 +6,16 @@ http://www.springframework.org
 Changes in version 2.1 M4 (2007-08-17)
 --------------------------------------
 
+General
+* updated build to use JUnit 4.4 for the tiger test suite while sticking with JUnit 3.8 for the main test suite
+
 Package org.springframework.aop
 * ProxyFactoryBean and AbstractSingletonProxyFactoryBean are serializable if their target and interceptors are
 
 Package org.springframework.beans
 * removed superseded ResourceFactoryBean (String-to-Resource conversion has been implicitly available for years)
+* introduced qualifier support, allowing to use custom parameter annotations for identifying specific target beans
+* introduced AutowireCandidateResolver mechanism and QualifierAnnotationAutowireCandidateResolver implementation
 
 Package org.springframework.jdbc
 * strengthened SQLExceptionTranslator's contract to define root cause handling for returned DataAccessExceptions
@@ -18,8 +23,13 @@ Package org.springframework.jdbc
 Package org.springframework.orm
 * HibernateJdbcException extracts the SQL statement and explicitly builds it into the exception message
 
+Package org.springframework.test
+* introduced generic annotation-based test execution framework
+* introduced JUnit4 support (SpringJUnit4ClassRunner)
+
 Package org.springframework.web
 * JstlView properly allows for programmatic usage (added overloaded constructors; exposing a MessageSource is optional)
+* InternalResourceViewResolver uses JstlView as default (instead of InternalResourceView) if the JSTL API is present
 
 
 Changes in version 2.1 M3 (2007-07-31)
