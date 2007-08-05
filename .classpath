@@ -20,7 +20,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/jta.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xerces/xercesImpl.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/junit/junit.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/junit/junit-4.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/easymock/easymock.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/easymock/easymockclassextension.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-beanutils.jar"/>
