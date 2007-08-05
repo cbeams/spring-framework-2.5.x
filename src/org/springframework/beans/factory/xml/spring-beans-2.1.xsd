@@ -367,6 +367,16 @@
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>
+        <xsd:attribute name="primary" type="xsd:boolean">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[
+    Specifies that this bean should be given preference when multiple
+    candidates are qualified to autowire a single-valued dependency.
+    If exactly one 'primary' bean exists among the candidates, it
+    will be the autowired value.
+                ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
 		<xsd:attribute name="dependency-check" default="default">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[

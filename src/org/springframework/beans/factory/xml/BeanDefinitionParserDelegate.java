@@ -131,6 +131,8 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String AUTOWIRE_CANDIDATE_ATTRIBUTE = "autowire-candidate";
 
+	public static final String PRIMARY_ATTRIBUTE = "primary";
+
 	public static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
 
 	public static final String DEPENDS_ON_ATTRIBUTE = "depends-on";
@@ -457,6 +459,10 @@ public class BeanDefinitionParserDelegate {
 				autowire = this.defaults.getAutowire();
 			}
 			bd.setAutowireMode(getAutowireMode(autowire));
+
+			if (ele.hasAttribute(PRIMARY_ATTRIBUTE)) {
+				bd.setPrimary(TRUE_VALUE.equals(ele.getAttribute(PRIMARY_ATTRIBUTE)));
+			}
 
 			String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
 			if (DEFAULT_VALUE.equals(dependencyCheck)) {

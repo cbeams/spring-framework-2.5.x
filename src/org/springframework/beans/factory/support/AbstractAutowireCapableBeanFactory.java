@@ -95,6 +95,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Mark Fisher
  * @since 13.02.2004
  * @see RootBeanDefinition
  * @see DefaultListableBeanFactory
@@ -404,13 +405,35 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		else {
 			Map matchingBeans = findAutowireCandidates(beanName, type, descriptor);
-			if (matchingBeans.size() > 1 || (descriptor.isRequired() && matchingBeans.isEmpty())) {
-				throw new NoSuchBeanDefinitionException(type,
-						"expected single matching bean but found " + matchingBeans.size() + ": " + matchingBeans.keySet());
-			}
 			if (matchingBeans.isEmpty()) {
+				if (descriptor.isRequired()) {
+					throw new NoSuchBeanDefinitionException(type,
+							"Unsatisfied dependency of type [" + type + "]: expected at least 1 matching bean");
+				}
 				return null;
 			}
+			if (matchingBeans.size() > 1) {
+				String primaryBeanName = null;
+				Object primaryBeanInstance = null;
+				for (Iterator it = matchingBeans.entrySet().iterator(); it.hasNext();) {
+					Map.Entry entry = (Map.Entry) it.next();
+					if (this.isPrimary((String) entry.getKey())) {
+						if (primaryBeanName != null) {
+							throw new NoSuchBeanDefinitionException(type,
+									"more than one 'primary' bean found among candidates: " + matchingBeans.keySet());
+						}
+						primaryBeanName = (String) entry.getKey();
+						primaryBeanInstance = entry.getValue();
+					}
+				}
+				if (primaryBeanName == null) {
+					throw new NoSuchBeanDefinitionException(type,
+							"expected single matching bean but found " + matchingBeans.size() + ": " + matchingBeans.keySet());
+				}
+				autowiredBeanNames.add(primaryBeanName);
+				return primaryBeanInstance;
+			}
+			// we have exactly one match
 			Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
 			if (autowiredBeanNames != null) {
 				autowiredBeanNames.add(entry.getKey());

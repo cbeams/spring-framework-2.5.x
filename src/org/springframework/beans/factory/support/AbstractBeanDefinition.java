@@ -17,11 +17,9 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -128,6 +126,8 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 	private Map qualifiers = new HashMap();
 
+	private boolean primary = false;
+
 	private int autowireMode = AUTOWIRE_NO;
 
 	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
@@ -215,6 +215,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 			setAutowireCandidate(originalAbd.isAutowireCandidate());
 			setAutowireMode(originalAbd.getAutowireMode());
 			setQualifiers(originalAbd.getQualifiers());
+			setPrimary(originalAbd.isPrimary());
 			setDependencyCheck(originalAbd.getDependencyCheck());
 			setDependsOn(originalAbd.getDependsOn());
 			setInitMethodName(originalAbd.getInitMethodName());
@@ -281,6 +282,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 			setAutowireCandidate(otherAbd.isAutowireCandidate());
 			setAutowireMode(otherAbd.getAutowireMode());
 			setQualifiers(otherAbd.getQualifiers());
+			setPrimary(otherAbd.isPrimary());
 			setDependencyCheck(otherAbd.getDependencyCheck());
 			setDependsOn(otherAbd.getDependsOn());
 			if (otherAbd.getInitMethodName() != null) {
@@ -527,6 +529,24 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 */
 	private Map getQualifiers() {
 		return this.qualifiers;
+	}
+
+	/**
+	 * Set whether this bean is a primary autowire candidate.
+	 * If this value is true for exactly one bean among multiple
+	 * matching candidates, it will serve as a tie-breaker.
+	 */
+	public void setPrimary(boolean primary) {
+		this.primary = primary;
+	}
+
+	/**
+	 * Return whether this bean is a primary autowire candidate.
+	 * If this value is true for exactly one bean among multiple
+	 * matching candidates, it will serve as a tie-breaker.
+	 */
+	public boolean isPrimary() {
+		return this.primary;
 	}
 
 	/**
