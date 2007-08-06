@@ -23,9 +23,6 @@ import java.util.regex.Pattern;
  * Editor for <code>java.util.regex.Pattern</code>, to directly populate a Pattern property.
  * Expects the same syntax as Pattern's <code>compile</code> method.
  *
- * <p>Since <code>java.util.regex.Pattern</code> is only available on JDK 1.4 or higher,
- * this editor is only available on JDK 1.4 or higher as well.
- *
  * @author Juergen Hoeller
  * @since 2.0.1
  * @see java.util.regex.Pattern
