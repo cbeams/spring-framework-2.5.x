@@ -19,6 +19,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import javax.annotation.Resource;
+
 import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
@@ -57,7 +60,7 @@ import org.springframework.test.annotation.ContextConfiguration;
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -105,7 +108,12 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	private Pet pet;
 
 	@Autowired(required = false)
-	protected String nonrequiredString;
+	protected Long nonrequiredLong;
+
+	@Resource()
+	protected String foo;
+
+	protected String bar;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
@@ -141,6 +149,12 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 		this.employee = employee;
 	}
 
+	@Resource
+	protected final void setBar(final String bar) {
+
+		this.bar = bar;
+	}
+
 	// ------------------------------------------------------------------------|
 
 	@Test
@@ -168,7 +182,7 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	@Test
 	public final void verifyAnnotationAutowiredFields() {
 
-		assertNull("The nonrequiredString property should NOT have been autowired.", this.nonrequiredString);
+		assertNull("The nonrequiredLong property should NOT have been autowired.", this.nonrequiredLong);
 		assertNotNull("The pet field should have been autowired.", this.pet);
 		assertEquals("Fido", this.pet.getName());
 	}
@@ -178,6 +192,18 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 
 		assertNotNull("The employee setter method should have been autowired.", this.employee);
 		assertEquals("John Smith", this.employee.getName());
+	}
+
+	@Test
+	public final void verifyResourceAnnotationWiredFields() {
+
+		assertEquals("The foo field should have been wired via @Resource.", "Foo", this.foo);
+	}
+
+	@Test
+	public final void verifyResourceAnnotationWiredMethods() {
+
+		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
 	}
 
 	// ------------------------------------------------------------------------|

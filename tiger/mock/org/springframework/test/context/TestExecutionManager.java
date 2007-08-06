@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -35,9 +36,18 @@ import org.springframework.util.ClassUtils;
  * dependency injection of test classes, and {@link Transactional transactional}
  * execution of test methods.
  * </p>
+ * <p>
+ * {@link AutowiredAnnotationBeanPostProcessor} and
+ * {@link CommonAnnotationBeanPostProcessor} will be automatically registered
+ * with the bean factory of contexts managed by this test execution manager.
+ * Managed test instances are therefore automatically candidates for
+ * annotation-based dependency injection using
+ * {@link org.springframework.beans.factory.annotation.Autowired Autowired} and
+ * {@link javax.annotation.Resource Resource}.
+ * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class TestExecutionManager<T> {
@@ -105,6 +115,11 @@ public class TestExecutionManager<T> {
 	 * Builds and configures a {@link ConfigurableApplicationContext} based on
 	 * the supplied {@link ContextConfigurationAttributes}.
 	 * </p>
+	 * <p>
+	 * {@link AutowiredAnnotationBeanPostProcessor} and
+	 * {@link CommonAnnotationBeanPostProcessor} will be automatically
+	 * registered with the context's bean factory.
+	 * </p>
 	 *
 	 * @param configAttributes the context configuration attributes to use to
 	 *        determine how to build and configure an appropriate application
@@ -120,9 +135,15 @@ public class TestExecutionManager<T> {
 		final ConfigurableApplicationContext applicationContext = createContextLoader(configAttributes).loadContext();
 
 		final ConfigurableBeanFactory beanFactory = applicationContext.getBeanFactory();
-		final AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
-		bpp.setBeanFactory(beanFactory);
-		beanFactory.addBeanPostProcessor(bpp);
+
+		final AutowiredAnnotationBeanPostProcessor autowiredAnnotationBpp = new AutowiredAnnotationBeanPostProcessor();
+		final CommonAnnotationBeanPostProcessor commonAnnotationBpp = new CommonAnnotationBeanPostProcessor();
+
+		autowiredAnnotationBpp.setBeanFactory(beanFactory);
+		commonAnnotationBpp.setBeanFactory(beanFactory);
+
+		beanFactory.addBeanPostProcessor(autowiredAnnotationBpp);
+		beanFactory.addBeanPostProcessor(commonAnnotationBpp);
 
 		return applicationContext;
 	}
