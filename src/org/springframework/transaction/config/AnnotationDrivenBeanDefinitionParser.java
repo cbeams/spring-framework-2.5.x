@@ -19,6 +19,7 @@ package org.springframework.transaction.config;
 import org.w3c.dom.Element;
 
 import org.springframework.aop.config.AopNamespaceUtils;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -60,26 +61,27 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext, element);
 
-		String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
-		Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();
-
 		// Create the TransactionInterceptor definition.
-		RootBeanDefinition interceptorDefinition = new RootBeanDefinition(TransactionInterceptor.class);
-		interceptorDefinition.setSource(parserContext.extractSource(element));
-		interceptorDefinition.getPropertyValues().addPropertyValue(
+		RootBeanDefinition interceptorDef = new RootBeanDefinition(TransactionInterceptor.class);
+		interceptorDef.setSource(parserContext.extractSource(element));
+		interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
+		interceptorDef.getPropertyValues().addPropertyValue(
 				TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
-		interceptorDefinition.getPropertyValues().addPropertyValue(
+		Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();
+		interceptorDef.getPropertyValues().addPropertyValue(
 				TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(sourceClass));
 
 		// Create the TransactionAttributeSourceAdvisor definition.
-		RootBeanDefinition advisorDefinition = new RootBeanDefinition(TransactionAttributeSourceAdvisor.class);
-		advisorDefinition.setSource(parserContext.extractSource(element));
-		advisorDefinition.getPropertyValues().addPropertyValue(TRANSACTION_INTERCEPTOR, interceptorDefinition);
-		if (element.hasAttribute(ORDER)) {
-			advisorDefinition.getPropertyValues().addPropertyValue(
-					ORDER, element.getAttribute(ORDER));
+		RootBeanDefinition advisorDef = new RootBeanDefinition(TransactionAttributeSourceAdvisor.class);
+		advisorDef.setSource(parserContext.extractSource(element));
+		advisorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		advisorDef.getPropertyValues().addPropertyValue("transactionInterceptor", interceptorDef);
+		if (element.hasAttribute("order")) {
+			advisorDef.getPropertyValues().addPropertyValue("order", element.getAttribute("order"));
 		}
-		return advisorDefinition;
+
+		return advisorDef;
 	}
 
 	protected boolean shouldGenerateId() {
