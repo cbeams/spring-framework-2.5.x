@@ -57,7 +57,7 @@ import org.springframework.test.annotation.ContextConfiguration;
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -114,44 +114,15 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	/**
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
 	 */
-	public void afterPropertiesSet() throws Exception {
+	public final void afterPropertiesSet() throws Exception {
 
 		this.beanInitialized = true;
 	}
 
-	// ------------------------------------------------------------------------|
-
-	protected final ApplicationContext getApplicationContext() {
-
-		return this.applicationContext;
-	}
-
-	protected final String getBeanName() {
-
-		return this.beanName;
-	}
-
-	protected final Employee getEmployee() {
-
-		return this.employee;
-	}
-
-	protected final Pet getPet() {
-
-		return this.pet;
-	}
-
-	protected final boolean isBeanInitialized() {
-
-		return this.beanInitialized;
-	}
-
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
 	 */
-	public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
+	public final void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
 
 		this.applicationContext = applicationContext;
 	}
@@ -159,13 +130,13 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	/**
 	 * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
 	 */
-	public void setBeanName(final String beanName) {
+	public final void setBeanName(final String beanName) {
 
 		this.beanName = beanName;
 	}
 
 	@Autowired
-	protected void setEmployee(final Employee employee) {
+	protected final void setEmployee(final Employee employee) {
 
 		this.employee = employee;
 	}
@@ -173,40 +144,40 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	// ------------------------------------------------------------------------|
 
 	@Test
-	public void verifyApplicationContext() {
+	public final void verifyApplicationContext() {
 
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
-				getApplicationContext());
+				this.applicationContext);
 	}
 
 	@Test
-	public void verifyBeanInitialized() {
+	public final void verifyBeanInitialized() {
 
 		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
-				isBeanInitialized());
+				this.beanInitialized);
 	}
 
 	@Test
-	public void verifyBeanNameSet() {
+	public final void verifyBeanNameSet() {
 
 		assertNull("The bean name of this test instance should have been set to NULL "
 				+ "due to BeanNameAware semantics, since the testing support classes "
-				+ "currently do not provide a bean name for dependency injected test instances.", getBeanName());
+				+ "currently do not provide a bean name for dependency injected test instances.", this.beanName);
 	}
 
 	@Test
-	public void verifyAnnotationAutowiredFields() {
+	public final void verifyAnnotationAutowiredFields() {
 
 		assertNull("The nonrequiredString property should NOT have been autowired.", this.nonrequiredString);
-		assertNotNull("The pet field should have been autowired.", getPet());
-		assertEquals("Fido", getPet().getName());
+		assertNotNull("The pet field should have been autowired.", this.pet);
+		assertEquals("Fido", this.pet.getName());
 	}
 
 	@Test
-	public void verifyAnnotationAutowiredMethods() {
+	public final void verifyAnnotationAutowiredMethods() {
 
-		assertNotNull("The employee setter method should have been autowired.", getEmployee());
-		assertEquals("John Smith", getEmployee().getName());
+		assertNotNull("The employee setter method should have been autowired.", this.employee);
+		assertEquals("John Smith", this.employee.getName());
 	}
 
 	// ------------------------------------------------------------------------|
