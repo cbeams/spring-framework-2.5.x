@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test;
+package org.springframework.test.context;
 
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
 
@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * <p>
  * Default implementation of the {@link ContextConfigurationAttributes}
  * interface, which also provides a static factory method for
- * {@link #constructAttributes(Class) constructing configuration attributes} for
+ * {@link #constructAttributes(Class) constructing} configuration attributes for
  * a specified class.
  * </p>
  * <p>
@@ -45,8 +45,8 @@ import org.springframework.util.StringUtils;
  *
  * @see #constructAttributes(Class)
  * @author Sam Brannen
- * @version $Revision: 1.5 $
- * @since 2.2
+ * @version $Revision: 1.1 $
+ * @since 2.1
  */
 public class DefaultContextConfigurationAttributes implements ContextConfigurationAttributes {
 
@@ -70,13 +70,13 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 
 	private final Autowire autowireMode;
 
-	// XXX Do we really want/need contextResourceSuffix in config attributes?
-	private final String contextResourceSuffix;
+	// XXX Do we really want/need resourceSuffix in config attributes?
+	private final String resourceSuffix;
 
-	// XXX Do we really want/need contextLoaderClass in config attributes?
-	private final Class<? extends ContextLoader> contextLoaderClass;
+	// XXX Do we really want/need loaderClass in config attributes?
+	private final Class<? extends ContextLoader> loaderClass;
 
-	private final boolean dependencyCheckEnabled;
+	private final boolean checkDependencies;
 
 	// XXX Do we really want/need generateDefaultLocations in config attributes?
 	private final boolean generateDefaultLocations;
@@ -95,38 +95,37 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	 * Constructs a new {@link DefaultContextConfigurationAttributes} instance
 	 * from the supplied arguments.
 	 *
-	 * @param contextLoaderClass The type of ContextLoader to use for loading
-	 *        the application context.
+	 * @param loaderClass The type of ContextLoader to use for loading the
+	 *        application context.
 	 * @param locations The classpath resource locations to use for loading the
 	 *        application context.
 	 * @param clazz Class object representing the class with which
 	 *        <em>locations</em> are associated
 	 * @param generateDefaultLocations Whether or not default locations should
 	 *        be generated if no locations are explicitly defined.
-	 * @param contextResourceSuffix The suffix to append to application context
+	 * @param resourceSuffix The suffix to append to application context
 	 *        resource paths when generating default locations.
 	 * @param autowireMode The mode to use when autowiring dependencies.
 	 * @param dependencyCheckEnabled Whether or not to perform dependency
 	 *        checking when autowiring dependencies.
-	 * @throws IllegalArgumentException if the supplied
-	 *         <code>contextLoaderClass</code>,
-	 *         <code>contextResourceSuffix</code>, or
-	 *         <code>autowireMode</code> is <code>null</code>.
+	 * @throws IllegalArgumentException if the supplied <code>loaderClass</code>,
+	 *         <code>resourceSuffix</code>, or <code>autowireMode</code> is
+	 *         <code>null</code>.
 	 */
-	public DefaultContextConfigurationAttributes(final Class<? extends ContextLoader> contextLoaderClass,
+	public DefaultContextConfigurationAttributes(final Class<? extends ContextLoader> loaderClass,
 			final String[] locations, final Class<?> clazz, final boolean generateDefaultLocations,
-			final String contextResourceSuffix, final Autowire autowireMode, final boolean dependencyCheckEnabled) {
+			final String resourceSuffix, final Autowire autowireMode, final boolean dependencyCheckEnabled) {
 
-		Assert.notNull(contextLoaderClass, "contextLoaderClass can not be null.");
-		Assert.notNull(contextResourceSuffix, "contextResourceSuffix can not be null.");
+		Assert.notNull(loaderClass, "loaderClass can not be null.");
+		Assert.notNull(resourceSuffix, "resourceSuffix can not be null.");
 		Assert.notNull(autowireMode, "autowireMode can not be null.");
 
-		this.contextLoaderClass = contextLoaderClass;
-		this.locations = generateLocations(locations, clazz, generateDefaultLocations, contextResourceSuffix);
+		this.loaderClass = loaderClass;
+		this.locations = generateLocations(locations, clazz, generateDefaultLocations, resourceSuffix);
 		this.generateDefaultLocations = generateDefaultLocations;
-		this.contextResourceSuffix = contextResourceSuffix;
+		this.resourceSuffix = resourceSuffix;
 		this.autowireMode = autowireMode;
-		this.dependencyCheckEnabled = dependencyCheckEnabled;
+		this.checkDependencies = dependencyCheckEnabled;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -160,10 +159,10 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 					+ "].");
 		}
 
-		return new DefaultContextConfigurationAttributes(contextConfiguration.contextLoaderClass(),
+		return new DefaultContextConfigurationAttributes(contextConfiguration.loaderClass(),
 				contextConfiguration.locations(), declaringClass, contextConfiguration.generateDefaultLocations(),
-				contextConfiguration.contextResourceSuffix(), contextConfiguration.autowire(),
-				contextConfiguration.dependencyCheck());
+				contextConfiguration.resourceSuffix(), contextConfiguration.autowire(),
+				contextConfiguration.checkDependencies());
 	}
 
 	// ------------------------------------------------------------------------|
@@ -181,7 +180,7 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 		}
 		final DefaultContextConfigurationAttributes that = (DefaultContextConfigurationAttributes) object;
 
-		// .append(this.contextResourceSuffix,that.contextResourceSuffix)
+		// .append(this.resourceSuffix,that.resourceSuffix)
 		// .append(this.generateDefaultLocations,that.generateDefaultLocations)
 
 		return new EqualsBuilder()
@@ -190,7 +189,7 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 
 		.append(this.autowireMode, that.autowireMode)
 
-		.append(this.dependencyCheckEnabled, that.dependencyCheckEnabled)
+		.append(this.checkDependencies, that.checkDependencies)
 
 		.isEquals();
 	}
@@ -218,15 +217,15 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	 *        used when generating default locations.
 	 * @param generateDefaultLocations Whether or not default locations should
 	 *        be generated if no locations are explicitly defined.
-	 * @param contextResourceSuffix The suffix to append to application context
+	 * @param resourceSuffix The suffix to append to application context
 	 *        resource paths when generating default locations.
 	 * @return An array of config locations
 	 */
 	protected final String[] generateLocations(final String[] locations, final Class<?> clazz,
-			final boolean generateDefaultLocations, final String contextResourceSuffix) {
+			final boolean generateDefaultLocations, final String resourceSuffix) {
 
 		return (ArrayUtils.isEmpty(locations) && generateDefaultLocations) ? generateDefaultLocations(clazz,
-				contextResourceSuffix) : modifyLocations(locations, clazz);
+				resourceSuffix) : modifyLocations(locations, clazz);
 	}
 
 	// ------------------------------------------------------------------------|
@@ -241,7 +240,7 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	 * the generated locations will contain a single string with a value of
 	 * &quot;classpath:/com/example/MyTest<code>&lt;suffix&gt;</code>&quot;,
 	 * where <code>&lt;suffix&gt;</code> is the value of the supplied
-	 * <code>contextResourceSuffix</code> string.
+	 * <code>resourceSuffix</code> string.
 	 * </p>
 	 * <p>
 	 * Subclasses can override this method to implement a different
@@ -250,17 +249,17 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	 *
 	 * @param clazz The class for which the default locations are to be
 	 *        generated.
-	 * @param contextResourceSuffix The suffix to append to application context
+	 * @param resourceSuffix The suffix to append to application context
 	 *        resource paths when generating the default locations.
 	 * @return An array of default config locations.
 	 */
-	protected String[] generateDefaultLocations(final Class<?> clazz, final String contextResourceSuffix) {
+	protected String[] generateDefaultLocations(final Class<?> clazz, final String resourceSuffix) {
 
 		Assert.notNull(clazz, "clazz can not be null.");
-		Assert.hasText(contextResourceSuffix, "contextResourceSuffix can not be empty.");
+		Assert.hasText(resourceSuffix, "resourceSuffix can not be empty.");
 
 		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + "/"
-				+ ClassUtils.convertClassNameToResourcePath(clazz.getName()) + contextResourceSuffix };
+				+ ClassUtils.convertClassNameToResourcePath(clazz.getName()) + resourceSuffix };
 	}
 
 	// ------------------------------------------------------------------------|
@@ -306,7 +305,7 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @see org.springframework.test.ContextConfigurationAttributes#getAutowireMode()
+	 * @see org.springframework.test.context.ContextConfigurationAttributes#getAutowireMode()
 	 */
 	public Autowire getAutowireMode() {
 
@@ -316,27 +315,27 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @see org.springframework.test.ContextConfigurationAttributes#getContextResourceSuffix()
+	 * @see org.springframework.test.context.ContextConfigurationAttributes#getResourceSuffix()
 	 */
-	public final String getContextResourceSuffix() {
+	public final String getResourceSuffix() {
 
-		return this.contextResourceSuffix;
+		return this.resourceSuffix;
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @see org.springframework.test.ContextConfigurationAttributes#getContextLoaderClass()
+	 * @see org.springframework.test.context.ContextConfigurationAttributes#getLoaderClass()
 	 */
-	public Class<? extends ContextLoader> getContextLoaderClass() {
+	public Class<? extends ContextLoader> getLoaderClass() {
 
-		return this.contextLoaderClass;
+		return this.loaderClass;
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @see org.springframework.test.ContextConfigurationAttributes#getLocations()
+	 * @see org.springframework.test.context.ContextConfigurationAttributes#getLocations()
 	 */
 	@Override
 	public String[] getLocations() {
@@ -352,7 +351,7 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	@Override
 	public int hashCode() {
 
-		// .append(this.contextResourceSuffix)
+		// .append(this.resourceSuffix)
 		// .append(this.generateDefaultLocations)
 
 		return new HashCodeBuilder(267177669, -523529461)
@@ -361,7 +360,7 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 
 		.append(this.autowireMode)
 
-		.append(this.dependencyCheckEnabled)
+		.append(this.checkDependencies)
 
 		.toHashCode();
 	}
@@ -369,17 +368,17 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @see org.springframework.test.ContextConfigurationAttributes#isDependencyCheckEnabled()
+	 * @see org.springframework.test.context.ContextConfigurationAttributes#isCheckDependencies()
 	 */
-	public boolean isDependencyCheckEnabled() {
+	public boolean isCheckDependencies() {
 
-		return this.dependencyCheckEnabled;
+		return this.checkDependencies;
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @see org.springframework.test.ContextConfigurationAttributes#isGenerateDefaultLocations()
+	 * @see org.springframework.test.context.ContextConfigurationAttributes#isGenerateDefaultLocations()
 	 */
 	public boolean isGenerateDefaultLocations() {
 
@@ -398,15 +397,15 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 
 		.append("locations", ObjectUtils.nullSafeToString(this.locations))
 
-		.append("contextLoaderClass", this.contextLoaderClass)
+		.append("loaderClass", this.loaderClass)
 
 		.append("generateDefaultLocations", this.generateDefaultLocations)
 
-		.append("contextResourceSuffix", this.contextResourceSuffix)
+		.append("resourceSuffix", this.resourceSuffix)
 
 		.append("autowireMode", this.autowireMode)
 
-		.append("dependencyCheckEnabled", this.dependencyCheckEnabled)
+		.append("dependencyCheckEnabled", this.checkDependencies)
 
 		.toString();
 	}

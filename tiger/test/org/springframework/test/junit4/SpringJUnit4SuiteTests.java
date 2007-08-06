@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.junit;
+package org.springframework.test.junit4;
 
 import junit.framework.JUnit4TestAdapter;
 
@@ -38,8 +38,8 @@ import org.junit.runners.Suite.SuiteClasses;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
- * @since 2.2
+ * @version $Revision: 1.1 $
+ * @since 2.1
  */
 @RunWith(Suite.class)
 // Note: the following 'multi-line' layout is for enhanced code readability.

@@ -13,66 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test;
+package org.springframework.test.context;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * <p>
- * Concrete implementation of the {@link ContextLoader} strategy which loads a
- * {@link GenericApplicationContext} from the <em>locations</em> in the
- * supplied {@link ContextConfigurationAttributes configuration attributes}.
+ * Abstract, generic implementation of the {@link ContextLoader} strategy which
+ * loads a {@link GenericApplicationContext} from the <em>locations</em> in
+ * the supplied {@link ContextConfigurationAttributes configuration attributes}.
+ * </p>
+ * <p>
+ * Concrete subclasses must provide an appropriate
+ * {@link #createBeanDefinitionReader(GenericApplicationContext) BeanDefinitionReader}.
  * </p>
  *
  * @see #loadContext()
  * @author Sam Brannen
- * @version $Revision: 1.2 $
- * @since 2.2
+ * @version $Revision: 1.1 $
+ * @since 2.1
  */
-public class GenericContextLoader implements ContextLoader {
+public abstract class AbstractGenericContextLoader extends AbstractContextLoader {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	/** Class Logger. */
-	protected static final Log LOG = LogFactory.getLog(GenericContextLoader.class);
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC INITIALIZATION ----------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- CLASS VARIABLES ----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	private final ContextConfigurationAttributes configAttributes;
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE INITIALIZATION --------------------------------------------|
-	// ------------------------------------------------------------------------|
+	protected static final Log LOG = LogFactory.getLog(AbstractGenericContextLoader.class);
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	public GenericContextLoader(final ContextConfigurationAttributes configAttributes) {
+	/**
+	 * Constructs a new {@link AbstractGenericContextLoader} with the supplied
+	 * {@link ContextConfigurationAttributes configuration attributes}.
+	 *
+	 * @param configAttributes Configuration attributes for the
+	 *        {@link ApplicationContext} which this context loader loads.
+	 */
+	public AbstractGenericContextLoader(final ContextConfigurationAttributes configAttributes) {
 
-		this.configAttributes = configAttributes;
+		super(configAttributes);
 	}
-
-	// ------------------------------------------------------------------------|
-	// --- CLASS METHODS ------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
@@ -81,37 +71,42 @@ public class GenericContextLoader implements ContextLoader {
 	/**
 	 * <p>
 	 * Loads a Spring ApplicationContext from the <em>locations</em> defined
-	 * in the supplied
-	 * {@link ContextConfigurationAttributes configuration attributes}.
+	 * in the supplied {@link #getConfigAttributes() configuration attributes}.
 	 * </p>
 	 * <p>
-	 * The default implementation creates a standard GenericApplicationContext
-	 * instance, populates it from the specified config locations through an
-	 * {@link XmlBeanDefinitionReader}, calls {@link #customizeBeanFactory} to
-	 * allow for customizing the context's DefaultListableBeanFactory, and
-	 * finally registers a JVM shutdown hook for itself
+	 * Implementation details: creates a standard
+	 * {@link GenericApplicationContext} instance, populates it from the
+	 * specified config locations through a
+	 * {@link #createBeanDefinitionReader(GenericApplicationContext) BeanDefinitionReader},
+	 * calls {@link #customizeBeanFactory} to allow for customizing the
+	 * context's DefaultListableBeanFactory, and finally registers a JVM
+	 * shutdown hook for the context.
+	 * </p>
+	 * <p>
+	 * Subclasses must provide an appropriate implementation of
+	 * {@link #createBeanDefinitionReader(GenericApplicationContext)}.
 	 * </p>
 	 * <p>
 	 * Note: the returned context will already have been
 	 * {@link ConfigurableApplicationContext#refresh() refreshed}.
 	 * </p>
 	 *
-	 * @see org.springframework.test.ContextLoader#loadContext()
+	 * @see org.springframework.test.context.ContextLoader#loadContext()
 	 * @see GenericApplicationContext
-	 * @see XmlBeanDefinitionReader
 	 * @see #customizeBeanFactory
-	 * @return
+	 * @see BeanDefinitionReader
+	 * @return a new application context
 	 */
 	@Override
-	public ConfigurableApplicationContext loadContext() throws Exception {
+	public final ConfigurableApplicationContext loadContext() throws Exception {
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Loading ApplicationContext for ContextConfigurationAttributes [" + this.configAttributes + "].");
+			LOG.debug("Loading ApplicationContext for ContextConfigurationAttributes [" + getConfigAttributes() + "].");
 		}
 
 		final GenericApplicationContext context = new GenericApplicationContext();
-		new XmlBeanDefinitionReader(context).loadBeanDefinitions(this.configAttributes.getLocations());
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
+		createBeanDefinitionReader(context).loadBeanDefinitions(getConfigAttributes().getLocations());
 		context.refresh();
 		context.registerShutdownHook();
 		return context;
@@ -125,13 +120,12 @@ public class GenericContextLoader implements ContextLoader {
 	 * this ContextLoader.
 	 * </p>
 	 * <p>
-	 * The default implementation is empty. Can be overridden in subclasses to
-	 * customize DefaultListableBeanFactory's standard settings.
+	 * The default implementation is empty but can be overridden in subclasses
+	 * to customize DefaultListableBeanFactory's standard settings.
 	 * </p>
 	 *
 	 * @param beanFactory the newly created bean factory for this context
-	 * @see #loadContextLocations
-	 * @see #createApplicationContext
+	 * @see #loadContext()
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowEagerClassLoading
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
@@ -141,6 +135,21 @@ public class GenericContextLoader implements ContextLoader {
 
 		/* no-op */
 	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Factory method for creating new {@link BeanDefinitionReader}s for
+	 * loading bean definitions into the supplied
+	 * {@link GenericApplicationContext context}.
+	 *
+	 * @param context The context for which the BeanDefinitionReader should be
+	 *        created.
+	 * @see #loadContext()
+	 * @see BeanDefinitionReader
+	 * @return A BeanDefinitionReader for the supplied context.
+	 */
+	protected abstract BeanDefinitionReader createBeanDefinitionReader(final GenericApplicationContext context);
 
 	// ------------------------------------------------------------------------|
 

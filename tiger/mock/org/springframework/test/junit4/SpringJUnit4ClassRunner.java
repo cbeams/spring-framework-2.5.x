@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.junit;
+package org.springframework.test.junit4;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,7 +26,7 @@ import org.junit.internal.runners.MethodRoadie;
 import org.junit.internal.runners.TestMethod;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
-import org.springframework.test.TestExecutionManager;
+import org.springframework.test.context.TestExecutionManager;
 
 /**
  * SpringJUnit4ClassRunner is a custom extension of {@link JUnit4ClassRunner}
@@ -35,8 +35,8 @@ import org.springframework.test.TestExecutionManager;
  * annotations.
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
- * @since 2.2
+ * @version $Revision: 1.1 $
+ * @since 2.1
  */
 public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 

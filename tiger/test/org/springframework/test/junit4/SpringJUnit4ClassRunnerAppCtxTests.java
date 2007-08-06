@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.junit;
+package org.springframework.test.junit4;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import junit.framework.JUnit4TestAdapter;
 
@@ -25,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -55,12 +57,23 @@ import org.springframework.test.annotation.ContextConfiguration;
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.3 $
- * @since 2.2
+ * @version $Revision: 1.1 $
+ * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration()
-public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAware, InitializingBean {
+public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAware, BeanNameAware, InitializingBean {
+
+	// ------------------------------------------------------------------------|
+	// --- CONSTANTS ----------------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Default resource path for the test application context configuration for
+	 * {@link SpringJUnit4ClassRunnerAppCtxTests}:
+	 * <code>&quot;/org/springframework/test/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>
+	 */
+	public static final String DEFAULT_CONTEXT_RESOURCE_PATH = "/org/springframework/test/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml";
 
 	// ------------------------------------------------------------------------|
 	// --- CLASS VARIABLES ----------------------------------------------------|
@@ -84,6 +97,8 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 
 	private boolean beanInitialized = false;
 
+	private String beanName = "replace me with null";
+
 	private Employee employee;
 
 	@Autowired
@@ -96,7 +111,6 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	/**
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
 	 */
-	@Override
 	public void afterPropertiesSet() throws Exception {
 
 		this.beanInitialized = true;
@@ -109,21 +123,20 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 		return this.applicationContext;
 	}
 
-	// ------------------------------------------------------------------------|
+	protected String getBeanName() {
+
+		return this.beanName;
+	}
 
 	protected Employee getEmployee() {
 
 		return this.employee;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	protected Pet getPet() {
 
 		return this.pet;
 	}
-
-	// ------------------------------------------------------------------------|
 
 	protected boolean isBeanInitialized() {
 
@@ -135,13 +148,18 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	/**
 	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
 	 */
-	@Override
 	public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
 
 		this.applicationContext = applicationContext;
 	}
 
-	// ------------------------------------------------------------------------|
+	/**
+	 * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
+	 */
+	public void setBeanName(final String beanName) {
+
+		this.beanName = beanName;
+	}
 
 	@Autowired
 	protected void setEmployee(final Employee employee) {
@@ -158,8 +176,6 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 				getApplicationContext());
 	}
 
-	// ------------------------------------------------------------------------|
-
 	@Test
 	public void verifyBeanInitialized() {
 
@@ -167,7 +183,13 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 				isBeanInitialized());
 	}
 
-	// ------------------------------------------------------------------------|
+	@Test
+	public void verifyBeanNameSet() {
+
+		assertNull("The bean name of this test instance should have been set to NULL "
+				+ "due to BeanNameAware semantics, since the testing support classes "
+				+ "currently do not provide a bean name for dependency injected test instances.", getBeanName());
+	}
 
 	@Test
 	public void verifyAnnotationAutowiredFields() {
@@ -175,8 +197,6 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 		assertNotNull("The pet field should have been autowired.", getPet());
 		assertEquals("Fido", getPet().getName());
 	}
-
-	// ------------------------------------------------------------------------|
 
 	@Test
 	public void verifyAnnotationAutowiredMethods() {

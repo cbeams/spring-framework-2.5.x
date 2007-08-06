@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test;
+package org.springframework.test.context;
 
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -30,14 +30,10 @@ import org.springframework.context.ConfigurableApplicationContext;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
- * @since 2.2
+ * @version $Revision: 1.1 $
+ * @since 2.1
  */
 public interface ContextLoader {
-
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
@@ -45,9 +41,11 @@ public interface ContextLoader {
 
 	/**
 	 * <p>
-	 * Loads a new {@link ConfigurableApplicationContext} based on the
+	 * Loads a new {@link ConfigurableApplicationContext context} based on the
 	 * {@link ContextConfigurationAttributes configuration attributes} provided
-	 * to this ContextLoader.
+	 * to this ContextLoader, possibly configures the context, and finally
+	 * returns the {@link ConfigurableApplicationContext#refresh() refreshed}
+	 * context.
 	 * </p>
 	 * <p>
 	 * Any ApplicationContext loaded by this method <strong>must</strong> be

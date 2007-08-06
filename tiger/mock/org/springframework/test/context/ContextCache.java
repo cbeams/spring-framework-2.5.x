@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test;
+package org.springframework.test.context;
 
 import java.io.Serializable;
 
@@ -37,8 +37,8 @@ import org.springframework.context.ConfigurableApplicationContext;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
- * @since 2.2
+ * @version $Revision: 1.1 $
+ * @since 2.1
  * @param <KEY> {@link Serializable serializable} context key type
  * @param <CONTEXT> {@link ConfigurableApplicationContext application context}
  *        type

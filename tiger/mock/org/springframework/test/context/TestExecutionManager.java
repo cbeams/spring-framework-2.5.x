@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test;
+package org.springframework.test.context;
 
 import java.lang.reflect.Constructor;
 
@@ -37,8 +37,8 @@ import org.springframework.util.ClassUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.6 $
- * @since 2.2
+ * @version $Revision: 1.1 $
+ * @since 2.1
  */
 public class TestExecutionManager<T> {
 
@@ -136,7 +136,7 @@ public class TestExecutionManager<T> {
 	 * </p>
 	 *
 	 * @see ContextLoader
-	 * @see ContextConfigurationAttributes#getContextLoaderClass()
+	 * @see ContextConfigurationAttributes#getLoaderClass()
 	 * @param configAttributes the context configuration attributes to use to
 	 *        determine the type of ContextLoader to instantiate.
 	 * @return a new ContextLoader
@@ -146,7 +146,7 @@ public class TestExecutionManager<T> {
 			throws Exception {
 
 		Assert.notNull(configAttributes, "ContextConfigurationAttributes can not be null.");
-		final Class<? extends ContextLoader> contextLoaderClass = configAttributes.getContextLoaderClass();
+		final Class<? extends ContextLoader> contextLoaderClass = configAttributes.getLoaderClass();
 		Assert.state(contextLoaderClass != null,
 				"contextLoaderClass is null: ContextConfigurationAttributes have not been properly initialized.");
 
@@ -262,7 +262,7 @@ public class TestExecutionManager<T> {
 	 * application context, using the
 	 * {@link ContextConfigurationAttributes#getAutowireMode() autowire mode}
 	 * and
-	 * {@link ContextConfigurationAttributes#isDependencyCheckEnabled() dependency check}
+	 * {@link ContextConfigurationAttributes#isCheckDependencies() dependency check}
 	 * attributes in the supplied configuration.
 	 * </p>
 	 * <p>
@@ -282,7 +282,7 @@ public class TestExecutionManager<T> {
 		}
 		final ConfigurableListableBeanFactory beanFactory = getApplicationContext().getBeanFactory();
 		beanFactory.autowireBeanProperties(testInstance, getConfigurationAttributes().getAutowireMode().value(),
-				getConfigurationAttributes().isDependencyCheckEnabled());
+				getConfigurationAttributes().isCheckDependencies());
 		beanFactory.initializeBean(testInstance, null);
 	}
 

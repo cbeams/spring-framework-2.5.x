@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test;
+package org.springframework.test.context;
 
 import java.io.Serializable;
 
@@ -23,7 +23,7 @@ import org.springframework.test.annotation.ContextConfiguration;
 
 /**
  * <p>
- * Strategy interface for configuration attributes for a configured
+ * Strategy interface for configuration attributes for an
  * {@link ApplicationContext}.
  * </p>
  * <p>
@@ -36,8 +36,8 @@ import org.springframework.test.annotation.ContextConfiguration;
  *
  * @see ContextConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.3 $
- * @since 2.2
+ * @version $Revision: 1.1 $
+ * @since 2.1
  */
 public interface ContextConfigurationAttributes extends Serializable {
 
@@ -56,27 +56,27 @@ public interface ContextConfigurationAttributes extends Serializable {
 	 * The {@link ContextLoader} type to use for loading the
 	 * {@link ApplicationContext}.
 	 *
-	 * @see #getContextResourceSuffix()
+	 * @see #getResourceSuffix()
 	 * @see #getLocations()
 	 * @see #isGenerateDefaultLocations()
 	 */
-	public abstract Class<? extends ContextLoader> getContextLoaderClass();
+	public abstract Class<? extends ContextLoader> getLoaderClass();
 
 	/**
 	 * The suffix to append to application context resource paths when
 	 * generating default locations.
 	 *
-	 * @see #getContextLoaderClass()
+	 * @see #getLoaderClass()
 	 * @see #getLocations()
 	 * @see #isGenerateDefaultLocations()
 	 */
-	public abstract String getContextResourceSuffix();
+	public abstract String getResourceSuffix();
 
 	/**
 	 * The resource locations to use for loading an {@link ApplicationContext}.
 	 *
-	 * @see #getContextLoaderClass()
-	 * @see #getContextResourceSuffix()
+	 * @see #getLoaderClass()
+	 * @see #getResourceSuffix()
 	 * @see #isGenerateDefaultLocations()
 	 */
 	public abstract String[] getLocations();
@@ -84,14 +84,14 @@ public interface ContextConfigurationAttributes extends Serializable {
 	/**
 	 * Is dependency checking to be performed for autowired beans?
 	 */
-	public abstract boolean isDependencyCheckEnabled();
+	public abstract boolean isCheckDependencies();
 
 	/**
 	 * Whether or not <em>default</em> locations should be generated if no
 	 * {@link #getLocations() locations} are explicitly defined.
 	 *
-	 * @see #getContextLoaderClass()
-	 * @see #getContextResourceSuffix()
+	 * @see #getLoaderClass()
+	 * @see #getResourceSuffix()
 	 * @see #getLocations()
 	 */
 	public abstract boolean isGenerateDefaultLocations();

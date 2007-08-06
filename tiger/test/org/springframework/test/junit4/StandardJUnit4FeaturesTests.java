@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.junit;
+package org.springframework.test.junit4;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -45,8 +45,8 @@ import org.junit.Test;
  *
  * @see StandardJUnit4FeaturesSpringRunnerTests
  * @author Sam Brannen
- * @version $Revision: 1.2 $
- * @since 2.2
+ * @version $Revision: 1.1 $
+ * @since 2.1
  */
 public class StandardJUnit4FeaturesTests {
 
