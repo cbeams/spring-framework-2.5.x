@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator;
-import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.aop.framework.autoproxy.InfrastructureAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -68,7 +68,7 @@ public abstract class AopConfigUtils {
 	 * Setup the escalation list.
 	 */
 	static {
-		APC_PRIORITY_LIST.add(DefaultAdvisorAutoProxyCreator.class.getName());
+		APC_PRIORITY_LIST.add(InfrastructureAdvisorAutoProxyCreator.class.getName());
 		APC_PRIORITY_LIST.add(AspectJAwareAdvisorAutoProxyCreator.class.getName());
 		APC_PRIORITY_LIST.add(ASPECTJ_ANNOTATION_AUTO_PROXY_CREATOR_CLASS_NAME);
 	}
@@ -79,7 +79,7 @@ public abstract class AopConfigUtils {
 	}
 
 	public static BeanDefinition registerAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry, Object source) {
-		return registerOrEscalateApcAsRequired(DefaultAdvisorAutoProxyCreator.class, registry, source);
+		return registerOrEscalateApcAsRequired(InfrastructureAdvisorAutoProxyCreator.class, registry, source);
 	}
 
 	public static BeanDefinition registerAspectJAutoProxyCreatorIfNecessary(BeanDefinitionRegistry registry) {
