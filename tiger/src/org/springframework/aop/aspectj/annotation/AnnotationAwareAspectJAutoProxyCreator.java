@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * an include pattern will be considered as defining aspects to use for Spring auto-proxying.
  *
  * <p>Processing of Spring Advisors follows the rules established in
- * {@link org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator}.
+ * {@link org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
