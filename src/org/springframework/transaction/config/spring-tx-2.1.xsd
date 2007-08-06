@@ -139,7 +139,7 @@
 	The method name(s) with which the transaction attributes are to be
 	associated. The wildcard (*) character can be used to associate the
 	same transaction attribute settings with a number of methods; for
-	example, 'get*', 'handle*', 'on*Event', etc.
+	example, 'get*', 'handle*', '*Order', 'on*Event', etc.
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
