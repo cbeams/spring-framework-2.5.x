@@ -22,7 +22,7 @@ import java.util.List;
 import org.w3c.dom.Element;
 
 import org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator;
-import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.aop.framework.autoproxy.InfrastructureAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -77,19 +77,18 @@ public abstract class AopNamespaceUtils {
 	 * Setup the escalation list.
 	 */
 	static {
-		APC_PRIORITY_LIST.add(DefaultAdvisorAutoProxyCreator.class.getName());
+		APC_PRIORITY_LIST.add(InfrastructureAdvisorAutoProxyCreator.class.getName());
 		APC_PRIORITY_LIST.add(AspectJAwareAdvisorAutoProxyCreator.class.getName());
 		APC_PRIORITY_LIST.add(ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME);
 	}
 
 
 	public static void registerAutoProxyCreatorIfNecessary(ParserContext parserContext, Object sourceElement) {
-		registryOrEscalateApcAsRequired(DefaultAdvisorAutoProxyCreator.class, parserContext, sourceElement);
+		registryOrEscalateApcAsRequired(InfrastructureAdvisorAutoProxyCreator.class, parserContext, sourceElement);
 	}
 
 	public static void registerAspectJAutoProxyCreatorIfNecessary(ParserContext parserContext, Object sourceElement) {
-		registryOrEscalateApcAsRequired(
-				AspectJAwareAdvisorAutoProxyCreator.class, parserContext, sourceElement);
+		registryOrEscalateApcAsRequired(AspectJAwareAdvisorAutoProxyCreator.class, parserContext, sourceElement);
 	}
 
 	public static void registerAtAspectJAutoProxyCreatorIfNecessary(ParserContext parserContext, Object sourceElement) {
