@@ -57,7 +57,7 @@ import org.springframework.test.annotation.ContextConfiguration;
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -104,6 +104,9 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	@Autowired
 	private Pet pet;
 
+	@Autowired(required = false)
+	protected String nonrequiredString;
+
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
@@ -118,27 +121,27 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 
 	// ------------------------------------------------------------------------|
 
-	protected ApplicationContext getApplicationContext() {
+	protected final ApplicationContext getApplicationContext() {
 
 		return this.applicationContext;
 	}
 
-	protected String getBeanName() {
+	protected final String getBeanName() {
 
 		return this.beanName;
 	}
 
-	protected Employee getEmployee() {
+	protected final Employee getEmployee() {
 
 		return this.employee;
 	}
 
-	protected Pet getPet() {
+	protected final Pet getPet() {
 
 		return this.pet;
 	}
 
-	protected boolean isBeanInitialized() {
+	protected final boolean isBeanInitialized() {
 
 		return this.beanInitialized;
 	}
@@ -194,6 +197,7 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	@Test
 	public void verifyAnnotationAutowiredFields() {
 
+		assertNull("The nonrequiredString property should NOT have been autowired.", this.nonrequiredString);
 		assertNotNull("The pet field should have been autowired.", getPet());
 		assertEquals("Fido", getPet().getName());
 	}
