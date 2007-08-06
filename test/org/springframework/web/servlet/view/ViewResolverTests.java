@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,7 +45,6 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
-import org.springframework.web.servlet.support.JstlUtils;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 
@@ -90,13 +89,13 @@ public class ViewResolverTests extends TestCase {
 
 	public void testUrlBasedViewResolverWithoutPrefixes() throws Exception {
 		UrlBasedViewResolver vr = new UrlBasedViewResolver();
-		vr.setViewClass(InternalResourceView.class);
+		vr.setViewClass(JstlView.class);
 		doTestUrlBasedViewResolverWithoutPrefixes(vr);
 	}
 
 	public void testUrlBasedViewResolverWithPrefixes() throws Exception {
 		UrlBasedViewResolver vr = new UrlBasedViewResolver();
-		vr.setViewClass(InternalResourceView.class);
+		vr.setViewClass(JstlView.class);
 		doTestUrlBasedViewResolverWithPrefixes(vr);
 	}
 
@@ -117,12 +116,12 @@ public class ViewResolverTests extends TestCase {
 		vr.setRequestContextAttribute("rc");
 
 		View view = vr.resolveViewName("example1", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "example1", ((InternalResourceView) view).getUrl());
 		assertEquals("Correct contentType", "myContentType", ((InternalResourceView) view).getContentType());
 
 		view = vr.resolveViewName("example2", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "example2", ((InternalResourceView) view).getUrl());
 		assertEquals("Correct contentType", "myContentType", ((InternalResourceView) view).getContentType());
 
@@ -156,11 +155,11 @@ public class ViewResolverTests extends TestCase {
 		vr.setApplicationContext(wac);
 
 		View view = vr.resolveViewName("example1", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "/WEB-INF/example1.jsp", ((InternalResourceView) view).getUrl());
 
 		view = vr.resolveViewName("example2", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "/WEB-INF/example2.jsp", ((InternalResourceView) view).getUrl());
 
 		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
@@ -187,14 +186,14 @@ public class ViewResolverTests extends TestCase {
 		vr.setApplicationContext(wac);
 
 		View view = vr.resolveViewName("example1", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "example1", ((InternalResourceView) view).getUrl());
 		Map attributes = ((InternalResourceView) view).getStaticAttributes();
 		assertEquals("value1", attributes.get("key1"));
 		assertEquals(new Integer(2), attributes.get("key2"));
 
 		view = vr.resolveViewName("example2", Locale.getDefault());
-		assertEquals("Correct view class", InternalResourceView.class, view.getClass());
+		assertEquals("Correct view class", JstlView.class, view.getClass());
 		assertEquals("Correct URL", "example2", ((InternalResourceView) view).getUrl());
 		attributes = ((InternalResourceView) view).getStaticAttributes();
 		assertEquals("value1", attributes.get("key1"));
@@ -252,9 +251,9 @@ public class ViewResolverTests extends TestCase {
 		assertTrue("Correct JSTL attributes",
 				locale.equals(request.getAttribute(Config.FMT_LOCALE)));
 		assertTrue("Correct JSTL attributes",
-				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + JstlUtils.REQUEST_SCOPE_SUFFIX) instanceof LocalizationContext);
+				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + ".request") instanceof LocalizationContext);
 		assertTrue("Correct JSTL attributes",
-				locale.equals(request.getAttribute(Config.FMT_LOCALE + JstlUtils.REQUEST_SCOPE_SUFFIX)));
+				locale.equals(request.getAttribute(Config.FMT_LOCALE + ".request")));
 
 		LocalizationContext lc = (LocalizationContext) request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT);
 		assertEquals("messageX", lc.getResourceBundle().getString("code1"));
@@ -298,9 +297,9 @@ public class ViewResolverTests extends TestCase {
 		assertTrue("Correct JSTL attributes",
 				locale.equals(request.getAttribute(Config.FMT_LOCALE)));
 		assertTrue("Correct JSTL attributes",
-				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + JstlUtils.REQUEST_SCOPE_SUFFIX) instanceof LocalizationContext);
+				request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT + ".request") instanceof LocalizationContext);
 		assertTrue("Correct JSTL attributes",
-				locale.equals(request.getAttribute(Config.FMT_LOCALE + JstlUtils.REQUEST_SCOPE_SUFFIX)));
+				locale.equals(request.getAttribute(Config.FMT_LOCALE + ".request")));
 
 		LocalizationContext lc = (LocalizationContext) request.getAttribute(Config.FMT_LOCALIZATION_CONTEXT);
 		assertEquals("message1", lc.getResourceBundle().getString("code1"));
