@@ -50,9 +50,11 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 
 	protected static final String SELECTOR_ATTRIBUTE = "selector";
 
-	protected static final String HANDLER_BEAN_ATTRIBUTE = "ref";
+	protected static final String REF_ATTRIBUTE = "ref";
 
-	protected static final String HANDLER_METHOD_ATTRIBUTE = "method";
+	protected static final String METHOD_ATTRIBUTE = "method";
+
+	protected static final String MESSAGE_CONVERTER_ATTRIBUTE = "message-converter";
 
 	protected static final String DESTINATION_TYPE_ATTRIBUTE = "destination-type";
 
@@ -98,22 +100,28 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 	private void parseListener(Element listenerEle, Element containerEle, ParserContext parserContext) {
 		RootBeanDefinition listenerDef = new RootBeanDefinition();
 
-		String handlerBean = listenerEle.getAttribute(HANDLER_BEAN_ATTRIBUTE);
-		if (!StringUtils.hasText(handlerBean)) {
+		String ref = listenerEle.getAttribute(REF_ATTRIBUTE);
+		if (!StringUtils.hasText(ref)) {
 			parserContext.getReaderContext().error(
 					"Listener 'ref' attribute contains empty value.", listenerEle);
 		}
-		listenerDef.getPropertyValues().addPropertyValue("delegate", new RuntimeBeanReference(handlerBean));
+		listenerDef.getPropertyValues().addPropertyValue("delegate", new RuntimeBeanReference(ref));
 
-		String handlerMethod = null;
-		if (listenerEle.hasAttribute(HANDLER_METHOD_ATTRIBUTE)) {
-			handlerMethod = listenerEle.getAttribute(HANDLER_METHOD_ATTRIBUTE);
-			if (!StringUtils.hasText(handlerMethod)) {
+		String method = null;
+		if (listenerEle.hasAttribute(METHOD_ATTRIBUTE)) {
+			method = listenerEle.getAttribute(METHOD_ATTRIBUTE);
+			if (!StringUtils.hasText(method)) {
 				parserContext.getReaderContext().error(
 						"Listener 'method' attribute contains empty value.", listenerEle);
 			}
 		}
-		listenerDef.getPropertyValues().addPropertyValue("defaultListenerMethod", handlerMethod);
+		listenerDef.getPropertyValues().addPropertyValue("defaultListenerMethod", method);
+
+		if (containerEle.hasAttribute(MESSAGE_CONVERTER_ATTRIBUTE)) {
+			String messageConverter = containerEle.getAttribute(MESSAGE_CONVERTER_ATTRIBUTE);
+			listenerDef.getPropertyValues().addPropertyValue("messageConverter",
+					new RuntimeBeanReference(messageConverter));
+		}
 
 		BeanDefinition containerDef = parseContainer(listenerEle, containerEle, parserContext);
 		// Remain JMS 1.0.2 compatible for the adapter if the container class indicates this.
@@ -147,9 +155,8 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 		}
 		configDef.getPropertyValues().addPropertyValue("destinationName", destination);
 
-		String subscription = null;
 		if (ele.hasAttribute(SUBSCRIPTION_ATTRIBUTE)) {
-			subscription = ele.getAttribute(SUBSCRIPTION_ATTRIBUTE);
+			String subscription = ele.getAttribute(SUBSCRIPTION_ATTRIBUTE);
 			if (!StringUtils.hasText(subscription)) {
 				parserContext.getReaderContext().error(
 						"Listener 'subscription' attribute contains empty value.", ele);
@@ -157,9 +164,8 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 			configDef.getPropertyValues().addPropertyValue("durableSubscriptionName", subscription);
 		}
 
-		String selector = null;
 		if (ele.hasAttribute(SELECTOR_ATTRIBUTE)) {
-			selector = ele.getAttribute(SELECTOR_ATTRIBUTE);
+			String selector = ele.getAttribute(SELECTOR_ATTRIBUTE);
 			if (!StringUtils.hasText(selector)) {
 				parserContext.getReaderContext().error(
 						"Listener 'selector' attribute contains empty value.", ele);

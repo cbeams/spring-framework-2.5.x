@@ -5,7 +5,8 @@
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
 				http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-2.1.xsd">
 
-	<jms:listener-container connection-factory="testConnectionFactory" transaction-manager="testTransactionManager">
+	<jms:listener-container connection-factory="testConnectionFactory" message-converter="testMessageConverter"
+			transaction-manager="testTransactionManager">
 		<jms:listener id="listener1" destination="testDestination" ref="testBean1" method="setName"/>
 		<jms:listener id="listener2" destination="testDestination" ref="testBean2" method="setName"/>
 	</jms:listener-container>
@@ -18,6 +19,8 @@
 	<bean id="connectionFactory" class="org.springframework.jms.StubConnectionFactory"/>
 
 	<bean id="testConnectionFactory" class="org.springframework.jms.StubConnectionFactory"/>
+
+	<bean id="testMessageConverter" class="org.springframework.jms.support.converter.SimpleMessageConverter102"/>
 
 	<bean id="testTransactionManager" class="org.springframework.transaction.CallCountingTransactionManager"/>
 

@@ -43,8 +43,6 @@ public class JmsListenerContainerParser extends AbstractListenerContainerParser 
 
 	private static final String CONNECTION_FACTORY_ATTRIBUTE = "connection-factory";
 
-	private static final String DEFAULT_CONNECTION_FACTORY_BEAN_NAME = "connectionFactory";
-
 	private static final String TASK_EXECUTOR_ATTRIBUTE = "task-executor";
 
 	private static final String DESTINATION_RESOLVER_ATTRIBUTE = "destination-resolver";
@@ -73,13 +71,10 @@ public class JmsListenerContainerParser extends AbstractListenerContainerParser 
 					"Invalid 'container-type' attribute: only \"default\" and \"simple\" supported.", containerEle);
 		}
 
-		String connectionFactoryBeanName = DEFAULT_CONNECTION_FACTORY_BEAN_NAME;
-		if (containerEle.hasAttribute(CONNECTION_FACTORY_ATTRIBUTE)) {
-			connectionFactoryBeanName = containerEle.getAttribute(CONNECTION_FACTORY_ATTRIBUTE);
-			if (!StringUtils.hasText(connectionFactoryBeanName)) {
-				parserContext.getReaderContext().error(
-						"Listener container 'connection-factory' attribute contains empty value.", containerEle);
-			}
+		String connectionFactoryBeanName = containerEle.getAttribute(CONNECTION_FACTORY_ATTRIBUTE);
+		if (!StringUtils.hasText(connectionFactoryBeanName)) {
+			parserContext.getReaderContext().error(
+					"Listener container 'connection-factory' attribute contains empty value.", containerEle);
 		}
 		containerDef.getPropertyValues().addPropertyValue("connectionFactory",
 				new RuntimeBeanReference(connectionFactoryBeanName));

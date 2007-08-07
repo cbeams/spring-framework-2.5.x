@@ -36,21 +36,16 @@ public class JcaListenerContainerParser extends AbstractListenerContainerParser 
 
 	private static final String RESOURCE_ADAPTER_ATTRIBUTE = "resource-adapter";
 
-	private static final String DEFAULT_RESOURCE_ADAPTER_BEAN_NAME = "resourceAdapter";
-
 	private static final String ACTIVATION_SPEC_FACTORY_ATTRIBUTE = "activation-spec-factory";
 
 
 	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
 		RootBeanDefinition containerDef = new RootBeanDefinition(JmsMessageEndpointManager.class);
 
-		String resourceAdapterBeanName = DEFAULT_RESOURCE_ADAPTER_BEAN_NAME;
-		if (containerEle.hasAttribute(RESOURCE_ADAPTER_ATTRIBUTE)) {
-			resourceAdapterBeanName = containerEle.getAttribute(RESOURCE_ADAPTER_ATTRIBUTE);
-			if (!StringUtils.hasText(resourceAdapterBeanName)) {
-				parserContext.getReaderContext().error(
-						"Listener container 'resource-adapter' attribute contains empty value.", containerEle);
-			}
+		String resourceAdapterBeanName = containerEle.getAttribute(RESOURCE_ADAPTER_ATTRIBUTE);
+		if (!StringUtils.hasText(resourceAdapterBeanName)) {
+			parserContext.getReaderContext().error(
+					"Listener container 'resource-adapter' attribute contains empty value.", containerEle);
 		}
 		containerDef.getPropertyValues().addPropertyValue("resourceAdapter",
 				new RuntimeBeanReference(resourceAdapterBeanName));
