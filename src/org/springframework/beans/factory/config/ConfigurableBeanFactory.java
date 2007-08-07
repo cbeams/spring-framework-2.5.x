@@ -266,6 +266,13 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void registerDependentBean(String beanName, String dependentBeanName);
 
 	/**
+	 * Return the names of all beans which depend on the specified bean, if any.
+	 * @param beanName the name of the bean
+	 * @return the array of dependent bean names, or an empty array if none
+	 */
+	String[] getDependentBeans(String beanName);
+
+	/**
 	 * Destroy the given bean instance (usually a prototype instance
 	 * obtained from this factory) according to its bean definition.
 	 * <p>Any exception that arises during destruction should be caught

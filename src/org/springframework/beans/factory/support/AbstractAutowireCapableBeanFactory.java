@@ -535,9 +535,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (!this.allowRawInjectionDespiteWrapping && originalBean != bean &&
 					mbd.isSingleton() && hasDependentBean(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName,
-						"Bean with name '" + beanName + "' has been injected into other beans " +
-						getDependentBeans(beanName) + " in its raw version as part of a circular reference, " +
-						"but has eventually been wrapped (for example as part of auto-proxy creation). " +
+						"Bean with name '" + beanName + "' has been injected into other beans [" +
+						StringUtils.arrayToCommaDelimitedString(getDependentBeans(beanName)) +
+						"] in its raw version as part of a circular reference, but has eventually " +
+						"been wrapped (for example as part of auto-proxy creation). " +
 						"This means that said other beans do not use the final version of the bean. " +
 						"This is often the result of over-eager type matching - consider using " +
 						"'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.");

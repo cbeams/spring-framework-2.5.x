@@ -302,13 +302,17 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	}
 
 	/**
-	 * Return whether a dependent bean has been registered under the given name.
+	 * Return the names of all beans which depend on the specified bean, if any.
 	 * @param beanName the name of the bean
-	 * @return an unmodifiable Set of dependent bean names (as Strings)
+	 * @return the array of dependent bean names, or an empty array if none
 	 */
-	protected Set getDependentBeans(String beanName) {
+	public String[] getDependentBeans(String beanName) {
 		synchronized (this.dependentBeanMap) {
-			return Collections.unmodifiableSet((Set) this.dependentBeanMap.get(beanName));
+			Set dependentBeans = (Set) this.dependentBeanMap.get(beanName);
+			if (dependentBeans == null) {
+				return new String[0];
+			}
+			return (String[]) dependentBeans.toArray(new String[dependentBeans.size()]);
 		}
 	}
 
