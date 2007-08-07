@@ -122,17 +122,17 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 	private boolean lazyInit = false;
 
-	private boolean autowireCandidate = true;
-
-	private Map qualifiers = new HashMap();
-
-	private boolean primary = false;
-
 	private int autowireMode = AUTOWIRE_NO;
 
 	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
 
 	private String[] dependsOn;
+
+	private boolean autowireCandidate = true;
+
+	private Map qualifiers = new HashMap();
+
+	private boolean primary = false;
 
 	private ConstructorArgumentValues constructorArgumentValues;
 
@@ -212,12 +212,12 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 			if (originalAbd.hasBeanClass()) {
 				setBeanClass(originalAbd.getBeanClass());
 			}
-			setAutowireCandidate(originalAbd.isAutowireCandidate());
 			setAutowireMode(originalAbd.getAutowireMode());
-			setQualifiers(originalAbd.getQualifiers());
-			setPrimary(originalAbd.isPrimary());
 			setDependencyCheck(originalAbd.getDependencyCheck());
 			setDependsOn(originalAbd.getDependsOn());
+			setAutowireCandidate(originalAbd.isAutowireCandidate());
+			setQualifiers(originalAbd.getQualifiers());
+			setPrimary(originalAbd.isPrimary());
 			setInitMethodName(originalAbd.getInitMethodName());
 			setEnforceInitMethod(originalAbd.isEnforceInitMethod());
 			setDestroyMethodName(originalAbd.getDestroyMethodName());
@@ -461,6 +461,92 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 
 	/**
+	 * Set the autowire mode. This determines whether any automagical detection
+	 * and setting of bean references will happen. Default is AUTOWIRE_NO,
+	 * which means there's no autowire.
+	 * @param autowireMode the autowire mode to set.
+	 * Must be one of the constants defined in this class.
+	 * @see #AUTOWIRE_NO
+	 * @see #AUTOWIRE_BY_NAME
+	 * @see #AUTOWIRE_BY_TYPE
+	 * @see #AUTOWIRE_CONSTRUCTOR
+	 * @see #AUTOWIRE_AUTODETECT
+	 */
+	public void setAutowireMode(int autowireMode) {
+		this.autowireMode = autowireMode;
+	}
+
+	/**
+	 * Return the autowire mode as specified in the bean definition.
+	 */
+	public int getAutowireMode() {
+		return this.autowireMode;
+	}
+
+	/**
+	 * Return the resolved autowire code,
+	 * (resolving AUTOWIRE_AUTODETECT to AUTOWIRE_CONSTRUCTOR or AUTOWIRE_BY_TYPE).
+	 * @see #AUTOWIRE_AUTODETECT
+	 * @see #AUTOWIRE_CONSTRUCTOR
+	 * @see #AUTOWIRE_BY_TYPE
+	 */
+	public int getResolvedAutowireMode() {
+		if (this.autowireMode == AUTOWIRE_AUTODETECT) {
+			// Work out whether to apply setter autowiring or constructor autowiring.
+			// If it has a no-arg constructor it's deemed to be setter autowiring,
+			// otherwise we'll try constructor autowiring.
+			Constructor[] constructors = getBeanClass().getConstructors();
+			for (int i = 0; i < constructors.length; i++) {
+				if (constructors[i].getParameterTypes().length == 0) {
+					return AUTOWIRE_BY_TYPE;
+				}
+			}
+			return AUTOWIRE_CONSTRUCTOR;
+		}
+		else {
+			return this.autowireMode;
+		}
+	}
+
+	/**
+	 * Set the dependency check code.
+	 * @param dependencyCheck the code to set.
+	 * Must be one of the four constants defined in this class.
+	 * @see #DEPENDENCY_CHECK_NONE
+	 * @see #DEPENDENCY_CHECK_OBJECTS
+	 * @see #DEPENDENCY_CHECK_SIMPLE
+	 * @see #DEPENDENCY_CHECK_ALL
+	 */
+	public void setDependencyCheck(int dependencyCheck) {
+		this.dependencyCheck = dependencyCheck;
+	}
+
+	/**
+	 * Return the dependency check code.
+	 */
+	public int getDependencyCheck() {
+		return this.dependencyCheck;
+	}
+
+	/**
+	 * Set the names of the beans that this bean depends on being initialized.
+	 * The bean factory will guarantee that these beans get initialized before.
+	 * <p>Note that dependencies are normally expressed through bean properties or
+	 * constructor arguments. This property should just be necessary for other kinds
+	 * of dependencies like statics (*ugh*) or database preparation on startup.
+	 */
+	public void setDependsOn(String[] dependsOn) {
+		this.dependsOn = dependsOn;
+	}
+
+	/**
+	 * Return the bean names that this bean depends on.
+	 */
+	public String[] getDependsOn() {
+		return this.dependsOn;
+	}
+
+	/**
 	 * Set whether this bean is a candidate for getting autowired into
 	 * some other bean.
 	 */
@@ -547,92 +633,6 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 */
 	public boolean isPrimary() {
 		return this.primary;
-	}
-
-	/**
-	 * Set the autowire mode. This determines whether any automagical detection
-	 * and setting of bean references will happen. Default is AUTOWIRE_NO,
-	 * which means there's no autowire.
-	 * @param autowireMode the autowire mode to set.
-	 * Must be one of the constants defined in this class.
-	 * @see #AUTOWIRE_NO
-	 * @see #AUTOWIRE_BY_NAME
-	 * @see #AUTOWIRE_BY_TYPE
-	 * @see #AUTOWIRE_CONSTRUCTOR
-	 * @see #AUTOWIRE_AUTODETECT
-	 */
-	public void setAutowireMode(int autowireMode) {
-		this.autowireMode = autowireMode;
-	}
-
-	/**
-	 * Return the autowire mode as specified in the bean definition.
-	 */
-	public int getAutowireMode() {
-		return this.autowireMode;
-	}
-
-	/**
-	 * Return the resolved autowire code,
-	 * (resolving AUTOWIRE_AUTODETECT to AUTOWIRE_CONSTRUCTOR or AUTOWIRE_BY_TYPE).
-	 * @see #AUTOWIRE_AUTODETECT
-	 * @see #AUTOWIRE_CONSTRUCTOR
-	 * @see #AUTOWIRE_BY_TYPE
-	 */
-	public int getResolvedAutowireMode() {
-		if (this.autowireMode == AUTOWIRE_AUTODETECT) {
-			// Work out whether to apply setter autowiring or constructor autowiring.
-			// If it has a no-arg constructor it's deemed to be setter autowiring,
-			// otherwise we'll try constructor autowiring.
-			Constructor[] constructors = getBeanClass().getConstructors();
-			for (int i = 0; i < constructors.length; i++) {
-				if (constructors[i].getParameterTypes().length == 0) {
-					return AUTOWIRE_BY_TYPE;
-				}
-			}
-			return AUTOWIRE_CONSTRUCTOR;
-		}
-		else {
-			return this.autowireMode;
-		}
-	}
-
-	/**
-	 * Set the dependency check code.
-	 * @param dependencyCheck the code to set.
-	 * Must be one of the four constants defined in this class.
-	 * @see #DEPENDENCY_CHECK_NONE
-	 * @see #DEPENDENCY_CHECK_OBJECTS
-	 * @see #DEPENDENCY_CHECK_SIMPLE
-	 * @see #DEPENDENCY_CHECK_ALL
-	 */
-	public void setDependencyCheck(int dependencyCheck) {
-		this.dependencyCheck = dependencyCheck;
-	}
-
-	/**
-	 * Return the dependency check code.
-	 */
-	public int getDependencyCheck() {
-		return this.dependencyCheck;
-	}
-
-	/**
-	 * Set the names of the beans that this bean depends on being initialized.
-	 * The bean factory will guarantee that these beans get initialized before.
-	 * <p>Note that dependencies are normally expressed through bean properties or
-	 * constructor arguments. This property should just be necessary for other kinds
-	 * of dependencies like statics (*ugh*) or database preparation on startup.
-	 */
-	public void setDependsOn(String[] dependsOn) {
-		this.dependsOn = dependsOn;
-	}
-
-	/**
-	 * Return the bean names that this bean depends on.
-	 */
-	public String[] getDependsOn() {
-		return this.dependsOn;
 	}
 
 
