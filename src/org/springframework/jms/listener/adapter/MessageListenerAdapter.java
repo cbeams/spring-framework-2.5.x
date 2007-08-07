@@ -486,8 +486,8 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 			sendResponse(session, destination,  response);
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Listener method returned result [" + result +
+			if (logger.isWarnEnabled()) {
+				logger.warn("Listener method returned result [" + result +
 						"]: not generating response message for it because of no JMS Session given");
 			}
 		}
