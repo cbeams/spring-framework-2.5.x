@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,10 +214,10 @@ public class MessageTag extends HtmlEscapingAwareTag {
 		String resolvedCode = ExpressionEvaluationUtils.evaluateString("code", this.code, pageContext);
 		String resolvedText = ExpressionEvaluationUtils.evaluateString("text", this.text, pageContext);
 
-		if (resolvedCode != null) {
-			// We have a code that we need to resolve.
+		if (resolvedCode != null || resolvedText != null) {
+			// We have a code or default text that we need to resolve.
 			Object[] argumentsArray = resolveArguments(this.arguments);
-				if (resolvedText != null) {
+			if (resolvedText != null) {
 				// We have a fallback text to consider.
 				return messageSource.getMessage(
 						resolvedCode, argumentsArray, resolvedText, getRequestContext().getLocale());
