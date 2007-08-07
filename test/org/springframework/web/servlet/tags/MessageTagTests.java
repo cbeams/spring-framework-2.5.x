@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -302,6 +302,23 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test &amp; text", message.toString());
 	}
 	
+	public void testMessageTagWithTextAndExpressionArgumentFormat() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer message = new StringBuffer();
+		MessageTag tag = new MessageTag() {
+			protected void writeMessage(String msg) {
+				message.append(msg);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setText("test {0} message {1,number,#.##} X");
+		tag.setArguments("${arg1},${arg2}");
+		pc.setAttribute("arg1", "my,value");
+		pc.setAttribute("arg2", new Float(5.145));
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct message", "test my,value message 5.14 X", message.toString());
+	}
+
 	public void testMessageTagWithTextAndJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
