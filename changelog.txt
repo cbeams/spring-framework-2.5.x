@@ -12,6 +12,7 @@ General
 Package org.springframework.aop
 * Cglib2AopProxy uses weak references for advised object, interceptors and validated classes (avoiding a memory leak)
 * ProxyFactoryBean avoids NPE in case of target class being null (due to misconfiguration)
+* "AopNamespaceUtils.registerAutoProxyCreatorIfNecessary" registers a plain InfrastructureAdvisorAutoProxyCreator now
 * fixed AspectJ pointcut handling to resolve bridge methods before matching
 * fixed AspectJ pointcut handling to correctly match generic return types
 
@@ -43,6 +44,7 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * SingleConnectionFactory sets client ID before ExceptionListener (for providers with strict Connection state handling)
+* MessageListenerAdapter logs at warn level if a listener method returned a result but no response message can be sent
 
 Package org.springframework.jmx
 * MBeanExporter unregisters its MBeans in case of any kind of registration failure
@@ -67,6 +69,7 @@ Package org.springframework.scheduling
 
 Package org.springframework.transaction
 * TransactionInterceptor only uses ThrowableHolderException if necessary and makes sure to expose the cause in any case
+* fixed "tx:annotation-driven" to not activate "aop:config"-style autodetection of application-defined Advisor beans
 
 Package org.springframework.util
 * fixed "StringUtils.parseLocaleString" to parse multiple variants correctly
@@ -81,7 +84,9 @@ Package org.springframework.web
 * AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
 * JstlView properly allows for programmatic usage (added overloaded constructors; exposing a MessageSource is optional)
-* fixed CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
+* InternalResourceViewResolver uses JstlView as default (instead of InternalResourceView) if the JSTL API is present
+* fixed JSP CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
+* JSP MessageTag resolves arguments in default text even if no message code was specified
 
 
 Changes in version 2.0.6 (2007-06-18)
