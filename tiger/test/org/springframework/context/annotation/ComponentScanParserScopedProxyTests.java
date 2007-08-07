@@ -20,42 +20,47 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.FatalBeanException;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.config.SimpleMapScope;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class ComponentScanParserScopedProxyTests extends TestCase {
 
 	public void testDefaultScopedProxy() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyDefaultTests.xml");
+		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should not be a proxy
 		assertFalse(AopUtils.isAopProxy(bean));
 	}
 
 	public void testNoScopedProxy() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyNoTests.xml");
+		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should not be a proxy
 		assertFalse(AopUtils.isAopProxy(bean));
 	}
-	
+
 	public void testInterfacesScopedProxy() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyInterfacesTests.xml");
+		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
 		// should cast to the interface
 		FooService bean = (FooService) context.getBean("scopedProxyTestBean");
 		// should be dynamic proxy
 		assertTrue(AopUtils.isJdkDynamicProxy(bean));
 	}
-	
+
 	public void testTargetClassScopedProxy() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/scopedProxyTargetClassTests.xml");
+		context.getBeanFactory().registerScope("myScope", new SimpleMapScope());
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should be a class-based proxy
 		assertTrue(AopUtils.isCglibProxy(bean));
@@ -71,5 +76,5 @@ public class ComponentScanParserScopedProxyTests extends TestCase {
 			// expected
 		}
 	}
-	
+
 }

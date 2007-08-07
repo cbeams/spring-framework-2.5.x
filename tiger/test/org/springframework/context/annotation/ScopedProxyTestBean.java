@@ -18,8 +18,9 @@ package org.springframework.context.annotation;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
-@Scope("prototype")
+@Scope("myScope")
 public class ScopedProxyTestBean implements FooService {
 
 	public String foo(int id) {

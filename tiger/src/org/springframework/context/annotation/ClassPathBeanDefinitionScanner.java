@@ -219,9 +219,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @return the final bean definition to use (potentially a proxy)
 	 */
 	private BeanDefinition applyScope(BeanDefinition beanDefinition, String beanName, ScopeMetadata scopeMetadata) {
-		beanDefinition.setScope(scopeMetadata.getScopeName());
+		String scope = scopeMetadata.getScopeName();
 		ScopedProxyMode scopedProxyMode = scopeMetadata.getScopedProxyMode();
-		if (beanDefinition.isSingleton() || scopedProxyMode.equals(ScopedProxyMode.NO)) {
+		beanDefinition.setScope(scope);
+		if (BeanDefinition.SCOPE_SINGLETON.equals(scope) || BeanDefinition.SCOPE_PROTOTYPE.equals(scope) ||
+				scopedProxyMode.equals(ScopedProxyMode.NO)) {
 			return beanDefinition;
 		}
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
