@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public class AutowireWithExclusionTests extends TestCase {
 
@@ -41,6 +41,24 @@ public class AutowireWithExclusionTests extends TestCase {
 	public void testByTypeAutowireWithExclusion() throws Exception {
 		CountingFactory.reset();
 		XmlBeanFactory beanFactory = getBeanFactory("autowire-with-exclusion.xml");
+		beanFactory.preInstantiateSingletons();
+		TestBean rob = (TestBean) beanFactory.getBean("rob");
+		assertEquals("props1", rob.getSomeProperties().getProperty("name"));
+		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
+	}
+
+	public void testByTypeAutowireWithInclusion() throws Exception {
+		CountingFactory.reset();
+		XmlBeanFactory beanFactory = getBeanFactory("autowire-with-inclusion.xml");
+		beanFactory.preInstantiateSingletons();
+		TestBean rob = (TestBean) beanFactory.getBean("rob");
+		assertEquals("props1", rob.getSomeProperties().getProperty("name"));
+		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
+	}
+
+	public void testByTypeAutowireWithSelectiveInclusion() throws Exception {
+		CountingFactory.reset();
+		XmlBeanFactory beanFactory = getBeanFactory("autowire-with-selective-inclusion.xml");
 		beanFactory.preInstantiateSingletons();
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		assertEquals("props1", rob.getSomeProperties().getProperty("name"));

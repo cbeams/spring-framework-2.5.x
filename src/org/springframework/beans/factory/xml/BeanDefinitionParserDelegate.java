@@ -60,6 +60,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
@@ -213,15 +214,17 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String DEFAULT_LAZY_INIT_ATTRIBUTE = "default-lazy-init";
 
+	public static final String DEFAULT_MERGE_ATTRIBUTE = "default-merge";
+
 	public static final String DEFAULT_AUTOWIRE_ATTRIBUTE = "default-autowire";
 
 	public static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
 
+	public static final String DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE = "default-autowire-candidates";
+
 	public static final String DEFAULT_INIT_METHOD_ATTRIBUTE = "default-init-method";
 
 	public static final String DEFAULT_DESTROY_METHOD_ATTRIBUTE = "default-destroy-method";
-
-	public static final String DEFAULT_MERGE_ATTRIBUTE = "default-merge";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -286,15 +289,16 @@ public class BeanDefinitionParserDelegate {
 	public void initDefaults(Element root) {
 		DocumentDefaultsDefinition defaults = new DocumentDefaultsDefinition();
 		defaults.setLazyInit(root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE));
+		defaults.setMerge(root.getAttribute(DEFAULT_MERGE_ATTRIBUTE));
 		defaults.setAutowire(root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE));
 		defaults.setDependencyCheck(root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE));
+		defaults.setAutowireCandidates(root.getAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE));
 		if (root.hasAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE)) {
 			defaults.setInitMethod(root.getAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE));
 		}
 		if (root.hasAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE)) {
 			defaults.setDestroyMethod(root.getAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE));
 		}
-		defaults.setMerge(root.getAttribute(DEFAULT_MERGE_ATTRIBUTE));
 		defaults.setSource(this.readerContext.extractSource(root));
 
 		this.defaults = defaults;
@@ -450,19 +454,11 @@ public class BeanDefinitionParserDelegate {
 			}
 			bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
 
-			if (ele.hasAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE)) {
-				bd.setAutowireCandidate(TRUE_VALUE.equals(ele.getAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE)));
-			}
-
 			String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
 			if (DEFAULT_VALUE.equals(autowire)) {
 				autowire = this.defaults.getAutowire();
 			}
 			bd.setAutowireMode(getAutowireMode(autowire));
-
-			if (ele.hasAttribute(PRIMARY_ATTRIBUTE)) {
-				bd.setPrimary(TRUE_VALUE.equals(ele.getAttribute(PRIMARY_ATTRIBUTE)));
-			}
 
 			String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
 			if (DEFAULT_VALUE.equals(dependencyCheck)) {
@@ -475,11 +471,20 @@ public class BeanDefinitionParserDelegate {
 				bd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, BEAN_NAME_DELIMITERS));
 			}
 
-			if (ele.hasAttribute(FACTORY_METHOD_ATTRIBUTE)) {
-				bd.setFactoryMethodName(ele.getAttribute(FACTORY_METHOD_ATTRIBUTE));
+			if (ele.hasAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE)) {
+				String autowireCandidate = ele.getAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE);
+				if (DEFAULT_VALUE.equals(autowireCandidate)) {
+					String candidatePattern = this.defaults.getAutowireCandidates();
+					String[] patterns = StringUtils.commaDelimitedListToStringArray(candidatePattern);
+					bd.setAutowireCandidate(PatternMatchUtils.simpleMatch(patterns, beanName));
+				}
+				else {
+					bd.setAutowireCandidate(TRUE_VALUE.equals(autowireCandidate));
+				}
 			}
-			if (ele.hasAttribute(FACTORY_BEAN_ATTRIBUTE)) {
-				bd.setFactoryBeanName(ele.getAttribute(FACTORY_BEAN_ATTRIBUTE));
+
+			if (ele.hasAttribute(PRIMARY_ATTRIBUTE)) {
+				bd.setPrimary(TRUE_VALUE.equals(ele.getAttribute(PRIMARY_ATTRIBUTE)));
 			}
 
 			if (ele.hasAttribute(INIT_METHOD_ATTRIBUTE)) {
@@ -506,6 +511,13 @@ public class BeanDefinitionParserDelegate {
 					bd.setDestroyMethodName(this.defaults.getDestroyMethod());
 					bd.setEnforceDestroyMethod(false);
 				}
+			}
+
+			if (ele.hasAttribute(FACTORY_METHOD_ATTRIBUTE)) {
+				bd.setFactoryMethodName(ele.getAttribute(FACTORY_METHOD_ATTRIBUTE));
+			}
+			if (ele.hasAttribute(FACTORY_BEAN_ATTRIBUTE)) {
+				bd.setFactoryBeanName(ele.getAttribute(FACTORY_BEAN_ATTRIBUTE));
 			}
 
 			parseMetaElements(ele, bd);

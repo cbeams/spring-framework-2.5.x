@@ -78,7 +78,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'lazy-init' value; see the documentation for the
-	'lazy-init' attribute of the '<bean>/' element. 
+	'lazy-init' attribute of the '<bean>/' element.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -86,31 +86,15 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'merge' value; see the documentation for the
-	'merge' attribute of the various collection elements. 
+	'merge' attribute of the various collection elements.
 					]]></xsd:documentation>
 				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="default-dependency-check" default="none">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	The default 'dependency-check' value; see the documentation for the
-	'dependency-check' attribute of the '<bean>/' element. 
-					]]></xsd:documentation>
-				</xsd:annotation>
-				<xsd:simpleType>
-					<xsd:restriction base="xsd:NMTOKEN">
-						<xsd:enumeration value="none"/>
-						<xsd:enumeration value="simple"/>
-						<xsd:enumeration value="objects"/>
-						<xsd:enumeration value="all"/>
-					</xsd:restriction>
-				</xsd:simpleType>
 			</xsd:attribute>
 			<xsd:attribute name="default-autowire" default="no">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'autowire' value; see the documentation for the
-	'autowire' attribute of the '<bean>/' element. 
+	'autowire' attribute of the '<bean>/' element.
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
@@ -123,11 +107,38 @@
 					</xsd:restriction>
 				</xsd:simpleType>
 			</xsd:attribute>
+			<xsd:attribute name="default-dependency-check" default="none">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The default 'dependency-check' value; see the documentation for the
+	'dependency-check' attribute of the '<bean>/' element.
+					]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:NMTOKEN">
+						<xsd:enumeration value="none"/>
+						<xsd:enumeration value="simple"/>
+						<xsd:enumeration value="objects"/>
+						<xsd:enumeration value="all"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+			<xsd:attribute name="default-autowire-candidates" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A default bean name pattern for identifying autowire candidates:
+	e.g. "*Service", "data*", "*Service*", "data*Service".
+	Also accepts a comma-separated list of patterns: e.g. "*Service,*Dao".
+	See the documentation for the 'autowire-candidate' attribute of the
+	'<bean>/' element for the semantic details of autowire candidate beans.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="default-init-method" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'init-method' value; see the documentation for the
-	'init-method' attribute of the '<bean>/' element. 
+	'init-method' attribute of the '<bean>/' element.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -135,18 +146,18 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'destroy-method' value; see the documentation for the
-	'destroy-method' attribute of the '<bean>/' element. 
+	'destroy-method' attribute of the '<bean>/' element.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:anyAttribute namespace="##other" processContents="lax"/>
 		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="description">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Contains informative text describing the purpose of the enclosing
-	element.
+	Contains informative text describing the purpose of the enclosing element.
 	Used primarily for user documentation of XML bean definition documents.
 			]]></xsd:documentation>
 		</xsd:annotation>
@@ -367,16 +378,6 @@
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>
-        <xsd:attribute name="primary" type="xsd:boolean">
-            <xsd:annotation>
-                <xsd:documentation><![CDATA[
-    Specifies that this bean should be given preference when multiple
-    candidates are qualified to autowire a single-valued dependency.
-    If exactly one 'primary' bean exists among the candidates, it
-    will be the autowired value.
-                ]]></xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
 		<xsd:attribute name="dependency-check" default="default">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
@@ -416,6 +417,26 @@
 
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per concrete bean definition.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="autowire-candidate" default="default" type="defaultable-boolean">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Indicates whether or not this bean should be considered when looking
+	for matching candidates to satisfy another bean's autowiring requirements.
+	Note that this does not affect explicit references by name, which will get
+	resolved even if the specified bean is not marked as an autowire candidate.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="primary" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Specifies that this bean should be given preference when multiple
+	candidates are qualified to autowire a single-valued dependency.
+	If exactly one 'primary' bean exists among the candidates, it
+	will be the autowired value.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -480,14 +501,6 @@
 	ancestor factories that contains the relevant factory method.
 	This allows the factory itself to be configured using Dependency
 	Injection, and an instance (rather than static) method to be used.
-				]]></xsd:documentation>
-			</xsd:annotation>
-		</xsd:attribute>
-		<xsd:attribute name="autowire-candidate" type="xsd:boolean">
-			<xsd:annotation>
-				<xsd:documentation><![CDATA[
-	Indicates whether or not this bean should be considered when looking
-	for candidates to satisfy another bean's autowiring requirements.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -1042,7 +1055,7 @@
 					<xsd:annotation>
 						<xsd:documentation source="java:java.lang.Class"><![CDATA[
 	The default Java type for nested entry keys. Must be a fully qualified
-	class name. 	
+	class name.
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
