@@ -292,7 +292,9 @@ public class BeanDefinitionParserDelegate {
 		defaults.setMerge(root.getAttribute(DEFAULT_MERGE_ATTRIBUTE));
 		defaults.setAutowire(root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE));
 		defaults.setDependencyCheck(root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE));
-		defaults.setAutowireCandidates(root.getAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE));
+		if (root.hasAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE)) {
+			defaults.setAutowireCandidates(root.getAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE));
+		}
 		if (root.hasAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE)) {
 			defaults.setInitMethod(root.getAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE));
 		}
@@ -455,15 +457,9 @@ public class BeanDefinitionParserDelegate {
 			bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
 
 			String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
-			if (DEFAULT_VALUE.equals(autowire)) {
-				autowire = this.defaults.getAutowire();
-			}
 			bd.setAutowireMode(getAutowireMode(autowire));
 
 			String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
-			if (DEFAULT_VALUE.equals(dependencyCheck)) {
-				dependencyCheck = this.defaults.getDependencyCheck();
-			}
 			bd.setDependencyCheck(getDependencyCheck(dependencyCheck));
 
 			if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
@@ -475,8 +471,10 @@ public class BeanDefinitionParserDelegate {
 				String autowireCandidate = ele.getAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE);
 				if (DEFAULT_VALUE.equals(autowireCandidate)) {
 					String candidatePattern = this.defaults.getAutowireCandidates();
-					String[] patterns = StringUtils.commaDelimitedListToStringArray(candidatePattern);
-					bd.setAutowireCandidate(PatternMatchUtils.simpleMatch(patterns, beanName));
+					if (candidatePattern != null) {
+						String[] patterns = StringUtils.commaDelimitedListToStringArray(candidatePattern);
+						bd.setAutowireCandidate(PatternMatchUtils.simpleMatch(patterns, beanName));
+					}
 				}
 				else {
 					bd.setAutowireCandidate(TRUE_VALUE.equals(autowireCandidate));
@@ -562,22 +560,11 @@ public class BeanDefinitionParserDelegate {
 		}
 	}
 
-	public int getDependencyCheck(String att) {
-		int dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;
-		if (DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
+	public int getAutowireMode(String attValue) {
+		String att = attValue;
+		if (DEFAULT_VALUE.equals(att)) {
+			att = this.defaults.getAutowire();
 		}
-		else if (DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
-		}
-		else if (DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE.equals(att)) {
-			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
-		}
-		// Else leave default value.
-		return dependencyCheckCode;
-	}
-
-	public int getAutowireMode(String att) {
 		int autowire = AbstractBeanDefinition.AUTOWIRE_NO;
 		if (AUTOWIRE_BY_NAME_VALUE.equals(att)) {
 			autowire = AbstractBeanDefinition.AUTOWIRE_BY_NAME;
@@ -593,6 +580,25 @@ public class BeanDefinitionParserDelegate {
 		}
 		// Else leave default value.
 		return autowire;
+	}
+
+	public int getDependencyCheck(String attValue) {
+		String att = attValue;
+		if (DEFAULT_VALUE.equals(att)) {
+			att = this.defaults.getDependencyCheck();
+		}
+		int dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;
+		if (DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE.equals(att)) {
+			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
+		}
+		else if (DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE.equals(att)) {
+			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
+		}
+		else if (DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE.equals(att)) {
+			dependencyCheckCode = AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
+		}
+		// Else leave default value.
+		return dependencyCheckCode;
 	}
 
 	/**

@@ -26,7 +26,9 @@ import org.easymock.MockControl;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.NestedRuntimeException;
@@ -333,10 +335,26 @@ public class GroovyScriptFactoryTests extends TestCase {
 	 */
 	public void testCanPassInMoreThanOneProperty() {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-multiple-properties.xml", getClass());
+		TestBean tb = (TestBean) ctx.getBean("testBean");
+
 		ContextScriptBean bean = (ContextScriptBean) ctx.getBean("bean");
 		assertEquals("The first property ain't bein' injected.", "Sophie Marceau", bean.getName());
 		assertEquals("The second property ain't bein' injected.", 31, bean.getAge());
+		assertEquals(tb, bean.getTestBean());
 		assertEquals(ctx, bean.getApplicationContext());
+
+		ContextScriptBean bean2 = (ContextScriptBean) ctx.getBean("bean2");
+		assertEquals(tb, bean2.getTestBean());
+		assertEquals(ctx, bean2.getApplicationContext());
+
+		try {
+			ctx.getBean("bean3");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+			assertTrue(ex.contains(UnsatisfiedDependencyException.class));
+		}
 	}
 
 	public void testMetaClassWithBeans() {
@@ -362,7 +380,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 
-	public static final class TestCustomizer implements GroovyObjectCustomizer {
+	public static class TestCustomizer implements GroovyObjectCustomizer {
 
 		public void customize(GroovyObject goo) {
 			DelegatingMetaClass dmc = new DelegatingMetaClass(goo.getMetaClass()) {

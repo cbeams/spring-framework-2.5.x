@@ -24,6 +24,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -65,6 +66,10 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private static final String INLINE_SCRIPT_ELEMENT = "inline-script";
 
 	private static final String SCOPE_ATTRIBUTE = "scope";
+
+	private static final String AUTOWIRE_ATTRIBUTE = "autowire";
+
+	private static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
 
 	private static final String INIT_METHOD_ATTRIBUTE = "init-method";
 
@@ -109,35 +114,51 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		registerScriptFactoryPostProcessorIfNecessary(parserContext.getRegistry());
 
 		// Create script factory bean definition.
-		RootBeanDefinition beanDefinition = new RootBeanDefinition();
-		beanDefinition.setBeanClassName(this.scriptFactoryClassName);
-		beanDefinition.setSource(parserContext.extractSource(element));
+		GenericBeanDefinition bd = new GenericBeanDefinition();
+		bd.setBeanClassName(this.scriptFactoryClassName);
+		bd.setSource(parserContext.extractSource(element));
 
 		// Determine bean scope.
 		String scope = element.getAttribute(SCOPE_ATTRIBUTE);
 		if (StringUtils.hasLength(scope)) {
-			beanDefinition.setScope(scope);
+			bd.setScope(scope);
 		}
+
+		// Determine autowire mode.
+		String autowire = element.getAttribute(AUTOWIRE_ATTRIBUTE);
+		int autowireMode = parserContext.getDelegate().getAutowireMode(autowire);
+		// Only "byType" and "byName" supported, but maybe other default inherited...
+		if (autowireMode == GenericBeanDefinition.AUTOWIRE_AUTODETECT) {
+			autowireMode = GenericBeanDefinition.AUTOWIRE_BY_TYPE;
+		}
+		else if (autowireMode == GenericBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
+			autowireMode = GenericBeanDefinition.AUTOWIRE_NO;
+		}
+		bd.setAutowireMode(autowireMode);
+
+		// Determine dependency check setting.
+		String dependencyCheck = element.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
+		bd.setDependencyCheck(parserContext.getDelegate().getDependencyCheck(dependencyCheck));
 
 		// Determine init method and destroy method.
 		String initMethod = element.getAttribute(INIT_METHOD_ATTRIBUTE);
 		if (StringUtils.hasLength(initMethod)) {
-			beanDefinition.setInitMethodName(initMethod);
+			bd.setInitMethodName(initMethod);
 		}
 		String destroyMethod = element.getAttribute(DESTROY_METHOD_ATTRIBUTE);
 		if (StringUtils.hasLength(destroyMethod)) {
-			beanDefinition.setDestroyMethodName(destroyMethod);
+			bd.setDestroyMethodName(destroyMethod);
 		}
 
 		// Attach any refresh metadata.
 		String refreshCheckDelay = element.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
 		if (StringUtils.hasText(refreshCheckDelay)) {
-			beanDefinition.setAttribute(
+			bd.setAttribute(
 					ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE, new Long(refreshCheckDelay));
 		}
 
 		// Add constructor arguments.
-		ConstructorArgumentValues cav = beanDefinition.getConstructorArgumentValues();
+		ConstructorArgumentValues cav = bd.getConstructorArgumentValues();
 		int constructorArgNum = 0;
 		cav.addIndexedArgumentValue(constructorArgNum++, value);
 		if (element.hasAttribute(SCRIPT_INTERFACES_ATTRIBUTE)) {
@@ -151,9 +172,9 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		}
 
 		// Add any property definitions that need adding.
-		parserContext.getDelegate().parsePropertyElements(element, beanDefinition);
+		parserContext.getDelegate().parsePropertyElements(element, bd);
 
-		return beanDefinition;
+		return bd;
 	}
 
 	/**

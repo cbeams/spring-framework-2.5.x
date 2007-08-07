@@ -22,6 +22,7 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -29,6 +30,7 @@ import org.springframework.scripting.Calculator;
 import org.springframework.scripting.ConfigurableMessenger;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
+import org.springframework.scripting.TestBeanAwareMessenger;
 
 /**
  * @author Rob Harrop
@@ -136,9 +138,17 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 	public void testResourceScriptFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
+		TestBean testBean = (TestBean) ctx.getBean("testBean");
+
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 		assertEquals("Hello World!", messenger.getMessage());
 		assertFalse(messenger instanceof Refreshable);
+
+		TestBeanAwareMessenger messengerByType = (TestBeanAwareMessenger) ctx.getBean("messengerByType");
+		assertEquals(testBean, messengerByType.getTestBean());
+
+		TestBeanAwareMessenger messengerByName = (TestBeanAwareMessenger) ctx.getBean("messengerByName");
+		assertEquals(testBean, messengerByName.getTestBean());
 	}
 
 	public void testPrototypeScriptFromTag() throws Exception {

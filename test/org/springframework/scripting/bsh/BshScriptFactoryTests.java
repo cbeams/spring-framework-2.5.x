@@ -24,6 +24,7 @@ import org.easymock.MockControl;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
+import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.NestedRuntimeException;
@@ -32,6 +33,7 @@ import org.springframework.scripting.ConfigurableMessenger;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptSource;
+import org.springframework.scripting.TestBeanAwareMessenger;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 
 /**
@@ -236,6 +238,8 @@ public class BshScriptFactoryTests extends TestCase {
 
 	public void testResourceScriptFromTag() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
+		TestBean testBean = (TestBean) ctx.getBean("testBean");
+
 		Collection beanNames = Arrays.asList(ctx.getBeanNamesForType(Messenger.class));
 		assertTrue(beanNames.contains("messenger"));
 		assertTrue(beanNames.contains("messengerImpl"));
@@ -251,10 +255,18 @@ public class BshScriptFactoryTests extends TestCase {
 		Messenger messengerInstance = (Messenger) ctx.getBean("messengerInstance");
 		assertEquals("Hello World!", messengerInstance.getMessage());
 
+		TestBeanAwareMessenger messengerByType = (TestBeanAwareMessenger) ctx.getBean("messengerByType");
+		assertEquals(testBean, messengerByType.getTestBean());
+
+		TestBeanAwareMessenger messengerByName = (TestBeanAwareMessenger) ctx.getBean("messengerByName");
+		assertEquals(testBean, messengerByName.getTestBean());
+
 		Collection beans = ctx.getBeansOfType(Messenger.class).values();
 		assertTrue(beans.contains(messenger));
 		assertTrue(beans.contains(messengerImpl));
 		assertTrue(beans.contains(messengerInstance));
+		assertTrue(beans.contains(messengerByType));
+		assertTrue(beans.contains(messengerByName));
 
 		ctx.close();
 		assertNull(messenger.getMessage());

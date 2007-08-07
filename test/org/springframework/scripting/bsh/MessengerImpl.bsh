@@ -1,8 +1,11 @@
-import org.springframework.scripting.ConfigurableMessenger;
+import org.springframework.beans.TestBean;
+import org.springframework.scripting.TestBeanAwareMessenger;
 
-public class MyMessenger implements ConfigurableMessenger {
+public class MyMessenger implements TestBeanAwareMessenger {
 
 	private String message;
+
+	private TestBean testBean;
 
 	private boolean active;
 
@@ -17,6 +20,14 @@ public class MyMessenger implements ConfigurableMessenger {
 
 	public void setMessage(String aMessage) {
 		message = aMessage;
+	}
+
+	public TestBean getTestBean() {
+		return testBean;
+	}
+
+	public void setTestBean(TestBean tb) {
+		testBean = tb;
 	}
 
 	public void destroy() {

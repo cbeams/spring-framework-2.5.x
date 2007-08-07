@@ -1,3 +1,4 @@
+import org.springframework.beans.TestBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.scripting.ContextScriptBean
@@ -15,6 +16,8 @@ class GroovyScriptBean implements ContextScriptBean, ApplicationContextAware {
 	}
 
 	def String name
+
+	def TestBean testBean;
 
 	def ApplicationContext applicationContext
 }

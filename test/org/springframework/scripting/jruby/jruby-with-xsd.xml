@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xmlns:lang="http://www.springframework.org/schema/lang"
-			 xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd">
+		xmlns:lang="http://www.springframework.org/schema/lang"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.1.xsd
+				http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.1.xsd">
 
 	<lang:jruby id="messenger"
 			script-source="classpath:org/springframework/scripting/jruby/Messenger.rb"
@@ -16,6 +15,20 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
 			script-interfaces="org.springframework.scripting.ConfigurableMessenger" scope="prototype">
 		<lang:property name="message" value="Hello World!"/>
 	</lang:jruby>
+
+	<lang:jruby id="messengerByType"
+			script-source="classpath:org/springframework/scripting/jruby/Messenger.rb"
+			script-interfaces="org.springframework.scripting.TestBeanAwareMessenger" scope="prototype"
+			autowire="byType" dependency-check="objects">
+	</lang:jruby>
+
+	<lang:jruby id="messengerByName"
+			script-source="classpath:org/springframework/scripting/jruby/Messenger.rb"
+			script-interfaces="org.springframework.scripting.TestBeanAwareMessenger" scope="prototype"
+			autowire="byName">
+	</lang:jruby>
+
+	<bean id="testBean" class="org.springframework.beans.TestBean"/>
 
 	<lang:jruby id="calculator"
 			script-interfaces="org.springframework.scripting.Calculator">

@@ -20,10 +20,15 @@ import java.io.IOException;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
+import groovy.lang.MetaClass;
 import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilationFailedException;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
@@ -45,7 +50,7 @@ import org.springframework.util.ClassUtils;
  * @see groovy.lang.GroovyClassLoader
  * @see org.springframework.scripting.support.ScriptFactoryPostProcessor
  */
-public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
+public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, BeanClassLoaderAware {
 
 	private final String scriptSourceLocator;
 	
@@ -90,9 +95,16 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 	}
 
 
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		if (beanFactory instanceof ConfigurableListableBeanFactory) {
+			((ConfigurableListableBeanFactory) beanFactory).ignoreDependencyType(MetaClass.class);
+		}
+	}
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.groovyClassLoader = new GroovyClassLoader(classLoader);
 	}
+
 
 	public String getScriptSourceLocator() {
 		return this.scriptSourceLocator;

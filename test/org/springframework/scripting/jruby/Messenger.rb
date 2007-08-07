@@ -10,4 +10,12 @@ class RubyMessenger
 	def getMessage
 		@@message
 	end
+
+	def setTestBean(testBean)
+		@@testBean = testBean
+	end
+
+	def getTestBean
+		@@testBean
+	end
 end
