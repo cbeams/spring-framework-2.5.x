@@ -8,28 +8,44 @@ Changes in version 2.1 M4 (2007-08-17)
 
 General
 * updated build to use JUnit 4.4 for the tiger test suite while sticking with JUnit 3.8 for the main test suite
+* Spring-style pattern matching ("*xxx", "xxx*", "*xxx*") supports multi-part patterns as well now ("xxx*yyy")
 
 Package org.springframework.aop
 * ProxyFactoryBean and AbstractSingletonProxyFactoryBean are serializable if their target and interceptors are
+* "AopNamespaceUtils.registerAutoProxyCreatorIfNecessary" registers a plain InfrastructureAdvisorAutoProxyCreator now
 
 Package org.springframework.beans
+* exposed "String[] getDependentBeans(beanName)" method on ConfigurableBeanFactory interface
 * removed superseded ResourceFactoryBean (String-to-Resource conversion has been implicitly available for years)
 * introduced qualifier support, allowing to use custom parameter annotations for identifying specific target beans
 * introduced AutowireCandidateResolver mechanism and QualifierAnnotationAutowireCandidateResolver implementation
+* "spring-beans-2.1.xsd" supports "default-autowire-candidates" attribute, accepting Spring-style bean name patterns
+* ClassPathBeanDefinitionScanner does not apply scoped-proxy setting to prototypes (only to extended scopes)
 
 Package org.springframework.jdbc
 * strengthened SQLExceptionTranslator's contract to define root cause handling for returned DataAccessExceptions
 
+Package org.springframework.jms
+* MessageListenerAdapter logs at warn level if a listener method returned a result but no response message can be sent
+* added "message-converter" attribute to "jms:listener-container/jca-listener-container" XML configuration element
+
 Package org.springframework.orm
 * HibernateJdbcException extracts the SQL statement and explicitly builds it into the exception message
+
+Package org.springframework.scripting
+* added "autowire" and "dependency-check" attributes to "lang:bsh/jruby/groovy" XML configuration elements
 
 Package org.springframework.test
 * introduced generic annotation-based test execution framework
 * introduced JUnit4 support (SpringJUnit4ClassRunner)
 
+Package org.springframework.transaction
+* fixed "tx:annotation-driven" to not activate "aop:config"-style autodetection of application-defined Advisor beans
+
 Package org.springframework.web
 * JstlView properly allows for programmatic usage (added overloaded constructors; exposing a MessageSource is optional)
 * InternalResourceViewResolver uses JstlView as default (instead of InternalResourceView) if the JSTL API is present
+* JSP MessageTag resolves arguments in default text even if no message code was specified
 
 
 Changes in version 2.1 M3 (2007-07-31)
@@ -193,7 +209,7 @@ Package org.springframework.web
 * AbstractUrlHandlerMapping exposes "path within mapping" attribute through an interceptor (for proper include cleanup)
 * AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
-* fixed CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
+* fixed JSP CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
 
 
 Changes in version 2.1 M2 (2007-05-31)
