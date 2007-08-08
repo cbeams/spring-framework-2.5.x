@@ -36,7 +36,7 @@ import org.springframework.test.context.TestContextManager;
  * {@link SpringJUnit4ClassRunner} and the {@link DirtiesContext} annotation.
  *
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 @RunWith(SpringRunnerContextCacheTests.TestableSpringJUnit4ClassRunner.class)
@@ -139,11 +139,6 @@ public class SpringRunnerContextCacheTests {
 			final TestableTestContextManager<T> testableTestContextManager = new TestableTestContextManager<T>(clazz);
 			TestableSpringJUnit4ClassRunner.testableTestContextManager = testableTestContextManager;
 			return testableTestContextManager;
-		}
-
-		TestableTestContextManager<T> getTestableTestContextManager() {
-
-			return (TestableTestContextManager<T>) super.getTestContextManager();
 		}
 	}
 
