@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.1
  */
-public class JcaListenerContainerParser extends AbstractListenerContainerParser {
+class JcaListenerContainerParser extends AbstractListenerContainerParser {
 
 	private static final String RESOURCE_ADAPTER_ATTRIBUTE = "resource-adapter";
 
@@ -84,6 +84,12 @@ public class JcaListenerContainerParser extends AbstractListenerContainerParser 
 		containerDef.getPropertyValues().addPropertyValue("activationSpecConfig", configDef);
 
 		return containerDef;
+	}
+
+	protected boolean indicatesPubSub(BeanDefinition containerDef) {
+		BeanDefinition configDef =
+				(BeanDefinition) containerDef.getPropertyValues().getPropertyValue("activationSpecConfig").getValue();
+		return indicatesPubSubConfig(configDef);
 	}
 
 }

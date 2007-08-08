@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.1
  */
-public class JmsListenerContainerParser extends AbstractListenerContainerParser {
+class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 	private static final String CONTAINER_TYPE_ATTRIBUTE = "container-type";
 
@@ -129,6 +129,10 @@ public class JmsListenerContainerParser extends AbstractListenerContainerParser 
 		}
 
 		return containerDef;
+	}
+
+	protected boolean indicatesPubSub(BeanDefinition containerDef) {
+		return indicatesPubSubConfig(containerDef);
 	}
 
 	protected boolean indicatesJms102(BeanDefinition containerDef) {

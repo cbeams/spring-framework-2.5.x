@@ -38,7 +38,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.1
  */
-public abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
+abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 	protected static final String LISTENER_ELEMENT = "listener";
 
@@ -55,6 +55,8 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 	protected static final String METHOD_ATTRIBUTE = "method";
 
 	protected static final String MESSAGE_CONVERTER_ATTRIBUTE = "message-converter";
+
+	protected static final String RESPONSE_DESTINATION_ATTRIBUTE = "response-destination";
 
 	protected static final String DESTINATION_TYPE_ATTRIBUTE = "destination-type";
 
@@ -124,9 +126,22 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 		}
 
 		BeanDefinition containerDef = parseContainer(listenerEle, containerEle, parserContext);
+
+		if (listenerEle.hasAttribute(RESPONSE_DESTINATION_ATTRIBUTE)) {
+			String responseDestination = listenerEle.getAttribute(RESPONSE_DESTINATION_ATTRIBUTE);
+			boolean pubSubDomain = indicatesPubSub(containerDef);
+			listenerDef.getPropertyValues().addPropertyValue(
+					pubSubDomain ? "defaultResponseTopicName" : "defaultResponseQueueName", responseDestination);
+			if (containerDef.getPropertyValues().contains("destinationResolver")) {
+				listenerDef.getPropertyValues().addPropertyValue("destinationResolver",
+						containerDef.getPropertyValues().getPropertyValue("destinationResolver").getValue());
+			}
+		}
+
 		// Remain JMS 1.0.2 compatible for the adapter if the container class indicates this.
 		boolean jms102 = indicatesJms102(containerDef);
 		listenerDef.setBeanClass(jms102 ? MessageListenerAdapter102.class : MessageListenerAdapter.class);
+
 		containerDef.getPropertyValues().addPropertyValue("messageListener", listenerDef);
 
 		String containerBeanName = listenerEle.getAttribute(ID_ATTRIBUTE);
@@ -141,6 +156,10 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 
 	protected abstract BeanDefinition parseContainer(
 			Element listenerEle, Element containerEle, ParserContext parserContext);
+
+	protected boolean indicatesPubSub(BeanDefinition containerDef) {
+		return false;
+	}
 
 	protected boolean indicatesJms102(BeanDefinition containerDef) {
 		return false;
@@ -172,7 +191,6 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 			}
 			configDef.getPropertyValues().addPropertyValue("messageSelector", selector);
 		}
-
 	}
 
 	protected void parseContainerConfiguration(Element ele, ParserContext parserContext, BeanDefinition configDef) {
@@ -227,6 +245,10 @@ public abstract class AbstractListenerContainerParser implements BeanDefinitionP
 		else {
 			return null;
 		}
+	}
+
+	protected boolean indicatesPubSubConfig(BeanDefinition configDef) {
+		return ((Boolean) configDef.getPropertyValues().getPropertyValue("pubSubDomain").getValue()).booleanValue();
 	}
 
 }
