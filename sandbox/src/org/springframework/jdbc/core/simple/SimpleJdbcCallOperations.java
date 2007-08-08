@@ -82,10 +82,15 @@ public interface SimpleJdbcCallOperations {
 	/** Not used yet */
 	SimpleJdbcCall useInParameterNames(String... inParameterNames);
 
-	/** Not used yet */
-	SimpleJdbcCall useOutParameterNames(String... inParameterNames);
-
-	/** Not used yet */
+	/** Used to specify when a ResultSet is returned by the stored procedure and you want it mapped
+	 * by a RowMapper.  The results will be returned using the parameter name specified.  Multiple
+	 * ResultSets must be declared in the correct order. If the database you are using uses ref cursors
+	 * then the name specified must match the name of the parameter declared for the procedure in the
+	 * database.
+	 *
+	 * @param parameterName the name of the returned results and/or the name of the ref cursor parameter
+	 * @param rowMapper the RowMapper implementation that will map the data returned for each row
+	 * */
 	SimpleJdbcCall returningResultSet(String parameterName, ParameterizedRowMapper rowMapper);
 
 	/**

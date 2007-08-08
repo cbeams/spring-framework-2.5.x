@@ -39,4 +39,9 @@ public class Db2CallMetaDataProvider extends GenericCallMetaDataProvider {
 		}
 	}
 
+	@Override
+	public String metaDataSchemaNameToUse(String schemaName) {
+		// Use current user schema if no schema specified
+		return schemaName == null ? getUserName().toUpperCase() : super.metaDataSchemaNameToUse(schemaName);
+	}
 }

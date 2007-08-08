@@ -76,6 +76,10 @@ public abstract class AbstractJdbcCall {
 		return callMetaDataContext.getProcedureName();
 	}
 
+	public void setInParameterNames(HashSet inParameterNames) {
+		callMetaDataContext.setLimitedInParameterNames(inParameterNames);
+	}
+
 	public void setProcedureName(String procedureName) {
 		callMetaDataContext.setProcedureName(procedureName);
 	}

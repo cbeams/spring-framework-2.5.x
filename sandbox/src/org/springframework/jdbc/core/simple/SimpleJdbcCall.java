@@ -25,6 +25,8 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * A SimpleJdbcCall is a multi-threaded, reusable object representing a call to a stored procedure or a
@@ -107,10 +109,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	public SimpleJdbcCall useInParameterNames(String... inParameterNames) {
-		return this;
-	}
-
-	public SimpleJdbcCall useOutParameterNames(String... inParameterNames) {
+		super.setInParameterNames(new HashSet(Arrays.asList(inParameterNames)));
 		return this;
 	}
 

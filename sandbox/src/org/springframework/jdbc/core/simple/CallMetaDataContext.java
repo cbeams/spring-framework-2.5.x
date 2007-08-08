@@ -56,6 +56,9 @@ public class CallMetaDataContext {
 	/** name to use for the return value in the output map */
 	private String functionReturnName = "return";
 
+	/** Set of in parameter names to exclude use for any not listed */
+	private HashSet<String> limitedInParameterNames = new HashSet<String>();
+
 	/** List of SqlParameter names for out parameters */
 	private List<String> outParameterNames = new ArrayList<String>();
 
@@ -78,6 +81,10 @@ public class CallMetaDataContext {
 
 	public void setFunctionReturnName(String functionReturnName) {
 		this.functionReturnName = functionReturnName;
+	}
+
+	public void setLimitedInParameterNames(HashSet<String> limitedInParameterNames) {
+		this.limitedInParameterNames = limitedInParameterNames;
 	}
 
 	public List<String> getOutParameterNames() {
@@ -281,9 +288,17 @@ public class CallMetaDataContext {
 						}
 					}
 					else {
-						workParameters.add(metaDataProvider.createDefaultInParameter(parNameToUse, meta));
-						if (logger.isDebugEnabled()) {
-							logger.debug("Added metadata in parameter for: " + parNameToUse);
+						if (limitedInParameterNames.size() == 0 || limitedInParameterNames.contains(parNameToUse)) {
+							workParameters.add(metaDataProvider.createDefaultInParameter(parNameToUse, meta));
+							if (logger.isDebugEnabled()) {
+								logger.debug("Added metadata in parameter for: " + parNameToUse);
+							}
+						}
+						else {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Limited set of parameters " + limitedInParameterNames +
+										" -- skipped parameter for: " + parNameToUse);
+							}
 						}
 					}
 				}

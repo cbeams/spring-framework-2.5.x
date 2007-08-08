@@ -222,7 +222,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	private void processProcedureColumns(DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String procedureName) {
 		ResultSet procs = null;
 		String metaDataCatalogName = metaDataCatalogNameToUse(catalogName);
-		String metaDataSchemaName = schemaNameToUse(schemaName);
+		String metaDataSchemaName = metaDataSchemaNameToUse(schemaName);
 		String metaDataProcedureName = procedureNameToUse(procedureName);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Retrieving metadata for " + metaDataCatalogName + "/" +
