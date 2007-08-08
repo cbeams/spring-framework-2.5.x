@@ -37,13 +37,60 @@ import org.springframework.context.ConfigurableApplicationContext;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  * @param <KEY> {@link Serializable serializable} context key type
  * @param <CONTEXT> {@link ConfigurableApplicationContext application context}
  *        type
  */
 public interface ContextCache<KEY extends Serializable, CONTEXT extends ConfigurableApplicationContext> {
+
+	/**
+	 * Clears all contexts from the cache.
+	 */
+	public abstract void clear();
+
+	/**
+	 * <p>
+	 * Return whether there is a cached context for the given key.
+	 * </p>
+	 *
+	 * @param key The context key, not <code>null</code>.
+	 */
+	public abstract boolean contains(final KEY key);
+
+	/**
+	 * <p>
+	 * Obtain a cached ConfigurableApplicationContext for the given key.
+	 * </p>
+	 * <p>
+	 * The {@link #getHitCount() hit} and {@link #getMissCount() miss} counts
+	 * will be updated accordingly.
+	 * </p>
+	 *
+	 * @see #remove(Serializable)
+	 * @param key The context key, not <code>null</code>.
+	 * @return the corresponding ConfigurableApplicationContext instance, or
+	 *         <code>null</code> if not found in the cache.
+	 */
+	public abstract CONTEXT get(final KEY key) throws Exception;
+
+	/**
+	 * Gets the overall hit count for this cache. A <em>hit</em> is an access
+	 * to the cache, which returned a non-null context for a queried key.
+	 *
+	 * @return The hit count.
+	 */
+	public abstract int getHitCount();
+
+	/**
+	 * Gets the overall miss count for this cache. A <em>miss</em> is an
+	 * access to the cache, which returned a <code>null</code> context for a
+	 * queried key.
+	 *
+	 * @return The miss count.
+	 */
+	public abstract int getMissCount();
 
 	/**
 	 * <p>
@@ -55,41 +102,44 @@ public interface ContextCache<KEY extends Serializable, CONTEXT extends Configur
 	 * @param context The ConfigurableApplicationContext instance, not
 	 *        <code>null</code>.
 	 */
-	public abstract void addContext(final KEY key, final CONTEXT context);
+	public abstract void put(final KEY key, final CONTEXT context);
 
 	/**
 	 * <p>
-	 * Return whether there is a cached context for the given key.
+	 * Remove the context with the given key.
 	 * </p>
 	 *
-	 * @param key The context key, not <code>null</code>.
-	 */
-	public abstract boolean hasCachedContext(final KEY key);
-
-	/**
-	 * <p>
-	 * Obtain a cached ConfigurableApplicationContext for the given key.
-	 * </p>
-	 *
+	 * @see #setDirty(Serializable)
 	 * @param key The context key, not <code>null</code>.
 	 * @return the corresponding ConfigurableApplicationContext instance, or
 	 *         <code>null</code> if not found in the cache.
 	 */
-	public abstract CONTEXT getContext(final KEY key) throws Exception;
+	public abstract CONTEXT remove(final KEY key);
 
 	/**
 	 * <p>
-	 * Mark the context with the given key as dirty, effectively removing the
-	 * context from the cache and explicitly
-	 * {@link ConfigurableApplicationContext#close() closing} it.
+	 * Mark the context with the given key as dirty, effectively
+	 * {@link #remove(Serializable) removing} the context from the cache and
+	 * explicitly {@link ConfigurableApplicationContext#close() closing} it.
 	 * </p>
 	 * <p>
-	 * Call this method only if you change the state of a singleton bean,
-	 * potentially affecting future interaction with the context.
+	 * Generally speaking, you would only call this method only if you change
+	 * the state of a singleton bean, potentially affecting future interaction
+	 * with the context.
 	 * </p>
 	 *
+	 * @see #remove(Serializable)
 	 * @param key The context key, not <code>null</code>.
 	 */
 	public abstract void setDirty(final KEY key);
+
+	/**
+	 * Returns the number of contexts currently stored in the cache. If the
+	 * cache contains more than <tt>Integer.MAX_VALUE</tt> elements, returns
+	 * <tt>Integer.MAX_VALUE</tt>.
+	 *
+	 * @return the number of contexts stored in the cache.
+	 */
+	public abstract int size();
 
 }

@@ -30,16 +30,16 @@ import org.springframework.util.ClassUtils;
 
 /**
  * <p>
- * TestExecutionManager is the central entry point into the Spring testing
- * support API, which serves as a facade and encapsulates support for loading
- * and accessing {@link ConfigurableApplicationContext application contexts},
+ * TestContextManager is the central entry point into the Spring testing support
+ * API, which serves as a facade and encapsulates support for loading and
+ * accessing {@link ConfigurableApplicationContext application contexts},
  * dependency injection of test classes, and {@link Transactional transactional}
  * execution of test methods.
  * </p>
  * <p>
  * {@link AutowiredAnnotationBeanPostProcessor} and
  * {@link CommonAnnotationBeanPostProcessor} will be automatically registered
- * with the bean factory of contexts managed by this test execution manager.
+ * with the bean factories of contexts managed by this test context manager.
  * Managed test instances are therefore automatically candidates for
  * annotation-based dependency injection using
  * {@link org.springframework.beans.factory.annotation.Autowired Autowired} and
@@ -47,17 +47,17 @@ import org.springframework.util.ClassUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  * @since 2.1
  */
-public class TestExecutionManager<T> {
+public class TestContextManager<T> {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	/** Class Logger. */
-	private static final Log LOG = LogFactory.getLog(TestExecutionManager.class);
+	private static final Log LOG = LogFactory.getLog(TestContextManager.class);
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
@@ -92,7 +92,7 @@ public class TestExecutionManager<T> {
 
 	/**
 	 * <p>
-	 * Constructs a new {@link TestExecutionManager} for the specified
+	 * Constructs a new {@link TestContextManager} for the specified
 	 * {@link Class testClass}.
 	 * </p>
 	 *
@@ -100,7 +100,7 @@ public class TestExecutionManager<T> {
 	 *        managed.
 	 * @throws Exception if an error occurs while processing the test class
 	 */
-	public TestExecutionManager(final Class<T> testClass) throws Exception {
+	public TestContextManager(final Class<T> testClass) throws Exception {
 
 		this.testClass = testClass;
 		this.configurationAttributes = parseConfigurationAttributes(testClass);
@@ -223,11 +223,11 @@ public class TestExecutionManager<T> {
 	 */
 	public synchronized ConfigurableApplicationContext getApplicationContext() throws Exception {
 
-		ConfigurableApplicationContext context = getContextCache().getContext(getConfigurationAttributes());
+		ConfigurableApplicationContext context = getContextCache().get(getConfigurationAttributes());
 
 		if (context == null) {
 			context = buildApplicationContext(getConfigurationAttributes());
-			getContextCache().addContext(getConfigurationAttributes(), context);
+			getContextCache().put(getConfigurationAttributes(), context);
 		}
 
 		return context;
@@ -255,7 +255,7 @@ public class TestExecutionManager<T> {
 	 */
 	protected ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> getContextCache() {
 
-		return TestExecutionManager.contextCache;
+		return TestContextManager.contextCache;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -291,17 +291,20 @@ public class TestExecutionManager<T> {
 	 * injected into the test instance.
 	 * </p>
 	 *
-	 * @param testInstance the object into which dependencies should be
+	 * @param testInstance The object into which dependencies should be
 	 *        injected.
+	 * @param context The application context from which dependencies should be
+	 *        retrieved.
 	 * @throws Exception in case of dependency injection failure
 	 */
-	protected void injectDependencies(final T testInstance) throws Exception {
+	protected void injectDependencies(final T testInstance, final ConfigurableApplicationContext context)
+			throws Exception {
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Dependency injecting test instance [" + testInstance + "] based on configuration attributes ["
 					+ getConfigurationAttributes() + "].");
 		}
-		final ConfigurableListableBeanFactory beanFactory = getApplicationContext().getBeanFactory();
+		final ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
 		beanFactory.autowireBeanProperties(testInstance, getConfigurationAttributes().getAutowireMode().value(),
 				getConfigurationAttributes().isCheckDependencies());
 		beanFactory.initializeBean(testInstance, null);
@@ -312,7 +315,7 @@ public class TestExecutionManager<T> {
 	/**
 	 * Call this method to signal that the
 	 * {@link ConfigurableApplicationContext application context} associated
-	 * with this {@link TestExecutionManager} is <em>dirty</em> and should be
+	 * with this {@link TestContextManager} is <em>dirty</em> and should be
 	 * reloaded. Do this if a test has modified the context (for example, by
 	 * replacing a bean definition).
 	 */
@@ -333,9 +336,10 @@ public class TestExecutionManager<T> {
 	 */
 	public synchronized void prepareTestInstance(final T testInstance) throws Exception {
 
-		injectDependencies(testInstance);
-		if (!getApplicationContext().isActive()) {
-			getApplicationContext().refresh();
+		final ConfigurableApplicationContext context = getApplicationContext();
+		injectDependencies(testInstance, context);
+		if (!context.isActive()) {
+			context.refresh();
 		}
 	}
 

@@ -26,16 +26,16 @@ import org.junit.internal.runners.MethodRoadie;
 import org.junit.internal.runners.TestMethod;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
-import org.springframework.test.context.TestExecutionManager;
+import org.springframework.test.context.TestContextManager;
 
 /**
  * SpringJUnit4ClassRunner is a custom extension of {@link JUnit4ClassRunner}
  * which provides Spring testing functionality to standard JUnit tests by means
- * of the {@link TestExecutionManager} and associated support classes and
+ * of the {@link TestContextManager} and associated support classes and
  * annotations.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
@@ -59,7 +59,7 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final TestExecutionManager<T> testExecutionManager;
+	private final TestContextManager<T> testContextManager;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -71,11 +71,13 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 
 	/**
 	 * Constructs a new <code>SpringJUnit4ClassRunner</code> and initializes a
-	 * {@link TestExecutionManager} to provide Spring testing functionality to
+	 * {@link TestContextManager} to provide Spring testing functionality to
 	 * standard JUnit tests.
 	 *
-	 * @param clazz
-	 * @throws InitializationError
+	 * @param clazz the Class object corresponding to the test class to be run.
+	 * @see #createTestContextManager(Class)
+	 * @throws InitializationError if an error occurs while initializing the
+	 *         runner.
 	 */
 	public SpringJUnit4ClassRunner(final Class<T> clazz) throws InitializationError {
 
@@ -86,10 +88,10 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 		}
 
 		try {
-			this.testExecutionManager = new TestExecutionManager<T>(clazz);
+			this.testContextManager = createTestContextManager(clazz);
 		}
 		catch (final Exception e) {
-			LOG.error("Caught an exception while attempting to instantiate a new TestExecutionManager for test class ["
+			LOG.error("Caught an exception while attempting to instantiate a new TestContextManager for test class ["
 					+ clazz + "].", e);
 			throw new InitializationError(e);
 		}
@@ -105,11 +107,11 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 
 	/**
 	 * Delegates to {@link JUnit4ClassRunner#createTest()} to create the test
-	 * instance and then to a {@link TestExecutionManager} to prepare the test
+	 * instance and then to a {@link TestContextManager} to prepare the test
 	 * instance for Spring testing functionality.
 	 *
 	 * @see JUnit4ClassRunner#createTest()
-	 * @see TestExecutionManager#prepareTestInstance(Object)
+	 * @see TestContextManager#prepareTestInstance(Object)
 	 * @return A new test instance.
 	 * @throws Exception if an error occurs while creating or preparing the test
 	 *         instance.
@@ -119,8 +121,34 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 
 		@SuppressWarnings("unchecked")
 		final T testInstance = (T) super.createTest();
-		this.testExecutionManager.prepareTestInstance(testInstance);
+		getTestContextManager().prepareTestInstance(testInstance);
 		return testInstance;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Creates a new {@link TestContextManager}. Can be overridden by
+	 * subclasses.
+	 *
+	 * @param clazz the Class object corresponding to the test class to be
+	 *        managed.
+	 * @return A new TestContextManager
+	 * @throws Exception
+	 */
+	protected TestContextManager<T> createTestContextManager(final Class<T> clazz) throws Exception {
+
+		return new TestContextManager<T>(clazz);
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * @return The testContextManager.
+	 */
+	protected final TestContextManager<T> getTestContextManager() {
+
+		return this.testContextManager;
 	}
 
 	// ------------------------------------------------------------------------|
