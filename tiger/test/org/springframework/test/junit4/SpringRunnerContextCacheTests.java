@@ -16,6 +16,7 @@
 package org.springframework.test.junit4;
 
 import static org.junit.Assert.assertEquals;
+import junit.framework.JUnit4TestAdapter;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -35,7 +36,7 @@ import org.springframework.test.context.TestContextManager;
  * {@link SpringJUnit4ClassRunner} and the {@link DirtiesContext} annotation.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 @RunWith(SpringRunnerContextCacheTests.TestableSpringJUnit4ClassRunner.class)
@@ -49,6 +50,12 @@ public class SpringRunnerContextCacheTests {
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
+
+	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
+	public static junit.framework.Test suite() {
+
+		return new JUnit4TestAdapter(SpringJUnit4SuiteTests.class);
+	}
 
 	/**
 	 * Asserts the statistics of the supplied context cache.
@@ -96,7 +103,7 @@ public class SpringRunnerContextCacheTests {
 
 	@Test
 	@DirtiesContext
-	public void alwaysPassesButDirtiesContext() {
+	public void dirtyContext() {
 
 		final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
 		assertContextCacheStatistics(contextCache, "alwaysPassesButDirtiesContext()", 1, 0, 1);
