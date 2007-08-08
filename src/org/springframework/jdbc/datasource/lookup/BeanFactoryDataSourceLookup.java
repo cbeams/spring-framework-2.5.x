@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class BeanFactoryDataSourceLookup implements DataSourceLookup, BeanFactor
 
 
 	public DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException {
-		Assert.notNull(this.beanFactory, "BeanFactory is required");
+		Assert.state(this.beanFactory != null, "BeanFactory is required");
 		try {
 			return (DataSource) this.beanFactory.getBean(dataSourceName, DataSource.class);
 		}
