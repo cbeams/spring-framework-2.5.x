@@ -16,6 +16,7 @@
 package org.springframework.test.context;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,6 +25,8 @@ import org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProc
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -47,7 +50,7 @@ import org.springframework.util.ClassUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class TestContextManager<T> {
@@ -322,6 +325,44 @@ public class TestContextManager<T> {
 	public void markApplicationContextDirty() {
 
 		getContextCache().setDirty(getConfigurationAttributes());
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Hook method for preparing a test just <em>before</em> the execution of
+	 * the supplied test method, for example setting up test fixtures,
+	 * transaction handling, etc.
+	 *
+	 * @param method the test method which is about to be executed.
+	 */
+	public void beforeTestMethodExecution(final Method method) {
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("beforeTestMethodExecution(): method [" + method + "].");
+		}
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Hook method for post-processing a test just <em>after</em> the
+	 * execution of the supplied test method, for example tearing down test
+	 * fixtures, transaction handling, etc.
+	 *
+	 * @param method the test method which has just been executed.
+	 */
+	public void afterTestMethodExecution(final Method method) {
+
+		final boolean dirtiesContext = (AnnotationUtils.findAnnotation(method, DirtiesContext.class) != null);
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("afterTestMethodExecution(): method [" + method + "] dirtiesContext [" + dirtiesContext + "].");
+		}
+
+		if (dirtiesContext) {
+			getContextCache().setDirty(getConfigurationAttributes());
+		}
 	}
 
 	// ------------------------------------------------------------------------|

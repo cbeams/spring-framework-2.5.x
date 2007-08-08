@@ -35,7 +35,7 @@ import org.springframework.test.context.TestContextManager;
  * annotations.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
@@ -134,7 +134,8 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 	 * @param clazz the Class object corresponding to the test class to be
 	 *        managed.
 	 * @return A new TestContextManager
-	 * @throws Exception
+	 * @throws Exception if an error occurs while creating a new
+	 *         TestContextManager.
 	 */
 	protected TestContextManager<T> createTestContextManager(final Class<T> clazz) throws Exception {
 
@@ -207,7 +208,13 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 		}
 		final TestMethod testMethod = wrapMethod(method);
 
-		new MethodRoadie(test, testMethod, notifier, description).run();
+		try {
+			getTestContextManager().beforeTestMethodExecution(method);
+			new MethodRoadie(test, testMethod, notifier, description).run();
+		}
+		finally {
+			getTestContextManager().afterTestMethodExecution(method);
+		}
 	}
 
 	// ------------------------------------------------------------------------|
