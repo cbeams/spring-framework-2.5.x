@@ -28,10 +28,9 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.beans.TestBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.jca.endpoint.GenericMessageEndpointManager;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
-import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 
 /**
  * @author Mark Fisher
@@ -43,17 +42,23 @@ public class JmsNamespaceHandlerTests extends TestCase {
 
 	private static final String EXPLICIT_CONNECTION_FACTORY = "testConnectionFactory";
 
-	private ApplicationContext context;
+	private ClassPathXmlApplicationContext context;
+
 
 	protected void setUp() throws Exception {
 		this.context = new ClassPathXmlApplicationContext("jmsNamespaceHandlerTests.xml", getClass());
 	}
 
+	protected void tearDown() throws Exception {
+		this.context.close();
+	}
+
 	public void testBeansCreated() {
 		Map containers = context.getBeansOfType(DefaultMessageListenerContainer.class);
-		Map listeners = context.getBeansOfType(MessageListenerAdapter.class);
+		assertEquals("Context should contain 3 JMS listener containers", 3, containers.size());
 
-		assertEquals("context should contain 3 containers", 3, containers.size());
+		containers = context.getBeansOfType(GenericMessageEndpointManager.class);
+		assertEquals("Context should contain 3 JCA endpoint containers", 3, containers.size());
 	}
 
 	public void testContainerConfiguration() throws Exception {
