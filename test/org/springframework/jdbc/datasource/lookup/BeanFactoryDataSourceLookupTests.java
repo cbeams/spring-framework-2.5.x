@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,10 @@ import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.test.AssertThrows;
 
 /**
- * Unit tests for the {@link BeanFactoryDataSourceLookup} class.
- *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class BeanFactoryDataSourceLookupTests extends TestCase {
+public class BeanFactoryDataSourceLookupTests extends TestCase {
 
 	private static final String DATASOURCE_BEAN_NAME = "dataSource";
 
@@ -74,7 +73,7 @@ public final class BeanFactoryDataSourceLookupTests extends TestCase {
 	}
 
 	public void testLookupWhereBeanFactoryHasNotBeenSupplied() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
+		new AssertThrows(IllegalStateException.class) {
 			public void test() throws Exception {
 				BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup();
 				lookup.getDataSource(DATASOURCE_BEAN_NAME);
