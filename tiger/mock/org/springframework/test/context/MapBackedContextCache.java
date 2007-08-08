@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  * @param <KEY> {@link Serializable serializable} context key type
  * @param <CONTEXT> {@link ConfigurableApplicationContext application context}
@@ -60,6 +60,15 @@ public class MapBackedContextCache<KEY extends Serializable, CONTEXT extends Con
 	public final void clear() {
 
 		this.contextKeyToContextMap.clear();
+	}
+
+	// ------------------------------------------------------------------------|
+
+	@Override
+	public void clearStatistics() {
+
+		this.hitCount = 0;
+		this.missCount = 0;
 	}
 
 	// ------------------------------------------------------------------------|

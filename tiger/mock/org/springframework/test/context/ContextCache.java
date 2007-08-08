@@ -37,7 +37,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  * @param <KEY> {@link Serializable serializable} context key type
  * @param <CONTEXT> {@link ConfigurableApplicationContext application context}
@@ -49,6 +49,12 @@ public interface ContextCache<KEY extends Serializable, CONTEXT extends Configur
 	 * Clears all contexts from the cache.
 	 */
 	public abstract void clear();
+
+	/**
+	 * Clears hit and miss count statistics for the cache (i.e., resets counters
+	 * to zero).
+	 */
+	public abstract void clearStatistics();
 
 	/**
 	 * <p>
