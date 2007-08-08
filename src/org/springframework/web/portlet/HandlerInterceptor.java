@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import javax.portlet.RenderResponse;
 /**
  * Workflow interface that allows for customized handler execution chains.
  * Applications can register any number of existing or custom interceptors
- * for certain groups of handlers, to add common preprocessing behavior
+ * for certain groups of handlers, to add common pre-processing behavior
  * without needing to modify each handler implementation.
  *
  * <p>A <code>HandlerInterceptor</code> gets called before the appropriate
@@ -44,7 +44,7 @@ import javax.portlet.RenderResponse;
  * {@link org.springframework.web.portlet.handler.AbstractHandlerMapping#setInterceptors "interceptors"}
  * property (in XML: a &lt;list&gt; of &lt;ref&gt; elements).
  *
- * <p>A <code>HandlerInterceptor</code> is basically similar to a Servlet 2.3
+ * <p>A <code>HandlerInterceptor</code> is basically similar to a Servlet
  * {@link javax.servlet.Filter}, but in contrast to the latter it allows
  * custom pre-processing with the option to prohibit the execution of the handler
  * itself, and custom post-processing. <code>Filters</code> are more powerful;
@@ -52,39 +52,52 @@ import javax.portlet.RenderResponse;
  * are handed down the chain. Note that a filter gets configured in
  * <code>web.xml</code>, a <code>HandlerInterceptor</code> in the application context.
  *
- * <p>As a basic guideline, fine-grained handler-related preprocessing tasks are
+ * <p>As a basic guideline, fine-grained handler-related pre-processing tasks are
  * candidates for <code>HandlerInterceptor</code> implementations, especially
  * factored-out common handler code and authorization checks. On the other hand,
  * a <code>Filter</code> is well-suited for request content and view content
  * handling, like multipart forms and GZIP compression. This typically shows when
  * one needs to map the filter to certain content types (e.g. images), or to all
- * requests. Be aware that filters cannot be applied to portlet requests (they
+ * requests.
+ *
+ * <p>Be aware that filters cannot be applied to portlet requests (they
  * only operate on servlet requests), so for portlet requests interceptors are
  * essential.
- * 
- * <p>If we assume a "sunny day" request (i.e. a request where nothing goes wrong
+ *
+ * <p>If we assume a "sunny day" request cycle (i.e. a request where nothing goes wrong
  * and all is well), the workflow of a <code>HandlerInterceptor</code> will be as
  * follows:
- * 
+ *
+ * <p><b>Action Request:</b><p>
  * <ol>
- *   <li><i>(<code>DispatcherServlet</code> maps a request to particular handler
+ *   <li><code>DispatcherPortlet</code> maps the action request to a particular handler
  * 		 and assembles a handler execution chain consisting of the handler that
  * 		 is to be invoked and all of the <code>HandlerInterceptor</code>
- * 		 instances that apply to the request.)</i></li>
+ * 		 instances that apply to the request.</li>
  *   <li>{@link org.springframework.web.portlet.HandlerInterceptor#preHandleAction(javax.portlet.ActionRequest, javax.portlet.ActionResponse, Object) preHandleAction(..)}
  * 		 is called; if the invocation of this method returns <code>true</code> then
  *		 this workflow continues</li>
- *   <li>The target handler handles the action phase of the request (via
+ *   <li>The target handler handles the action request (via
  * 		 {@link org.springframework.web.portlet.HandlerAdapter#handleAction(javax.portlet.ActionRequest, javax.portlet.ActionResponse, Object) HandlerAdapter.handleAction(..)})</li>
  *   <li>{@link org.springframework.web.portlet.HandlerInterceptor#afterActionCompletion(javax.portlet.ActionRequest, javax.portlet.ActionResponse, Object, Exception) afterActionCompletion(..)}
  * 		 is called</li>
+ * </ol>
+ *
+ * <p><b>Render Request:</b><p>
+ * <ol>
+ *   <li><code>DispatcherPortlet</code> maps the render request to a particular handler
+ * 		 and assembles a handler execution chain consisting of the handler that
+ * 		 is to be invoked and all of the <code>HandlerInterceptor</code>
+ * 		 instances that apply to the request.</li>
  *   <li>{@link org.springframework.web.portlet.HandlerInterceptor#preHandleRender(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object) preHandleRender(..)}
  * 		 is called; if the invocation of this method returns <code>true</code> then
  *		 this workflow continues</li>
- *   <li>The target handler handles the render phase of the request (via
+ *   <li>The target handler handles the render request (via
  * 		 {@link org.springframework.web.portlet.HandlerAdapter#handleRender(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object) HandlerAdapter.handleRender(..)})</li>
  *   <li>{@link org.springframework.web.portlet.HandlerInterceptor#postHandleRender(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object, ModelAndView) postHandleRender(..)}
  * 		 is called</li>
+ *   <li>If the <code>HandlerAdapter</code> returned a <code>ModelAndView</code>,
+ *       then <code>DispatcherPortlet</code> renders the view accordingly
  *   <li>{@link org.springframework.web.portlet.HandlerInterceptor#afterRenderCompletion(javax.portlet.RenderRequest, javax.portlet.RenderResponse, Object, Exception) afterRenderCompletion(..)}
  * 		 is called</li>
  * </ol>
