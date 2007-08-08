@@ -35,7 +35,7 @@ import org.springframework.test.context.TestContextManager;
  * annotations.
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
@@ -167,7 +167,6 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 			LOG.debug("Invoking test method [" + method.toGenericString() + "].");
 		}
 
-		// TODO Add test support for @DirtiesContext
 		// TODO Add test support for @Transactional and @NotTransactional
 
 		// XXX Optional: add test support for @IfProfileValue & @Repeat
