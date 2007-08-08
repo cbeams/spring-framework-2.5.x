@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beansProjectDescription>
+	<configExtensions>
+		<configExtension>xml</configExtension>
+	</configExtensions>
+	<configs>
+		<config>tiger/test/org/springframework/test/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml</config>
+	</configs>
+	<configSets>
+	</configSets>
+</beansProjectDescription>
