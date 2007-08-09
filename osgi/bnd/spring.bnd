@@ -7,6 +7,8 @@ Import-Package: org.apache.commons.logging*, \
 DynamicImport-Package: *
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
+Bundle-Name: spring
+Bundle-SymbolicName: org.springframework
 
 
 
