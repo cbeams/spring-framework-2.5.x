@@ -68,8 +68,8 @@ public class StaticScriptSource implements ScriptSource {
 	}
 
 
-	public synchronized String toString() {
-		return this.script;
+	public String toString() {
+		return "static script";
 	}
 
 }

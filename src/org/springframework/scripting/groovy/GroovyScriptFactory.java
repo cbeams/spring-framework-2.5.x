@@ -140,7 +140,8 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 			synchronized (this.scriptClassMonitor) {
 				if (this.scriptClass == null || scriptSource.isModified()) {
-					this.scriptClass = this.groovyClassLoader.parseClass(scriptSource.getScriptAsString());
+					this.scriptClass = this.groovyClassLoader.parseClass(
+							scriptSource.getScriptAsString(), scriptSource.toString());
 
 					if (Script.class.isAssignableFrom(this.scriptClass)) {
 						// A Groovy script, probably creating an instance: let's execute it.
