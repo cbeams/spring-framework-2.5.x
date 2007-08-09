@@ -38,7 +38,19 @@ import java.util.List;
 public abstract class ReflectionUtils {
 
 	/**
-	 * Attempt to find a {@link Method} on the supplied type with the supplied name
+	 * Attempt to find a {@link Method} on the supplied class with the supplied name
+	 * and no parameters. Searches all superclasses up to <code>Object</code>.
+	 * <p>Returns <code>null</code> if no {@link Method} can be found.
+	 * @param clazz the class to introspect
+	 * @param name the name of the method
+	 * @return the Method object, or <code>null</code> if none found
+	 */
+	public static Method findMethod(Class clazz, String name) {
+		return findMethod(clazz, name, new Class[0]);
+	}
+
+	/**
+	 * Attempt to find a {@link Method} on the supplied class with the supplied name
 	 * and parameter types. Searches all superclasses up to <code>Object</code>.
 	 * <p>Returns <code>null</code> if no {@link Method} can be found.
 	 * @param clazz the class to introspect

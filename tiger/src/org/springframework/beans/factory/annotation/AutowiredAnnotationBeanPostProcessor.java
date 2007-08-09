@@ -280,8 +280,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 */
 	protected boolean determineRequiredStatus(Annotation annotation) {
 		try {
-			Method method =
-					ReflectionUtils.findMethod(annotation.annotationType(), this.requiredParameterName, new Class[0]);
+			Method method = ReflectionUtils.findMethod(annotation.annotationType(), this.requiredParameterName);
 			return (this.requiredParameterValue == (Boolean) ReflectionUtils.invokeMethod(method, annotation));
 		}
 		catch (Exception ex) {
