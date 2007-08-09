@@ -93,8 +93,7 @@ public class OverridingClassLoader extends ClassLoader {
 		if (isEligibleForOverriding(name)) {
 			result = findLoadedClass(name);
 			if (result == null) {
-				String internalName = name.replace('.', '/') + CLASS_FILE_SUFFIX;
-				InputStream is = getParent().getResourceAsStream(internalName);
+				InputStream is = openStreamForClass(name);
 				if (is != null) {
 					try {
 						// Load the raw bytes.
@@ -141,6 +140,18 @@ public class OverridingClassLoader extends ClassLoader {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Open an InputStream for the specified class.
+	 * <p>The default implementation loads a standard class file through
+	 * the parent ClassLoader's <code>getResourceAsStream</code> method.
+	 * @param name the name of the class
+	 * @return the InputStream containing the byte code for the specified class
+	 */
+	protected InputStream openStreamForClass(String name) {
+		String internalName = name.replace('.', '/') + CLASS_FILE_SUFFIX;
+		return getParent().getResourceAsStream(internalName);
 	}
 
 
