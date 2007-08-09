@@ -10,7 +10,7 @@ public class SimpleJdbcUtils {
 		if (source != null && source.startsWith("DB2")) {
 			name = "DB2";
 		}
-		else if ("Sybase SQL Server".equals(source) || "Adaptive Server Enterprise".equals(source)) {
+		else if ( "Sybase SQL Server".equals(source) || "Adaptive Server Enterprise".equals(source) || "sql server".equals(source) ) {
 			name = "Sybase";
 		}
 		return name; 
