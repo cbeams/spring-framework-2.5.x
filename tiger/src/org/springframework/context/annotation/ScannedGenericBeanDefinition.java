@@ -19,13 +19,13 @@ package org.springframework.context.annotation;
 import org.objectweb.asm.ClassReader;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
 import org.springframework.util.Assert;
 
 /**
- * Extension of the {@link org.springframework.beans.factory.support.RootBeanDefinition}
+ * Extension of the {@link org.springframework.beans.factory.support.GenericBeanDefinition}
  * class, based on an ASM ClassReader, with support for annotation metadata exposed
  * through the {@link AnnotatedBeanDefinition} interface.
  *
@@ -39,27 +39,24 @@ import org.springframework.util.Assert;
  * @see #getBeanClassName()
  * @see org.objectweb.asm.ClassReader
  */
-public class ScannedRootBeanDefinition extends RootBeanDefinition implements AnnotatedBeanDefinition {
+public class ScannedGenericBeanDefinition extends GenericBeanDefinition implements AnnotatedBeanDefinition {
 
 	private final AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor();
 
 
 	/**
-	 * Create a new ScannedRootBeanDefinition for the given ASM ClassReader.
+	 * Create a new ScannedGenericBeanDefinition for the given ASM ClassReader.
 	 * @param classReader the ASM ClassReader for the scanned target class
 	 */
-	public ScannedRootBeanDefinition(ClassReader classReader) {
+	public ScannedGenericBeanDefinition(ClassReader classReader) {
 		Assert.notNull(classReader, "ClassReader must not be null");
 		classReader.accept(this.visitor, true);
+		setBeanClassName(this.visitor.getClassName());
 	}
 
 
 	public final AnnotationMetadata getMetadata() {
 		return this.visitor;
-	}
-
-	public String getBeanClassName() {
-		return this.visitor.getClassName();
 	}
 
 }

@@ -26,7 +26,7 @@ import org.springframework.core.type.AnnotationMetadata;
  *
  * @author Juergen Hoeller
  * @since 2.1
- * @see AnnotatedRootBeanDefinition
+ * @see AnnotatedGenericBeanDefinition
  * @see org.springframework.core.type.AnnotationMetadata
  */
 public interface AnnotatedBeanDefinition extends BeanDefinition {

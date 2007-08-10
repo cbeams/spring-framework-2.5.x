@@ -20,7 +20,7 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.annotation.AnnotatedRootBeanDefinition;
+import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -39,7 +39,7 @@ public class AnnotationBeanNameGeneratorTests extends TestCase {
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) control.getMock();
 		control.replay();
 
-		AnnotatedBeanDefinition bd = new AnnotatedRootBeanDefinition(ComponentWithName.class);
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentWithName.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
 		assertNotNull("The generated beanName must *never* be null.", beanName);
 		assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
@@ -53,7 +53,7 @@ public class AnnotationBeanNameGeneratorTests extends TestCase {
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) control.getMock();
 		control.replay();
 
-		AnnotatedBeanDefinition bd = new AnnotatedRootBeanDefinition(ComponentWithBlankName.class);
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(ComponentWithBlankName.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
 		assertNotNull("The generated beanName must *never* be null.", beanName);
 		assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));
@@ -70,7 +70,7 @@ public class AnnotationBeanNameGeneratorTests extends TestCase {
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) control.getMock();
 		control.replay();
 
-		AnnotatedBeanDefinition bd = new AnnotatedRootBeanDefinition(AnonymousComponent.class);
+		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnonymousComponent.class);
 		String beanName = this.beanNameGenerator.generateBeanName(bd, registry);
 		assertNotNull("The generated beanName must *never* be null.", beanName);
 		assertTrue("The generated beanName must *never* be blank.", StringUtils.hasText(beanName));

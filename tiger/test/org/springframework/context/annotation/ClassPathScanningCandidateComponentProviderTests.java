@@ -130,7 +130,7 @@ public class ClassPathScanningCandidateComponentProviderTests extends TestCase {
 
 	private boolean containsBeanClass(Set<BeanDefinition> candidates, Class beanClass) {
 		for (Iterator it = candidates.iterator(); it.hasNext();) {
-			ScannedRootBeanDefinition definition = (ScannedRootBeanDefinition) it.next();
+			ScannedGenericBeanDefinition definition = (ScannedGenericBeanDefinition) it.next();
 			if (beanClass.getName().equals(definition.getBeanClassName())) {
 				return true;
 			}

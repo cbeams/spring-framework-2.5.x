@@ -147,7 +147,7 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 				Resource resource = resources[i];
 				ClassReader classReader = getClassReaderIfCandidate(resource);
 				if (classReader != null) {
-					ScannedRootBeanDefinition sbd = new ScannedRootBeanDefinition(classReader);
+					ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(classReader);
 					sbd.setSource(resource);
 					if (sbd.getMetadata().isConcrete()) {
 						candidates.add(sbd);

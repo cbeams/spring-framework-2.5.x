@@ -16,19 +16,19 @@
 
 package org.springframework.beans.factory.annotation;
 
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 
 /**
- * Extension of the {@link org.springframework.beans.factory.support.RootBeanDefinition}
+ * Extension of the {@link org.springframework.beans.factory.support.GenericBeanDefinition}
  * class, adding support for annotation metadata exposed through the
  * {@link AnnotatedBeanDefinition} interface.
  *
  * <p>This RootBeanDefinition variant is mainly useful for testing code that expects
  * to operate on an AnnotatedBeanDefinition, for example strategy implementations
  * in Spring's component scanning support (where the default definition class is
- * {@link org.springframework.context.annotation.ScannedRootBeanDefinition},
+ * {@link org.springframework.context.annotation.ScannedGenericBeanDefinition},
  * which also implements the AnnotatedBeanDefinition interface).
  *
  * @author Juergen Hoeller
@@ -36,17 +36,17 @@ import org.springframework.core.type.StandardAnnotationMetadata;
  * @see AnnotatedBeanDefinition#getMetadata()
  * @see org.springframework.core.type.StandardAnnotationMetadata
  */
-public class AnnotatedRootBeanDefinition extends RootBeanDefinition implements AnnotatedBeanDefinition {
+public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implements AnnotatedBeanDefinition {
 
 	private final AnnotationMetadata annotationMetadata;
 
 
 	/**
-	 * Create a new AnnotatedRootBeanDefinition for the given bean class.
+	 * Create a new AnnotatedGenericBeanDefinition for the given bean class.
 	 * @param beanClass the loaded bean class
 	 */
-	public AnnotatedRootBeanDefinition(Class beanClass) {
-		super(beanClass);
+	public AnnotatedGenericBeanDefinition(Class beanClass) {
+		setBeanClass(beanClass);
 		this.annotationMetadata = new StandardAnnotationMetadata(beanClass);
 	}
 
