@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.context;
-
-import java.util.Properties;
+package org.springframework.test.context.support;
 
 import org.springframework.beans.factory.support.BeanDefinitionReader;
-import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.test.context.ContextConfigurationAttributes;
 
 /**
  * <p>
  * Concrete implementation of {@link AbstractGenericContextLoader} which reads
- * bean definitions from Java {@link Properties} resources.
+ * bean definitions from XML resources.
  * </p>
  *
  * @see #createBeanDefinitionReader(GenericApplicationContext)
@@ -33,20 +32,20 @@ import org.springframework.context.support.GenericApplicationContext;
  * @version $Revision: 1.1 $
  * @since 2.1
  */
-public class GenericPropertiesContextLoader extends AbstractGenericContextLoader {
+public class GenericXmlContextLoader extends AbstractGenericContextLoader {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Constructs a new {@link GenericPropertiesContextLoader} with the supplied
+	 * Constructs a new {@link GenericXmlContextLoader} with the supplied
 	 * {@link ContextConfigurationAttributes configuration attributes}.
 	 *
 	 * @param configAttributes Configuration attributes for the
 	 *        {@link ApplicationContext} which this context loader loads.
 	 */
-	public GenericPropertiesContextLoader(final ContextConfigurationAttributes configAttributes) {
+	public GenericXmlContextLoader(final ContextConfigurationAttributes configAttributes) {
 
 		super(configAttributes);
 	}
@@ -57,17 +56,17 @@ public class GenericPropertiesContextLoader extends AbstractGenericContextLoader
 
 	/**
 	 * <p>
-	 * Creates a new {@link PropertiesBeanDefinitionReader}.
+	 * Creates a new {@link XmlBeanDefinitionReader}.
 	 * </p>
 	 *
-	 * @see org.springframework.test.context.AbstractGenericContextLoader#createBeanDefinitionReader(org.springframework.context.support.GenericApplicationContext)
-	 * @see PropertiesBeanDefinitionReader
-	 * @return a new PropertiesBeanDefinitionReader.
+	 * @see org.springframework.test.context.support.AbstractGenericContextLoader#createBeanDefinitionReader(org.springframework.context.support.GenericApplicationContext)
+	 * @see XmlBeanDefinitionReader
+	 * @return a new XmlBeanDefinitionReader.
 	 */
 	@Override
 	protected BeanDefinitionReader createBeanDefinitionReader(final GenericApplicationContext context) {
 
-		return new PropertiesBeanDefinitionReader(context);
+		return new XmlBeanDefinitionReader(context);
 	}
 
 	// ------------------------------------------------------------------------|

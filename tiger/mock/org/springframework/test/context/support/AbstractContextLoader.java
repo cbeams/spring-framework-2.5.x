@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.context;
+package org.springframework.test.context.support;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.test.context.ContextConfigurationAttributes;
+import org.springframework.test.context.ContextLoader;
 
 /**
  * <p>

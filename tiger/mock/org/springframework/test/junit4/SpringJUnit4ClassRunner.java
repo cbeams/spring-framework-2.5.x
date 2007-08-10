@@ -35,7 +35,7 @@ import org.springframework.test.context.TestContextManager;
  * annotations.
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
@@ -167,10 +167,10 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 			LOG.debug("Invoking test method [" + method.toGenericString() + "].");
 		}
 
-		// TODO Add test support for @Transactional and @NotTransactional
+		// TODO Add support for @Transactional and @NotTransactional
 
-		// XXX Optional: add test support for @IfProfileValue & @Repeat
-		// XXX Optional: add test support for @Timed & @ExpectedException
+		// XXX Optional: add support for @IfProfileValue & @Repeat
+		// XXX Optional: add support for @Timed & @ExpectedException
 
 		// ---------------------------------------------------------------------
 		// --- DEVELOPMENT NOTES -----------------------------------------------
@@ -208,11 +208,11 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 		final TestMethod testMethod = wrapMethod(method);
 
 		try {
-			getTestContextManager().beforeTestMethodExecution(method);
+			getTestContextManager().beforeTestMethod(test, method);
 			new MethodRoadie(test, testMethod, notifier, description).run();
 		}
 		finally {
-			getTestContextManager().afterTestMethodExecution(method);
+			getTestContextManager().afterTestMethod(test, method);
 		}
 	}
 

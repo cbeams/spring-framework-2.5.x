@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.context;
+package org.springframework.test.context.support;
 
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
 
@@ -25,6 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.test.annotation.ContextConfiguration;
+import org.springframework.test.context.ContextConfigurationAttributes;
+import org.springframework.test.context.ContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;

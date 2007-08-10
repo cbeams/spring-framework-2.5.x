@@ -28,7 +28,7 @@ import org.springframework.beans.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.ContextConfiguration;
-import org.springframework.test.context.GenericPropertiesContextLoader;
+import org.springframework.test.context.support.GenericPropertiesContextLoader;
 
 /**
  * <p>
@@ -53,7 +53,7 @@ import org.springframework.test.context.GenericPropertiesContextLoader;
  * @see GenericPropertiesContextLoader
  * @see SpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
