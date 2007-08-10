@@ -26,14 +26,14 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  * implementation that passes the BootstrapContext to beans that implement
  * the {@link BootstrapContextAware} interface.
  *
- * <p>JCA application contexts will automatically register this with their
- * underlying bean factory. Applications do not use this directly.
+ * <p>{@link ResourceAdapterApplicationContext} automatically registers
+ * this processor with its underlying bean factory.
  *
  * @author Juergen Hoeller
  * @since 2.1
  * @see BootstrapContextAware
  */
-public class BootstrapContextAwareProcessor implements BeanPostProcessor {
+class BootstrapContextAwareProcessor implements BeanPostProcessor {
 
 	private final BootstrapContext bootstrapContext;
 

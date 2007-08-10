@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,21 +22,22 @@ import org.apache.struts.action.ActionServlet;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 
 /**
- * BeanPostProcessor implementation that passes the ActionServlet to beans
- * that extend the Struts Action class. Invokes <code>Action.setServlet</code>
- * with <code>null</dode> on bean destruction, providing the same lifecycle
- * handling as Struts' ActionServlet.
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor}
+ * implementation that passes the ActionServlet to beans that extend
+ * the Struts {@link org.apache.struts.action.Action} class.
+ * Invokes <code>Action.setServlet</code> with <code>null</dode> on
+ * bean destruction, providing the same lifecycle handling as the
+ * native Struts ActionServlet.
  *
  * <p>ContextLoaderPlugIn automatically registers this processor
  * with the underlying bean factory of its WebApplicationContext.
- * Applications do not need to use this class directly.
  *
  * @author Juergen Hoeller
  * @since 1.0.1
  * @see ContextLoaderPlugIn
  * @see org.apache.struts.action.Action#setServlet
  */
-public class ActionServletAwareProcessor implements DestructionAwareBeanPostProcessor {
+class ActionServletAwareProcessor implements DestructionAwareBeanPostProcessor {
 
 	private final ActionServlet actionServlet;
 
