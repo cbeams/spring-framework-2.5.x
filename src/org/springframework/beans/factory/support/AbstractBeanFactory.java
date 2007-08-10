@@ -1354,9 +1354,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * Return whether the bean definition for the given bean name has been
 	 * marked as a primary bean. 
 	 */
-	public boolean isPrimary(String beanName) throws NoSuchBeanDefinitionException {
-		RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
-		return bd.isPrimary();
+	protected boolean isPrimary(String beanName, Object beanInstance) {
+		return (containsBeanDefinition(beanName) && getMergedLocalBeanDefinition(beanName).isPrimary());
 	}
 
 	/**

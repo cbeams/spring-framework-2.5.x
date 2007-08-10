@@ -16,9 +16,6 @@
 
 package org.springframework.context.support;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
@@ -29,9 +26,10 @@ import org.springframework.context.ResourceLoaderAware;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor}
- * implementation that passes the ApplicationContext to beans that implement
- * the {@link ResourceLoaderAware}, {@link ApplicationEventPublisherAware},
- * {@link MessageSourceAware} and/or {@link ApplicationContextAware} interfaces.
+ * implementation that passes the ApplicationContext to beans that
+ * implement the {@link ResourceLoaderAware}, {@link MessageSourceAware},
+ * {@link ApplicationEventPublisherAware} and/or
+ * {@link ApplicationContextAware} interfaces.
  * If all of them are implemented, they are satisfied in the given order.
  *
  * <p>Application contexts will automatically register this with their
@@ -40,12 +38,12 @@ import org.springframework.context.ResourceLoaderAware;
  * @author Juergen Hoeller
  * @since 10.10.2003
  * @see org.springframework.context.ResourceLoaderAware
- * @see org.springframework.context.ApplicationEventPublisherAware
  * @see org.springframework.context.MessageSourceAware
+ * @see org.springframework.context.ApplicationEventPublisherAware
  * @see org.springframework.context.ApplicationContextAware
  * @see org.springframework.context.support.AbstractApplicationContext#refresh()
  */
-public class ApplicationContextAwareProcessor implements BeanPostProcessor {
+class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 	private final ApplicationContext applicationContext;
 

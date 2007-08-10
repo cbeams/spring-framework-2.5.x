@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +87,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/** Resolver to use for checking if a bean definition is an autowire candidate */
 	private AutowireCandidateResolver autowireCandidateResolver = AutowireUtils.createAutowireCandidateResolver();
+
+	/** Map from dependency type to corresponding autowired value */
+	private final Map resolvableDependencies = new HashMap();
 
 
 	/**
@@ -295,6 +299,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of ConfigurableListableBeanFactory interface
 	//---------------------------------------------------------------------
 
+	public void registerResolvableDependency(Class dependencyType, Object autowiredValue) {
+		Assert.notNull(dependencyType, "Type must not be null");
+		Assert.isTrue(dependencyType.isInstance(autowiredValue), "Value does not implement specified type");
+		this.resolvableDependencies.put(dependencyType, autowiredValue);
+	}
+
 	public boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor)
 			throws NoSuchBeanDefinitionException {
 
@@ -447,6 +457,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	protected Map findAutowireCandidates(String beanName, Class requiredType, DependencyDescriptor descriptor) {
 		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType);
 		Map result = CollectionFactory.createLinkedMapIfPossible(candidateNames.length);
+		for (Iterator it = this.resolvableDependencies.keySet().iterator(); it.hasNext();) {
+			Class autowiringType = (Class) it.next();
+			if (autowiringType.isAssignableFrom(requiredType)) {
+				Object autowiringValue = this.resolvableDependencies.get(autowiringType);
+				if (requiredType.isInstance(autowiringValue)) {
+					result.put(ObjectUtils.identityToString(autowiringValue), autowiringValue);
+					break;
+				}
+			}
+		}
 		for (int i = 0; i < candidateNames.length; i++) {
 			String candidateName = candidateNames[i];
 			if (!candidateName.equals(beanName) && isAutowireCandidate(candidateName, descriptor)) {
@@ -454,6 +474,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		return result;
+	}
+
+	protected boolean isPrimary(String beanName, Object beanInstance) {
+		return (super.isPrimary(beanName, beanInstance) || this.resolvableDependencies.values().contains(beanInstance));
 	}
 
 

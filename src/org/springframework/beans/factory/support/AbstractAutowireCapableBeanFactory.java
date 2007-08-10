@@ -417,7 +417,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				Object primaryBeanInstance = null;
 				for (Iterator it = matchingBeans.entrySet().iterator(); it.hasNext();) {
 					Map.Entry entry = (Map.Entry) it.next();
-					if (this.isPrimary((String) entry.getKey())) {
+					if (isPrimary((String) entry.getKey(), entry.getValue())) {
 						if (primaryBeanName != null) {
 							throw new NoSuchBeanDefinitionException(type,
 									"more than one 'primary' bean found among candidates: " + matchingBeans.keySet());

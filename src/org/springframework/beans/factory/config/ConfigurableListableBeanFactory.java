@@ -60,6 +60,22 @@ public interface ConfigurableListableBeanFactory
 	void ignoreDependencyInterface(Class ifc);
 
 	/**
+	 * Register a special dependency type with corresponding autowired value.
+	 * <p>This is intended for factory/context references that are supposed
+	 * to be autowirable but are not defined as beans in the factory:
+	 * e.g. a dependency of type ApplicationContext resolved to the
+	 * ApplicationContext instance that the bean is living in.
+	 * <p>Note: There are no such default types registered in a plain BeanFactory,
+	 * not even for the BeanFactory interface itself.
+	 * @param dependencyType the dependency type to register. This will typically
+	 * be a base interface such as BeanFactory, with extensions of it resolved
+	 * as well if declared as an autowiring dependency (e.g. ListableBeanFactory),
+	 * as long as the given value actually implements the extended interface.
+	 * @param autowiredValue the corresponding autowired value
+	 */
+	void registerResolvableDependency(Class dependencyType, Object autowiredValue);
+
+	/**
 	 * Determine whether the specified bean qualifies as an autowire candidate,
 	 * to be injected into other beans which declare a dependency of matching type.
 	 * <p>This method checks ancestor factories as well.

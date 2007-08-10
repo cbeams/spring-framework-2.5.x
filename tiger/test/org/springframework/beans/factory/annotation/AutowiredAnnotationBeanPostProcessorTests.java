@@ -30,6 +30,8 @@ import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
@@ -56,6 +58,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 	public void testExtendedResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerResolvableDependency(BeanFactory.class, bf);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
@@ -71,11 +74,13 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(tb, bean.getTestBean3());
 		assertSame(tb, bean.getTestBean4());
 		assertSame(ntb, bean.getNestedTestBean());
+		assertSame(bf, bean.getBeanFactory());
 		bf.destroySingletons();
 	}
 
 	public void testExtendedResourceInjectionWithOverriding() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerResolvableDependency(BeanFactory.class, bf);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
@@ -94,6 +99,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(tb, bean.getTestBean3());
 		assertSame(tb, bean.getTestBean4());
 		assertSame(ntb, bean.getNestedTestBean());
+		assertSame(bf, bean.getBeanFactory());
 		bf.destroySingletons();
 	}
 
@@ -193,6 +199,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 	public void testConstructorResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerResolvableDependency(BeanFactory.class, bf);
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
@@ -208,6 +215,7 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(tb, bean.getTestBean3());
 		assertSame(tb, bean.getTestBean4());
 		assertSame(ntb, bean.getNestedTestBean());
+		assertSame(bf, bean.getBeanFactory());
 		bf.destroySingletons();
 	}
 	
@@ -686,6 +694,8 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 		private ITestBean testBean4;
 
+		private BeanFactory beanFactory;
+
 		public ExtendedResourceInjectionBean() {
 		}
 
@@ -700,6 +710,11 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 			this.nestedTestBean = nestedTestBean;
 		}
 
+		@Autowired
+		protected void initBeanFactory(BeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
+
 		public ITestBean getTestBean3() {
 			return testBean3;
 		}
@@ -710,6 +725,10 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 		public NestedTestBean getNestedTestBean() {
 			return nestedTestBean;
+		}
+
+		public BeanFactory getBeanFactory() {
+			return beanFactory;
 		}
 	}
 
@@ -811,6 +830,8 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 		private NestedTestBean nestedTestBean;
 
+		private ConfigurableListableBeanFactory beanFactory;
+
 		public ConstructorResourceInjectionBean() {
 			throw new UnsupportedOperationException();
 		}
@@ -820,9 +841,10 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 		}
 
 		@Autowired
-		public ConstructorResourceInjectionBean(ITestBean testBean4, NestedTestBean nestedTestBean) {
+		public ConstructorResourceInjectionBean(ITestBean testBean4, NestedTestBean nestedTestBean, ConfigurableListableBeanFactory beanFactory) {
 			this.testBean4 = testBean4;
 			this.nestedTestBean = nestedTestBean;
+			this.beanFactory = beanFactory;
 		}
 
 		public ConstructorResourceInjectionBean(NestedTestBean nestedTestBean) {
@@ -848,6 +870,10 @@ public class AutowiredAnnotationBeanPostProcessorTests extends TestCase {
 
 		public NestedTestBean getNestedTestBean() {
 			return nestedTestBean;
+		}
+
+		public ConfigurableListableBeanFactory getBeanFactory() {
+			return beanFactory;
 		}
 	}
 

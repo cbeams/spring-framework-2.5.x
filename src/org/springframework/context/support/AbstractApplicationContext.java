@@ -43,6 +43,7 @@ import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -64,6 +65,7 @@ import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.Assert;
@@ -418,12 +420,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Populate the bean factory with context-specific resource editors.
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
 
-		// Configure the bean factory with context semantics.
+		// Configure the bean factory with context callbacks.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
 		beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
 		beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
 		beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+
+		// BeanFactory interface not registered as resolvable type in a plain factory.
+		// MessageSource registered (and found for autowiring) as a bean.
+		beanFactory.registerResolvableDependency(BeanFactory.class, beanFactory);
+		beanFactory.registerResolvableDependency(ResourceLoader.class, this);
+		beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
+		beanFactory.registerResolvableDependency(ApplicationContext.class, this);
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found.
 		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME) && JdkVersion.isAtLeastJava15()) {
@@ -590,8 +599,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Use parent's if none defined in this context.
 	 */
 	protected void initMessageSource() {
-		if (containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
-			this.messageSource = (MessageSource) getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		if (beanFactory.containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
+			this.messageSource = (MessageSource) beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
 			// Make MessageSource aware of parent MessageSource.
 			if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource) {
 				HierarchicalMessageSource hms = (HierarchicalMessageSource) this.messageSource;
@@ -610,6 +620,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			DelegatingMessageSource dms = new DelegatingMessageSource();
 			dms.setParentMessageSource(getInternalParentMessageSource());
 			this.messageSource = dms;
+			beanFactory.registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.messageSource);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
 						"': using default [" + this.messageSource + "]");
@@ -623,15 +634,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
 	protected void initApplicationEventMulticaster() {
-		if (containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster = (ApplicationEventMulticaster)
-					getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
+					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
 			}
 		}
 		else {
 			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster();
+			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Unable to locate ApplicationEventMulticaster with name '" +
 						APPLICATION_EVENT_MULTICASTER_BEAN_NAME +
