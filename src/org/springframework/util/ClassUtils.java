@@ -27,8 +27,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -779,7 +779,7 @@ public abstract class ClassUtils {
 		if (clazz.isInterface()) {
 			return Collections.singleton(clazz);
 		}
-		Set interfaces = new HashSet();
+		Set interfaces = new LinkedHashSet();
 		while (clazz != null) {
 			for (int i = 0; i < clazz.getInterfaces().length; i++) {
 				Class ifc = clazz.getInterfaces()[i];
