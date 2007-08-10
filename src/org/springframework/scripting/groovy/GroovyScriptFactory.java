@@ -145,7 +145,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 					if (Script.class.isAssignableFrom(this.scriptClass)) {
 						// A Groovy script, probably creating an instance: let's execute it.
-						Object result = executeScript(this.scriptClass);
+						Object result = executeScript(scriptSource, this.scriptClass);
 						this.scriptResultClass = (result != null ? result.getClass() : null);
 						return result;
 					}
@@ -157,11 +157,10 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 			}
 
 			// Process re-execution outside of the synchronized block.
-			return executeScript(scriptClassToExecute);
+			return executeScript(scriptSource, scriptClassToExecute);
 		}
 		catch (CompilationFailedException ex) {
-			throw new ScriptCompilationException(
-					"Could not compile Groovy script: " + scriptSource, ex);
+			throw new ScriptCompilationException(scriptSource, ex);
 		}
 	}
 
@@ -170,11 +169,12 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 		synchronized (this.scriptClassMonitor) {
 			if (this.scriptClass == null || scriptSource.isModified()) {
-				this.scriptClass = this.groovyClassLoader.parseClass(scriptSource.getScriptAsString());
+				this.scriptClass = this.groovyClassLoader.parseClass(
+						scriptSource.getScriptAsString(), scriptSource.toString());
 
 				if (Script.class.isAssignableFrom(this.scriptClass)) {
 					// A Groovy script, probably creating an instance: let's execute it.
-					Object result = executeScript(this.scriptClass);
+					Object result = executeScript(scriptSource, this.scriptClass);
 					this.scriptResultClass = (result != null ? result.getClass() : null);
 				}
 				else {
@@ -187,12 +187,13 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 	/**
 	 * Instantiate the given Groovy script class and run it if necessary.
+	 * @param scriptSource the source for the underlying script
 	 * @param scriptClass the Groovy script class
 	 * @return the result object (either an instance of the script class
 	 * or the result of running the script instance)
 	 * @throws ScriptCompilationException in case of instantiation failure
 	 */
-	protected Object executeScript(Class scriptClass) throws ScriptCompilationException {
+	protected Object executeScript(ScriptSource scriptSource, Class scriptClass) throws ScriptCompilationException {
 		try {
 			GroovyObject goo = (GroovyObject) scriptClass.newInstance();
 
@@ -212,11 +213,11 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 		}
 		catch (InstantiationException ex) {
 			throw new ScriptCompilationException(
-					"Could not instantiate Groovy script class: " + scriptClass.getName(), ex);
+					scriptSource, "Could not instantiate Groovy script class: " + scriptClass.getName(), ex);
 		}
 		catch (IllegalAccessException ex) {
 			throw new ScriptCompilationException(
-					"Could not access Groovy script constructor: " + scriptClass.getName(), ex);
+					scriptSource, "Could not access Groovy script constructor: " + scriptClass.getName(), ex);
 		}
 	}
 
