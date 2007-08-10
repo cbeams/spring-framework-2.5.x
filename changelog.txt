@@ -17,22 +17,36 @@ Package org.springframework.aop
 Package org.springframework.beans
 * exposed "String[] getDependentBeans(beanName)" method on ConfigurableBeanFactory interface
 * removed superseded ResourceFactoryBean (String-to-Resource conversion has been implicitly available for years)
+* introduced "registerResolvableDependency" method on ConfigurableListableBeanFactory interface
 * introduced qualifier support, allowing to use custom parameter annotations for identifying specific target beans
 * introduced AutowireCandidateResolver mechanism and QualifierAnnotationAutowireCandidateResolver implementation
-* "spring-beans-2.1.xsd" supports "default-autowire-candidates" attribute, accepting Spring-style bean name patterns
+* reworked Annotated/ScannedRootBeanDefinition into Annotated/ScannedGenericBeanDefinition
 * ClassPathBeanDefinitionScanner does not apply scoped-proxy setting to prototypes (only to extended scopes)
+* "spring-beans-2.1.xsd" supports "default-autowire-candidates" attribute, accepting Spring-style bean name patterns
+
+Package org.springframework.context
+* AbstractApplicationContext registers BeanFactory, ApplicationContext etc as resolvable dependency types for @Autowired
+
+Package org.springframework.core
+* factored out protected "openStreamForClass" template method in OverridingClassLoader
 
 Package org.springframework.jdbc
 * strengthened SQLExceptionTranslator's contract to define root cause handling for returned DataAccessExceptions
 
 Package org.springframework.jms
 * MessageListenerAdapter logs at warn level if a listener method returned a result but no response message can be sent
+* added BeanFactoryDestinationResolver, for use with "jms:listener-container"'s "destination-resolver" attribute
 * added "message-converter" attribute to "jms:listener-container/jca-listener-container" XML configuration element
+* added "response-destination" attribute to "jms:listener" element, defining a default in case of no JMSReplyTo header
 
 Package org.springframework.orm
 * HibernateJdbcException extracts the SQL statement and explicitly builds it into the exception message
+* introduced EntityManagerProxy interface, allowing access to underlying EntityManager for shared/extended EM proxies
+* container-managed extended EntityManager gets explicitly closed on destruction of the containing bean
 
 Package org.springframework.scripting
+* ScriptCompilationException carries the ScriptSource of the offending script
+* GroovyScriptFactory passes script source description to GroovyClassLoader.parseClass (for descriptive error messages)
 * added "autowire" and "dependency-check" attributes to "lang:bsh/jruby/groovy" XML configuration elements
 
 Package org.springframework.test
@@ -41,6 +55,9 @@ Package org.springframework.test
 
 Package org.springframework.transaction
 * fixed "tx:annotation-driven" to not activate "aop:config"-style autodetection of application-defined Advisor beans
+
+Package org.springframework.util
+* ReflectionUtils provides a "findMethod" variant without parameter types argument
 
 Package org.springframework.web
 * JstlView properly allows for programmatic usage (added overloaded constructors; exposing a MessageSource is optional)
