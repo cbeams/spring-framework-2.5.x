@@ -23,6 +23,8 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
+import org.springframework.context.MessageSource;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
@@ -155,7 +157,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
-	
+
 	public void testCustomIncludeFilterAndDefaults() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context, true);
@@ -255,7 +257,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		assertTrue(context.containsBean(AnnotationConfigUtils.COMMON_ANNOTATION_PROCESSOR_BEAN_NAME));
 		assertTrue(context.containsBean(AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 	}
-	
+
 	public void testMultipleBasePackagesWithDefaultsOnly() {
 		GenericApplicationContext singlePackageContext = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner singlePackageScanner = new ClassPathBeanDefinitionScanner(singlePackageContext);
@@ -267,7 +269,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 				BASE_PACKAGE, "org.springframework.dao.annotation");
 		assertTrue(multiPackageBeanCount > singlePackageBeanCount);
 	}
-	
+
 	public void testMultipleScanCalls() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
@@ -277,17 +279,33 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 		int addedBeanCount = scanner.scan("org.springframework.aop.aspectj.annotation");
 		assertEquals(beanCount + addedBeanCount, context.getBeanDefinitionCount());
 	}
-	
+
 	public void testBeanAutowiredWithAnnotationConfigEnabled() {
 		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBeanDefinition("myBf", new RootBeanDefinition(StaticListableBeanFactory.class));
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setBeanNameGenerator(new TestBeanNameGenerator());
 		int beanCount = scanner.scan(BASE_PACKAGE);
 		assertEquals(12, beanCount);
 		context.refresh();
-		FooService fooService = (FooService) context.getBean("fooService");
+
+		FooServiceImpl fooService = (FooServiceImpl) context.getBean("fooService");
+		StaticListableBeanFactory myBf = (StaticListableBeanFactory) context.getBean("myBf");
+		MessageSource ms = (MessageSource) context.getBean("messageSource");
 		assertTrue(fooService.isInitCalled());
 		assertEquals("bar", fooService.foo(123));
+		assertSame(context.getDefaultListableBeanFactory(), fooService.beanFactory);
+		assertEquals(2, fooService.listableBeanFactory.size());
+		assertSame(context.getDefaultListableBeanFactory(), fooService.listableBeanFactory.get(0));
+		assertSame(myBf, fooService.listableBeanFactory.get(1));
+		assertSame(context, fooService.resourceLoader);
+		assertSame(context, fooService.resourcePatternResolver);
+		assertSame(context, fooService.eventPublisher);
+		assertSame(ms, fooService.messageSource);
+		assertSame(context, fooService.context);
+		assertEquals(1, fooService.configurableContext.length);
+		assertSame(context, fooService.configurableContext[0]);
+		assertSame(context, fooService.genericContext);
 	}
 
 	public void testBeanNotAutowiredWithAnnotationConfigDisabled() {
@@ -309,7 +327,7 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 	}
 
 
-	private static final class TestBeanNameGenerator extends AnnotationBeanNameGenerator {
+	private static class TestBeanNameGenerator extends AnnotationBeanNameGenerator {
 
 		@Override
 		public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {

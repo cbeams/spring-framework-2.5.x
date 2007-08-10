@@ -16,9 +16,20 @@
 
 package org.springframework.context.annotation;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,8 +39,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class FooServiceImpl implements FooService {
 
-	@Autowired
-	private FooDao fooDao;
+	@Autowired private FooDao fooDao;
+
+	@Autowired public BeanFactory beanFactory;
+
+	@Autowired public List<ListableBeanFactory> listableBeanFactory;
+
+	@Autowired public ResourceLoader resourceLoader;
+
+	@Autowired public ResourcePatternResolver resourcePatternResolver;
+
+	@Autowired public ApplicationEventPublisher eventPublisher;
+
+	@Autowired public MessageSource messageSource;
+
+	@Autowired public ApplicationContext context;
+
+	@Autowired public ConfigurableApplicationContext[] configurableContext;
+
+	@Autowired public AbstractApplicationContext genericContext;
 
 	private boolean initCalled = false;
 
