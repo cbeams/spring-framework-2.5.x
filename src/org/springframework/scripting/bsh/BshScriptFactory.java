@@ -106,16 +106,16 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * Load and parse the BeanShell script via {@link BshScriptUtils}.
 	 * @see BshScriptUtils#createBshObject(String, Class[], ClassLoader)
 	 */
-	public Object getScriptedObject(ScriptSource actualScriptSource, Class[] actualInterfaces)
+	public Object getScriptedObject(ScriptSource scriptSource, Class[] actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
 		try {
 			Class clazz = null;
 			synchronized (this.scriptClassMonitor) {
-				if (actualScriptSource.isModified()) {
+				if (scriptSource.isModified()) {
 					// New script content: Let's check whether it evaluates to a Class.
 					Object result = BshScriptUtils.evaluateBshScript(
-							actualScriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
+							scriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
 					if (result instanceof Class) {
 						// A Class: We'll cache the Class here and create an instance
 						// outside of the synchronized block.
@@ -137,17 +137,18 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 					return clazz.newInstance();
 				}
 				catch (Throwable ex) {
-					throw new ScriptCompilationException("Could not instantiate script class: " + clazz, ex);
+					throw new ScriptCompilationException(
+							scriptSource, "Could not instantiate script class: " + clazz.getName(), ex);
 				}
 			}
 			else {
 				// Not a Class: We need to evaluate the script for every call.
 				return BshScriptUtils.createBshObject(
-						actualScriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
+						scriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
 			}
 		}
 		catch (EvalError ex) {
-			throw new ScriptCompilationException("Could not compile BeanShell script: " + actualScriptSource, ex);
+			throw new ScriptCompilationException(scriptSource, ex);
 		}
 	}
 
@@ -164,7 +165,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 			}
 		}
 		catch (EvalError ex) {
-			throw new ScriptCompilationException("Could not compile BeanShell script: " + scriptSource, ex);
+			throw new ScriptCompilationException(scriptSource, ex);
 		}
 	}
 
