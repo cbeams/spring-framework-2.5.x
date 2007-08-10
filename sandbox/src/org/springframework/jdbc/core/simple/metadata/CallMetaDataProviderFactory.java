@@ -92,6 +92,9 @@ public class CallMetaDataProviderFactory {
 					else if ("DB2".equals(databaseProductName)) {
 						provider = new Db2CallMetaDataProvider((databaseMetaData));
 					}
+					else if ("Apache Derby".equals(databaseProductName)) {
+						provider = new DerbyCallMetaDataProvider((databaseMetaData));
+					}
 					else if ("Sybase".equals(databaseProductName)) {
 						provider = new SybaseCallMetaDataProvider((databaseMetaData));
 					}
