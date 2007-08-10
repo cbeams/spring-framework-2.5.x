@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -40,7 +41,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Factory for dynamic EntityManager proxies that follow the JPA spec's
@@ -245,12 +245,14 @@ public abstract class ExtendedEntityManagerCreator {
 			PersistenceExceptionTranslator exceptionTranslator, Boolean jta, boolean containerManaged) {
 
 		Assert.notNull(rawEntityManager, "EntityManager must not be null");
-		Class[] ifcs = ClassUtils.getAllInterfaces(rawEntityManager);
+		Set ifcs = ClassUtils.getAllInterfacesAsSet(rawEntityManager);
+		ifcs.add(EntityManagerProxy.class);
 		if (plusOperations != null) {
-			ifcs = (Class[]) ObjectUtils.addObjectToArray(ifcs, EntityManagerPlusOperations.class);
+			ifcs.add(EntityManagerPlusOperations.class);
 		}
 		return (EntityManager) Proxy.newProxyInstance(
-				ExtendedEntityManagerCreator.class.getClassLoader(), ifcs,
+				ExtendedEntityManagerCreator.class.getClassLoader(),
+				(Class[]) ifcs.toArray(new Class[ifcs.size()]),
 				new ExtendedEntityManagerInvocationHandler(
 						rawEntityManager, plusOperations, exceptionTranslator, jta, containerManaged));
 	}
@@ -306,14 +308,12 @@ public abstract class ExtendedEntityManagerCreator {
 				// Use hashCode of EntityManager proxy.
 				return hashCode();
 			}
-			else if (method.getName().equals("joinTransaction")) {
-				doJoinTransaction(true);
-				return null;
+			else if (method.getName().equals("getTargetEntityManager")) {
+				return this.target;
 			}
-			else if (method.getName().equals("getTransaction")) {
+			else if (method.getName().equals("isOpen")) {
 				if (this.containerManaged) {
-					throw new IllegalStateException("Cannot execute getTransaction() on " +
-						"a container-managed EntityManager");
+					return true;
 				}
 			}
 			else if (method.getName().equals("close")) {
@@ -321,10 +321,15 @@ public abstract class ExtendedEntityManagerCreator {
 					throw new IllegalStateException("Invalid usage: Cannot close a container-managed EntityManager");
 				}
 			}
-			else if (method.getName().equals("isOpen")) {
+			else if (method.getName().equals("getTransaction")) {
 				if (this.containerManaged) {
-					return true;
+					throw new IllegalStateException(
+							"Cannot execute getTransaction() on a container-managed EntityManager");
 				}
+			}
+			else if (method.getName().equals("joinTransaction")) {
+				doJoinTransaction(true);
+				return null;
 			}
 
 			// Do automatic joining if required.

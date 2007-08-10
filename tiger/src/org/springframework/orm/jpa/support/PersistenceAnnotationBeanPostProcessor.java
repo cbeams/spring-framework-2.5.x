@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa.support;
 
 import java.beans.PropertyDescriptor;
+import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -44,10 +45,12 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.InjectionMetadata;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
+import org.springframework.orm.jpa.EntityManagerProxy;
 import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.ObjectUtils;
@@ -145,20 +148,23 @@ import org.springframework.util.ReflectionUtils;
  * @see javax.persistence.PersistenceContext
  */
 public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
-		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
+		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor, BeanFactoryAware, Serializable {
 
-	private Map<String, String> persistenceUnits;
+	private transient Map<String, String> persistenceUnits;
 
-	private Map<String, String> persistenceContexts;
+	private transient Map<String, String> persistenceContexts;
 
-	private Map<String, String> extendedPersistenceContexts;
+	private transient Map<String, String> extendedPersistenceContexts;
 
-	private String defaultPersistenceUnitName = "";
+	private transient String defaultPersistenceUnitName = "";
 
-	private ListableBeanFactory beanFactory;
+	private transient ListableBeanFactory beanFactory;
 
-	private final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
+	private transient final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
 			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
+
+	private final Map<Object, EntityManager> extendedEntityManagersToClose =
+			new ConcurrentHashMap<Object, EntityManager>();
 
 
 	public PersistenceAnnotationBeanPostProcessor() {
@@ -295,6 +301,13 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
+	}
+
+	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
+		EntityManager emToClose = this.extendedEntityManagersToClose.remove(bean);
+		if (emToClose != null) {
+			emToClose.close();
+		}
 	}
 
 
@@ -513,11 +526,12 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 		 * Resolve the object against the application context.
 		 */
 		@Override
-		protected Object getResourceToInject(String requestingBeanName) {
+		protected Object getResourceToInject(Object target, String requestingBeanName) {
 			// Resolves to EntityManagerFactory or EntityManager.
 			if (this.type != null) {
 				return (this.type == PersistenceContextType.EXTENDED ?
-						resolveExtendedEntityManager(requestingBeanName) : resolveEntityManager(requestingBeanName));
+						resolveExtendedEntityManager(target, requestingBeanName) :
+						resolveEntityManager(requestingBeanName));
 			}
 			else {
 				// OK, so we need an EntityManagerFactory...
@@ -561,7 +575,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 			return em;
 		}
 
-		private EntityManager resolveExtendedEntityManager(String requestingBeanName) {
+		private EntityManager resolveExtendedEntityManager(Object target, String requestingBeanName) {
 			// Obtain EntityManager reference from JNDI?
 			EntityManager em = getPersistenceContext(this.unitName, true);
 			if (em == null) {
@@ -574,6 +588,10 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 				}
 				// Inject a container-managed extended EntityManager.
 				em = ExtendedEntityManagerCreator.createContainerManagedEntityManager(emf, this.properties);
+			}
+			if (em instanceof EntityManagerProxy &&
+					beanFactory != null && !beanFactory.isPrototype(requestingBeanName)) {
+				extendedEntityManagersToClose.put(target, ((EntityManagerProxy) em).getTargetEntityManager());
 			}
 			return em;
 		}

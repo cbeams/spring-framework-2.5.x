@@ -78,7 +78,8 @@ public abstract class SharedEntityManagerCreator {
 			Class entityManagerInterface = emfInfo.getEntityManagerInterface();
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
 			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
-				entityManagerInterfaces = new Class[] {entityManagerInterface, EntityManagerPlus.class};
+				entityManagerInterfaces =
+						new Class[] {entityManagerInterface, EntityManagerPlus.class};
 			}
 			else {
 				entityManagerInterfaces = new Class[] {entityManagerInterface};
@@ -103,9 +104,11 @@ public abstract class SharedEntityManagerCreator {
 	public static EntityManager createSharedEntityManager(
 			EntityManagerFactory emf, Map properties, Class... entityManagerInterfaces) {
 
+		Class[] ifcs = new Class[entityManagerInterfaces.length + 1];
+		System.arraycopy(entityManagerInterfaces, 0, ifcs, 0, entityManagerInterfaces.length);
+		ifcs[entityManagerInterfaces.length] = EntityManagerProxy.class;
 		return (EntityManager) Proxy.newProxyInstance(
-				SharedEntityManagerCreator.class.getClassLoader(),
-				entityManagerInterfaces,
+				SharedEntityManagerCreator.class.getClassLoader(), ifcs,
 				new SharedEntityManagerInvocationHandler(emf, properties));
 	}
 
@@ -166,6 +169,16 @@ public abstract class SharedEntityManagerCreator {
 			// managed by the factory or a temporary one for the given invocation.
 			EntityManager target =
 					EntityManagerFactoryUtils.doGetTransactionalEntityManager(this.targetFactory, this.properties);
+
+			// Handle EntityManagerProxy interface.
+			if (method.getName().equals("getTargetEntityManager")) {
+				if (target == null) {
+					throw new IllegalStateException("No transactional EntityManager available");
+				}
+				return target;
+			}
+
+			// Regular EntityManager operations.
 			boolean isNewEm = false;
 			if (target == null) {
 				logger.debug("Creating new EntityManager for shared EntityManager invocation");

@@ -33,6 +33,7 @@ import javax.persistence.PersistenceUnit;
 
 import org.easymock.MockControl;
 
+import org.springframework.beans.factory.config.SimpleMapScope;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
@@ -87,24 +88,33 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	public void testPublicExtendedPersistenceContextSetterWithSerialization() throws Exception {
+		DummyInvocationHandler ih = new DummyInvocationHandler();
 		Object mockEm = (EntityManager) Proxy.newProxyInstance(
-				getClass().getClassLoader(), new Class[] {EntityManager.class}, new DummyInvocationHandler());
+				getClass().getClassLoader(), new Class[] {EntityManager.class}, ih);
 		mockEmf.createEntityManager();
 		emfMc.setReturnValue(mockEm, 1);
 		emfMc.replay();
 
 		GenericApplicationContext gac = new GenericApplicationContext();
+		SimpleMapScope myScope = new SimpleMapScope();
+		gac.getDefaultListableBeanFactory().registerScope("myScope", myScope);
 		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
 		gac.registerBeanDefinition("annotationProcessor",
 				new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
-		gac.registerBeanDefinition(DefaultPublicPersistenceContextSetter.class.getName(),
-				new RootBeanDefinition(DefaultPublicPersistenceContextSetter.class));
+		RootBeanDefinition bd = new RootBeanDefinition(DefaultPublicPersistenceContextSetter.class);
+		bd.setScope("myScope");
+		gac.registerBeanDefinition(DefaultPublicPersistenceContextSetter.class.getName(), bd);
 		gac.refresh();
 
 		DefaultPublicPersistenceContextSetter bean = (DefaultPublicPersistenceContextSetter) gac.getBean(
 				DefaultPublicPersistenceContextSetter.class.getName());
 		assertNotNull(bean.em);
 		assertNotNull(SerializationTestUtils.serializeAndDeserialize(bean.em));
+
+		SimpleMapScope serialized = (SimpleMapScope) SerializationTestUtils.serializeAndDeserialize(myScope);
+		serialized.close();
+		assertTrue(DummyInvocationHandler.closed);
+		DummyInvocationHandler.closed = false;
 		emfMc.verify();
 	}
 
@@ -660,7 +670,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
-	public static class DefaultPublicPersistenceContextSetter {
+	public static class DefaultPublicPersistenceContextSetter implements Serializable {
 
 		private EntityManager em;
 
@@ -762,7 +772,13 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 	private static class DummyInvocationHandler implements InvocationHandler, Serializable {
 
+		public static boolean closed;
+
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			if ("close".equals(method.getName())) {
+				closed = true;
+				return null;
+			}
 			if ("toString".equals(method.getName())) {
 				return "";
 			}

@@ -22,6 +22,8 @@ import javax.persistence.EntityManagerFactory;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.orm.jpa.EntityManagerHolder;
+import org.springframework.orm.jpa.EntityManagerProxy;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -32,36 +34,52 @@ public class SharedEntityManagerFactoryTests extends TestCase {
 	
 	public void testValidUsage() {
 		Object o = new Object();
-		
+
 		MockControl emMc = MockControl.createControl(EntityManager.class);
 		EntityManager mockEm = (EntityManager) emMc.getMock();
-		
+
 		mockEm.contains(o);
 		emMc.setReturnValue(false, 1);
-		
+
 		mockEm.close();
 		emMc.setVoidCallable(1);
 		emMc.replay();
-		
-		
+
 		MockControl emfMc = MockControl.createControl(EntityManagerFactory.class);
 		EntityManagerFactory mockEmf = (EntityManagerFactory) emfMc.getMock();
 		mockEmf.createEntityManager();
 		emfMc.setReturnValue(mockEm, 1);
 		emfMc.replay();
-		
+
 		SharedEntityManagerBean proxyFactoryBean = new SharedEntityManagerBean();
 		proxyFactoryBean.setEntityManagerFactory(mockEmf);
 		proxyFactoryBean.afterPropertiesSet();
-		
+
 		assertTrue(EntityManager.class.isAssignableFrom(proxyFactoryBean.getObjectType()));
 		assertTrue(proxyFactoryBean.isSingleton());
-		
+
 		EntityManager proxy = (EntityManager) proxyFactoryBean.getObject();
 		assertSame(proxy, proxyFactoryBean.getObject());
-		
 		assertFalse(proxy.contains(o));
-		
+
+		assertTrue(proxy instanceof EntityManagerProxy);
+		EntityManagerProxy emProxy = (EntityManagerProxy) proxy;
+		try {
+			emProxy.getTargetEntityManager();
+			fail("Should have thrown IllegalStateException outside of transaction");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+
+		TransactionSynchronizationManager.bindResource(mockEmf, new EntityManagerHolder(mockEm));
+		try {
+			assertSame(mockEm, emProxy.getTargetEntityManager());
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(mockEmf);
+		}
+
 		emfMc.verify();
 		emMc.verify();
 
