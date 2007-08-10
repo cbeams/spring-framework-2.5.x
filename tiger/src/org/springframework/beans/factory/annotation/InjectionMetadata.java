@@ -118,7 +118,7 @@ public class InjectionMetadata {
 			if (this.isField) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
-				field.set(target, getResourceToInject(requestingBeanName));
+				field.set(target, getResourceToInject(target, requestingBeanName));
 			}
 			else {
 				if (this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
@@ -128,7 +128,7 @@ public class InjectionMetadata {
 				try {
 					Method method = (Method) this.member;
 					ReflectionUtils.makeAccessible(method);
-					method.invoke(target, getResourceToInject(requestingBeanName));
+					method.invoke(target, getResourceToInject(target, requestingBeanName));
 				}
 				catch (InvocationTargetException ex) {
 					throw ex.getTargetException();
@@ -139,7 +139,7 @@ public class InjectionMetadata {
 		/**
 		 * Either this or {@link #inject} needs to be overridden.
 		 */
-		protected Object getResourceToInject(String requestingBeanName) {
+		protected Object getResourceToInject(Object target, String requestingBeanName) {
 			return null;
 		}
 

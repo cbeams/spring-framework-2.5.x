@@ -248,7 +248,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 
 		@Override
-		protected Object getResourceToInject(String requestingBeanName) {
+		protected Object getResourceToInject(Object target, String requestingBeanName) {
 			return getResource(this.name, this.type, this.shareable, requestingBeanName);
 		}
 	}
