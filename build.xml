@@ -90,8 +90,6 @@
 		<include name="org/springframework/context/**"/>
 		<include name="org/springframework/ejb/**"/>
 		<include name="org/springframework/instrument/classloading/**"/>
-		<exclude name="org/springframework/instrument/classloading/glassfish/**"/>
-		<exclude name="org/springframework/instrument/classloading/oc4j/**"/>
 		<exclude name="org/springframework/instrument/classloading/tomcat/**"/>
 		<include name="org/springframework/jmx/**"/>
 		<include name="org/springframework/jndi/**"/>
@@ -113,8 +111,6 @@
 
 	<patternset id="spring.context.support.packages">
 		<include name="org/springframework/cache/**"/>
-		<include name="org/springframework/instrument/classloading/glassfish/**"/>
-		<include name="org/springframework/instrument/classloading/oc4j/**"/>
 		<include name="org/springframework/mail/**"/>
 		<include name="org/springframework/remoting/caucho/**"/>
 		<exclude name="org/springframework/remoting/caucho/*ServiceExporter.*"/>
