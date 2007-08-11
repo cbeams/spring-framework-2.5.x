@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  * @since 2.0.2
  * @see AnnotationAwareAspectJAutoProxyCreator
  */
-class BeanFactoryAspectJAdvisorsBuilder {
+public class BeanFactoryAspectJAdvisorsBuilder {
 
 	private final ListableBeanFactory beanFactory;
 

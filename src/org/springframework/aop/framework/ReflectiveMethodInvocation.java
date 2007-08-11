@@ -43,6 +43,11 @@ import org.springframework.aop.support.AopUtils;
  * It is also possible to attach custom attributes to the invocation,
  * using the {@link #setUserAttribute} / {@link #getUserAttribute} methods.
  *
+ * <p><b>NOTE:</b> This class is considered internal and should not be
+ * directly accessed. The sole reason for it being public is compatibility
+ * with existing framework integrations (e.g. Pitchfork). For any other
+ * purposes, use the {@link ProxyMethodInvocation} interface instead.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Adrian Colyer
@@ -52,7 +57,7 @@ import org.springframework.aop.support.AopUtils;
  * @see #setUserAttribute
  * @see #getUserAttribute
  */
-class ReflectiveMethodInvocation implements ProxyMethodInvocation, Cloneable {
+public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Cloneable {
 
 	protected final Object proxy;
 
@@ -95,7 +100,7 @@ class ReflectiveMethodInvocation implements ProxyMethodInvocation, Cloneable {
 	 * as far as was possibly statically. Passing an array might be about 10% faster,
 	 * but would complicate the code. And it would work only for static pointcuts.
 	 */
-	public ReflectiveMethodInvocation(
+	protected ReflectiveMethodInvocation(
 	    Object proxy, Object target, Method method, Object[] arguments,
 	    Class targetClass, List interceptorsAndDynamicMethodMatchers) {
 
