@@ -24,7 +24,8 @@ import java.util.Set;
 
 import org.objectweb.asm.ClassReader;
 
-import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
@@ -145,33 +146,27 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 			Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
 			for (int i = 0; i < resources.length; i++) {
 				Resource resource = resources[i];
-				ClassReader classReader = getClassReaderIfCandidate(resource);
-				if (classReader != null) {
+				ClassReader classReader = this.classReaderFactory.getClassReader(resource);
+				if (isCandidateComponent(classReader)) {
 					ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(classReader);
 					sbd.setSource(resource);
-					if (sbd.getMetadata().isConcrete()) {
+					if (isCandidateComponent(sbd)) {
 						candidates.add(sbd);
 					}
 				}
 			}
 		}
 		catch (IOException ex) {
-			throw new FatalBeanException("I/O failure during classpath scanning", ex);
+			throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
 		}
 		return candidates;
 	}
 
-	private ClassReader getClassReaderIfCandidate(Resource resource) throws IOException {
-		ClassReader classReader = this.classReaderFactory.getClassReader(resource);
-		if (isCandidateComponent(classReader)) {
-			return classReader;
-		}
-		return null;
-	}
-
 	/**
-	 * @return true if this class does not match any exclude filter
-	 * and does match at least one include filter
+	 * Determine whether the given class does not match any exclude filter
+	 * and does match at least one include filter.
+	 * @param classReader the ASM ClassReader for the class
+	 * @return whether the class qualifies as a candidate component
 	 */
 	protected boolean isCandidateComponent(ClassReader classReader) throws IOException {
 		for (TypeFilter tf : this.excludeFilters) {
@@ -185,6 +180,17 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Determine whether the given bean definition qualifies as candidate.
+	 * <p>The default implementation checks whether the class is concrete
+	 * (i.e. not abstract and not an interface). Can be overridden in subclasses.
+	 * @param beanDefinition the bean definition to check
+	 * @return whether the bean definition qualifies as a candidate component
+	 */
+	protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+		return beanDefinition.getMetadata().isConcrete();
 	}
 
 }
