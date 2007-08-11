@@ -28,7 +28,13 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
  */
 public class DefaultAutowireCandidateResolver implements AutowireCandidateResolver {
 
-	public boolean isAutowireCandidate(RootBeanDefinition mbd, DependencyDescriptor descriptor, TypeConverter typeConverter) {
+	public void addQualifierType(Class qualifierType) {
+		// qualifiers are ignored by this implementation
+	}
+
+	public boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd,
+			DependencyDescriptor descriptor, TypeConverter typeConverter) {
+
 		return mbd.isAutowireCandidate();
 	}
 

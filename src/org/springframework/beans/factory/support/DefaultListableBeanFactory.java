@@ -109,6 +109,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
+	 * Register the given type to be used as a qualifier when autowiring.
+	 * @param qualifierType the annotation type to register
+	 */
+	public void registerQualifierType(Class qualifierType) {
+		this.autowireCandidateResolver.addQualifierType(qualifierType);
+	}
+
+	/**
 	 * Set whether it should be allowed to override bean definitions by registering
 	 * a different definition with the same name, automatically replacing the former.
 	 * If not, an exception will be thrown. Default is "true".
@@ -317,18 +325,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return ((ConfigurableListableBeanFactory) getParentBeanFactory()).isAutowireCandidate(beanName, descriptor);
 			}
 		}
-		return isAutowireCandidate(getMergedLocalBeanDefinition(beanName), descriptor);
+		return isAutowireCandidate(beanName, getMergedLocalBeanDefinition(beanName), descriptor);
 	}
 
 	/**
 	 * Determine whether the specified bean definition qualifies as an autowire candidate,
 	 * to be injected into other beans which declare a dependency of matching type.
+	 * @param beanName the name of the bean definition to check
 	 * @param mbd the merged bean definition to check
 	 * @param descriptor the descriptor of the dependency to resolve
 	 * @return whether the bean should be considered as autowire candidate
 	 */
-	protected boolean isAutowireCandidate(RootBeanDefinition mbd, DependencyDescriptor descriptor) {
-		return autowireCandidateResolver.isAutowireCandidate(mbd, descriptor, getTypeConverter());
+	protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd, DependencyDescriptor descriptor) {
+		return autowireCandidateResolver.isAutowireCandidate(beanName, mbd, descriptor, getTypeConverter());
 	}
 
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {

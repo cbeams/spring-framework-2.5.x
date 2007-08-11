@@ -61,6 +61,17 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 
 
 	/**
+	 * Register the given type to be used as a qualifier when autowiring.
+	 * @param qualifierType the annotation type to register
+	 */
+	public void addQualifierType(Class qualifierType) {
+		if (!Annotation.class.isAssignableFrom(qualifierType)) {
+			throw new IllegalArgumentException("qualifierType must be an annotation type");
+		}
+		this.qualifierTypes.add(qualifierType);
+	}
+
+	/**
 	 * Determine if the provided bean definition is an autowire candidate.
 	 * <p>To be considered a candidate the bean's <em>autowire-candidate</em>
 	 * attribute must not have been set to 'false'. Also any annotations
@@ -70,7 +81,9 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	 * any attributes (including a simple "value"), then the qualifier on the
 	 * bean definition must also match all specified attribute values.</p>
 	 */
-	public boolean isAutowireCandidate(RootBeanDefinition mbd, DependencyDescriptor descriptor, TypeConverter typeConverter) {
+	public boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd,
+			DependencyDescriptor descriptor, TypeConverter typeConverter) {
+
 		if (!mbd.isAutowireCandidate()) {
 			// if explicitly set to false, then do not proceed with qualifier check
 			return false;
@@ -85,14 +98,17 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			// check if this annotation is a recognized qualifier type
 			if (isQualifier(type)) {
 				AutowireCandidateQualifier qualifier = mbd.getQualifier(type.getName());
+				Map<String, Object> attributes = AnnotationUtils.getAnnotationAttributes(annotation);
 				if (qualifier == null) {
 					qualifier = mbd.getQualifier(ClassUtils.getShortName(type));
 					if (qualifier == null) {
-						// qualifier is not present on bean definition
+						// no qualifier present, fall back on beanName match
+						if (attributes.size() == 1 && beanNameResolves(beanName, annotation)) {
+							continue;
+						}
 						return false;
 					}
 				}
-				Map<String, Object> attributes = AnnotationUtils.getAnnotationAttributes(annotation);
 				for (Iterator<Map.Entry<String, Object>> it = attributes.entrySet().iterator(); it.hasNext();) {
 					Map.Entry<String, Object> entry = it.next();
 					String attributeName = entry.getKey();
@@ -103,7 +119,14 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 						Object defaultValue = AnnotationUtils.getDefaultValue(annotation, attributeName);
 						if (defaultValue == null) {
 							// there is no default
+							if (attributeName.equals("value") && beanNameResolves(beanName, annotation)) {
+								continue;
+							}
 							return false;
+						}
+						if ((defaultValue instanceof String) && ((String) defaultValue).length() == 0
+								&& attributeName.equals("value") && beanNameResolves(beanName, annotation)) {
+							continue;
 						}
 						actualValue = defaultValue;
 					}
@@ -129,6 +152,15 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			}
 		}
 		return false;
+	}
+
+
+	private static boolean beanNameResolves(String beanName, Annotation annotation) {
+		Object value = AnnotationUtils.getValue(annotation, "value");
+		if (value == null || !(value instanceof String)) {
+			return false;
+		}
+		return (value.equals(beanName));
 	}
 
 }

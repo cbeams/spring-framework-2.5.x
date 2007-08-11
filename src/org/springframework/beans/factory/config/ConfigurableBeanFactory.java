@@ -163,6 +163,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	TypeConverter getTypeConverter();
 
 	/**
+	 * Register the given type to be used as a qualifier when autowiring.
+	 * @param qualifierType the annotation type to register
+	 */
+	void registerQualifierType(Class qualifierType);
+
+	/**
 	 * Add a new BeanPostProcessor that will get applied to beans created
 	 * by this factory. To be invoked during factory configuration.
 	 * @param beanPostProcessor the bean processor to register

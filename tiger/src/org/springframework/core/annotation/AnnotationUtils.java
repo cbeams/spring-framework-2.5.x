@@ -277,18 +277,29 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
+	 * Retrieve the value for an Annotation attribute. 
+	 */
+	public static Object getValue(Annotation annotation, String attributeName) {
+		try {
+			Method method = annotation.annotationType().getDeclaredMethod(attributeName, new Class[] {});
+			return method.invoke(annotation);
+		}
+		catch (Exception ex) {
+			return null;
+		}
+	}
+
+	/**
 	 * Retrieve the default value for an Annotation attribute. 
 	 */
 	public static Object getDefaultValue(Annotation annotation, String attributeName) {
-		Object defaultValue = null;
 		try {
 			Method method = annotation.annotationType().getDeclaredMethod(attributeName, new Class[] {});
-			defaultValue = method.getDefaultValue();
+			return method.getDefaultValue();
 		}
 		catch (Exception ex) {
-			// will return null
+			return null;
 		}
-		return defaultValue;
 	}
 
 }
