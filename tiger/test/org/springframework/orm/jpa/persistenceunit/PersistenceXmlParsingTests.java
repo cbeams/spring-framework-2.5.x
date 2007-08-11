@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,19 +237,6 @@ public class PersistenceXmlParsingTests extends TestCase {
 		}
 		catch (RuntimeException expected) {
 		}
-	}
-
-	public void testSchemaLocation() throws Exception {
-		PersistenceUnitReader reader = new PersistenceUnitReader(
-				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
-		Resource res = reader.findSchemaResource("memdb.xml");
-		assertNotNull(res);
-		res = reader.findSchemaResource("persistence.xml");
-		assertNotNull(res);
-		res = reader.findSchemaResource("hibernate-manager.xml");
-		assertNotNull(res);
-		res = reader.findSchemaResource("white-horse.xml");
-		assertNull(res);
 	}
 
 	public void testPersistenceUnitRootUrl() throws Exception {

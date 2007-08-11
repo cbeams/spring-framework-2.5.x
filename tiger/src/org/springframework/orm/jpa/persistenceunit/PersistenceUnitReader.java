@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,13 +75,18 @@ class PersistenceUnitReader {
 
 	private static final String UNIT_NAME = "name";
 
-	private static final String SCHEMA_NAME = "persistence_1_0.xsd";
+	private static final String META_INF = "META-INF";
 
 	private static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
 
 	private static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
 
-	private static final String META_INF = "META-INF";
+	private static final String SCHEMA_NAME = "persistence_1_0.xsd";
+
+	private static final String[] SCHEMA_RESOURCE_LOCATIONS = {
+			"classpath:persistence_1_0.xsd",
+			"classpath:org/hibernate/ejb/persistence_1_0.xsd",
+			"classpath:org/jpox/jpa/persistence_1_0.xsd"};
 
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -163,7 +168,7 @@ class PersistenceUnitReader {
 		dbf.setNamespaceAware(true);
 
 		// Set schema location only if we found one inside the classpath.
-		Resource schemaLocation = findSchemaResource(SCHEMA_NAME);
+		Resource schemaLocation = findSchemaResource();
 		if (schemaLocation != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found schema resource: " + schemaLocation.getURL());
@@ -186,38 +191,11 @@ class PersistenceUnitReader {
 	 * Try to locate the schema first in the class path before using the URL specified inside the XML.
 	 * @return an existing resource, or <code>null</code> if none found
 	 */
-	protected Resource findSchemaResource(String schemaName) {
-		try {
-			// First search the class path root (TopLink)
-			Resource schemaLocation = this.resourcePatternResolver.getResource("classpath:" + schemaName);
+	protected Resource findSchemaResource() {
+		for (int i = 0; i < SCHEMA_RESOURCE_LOCATIONS.length; i++) {
+			Resource schemaLocation = this.resourcePatternResolver.getResource(SCHEMA_RESOURCE_LOCATIONS[i]);
 			if (schemaLocation.exists()) {
 				return schemaLocation;
-			}
-
-			// Search org packages (open source provider such as Hibernate or OpenJPA)
-			Resource[] resources = this.resourcePatternResolver.getResources("classpath*:org/**/" + schemaName);
-			if (resources.length > 0) {
-				return resources[0];
-			}
-
-			// Search com packages (some commercial provider)
-			resources = this.resourcePatternResolver.getResources("classpath*:com/**/" + schemaName);
-			if (resources.length > 0) {
-				return resources[0];
-			}
-
-			// Finally, do a lookup for unpacked files.
-			// See the warning in
-			// org.springframework.core.io.support.PathMatchingResourcePatternResolver
-			// for more info on this strategy.
-			resources = this.resourcePatternResolver.getResources("classpath*:**/" + schemaName);
-			if (resources.length > 0) {
-				return resources[0];
-			}
-		}
-		catch (IOException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Could not search for JPA schema resource [" + schemaName + "] in class path", ex);
 			}
 		}
 		return null;
