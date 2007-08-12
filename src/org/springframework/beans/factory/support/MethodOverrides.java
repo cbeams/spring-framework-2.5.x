@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,13 @@ import java.util.Set;
  * Set of method overrides, determining which, if any, methods on a
  * managed object the Spring IoC container will override at runtime.
  *
- * <p>The currently supported MethodOverride variants are
- * LookupOverride and ReplaceOverride.
+ * <p>The currently supported {@link MethodOverride} variants are
+ * {@link LookupOverride} and {@link ReplaceOverride}.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 1.1
  * @see MethodOverride
- * @see LookupOverride
- * @see ReplaceOverride
  */
 public class MethodOverrides {
 
@@ -75,7 +74,7 @@ public class MethodOverrides {
 	 * @see MethodOverride
 	 */
 	public Set getOverrides() {
-		return overrides;
+		return this.overrides;
 	}
 
 	/**
@@ -114,4 +113,5 @@ public class MethodOverrides {
 	public int hashCode() {
 		return this.overrides.hashCode();
 	}
+
 }
