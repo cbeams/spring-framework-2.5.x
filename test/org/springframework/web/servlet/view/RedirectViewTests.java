@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.view;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +27,7 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -117,18 +119,14 @@ public class RedirectViewTests extends TestCase {
 		String val = "bar";
 		String key2 = "int2";
 		Object val2 = new Long(611);
-		Map m = new HashMap();
+		Object key3 = "tb";
+		Object val3 = new TestBean();
+		Map m = new LinkedHashMap();
 		m.put(key, val);
 		m.put(key2, val2);
-		try {
-			String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val + "&" + key2 + "=" + val2;
-			doTest(m, url, false, expectedUrlForEncoding);
-		}
-		catch (AssertionFailedError err) {
-			// OK, so it's the other order... probably on Sun JDK 1.6 or IBM JDK 1.5
-			String expectedUrlForEncoding = "http://url.somewhere.com?" + key2 + "=" + val2 + "&" + key + "=" + val;
-			doTest(m, url, false, expectedUrlForEncoding);
-		}
+		m.put(key3, val3);
+		String expectedUrlForEncoding = "http://url.somewhere.com?" + key + "=" + val + "&" + key2 + "=" + val2;
+		doTest(m, url, false, expectedUrlForEncoding);
 	}
 
 	private void doTest(final Map map, String url, boolean contextRelative, String expectedUrlForEncoding)

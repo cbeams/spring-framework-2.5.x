@@ -20,10 +20,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.util.ClassUtils;
 
 /**
  * <p>View that redirects to an absolute, context relative, or current request
@@ -211,6 +214,39 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * Determine name-value pairs for query strings, which will be stringified,
+	 * URL-encoded and formatted by {@link #appendQueryProperties}.
+	 * <p>This implementation filters the model through checking
+	 * {@link #isEligibleProperty(String, Object)} for each element,
+	 * by default accepting Strings, primitives and primitive wrappers only.
+	 * @param model the original model Map
+	 * @return the filtered Map of eligible query properties
+	 * @see #isEligibleProperty(String, Object)
+	 */
+	protected Map queryProperties(Map model) {
+		Map result = new LinkedHashMap();
+		for (Iterator it = model.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			if (isEligibleProperty(entry.getKey().toString(), entry.getValue())) {
+				result.put(entry.getKey().toString(), entry.getValue().toString());
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Determine whether the given model element should be exposed
+	 * as a query property.
+	 * @param key the key of the model element
+	 * @param value the value of the model element
+	 * @return whether the element is eligible as query property
+	 */
+	protected boolean isEligibleProperty(String key, Object value) {
+		return (value != null &&
+				(value instanceof String || ClassUtils.isPrimitiveOrWrapper(value.getClass())));
+	}
+
+	/**
 	 * URL-encode the given input String with the given encoding scheme.
 	 * <p>Default implementation uses <code>URLEncoder.encode(input, enc)</code>.
 	 * @param input the unencoded input String
@@ -221,17 +257,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * @see java.net.URLEncoder#encode(String)
 	 */
 	protected String urlEncode(String input, String encodingScheme) throws UnsupportedEncodingException {
-		return URLEncoder.encode(input, encodingScheme);
-	}
-
-	/**
-	 * Determine name-value pairs for query strings, which will be stringified,
-	 * URL-encoded and formatted by appendQueryProperties.
-	 * <p>This implementation returns all model elements as-is.
-	 * @see #appendQueryProperties
-	 */
-	protected Map queryProperties(Map model) {
-		return model;
+		return (input != null ? URLEncoder.encode(input, encodingScheme) : null);
 	}
 
 	/**
