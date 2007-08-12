@@ -272,8 +272,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
-* jasperreports/jasperreports-1.3.3.jar
-- JasperReports 1.3.3 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-1.3.4.jar
+- JasperReports 1.3.4 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
