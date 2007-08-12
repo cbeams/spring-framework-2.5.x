@@ -1108,7 +1108,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				else {
 					resolveNecessary = true;
-					deepCopy.add(new PropertyValue(propertyName, resolvedValue));
+					deepCopy.add(new PropertyValue(pv, resolvedValue));
 				}
 			}
 		}
