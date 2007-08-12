@@ -33,27 +33,15 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * Spring Controller implementation that wraps a servlet instance which it manages
  * internally. Such a wrapped servlet is not known outside of this controller;
- * its entire lifecycle is covered here (in contrast to ServletForwardingController).
+ * its entire lifecycle is covered here (in contrast to {@link ServletForwardingController}).
  *
  * <p>Useful to invoke an existing servlet via Spring's dispatching infrastructure,
- * for example to apply Spring HandlerInterceptors to its requests. This will work
- * even in a Servlet 2.2 container that does not support Servlet filters.
+ * for example to apply Spring HandlerInterceptors to its requests.
  *
- * <p>In particular, the main intent of this controller is to allow for applying
- * Spring's OpenSessionInViewInterceptor or OpenPersistenceManagerInViewInterceptor
- * to Struts actions in a Servlet 2.2 container. The Struts ActionServlet will be
- * wrapped by this controller in such a scenario, rather than defined in web.xml.
- * You then need to map "/*.do" (or whatever pattern you choose for your Struts actions)
- * onto this controller, which will in turn forward to the Struts ActionServlet.
- *
- * <p>Note that Struts has a special requirement in that it parses web.xml to
- * find its servlet mapping. Therefore, you need to specify the DispatcherServlet's
+ * <p>Note that Struts has a special requirement in that it parses <code>web.xml</code>
+ * to find its servlet mapping. Therefore, you need to specify the DispatcherServlet's
  * servlet name as "servletName" on this controller, so that Struts finds the
  * DispatcherServlet's mapping (thinking that it refers to the ActionServlet).
- *
- * <p>In a Servlet 2.3 container, when not using Spring's own web MVC framework,
- * it is recommended to use classic servlet mapping in combination with a filter,
- * for example Spring's OpenSessionInViewFilter or OpenPersistenceManagerInViewFilter.
  *
  * <p><b>Example:</b> a DispatcherServlet XML context, forwarding "*.do" to the Struts
  * ActionServlet wrapped by a ServletWrappingController. All such requests will go
@@ -87,10 +75,6 @@ import org.springframework.web.servlet.ModelAndView;
  *     &lt;/props&gt;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
- *
- * Thanks to Keith Garry Boyce for pointing out the issue with Struts in a
- * Servlet 2.2 container, and for providing a prototype for accessing Struts
- * through Spring's web dispatching infrastructure!
  *
  * @author Juergen Hoeller
  * @since 1.1.1

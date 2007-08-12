@@ -45,12 +45,6 @@ import org.springframework.util.ClassUtils;
  * is, they are much better off setting this flag to true, and submitting paths
  * which are to be considered relative to the web application root.
  *
- * <p>Note that in a Servlet 2.2 environment, i.e. a servlet container which
- * is only compliant to the limits of this spec, this class will probably fail
- * when feeding in URLs which are not fully absolute, or relative to the current
- * request (no leading "/"), as these are the only two types of URL that
- * <code>sendRedirect</code> supports in a Servlet 2.2 environment.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Colin Sampaleanu

@@ -447,8 +447,6 @@ public abstract class WebUtils {
 	 * Maps single values to String and multiple values to String array.
 	 * <p>For example, with a prefix of "spring_", "spring_param1" and
 	 * "spring_param2" result in a Map with "param1" and "param2" as keys.
-	 * <p>Similar to Servlet 2.3's <code>ServletRequest.getParameterMap</code>,
-	 * but more flexible and compatible with Servlet 2.2.
 	 * @param request HTTP request in which to look for parameters
 	 * @param prefix the beginning of parameter names
 	 * (if this is null or the empty string, all parameters will match)

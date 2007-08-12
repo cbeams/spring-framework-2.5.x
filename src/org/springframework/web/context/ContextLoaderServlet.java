@@ -36,7 +36,6 @@ import javax.servlet.http.HttpServletResponse;
  * According to Servlet 2.4, listeners must be initialized before load-on-startup
  * servlets. Many Servlet 2.3 containers already enforce this behavior. If you
  * use such a container, this servlet can be replaced with ContextLoaderListener.
- * Else or if working with a Servlet 2.2 container, stick with this servlet.
  *
  * <p>Servlet 2.3 containers known to work with bootstrap listeners are:
  * <ul>
@@ -123,7 +122,7 @@ public class ContextLoaderServlet extends HttpServlet {
 
 
 	public String getServletInfo() {
-		return "ContextLoaderServlet for Servlet API 2.2/2.3 " +
+		return "ContextLoaderServlet for Servlet API 2.3 " +
 		    "(deprecated in favor of ContextLoaderListener for Servlet API 2.4)";
 	}
 

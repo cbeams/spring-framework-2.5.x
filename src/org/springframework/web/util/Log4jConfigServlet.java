@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,8 +42,7 @@ import javax.servlet.http.HttpServletResponse;
  * According to Servlet 2.4, listeners must be initialized before load-on-startup
  * servlets. Many Servlet 2.3 containers already enforce this behavior
  * (see ContextLoaderServlet javadocs for details). If you use such a container,
- * this servlet can be replaced with Log4jConfigListener. Else or if working
- * with a Servlet 2.2 container, stick with this servlet.
+ * this servlet can be replaced with Log4jConfigListener.
  *
  * @author Juergen Hoeller
  * @author Darren Davison
@@ -77,7 +76,7 @@ public class Log4jConfigServlet extends HttpServlet {
 
 
 	public String getServletInfo() {
-		return "Log4jConfigServlet for Servlet API 2.2/2.3 " +
+		return "Log4jConfigServlet for Servlet API 2.3 " +
 				"(deprecated in favor of Log4jConfigListener for Servlet API 2.4)";
 	}
 

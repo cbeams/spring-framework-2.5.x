@@ -27,10 +27,6 @@ import javax.servlet.ServletContextListener;
  * {@link org.springframework.web.util.Log4jConfigListener}
  * in <code>web.xml</code>, if the latter is used.
  *
- * <p>For Servlet 2.2 containers and Servlet 2.3 ones that do not initalize
- * listeners before servlets, use {@link ContextLoaderServlet}.
- * See the latter's Javadoc for details.
- *
  * @author Juergen Hoeller
  * @since 17.02.2003
  * @see ContextLoaderServlet

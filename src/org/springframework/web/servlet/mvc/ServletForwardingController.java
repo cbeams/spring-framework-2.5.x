@@ -33,18 +33,7 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>Useful to invoke an existing servlet via Spring's dispatching infrastructure,
  * for example to apply Spring HandlerInterceptors to its requests. This will work
- * even in a Servlet 2.2 container that does not support Servlet filters.
- *
- * <p>In particular, the main intent of this controller is to allow for applying
- * Spring's OpenSessionInViewInterceptor or OpenPersistenceManagerInViewInterceptor
- * to servlets in a Servlet 2.2 container. The specified "servlet-name" will
- * simply refer to a custom servlet definition in web.xml in such a scenario.
- * You then need to map "/myservlet" (or whatever path you choose for your servlet)
- * onto this controller, which will in turn forward to your servlet.
- *
- * <p>In a Servlet 2.3 container, when not using Spring's own web MVC framework,
- * it is recommended to use classic servlet mapping in combination with a filter,
- * for example Spring's OpenSessionInViewFilter or OpenPersistenceManagerInViewFilter.
+ * even in a minimal Servlet container that does not support Servlet filters.
  *
  * <p><b>Example:</b> web.xml, mapping all "/myservlet" requests to a Spring dispatcher.
  * Also defines a custom "myServlet", but <i>without</i> servlet mapping.
