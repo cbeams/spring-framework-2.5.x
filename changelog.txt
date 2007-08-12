@@ -8,10 +8,12 @@ Changes in version 2.1 M4 (2007-08-17)
 
 General
 * updated build to use JUnit 4.4 for the tiger test suite while sticking with JUnit 3.8 for the main test suite
+* moved GlassFish and OC4J instrumentation support from spring-context-support.jar to spring-context.jar
 * Spring-style pattern matching ("*xxx", "xxx*", "*xxx*") supports multi-part patterns as well now ("xxx*yyy")
 
 Package org.springframework.aop
 * ProxyFactoryBean and AbstractSingletonProxyFactoryBean are serializable if their target and interceptors are
+* made parts of ReflectiveMethodInvocation and other internal impl classes public again (for framework integration)
 * "AopNamespaceUtils.registerAutoProxyCreatorIfNecessary" registers a plain InfrastructureAdvisorAutoProxyCreator now
 
 Package org.springframework.beans
@@ -21,6 +23,9 @@ Package org.springframework.beans
 * introduced qualifier support, allowing to use custom parameter annotations for identifying specific target beans
 * introduced AutowireCandidateResolver mechanism and QualifierAnnotationAutowireCandidateResolver implementation
 * reworked Annotated/ScannedRootBeanDefinition into Annotated/ScannedGenericBeanDefinition
+* optimized DefaultListableBeanFactory's shortcut access to cached merged bean definitions
+* optimized DefaultListableBeanFactory's resolution of bean references during prototype creation
+* factored out "isCandidateComponent(beanDefinition)" template method in ClassPathScanningCandidateComponentProvider
 * ClassPathBeanDefinitionScanner does not apply scoped-proxy setting to prototypes (only to extended scopes)
 * "spring-beans-2.1.xsd" supports "default-autowire-candidates" attribute, accepting Spring-style bean name patterns
 
@@ -43,6 +48,7 @@ Package org.springframework.orm
 * HibernateJdbcException extracts the SQL statement and explicitly builds it into the exception message
 * introduced EntityManagerProxy interface, allowing access to underlying EntityManager for shared/extended EM proxies
 * container-managed extended EntityManager gets explicitly closed on destruction of the containing bean
+* PersistenceUnitReader checks for well-known explicit schema resource locations instead of searching the classpath
 
 Package org.springframework.scripting
 * ScriptCompilationException carries the ScriptSource of the offending script
@@ -56,10 +62,15 @@ Package org.springframework.test
 Package org.springframework.transaction
 * fixed "tx:annotation-driven" to not activate "aop:config"-style autodetection of application-defined Advisor beans
 
+Package org.springframework.ui
+* ModelMap extends LinkedHashMap, exposing model elements in registration order
+
 Package org.springframework.util
 * ReflectionUtils provides a "findMethod" variant without parameter types argument
 
 Package org.springframework.web
+* factored out protected "isEligibleProperty(key, value)" template method in RedirectView
+* RedirectView only exposes Strings, primitives and primitive wrappers as query properties by default
 * JstlView properly allows for programmatic usage (added overloaded constructors; exposing a MessageSource is optional)
 * InternalResourceViewResolver uses JstlView as default (instead of InternalResourceView) if the JSTL API is present
 * JSP MessageTag resolves arguments in default text even if no message code was specified
