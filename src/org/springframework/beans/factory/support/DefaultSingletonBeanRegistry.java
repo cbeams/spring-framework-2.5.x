@@ -130,7 +130,6 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	}
 
 	public Object getSingleton(String beanName) {
-		Assert.notNull(beanName, "'beanName' must not be null");
 		Object singletonObject = this.singletonObjects.get(beanName);
 		return (singletonObject != NULL_OBJECT ? singletonObject : null);
 	}
@@ -202,13 +201,11 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * @param beanName the name of the bean
 	 */
 	protected void removeSingleton(String beanName) {
-		Assert.notNull(beanName, "'beanName' must not be null");
 		this.singletonObjects.remove(beanName);
 		this.registeredSingletons.remove(beanName);
 	}
 
 	public boolean containsSingleton(String beanName) {
-		Assert.notNull(beanName, "'beanName' must not be null");
 		return (this.singletonObjects.containsKey(beanName));
 	}
 
