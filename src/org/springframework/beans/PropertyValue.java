@@ -74,6 +74,22 @@ public class PropertyValue extends AttributeAccessorSupport implements BeanMetad
 		this.name = original.getName();
 		this.value = original.getValue();
 		this.source = original.getSource();
+		this.resolvedTokens = original.resolvedTokens;
+		copyAttributesFrom(original);
+	}
+
+	/**
+	 * Constructor that exposes a new value for an original value holder.
+	 * The original holder will be exposed as source of the new holder.
+	 * @param original the PropertyValue to link to (never <code>null</code>)
+	 * @param newValue the new value to apply
+	 */
+	public PropertyValue(PropertyValue original, Object newValue) {
+		Assert.notNull(original, "Original must not be null");
+		this.name = original.getName();
+		this.value = newValue;
+		this.source = original;
+		this.resolvedTokens = original.resolvedTokens;
 		copyAttributesFrom(original);
 	}
 
@@ -105,6 +121,19 @@ public class PropertyValue extends AttributeAccessorSupport implements BeanMetad
 
 	public Object getSource() {
 		return this.source;
+	}
+
+	/**
+	 * Return the original PropertyValue instance for this value holder.
+	 * @return the original PropertyValue (either a source of this
+	 * value holder or this value holder itself).
+	 */
+	public PropertyValue getOriginalPropertyValue() {
+		PropertyValue original = this;
+		while (original.source instanceof PropertyValue) {
+			original = (PropertyValue) original.source;
+		}
+		return original;
 	}
 
 	/**
@@ -151,7 +180,7 @@ public class PropertyValue extends AttributeAccessorSupport implements BeanMetad
 	}
 
 	public String toString() {
-		return "PropertyValue: name='" + this.name + "', value=[" + this.value + "]";
+		return "bean property '" + this.name + "'";
 	}
 
 }

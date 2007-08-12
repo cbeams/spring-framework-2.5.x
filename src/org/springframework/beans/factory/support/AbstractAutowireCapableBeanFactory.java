@@ -836,13 +836,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Constructor[] determineConstructorsFromBeanPostProcessors(Class beanClass, String beanName)
 			throws BeansException {
 
-		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
-			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
-			if (beanProcessor instanceof SmartInstantiationAwareBeanPostProcessor) {
-				SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) beanProcessor;
-				Constructor[] ctors = ibp.determineCandidateConstructors(beanClass, beanName);
-				if (ctors != null) {
-					return ctors;
+		if (hasInstantiationAwareBeanPostProcessors()) {
+			for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
+				BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
+				if (beanProcessor instanceof SmartInstantiationAwareBeanPostProcessor) {
+					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) beanProcessor;
+					Constructor[] ctors = ibp.determineCandidateConstructors(beanClass, beanName);
+					if (ctors != null) {
+						return ctors;
+					}
 				}
 			}
 		}
@@ -1214,8 +1216,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			else {
 				String propertyName = pv.getName();
 				Object originalValue = pv.getValue();
-				Object resolvedValue =
-						valueResolver.resolveValueIfNecessary("bean property '" + propertyName + "'", originalValue);
+				Object resolvedValue = valueResolver.resolveValueIfNecessary(pv, originalValue);
 				// Possibly store converted value in merged bean definition,
 				// in order to avoid re-conversion for every created bean instance.
 				if (resolvedValue == originalValue) {
@@ -1231,7 +1232,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 				else {
 					resolveNecessary = true;
-					deepCopy.add(new PropertyValue(propertyName, resolvedValue));
+					deepCopy.add(new PropertyValue(pv, resolvedValue));
 				}
 			}
 		}

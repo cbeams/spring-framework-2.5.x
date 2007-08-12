@@ -650,7 +650,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 			tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));
 			if (nestedBw == this) {
-				pv.resolvedTokens = tokens;
+				pv.getOriginalPropertyValue().resolvedTokens = tokens;
 			}
 			nestedBw.setPropertyValue(tokens, pv);
 		}
