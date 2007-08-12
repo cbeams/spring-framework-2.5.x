@@ -52,11 +52,11 @@
 	the "bean" level. See those attribute definitions for details.
 -->
 <!ATTLIST beans default-lazy-init (true | false) "false">
+<!ATTLIST beans default-merge (true | false) "false">
 <!ATTLIST beans default-autowire (no | byName | byType | constructor | autodetect) "no">
 <!ATTLIST beans default-dependency-check (none | objects | simple | all) "none">
 <!ATTLIST beans default-init-method CDATA #IMPLIED>
 <!ATTLIST beans default-destroy-method CDATA #IMPLIED>
-<!ATTLIST beans default-merge (true | false) "false">
 
 <!--
 	Element containing informative text describing the purpose of the enclosing
@@ -139,7 +139,7 @@
 
 <!--
 	Each bean definition must specify the fully qualified name of the class,
-	except if it pure serves as parent for child bean definitions.
+	except if it serves only as a parent definition for child bean definitions.
 -->
 <!ATTLIST bean class CDATA #IMPLIED>
 
@@ -202,12 +202,6 @@
 	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean lazy-init (true | false | default) "default">
-
-<!--
-  Indicates whether or not this bean should be considered when looking
-  for candidates to satisfy another bean's autowiring requirements.
--->
-<!ATTLIST bean autowire-candidate (true | false) #IMPLIED>
 
 <!--
 	Optional attribute controlling whether to "autowire" bean properties.
@@ -280,6 +274,14 @@
 	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean depends-on CDATA #IMPLIED>
+
+<!--
+	Indicates whether or not this bean should be considered when looking
+	for matching candidates to satisfy another bean's autowiring requirements.
+	Note that this does not affect explicit references by name, which will get
+	resolved even if the specified bean is not marked as an autowire candidate.
+-->
+<!ATTLIST bean autowire-candidate (true | false) #IMPLIED>
 
 <!--
 	Optional attribute for the name of the custom initialization method
