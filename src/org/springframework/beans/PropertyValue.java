@@ -130,7 +130,7 @@ public class PropertyValue extends AttributeAccessorSupport implements BeanMetad
 	 */
 	public PropertyValue getOriginalPropertyValue() {
 		PropertyValue original = this;
-		while (original.source instanceof PropertyValue) {
+		while (original.source instanceof PropertyValue && original.source != original) {
 			original = (PropertyValue) original.source;
 		}
 		return original;
