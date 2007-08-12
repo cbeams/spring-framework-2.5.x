@@ -113,7 +113,7 @@ public class RequestContext {
 
 	private Theme theme;
 
-	private boolean defaultHtmlEscape;
+	private Boolean defaultHtmlEscape;
 
 	private UrlPathHelper urlPathHelper;
 
@@ -241,7 +241,7 @@ public class RequestContext {
 
 		// Determine default HTML escape setting from the "defaultHtmlEscape"
 		// context-param in web.xml, if any.
-		this.defaultHtmlEscape = WebUtils.isDefaultHtmlEscape(this.webApplicationContext.getServletContext());
+		this.defaultHtmlEscape = WebUtils.getDefaultHtmlEscape(this.webApplicationContext.getServletContext());
 
 		this.urlPathHelper = new UrlPathHelper();
 	}
@@ -342,13 +342,23 @@ public class RequestContext {
 	 * @see org.springframework.web.util.WebUtils#isDefaultHtmlEscape
 	 */
 	public void setDefaultHtmlEscape(boolean defaultHtmlEscape) {
-		this.defaultHtmlEscape = defaultHtmlEscape;
+		this.defaultHtmlEscape = Boolean.valueOf(defaultHtmlEscape);
 	}
 
 	/**
 	 * Is default HTML escaping active?
+	 * Falls back to <code>false</code> in case of no explicit default given.
 	 */
 	public boolean isDefaultHtmlEscape() {
+		return (this.defaultHtmlEscape != null && this.defaultHtmlEscape.booleanValue());
+	}
+
+	/**
+	 * Return the default HTML escape setting, differentiating
+	 * between no default specified and an explicit value.
+	 * @return whether default HTML escaping is enabled (null = no explicit default)
+	 */
+	public Boolean getDefaultHtmlEscape() {
 		return this.defaultHtmlEscape;
 	}
 
@@ -429,7 +439,7 @@ public class RequestContext {
 	 * @return the message
 	 */
 	public String getMessage(String code, String defaultMessage) {
-		return getMessage(code, null, defaultMessage, this.defaultHtmlEscape);
+		return getMessage(code, null, defaultMessage, isDefaultHtmlEscape());
 	}
 
 	/**
@@ -440,7 +450,7 @@ public class RequestContext {
 	 * @return the message
 	 */
 	public String getMessage(String code, Object[] args, String defaultMessage) {
-		return getMessage(code, args, defaultMessage, this.defaultHtmlEscape);
+		return getMessage(code, args, defaultMessage, isDefaultHtmlEscape());
 	}
 
 	/**
@@ -451,7 +461,7 @@ public class RequestContext {
 	 * @return the message
 	 */
 	public String getMessage(String code, List args, String defaultMessage) {
-		return getMessage(code, (args != null ? args.toArray() : null), defaultMessage, this.defaultHtmlEscape);
+		return getMessage(code, (args != null ? args.toArray() : null), defaultMessage, isDefaultHtmlEscape());
 	}
 
 	/**
@@ -474,7 +484,7 @@ public class RequestContext {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(String code) throws NoSuchMessageException {
-		return getMessage(code, null, this.defaultHtmlEscape);
+		return getMessage(code, null, isDefaultHtmlEscape());
 	}
 
 	/**
@@ -485,7 +495,7 @@ public class RequestContext {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(String code, Object[] args) throws NoSuchMessageException {
-		return getMessage(code, args, this.defaultHtmlEscape);
+		return getMessage(code, args, isDefaultHtmlEscape());
 	}
 
 	/**
@@ -496,7 +506,7 @@ public class RequestContext {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(String code, List args) throws NoSuchMessageException {
-		return getMessage(code, (args != null ? args.toArray() : null), this.defaultHtmlEscape);
+		return getMessage(code, (args != null ? args.toArray() : null), isDefaultHtmlEscape());
 	}
 
 	/**
@@ -520,7 +530,7 @@ public class RequestContext {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getMessage(MessageSourceResolvable resolvable) throws NoSuchMessageException {
-		return getMessage(resolvable, this.defaultHtmlEscape);
+		return getMessage(resolvable, isDefaultHtmlEscape());
 	}
 
 	/**
@@ -634,7 +644,7 @@ public class RequestContext {
 	 * @return the Errors instance, or <code>null</code> if not found
 	 */
 	public Errors getErrors(String name) {
-		return getErrors(name, this.defaultHtmlEscape);
+		return getErrors(name, isDefaultHtmlEscape());
 	}
 
 	/**
@@ -698,7 +708,7 @@ public class RequestContext {
 	 * @throws IllegalStateException if no corresponding Errors object found
 	 */
 	public BindStatus getBindStatus(String path) throws IllegalStateException {
-		return new BindStatus(this, path, this.defaultHtmlEscape);
+		return new BindStatus(this, path, isDefaultHtmlEscape());
 	}
 
 	/**

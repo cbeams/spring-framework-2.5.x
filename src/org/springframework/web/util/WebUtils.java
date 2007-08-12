@@ -154,7 +154,7 @@ public abstract class WebUtils {
 	/**
 	 * Return whether default HTML escaping is enabled for the web application,
 	 * i.e. the value of the "defaultHtmlEscape" context-param in <code>web.xml</code>
-	 * (if any).
+	 * (if any). Falls back to <code>false</code> in case of no explicit default given.
 	 * @param servletContext the servlet context of the web application
 	 * @return whether default HTML escaping is enabled (default is false)
 	 */
@@ -162,6 +162,22 @@ public abstract class WebUtils {
 		Assert.notNull(servletContext, "ServletContext must not be null");
 		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
 		return Boolean.valueOf(param).booleanValue();
+	}
+
+	/**
+	 * Return whether default HTML escaping is enabled for the web application,
+	 * i.e. the value of the "defaultHtmlEscape" context-param in <code>web.xml</code>
+	 * (if any).
+	 * <p>This method differentiates between no param specified at all and
+	 * an actual boolean value specified, allowing to have a context-specific
+	 * default in case of no setting at the global level.
+	 * @param servletContext the servlet context of the web application
+	 * @return whether default HTML escaping is enabled (null = no explicit default)
+	 */
+	public static Boolean getDefaultHtmlEscape(ServletContext servletContext) {
+		Assert.notNull(servletContext, "ServletContext must not be null");
+		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
+		return (StringUtils.hasText(param)? Boolean.valueOf(param) : null);
 	}
 
 	/**

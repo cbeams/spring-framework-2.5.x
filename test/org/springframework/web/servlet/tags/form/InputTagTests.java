@@ -89,7 +89,6 @@ public class InputTagTests extends AbstractFormTagTests {
 		final String HTML_ESCAPED_NAME = "Rob &quot;I Love Mangos&quot; Harrop";
 
 		this.tag.setPath("name");
-		this.tag.setHtmlEscape("true");
 		this.rob.setName(NAME);
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());

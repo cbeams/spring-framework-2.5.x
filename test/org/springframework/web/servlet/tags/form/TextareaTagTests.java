@@ -71,8 +71,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		
 		this.tag.setPath("name");
 		this.rob.setName(NAME);
-		this.tag.setHtmlEscape("true");
-		
+
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 		String output = getOutput();
 		System.out.println(output);
