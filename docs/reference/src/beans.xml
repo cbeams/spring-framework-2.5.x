@@ -1134,7 +1134,7 @@ public class ExampleBean {
                 <literal>id</literal> attribute of the target bean. The XML parser
                 will issue an error if no matching element is found in the same file.
                 As such, using the local variant is the best choice (in order to know
-                about errors are early as possible) if the target bean is in the same
+                about errors as early as possible) if the target bean is in the same
                 XML file.</para>
                 <programlisting><![CDATA[<ref local="someBean"/>]]></programlisting>
                 <para>Specifying the target bean by using the <literal>'parent'</literal>
