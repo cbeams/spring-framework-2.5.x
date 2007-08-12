@@ -215,6 +215,17 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * Determine name-value pairs for query strings, which will be stringified,
+	 * URL-encoded and formatted by {@link #appendQueryProperties}.
+	 * <p>This implementation returns all model elements as-is.
+	 * @param model the original model Map
+	 * @return the filtered Map of eligible query properties
+	 */
+	protected Map queryProperties(Map model) {
+		return model;
+	}
+
+	/**
 	 * URL-encode the given input String with the given encoding scheme.
 	 * <p>Default implementation uses <code>URLEncoder.encode(input, enc)</code>
 	 * on JDK 1.4+, falling back to <code>URLEncoder.encode(input)</code>
@@ -227,6 +238,9 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * @see java.net.URLEncoder#encode(String)
 	 */
 	protected String urlEncode(String input, String encodingScheme) throws UnsupportedEncodingException {
+		if (input == null) {
+			return null;
+		}
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Only JDK 1.3 URLEncoder available: using platform default encoding " +
@@ -235,16 +249,6 @@ public class RedirectView extends AbstractUrlBasedView {
 			return URLEncoder.encode(input);
 		}
 		return URLEncoder.encode(input, encodingScheme);
-	}
-
-	/**
-	 * Determine name-value pairs for query strings, which will be stringified,
-	 * URL-encoded and formatted by appendQueryProperties.
-	 * <p>This implementation returns all model elements as-is.
-	 * @see #appendQueryProperties
-	 */
-	protected Map queryProperties(Map model) {
-		return model;
 	}
 
 	/**
