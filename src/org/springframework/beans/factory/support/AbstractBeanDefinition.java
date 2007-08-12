@@ -853,9 +853,12 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 */
 	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
 		// Check that lookup methods exists.
-		for (Iterator it = getMethodOverrides().getOverrides().iterator(); it.hasNext(); ) {
-			MethodOverride mo = (MethodOverride) it.next();
-			prepareMethodOverride(mo);
+		MethodOverrides methodOverrides = getMethodOverrides();
+		if (!methodOverrides.isEmpty()) {
+			for (Iterator it = methodOverrides.getOverrides().iterator(); it.hasNext(); ) {
+				MethodOverride mo = (MethodOverride) it.next();
+				prepareMethodOverride(mo);
+			}
 		}
 	}
 

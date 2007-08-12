@@ -120,8 +120,7 @@ abstract class ConstructorResolver {
 					for (int i = 0; i < argsToResolve.length; i++) {
 						Object argValue = argsToResolve[i];
 						if (argValue instanceof BeanMetadataElement) {
-							String argName = "constructor argument with index " + i;
-							argValue = valueResolver.resolveValueIfNecessary(argName, argValue);
+							argValue = valueResolver.resolveValueIfNecessary("constructor argument", argValue);
 						}
 						argsToUse[i] = converter.convertIfNecessary(argValue, paramTypes[i],
 								new MethodParameter(constructorToUse, i));
@@ -279,8 +278,7 @@ abstract class ConstructorResolver {
 					for (int i = 0; i < argsToResolve.length; i++) {
 						Object argValue = argsToResolve[i];
 						if (argValue instanceof BeanMetadataElement) {
-							String argName = "factory method argument with index " + i;
-							argValue = valueResolver.resolveValueIfNecessary(argName, argValue);
+							argValue = valueResolver.resolveValueIfNecessary("factory method argument", argValue);
 						}
 						argsToUse[i] = converter.convertIfNecessary(argValue, paramTypes[i],
 								new MethodParameter(factoryMethodToUse, i));
@@ -412,8 +410,8 @@ abstract class ConstructorResolver {
 				resolvedValues.addIndexedArgumentValue(index, valueHolder);
 			}
 			else {
-				String argName = "constructor argument with index " + index;
-				Object resolvedValue = valueResolver.resolveValueIfNecessary(argName, valueHolder.getValue());
+				Object resolvedValue =
+						valueResolver.resolveValueIfNecessary("constructor argument", valueHolder.getValue());
 				ConstructorArgumentValues.ValueHolder resolvedValueHolder =
 						new ConstructorArgumentValues.ValueHolder(resolvedValue, valueHolder.getType());
 				resolvedValueHolder.setSource(valueHolder);
@@ -428,8 +426,8 @@ abstract class ConstructorResolver {
 				resolvedValues.addGenericArgumentValue(valueHolder);
 			}
 			else {
-				String argName = "constructor argument";
-				Object resolvedValue = valueResolver.resolveValueIfNecessary(argName, valueHolder.getValue());
+				Object resolvedValue =
+						valueResolver.resolveValueIfNecessary("constructor argument", valueHolder.getValue());
 				ConstructorArgumentValues.ValueHolder resolvedValueHolder =
 						new ConstructorArgumentValues.ValueHolder(resolvedValue, valueHolder.getType());
 				resolvedValueHolder.setSource(valueHolder);

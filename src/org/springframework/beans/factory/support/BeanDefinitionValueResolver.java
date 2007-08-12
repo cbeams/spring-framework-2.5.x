@@ -29,6 +29,7 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
@@ -94,7 +95,7 @@ class BeanDefinitionValueResolver {
 	 * @param value the value object to resolve
 	 * @return the resolved object
 	 */
-	public Object resolveValueIfNecessary(String argName, Object value) {
+	public Object resolveValueIfNecessary(Object argName, Object value) {
 		// We must check each value to see whether it requires a runtime reference
 		// to another bean to be resolved.
 		if (value instanceof RuntimeBeanReference) {
@@ -195,7 +196,7 @@ class BeanDefinitionValueResolver {
 	 * @param innerBd the bean definition for the inner bean
 	 * @return the resolved inner bean instance
 	 */
-	private Object resolveInnerBean(String argName, String innerBeanName, BeanDefinition innerBd) {
+	private Object resolveInnerBean(Object argName, String innerBeanName, BeanDefinition innerBd) {
 		RootBeanDefinition mbd = null;
 		try {
 			mbd = this.beanFactory.getMergedBeanDefinition(innerBeanName, innerBd, this.beanDefinition);
@@ -207,7 +208,12 @@ class BeanDefinitionValueResolver {
 			}
 			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mbd, null);
 			this.beanFactory.registerDependentBean(actualInnerBeanName, this.beanName);
-			return this.beanFactory.getObjectForBeanInstance(innerBean, actualInnerBeanName, mbd);
+			if (innerBean instanceof FactoryBean) {
+				return this.beanFactory.getObjectFromFactoryBean((FactoryBean) innerBean, actualInnerBeanName, mbd);
+			}
+			else {
+				return innerBean;
+			}
 		}
 		catch (BeansException ex) {
 			throw new BeanCreationException(
@@ -237,7 +243,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * Resolve a reference to another bean in the factory.
 	 */
-	private Object resolveReference(String argName, RuntimeBeanReference ref) {
+	private Object resolveReference(Object argName, RuntimeBeanReference ref) {
 		try {
 			if (ref.isToParent()) {
 				if (this.beanFactory.getParentBeanFactory() == null) {
@@ -264,7 +270,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	private List resolveManagedList(String argName, List ml) {
+	private List resolveManagedList(Object argName, List ml) {
 		List resolved = new ArrayList(ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			resolved.add(
@@ -278,7 +284,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
-	private Set resolveManagedSet(String argName, Set ms) {
+	private Set resolveManagedSet(Object argName, Set ms) {
 		Set resolved = CollectionFactory.createLinkedSetIfPossible(ms.size());
 		int i = 0;
 		for (Iterator it = ms.iterator(); it.hasNext();) {
@@ -294,7 +300,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the ManagedMap, resolve reference if necessary.
 	 */
-	private Map resolveManagedMap(String argName, Map mm) {
+	private Map resolveManagedMap(Object argName, Map mm) {
 		Map resolved = CollectionFactory.createLinkedMapIfPossible(mm.size());
 		Iterator it = mm.entrySet().iterator();
 		while (it.hasNext()) {

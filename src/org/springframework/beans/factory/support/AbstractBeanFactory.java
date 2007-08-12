@@ -191,24 +191,16 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		// Eagerly check singleton cache for manually registered singletons.
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null) {
-			if (isSingletonCurrentlyInCreation(beanName)) {
-				if (logger.isDebugEnabled()) {
+			if (logger.isDebugEnabled()) {
+				if (isSingletonCurrentlyInCreation(beanName)) {
 					logger.debug("Returning eagerly cached instance of singleton bean '" + beanName +
 							"' that is not fully initialized yet - a consequence of a circular reference");
 				}
-			}
-			else {
-				if (logger.isDebugEnabled()) {
+				else {
 					logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
-			if (containsBeanDefinition(beanName)) {
-				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
-				bean = getObjectForBeanInstance(sharedInstance, name, mbd);
-			}
-			else {
-				bean = getObjectForBeanInstance(sharedInstance, name, null);
-			}
+			bean = getObjectForBeanInstance(sharedInstance, name, beanName);
 		}
 
 		else {
@@ -254,7 +246,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 						}
 					}
 				});
-				bean = getObjectForBeanInstance(sharedInstance, name, mbd);
+				bean = getObjectForBeanInstance(sharedInstance, name, beanName);
 			}
 
 			else if (mbd.isPrototype()) {
@@ -267,7 +259,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				finally {
 					afterPrototypeCreation(beanName);
 				}
-				bean = getObjectForBeanInstance(prototypeInstance, name, mbd);
+				bean = getObjectForBeanInstance(prototypeInstance, name, beanName);
 			}
 
 			else {
@@ -293,7 +285,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 							}
 						}
 					});
-					bean = getObjectForBeanInstance(scopedInstance, name, mbd);
+					bean = getObjectForBeanInstance(scopedInstance, name, beanName);
 				}
 				catch (IllegalStateException ex) {
 					throw new BeanCreationException(beanName,
@@ -932,21 +924,25 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		if (registrySupport != null) {
 			registrySupport.useConfigValueEditors();
 		}
-		for (Iterator it = this.propertyEditorRegistrars.iterator(); it.hasNext();) {
-			PropertyEditorRegistrar registrar = (PropertyEditorRegistrar) it.next();
-			registrar.registerCustomEditors(registry);
-		}
-		for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
-			Class clazz = (Class) entry.getKey();
-			PropertyEditor editor = (PropertyEditor) entry.getValue();
-			// Register the editor as shared instance, if possible,
-			// to make it clear that it might be used concurrently.
-			if (registrySupport != null) {
-				registrySupport.registerSharedEditor(clazz, editor);
+		if (!this.propertyEditorRegistrars.isEmpty()) {
+			for (Iterator it = this.propertyEditorRegistrars.iterator(); it.hasNext();) {
+				PropertyEditorRegistrar registrar = (PropertyEditorRegistrar) it.next();
+				registrar.registerCustomEditors(registry);
 			}
-			else {
-				registry.registerCustomEditor(clazz, editor);
+		}
+		if (!this.customEditors.isEmpty()) {
+			for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				Class clazz = (Class) entry.getKey();
+				PropertyEditor editor = (PropertyEditor) entry.getValue();
+				// Register the editor as shared instance, if possible,
+				// to make it clear that it might be used concurrently.
+				if (registrySupport != null) {
+					registrySupport.registerSharedEditor(clazz, editor);
+				}
+				else {
+					registry.registerCustomEditor(clazz, editor);
+				}
 			}
 		}
 	}
@@ -961,6 +957,11 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
 	protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName) throws BeansException {
+		// Quick check on the concurrent map first, with minimal locking.
+		RootBeanDefinition mbd = (RootBeanDefinition) this.mergedBeanDefinitions.get(beanName);
+		if (mbd != null) {
+			return mbd;
+		}
 		return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
 	}
 
@@ -992,70 +993,64 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			String beanName, BeanDefinition bd, BeanDefinition containingBd)
 			throws BeanDefinitionStoreException {
 
-		RootBeanDefinition mbd = null;
-		// Quick check on the concurrent map first, with minimal locking.
-		if (containingBd == null) {
-			mbd = (RootBeanDefinition) this.mergedBeanDefinitions.get(beanName);
-		}
-		if (mbd == null) {
+		synchronized (this.mergedBeanDefinitions) {
+			RootBeanDefinition mbd = null;
 
-			synchronized (this.mergedBeanDefinitions) {
-				// Second check with full lock now, to enforce the same merged instance.
-				if (containingBd == null) {
-					mbd = (RootBeanDefinition) this.mergedBeanDefinitions.get(beanName);
+			// Check with full lock now in order to enforce the same merged instance.
+			if (containingBd == null) {
+				mbd = (RootBeanDefinition) this.mergedBeanDefinitions.get(beanName);
+			}
+
+			if (mbd == null) {
+				if (bd.getParentName() == null) {
+					// Use copy of given root bean definition.
+					mbd = new RootBeanDefinition(bd);
 				}
-
-				if (mbd == null) {
-					if (bd.getParentName() == null) {
-						// Use copy of given root bean definition.
-						mbd = new RootBeanDefinition(bd);
-					}
-					else {
-						// Child bean definition: needs to be merged with parent.
-						BeanDefinition pbd = null;
-						try {
-							String parentBeanName = transformedBeanName(bd.getParentName());
-							if (!beanName.equals(parentBeanName)) {
-								pbd = getMergedBeanDefinition(parentBeanName);
+				else {
+					// Child bean definition: needs to be merged with parent.
+					BeanDefinition pbd = null;
+					try {
+						String parentBeanName = transformedBeanName(bd.getParentName());
+						if (!beanName.equals(parentBeanName)) {
+							pbd = getMergedBeanDefinition(parentBeanName);
+						}
+						else {
+							if (getParentBeanFactory() instanceof ConfigurableBeanFactory) {
+								pbd = ((ConfigurableBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(parentBeanName);
 							}
 							else {
-								if (getParentBeanFactory() instanceof ConfigurableBeanFactory) {
-									pbd = ((ConfigurableBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(parentBeanName);
-								}
-								else {
-									throw new NoSuchBeanDefinitionException(bd.getParentName(),
-											"Parent name '" + bd.getParentName() + "' is equal to bean name '" + beanName +
-											"': cannot be resolved without an AbstractBeanFactory parent");
-								}
+								throw new NoSuchBeanDefinitionException(bd.getParentName(),
+										"Parent name '" + bd.getParentName() + "' is equal to bean name '" + beanName +
+										"': cannot be resolved without an AbstractBeanFactory parent");
 							}
 						}
-						catch (NoSuchBeanDefinitionException ex) {
-							throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanName,
-									"Could not resolve parent bean definition '" + bd.getParentName() + "'", ex);
-						}
-						// Deep copy with overridden values.
-						mbd = new RootBeanDefinition(pbd);
-						mbd.overrideFrom(bd);
 					}
+					catch (NoSuchBeanDefinitionException ex) {
+						throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanName,
+								"Could not resolve parent bean definition '" + bd.getParentName() + "'", ex);
+					}
+					// Deep copy with overridden values.
+					mbd = new RootBeanDefinition(pbd);
+					mbd.overrideFrom(bd);
+				}
 
-					// A bean contained in a non-singleton bean cannot be a singleton itself.
-					// Let's correct this on the fly here, since this might be the result of
-					// parent-child merging for the outer bean, in which case the original inner bean
-					// definition will not have inherited the merged outer bean's singleton status.
-					if (containingBd != null && !containingBd.isSingleton() && mbd.isSingleton()) {
-						mbd.setSingleton(false);
-					}
+				// A bean contained in a non-singleton bean cannot be a singleton itself.
+				// Let's correct this on the fly here, since this might be the result of
+				// parent-child merging for the outer bean, in which case the original inner bean
+				// definition will not have inherited the merged outer bean's singleton status.
+				if (containingBd != null && !containingBd.isSingleton() && mbd.isSingleton()) {
+					mbd.setSingleton(false);
+				}
 
-					// Only cache the merged bean definition if we're already about to create an
-					// instance of the bean, or at least have already created an instance before.
-					if (containingBd == null && isCacheBeanMetadata() && this.alreadyCreated.contains(beanName)) {
-						this.mergedBeanDefinitions.put(beanName, mbd);
-					}
+				// Only cache the merged bean definition if we're already about to create an
+				// instance of the bean, or at least have already created an instance before.
+				if (containingBd == null && isCacheBeanMetadata() && this.alreadyCreated.contains(beanName)) {
+					this.mergedBeanDefinitions.put(beanName, mbd);
 				}
 			}
-		}
 
-		return mbd;
+			return mbd;
+		}
 	}
 
 	/**
@@ -1234,17 +1229,16 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * instance itself or its created object in case of a FactoryBean.
 	 * @param beanInstance the shared bean instance
 	 * @param name name that may include factory dereference prefix
-	 * @param mbd the merged bean definition
+	 * @param beanName the canonical bean name
 	 * @return the object to expose for the bean
 	 */
-	protected Object getObjectForBeanInstance(Object beanInstance, String name, RootBeanDefinition mbd) {
+	protected Object getObjectForBeanInstance(Object beanInstance, String name, String beanName) {
 		// Don't let calling code try to dereference the
 		// bean factory if the bean isn't a factory.
 		if (BeanFactoryUtils.isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
 			throw new BeanIsNotAFactoryException(transformedBeanName(name), beanInstance.getClass());
 		}
 
-		boolean shared = (mbd == null || mbd.isSingleton());
 		Object object = beanInstance;
 
 		// Now we have the bean instance, which may be a normal bean or a FactoryBean.
@@ -1254,8 +1248,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			if (!BeanFactoryUtils.isFactoryDereference(name)) {
 				// Return bean instance from factory.
 				FactoryBean factory = (FactoryBean) beanInstance;
-				String beanName = transformedBeanName(name);
 				// Cache object obtained from FactoryBean if it is a singleton.
+				RootBeanDefinition mbd =
+						(containsBeanDefinition(beanName) ? getMergedLocalBeanDefinition(beanName) :  null);
+				boolean shared = (mbd == null || mbd.isSingleton());
 				if (shared && factory.isSingleton()) {
 					synchronized (getSingletonMutex()) {
 						object = this.factoryBeanObjectCache.get(beanName);
@@ -1283,7 +1279,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	private Object getObjectFromFactoryBean(FactoryBean factory, String beanName, RootBeanDefinition mbd)
+	protected Object getObjectFromFactoryBean(FactoryBean factory, String beanName, RootBeanDefinition mbd)
 			throws BeanCreationException {
 
 		Object object;
