@@ -9,6 +9,7 @@ Changes in version 2.1 M4 (2007-08-17)
 General
 * updated build to use JUnit 4.4 for the tiger test suite while sticking with JUnit 3.8 for the main test suite
 * moved GlassFish and OC4J instrumentation support from spring-context-support.jar to spring-context.jar
+* factored out Struts 1.x support (including Tiles 1.x support) into spring-webmvc-struts.jar
 * Spring-style pattern matching ("*xxx", "xxx*", "*xxx*") supports multi-part patterns as well now ("xxx*yyy")
 
 Package org.springframework.aop
@@ -19,6 +20,7 @@ Package org.springframework.aop
 Package org.springframework.beans
 * exposed "String[] getDependentBeans(beanName)" method on ConfigurableBeanFactory interface
 * removed superseded ResourceFactoryBean (String-to-Resource conversion has been implicitly available for years)
+* added overloaded "createBean(beanClass)" method to AutowireCapableBeanFactory interface
 * introduced "registerResolvableDependency" method on ConfigurableListableBeanFactory interface
 * introduced qualifier support, allowing to use custom parameter annotations for identifying specific target beans
 * introduced AutowireCandidateResolver mechanism and QualifierAnnotationAutowireCandidateResolver implementation
@@ -74,6 +76,8 @@ Package org.springframework.web
 * JstlView properly allows for programmatic usage (added overloaded constructors; exposing a MessageSource is optional)
 * InternalResourceViewResolver uses JstlView as default (instead of InternalResourceView) if the JSTL API is present
 * JSP MessageTag resolves arguments in default text even if no message code was specified
+* JSP tags in the form tag library default to htmlEscape=true in case of no defaultHtmlEscape setting given
+* added support for Tiles2 in the "org.springframework.web.servlet.view.tiles2" package (requiring Tiles 2.0.4+)
 
 
 Changes in version 2.1 M3 (2007-07-31)
