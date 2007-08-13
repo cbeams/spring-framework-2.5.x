@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,24 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
- * Helper class to configure Tiles for the Spring Framework. See
- * <a href="http://jakarta.apache.org/struts">http://jakarta.apache.org/struts</a>
- * for more information about Tiles, which basically is a templating mechanism
- * for JSP-based web applications.
+ * Helper class to configure Tiles 1.x for the Spring Framework. See
+ * <a href="http://struts.apache.org">http://struts.apache.org</a>
+ * for more information about Struts Tiles, which basically is a templating
+ * mechanism for JSP-based web applications.
  *
- * <p>The TilesConfigurer simply configures a Tiles DefinitionsFactory using a
- * set of files containing definitions, to be accessed by TilesView instances.
- * TilesViews can be managed by any ViewResolver.
+ * <p><b>NOTE:</b> This TilesConfigurer class supports Tiles 1.x,
+ * a.k.a. "Struts Tiles", which comes as part of Struts 1.x.
+ * For Tiles 2.x support, check out
+ * {@link org.springframework.web.servlet.view.tiles2.TilesConfigurer}.
+ *
+ * <p>The TilesConfigurer simply configures a Tiles DefinitionsFactory using
+ * a set of files containing definitions, to be accessed by {@link TilesView}
+ * instances.
+ *
+ * <p>TilesViews can be managed by any {@link org.springframework.web.servlet.ViewResolver}.
+ * For simple convention-based view resolution, consider using
+ * {@link org.springframework.web.servlet.view.UrlBasedViewResolver} with the
+ * "viewClass" property set to "org.springframework.web.servlet.view.tiles.TilesView".
  *
  * <p>A typical TilesConfigurer bean definition looks as follows:
  *
@@ -56,19 +66,33 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  * @author Alef Arendsen
  * @author Juergen Hoeller
  * @see TilesView
- * @see org.springframework.web.servlet.ViewResolver
+ * @see org.springframework.web.servlet.view.UrlBasedViewResolver
  */
 public class TilesConfigurer extends WebApplicationObjectSupport implements InitializingBean {
 
-	/** factory class for Tiles */
-	private Class factoryClass = I18nFactorySet.class;
-
-	/** validate the Tiles definitions? */
-	private boolean validateDefinitions = true;
-
-	/** definition URLs mapped to descriptions */
+	/** Definition URLs mapped to descriptions */
 	private String[] definitions;
 
+	/** Validate the Tiles definitions? */
+	private boolean validateDefinitions = true;
+
+	/** Factory class for Tiles */
+	private Class factoryClass = I18nFactorySet.class;
+
+
+	/**
+	 * Set the Tiles definitions, i.e. the list of files containing the definitions.
+	 */
+	public void setDefinitions(String[] definitions) {
+		this.definitions = definitions;
+	}
+
+	/**
+	 * Set whether to validate the Tiles XML definitions. Default is "true".
+	 */
+	public void setValidateDefinitions(boolean validateDefinitions) {
+		this.validateDefinitions = validateDefinitions;
+	}
 
 	/**
 	 * Set the factory class for Tiles. Default is I18nFactorySet.
@@ -76,20 +100,6 @@ public class TilesConfigurer extends WebApplicationObjectSupport implements Init
 	 */
 	public void setFactoryClass(Class factoryClass) {
 		this.factoryClass = factoryClass;
-	}
-
-	/**
-	 * Set whether to validate the Tiles definitions. Default is "true".
-	 */
-	public void setValidateDefinitions(boolean validateDefinitions) {
-		this.validateDefinitions = validateDefinitions;
-	}
-
-	/**
-	 * Set the Tiles definitions, i.e. the list of files containing the definitions.
-	 */
-	public void setDefinitions(String[] definitions) {
-		this.definitions = definitions;
 	}
 
 

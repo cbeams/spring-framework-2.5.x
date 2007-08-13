@@ -31,8 +31,8 @@
 		<fileset dir="${spring.root}/lib/jakarta-commons">
 			<include name="commons-logging.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/struts">
-			<include name="struts.jar"/>
+		<fileset dir="${spring.root}/lib/tiles">
+			<include name="*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
@@ -72,7 +72,7 @@
 
 		<mkdir dir="${build.dir}"/>
 
-		<javac destdir="${build.dir}" source="1.3" target="1.3" debug="true"
+		<javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<classpath refid="master-classpath"/>
@@ -99,8 +99,8 @@
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/struts">
-				<include name="struts.jar"/>
+			<fileset dir="${spring.root}/lib/tiles">
+				<include name="*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>

@@ -10,16 +10,22 @@
 		<property name="basename" value="messages"/>
 	</bean>
 
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="viewClass" value="org.springframework.web.servlet.view.tiles.TilesJstlView"/>
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView"/>
 	</bean>
 
-	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer">
+	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
 		<property name="definitions">
 			<list>
 				<value>/WEB-INF/defs/definitions.xml</value>
 			</list>
 		</property>
+		<property name="preparerFactoryClass"
+				value="org.springframework.web.servlet.view.tiles2.SpringBeanPreparerFactory"/>
+	</bean>
+
+	<bean id="feedPreparer" class="org.springframework.samples.tiles.NewsFeedController">
+		<property name="configurer" ref="feedConfigurer"/>
 	</bean>
 
 	<bean id="feedConfigurer" class="org.springframework.samples.tiles.NewsFeedConfigurer">

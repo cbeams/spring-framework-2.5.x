@@ -359,8 +359,13 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 * struts/struts.jar
 - Apache Struts 1.2.9 (http://jakarta.apache.org/struts)
 - required for building the framework
-- required at runtime when using the Struts support or TilesView
+- required at runtime when using the Struts 1.x support or Tiles 1.x TilesView
 - required for running JPetStore's Struts web tier
+
+* tiles/tiles-api-2.0.4.jar, tiles/tiles-core-2.0.4.jar, tiles/tiles-jsp-2.0.4.jar
+- Apache Tiles 2.0.4 (http://tiles.apache.org)
+- required for building the framework
+- required at runtime when using the Tiles2 TilesView
 
 * tomcat/catalina.jar, tomcat/naming-resources.jar
 - Apache Tomcat 5.5.23 (http://tomcat.apache.org)

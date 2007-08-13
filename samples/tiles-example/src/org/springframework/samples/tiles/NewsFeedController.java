@@ -6,10 +6,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.struts.tiles.ComponentContext;
+import org.apache.tiles.Attribute;
+import org.apache.tiles.AttributeContext;
+import org.apache.tiles.context.TilesRequestContext;
+import org.apache.tiles.preparer.PreparerException;
+import org.apache.tiles.preparer.ViewPreparer;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentFactory;
@@ -17,35 +18,40 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
-import org.springframework.web.servlet.view.tiles.ComponentControllerSupport;
-
 /**
  * Controller for the news tile that retrieves a feed
  * mentioned in the definitions file.
  *
  * @author Alef Arendsen
+ * @author Juergen Hoeller
  */
-public class NewsFeedController extends ComponentControllerSupport {
+public class NewsFeedController implements ViewPreparer {
 
-	protected void doPerform(
-			ComponentContext componentContext, HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+	private NewsFeedConfigurer configurer;
 
-		NewsFeedConfigurer configurer = (NewsFeedConfigurer) getApplicationContext().getBean("feedConfigurer");
-		String uri = configurer.feedUri((String) componentContext.getAttribute("sourceName"));
-		NewsReader reader = new NewsReader(uri);
 
-		int size = Integer.parseInt((String) componentContext.getAttribute("size"));
-		List items = new ArrayList();
-		for (int i = 0; i < size && i < reader.size(); i++) {
-			NewsItem item = new NewsItem();
-			item.setLink(reader.getLinkAt(i));
-			item.setTitle(reader.getTitleAt(i));
-			item.setSourceName((String) componentContext.getAttribute("sourceName"));
-			items.add(item);
+	public void setConfigurer(NewsFeedConfigurer configurer) {
+		this.configurer = configurer;
+	}
+
+	public void execute(TilesRequestContext tilesRequestContext, AttributeContext attributeContext) throws PreparerException {
+		String uri = this.configurer.feedUri((String) attributeContext.getAttribute("sourceName").getValue());
+		try {
+			NewsReader reader = new NewsReader(uri);
+			int size = Integer.parseInt((String) attributeContext.getAttribute("size").getValue());
+			List items = new ArrayList();
+			for (int i = 0; i < size && i < reader.size(); i++) {
+				NewsItem item = new NewsItem();
+				item.setLink(reader.getLinkAt(i));
+				item.setTitle(reader.getTitleAt(i));
+				item.setSourceName((String) attributeContext.getAttribute("sourceName").getValue());
+				items.add(item);
+			}
+			attributeContext.putAttribute("items", new Attribute(items));
 		}
-		
-		componentContext.putAttribute("items", items);
+		catch (Exception ex) {
+			throw new PreparerException(ex);
+		}
 	}
 
 

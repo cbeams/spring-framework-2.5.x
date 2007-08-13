@@ -1,4 +1,4 @@
-<%@ taglib prefix="tiles" uri="http://jakarta.apache.org/struts/tags-tiles" %>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jstl/fmt" %>
 
@@ -17,11 +17,11 @@
 			</tr>
 			<tr>
 				<td width="70%" valign="top">
-					<tiles:insert name="content"/>
+					<tiles:insertAttribute name="content"/>
 				</td>
 				<td valign="top">
-					<tiles:insert name="newsOne"/>
-					<tiles:insert name="newsTwo"/>
+					<tiles:insertAttribute name="newsOne"/>
+					<tiles:insertAttribute name="newsTwo"/>
 				</td>
 			</tr>
 		</table>

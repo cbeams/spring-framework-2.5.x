@@ -14,34 +14,36 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.view.tiles;
+package org.springframework.web.servlet.view.tiles2;
+
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.tiles.TilesContainer;
+import org.apache.tiles.access.TilesAccess;
 
 import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.support.JstlUtils;
+import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
- * Specialization of {@link TilesView} for JSTL pages,
- * i.e. Tiles pages that  use the JSP Standard Tag Library.
+ * View implementation that retrieves a Tiles definition.
+ * The "url" property is interpreted as name of a Tiles definition.
  *
- * <p><b>NOTE:</b> This TilesJstlView class supports Tiles 1.x,
- * a.k.a. "Struts Tiles", which comes as part of Struts 1.x.
- * For Tiles 2.x support, check out
- * {@link org.springframework.web.servlet.view.tiles2.TilesView}.
+ * <p>This class builds on Tiles2, which requires Java 5 and JSP 2.0.
+ * JSTL support is integrated out of the box.
  *
- * <p>Exposes JSTL-specific request attributes specifying locale
- * and resource bundle for JSTL's formatting and message tags,
- * using Spring's locale and message source.
- *
- * <p>This is a separate class mainly to avoid JSTL dependencies
- * in TilesView itself.
+ * <p>Depends on a TilesContainer which must be available in
+ * the ServletContext. This container is typically set up via a
+ * {@link TilesConfigurer} bean definition in the application context.
  *
  * @author Juergen Hoeller
- * @since 20.08.2003
- * @see org.springframework.web.servlet.support.JstlUtils#exposeLocalizationContext
+ * @see #setUrl
+ * @see TilesConfigurer
  */
-public class TilesJstlView extends TilesView {
+public class TilesView extends AbstractUrlBasedView {
 
 	private MessageSource jstlAwareMessageSource;
 
@@ -52,9 +54,13 @@ public class TilesJstlView extends TilesView {
 				JstlUtils.getJstlAwareMessageSource(getServletContext(), getApplicationContext());
 	}
 
+	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
 
-	protected void exposeHelpers(HttpServletRequest request) throws Exception {
+		TilesContainer container = TilesAccess.getContainer(getServletContext());
+		exposeModelAsRequestAttributes(model, request);
 		JstlUtils.exposeLocalizationContext(request, this.jstlAwareMessageSource);
+		container.render(getUrl(), request, response);
 	}
 
 }

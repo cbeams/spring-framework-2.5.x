@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,21 @@ import org.springframework.web.servlet.view.InternalResourceView;
  * View implementation that retrieves a Tiles definition.
  * The "url" property is interpreted as name of a Tiles definition.
  *
- * <p>TilesJstlView with JSTL support is a separate class,
+ * <p>{@link TilesJstlView} with JSTL support is a separate class,
  * mainly to avoid JSTL dependencies in this class.
+ *
+ * <p><b>NOTE:</b> This TilesView class supports Tiles 1.x,
+ * a.k.a. "Struts Tiles", which comes as part of Struts 1.x.
+ * For Tiles 2.x support, check out
+ * {@link org.springframework.web.servlet.view.tiles2.TilesView}.
  *
  * <p>Depends on a Tiles DefinitionsFactory which must be available
  * in the ServletContext. This factory is typically set up via a
- * TilesConfigurer bean definition in the application context.
+ * {@link TilesConfigurer} bean definition in the application context.
  *
- * <p>A component controller specified in the Tiles definition will receive
- * a reference to the current Spring ApplicationContext if it implements
- * ApplicationContextAware. The ComponentControllerSupport class provides
- * a convenient base class for such Spring-aware component controllers.
+ * <p>Check out {@link ComponentControllerSupport} which provides
+ * a convenient base class for Spring-aware component controllers,
+ * allowing convenient access to the Spring ApplicationContext.
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller
@@ -51,7 +55,6 @@ import org.springframework.web.servlet.view.InternalResourceView;
  * @see TilesJstlView
  * @see TilesConfigurer
  * @see ComponentControllerSupport
- * @see org.springframework.context.ApplicationContextAware
  */
 public class TilesView extends InternalResourceView {
 
@@ -75,6 +78,7 @@ public class TilesView extends InternalResourceView {
 
 
 	private DefinitionsFactory definitionsFactory;
+
 
 	protected void initApplicationContext() throws ApplicationContextException {
 		super.initApplicationContext();
@@ -164,6 +168,7 @@ public class TilesView extends InternalResourceView {
 	 */
 	protected Controller getController(ComponentDefinition definition, HttpServletRequest request)
 			throws Exception {
+
 		return definition.getOrCreateController();
 	}
 
@@ -178,6 +183,7 @@ public class TilesView extends InternalResourceView {
 	protected void executeController(
 			Controller controller, ComponentContext context, HttpServletRequest request, HttpServletResponse response)
 	    throws Exception {
+
 		controller.perform(context, request, response, getServletContext());
 	}
 
@@ -191,6 +197,7 @@ public class TilesView extends InternalResourceView {
 	 */
 	protected String getDispatcherPath(ComponentDefinition definition, HttpServletRequest request)
 	    throws Exception {
+
 		Object pathAttr = request.getAttribute(PATH_ATTRIBUTE);
 		return (pathAttr != null ? pathAttr.toString() : definition.getPath());
 	}
