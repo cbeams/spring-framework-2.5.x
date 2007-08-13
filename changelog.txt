@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.7 (2007-08-15)
+Changes in version 2.0.7 (2007-08-20)
 -------------------------------------
 
 General
@@ -26,10 +26,12 @@ Package org.springframework.beans
 * added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
 * BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
 * PropertyPathFactoryBean supports a null property value (removed historic restriction there)
+* optimized DefaultListableBeanFactory's resolution of bean references during prototype creation
 * changed visibility of BeanDefinitionParserDelegate's "buildTypedStringValue(ForMap)" methods to protected
 
 Package org.springframework.core
 * added "isAtLeastJava16()" convenience method to JdkVersion class
+* factored out protected "openStreamForClass" template method in OverridingClassLoader
 * fixed PathMatchingResourcePatternResolver to build correct JarFile URLs on WebLogic and WebSphere
 * PathMatchingResourcePatternResolver uses a static Log instance in order to avoid repeated synchronization overhead
 
@@ -73,6 +75,7 @@ Package org.springframework.transaction
 
 Package org.springframework.util
 * fixed "StringUtils.parseLocaleString" to parse multiple variants correctly
+* ReflectionUtils provides a "findMethod" variant without parameter types argument
 
 Package org.springframework.validation
 * added overloaded "rejectIfEmpty(OrWhitespace)" methods with args but without default message to ValidationUtils
