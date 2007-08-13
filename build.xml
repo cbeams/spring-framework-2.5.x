@@ -71,9 +71,11 @@
 		<exclude name="META-INF/aop.xml"/>
 		<exclude name="org/springframework/beans/factory/aspectj/**"/>
 		<exclude name="org/springframework/transaction/aspectj/**"/>
+		<!-- exclude content of spring-webmvc-portlet.jar and spring-webmvc-struts.jar -->
 		<exclude name="org/springframework/web/portlet/**"/>
+		<exclude name="org/springframework/web/struts/**"/>
+		<exclude name="org/springframework/web/servlet/view/tiles/**"/>
 	</patternset>
-
 
 	<patternset id="spring.aop.packages">
 		<include name="org/springframework/aop/**"/>
@@ -163,6 +165,7 @@
 		<include name="org/springframework/web/**"/>
 		<exclude name="org/springframework/web/servlet/**"/>
 		<exclude name="org/springframework/web/portlet/**"/>
+		<exclude name="org/springframework/web/struts/**"/>
 		<include name="org/springframework/orm/jdo/support/Open*InView*.*"/>
 		<include name="org/springframework/orm/jpa/support/Open*InView*.*"/>
 		<include name="org/springframework/orm/hibernate3/support/Open*InView*.*"/>
@@ -175,10 +178,16 @@
 	<patternset id="spring.webmvc.packages">
 		<include name="META-INF/*.tld"/>
 		<include name="org/springframework/web/servlet/**"/>
+		<exclude name="org/springframework/web/servlet/view/tiles/**"/>
 	</patternset>
 
 	<patternset id="spring.webmvc.portlet.packages">
 		<include name="org/springframework/web/portlet/**"/>
+	</patternset>
+
+	<patternset id="spring.webmvc.struts.packages">
+		<include name="org/springframework/web/struts/**"/>
+		<include name="org/springframework/web/servlet/view/tiles/**"/>
 	</patternset>
 
 	<patternset id="spring.aspects.packages">
@@ -412,7 +421,7 @@
 		<mkdir dir="${dist.dir}/module-sources"/>
 		<mkdir dir="${dist.dir}/resources"/>
 		<mkdir dir="${dist.dir}/weaving"/>
-		<mkdir dir="${dist.dir}/weaving-sources" />
+		<mkdir dir="${dist.dir}/weaving-sources"/>
 
 	</target>
 	
@@ -523,7 +532,7 @@
 
 		<jar jarfile="${dist.dir}/modules/spring-core.jar">
 			<fileset dir="${target.classes.dir}">
-				<patternset refid="spring.core.packages" />
+				<patternset refid="spring.core.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -534,7 +543,7 @@
 
 		<jar jarfile="${dist.dir}/modules/spring-jdbc.jar">
 			<fileset dir="${target.classes.dir}">
-				<patternset refid="spring.jdbc.packages" />
+				<patternset refid="spring.jdbc.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -545,7 +554,7 @@
 
 		<jar jarfile="${dist.dir}/modules/spring-jms.jar">
 			<fileset dir="${target.classes.dir}">
-				<patternset refid="spring.jms.packages" />
+				<patternset refid="spring.jms.packages"/>
 			</fileset>
 			<fileset dir="${jarcontent.dir}/spring-jms"/>
 			<manifest>
@@ -557,7 +566,7 @@
 
 		<jar jarfile="${dist.dir}/modules/spring-orm.jar">
 			<fileset dir="${target.classes.dir}">
-				<patternset refid="spring.orm.packages" />
+				<patternset refid="spring.orm.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -568,7 +577,7 @@
 
 		<jar jarfile="${dist.dir}/modules/spring-mock.jar">
 			<fileset dir="${target.mockclasses.dir}">
-				<patternset refid="spring.mock.packages" />
+				<patternset refid="spring.mock.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -579,7 +588,7 @@
 
 		<jar jarfile="${dist.dir}/modules/spring-tx.jar">
 			<fileset dir="${target.classes.dir}">
-				<patternset refid="spring.tx.packages" />
+				<patternset refid="spring.tx.packages"/>
 			</fileset>
 			<fileset dir="${jarcontent.dir}/spring-tx"/>
 			<manifest>
@@ -591,7 +600,7 @@
 
 		<jar jarfile="${dist.dir}/modules/spring-web.jar">
 			<fileset dir="${target.classes.dir}">
-				<patternset refid="spring.web.packages" />
+				<patternset refid="spring.web.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -602,7 +611,7 @@
 
 		<jar jarfile="${dist.dir}/modules/spring-webmvc.jar">
 			<fileset dir="${target.classes.dir}">
-				<patternset refid="spring.webmvc.packages" />
+				<patternset refid="spring.webmvc.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -613,7 +622,18 @@
 
 		<jar jarfile="${dist.dir}/modules/spring-webmvc-portlet.jar">
 			<fileset dir="${target.classes.dir}">
-				<patternset refid="spring.webmvc.portlet.packages" />
+				<patternset refid="spring.webmvc.portlet.packages"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-webmvc-struts.jar">
+			<fileset dir="${target.classes.dir}">
+				<patternset refid="spring.webmvc.struts.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -705,10 +725,10 @@
 
 		<jar jarfile="${dist.dir}/module-sources/spring-core-sources.jar">
 			<fileset dir="${src.dir}">
-				<patternset refid="spring.core.packages" />
+				<patternset refid="spring.core.packages"/>
 			</fileset>
 			<fileset dir="${tiger.src.dir}">
-				<patternset refid="spring.core.packages" />
+				<patternset refid="spring.core.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -719,10 +739,10 @@
 
 		<jar jarfile="${dist.dir}/module-sources/spring-jdbc-sources.jar">
 			<fileset dir="${src.dir}">
-				<patternset refid="spring.jdbc.packages" />
+				<patternset refid="spring.jdbc.packages"/>
 			</fileset>
 			<fileset dir="${tiger.src.dir}">
-				<patternset refid="spring.jdbc.packages" />
+				<patternset refid="spring.jdbc.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -733,10 +753,10 @@
 
 		<jar jarfile="${dist.dir}/module-sources/spring-jms-sources.jar">
 			<fileset dir="${src.dir}">
-				<patternset refid="spring.jms.packages" />
+				<patternset refid="spring.jms.packages"/>
 			</fileset>
 			<fileset dir="${tiger.src.dir}">
-				<patternset refid="spring.jms.packages" />
+				<patternset refid="spring.jms.packages"/>
 			</fileset>
 			<fileset dir="${jarcontent.dir}/spring-jms"/>
 			<manifest>
@@ -748,10 +768,10 @@
 
 		<jar jarfile="${dist.dir}/module-sources/spring-orm-sources.jar">
 			<fileset dir="${src.dir}">
-				<patternset refid="spring.orm.packages" />
+				<patternset refid="spring.orm.packages"/>
 			</fileset>
 			<fileset dir="${tiger.src.dir}">
-				<patternset refid="spring.orm.packages" />
+				<patternset refid="spring.orm.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -762,10 +782,10 @@
 
 		<jar jarfile="${dist.dir}/module-sources/spring-mock-sources.jar">
 			<fileset dir="${mock.dir}">
-				<patternset refid="spring.mock.packages" />
+				<patternset refid="spring.mock.packages"/>
 			</fileset>
 			<fileset dir="${tiger.mock.dir}">
-				<patternset refid="spring.mock.packages" />
+				<patternset refid="spring.mock.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -776,10 +796,10 @@
 
 		<jar jarfile="${dist.dir}/module-sources/spring-tx-sources.jar">
 			<fileset dir="${src.dir}">
-				<patternset refid="spring.tx.packages" />
+				<patternset refid="spring.tx.packages"/>
 			</fileset>
 			<fileset dir="${tiger.src.dir}">
-				<patternset refid="spring.tx.packages" />
+				<patternset refid="spring.tx.packages"/>
 			</fileset>
 			<fileset dir="${jarcontent.dir}/spring-tx"/>
 			<manifest>
@@ -791,10 +811,10 @@
 
 		<jar jarfile="${dist.dir}/module-sources/spring-web-sources.jar">
 			<fileset dir="${src.dir}">
-				<patternset refid="spring.web.packages" />
+				<patternset refid="spring.web.packages"/>
 			</fileset>
 			<fileset dir="${tiger.src.dir}">
-				<patternset refid="spring.web.packages" />
+				<patternset refid="spring.web.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -805,10 +825,10 @@
 
 		<jar jarfile="${dist.dir}/module-sources/spring-webmvc-sources.jar">
 			<fileset dir="${src.dir}">
-				<patternset refid="spring.webmvc.packages" />
+				<patternset refid="spring.webmvc.packages"/>
 			</fileset>
 			<fileset dir="${tiger.src.dir}">
-				<patternset refid="spring.webmvc.packages" />
+				<patternset refid="spring.webmvc.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -819,10 +839,24 @@
 
 		<jar jarfile="${dist.dir}/module-sources/spring-webmvc-portlet-sources.jar">
 			<fileset dir="${src.dir}">
-				<patternset refid="spring.webmvc.portlet.packages" />
+				<patternset refid="spring.webmvc.portlet.packages"/>
 			</fileset>
 			<fileset dir="${tiger.src.dir}">
-				<patternset refid="spring.webmvc.portlet.packages" />
+				<patternset refid="spring.webmvc.portlet.packages"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/module-sources/spring-webmvc-struts-sources.jar">
+			<fileset dir="${src.dir}">
+				<patternset refid="spring.webmvc.struts.packages"/>
+			</fileset>
+			<fileset dir="${tiger.src.dir}">
+				<patternset refid="spring.webmvc.struts.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -844,7 +878,7 @@
 
 		<jar jarfile="${dist.dir}/weaving/spring-agent.jar">
 			<fileset dir="${target.classes.dir}">
-				<patternset refid="spring.agent.packages" />
+				<patternset refid="spring.agent.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -867,7 +901,7 @@
 
 		<jar jarfile="${dist.dir}/weaving/spring-tomcat-weaver.jar">
 			<fileset dir="${target.classes.dir}">
-				<patternset refid="spring.tomcat.weaver.packages" />
+				<patternset refid="spring.tomcat.weaver.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -900,10 +934,10 @@
 
 		<jar jarfile="${dist.dir}/weaving-sources/spring-agent-sources.jar">
 			<fileset dir="${src.dir}">
-				<patternset refid="spring.agent.packages" />
+				<patternset refid="spring.agent.packages"/>
 			</fileset>
 			<fileset dir="${tiger.src.dir}">
-				<patternset refid="spring.agent.packages" />
+				<patternset refid="spring.agent.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -915,10 +949,10 @@
 
 		<jar jarfile="${dist.dir}/weaving-sources/spring-tomcat-weaver-sources.jar">
 			<fileset dir="${src.dir}">
-				<patternset refid="spring.tomcat.weaver.packages" />
+				<patternset refid="spring.tomcat.weaver.packages"/>
 			</fileset>
 			<fileset dir="${tiger.src.dir}">
-				<patternset refid="spring.tomcat.weaver.packages" />
+				<patternset refid="spring.tomcat.weaver.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -976,7 +1010,7 @@
 		</path>
 
 		<taskdef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant"
-				classpathref="maven.lib.path" />
+				classpathref="maven.lib.path"/>
 
 	</target>
 
@@ -985,87 +1019,92 @@
 			description="Uploads all jars, sources, and POMs to a local m2 repository">
 
 		<maven:install file="${dist.dir}/spring.jar">
-			<pom file="${pom.src.dir}/spring.pom" />
+			<pom file="${pom.src.dir}/spring.pom"/>
 			<attach file="${dist.dir}/spring-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-aop.jar">
-			<pom file="${pom.src.dir}/spring-aop.pom" />
+			<pom file="${pom.src.dir}/spring-aop.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-aop-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-beans.jar">
-			<pom file="${pom.src.dir}/spring-beans.pom" />
+			<pom file="${pom.src.dir}/spring-beans.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-beans-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-context-support.jar">
-			<pom file="${pom.src.dir}/spring-context-support.pom" />
+			<pom file="${pom.src.dir}/spring-context-support.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-context-support-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-context.jar">
-			<pom file="${pom.src.dir}/spring-context.pom" />
+			<pom file="${pom.src.dir}/spring-context.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-context-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-core.jar">
-			<pom file="${pom.src.dir}/spring-core.pom" />
+			<pom file="${pom.src.dir}/spring-core.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-core-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-jdbc.jar">
-			<pom file="${pom.src.dir}/spring-jdbc.pom" />
+			<pom file="${pom.src.dir}/spring-jdbc.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-jdbc-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-jms.jar">
-			<pom file="${pom.src.dir}/spring-jms.pom" />
+			<pom file="${pom.src.dir}/spring-jms.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-jms-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-mock.jar">
-			<pom file="${pom.src.dir}/spring-mock.pom" />
+			<pom file="${pom.src.dir}/spring-mock.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-mock-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-orm.jar">
-			<pom file="${pom.src.dir}/spring-orm.pom" />
+			<pom file="${pom.src.dir}/spring-orm.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-orm-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-tx.jar">
-			<pom file="${pom.src.dir}/spring-tx.pom" />
+			<pom file="${pom.src.dir}/spring-tx.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-tx-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-web.jar">
-			<pom file="${pom.src.dir}/spring-web.pom" />
+			<pom file="${pom.src.dir}/spring-web.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-web-sources.jar" classifier="sources"/>
 		</maven:install>
 
-		<maven:install file="${dist.dir}/modules/spring-webmvc-portlet.jar">
-			<pom file="${pom.src.dir}/spring-webmvc-portlet.pom" />
-			<attach file="${dist.dir}/module-sources/spring-webmvc-portlet-sources.jar" classifier="sources"/>
-		</maven:install>
-
 		<maven:install file="${dist.dir}/modules/spring-webmvc.jar">
-			<pom file="${pom.src.dir}/spring-webmvc.pom" />
+			<pom file="${pom.src.dir}/spring-webmvc.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-webmvc-sources.jar" classifier="sources"/>
 		</maven:install>
 
+		<maven:install file="${dist.dir}/modules/spring-webmvc-portlet.jar">
+			<pom file="${pom.src.dir}/spring-webmvc-portlet.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-webmvc-portlet-sources.jar" classifier="sources"/>
+		</maven:install>
+
+		<maven:install file="${dist.dir}/modules/spring-webmvc-struts.jar">
+			<pom file="${pom.src.dir}/spring-webmvc-struts.pom"/>
+			<attach file="${dist.dir}/module-sources/spring-webmvc-struts-sources.jar" classifier="sources"/>
+		</maven:install>
+
 		<maven:install file="${dist.dir}/weaving/spring-agent.jar">
-			<pom file="${pom.src.dir}/spring-agent.pom" />
+			<pom file="${pom.src.dir}/spring-agent.pom"/>
 			<attach file="${dist.dir}/weaving-sources/spring-agent-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/weaving/spring-aspects.jar">
-			<pom file="${pom.src.dir}/spring-aspects.pom" />
+			<pom file="${pom.src.dir}/spring-aspects.pom"/>
 			<attach file="${dist.dir}/weaving-sources/spring-aspects-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/weaving/spring-tomcat-weaver.jar">
-			<pom file="${pom.src.dir}/spring-tomcat-weaver.pom" />
+			<pom file="${pom.src.dir}/spring-tomcat-weaver.pom"/>
 			<attach file="${dist.dir}/weaving-sources/spring-tomcat-weaver-sources.jar" classifier="sources"/>
 		</maven:install>
 
@@ -1137,6 +1176,7 @@
 			<link href="http://portals.apache.org/pluto/multiproject/portlet-api/apidocs/"/>
 			<link href="http://quartz.sourceforge.net/javadoc/"/>
 			<link href="http://struts.apache.org/struts-doc-1.2.9/api/"/>
+			<link href="http://tiles.apache.org/framework/apidocs/"/>
 			<link href="http://velocity.apache.org/engine/devel/apidocs/"/>
 		</javadoc>
 
@@ -2001,6 +2041,7 @@
 				<include name="lib/quartz/**"/>
 				<include name="lib/serp/**"/>
 				<include name="lib/struts/**"/>
+				<include name="lib/tiles/**"/>
 				<include name="lib/tomcat/**"/>
 				<include name="lib/toplink/**"/>
 				<include name="lib/velocity/**"/>

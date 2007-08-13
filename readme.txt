@@ -54,10 +54,10 @@ knowledge about it immediately.
 The Spring Framework 2.1 requires JDK 1.4.2 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). JDK 1.6 is
 required for building the framework; for the full build including all aspects, AspectJ is required as well.
 
-Integration is provided with Log4J 1.2, CGLIB 2.1, AspectJ 1.5.3, Commons Attributes 2.1/2.2, JMX 1.0/1.2,
-JCA 1.0/1.5, Hibernate 3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, iBATIS SQL Maps 2.1/2.2/2.3,
-Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5/1.6, EHCache 1.2, JSTL 1.0/1.1, Velocity 1.3/1.4/1.5,
-FreeMarker 2.3, JasperReports 1.2/1.3, Struts/Tiles 1.1/1.2/1.3, JSF 1.1/1.2, Commons FileUpload 1.1/1.2, etc.
+Integration is provided with Log4J 1.2, CGLIB 2.1, AspectJ 1.5.3, Commons Attributes 2.2, JMX 1.0/1.2,
+JCA 1.0/1.5, Hibernate 3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, iBATIS SQL Maps 2.3,
+Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5/1.6, EHCache 1.2, JSTL 1.0/1.1, Velocity 1.5,
+FreeMarker 2.3, JasperReports 1.3, Commons FileUpload 1.2, JSF 1.1/1.2, Struts 1.2/1.3, Tiles 2.0, etc.
 
 Basic release contents (~10 MB):
 * "dist" contains the Spring distribution jar files, as well as a zip of all Java source files
@@ -98,10 +98,10 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2875 KB)
-- Convenient jar file combining all standard modules (except for the mock module and the Portlet support)
-- Also includes the AOP Alliance interfaces (as a convenience)
-- Note: Does not include contents of spring-mock.jar, spring-aspects.jar and spring-webmvc-portlet.jar!
+* "spring" (~2850 KB)
+- Convenient jar file combining all standard modules (except for the mock module and the Portlet/Struts support)
+- Also includes the AOP Alliance interfaces (as a convenience)!
+- Does not include contents of spring-aspects.jar, spring-mock.jar, spring-webmvc-portlet and spring-webmvc-struts.jar!
 
 MODULE JARS (dist/modules):
 
@@ -145,17 +145,21 @@ MODULE JARS (dist/modules):
 - Contents: transaction infrastructure, JCA support, DAO support
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API, JCA API)
 
-* "spring-web" (~200 KB)
+* "spring-web" (~175 KB)
 - Contents: web application context, multipart resolver, HTTP-based remoting exporters
 - Dependencies: spring-context, Servlet API, (JSP API, JSTL)
 
-* "spring-webmvc" (~285 KB)
+* "spring-webmvc" (~290 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-context-support)
 
 * "spring-webmvc-portlet" (~120 KB)
 - Contents: framework portlets, portlet MVC framework, portlet controllers
 - Dependencies: spring-web, Portlet API, (spring-webmvc)
+
+* "spring-webmvc-struts" (~35 KB)
+- Contents: Struts 1.x action support, Tiles 1.x view support
+- Dependencies: spring-web, Struts API, (spring-webmvc)
 
 WEAVING JARS (dist/weaving)
 
