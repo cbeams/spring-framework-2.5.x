@@ -31,7 +31,7 @@ import org.springframework.util.FileCopyUtils;
  * parent loader, as normal class loaders do. This enables, for example,
  * instrumentation to be forced in the overriding ClassLoader, or a
  * "throwaway" class loading behavior, where selected classes are
- * temporarily loaded in the overriding ClassLoader, in order to be load
+ * temporarily loaded in the overriding ClassLoader, in order to load
  * an instrumented version of the class in the parent ClassLoader later on.
  *
  * @author Rod Johnson
