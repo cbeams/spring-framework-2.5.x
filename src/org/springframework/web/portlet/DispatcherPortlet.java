@@ -41,7 +41,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -604,8 +603,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
 	 */
 	protected Object createDefaultStrategy(ApplicationContext context, Class clazz) throws BeansException {
-		return context.getAutowireCapableBeanFactory().createBean(
-				clazz, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+		return context.getAutowireCapableBeanFactory().createBean(clazz);
 	}
 
 

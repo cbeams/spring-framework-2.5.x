@@ -103,6 +103,16 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 
 	/**
+	 * Fully create a new bean instance of the given class.
+	 * <p>Performs full initialization of the bean, including all applicable
+	 * {@link BeanPostProcessor BeanPostProcessors}.
+	 * @param beanClass the class of the bean to create
+	 * @return the new bean instance
+	 * @throws BeansException if instantiation or wiring failed
+	 */
+	Object createBean(Class beanClass) throws BeansException;
+
+	/**
 	 * Fully create a new bean instance of the given class with the specified
 	 * autowire strategy. All constants defined in this interface are supported here.
 	 * <p>Performs full initialization of the bean, including all applicable

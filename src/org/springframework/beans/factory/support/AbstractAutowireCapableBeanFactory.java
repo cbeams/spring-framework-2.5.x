@@ -245,6 +245,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	// Implementation of AutowireCapableBeanFactory interface
 	//---------------------------------------------------------------------
 
+	public Object createBean(Class beanClass) throws BeansException {
+		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
+		RootBeanDefinition bd = new RootBeanDefinition(beanClass, false);
+		return createBean(beanClass.getName(), bd, null);
+	}
+
 	public Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck)
 			throws BeansException {
 
