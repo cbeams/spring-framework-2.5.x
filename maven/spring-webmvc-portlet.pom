@@ -9,7 +9,7 @@
 	<artifactId>spring-webmvc-portlet</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Framework: Web MVC Portlet</name>
-	<version>2.1-m3-SNAPSHOT</version>
+	<version>2.1-m4</version>
 	<description>Spring Framework: Web MVC Portlet</description>
 	<url>http://www.springframework.org</url>
 	<licenses>

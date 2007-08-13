@@ -9,7 +9,7 @@
 	<artifactId>spring-orm</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Framework: ORM</name>
-	<version>2.1-m3-SNAPSHOT</version>
+	<version>2.1-m4</version>
 	<description>Spring Framework: ORM</description>
 	<url>http://www.springframework.org</url>
 	<licenses>
