@@ -97,12 +97,12 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
     <para><emphasis>NOTE:</emphasis> This section focuses on Spring's support
     for Tiles 2 (the standalone version of Tiles, requiring Java 5+) in the
     <literal>org.springframework.web.servlet.view.tiles2</literal> package.
-    Spring also continues to support Tiles 1.x (as shipped with
-    Struts 1.1+; compatible with Java 1.4) in the original
+    Spring also continues to support Tiles 1.x (a.k.a. "Struts Tiles",
+    as shipped with Struts 1.1+; compatible with Java 1.4) in the original
     <literal>org.springframework.web.servlet.view.tiles</literal> package.
     </para>
 
-		<section id="view-tiles-dependencies">
+   <section id="view-tiles-dependencies">
       <title>Dependencies</title>
 
       <para>To be able to use Tiles you have to have a couple of additional
@@ -183,7 +183,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
   <property name="basename" value="views"/>
 </bean>]]></programlisting>
 
-        <programlisting><![CDATA[    ...
+        <programlisting><![CDATA[...
 welcomeView.class=org.springframework.web.servlet.view.tiles2.TilesView
 welcomeView.url=welcome ]]><lineannotation>(this is the name of a Tiles definition)</lineannotation><![CDATA[
 
