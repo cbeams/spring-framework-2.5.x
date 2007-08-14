@@ -72,7 +72,7 @@
         either by using an explicit 'template' wrapper class at the Java code
         level or by exposing a current <interfacename>Session</interfacename>
         through the Hibernate <interfacename>SessionFactory</interfacename>
-        (for DAOs based on plain Hibernate3 API). Thus Spring solves many of
+        (for DAOs based on plain Hibernate API). Thus Spring solves many of
         the issues that repeatedly arise from typical Hibernate usage, for any
         transaction environment (local or JTA).</para>
       </listitem>
@@ -107,22 +107,20 @@
     Spring environment. It also features two web tier versions: one based on
     Spring Web MVC, one based on Struts.</para>
 
-    <para>Beyond the samples shipped with Spring, there is a variety of
+    <para>Beyond the samples shipped with Spring, there are a variety of
     Spring-based O/R mapping samples provided by specific vendors: for
     example, the JDO implementations JPOX (<ulink url="http://www.jpox.org/"></ulink>)
-    and Kodo (<ulink url="http://www.bea.com/kodo"></ulink>).</para>
+    and Kodo (<ulink url="http://www.bea.com/kodo/"></ulink>).</para>
   </section>
 
-  <section id="orm-hibernate">
+	<section id="orm-hibernate">
     <title>Hibernate</title>
 
-    <para>We will start with a coverage of <ulink url="http://www.hibernate.org/">Hibernate</ulink>
-    in a Spring environment, using it to demonstrate the approach that Spring takes towards
-    integrating O/R mappers. This section will cover many issues in detail and show different
-    variations of DAO implementations and transaction demarcations. Most of
-    these patterns can be directly translated to all other supported O/R
-    mapping tools. The following sections in this chapter will then cover the
-    other O/R mappers, showing briefer examples there.</para>
+    <para>We will start with a coverage of <ulink url="http://www.hibernate.org/">Hibernate 3</ulink> in a Spring
+    environment, using it to demonstrate the approach that Spring takes towards integrating O/R mappers. This section
+    will cover many issues in detail and show different variations of DAO implementations and transaction demarcations.
+    Most of these patterns can be directly translated to all other supported ORM tools. The following sections in this
+    chapter will then cover the other ORM technologies, showing briefer examples there.</para>
 
     <para>The following discussion focuses on Hibernate 3: this is the current
     major production ready version of Hibernate. Hibernate 2.x, which has been
@@ -380,7 +378,7 @@
     </section>
 
     <section id="orm-hibernate-straight">
-      <title>Implementing DAOs based on plain Hibernate3 API</title>
+      <title>Implementing DAOs based on plain Hibernate 3 API</title>
 
       <para>Hibernate 3.0.1 introduced a feature called "contextual Sessions",
       where Hibernate itself manages one current
@@ -455,7 +453,7 @@
       transaction, if any (no matter whether driven by Spring's
       <classname>JtaTransactionManager</classname>, by EJB CMT, or by JTA).</para>
 
-      <para>In summary: DAOs can be implemented based on the plain Hibernate3
+      <para>In summary: DAOs can be implemented based on the plain Hibernate 3
       API, while still being able to participate in Spring-managed transactions.</para>
     </section>
 
@@ -2048,26 +2046,26 @@
         <interfacename>LoadTimeWeaver</interfacename> implementations for
         various environments, allowing
         <interfacename>ClassTransformer</interfacename> instances to be
-        applied only <emphasis>per classloader</emphasis> and not per
+        applied only <emphasis>per ClassLoader</emphasis> and not per
         VM.</para>
 
         <section id="orm-jpa-setup-lcemfb-tomcat">
-          <title>Tomcat setup</title>
+          <title>Tomcat load-time weaving setup (4.1+)</title>
 
           <para><ulink url="http://tomcat.apache.org/">Jakarta
-          Tomcat's</ulink> default classloader does not support class
-          transformation but allows custom classloaders to be used. Spring
+          Tomcat's</ulink> default ClassLoader does not support class
+          transformation but allows custom ClassLoaders to be used. Spring
           offers the <classname>TomcatInstrumentableClassLoader</classname>
           (inside the
           <literal>org.springframework.instrument.classloading.tomcat</literal>
-          package) which extends the Tomcat classloader
+          package) which extends the Tomcat ClassLoader
           (<classname>WebappClassLoader</classname>) and allows JPA
           <classname>ClassTransformer</classname> instances to 'enhance' all
           classes loaded by it. In short, JPA transformers will be applied
           only inside a specific web application (which uses the
           <classname>TomcatInstrumentableClassLoader</classname>).</para>
 
-          <para>In order to use the custom classloader on:</para>
+          <para>In order to use the custom ClassLoader on:</para>
 
           <itemizedlist>
             <listitem>
@@ -2083,7 +2081,7 @@
             </listitem>
 
             <listitem>
-              <para>Instruct Tomcat to use the custom classloader (instead of
+              <para>Instruct Tomcat to use the custom ClassLoader (instead of
               the default one) by editing the web application context file:</para>
 
               <programlisting><![CDATA[<Context path="/myWebApp" docBase="/my/webApp/location">
@@ -2102,7 +2100,7 @@
               (<emphasis>your-webapp.war/META-INF/context.xml</emphasis>). For
               efficiency, inside the web-app configuration style is
               recommended since only applications which use JPA will use the
-              custom classloader. See the Tomcat 5.x <ulink
+              custom ClassLoader. See the Tomcat 5.x <ulink
               url="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">documentation</ulink>
               for more details about available context locations.</para>
 
@@ -2126,7 +2124,7 @@
               <para>In Tomcat 4.x, one can use the same contex.xml and place
               it under <emphasis>$CATALINA_HOME</emphasis>/webapps or modify
               <emphasis>$CATALINA_HOME/</emphasis>conf/server.xml to use the
-              custom classloader by default. See the Tomcat 4.x <ulink
+              custom ClassLoader by default. See the Tomcat 4.x <ulink
               url="http://tomcat.apache.org/tomcat-4.1-doc/config/context.html">documentation</ulink>
               for more information.</para>
             </listitem>
@@ -2146,7 +2144,7 @@
             </listitem>
 
             <listitem>
-              <para>Instruct Tomcat to use the custom classloader (instead of
+              <para>Instruct Tomcat to use the custom ClassLoader (instead of
               the default one) by editing the web application context file:</para>
 
               <programlisting><![CDATA[<Context path="/myWebApp" docBase="/my/webApp/location">
@@ -2165,7 +2163,7 @@
               (<emphasis>your-webapp.war/META-INF/context.xml</emphasis>). For
               efficiency, inside the web-app configuration style is
               recommended since only applications which use JPA will use the
-              custom classloader. See the Tomcat 5.x <ulink
+              custom ClassLoader. See the Tomcat 5.x <ulink
               url="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">documentation</ulink>
               for more details about available context locations.</para>
 
@@ -2187,7 +2185,7 @@
           instrumentation, can run in Tomcat without the need of an agent.
           This is important especially when hosting applications which rely on
           different JPA implementations since the JPA transformers are applied
-          only at classloader level and thus, are isolated from each
+          only at ClassLoader level and thus, are isolated from each
           other.</para>
 
 			<note>
@@ -2200,11 +2198,11 @@
         </section>
 
         <section id="orm-jpa-oc4j">
-          <title>OC4J setup (10.1.3.1+)</title>
+          <title>OC4J load-time weaving setup (10.1.3.1+)</title>
 
           <para>As Oracle's <ulink
           url="http://www.oracle.com/technology/tech/java/oc4j/index.html">OC4J</ulink>
-          classloader has native bytecode transformation support, switching
+          ClassLoader has native bytecode transformation support, switching
           from an JDK agent to a <interfacename>LoadTimeWeaver</interfacename> can be done
           just through the application Spring configuration:</para>
 
@@ -2216,11 +2214,11 @@
         </section>
 
         <section id="orm-jpa-glassfish">
-          <title>GlassFish</title>
+          <title>GlassFish load-time weaving setup</title>
 
           <para><ulink url="https://glassfish.dev.java.net/">GlassFish</ulink>
           application server provides out of the box, an instrumentation cable
-          classloader. Spring supports it through
+          ClassLoader. Spring supports it through
           <classname>GlassFishLoadTimeWeaver</classname>:</para>
 
           <programlisting><![CDATA[<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
@@ -2231,11 +2229,11 @@
         </section>
         
         <section id="orm-jpa-resin">
-          <title>Resin setup (3.1.0+)</title>
+          <title>Resin load-time weaving setup (3.1.0+)</title>
 
           <para>Caucho <ulink
           url="http://www.caucho.com/resin-3.1/">Resin 3.1</ulink>
-          sesies classloader provides native bytecode capabilities which can
+          sesies ClassLoader provides native bytecode capabilities which can
           be used by Spring through <classname>ReflectiveLoadTimeWeaver</classname>:</para>
 
           <programlisting><![CDATA[<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
@@ -2381,13 +2379,21 @@
 
       <para>Besides working with Spring's <classname>JpaTemplate</classname>,
       one can also code Spring-based DAOs against the JPA, doing one's own
-      explicit <interfacename>EntityManager</interfacename> handling. As elaborated in the
-      corresponding Hibernate section, the main advantage of this approach is
-      that your data access code is able to throw checked exceptions.
+      explicit <interfacename>EntityManager</interfacename> handling. As also
+      elaborated in the corresponding Hibernate section, the main advantage of
+      this approach is that your data access code is able to throw checked exceptions.
       <classname>JpaDaoSupport</classname> offers a variety of support methods
       for this scenario, for retrieving and releasing a transaction
       <interfacename>EntityManager</interfacename>, as well as for converting
       exceptions.</para>
+
+      <para><emphasis>JpaTemplate mainly exists as a sibling of JdoTemplate and
+      HibernateTemplate, offering the same style for people used to it. For newly
+      started projects, consider adopting the native JPA style of coding data
+      access objects instead, based on a "shared EntityManager" reference obtained
+      through the JPA <literal>@PersistenceContext</literal> annotation (using
+      Spring's <classname>PersistenceAnnotationBeanPostProcessor</classname>;
+      see below for details.)</emphasis></para>
     </section>
 
     <section id="orm-jpa-straight">
@@ -2395,7 +2401,7 @@
 
       <note>
         <para>While <interfacename>EntityManagerFactory</interfacename>
-        instances are thread safe,
+        instances are thread-safe,
         <interfacename>EntityManager</interfacename> instances are not. The
         injected JPA <interfacename>EntityManager</interfacename> behave just
         like an <interfacename>EntityManager</interfacename> fetched from an
@@ -2404,7 +2410,7 @@
         <interfacename>EntityManager</interfacename>, if any; else, it will
         fall back to a newly created
         <interfacename>EntityManager</interfacename> per operation, making it
-        thread safe.</para>
+        thread-safe.</para>
       </note>
 
       <para>It is possible to write code against the plain JPA without using
