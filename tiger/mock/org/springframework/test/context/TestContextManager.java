@@ -16,6 +16,7 @@
 package org.springframework.test.context;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -49,7 +50,7 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 public class TestContextManager<T> {
@@ -102,6 +103,8 @@ public class TestContextManager<T> {
 	 * {@link Class test class}.
 	 * </p>
 	 *
+	 * @see #registerDefaultTestExecutionListeners()
+	 * @see #registerTestExecutionListeners(TestExecutionListener...)
 	 * @param testClass the Class object corresponding to the test class to be
 	 *        managed.
 	 * @throws Exception if an error occurs while processing the test class
@@ -110,6 +113,8 @@ public class TestContextManager<T> {
 
 		this.testContext = new TestContext<T>(testClass, getContextCache());
 		registerDefaultTestExecutionListeners();
+		// TODO Add TestExecutionListeners to ContextConfig, and
+		// TODO Register custom TestExecutionListeners from config
 	}
 
 	// ------------------------------------------------------------------------|
@@ -129,11 +134,32 @@ public class TestContextManager<T> {
 	 * <li>{@link DependencyInjectionTestExecutionListener}</li>
 	 * <li>{@link DirtiesContextTestExecutionListener}</li>
 	 * </ol>
+	 *
+	 * @see #registerTestExecutionListeners(TestExecutionListener...)
 	 */
-	protected void registerDefaultTestExecutionListeners() {
+	public void registerDefaultTestExecutionListeners() {
 
-		this.testExecutionListeners.add(new DependencyInjectionTestExecutionListener());
-		this.testExecutionListeners.add(new DirtiesContextTestExecutionListener());
+		registerTestExecutionListeners(new DependencyInjectionTestExecutionListener(),
+				new DirtiesContextTestExecutionListener());
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Registers the supplied
+	 * {@link TestExecutionListener TestExecutionListeners} by appending them to
+	 * the set of listeners used by this {@link TestContextManager}.
+	 * </p>
+	 */
+	public void registerTestExecutionListeners(final TestExecutionListener... testExecutionListeners) {
+
+		for (final TestExecutionListener listener : testExecutionListeners) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Registering TestExecutionListener [" + listener + "].");
+			}
+			this.testExecutionListeners.add(listener);
+		}
 	}
 
 	// ------------------------------------------------------------------------|
@@ -238,7 +264,8 @@ public class TestContextManager<T> {
 	 * <p>
 	 * The default implementation gives each registered
 	 * {@link TestExecutionListener} a chance to post-process the test method
-	 * execution.
+	 * execution. Note that registered listeners will be executed in the
+	 * opposite order in which they were registered.
 	 * </p>
 	 *
 	 * @param testInstance The current test instance, not <code>null</code>.
@@ -254,11 +281,17 @@ public class TestContextManager<T> {
 			LOG.debug("afterTestMethod(): instance [" + testInstance + "], method [" + testMethod + "].");
 		}
 
-		// Update test instance
+		// Update test instance.
 		getTestContext().setTestInstanceAndMethod(testInstance, testMethod);
 
-		for (final TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
+		// Traverse the TestExecutionListeners in reverse order.
+		final ArrayList<TestExecutionListener> listenersList = new ArrayList<TestExecutionListener>(
+				getTestExecutionListeners());
+		Collections.reverse(listenersList);
+
+		for (final TestExecutionListener testExecutionListener : listenersList) {
 			try {
+				// TODO Relocate call to afterTestMethod() & pass in Throwable!
 				testExecutionListener.afterTestMethod(getTestContext(), null);
 			}
 			catch (final Exception e) {
