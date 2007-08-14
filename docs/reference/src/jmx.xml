@@ -935,7 +935,7 @@ public class AnnotationTestBean implements IJmxTestBean {
     </property>
   </bean>
   
-  ]]><lineannotation>&lt;!-- (for Java5+ annotations-based metadata) --&gt;</lineannotation><emphasis><![CDATA[
+  ]]><lineannotation>&lt;!-- (for Java 5+ annotations-based metadata) --&gt;</lineannotation><emphasis><![CDATA[
   <!--
   <bean id="attributeSource"
         class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>

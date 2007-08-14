@@ -1315,9 +1315,9 @@ support=support@somecompany.co.uk]]></programlisting>
                     versions).</para>
                 </section>
                 <section id="beans-collection-elements-strongly-typed">
-                    <title>Strongly-typed collection (Java5+ only)</title>
-                    <para>If you are one of the lucky few to be using Java5 (Tiger), you will be aware
-                    that it is possible to have strongly typed collections. That is, it is possible to
+                    <title>Strongly-typed collection (Java 5+ only)</title>
+                    <para>If you are using Java 5 or Java 6, you will be aware that it is possible to
+                    have strongly typed collections (using generic types). That is, it is possible to
                     declare a <interfacename>Collection</interfacename> type such that it can only
                     contain <classname>String</classname> elements (for example).
                     If you are using Spring to dependency inject a strongly-typed
@@ -1826,7 +1826,7 @@ support=support@somecompany.co.uk]]></programlisting>
                     </tbody>
                 </tgroup>
             </table>
-            <para>If you are using Java 5 (Tiger) and thus have access to source level annotations,
+            <para>If you are using Java 5 and thus have access to source-level annotations,
 			you may find the section entitled <xref linkend="metadata-annotations-required"/>
 			to be of interest.</para>
         </section>

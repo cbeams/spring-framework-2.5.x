@@ -154,7 +154,7 @@ public void echoException(Exception ex) throws Exception {
 	<section id="metadata-annotations">
 		<title>Annotations</title>
 		<para>
-			The Spring Framework ships with a number of custom Java5+ annotations.
+			The Spring Framework ships with a number of custom Java 5+ annotations.
 		</para>
 		<section id="metadata-annotations-required">
 			<title>@<interfacename>Required</interfacename></title>

@@ -306,8 +306,8 @@
 			used in many tests.</para>
 		</section>
 		<section id="testing-java5-support">
-			<title>Java5+ specific support</title>
-			<para>If you are developing against Java5 or greater, there are
+			<title>Java 5+ specific support</title>
+			<para>If you are developing against Java 5 or greater, there are
 			some additional annotations and support classes that you can use
 			in your testing. The <classname>AbstractAnnotationAwareTransactionalTests</classname>
 			class extends the <classname>AbstractTransactionalDataSourceSpringContextTests</classname>

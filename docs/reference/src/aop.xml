@@ -2043,7 +2043,7 @@ public @interface Idempotent {
 		(for example, field get or set join points, and so on).</para>
 		
 		<para>When using AspectJ, you have the choice of the AspectJ language syntax (also known as the "code style") or
-		the @AspectJ annotation style. Clearly, if you are not using Java5+ then the choice has been made for you...
+		the @AspectJ annotation style. Clearly, if you are not using Java 5+ then the choice has been made for you...
 		use the code style. If aspects play a large role in your design, and you are able to use the
 		<ulink url="http://www.eclipse.org/ajdt/">AspectJ Development Tools (AJDT)</ulink> plugin for Eclipse, then the
 		AspectJ language syntax is the preferred option: it is cleaner and simpler because the language was purposefully
@@ -2055,10 +2055,10 @@ public @interface Idempotent {
 	<section id="aop-ataspectj-or-xml">
 		<title>@AspectJ or XML for Spring AOP?</title>
 		<para>If you have chosen to use Spring AOP, then you have a choice of @AspectJ or XML style. Clearly if you are
-		not running on Java5+, then the XML style is the best choice; for Java5 projects there are various trade offs to
-		consider.</para>
+		not running on Java 5+, then the XML style is the appropriate choice; for Java 5 projects there are various
+		tradeoffs to consider.</para>
 		<para>The XML style will be most familiar to existing Spring users. It can be used with any JDK level (referring
-		to named pointcuts from within pointcut expressions does still require Java5+ though) and is backed by genuine
+		to named pointcuts from within pointcut expressions does still require Java 5+ though) and is backed by genuine
 		POJOs. When using AOP as a tool to configure enterprise services then XML can be a good choice (a good test is
 		whether you consider the pointcut expression to be a part of your configuration you might want to change
 		independently). With the XML style arguably it is clearer from your configuration what aspects are present in
@@ -2782,7 +2782,7 @@ public final class Main {
 
 				<programlisting><![CDATA[java -javaagent:C:/projects/foo/lib/global/spring-agent.jar foo.Main]]></programlisting>
 
-				<para>The '<literal>-javaagent</literal>' is a Java5+ flag for
+				<para>The '<literal>-javaagent</literal>' is a Java 5+ flag for
 				specifying and enabling <ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">agents to instrument programs running on the JVM</ulink>.
 				The Spring Framework ships with such an agent, the
 				<classname>InstrumentationSavingAgent</classname>, which is packaged
@@ -2856,7 +2856,7 @@ public final class Main {
 				<para>The aspects that you use in LTW have to be AspectJ aspects.
 				They can be written in either the AspectJ language itself or you
 				can write your aspects in the @AspectJ-style. The latter option
-				is of course only an option if you are using Java5+, but it does
+				is of course only an option if you are using Java 5+, but it does
 				mean that your aspects are then both valid AspectJ
 				<emphasis>and</emphasis> Spring AOP aspects. Furthermore, the
 				compiled aspect classes need to be available on the classpath.</para>
