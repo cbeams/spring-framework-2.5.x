@@ -259,16 +259,17 @@ public abstract class AnnotationUtils {
 	/**
 	 * Retrieve an Annotation's attributes as a Map.
 	 */
-	public static Map<String, Object> getAnnotationAttributes(Annotation annotation) {
-		Map<String, Object> attrs = new HashMap<String, Object>();
-		Method[] methods = annotation.annotationType().getDeclaredMethods();
+	public static Map<String, Object> getAnnotationAttributes(final Annotation annotation) {
+
+		final Map<String, Object> attrs = new HashMap<String, Object>();
+		final Method[] methods = annotation.annotationType().getDeclaredMethods();
 		for (int j = 0; j < methods.length; j++) {
-			Method method = methods[j];
+			final Method method = methods[j];
 			if (method.getParameterTypes().length == 0 && method.getReturnType() != void.class) {
 				try {
 					attrs.put(method.getName(), method.invoke(annotation));
 				}
-				catch (Exception ex) {
+				catch (final Exception ex) {
 					throw new IllegalStateException("Could not obtain annotation attribute values", ex);
 				}
 			}
@@ -277,27 +278,61 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Retrieve the value for an Annotation attribute. 
+	 * Retrieve the <em>value</em> for an Annotation attribute.
+	 *
+	 * @param annotation The annotation instance from which to retrieve the
+	 *        value.
+	 * @param attributeName The name of the attribute value to retrieve.
+	 * @return The attribute value, or <code>null</code> if not found.
 	 */
-	public static Object getValue(Annotation annotation, String attributeName) {
+	public static Object getValue(final Annotation annotation, final String attributeName) {
+
 		try {
-			Method method = annotation.annotationType().getDeclaredMethod(attributeName, new Class[] {});
+			final Method method = annotation.annotationType().getDeclaredMethod(attributeName, new Class[] {});
 			return method.invoke(annotation);
 		}
-		catch (Exception ex) {
+		catch (final Exception ex) {
 			return null;
 		}
 	}
 
 	/**
-	 * Retrieve the default value for an Annotation attribute. 
+	 * Retrieve the <em>default value</em> for an Annotation attribute, given
+	 * an annotation instance.
+	 *
+	 * @see #getDefaultValue(Class, String)
+	 * @param annotation The annotation instance from which to retrieve the
+	 *        default value.
+	 * @param attributeName The name of the attribute value to retrieve.
+	 * @return The default attribute value, or <code>null</code> if not found.
 	 */
-	public static Object getDefaultValue(Annotation annotation, String attributeName) {
+	public static Object getDefaultValue(final Annotation annotation, final String attributeName) {
+
 		try {
-			Method method = annotation.annotationType().getDeclaredMethod(attributeName, new Class[] {});
+			return getDefaultValue(annotation.annotationType(), attributeName);
+		}
+		catch (final Exception ex) {
+			return null;
+		}
+	}
+
+	/**
+	 * Retrieve the <em>default value</em> for an Annotation attribute, given
+	 * the {@link Class annotation type}.
+	 *
+	 * @see #getDefaultValue(Annotation, String)
+	 * @param annotationType The <em>annotation type</em> for which the
+	 *        default value should be retrieved.
+	 * @param attributeName The name of the attribute value to retrieve.
+	 * @return The default attribute value, or <code>null</code> if not found.
+	 */
+	public static Object getDefaultValue(final Class<? extends Annotation> annotationType, final String attributeName) {
+
+		try {
+			final Method method = annotationType.getDeclaredMethod(attributeName, new Class[] {});
 			return method.getDefaultValue();
 		}
-		catch (Exception ex) {
+		catch (final Exception ex) {
 			return null;
 		}
 	}
