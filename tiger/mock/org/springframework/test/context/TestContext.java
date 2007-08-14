@@ -46,7 +46,7 @@ import org.springframework.util.ClassUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class TestContext<T> {
@@ -109,7 +109,7 @@ public class TestContext<T> {
 
 		this.testClass = testClass;
 		this.contextCache = contextCache;
-		this.configurationAttributes = parseConfigurationAttributes(testClass);
+		this.configurationAttributes = retrieveConfigurationAttributes(testClass);
 	}
 
 	// ------------------------------------------------------------------------|
@@ -188,24 +188,24 @@ public class TestContext<T> {
 
 	/**
 	 * <p>
-	 * Parses the {@link ContextConfigurationAttributes} from the specified
+	 * Retrieves the {@link ContextConfigurationAttributes} for the specified
 	 * {@link Class class}.
 	 * </p>
 	 *
-	 * @param clazz The Class object corresponding to the test class from which
-	 *        the configuration attributes should be parsed.
+	 * @param clazz The Class object corresponding to the test class for which
+	 *        the configuration attributes should be retrieved.
 	 * @return a new ContextConfigurationAttributes instance for the specified
 	 *         class.
-	 * @throws IllegalArgumentException if any of the supplied arguments is
+	 * @throws IllegalArgumentException if the supplied class is
 	 *         <code>null</code>.
 	 */
-	protected static ContextConfigurationAttributes parseConfigurationAttributes(final Class<?> clazz)
+	protected static ContextConfigurationAttributes retrieveConfigurationAttributes(final Class<?> clazz)
 			throws IllegalArgumentException {
 
-		Assert.notNull(clazz, "Can not parse context configuration attributes for a NULL class.");
+		Assert.notNull(clazz, "Can not retrieve context configuration attributes for a NULL class.");
 		final ContextConfigurationAttributes configAttributes = DefaultContextConfigurationAttributes.constructAttributes(clazz);
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Parsed configuration attributes [" + configAttributes + "].");
+			LOG.debug("Retrieved configuration attributes [" + configAttributes + "].");
 		}
 		return configAttributes;
 	}
