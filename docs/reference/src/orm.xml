@@ -6,14 +6,14 @@
     <title>Introduction</title>
 
     <para>The Spring Framework provides integration with <emphasis>Hibernate,
-	JDO, Oracle TopLink, iBATIS SQL Maps</emphasis> and <emphasis>JPA</emphasis>:
-	in terms of resource management, DAO implementation support, and transaction
+    JDO, Oracle TopLink, iBATIS SQL Maps</emphasis> and <emphasis>JPA</emphasis>:
+    in terms of resource management, DAO implementation support, and transaction
     strategies. For example for Hibernate, there is first-class support with
     lots of IoC convenience features, addressing many typical Hibernate
     integration issues. All of these support packages for O/R (Object Relational)
-	mappers comply with Spring's generic transaction and DAO exception hierarchies.
-	There are usually two integration styles: either using Spring's DAO 'templates'
-	or coding DAOs against plain Hibernate/JDO/TopLink/etc APIs. In both cases,
+    mappers comply with Spring's generic transaction and DAO exception hierarchies.
+    There are usually two integration styles: either using Spring's DAO 'templates'
+    or coding DAOs against plain Hibernate/JDO/TopLink/etc APIs. In both cases,
     DAOs can be configured through Dependency Injection and participate in
     Spring's resource and transaction management.</para>
 
@@ -30,7 +30,7 @@
     this section show configuration inside a Spring container.</para>
 
     <para>Some of the benefits of using the Spring Framework to create your
-	ORM DAOs include:</para>
+    ORM DAOs include:</para>
 
     <itemizedlist>
       <listitem>
@@ -1858,18 +1858,18 @@
     <section id="orm-jpa-setup">
       <title>JPA setup in a Spring environment</title>
 
-      <para>Spring JPA offers two ways of setting up JPA
+      <para>Spring JPA offers three ways of setting up JPA
       <interfacename>EntityManagerFactory</interfacename>:</para>
 
       <section id="orm-jpa-setup-lemfb">
         <title><classname>LocalEntityManagerFactoryBean</classname></title>
 
         <para>The <classname>LocalEntityManagerFactoryBean</classname> creates
-        an <interfacename>EntityManager</interfacename> suitable for
+        an <interfacename>EntityManagerFactory</interfacename> suitable for
         environments which solely use JPA for data access. The factory bean
         will use the JPA <interfacename>PersistenceProvider</interfacename>
-        autodetection mechanism and in most cases, requires only the
-        persistence unit name:</para>
+        autodetection mechanism (according to JPA's Java SE bootstrapping) and,
+        in most cases, requires only the persistence unit name to be specified:</para>
 
         <programlisting><![CDATA[<beans>
 
@@ -1879,32 +1879,72 @@
 
 </beans>]]></programlisting>
 
-        <para>Switching to a JNDI <interfacename>EntityManagerFactory</interfacename>
-        (for example in JTA environments), is just a matter of changing the XML
+        <para>This is the simplest but also most limited form of JPA deployment.
+        There is no way to link to an existing JDBC <interfacename>DataSource</interfacename>
+        and no support for global transactions, for example. Furthermore, weaving
+        (byte-code transformation) of persistent classes is provider-specific,
+        often requiring a specific JVM agent to specified on startup. All in all,
+        this option is only really sufficient for standalone applications and test
+        environments (which is exactly what the JPA specification designed it for).</para>
+
+        <para><emphasis>Only use this option in simple deployment environments
+        like standalone applications and integration tests.</emphasis></para>
+      </section>
+
+      <section id="orm-jpa-setup-jndi">
+        <title><classname>Obtaining an EntityManagerFactory from JNDI</classname></title>
+
+        <para>Obtaining an <interfacename>EntityManagerFactory</interfacename> from JNDI
+        (for example in a Java EE 5 environment), is just a matter of changing the XML
         configuration:</para>
 
         <programlisting><![CDATA[<beans>
 
-    <jndi:lookup id="entityManagerFactory" jndi-name="jpa/myPersistenceUnit"/>
+    <jee:jndi-lookup id="entityManagerFactory" jndi-name="persistence/myPersistenceUnit"/>
 
 </beans>]]></programlisting>
-      </section>
+
+        <para>This assumes standard Java EE 5 bootstrapping, with the Java EE server
+        autodetecting persistence units (i.e. <literal>META-INF/persistence.xml</literal>
+        files in application jars) and <literal>persistence-unit-ref</literal> entries
+        in the Java EE deployment descriptor (e.g. <literal>web.xml</literal>) defining
+        environment naming context locations for those persistence units.</para>
+
+        <para>In such a scenario, the entire persistence unit deployment, including the
+        weaving (byte-code transformation) of persistent classes, is up to the Java EE
+        server. The JDBC <interfacename>DataSource</interfacename> is defined through
+        a JNDI location in the <literal>META-INF/persistence.xml</literal> file;
+        EntityManager transactions are integrated with the server's JTA subsystem.
+        Spring merely uses the obtained <interfacename>EntityManagerFactory</interfacename>,
+        passing it on to application objects via dependency injection, and managing
+        transactions for it (typically through <classname>JtaTransactionManager</classname>).</para>
+
+        <para>Note that, in case of multiple persistence units used in the same application,
+        the bean names of such a JNDI-retrieved persistence units should match the
+        persistence unit names that the application uses to refer to them (e.g. in
+        <literal>@PersistenceUnit</literal> and <literal>@PersistenceContext</literal>
+        annotations).</para>
+
+        <para><emphasis>Use this option when deploying to a Java EE 5 server.
+        Check your server's documentation on how to deploy a custom JPA provider
+        into your server, allowing for a different provider than the server's default.
+        </emphasis></para>
+
+			</section>
 
       <section id="orm-jpa-setup-lcemfb">
         <title><classname>LocalContainerEntityManagerFactoryBean</classname></title>
 
-        <para>The
-        <classname>LocalContainerEntityManagerFactoryBean</classname> gives
-        full control over the JPA
-        <interfacename>EntityManagerFactory</interfacename> and is appropriate
-        for environments where fine customizations are required. The
+        <para>The <classname>LocalContainerEntityManagerFactoryBean</classname>
+        gives full control over <interfacename>EntityManagerFactory</interfacename>
+        configuration and is appropriate for environments where fine-grained
+        customization is required. The
         <classname>LocalContainerEntityManagerFactoryBean</classname> will
         create a <interfacename>PersistenceUnitInfo</interfacename> based on
-        the <literal>'persistence.xml'</literal> file, the supplied
-        <literal>dataSourceLookup</literal> strategy and the
+        the <literal>persistence.xml</literal> file, the supplied
+        <literal>dataSourceLookup</literal> strategy and the specified
         <literal>loadTimeWeaver</literal>. It is thus possible to work with
-        custom datasources outside of JNDI and control the weaving
-        process.</para>
+        custom DataSources outside of JNDI and to control the weaving process.</para>
 
         <programlisting><![CDATA[<beans>
         
@@ -1917,10 +1957,33 @@
  
 </beans>]]></programlisting>
 
+        <para>This is the most powerful JPA setup option, allowing for flexible
+        local configuration within the application. It supports links to an
+        existing JDBC <interfacename>DataSource</interfacename>, supports both
+        local and global transactions, etc. However, it also imposes requirements
+        onto the runtime environment, such as the availability of a weaving-capable
+        ClassLoader if the persistence provider demands byte-code transformation.</para>
+
+        <para>Note that this option may conflict with the built-in JPA capabilities
+        of a Java EE 5 server. So when running in a full Java EE 5 environment,
+        consider obtaining your <interfacename>EntityManagerFactory</interfacename>
+        from JNDI. Alternatively, specify a custom "persistenceXmlLocation" on
+        your <classname>LocalContainerEntityManagerFactoryBean</classname> definition,
+        e.g. "META-INF/my-persistence.xml", and only include a descriptor with that
+        name in your application jar files. Since the Java EE 5 server will only
+        look for default <literal>META-INF/persistence.xml</literal> files, it
+        will ignore such custom persistence units and hence avoid conflicts with a
+        Spring-driven JPA setup upfront. (This applies to Resin 3.1, for example.)</para>
+
+        <para><emphasis>Use this option for full JPA capabilities in a Spring-based
+        application environment. This includes web containers such as Tomcat as well
+        as standalone applications and integration tests with sophisticated
+        persistence requirements.</emphasis></para>
+
         <sidebar>
           <title>When is load time weaving required?</title>
 
-          <para>Not all JPA providers impose the need of a JDK agent
+          <para>Not all JPA providers impose the need of a JVM agent
           (Hibernate being an example). If your provider does not require an
           agent or you have other alternatives (for example applying
           enhancements at build time through a custom compiler or an ant task)
@@ -1967,7 +2030,7 @@
 
           <itemizedlist>
             <listitem>
-              <para>Tomcat 4.x/5.x/5.5.x</para>
+              <para>Tomcat 4.1.x/5.0.x/5.5.x</para>
             </listitem>
             
           <orderedlist>
@@ -2004,8 +2067,8 @@
 
               <para>Note that versions prior to 5.5.20 contained a bug in the
               XML configuration parsing preventing usage of <literal>Loader
-              </literal>tag inside<emphasis> server.xml </emphasis>(no matter
-              if a classloader is specified or not (be it the official or a
+              </literal>tag inside <emphasis>server.xml</emphasis> (no matter
+              if a ClassLoader is specified or not (be it the official or a
               custom one). See Tomcat's bugzilla for <ulink
               url="http://issues.apache.org/bugzilla/show_bug.cgi?id=39704">more
               details</ulink>.
