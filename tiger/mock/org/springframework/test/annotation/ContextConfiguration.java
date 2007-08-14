@@ -30,14 +30,14 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
 /**
  * ContextConfiguration defines class-level metadata which can be used to
  * instruct client code with regard to how to load and configure an
- * {@link ApplicationContext}. Although the annotated class would generally be
+ * {@link ApplicationContext}. Although the annotated class will generally be
  * an integration or unit test, the use of ContextConfiguration is not
  * necessarily limited to testing scenarios.
  *
  * @see ContextLoader
  * @see ApplicationContext
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -51,8 +51,12 @@ public @interface ContextConfiguration {
 	// ------------------------------------------------------------------------|
 
 	/**
+	 * <p>
 	 * The resource locations to use for loading the {@link ApplicationContext}.
+	 * </p>
+	 * <p>
 	 * Defaults to an empty array.
+	 * </p>
 	 *
 	 * @see #generateDefaultLocations()
 	 * @see #loaderClass()
@@ -60,9 +64,13 @@ public @interface ContextConfiguration {
 	String[] locations() default {};
 
 	/**
+	 * <p>
 	 * Whether or not <em>default</em> resource locations should be generated
-	 * if no {@link #locations() locations} are explicitly defined. Defaults to
-	 * <code>true</code>.
+	 * if no {@link #locations() locations} are explicitly defined.
+	 * </p>
+	 * <p>
+	 * Defaults to <code>true</code>.
+	 * </p>
 	 *
 	 * @see #locations()
 	 * @see #loaderClass()
@@ -71,16 +79,26 @@ public @interface ContextConfiguration {
 	boolean generateDefaultLocations() default true;
 
 	/**
+	 * <p>
 	 * The suffix to append to {@link ApplicationContext} resource locations
-	 * when generating default locations. Defaults to &quot;<code>-context.xml</code>&quot;.
+	 * when generating default locations.
+	 * </p>
+	 * <p>
+	 * Defaults to &quot;<code>-context.xml</code>&quot;.
+	 * </p>
 	 *
 	 * @see #generateDefaultLocations()
 	 */
 	String resourceSuffix() default "-context.xml";
 
 	/**
+	 * <p>
 	 * The {@link ContextLoader} type to use for loading the
-	 * {@link ApplicationContext}. Defaults to {@link GenericXmlContextLoader}.
+	 * {@link ApplicationContext}.
+	 * </p>
+	 * <p>
+	 * Defaults to {@link GenericXmlContextLoader}.
+	 * </p>
 	 *
 	 * @see #locations()
 	 * @see #generateDefaultLocations()
@@ -88,14 +106,26 @@ public @interface ContextConfiguration {
 	Class<? extends ContextLoader> loaderClass() default GenericXmlContextLoader.class;
 
 	/**
-	 * Are dependencies to be injected via autowiring? Defaults to
-	 * {@link Autowire#NO no}.
+	 * <p>
+	 * Are dependencies to be injected via autowiring?
+	 * </p>
+	 * <p>
+	 * Note: setting this attribute generally only affects non-annotation-based
+	 * autowiring.
+	 * </p>
+	 * <p>
+	 * Defaults to {@link Autowire#NO no}.
+	 * </p>
 	 */
 	Autowire autowire() default Autowire.NO;
 
 	/**
-	 * Is dependency checking to be performed for configured objects? Defaults
-	 * to <code>false</code>.
+	 * <p>
+	 * Is dependency checking to be performed for configured objects?
+	 * </p>
+	 * <p>
+	 * Defaults to <code>false</code>.
+	 * </p>
 	 */
 	boolean checkDependencies() default false;
 
