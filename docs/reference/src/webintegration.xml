@@ -864,7 +864,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 					You will then need to create and expose the Spring container using the
 					<link linkend="webintegration-common">method detailed previously</link>.
 					You can then inject Spring-managed beans into Tapestry very easily; if
-					we are using Java5, consider the <classname>Login</classname> page from above:
+					we are using Java 5, consider the <classname>Login</classname> page from above:
 					we simply need to annotate the appropriate getter methods
 					in order to dependency inject the Spring-managed <literal>userService</literal>
 					and <literal>authenticationService</literal> objects (lots of the class
@@ -908,11 +908,11 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 
 </module>]]></programlisting>
 				<para>
-					If you are using Java5 (and thus have access to annotations), then
+					If you are using Java 5 (and thus have access to annotations), then
 					that really is it.
 				</para>
 				<para>
-		            If you are not using Java5, then one obviously doesn't annotate one's
+		            If you are not using Java 5, then one obviously doesn't annotate one's
 		            Tapestry page classes with annotations; instead, one simply uses
 		            good old fashioned XML to declare the dependency injection; for example,
 		            inside the <literal>.page</literal> or <literal>.jwc</literal> file

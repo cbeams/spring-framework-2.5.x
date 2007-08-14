@@ -408,7 +408,7 @@ public int countOfActors(Actor exampleActor) {
 			<note>
 				<para>
 					<emphasis>The functionality offered by the <classname>SimpleJdbcTemplate</classname>
-					is only available to you if you are using Java 5 (Tiger).</emphasis>
+					is only available to you if you are using Java 5.</emphasis>
 				</para>
 			</note>
 			<para>

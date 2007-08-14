@@ -186,7 +186,7 @@
       <para>Another of the new classes, the
       <link linkend="jdbc-SimpleJdbcTemplate"><classname>SimpleJdbcTemplate</classname></link>,
       is aimed at making using the <classname>JdbcTemplate</classname> even easier to use when
-      you are developing against Java 5+ (Tiger).</para>
+      you are developing against Java 5+.</para>
     </section>
   </section>
 

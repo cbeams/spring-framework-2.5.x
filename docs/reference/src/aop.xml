@@ -2100,9 +2100,9 @@ public @interface Idempotent {
 		then it is very easy to migrate to an AspectJ based approach.
 	</para>
 
-	<para>So much for the pros and cons of each style then: which is best? If you are not using Java5
-	(or above) then clearly the XML-style is the best because it is the only option available to you.
-	If you are using Java5+, then you really will have to come to your own decision as to which style suits
+	<para>So much for the pros and cons of each style then: which is best? If you are not using Java 5
+	(or above) then clearly the XML-style is appropriate because it is the only option available to you.
+	If you are using Java 5+, then you really will have to come to your own decision as to which style suits
 	you best. In the experience of the Spring team, we advocate the use of the @AspectJ style whenever
 	there are aspects that do more than simple "configuration" of enterprise services. If you are writing,
 	have written, or have access to an aspect that is not part of the business contract of a particular

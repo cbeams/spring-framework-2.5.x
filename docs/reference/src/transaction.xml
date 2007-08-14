@@ -1005,7 +1005,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 			<note>
 				<para>The functionality offered by the <interfacename>@Transactional</interfacename>
 				annotation and the support classes is only available to you if you
-				are using at least Java 5 (Tiger).</para>
+				are using Java 5+.</para>
 			</note>
             <para>In addition to the XML-based declarative approach to transaction configuration,
             you can also use an annotation-based approach to transaction configuration. Declaring
