@@ -4066,8 +4066,9 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 </beans>]]></programlisting>
         <para>(The implicitly registered post-processors include 
         <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html">AutowiredAnnotationBeanPostProcessor</ulink></classname>,
-        and <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/annotation/CommonAnnotationBeanPostProcessor.html">CommonAnnotationBeanPostProcessor</ulink></classname>,
-        as well as the aforementioned 
+        <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/annotation/CommonAnnotationBeanPostProcessor.html">CommonAnnotationBeanPostProcessor</ulink></classname>,
+        <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html">PersistenceAnnotationBeanPostProcessor</ulink></classname>,
+        as well as the aforementioned
         <classname><ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html">RequiredAnnotationBeanPostProcessor</ulink></classname>.)
         </para>
         <section id="beans-autowired-annotation">

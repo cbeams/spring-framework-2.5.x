@@ -2345,8 +2345,25 @@
 
       <programlisting><![CDATA[<beans>
 
-  ]]><lineannotation>&lt;!-- JPA annotations bean post processor --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- bean post-processor for JPA annotations --&gt;</lineannotation><![CDATA[
   <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"/>
+
+  <bean id="myProductDao" class="product.ProductDaoImpl"/>
+
+</beans>]]></programlisting>
+
+      <para>Note: As alternative to defining a
+      <classname>PersistenceAnnotationBeanPostProcessor</classname> explicitly,
+      consider using Spring 2.1's <literal>context:annotation-config</literal> XML
+      element in your application context configuration. This will automatically
+      register all of Spring's standard post-processors for annotation-based
+      configuration (including <classname>CommonAnnotationBeanPostProcessor</classname>
+      etc).</para>
+
+     <programlisting><![CDATA[<beans>
+
+  ]]><lineannotation>&lt;!-- post-processors for all standard config annotations --&gt;</lineannotation><![CDATA[
+  <context:annotation-config/>
 
   <bean id="myProductDao" class="product.ProductDaoImpl"/>
 
