@@ -24,8 +24,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.listeners.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.listeners.DirtiesContextTestExecutionListener;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.test.annotation.TestExecutionListeners;
 import org.springframework.test.context.listeners.TestExecutionListener;
 import org.springframework.test.context.support.MapBackedContextCache;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 public class TestContextManager<T> {
@@ -78,10 +78,6 @@ public class TestContextManager<T> {
 	// ------------------------------------------------------------------------|
 
 	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
@@ -103,8 +99,8 @@ public class TestContextManager<T> {
 	 * {@link Class test class}.
 	 * </p>
 	 *
-	 * @see #registerDefaultTestExecutionListeners()
 	 * @see #registerTestExecutionListeners(TestExecutionListener...)
+	 * @see #retrieveTestExecutionListeners(Class)
 	 * @param testClass the Class object corresponding to the test class to be
 	 *        managed.
 	 * @throws Exception if an error occurs while processing the test class
@@ -112,143 +108,62 @@ public class TestContextManager<T> {
 	public TestContextManager(final Class<T> testClass) throws Exception {
 
 		this.testContext = new TestContext<T>(testClass, getContextCache());
-		registerDefaultTestExecutionListeners();
-		// TODO Add TestExecutionListeners to ContextConfig, and
-		// TODO Register custom TestExecutionListeners from config
+		registerTestExecutionListeners(retrieveTestExecutionListeners(testClass));
+	}
+
+	// ------------------------------------------------------------------------|
+	// --- STATIC METHODS -----------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Retrieves an array of newly instantiated
+	 * {@link TestExecutionListener TestExecutionListeners} for the specified
+	 * {@link Class class}.
+	 * </p>
+	 *
+	 * @param clazz The Class object corresponding to the test class for which
+	 *        the listeners should be retrieved.
+	 * @return an array of TestExecutionListeners for the specified class.
+	 * @throws IllegalArgumentException if the supplied class is
+	 *         <code>null</code>.
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	protected static TestExecutionListener[] retrieveTestExecutionListeners(final Class<?> clazz)
+			throws IllegalArgumentException, Exception {
+
+		Assert.notNull(clazz, "Can not retrieve TestExecutionListeners for a NULL class.");
+		final TestExecutionListeners testExecutionListeners = clazz.getAnnotation(TestExecutionListeners.class);
+		Class<? extends TestExecutionListener>[] classes;
+
+		if (testExecutionListeners != null) {
+			classes = testExecutionListeners.value();
+		}
+		else {
+			if (LOG.isInfoEnabled()) {
+				LOG.info("@TestExecutionListeners is not present for class [" + clazz + "]: using defaults.");
+			}
+			classes = (Class<? extends TestExecutionListener>[]) AnnotationUtils.getDefaultValue(
+					TestExecutionListeners.class, "value");
+		}
+
+		final TestExecutionListener[] listeners = new TestExecutionListener[classes.length];
+
+		for (int i = 0; i < classes.length; i++) {
+			final Class<? extends TestExecutionListener> listenerClass = classes[i];
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Retrieved TestExecutionListener class [" + listenerClass + "] for annotated class [" + clazz
+						+ "].");
+			}
+			listeners[i] = listenerClass.newInstance();
+		}
+
+		return listeners;
 	}
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * <p>
-	 * Registers the default set of
-	 * {@link TestExecutionListener TestExecutionListeners} to be used by this
-	 * {@link TestContextManager}.
-	 * </p>
-	 * <p>
-	 * The default implementation registers the following standard listeners:
-	 * </p>
-	 * <ol>
-	 * <li>{@link DependencyInjectionTestExecutionListener}</li>
-	 * <li>{@link DirtiesContextTestExecutionListener}</li>
-	 * </ol>
-	 *
-	 * @see #registerTestExecutionListeners(TestExecutionListener...)
-	 */
-	public void registerDefaultTestExecutionListeners() {
-
-		registerTestExecutionListeners(new DependencyInjectionTestExecutionListener(),
-				new DirtiesContextTestExecutionListener());
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * <p>
-	 * Registers the supplied
-	 * {@link TestExecutionListener TestExecutionListeners} by appending them to
-	 * the set of listeners used by this {@link TestContextManager}.
-	 * </p>
-	 */
-	public void registerTestExecutionListeners(final TestExecutionListener... testExecutionListeners) {
-
-		for (final TestExecutionListener listener : testExecutionListeners) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Registering TestExecutionListener [" + listener + "].");
-			}
-			this.testExecutionListeners.add(listener);
-		}
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * <p>
-	 * Prepares the supplied test instance (e.g., injecting dependencies, etc.).
-	 * </p>
-	 * <p>
-	 * The managed {@link TestContext} will be updated with the supplied
-	 * <code>testInstance</code>.
-	 * </p>
-	 *
-	 * @param testInstance The test instance to prepare, not <code>null</code>.
-	 * @throws Exception if an error occurs while preparing the test instance.
-	 */
-	public void prepareTestInstance(final T testInstance) throws Exception {
-
-		Assert.notNull(testInstance, "The testInstance can not be null.");
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("prepareTestInstance(): instance [" + testInstance + "].");
-		}
-
-		// Update test instance
-		getTestContext().setTestInstanceAndMethod(testInstance, null);
-
-		for (final TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
-			try {
-				testExecutionListener.prepareTestInstance(getTestContext());
-			}
-			catch (final Exception e) {
-				// log and continue in order to let all listeners have a chance
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Caught exception while allowing TestExecutionListener [" + testExecutionListener
-							+ "] to prepare test instance [" + testInstance + "].", e);
-				}
-			}
-		}
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * <p>
-	 * Hook for pre-processing a test just <em>before</em> the execution of
-	 * the supplied {@link Method test method}, for example for setting up test
-	 * fixtures, transaction handling, etc.
-	 * </p>
-	 * <p>
-	 * The managed {@link TestContext} will be updated with the supplied
-	 * <code>testInstance</code> and <code>testMethod</code>.
-	 * </p>
-	 * <p>
-	 * The default implementation gives each registered
-	 * {@link TestExecutionListener} a chance to pre-process the test method
-	 * execution.
-	 * </p>
-	 *
-	 * @param testInstance The current test instance, not <code>null</code>.
-	 * @param testMethod The test method which is about to be executed on the
-	 *        test instance, not <code>null</code>.
-	 * @see #getTestExecutionListeners()
-	 */
-	public void beforeTestMethod(final Object testInstance, final Method testMethod) {
-
-		Assert.notNull(testInstance, "The testInstance can not be null.");
-		Assert.notNull(testMethod, "The testMethod can not be null.");
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("beforeTestMethod(): instance [" + testInstance + "], method [" + testMethod + "].");
-		}
-
-		// Update test instance
-		getTestContext().setTestInstanceAndMethod(testInstance, testMethod);
-
-		for (final TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
-			try {
-				testExecutionListener.beforeTestMethod(getTestContext());
-			}
-			catch (final Exception e) {
-				// log and continue in order to let all listeners have a chance
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Caught exception while allowing TestExecutionListener [" + testExecutionListener
-							+ "] to process 'before' method execution of test method [" + testMethod
-							+ "] for test instance [" + testInstance + "].", e);
-				}
-			}
-		}
-	}
-
 	// ------------------------------------------------------------------------|
 
 	/**
@@ -309,6 +224,55 @@ public class TestContextManager<T> {
 
 	/**
 	 * <p>
+	 * Hook for pre-processing a test just <em>before</em> the execution of
+	 * the supplied {@link Method test method}, for example for setting up test
+	 * fixtures, transaction handling, etc.
+	 * </p>
+	 * <p>
+	 * The managed {@link TestContext} will be updated with the supplied
+	 * <code>testInstance</code> and <code>testMethod</code>.
+	 * </p>
+	 * <p>
+	 * The default implementation gives each registered
+	 * {@link TestExecutionListener} a chance to pre-process the test method
+	 * execution.
+	 * </p>
+	 *
+	 * @param testInstance The current test instance, not <code>null</code>.
+	 * @param testMethod The test method which is about to be executed on the
+	 *        test instance, not <code>null</code>.
+	 * @see #getTestExecutionListeners()
+	 */
+	public void beforeTestMethod(final Object testInstance, final Method testMethod) {
+
+		Assert.notNull(testInstance, "The testInstance can not be null.");
+		Assert.notNull(testMethod, "The testMethod can not be null.");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("beforeTestMethod(): instance [" + testInstance + "], method [" + testMethod + "].");
+		}
+
+		// Update test instance
+		getTestContext().setTestInstanceAndMethod(testInstance, testMethod);
+
+		for (final TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
+			try {
+				testExecutionListener.beforeTestMethod(getTestContext());
+			}
+			catch (final Exception e) {
+				// log and continue in order to let all listeners have a chance
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Caught exception while allowing TestExecutionListener [" + testExecutionListener
+							+ "] to process 'before' method execution of test method [" + testMethod
+							+ "] for test instance [" + testInstance + "].", e);
+				}
+			}
+		}
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
 	 * Gets the {@link ContextCache} used by this {@link TestContextManager}.
 	 * </p>
 	 * <p>
@@ -351,6 +315,63 @@ public class TestContextManager<T> {
 	public final Set<TestExecutionListener> getTestExecutionListeners() {
 
 		return Collections.unmodifiableSet(this.testExecutionListeners);
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Prepares the supplied test instance (e.g., injecting dependencies, etc.).
+	 * </p>
+	 * <p>
+	 * The managed {@link TestContext} will be updated with the supplied
+	 * <code>testInstance</code>.
+	 * </p>
+	 *
+	 * @param testInstance The test instance to prepare, not <code>null</code>.
+	 * @throws Exception if an error occurs while preparing the test instance.
+	 */
+	public void prepareTestInstance(final T testInstance) throws Exception {
+
+		Assert.notNull(testInstance, "The testInstance can not be null.");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("prepareTestInstance(): instance [" + testInstance + "].");
+		}
+
+		// Update test instance
+		getTestContext().setTestInstanceAndMethod(testInstance, null);
+
+		for (final TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
+			try {
+				testExecutionListener.prepareTestInstance(getTestContext());
+			}
+			catch (final Exception e) {
+				// log and continue in order to let all listeners have a chance
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Caught exception while allowing TestExecutionListener [" + testExecutionListener
+							+ "] to prepare test instance [" + testInstance + "].", e);
+				}
+			}
+		}
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Registers the supplied
+	 * {@link TestExecutionListener TestExecutionListeners} by appending them to
+	 * the set of listeners used by this {@link TestContextManager}.
+	 * </p>
+	 */
+	public void registerTestExecutionListeners(final TestExecutionListener... testExecutionListeners) {
+
+		for (final TestExecutionListener listener : testExecutionListeners) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Registering TestExecutionListener [" + listener + "].");
+			}
+			this.testExecutionListeners.add(listener);
+		}
 	}
 
 	// ------------------------------------------------------------------------|
