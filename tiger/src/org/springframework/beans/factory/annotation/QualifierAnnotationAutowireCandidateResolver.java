@@ -117,16 +117,10 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 					if (actualValue == null) {
 						// if relying on default value, then the qualifier need not be specified
 						Object defaultValue = AnnotationUtils.getDefaultValue(annotation, attributeName);
-						if (defaultValue == null) {
-							// there is no default
+						if (defaultValue == null || ((defaultValue instanceof String) && ((String) defaultValue).length() == 0)) {
 							if (attributeName.equals("value") && beanNameResolves(beanName, annotation)) {
 								continue;
 							}
-							return false;
-						}
-						if ((defaultValue instanceof String) && ((String) defaultValue).length() == 0
-								&& attributeName.equals("value") && beanNameResolves(beanName, annotation)) {
-							continue;
 						}
 						actualValue = defaultValue;
 					}
