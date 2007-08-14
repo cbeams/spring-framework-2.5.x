@@ -80,8 +80,10 @@ import org.springframework.util.ReflectionUtils;
  * the persistence unit name will be matched against the actual deployed unit,
  * with the bean name used as fallback unit name if no deployed name found.
  * Typically, Spring's {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}
- * will be used for setting up such EntityManagerFactory beans. The post-processor
- * definition will then look as simple as this:
+ * will be used for setting up such EntityManagerFactory beans. Alternatively,
+ * such beans may also be obtained from JNDI, e.g. using the <code>jee:jndi-lookup</code>
+ * XML configuration element (with the bean name matching the requested unit name).
+ * In both cases, the post-processor definition will look as simple as this:
  *
  * <pre class="code">
  * &lt;bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"/&gt;</pre>
