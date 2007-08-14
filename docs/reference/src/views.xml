@@ -94,6 +94,10 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
     technology - in web applications using Spring. The following describes in
     a broad way how to do this.</para>
 
+    <para><emphasis>NOTE:</emphasis> Spring 2.0 supports Tiles 1.x (a.k.a. "Struts Tiles",
+    as shipped with Struts 1.1+). There is no out of the box support for Tiles 2 yet.
+    </para>
+
     <section id="view-tiles-dependencies">
       <title>Dependencies</title>
 
@@ -105,19 +109,12 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
           <listitem>
             <para><literal>Struts version 1.1 or higher</literal></para>
           </listitem>
-
           <listitem>
             <para><literal>Commons BeanUtils</literal></para>
           </listitem>
-
           <listitem>
             <para><literal>Commons Digester</literal></para>
           </listitem>
-
-          <listitem>
-            <para><literal>Commons Lang</literal></para>
-          </listitem>
-
           <listitem>
             <para><literal>Commons Logging</literal></para>
           </listitem>
@@ -132,12 +129,11 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
       <para>To be able to use Tiles, you have to configure it using files
       containing definitions (for basic information on definitions and other
       Tiles concepts, please have a look at <ulink
-      url="http://jakarta.apache.org/struts"></ulink>). In Spring this is done
+      url="http://struts.apache.org"></ulink>). In Spring this is done
       using the <classname>TilesConfigurer</classname>. Have a look at the
       following piece of example ApplicationContext configuration:</para>
       
       <programlisting><![CDATA[<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer">
-  <property name="factoryClass" value="org.apache.struts.tiles.xmlDefinition.I18nFactorySet"/>
   <property name="definitions">
     <list>
       <value>/WEB-INF/defs/general.xml</value>
@@ -150,25 +146,23 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
 </bean>]]></programlisting>
 
       <para>As you can see, there are five files containing definitions, which
-      are all located in the <filename class="directory">'WEB-INF/defs'</filename> directory. At initialization of the
-      <interfacename>WebApplicationContext</interfacename>, the files will be loaded and the
-      definitionsfactory defined by the
-      <literal>factoryClass</literal>-property is initialized. After that has
-      been done, the tiles includes in the definition files can be used as
-      views within your Spring web application. To be able to use the views
+      are all located in the <filename class="directory">'WEB-INF/defs'</filename> directory.
+      At initialization of the <interfacename>WebApplicationContext</interfacename>,
+      the files will be loaded and the definitions factory will be initialized.
+      After that has been done, the Tiles includes in the definition files can be used
+      as views within your Spring web application. To be able to use the views
       you have to have a <interfacename>ViewResolver</interfacename> just as with any
       other view technology used with Spring. Below you can find two
-      possibilities, the <classname>InternalResourceViewResolver</classname> and
+      possibilities, the <classname>UrlBasedViewResolver</classname> and
       the <classname>ResourceBundleViewResolver</classname>.</para>
 
-      <section id="view-tiles-internal">
-        <title><classname>InternalResourceViewResolver</classname></title>
+      <section id="view-tiles-url">
+        <title><classname>UrlBasedViewResolver</classname></title>
 
-        <para>The <classname>InternalResourceViewResolver</classname> instantiates the given
+        <para>The <classname>UrlBasedViewResolver</classname> instantiates the given
         <literal>viewClass</literal> for each view it has to resolve.</para>
         
-        <programlisting><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-  <property name="requestContextAttribute" value="requestContext"/>
+        <programlisting><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
   <property name="viewClass" value="org.springframework.web.servlet.view.tiles.TilesView"/>
 </bean>]]></programlisting>
         
@@ -185,20 +179,25 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
   <property name="basename" value="views"/>
 </bean>]]></programlisting>
 
-        <programlisting><![CDATA[    ...
+        <programlisting><![CDATA[...
 welcomeView.class=org.springframework.web.servlet.view.tiles.TilesView
-welcomeView.url=welcome (&lt;b&gt;this is the name of a definition&lt;/b&gt;)
+welcomeView.url=welcome ]]><lineannotation>(this is the name of a Tiles definition)</lineannotation><![CDATA[
 
 vetsView.class=org.springframework.web.servlet.view.tiles.TilesView
-vetsView.url=vetsView ]]><lineannotation>(again, this is the name of a definition)</lineannotation><![CDATA[
+vetsView.url=vetsView ]]><lineannotation>(again, this is the name of a Tiles definition)</lineannotation><![CDATA[
 
 findOwnersForm.class=org.springframework.web.servlet.view.JstlView
 findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 ...]]></programlisting>
-        
-        <para>As you can see, when using the <classname>ResourceBundleViewResolver</classname>, you can mix view using different view
-        technologies.</para>
+
+        <para>As you can see, when using the <classname>ResourceBundleViewResolver</classname>,
+        you can easily mix different view technologies.</para>
       </section>
+
+      <para>Note that the <classname>TilesView</classname> class does <emphasis>not</emphasis>
+      support JSTL (the JSP Standard Tag Library) out of the box. There is a separate
+      <classname>TilesJstlView</classname> subclass for JSTL-enabled templates.</para>
+
     </section>
   </section>
 
