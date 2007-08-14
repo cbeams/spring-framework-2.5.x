@@ -94,7 +94,15 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
     technology - in web applications using Spring. The following describes in
     a broad way how to do this.</para>
 
-    <section id="view-tiles-dependencies">
+    <para><emphasis>NOTE:</emphasis> This section focuses on Spring's support
+    for Tiles 2 (the standalone version of Tiles, requiring Java 5+) in the
+    <literal>org.springframework.web.servlet.view.tiles2</literal> package.
+    Spring also continues to support Tiles 1.x (as shipped with
+    Struts 1.1+; compatible with Java 1.4) in the original
+    <literal>org.springframework.web.servlet.view.tiles</literal> package.
+    </para>
+
+		<section id="view-tiles-dependencies">
       <title>Dependencies</title>
 
       <para>To be able to use Tiles you have to have a couple of additional
@@ -103,21 +111,14 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
 
       <para><itemizedlist spacing="compact">
           <listitem>
-            <para><literal>Struts version 1.1 or higher</literal></para>
+            <para><literal>Tiles version 2.0.4 or higher</literal></para>
           </listitem>
-
           <listitem>
             <para><literal>Commons BeanUtils</literal></para>
           </listitem>
-
           <listitem>
             <para><literal>Commons Digester</literal></para>
           </listitem>
-
-          <listitem>
-            <para><literal>Commons Lang</literal></para>
-          </listitem>
-
           <listitem>
             <para><literal>Commons Logging</literal></para>
           </listitem>
@@ -132,12 +133,11 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
       <para>To be able to use Tiles, you have to configure it using files
       containing definitions (for basic information on definitions and other
       Tiles concepts, please have a look at <ulink
-      url="http://jakarta.apache.org/struts"></ulink>). In Spring this is done
+      url="http://tiles.apache.org"></ulink>). In Spring this is done
       using the <classname>TilesConfigurer</classname>. Have a look at the
       following piece of example ApplicationContext configuration:</para>
       
-      <programlisting><![CDATA[<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles.TilesConfigurer">
-  <property name="factoryClass" value="org.apache.struts.tiles.xmlDefinition.I18nFactorySet"/>
+      <programlisting><![CDATA[<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
   <property name="definitions">
     <list>
       <value>/WEB-INF/defs/general.xml</value>
@@ -150,26 +150,24 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
 </bean>]]></programlisting>
 
       <para>As you can see, there are five files containing definitions, which
-      are all located in the <filename class="directory">'WEB-INF/defs'</filename> directory. At initialization of the
-      <interfacename>WebApplicationContext</interfacename>, the files will be loaded and the
-      definitions factory defined by the
-      <literal>factoryClass</literal> property is initialized. After that has
-      been done, the Tiles includes in the definition files can be used as
-      views within your Spring web application. To be able to use the views
+      are all located in the <filename class="directory">'WEB-INF/defs'</filename> directory.
+      At initialization of the <interfacename>WebApplicationContext</interfacename>,
+      the files will be loaded and the definitions factory will be initialized.
+      After that has been done, the Tiles includes in the definition files can be used
+      as views within your Spring web application. To be able to use the views
       you have to have a <interfacename>ViewResolver</interfacename> just as with any
       other view technology used with Spring. Below you can find two
-      possibilities, the <classname>InternalResourceViewResolver</classname> and
+      possibilities, the <classname>UrlBasedViewResolver</classname> and
       the <classname>ResourceBundleViewResolver</classname>.</para>
 
-      <section id="view-tiles-internal">
-        <title><classname>InternalResourceViewResolver</classname></title>
+      <section id="view-tiles-url">
+        <title><classname>UrlBasedViewResolver</classname></title>
 
-        <para>The <classname>InternalResourceViewResolver</classname> instantiates the given
+        <para>The <classname>UrlBasedViewResolver</classname> instantiates the given
         <literal>viewClass</literal> for each view it has to resolve.</para>
         
-        <programlisting><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-  <property name="requestContextAttribute" value="requestContext"/>
-  <property name="viewClass" value="org.springframework.web.servlet.view.tiles.TilesView"/>
+        <programlisting><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+  <property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView"/>
 </bean>]]></programlisting>
         
       </section>
@@ -186,19 +184,65 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
 </bean>]]></programlisting>
 
         <programlisting><![CDATA[    ...
-welcomeView.class=org.springframework.web.servlet.view.tiles.TilesView
-welcomeView.url=welcome (&lt;b&gt;this is the name of a definition&lt;/b&gt;)
+welcomeView.class=org.springframework.web.servlet.view.tiles2.TilesView
+welcomeView.url=welcome ]]><lineannotation>(this is the name of a Tiles definition)</lineannotation><![CDATA[
 
-vetsView.class=org.springframework.web.servlet.view.tiles.TilesView
-vetsView.url=vetsView ]]><lineannotation>(again, this is the name of a definition)</lineannotation><![CDATA[
+vetsView.class=org.springframework.web.servlet.view.tiles2.TilesView
+vetsView.url=vetsView ]]><lineannotation>(again, this is the name of a Tiles definition)</lineannotation><![CDATA[
 
 findOwnersForm.class=org.springframework.web.servlet.view.JstlView
 findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 ...]]></programlisting>
-        
-        <para>As you can see, when using the <classname>ResourceBundleViewResolver</classname>, you can mix view using different view
-        technologies.</para>
+
+        <para>As you can see, when using the <classname>ResourceBundleViewResolver</classname>,
+        you can easily mix different view technologies.</para>
       </section>
+
+      <para>Note that the <classname>TilesView</classname> class for Tiles 2 supports
+      JSTL (the JSP Standard Tag Library) out of the box, whereas there is a separate
+			<classname>TilesJstlView</classname> subclass in the Tiles 1.x support.</para>
+
+      <section id="view-tiles-preparer">
+        <title><classname>SimpleSpringPreparerFactory</classname> and <classname>SpringBeanPreparerFactory</classname></title>
+
+        <para>As an advanced feature, Spring also supports two special Tiles 2
+        <interfacename>PreparerFactory</interfacename> implementations. Check out the
+        Tiles documentation for details on how to use <interfacename>ViewPreparer</interfacename>
+        references in your Tiles definition files.</para>
+
+        <para>Specify <classname>SimpleSpringPreparerFactory</classname> to autowire
+        ViewPreparer instances based on specified preparer classes, applying Spring's
+        container callbacks as well as applying configured Spring BeanPostProcessors.
+        If Spring's context-wide annotation-config has been activated, annotations in
+        ViewPreparer classes will be automatically detected and applied.
+        Note that this expects preparer <emphasis>classes</emphasis> in the Tiles definition files,
+        just like the default <classname>PreparerFactory</classname> does.</para>
+
+        <para>Specify <classname>SpringBeanPreparerFactory</classname> to operate on specified
+        preparer <emphasis>names</emphasis> instead of classes, obtaining the corresponding
+        Spring bean from the DispatcherServlet's application context. The full bean
+        creation process will be in the control of the Spring application context in
+        this case, allowing for the use of explicit dependency injection configuration,
+        scoped beans etc. Note that you need to define one Spring bean definition per
+        preparer name (as used in your Tiles definitions).</para>
+
+        <programlisting><![CDATA[<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+  <property name="definitions">
+    <list>
+      <value>/WEB-INF/defs/general.xml</value>
+      <value>/WEB-INF/defs/widgets.xml</value>
+      <value>/WEB-INF/defs/administrator.xml</value>
+      <value>/WEB-INF/defs/customer.xml</value>
+      <value>/WEB-INF/defs/templates.xml</value>
+    </list>
+  </property>
+
+  ]]><lineannotation>&lt;!-- resolving preparer names as Spring bean definition names --&gt;</lineannotation><![CDATA[
+  <property name="preparerFactoryClass"
+       value="org.springframework.web.servlet.view.tiles2.SpringBeanPreparerFactory"/>
+
+</bean>]]></programlisting>
+			</section>
     </section>
   </section>
 
@@ -260,10 +304,6 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
   <property name="cache" value="true"/>
   <property name="prefix" value=""/>
   <property name="suffix" value=".vm"/>
-  
-  ]]><lineannotation>&lt;!-- if you want to use the Spring Velocity macros, set this property to true --&gt;</lineannotation><![CDATA[
-  <property name="exposeSpringMacroHelpers" value="true"/>
-
 </bean>]]></programlisting>
 
       <programlisting><lineannotation>&lt;!-- freemarker config --&gt;</lineannotation><![CDATA[
@@ -281,10 +321,6 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
   <property name="cache" value="true"/>
   <property name="prefix" value=""/>
   <property name="suffix" value=".ftl"/>
-  
-  ]]><lineannotation>&lt;!-- if you want to use the Spring FreeMarker macros, set this property to true --&gt;</lineannotation><![CDATA[
-  <property name="exposeSpringMacroHelpers" value="true"/>
-
 </bean>]]></programlisting>
 
       <note><para>For non web-apps add a <classname>VelocityConfigurationFactoryBean</classname> or a
@@ -394,71 +430,12 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       and FreeMarker, with additional convenience macros for generating form
       input elements themselves.</para>
 
-      <section id="view-velocity-validation">
+      <section id="view-bind-macros">
         <title>The bind macros</title>
 
         <para>A standard set of macros are maintained within the
         <literal>spring.jar</literal> file for both languages, so they are
-        always available to a suitably configured application. However they
-        can only be used if your view sets the bean property
-        <literal>exposeSpringMacroHelpers</literal> to <literal>'true'</literal>
-        on your <classname>VelocityView</classname> / <classname>FreeMarkerView</classname>
-        beans. By way of a shortcut, you can also configure this property on
-        <classname>VelocityViewResolver</classname> or
-        <classname>FreeMarkerViewResolver</classname> too if you happen to be
-        using it, in which case all of your views will inherit the value from
-        it. Note that this property is <emphasis role="bold">not
-        required</emphasis> for any aspect of HTML form handling <emphasis
-        role="bold">except</emphasis> where you wish to take advantage of the
-        Spring macros. Below is an example of a view.properties file showing
-        correct configuration of such a view for either language;</para>
-
-        <programlisting>personFormV.class=org.springframework.web.servlet.view.velocity.VelocityView
-personFormV.url=personForm.vm
-personFormV.exposeSpringMacroHelpers=true</programlisting>
-
-        <programlisting>personFormF.class=org.springframework.web.servlet.view.freemarker.FreeMarkerView
-personFormF.url=personForm.ftl
-personFormF.exposeSpringMacroHelpers=true</programlisting>
-
-        <para>Find below an example of a complete (albeit trivial) Spring Web MVC
-        configuration file that exposes the Velocity macros to every (Velocity) view.</para>
-        
-        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
-
-<beans>
-
-    <bean name="helloController" class="info.wilhelms.springwebapp.SampleController">
-        <property name="commandName" value="command"/>
-        <property name="commandClass" value="info.wilhelms.springwebapp.Message"/>
-        <property name="formView" value="foo"/>
-        <property name="successView" value="banjo"/>
-        <property name="bindOnNewForm" value="true"/>
-        <property name="sessionForm" value="true"/>
-    </bean>
-
-    <bean id="velocityConfig"
-          class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
-        <property name="resourceLoaderPath" value="/WEB-INF/velocity/"/>
-    </bean>
-
-    <bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
-        <property name="cache" value="false"/>
-        <property name="prefix" value=""/>
-        <property name="suffix" value=".vm"/>
-        ]]><lineannotation><emphasis role="bold">&lt;property name="exposeSpringMacroHelpers" value="true"/&gt;</emphasis></lineannotation><![CDATA[
-    </bean>
-
-    <bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-        <property name="mappings">
-            <value>
-                **/hello.htm=helloController
-            </value>
-        </property>
-    </bean>
-
-</beans>]]></programlisting>
+        always available to a suitably configured application.</para>
 
         <para>Some of the macros defined in the Spring libraries are
         considered internal (private) but no such scoping exists in the macro
@@ -472,8 +449,8 @@ personFormF.exposeSpringMacroHelpers=true</programlisting>
         respectively.</para>
       </section>
 
-      <section id="view-velocity-validationmessages">
-        <title>simple binding</title>
+      <section id="view-simple-binding">
+        <title>Simple binding</title>
 
         <para>In your html forms (vm / ftl templates) that act as the
         'formView' for a Spring form controller, you can use code similar to
@@ -542,7 +519,7 @@ recommend sticking to 'spring' --&gt;
       </section>
 
       <section id="views-form-macros">
-        <title>form input generation macros</title>
+        <title>Form input generation macros</title>
 
         <para>Additional convenience macros for both languages simplify both
         binding and form generation (including validation error display). It
