@@ -53,7 +53,7 @@ import org.springframework.util.ClassUtils;
  * given to the service directly, in the second case to the prepared template.
  *
  * <p><b>NOTE: JpaTemplate mainly exists as a sibling of JdoTemplate and
- * HibernateTemplate, to offer the same style for people used to it. For newly
+ * HibernateTemplate, offering the same style for people used to it. For newly
  * started projects, consider adopting the standard JPA style of coding data
  * access objects instead, based on a "shared EntityManager" reference injected
  * via a Spring bean definition or the JPA PersistenceContext annotation.</b>
@@ -61,10 +61,12 @@ import org.springframework.util.ClassUtils;
  * or using a direct JNDI lookup for an EntityManager on a Java EE 5 server.)
  *
  * <p>JpaTemplate can be considered as direct alternative to working with the
- * raw JPA EntityManager API (through a shared EntityManager reference,
+ * native JPA EntityManager API (through a shared EntityManager reference,
  * as outlined above). The major advantage is its automatic conversion to
- * DataAccessExceptions, the major disadvantage is that it introduces
- * another thin layer on top of the target API.
+ * DataAccessExceptions; the major disadvantage is that it introduces
+ * another thin layer on top of the native JPA API. Note that exception
+ * translation can also be achieved through AOP advice; check out
+ * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor}.
  *
  * <p>{@link LocalContainerEntityManagerFactoryBean} is the preferred way of
  * obtaining a reference to an EntityManagerFactory, at least outside of a full

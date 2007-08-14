@@ -49,10 +49,11 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  *
  * <p>Passes a "contextConfigLocation" context-param to the context instance,
  * parsing it into potentially multiple file paths which can be separated by
- * any number of commas and spaces, like "applicationContext1.xml,
- * applicationContext2.xml". If not explicitly specified, the context
- * implementation is supposed to use a default location (with
- * XmlWebApplicationContext: "/WEB-INF/applicationContext.xml").
+ * any number of commas and spaces, e.g. "WEB-INF/applicationContext1.xml,
+ * WEB-INF/applicationContext2.xml". Ant-style path patterns are supported as well,
+ * e.g. "WEB-INF/*Context.xml,WEB-INF/spring*.xml" or "WEB-INF/&#42;&#42;/*Context.xml".
+ * If not explicitly specified, the context implementation is supposed to use a
+ * default location (with XmlWebApplicationContext: "/WEB-INF/applicationContext.xml").
  *
  * <p>Note: In case of multiple config locations, later bean definitions will
  * override ones defined in earlier loaded files, at least when using one of
