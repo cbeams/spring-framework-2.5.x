@@ -41,7 +41,7 @@ import org.springframework.test.context.TestContextManager;
  * </ul>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.2
  */
 public interface TestExecutionListener {
@@ -92,10 +92,10 @@ public interface TestExecutionListener {
 	 *
 	 * @param testContext The test context in which the test method was
 	 *        executed, not <code>null</code>.
-	 * @param t The Throwable that was thrown during execution of the test
-	 *        method, or <code>null</code> if none was thrown.
+	 * @param exception The exception that was thrown during execution of the
+	 *        test method, or <code>null</code> if none was thrown.
 	 */
-	public abstract void afterTestMethod(final TestContext<?> testContext, final Throwable t);
+	public abstract void afterTestMethod(final TestContext<?> testContext, final Throwable exception);
 
 	// ------------------------------------------------------------------------|
 
