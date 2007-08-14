@@ -55,7 +55,7 @@ public void echoException(Exception ex) throws Exception {
                 standard Java metadata implementation (developed as JSR-175 and available
                 in Java 5). Spring has specific Java 5 annotations for transactional
                 demarcation, JMX, and aspects (to be precise they are AspectJ annotations).
-                However, since Spring supports both Java 1.3 and 1.4 a solution for said
+                However, since Spring supports Java 1.4 as well, a solution for said
                 JVM versions is needed too. Spring metadata support provides such a
                 solution.</para>
 			</listitem>
@@ -65,9 +65,9 @@ public void echoException(Exception ex) throws Exception {
 			</listitem>
 			<listitem>
 				<para>Various <emphasis role="bold">open source attribute
-                implementations</emphasis>, for Java 1.3 and 1.4, of which Commons
-                Attributes is the most complete implementation. All these require a
-                special pre- or post-compilation step.</para>
+                implementations</emphasis>, for Java 1.4, of which Commons
+                Attributes is the most complete implementation. All these require
+                a special pre- or post-compilation step.</para>
 			</listitem>
 		</itemizedlist>
 	</section>
@@ -128,11 +128,7 @@ public void echoException(Exception ex) throws Exception {
 }]]></programlisting>
 		<para>
 			This is a lowest common denominator interface. JSR-175 offers more
-			capabilities than this, such as attributes on method arguments. As of
-			Spring 1.0, Spring aimed to provide the subset of metadata required to
-			provide effective declarative enterprise services in the vein of EJB
-			or .NET, on Java 1.3+. As of Spring 1.2, analogous Java 5 annotations
-			are also supported, as a direct alternative to Commons Attributes.
+			capabilities than this, such as attributes on method arguments.
 		</para>
 		<para>
 			Note that this interface offers <classname>Object</classname>
