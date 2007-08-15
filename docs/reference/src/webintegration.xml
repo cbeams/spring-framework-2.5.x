@@ -91,10 +91,10 @@
 </listener>]]></programlisting>
 		<note>
 			<para>
-				Listeners were added to the Servlet API in version 2.3. If you have a Servlet 2.2
-				container, you can use the
+				Listeners were added to the Servlet API in version 2.3; listener startup order was
+				finally clarified in Servlet 2.4. If you have a Servlet 2.3 container, you can use the
 				<ulink url="http://www.springframework.org/docs/api/org/springframework/web/context/ContextLoaderServlet.html"><classname>ContextLoaderServlet</classname></ulink>
-				to achieve this same functionality.
+				to achieve the same functionality in a 100% portable fashion (with respect to startup order).
 			</para>
 		</note>
 		<para>
