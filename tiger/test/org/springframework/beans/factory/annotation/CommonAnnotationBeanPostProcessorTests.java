@@ -22,8 +22,13 @@ import javax.annotation.Resource;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.INestedTestBean;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
@@ -132,7 +137,10 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setResourceFactory(bf);
 		bf.addBeanPostProcessor(bpp);
+		bf.registerResolvableDependency(BeanFactory.class, bf);
+
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ExtendedResourceInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean2", new RootBeanDefinition(NamedResourceInjectionBean.class));
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 		TestBean tb2 = new TestBean();
@@ -141,6 +149,9 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		bf.registerSingleton("testBean3", tb3);
 		TestBean tb4 = new TestBean();
 		bf.registerSingleton("testBean4", tb4);
+		NestedTestBean tb6 = new NestedTestBean();
+		bf.registerSingleton("xy", tb6);
+		bf.registerAlias("xy", "testBean9");
 
 		ExtendedResourceInjectionBean bean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
 		assertTrue(bean.initCalled);
@@ -149,6 +160,13 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(tb2, bean.getTestBean2());
 		assertSame(tb4, bean.getTestBean3());
 		assertSame(tb3, bean.getTestBean4());
+		assertSame(tb6, bean.testBean5);
+		assertSame(tb6, bean.testBean6);
+		assertSame(bf, bean.beanFactory);
+
+		NamedResourceInjectionBean bean2 = (NamedResourceInjectionBean) bf.getBean("annotatedBean2");
+		assertSame(tb6, bean2.testBean);
+
 		bf.destroySingletons();
 		assertTrue(bean.destroyCalled);
 		assertTrue(bean.destroy2Called);
@@ -159,10 +177,13 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setResourceFactory(bf);
 		bf.addBeanPostProcessor(bpp);
+		bf.registerResolvableDependency(BeanFactory.class, bf);
+
 		RootBeanDefinition annotatedBd = new RootBeanDefinition(ExtendedResourceInjectionBean.class);
 		TestBean tb5 = new TestBean();
 		annotatedBd.getPropertyValues().addPropertyValue("testBean2", tb5);
 		bf.registerBeanDefinition("annotatedBean", annotatedBd);
+		bf.registerBeanDefinition("annotatedBean2", new RootBeanDefinition(NamedResourceInjectionBean.class));
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 		TestBean tb2 = new TestBean();
@@ -171,6 +192,8 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		bf.registerSingleton("testBean3", tb3);
 		TestBean tb4 = new TestBean();
 		bf.registerSingleton("testBean4", tb4);
+		NestedTestBean tb6 = new NestedTestBean();
+		bf.registerSingleton("xy", tb6);
 
 		ExtendedResourceInjectionBean bean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
 		assertTrue(bean.initCalled);
@@ -179,6 +202,19 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertSame(tb5, bean.getTestBean2());
 		assertSame(tb4, bean.getTestBean3());
 		assertSame(tb3, bean.getTestBean4());
+		assertSame(tb6, bean.testBean5);
+		assertSame(tb6, bean.testBean6);
+		assertSame(bf, bean.beanFactory);
+
+		try {
+			bf.getBean("annotatedBean2");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getRootCause() instanceof NoSuchBeanDefinitionException);
+			NoSuchBeanDefinitionException innerEx = (NoSuchBeanDefinitionException) ex.getRootCause();
+			assertEquals("testBean9", innerEx.getBeanName());
+		}
+
 		bf.destroySingletons();
 		assertTrue(bean.destroyCalled);
 		assertTrue(bean.destroy2Called);
@@ -265,6 +301,14 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		private ITestBean testBean4;
 
 		@Resource
+		private INestedTestBean testBean5;
+
+		private INestedTestBean testBean6;
+
+		@Resource
+		private BeanFactory beanFactory;
+
+		@Resource
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
 		}
@@ -272,6 +316,11 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		@Resource(name="testBean3", type=ITestBean.class)
 		private void setTestBean4(ITestBean testBean4) {
 			this.testBean4 = testBean4;
+		}
+
+		@Resource
+		public void setTestBean6(INestedTestBean testBean6) {
+			this.testBean6 = testBean6;
 		}
 
 		public ITestBean getTestBean3() {
@@ -294,6 +343,13 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		protected void destroy2() {
 			super.destroy2();
 		}
+	}
+
+
+	private static class NamedResourceInjectionBean {
+
+		@Resource(name="testBean9")
+		private INestedTestBean testBean;
 	}
 
 }

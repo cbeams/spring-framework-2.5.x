@@ -23,7 +23,11 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
@@ -36,8 +40,11 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.core.MethodParameter;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -75,6 +82,11 @@ import org.springframework.util.StringUtils;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
+ * Note: A default CommonAnnotationBeanPostProcessor will be registered
+ * by the "context:annotation-config" and "context:component-scan" XML tags.
+ * Remove or turn off the default annotation configuration there if you intend
+ * to specify a custom CommonAnnotationBeanPostProcessor bean definition.
+ *
  * @author Juergen Hoeller
  * @since 2.1
  * @see #setResourceFactory
@@ -83,6 +95,8 @@ import org.springframework.util.StringUtils;
  */
 public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Serializable {
+
+	private boolean fallbackToDefaultTypeMatch = true;
 
 	private transient BeanFactory resourceFactory;
 
@@ -101,6 +115,20 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		setDestroyAnnotationType(PreDestroy.class);
 	}
 
+
+	/**
+	 * Set whether to allow a fallback to a type match if no explicit name has been
+	 * specified. The default name (i.e. the field name or bean property name) will
+	 * still be checked first; if a bean of that name exists, it will be taken.
+	 * However, if no bean of that name exists, a by-type resolution of the
+	 * dependency will be attempted if this flag is "true".
+	 * <p>Default is "true". Switch this flag to "false" in order to enforce a
+	 * by-name lookup in all cases, throwing an exception in case of no name match.
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#resolveDependency
+	 */
+	public void setFallbackToDefaultTypeMatch(boolean fallbackToDefaultTypeMatch) {
+		this.fallbackToDefaultTypeMatch = fallbackToDefaultTypeMatch;
+	}
 
 	/**
 	 * Specify the factory for objects to be injected into <code>@Resource</code>
@@ -189,25 +217,44 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	/**
 	 * Obtain the resource object for the given name and type.
-	 * @param name the name of the target resource
-	 * @param type the type of the target resource
-	 * @param shareable whether the target resource is shareable
-	 * (as defined in the @Resource annotation)
+	 * @param resourceElement the descriptor for the annotated field/method
 	 * @param requestingBeanName the name of the requesting bean
 	 * @return the resource object (never <code>null</code>)
 	 * @throws BeansException if we failed to obtain the target resource
 	 */
-	protected Object getResource(String name, Class type, boolean shareable, String requestingBeanName)
+	protected Object getResource(ResourceElement resourceElement, String requestingBeanName)
 			throws BeansException {
 
 		if (this.resourceFactory == null) {
 			throw new IllegalStateException("No resource factory configured - " +
 					"override the getResource method or specify the 'resourceFactory' property");
 		}
-		if (this.resourceFactory instanceof ConfigurableBeanFactory) {
-			((ConfigurableBeanFactory) this.resourceFactory).registerDependentBean(name, requestingBeanName);
+
+		Object resource = null;
+		Set autowiredBeanNames = null;
+		String name = resourceElement.getName();
+		Class type = resourceElement.getType();
+
+		if (this.fallbackToDefaultTypeMatch && this.resourceFactory instanceof AutowireCapableBeanFactory &&
+				resourceElement.isDefaultName() && !this.resourceFactory.containsBean(name)) {
+			autowiredBeanNames = new HashSet();
+			resource = ((AutowireCapableBeanFactory) this.resourceFactory).resolveDependency(
+					resourceElement.getDependencyDescriptor(), requestingBeanName, autowiredBeanNames, null);
 		}
-		return this.resourceFactory.getBean(name, type);
+		else {
+			resource = this.resourceFactory.getBean(name, type);
+			autowiredBeanNames = Collections.singleton(name);
+		}
+
+		if (this.resourceFactory instanceof ConfigurableBeanFactory) {
+			ConfigurableBeanFactory beanFactory = (ConfigurableBeanFactory) this.resourceFactory;
+			for (Iterator it = autowiredBeanNames.iterator(); it.hasNext();) {
+				String autowiredBeanName = (String) it.next();
+				beanFactory.registerDependentBean(autowiredBeanName, requestingBeanName);
+			}
+		}
+
+		return resource;
 	}
 
 
@@ -215,9 +262,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 * Class representing injection information about an annotated field
 	 * or setter method.
 	 */
-	private class ResourceElement extends InjectionMetadata.InjectedElement {
+	protected class ResourceElement extends InjectionMetadata.InjectedElement {
 
 		private final String name;
+
+		private final boolean isDefaultName;
 
 		private final Class type;
 
@@ -229,7 +278,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			Resource resource = ae.getAnnotation(Resource.class);
 			String resourceName = resource.name();
 			Class resourceType = resource.type();
-			if (!StringUtils.hasLength(resourceName)) {
+			this.isDefaultName = !StringUtils.hasLength(resourceName);
+			if (this.isDefaultName) {
 				resourceName = member.getName();
 				if (member instanceof Method && resourceName.startsWith("set") && resourceName.length() > 3) {
 					resourceName = Introspector.decapitalize(resourceName.substring(3));
@@ -247,9 +297,75 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			this.shareable = resource.shareable();
 		}
 
+		/**
+		 * Return the name of the target resource.
+		 */
+		public String getName() {
+			return this.name;
+		}
+
+		/**
+		 * Return whether the given name is a default name
+		 * (derived from the field name / method name)
+		 */
+		public boolean isDefaultName() {
+			return this.isDefaultName;
+		}
+
+		/**
+		 * Return the type of the target resource
+		 */
+		public Class getType() {
+			return this.type;
+		}
+
+		/**
+		 * Return whether the target resource is shareable
+		 * (as defined in the @Resource annotation)
+		 */
+		public boolean isShareable() {
+			return this.shareable;
+		}
+
+		/**
+		 * Build a DependencyDescriptor for the underlying field/method.
+		 */
+		public DependencyDescriptor getDependencyDescriptor() {
+			if (this.isField) {
+				return new ResourceDependencyDescriptor((Field) this.member, this.type);
+			}
+			else {
+				return new ResourceDependencyDescriptor((Method) this.member, this.type);
+			}
+		}
+
 		@Override
 		protected Object getResourceToInject(Object target, String requestingBeanName) {
-			return getResource(this.name, this.type, this.shareable, requestingBeanName);
+			return getResource(this, requestingBeanName);
+		}
+	}
+
+
+	/**
+	 * Extension of the DependencyDescriptor class,
+	 * overriding the dependency type with the specified resource type.
+	 */
+	private static class ResourceDependencyDescriptor extends DependencyDescriptor {
+
+		private final Class resourceType;
+
+		public ResourceDependencyDescriptor(Field field, Class resourceType) {
+			super(field, true);
+			this.resourceType = resourceType;
+		}
+
+		public ResourceDependencyDescriptor(Method method, Class resourceType) {
+			super(new MethodParameter(method, 0), true);
+			this.resourceType = resourceType;
+		}
+
+		public Class getDependencyType() {
+			return this.resourceType;
 		}
 	}
 
