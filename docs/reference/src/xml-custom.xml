@@ -476,7 +476,7 @@ http\://www.foo.com/schema/component/component.xsd=com/foo/component.xsd]]></pro
    ]]><lineannotation>&lt;!-- other dependencies here... --&gt;</lineannotation><![CDATA[
 </bean>]]></programlisting>
             <para>What we are going to do here is create another <interfacename>BeanDefinition</interfacename>
-            when the <literal>'cache:cache-name'</literal> attribute is parsed; this
+            when the <literal>'jcache:cache-name'</literal> attribute is parsed; this
             <interfacename>BeanDefinition</interfacename> will then initialize the named JCache
             for us. We will also modify the existing <interfacename>BeanDefinition</interfacename> for the
             <literal>'checkingAccountService'</literal> so that it will have a dependency on this
