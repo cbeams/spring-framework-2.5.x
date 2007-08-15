@@ -160,7 +160,7 @@ import org.springframework.util.StringUtils;
  */
 public class PathMatchingResourcePatternResolver implements ResourcePatternResolver {
 
-	protected static final Log logger = LogFactory.getLog(PathMatchingResourcePatternResolver.class);
+	private static final Log logger = LogFactory.getLog(PathMatchingResourcePatternResolver.class);
 
 	private final ResourceLoader resourceLoader;
 
