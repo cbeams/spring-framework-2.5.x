@@ -3619,25 +3619,23 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
             <para>
 				When an <interfacename>ApplicationContext</interfacename> gets loaded, it automatically searches
 				for a <interfacename>MessageSource</interfacename> bean defined in the context. The bean has to have
-				the name <literal>messageSource</literal>. If such a bean is found, all
-				calls to the methods described above will be delegated to the message
-				source that was found. If no message source was found, the
-				<interfacename>ApplicationContext</interfacename> attempts to see if it has a parent containing a bean
-				with the same name. If so, it uses that bean as the <interfacename>MessageSource</interfacename>. If it
-				can't find any source for messages, an empty
-				<classname>StaticMessageSource</classname> will be instantiated in order to
-				be able to accept calls to the methods defined above.
+				the name <literal>'messageSource'</literal>. If such a bean is found, all calls to the methods
+				described above will be delegated to the message source that was found. If no message source was
+				found, the <interfacename>ApplicationContext</interfacename> attempts to see if it has a parent
+				containing a bean with the same name. If so, it uses that bean as the
+				<interfacename>MessageSource</interfacename>. If it can't find any source for messages, an empty
+				<classname>StaticMessageSource</classname> will be instantiated in order to be able to accept calls
+				to the methods defined above.
 			</para>
             <para>
 				Spring currently provides two <interfacename>MessageSource</interfacename>
-				implementations. These are the
-				<classname>ResourceBundleMessageSource</classname> and the
+				implementations. These are the <classname>ResourceBundleMessageSource</classname> and the
 				<classname>StaticMessageSource</classname>. Both implement
-				<classname>NestingMessageSource</classname> in order to do nested messaging.
+				<interfacename>HierarchicalMessageSource</interfacename> in order to do nested messaging.
 				The <classname>StaticMessageSource</classname> is hardly ever used but provides programmatic
 				ways to add messages to the source. The <classname>ResourceBundleMessageSource</classname> is
 				more interesting and is the one we will provide an example for:
-      </para>
+      		</para>
       <programlisting><![CDATA[<beans>
   <bean id="messageSource"
         class="org.springframework.context.support.ResourceBundleMessageSource">
@@ -3717,7 +3715,7 @@ argument.required=The '{0}' argument is required.]]></programlisting>
             <programlisting><![CDATA[The 'userDao' argument is required.]]></programlisting>
             <para>With regard to internationalization (i18n), Spring's various
         <classname>MessageResource</classname> implementations follow the same locale resolution
-        and fallback rules as the standard JDK ResourceBundle. In short, and continuing with
+        and fallback rules as the standard JDK <classname>ResourceBundle</classname>. In short, and continuing with
         the example <literal>'messageSource'</literal> defined previously, if you want to resolve
         messages against the British (en-GB) locale, you would create files called
         <literal>format_en_GB.properties</literal>, <literal>exceptions_en_GB.properties</literal>,
@@ -3891,17 +3889,15 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
             <para>A bean deployed into the application context may implement the
 			special marker interface, <interfacename>ResourceLoaderAware</interfacename>, to be
 			automatically called back at initialization time with the application
-			context itself passed in as the <interfacename>ResourceLoader</interfacename>.</para>
-            <para>
-				A bean may also expose properties of type
-				<interfacename>Resource</interfacename>, to be used to access static resources, and
-				expect that they will be injected into it like any other properties. The
-				person deploying the bean may specify those <interfacename>Resource</interfacename>
-				properties as simple String paths, and rely on a special JavaBean
-				<interfacename>PropertyEditor</interfacename> that is automatically registered
-				by the context, to convert those text strings to actual <interfacename>Resource</interfacename>
-				objects.
-			</para>
+			context itself passed in as the <interfacename>ResourceLoader</interfacename>.
+			A bean may also expose properties of type
+			<interfacename>Resource</interfacename>, to be used to access static resources, and
+			expect that they will be injected into it like any other properties. The
+			person deploying the bean may specify those <interfacename>Resource</interfacename>
+			properties as simple String paths, and rely on a special JavaBean
+			<interfacename>PropertyEditor</interfacename> that is automatically registered
+			by the context, to convert those text strings to actual <interfacename>Resource</interfacename>
+			objects.</para>
             <para>The location path or paths supplied to an <interfacename>ApplicationContext</interfacename>
 			constructor are actually resource strings, and in simple form are
 			treated appropriately to the specific context implementation (
@@ -3915,16 +3911,16 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
             <para>As opposed to the <interfacename>BeanFactory</interfacename>, which will
 			often be created programmatically, <interfacename>ApplicationContext</interfacename>
 			instances can be created declaratively using for example a
-			<interfacename>ContextLoader</interfacename>. Of course you can also create
+			<classname>ContextLoader</classname>. Of course you can also create
 			<interfacename>ApplicationContext</interfacename> instances programmatically
 			using one of the <interfacename>ApplicationContext</interfacename> implementations.
-			First, let's examine the <interfacename>ContextLoader</interfacename> interface
+			First, let's examine the <classname>ContextLoader</classname> mechanism
 			and its implementations.</para>
-            <para>The <interfacename>ContextLoader</interfacename> interface has two
-            implementations: the <classname>ContextLoaderListener</classname> and the
+            <para>The <classname>ContextLoader</classname> mechanism comes in two
+            flavors: the <classname>ContextLoaderListener</classname> and the
 			<classname>ContextLoaderServlet</classname>. They both have the same
-			functionality but differ in that the listener version cannot be used in Servlet
-			2.2 compatible containers. Since the Servlet 2.4 specification, servlet context
+			functionality but differ in that the listener version cannot be reliably used in
+			Servlet 2.3 containers. Since the Servlet 2.4 specification, servlet context
 			listeners are required to execute immediately after the servlet context for the
 			web application has been created and is available to service the first request
 			(and also when the servlet context is about to be shut down): as such a 
@@ -3953,13 +3949,17 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 </servlet>
 --]]></emphasis>&gt;</programlisting>
 		    <para>The listener inspects the
-			<literal>contextConfigLocation</literal> parameter. If it doesn't exist,
-			it'll use <literal>/WEB-INF/applicationContext.xml</literal> as a default.
-			When it <emphasis>does</emphasis> exist, it'll separate the String using
+			<literal>'contextConfigLocation'</literal> parameter. If the parameter does not exist,
+			the listener will use <literal>/WEB-INF/applicationContext.xml</literal> as a default.
+			When it <emphasis>does</emphasis> exist, it will separate the String using
 			predefined delimiters (comma, semi-colon and whitespace) and use the values as
-			locations where application contexts will be searched for. The
-			<classname>ContextLoaderServlet</classname> can be used instead of the
-			<classname>ContextLoaderListener</classname>. The servlet will use the
+			locations where application contexts will be searched for. Ant-style path patterns
+			are supported as well: e.g. <literal>/WEB-INF/*Context.xml</literal>
+			(for all files whose name ends with "Context.xml", residing in the "WEB-INF" directory)
+			or <literal>/WEB-INF/**/*Context.xml</literal> (for all such files in any subdirectory
+			of "WEB-INF").</para>
+        <para>The <classname>ContextLoaderServlet</classname> can be used instead of
+			the <classname>ContextLoaderListener</classname>. The servlet will use the
 			<literal>'contextConfigLocation'</literal> parameter just as the listener does.</para>
         </section>
     </section>
@@ -3986,7 +3986,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 		using beans in the Spring IoC container such as a Hibernate
 		<interfacename>SessionFactory</interfacename>) for each bean to use its own, non-singleton
 		Spring IoC container.</para>
-        <para>As another example, in a complex J2EE apps with multiple layers
+        <para>As another example, in complex J2EE apps with multiple layers
         (various JAR files, EJBs, and WAR files packaged as an EAR),
         with each layer having its own Spring IoC container definition
         (effectively forming a hierarchy), the preferred approach when
@@ -4000,7 +4000,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
         which consists of mostly identical bean definitions from lower layers,
         as there may be issues due to increased memory usage, issues with
         creating multiple copies of beans which take a long time to initialize
-        (e.g. a Hibernate <interfacename>SessionFactory</interfacename>), and
+        (for example a Hibernate <interfacename>SessionFactory</interfacename>), and
         possible issues due to side-effects. As an alternative, classes such as
         <literal><ulink url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink></literal>
         or
