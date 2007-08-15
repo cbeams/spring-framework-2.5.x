@@ -436,10 +436,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					throw new NoSuchBeanDefinitionException(type,
 							"expected single matching bean but found " + matchingBeans.size() + ": " + matchingBeans.keySet());
 				}
-				autowiredBeanNames.add(primaryBeanName);
+				if (autowiredBeanNames != null) {
+					autowiredBeanNames.add(primaryBeanName);
+				}
 				return primaryBeanInstance;
 			}
-			// we have exactly one match
+			// We have exactly one match.
 			Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
 			if (autowiredBeanNames != null) {
 				autowiredBeanNames.add(entry.getKey());
