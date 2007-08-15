@@ -26,10 +26,11 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
  * @author Mark Fisher
  * @since 2.1
  */
-public class DefaultAutowireCandidateResolver implements AutowireCandidateResolver {
+public class DefaultAutowireCandidateResolver extends AbstractAutowireCandidateResolver {
 
 	public void addQualifierType(Class qualifierType) {
-		// qualifiers are ignored by this implementation
+		throw new UnsupportedOperationException(getClass().getName() + 
+				" does not support registration of custom qualifier types.");
 	}
 
 	public boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd,

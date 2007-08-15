@@ -419,19 +419,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				return null;
 			}
 			if (matchingBeans.size() > 1) {
-				String primaryBeanName = null;
-				Object primaryBeanInstance = null;
-				for (Iterator it = matchingBeans.entrySet().iterator(); it.hasNext();) {
-					Map.Entry entry = (Map.Entry) it.next();
-					if (isPrimary((String) entry.getKey(), entry.getValue())) {
-						if (primaryBeanName != null) {
-							throw new NoSuchBeanDefinitionException(type,
-									"more than one 'primary' bean found among candidates: " + matchingBeans.keySet());
-						}
-						primaryBeanName = (String) entry.getKey();
-						primaryBeanInstance = entry.getValue();
-					}
-				}
+				String primaryBeanName = determinePrimaryCandidate(matchingBeans, type);
 				if (primaryBeanName == null) {
 					throw new NoSuchBeanDefinitionException(type,
 							"expected single matching bean but found " + matchingBeans.size() + ": " + matchingBeans.keySet());
@@ -439,7 +427,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (autowiredBeanNames != null) {
 					autowiredBeanNames.add(primaryBeanName);
 				}
-				return primaryBeanInstance;
+				return matchingBeans.get(primaryBeanName);
 			}
 			// We have exactly one match.
 			Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
@@ -1425,6 +1413,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected abstract Map findAutowireCandidates(
 			String beanName, Class requiredType, DependencyDescriptor descriptor)
 			throws BeansException;
+
+	protected abstract String determinePrimaryCandidate(Map matchingBeans, Class type);
 
 
 	//---------------------------------------------------------------------

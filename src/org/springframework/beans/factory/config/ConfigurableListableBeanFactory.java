@@ -88,6 +88,12 @@ public interface ConfigurableListableBeanFactory
 			throws NoSuchBeanDefinitionException;
 
 	/**
+	 * Return whether the bean definition for the given bean name and instance
+	 * has been marked as a primary bean. 
+	 */
+	boolean isPrimary(String beanName, Object beanInstance);
+
+	/**
 	 * Return the registered BeanDefinition for the specified bean, allowing access
 	 * to its property values and constructor argument value (which can be
 	 * modified during bean factory post-processing).

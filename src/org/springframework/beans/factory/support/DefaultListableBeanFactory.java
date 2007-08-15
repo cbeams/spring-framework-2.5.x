@@ -350,6 +350,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return autowireCandidateResolver.isAutowireCandidate(beanName, mbd, descriptor, getTypeConverter());
 	}
 
+	protected String determinePrimaryCandidate(Map candidateBeans, Class type) {
+		return autowireCandidateResolver.determinePrimaryCandidate(candidateBeans, type, this);
+	}
+
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
@@ -495,7 +499,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return result;
 	}
 
-	protected boolean isPrimary(String beanName, Object beanInstance) {
+	public boolean isPrimary(String beanName, Object beanInstance) {
 		return (super.isPrimary(beanName, beanInstance) || this.resolvableDependencies.values().contains(beanInstance));
 	}
 

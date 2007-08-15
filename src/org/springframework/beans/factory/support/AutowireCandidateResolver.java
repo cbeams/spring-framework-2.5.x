@@ -16,7 +16,10 @@
 
 package org.springframework.beans.factory.support;
 
+import java.util.Map;
+
 import org.springframework.beans.TypeConverter;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 
 /**
@@ -29,5 +32,7 @@ public interface AutowireCandidateResolver {
 
 	boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd,
 			DependencyDescriptor descriptor, TypeConverter typeConverter);
+
+	String determinePrimaryCandidate(Map candidateBeans, Class type, ConfigurableListableBeanFactory beanFactory);
 
 }

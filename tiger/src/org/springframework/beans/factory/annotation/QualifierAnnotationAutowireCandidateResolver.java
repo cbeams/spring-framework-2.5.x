@@ -25,7 +25,7 @@ import java.util.Set;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.config.AutowireCandidateQualifier;
 import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.beans.factory.support.AutowireCandidateResolver;
+import org.springframework.beans.factory.support.AbstractAutowireCandidateResolver;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
@@ -40,7 +40,7 @@ import org.springframework.util.ClassUtils;
  * @since 2.1
  * @see Qualifier
  */
-public class QualifierAnnotationAutowireCandidateResolver implements AutowireCandidateResolver {
+public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowireCandidateResolver {
 
 	private final Set<Class<? extends Annotation>> qualifierTypes;
 

@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -101,6 +102,10 @@ public class CustomAutowireConfigurerTests extends TestCase {
 				return true;
 			}
 			return false;
+		}
+
+		public String determinePrimaryCandidate(Map candidateBeans, Class type, ConfigurableListableBeanFactory beanFactory) {
+			return null;
 		}
 
 	}
