@@ -3928,13 +3928,13 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 			<interfacename>ContextLoader</interfacename>. Of course you can also create
 			<interfacename>ApplicationContext</interfacename> instances programmatically
 			using one of the <interfacename>ApplicationContext</interfacename> implementations.
-			First, let's examine the <interfacename>ContextLoader</interfacename> interface
+			First, let's examine the <classname>ContextLoader</classname> mechanism
 			and its implementations.</para>
-            <para>The <interfacename>ContextLoader</interfacename> interface has two
-            implementations: the <classname>ContextLoaderListener</classname> and the
+            <para>The <classname>ContextLoader</classname> mechanism comes in two
+            flavors: the <classname>ContextLoaderListener</classname> and the
 			<classname>ContextLoaderServlet</classname>. They both have the same
-			functionality but differ in that the listener version cannot be used in Servlet
-			2.2 compatible containers. Since the Servlet 2.4 specification, servlet context
+			functionality but differ in that the listener version cannot be reliably used in
+			Servlet 2.3 containers. Since the Servlet 2.4 specification, servlet context
 			listeners are required to execute immediately after the servlet context for the
 			web application has been created and is available to service the first request
 			(and also when the servlet context is about to be shut down): as such a 
@@ -3963,13 +3963,17 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 </servlet>
 --]]></emphasis>&gt;</programlisting>
 		    <para>The listener inspects the
-			<literal>contextConfigLocation</literal> parameter. If it doesn't exist,
-			it'll use <literal>/WEB-INF/applicationContext.xml</literal> as a default.
-			When it <emphasis>does</emphasis> exist, it'll separate the String using
+			<literal>'contextConfigLocation'</literal> parameter. If the parameter does not exist,
+			the listener will use <literal>/WEB-INF/applicationContext.xml</literal> as a default.
+			When it <emphasis>does</emphasis> exist, it will separate the String using
 			predefined delimiters (comma, semi-colon and whitespace) and use the values as
-			locations where application contexts will be searched for. The
-			<classname>ContextLoaderServlet</classname> can be used instead of the
-			<classname>ContextLoaderListener</classname>. The servlet will use the
+			locations where application contexts will be searched for. Ant-style path patterns
+			are supported as well: e.g. <literal>/WEB-INF/*Context.xml</literal>
+			(for all files whose name ends with "Context.xml", residing in the "WEB-INF" directory)
+			or <literal>/WEB-INF/**/*Context.xml</literal> (for all such files in any subdirectory
+			of "WEB-INF").</para>
+        <para>The <classname>ContextLoaderServlet</classname> can be used instead of
+			the <classname>ContextLoaderListener</classname>. The servlet will use the
 			<literal>'contextConfigLocation'</literal> parameter just as the listener does.</para>
         </section>
     </section>
