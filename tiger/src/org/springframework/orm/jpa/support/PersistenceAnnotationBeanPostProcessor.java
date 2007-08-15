@@ -431,7 +431,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 			throws NoSuchBeanDefinitionException {
 
 		if (this.beanFactory == null) {
-			throw new IllegalStateException("ListableBeanFactory required for EntityManagerFactory lookup");
+			throw new IllegalStateException("ListableBeanFactory required for EntityManagerFactory bean lookup");
 		}
 		String unitNameForLookup = (unitName != null ? unitName : "");
 		if ("".equals(unitNameForLookup)) {
@@ -506,7 +506,7 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 			Class resourceType = EntityManager.class;
 			if (pc != null) {
 				if (pu != null) {
-					throw new IllegalStateException("Memeber may only be annotated with either " +
+					throw new IllegalStateException("Member may only be annotated with either " +
 							"@PersistenceContext or @PersistenceUnit, not both: " + member);
 				}
 				Properties properties = null;
