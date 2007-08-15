@@ -49,6 +49,11 @@ import org.springframework.util.Assert;
  * <b>not</b> check anything else... In particular, it does not check that a
  * configured value is not <code>null</code>.
  *
+ * <p>Note: A default RequiredAnnotationBeanPostProcessor will be registered
+ * by the "context:annotation-config" and "context:component-scan" XML tags.
+ * Remove or turn off the default annotation configuration there if you intend
+ * to specify a custom RequiredAnnotationBeanPostProcessor bean definition.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0

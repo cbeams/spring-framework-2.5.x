@@ -74,6 +74,11 @@ import org.springframework.util.ReflectionUtils;
  * a special case of such a general config method. Such config methods
  * do not have to be public.
  *
+ * <p>Note: A default AutowiredAnnotationBeanPostProcessor will be registered
+ * by the "context:annotation-config" and "context:component-scan" XML tags.
+ * Remove or turn off the default annotation configuration there if you intend
+ * to specify a custom AutowiredAnnotationBeanPostProcessor bean definition.
+ *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.1
