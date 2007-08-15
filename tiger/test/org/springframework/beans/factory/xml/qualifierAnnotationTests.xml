@@ -18,11 +18,9 @@
     </bean>
 
     <bean class="org.springframework.beans.factory.xml.QualifierAnnotationTests$Person">
+        <meta key="name" value="moe"/>
+        <meta key="age" value="42"/>
         <property name="name" value="Moe Sr."/>
-        <qualifier type="QualifierAnnotationTests.MultipleAttributeQualifier">
-            <attribute name="name" value="moe"/>
-            <attribute name="age" value="42"/>
-        </qualifier>
     </bean>
 
     <bean class="org.springframework.beans.factory.xml.QualifierAnnotationTests$Person">

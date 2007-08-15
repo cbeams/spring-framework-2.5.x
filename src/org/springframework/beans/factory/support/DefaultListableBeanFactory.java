@@ -109,6 +109,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
+	 * Set a custom autowire candidate resolver for this BeanFactory to use
+	 * when deciding whether a bean definition should be considered as a
+	 * candidate for autowiring.
+	 * @see #registerQualifierType
+	 */
+	public void setAutowireCandidateResolver(AutowireCandidateResolver autowireCandidateResolver) {
+		this.autowireCandidateResolver = autowireCandidateResolver;
+	}
+
+	/**
 	 * Register the given type to be used as a qualifier when autowiring.
 	 * @param qualifierType the annotation type to register
 	 */

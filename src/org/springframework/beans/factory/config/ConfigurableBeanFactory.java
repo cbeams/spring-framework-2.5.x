@@ -24,6 +24,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -161,6 +162,14 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * TypeConverter will be aware of all custom editors that have been registered.
 	 */
 	TypeConverter getTypeConverter();
+
+	/**
+	 * Set a custom autowire candidate resolver for this BeanFactory to use
+	 * when deciding whether a bean definition should be considered as a
+	 * candidate for autowiring.
+	 * @see #registerQualifierType
+	 */
+	void setAutowireCandidateResolver(AutowireCandidateResolver autowireCandidateResolver);
 
 	/**
 	 * Register the given type to be used as a qualifier when autowiring.

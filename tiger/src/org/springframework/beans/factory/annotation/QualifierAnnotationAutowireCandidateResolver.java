@@ -74,60 +74,72 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	/**
 	 * Determine if the provided bean definition is an autowire candidate.
 	 * <p>To be considered a candidate the bean's <em>autowire-candidate</em>
-	 * attribute must not have been set to 'false'. Also any annotations
-	 * on the field or parameter to be autowired that are recognized by
-	 * this bean factory as <em>qualifiers</em> must also be present as
-	 * qualifiers on the bean definition. If the annotation further specifies
-	 * any attributes (including a simple "value"), then the qualifier on the
-	 * bean definition must also match all specified attribute values.</p>
+	 * attribute must not have been set to 'false'. Also if an annotation on
+	 * the field or parameter to be autowired is recognized by this bean factory
+	 * as a <em>qualifier</em>, the bean must 'match' against the annotation as
+	 * well as any attributes it may contain. The bean definition must contain
+	 * the same qualifier or match by meta attributes. A "value" attribute will
+	 * fallback to match against the bean name if a qualifier or attribute does
+	 * not match.</p>
 	 */
 	public boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd,
 			DependencyDescriptor descriptor, TypeConverter typeConverter) {
 
 		if (!mbd.isAutowireCandidate()) {
-			// if explicitly set to false, then do not proceed with qualifier check
+			// if explicitly false, do not proceed with qualifier check
 			return false;
 		}
 		if (descriptor == null || descriptor.getAnnotations() == null) {
-			// isAutowireCandidate must have been true and no qualification necessary
+			// no qualification necessary
 			return true;
 		}
 		Annotation[] annotations = (Annotation[]) descriptor.getAnnotations();
 		for (Annotation annotation : annotations) {
 			Class<? extends Annotation> type = annotation.annotationType();
-			// check if this annotation is a recognized qualifier type
 			if (isQualifier(type)) {
 				AutowireCandidateQualifier qualifier = mbd.getQualifier(type.getName());
-				Map<String, Object> attributes = AnnotationUtils.getAnnotationAttributes(annotation);
 				if (qualifier == null) {
 					qualifier = mbd.getQualifier(ClassUtils.getShortName(type));
-					if (qualifier == null) {
-						// no qualifier present, fall back on beanName match
-						if (attributes.size() == 1 && beanNameResolves(beanName, annotation)) {
-							continue;
-						}
-						return false;
-					}
+				}
+				Map<String, Object> attributes = AnnotationUtils.getAnnotationAttributes(annotation);
+				if (attributes.size() == 0 && qualifier == null) {
+					// if no attributes, the qualifier must be present
+					return false;
 				}
 				for (Iterator<Map.Entry<String, Object>> it = attributes.entrySet().iterator(); it.hasNext();) {
 					Map.Entry<String, Object> entry = it.next();
 					String attributeName = entry.getKey();
 					Object expectedValue = entry.getValue();
-					Object actualValue = qualifier.getAttribute(attributeName);
-					if (actualValue == null) {
-						// if relying on default value, then the qualifier need not be specified
-						Object defaultValue = AnnotationUtils.getDefaultValue(annotation, attributeName);
-						if (defaultValue == null || ((defaultValue instanceof String) && ((String) defaultValue).length() == 0)) {
-							if (attributeName.equals("value") && beanNameResolves(beanName, annotation)) {
-								continue;
-							}
-						}
-						actualValue = defaultValue;
+					Object actualValue = null;
+
+					// check qualifier first
+					if (qualifier != null) {
+						actualValue = qualifier.getAttribute(attributeName);
 					}
-					else {
+
+					if (actualValue == null) {
+						// fall back on bean definition attribute
+						Object attr = mbd.getAttribute(attributeName);
+						if (attr != null) {
+							actualValue = typeConverter.convertIfNecessary(attr, expectedValue.getClass());
+						}
+					}
+
+					if (actualValue == null && attributeName.equals("value") && expectedValue.equals(beanName)) {
+						// fall back on bean name match
+						continue;
+					}
+
+					if (actualValue == null && qualifier != null) {
+						// fall back on default, but only if the qualifier is present
+						actualValue = AnnotationUtils.getDefaultValue(annotation, attributeName);
+					}
+
+					if (actualValue != null) {
 						actualValue = typeConverter.convertIfNecessary(actualValue, expectedValue.getClass());
 					}
-					if (!actualValue.equals(expectedValue)) {
+
+					if (!expectedValue.equals(actualValue)) {
 						return false;
 					}
 				}
@@ -146,15 +158,6 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 			}
 		}
 		return false;
-	}
-
-
-	private static boolean beanNameResolves(String beanName, Annotation annotation) {
-		Object value = AnnotationUtils.getValue(annotation, "value");
-		if (value == null || !(value instanceof String)) {
-			return false;
-		}
-		return (value.equals(beanName));
 	}
 
 }
