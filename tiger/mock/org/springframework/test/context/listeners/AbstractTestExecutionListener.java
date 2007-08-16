@@ -15,6 +15,8 @@
  */
 package org.springframework.test.context.listeners;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.test.context.TestContext;
 
 /**
@@ -23,51 +25,70 @@ import org.springframework.test.context.TestContext;
  * only those methods suitable for the task at hand.
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 public abstract class AbstractTestExecutionListener implements TestExecutionListener {
+
+	// ------------------------------------------------------------------------|
+	// --- CONSTANTS ----------------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	/** Class Logger. */
+	private static final Log	LOG	= LogFactory.getLog(AbstractTestExecutionListener.class);
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * The default implementation is <em>empty</em>. Can be overridden by
-	 * subclasses as necessary.
+	 * The default implementation provides debug logging but is otherwise
+	 * <em>empty</em>. Can be overridden by subclasses as necessary.
 	 *
 	 * @see org.springframework.test.context.listeners.TestExecutionListener#prepareTestInstance(java.lang.Object)
 	 */
 	@Override
 	public void prepareTestInstance(final TestContext<?> testContext) throws Exception {
 
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Preparing test instance: context [" + testContext + "].");
+		}
+
 		/* no-op */
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * The default implementation is <em>empty</em>. Can be overridden by
-	 * subclasses as necessary.
+	 * The default implementation provides debug logging but is otherwise
+	 * <em>empty</em>. Can be overridden by subclasses as necessary.
 	 *
 	 * @see org.springframework.test.context.listeners.TestExecutionListener#beforeTestMethod(org.springframework.test.context.TestContext)
 	 */
 	@Override
 	public void beforeTestMethod(final TestContext<?> testContext) {
 
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Before test method: context [" + testContext + "].");
+		}
+
 		/* no-op */
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * The default implementation is <em>empty</em>. Can be overridden by
-	 * subclasses as necessary.
+	 * The default implementation provides debug logging but is otherwise
+	 * <em>empty</em>. Can be overridden by subclasses as necessary.
 	 *
 	 * @see org.springframework.test.context.listeners.TestExecutionListener#afterTestMethod(TestContext)
 	 */
 	@Override
 	public void afterTestMethod(final TestContext<?> testContext) {
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("After test method: context [" + testContext + "].");
+		}
 
 		/* no-op */
 	}
