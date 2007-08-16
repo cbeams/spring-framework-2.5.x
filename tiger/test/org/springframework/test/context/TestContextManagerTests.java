@@ -46,7 +46,7 @@ import org.springframework.test.context.listeners.TestExecutionListener;
  * {@link TestExecutionListener TestExecutionListeners}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 @RunWith(JUnit4ClassRunner.class)
@@ -202,7 +202,7 @@ public class TestContextManagerTests {
 
 		final Method testMethod = ExampleTest.class.getDeclaredMethod("exampleTestMethod", (Class<?>[]) null);
 
-		this.testContextManager.afterTestMethod(new ExampleTest(), testMethod);
+		this.testContextManager.afterTestMethod(new ExampleTest(), testMethod, null);
 		this.testContextManager = null;
 	}
 

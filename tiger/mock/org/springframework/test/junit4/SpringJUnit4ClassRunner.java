@@ -22,8 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.internal.runners.InitializationError;
 import org.junit.internal.runners.JUnit4ClassRunner;
-import org.junit.internal.runners.MethodRoadie;
-import org.junit.internal.runners.TestMethod;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
 import org.springframework.test.context.TestContextManager;
@@ -35,7 +33,7 @@ import org.springframework.test.context.TestContextManager;
  * annotations.
  *
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
@@ -155,7 +153,7 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Overrides invokeTestMethod().
+	 * TODO Add comments for invokeTestMethod().
 	 *
 	 * @see #createTest()
 	 * @see JUnit4ClassRunner#invokeTestMethod(Method, RunNotifier)
@@ -190,12 +188,13 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 
 		// ---------------------------------------------------------------------
 		// The following is a direct copy of the original JUnit 4.4 code, except
-		// that we ... ??? (currently do nothing special)
+		// that we inform the TestContextManager of test execution lifecycle
+		// events.
 
 		final Description description = methodDescription(method);
-		Object test;
+		Object testInstance;
 		try {
-			test = createTest();
+			testInstance = createTest();
 		}
 		catch (final InvocationTargetException e) {
 			notifier.testAborted(description, e.getCause());
@@ -205,15 +204,12 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 			notifier.testAborted(description, e);
 			return;
 		}
-		final TestMethod testMethod = wrapMethod(method);
 
-		try {
-			getTestContextManager().beforeTestMethod(test, method);
-			new MethodRoadie(test, testMethod, notifier, description).run();
-		}
-		finally {
-			getTestContextManager().afterTestMethod(test, method);
-		}
+		final SpringTestMethod testMethod = new SpringTestMethod(method, getTestClass());
+
+		// TODO Move beforeTestMethod() call to SpringMethodRoadie.
+		getTestContextManager().beforeTestMethod(testInstance, method);
+		new SpringMethodRoadie<T>(getTestContextManager(), testInstance, testMethod, notifier, description).run();
 	}
 
 	// ------------------------------------------------------------------------|

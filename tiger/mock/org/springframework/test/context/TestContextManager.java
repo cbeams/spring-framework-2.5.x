@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 2.1
  */
 public class TestContextManager<T> {
@@ -186,9 +186,11 @@ public class TestContextManager<T> {
 	 * @param testInstance The current test instance, not <code>null</code>.
 	 * @param testMethod The test method which has just been executed on the
 	 *        test instance, not <code>null</code>.
+	 * @param exception The exception that was thrown during execution of the
+	 *        test method, or <code>null</code> if none was thrown.
 	 * @see #getTestExecutionListeners()
 	 */
-	public void afterTestMethod(final Object testInstance, final Method testMethod) {
+	public void afterTestMethod(final Object testInstance, final Method testMethod, final Throwable exception) {
 
 		Assert.notNull(testInstance, "The testInstance can not be null.");
 		Assert.notNull(testMethod, "The testMethod can not be null.");
@@ -198,6 +200,7 @@ public class TestContextManager<T> {
 
 		// Update test instance.
 		getTestContext().setTestInstanceAndMethod(testInstance, testMethod);
+		getTestContext().setException(exception);
 
 		// Traverse the TestExecutionListeners in reverse order.
 		final ArrayList<TestExecutionListener> listenersList = new ArrayList<TestExecutionListener>(
@@ -206,8 +209,7 @@ public class TestContextManager<T> {
 
 		for (final TestExecutionListener testExecutionListener : listenersList) {
 			try {
-				// TODO Relocate call to afterTestMethod() & pass in Throwable!
-				testExecutionListener.afterTestMethod(getTestContext(), null);
+				testExecutionListener.afterTestMethod(getTestContext(), exception);
 			}
 			catch (final Exception e) {
 				// log and continue in order to let all listeners have a chance
@@ -253,6 +255,7 @@ public class TestContextManager<T> {
 
 		// Update test instance
 		getTestContext().setTestInstanceAndMethod(testInstance, testMethod);
+		getTestContext().setException(null);
 
 		for (final TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {
@@ -340,6 +343,7 @@ public class TestContextManager<T> {
 
 		// Update test instance
 		getTestContext().setTestInstanceAndMethod(testInstance, null);
+		getTestContext().setException(null);
 
 		for (final TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {

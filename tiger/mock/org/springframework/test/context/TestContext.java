@@ -46,7 +46,7 @@ import org.springframework.util.ClassUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public class TestContext<T> {
@@ -73,6 +73,8 @@ public class TestContext<T> {
 	private final ContextConfigurationAttributes configurationAttributes;
 
 	private final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> contextCache;
+
+	private Throwable exception;
 
 	private final Class<T> testClass;
 
@@ -273,6 +275,19 @@ public class TestContext<T> {
 	// ------------------------------------------------------------------------|
 
 	/**
+	 * Gets the exception that was thrown during execution of the last test
+	 * method.
+	 *
+	 * @return the exception that was thrown, or <code>null</code> if none.
+	 */
+	public final Throwable getException() {
+
+		return this.exception;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
 	 * <p>
 	 * Gets the {@link Class test class} for this test context.
 	 * </p>
@@ -326,6 +341,19 @@ public class TestContext<T> {
 	public void markApplicationContextDirty() {
 
 		getContextCache().setDirty(getConfigurationAttributes());
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Sets the exception thrown during the last test method execution.
+	 *
+	 * @param exception The exception that was thrown during execution of the
+	 *        test method, or <code>null</code> if none was thrown.
+	 */
+	public final void setException(final Throwable exception) {
+
+		this.exception = exception;
 	}
 
 	// ------------------------------------------------------------------------|
