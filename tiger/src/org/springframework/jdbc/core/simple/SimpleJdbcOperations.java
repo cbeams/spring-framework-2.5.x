@@ -25,10 +25,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * JDBC operations nterface usable on Java 5 and above, exposing a
+ * JDBC operations interface usable on Java 5 and above, exposing a
  * set of common JDBC operations, whose interface is simplified
  * through the use of varargs and autoboxing.
- * 
+ *
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Thomas Risberg
