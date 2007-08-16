@@ -43,14 +43,16 @@ import org.springframework.util.Assert;
  * Specifically, a TestContextManager is responsible for managing a single
  * {@link TestContext} and ensuring that all registered
  * {@link TestExecutionListener TestExecutionListeners} are given a chance to
- * process the test context at well defined test lifecycle execution points
- * (e.g., {@link #prepareTestInstance(Object)},
- * {@link #beforeTestMethod(Object, Method)},
- * {@link #afterTestMethod(Object, Method)}, etc.).
+ * process the test context at well defined test lifecycle execution points:
  * </p>
+ * <ul>
+ * <li>{@link #prepareTestInstance(Object) test instance preparation}</li>
+ * <li>{@link #beforeTestMethod(Object, Method) before a test method is executed}</li>
+ * <li>{@link #afterTestMethod(Object, Method, Throwable) after a test method has been executed}</li>
+ * </ul>
  *
  * @author Sam Brannen
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 2.1
  */
 public class TestContextManager<T> {
@@ -127,7 +129,7 @@ public class TestContextManager<T> {
 	 * @return an array of TestExecutionListeners for the specified class.
 	 * @throws IllegalArgumentException if the supplied class is
 	 *         <code>null</code>.
-	 * @throws Exception
+	 * @throws Exception if an error occurs while retrieving the listeners.
 	 */
 	@SuppressWarnings("unchecked")
 	protected static TestExecutionListener[] retrieveTestExecutionListeners(final Class<?> clazz)
