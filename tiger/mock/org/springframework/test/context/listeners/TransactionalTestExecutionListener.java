@@ -19,7 +19,6 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.TestContext;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -27,14 +26,22 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
- * TODO Add comments for TransactionalTestExecutionListener.
+ * TestExecutionListener which provides support for executing tests within
+ * transactions by using the &#064;Transactional and &#064;NotTransactional
+ * annotations. Changes to the database during a test run with
+ * &#064;Transactional will automatically be rolled back after completion of the
+ * test; whereas, changes to the database during a test run with
+ * &#064;NotTransactional will be committed after completion of the test.
  *
+ * @see Transactional
+ * @see NotTransactional
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
@@ -44,37 +51,34 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	// ------------------------------------------------------------------------|
 
 	/** Class Logger. */
-	private static final Log LOG = LogFactory.getLog(TransactionalTestExecutionListener.class);
+	private static final Log					LOG							= LogFactory.getLog(TransactionalTestExecutionListener.class);
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	/** Should we commit the current transaction? */
-	private boolean complete = false;
+	private boolean								complete					= false;
 
 	/** Should we roll back by default? */
-	private final boolean defaultRollback = true;
+	private final boolean						rollbackByDefault			= true;
 
-	private final TransactionAttributeSource transactionAttributeSource = new AnnotationTransactionAttributeSource();
+	private final TransactionAttributeSource	transactionAttributeSource	= new AnnotationTransactionAttributeSource();
 
 	/**
 	 * Transaction definition used by this test class: by default, a plain
 	 * DefaultTransactionDefinition. Subclasses can change this to cause
 	 * different behavior.
 	 */
-	protected TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-
-	/** The transaction manager to use */
-	protected PlatformTransactionManager transactionManager;
+	protected TransactionDefinition				transactionDefinition		= new DefaultTransactionDefinition();
 
 	/** Number of transactions started */
-	private int transactionsStarted = 0;
+	private int									transactionsStarted			= 0;
 
 	/**
 	 * TransactionStatus for this test. Typical subclasses won't need to use it.
 	 */
-	protected TransactionStatus transactionStatus;
+	protected TransactionStatus					transactionStatus;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
@@ -82,126 +86,99 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	/**
 	 * <p>
-	 * TODO Update JavaDoc.
-	 * <p>
-	 * Overrides afterTestMethod(): This implementation ends the transaction
-	 * after test execution.
-	 * <p>
-	 * Override {@link #onTearDownInTransaction()} and/or
-	 * {@link #onTearDownAfterTransaction()} to add custom tear-down behavior
-	 * for transactional execution. Alternatively, override this method for
-	 * general tear-down behavior, calling <code>super.onTearDown()</code> as
-	 * part of your method implementation.
-	 * <p>
-	 * Note that {@link #onTearDownInTransaction()} will only be called if a
-	 * transaction is still active at the time of the test shutdown. In
-	 * particular, it will <i>not</i> be called if the transaction has been
-	 * completed with an explicit {@link #endTransaction()} call before.
+	 * Creates a transaction before test method execution.
+	 * </p>
 	 *
+	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#beforeTestMethod(TestContext)
 	 * @throws Exception simply let any exception propagate
-	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#afterTestMethod(TestContext)
-	 */
-	@Override
-	public void afterTestMethod(final TestContext<?> testContext) {
-
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("After test method: context [" + testContext + "].");
-		}
-
-		// End transaction if the transaction is still active.
-		if (this.transactionStatus != null && !this.transactionStatus.isCompleted()) {
-			endTransaction();
-		}
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * <p>
-	 * TODO Update JavaDoc.
-	 * <p>
-	 * Overrides beforeTestMethod(): this implementation creates a transaction
-	 * before test execution.
-	 * <p>
-	 * Override {@link #onSetUpBeforeTransaction()} and/or
-	 * {@link #onSetUpInTransaction()} to add custom set-up behavior for
-	 * transactional execution. Alternatively, override this method for general
-	 * set-up behavior, calling <code>super.onSetUp()</code> as part of your
-	 * method implementation.
-	 *
-	 * @throws Exception simply let any exception propagate
-	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#beforeTestMethod(org.springframework.test.context.TestContext)
 	 */
 	@Override
 	public void beforeTestMethod(final TestContext<?> testContext) {
 
 		final Method testMethod = testContext.getTestMethod();
 
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Before test method: context [" + testContext + "].");
-		}
-
-		// ---------------------------------------------------------------------
-
-		this.complete = !isDefaultRollback();
-
-		if (getTransactionManager() == null) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("No transaction manager set: test will NOT run within a transaction");
-			}
-		}
-		else if (this.transactionDefinition == null) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("No transaction definition set: test will NOT run within a transaction");
-			}
+		if (testMethod.isAnnotationPresent(NotTransactional.class)) {
+			this.transactionDefinition = null;
 		}
 		else {
-			startNewTransaction();
-		}
 
-		// ---------------------------------------------------------------------
-
-		final TransactionDefinition explicitTransactionDefinition = this.transactionAttributeSource.getTransactionAttribute(
-				testMethod, testContext.getTestClass());
-		if (explicitTransactionDefinition != null) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Custom transaction definition [" + explicitTransactionDefinition + " for test method ["
-						+ testMethod + "].");
+			final TransactionDefinition explicitTransactionDefinition = this.transactionAttributeSource.getTransactionAttribute(
+					testMethod, testContext.getTestClass());
+			if (explicitTransactionDefinition != null) {
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Explicit transaction definition [" + explicitTransactionDefinition
+							+ "] found for test context [" + testContext + "].");
+				}
+				this.transactionDefinition = explicitTransactionDefinition;
 			}
-			setTransactionDefinition(explicitTransactionDefinition);
-		}
-		else if (testMethod.isAnnotationPresent(NotTransactional.class)) {
-			// Don't have any transaction...
-			preventTransaction();
+
+			// -----------------------------------------------------------------
+
+			this.complete = !isRollbackByDefault();
+
+			// -----------------------------------------------------------------
+
+			if (getTransactionManager(testContext) == null) {
+				if (LOG.isInfoEnabled()) {
+					LOG.info("No transaction manager set for test context [" + testContext
+							+ "]: test will NOT run within a transaction.");
+				}
+			}
+			else if (this.transactionDefinition == null) {
+				if (LOG.isInfoEnabled()) {
+					LOG.info("No transaction definition set for test context [" + testContext
+							+ "]: test will NOT run within a transaction.");
+				}
+			}
+			else {
+				startNewTransaction(testContext);
+			}
 		}
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Immediately force a commit or rollback of the transaction, according to
-	 * the complete flag.
 	 * <p>
-	 * Can be used to explicitly let the transaction end early, for example to
-	 * check whether lazy associations of persistent objects work outside of a
-	 * transaction (that is, have been initialized properly).
+	 * Ends the transaction after test method execution if necessary.
+	 * </p>
+	 *
+	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#afterTestMethod(TestContext)
+	 * @throws Exception simply let any exception propagate
+	 */
+	@Override
+	public void afterTestMethod(final TestContext<?> testContext) {
+
+		// End transaction if the transaction is still active.
+		if (this.transactionStatus != null && !this.transactionStatus.isCompleted()) {
+			endTransaction(testContext);
+		}
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Immediately force a commit or rollback of the transaction, according to
+	 * the <code>complete</code> flag.
+	 * </p>
 	 *
 	 * @see #setComplete()
 	 */
-	protected void endTransaction() {
+	protected void endTransaction(final TestContext<?> testContext) {
 
 		if (this.transactionStatus != null) {
 			try {
 				if (!this.complete) {
-					getTransactionManager().rollback(this.transactionStatus);
+					getTransactionManager(testContext).rollback(this.transactionStatus);
 					if (LOG.isInfoEnabled()) {
-						LOG.info("Rolled back transaction after test execution");
+						LOG.info("Rolled back transaction after test execution.");
 					}
 				}
 				else {
-					getTransactionManager().commit(this.transactionStatus);
+					getTransactionManager(testContext).commit(this.transactionStatus);
 					if (LOG.isInfoEnabled()) {
-						LOG.info("Committed transaction after test execution");
+						LOG.info("Committed transaction after test execution.");
 					}
 				}
 			}
@@ -214,34 +191,47 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @return The PlatformTransactionManager.
+	 * Gets the {@link PlatformTransactionManager transaction manager} to use
+	 * for the supplied {@link TestContext test context}.
+	 *
+	 * @param testContext The test context for which the transaction manager
+	 *        should be retrieved.
+	 * @return The transaction manager to use, or <code>null</code> if not
+	 *         found.
 	 */
-	protected final PlatformTransactionManager getTransactionManager() {
+	protected final PlatformTransactionManager getTransactionManager(final TestContext<?> testContext) {
 
-		return this.transactionManager;
+		// TODO Make transactionManagerName configurable via an annotation
+		// attribute.
+		final String transactionManagerName = "transactionManager";
+		PlatformTransactionManager transactionManager = null;
+
+		try {
+			transactionManager = (PlatformTransactionManager) testContext.getApplicationContext().getBean(
+					transactionManagerName, PlatformTransactionManager.class);
+		}
+		catch (final Exception e) {
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Caught exception while retrieving transaction manager with bean name ["
+						+ transactionManagerName + "] for test context [" + testContext + "].", e);
+			}
+		}
+
+		return transactionManager;
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @return Returns the defaultRollback.
+	 * Whether or not to rollback transactions by default.
+	 *
+	 * @return The default <em>rollback</em> flag.
 	 */
-	public final boolean isDefaultRollback() {
+	protected final boolean isRollbackByDefault() {
 
-		// TODO Parse the new @Rollback annotation...
+		// TODO Parse the new @Rollback annotation... (?)
 
-		return this.defaultRollback;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * Call this method in an overridden {@link #runBare()} method to prevent
-	 * transactional execution.
-	 */
-	protected void preventTransaction() {
-
-		this.transactionDefinition = null;
+		return this.rollbackByDefault;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -253,41 +243,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @throws IllegalStateException if the operation cannot be set to complete
 	 *         as no transaction manager was provided
 	 */
-	protected final void setComplete() {
+	protected final void setComplete(final TestContext<?> testContext) {
 
-		if (getTransactionManager() == null) {
+		if (getTransactionManager(testContext) == null) {
 			throw new IllegalStateException("No transaction manager set");
 		}
 		this.complete = true;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * Call this method in an overridden {@link #runBare()} method to override
-	 * the transaction attributes that will be used, so that {@link #setUp()}
-	 * and {@link #tearDown()} behavior is modified.
-	 *
-	 * @param customDefinition the custom transaction definition
-	 */
-	protected final void setTransactionDefinition(final TransactionDefinition customDefinition) {
-
-		this.transactionDefinition = customDefinition;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * Specify the transaction manager to use. No transaction management will be
-	 * available if this is not set. Populated through dependency injection by
-	 * the superclass.
-	 * <p>
-	 * This mode works only if dependency checking is turned off in the
-	 * {@link AbstractDependencyInjectionSpringContextTests} superclass.
-	 */
-	public final void setTransactionManager(final PlatformTransactionManager transactionManager) {
-
-		this.transactionManager = transactionManager;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -300,23 +261,23 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 *
 	 * @throws TransactionException if starting the transaction failed
 	 */
-	protected void startNewTransaction() throws TransactionException {
+	protected void startNewTransaction(final TestContext<?> testContext) throws TransactionException {
 
 		if (this.transactionStatus != null) {
 			throw new IllegalStateException("Cannot start new transaction without ending existing transaction: "
-					+ "Invoke endTransaction() before startNewTransaction()");
+					+ "Invoke endTransaction() before startNewTransaction().");
 		}
-		if (getTransactionManager() == null) {
-			throw new IllegalStateException("No transaction manager set");
+		if (getTransactionManager(testContext) == null) {
+			throw new IllegalStateException("No transaction manager set.");
 		}
 
-		this.transactionStatus = getTransactionManager().getTransaction(this.transactionDefinition);
+		this.transactionStatus = getTransactionManager(testContext).getTransaction(this.transactionDefinition);
 		++this.transactionsStarted;
-		this.complete = !isDefaultRollback();
+		this.complete = !isRollbackByDefault();
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Began transaction (" + this.transactionsStarted + "): transaction manager ["
-					+ getTransactionManager() + "]; default rollback = " + isDefaultRollback());
+					+ getTransactionManager(testContext) + "]; default rollback [" + isRollbackByDefault() + "].");
 		}
 	}
 
