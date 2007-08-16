@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.ContextConfiguration;
 import org.springframework.test.annotation.NotTransactional;
@@ -44,7 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -72,6 +73,11 @@ public class TransactionalSpringRunnerTests {
 	// --- STATIC METHODS -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
+	protected static int countRowsInPersonTable() {
+
+		return simpleJdbcTemplate.queryForInt("SELECT COUNT(0) FROM person");
+	}
+
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
 	public static junit.framework.Test suite() {
 
@@ -91,11 +97,6 @@ public class TransactionalSpringRunnerTests {
 	protected void addPerson(final String name, final int age) {
 
 		simpleJdbcTemplate.update("INSERT INTO person VALUES(?,?)", name, age);
-	}
-
-	protected int countRowsInPersonTable() {
-
-		return simpleJdbcTemplate.queryForInt("SELECT COUNT(0) FROM person");
 	}
 
 	@Before
@@ -146,7 +147,12 @@ public class TransactionalSpringRunnerTests {
 		void setDataSource(final DataSource dataSource) {
 
 			TransactionalSpringRunnerTests.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
-			TransactionalSpringRunnerTests.simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, age INTEGER NOT NULL, PRIMARY KEY(name))");
+			try {
+				TransactionalSpringRunnerTests.simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, age INTEGER NOT NULL, PRIMARY KEY(name))");
+			}
+			catch (final BadSqlGrammarException bsge) {
+				/* ignore */
+			}
 		}
 	}
 
