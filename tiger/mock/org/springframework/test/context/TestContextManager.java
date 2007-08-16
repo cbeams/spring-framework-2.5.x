@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 2.1
  */
 public class TestContextManager<T> {
@@ -183,12 +183,12 @@ public class TestContextManager<T> {
 	 * opposite order in which they were registered.
 	 * </p>
 	 *
+	 * @see #getTestExecutionListeners()
 	 * @param testInstance The current test instance, not <code>null</code>.
 	 * @param testMethod The test method which has just been executed on the
 	 *        test instance, not <code>null</code>.
 	 * @param exception The exception that was thrown during execution of the
 	 *        test method, or <code>null</code> if none was thrown.
-	 * @see #getTestExecutionListeners()
 	 */
 	public void afterTestMethod(final T testInstance, final Method testMethod, final Throwable exception) {
 
@@ -236,17 +236,20 @@ public class TestContextManager<T> {
 	 * <code>testInstance</code> and <code>testMethod</code>.
 	 * </p>
 	 * <p>
-	 * The default implementation gives each registered
+	 * The default implementation attempts to give each registered
 	 * {@link TestExecutionListener} a chance to pre-process the test method
-	 * execution.
+	 * execution. If a listener throws an exception, however, the remaining
+	 * registered listeners will not be called.
 	 * </p>
 	 *
+	 * @see #getTestExecutionListeners()
 	 * @param testInstance The current test instance, not <code>null</code>.
 	 * @param testMethod The test method which is about to be executed on the
 	 *        test instance, not <code>null</code>.
-	 * @see #getTestExecutionListeners()
+	 * @throws Exception if a registered TestExecutionListener throws an
+	 *         exception.
 	 */
-	public void beforeTestMethod(final T testInstance, final Method testMethod) {
+	public void beforeTestMethod(final T testInstance, final Method testMethod) throws Exception {
 
 		Assert.notNull(testInstance, "The testInstance can not be null.");
 		Assert.notNull(testMethod, "The testMethod can not be null.");
@@ -261,13 +264,13 @@ public class TestContextManager<T> {
 				testExecutionListener.beforeTestMethod(getTestContext());
 			}
 			catch (final Exception e) {
-				// log and continue in order to let all listeners have a chance
-				// to process the event.
+				// log and rethrow.
 				if (LOG.isInfoEnabled()) {
 					LOG.info("Caught exception while allowing TestExecutionListener [" + testExecutionListener
 							+ "] to process 'before' method execution of test method [" + testMethod
 							+ "] for test instance [" + testInstance + "].", e);
 				}
+				throw e;
 			}
 		}
 	}
