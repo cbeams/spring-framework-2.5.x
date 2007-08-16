@@ -37,7 +37,7 @@ import org.springframework.test.context.TestContextManager;
  * TODO Add comments for SpringMethodRoadie.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class SpringMethodRoadie<T> {
@@ -61,15 +61,17 @@ public class SpringMethodRoadie<T> {
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final Object testInstance;
-
 	private final TestContextManager<T> testContextManager;
+
+	private final T testInstance;
+
+	private final SpringTestMethod testMethod;
+
+	private Throwable testException;
 
 	private final RunNotifier notifier;
 
 	private final Description description;
-
-	private final SpringTestMethod testMethod;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -79,7 +81,7 @@ public class SpringMethodRoadie<T> {
 	// --- CONSTRUCTORS -------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	public SpringMethodRoadie(final TestContextManager<T> testContextManager, final Object testInstance,
+	public SpringMethodRoadie(final TestContextManager<T> testContextManager, final T testInstance,
 			final SpringTestMethod testMethod, final RunNotifier notifier, final Description description) {
 
 		this.testContextManager = testContextManager;
@@ -154,7 +156,7 @@ public class SpringMethodRoadie<T> {
 		});
 	}
 
-	public void runTest() {
+	protected void runTest() {
 
 		runBeforesThenTestThenAfters(new Runnable() {
 
@@ -165,7 +167,7 @@ public class SpringMethodRoadie<T> {
 		});
 	}
 
-	public void runBeforesThenTestThenAfters(final Runnable test) {
+	protected void runBeforesThenTestThenAfters(final Runnable test) {
 
 		try {
 			runBefores();
@@ -183,8 +185,7 @@ public class SpringMethodRoadie<T> {
 
 	protected void runTestMethod() {
 
-		Throwable actual = null;
-
+		this.testException = null;
 		try {
 			getTestMethod().invoke(getTestInstance());
 			if (getTestMethod().expectsException()) {
@@ -192,18 +193,18 @@ public class SpringMethodRoadie<T> {
 			}
 		}
 		catch (final InvocationTargetException e) {
-			actual = e.getTargetException();
-			if (actual instanceof AssumptionViolatedException) {
+			this.testException = e.getTargetException();
+			if (this.testException instanceof AssumptionViolatedException) {
 				return;
 			}
 			else if (!getTestMethod().expectsException()) {
-				addFailure(actual);
+				addFailure(this.testException);
 			}
-			else if (getTestMethod().isUnexpected(actual)) {
+			else if (getTestMethod().isUnexpected(this.testException)) {
 				final String message = "Unexpected exception, expected<"
-						+ getTestMethod().getExpectedException().getName() + "> but was<" + actual.getClass().getName()
-						+ ">";
-				addFailure(new Exception(message, actual));
+						+ getTestMethod().getExpectedException().getName() + "> but was<"
+						+ this.testException.getClass().getName() + ">";
+				addFailure(new Exception(message, this.testException));
 			}
 		}
 		catch (final Throwable e) {
@@ -211,15 +212,17 @@ public class SpringMethodRoadie<T> {
 		}
 		finally {
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("Test method [" + getTestMethod().getMethod() + "] threw exception [" + actual + "].");
+				LOG.debug("Test method [" + getTestMethod().getMethod() + "] threw exception [" + getTestException()
+						+ "].");
 			}
-			getTestContextManager().afterTestMethod(getTestInstance(), getTestMethod().getMethod(), actual);
 		}
 	}
 
 	protected void runBefores() throws SpringFailedBefore {
 
 		try {
+			getTestContextManager().beforeTestMethod(getTestInstance(), getTestMethod().getMethod());
+
 			final List<Method> befores = getTestMethod().getBefores();
 			for (final Method before : befores) {
 				before.invoke(getTestInstance());
@@ -249,6 +252,7 @@ public class SpringMethodRoadie<T> {
 				addFailure(e); // Untested, but seems impossible
 			}
 		}
+		getTestContextManager().afterTestMethod(getTestInstance(), getTestMethod().getMethod(), getTestException());
 	}
 
 	protected void addFailure(final Throwable e) {
@@ -259,7 +263,7 @@ public class SpringMethodRoadie<T> {
 	/**
 	 * @return Returns the testContext.
 	 */
-	public final TestContextManager<T> getTestContextManager() {
+	protected final TestContextManager<T> getTestContextManager() {
 
 		return this.testContextManager;
 	}
@@ -267,7 +271,7 @@ public class SpringMethodRoadie<T> {
 	/**
 	 * @return Returns the testInstance.
 	 */
-	public final Object getTestInstance() {
+	protected final T getTestInstance() {
 
 		return this.testInstance;
 	}
@@ -275,15 +279,26 @@ public class SpringMethodRoadie<T> {
 	/**
 	 * @return Returns the testMethod.
 	 */
-	public final SpringTestMethod getTestMethod() {
+	protected final SpringTestMethod getTestMethod() {
 
 		return this.testMethod;
 	}
 
 	/**
+	 * Gets the exception thrown during execution of the test method, or
+	 * <code>null</code> if no exception was thrown.
+	 *
+	 * @return The test exception.
+	 */
+	protected final Throwable getTestException() {
+
+		return this.testException;
+	}
+
+	/**
 	 * @return Returns the notifier.
 	 */
-	public final RunNotifier getNotifier() {
+	protected final RunNotifier getNotifier() {
 
 		return this.notifier;
 	}
@@ -291,9 +306,20 @@ public class SpringMethodRoadie<T> {
 	/**
 	 * @return Returns the description.
 	 */
-	public final Description getDescription() {
+	protected final Description getDescription() {
 
 		return this.description;
+	}
+
+	/**
+	 * Sets the exception thrown during execution of the test method, or
+	 * <code>null</code> if no exception was thrown.
+	 *
+	 * @param testException The thrown test exception, or <code>null</code>.
+	 */
+	protected final void setTestException(final Throwable testException) {
+
+		this.testException = testException;
 	}
 
 }

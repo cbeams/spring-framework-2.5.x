@@ -34,7 +34,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * TODO Add comments for TransactionalTestExecutionListener.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
@@ -99,17 +99,13 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * completed with an explicit {@link #endTransaction()} call before.
 	 *
 	 * @throws Exception simply let any exception propagate
-	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#afterTestMethod(org.springframework.test.context.TestContext,
-	 *      java.lang.Throwable)
+	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#afterTestMethod(TestContext)
 	 */
 	@Override
-	public void afterTestMethod(final TestContext<?> testContext, final Throwable t) {
+	public void afterTestMethod(final TestContext<?> testContext) {
 
-		super.afterTestMethod(testContext, t);
-
-		final Method testMethod = testContext.getTestMethod();
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("afterTestMethodExecution(): method [" + testMethod + "].");
+			LOG.debug("After test method: context [" + testContext + "].");
 		}
 
 		// End transaction if the transaction is still active.
@@ -139,12 +135,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	@Override
 	public void beforeTestMethod(final TestContext<?> testContext) {
 
-		super.beforeTestMethod(testContext);
-
 		final Method testMethod = testContext.getTestMethod();
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("beforeTestMethodExecution(): method [" + testMethod + "].");
+			LOG.debug("Before test method: context [" + testContext + "].");
 		}
 
 		// ---------------------------------------------------------------------

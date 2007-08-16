@@ -46,7 +46,7 @@ import org.springframework.test.context.listeners.TestExecutionListener;
  * {@link TestExecutionListener TestExecutionListeners}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 @RunWith(JUnit4ClassRunner.class)
@@ -73,7 +73,7 @@ public class TestContextManagerTests {
 	// --- STATIC VARIABLES ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private TestContextManager<?> testContextManager = null;
+	private TestContextManager<ExampleTest> testContextManager = null;
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC INITIALIZATION ----------------------------------------------|
@@ -229,7 +229,7 @@ public class TestContextManagerTests {
 		}
 
 		@Override
-		public void afterTestMethod(final TestContext<?> testContext, final Throwable t) {
+		public void afterTestMethod(final TestContext<?> testContext) {
 
 			afterTestMethodCalls.add(this.name);
 		}

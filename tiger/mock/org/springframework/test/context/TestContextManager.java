@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 2.1
  */
 public class TestContextManager<T> {
@@ -190,33 +190,34 @@ public class TestContextManager<T> {
 	 *        test method, or <code>null</code> if none was thrown.
 	 * @see #getTestExecutionListeners()
 	 */
-	public void afterTestMethod(final Object testInstance, final Method testMethod, final Throwable exception) {
+	public void afterTestMethod(final T testInstance, final Method testMethod, final Throwable exception) {
 
 		Assert.notNull(testInstance, "The testInstance can not be null.");
 		Assert.notNull(testMethod, "The testMethod can not be null.");
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("afterTestMethod(): instance [" + testInstance + "], method [" + testMethod + "].");
+			LOG.debug("afterTestMethod(): instance [" + testInstance + "], method [" + testMethod + "], exception ["
+					+ exception + "].");
 		}
 
-		// Update test instance.
-		getTestContext().setTestInstanceAndMethod(testInstance, testMethod);
-		getTestContext().setException(exception);
+		getTestContext().updateState(testInstance, testMethod, exception);
 
-		// Traverse the TestExecutionListeners in reverse order.
+		// Traverse the TestExecutionListeners in reverse order to ensure proper
+		// "wrapper"-style execution ordering of listeners.
 		final ArrayList<TestExecutionListener> listenersList = new ArrayList<TestExecutionListener>(
 				getTestExecutionListeners());
 		Collections.reverse(listenersList);
 
 		for (final TestExecutionListener testExecutionListener : listenersList) {
 			try {
-				testExecutionListener.afterTestMethod(getTestContext(), exception);
+				testExecutionListener.afterTestMethod(getTestContext());
 			}
 			catch (final Exception e) {
 				// log and continue in order to let all listeners have a chance
+				// to process the event.
 				if (LOG.isInfoEnabled()) {
 					LOG.info("Caught exception while allowing TestExecutionListener [" + testExecutionListener
-							+ "] to process 'after' method execution of test method [" + testMethod
-							+ "] for test instance [" + testInstance + "].", e);
+							+ "] to process 'after' method execution for test: method [" + testMethod + "], instance ["
+							+ testInstance + "], exception [" + exception + "].", e);
 				}
 			}
 		}
@@ -245,7 +246,7 @@ public class TestContextManager<T> {
 	 *        test instance, not <code>null</code>.
 	 * @see #getTestExecutionListeners()
 	 */
-	public void beforeTestMethod(final Object testInstance, final Method testMethod) {
+	public void beforeTestMethod(final T testInstance, final Method testMethod) {
 
 		Assert.notNull(testInstance, "The testInstance can not be null.");
 		Assert.notNull(testMethod, "The testMethod can not be null.");
@@ -253,9 +254,7 @@ public class TestContextManager<T> {
 			LOG.debug("beforeTestMethod(): instance [" + testInstance + "], method [" + testMethod + "].");
 		}
 
-		// Update test instance
-		getTestContext().setTestInstanceAndMethod(testInstance, testMethod);
-		getTestContext().setException(null);
+		getTestContext().updateState(testInstance, testMethod, null);
 
 		for (final TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {
@@ -263,6 +262,7 @@ public class TestContextManager<T> {
 			}
 			catch (final Exception e) {
 				// log and continue in order to let all listeners have a chance
+				// to process the event.
 				if (LOG.isInfoEnabled()) {
 					LOG.info("Caught exception while allowing TestExecutionListener [" + testExecutionListener
 							+ "] to process 'before' method execution of test method [" + testMethod
@@ -341,9 +341,7 @@ public class TestContextManager<T> {
 			LOG.debug("prepareTestInstance(): instance [" + testInstance + "].");
 		}
 
-		// Update test instance
-		getTestContext().setTestInstanceAndMethod(testInstance, null);
-		getTestContext().setException(null);
+		getTestContext().updateState(testInstance, null, null);
 
 		for (final TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {

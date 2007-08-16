@@ -46,7 +46,7 @@ import org.springframework.util.ClassUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 public class TestContext<T> {
@@ -74,7 +74,7 @@ public class TestContext<T> {
 
 	private final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> contextCache;
 
-	private Throwable exception;
+	private Throwable testException;
 
 	private final Class<T> testClass;
 
@@ -275,19 +275,6 @@ public class TestContext<T> {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Gets the exception that was thrown during execution of the last test
-	 * method.
-	 *
-	 * @return the exception that was thrown, or <code>null</code> if none.
-	 */
-	public final Throwable getException() {
-
-		return this.exception;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
 	 * <p>
 	 * Gets the {@link Class test class} for this test context.
 	 * </p>
@@ -303,10 +290,33 @@ public class TestContext<T> {
 
 	/**
 	 * <p>
-	 * Gets the current {@link Object test instance} for this test context. Note
-	 * that the test instance is a mutable property of a test context.
+	 * Gets the exception that was thrown during execution of the
+	 * {@link #getTestMethod() test method}.
+	 * </p>
+	 * <p>
+	 * Note: this is a mutable property.
 	 * </p>
 	 *
+	 * @see #updateState(Object, Method, Throwable)
+	 * @return The exception that was thrown, or <code>null</code> if no
+	 *         exception was thrown.
+	 */
+	public final Throwable getTestException() {
+
+		return this.testException;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Gets the current {@link Object test instance} for this test context.
+	 * </p>
+	 * <p>
+	 * Note: this is a mutable property.
+	 * </p>
+	 *
+	 * @see #updateState(Object, Method, Throwable)
 	 * @return The current test instance; may be <code>null</code>.
 	 */
 	public final Object getTestInstance() {
@@ -318,10 +328,13 @@ public class TestContext<T> {
 
 	/**
 	 * <p>
-	 * Gets the current {@link Method test method} for this test context. Note
-	 * that the test method is a mutable property of a test context.
+	 * Gets the current {@link Method test method} for this test context.
+	 * </p>
+	 * <p>
+	 * Note: this is a mutable property.
 	 * </p>
 	 *
+	 * @see #updateState(Object, Method, Throwable)
 	 * @return The current test method; may be <code>null</code>.
 	 */
 	public final Method getTestMethod() {
@@ -346,29 +359,20 @@ public class TestContext<T> {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Sets the exception thrown during the last test method execution.
-	 *
-	 * @param exception The exception that was thrown during execution of the
-	 *        test method, or <code>null</code> if none was thrown.
-	 */
-	public final void setException(final Throwable exception) {
-
-		this.exception = exception;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * Sets the current {@link Object test instance} and
-	 * {@link Method test method} to associate with this test context.
+	 * Updates this test context to reflect the state of the currently executing
+	 * test.
 	 *
 	 * @param testInstance The current test instance; may be <code>null</code>.
 	 * @param testMethod The current test method; may be <code>null</code>.
+	 * @param testException The exception that was thrown in the test method, or
+	 *        <code>null</code> if no exception was thrown.
 	 */
-	public final synchronized void setTestInstanceAndMethod(final Object testInstance, final Method testMethod) {
+	public final void updateState(final Object testInstance, final Method testMethod, final Throwable testException) {
 
-		this.testInstance = testInstance;
-		this.testMethod = testMethod;
+		synchronized (this) {
+			this.testInstance = testInstance;
+			this.testMethod = testMethod;
+		}
 	}
 
 	// ------------------------------------------------------------------------|
@@ -377,8 +381,9 @@ public class TestContext<T> {
 	 * Provides a string representation of this test contexts's
 	 * {@link #getTestClass() test class},
 	 * {@link #getConfigurationAttributes() configuration attributes},
-	 * {@link #getTestInstance() test instance}, and
-	 * {@link #getTestMethod() test method}.
+	 * {@link #getTestInstance() test instance},
+	 * {@link #getTestMethod() test method}, and
+	 * {@link #getTestException() test exception}.
 	 *
 	 * @see java.lang.Object#toString()
 	 */
@@ -387,13 +392,15 @@ public class TestContext<T> {
 
 		return new ToStringBuilder(this)
 
-		.append("testClass", this.testClass)
+		.append("testClass", getTestClass())
 
-		.append("configurationAttributes", this.configurationAttributes)
+		.append("configurationAttributes", getConfigurationAttributes())
 
-		.append("testInstance", this.testInstance)
+		.append("testInstance", getTestInstance())
 
-		.append("testMethod", this.testMethod)
+		.append("testMethod", getTestMethod())
+
+		.append("testException", getTestException())
 
 		.toString();
 	}

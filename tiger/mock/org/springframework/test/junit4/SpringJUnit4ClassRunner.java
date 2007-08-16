@@ -33,7 +33,7 @@ import org.springframework.test.context.TestContextManager;
  * annotations.
  *
  * @author Sam Brannen
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 2.1
  */
 public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
@@ -115,7 +115,7 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 	 *         instance.
 	 */
 	@Override
-	protected Object createTest() throws Exception {
+	protected T createTest() throws Exception {
 
 		@SuppressWarnings("unchecked")
 		final T testInstance = (T) super.createTest();
@@ -192,7 +192,7 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 		// events.
 
 		final Description description = methodDescription(method);
-		Object testInstance;
+		T testInstance;
 		try {
 			testInstance = createTest();
 		}
@@ -206,9 +206,6 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 		}
 
 		final SpringTestMethod testMethod = new SpringTestMethod(method, getTestClass());
-
-		// TODO Move beforeTestMethod() call to SpringMethodRoadie.
-		getTestContextManager().beforeTestMethod(testInstance, method);
 		new SpringMethodRoadie<T>(getTestContextManager(), testInstance, testMethod, notifier, description).run();
 	}
 

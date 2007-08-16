@@ -30,7 +30,7 @@ import org.springframework.test.context.TestContext;
  *
  * @see DirtiesContext
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class DirtiesContextTestExecutionListener extends AbstractTestExecutionListener {
@@ -55,21 +55,20 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * be {@link TestContext#markApplicationContextDirty() marked as dirty}.
 	 * </p>
 	 * <p>
-	 * Note that this implementation allows for annotation inheritance for
-	 * methods annotated with {@link DirtiesContext}.
+	 * Note that this implementation allows for <em>annotation inheritance</em>
+	 * for methods annotated with {@link DirtiesContext}.
 	 * </p>
 	 *
 	 * @see AnnotationUtils#findAnnotation(Method, Class)
-	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#afterTestMethod(org.springframework.test.context.TestContext,
-	 *      java.lang.Throwable)
+	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#afterTestMethod(TestContext)
 	 */
 	@Override
-	public void afterTestMethod(final TestContext<?> testContext, final Throwable t) {
+	public void afterTestMethod(final TestContext<?> testContext) {
 
-		final Method method = testContext.getTestMethod();
-		final boolean dirtiesContext = (AnnotationUtils.findAnnotation(method, DirtiesContext.class) != null);
+		final boolean dirtiesContext = (AnnotationUtils.findAnnotation(testContext.getTestMethod(),
+				DirtiesContext.class) != null);
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("afterTestMethodExecution(): method [" + method + "] dirtiesContext [" + dirtiesContext + "].");
+			LOG.debug("After test method: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
 		}
 
 		if (dirtiesContext) {
