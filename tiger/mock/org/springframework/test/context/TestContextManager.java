@@ -52,7 +52,7 @@ import org.springframework.util.Assert;
  * </ul>
  *
  * @author Sam Brannen
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @since 2.1
  */
 public class TestContextManager<T> {
@@ -66,10 +66,10 @@ public class TestContextManager<T> {
 	 * may be destroyed and recreated between running individual test methods,
 	 * for example with JUnit.
 	 */
-	private static final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> CONTEXT_CACHE = new MapBackedContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext>();
+	private static final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext>	CONTEXT_CACHE			= new MapBackedContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext>();
 
 	/** Class Logger. */
-	private static final Log LOG = LogFactory.getLog(TestContextManager.class);
+	private static final Log																			LOG						= LogFactory.getLog(TestContextManager.class);
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
@@ -83,9 +83,9 @@ public class TestContextManager<T> {
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final TestContext<T> testContext;
+	private final TestContext<T>																		testContext;
 
-	private final Set<TestExecutionListener> testExecutionListeners = new LinkedHashSet<TestExecutionListener>();
+	private final Set<TestExecutionListener>															testExecutionListeners	= new LinkedHashSet<TestExecutionListener>();
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -335,6 +335,12 @@ public class TestContextManager<T> {
 	 * The managed {@link TestContext} will be updated with the supplied
 	 * <code>testInstance</code>.
 	 * </p>
+	 * <p>
+	 * The default implementation attempts to give each registered
+	 * {@link TestExecutionListener} a chance to prepare the test instance. If a
+	 * listener throws an exception, however, the remaining registered listeners
+	 * will not be called.
+	 * </p>
 	 *
 	 * @param testInstance The test instance to prepare, not <code>null</code>.
 	 * @throws Exception if an error occurs while preparing the test instance.
@@ -353,11 +359,12 @@ public class TestContextManager<T> {
 				testExecutionListener.prepareTestInstance(getTestContext());
 			}
 			catch (final Exception e) {
-				// log and continue in order to let all listeners have a chance
+				// log and rethrow.
 				if (LOG.isInfoEnabled()) {
 					LOG.info("Caught exception while allowing TestExecutionListener [" + testExecutionListener
 							+ "] to prepare test instance [" + testInstance + "].", e);
 				}
+				throw e;
 			}
 		}
 	}
