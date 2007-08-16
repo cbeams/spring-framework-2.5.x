@@ -1,0 +1,10 @@
+Export-Package: org.springframework*;version=${spring-version-osgi}
+# should we make org.aspectj* mandatory ?
+# Import-Package: org.aspectj*,*;resolution:=optional
+Bundle-Version: ${spring-version-osgi}
+Bundle-Description: ${spring-title}
+Bundle-Name: spring-aspects
+Bundle-SymbolicName: org.springframework.aspects
+
+
+

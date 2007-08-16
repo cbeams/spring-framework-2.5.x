@@ -911,6 +911,18 @@
 			</manifest>
 		</jar>
 
+		<!-- osgi wrappers -->
+		<bndwrap definitions="${basedir}/osgi/bnd" output="${dist.dir}/weaving">
+			<fileset dir="${dist.dir}/weaving" includes="spring-aspects.jar"/>
+		</bndwrap>
+		
+		<move todir="${dist.dir}/weaving">
+			<fileset dir="${dist.dir}/weaving">
+		      <include name="*.bar"/>
+		    </fileset>
+			<mapper type="glob" from="*.bar" to="*.jar"/>
+		</move>
+
 	</target>
 	
 
