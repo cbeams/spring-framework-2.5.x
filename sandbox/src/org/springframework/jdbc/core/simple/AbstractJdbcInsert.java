@@ -135,7 +135,7 @@ public class AbstractJdbcInsert {
 		return insertTypes;
 	}
 
-	public JdbcTemplate getJdbcTemplate() {
+	protected JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
 	}
 
@@ -216,13 +216,13 @@ public class AbstractJdbcInsert {
 		}
 	}
 
-	public int doExecute(Map<String, Object> args) {
+	protected int doExecute(Map<String, Object> args) {
 		checkCompiled();
 		List<Object> values = matchInParameterValuesWithInsertColumns(args);
 		return executeInsert(values);
 	}
 
-	public int doExecute(SqlParameterSource parameterSource) {
+	protected int doExecute(SqlParameterSource parameterSource) {
 		checkCompiled();
 		List<Object> values = matchInParameterValuesWithInsertColumns(parameterSource);
 		return executeInsert(values);
@@ -236,25 +236,25 @@ public class AbstractJdbcInsert {
 		return updateCount;
 	}
 
-	public Number doExecuteAndReturnKey(Map<String, Object> args) {
+	protected Number doExecuteAndReturnKey(Map<String, Object> args) {
 		checkCompiled();
 		List<Object> values = matchInParameterValuesWithInsertColumns(args);
 		return executeInsertAndReturnKey(values);
 	}
 
-	public Number doExecuteAndReturnKey(SqlParameterSource parameterSource) {
+	protected Number doExecuteAndReturnKey(SqlParameterSource parameterSource) {
 		checkCompiled();
 		List<Object> values = matchInParameterValuesWithInsertColumns(parameterSource);
 		return executeInsertAndReturnKey(values);
 	}
 
-	public KeyHolder doExecuteAndReturnKeyHolder(Map<String, Object> args) {
+	protected KeyHolder doExecuteAndReturnKeyHolder(Map<String, Object> args) {
 		checkCompiled();
 		List<Object> values = matchInParameterValuesWithInsertColumns(args);
 		return executeInsertAndReturnKeyHolder(values);
 	}
 
-	public KeyHolder doExecuteAndReturnKeyHolder(SqlParameterSource parameterSource) {
+	protected KeyHolder doExecuteAndReturnKeyHolder(SqlParameterSource parameterSource) {
 		checkCompiled();
 		List<Object> values = matchInParameterValuesWithInsertColumns(parameterSource);
 		return executeInsertAndReturnKeyHolder(values);
@@ -312,7 +312,7 @@ public class AbstractJdbcInsert {
 		return ps;
 	}
 
-	public int[] doExecuteBatch(Map<String, Object>[] batch) {
+	protected int[] doExecuteBatch(Map<String, Object>[] batch) {
 		checkCompiled();
 		List[] batchValues = new ArrayList[batch.length];
 		int i = 0;
@@ -323,7 +323,7 @@ public class AbstractJdbcInsert {
 		return executeBatch(batchValues);
 	}
 
-	public int[] doExecuteBatch(SqlParameterSource[] batch) {
+	protected int[] doExecuteBatch(SqlParameterSource[] batch) {
 		checkCompiled();
 		List[] batchValues = new ArrayList[batch.length];
 		int i = 0;
