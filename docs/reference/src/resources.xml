@@ -386,6 +386,23 @@
     that's needed. The code would just be coupled to the resource loading
     interface, which can be considered a utility interface, and not the whole
     Spring <interfacename>ApplicationContext</interfacename> interface.</para>
+
+    <para>As of Spring 2.1, you can rely upon autowiring of the
+    <interfacename>ResourceLoader</interfacename> as an alternative to
+    implementing the <interfacename>ResourceLoaderAware</interfacename> interface.
+    The "traditional" <literal>constructor</literal> and <literal>byType</literal>
+    autowiring modes (as described in the section entitled
+    <xref linkend="beans-factory-autowire"/>) are now capable of providing a
+    dependency of type <interfacename>ResourceLoader</interfacename> for either a
+    constructor argument or setter method parameter respectively. For more flexibility
+    (including the ability to autowire fields and multiple parameter methods), consider
+    using the new annotation-based autowiring features. In that case, the
+    <interfacename>ResourceLoader</interfacename> will be autowired into a field,
+    constructor argument, or method parameter that is expecting the
+    <interfacename>ResourceLoader</interfacename> type as long as the field,
+    constructor, or method in question carries the
+    <interfacename>@Autowired</interfacename> annotation. For more information,
+    see the section entitled <xref linkend="beans-autowired-annotation"/>.</para>
   </section>
 
   <section id="resources-as-dependencies">
