@@ -1704,8 +1704,14 @@ support=support@somecompany.co.uk]]></programlisting>
             override autowiring. Please also note that it is not currently possible to autowire
             so-called <emphasis>simple</emphasis> properties such as primitives,
             <classname>Strings</classname>, and <classname>Classes</classname> (and arrays of such
-            simple properties).(This is by-design and should be considered a <emphasis>feature</emphasis>.)
-            Autowire behavior can be combined with dependency checking, which will
+            simple properties). (This is by-design and should be considered a <emphasis>feature</emphasis>.)
+            When using either the <emphasis>byType</emphasis> or <emphasis>constructor</emphasis> autowiring
+            mode, it is possible to wire arrays and typed-collections. In such cases <emphasis>all</emphasis>
+            autowire candidates within the container that match the expected type will be provided to satisfy
+            the dependency. Strongly-typed Maps can even be autowired if the expected key type is
+            <classname>String</classname>. An autowired Map's values will consist of all bean instances that
+            match the expected type, and the Map's keys will contain the corresponding bean names.</para>
+            <para>Autowire behavior can be combined with dependency checking, which will
             be performed after all autowiring has been completed.</para>
             <para>It is important to understand the various advantages and disadvantages of autowiring.
             Some advantages of autowiring include:</para>
@@ -1739,17 +1745,28 @@ support=support@somecompany.co.uk]]></programlisting>
                     <para>Wiring information may not be available to tools that may
                     generate documentation from a Spring container.</para>
                 </listitem>
-                <listitem>
-                    <para>Autowiring by type will only work when there is a single bean
-                    definition of the type specified by the setter method or constructor
-                    argument. You need to use explicit wiring if there is any potential
-                    ambiguity.</para>
-                </listitem>
             </itemizedlist>
-            <para>There is no wrong or right answer in all cases. A degree of
-            consistency across a project is best though; for example, if autowiring is
-            not used in general, it might be confusing to developers to use it just
-            to wire one or two bean definitions.</para>
+            <para>Another issue to consider when autowiring by type is that multiple
+            bean definitions within the container may match the type specified by the
+            setter method or constructor argument to be autowired. For arrays, collections,
+            or Maps, this is not necessarily a problem. However for dependencies that expect
+            a single value, this ambiguity will not be arbitrarily resolved. Instead, if
+            no unique bean definition is available, an Exception will be thrown. You do have
+            several options when confronted with this scenario. First, you may abandon
+            autowiring in favor of explicit wiring. Second, you may designate that certain
+            bean definitions are never to be considered as candidates by setting their
+            <literal>'autowire-candidate'</literal> attributes to <literal>'false'</literal>
+            as described in the next section. Third, you may designate a single bean
+            definition as the <emphasis>primary</emphasis> candidate by setting the
+            <literal>'primary'</literal> attribute of its <literal>&lt;bean/&gt;</literal>
+            element to <literal>'true'</literal>. Finally, if you are using at least Java 5,
+            you may be interested in exploring the more fine-grained control available with
+            annotation-based configuration as described in the section entitled
+            <xref linkend="beans-annotation-config"/>.</para>
+            <para>When deciding whether to use autowiring, there is no wrong or right answer
+            in all cases. A degree of consistency across a project is best though; for example,
+            if autowiring is not used in general, it might be confusing to developers to use
+            it just to wire one or two bean definitions.</para>
             <section id="beans-factory-autowire-candidate">
                 <title>Excluding a bean from being available for autowiring</title>
                 <para>You can also (on a per-bean basis) totally exclude a bean from being an
@@ -4087,6 +4104,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
     public void setMovieFinder(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
+
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
 }]]></programlisting>
             <para>The annotation may also be applied to methods with arbitrary names and/or 
             multiple arguments:</para>
@@ -4097,10 +4116,12 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
     private CustomerPreferenceDao customerPreferenceDao;
 
     @Autowired
-    public void provideDependencies(MovieCatalog movieCatalog, CustomerPreferenceDao customerPreferenceDao) {
+    public void prepare(MovieCatalog movieCatalog, CustomerPreferenceDao customerPreferenceDao) {
         this.movieCatalog = movieCatalog;
         this.customerPreferenceDao = customerPreferenceDao;
     }
+
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
 }]]></programlisting>
             <para>The <interfacename>@Autowired</interfacename> annotation
             may even be applied on constructors and fields:</para>
@@ -4115,6 +4136,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
     public MovieRecommender(CustomerPreferenceDao customerPreferenceDao) {
         this.customerPreferenceDao = customerPreferenceDao;
     }
+
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
 }]]></programlisting>
             <para>It is also possible to provide <emphasis>all</emphasis> beans of a particular
             type from the <interfacename>ApplicationContext</interfacename> by adding the annotation
@@ -4123,7 +4146,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 
     @Autowired
     private MovieCatalog[] movieCatalogs;
-    
+
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
 }]]></programlisting>
             <para>If you are using at least Java 5, then the same applies for typed collections:</para>
             <programlisting><![CDATA[public class MovieRecommender {
@@ -4134,6 +4158,22 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
     public void setMovieCatalogs(Set<MovieCatalog> movieCatalogs) {
         this.movieCatalogs = movieCatalogs;
     }
+
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
+}]]></programlisting>
+            <para>Even typed Maps may be autowired as long as the expected key type is
+            <classname>String</classname>. The Map values will contain all beans of the expected
+            type, and the keys will contain the corresponding bean names:</para>
+            <programlisting><![CDATA[public class MovieRecommender {
+
+    private Map<String, MovieCatalog> movieCatalogs;
+    
+    @Autowired
+    public void setMovieCatalogs(Map<String, MovieCatalog> movieCatalogs) {
+        this.movieCatalogs = movieCatalogs;
+    }
+
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
 }]]></programlisting>
             <para>By default, the autowiring will fail whenever <emphasis>zero</emphasis> 
             candidate beans are available; the default behavior is to treat 
@@ -4148,6 +4188,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
     public void setMovieFinder(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
+
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
 }]]></programlisting>
             <note>
                 <para>Only <emphasis>one annotated constructor per-class</emphasis> may be marked as
@@ -4156,14 +4198,220 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
                 <emphasis>greediest</emphasis> constructor whose dependencies can be satisfied.</para>
             </note>
         </section>
+        <section id="beans-autowired-annotation-qualifiers">
+            <title>Fine-tuning annotation-based autowiring with qualifiers</title>
+            <para>Since autowiring by type may lead to multiple candidates, it is often necessary to
+            have more control over the selection process. One way to accomplish this is with Spring's
+            <interfacename>@Qualifier</interfacename> annotation. In the simplest case, you can
+            achieve by-name autowiring by providing a bean name within the annotation:</para>
+            <programlisting><![CDATA[public class MovieRecommender {
+
+    @Autowired
+    ]]><emphasis role="bold"><![CDATA[@Qualifier("mainCatalog")]]></emphasis><![CDATA[
+    private MovieCatalog movieCatalog;
+
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
+}]]></programlisting>
+            <para>The <interfacename>@Qualifier</interfacename> annotation can also be specified
+            on individual constructor arguments or method parameters:</para>
+            <programlisting><![CDATA[public class MovieRecommender {
+
+    private MovieCatalog movieCatalog;
+    
+    private CustomerPreferenceDao customerPreferenceDao;
+
+    @Autowired
+    public void prepare(]]><emphasis role="bold"><![CDATA[@Qualifier("mainCatalog")]]></emphasis><![CDATA[ MovieCatalog movieCatalog, CustomerPreferenceDao customerPreferenceDao) {
+        this.movieCatalog = movieCatalog;
+        this.customerPreferenceDao = customerPreferenceDao;
+    }
+
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
+}]]></programlisting>
+            <para>You may create your own custom qualifier annotations as well. Simply define
+            an annotation and provide the <interfacename>@Qualifier</interfacename> annotation
+            within your definition:</para>
+            <programlisting><![CDATA[@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+]]><emphasis role="bold"><![CDATA[@Qualifier]]></emphasis><![CDATA[
+public @interface Genre {
+
+    String value();
+
+}]]></programlisting>
+            <para>Then you can provide the custom qualifier on autowired fields and parameters:</para>
+            <programlisting><![CDATA[public class MovieRecommender {
+
+    @Autowired
+    ]]><emphasis role="bold"><![CDATA[@Genre("Action")]]></emphasis><![CDATA[
+    private MovieCatalog actionCatalog;
+    
+    private MovieCatalog comedyCatalog;
+    
+    @Autowired
+    public void setComedyCatalog(]]><emphasis role="bold"><![CDATA[@Genre("Comedy")]]></emphasis><![CDATA[ MovieCatalog comedyCatalog) {
+        this.comedyCatalog = comedyCatalog;
+    }
+
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
+}]]></programlisting>
+            <para>The next step is to provide the information on the candidate
+            bean definitions. You can add <literal>&lt;qualifier/&gt;</literal>
+            tags as sub-elements of the <literal>&lt;bean/&gt;</literal> tag and
+            then specify the <literal>'type'</literal> and <literal>'value'</literal>
+            to match your custom qualifier annotations. The type will be matched
+            against the fully-qualified classname of the annotation, or as a
+            convenience when there is no risk of conflicting names, you may use
+            the 'short' classname. Both are demonstrated in the following example.
+            </para>
+            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.1.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+
+    <context:annotation-config/>
+
+    <bean class="example.SimpleMovieCatalog">
+        ]]><emphasis role="bold"><![CDATA[<qualifier type="Genre" value="Action"/>]]></emphasis><![CDATA[
+        ]]><lineannotation>&lt;!-- inject any dependencies required by this bean --&gt;</lineannotation><![CDATA[
+    </bean>
+
+    <bean class="example.SimpleMovieCatalog">
+        ]]><emphasis role="bold"><![CDATA[<qualifier type="example.Genre" value="Comedy"/>]]></emphasis><![CDATA[
+        ]]><lineannotation>&lt;!-- inject any dependencies required by this bean --&gt;</lineannotation><![CDATA[
+    </bean>
+    
+    <bean id="movieRecommender" class="example.MovieRecommender"/>
+
+</beans>
+]]></programlisting>
+            <para>In some cases, it may be sufficient to use an annotation without a value.
+            This may be useful when the annotation serves a more generic purpose and could be
+            applied across several different types of dependency. For example, you may
+            provide an <emphasis>offline</emphasis> catalog that would be searched when
+            no internet connection is available. First define the simple annotation:</para>
+            <programlisting><![CDATA[@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+@Qualifier
+public @interface Offline {
+
+}]]></programlisting>
+            <para>Then add the annotation to the field or property to be autowired:</para>
+            <programlisting><![CDATA[public class MovieRecommender {
+
+    @Autowired
+    ]]><emphasis role="bold"><![CDATA[@Offline]]></emphasis><![CDATA[
+    private MovieCatalog offlineCatalog;
+
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
+}]]></programlisting>
+            <para>Now the bean definition only needs a qualifier <literal>'type'</literal>:</para>
+            <programlisting><![CDATA[<bean class="example.SimpleMovieCatalog">
+    ]]><emphasis role="bold"><![CDATA[<qualifier type="Offline"/>]]></emphasis><![CDATA[
+    ]]><lineannotation>&lt;!-- inject any dependencies required by this bean --&gt;</lineannotation><![CDATA[
+</bean>]]></programlisting>
+            <para>It is also possible to define custom qualifier annotations that accept named
+            attributes in addition to or instead of the simple <literal>'value'</literal> attribute.
+            If multiple attribute values are then specified on a field or parameter to be autowired,
+            a bean definition must match <emphasis>all</emphasis> such attribute values to be considered
+            an autowire candidate. As an example, consider the following annotation definition:</para>
+            <programlisting><![CDATA[@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+@Qualifier
+public @interface MovieQualifier {
+
+    String genre();
+    
+    Format format();
+
+}]]></programlisting>
+            <para>In this case <literal>Format</literal> is an enum:</para>
+            <programlisting><![CDATA[public enum Format {
+    
+    VHS, DVD, BLURAY
+}]]></programlisting>
+            <para>The fields to be autowired are annotated with the custom qualifier and
+            include values for both attributes: <literal>'genre'</literal> and
+            <literal>'format'</literal>.</para>
+            <programlisting><![CDATA[public class MovieRecommender {
+
+    @Autowired
+    @MovieQualifier(format=Format.VHS, genre="Action")
+    private MovieCatalog actionVhsCatalog;
+
+    @Autowired
+    @MovieQualifier(format=Format.VHS, genre="Comedy")
+    private MovieCatalog comedyVhsCatalog;
+
+    @Autowired
+    @MovieQualifier(format=Format.DVD, genre="Action")
+    private MovieCatalog actionDvdCatalog;
+
+    @Autowired
+    @MovieQualifier(format=Format.BLURAY, genre="Comedy")
+    private MovieCatalog comedyBluRayCatalog;
+   
+    ]]><lineannotation>// ...</lineannotation><![CDATA[
+}]]></programlisting>
+            <para>Finally, the bean definitions should contain matching
+            qualifier values. This example also demonstrates that bean
+            <emphasis>meta</emphasis> attributes may be used instead of
+            the <literal>&lt;qualifier/&gt;</literal> sub-elements. If
+            available, the <literal>&lt;qualifier/&gt;</literal> and its
+            attributes would take precedence, but the autowiring mechanism
+            will fallback on the values provided within the
+            <literal>&lt;meta/&gt;</literal> tags if no such qualifier
+            is present (see the last 2 bean definitions below).</para>
+            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.1.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+
+    <context:annotation-config/>
+
+    <bean class="example.SimpleMovieCatalog">
+        <qualifier type="MovieQualifier">
+            <attribute name="format" value="VHS"/>
+            <attribute name="genre" value="Action"/>
+        </qualifier>
+        ]]><lineannotation>&lt;!-- inject any dependencies required by this bean --&gt;</lineannotation><![CDATA[
+    </bean>
+
+    <bean class="example.SimpleMovieCatalog">
+        <qualifier type="MovieQualifier">
+            <attribute name="format" value="VHS"/>
+            <attribute name="genre" value="Comedy"/>
+        </qualifier>
+        ]]><lineannotation>&lt;!-- inject any dependencies required by this bean --&gt;</lineannotation><![CDATA[
+    </bean>
+
+    <bean class="example.SimpleMovieCatalog">
+        <meta key="format" value="DVD"/>
+        <meta key="genre" value="Action"/>
+        ]]><lineannotation>&lt;!-- inject any dependencies required by this bean --&gt;</lineannotation><![CDATA[
+    </bean>
+    
+    <bean class="example.SimpleMovieCatalog">
+        <meta key="format" value="BLURAY"/>
+        <meta key="genre" value="Comedy"/>
+        ]]><lineannotation>&lt;!-- inject any dependencies required by this bean --&gt;</lineannotation><![CDATA[
+    </bean>
+
+</beans>]]></programlisting>
+        </section>
         <section id="beans-resource-annotation">
             <title><interfacename>@Resource</interfacename></title>
-            <para>The autowired properties demonstrated thus far have all followed 
-            <emphasis>by-type</emphasis> semantics meaning that multiple candidate matches will 
-            result in an <classname>Exception</classname> being thrown by the container.
-			In order to specify <emphasis>by-name</emphasis> semantics instead, use
-			the JSR-250 <interfacename>@Resource</interfacename> annotation and provide the
-			bean name for the dependency as demonstrated in this example:</para>
+            <para>Spring also supports autowiring with the JSR-250
+            <interfacename>@Resource</interfacename> annotation. <interfacename>@Resource</interfacename>
+            always takes a value, and by default Spring will interpret that value as the
+            bean name to be autowired. In other words, it follows <emphasis>by-name</emphasis>
+            semantics as demonstrated in this example:</para>
             <programlisting><![CDATA[public class SimpleMovieLister {
 
     private MovieFinder movieFinder;
@@ -4182,7 +4430,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
                 is configured explicitly. However, it is recommended to rely on the default behavior and
                 simply use Spring's JNDI lookup capabilities to preserve the level of indirection.</para>
             </note>
-        </section>   
+        </section>
         <section id="beans-postconstruct-and-predestroy-annotations">
             <title><interfacename>@PostConstruct</interfacename> and <interfacename>@PreDestroy</interfacename></title>
             <para>The <classname>CommonAnnotationBeanPostProcessor</classname> not only recognizes the
