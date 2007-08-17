@@ -25,7 +25,22 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
+ * A SimpleJdbcInsert is a multi-threaded, reusable object providing easy inserft capabilities for a table.  It provides
+ * meta data processing to simplify the code needed to construct a basic insert statement.  All you need to provide is
+ * the name of the table and a Map containing the column names and the column values.
+ *
+ * The meta data processing is based on the DatabaseMetaData provided by the JDBC driver.  As long as the JBDC driver
+ * can provide the names of the columns for a specified table than we can rely on this auto-detection feature.  If that
+ * is not the case then the column names must be specified explicitly.  The actual insert is being handled using the
+ * JdbcTemplate.
+ *
+ * Many of the configuration methods return the current instance of the SimpleJdbcInsert to provide the ablity
+ * to string multiple ones together in a "fluid" interface style.
+ *
  * @author trisberg
+ * @since 2.1
+ * @see org.springframework.jdbc.core.JdbcTemplate
+ * @see java.sql.DatabaseMetaData
  */
 public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcInsertOperations {
 

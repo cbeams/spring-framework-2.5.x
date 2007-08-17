@@ -29,13 +29,22 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
+ * Factory used to create a {@link TableMetaDataProvider} implementation based on the type of databse being used.
+ *
  * @author trisberg
+ * @since 2.1
  */
 public class TableMetaDataProviderFactory {
 
 	/** Logger */
 	private static final Log logger = LogFactory.getLog(TableMetaDataProviderFactory.class);
 
+	/**
+	 * Create a TableMetaDataProvider based on the database metedata
+	 * @param dataSource used to retrieve metedata
+	 * @param context the class that holds configuration and metedata
+	 * @return instance of the TableMetaDataProvider implementation to be used
+	 */
 	static public TableMetaDataProvider createMetaDataProvider(DataSource dataSource,
 															 final TableMetaDataContext context) {
 		try {
@@ -44,8 +53,6 @@ public class TableMetaDataProviderFactory {
 
 				public Object processMetaData(DatabaseMetaData databaseMetaData)
 						throws SQLException, MetaDataAccessException {
-//					String databaseProductName =
-//							SimpleJdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
 					boolean accessTableColumnMetaData = context.isAccessCallParameterMetaData();
 					TableMetaDataProvider provider = new GenericTableMetaDataProvider(databaseMetaData);
 					if (logger.isDebugEnabled()) {

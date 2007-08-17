@@ -32,13 +32,17 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Factory used to create a {@link CallMetaDataProvider} implementation based on the type of databse being used.
+ *
  * @author trisberg
+ * @since 2.1
  */
 public class CallMetaDataProviderFactory {
 
 	/** Logger */
 	private static final Log logger = LogFactory.getLog(CallMetaDataProviderFactory.class);
 
+	/** List of supported database products for procedure calls */
 	public static final List<String> supportedDatabaseProductsForProcedures = Arrays.asList(
 			"Apache Derby",
 			"DB2",
@@ -47,12 +51,19 @@ public class CallMetaDataProviderFactory {
 			"Oracle",
 			"Sybase"
 		);
+	/** List of supported database products for function calls */
 	public static final List<String> supportedDatabaseProductsForFunctions = Arrays.asList(
 			"MySQL",
 			"Microsoft SQL Server",
 			"Oracle"
 		);
 
+	/**
+	 * Create a CallMetaDataProvider based on the database metedata
+	 * @param dataSource used to retrieve metedata
+	 * @param context the class that holds configuration and metedata
+	 * @return instance of the CallMetaDataProvider implementation to be used 
+	 */
 	static public CallMetaDataProvider createMetaDataProvider(DataSource dataSource,
 															 final CallMetaDataContext context) {
 		try {

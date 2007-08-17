@@ -40,9 +40,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Abstract class to provide base functionality for easy inserts based on configuration options and database metadata.
+ * This class provides the base SPI for {@link SimpleJdbcInsert}.
+ *
  * @author trisberg
+ * @since 2.1
  */
-public class AbstractJdbcInsert {
+public abstract class AbstractJdbcInsert {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -50,12 +54,12 @@ public class AbstractJdbcInsert {
 	/** Lower-level class used to execute SQL */
 	private JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
-	/** List of columns objects to be used in insert execution */
+	/** List of columns objects to be used in insert statement */
 	private List<String> declaredColumns = new ArrayList<String>();
 
 	/**
 	 * Has this operation been compiled? Compilation means at
-	 * least checking that a DataSource and sql have been provided,
+	 * least checking that a DataSource or JdbcTemplate has been provided,
 	 * but subclasses may also implement their own custom validation.
 	 */
 	private boolean compiled = false;
@@ -73,20 +77,31 @@ public class AbstractJdbcInsert {
 	private TableMetaDataContext tableMetaDataContext = new TableMetaDataContext();
 
 
+	/**
+	 * Constructor for sublasses to delegate to for setting the DataSource.
+	 */
 	protected AbstractJdbcInsert(DataSource dataSource) {
 		jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
+	/**
+	 * Constructor for sublasses to delegate to for setting the JdbcTemplate.
+	 */
 	protected AbstractJdbcInsert(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
+
+	//-------------------------------------------------------------------------
+	// Methods dealing with configuaration properties
+	//-------------------------------------------------------------------------
 
 	public String getTableName() {
 		return tableMetaDataContext.getTableName();
 	}
 
 	public void setTableName(String tableName) {
+		checkIfConfigurationModificationIsAllowed();
 		tableMetaDataContext.setTableName(tableName);
 	}
 
@@ -95,6 +110,7 @@ public class AbstractJdbcInsert {
 	}
 
 	public void setSchemaName(String schemaName) {
+		checkIfConfigurationModificationIsAllowed();
 		tableMetaDataContext.setSchemaName(schemaName);
 	}
 
@@ -103,10 +119,12 @@ public class AbstractJdbcInsert {
 	}
 
 	public void setCatalogName(String catalogName) {
+		checkIfConfigurationModificationIsAllowed();
 		tableMetaDataContext.setCatalogName(catalogName);
 	}
 
 	public void setColumnNames(List<String> columnNames) {
+		checkIfConfigurationModificationIsAllowed();
 		declaredColumns.clear();
 		declaredColumns.addAll(columnNames);
 	}
@@ -120,10 +138,12 @@ public class AbstractJdbcInsert {
 	}
 
 	public void setGeneratedKeyNames(String[] generatedKeyNames) {
+		checkIfConfigurationModificationIsAllowed();
 		this.generatedKeyNames = generatedKeyNames;
 	}
 
 	public void setGeneratedKeyName(String generatedKeyName) {
+		checkIfConfigurationModificationIsAllowed();
 		this.generatedKeyNames = new String[] {generatedKeyName};
 	}
 
@@ -138,6 +158,11 @@ public class AbstractJdbcInsert {
 	protected JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
 	}
+
+
+	//-------------------------------------------------------------------------
+	// Methods handling compilation issues
+	//-------------------------------------------------------------------------
 
 	/**
 	 * Compile this query.
@@ -168,11 +193,10 @@ public class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Overridden method to configure the CallableStatementCreatorFactory
-	 * based on our declared parameters.
-	 * @see org.springframework.jdbc.object.RdbmsOperation#compileInternal()
+	 * Method to do the compilation work and allow the use of a onCompileInternal hook for
+	 * subclasses.
 	 */
-	protected final void compileInternal() {
+	private void compileInternal() {
 
 		tableMetaDataContext.processMetaData(getJdbcTemplate().getDataSource(), getColumnNames(), getGeneratedKeyNames());
 
@@ -215,6 +239,21 @@ public class AbstractJdbcInsert {
 			compile();
 		}
 	}
+
+	/**
+	 * Method to check whether we are allowd to make any configuration changes at this time.  If the class has been
+	 * compiled, then no further changes to the configuration are allowed.
+	 */
+	protected void checkIfConfigurationModificationIsAllowed() {
+		if (isCompiled()) {
+			throw new InvalidDataAccessApiUsageException("Configuration can't be altered once the class has been compiled or used.");
+		}
+	}
+
+
+	//-------------------------------------------------------------------------
+	// Methods handling execution
+	//-------------------------------------------------------------------------
 
 	protected int doExecute(Map<String, Object> args) {
 		checkCompiled();
@@ -372,7 +411,5 @@ public class AbstractJdbcInsert {
 	protected List<Object> matchInParameterValuesWithInsertColumns(Map<String, Object> args) {
 		return tableMetaDataContext.matchInParameterValuesWithInsertColumns(args);
 	}
-
-
 
 }

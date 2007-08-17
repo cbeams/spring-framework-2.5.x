@@ -30,7 +30,7 @@ import java.util.HashSet;
 
 /**
  * A SimpleJdbcCall is a multi-threaded, reusable object representing a call to a stored procedure or a
- * stored function.  It provides meta data processing to simplify the code need to access basic
+ * stored function.  It provides meta data processing to simplify the code needed to access basic
  * stored procedures/functions.  All you need to provide is the name of the procedure/fumnction and a Map
  * containing the parameters when you execute the call.  The names of the supplied parameters will be matched
  * up with in and out parameters declared when the stored procedure was created.
@@ -46,9 +46,10 @@ import java.util.HashSet;
  * The actual call is being handled via the standard call method of the JdbcTemplate.
  *
  * Many of the configuration methods return the current instance of the SimpleJdbcCall to provide the ablity
- * to string multiple ones tgether in a "fluid" interface style.
+ * to string multiple ones together in a "fluid" interface style.
  * 
  * @author trisberg
+ * @since 2.1
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see java.sql.DatabaseMetaData
  */

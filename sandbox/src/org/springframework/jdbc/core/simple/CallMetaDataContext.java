@@ -32,7 +32,7 @@ import java.util.*;
 import java.sql.DatabaseMetaData;
 
 /**
- * Class to hold context data for one of the MetaData strategy implementations of DatabaseMetaDataProvider.
+ * Class to manage context metadata used for the configuration and execution of the call.
  *
  * @author trisberg
  */
@@ -74,75 +74,133 @@ public class CallMetaDataContext {
 	/** the provider of call meta data */
 	private CallMetaDataProvider metaDataProvider;
 
-
+	/**
+	 * Get the name used for the return value of the function
+	 */
 	public String getFunctionReturnName() {
 		return functionReturnName;
 	}
 
+	/**
+	 * Specify the name used for the return value of the function
+	 */
 	public void setFunctionReturnName(String functionReturnName) {
 		this.functionReturnName = functionReturnName;
 	}
 
+	/**
+	 * Speicfy a limited set of in parameters to be used
+	 */
 	public void setLimitedInParameterNames(HashSet<String> limitedInParameterNames) {
 		this.limitedInParameterNames = limitedInParameterNames;
 	}
 
+	/**
+	 * Get a list of the out parameter names
+	 */
 	public List<String> getOutParameterNames() {
 		return outParameterNames;
 	}
 
+	/**
+	 * Specify the names of the out parameters
+	 */
 	public void setOutParameterNames(List<String> outParameterNames) {
 		this.outParameterNames = outParameterNames;
 	}
 
+	/**
+	 * Get the name of the procedure
+	 */
 	public String getProcedureName() {
 		return procedureName;
 	}
 
+	/**
+	 * Specify the name of the procedure
+	 */
 	public void setProcedureName(String procedureName) {
 		this.procedureName = procedureName;
 	}
 
+	/**
+	 * Get the name of the catalog
+	 */
 	public String getCatalogName() {
 		return catalogName;
 	}
 
+	/**
+	 * Specify the name of the catalog
+	 */
 	public void setCatalogName(String catalogName) {
 		this.catalogName = catalogName;
 	}
 
+	/**
+	 * Get the name of the schema
+	 */
 	public String getSchemaName() {
 		return schemaName;
 	}
 
+	/**
+	 * Secify the name of the schema
+	 */
 	public void setSchemaName(String schemaName) {
 		this.schemaName = schemaName;
 	}
 
+	/**
+	 * Check whether this call is a function call
+	 */
 	public boolean isFunction() {
 		return function;
 	}
 
+	/**
+	 * Specify whether this call is a function call
+	 */
 	public void setFunction(boolean function) {
 		this.function = function;
 	}
 
+	/**
+	 * Check whether a return value is required
+	 */
 	public boolean isReturnValueRequired() {
 		return returnValueRequired;
 	}
 
+	/**
+	 * Specify whether a return value is required
+	 */
 	public void setReturnValueRequired(boolean returnValueRequired) {
 		this.returnValueRequired = returnValueRequired;
 	}
 
+	/**
+	 * Check whether call parameter metadata should be accessed
+	 */
 	public boolean isAccessCallParameterMetaData() {
 		return accessCallParameterMetaData;
 	}
 
+	/**
+	 * Specify whether call parameter metadata should be accessed
+	 */
 	public void setAccessCallParameterMetaData(boolean accessCallParameterMetaData) {
 		this.accessCallParameterMetaData = accessCallParameterMetaData;
 	}
 
+	/**
+	 * Create a ReturnResultSetParameter/SqlOutParameter depending on the support provided by the JDBC driver
+	 * used for the database in use.
+	 *
+	 * @param parameterName the name of the parameter.  Also be used as the name of the List returned in the output.
+	 * @param rowMapper a RowMapper iplementation used to map the data retuned in the result set
+	 * @return the appropriate SqlParameter
+	 */
 	public SqlParameter createReturnResultSetParameter(String parameterName, ParameterizedRowMapper rowMapper) {
 		if (this.metaDataProvider.isReturnResultSetSupported()) {
 			return new SqlReturnResultSet(parameterName, rowMapper);
@@ -157,6 +215,10 @@ public class CallMetaDataContext {
 		}
 	}
 
+	/**
+	 * Get the name of the single out parameter for this call.  If there are multiple parameters then the name of
+	 * the first one is returned.
+	 */
 	public String getScalarOutParameterName() {
 		if (isFunction()) {
 			return functionReturnName;
@@ -172,10 +234,17 @@ public class CallMetaDataContext {
 		}
 	}
 
+	/**
+	 * Get the List of SqlParameter objects to be used in call execution
+	 */
 	public List<SqlParameter> getCallParameters() {
 		return callParameters;
 	}
 
+	/**
+	 * Initialize this class with metadata from the database 
+	 * @param dataSource the DataSource used to retrieve metadata
+	 */
 	public void initializeMetaData(DataSource dataSource) {
 
 		metaDataProvider =
@@ -183,12 +252,21 @@ public class CallMetaDataContext {
 
 	}
 
+	/**
+	 * Process the list of parameters provided and if procedure column metedata is used the
+	 * parameters will be matched against the metadata information and any missing ones will
+	 * be automatically included
+	 * @param parameters the list of parameters ti use as a base
+	 */
 	public void processParameters(List<SqlParameter> parameters) {
 
 		callParameters = reconcileParameters(parameters);
 
 	}
 
+	/**
+	 * Reconcile the provided parameters with available metadata and add new ones where appropriate
+	 */
 	private List<SqlParameter> reconcileParameters(List<SqlParameter> parameters) {
 		final List<SqlParameter> declaredReturnParameters = new ArrayList<SqlParameter>();
 
@@ -309,6 +387,11 @@ public class CallMetaDataContext {
 
 	}
 
+	/**
+	 * Match input parameter values with the parameters declared to be used in the call
+	 * @param parameterSource the input values
+	 * @return a Map containing the matched parameter names with the value taken from the input
+	 */
 	public Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
 		Map<String, Object> matchedParameters = new HashMap<String, Object>(callParameters.size());
 		for (SqlParameter parameter : callParameters) {
@@ -334,6 +417,11 @@ public class CallMetaDataContext {
 		return matchedParameters;
 	}
 
+	/**
+	 * Match input parameter values with the parameters declared to be used in the call
+	 * @param inParameters the input values
+	 * @return a Map containing the matched parameter names with the value taken from the input
+	 */
 	public Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> inParameters) {
 		if (!metaDataProvider.isProcedureColumnMetaDataUsed()) {
 			return inParameters;
@@ -364,7 +452,10 @@ public class CallMetaDataContext {
 		return matchedParameters;
 	}
 
-
+	/**
+	 * Build the call string based on configuration and metadata information
+	 * @return the call string to be used
+	 */
 	public String createCallString() {
 		String callString;
 		int parameterCount = 0;

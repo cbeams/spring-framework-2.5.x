@@ -172,6 +172,7 @@
 			<list>
 				<value>Sybase SQL Server</value>
 				<value>Adaptive Server Enterprise</value>
+				<value>sql server</value> <!-- name as returned by jTDS driver -->
 			</list>
 		</property>
 		<property name="badSqlGrammarCodes">

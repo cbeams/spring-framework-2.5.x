@@ -30,7 +30,7 @@ import java.util.*;
 import java.sql.Types;
 
 /**
- * Class to hold context data for one of the MetaData strategy implementations of MetaDataProvider.
+ * Class to manage context metadata used for the configuration and execution of operations on the table.
  *
  * @author trisberg
  */

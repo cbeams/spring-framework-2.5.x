@@ -17,10 +17,17 @@
 package org.springframework.jdbc.core.simple;
 
 /**
+ * Utility class used for the Simple JDBC functionality.
+ *
  * @author trisberg
  */
 public class SimpleJdbcUtils {
 
+	/**
+	 * Extract a common name for the database in use even if various drivers/platforms provide varying names.
+	 * @param source the name as provided in database metedata
+	 * @return the common name to be used
+	 */
 	public static String commonDatabaseName(String source) {
 		String name = source;
 		if (source != null && source.startsWith("DB2")) {
@@ -32,6 +39,12 @@ public class SimpleJdbcUtils {
 		return name; 
 	}
 
+	/**
+	 * Convert a column name with undercores to the corresponding property name using "camel case".  A name
+	 * like "customer_number" would match a "customerNumber" property name.
+	 * @param name the column name to be converted
+	 * @return the name using "camel case"
+	 */
 	public static String convertUnderscoreNameToPropertyName(String name) {
 		StringBuffer result = new StringBuffer();
 		boolean nextIsUpper = false;

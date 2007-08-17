@@ -23,7 +23,11 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
+ * Interface specifying the API to be implemented by a class providing call metedata.  This is intended for internal use
+ * by the Simple JDBC classes.
+ *
  * @author trisberg
+ * @since 2.1
  */
 public interface CallMetaDataProvider {
 

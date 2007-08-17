@@ -26,30 +26,95 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
+ * A generic implementation of the {@link TableMetaDataProvider} that should provide enough features for all supported
+ * databases.
+ *
  * @author trisberg
+ * @since 2.1
  */
 public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	/** Logger available to subclasses */
 	protected static final Log logger = LogFactory.getLog(TableMetaDataProvider.class);
 
+	/** indicator whether column metadata should be used */
 	private boolean tableColumnMetaDataUsed = false;
 
+	/** the name of the user currently connected */
 	private String userName;
 
+	/** indicates whether the identifiers are uppercased */
 	private boolean storesUpperCaseIdentifiers = true;
 
+	/** indicates whether the identifiers are lowercased */
 	private boolean storesLowerCaseIdentifiers = false;
 
+	/** indicates whether the use of a String[] for generated keys is supported */
 	private boolean generatedKeysColumnNameArraySupported = true;
 
+	/** database product we know that don't support the use of a String[] for generated keys */
 	private List productsNotSupportingGeneratedKeysColumnNameArray = Arrays.asList(new String[] {"Apache Derby"});
 
+	/** Collection of TableParameterMetaData objects */
 	private List<TableParameterMetaData> insertParameterMetaData = new ArrayList<TableParameterMetaData>();
 
+
+	/**
+	 * Construct a new instance
+	 * @param databaseMetaData database metadata to be used
+	 * @throws SQLException
+	 */
 	protected GenericTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		userName = databaseMetaData.getUserName();
 	}
+
+	/**
+	 * Get whether identifiers use upper case
+	 */
+	public boolean isStoresUpperCaseIdentifiers() {
+		return storesUpperCaseIdentifiers;
+	}
+
+	/**
+	 * Specify whether identifiers use upper case
+	 */
+	public void setStoresUpperCaseIdentifiers(boolean storesUpperCaseIdentifiers) {
+		this.storesUpperCaseIdentifiers = storesUpperCaseIdentifiers;
+	}
+
+	/**
+	 * Get whether identifiers use lower case
+	 */
+	public boolean isStoresLowerCaseIdentifiers() {
+		return storesLowerCaseIdentifiers;
+	}
+
+	/**
+	 * Specify whether identifiers use lower case
+	 */
+	public void setStoresLowerCaseIdentifiers(boolean storesLowerCaseIdentifiers) {
+		this.storesLowerCaseIdentifiers = storesLowerCaseIdentifiers;
+	}
+
+	public boolean isTableColumnMetaDataUsed() {
+		return tableColumnMetaDataUsed;
+	}
+
+	public List<TableParameterMetaData> getInsertParameterMetaData() {
+		return insertParameterMetaData;
+	}
+
+	public boolean isGeneratedKeysColumnNameArraySupported() {
+		return generatedKeysColumnNameArraySupported;
+	}
+
+	/**
+	 * Specify whether a column name array is supported for generated keys
+	 */
+	public void setGeneratedKeysColumnNameArraySupported(boolean generatedKeysColumnNameArraySupported) {
+		this.generatedKeysColumnNameArraySupported = generatedKeysColumnNameArraySupported;
+	}
+
 
 	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 
@@ -137,14 +202,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 
-	public boolean isGeneratedKeysColumnNameArraySupported() {
-		return generatedKeysColumnNameArraySupported;
-	}
-
-	public void setGeneratedKeysColumnNameArraySupported(boolean generatedKeysColumnNameArraySupported) {
-		this.generatedKeysColumnNameArraySupported = generatedKeysColumnNameArraySupported;
-	}
-
+	/**
+	 * Method supporting the metedata processing for a table
+	 */
 	private void locateTableAndProcessMetaData(DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String tableName) {
 
 		Map<String, TableMetaData> tableMeta = new HashMap<String, TableMetaData>();
@@ -211,6 +271,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		processTableColumns(databaseMetaData, tmd);
 	}
 
+	/**
+	 * Method supporting the metedata processing for a table's columns
+	 */
 	private void processTableColumns(DatabaseMetaData databaseMetaData, TableMetaData tmd) {
 		ResultSet tableColumns = null;
 		String metaDataCatalogName = metaDataCatalogNameToUse(tmd.getCatalogName());
@@ -259,30 +322,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 
-	public boolean isStoresUpperCaseIdentifiers() {
-		return storesUpperCaseIdentifiers;
-	}
-
-	public void setStoresUpperCaseIdentifiers(boolean storesUpperCaseIdentifiers) {
-		this.storesUpperCaseIdentifiers = storesUpperCaseIdentifiers;
-	}
-
-	public boolean isStoresLowerCaseIdentifiers() {
-		return storesLowerCaseIdentifiers;
-	}
-
-	public void setStoresLowerCaseIdentifiers(boolean storesLowerCaseIdentifiers) {
-		this.storesLowerCaseIdentifiers = storesLowerCaseIdentifiers;
-	}
-
-	public boolean isTableColumnMetaDataUsed() {
-		return tableColumnMetaDataUsed;
-	}
-
-	public List<TableParameterMetaData> getInsertParameterMetaData() {
-		return insertParameterMetaData;
-	}
-
+	/**
+	 * Class representing table meta data
+	 */
 	private class TableMetaData {
 		private String catalogName;
 		private String schemaName;
