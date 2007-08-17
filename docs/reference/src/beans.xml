@@ -1776,11 +1776,20 @@ support=support@somecompany.co.uk]]></programlisting>
                 <literal>'false'</literal>; this has the effect of making the container
                 totally exclude that specific bean definition from being available
                 to the autowiring infrastructure.</para>
-                <para>This can be useful when you have a bean that you absolutely never ever
-                want to have injected into other beans via autowiring. It does not
-                mean that the excluded bean cannot itself be configured using autowiring...
-                it can, it is rather that it itself will not be considered as a candidate
-                for autowiring other beans.</para>
+                <para>Another option is to limit autowire candidates based on pattern-matching
+                against bean names. The top-level <literal>&lt;beans/&gt;</literal> element
+                accepts one or more patterns within its <literal>'default-autowire-candidates'</literal>
+                attribute. For example, to limit autowire candidate status to any bean whose name
+                ends with <emphasis>'Repository'</emphasis>, provide a value of '*Repository'.
+                To provide multiple patterns, define them in a comma-separated list. Note that
+                an explicit value of <literal>'true'</literal> or <literal>'false'</literal> for
+                a bean definition's <literal>'autowire-candidate'</literal> attribute always takes
+                precedence, and for such beans, the pattern matching rules will not apply.</para>
+                <para>These techniques can be useful when you have one or more beans that you
+                absolutely never ever want to have injected into other beans via autowiring.
+                It does not mean that an excluded bean cannot itself be configured using
+                autowiring... it can, it is rather that it itself will not be considered as a
+                candidate for autowiring other beans.</para>
             </section>
         </section>
         <section id="beans-factory-dependencies">
@@ -4404,6 +4413,51 @@ public @interface MovieQualifier {
     </bean>
 
 </beans>]]></programlisting>
+        </section>
+        <section id="beans-custom-autowire-configurer">
+            <title><classname>CustomAutowireConfigurer</classname></title>
+            The <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/config/CustomAutowireConfigurer.html">CustomAutowireConfigurer</ulink></classname>
+            is a <interfacename>BeanFactoryPostProcessor</interfacename> that enables customization of the autowiring process.
+            For example, you can register your own custom qualifier annotation types even if they are
+            not themselves annotated with Spring's <interfacename>@Qualifier</interfacename> annotation.
+            <programlisting><![CDATA[<bean id="customAutowireConfigurer" class="org.springframework.beans.factory.config.CustomAutowireConfigurer">
+    <property name="customQualifierTypes">
+        <set>
+            <value>example.CustomQualifier</value>
+        </set>
+    </property>
+</bean>]]></programlisting>
+            <para>It is also possible to supply your own implementation of the
+            <interfacename>AutowireCandidateResolver</interfacename> interface (or subclass
+            one of the existing implementations). As you can see by reviewing its
+            <ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/support/AutowireCandidateResolver.html">Javadoc</ulink>,
+            the resolver provides customization opportunities for determining whether individual bean
+            definitions should be considered as autowire candidates as well as the decision logic for
+            resolving ambiguities in the case of multiple matches.</para>
+            <para>If you do not supply your own, the resolver strategy is dependent upon the Java
+            version. If running on less than Java 5, the qualifier annotations are not supported, and
+            therefore autowire candidates are solely determined by the <literal>'autowire-candidate'</literal>
+            value of each bean definition as well as any <literal>'default-autowire-candidates'</literal>
+            pattern(s) available on the <literal>&lt;beans/&gt;</literal> element. If running on Java 5
+            or greater, the presence of <interfacename>@Qualifier</interfacename> annotations will
+            also play a role. Regardless of the Java version, the default implementation of the
+            <methodname>determinePrimaryCandidate(..)</methodname> method is the same: if exactly one
+            bean definition among the candidates has a <literal>'primary'</literal> attribute set to
+            <literal>'true'</literal>, it will be selected. If you choose to customize the behavior,
+            consider reviewing the existing implementations in more detail in order to make an informed
+            decision whether to subclass or implement the interface. To configure your custom resolver,
+            set the <literal>autowireCandidateResolver</literal> property on the
+            <classname>CustomAutowireConfigurer</classname>:</para> 
+            <programlisting><![CDATA[<bean id="customAutowireConfigurer" class="org.springframework.beans.factory.config.CustomAutowireConfigurer">
+    ]]><emphasis role="bold"><![CDATA[<property name="autowireCandidateResolver">
+        <bean class="example.CustomAutowireCandidateResolver"/>
+    </property>]]></emphasis><![CDATA[
+    <property name="customQualifierTypes">
+        <set>
+            <value>example.CustomQualifier</value>
+        </set>
+    </property>
+</bean>]]></programlisting>
         </section>
         <section id="beans-resource-annotation">
             <title><interfacename>@Resource</interfacename></title>

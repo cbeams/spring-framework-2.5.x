@@ -130,7 +130,7 @@
 	e.g. "*Service", "data*", "*Service*", "data*Service".
 	Also accepts a comma-separated list of patterns: e.g. "*Service,*Dao".
 	See the documentation for the 'autowire-candidate' attribute of the
-	'<bean>/' element for the semantic details of autowire candidate beans.
+	'<bean/>' element for the semantic details of autowire candidate beans.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
