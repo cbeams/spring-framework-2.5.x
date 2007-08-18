@@ -45,9 +45,10 @@ import org.springframework.util.StringUtils;
  * be classpath resources.
  * </p>
  *
+ * @see ContextConfiguration
  * @see #constructAttributes(Class)
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class DefaultContextConfigurationAttributes implements ContextConfigurationAttributes {
@@ -57,10 +58,10 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	// ------------------------------------------------------------------------|
 
 	/** serialVersionUID. */
-	private static final long serialVersionUID = -1748862298523840362L;
+	private static final long						serialVersionUID	= -1748862298523840362L;
 
 	/** Class Logger. */
-	private static final Log LOG = LogFactory.getLog(DefaultContextConfigurationAttributes.class);
+	private static final Log						LOG					= LogFactory.getLog(DefaultContextConfigurationAttributes.class);
 
 	// ------------------------------------------------------------------------|
 	// --- CLASS VARIABLES ----------------------------------------------------|
@@ -70,20 +71,20 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final Autowire autowireMode;
+	private final Autowire							autowireMode;
 
 	// XXX Do we really want/need resourceSuffix in config attributes?
-	private final String resourceSuffix;
+	private final String							resourceSuffix;
 
 	// XXX Do we really want/need loaderClass in config attributes?
-	private final Class<? extends ContextLoader> loaderClass;
+	private final Class<? extends ContextLoader>	loaderClass;
 
-	private final boolean checkDependencies;
+	private final boolean							checkDependencies;
 
 	// XXX Do we really want/need generateDefaultLocations in config attributes?
-	private final boolean generateDefaultLocations;
+	private final boolean							generateDefaultLocations;
 
-	private final String[] locations;
+	private final String[]							locations;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -108,15 +109,15 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	 * @param resourceSuffix The suffix to append to application context
 	 *        resource paths when generating default locations.
 	 * @param autowireMode The mode to use when autowiring dependencies.
-	 * @param dependencyCheckEnabled Whether or not to perform dependency
-	 *        checking when autowiring dependencies.
+	 * @param checkDependencies Whether or not to perform dependency checking
+	 *        when autowiring dependencies.
 	 * @throws IllegalArgumentException if the supplied <code>loaderClass</code>,
 	 *         <code>resourceSuffix</code>, or <code>autowireMode</code> is
 	 *         <code>null</code>.
 	 */
 	public DefaultContextConfigurationAttributes(final Class<? extends ContextLoader> loaderClass,
 			final String[] locations, final Class<?> clazz, final boolean generateDefaultLocations,
-			final String resourceSuffix, final Autowire autowireMode, final boolean dependencyCheckEnabled) {
+			final String resourceSuffix, final Autowire autowireMode, final boolean checkDependencies) {
 
 		Assert.notNull(loaderClass, "loaderClass can not be null.");
 		Assert.notNull(resourceSuffix, "resourceSuffix can not be null.");
@@ -127,7 +128,7 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 		this.generateDefaultLocations = generateDefaultLocations;
 		this.resourceSuffix = resourceSuffix;
 		this.autowireMode = autowireMode;
-		this.checkDependencies = dependencyCheckEnabled;
+		this.checkDependencies = checkDependencies;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -407,7 +408,7 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 
 		.append("autowireMode", this.autowireMode)
 
-		.append("dependencyCheckEnabled", this.checkDependencies)
+		.append("checkDependencies", this.checkDependencies)
 
 		.toString();
 	}
