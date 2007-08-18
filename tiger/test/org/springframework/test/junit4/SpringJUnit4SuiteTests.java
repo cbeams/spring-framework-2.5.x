@@ -38,7 +38,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 @RunWith(Suite.class)
@@ -63,7 +63,9 @@ SpringRunnerContextCacheTests.class,
 
 InheritedDirtiesContextSpringRunnerContextCacheTests.class,
 
-TransactionalSpringRunnerTests.class
+ClassLevelTransactionalSpringRunnerTests.class,
+
+MethodLevelTransactionalSpringRunnerTests.class
 
 })
 public class SpringJUnit4SuiteTests {

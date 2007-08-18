@@ -24,7 +24,7 @@
 	*
 	* Module:       JUnit 4 - Testing Support
 	*
-	* File:         $Source: /var/local/springframework.cvs.sourceforge.net/spring/tiger/test/org/springframework/test/junit4/TransactionalSpringRunnerTests-context.xml,v $
+	* File:         $Source: /var/local/springframework.cvs.sourceforge.net/spring/tiger/test/org/springframework/test/junit4/ClassLevelTransactionalSpringRunnerTests-context.xml,v $
 	*
 	* Description:  Simple application context for testing transactional support 
 	*               for tests.
@@ -37,7 +37,7 @@
 	*
 	* Modified By: $Author: sbrannen $
 	*
-	* Modified On: $Date: 2007-08-16 19:20:48 $
+	* Modified On: $Date: 2007-08-18 22:31:11 $
 	*
 	\**************************************************************************/
 -->
@@ -56,7 +56,7 @@
 		<property name="password" value="" />
 	</bean>
 
-	<bean id="databaseSetup" class="org.springframework.test.junit4.TransactionalSpringRunnerTests$DatabaseSetup" />
+	<bean id="databaseSetup" class="org.springframework.test.junit4.ClassLevelTransactionalSpringRunnerTests$DatabaseSetup" />
 
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
 		p:data-source-ref="dataSource" />
