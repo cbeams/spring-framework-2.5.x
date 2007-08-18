@@ -33,19 +33,28 @@ import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.annotation.TestExecutionListeners;
 import org.springframework.test.context.listeners.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.listeners.DirtiesContextTestExecutionListener;
+import org.springframework.test.context.listeners.TestExecutionListener;
 import org.springframework.test.context.listeners.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
  * JUnit 4 based unit test which verifies support of Spring's
- * {@link Transactional}, {@link NotTransactional},
- * {@link TestExecutionListeners}, and {@link ContextConfiguration} annotations
- * in conjunction with {@link SpringJUnit4ClassRunner}.
+ * &#064;Transactional, &#064;NotTransactional, &#064;TestExecutionListeners,
+ * and &#064;ContextConfiguration annotations in conjunction with the
+ * {@link SpringJUnit4ClassRunner} and the following
+ * {@link TestExecutionListener TestExecutionListeners}:
+ * {@link DependencyInjectionTestExecutionListener},
+ * {@link DirtiesContextTestExecutionListener}, and
+ * {@link TransactionalTestExecutionListener}.
  * </p>
  *
+ * @see Transactional
+ * @see NotTransactional
+ * @see TestExecutionListeners
+ * @see ContextConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -73,9 +82,24 @@ public class TransactionalSpringRunnerTests {
 	// --- STATIC METHODS -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
+	protected static void createPersonTable() {
+
+		simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, age INTEGER NOT NULL, PRIMARY KEY(name))");
+	}
+
 	protected static int countRowsInPersonTable() {
 
 		return simpleJdbcTemplate.queryForInt("SELECT COUNT(0) FROM person");
+	}
+
+	protected static int addPerson(final String name, final int age) {
+
+		return simpleJdbcTemplate.update("INSERT INTO person VALUES(?,?)", name, age);
+	}
+
+	protected static int deletePerson(final String name) {
+
+		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
@@ -94,17 +118,12 @@ public class TransactionalSpringRunnerTests {
 	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected void addPerson(final String name, final int age) {
-
-		simpleJdbcTemplate.update("INSERT INTO person VALUES(?,?)", name, age);
-	}
-
 	@Before
 	public void verifyInitialTestData() {
 
 		if (this.noTestsRun) {
 			simpleJdbcTemplate.update("DELETE FROM person");
-			addPerson("bob", 35);
+			assertEquals("Adding bob", 1, addPerson("bob", 35));
 			assertEquals("Verifying the initial number of rows in the person table.", 1, countRowsInPersonTable());
 		}
 	}
@@ -112,11 +131,12 @@ public class TransactionalSpringRunnerTests {
 	@Test
 	public void modifyTestDataWithinTransaction() {
 
-		addPerson("jane", 25);
-		addPerson("sue", 24);
+		assertEquals("Deleting bob", 1, deletePerson("bob"));
+		assertEquals("Adding jane", 1, addPerson("jane", 25));
+		assertEquals("Adding sue", 1, addPerson("sue", 24));
 
 		final int numRows = countRowsInPersonTable();
-		assertEquals("Verifying the number of rows in the person table within a transaction.", 3, numRows);
+		assertEquals("Verifying the number of rows in the person table within a transaction.", 2, numRows);
 
 		this.noTestsRun = false;
 		TransactionalSpringRunnerTests.numRowsInPersonTable = numRows;
@@ -126,9 +146,9 @@ public class TransactionalSpringRunnerTests {
 	@NotTransactional
 	public void modifyTestDataWithoutTransaction() {
 
-		addPerson("luke", 25);
-		addPerson("leia", 25);
-		addPerson("yoda", 900);
+		assertEquals("Adding luke", 1, addPerson("luke", 25));
+		assertEquals("Adding leia", 1, addPerson("leia", 25));
+		assertEquals("Adding yoda", 1, addPerson("yoda", 900));
 
 		final int numRows = countRowsInPersonTable();
 		assertEquals("Verifying the number of rows in the person table without a transaction.", 4, numRows);
@@ -148,7 +168,7 @@ public class TransactionalSpringRunnerTests {
 
 			TransactionalSpringRunnerTests.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			try {
-				TransactionalSpringRunnerTests.simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, age INTEGER NOT NULL, PRIMARY KEY(name))");
+				createPersonTable();
 			}
 			catch (final BadSqlGrammarException bsge) {
 				/* ignore */
