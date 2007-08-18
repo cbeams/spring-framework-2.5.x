@@ -54,7 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see TestExecutionListeners
  * @see ContextConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -63,6 +63,22 @@ import org.springframework.transaction.annotation.Transactional;
 		TransactionalTestExecutionListener.class })
 @Transactional
 public class TransactionalSpringRunnerTests {
+
+	// ------------------------------------------------------------------------|
+	// --- CONSTANTS ----------------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	protected static final String		BOB			= "bob";
+
+	protected static final String		JANE		= "jane";
+
+	protected static final String		SUE			= "sue";
+
+	protected static final String		LUKE		= "luke";
+
+	protected static final String		LEIA		= "leia";
+
+	protected static final String		YODA		= "yoda";
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
@@ -123,17 +139,17 @@ public class TransactionalSpringRunnerTests {
 
 		if (this.noTestsRun) {
 			simpleJdbcTemplate.update("DELETE FROM person");
-			assertEquals("Adding bob", 1, addPerson("bob", 35));
-			assertEquals("Verifying the initial number of rows in the person table.", 1, countRowsInPersonTable());
 		}
+		assertEquals("Adding bob", 1, addPerson(BOB, 35));
+		assertEquals("Verifying the initial number of rows in the person table.", 1, countRowsInPersonTable());
 	}
 
 	@Test
 	public void modifyTestDataWithinTransaction() {
 
-		assertEquals("Deleting bob", 1, deletePerson("bob"));
-		assertEquals("Adding jane", 1, addPerson("jane", 25));
-		assertEquals("Adding sue", 1, addPerson("sue", 24));
+		assertEquals("Deleting bob", 1, deletePerson(BOB));
+		assertEquals("Adding jane", 1, addPerson(JANE, 25));
+		assertEquals("Adding sue", 1, addPerson(SUE, 24));
 
 		final int numRows = countRowsInPersonTable();
 		assertEquals("Verifying the number of rows in the person table within a transaction.", 2, numRows);
@@ -146,9 +162,9 @@ public class TransactionalSpringRunnerTests {
 	@NotTransactional
 	public void modifyTestDataWithoutTransaction() {
 
-		assertEquals("Adding luke", 1, addPerson("luke", 25));
-		assertEquals("Adding leia", 1, addPerson("leia", 25));
-		assertEquals("Adding yoda", 1, addPerson("yoda", 900));
+		assertEquals("Adding luke", 1, addPerson(LUKE, 25));
+		assertEquals("Adding leia", 1, addPerson(LEIA, 25));
+		assertEquals("Adding yoda", 1, addPerson(YODA, 900));
 
 		final int numRows = countRowsInPersonTable();
 		assertEquals("Verifying the number of rows in the person table without a transaction.", 4, numRows);
@@ -166,7 +182,7 @@ public class TransactionalSpringRunnerTests {
 		@Autowired
 		void setDataSource(final DataSource dataSource) {
 
-			TransactionalSpringRunnerTests.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			try {
 				createPersonTable();
 			}
