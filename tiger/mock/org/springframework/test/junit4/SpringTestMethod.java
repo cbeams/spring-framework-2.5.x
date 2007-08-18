@@ -32,7 +32,7 @@ import org.junit.internal.runners.TestClass;
  * TODO Add comments for SpringTestMethod.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class SpringTestMethod {
@@ -42,7 +42,7 @@ public class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/** Class Logger. */
-	protected static final Log LOG = LogFactory.getLog(SpringTestMethod.class);
+	protected static final Log	LOG	= LogFactory.getLog(SpringTestMethod.class);
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
@@ -56,9 +56,9 @@ public class SpringTestMethod {
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final Method method;
+	private final Method		method;
 
-	private final TestClass testClass;
+	private final TestClass		testClass;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -68,6 +68,12 @@ public class SpringTestMethod {
 	// --- CONSTRUCTORS -------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
+	/**
+	 * TODO Add comments for constructor.
+	 *
+	 * @param method
+	 * @param testClass
+	 */
 	public SpringTestMethod(final Method method, final TestClass testClass) {
 
 		this.method = method;
@@ -82,22 +88,50 @@ public class SpringTestMethod {
 	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
+	/**
+	 * TODO Add comments for expectsException().
+	 *
+	 * @return
+	 */
 	public boolean expectsException() {
 
 		return getExpectedException() != null;
 	}
 
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for getAfters().
+	 *
+	 * @return
+	 */
 	public List<Method> getAfters() {
 
 		return getTestClass().getAnnotatedMethods(After.class);
 	}
 
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for getBefores().
+	 *
+	 * @return
+	 */
 	public List<Method> getBefores() {
 
 		return getTestClass().getAnnotatedMethods(Before.class);
 	}
 
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for getExpectedException().
+	 *
+	 * @return
+	 */
 	protected Class<? extends Throwable> getExpectedException() {
+
+		// XXX Add support for Spring's @ExpectedException.
 
 		final Test annotation = getMethod().getAnnotation(Test.class);
 		if (annotation == null || annotation.expected() == None.class) {
@@ -108,23 +142,40 @@ public class SpringTestMethod {
 		}
 	}
 
+	// ------------------------------------------------------------------------|
+
 	/**
-	 * @return the test method.
+	 * TODO Add comments for getMethod().
+	 *
+	 * @return The test method.
 	 */
 	public final Method getMethod() {
 
 		return this.method;
 	}
 
+	// ------------------------------------------------------------------------|
+
 	/**
-	 * @return the test class.
+	 * TODO Add comments for getTestClass().
+	 *
+	 * @return The test class.
 	 */
 	public final TestClass getTestClass() {
 
 		return this.testClass;
 	}
 
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for getTimeout().
+	 *
+	 * @return
+	 */
 	public long getTimeout() {
+
+		// XXX Add support for Spring's @Timed.
 
 		final Test annotation = getMethod().getAnnotation(Test.class);
 		if (annotation == null) {
@@ -134,20 +185,47 @@ public class SpringTestMethod {
 		return timeout;
 	}
 
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for invoke().
+	 *
+	 * @param testInstance
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 */
 	public void invoke(final Object testInstance) throws IllegalArgumentException, IllegalAccessException,
 			InvocationTargetException {
 
 		getMethod().invoke(testInstance);
 	}
 
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for isIgnored().
+	 *
+	 * @return
+	 */
 	public boolean isIgnored() {
 
 		return getMethod().getAnnotation(Ignore.class) != null;
 	}
 
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for isUnexpected().
+	 *
+	 * @param exception
+	 * @return
+	 */
 	public boolean isUnexpected(final Throwable exception) {
 
 		return !getExpectedException().isAssignableFrom(exception.getClass());
 	}
+
+	// ------------------------------------------------------------------------|
 
 }
