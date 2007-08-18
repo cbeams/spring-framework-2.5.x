@@ -27,13 +27,19 @@ import org.junit.runner.notification.RunNotifier;
 import org.springframework.test.context.TestContextManager;
 
 /**
+ * <p>
  * SpringJUnit4ClassRunner is a custom extension of {@link JUnit4ClassRunner}
  * which provides Spring testing functionality to standard JUnit tests by means
  * of the {@link TestContextManager} and associated support classes and
  * annotations.
+ * </p>
+ * <p>
+ * TODO Comment on configuration via ContextConfiguration,
+ * TransactionConfiguration, etc.
+ * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 2.1
  */
 public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
@@ -43,7 +49,7 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 	// ------------------------------------------------------------------------|
 
 	/** Class Logger. */
-	private static final Log LOG = LogFactory.getLog(SpringJUnit4ClassRunner.class);
+	private static final Log			LOG	= LogFactory.getLog(SpringJUnit4ClassRunner.class);
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
@@ -57,7 +63,7 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final TestContextManager<T> testContextManager;
+	private final TestContextManager<T>	testContextManager;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -105,7 +111,8 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 
 	/**
 	 * Delegates to {@link JUnit4ClassRunner#createTest()} to create the test
-	 * instance and then to a {@link TestContextManager} to prepare the test
+	 * instance and then to a {@link TestContextManager} to
+	 * {@link TestContextManager#prepareTestInstance(Object) prepare} the test
 	 * instance for Spring testing functionality.
 	 *
 	 * @see JUnit4ClassRunner#createTest()
@@ -165,31 +172,9 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 			LOG.debug("Invoking test method [" + method.toGenericString() + "].");
 		}
 
-		// TODO Add support for @Transactional and @NotTransactional
-
-		// XXX Optional: add support for @IfProfileValue & @Repeat
-		// XXX Optional: add support for @Timed & @ExpectedException
-
 		// ---------------------------------------------------------------------
-		// --- DEVELOPMENT NOTES -----------------------------------------------
-		// ---------------------------------------------------------------------
-		// create a custom MethodRoadie that ...
-		//
-		// 1) overrides run(): by adding support for Spring's @Repeat.
-		//
-		// ---------------------------------------------------------------------
-		// create a custom TestMethod that ...
-		//
-		// 1) overrides getExpectedException(): by adding support for Spring's
-		// @ExpectedException.
-		//
-		// 2) overrides getTimeout(): by detecting Spring's @Timed and handling
-		// it the same as the standard JUnit @Test(timeout=1) feature.
-
-		// ---------------------------------------------------------------------
-		// The following is a direct copy of the original JUnit 4.4 code, except
-		// that we inform the TestContextManager of test execution lifecycle
-		// events.
+		// The following is a 1-to-1 copy of the original JUnit 4.4 code, except
+		// that we use custom implementations for TestMethod and MethodRoadie.
 
 		final Description description = methodDescription(method);
 		T testInstance;

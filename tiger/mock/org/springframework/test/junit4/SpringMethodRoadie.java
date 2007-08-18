@@ -37,7 +37,7 @@ import org.springframework.test.context.TestContextManager;
  * TODO Add comments for SpringMethodRoadie.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public class SpringMethodRoadie<T> {
@@ -47,7 +47,7 @@ public class SpringMethodRoadie<T> {
 	// ------------------------------------------------------------------------|
 
 	/** Class Logger. */
-	protected static final Log LOG = LogFactory.getLog(SpringMethodRoadie.class);
+	protected static final Log			LOG	= LogFactory.getLog(SpringMethodRoadie.class);
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
@@ -61,17 +61,17 @@ public class SpringMethodRoadie<T> {
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final TestContextManager<T> testContextManager;
+	private final TestContextManager<T>	testContextManager;
 
-	private final T testInstance;
+	private final T						testInstance;
 
-	private final SpringTestMethod testMethod;
+	private final SpringTestMethod		testMethod;
 
-	private Throwable testException;
+	private Throwable					testException;
 
-	private final RunNotifier notifier;
+	private final RunNotifier			notifier;
 
-	private final Description description;
+	private final Description			description;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -100,6 +100,8 @@ public class SpringMethodRoadie<T> {
 	// ------------------------------------------------------------------------|
 
 	public void run() {
+
+		// XXX Optional: add support for Spring's @IfProfileValue & @Repeat
 
 		if (getTestMethod().isIgnored()) {
 			getNotifier().fireTestIgnored(getDescription());

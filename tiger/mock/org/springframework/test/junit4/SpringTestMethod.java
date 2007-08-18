@@ -32,7 +32,7 @@ import org.junit.internal.runners.TestClass;
  * TODO Add comments for SpringTestMethod.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public class SpringTestMethod {
@@ -131,7 +131,7 @@ public class SpringTestMethod {
 	 */
 	protected Class<? extends Throwable> getExpectedException() {
 
-		// XXX Add support for Spring's @ExpectedException.
+		// XXX Optional: add support for Spring's @ExpectedException
 
 		final Test annotation = getMethod().getAnnotation(Test.class);
 		if (annotation == null || annotation.expected() == None.class) {
@@ -175,7 +175,7 @@ public class SpringTestMethod {
 	 */
 	public long getTimeout() {
 
-		// XXX Add support for Spring's @Timed.
+		// XXX Optional: add support for Spring's @Timed
 
 		final Test annotation = getMethod().getAnnotation(Test.class);
 		if (annotation == null) {
