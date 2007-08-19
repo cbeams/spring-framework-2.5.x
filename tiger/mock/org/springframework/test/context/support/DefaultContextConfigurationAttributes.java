@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  * @see ContextConfiguration
  * @see #constructAttributes(Class)
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public class DefaultContextConfigurationAttributes implements ContextConfigurationAttributes {
@@ -73,15 +73,12 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 
 	private final Autowire							autowireMode;
 
-	// XXX Do we really want/need resourceSuffix in config attributes?
 	private final String							resourceSuffix;
 
-	// XXX Do we really want/need loaderClass in config attributes?
 	private final Class<? extends ContextLoader>	loaderClass;
 
 	private final boolean							checkDependencies;
 
-	// XXX Do we really want/need generateDefaultLocations in config attributes?
 	private final boolean							generateDefaultLocations;
 
 	private final String[]							locations;
