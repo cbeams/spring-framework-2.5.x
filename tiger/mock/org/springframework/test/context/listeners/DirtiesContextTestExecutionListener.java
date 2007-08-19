@@ -30,7 +30,7 @@ import org.springframework.test.context.TestContext;
  *
  * @see DirtiesContext
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public class DirtiesContextTestExecutionListener extends AbstractTestExecutionListener {
@@ -40,7 +40,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	// ------------------------------------------------------------------------|
 
 	/** Class Logger. */
-	private static final Log LOG = LogFactory.getLog(DirtiesContextTestExecutionListener.class);
+	private static final Log	LOG	= LogFactory.getLog(DirtiesContextTestExecutionListener.class);
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
@@ -63,7 +63,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#afterTestMethod(TestContext)
 	 */
 	@Override
-	public void afterTestMethod(final TestContext<?> testContext) {
+	public void afterTestMethod(final TestContext<?> testContext) throws Exception {
 
 		final boolean dirtiesContext = (AnnotationUtils.findAnnotation(testContext.getTestMethod(),
 				DirtiesContext.class) != null);

@@ -41,7 +41,7 @@ import org.springframework.test.context.TestContextManager;
  * </ul>
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.2
  */
 public interface TestExecutionListener {
@@ -61,7 +61,7 @@ public interface TestExecutionListener {
 	 * </p>
 	 *
 	 * @param testInstance The test object to prepare.
-	 * @throws Exception if an error occurs while preparing the test instance.
+	 * @throws Exception Allows any exception to propagate.
 	 */
 	public abstract void prepareTestInstance(final TestContext<?> testContext) throws Exception;
 
@@ -77,8 +77,9 @@ public interface TestExecutionListener {
 	 *
 	 * @param testContext The test context in which the test method will be
 	 *        executed, not <code>null</code>.
+	 * @throws Exception Allows any exception to propagate.
 	 */
-	public abstract void beforeTestMethod(final TestContext<?> testContext);
+	public abstract void beforeTestMethod(final TestContext<?> testContext) throws Exception;
 
 	// ------------------------------------------------------------------------|
 
@@ -92,8 +93,9 @@ public interface TestExecutionListener {
 	 *
 	 * @param testContext The test context in which the test method was
 	 *        executed, not <code>null</code>.
+	 * @throws Exception Allows any exception to propagate.
 	 */
-	public abstract void afterTestMethod(final TestContext<?> testContext);
+	public abstract void afterTestMethod(final TestContext<?> testContext) throws Exception;
 
 	// ------------------------------------------------------------------------|
 

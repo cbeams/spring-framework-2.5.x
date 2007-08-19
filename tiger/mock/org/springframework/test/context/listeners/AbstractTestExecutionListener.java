@@ -25,7 +25,7 @@ import org.springframework.test.context.TestContext;
  * only those methods suitable for the task at hand.
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 public abstract class AbstractTestExecutionListener implements TestExecutionListener {
@@ -66,7 +66,7 @@ public abstract class AbstractTestExecutionListener implements TestExecutionList
 	 * @see org.springframework.test.context.listeners.TestExecutionListener#beforeTestMethod(org.springframework.test.context.TestContext)
 	 */
 	@Override
-	public void beforeTestMethod(final TestContext<?> testContext) {
+	public void beforeTestMethod(final TestContext<?> testContext) throws Exception {
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Before test method: context [" + testContext + "].");
@@ -84,7 +84,7 @@ public abstract class AbstractTestExecutionListener implements TestExecutionList
 	 * @see org.springframework.test.context.listeners.TestExecutionListener#afterTestMethod(TestContext)
 	 */
 	@Override
-	public void afterTestMethod(final TestContext<?> testContext) {
+	public void afterTestMethod(final TestContext<?> testContext) throws Exception {
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("After test method: context [" + testContext + "].");
