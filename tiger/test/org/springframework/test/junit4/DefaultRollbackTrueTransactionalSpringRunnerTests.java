@@ -28,46 +28,31 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.ContextConfiguration;
-import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.annotation.TestExecutionListeners;
+import org.springframework.test.annotation.TransactionConfiguration;
 import org.springframework.test.context.listeners.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.listeners.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.listeners.TestExecutionListener;
 import org.springframework.test.context.listeners.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
- * JUnit 4 based unit test which verifies support of Spring's
- * &#064;Transactional, &#064;TestExecutionListeners, and
- * &#064;ContextConfiguration annotations in conjunction with the
- * {@link SpringJUnit4ClassRunner} and the following
- * {@link TestExecutionListener TestExecutionListeners}:
- * {@link DependencyInjectionTestExecutionListener},
- * {@link DirtiesContextTestExecutionListener}, and
- * {@link TransactionalTestExecutionListener}.
- * </p>
- * <p>
- * This class specifically tests usage of &#064;Transactional defined at the
- * <strong>method level</strong>. In contrast to
- * {@link ClassLevelTransactionalSpringRunnerTests}, this class omits usage of
- * &#064;NotTransactional.
+ * JUnit 4 based unit test which verifies proper transactional behavior when the
+ * {@link TransactionConfiguration#defaultRollback() defaultRollback} attribute
+ * of the {@link TransactionConfiguration} annotation is set to <strong><code>true</code></strong>.
  * </p>
  *
- * @see ClassLevelTransactionalSpringRunnerTests
- * @see Transactional
- * @see NotTransactional
- * @see TestExecutionListeners
- * @see ContextConfiguration
+ * @see TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
 		TransactionalTestExecutionListener.class })
-public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransactionalSpringRunnerTests {
+@TransactionConfiguration(defaultRollback = true)
+public class DefaultRollbackTrueTransactionalSpringRunnerTests extends AbstractTransactionalSpringRunnerTests {
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
@@ -82,14 +67,16 @@ public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransacti
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
 	public static junit.framework.Test suite() {
 
-		return new JUnit4TestAdapter(MethodLevelTransactionalSpringRunnerTests.class);
+		return new JUnit4TestAdapter(DefaultRollbackTrueTransactionalSpringRunnerTests.class);
 	}
 
 	@AfterClass
 	public static void verifyFinalTestData() {
 
-		assertEquals("Verifying the final number of rows in the person table after all tests.", 4,
-				countRowsInPersonTable(simpleJdbcTemplate));
+		// XXX Uncomment once their is a programmatic means for committing.
+		// assertEquals("Verifying the final number of rows in the person table
+		// after all tests.", 0,
+		// countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 	// ------------------------------------------------------------------------|
@@ -105,28 +92,15 @@ public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransacti
 				countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
+	// ------------------------------------------------------------------------|
+
 	@Test
 	@Transactional
 	public void modifyTestDataWithinTransaction() {
 
-		// TODO How can we verify this method IS executing in a transaction?
-
-		assertEquals("Deleting bob", 1, deletePerson(simpleJdbcTemplate, BOB));
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
-		assertEquals("Verifying the number of rows in the person table within a transaction.", 2,
-				countRowsInPersonTable(simpleJdbcTemplate));
-	}
-
-	@Test
-	public void modifyTestDataWithoutTransaction() {
-
-		// TODO How can we verify this method is NOT executing in a transaction?
-
-		assertEquals("Adding luke", 1, addPerson(simpleJdbcTemplate, LUKE));
-		assertEquals("Adding leia", 1, addPerson(simpleJdbcTemplate, LEIA));
-		assertEquals("Adding yoda", 1, addPerson(simpleJdbcTemplate, YODA));
-		assertEquals("Verifying the number of rows in the person table without a transaction.", 4,
+		assertEquals("Verifying the number of rows in the person table within a transaction.", 3,
 				countRowsInPersonTable(simpleJdbcTemplate));
 	}
 

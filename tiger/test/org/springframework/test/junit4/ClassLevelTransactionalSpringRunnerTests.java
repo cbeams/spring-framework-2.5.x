@@ -58,7 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see TestExecutionListeners
  * @see ContextConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -71,8 +71,6 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
-
-	protected static int				numRowsInPersonTable;
 
 	protected static SimpleJdbcTemplate	simpleJdbcTemplate;
 
@@ -89,7 +87,8 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 	@AfterClass
 	public static void verifyFinalTestData() {
 
-		assertEquals("Verifying the final number of rows in the person table after all tests.", 4, numRowsInPersonTable);
+		assertEquals("Verifying the final number of rows in the person table after all tests.", 4,
+				countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 	// ------------------------------------------------------------------------|
@@ -99,9 +98,7 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 	@Before
 	public void verifyInitialTestData() {
 
-		if (this.noTestsRun) {
-			simpleJdbcTemplate.update("DELETE FROM person");
-		}
+		clearPersonTable(simpleJdbcTemplate);
 		assertEquals("Adding bob", 1, addPerson(simpleJdbcTemplate, BOB));
 		assertEquals("Verifying the initial number of rows in the person table.", 1,
 				countRowsInPersonTable(simpleJdbcTemplate));
@@ -115,12 +112,8 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 		assertEquals("Deleting bob", 1, deletePerson(simpleJdbcTemplate, BOB));
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
-
-		final int numRows = countRowsInPersonTable(simpleJdbcTemplate);
-		assertEquals("Verifying the number of rows in the person table within a transaction.", 2, numRows);
-
-		this.noTestsRun = false;
-		ClassLevelTransactionalSpringRunnerTests.numRowsInPersonTable = numRows;
+		assertEquals("Verifying the number of rows in the person table within a transaction.", 2,
+				countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 	@Test
@@ -132,12 +125,8 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 		assertEquals("Adding luke", 1, addPerson(simpleJdbcTemplate, LUKE));
 		assertEquals("Adding leia", 1, addPerson(simpleJdbcTemplate, LEIA));
 		assertEquals("Adding yoda", 1, addPerson(simpleJdbcTemplate, YODA));
-
-		final int numRows = countRowsInPersonTable(simpleJdbcTemplate);
-		assertEquals("Verifying the number of rows in the person table without a transaction.", 4, numRows);
-
-		this.noTestsRun = false;
-		ClassLevelTransactionalSpringRunnerTests.numRowsInPersonTable = numRows;
+		assertEquals("Verifying the number of rows in the person table without a transaction.", 4,
+				countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 	// ------------------------------------------------------------------------|

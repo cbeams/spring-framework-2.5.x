@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see Transactional
  * @see NotTransactional
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public abstract class AbstractTransactionalSpringRunnerTests {
@@ -40,31 +40,26 @@ public abstract class AbstractTransactionalSpringRunnerTests {
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected static final String	BOB			= "bob";
+	protected static final String	BOB		= "bob";
 
-	protected static final String	JANE		= "jane";
+	protected static final String	JANE	= "jane";
 
-	protected static final String	SUE			= "sue";
+	protected static final String	SUE		= "sue";
 
-	protected static final String	LUKE		= "luke";
+	protected static final String	LUKE	= "luke";
 
-	protected static final String	LEIA		= "leia";
+	protected static final String	LEIA	= "leia";
 
-	protected static final String	YODA		= "yoda";
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	protected boolean				noTestsRun	= true;
+	protected static final String	YODA	= "yoda";
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
+
+	protected static int clearPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
+
+		return simpleJdbcTemplate.update("DELETE FROM person");
+	}
 
 	protected static void createPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
 
@@ -91,7 +86,4 @@ public abstract class AbstractTransactionalSpringRunnerTests {
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 }
