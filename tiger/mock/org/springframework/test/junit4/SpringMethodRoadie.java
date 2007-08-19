@@ -37,10 +37,10 @@ import org.springframework.test.context.TestContextManager;
  * TODO Add comments for SpringMethodRoadie.
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
-public class SpringMethodRoadie<T> {
+class SpringMethodRoadie<T> {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|

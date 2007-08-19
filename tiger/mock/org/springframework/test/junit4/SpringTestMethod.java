@@ -32,10 +32,10 @@ import org.junit.internal.runners.TestClass;
  * TODO Add comments for SpringTestMethod.
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
-public class SpringTestMethod {
+class SpringTestMethod {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|
