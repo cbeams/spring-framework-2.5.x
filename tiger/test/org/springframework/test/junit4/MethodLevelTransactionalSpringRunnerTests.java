@@ -60,7 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see TestExecutionListeners
  * @see ContextConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -109,8 +109,6 @@ public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransacti
 	@Transactional
 	public void modifyTestDataWithinTransaction() {
 
-		// TODO How can we verify this method IS executing in a transaction?
-
 		assertEquals("Deleting bob", 1, deletePerson(simpleJdbcTemplate, BOB));
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
@@ -120,8 +118,6 @@ public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransacti
 
 	@Test
 	public void modifyTestDataWithoutTransaction() {
-
-		// TODO How can we verify this method is NOT executing in a transaction?
 
 		assertEquals("Adding luke", 1, addPerson(simpleJdbcTemplate, LUKE));
 		assertEquals("Adding leia", 1, addPerson(simpleJdbcTemplate, LEIA));
