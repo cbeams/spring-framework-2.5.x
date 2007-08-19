@@ -44,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @see TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -73,7 +73,9 @@ public class DefaultRollbackTrueTransactionalSpringRunnerTests extends AbstractT
 	@AfterClass
 	public static void verifyFinalTestData() {
 
-		// XXX Uncomment once their is a programmatic means for committing.
+		// XXX Uncomment once their is a programmatic means for committing or a
+		// way to execute code before a test but outside of a transaction (e.g.,
+		// @BeforeTransaction).
 		// assertEquals("Verifying the final number of rows in the person table
 		// after all tests.", 0,
 		// countRowsInPersonTable(simpleJdbcTemplate));
