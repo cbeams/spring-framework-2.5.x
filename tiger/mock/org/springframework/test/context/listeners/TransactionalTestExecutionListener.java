@@ -15,11 +15,18 @@
  */
 package org.springframework.test.context.listeners;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.test.annotation.AfterTransaction;
+import org.springframework.test.annotation.BeforeTransaction;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.annotation.TransactionConfiguration;
@@ -47,7 +54,7 @@ import org.springframework.util.Assert;
  * <em>rolled back</em> after completion of the test; whereas, changes to the
  * database during a test run with &#064;NotTransactional will <strong>not</strong>
  * be run within a transaction. Similarly, test methods that are not annotated
- * with &#064;Transactional (at the class or method level) or
+ * with either &#064;Transactional (at the class or method level) or
  * &#064;NotTransactional will not be run within a transaction.
  * </p>
  * <p>
@@ -58,13 +65,16 @@ import org.springframework.util.Assert;
  * configure the bean name of the {@link PlatformTransactionManager} that is to
  * be used to drive transactions.
  * </p>
+ * <p>
+ * TODO Comment on usage of &#064;BeforeTransaction and &#064;AfterTransaction.
+ * </p>
  *
  * @see Transactional
  * @see NotTransactional
  * @see Rollback
  * @see TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 2.1
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
@@ -198,6 +208,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			}
 		}
 		else {
+			runBeforeTransactionMethods(testContext);
 			startNewTransaction(testContext);
 		}
 	}
@@ -217,10 +228,159 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 		super.afterTestMethod(testContext);
 
-		// End transaction if the transaction is still active.
+		// If the transaction is still active...
 		if (this.transactionStatus != null && !this.transactionStatus.isCompleted()) {
-			endTransaction(testContext);
+			try {
+				endTransaction(testContext);
+			}
+			finally {
+				runAfterTransactionMethods(testContext);
+			}
 		}
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for runBeforeTransactionMethods().
+	 *
+	 * @param testContext The current test context.
+	 */
+	protected void runBeforeTransactionMethods(final TestContext<?> testContext) throws Exception {
+
+		try {
+			final List<Method> methods = getAnnotatedMethods(testContext.getTestClass(), BeforeTransaction.class);
+			Collections.reverse(methods);
+			for (final Method method : methods) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Executing @BeforeTransaction method [" + method + "] for test context [" + testContext
+							+ "].");
+				}
+				method.invoke(testContext.getTestInstance());
+			}
+		}
+		catch (final InvocationTargetException e) {
+			throw new RuntimeException(
+					"Exception encountered while executing @BeforeTransaction methods for test context [" + testContext
+							+ "].", e.getTargetException());
+		}
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for runAfterTransactionMethods().
+	 *
+	 * @param testContext The current test context.
+	 */
+	protected void runAfterTransactionMethods(final TestContext<?> testContext) throws Exception {
+
+		final List<Method> methods = getAnnotatedMethods(testContext.getTestClass(), AfterTransaction.class);
+		for (final Method method : methods) {
+			try {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Executing @AfterTransaction method [" + method + "] for test context [" + testContext
+							+ "].");
+				}
+				method.invoke(testContext.getTestInstance());
+			}
+			catch (final InvocationTargetException e) {
+				LOG.error("Exception encountered while executing @AfterTransaction method [" + method
+						+ "] for test context [" + testContext + "].", e.getTargetException());
+			}
+			catch (final Throwable e) {
+				LOG.error("Exception encountered while executing @AfterTransaction method [" + method
+						+ "] for test context [" + testContext + "].", e);
+			}
+		}
+
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for getAnnotatedMethods().
+	 *
+	 * @param clazz
+	 * @param annotationType
+	 * @return
+	 */
+	protected List<Method> getAnnotatedMethods(final Class<?> clazz, final Class<? extends Annotation> annotationType) {
+
+		final List<Method> results = new ArrayList<Method>();
+		for (final Class<?> eachClass : getSuperClasses(clazz)) {
+			final Method[] methods = eachClass.getDeclaredMethods();
+			for (final Method eachMethod : methods) {
+				final Annotation annotation = eachMethod.getAnnotation(annotationType);
+				if (annotation != null && !isShadowed(eachMethod, results)) {
+					results.add(eachMethod);
+				}
+			}
+		}
+		return results;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for isShadowed().
+	 *
+	 * @param method
+	 * @param results
+	 * @return
+	 */
+	private boolean isShadowed(final Method method, final List<Method> results) {
+
+		for (final Method each : results) {
+			if (isShadowed(method, each)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for isShadowed().
+	 *
+	 * @param current
+	 * @param previous
+	 * @return
+	 */
+	private boolean isShadowed(final Method current, final Method previous) {
+
+		if (!previous.getName().equals(current.getName())) {
+			return false;
+		}
+		if (previous.getParameterTypes().length != current.getParameterTypes().length) {
+			return false;
+		}
+		for (int i = 0; i < previous.getParameterTypes().length; i++) {
+			if (!previous.getParameterTypes()[i].equals(current.getParameterTypes()[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Add comments for getSuperClasses().
+	 *
+	 * @param testClass
+	 * @return
+	 */
+	private List<Class<?>> getSuperClasses(final Class<?> testClass) {
+
+		final ArrayList<Class<?>> results = new ArrayList<Class<?>>();
+		Class<?> current = testClass;
+		while (current != null) {
+			results.add(current);
+			current = current.getSuperclass();
+		}
+		return results;
 	}
 
 	// ------------------------------------------------------------------------|
