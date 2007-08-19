@@ -31,7 +31,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
 
 /**
@@ -54,7 +53,7 @@ import org.springframework.util.Assert;
  * @see Transactional
  * @see NotTransactional
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
@@ -83,6 +82,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 */
 	protected TransactionDefinition				transactionDefinition;
 
+	private PlatformTransactionManager			transactionManager			= null;
+
 	/** Number of transactions started */
 	private int									transactionsStarted			= 0;
 
@@ -93,11 +94,11 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	protected TransactionStatus					transactionStatus;
 
 	/**
-	 * Has the current transaction been marked as 'complete'? In other words,
+	 * Has the current transaction been flagged for 'commit'? In other words,
 	 * should we commit the current transaction upon completion of the current
 	 * test?
 	 */
-	private boolean								transactionMarkedComplete	= false;
+	private boolean								transactionFlaggedForCommit	= false;
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
@@ -115,9 +116,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 *         specified class.
 	 * @throws IllegalArgumentException if the supplied class is
 	 *         <code>null</code>.
+	 * @throws Exception Allows any exception to propagate.
 	 */
 	protected static TransactionConfigurationAttributes retrieveConfigurationAttributes(final Class<?> clazz)
-			throws IllegalArgumentException {
+			throws IllegalArgumentException, Exception {
 
 		Assert.notNull(clazz, "Can not retrieve transaction configuration attributes for a NULL class.");
 		final TransactionConfigurationAttributes configAttributes = DefaultTransactionConfigurationAttributes.constructAttributes(clazz);
@@ -139,23 +141,25 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * </p>
 	 *
 	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#beforeTestMethod(TestContext)
-	 * @throws Exception simply let any exception propagate
+	 * @throws Exception Allows any exception to propagate.
 	 */
 	@Override
-	public void beforeTestMethod(final TestContext<?> testContext) {
+	public void beforeTestMethod(final TestContext<?> testContext) throws Exception {
 
+		super.beforeTestMethod(testContext);
+
+		this.transactionDefinition = null;
 		final Method testMethod = testContext.getTestMethod();
 
 		// Abort early?
 		if (testMethod.isAnnotationPresent(NotTransactional.class)) {
-			this.transactionDefinition = null;
+			this.transactionStatus = null;
 			return;
 		}
 
 		// ---------------------------------------------------------------------
 		// else...
 
-		this.transactionDefinition = new DefaultTransactionDefinition();
 		final TransactionDefinition explicitTransactionDefinition = this.transactionAttributeSource.getTransactionAttribute(
 				testMethod, testContext.getTestClass());
 		if (explicitTransactionDefinition != null) {
@@ -175,7 +179,6 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			}
 		}
 		else if (this.transactionDefinition == null) {
-			// This should theoretically never occur!
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("No transaction definition set for test context [" + testContext
 						+ "]: test will NOT run within a transaction.");
@@ -194,10 +197,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * </p>
 	 *
 	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#afterTestMethod(TestContext)
-	 * @throws Exception simply let any exception propagate
+	 * @throws Exception Allows any exception to propagate.
 	 */
 	@Override
-	public void afterTestMethod(final TestContext<?> testContext) {
+	public void afterTestMethod(final TestContext<?> testContext) throws Exception {
+
+		super.afterTestMethod(testContext);
 
 		// End transaction if the transaction is still active.
 		if (this.transactionStatus != null && !this.transactionStatus.isCompleted()) {
@@ -214,15 +219,17 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * <p>
 	 * Only call this method if {@link #endTransaction()} has been called or if
 	 * no transaction has been previously started.
-	 * {@link #markTransactionComplete(TestContext)} can be used again in the
+	 * {@link #flagTransactionForCommit(TestContext)} can be used again in the
 	 * new transaction. The fate of the new transaction, by default, will be the
 	 * usual {@link #isDefaultRollback() rollback}.
 	 * </p>
 	 *
 	 * @param testContext The current test context.
 	 * @throws TransactionException If starting the transaction failed.
+	 * @throws Exception If an error occurs while retrieving the transaction
+	 *         manager.
 	 */
-	protected void startNewTransaction(final TestContext<?> testContext) throws TransactionException {
+	protected void startNewTransaction(final TestContext<?> testContext) throws TransactionException, Exception {
 
 		if (this.transactionStatus != null) {
 			throw new IllegalStateException("Cannot start new transaction without ending existing transaction: "
@@ -235,11 +242,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 		this.transactionStatus = transactionManager.getTransaction(this.transactionDefinition);
 		++this.transactionsStarted;
-		this.transactionMarkedComplete = !isDefaultRollback(testContext);
+		this.transactionFlaggedForCommit = !isDefaultRollback(testContext);
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Began transaction (" + this.transactionsStarted + "): transaction manager [" + transactionManager
-					+ "]; default rollback [" + isDefaultRollback(testContext) + "].");
+					+ "]; default rollback [" + isDefaultRollback(testContext) + "]; flagged for commmit ["
+					+ this.transactionFlaggedForCommit + "].");
 		}
 	}
 
@@ -249,29 +257,36 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * <p>
 	 * Immediately force a commit or rollback of the transaction for the
 	 * supplied {@link TestContext test context}, according to the
-	 * {@link #isTransactionMarkedComplete(TestContext) complete} flag.
+	 * {@link #isTransactionFlaggedForCommit(TestContext) commit flag}.
 	 * </p>
 	 *
-	 * @see #isTransactionMarkedComplete(TestContext)
+	 * @see #isTransactionFlaggedForCommit(TestContext)
 	 * @param testContext The current test context.
-	 * @throws TransactionException If starting the transaction failed.
+	 * @throws TransactionException If ending the transaction failed.
+	 * @throws Exception If an error occurs while retrieving the transaction
+	 *         manager.
 	 */
-	protected void endTransaction(final TestContext<?> testContext) throws TransactionException {
+	protected void endTransaction(final TestContext<?> testContext) throws TransactionException, Exception {
 
 		// XXX Parse the yet-to-be-defined @Rollback annotation(?)
 
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Ending transaction for test context [" + testContext + "]; transactionStatus ["
+					+ this.transactionStatus + "].");
+		}
+
 		if (this.transactionStatus != null) {
 			try {
-				if (!isTransactionMarkedComplete(testContext)) {
-					getTransactionManager(testContext).rollback(this.transactionStatus);
-					if (LOG.isInfoEnabled()) {
-						LOG.info("Rolled back transaction after test execution for test context [" + testContext + "].");
-					}
-				}
-				else {
+				if (isTransactionFlaggedForCommit(testContext)) {
 					getTransactionManager(testContext).commit(this.transactionStatus);
 					if (LOG.isInfoEnabled()) {
 						LOG.info("Committed transaction after test execution for test context [" + testContext + "].");
+					}
+				}
+				else {
+					getTransactionManager(testContext).rollback(this.transactionStatus);
+					if (LOG.isInfoEnabled()) {
+						LOG.info("Rolled back transaction after test execution for test context [" + testContext + "].");
 					}
 				}
 			}
@@ -291,15 +306,23 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 *        should be retrieved.
 	 * @return The transaction manager to use, or <code>null</code> if not
 	 *         found.
+	 * @throws Exception If an error occurs while retrieving the transaction
+	 *         manager.
 	 */
-	protected final PlatformTransactionManager getTransactionManager(final TestContext<?> testContext) {
+	protected final PlatformTransactionManager getTransactionManager(final TestContext<?> testContext) throws Exception {
+
+		// Lazy load:
+		if (this.transactionManager != null) {
+			return this.transactionManager;
+		}
+
+		// else...
 
 		final TransactionConfigurationAttributes configAttributes = retrieveConfigurationAttributes(testContext.getTestClass());
 		final String transactionManagerName = configAttributes.getTransactionManagerName();
-		PlatformTransactionManager transactionManager = null;
 
 		try {
-			transactionManager = (PlatformTransactionManager) testContext.getApplicationContext().getBean(
+			this.transactionManager = (PlatformTransactionManager) testContext.getApplicationContext().getBean(
 					transactionManagerName, PlatformTransactionManager.class);
 		}
 		catch (final Exception e) {
@@ -307,9 +330,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				LOG.info("Caught exception while retrieving transaction manager with bean name ["
 						+ transactionManagerName + "] for test context [" + testContext + "].", e);
 			}
+			throw e;
 		}
 
-		return transactionManager;
+		return this.transactionManager;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -322,8 +346,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 *        should be retrieved.
 	 * @return The <em>default rollback</em> flag for the supplied test
 	 *         context.
+	 * @throws Exception If an error occurs while retrieving the transaction
+	 *         manager.
 	 */
-	protected final boolean isDefaultRollback(final TestContext<?> testContext) {
+	protected final boolean isDefaultRollback(final TestContext<?> testContext) throws Exception {
 
 		return retrieveConfigurationAttributes(testContext.getTestClass()).isDefaultRollback();
 	}
@@ -332,37 +358,43 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	/**
 	 * Has the current transaction for the supplied
-	 * {@link TestContext test context} been marked as <em>complete</em>? In
+	 * {@link TestContext test context} been <em>flagged for commit</em>? In
 	 * other words, should the current transaction be committed upon completion
-	 * of the current test despite the value of {@link #isDefaultRollback()}?
+	 * of the current test regardless of the value of
+	 * {@link #isDefaultRollback()}?
 	 *
-	 * @see #markTransactionComplete(TestContext)
+	 * @see #flagTransactionForCommit(TestContext)
 	 * @see #isDefaultRollback()
 	 * @param testContext The current test context.
-	 * @return The <em>transactionMarkedComplete</em> flag.
+	 * @return The <em>transactionFlaggedForCommit</em> flag.
 	 */
-	protected final boolean isTransactionMarkedComplete(final TestContext<?> testContext) {
+	protected final boolean isTransactionFlaggedForCommit(final TestContext<?> testContext) {
 
-		return this.transactionMarkedComplete;
+		return this.transactionFlaggedForCommit;
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Mark the current transaction as <em>complete</em>, thus causing the
+	 * Flag the current transaction for <em>commit</em>, thus causing the
 	 * transaction to <em>commit</em> for the current test method, even if the
 	 * default is set to rollback.
 	 *
 	 * @see #isDefaultRollback()
-	 * @throws IllegalStateException if the operation cannot be set to complete
-	 *         as no transaction manager was provided
+	 * @throws IllegalStateException if the transaction cannot be flagged for
+	 *         commit because no transaction manager was provided.
 	 */
-	protected final void markTransactionComplete(final TestContext<?> testContext) {
+	protected final void flagTransactionForCommit(final TestContext<?> testContext) throws IllegalStateException {
 
-		if (getTransactionManager(testContext) == null) {
-			throw new IllegalStateException("No transaction manager set.");
+		try {
+			if (getTransactionManager(testContext) == null) {
+				throw new IllegalStateException("No transaction manager set.");
+			}
 		}
-		this.transactionMarkedComplete = true;
+		catch (final Exception e) {
+			throw new IllegalStateException("No transaction manager set.", e);
+		}
+		this.transactionFlaggedForCommit = true;
 	}
 
 	// ------------------------------------------------------------------------|
