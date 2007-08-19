@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	/**************************************************************************\
+	*
+	* Copyright 2007 the original author or authors.
+	*
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	*
+	*      http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*
+	\**************************************************************************/
+	
+	/***************************************************************************
+	*
+	* Project:      Spring Framework
+	*
+	* Module:       JUnit 4 - Testing Support
+	*
+	* File:         $Source: /var/local/springframework.cvs.sourceforge.net/spring/tiger/test/org/springframework/test/junit4/RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests-context.xml,v $
+	*
+	* Description:  Simple application context for testing transactional support 
+	*               for tests.
+	*
+	* Author:       Sam Brannen
+	*
+	****************************************************************************
+	*
+	* Revision History:
+	*
+	* Modified By: $Author: sbrannen $
+	*
+	* Modified On: $Date: 2007-08-19 13:10:08 $
+	*
+	\**************************************************************************/
+-->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+
+	<context:annotation-config />
+
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+		<property name="url" value="jdbc:hsqldb:mem:transactional_tests" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+
+	<bean id="databaseSetup" class="org.springframework.test.junit4.RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests$DatabaseSetup" />
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:data-source-ref="dataSource" />
+
+</beans>

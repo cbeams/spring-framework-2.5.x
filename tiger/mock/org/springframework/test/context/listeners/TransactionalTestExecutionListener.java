@@ -19,7 +19,9 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.annotation.NotTransactional;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.annotation.TransactionConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TransactionConfigurationAttributes;
@@ -41,19 +43,28 @@ import org.springframework.util.Assert;
  * </p>
  * <p>
  * Changes to the database during a test run with &#064;Transactional will be
- * run within a transaction that will be automatically <em>rolled back</em>
- * after completion of the test; whereas, changes to the database during a test
- * run with &#064;NotTransactional will <strong>not</strong> be run within a
- * transaction.
+ * run within a transaction that will, by default, be automatically
+ * <em>rolled back</em> after completion of the test; whereas, changes to the
+ * database during a test run with &#064;NotTransactional will <strong>not</strong>
+ * be run within a transaction. Similarly, test methods that are not annotated
+ * with &#064;Transactional (at the class or method level) or
+ * &#064;NotTransactional will not be run within a transaction.
  * </p>
  * <p>
- * TODO Comment on configuration via {@link TransactionConfiguration}.
+ * Transactional commit and rollback behavior can be configured via the
+ * class-level {@link TransactionConfiguration @TransactionConfiguration} and
+ * method-level {@link Rollback @Rollback} annotations.
+ * {@link TransactionConfiguration @TransactionConfiguration} also allows you to
+ * configure the bean name of the {@link PlatformTransactionManager} that is to
+ * be used to drive transactions.
  * </p>
  *
  * @see Transactional
  * @see NotTransactional
+ * @see Rollback
+ * @see TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
@@ -118,7 +129,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 *         <code>null</code>.
 	 * @throws Exception Allows any exception to propagate.
 	 */
-	protected static TransactionConfigurationAttributes retrieveConfigurationAttributes(final Class<?> clazz)
+	protected static TransactionConfigurationAttributes retrieveTransactionConfigurationAttributes(final Class<?> clazz)
 			throws IllegalArgumentException, Exception {
 
 		Assert.notNull(clazz, "Can not retrieve transaction configuration attributes for a NULL class.");
@@ -137,9 +148,11 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	/**
 	 * <p>
-	 * Creates a transaction before test method execution.
+	 * Starts a new transaction before test method execution if necessary.
 	 * </p>
 	 *
+	 * @see Transactional
+	 * @see NotTransactional
 	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#beforeTestMethod(TestContext)
 	 * @throws Exception Allows any exception to propagate.
 	 */
@@ -219,9 +232,11 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * <p>
 	 * Only call this method if {@link #endTransaction()} has been called or if
 	 * no transaction has been previously started.
-	 * {@link #flagTransactionForCommit(TestContext)} can be used again in the
-	 * new transaction. The fate of the new transaction, by default, will be the
-	 * usual {@link #isDefaultRollback() rollback}.
+	 * </p>
+	 * <p>
+	 * {@link #flagTransactionForCommit(TestContext)} can be used in the new
+	 * transaction. The fate of the new transaction will then, by default, be
+	 * determined by the configured {@link #isRollback() rollback flag}.
 	 * </p>
 	 *
 	 * @param testContext The current test context.
@@ -242,11 +257,11 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 		this.transactionStatus = transactionManager.getTransaction(this.transactionDefinition);
 		++this.transactionsStarted;
-		this.transactionFlaggedForCommit = !isDefaultRollback(testContext);
+		this.transactionFlaggedForCommit = !isRollback(testContext);
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Began transaction (" + this.transactionsStarted + "): transaction manager [" + transactionManager
-					+ "]; default rollback [" + isDefaultRollback(testContext) + "]; flagged for commmit ["
+					+ "]; rollback [" + isRollback(testContext) + "]; flagged for commmit ["
 					+ this.transactionFlaggedForCommit + "].");
 		}
 	}
@@ -255,9 +270,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	/**
 	 * <p>
-	 * Immediately force a commit or rollback of the transaction for the
-	 * supplied {@link TestContext test context}, according to the
-	 * {@link #isTransactionFlaggedForCommit(TestContext) commit flag}.
+	 * Immediately force a <em>commit</em> or <em>rollback</em> of the
+	 * transaction for the supplied {@link TestContext test context}, according
+	 * to the {@link #isTransactionFlaggedForCommit(TestContext) commit} and
+	 * {@link #isRollback(TestContext) rollback} flags.
 	 * </p>
 	 *
 	 * @see #isTransactionFlaggedForCommit(TestContext)
@@ -268,16 +284,16 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 */
 	protected void endTransaction(final TestContext<?> testContext) throws TransactionException, Exception {
 
-		// XXX Parse the yet-to-be-defined @Rollback annotation(?)
+		final boolean commit = isTransactionFlaggedForCommit(testContext) || !isRollback(testContext);
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Ending transaction for test context [" + testContext + "]; transactionStatus ["
-					+ this.transactionStatus + "].");
+					+ this.transactionStatus + "]; commit [" + commit + "].");
 		}
 
 		if (this.transactionStatus != null) {
 			try {
-				if (isTransactionFlaggedForCommit(testContext)) {
+				if (commit) {
 					getTransactionManager(testContext).commit(this.transactionStatus);
 					if (LOG.isInfoEnabled()) {
 						LOG.info("Committed transaction after test execution for test context [" + testContext + "].");
@@ -318,7 +334,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 		// else...
 
-		final TransactionConfigurationAttributes configAttributes = retrieveConfigurationAttributes(testContext.getTestClass());
+		final TransactionConfigurationAttributes configAttributes = retrieveTransactionConfigurationAttributes(testContext.getTestClass());
 		final String transactionManagerName = configAttributes.getTransactionManagerName();
 
 		try {
@@ -346,12 +362,48 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 *        should be retrieved.
 	 * @return The <em>default rollback</em> flag for the supplied test
 	 *         context.
-	 * @throws Exception If an error occurs while retrieving the transaction
-	 *         manager.
+	 * @throws Exception If an error occurs while determining the default
+	 *         rollback flag.
 	 */
 	protected final boolean isDefaultRollback(final TestContext<?> testContext) throws Exception {
 
-		return retrieveConfigurationAttributes(testContext.getTestClass()).isDefaultRollback();
+		return retrieveTransactionConfigurationAttributes(testContext.getTestClass()).isDefaultRollback();
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Determines whether or not to rollback transactions for the supplied
+	 * {@link TestContext test context} by taking into consideration the
+	 * {@link #isDefaultRollback(TestContext) default rollback} flag and a
+	 * possible method-level override via the {@link Rollback} annotation.
+	 *
+	 * @param testContext The test context for which the rollback flag should be
+	 *        retrieved.
+	 * @return The <em>rollback</em> flag for the supplied test context.
+	 * @throws Exception If an error occurs while determining the rollback flag.
+	 */
+	protected final boolean isRollback(final TestContext<?> testContext) throws Exception {
+
+		boolean rollback = isDefaultRollback(testContext);
+		final Rollback rollbackAnnotation = AnnotationUtils.findAnnotation(testContext.getTestMethod(), Rollback.class);
+		if (rollbackAnnotation != null) {
+
+			final boolean rollbackOverride = rollbackAnnotation.value();
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Method-level @Rollback(" + rollbackOverride + ") overrides default rollback [" + rollback
+						+ "] for test context [" + testContext + "].");
+			}
+			rollback = rollbackOverride;
+		}
+		else {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("No method-level @Rollback override: using default rollback [" + rollback
+						+ "] for test context [" + testContext + "].");
+			}
+		}
+
+		return rollback;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -360,11 +412,11 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * Has the current transaction for the supplied
 	 * {@link TestContext test context} been <em>flagged for commit</em>? In
 	 * other words, should the current transaction be committed upon completion
-	 * of the current test regardless of the value of
-	 * {@link #isDefaultRollback()}?
+	 * of the current test regardless of the value of the
+	 * {@link #isRollback(TestContext) rollback flag}?
 	 *
 	 * @see #flagTransactionForCommit(TestContext)
-	 * @see #isDefaultRollback()
+	 * @see #isRollback(TestContext)
 	 * @param testContext The current test context.
 	 * @return The <em>transactionFlaggedForCommit</em> flag.
 	 */
@@ -377,10 +429,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	/**
 	 * Flag the current transaction for <em>commit</em>, thus causing the
-	 * transaction to <em>commit</em> for the current test method, even if the
-	 * default is set to rollback.
+	 * transaction to be committed for the current test method, even if the
+	 * {@link #isRollback(TestContext) rollback flag} is <code>true</code>.
 	 *
-	 * @see #isDefaultRollback()
+	 * @see #isRollback(TestContext)
 	 * @throws IllegalStateException if the transaction cannot be flagged for
 	 *         commit because no transaction manager was provided.
 	 */

@@ -38,7 +38,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 2.1
  */
 @RunWith(Suite.class)
@@ -69,7 +69,11 @@ MethodLevelTransactionalSpringRunnerTests.class,
 
 DefaultRollbackTrueTransactionalSpringRunnerTests.class,
 
-DefaultRollbackFalseTransactionalSpringRunnerTests.class
+DefaultRollbackFalseTransactionalSpringRunnerTests.class,
+
+RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests.class,
+
+RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests.class
 
 })
 public class SpringJUnit4SuiteTests {
