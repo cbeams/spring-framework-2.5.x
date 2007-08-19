@@ -28,7 +28,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.ContextConfiguration;
-import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.annotation.TestExecutionListeners;
 import org.springframework.test.context.listeners.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.listeners.DirtiesContextTestExecutionListener;
@@ -39,28 +38,27 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * <p>
  * JUnit 4 based unit test which verifies support of Spring's
- * &#064;Transactional, &#064;TestExecutionListeners, and
- * &#064;ContextConfiguration annotations in conjunction with the
- * {@link SpringJUnit4ClassRunner} and the following
+ * {@link Transactional @Transactional},
+ * {@link TestExecutionListeners @TestExecutionListeners}, and
+ * {@link ContextConfiguration @ContextConfiguration} annotations in conjunction
+ * with the {@link SpringJUnit4ClassRunner} and the following
  * {@link TestExecutionListener TestExecutionListeners}:
- * {@link DependencyInjectionTestExecutionListener},
- * {@link DirtiesContextTestExecutionListener}, and
- * {@link TransactionalTestExecutionListener}.
  * </p>
+ * <ul>
+ * <li>{@link DependencyInjectionTestExecutionListener}</li>
+ * <li>{@link DirtiesContextTestExecutionListener}</li>
+ * <li>{@link TransactionalTestExecutionListener}</li>
+ * </ul>
  * <p>
- * This class specifically tests usage of &#064;Transactional defined at the
- * <strong>method level</strong>. In contrast to
+ * This class specifically tests usage of <code>&#064;Transactional</code>
+ * defined at the <strong>method level</strong>. In contrast to
  * {@link ClassLevelTransactionalSpringRunnerTests}, this class omits usage of
- * &#064;NotTransactional.
+ * <code>&#064;NotTransactional</code>.
  * </p>
  *
  * @see ClassLevelTransactionalSpringRunnerTests
- * @see Transactional
- * @see NotTransactional
- * @see TestExecutionListeners
- * @see ContextConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
