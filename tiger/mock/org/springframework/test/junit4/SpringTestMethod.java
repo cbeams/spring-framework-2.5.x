@@ -19,8 +19,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -29,10 +27,13 @@ import org.junit.Test.None;
 import org.junit.internal.runners.TestClass;
 
 /**
- * TODO Add comments for SpringTestMethod.
+ * SpringTestMethod is a custom implementation of JUnit 4.4's
+ * {@link org.junit.internal.runners.TestMethod}. Due to class and method
+ * visibility constraints, it is necessary to duplicate the code of TestMethod
+ * in a local Spring package instead of extending TestMethod.
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 class SpringTestMethod {
@@ -40,9 +41,6 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
-
-	/** Class Logger. */
-	protected static final Log	LOG	= LogFactory.getLog(SpringTestMethod.class);
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
@@ -56,9 +54,9 @@ class SpringTestMethod {
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final Method		method;
+	private final Method	method;
 
-	private final TestClass		testClass;
+	private final TestClass	testClass;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -69,10 +67,11 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for constructor.
+	 * Constructs a test method for the supplied {@link Method method} and
+	 * {@link TestClass test class}.
 	 *
-	 * @param method
-	 * @param testClass
+	 * @param method The test method.
+	 * @param testClass The test class.
 	 */
 	public SpringTestMethod(final Method method, final TestClass testClass) {
 
@@ -89,9 +88,11 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for expectsException().
+	 * Determines if this test method is {@link Test#expected() expected} to
+	 * throw an exception.
 	 *
-	 * @return
+	 * @return <code>true</code> if this test method should throw an
+	 *         exception.
 	 */
 	public boolean expectsException() {
 
@@ -101,9 +102,9 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for getAfters().
+	 * Gets the {@link After @After} methods for this test method.
 	 *
-	 * @return
+	 * @return The <em>after</em> methods.
 	 */
 	public List<Method> getAfters() {
 
@@ -113,9 +114,9 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for getBefores().
+	 * Gets the {@link Before @Before} methods for this test method.
 	 *
-	 * @return
+	 * @return The <em>before</em> methods.
 	 */
 	public List<Method> getBefores() {
 
@@ -125,9 +126,11 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for getExpectedException().
+	 * Gets the {@link Test#expected() exception} that this test method is
+	 * expected to throw.
 	 *
-	 * @return
+	 * @return The expected exception, or <code>null</code> if none was
+	 *         specified.
 	 */
 	protected Class<? extends Throwable> getExpectedException() {
 
@@ -145,7 +148,7 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for getMethod().
+	 * Gets the actual {@link Method method} referenced by this test method.
 	 *
 	 * @return The test method.
 	 */
@@ -157,7 +160,7 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for getTestClass().
+	 * Gets the {@link TestClass test class} for this test method.
 	 *
 	 * @return The test class.
 	 */
@@ -169,9 +172,9 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for getTimeout().
+	 * Gets the configured {@link Test#timeout() timeout} for this test method.
 	 *
-	 * @return
+	 * @return The timeout, or <code>0</code> if none was specified.
 	 */
 	public long getTimeout() {
 
@@ -188,9 +191,11 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for invoke().
+	 * Convenience method for {@link Method#invoke(Object, Object...) invoking}
+	 * the method associated with this test method. Throws exceptions consistent
+	 * with {@link Method#invoke(Object, Object...) Method.invoke()}.
 	 *
-	 * @param testInstance
+	 * @param testInstance The test instance upon which to invoke the method.
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 * @throws InvocationTargetException
@@ -204,9 +209,9 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for isIgnored().
+	 * Determines if this test method should be ignored.
 	 *
-	 * @return
+	 * @return <code>true</code> if this test method should be ignored.
 	 */
 	public boolean isIgnored() {
 
@@ -216,10 +221,12 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for isUnexpected().
+	 * Determines if this test method {@link Test#expected() expects} exceptions
+	 * of the type of the supplied <code>exception</code> to be thrown.
 	 *
-	 * @param exception
-	 * @return
+	 * @param exception The thrown exception.
+	 * @return <code>true</code> if the supplied exception was of an expected
+	 *         type.
 	 */
 	public boolean isUnexpected(final Throwable exception) {
 
