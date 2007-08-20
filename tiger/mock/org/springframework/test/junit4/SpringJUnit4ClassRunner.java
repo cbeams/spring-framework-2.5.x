@@ -29,17 +29,14 @@ import org.springframework.test.context.TestContextManager;
 /**
  * <p>
  * SpringJUnit4ClassRunner is a custom extension of {@link JUnit4ClassRunner}
- * which provides Spring testing functionality to standard JUnit tests by means
- * of the {@link TestContextManager} and associated support classes and
+ * which provides Spring testing functionality to standard JUnit 4.4+ tests by
+ * means of the {@link TestContextManager} and associated support classes and
  * annotations.
  * </p>
- * <p>
- * TODO Comment on configuration via ContextConfiguration,
- * TransactionConfiguration, etc.
- * </p>
  *
+ * @see TestContextManager
  * @author Sam Brannen
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 2.1
  */
 public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
@@ -150,7 +147,9 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @return The testContextManager.
+	 * Gets the {@link TestContextManager} associated with this runner.
+	 *
+	 * @return The TestContextManager.
 	 */
 	protected final TestContextManager<T> getTestContextManager() {
 
@@ -160,7 +159,8 @@ public class SpringJUnit4ClassRunner<T> extends JUnit4ClassRunner {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for invokeTestMethod().
+	 * Invokes the supplied {@link Method test method} and notifies the supplied
+	 * {@link RunNotifier} of the appropriate events.
 	 *
 	 * @see #createTest()
 	 * @see JUnit4ClassRunner#invokeTestMethod(Method, RunNotifier)

@@ -45,8 +45,8 @@ import org.springframework.util.Assert;
 /**
  * <p>
  * TestExecutionListener which provides support for executing tests within
- * transactions by using Spring's &#064;Transactional and &#064;NotTransactional
- * annotations.
+ * transactions by using {@link Transactional @Transactional} and
+ * {@link NotTransactional @NotTransactional} annotations.
  * </p>
  * <p>
  * Changes to the database during a test run with &#064;Transactional will be
@@ -61,12 +61,16 @@ import org.springframework.util.Assert;
  * Transactional commit and rollback behavior can be configured via the
  * class-level {@link TransactionConfiguration @TransactionConfiguration} and
  * method-level {@link Rollback @Rollback} annotations.
- * {@link TransactionConfiguration @TransactionConfiguration} also allows you to
- * configure the bean name of the {@link PlatformTransactionManager} that is to
- * be used to drive transactions.
+ * {@link TransactionConfiguration @TransactionConfiguration} also provides
+ * configuration of the bean name of the {@link PlatformTransactionManager} that
+ * is to be used to drive transactions.
  * </p>
  * <p>
- * TODO Comment on usage of &#064;BeforeTransaction and &#064;AfterTransaction.
+ * When executing transactional tests, it is sometimes useful to be able execute
+ * certain <em>set up</em> or <em>tear down</em> code outside of a
+ * transaction. TransactionalTestExecutionListener provides such support for
+ * methods annotated with {@link BeforeTransaction @BeforeTransaction} and
+ * {@link AfterTransaction @AfterTransaction}.
  * </p>
  *
  * @see Transactional
@@ -74,7 +78,7 @@ import org.springframework.util.Assert;
  * @see Rollback
  * @see TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 2.1
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
@@ -281,7 +285,15 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	/**
 	 * <p>
-	 * Starts a new transaction before test method execution if necessary.
+	 * If the test method of the supplied {@link TestContext test context} is
+	 * configured to run within a transaction, this method will run
+	 * {@link BeforeTransaction @BeforeTransaction methods} and start a new
+	 * transaction.
+	 * </p>
+	 * <p>
+	 * Note that if a {@link BeforeTransaction @BeforeTransaction method} fails,
+	 * remaining {@link BeforeTransaction @BeforeTransaction methods} will not
+	 * be invoked, and a transaction will not be started.
 	 * </p>
 	 *
 	 * @see Transactional
@@ -340,7 +352,13 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	/**
 	 * <p>
-	 * Ends the transaction after test method execution if necessary.
+	 * If a transaction is currently active for the test method of the supplied
+	 * {@link TestContext test context}, this method will end the transaction
+	 * and run {@link AfterTransaction @AfterTransaction methods}.
+	 * </p>
+	 * <p>
+	 * {@link AfterTransaction @AfterTransaction methods} are guaranteed to be
+	 * invoked even if an error occurs while ending the transaction.
 	 * </p>
 	 *
 	 * @see org.springframework.test.context.listeners.AbstractTestExecutionListener#afterTestMethod(TestContext)

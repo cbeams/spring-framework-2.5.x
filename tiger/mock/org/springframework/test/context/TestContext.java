@@ -45,8 +45,9 @@ import org.springframework.util.ClassUtils;
  * {@link javax.annotation.Resource Resource}.
  * </p>
  *
+ * @param <T> The type of the test managed by this TestContext.
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 public class TestContext<T> {
@@ -91,8 +92,10 @@ public class TestContext<T> {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Constructs a new test context for the supplied {@link Class class} and
-	 * {@link ContextCache context cache}.
+	 * Constructs a new test context for the supplied {@link Class test class}
+	 * and {@link ContextCache context cache} and parses the
+	 * {@link ContextConfigurationAttributes} configured for the test class via
+	 * the {@link org.springframework.test.annotation.ContextConfiguration @ContextConfiguration} annotation.
 	 *
 	 * @param testClass The {@link Class} object corresponding to the test class
 	 *        for which the test context should be constructed, not
@@ -204,11 +207,10 @@ public class TestContext<T> {
 	protected static ContextConfigurationAttributes retrieveConfigurationAttributes(final Class<?> clazz)
 			throws IllegalArgumentException {
 
-		Assert.notNull(clazz, "Can not retrieve context configuration attributes for a NULL class.");
+		Assert.notNull(clazz, "Can not retrieve ContextConfigurationAttributes for a NULL class.");
 		final ContextConfigurationAttributes configAttributes = DefaultContextConfigurationAttributes.constructAttributes(clazz);
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Retrieved context configuration attributes [" + configAttributes + "] for class [" + clazz
-					+ "].");
+			LOG.debug("Retrieved ContextConfigurationAttributes [" + configAttributes + "] for class [" + clazz + "].");
 		}
 		return configAttributes;
 	}
