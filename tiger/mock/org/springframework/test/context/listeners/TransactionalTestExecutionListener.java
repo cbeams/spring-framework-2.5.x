@@ -74,7 +74,7 @@ import org.springframework.util.Assert;
  * @see Rollback
  * @see TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 2.1
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
@@ -123,6 +123,129 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Gets all superclasses of the supplied {@link Class class}, including the
+	 * class itself. The ordering of the returned list will begin with the
+	 * supplied class and continue up the class hierarchy.
+	 * </p>
+	 * <p>
+	 * Note: This code has been borrowed from
+	 * {@link org.junit.internal.runners.TestClass#getSuperClasses(Class)} and
+	 * adapted.
+	 * </p>
+	 *
+	 * @param clazz The class for which to retrieve the superclasses.
+	 * @return All superclasses of the supplied class.
+	 */
+	protected static List<Class<?>> getSuperClasses(final Class<?> clazz) {
+
+		final ArrayList<Class<?>> results = new ArrayList<Class<?>>();
+		Class<?> current = clazz;
+		while (current != null) {
+			results.add(current);
+			current = current.getSuperclass();
+		}
+		return results;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Gets all methods in the supplied {@link Class class} and its superclasses
+	 * which are annotated with the supplied <code>annotationType</code> but
+	 * which are not <em>shadowed</em> by methods overridden in subclasses.
+	 * </p>
+	 * <p>
+	 * Note: This code has been borrowed from
+	 * {@link org.junit.internal.runners.TestClass#getAnnotatedMethods(Class)}
+	 * and adapted.
+	 * </p>
+	 *
+	 * @param clazz The class for which to retrieve the annotated methods.
+	 * @param annotationType The annotation type for which to search.
+	 * @return All annotated methods in the supplied class and its superclasses.
+	 */
+	protected static List<Method> getAnnotatedMethods(final Class<?> clazz,
+			final Class<? extends Annotation> annotationType) {
+
+		final List<Method> results = new ArrayList<Method>();
+		for (final Class<?> eachClass : getSuperClasses(clazz)) {
+			final Method[] methods = eachClass.getDeclaredMethods();
+			for (final Method eachMethod : methods) {
+				final Annotation annotation = eachMethod.getAnnotation(annotationType);
+				if (annotation != null && !isShadowed(eachMethod, results)) {
+					results.add(eachMethod);
+				}
+			}
+		}
+		return results;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Determines if the supplied {@link Method method} is <em>shadowed</em>
+	 * by a method in supplied {@link List list} of previous methods.
+	 * </p>
+	 * <p>
+	 * Note: This code has been borrowed from
+	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method,List)}.
+	 * </p>
+	 *
+	 * @param method The method to check for shadowing.
+	 * @param previousMethods The list of methods which have previously been
+	 *        processed.
+	 * @return <code>true</code> if the supplied method is shadowed by a
+	 *         method in the <code>previousMethods</code> list.
+	 */
+	protected static boolean isShadowed(final Method method, final List<Method> previousMethods) {
+
+		for (final Method each : previousMethods) {
+			if (isShadowed(method, each)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Determines if the supplied {@link Method current method} is
+	 * <em>shadowed</em> by a {@link Method previous method}.
+	 * </p>
+	 * <p>
+	 * Note: This code has been borrowed from
+	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method,Method)}.
+	 * </p>
+	 *
+	 * @param current The current method.
+	 * @param previous The previous method.
+	 * @return <code>true</code> if the previous method shadows the current
+	 *         one.
+	 */
+	private static boolean isShadowed(final Method current, final Method previous) {
+
+		if (!previous.getName().equals(current.getName())) {
+			return false;
+		}
+		if (previous.getParameterTypes().length != current.getParameterTypes().length) {
+			return false;
+		}
+		for (int i = 0; i < previous.getParameterTypes().length; i++) {
+			if (!previous.getParameterTypes()[i].equals(current.getParameterTypes()[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	// ------------------------------------------------------------------------|
 
 	/**
@@ -242,7 +365,11 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for runBeforeTransactionMethods().
+	 * Runs all {@link BeforeTransaction @BeforeTransaction methods} for the
+	 * specified {@link TestContext test context}. If one of the methods fails,
+	 * however, the caught exception will be rethrown in a wrapped
+	 * {@link RuntimeException}, and the remaining methods will not be given a
+	 * chance to execute.
 	 *
 	 * @param testContext The current test context.
 	 */
@@ -269,7 +396,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for runAfterTransactionMethods().
+	 * Runs all {@link AfterTransaction @AfterTransaction methods} for the
+	 * specified {@link TestContext test context}. If one of the methods fails,
+	 * the caught exception will be logged as an error, and the remaining
+	 * methods will be given a chance to execute.
 	 *
 	 * @param testContext The current test context.
 	 */
@@ -294,93 +424,6 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			}
 		}
 
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * TODO Add comments for getAnnotatedMethods().
-	 *
-	 * @param clazz
-	 * @param annotationType
-	 * @return
-	 */
-	protected List<Method> getAnnotatedMethods(final Class<?> clazz, final Class<? extends Annotation> annotationType) {
-
-		final List<Method> results = new ArrayList<Method>();
-		for (final Class<?> eachClass : getSuperClasses(clazz)) {
-			final Method[] methods = eachClass.getDeclaredMethods();
-			for (final Method eachMethod : methods) {
-				final Annotation annotation = eachMethod.getAnnotation(annotationType);
-				if (annotation != null && !isShadowed(eachMethod, results)) {
-					results.add(eachMethod);
-				}
-			}
-		}
-		return results;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * TODO Add comments for isShadowed().
-	 *
-	 * @param method
-	 * @param results
-	 * @return
-	 */
-	private boolean isShadowed(final Method method, final List<Method> results) {
-
-		for (final Method each : results) {
-			if (isShadowed(method, each)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * TODO Add comments for isShadowed().
-	 *
-	 * @param current
-	 * @param previous
-	 * @return
-	 */
-	private boolean isShadowed(final Method current, final Method previous) {
-
-		if (!previous.getName().equals(current.getName())) {
-			return false;
-		}
-		if (previous.getParameterTypes().length != current.getParameterTypes().length) {
-			return false;
-		}
-		for (int i = 0; i < previous.getParameterTypes().length; i++) {
-			if (!previous.getParameterTypes()[i].equals(current.getParameterTypes()[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * TODO Add comments for getSuperClasses().
-	 *
-	 * @param testClass
-	 * @return
-	 */
-	private List<Class<?>> getSuperClasses(final Class<?> testClass) {
-
-		final ArrayList<Class<?>> results = new ArrayList<Class<?>>();
-		Class<?> current = testClass;
-		while (current != null) {
-			results.add(current);
-			current = current.getSuperclass();
-		}
-		return results;
 	}
 
 	// ------------------------------------------------------------------------|
