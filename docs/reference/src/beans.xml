@@ -838,7 +838,13 @@ public class ExampleBean {
 			    <para>One possible solution to this issue is to edit the source code of
 			    some of your classes to be configured via setters instead of via
 			    constructors. Another solution is not to use constructor injection
-			    and stick to setter injection only.</para>
+			    and stick to setter injection only. In other words, while it should
+                generally be avoided in all but the rarest of circumstances, it is
+                possible to configure circular dependencies with setter injection.</para>
+                <para>Unlike the <emphasis>typical</emphasis> case (with no circular
+                dependencies), a circular dependency between bean A and bean B will
+                force one of the beans to be injected into the other prior to being
+                fully initialized itself (a classic chicken/egg scenario).</para>
 			</sidebar>
             <para>
 				You can generally trust Spring to do the right thing. It will detect
@@ -860,16 +866,16 @@ public class ExampleBean {
 				singleton beans to lazy-initialize (that is not be pre-instantiated).
 			</para>
             <para>
-				Finally, if it is not immediately apparent, it is worth mentioning that when
-				one or more collaborating beans are being injected into a dependent bean, each
-				collaborating bean is <emphasis>totally</emphasis> configured prior to being
-				passed (via one of the DI flavors) to the dependent bean.
-				This means that if bean A has a dependency on bean B, the Spring IoC container
-				will <emphasis>totally</emphasis> configure bean B prior to invoking the setter method
-				on bean A; you can read '<emphasis>totally configure</emphasis>'
-				to mean that the bean will be instantiated (if not a pre-instantiated singleton),
-				all of its dependencies will be set, and the relevant lifecycle methods (such as
-				a <link linkend="beans-factory-lifecycle-initializingbean">configured init method</link>
+				If no circular dependencies are involved (see sidebar for a discussion of
+                circular dependencies), when one or more collaborating beans are being injected
+                into a dependent bean, each collaborating bean is <emphasis>totally</emphasis>
+                configured prior to being passed (via one of the DI flavors) to the dependent
+                bean. This means that if bean A has a dependency on bean B, the Spring IoC
+                container will <emphasis>totally</emphasis> configure bean B prior to invoking
+                the setter method on bean A; you can read '<emphasis>totally configure</emphasis>'
+                to mean that the bean will be instantiated (if not a pre-instantiated singleton),
+                all of its dependencies will be set, and the relevant lifecycle methods (such as a
+                <link linkend="beans-factory-lifecycle-initializingbean">configured init method</link>
 				or the
 				<link linkend="beans-factory-lifecycle-initializingbean">IntializingBean callback method</link>)
 				will all be invoked.
