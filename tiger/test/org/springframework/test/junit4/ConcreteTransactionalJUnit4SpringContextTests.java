@@ -23,6 +23,8 @@ import static org.junit.Assert.assertTrue;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
+import junit.framework.JUnit4TestAdapter;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +46,7 @@ import org.springframework.test.jdbc.SimpleJdbcTestUtils;
  * {@link AbstractTransactionalJUnit4SpringContextTests}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 @ContextConfiguration
@@ -93,6 +95,12 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
+
+	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
+	public static junit.framework.Test suite() {
+
+		return new JUnit4TestAdapter(ConcreteTransactionalJUnit4SpringContextTests.class);
+	}
 
 	protected static int clearPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
 
