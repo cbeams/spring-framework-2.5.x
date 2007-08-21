@@ -17,6 +17,7 @@
 
 	<context:annotation-config />
 
-	<bean id="databaseSetup" class="org.springframework.test.context.JUnit38TestContextManagerTests$DatabaseSetup" />
+	<bean id="databaseSetup"
+		class="org.springframework.test.junit38.ConcreteTransactionalJUnit38SpringContextTests$DatabaseSetup" />
 
 </beans>

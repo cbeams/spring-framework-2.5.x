@@ -13,114 +13,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.context;
-
-import java.lang.reflect.Method;
+package org.springframework.test.junit38;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-
-import org.junit.internal.runners.JUnit38ClassRunner;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.AfterTransaction;
 import org.springframework.test.annotation.BeforeTransaction;
 import org.springframework.test.annotation.ContextConfiguration;
-import org.springframework.test.annotation.TestExecutionListeners;
-import org.springframework.test.context.listeners.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.listeners.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.listeners.TransactionalTestExecutionListener;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
- * JUnit38TestContextManagerTests serves as a proof-of-concept for manually
- * using a {@link TestContextManager} to instrument a JUnit 3.8 based test.
+ * Unit test for {@link AbstractTransactionalJUnit38SpringContextTests}.
  *
  * @author Sam Brannen
  * @version $Revision: 1.1 $
  * @since 2.1
  */
-@RunWith(JUnit38ClassRunner.class)
 @ContextConfiguration
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-		TransactionalTestExecutionListener.class })
-@Transactional
-public class JUnit38TestContextManagerTests extends TestCase {
+public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTransactionalJUnit38SpringContextTests {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected static final String										BOB		= "bob";
+	protected static final String		BOB		= "bob";
 
-	protected static final String										JANE	= "jane";
+	protected static final String		JANE	= "jane";
 
-	protected static final String										SUE		= "sue";
+	protected static final String		SUE		= "sue";
 
-	protected static final String										LUKE	= "luke";
+	protected static final String		LUKE	= "luke";
 
-	protected static final String										LEIA	= "leia";
+	protected static final String		LEIA	= "leia";
 
-	protected static final String										YODA	= "yoda";
+	protected static final String		YODA	= "yoda";
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected static SimpleJdbcTemplate									simpleJdbcTemplate;
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC INITIALIZATION ----------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	private final TestContextManager<JUnit38TestContextManagerTests>	testContextManager;
-
-	private final Method												testMethod;
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE INITIALIZATION --------------------------------------------|
-	// ------------------------------------------------------------------------|
+	protected static SimpleJdbcTemplate	simpleJdbcTemplate;
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	// ------------------------------------------------------------------------|
+	public ConcreteTransactionalJUnit38SpringContextTests() throws Exception {
 
-	/**
-	 * Default no-args constructor which delegates to
-	 * {@link #JUnit38TestContextManagerTests(String)}, passing a value of
-	 * <code>null</code> for the name.
-	 *
-	 * @throws Exception
-	 */
-	public JUnit38TestContextManagerTests() throws Exception {
-
-		this(null);
+		super();
 	}
 
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * TODO Add comments for constructor.
-	 *
-	 * @param name
-	 * @throws Exception
-	 */
-	public JUnit38TestContextManagerTests(final String name) throws Exception {
+	public ConcreteTransactionalJUnit38SpringContextTests(final String name) throws Exception {
 
 		super(name);
-		this.testContextManager = new TestContextManager<JUnit38TestContextManagerTests>(
-				JUnit38TestContextManagerTests.class);
-		this.testMethod = getClass().getMethod(getName(), (Class[]) null);
-		this.testContextManager.prepareTestInstance(this);
 	}
 
 	// ------------------------------------------------------------------------|
@@ -159,41 +106,6 @@ public class JUnit38TestContextManagerTests extends TestCase {
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * TODO Add comments for overridden runBare().
-	 *
-	 * @see junit.framework.TestCase#runBare()
-	 */
-	@Override
-	public void runBare() throws Throwable {
-
-		Throwable exception = null;
-		this.testContextManager.beforeTestMethod(this, this.testMethod);
-		setUp();
-		try {
-			runTest();
-		}
-		catch (final Throwable running) {
-			exception = running;
-		}
-		finally {
-			try {
-				tearDown();
-			}
-			catch (final Throwable tearingDown) {
-				if (exception == null) {
-					exception = tearingDown;
-				}
-			}
-		}
-		this.testContextManager.afterTestMethod(this, this.testMethod, exception);
-		if (exception != null) {
-			throw exception;
-		}
-	}
-
 	// ------------------------------------------------------------------------|
 
 	@BeforeTransaction
