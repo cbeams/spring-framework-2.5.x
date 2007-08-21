@@ -677,47 +677,55 @@ public class SampleController extends AbstractController {
 		<classname>MultiActionController</classname> is especially handy when you have a lot of related functionality
 		that would perhaps be nice to define all in a single class without having to implement one
 		<interfacename>Controller</interfacename> for each bit of functionality.
-		The <classname>MultiActionController</classname> typically is not appropriate for capturing the request-handling
-		logic of complex request-handling logic or use cases that address totally-different areas of functionality, and
+		The <classname>MultiActionController</classname> typically is not appropriate for capturing very complex
+        request-handling logic or use cases that address totally-different areas of functionality, and
 		you are encouraged to stick with the standard
 		<emphasis>'one piece-of-functionality maps to one <interfacename>Controller</interfacename>'</emphasis> for such
 		cases.</para>
 
 		<para>There are two usage-styles for the <classname>MultiActionController</classname>. Either you subclass the
 		<classname>MultiActionController</classname> and specify the methods that will be resolved by the
-		<interfacename>MethodNameResolver</interfacename> on your subclass (in which case you don't need to set the
-		delegate), or you define a delegate object, on which methods resolved by the
-		<interfacename>MethodNameResolver</interfacename> will be invoked. If you choose this latter style, you will
-		have to inject your delegate object into the <classname>MultiActionController</classname> as a collaborator.</para>
+		<interfacename>MethodNameResolver</interfacename> on your subclass, or you define a delegate object, on which
+        methods resolved by the <interfacename>MethodNameResolver</interfacename> will be invoked. If you choose the former
+        style, you do not need to set a delegate, but for the latter style, you will need to inject your delegate object
+        into the <classname>MultiActionController</classname> as a collaborator (either as a single constructor argument
+        or via the '<methodname>setDelegate</methodname>' method).</para>
 
-		<para>The <classname>MultiActionController</classname> needs some strategy to determine which method has to be
-		invoked to handle an incoming request: this strategy is defined by the
+		<para>The <classname>MultiActionController</classname> needs some strategy to determine which method to invoke
+		when handling an incoming request: this strategy is defined by the
 		<interfacename>MethodNameResolver</interfacename> interface. The <classname>MultiActionController</classname>
-		class exposes the ' <literal>methodNameResolver</literal>' property so that you can inject a
+		class exposes the '<literal>methodNameResolver</literal>' property so that you can inject a
 		<interfacename>MethodNameResolver</interfacename> that is capable of doing that. The methods that you define on
 		a <classname>MultiActionController</classname> (or on the class of the injected delegate object) must conform to
 		the following signature:</para>
       
 		<programlisting><lineannotation>// '<literal>anyMeaningfulName</literal>' can be replaced by any method name</lineannotation><![CDATA[
-public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpServletResponse [, Exception | AnyObject])]]></programlisting>
+public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpServletResponse [,HttpSession] [,AnyObject])]]></programlisting>
 
-		<para>Now rather than duplicate the details of the above signature in this reference documentation
-		<emphasis>and</emphasis> in the class-level Javadoc of the <classname>MultiActionController</classname> source
-		itself (a sure recipe for the two bits of documentation becoming out of synch and confusing), you are directed
-		to said <ulink url="http://www.springframework.org/docs/api/org/springframework/web/servlet/mvc/multiaction/MultiActionController.html">class-level Javadoc</ulink>.
-
-		However, find below some examples of valid <classname>MultiActionController</classname> method signatures.</para>
+		<para>The full details of this method signature are covered in the
+        <ulink url="http://www.springframework.org/docs/api/org/springframework/web/servlet/mvc/multiaction/MultiActionController.html">class-level Javadoc</ulink>
+        of the <classname>MultiActionController</classname> source itself. If you are planning to use the
+        <classname>MultiActionController</classname>, you are highly encouraged to consult that Javadoc. However, below you
+        will find some basic examples of valid <classname>MultiActionController</classname> method signatures.</para>
 
 		<para>The standard signature (mirrors the <interfacename>Controller</interfacename> interface method).</para>
-		<programlisting><![CDATA[public ModelAndView doRequest(HttpServletRequest, HttpServletResponse)]]></programlisting>
-		<para>This signature accepts a <classname>Login</classname> argument that will be populated (bound) with parameters stripped from the request</para>
-		<programlisting><![CDATA[public ModelAndView doLogin(HttpServletRequest, HttpServletResponse, Login)]]></programlisting>
-		<para>The signature for an <classname>Exception</classname> handling method.</para>
-		<programlisting><![CDATA[public ModelAndView processException(HttpServletRequest, HttpServletResponse, IllegalArgumentException)]]></programlisting>
-		<para>This signature has a void return type (see the section entitled <xref linkend="mvc-coc"/> below).</para>
-		<programlisting><![CDATA[public void goHome(HttpServletRequest, HttpServletResponse)]]></programlisting>
-		<para>This signature has a <interfacename>Map</interfacename> return type (see the section entitled <xref linkend="mvc-coc"/> below).</para>
-		<programlisting><![CDATA[public Map doRequest(HttpServletRequest, HttpServletResponse)]]></programlisting>
+		<programlisting><![CDATA[public ModelAndView displayCatalog(HttpServletRequest, HttpServletResponse)]]></programlisting>
+		<para>This signature accepts a <classname>Login</classname> argument that will be populated (bound) with parameters retrieved from the request.</para>
+		<programlisting><![CDATA[public ModelAndView login(HttpServletRequest, HttpServletResponse, Login)]]></programlisting>
+        <para>This signature requires that the request already have a valid session.</para>
+        <programlisting><![CDATA[public ModelAndView viewCart(HttpServletRequest, HttpServletResponse, HttpSession)]]></programlisting>
+        <para>This signature accepts a <classname>Product</classname> argument that will be populated (bound) with parameters retrieved from the request
+        <emphasis>and</emphasis> requires that the request already have a valid session. Note that the order of arguments is important: the
+        session must be the third argument, and an object to be bound must always be the final argument (fourth when a session is specified,
+        or third otherwise).</para>
+        <programlisting><![CDATA[public ModelAndView updateCart(HttpServletRequest, HttpServletResponse, HttpSession, Product)]]></programlisting>
+		<para>This signature has a <literal>void</literal> return type indicating that the handler method assumes the
+		responsibility of writing the response.</para>
+		<programlisting><![CDATA[public void home(HttpServletRequest, HttpServletResponse)]]></programlisting>
+		<para>This signature has a <interfacename>Map</interfacename> return type indicating that a view name translator
+		will be responsible for providing the view name based upon the request, and the model will consist of the
+		<interfacename>Map's</interfacename> entries (see the section entitled <xref linkend="mvc-coc"/> below).</para>
+		<programlisting><![CDATA[public Map list(HttpServletRequest, HttpServletResponse)]]></programlisting>
 
 		<para>The <interfacename>MethodNameResolver</interfacename> is responsible for resolving method names based on
 		the specifics of the incoming <interfacename>HttpServletRequest</interfacename>. A number of
@@ -727,6 +735,13 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
 		explicitly.</para>
 
 		<itemizedlist>
+            <listitem>
+                <para><classname>InternalPathMethodNameResolver</classname> - interprets the final filename from the
+                request path and uses that as the method name/</para>
+                <para>For example, '<literal>http://www.sf.net/testing.view</literal>' will result in the method
+                <methodname>testing(HttpServletRequest, HttpServletResponse)</methodname> being invoked.</para>
+            </listitem>
+
 			<listitem>
 				<para><classname>ParameterMethodNameResolver</classname> - interprets a request parameter as the name of
 				the method that is to be invoked.</para>
@@ -737,23 +752,26 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
 			</listitem>
 
 			<listitem>
-				<para><classname>InternalPathMethodNameResolver</classname> - interprets the final filename from the
-				request path and uses that as the method name/</para>
-				<para>For example, '<literal>http://www.sf.net/testing.view</literal>' will result in the method
-				<methodname>testing(HttpServletRequest, HttpServletResponse)</methodname> being invoked.</para>
-			</listitem>
-
-			<listitem>
 				<para><classname>PropertiesMethodNameResolver</classname> - uses a user-defined
 				<classname>Properties</classname> object with request URLs mapped to method names. For example, when the
 				<classname>Properties</classname> contain '<literal>/index/welcome.html=doIt</literal>' and a request to
 				<literal>/index/welcome.html</literal> comes in, the
-				<methodname>doIt(HttpServletRequest, HttpServletResponse)</methodname> will be invoked. This
+				<methodname>doIt(HttpServletRequest, HttpServletResponse)</methodname> method will be invoked. This
 				particular <interfacename>MethodNameResolver</interfacename> uses the Spring
-				<classname>PathMatcher</classname> class internally , so if the <classname>Properties</classname>
+				<classname>PathMatcher</classname> class internally, so if the <classname>Properties</classname>
 				contained '<literal>/**/welcom?.html</literal>', the example would also have worked.</para>
 			</listitem>
 		</itemizedlist>
+        
+        <para>You may also declare custom methods for handling <classname>Exceptions</classname> that occur during request
+        handling. The valid signature for such a method is similar to the request handling methods in that the
+        <interfacename>HttpServletRequest</interfacename> and <interfacename>HttpServletResponse</interfacename> must be
+        provided as the first and second parameters respectively. Unlike request handling methods however, the method's
+        name is irrelevant. Instead, when determining which <classname>Exception</classname> handling method to invoke,
+        the decision is based upon the most specific possible match among the methods whose third argument is some type
+        of <classname>Exception</classname>. Here is an example signature for one such <classname>Exception</classname>
+        handling method.</para>
+        <programlisting><![CDATA[public ModelAndView processException(HttpServletRequest, HttpServletResponse, IllegalArgumentException)]]></programlisting>
 
 		<para>Let's look at an example showing the delegate-style of <classname>MultiActionController</classname>
 		usage in conjunction with the <classname>ParameterMethodNameResolver</classname>.</para>
