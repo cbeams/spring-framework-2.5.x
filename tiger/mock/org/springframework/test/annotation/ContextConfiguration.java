@@ -22,7 +22,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.support.GenericXmlContextLoader;
@@ -37,7 +36,7 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * @see ContextLoader
  * @see ApplicationContext
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -104,29 +103,5 @@ public @interface ContextConfiguration {
 	 * @see #generateDefaultLocations()
 	 */
 	Class<? extends ContextLoader> loaderClass() default GenericXmlContextLoader.class;
-
-	/**
-	 * <p>
-	 * Are dependencies to be injected via autowiring?
-	 * </p>
-	 * <p>
-	 * Note: setting this attribute generally only affects non-annotation-based
-	 * autowiring.
-	 * </p>
-	 * <p>
-	 * Defaults to {@link Autowire#NO no}.
-	 * </p>
-	 */
-	Autowire autowire() default Autowire.NO;
-
-	/**
-	 * <p>
-	 * Is dependency checking to be performed for configured objects?
-	 * </p>
-	 * <p>
-	 * Defaults to <code>false</code>.
-	 * </p>
-	 */
-	boolean checkDependencies() default false;
 
 }

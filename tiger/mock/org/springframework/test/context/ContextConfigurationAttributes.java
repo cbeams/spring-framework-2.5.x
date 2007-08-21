@@ -17,7 +17,6 @@ package org.springframework.test.context;
 
 import java.io.Serializable;
 
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.ContextConfiguration;
 import org.springframework.test.context.support.DefaultContextConfigurationAttributes;
@@ -38,7 +37,7 @@ import org.springframework.test.context.support.DefaultContextConfigurationAttri
  * @see ContextConfiguration
  * @see DefaultContextConfigurationAttributes
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public interface ContextConfigurationAttributes extends Serializable {
@@ -46,13 +45,6 @@ public interface ContextConfigurationAttributes extends Serializable {
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
-
-	/**
-	 * Are dependencies to be injected via autowiring? Note that a value of
-	 * {@link Autowire#NO no} does not necessarily preclude autowiring of
-	 * <em>annotated</em> fields or methods.
-	 */
-	public abstract Autowire getAutowireMode();
 
 	/**
 	 * The {@link ContextLoader} type to use for loading the
@@ -82,11 +74,6 @@ public interface ContextConfigurationAttributes extends Serializable {
 	 * @see #isGenerateDefaultLocations()
 	 */
 	public abstract String[] getLocations();
-
-	/**
-	 * Is dependency checking to be performed for autowired beans?
-	 */
-	public abstract boolean isCheckDependencies();
 
 	/**
 	 * Whether or not <em>default</em> locations should be generated if no

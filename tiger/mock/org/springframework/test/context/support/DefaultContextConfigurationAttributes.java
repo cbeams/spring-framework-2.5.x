@@ -23,7 +23,6 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.test.annotation.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
@@ -48,7 +47,7 @@ import org.springframework.util.StringUtils;
  * @see ContextConfiguration
  * @see #constructAttributes(Class)
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 public class DefaultContextConfigurationAttributes implements ContextConfigurationAttributes {
@@ -71,13 +70,9 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final Autowire							autowireMode;
-
 	private final String							resourceSuffix;
 
 	private final Class<? extends ContextLoader>	loaderClass;
-
-	private final boolean							checkDependencies;
 
 	private final boolean							generateDefaultLocations;
 
@@ -114,18 +109,15 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	 */
 	public DefaultContextConfigurationAttributes(final Class<? extends ContextLoader> loaderClass,
 			final String[] locations, final Class<?> clazz, final boolean generateDefaultLocations,
-			final String resourceSuffix, final Autowire autowireMode, final boolean checkDependencies) {
+			final String resourceSuffix) {
 
 		Assert.notNull(loaderClass, "loaderClass can not be null.");
 		Assert.notNull(resourceSuffix, "resourceSuffix can not be null.");
-		Assert.notNull(autowireMode, "autowireMode can not be null.");
 
 		this.loaderClass = loaderClass;
 		this.locations = generateLocations(locations, clazz, generateDefaultLocations, resourceSuffix);
 		this.generateDefaultLocations = generateDefaultLocations;
 		this.resourceSuffix = resourceSuffix;
-		this.autowireMode = autowireMode;
-		this.checkDependencies = checkDependencies;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -161,8 +153,7 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 
 		return new DefaultContextConfigurationAttributes(contextConfiguration.loaderClass(),
 				contextConfiguration.locations(), declaringClass, contextConfiguration.generateDefaultLocations(),
-				contextConfiguration.resourceSuffix(), contextConfiguration.autowire(),
-				contextConfiguration.checkDependencies());
+				contextConfiguration.resourceSuffix());
 	}
 
 	// ------------------------------------------------------------------------|
@@ -186,10 +177,6 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 		return new EqualsBuilder()
 
 		.append(this.locations, that.locations)
-
-		.append(this.autowireMode, that.autowireMode)
-
-		.append(this.checkDependencies, that.checkDependencies)
 
 		.isEquals();
 	}
@@ -305,16 +292,6 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * @see org.springframework.test.context.ContextConfigurationAttributes#getAutowireMode()
-	 */
-	public Autowire getAutowireMode() {
-
-		return this.autowireMode;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
 	 * @see org.springframework.test.context.ContextConfigurationAttributes#getResourceSuffix()
 	 */
 	public final String getResourceSuffix() {
@@ -358,21 +335,7 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 
 		.append(this.locations)
 
-		.append(this.autowireMode)
-
-		.append(this.checkDependencies)
-
 		.toHashCode();
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * @see org.springframework.test.context.ContextConfigurationAttributes#isCheckDependencies()
-	 */
-	public boolean isCheckDependencies() {
-
-		return this.checkDependencies;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -402,10 +365,6 @@ public class DefaultContextConfigurationAttributes implements ContextConfigurati
 		.append("generateDefaultLocations", this.generateDefaultLocations)
 
 		.append("resourceSuffix", this.resourceSuffix)
-
-		.append("autowireMode", this.autowireMode)
-
-		.append("checkDependencies", this.checkDependencies)
 
 		.toString();
 	}

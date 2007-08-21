@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.TestContext;
 
 /**
@@ -28,7 +27,7 @@ import org.springframework.test.context.TestContext;
  * instances.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public class DependencyInjectionTestExecutionListener extends AbstractTestExecutionListener {
@@ -52,12 +51,10 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * <p>
 	 * The default implementation
 	 * {@link AutowireCapableBeanFactory#autowireBeanProperties(Object, int, boolean) autowires}
-	 * the test instance via the supplied application context, using the
-	 * {@link ContextConfigurationAttributes#getAutowireMode() autowire mode}
-	 * and
-	 * {@link ContextConfigurationAttributes#isCheckDependencies() dependency check}
-	 * attributes in the {@link ContextConfigurationAttributes configuration} of
-	 * the supplied test context. The resulting bean will also be
+	 * the test instance via the application context of the supplied
+	 * {@link TestContext},
+	 * {@link AutowireCapableBeanFactory#AUTOWIRE_NO without autowiring} and
+	 * without dependency checking enabled. The resulting bean will also be
 	 * {@link AutowireCapableBeanFactory#initializeBean(Object, String) initialized}.
 	 * </p>
 	 * <p>
@@ -78,11 +75,9 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 		final Object bean = testContext.getTestInstance();
 
 		final ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-		beanFactory.autowireBeanProperties(bean, testContext.getConfigurationAttributes().getAutowireMode().value(),
-				testContext.getConfigurationAttributes().isCheckDependencies());
+		beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 		beanFactory.initializeBean(bean, null);
 	}
-
 	// ------------------------------------------------------------------------|
 
 }
