@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.support.DefaultContextConfigurationAttributes;
 import org.springframework.util.Assert;
@@ -37,17 +38,17 @@ import org.springframework.util.ClassUtils;
  * <p>
  * {@link AutowiredAnnotationBeanPostProcessor} and
  * {@link CommonAnnotationBeanPostProcessor} will be automatically registered
- * with bean factories of
- * {@link ConfigurableApplicationContext application contexts} created for the
- * test instance referenced by this test context. Test instances are therefore
- * automatically candidates for annotation-based dependency injection using
+ * with bean factories of {@link ApplicationContext application contexts}
+ * created for the test instance referenced by this test context. Test instances
+ * are therefore automatically candidates for annotation-based dependency
+ * injection using
  * {@link org.springframework.beans.factory.annotation.Autowired Autowired} and
  * {@link javax.annotation.Resource Resource}.
  * </p>
  *
  * @param <T> The type of the test managed by this TestContext.
  * @author Sam Brannen
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 2.1
  */
 public class TestContext<T> {
@@ -57,7 +58,7 @@ public class TestContext<T> {
 	// ------------------------------------------------------------------------|
 
 	/** Class Logger. */
-	private static final Log																	LOG	= LogFactory.getLog(TestContext.class);
+	private static final Log														LOG	= LogFactory.getLog(TestContext.class);
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
@@ -71,17 +72,17 @@ public class TestContext<T> {
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final ContextConfigurationAttributes												configurationAttributes;
+	private final ContextConfigurationAttributes									configurationAttributes;
 
-	private final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext>	contextCache;
+	private final ContextCache<ContextConfigurationAttributes, ApplicationContext>	contextCache;
 
-	private Throwable																			testException;
+	private Throwable																testException;
 
-	private final Class<T>																		testClass;
+	private final Class<T>															testClass;
 
-	private Object																				testInstance;
+	private Object																	testInstance;
 
-	private Method																				testMethod;
+	private Method																	testMethod;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -95,7 +96,9 @@ public class TestContext<T> {
 	 * Constructs a new test context for the supplied {@link Class test class}
 	 * and {@link ContextCache context cache} and parses the
 	 * {@link ContextConfigurationAttributes} configured for the test class via
-	 * the {@link org.springframework.test.annotation.ContextConfiguration @ContextConfiguration} annotation.
+	 * the
+	 * {@link org.springframework.test.annotation.ContextConfiguration @ContextConfiguration}
+	 * annotation.
 	 *
 	 * @param testClass The {@link Class} object corresponding to the test class
 	 *        for which the test context should be constructed, not
@@ -105,7 +108,7 @@ public class TestContext<T> {
 	 *        <code>null</code>.
 	 */
 	public TestContext(final Class<T> testClass,
-			final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> contextCache) {
+			final ContextCache<ContextConfigurationAttributes, ApplicationContext> contextCache) {
 
 		super();
 
@@ -123,8 +126,8 @@ public class TestContext<T> {
 
 	/**
 	 * <p>
-	 * Builds and configures a {@link ConfigurableApplicationContext} based on
-	 * the supplied {@link ContextConfigurationAttributes}.
+	 * Builds and configures a {@link ApplicationContext} based on the supplied
+	 * {@link ContextConfigurationAttributes}.
 	 * </p>
 	 * <p>
 	 * {@link AutowiredAnnotationBeanPostProcessor} and
@@ -138,13 +141,18 @@ public class TestContext<T> {
 	 * @throws Exception if an error occurs while building the application
 	 *         context
 	 */
-	protected static ConfigurableApplicationContext buildApplicationContext(
-			final ContextConfigurationAttributes configAttributes) throws Exception {
+	protected static ApplicationContext buildApplicationContext(final ContextConfigurationAttributes configAttributes)
+			throws Exception {
 
 		Assert.notNull(configAttributes, "configAttributes can not be null.");
 
-		final ConfigurableApplicationContext applicationContext = createContextLoader(configAttributes).loadContext();
-		final ConfigurableBeanFactory beanFactory = applicationContext.getBeanFactory();
+		final ApplicationContext applicationContext = createContextLoader(configAttributes).loadContext();
+		// TODO Remove cast to ConfigurableApplicationContext once we've pushed
+		// the context configuration to the ContextLoader.
+		final ConfigurableBeanFactory beanFactory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
+
+		// TODO Use AnnotationConfigUtils.registerAnnotationConfigProcessors()
+		// and move the BeanPostProcessor code to the ContextLoader.
 
 		final AutowiredAnnotationBeanPostProcessor autowiredAnnotationBpp = new AutowiredAnnotationBeanPostProcessor();
 		final CommonAnnotationBeanPostProcessor commonAnnotationBpp = new CommonAnnotationBeanPostProcessor();
@@ -221,18 +229,18 @@ public class TestContext<T> {
 
 	/**
 	 * <p>
-	 * Gets the {@link ConfigurableApplicationContext application context} for
-	 * this test context, possibly cached.
+	 * Gets the {@link ApplicationContext application context} for this test
+	 * context, possibly cached.
 	 * </p>
 	 *
 	 * @return The application context.
 	 * @throws Exception if an error occurs while retrieving the application
 	 *         context.
 	 */
-	public ConfigurableApplicationContext getApplicationContext() throws Exception {
+	public ApplicationContext getApplicationContext() throws Exception {
 
-		ConfigurableApplicationContext context;
-		final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> cache = getContextCache();
+		ApplicationContext context;
+		final ContextCache<ContextConfigurationAttributes, ApplicationContext> cache = getContextCache();
 
 		synchronized (cache) {
 			context = cache.get(getConfigurationAttributes());
@@ -270,7 +278,7 @@ public class TestContext<T> {
 	 *
 	 * @return The context cache, never <code>null</code>.
 	 */
-	protected final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> getContextCache() {
+	protected final ContextCache<ContextConfigurationAttributes, ApplicationContext> getContextCache() {
 
 		return this.contextCache;
 	}
@@ -349,10 +357,10 @@ public class TestContext<T> {
 
 	/**
 	 * Call this method to signal that the
-	 * {@link ConfigurableApplicationContext application context} associated
-	 * with this {@link TestContext} is <em>dirty</em> and should be reloaded.
-	 * Do this if a test has modified the context (for example, by replacing a
-	 * bean definition).
+	 * {@link ApplicationContext application context} associated with this
+	 * {@link TestContext} is <em>dirty</em> and should be reloaded. Do this
+	 * if a test has modified the context (for example, by replacing a bean
+	 * definition).
 	 */
 	public void markApplicationContextDirty() {
 

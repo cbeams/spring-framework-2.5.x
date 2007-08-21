@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.annotation.TestExecutionListeners;
 import org.springframework.test.context.listeners.TestExecutionListener;
@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * <p>
  * TestContextManager is the central entry point into the Spring testing support
  * API, which provides support for loading and accessing
- * {@link ConfigurableApplicationContext application contexts}, dependency
+ * {@link ApplicationContext application contexts}, dependency
  * injection of test instances, and {@link Transactional transactional}
  * execution of test methods.
  * </p>
@@ -56,7 +56,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.test.annotation.TransactionConfiguration
  * @param <T> The type of the test managed by this TestContextManager.
  * @author Sam Brannen
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @since 2.1
  */
 public class TestContextManager<T> {
@@ -70,7 +70,7 @@ public class TestContextManager<T> {
 	 * may be destroyed and recreated between running individual test methods,
 	 * for example with JUnit.
 	 */
-	private static final ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext>	CONTEXT_CACHE			= new ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext>();
+	private static final ContextCache<ContextConfigurationAttributes, ApplicationContext>	CONTEXT_CACHE			= new ContextCache<ContextConfigurationAttributes, ApplicationContext>();
 
 	/** Class Logger. */
 	private static final Log																			LOG						= LogFactory.getLog(TestContextManager.class);
@@ -342,7 +342,7 @@ public class TestContextManager<T> {
 	 *
 	 * @return The context cache.
 	 */
-	protected ContextCache<ContextConfigurationAttributes, ConfigurableApplicationContext> getContextCache() {
+	protected ContextCache<ContextConfigurationAttributes, ApplicationContext> getContextCache() {
 
 		return TestContextManager.CONTEXT_CACHE;
 	}

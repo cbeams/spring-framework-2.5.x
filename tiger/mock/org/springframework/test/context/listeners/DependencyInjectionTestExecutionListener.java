@@ -27,7 +27,7 @@ import org.springframework.test.context.TestContext;
  * instances.
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 public class DependencyInjectionTestExecutionListener extends AbstractTestExecutionListener {
@@ -71,7 +71,8 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 			LOG.debug("Performing dependency injection for test context [" + testContext + "].");
 		}
 
-		final ConfigurableApplicationContext context = testContext.getApplicationContext();
+		// TODO Can remove the cast to ConfigurableApplicationContext?
+		final ConfigurableApplicationContext context = (ConfigurableApplicationContext) testContext.getApplicationContext();
 		final Object bean = testContext.getTestInstance();
 
 		final ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
