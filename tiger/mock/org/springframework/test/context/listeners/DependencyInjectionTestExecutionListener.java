@@ -28,7 +28,7 @@ import org.springframework.test.context.TestContext;
  * instances.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class DependencyInjectionTestExecutionListener extends AbstractTestExecutionListener {
@@ -38,7 +38,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	// ------------------------------------------------------------------------|
 
 	/** Class Logger. */
-	private static final Log LOG = LogFactory.getLog(DependencyInjectionTestExecutionListener.class);
+	private static final Log	LOG	= LogFactory.getLog(DependencyInjectionTestExecutionListener.class);
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
@@ -77,19 +77,10 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 		final ConfigurableApplicationContext context = testContext.getApplicationContext();
 		final Object bean = testContext.getTestInstance();
 
-		synchronized (context) {
-
-			final ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-			beanFactory.autowireBeanProperties(bean,
-					testContext.getConfigurationAttributes().getAutowireMode().value(),
-					testContext.getConfigurationAttributes().isCheckDependencies());
-			beanFactory.initializeBean(bean, null);
-
-			if (!context.isActive()) {
-				context.refresh();
-			}
-		}
-
+		final ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
+		beanFactory.autowireBeanProperties(bean, testContext.getConfigurationAttributes().getAutowireMode().value(),
+				testContext.getConfigurationAttributes().isCheckDependencies());
+		beanFactory.initializeBean(bean, null);
 	}
 
 	// ------------------------------------------------------------------------|
