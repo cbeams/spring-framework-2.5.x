@@ -28,7 +28,7 @@ import org.springframework.test.annotation.ContextConfiguration;
  * Unit test for {@link AbstractTransactionalJUnit38SpringContextTests}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @ContextConfiguration
@@ -38,23 +38,17 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected static final String		BOB		= "bob";
+	protected static final String	BOB		= "bob";
 
-	protected static final String		JANE	= "jane";
+	protected static final String	JANE	= "jane";
 
-	protected static final String		SUE		= "sue";
+	protected static final String	SUE		= "sue";
 
-	protected static final String		LUKE	= "luke";
+	protected static final String	LUKE	= "luke";
 
-	protected static final String		LEIA	= "leia";
+	protected static final String	LEIA	= "leia";
 
-	protected static final String		YODA	= "yoda";
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	protected static SimpleJdbcTemplate	simpleJdbcTemplate;
+	protected static final String	YODA	= "yoda";
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
@@ -112,38 +106,38 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 	public void beforeTransaction() {
 
 		assertEquals("Verifying the number of rows in the person table before a transactional test method.", 1,
-				countRowsInPersonTable(simpleJdbcTemplate));
-		assertEquals("Adding yoda", 1, addPerson(simpleJdbcTemplate, YODA));
+				countRowsInPersonTable(getSimpleJdbcTemplate()));
+		assertEquals("Adding yoda", 1, addPerson(getSimpleJdbcTemplate(), YODA));
 	}
 
 	@Override
 	protected void setUp() throws Exception {
 
 		assertEquals("Verifying the number of rows in the person table before a test method.", 2,
-				countRowsInPersonTable(simpleJdbcTemplate));
+				countRowsInPersonTable(getSimpleJdbcTemplate()));
 	}
 
 	public void testModifyTestDataWithinTransaction() {
 
-		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
-		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
+		assertEquals("Adding jane", 1, addPerson(getSimpleJdbcTemplate(), JANE));
+		assertEquals("Adding sue", 1, addPerson(getSimpleJdbcTemplate(), SUE));
 		assertEquals("Verifying the number of rows in the person table within transactionalMethod2().", 4,
-				countRowsInPersonTable(simpleJdbcTemplate));
+				countRowsInPersonTable(getSimpleJdbcTemplate()));
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 
 		assertEquals("Verifying the number of rows in the person table after a test method.", 4,
-				countRowsInPersonTable(simpleJdbcTemplate));
+				countRowsInPersonTable(getSimpleJdbcTemplate()));
 	}
 
 	@AfterTransaction
 	public void afterTransaction() {
 
-		assertEquals("Deleting yoda", 1, deletePerson(simpleJdbcTemplate, YODA));
+		assertEquals("Deleting yoda", 1, deletePerson(getSimpleJdbcTemplate(), YODA));
 		assertEquals("Verifying the number of rows in the person table after a transactional test method.", 1,
-				countRowsInPersonTable(simpleJdbcTemplate));
+				countRowsInPersonTable(getSimpleJdbcTemplate()));
 	}
 
 	// ------------------------------------------------------------------------|
@@ -155,7 +149,7 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 		@Autowired
 		void setDataSource(final DataSource dataSource) {
 
-			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+			final SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			createPersonTable(simpleJdbcTemplate);
 			clearPersonTable(simpleJdbcTemplate);
 			addPerson(simpleJdbcTemplate, BOB);
