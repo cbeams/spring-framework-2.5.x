@@ -23,12 +23,13 @@ import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.AfterTransaction;
 import org.springframework.test.annotation.BeforeTransaction;
 import org.springframework.test.annotation.ContextConfiguration;
+import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 
 /**
  * Unit test for {@link AbstractTransactionalJUnit38SpringContextTests}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 @ContextConfiguration
@@ -70,7 +71,7 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 
 	protected static int clearPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
 
-		return simpleJdbcTemplate.update("DELETE FROM person");
+		return SimpleJdbcTestUtils.deleteFromTables(simpleJdbcTemplate, "person");
 	}
 
 	protected static void createPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
@@ -85,7 +86,7 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 
 	protected static int countRowsInPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
 
-		return simpleJdbcTemplate.queryForInt("SELECT COUNT(0) FROM person");
+		return SimpleJdbcTestUtils.countRowsInTable(simpleJdbcTemplate, "person");
 	}
 
 	protected static int addPerson(final SimpleJdbcTemplate simpleJdbcTemplate, final String name) {

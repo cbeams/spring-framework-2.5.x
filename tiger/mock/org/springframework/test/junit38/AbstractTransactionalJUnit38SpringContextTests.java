@@ -15,27 +15,18 @@
  */
 package org.springframework.test.junit38;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.TestExecutionListeners;
 import org.springframework.test.context.listeners.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.listeners.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.listeners.TransactionalTestExecutionListener;
+import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 /**
  * <p>
@@ -57,7 +48,7 @@ import org.springframework.util.StringUtils;
  * @see TestExecutionListeners
  * @see Transactional
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
@@ -69,7 +60,7 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected SimpleJdbcTemplate	jdbcTemplate;
+	protected SimpleJdbcTemplate	simpleJdbcTemplate;
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
@@ -111,38 +102,26 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Setter: DataSource is provided by Dependency Injection.
+	 * Set the DataSource, typically provided via Dependency Injection.
+	 *
+	 * @param dataSource The DataSource to inject.
 	 */
 	@Autowired
 	public void setDataSource(final DataSource dataSource) {
 
-		this.jdbcTemplate = new SimpleJdbcTemplate(dataSource);
+		this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Return the SimpleJdbcTemplate that this base class manages.
+	 * Get the SimpleJdbcTemplate that this base class manages.
+	 *
+	 * @return the SimpleJdbcTemplate
 	 */
 	public final SimpleJdbcTemplate getSimpleJdbcTemplate() {
 
-		return this.jdbcTemplate;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * Convenient method to delete all rows from these tables. Use with caution
-	 * outside of a transaction!
-	 */
-	protected void deleteFromTables(final String[] names) {
-
-		for (int i = 0; i < names.length; i++) {
-			final int rowCount = this.jdbcTemplate.update("DELETE FROM " + names[i]);
-			if (this.logger.isInfoEnabled()) {
-				this.logger.info("Deleted " + rowCount + " rows from table " + names[i]);
-			}
-		}
+		return this.simpleJdbcTemplate;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -155,68 +134,51 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	 */
 	protected int countRowsInTable(final String tableName) {
 
-		return this.jdbcTemplate.queryForInt("SELECT COUNT(0) FROM " + tableName);
+		return SimpleJdbcTestUtils.countRowsInTable(getSimpleJdbcTemplate(), tableName);
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Execute the given SQL script. Will be rolled back by default, according
-	 * to the fate of the current transaction.
+	 * <p>
+	 * Convenience method for deleting all rows from the specified tables.
+	 * </p>
+	 * <p>
+	 * Use with caution outside of a transaction!
+	 * </p>
+	 *
+	 * @param names The names of the tables from which to delete.
+	 * @return The total number of rows deleted from all specified tables.
+	 */
+	protected int deleteFromTables(final String... names) {
+
+		return SimpleJdbcTestUtils.deleteFromTables(getSimpleJdbcTemplate(), names);
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Execute the given SQL script.
+	 * </p>
+	 * <p>
+	 * Use with caution outside of a transaction!
+	 * </p>
 	 *
 	 * @param sqlResourcePath Spring resource path for the SQL script. Should
 	 *        normally be loaded by classpath. There should be one statement per
 	 *        line. Any semicolons will be removed. <b>Do not use this method to
 	 *        execute DDL if you expect rollback.</b>
 	 * @param continueOnError whether or not to continue without throwing an
-	 *        exception in the event of an error
+	 *        exception in the event of an error.
 	 * @throws DataAccessException if there is an error executing a statement
-	 *         and continueOnError was false
+	 *         and continueOnError was <code>false</code>.
 	 */
 	protected void executeSqlScript(final String sqlResourcePath, final boolean continueOnError)
 			throws DataAccessException {
 
-		if (this.logger.isInfoEnabled()) {
-			this.logger.info("Executing SQL script '" + sqlResourcePath + "'");
-		}
-
-		final long startTime = System.currentTimeMillis();
-		final List<String> statements = new LinkedList<String>();
-		final Resource res = getApplicationContext().getResource(sqlResourcePath);
-		try {
-			final LineNumberReader lnr = new LineNumberReader(new InputStreamReader(res.getInputStream()));
-			String currentStatement = lnr.readLine();
-			while (currentStatement != null) {
-				currentStatement = StringUtils.replace(currentStatement, ";", "");
-				statements.add(currentStatement);
-				currentStatement = lnr.readLine();
-			}
-
-			for (final Iterator<String> itr = statements.iterator(); itr.hasNext();) {
-				final String statement = itr.next();
-				try {
-					final int rowsAffected = this.jdbcTemplate.update(statement);
-					if (this.logger.isDebugEnabled()) {
-						this.logger.debug(rowsAffected + " rows affected by SQL: " + statement);
-					}
-				}
-				catch (final DataAccessException ex) {
-					if (continueOnError) {
-						if (this.logger.isWarnEnabled()) {
-							this.logger.warn("SQL: " + statement + " failed", ex);
-						}
-					}
-					else {
-						throw ex;
-					}
-				}
-			}
-			final long elapsedTime = System.currentTimeMillis() - startTime;
-			this.logger.info("Done executing SQL script '" + sqlResourcePath + "' in " + elapsedTime + " ms");
-		}
-		catch (final IOException ex) {
-			throw new DataAccessResourceFailureException("Failed to open SQL script '" + sqlResourcePath + "'", ex);
-		}
+		SimpleJdbcTestUtils.executeSqlScript(getSimpleJdbcTemplate(), getApplicationContext(), sqlResourcePath,
+				continueOnError);
 	}
 
 	// ------------------------------------------------------------------------|
