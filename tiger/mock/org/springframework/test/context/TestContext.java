@@ -15,6 +15,8 @@
  */
 package org.springframework.test.context;
 
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
@@ -26,7 +28,7 @@ import org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProc
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.support.DefaultContextConfigurationAttributes;
+import org.springframework.test.annotation.ContextConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -45,10 +47,15 @@ import org.springframework.util.ClassUtils;
  * {@link org.springframework.beans.factory.annotation.Autowired Autowired} and
  * {@link javax.annotation.Resource Resource}.
  * </p>
+ * <p>
+ * Note that all
+ * {@link ContextConfigurationAttributes#getLocations() configuration locations}
+ * are considered to be classpath resources.
+ * </p>
  *
  * @param <T> The type of the test managed by this TestContext.
  * @author Sam Brannen
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 2.1
  */
 public class TestContext<T> {
@@ -117,7 +124,7 @@ public class TestContext<T> {
 
 		this.testClass = testClass;
 		this.contextCache = contextCache;
-		this.configurationAttributes = retrieveConfigurationAttributes(testClass);
+		this.configurationAttributes = retrieveContextConfigurationAttributes(testClass);
 	}
 
 	// ------------------------------------------------------------------------|
@@ -147,6 +154,7 @@ public class TestContext<T> {
 		Assert.notNull(configAttributes, "configAttributes can not be null.");
 
 		final ApplicationContext applicationContext = createContextLoader(configAttributes).loadContext();
+
 		// TODO Remove cast to ConfigurableApplicationContext once we've pushed
 		// the context configuration to the ContextLoader.
 		final ConfigurableBeanFactory beanFactory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
@@ -185,7 +193,7 @@ public class TestContext<T> {
 		Assert.notNull(configAttributes, "ContextConfigurationAttributes can not be null.");
 		final Class<? extends ContextLoader> contextLoaderClass = configAttributes.getLoaderClass();
 		Assert.state(contextLoaderClass != null,
-				"contextLoaderClass is null: ContextConfigurationAttributes have not been properly initialized.");
+				"loaderClass is null: ContextConfigurationAttributes have not been properly initialized.");
 
 		@SuppressWarnings("unchecked")
 		final Constructor<? extends ContextLoader> constructor = ClassUtils.getConstructorIfAvailable(
@@ -198,28 +206,40 @@ public class TestContext<T> {
 	}
 
 	// ------------------------------------------------------------------------|
-
 	/**
-	 * <p>
-	 * Retrieves the {@link ContextConfigurationAttributes} for the specified
-	 * {@link Class class}.
-	 * </p>
+	 * Retrieves the {@link ContextConfigurationAttributes} for the supplied
+	 * {@link Class} which must declare or inherit
+	 * {@link ContextConfiguration @ContextConfiguration}.
 	 *
-	 * @param clazz The Class object corresponding to the test class for which
-	 *        the configuration attributes should be retrieved.
-	 * @return a new ContextConfigurationAttributes instance for the specified
-	 *         class.
+	 * @param clazz The class for which the
+	 *        {@link ContextConfigurationAttributes} should be constructed.
+	 * @return a new ContextConfigurationAttributes instance.
 	 * @throws IllegalArgumentException if the supplied class is
-	 *         <code>null</code>.
+	 *         <code>null</code> or if a {@link ContextConfiguration}
+	 *         annotation is not present for the supplied class.
 	 */
-	protected static ContextConfigurationAttributes retrieveConfigurationAttributes(final Class<?> clazz)
-			throws IllegalArgumentException {
+	public static ContextConfigurationAttributes retrieveContextConfigurationAttributes(final Class<?> clazz) {
 
 		Assert.notNull(clazz, "Can not retrieve ContextConfigurationAttributes for a NULL class.");
-		final ContextConfigurationAttributes configAttributes = DefaultContextConfigurationAttributes.constructAttributes(clazz);
+		final Class<ContextConfiguration> annotationType = ContextConfiguration.class;
+		final Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, clazz);
+		final ContextConfiguration contextConfiguration = clazz.getAnnotation(annotationType);
+		Assert.notNull(contextConfiguration, "@ContextConfiguration must be present for class [" + clazz + "].");
+		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
+				+ annotationType + "] and class [" + clazz + "].");
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("ContextConfiguration: test class [" + clazz + "], annotation declaring class [" + declaringClass
+					+ "].");
+		}
+
+		final ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(
+				contextConfiguration.loaderClass(), contextConfiguration.locations(), declaringClass,
+				contextConfiguration.generateDefaultLocations(), contextConfiguration.resourceSuffix());
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Retrieved ContextConfigurationAttributes [" + configAttributes + "] for class [" + clazz + "].");
 		}
+
 		return configAttributes;
 	}
 
