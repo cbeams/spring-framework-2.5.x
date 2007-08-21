@@ -16,45 +16,73 @@
 package org.springframework.test.context;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.util.Assert;
 
 /**
  * <p>
- * Caching strategy for Spring
- * {@link ConfigurableApplicationContext ConfigurableApplicationContexts}.
+ * Cache for Spring {@link ApplicationContext ApplicationContexts}.
  * </p>
  * <p>
- * Maintains a cache of {@link ConfigurableApplicationContext contexts} by
+ * Maintains a cache of {@link ApplicationContext contexts} by
  * {@link Serializable serializable} key. This has significant performance
- * benefit if initializing the context would take time. While initializing a
+ * benefits if initializing the context would take time. While initializing a
  * Spring context itself is very quick, some beans in a context, such as a
- * LocalSessionFactoryBean for working with Hibernate, may take some time to
- * initialize. Hence it often makes sense to do that initializing once.
- * </p>
- * <p>
- * Implementations should be thread-safe.
+ * {@link org.springframework.orm.hibernate3.LocalSessionFactoryBean LocalSessionFactoryBean}
+ * for working with Hibernate, may take some time to initialize. Hence it often
+ * makes sense to perform that initialization once.
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  * @param <KEY> {@link Serializable serializable} context key type
- * @param <CONTEXT> {@link ConfigurableApplicationContext application context}
- *        type
+ * @param <CONTEXT> {@link ApplicationContext application context} type
  */
-public interface ContextCache<KEY extends Serializable, CONTEXT extends ConfigurableApplicationContext> {
+class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext> {
+
+	// ------------------------------------------------------------------------|
+	// --- INSTANCE VARIABLES -------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	/** Map of context keys to Spring application contexts. */
+	private final Map<KEY, CONTEXT>	contextKeyToContextMap	= Collections.synchronizedMap(new HashMap<KEY, CONTEXT>());
+
+	private int						hitCount;
+
+	private int						missCount;
+
+	// ------------------------------------------------------------------------|
+	// --- INSTANCE METHODS ---------------------------------------------------|
+	// ------------------------------------------------------------------------|
 
 	/**
 	 * Clears all contexts from the cache.
 	 */
-	public abstract void clear();
+	void clear() {
+
+		this.contextKeyToContextMap.clear();
+	}
+
+	// ------------------------------------------------------------------------|
 
 	/**
 	 * Clears hit and miss count statistics for the cache (i.e., resets counters
 	 * to zero).
 	 */
-	public abstract void clearStatistics();
+	void clearStatistics() {
+
+		this.hitCount = 0;
+		this.missCount = 0;
+	}
+
+	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -63,11 +91,17 @@ public interface ContextCache<KEY extends Serializable, CONTEXT extends Configur
 	 *
 	 * @param key The context key, not <code>null</code>.
 	 */
-	public abstract boolean contains(final KEY key);
+	final boolean contains(final KEY key) {
+
+		Assert.notNull(key, "Key must not be null.");
+		return this.contextKeyToContextMap.containsKey(key);
+	}
+
+	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
-	 * Obtain a cached ConfigurableApplicationContext for the given key.
+	 * Obtain a cached ApplicationContext for the given key.
 	 * </p>
 	 * <p>
 	 * The {@link #getHitCount() hit} and {@link #getMissCount() miss} counts
@@ -76,10 +110,47 @@ public interface ContextCache<KEY extends Serializable, CONTEXT extends Configur
 	 *
 	 * @see #remove(Serializable)
 	 * @param key The context key, not <code>null</code>.
-	 * @return the corresponding ConfigurableApplicationContext instance, or
+	 * @return the corresponding ApplicationContext instance, or
 	 *         <code>null</code> if not found in the cache.
 	 */
-	public abstract CONTEXT get(final KEY key) throws Exception;
+	final CONTEXT get(final KEY key) throws Exception {
+
+		Assert.notNull(key, "Key must not be null.");
+		final CONTEXT context = this.contextKeyToContextMap.get(key);
+
+		if (context == null) {
+			incrementMissCount();
+		}
+		else {
+			incrementHitCount();
+		}
+
+		return context;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Increments the hit count by one. A <em>hit</em> is an access to the
+	 * cache, which returned a non-null context for a queried key.
+	 */
+	protected final void incrementHitCount() {
+
+		this.hitCount++;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Increments the miss count by one. A <em>miss</em> is an access to the
+	 * cache, which returned a <code>null</code> context for a queried key.
+	 */
+	protected final void incrementMissCount() {
+
+		this.missCount++;
+	}
+
+	// ------------------------------------------------------------------------|
 
 	/**
 	 * Gets the overall hit count for this cache. A <em>hit</em> is an access
@@ -87,7 +158,12 @@ public interface ContextCache<KEY extends Serializable, CONTEXT extends Configur
 	 *
 	 * @return The hit count.
 	 */
-	public abstract int getHitCount();
+	final int getHitCount() {
+
+		return this.hitCount;
+	}
+
+	// ------------------------------------------------------------------------|
 
 	/**
 	 * Gets the overall miss count for this cache. A <em>miss</em> is an
@@ -96,19 +172,30 @@ public interface ContextCache<KEY extends Serializable, CONTEXT extends Configur
 	 *
 	 * @return The miss count.
 	 */
-	public abstract int getMissCount();
+	final int getMissCount() {
+
+		return this.missCount;
+	}
+
+	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
-	 * Explicitly add a ConfigurableApplicationContext instance to the cache
-	 * under the given key.
+	 * Explicitly add a ApplicationContext instance to the cache under the given
+	 * key.
 	 * </p>
 	 *
 	 * @param key The context key, not <code>null</code>.
-	 * @param context The ConfigurableApplicationContext instance, not
-	 *        <code>null</code>.
+	 * @param context The ApplicationContext instance, not <code>null</code>.
 	 */
-	public abstract void put(final KEY key, final CONTEXT context);
+	final void put(final KEY key, final CONTEXT context) {
+
+		Assert.notNull(key, "Key must not be null.");
+		Assert.notNull(context, "ConfigurableApplicationContext must not be null.");
+		this.contextKeyToContextMap.put(key, context);
+	}
+
+	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -117,16 +204,22 @@ public interface ContextCache<KEY extends Serializable, CONTEXT extends Configur
 	 *
 	 * @see #setDirty(Serializable)
 	 * @param key The context key, not <code>null</code>.
-	 * @return the corresponding ConfigurableApplicationContext instance, or
+	 * @return the corresponding ApplicationContext instance, or
 	 *         <code>null</code> if not found in the cache.
 	 */
-	public abstract CONTEXT remove(final KEY key);
+	final CONTEXT remove(final KEY key) {
+
+		return this.contextKeyToContextMap.remove(key);
+	}
+
+	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
 	 * Mark the context with the given key as dirty, effectively
 	 * {@link #remove(Serializable) removing} the context from the cache and
-	 * explicitly {@link ConfigurableApplicationContext#close() closing} it.
+	 * explicitly {@link ConfigurableApplicationContext#close() closing} it if
+	 * it is an instance of {@link ConfigurableApplicationContext}.
 	 * </p>
 	 * <p>
 	 * Generally speaking, you would only call this method only if you change
@@ -137,7 +230,17 @@ public interface ContextCache<KEY extends Serializable, CONTEXT extends Configur
 	 * @see #remove(Serializable)
 	 * @param key The context key, not <code>null</code>.
 	 */
-	public abstract void setDirty(final KEY key);
+	final void setDirty(final KEY key) {
+
+		Assert.notNull(key, "Key must not be null.");
+		final CONTEXT context = remove(key);
+
+		if ((context != null) && (context instanceof ConfigurableApplicationContext)) {
+			((ConfigurableApplicationContext) context).close();
+		}
+	}
+
+	// ------------------------------------------------------------------------|
 
 	/**
 	 * Returns the number of contexts currently stored in the cache. If the
@@ -146,6 +249,32 @@ public interface ContextCache<KEY extends Serializable, CONTEXT extends Configur
 	 *
 	 * @return the number of contexts stored in the cache.
 	 */
-	public abstract int size();
+	int size() {
+
+		return this.contextKeyToContextMap.size();
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Generates a text string, which contains the {@link #size() size} as well
+	 * as the {@link #hitCount hit} and {@link #missCount miss} counts.
+	 *
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+
+		return new ToStringBuilder(this)
+
+		.append("size", size())
+
+		.append("hitCount", getHitCount())
+
+		.append("missCount", getMissCount())
+
+		.toString();
+	}
+
+	// ------------------------------------------------------------------------|
 
 }

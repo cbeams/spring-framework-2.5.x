@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.junit4;
+package org.springframework.test.context;
 
 import static org.junit.Assert.assertEquals;
 import junit.framework.JUnit4TestAdapter;
@@ -26,9 +26,7 @@ import org.junit.runner.RunWith;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.ContextConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextCache;
-import org.springframework.test.context.ContextConfigurationAttributes;
-import org.springframework.test.context.TestContextManager;
+import org.springframework.test.junit4.SpringJUnit4ClassRunner;
 
 /**
  * JUnit 4 based unit test which verifies correct
@@ -36,11 +34,11 @@ import org.springframework.test.context.TestContextManager;
  * {@link SpringJUnit4ClassRunner} and the {@link DirtiesContext} annotation.
  *
  * @author Sam Brannen
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.1 $
  * @since 2.1
  */
 @RunWith(SpringRunnerContextCacheTests.TestableSpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "SpringJUnit4ClassRunnerAppCtxTests-context.xml" })
+@ContextConfiguration(locations = { "/org/springframework/test/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml" })
 public class SpringRunnerContextCacheTests {
 
 	// ------------------------------------------------------------------------|
@@ -126,7 +124,7 @@ public class SpringRunnerContextCacheTests {
 
 	public static class TestableSpringJUnit4ClassRunner<T> extends SpringJUnit4ClassRunner<T> {
 
-		static TestableTestContextManager<?> testableTestContextManager;
+		static TestableTestContextManager<?>	testableTestContextManager;
 
 		public TestableSpringJUnit4ClassRunner(final Class<T> clazz) throws InitializationError {
 

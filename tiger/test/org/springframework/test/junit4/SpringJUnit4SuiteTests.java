@@ -20,6 +20,8 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import org.springframework.test.context.InheritedDirtiesContextSpringRunnerContextCacheTests;
+import org.springframework.test.context.SpringRunnerContextCacheTests;
 
 /**
  * <p>
@@ -38,7 +40,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 2.1
  */
 @RunWith(Suite.class)
