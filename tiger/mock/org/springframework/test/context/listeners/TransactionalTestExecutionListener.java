@@ -32,7 +32,6 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.annotation.TransactionConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TransactionConfigurationAttributes;
-import org.springframework.test.context.support.DefaultTransactionConfigurationAttributes;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -78,7 +77,7 @@ import org.springframework.util.Assert;
  * @see Rollback
  * @see TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 2.1
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
@@ -255,24 +254,44 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	/**
 	 * <p>
 	 * Retrieves the {@link TransactionConfigurationAttributes} for the
-	 * specified {@link Class class}.
-	 * </p>
+	 * specified {@link Class class} which may optionally declare or inherit a
+	 * {@link TransactionConfiguration @TransactionConfiguration}. If a
+	 * {@link TransactionConfiguration} annotation is not present for the
+	 * supplied class, the <em>default values</em> for attributes defined in
+	 * {@link TransactionConfiguration} will be used instead.
 	 *
 	 * @param clazz The Class object corresponding to the test class for which
 	 *        the configuration attributes should be retrieved.
-	 * @return a new TransactionConfigurationAttributes instance for the
-	 *         specified class.
+	 * @return a new TransactionConfigurationAttributes instance.
 	 * @throws IllegalArgumentException if the supplied class is
 	 *         <code>null</code>.
-	 * @throws Exception Allows any exception to propagate.
 	 */
-	protected static TransactionConfigurationAttributes retrieveTransactionConfigurationAttributes(final Class<?> clazz)
-			throws IllegalArgumentException, Exception {
+	protected static TransactionConfigurationAttributes retrieveTransactionConfigurationAttributes(final Class<?> clazz) {
 
 		Assert.notNull(clazz, "Can not retrieve transaction configuration attributes for a NULL class.");
-		final TransactionConfigurationAttributes configAttributes = DefaultTransactionConfigurationAttributes.constructAttributes(clazz);
+		final Class<TransactionConfiguration> annotationType = TransactionConfiguration.class;
+		final TransactionConfiguration config = clazz.getAnnotation(annotationType);
+
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Retrieved transaction configuration attributes [" + configAttributes + "] for class [" + clazz
+			LOG.debug("Retrieved TransactionConfiguration [" + config + "] for test class [" + clazz + "].");
+		}
+
+		String transactionManagerName;
+		boolean defaultRollback;
+
+		if (config != null) {
+			transactionManagerName = config.transactionManager();
+			defaultRollback = config.defaultRollback();
+		}
+		else {
+			transactionManagerName = (String) AnnotationUtils.getDefaultValue(annotationType, "transactionManager");
+			defaultRollback = (Boolean) AnnotationUtils.getDefaultValue(annotationType, "defaultRollback");
+		}
+
+		final TransactionConfigurationAttributes configAttributes = new TransactionConfigurationAttributes(
+				transactionManagerName, defaultRollback);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Retrieved TransactionConfigurationAttributes [" + configAttributes + "] for class [" + clazz
 					+ "].");
 		}
 
@@ -441,7 +460,6 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 						+ "] for test context [" + testContext + "].", e);
 			}
 		}
-
 	}
 
 	// ------------------------------------------------------------------------|
