@@ -34,12 +34,12 @@ import org.springframework.util.StringUtils;
 
 /**
  * <p>
- * A collection of JDBC related utility functions intended to simplify standard
- * database testing scenarios.
+ * A Java-5-based collection of JDBC related utility functions intended to
+ * simplify standard database testing scenarios.
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class SimpleJdbcTestUtils {
