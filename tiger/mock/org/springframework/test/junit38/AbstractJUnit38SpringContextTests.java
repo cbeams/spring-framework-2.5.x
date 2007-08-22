@@ -24,8 +24,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.ContextConfiguration;
+import org.springframework.test.annotation.TestExecutionListeners;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.context.listeners.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.listeners.DirtiesContextTestExecutionListener;
 
 /**
  * <p>
@@ -49,10 +52,12 @@ import org.springframework.test.context.TestContextManager;
  *
  * @see TestContext
  * @see TestContextManager
+ * @see TestExecutionListeners
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
+@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
 public class AbstractJUnit38SpringContextTests extends TestCase implements ApplicationContextAware {
 
 	// ------------------------------------------------------------------------|
