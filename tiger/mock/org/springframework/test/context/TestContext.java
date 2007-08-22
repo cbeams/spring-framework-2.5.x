@@ -55,7 +55,7 @@ import org.springframework.util.ClassUtils;
  *
  * @param <T> The type of the test managed by this TestContext.
  * @author Sam Brannen
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 2.1
  */
 public class TestContext<T> {
@@ -218,7 +218,7 @@ public class TestContext<T> {
 	 *         <code>null</code> or if a {@link ContextConfiguration}
 	 *         annotation is not present for the supplied class.
 	 */
-	public static ContextConfigurationAttributes retrieveContextConfigurationAttributes(final Class<?> clazz) {
+	protected static ContextConfigurationAttributes retrieveContextConfigurationAttributes(final Class<?> clazz) {
 
 		Assert.notNull(clazz, "Can not retrieve ContextConfigurationAttributes for a NULL class.");
 		final Class<ContextConfiguration> annotationType = ContextConfiguration.class;
