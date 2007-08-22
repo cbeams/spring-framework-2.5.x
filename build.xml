@@ -1027,96 +1027,96 @@
 	</target>
 
 
-	<target name="maveninstall" depends="maventasks,alljars"
+	<target name="maveninstall" depends="maventasks"
 			description="Uploads all jars, sources, and POMs to a local m2 repository">
 
 		<maven:install file="${dist.dir}/spring.jar">
-			<pom file="${pom.src.dir}/spring.pom"/>
+			<pom file="${dist.dir}/maven/spring.pom"/>
 			<attach file="${dist.dir}/spring-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-aop.jar">
-			<pom file="${pom.src.dir}/spring-aop.pom"/>
+			<pom file="${dist.dir}/maven/spring-aop.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-aop-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-beans.jar">
-			<pom file="${pom.src.dir}/spring-beans.pom"/>
+			<pom file="${dist.dir}/maven/spring-beans.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-beans-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-context-support.jar">
-			<pom file="${pom.src.dir}/spring-context-support.pom"/>
+			<pom file="${dist.dir}/maven/spring-context-support.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-context-support-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-context.jar">
-			<pom file="${pom.src.dir}/spring-context.pom"/>
+			<pom file="${dist.dir}/maven/spring-context.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-context-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-core.jar">
-			<pom file="${pom.src.dir}/spring-core.pom"/>
+			<pom file="${dist.dir}/maven/spring-core.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-core-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-jdbc.jar">
-			<pom file="${pom.src.dir}/spring-jdbc.pom"/>
+			<pom file="${dist.dir}/maven/spring-jdbc.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-jdbc-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-jms.jar">
-			<pom file="${pom.src.dir}/spring-jms.pom"/>
+			<pom file="${dist.dir}/maven/spring-jms.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-jms-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-mock.jar">
-			<pom file="${pom.src.dir}/spring-mock.pom"/>
+			<pom file="${dist.dir}/maven/spring-mock.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-mock-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-orm.jar">
-			<pom file="${pom.src.dir}/spring-orm.pom"/>
+			<pom file="${dist.dir}/maven/spring-orm.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-orm-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-tx.jar">
-			<pom file="${pom.src.dir}/spring-tx.pom"/>
+			<pom file="${dist.dir}/maven/spring-tx.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-tx-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-web.jar">
-			<pom file="${pom.src.dir}/spring-web.pom"/>
+			<pom file="${dist.dir}/maven/spring-web.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-web-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-webmvc.jar">
-			<pom file="${pom.src.dir}/spring-webmvc.pom"/>
+			<pom file="${dist.dir}/maven/spring-webmvc.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-webmvc-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-webmvc-portlet.jar">
-			<pom file="${pom.src.dir}/spring-webmvc-portlet.pom"/>
+			<pom file="${dist.dir}/maven/spring-webmvc-portlet.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-webmvc-portlet-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-webmvc-struts.jar">
-			<pom file="${pom.src.dir}/spring-webmvc-struts.pom"/>
+			<pom file="${dist.dir}/maven/spring-webmvc-struts.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-webmvc-struts-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/weaving/spring-agent.jar">
-			<pom file="${pom.src.dir}/spring-agent.pom"/>
+			<pom file="${dist.dir}/maven/spring-agent.pom"/>
 			<attach file="${dist.dir}/weaving-sources/spring-agent-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/weaving/spring-aspects.jar">
-			<pom file="${pom.src.dir}/spring-aspects.pom"/>
+			<pom file="${dist.dir}/maven/spring-aspects.pom"/>
 			<attach file="${dist.dir}/weaving-sources/spring-aspects-sources.jar" classifier="sources"/>
 		</maven:install>
 
 		<maven:install file="${dist.dir}/weaving/spring-tomcat-weaver.jar">
-			<pom file="${pom.src.dir}/spring-tomcat-weaver.pom"/>
+			<pom file="${dist.dir}/maven/spring-tomcat-weaver.pom"/>
 			<attach file="${dist.dir}/weaving-sources/spring-tomcat-weaver-sources.jar" classifier="sources"/>
 		</maven:install>
 
@@ -2044,6 +2044,7 @@
 				<include name="lib/jruby/**"/>
 				<include name="lib/junit/**"/>
 				<include name="lib/log4j/**"/>
+				<include name="lib/maven/**"/>
 				<include name="lib/oc4j/**"/>
 				<include name="lib/openjpa/**"/>
 				<include name="lib/oro/**"/>
