@@ -140,7 +140,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 			"Exiting method '" + PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
 
 	/**
-	 * The default method used for writing exception messages.
+	 * The default message used for writing exception messages.
 	 */
 	private static final String DEFAULT_EXCEPTION_MESSAGE =
 			"Exception thrown in method '" + PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
@@ -180,7 +180,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 
 	/**
-	 * Ses the template used for method entry log messages.
+	 * Set the template used for method entry log messages.
 	 * This template can contain any of the following placeholders:
 	 * <ul>
 	 * <li><code>$[targetClassName]</code></li>
@@ -379,7 +379,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @param methodInvocation the <code>MethodInvocation</code> that returned the value
 	 * @param matcher the <code>Matcher</code> containing the matched placeholder
 	 * @param output the <code>StringBuffer</code> to write output to
-	 * @param returnValue the value returned by the method invocatio.
+	 * @param returnValue the value returned by the method invocation.
 	 */
 	private void appendReturnValue(
 			MethodInvocation methodInvocation, Matcher matcher, StringBuffer output, Object returnValue) {
@@ -401,7 +401,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * <code>put(java.lang.String, java.lang.Object)</code> then the value returned
 	 * will be <code>String, Object</code>.
 	 * @param methodInvocation the <code>MethodInvocation</code> being logged.
-	 * Arguments will be retreived from the corresponding <code>Method</code>.
+	 * Arguments will be retrieved from the corresponding <code>Method</code>.
 	 * @param matcher the <code>Matcher</code> containing the state of the output
 	 * @param output the <code>StringBuffer</code> containing the output
 	 */
