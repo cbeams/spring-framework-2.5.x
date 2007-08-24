@@ -24,9 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.ContextConfiguration;
 import org.springframework.util.Assert;
 
@@ -53,7 +51,7 @@ import org.springframework.util.Assert;
  *
  * @param <T> The type of the test managed by this TestContext.
  * @author Sam Brannen
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @since 2.1
  */
 public class TestContext<T> {
@@ -134,11 +132,6 @@ public class TestContext<T> {
 	 * Builds and configures a {@link ApplicationContext} based on the supplied
 	 * {@link ContextConfigurationAttributes}.
 	 * </p>
-	 * <p>
-	 * {@link AutowiredAnnotationBeanPostProcessor} and
-	 * {@link CommonAnnotationBeanPostProcessor} will be automatically
-	 * registered with the context's bean factory.
-	 * </p>
 	 *
 	 * @param configAttributes the context configuration attributes to use to
 	 *        determine how to build and configure an appropriate application
@@ -150,25 +143,7 @@ public class TestContext<T> {
 			throws Exception {
 
 		Assert.notNull(configAttributes, "configAttributes can not be null.");
-
-		final ApplicationContext applicationContext = createContextLoader(configAttributes).loadContext(
-				configAttributes);
-
-		// TODO Remove cast to ConfigurableApplicationContext once we've pushed
-		// the context configuration to the ContextLoader.
-		final ConfigurableBeanFactory beanFactory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
-
-		// TODO Use AnnotationConfigUtils.registerAnnotationConfigProcessors()
-		// and move the BeanPostProcessor code to the ContextLoader.
-
-		final AutowiredAnnotationBeanPostProcessor autowiredAnnotationBpp = new AutowiredAnnotationBeanPostProcessor();
-		final CommonAnnotationBeanPostProcessor commonAnnotationBpp = new CommonAnnotationBeanPostProcessor();
-		autowiredAnnotationBpp.setBeanFactory(beanFactory);
-		commonAnnotationBpp.setBeanFactory(beanFactory);
-		beanFactory.addBeanPostProcessor(autowiredAnnotationBpp);
-		beanFactory.addBeanPostProcessor(commonAnnotationBpp);
-
-		return applicationContext;
+		return createContextLoader(configAttributes).loadContext(configAttributes);
 	}
 
 	// ------------------------------------------------------------------------|

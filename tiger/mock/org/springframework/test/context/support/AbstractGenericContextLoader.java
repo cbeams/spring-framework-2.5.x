@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
@@ -37,7 +38,7 @@ import org.springframework.test.context.ContextLoader;
  *
  * @see #loadContext()
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public abstract class AbstractGenericContextLoader implements ContextLoader {
@@ -64,21 +65,24 @@ public abstract class AbstractGenericContextLoader implements ContextLoader {
 	 * {@link ContextConfigurationAttributes configuration attributes}.
 	 * </p>
 	 * <p>
-	 * Implementation details: creates a standard
-	 * {@link GenericApplicationContext} instance, populates it from the
-	 * specified config locations through a
-	 * {@link #createBeanDefinitionReader(GenericApplicationContext) BeanDefinitionReader},
-	 * calls {@link #customizeBeanFactory} to allow for customizing the
-	 * context's DefaultListableBeanFactory, and finally registers a JVM
-	 * shutdown hook for the context.
+	 * Implementation details:
 	 * </p>
+	 * <ul>
+	 * <li>Creates a standard {@link GenericApplicationContext} instance.</li>
+	 * <li>Populates it from the specified config locations through a
+	 * {@link #createBeanDefinitionReader(GenericApplicationContext) BeanDefinitionReader}.</li>
+	 * <li>Calls {@link #customizeBeanFactory} to allow for customizing the
+	 * context's DefaultListableBeanFactory.</li>
+	 * <li>Delegates to {@link AnnotationConfigUtils} for
+	 * {@link AnnotationConfigUtils#registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry) registering}
+	 * annotation configuration processors.</li>
+	 * <li>{@link ConfigurableApplicationContext#refresh() Refreshes} the
+	 * context and registers a JVM shutdown hook for it.</li>
+	 * </p>
+	 * </ul>
 	 * <p>
 	 * Subclasses must provide an appropriate implementation of
 	 * {@link #createBeanDefinitionReader(GenericApplicationContext)}.
-	 * </p>
-	 * <p>
-	 * Note: the returned context will already have been
-	 * {@link ConfigurableApplicationContext#refresh() refreshed}.
 	 * </p>
 	 *
 	 * @see org.springframework.test.context.ContextLoader#loadContext()
@@ -99,6 +103,7 @@ public abstract class AbstractGenericContextLoader implements ContextLoader {
 		final GenericApplicationContext context = new GenericApplicationContext();
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
 		createBeanDefinitionReader(context).loadBeanDefinitions(configAttributes.getLocations());
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		context.registerShutdownHook();
 		return context;
