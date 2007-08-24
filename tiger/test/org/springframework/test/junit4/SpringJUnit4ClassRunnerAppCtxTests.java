@@ -57,7 +57,7 @@ import org.springframework.test.annotation.ContextConfiguration;
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -73,7 +73,7 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	 * {@link SpringJUnit4ClassRunnerAppCtxTests}:
 	 * <code>&quot;/org/springframework/test/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>
 	 */
-	public static final String DEFAULT_CONTEXT_RESOURCE_PATH = "/org/springframework/test/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml";
+	public static final String	DEFAULT_CONTEXT_RESOURCE_PATH	= "/org/springframework/test/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml";
 
 	// ------------------------------------------------------------------------|
 	// --- CLASS VARIABLES ----------------------------------------------------|
@@ -93,24 +93,24 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private ApplicationContext applicationContext;
+	private ApplicationContext	applicationContext;
 
-	private boolean beanInitialized = false;
+	private boolean				beanInitialized	= false;
 
-	private String beanName = "replace me with null";
+	private String				beanName		= "replace me with null";
 
-	private Employee employee;
+	private Employee			employee;
 
 	@Autowired
-	private Pet pet;
+	private Pet					pet;
 
 	@Autowired(required = false)
-	protected Long nonrequiredLong;
+	protected Long				nonrequiredLong;
 
 	@Resource()
-	protected String foo;
+	protected String			foo;
 
-	protected String bar;
+	protected String			bar;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
@@ -171,9 +171,8 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	@Test
 	public final void verifyBeanNameSet() {
 
-		assertNull("The bean name of this test instance should have been set to NULL "
-				+ "due to BeanNameAware semantics, since the testing support classes "
-				+ "currently do not provide a bean name for dependency injected test instances.", this.beanName);
+		assertEquals("The bean name of this test instance should have been set to the fully qualified class name "
+				+ "due to BeanNameAware semantics.", getClass().getName(), this.beanName);
 	}
 
 	@Test
