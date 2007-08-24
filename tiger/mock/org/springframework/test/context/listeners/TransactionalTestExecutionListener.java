@@ -77,7 +77,7 @@ import org.springframework.util.Assert;
  * @see Rollback
  * @see TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @since 2.1
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
@@ -349,21 +349,17 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 		// ---------------------------------------------------------------------
 
-		if (getTransactionManager(testContext) == null) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("No transaction manager set for test context [" + testContext
-						+ "]: test will NOT run within a transaction.");
+		if (this.transactionDefinition != null) {
+			if (getTransactionManager(testContext) == null) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn("Transaction definition was set for test context [" + testContext
+							+ "], but no transaction manager was set: test will NOT run within a transaction.");
+				}
 			}
-		}
-		else if (this.transactionDefinition == null) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn("No transaction definition set for test context [" + testContext
-						+ "]: test will NOT run within a transaction.");
+			else {
+				runBeforeTransactionMethods(testContext);
+				startNewTransaction(testContext);
 			}
-		}
-		else {
-			runBeforeTransactionMethods(testContext);
-			startNewTransaction(testContext);
 		}
 	}
 
@@ -581,8 +577,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 					transactionManagerName, PlatformTransactionManager.class);
 		}
 		catch (final Exception e) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Caught exception while retrieving transaction manager with bean name ["
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Caught exception while retrieving transaction manager with bean name ["
 						+ transactionManagerName + "] for test context [" + testContext + "].", e);
 			}
 			throw e;
