@@ -46,7 +46,7 @@ import org.springframework.test.jdbc.SimpleJdbcTestUtils;
  * {@link AbstractTransactionalJUnit4SpringContextTests}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 @ContextConfiguration
@@ -186,9 +186,8 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@NotTransactional
 	public final void verifyBeanNameSet() {
 
-		assertNull("The bean name of this test instance should have been set to NULL "
-				+ "due to BeanNameAware semantics, since the testing support classes "
-				+ "currently do not provide a bean name for dependency injected test instances.", this.beanName);
+		assertEquals("The bean name of this test instance should have been set to the fully qualified class name "
+				+ "due to BeanNameAware semantics.", getClass().getName(), this.beanName);
 	}
 
 	@Test
