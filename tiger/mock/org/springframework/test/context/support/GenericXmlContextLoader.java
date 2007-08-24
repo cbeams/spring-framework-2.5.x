@@ -17,9 +17,7 @@ package org.springframework.test.context.support;
 
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.test.context.ContextConfigurationAttributes;
 
 /**
  * <p>
@@ -27,9 +25,8 @@ import org.springframework.test.context.ContextConfigurationAttributes;
  * bean definitions from XML resources.
  * </p>
  *
- * @see #createBeanDefinitionReader(GenericApplicationContext)
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class GenericXmlContextLoader extends AbstractGenericContextLoader {
@@ -37,18 +34,6 @@ public class GenericXmlContextLoader extends AbstractGenericContextLoader {
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
 	// ------------------------------------------------------------------------|
-
-	/**
-	 * Constructs a new {@link GenericXmlContextLoader} with the supplied
-	 * {@link ContextConfigurationAttributes configuration attributes}.
-	 *
-	 * @param configAttributes Configuration attributes for the
-	 *        {@link ApplicationContext} which this context loader loads.
-	 */
-	public GenericXmlContextLoader(final ContextConfigurationAttributes configAttributes) {
-
-		super(configAttributes);
-	}
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|

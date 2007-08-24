@@ -15,22 +15,17 @@
  */
 package org.springframework.test.context;
 
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationContext;
 
 /**
  * <p>
  * Strategy interface for loading an
- * {@link ConfigurableApplicationContext application context} based on a
- * supplied set of
+ * {@link ApplicationContext application context} based on a supplied set of
  * {@link ContextConfigurationAttributes configuration attributes}.
- * </p>
- * <p>
- * Concrete implementations must declare a public constructor which accepts a
- * single {@link ContextConfigurationAttributes} argument.
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public interface ContextLoader {
@@ -41,22 +36,24 @@ public interface ContextLoader {
 
 	/**
 	 * <p>
-	 * Loads a new {@link ConfigurableApplicationContext context} based on the
-	 * {@link ContextConfigurationAttributes configuration attributes} provided
-	 * to this ContextLoader, possibly configures the context, and finally
-	 * returns the {@link ConfigurableApplicationContext#refresh() refreshed}
-	 * context.
+	 * Loads a new {@link ApplicationContext context} based on the supplied
+	 * {@link ContextConfigurationAttributes configuration attributes},
+	 * configures the context, and finally returns the context, potentially
+	 * <em>refreshed</em>.
 	 * </p>
 	 * <p>
-	 * Any ApplicationContext loaded by this method <strong>must</strong> be
-	 * asked to register a JVM shutdown hook for itself. Unless the context gets
-	 * closed early, all context instances will be automatically closed on JVM
+	 * Any ApplicationContext loaded by this method <strong>must</strong>
+	 * register a JVM shutdown hook for itself. Unless the context gets closed
+	 * early, all context instances will be automatically closed on JVM
 	 * shutdown. This allows for freeing external resources held by beans within
 	 * the context, e.g. temporary files.
 	 * </p>
 	 *
+	 * @param contextConfigurationAttributes The configuration attributes to use
+	 *        to determine how to load and configure the application context.
 	 * @return a new application context
 	 */
-	public abstract ConfigurableApplicationContext loadContext() throws Exception;
+	public abstract ApplicationContext loadContext(ContextConfigurationAttributes contextConfigurationAttributes)
+			throws Exception;
 
 }

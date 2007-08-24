@@ -19,9 +19,7 @@ import java.util.Properties;
 
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.test.context.ContextConfigurationAttributes;
 
 /**
  * <p>
@@ -29,9 +27,8 @@ import org.springframework.test.context.ContextConfigurationAttributes;
  * bean definitions from Java {@link Properties} resources.
  * </p>
  *
- * @see #createBeanDefinitionReader(GenericApplicationContext)
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class GenericPropertiesContextLoader extends AbstractGenericContextLoader {
@@ -39,18 +36,6 @@ public class GenericPropertiesContextLoader extends AbstractGenericContextLoader
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
 	// ------------------------------------------------------------------------|
-
-	/**
-	 * Constructs a new {@link GenericPropertiesContextLoader} with the supplied
-	 * {@link ContextConfigurationAttributes configuration attributes}.
-	 *
-	 * @param configAttributes Configuration attributes for the
-	 *        {@link ApplicationContext} which this context loader loads.
-	 */
-	public GenericPropertiesContextLoader(final ContextConfigurationAttributes configAttributes) {
-
-		super(configAttributes);
-	}
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|

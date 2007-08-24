@@ -17,7 +17,6 @@ package org.springframework.test.context;
 
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -30,7 +29,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.ContextConfiguration;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * <p>
@@ -55,7 +53,7 @@ import org.springframework.util.ClassUtils;
  *
  * @param <T> The type of the test managed by this TestContext.
  * @author Sam Brannen
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @since 2.1
  */
 public class TestContext<T> {
@@ -153,7 +151,8 @@ public class TestContext<T> {
 
 		Assert.notNull(configAttributes, "configAttributes can not be null.");
 
-		final ApplicationContext applicationContext = createContextLoader(configAttributes).loadContext();
+		final ApplicationContext applicationContext = createContextLoader(configAttributes).loadContext(
+				configAttributes);
 
 		// TODO Remove cast to ConfigurableApplicationContext once we've pushed
 		// the context configuration to the ContextLoader.
@@ -194,15 +193,7 @@ public class TestContext<T> {
 		final Class<? extends ContextLoader> contextLoaderClass = configAttributes.getLoaderClass();
 		Assert.state(contextLoaderClass != null,
 				"loaderClass is null: ContextConfigurationAttributes have not been properly initialized.");
-
-		@SuppressWarnings("unchecked")
-		final Constructor<? extends ContextLoader> constructor = ClassUtils.getConstructorIfAvailable(
-				contextLoaderClass, new Class[] { ContextConfigurationAttributes.class });
-		Assert.state(constructor != null, "The configured ContextLoader class [" + contextLoaderClass
-				+ "] must have a constructor which accepts an instance of "
-				+ "ContextConfigurationAttributes as its only argument.");
-
-		return constructor.newInstance(configAttributes);
+		return contextLoaderClass.newInstance();
 	}
 
 	// ------------------------------------------------------------------------|
