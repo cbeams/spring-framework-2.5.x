@@ -272,8 +272,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
-* jasperreports/jasperreports-1.3.4.jar
-- JasperReports 1.3.4 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-2.0.0.jar
+- JasperReports 2.0.0 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
@@ -310,7 +310,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's XAPoolNativeJdbcExtractor
 
 * jruby/jruby.jar
-- JRuby 1.0 (http://jruby.codehaus.org)
+- JRuby 1.0.1 (http://jruby.codehaus.org)
 - required for building the framework
 - required at runtime when using Spring's JRuby support
 
