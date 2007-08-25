@@ -15,12 +15,6 @@
  */
 package org.springframework.test.context;
 
-import java.lang.reflect.Method;
-
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
-
 /**
  * <p>
  * TestExecutionListener defines a <em>listener</em> API for reacting to test
@@ -36,13 +30,13 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
  * Spring provides the following out-of-the-box implementations:
  * </p>
  * <ul>
- * <li>{@link DependencyInjectionTestExecutionListener}</li>
- * <li>{@link DirtiesContextTestExecutionListener}</li>
- * <li>{@link TransactionalTestExecutionListener}</li>
+ * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener DependencyInjectionTestExecutionListener}</li>
+ * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener DirtiesContextTestExecutionListener}</li>
+ * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener TransactionalTestExecutionListener}</li>
  * </ul>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.2
  */
 public interface TestExecutionListener {
@@ -71,7 +65,7 @@ public interface TestExecutionListener {
 	/**
 	 * <p>
 	 * Pre-processes a test just <em>before</em> execution of the
-	 * {@link Method test method} in the supplied
+	 * {@link java.lang.reflect.Method test method} in the supplied
 	 * {@link TestContext test context}, for example for setting up test
 	 * fixtures.
 	 * </p>
@@ -87,7 +81,7 @@ public interface TestExecutionListener {
 	/**
 	 * <p>
 	 * Post-processes a test just <em>after</em> execution of the
-	 * {@link Method test method} in the supplied
+	 * {@link java.lang.reflect.Method test method} in the supplied
 	 * {@link TestContext test context}, for example for tearing down test
 	 * fixtures.
 	 * </p>
