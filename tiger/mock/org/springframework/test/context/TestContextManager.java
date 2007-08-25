@@ -25,8 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.test.annotation.TestExecutionListeners;
-import org.springframework.test.context.listeners.TestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -34,9 +32,9 @@ import org.springframework.util.Assert;
  * <p>
  * TestContextManager is the central entry point into the Spring testing support
  * API, which provides support for loading and accessing
- * {@link ApplicationContext application contexts}, dependency
- * injection of test instances, and {@link Transactional transactional}
- * execution of test methods.
+ * {@link ApplicationContext application contexts}, dependency injection of
+ * test instances, and {@link Transactional transactional} execution of test
+ * methods.
  * </p>
  * <p>
  * Specifically, a TestContextManager is responsible for managing a single
@@ -52,14 +50,13 @@ import org.springframework.util.Assert;
  *
  * @see TestContext
  * @see TestExecutionListeners
- * @see org.springframework.test.annotation.ContextConfiguration
- * @see org.springframework.test.annotation.TransactionConfiguration
- * @param <T> The type of the test managed by this TestContextManager.
+ * @see org.springframework.test.context.ContextConfiguration
+ * @see org.springframework.test.context.transaction.TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @since 2.1
  */
-public class TestContextManager<T> {
+public class TestContextManager {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|
@@ -73,7 +70,7 @@ public class TestContextManager<T> {
 	private static final ContextCache<ContextConfigurationAttributes, ApplicationContext>	CONTEXT_CACHE			= new ContextCache<ContextConfigurationAttributes, ApplicationContext>();
 
 	/** Class Logger. */
-	private static final Log																			LOG						= LogFactory.getLog(TestContextManager.class);
+	private static final Log																LOG						= LogFactory.getLog(TestContextManager.class);
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
@@ -87,9 +84,9 @@ public class TestContextManager<T> {
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final TestContext<T>																		testContext;
+	private final TestContext																testContext;
 
-	private final Set<TestExecutionListener>															testExecutionListeners	= new LinkedHashSet<TestExecutionListener>();
+	private final Set<TestExecutionListener>												testExecutionListeners	= new LinkedHashSet<TestExecutionListener>();
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -115,9 +112,9 @@ public class TestContextManager<T> {
 	 *        managed.
 	 * @throws Exception if an error occurs while processing the test class
 	 */
-	public TestContextManager(final Class<T> testClass) throws Exception {
+	public TestContextManager(final Class<?> testClass) throws Exception {
 
-		this.testContext = new TestContext<T>(testClass, getContextCache());
+		this.testContext = new TestContext(testClass, getContextCache());
 		registerTestExecutionListeners(retrieveTestExecutionListeners(testClass));
 	}
 
@@ -194,7 +191,7 @@ public class TestContextManager<T> {
 	 * @param testInstance The test instance to prepare, not <code>null</code>.
 	 * @throws Exception if an error occurs while preparing the test instance.
 	 */
-	public void prepareTestInstance(final T testInstance) throws Exception {
+	public void prepareTestInstance(final Object testInstance) throws Exception {
 
 		Assert.notNull(testInstance, "The testInstance can not be null.");
 		if (LOG.isDebugEnabled()) {
@@ -244,7 +241,7 @@ public class TestContextManager<T> {
 	 * @throws Exception if a registered TestExecutionListener throws an
 	 *         exception.
 	 */
-	public void beforeTestMethod(final T testInstance, final Method testMethod) throws Exception {
+	public void beforeTestMethod(final Object testInstance, final Method testMethod) throws Exception {
 
 		Assert.notNull(testInstance, "The testInstance can not be null.");
 		Assert.notNull(testMethod, "The testMethod can not be null.");
@@ -296,7 +293,7 @@ public class TestContextManager<T> {
 	 * @param exception The exception that was thrown during execution of the
 	 *        test method, or <code>null</code> if none was thrown.
 	 */
-	public void afterTestMethod(final T testInstance, final Method testMethod, final Throwable exception) {
+	public void afterTestMethod(final Object testInstance, final Method testMethod, final Throwable exception) {
 
 		Assert.notNull(testInstance, "The testInstance can not be null.");
 		Assert.notNull(testMethod, "The testMethod can not be null.");
@@ -356,7 +353,7 @@ public class TestContextManager<T> {
 	 *
 	 * @return The test context.
 	 */
-	public final TestContext<T> getTestContext() {
+	public final TestContext getTestContext() {
 
 		return this.testContext;
 	}

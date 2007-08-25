@@ -36,9 +36,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.internal.runners.JUnit4ClassRunner;
 import org.junit.runner.RunWith;
-import org.springframework.test.annotation.ContextConfiguration;
-import org.springframework.test.context.listeners.AbstractTestExecutionListener;
-import org.springframework.test.context.listeners.TestExecutionListener;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
  * JUnit 4 based unit test for {@link TestContextManager}, which verifies
@@ -46,7 +44,7 @@ import org.springframework.test.context.listeners.TestExecutionListener;
  * {@link TestExecutionListener TestExecutionListeners}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 @RunWith(JUnit4ClassRunner.class)
@@ -56,24 +54,24 @@ public class TestContextManagerTests {
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private static final String FIRST = "veni";
+	private static final String			FIRST					= "veni";
 
-	private static final String SECOND = "vidi";
+	private static final String			SECOND					= "vidi";
 
-	private static final String THIRD = "vici";
+	private static final String			THIRD					= "vici";
 
-	private static final List<String> afterTestMethodCalls = new ArrayList<String>();
+	private static final List<String>	afterTestMethodCalls	= new ArrayList<String>();
 
-	private static final List<String> beforeTestMethodCalls = new ArrayList<String>();
+	private static final List<String>	beforeTestMethodCalls	= new ArrayList<String>();
 
 	/** Class Logger. */
-	protected static final Log LOG = LogFactory.getLog(TestContextManagerTests.class);
+	protected static final Log			LOG						= LogFactory.getLog(TestContextManagerTests.class);
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private TestContextManager<ExampleTest> testContextManager = null;
+	private TestContextManager			testContextManager		= null;
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC INITIALIZATION ----------------------------------------------|
@@ -175,11 +173,11 @@ public class TestContextManagerTests {
 
 		final Method testMethod = ExampleTest.class.getDeclaredMethod("exampleTestMethod", (Class<?>[]) null);
 
-		this.testContextManager = new TestContextManager<ExampleTest>(ExampleTest.class);
+		this.testContextManager = new TestContextManager(ExampleTest.class);
 		this.testContextManager.registerTestExecutionListeners(new NamedTestExecutionListener(FIRST),
 				new NamedTestExecutionListener(SECOND), new NamedTestExecutionListener(THIRD));
 
-		assertEquals("Verifying the number of registered TestExecutionListeners.", 5,
+		assertEquals("Verifying the number of registered TestExecutionListeners.", 6,
 				this.testContextManager.getTestExecutionListeners().size());
 
 		this.testContextManager.beforeTestMethod(new ExampleTest(), testMethod);
@@ -221,7 +219,7 @@ public class TestContextManagerTests {
 
 	static class NamedTestExecutionListener extends AbstractTestExecutionListener {
 
-		private final String name;
+		private final String	name;
 
 		public NamedTestExecutionListener(final String name) {
 
@@ -229,13 +227,13 @@ public class TestContextManagerTests {
 		}
 
 		@Override
-		public void afterTestMethod(final TestContext<?> testContext) {
+		public void afterTestMethod(final TestContext testContext) {
 
 			afterTestMethodCalls.add(this.name);
 		}
 
 		@Override
-		public void beforeTestMethod(final TestContext<?> testContext) {
+		public void beforeTestMethod(final TestContext testContext) {
 
 			beforeTestMethodCalls.add(this.name);
 		}

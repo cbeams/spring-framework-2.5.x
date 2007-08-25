@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.annotation.ContextConfiguration;
 import org.springframework.util.Assert;
 
 /**
@@ -49,12 +48,11 @@ import org.springframework.util.Assert;
  * are considered to be classpath resources.
  * </p>
  *
- * @param <T> The type of the test managed by this TestContext.
  * @author Sam Brannen
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @since 2.1
  */
-public class TestContext<T> {
+public class TestContext {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|
@@ -81,7 +79,7 @@ public class TestContext<T> {
 
 	private Throwable																testException;
 
-	private final Class<T>															testClass;
+	private final Class<?>															testClass;
 
 	private Object																	testInstance;
 
@@ -100,7 +98,7 @@ public class TestContext<T> {
 	 * and {@link ContextCache context cache} and parses the
 	 * {@link ContextConfigurationAttributes} configured for the test class via
 	 * the
-	 * {@link org.springframework.test.annotation.ContextConfiguration @ContextConfiguration}
+	 * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
 	 * annotation.
 	 *
 	 * @param testClass The {@link Class} object corresponding to the test class
@@ -110,7 +108,7 @@ public class TestContext<T> {
 	 *        context should retrieve application contexts, not
 	 *        <code>null</code>.
 	 */
-	public TestContext(final Class<T> testClass,
+	public TestContext(final Class<?> testClass,
 			final ContextCache<ContextConfigurationAttributes, ApplicationContext> contextCache) {
 
 		super();
@@ -278,7 +276,7 @@ public class TestContext<T> {
 	 *
 	 * @return The test class, never <code>null</code>.
 	 */
-	public final Class<T> getTestClass() {
+	public final Class<?> getTestClass() {
 
 		return this.testClass;
 	}

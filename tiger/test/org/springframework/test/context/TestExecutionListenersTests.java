@@ -21,10 +21,7 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import org.junit.internal.runners.JUnit4ClassRunner;
 import org.junit.runner.RunWith;
-import org.springframework.test.annotation.ContextConfiguration;
-import org.springframework.test.annotation.TestExecutionListeners;
-import org.springframework.test.context.listeners.AbstractTestExecutionListener;
-import org.springframework.test.context.listeners.TestExecutionListener;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
  * JUnit 4 based unit test for the {@link TestExecutionListeners} annotation.
@@ -33,7 +30,7 @@ import org.springframework.test.context.listeners.TestExecutionListener;
  * {@link ContextConfiguration} annotation and a {@link TestContextManager}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(JUnit4ClassRunner.class)
@@ -56,7 +53,7 @@ public class TestExecutionListenersTests {
 	@Test
 	public void verifyNumListenersRegistered() throws Exception {
 
-		final TestContextManager<?> testContextManager = new TestContextManager<ExampleTest>(ExampleTest.class);
+		final TestContextManager testContextManager = new TestContextManager(ExampleTest.class);
 		assertEquals("Verifying the number of registered TestExecutionListeners", 4,
 				testContextManager.getTestExecutionListeners().size());
 	}

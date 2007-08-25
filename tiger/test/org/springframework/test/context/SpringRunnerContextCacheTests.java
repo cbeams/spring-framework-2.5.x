@@ -24,9 +24,8 @@ import org.junit.Test;
 import org.junit.internal.runners.InitializationError;
 import org.junit.runner.RunWith;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.annotation.ContextConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * JUnit 4 based unit test which verifies correct
@@ -34,11 +33,11 @@ import org.springframework.test.junit4.SpringJUnit4ClassRunner;
  * {@link SpringJUnit4ClassRunner} and the {@link DirtiesContext} annotation.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 @RunWith(SpringRunnerContextCacheTests.TestableSpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "/org/springframework/test/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml" })
+@ContextConfiguration(locations = { "/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml" })
 public class SpringRunnerContextCacheTests {
 
 	// ------------------------------------------------------------------------|
@@ -122,19 +121,19 @@ public class SpringRunnerContextCacheTests {
 	// --- STATIC CLASSES -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	public static class TestableSpringJUnit4ClassRunner<T> extends SpringJUnit4ClassRunner<T> {
+	public static class TestableSpringJUnit4ClassRunner extends SpringJUnit4ClassRunner {
 
-		static TestableTestContextManager<?>	testableTestContextManager;
+		static TestableTestContextManager	testableTestContextManager;
 
-		public TestableSpringJUnit4ClassRunner(final Class<T> clazz) throws InitializationError {
+		public TestableSpringJUnit4ClassRunner(final Class<?> clazz) throws InitializationError {
 
 			super(clazz);
 		}
 
 		@Override
-		protected TestContextManager<T> createTestContextManager(final Class<T> clazz) throws Exception {
+		protected TestContextManager createTestContextManager(final Class<?> clazz) throws Exception {
 
-			final TestableTestContextManager<T> testableTestContextManager = new TestableTestContextManager<T>(clazz);
+			final TestableTestContextManager testableTestContextManager = new TestableTestContextManager(clazz);
 			TestableSpringJUnit4ClassRunner.testableTestContextManager = testableTestContextManager;
 			return testableTestContextManager;
 		}
@@ -142,9 +141,9 @@ public class SpringRunnerContextCacheTests {
 
 	// ------------------------------------------------------------------------|
 
-	private static class TestableTestContextManager<T> extends TestContextManager<T> {
+	private static class TestableTestContextManager extends TestContextManager {
 
-		public TestableTestContextManager(final Class<T> testClass) throws Exception {
+		public TestableTestContextManager(final Class<?> testClass) throws Exception {
 
 			super(testClass);
 		}

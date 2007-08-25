@@ -22,7 +22,6 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.annotation.ContextConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -36,7 +35,7 @@ import org.springframework.util.StringUtils;
  *
  * @see ContextConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 public class ContextConfigurationAttributes implements Serializable {

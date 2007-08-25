@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+
+	<context:annotation-config />
+
+	<bean id="employee" class="org.springframework.beans.Employee">
+		<property name="name" value="John Smith" />
+		<property name="age" value="42" />
+		<property name="company" value="Acme Widgets, Inc." />
+	</bean>
+
+	<bean id="pet" class="org.springframework.beans.Pet">
+		<constructor-arg value="Fido" />
+	</bean>
+
+	<bean id="foo" class="java.lang.String">
+		<constructor-arg value="Foo" />
+	</bean>
+
+	<bean id="bar" class="java.lang.String">
+		<constructor-arg value="Bar" />
+	</bean>
+
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+		<property name="url" value="jdbc:hsqldb:mem:transactional_tests" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:data-source-ref="dataSource" />
+
+	<bean id="databaseSetup"
+		class="org.springframework.test.context.junit4.ConcreteTransactionalJUnit4SpringContextTests$DatabaseSetup" />
+
+</beans>
