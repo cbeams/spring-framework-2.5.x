@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.jdbc;
+package org.springframework.test.utils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -39,10 +39,10 @@ import org.springframework.util.StringUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  * @since 2.1
  */
-public class SimpleJdbcTestUtils {
+public abstract class SimpleJdbcTestUtils {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|

@@ -37,18 +37,16 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
-import org.springframework.test.jdbc.SimpleJdbcTestUtils;
+import org.springframework.test.utils.SimpleJdbcTestUtils;
 
 /**
  * Combined unit test for {@link AbstractJUnit4SpringContextTests} and
  * {@link AbstractTransactionalJUnit4SpringContextTests}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @ContextConfiguration

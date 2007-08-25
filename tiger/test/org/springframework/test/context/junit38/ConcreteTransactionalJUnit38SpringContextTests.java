@@ -32,14 +32,14 @@ import org.springframework.test.context.junit38.AbstractJUnit38SpringContextTest
 import org.springframework.test.context.junit38.AbstractTransactionalJUnit38SpringContextTests;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
-import org.springframework.test.jdbc.SimpleJdbcTestUtils;
+import org.springframework.test.utils.SimpleJdbcTestUtils;
 
 /**
  * Combined unit test for {@link AbstractJUnit38SpringContextTests} and
  * {@link AbstractTransactionalJUnit38SpringContextTests}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @ContextConfiguration
