@@ -30,30 +30,35 @@ import org.springframework.util.Assert;
 
 /**
  * <p>
- * TestContextManager is the central entry point into the Spring testing support
- * API, which provides support for loading and accessing
- * {@link ApplicationContext application contexts}, dependency injection of
- * test instances, and {@link Transactional transactional} execution of test
- * methods.
+ * TestContextManager is the central entry point into the
+ * <em>Spring Test Context Framework</em>, which provides support for loading
+ * and accessing {@link ApplicationContext application contexts}, dependency
+ * injection of test instances, and {@link Transactional transactional}
+ * execution of test methods.
  * </p>
  * <p>
  * Specifically, a TestContextManager is responsible for managing a single
- * {@link TestContext} and ensuring that all registered
- * {@link TestExecutionListener TestExecutionListeners} are given a chance to
- * process the test context at well defined test lifecycle execution points:
+ * {@link TestContext} and signaling events to all registered
+ * {@link TestExecutionListener TestExecutionListeners} at well defined test
+ * execution points:
  * </p>
  * <ul>
- * <li>{@link #prepareTestInstance(Object) test instance preparation}</li>
- * <li>{@link #beforeTestMethod(Object, Method) before a test method is executed}</li>
- * <li>{@link #afterTestMethod(Object, Method, Throwable) after a test method has been executed}</li>
+ * <li>{@link #prepareTestInstance(Object) test instance preparation}:
+ * immediately following instantiation of the test instance</li>
+ * <li>{@link #beforeTestMethod(Object, Method) before test method execution}:
+ * prior to any <em>before methods</em> of a particular testing framework
+ * (e.g., JUnit 4's {@link org.junit.Before @Before})</li>
+ * <li>{@link #afterTestMethod(Object, Method, Throwable) after test method execution}:
+ * after any <em>after methods</em> of a particular testing framework (e.g.,
+ * JUnit 4's {@link org.junit.After @After})</li>
  * </ul>
  *
  * @see TestContext
  * @see TestExecutionListeners
- * @see org.springframework.test.context.ContextConfiguration
+ * @see ContextConfiguration
  * @see org.springframework.test.context.transaction.TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @since 2.1
  */
 public class TestContextManager {
