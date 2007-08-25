@@ -25,7 +25,7 @@ import org.springframework.context.ApplicationContext;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public interface ContextLoader {
@@ -40,6 +40,19 @@ public interface ContextLoader {
 	 * {@link ContextConfigurationAttributes configuration attributes},
 	 * configures the context, and finally returns the context, potentially
 	 * <em>refreshed</em>.
+	 * </p>
+	 * <p>
+	 * {@link ContextConfigurationAttributes#getLocations() Configuration locations}
+	 * should be considered to be classpath resources by default.
+	 * </p>
+	 * <p>
+	 * Concrete implementations should register annotation configuration
+	 * processors with bean factories of
+	 * {@link ApplicationContext application contexts} loaded by this test
+	 * ContextLoader. Beans will therefore automatically be candidates for
+	 * annotation-based dependency injection using
+	 * {@link org.springframework.beans.factory.annotation.Autowired Autowired}
+	 * and {@link javax.annotation.Resource Resource}.
 	 * </p>
 	 * <p>
 	 * Any ApplicationContext loaded by this method <strong>must</strong>

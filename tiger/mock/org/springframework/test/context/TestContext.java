@@ -22,8 +22,6 @@ import java.lang.reflect.Method;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
-import org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
@@ -32,24 +30,9 @@ import org.springframework.util.Assert;
  * TestContext encapsulates the context in which a test is executed, agnostic of
  * the actual testing framework in use.
  * </p>
- * <p>
- * {@link AutowiredAnnotationBeanPostProcessor} and
- * {@link CommonAnnotationBeanPostProcessor} will be automatically registered
- * with bean factories of {@link ApplicationContext application contexts}
- * created for the test instance referenced by this test context. Test instances
- * are therefore automatically candidates for annotation-based dependency
- * injection using
- * {@link org.springframework.beans.factory.annotation.Autowired Autowired} and
- * {@link javax.annotation.Resource Resource}.
- * </p>
- * <p>
- * Note that all
- * {@link ContextConfigurationAttributes#getLocations() configuration locations}
- * are considered to be classpath resources.
- * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @since 2.1
  */
 public class TestContext {
