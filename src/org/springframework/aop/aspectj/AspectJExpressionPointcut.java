@@ -255,7 +255,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 		else {
 		  // the maybe case
-		  return (beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch));
+		  return beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch) || matchesTarget(shadowMatch, targetClass);
 		}
 	}
 
@@ -312,11 +312,12 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		 * type but not 'this' (as would be the case of JDK dynamic proxies).
 		 * <p>See SPR-2979 for the original bug.
 		 */
-		RuntimeTestWalker originalMethodResidueTest = new RuntimeTestWalker(originalShadowMatch);
-		if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject)) {
-			return false;
+		if(pmi != null) { // there is a current invocation
+			RuntimeTestWalker originalMethodResidueTest = new RuntimeTestWalker(originalShadowMatch);
+			if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
+				return false;
+			}
 		}
-
 		if (joinPointMatch.matches() && pmi != null) {
 			bindParameters(pmi, joinPointMatch);
 		}
@@ -337,6 +338,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	 */
 	private boolean matchesIgnoringSubtypes(ShadowMatch shadowMatch) {
 		return !(new RuntimeTestWalker(shadowMatch).testsSubtypeSensitiveVars());
+	}
+
+	private boolean matchesTarget(ShadowMatch shadowMatch, Class targetClass) {
+		return new RuntimeTestWalker(shadowMatch).testTargetInstanceOfResidue(targetClass);
 	}
 
 	private void bindParameters(ProxyMethodInvocation invocation, JoinPointMatch jpm) {
