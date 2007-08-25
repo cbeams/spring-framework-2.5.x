@@ -49,7 +49,7 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @since 2.1
  */
 public class TestContext {
@@ -127,7 +127,7 @@ public class TestContext {
 
 	/**
 	 * <p>
-	 * Builds and configures a {@link ApplicationContext} based on the supplied
+	 * Builds and configures an {@link ApplicationContext} based on the supplied
 	 * {@link ContextConfigurationAttributes}.
 	 * </p>
 	 *
@@ -140,36 +140,16 @@ public class TestContext {
 	protected static ApplicationContext buildApplicationContext(final ContextConfigurationAttributes configAttributes)
 			throws Exception {
 
-		Assert.notNull(configAttributes, "configAttributes can not be null.");
-		return createContextLoader(configAttributes).loadContext(configAttributes);
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * <p>
-	 * Creates a new {@link ContextLoader} of the concrete type specified in the
-	 * supplied {@link ContextConfigurationAttributes}.
-	 * </p>
-	 *
-	 * @see ContextLoader
-	 * @see ContextConfigurationAttributes#getLoaderClass()
-	 * @param configAttributes the context configuration attributes to use to
-	 *        determine the type of ContextLoader to instantiate.
-	 * @return a new ContextLoader
-	 * @throws Exception if an error occurs while creating the context loader.
-	 */
-	protected static ContextLoader createContextLoader(final ContextConfigurationAttributes configAttributes)
-			throws Exception {
-
 		Assert.notNull(configAttributes, "ContextConfigurationAttributes can not be null.");
 		final Class<? extends ContextLoader> contextLoaderClass = configAttributes.getLoaderClass();
 		Assert.state(contextLoaderClass != null,
 				"loaderClass is null: ContextConfigurationAttributes have not been properly initialized.");
-		return contextLoaderClass.newInstance();
+		final ContextLoader contextLoader = contextLoaderClass.newInstance();
+		return contextLoader.loadContext(configAttributes);
 	}
 
 	// ------------------------------------------------------------------------|
+
 	/**
 	 * Retrieves the {@link ContextConfigurationAttributes} for the supplied
 	 * {@link Class} which must declare or inherit
