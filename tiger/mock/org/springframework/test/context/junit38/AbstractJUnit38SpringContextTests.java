@@ -32,7 +32,8 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 
 /**
  * <p>
- * Abstract {@link TestCase} which integrates Spring's annotation-based
+ * Abstract {@link TestCase} which integrates the
+ * <em>Spring Test Context Framework</em> with explicit
  * {@link ApplicationContext} testing support in a JUnit 3.8 environment.
  * </p>
  * <p>
@@ -43,9 +44,9 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * annotation to configure the {@link ApplicationContext application context}
  * {@link ContextConfiguration#locations() resource locations}.</li>
  * <li>Declare public constructors which match the signatures of
- * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests()}
+ * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests() AbstractJUnit38SpringContextTests()}
  * and
- * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String)}
+ * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String) AbstractJUnit38SpringContextTests(String)}
  * and delegate to <code>super();</code> and <code>super(name);</code>
  * respectively.</li>
  * </ul>
@@ -54,7 +55,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * @see TestContextManager
  * @see TestExecutionListeners
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
