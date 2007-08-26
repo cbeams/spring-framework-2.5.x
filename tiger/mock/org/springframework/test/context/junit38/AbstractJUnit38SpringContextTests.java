@@ -55,7 +55,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * @see TestContextManager
  * @see TestExecutionListeners
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
@@ -71,8 +71,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	protected final Log					logger	= LogFactory.getLog(getClass());
 
 	private final TestContextManager	testContextManager;
-
-	private Method						testMethod;
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
@@ -108,7 +106,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 
 		super(name);
 		this.testContextManager = new TestContextManager(getClass());
-		this.testMethod = getClass().getMethod(getName(), (Class[]) null);
 		this.testContextManager.prepareTestInstance(this);
 	}
 
@@ -127,8 +124,10 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	@Override
 	public void runBare() throws Throwable {
 
+		final Method testMethod = getClass().getMethod(getName(), (Class[]) null);
+
 		Throwable exception = null;
-		this.testContextManager.beforeTestMethod(this, this.testMethod);
+		this.testContextManager.beforeTestMethod(this, testMethod);
 		setUp();
 		try {
 			runTest();
@@ -146,31 +145,9 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 				}
 			}
 		}
-		this.testContextManager.afterTestMethod(this, this.testMethod, exception);
+		this.testContextManager.afterTestMethod(this, testMethod, exception);
 		if (exception != null) {
 			throw exception;
-		}
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * Delegates to {@link TestCase#setName(String)} and sets internal state for
-	 * the current test method.
-	 *
-	 * @see junit.framework.TestCase#setName(java.lang.String)
-	 */
-	@Override
-	public void setName(final String name) {
-
-		super.setName(name);
-		try {
-			this.testMethod = getClass().getMethod(name, (Class[]) null);
-		}
-		catch (final Throwable e) {
-			final String msg = "Caught exception while setting the internal testMethod in setName(" + name + ").";
-			this.logger.error(msg, e);
-			throw new RuntimeException(msg, e);
 		}
 	}
 
