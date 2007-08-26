@@ -19,21 +19,33 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.Test.None;
 import org.junit.internal.runners.TestClass;
+import org.springframework.test.annotation.ExpectedException;
+import org.springframework.test.annotation.Timed;
 
 /**
+ * <p>
  * SpringTestMethod is a custom implementation of JUnit 4.4's
- * {@link org.junit.internal.runners.TestMethod}. Due to class and method
- * visibility constraints, it is necessary to duplicate the code of TestMethod
- * in a local Spring package instead of extending TestMethod.
+ * {@link org.junit.internal.runners.TestMethod TestMethod}. Due to class and
+ * method visibility constraints, it is necessary to duplicate the code of
+ * TestMethod in a local Spring package instead of extending TestMethod.
+ * </p>
+ * <p>
+ * SpringTestMethod also provides support for
+ * {@link ExpectedException @ExpectedException} and {@link Timed @Timed}. See
+ * {@link #getExpectedException()} and {@link #getTimeout()} for further
+ * details.
+ * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 class SpringTestMethod {
@@ -42,25 +54,16 @@ class SpringTestMethod {
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC INITIALIZATION ----------------------------------------------|
-	// ------------------------------------------------------------------------|
+	/** Class Logger. */
+	private static final Log	LOG	= LogFactory.getLog(SpringTestMethod.class);
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final Method	method;
+	private final Method		method;
 
-	private final TestClass	testClass;
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE INITIALIZATION --------------------------------------------|
-	// ------------------------------------------------------------------------|
+	private final TestClass		testClass;
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
@@ -126,23 +129,51 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Gets the {@link Test#expected() exception} that this test method is
-	 * expected to throw.
+	 * <p>
+	 * Gets the <code>exception</code> that this test method is expected to
+	 * throw.
+	 * </p>
+	 * <p>
+	 * Supports both Spring's {@link ExpectedException @ExpectedException(...)}
+	 * and JUnit's {@link Test#expected() @Test(expected=...)} annotations, but
+	 * not both simultaneously.
+	 * </p>
 	 *
 	 * @return The expected exception, or <code>null</code> if none was
 	 *         specified.
+	 * @throws IllegalStateException if both types of configuration are used
+	 *         simultaneously.
 	 */
-	protected Class<? extends Throwable> getExpectedException() {
+	public Class<? extends Throwable> getExpectedException() throws IllegalStateException {
 
-		// XXX Optional: add support for Spring's @ExpectedException
+		final ExpectedException expectedExceptionAnnotation = getMethod().getAnnotation(ExpectedException.class);
+		final Test testAnnotation = getMethod().getAnnotation(Test.class);
 
-		final Test annotation = getMethod().getAnnotation(Test.class);
-		if (annotation == null || annotation.expected() == None.class) {
-			return null;
+		Class<? extends Throwable> expectedException = null;
+		final Class<? extends Throwable> springExpectedException = ((expectedExceptionAnnotation != null) && (expectedExceptionAnnotation.value() != null)) ? expectedExceptionAnnotation.value()
+				: null;
+		final Class<? extends Throwable> junitExpectedException = ((testAnnotation != null) && (testAnnotation.expected() != None.class)) ? testAnnotation.expected()
+				: null;
+
+		if ((springExpectedException != null) && (junitExpectedException != null)) {
+			final String msg = "Test method ["
+					+ getMethod()
+					+ "] has been configured with Spring's @ExpectedException("
+					+ springExpectedException.getName()
+					+ ".class) and JUnit's @Test(expected="
+					+ junitExpectedException.getName()
+					+ ".class) annotations. Only one declaration of an 'expected exception' is permitted per test method.";
+			LOG.error(msg);
+			throw new IllegalStateException(msg);
 		}
-		else {
-			return annotation.expected();
+		else if (springExpectedException != null) {
+			expectedException = springExpectedException;
 		}
+		else if (junitExpectedException != null) {
+			expectedException = junitExpectedException;
+		}
+
+		return expectedException;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -172,19 +203,44 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Gets the configured {@link Test#timeout() timeout} for this test method.
+	 * <p>
+	 * Gets the configured <code>timeout</code> for this test method.
+	 * </p>
+	 * <p>
+	 * Supports both Spring's {@link Timed @Timed(millis=...)} and JUnit's
+	 * {@link Test#timeout() @Test(timeout=...)} annotations, but not both
+	 * simultaneously.
+	 * </p>
 	 *
 	 * @return The timeout, or <code>0</code> if none was specified.
+	 * @throws IllegalStateException if both types of configuration are used
+	 *         simultaneously.
 	 */
-	public long getTimeout() {
+	public long getTimeout() throws IllegalStateException {
 
-		// XXX Optional: add support for Spring's @Timed
+		final Timed timedAnnotation = getMethod().getAnnotation(Timed.class);
+		final Test testAnnotation = getMethod().getAnnotation(Test.class);
 
-		final Test annotation = getMethod().getAnnotation(Test.class);
-		if (annotation == null) {
-			return 0;
+		long timeout = 0;
+		final long springTimeout = ((timedAnnotation != null) && (timedAnnotation.millis() > 0)) ? timedAnnotation.millis()
+				: 0;
+		final long junitTimeout = ((testAnnotation != null) && (testAnnotation.timeout() > 0)) ? testAnnotation.timeout()
+				: 0;
+
+		if ((springTimeout > 0) && (junitTimeout > 0)) {
+			final String msg = "Test method [" + getMethod() + "] has been configured with Spring's @Timed(millis="
+					+ springTimeout + ") and JUnit's @Test(timeout=" + junitTimeout
+					+ ") annotations. Only one declaration of a 'timeout' is permitted per test method.";
+			LOG.error(msg);
+			throw new IllegalStateException(msg);
 		}
-		final long timeout = annotation.timeout();
+		else if (springTimeout > 0) {
+			timeout = springTimeout;
+		}
+		else if (junitTimeout > 0) {
+			timeout = junitTimeout;
+		}
+
 		return timeout;
 	}
 
