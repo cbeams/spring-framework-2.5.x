@@ -21,13 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
-import org.springframework.test.annotation.NotTransactional;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.utils.SimpleJdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,15 +45,18 @@ import org.springframework.transaction.annotation.Transactional;
  * </p>
  *
  * @see AbstractJUnit4SpringContextTests
- * @see ContextConfiguration
- * @see TestExecutionListeners
- * @see TransactionConfiguration
- * @see Transactional
- * @see NotTransactional
- * @see Rollback
- * @see SimpleJdbcTestUtils
+ * @see org.springframework.test.context.ContextConfiguration
+ * @see org.springframework.test.context.TestExecutionListeners
+ * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
+ * @see org.springframework.test.context.transaction.TransactionConfiguration
+ * @see org.springframework.transaction.annotation.Transactional
+ * @see org.springframework.test.annotation.NotTransactional
+ * @see org.springframework.test.annotation.Rollback
+ * @see org.springframework.test.context.transaction.BeforeTransaction
+ * @see org.springframework.test.context.transaction.AfterTransaction
+ * @see org.springframework.test.utils.SimpleJdbcTestUtils
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,

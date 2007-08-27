@@ -34,15 +34,15 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.util.Assert;
 
 /**
  * <p>
  * TestExecutionListener which provides support for executing tests within
- * transactions by using {@link Transactional @Transactional} and
- * {@link NotTransactional @NotTransactional} annotations.
+ * transactions by using
+ * {@link org.springframework.transaction.annotation.Transactional @Transactional}
+ * and {@link NotTransactional @NotTransactional} annotations.
  * </p>
  * <p>
  * Changes to the database during a test run with &#064;Transactional will be
@@ -69,12 +69,14 @@ import org.springframework.util.Assert;
  * {@link AfterTransaction @AfterTransaction}.
  * </p>
  *
- * @see Transactional
- * @see NotTransactional
- * @see Rollback
  * @see TransactionConfiguration
+ * @see org.springframework.transaction.annotation.Transactional
+ * @see org.springframework.test.annotation.NotTransactional
+ * @see org.springframework.test.annotation.Rollback
+ * @see BeforeTransaction
+ * @see AfterTransaction
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
@@ -312,8 +314,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * be invoked, and a transaction will not be started.
 	 * </p>
 	 *
-	 * @see Transactional
-	 * @see NotTransactional
+	 * @see org.springframework.transaction.annotation.Transactional
+	 * @see org.springframework.test.annotation.NotTransactional
 	 * @see org.springframework.test.context.support.AbstractTestExecutionListener#beforeTestMethod(TestContext)
 	 * @throws Exception Allows any exception to propagate.
 	 */
