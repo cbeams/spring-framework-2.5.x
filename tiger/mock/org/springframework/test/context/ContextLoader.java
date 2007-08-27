@@ -25,7 +25,7 @@ import org.springframework.context.ApplicationContext;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 public interface ContextLoader {
@@ -48,11 +48,11 @@ public interface ContextLoader {
 	 * <p>
 	 * Concrete implementations should register annotation configuration
 	 * processors with bean factories of
-	 * {@link ApplicationContext application contexts} loaded by this test
+	 * {@link ApplicationContext application contexts} loaded by this
 	 * ContextLoader. Beans will therefore automatically be candidates for
 	 * annotation-based dependency injection using
-	 * {@link org.springframework.beans.factory.annotation.Autowired Autowired}
-	 * and {@link javax.annotation.Resource Resource}.
+	 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired}
+	 * and {@link javax.annotation.Resource @Resource}.
 	 * </p>
 	 * <p>
 	 * Any ApplicationContext loaded by this method <strong>must</strong>
