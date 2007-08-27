@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  *
  * @see ContextConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 public class ContextConfigurationAttributes implements Serializable {
@@ -85,9 +85,8 @@ public class ContextConfigurationAttributes implements Serializable {
 	 *        be generated if no locations are explicitly defined.
 	 * @param resourceSuffix The suffix to append to application context
 	 *        resource paths when generating default locations.
-	 * @throws IllegalArgumentException if the supplied <code>loaderClass</code>,
-	 *         <code>resourceSuffix</code>, or <code>autowireMode</code> is
-	 *         <code>null</code>.
+	 * @throws IllegalArgumentException if the supplied <code>loaderClass</code>
+	 *         or <code>resourceSuffix</code> is <code>null</code>.
 	 */
 	public ContextConfigurationAttributes(final Class<? extends ContextLoader> loaderClass, final String[] locations,
 			final Class<?> clazz, final boolean generateDefaultLocations, final String resourceSuffix) {
