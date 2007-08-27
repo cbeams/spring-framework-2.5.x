@@ -53,6 +53,9 @@ import org.springframework.util.Assert;
  */
 public abstract class AnnotationUtils {
 
+	/** The attribute name for annotations with a single element. */
+	static final String	VALUE	= "value";
+
 	/**
 	 * <p>
 	 * Get all {@link Annotation Annotations} from the supplied {@link Method}.
@@ -278,8 +281,24 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Retrieve the <em>value</em> for an Annotation attribute.
+	 * Retrieve the <em>value</em> of the <code>&quot;value&quot;</code>
+	 * attribute of a single-element Annotation, given an annotation instance.
 	 *
+	 * @see #getValue(Annotation, String)
+	 * @param annotation The annotation instance from which to retrieve the
+	 *        value.
+	 * @return The attribute value, or <code>null</code> if not found.
+	 */
+	public static Object getValue(final Annotation annotation) {
+
+		return getValue(annotation, VALUE);
+	}
+
+	/**
+	 * Retrieve the <em>value</em> of a named Annotation attribute, given an
+	 * annotation instance.
+	 *
+	 * @see #getValue(Annotation)
 	 * @param annotation The annotation instance from which to retrieve the
 	 *        value.
 	 * @param attributeName The name of the attribute value to retrieve.
@@ -297,34 +316,61 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Retrieve the <em>default value</em> for an Annotation attribute, given
-	 * an annotation instance.
+	 * Retrieve the <em>default value</em> of the
+	 * <code>&quot;value&quot;</code> attribute of a single-element
+	 * Annotation, given an annotation instance.
+	 *
+	 * @see #getDefaultValue(Annotation, String)
+	 * @param annotation The annotation instance from which to retrieve the
+	 *        default value.
+	 * @return The default value, or <code>null</code> if not found.
+	 */
+	public static Object getDefaultValue(final Annotation annotation) {
+
+		return getDefaultValue(annotation, VALUE);
+	}
+
+	/**
+	 * Retrieve the <em>default value</em> of a named Annotation attribute,
+	 * given an annotation instance.
 	 *
 	 * @see #getDefaultValue(Class, String)
 	 * @param annotation The annotation instance from which to retrieve the
 	 *        default value.
 	 * @param attributeName The name of the attribute value to retrieve.
-	 * @return The default attribute value, or <code>null</code> if not found.
+	 * @return The default value of the named attribute, or <code>null</code>
+	 *         if not found.
 	 */
 	public static Object getDefaultValue(final Annotation annotation, final String attributeName) {
 
-		try {
-			return getDefaultValue(annotation.annotationType(), attributeName);
-		}
-		catch (final Exception ex) {
-			return null;
-		}
+		return getDefaultValue(annotation.annotationType(), attributeName);
 	}
 
 	/**
-	 * Retrieve the <em>default value</em> for an Annotation attribute, given
-	 * the {@link Class annotation type}.
+	 * Retrieve the <em>default value</em> of the
+	 * <code>&quot;value&quot;</code> attribute of a single-element
+	 * Annotation, given the {@link Class annotation type}.
+	 *
+	 * @see #getDefaultValue(Class, String)
+	 * @param annotationType The <em>annotation type</em> for which the
+	 *        default value should be retrieved.
+	 * @return The default value, or <code>null</code> if not found.
+	 */
+	public static Object getDefaultValue(final Class<? extends Annotation> annotationType) {
+
+		return getDefaultValue(annotationType, VALUE);
+	}
+
+	/**
+	 * Retrieve the <em>default value</em> of a named Annotation attribute,
+	 * given the {@link Class annotation type}.
 	 *
 	 * @see #getDefaultValue(Annotation, String)
 	 * @param annotationType The <em>annotation type</em> for which the
 	 *        default value should be retrieved.
 	 * @param attributeName The name of the attribute value to retrieve.
-	 * @return The default attribute value, or <code>null</code> if not found.
+	 * @return The default value of the named attribute, or <code>null</code>
+	 *         if not found.
 	 */
 	public static Object getDefaultValue(final Class<? extends Annotation> annotationType, final String attributeName) {
 

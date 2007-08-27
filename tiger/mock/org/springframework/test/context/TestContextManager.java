@@ -58,7 +58,7 @@ import org.springframework.util.Assert;
  * @see ContextConfiguration
  * @see org.springframework.test.context.transaction.TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @since 2.1
  */
 public class TestContextManager {
@@ -156,8 +156,7 @@ public class TestContextManager {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("@TestExecutionListeners is not present for class [" + clazz + "]: using defaults.");
 			}
-			classes = (Class<? extends TestExecutionListener>[]) AnnotationUtils.getDefaultValue(
-					TestExecutionListeners.class, "value");
+			classes = (Class<? extends TestExecutionListener>[]) AnnotationUtils.getDefaultValue(TestExecutionListeners.class);
 		}
 
 		final TestExecutionListener[] listeners = new TestExecutionListener[classes.length];

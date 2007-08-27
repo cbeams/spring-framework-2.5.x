@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
 
+import org.springframework.core.Ordered;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -151,6 +152,30 @@ public class AnnotationUtilsTests extends TestCase {
 		assertFalse(isAnnotationInherited(Order.class, SubNonInheritedAnnotationInterface.class));
 		assertFalse(isAnnotationInherited(Order.class, NonInheritedAnnotationClass.class));
 		assertFalse(isAnnotationInherited(Order.class, SubNonInheritedAnnotationClass.class));
+	}
+
+	public void testGetValueFromAnnotation() throws Exception {
+
+		final Method method = SimpleFoo.class.getMethod("something", Object.class);
+		final Order order = findAnnotation(method, Order.class);
+
+		assertEquals(1, AnnotationUtils.getValue(order, AnnotationUtils.VALUE));
+		assertEquals(1, AnnotationUtils.getValue(order));
+	}
+
+	public void testGetDefaultValueFromAnnotation() throws Exception {
+
+		final Method method = SimpleFoo.class.getMethod("something", Object.class);
+		final Order order = findAnnotation(method, Order.class);
+
+		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(order, AnnotationUtils.VALUE));
+		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(order));
+	}
+
+	public void testGetDefaultValueFromAnnotationType() throws Exception {
+
+		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(Order.class, AnnotationUtils.VALUE));
+		assertEquals(Ordered.LOWEST_PRECEDENCE, AnnotationUtils.getDefaultValue(Order.class));
 	}
 
 	public static interface AnnotatedInterface {
