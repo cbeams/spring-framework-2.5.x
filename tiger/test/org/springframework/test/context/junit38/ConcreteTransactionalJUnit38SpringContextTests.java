@@ -18,7 +18,10 @@ package org.springframework.test.context.junit38;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
-import org.junit.Test;
+import junit.framework.JUnit4TestAdapter;
+
+import org.junit.internal.runners.JUnit38ClassRunner;
+import org.junit.runner.RunWith;
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
@@ -28,8 +31,6 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests;
-import org.springframework.test.context.junit38.AbstractTransactionalJUnit38SpringContextTests;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.utils.SimpleJdbcTestUtils;
@@ -39,9 +40,10 @@ import org.springframework.test.utils.SimpleJdbcTestUtils;
  * {@link AbstractTransactionalJUnit38SpringContextTests}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
+@RunWith(JUnit38ClassRunner.class)
 @ContextConfiguration
 public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTransactionalJUnit38SpringContextTests
 		implements BeanNameAware, InitializingBean {
@@ -56,10 +58,6 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 
 	protected static final String	SUE				= "sue";
 
-	protected static final String	LUKE			= "luke";
-
-	protected static final String	LEIA			= "leia";
-
 	protected static final String	YODA			= "yoda";
 
 	// ------------------------------------------------------------------------|
@@ -68,7 +66,7 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 
 	private boolean					beanInitialized	= false;
 
-	private String					beanName		= "replace me with null";
+	private String					beanName		= "replace me with [" + getClass().getName() + "]";
 
 	private Employee				employee;
 
@@ -82,6 +80,8 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 	protected String				foo;
 
 	protected String				bar;
+
+	private boolean					inTransaction	= false;
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
@@ -100,6 +100,12 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
+
+	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
+	public static junit.framework.Test suite() {
+
+		return new JUnit4TestAdapter(ConcreteTransactionalJUnit38SpringContextTests.class);
+	}
 
 	protected static int clearPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
 
@@ -165,57 +171,50 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 
 	// ------------------------------------------------------------------------|
 
-	@Test
 	@NotTransactional
-	public final void verifyApplicationContext() {
+	public void testApplicationContext() {
 
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
 				getApplicationContext());
 	}
 
-	@Test
 	@NotTransactional
-	public final void verifyBeanInitialized() {
+	public void testBeanInitialized() {
 
 		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
 				this.beanInitialized);
 	}
 
-	@Test
 	@NotTransactional
-	public final void verifyBeanNameSet() {
+	public void testBeanNameSet() {
 
 		assertEquals("The bean name of this test instance should have been set to the fully qualified class name "
 				+ "due to BeanNameAware semantics.", getClass().getName(), this.beanName);
 	}
 
-	@Test
 	@NotTransactional
-	public final void verifyAnnotationAutowiredFields() {
+	public void testAnnotationAutowiredFields() {
 
 		assertNull("The nonrequiredLong property should NOT have been autowired.", this.nonrequiredLong);
 		assertNotNull("The pet field should have been autowired.", this.pet);
 		assertEquals("Fido", this.pet.getName());
 	}
 
-	@Test
 	@NotTransactional
-	public final void verifyAnnotationAutowiredMethods() {
+	public void testAnnotationAutowiredMethods() {
 
 		assertNotNull("The employee setter method should have been autowired.", this.employee);
 		assertEquals("John Smith", this.employee.getName());
 	}
 
-	@Test
 	@NotTransactional
-	public final void verifyResourceAnnotationWiredFields() {
+	public void testResourceAnnotationWiredFields() {
 
 		assertEquals("The foo field should have been wired via @Resource.", "Foo", this.foo);
 	}
 
-	@Test
 	@NotTransactional
-	public final void verifyResourceAnnotationWiredMethods() {
+	public void testResourceAnnotationWiredMethods() {
 
 		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
 	}
@@ -225,16 +224,17 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 	@BeforeTransaction
 	public void beforeTransaction() {
 
+		this.inTransaction = true;
 		assertEquals("Verifying the number of rows in the person table before a transactional test method.", 1,
 				countRowsInPersonTable(getSimpleJdbcTemplate()));
 		assertEquals("Adding yoda", 1, addPerson(getSimpleJdbcTemplate(), YODA));
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 
-		assertEquals("Verifying the number of rows in the person table before a test method.", 2,
-				countRowsInPersonTable(getSimpleJdbcTemplate()));
+		assertEquals("Verifying the number of rows in the person table before a test method.", (this.inTransaction ? 2
+				: 1), countRowsInPersonTable(getSimpleJdbcTemplate()));
 	}
 
 	public void testModifyTestDataWithinTransaction() {
@@ -246,10 +246,10 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 
-		assertEquals("Verifying the number of rows in the person table after a test method.", 4,
-				countRowsInPersonTable(getSimpleJdbcTemplate()));
+		assertEquals("Verifying the number of rows in the person table after a test method.", (this.inTransaction ? 4
+				: 1), countRowsInPersonTable(getSimpleJdbcTemplate()));
 	}
 
 	@AfterTransaction
