@@ -70,6 +70,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.1.1
  */
 public abstract class AbstractTransactionalSpringContextTests extends AbstractDependencyInjectionSpringContextTests {
@@ -107,7 +108,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	/**
 	 * Constructor for AbstractTransactionalSpringContextTests with a JUnit name.
 	 */
-	public AbstractTransactionalSpringContextTests(String name) {
+	public AbstractTransactionalSpringContextTests(final String name) {
 		super(name);
 	}
 
@@ -118,18 +119,45 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * <p>This mode works only if dependency checking is turned off in the
 	 * {@link AbstractDependencyInjectionSpringContextTests} superclass.
 	 */
-	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+	public void setTransactionManager(final PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
 	/**
-	 * Subclasses can set this value in their constructor to change
+	 * Get the <em>default rollback</em> flag for this test.
+	 *
+	 * @see #setDefaultRollback(boolean)
+	 * @return The <em>default rollback</em> flag.
+	 */
+	protected boolean isDefaultRollback() {
+
+		return this.defaultRollback;
+	}
+
+	/**
+	 * Subclasses can set this value in their constructor to change the
 	 * default, which is always to roll the transaction back.
 	 */
-	public void setDefaultRollback(boolean defaultRollback) {
+	public void setDefaultRollback(final boolean defaultRollback) {
 		this.defaultRollback = defaultRollback;
 	}
 
+	/**
+	 * <p>
+	 * Determines whether or not to rollback transactions for the current test.
+	 * </p>
+	 * <p>
+	 * The default implementation delegates to {@link #isDefaultRollback()}.
+	 * Subclasses can override as necessary.
+	 * </p>
+	 *
+	 * @return The <em>rollback</em> flag for the current test.
+	 * @throws Exception If an error occurs while determining the rollback flag.
+	 */
+	protected boolean isRollback() throws Exception {
+
+		return isDefaultRollback();
+	}
 
 	/**
 	 * Call this method in an overridden {@link #runBare()} method to
@@ -145,10 +173,9 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * {@link #setUp()} and {@link #tearDown()} behavior is modified.
 	 * @param customDefinition the custom transaction definition
 	 */
-	protected void setTransactionDefinition(TransactionDefinition customDefinition) {
+	protected void setTransactionDefinition(final TransactionDefinition customDefinition) {
 		this.transactionDefinition = customDefinition;
 	}
-
 
 	/**
 	 * This implementation creates a transaction before test execution.
@@ -161,13 +188,13 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * @see #onTearDown()
 	 */
 	protected void onSetUp() throws Exception {
-		this.complete = !this.defaultRollback;
+		this.complete = !this.isDefaultRollback();
 
 		if (this.transactionManager == null) {
-			logger.info("No transaction manager set: test will NOT run within a transaction");
+			this.logger.info("No transaction manager set: test will NOT run within a transaction");
 		}
 		else if (this.transactionDefinition == null) {
-			logger.info("No transaction definition set: test will NOT run within a transaction");
+			this.logger.info("No transaction definition set: test will NOT run within a transaction");
 		}
 		else {
 			onSetUpBeforeTransaction();
@@ -175,7 +202,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 			try {
 				onSetUpInTransaction();
 			}
-			catch (Exception ex) {
+			catch (final Exception ex) {
 				endTransaction();
 				throw ex;
 			}
@@ -207,7 +234,6 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 */
 	protected void onSetUpInTransaction() throws Exception {
 	}
-
 
 	/**
 	 * This implementation ends the transaction after test execution.
@@ -260,10 +286,9 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	protected void onTearDownAfterTransaction() throws Exception {
 	}
 
-
 	/**
 	 * Cause the transaction to commit for this test method,
-	 * even if default is set to rollback.
+	 * even if default is set to {@link #isRollback() rollback}.
 	 * @throws IllegalStateException if the operation cannot be set to
 	 * complete as no transaction manager was provided
 	 */
@@ -283,15 +308,29 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * @see #setComplete()
 	 */
 	protected void endTransaction() {
+
+		boolean rollback;
+		try {
+			rollback = isRollback();
+		}
+		catch (final Exception e) {
+			if (this.logger.isWarnEnabled()) {
+				this.logger.warn("Exception caught while retrieving the 'rollback' flag. Falling back to the defaultRollback.", e);
+			}
+			rollback = isDefaultRollback();
+		}
+
+		final boolean commit = this.complete || !rollback;
+
 		if (this.transactionStatus != null) {
 			try {
-				if (!this.complete) {
-					this.transactionManager.rollback(this.transactionStatus);
-					logger.info("Rolled back transaction after test execution");
+				if (commit) {
+					this.transactionManager.commit(this.transactionStatus);
+					this.logger.info("Committed transaction after test execution");
 				}
 				else {
-					this.transactionManager.commit(this.transactionStatus);
-					logger.info("Committed transaction after test execution");
+					this.transactionManager.rollback(this.transactionStatus);
+					this.logger.info("Rolled back transaction after test execution");
 				}
 			}
 			finally {
@@ -317,11 +356,11 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 		this.transactionStatus = this.transactionManager.getTransaction(this.transactionDefinition);
 		++this.transactionsStarted;
-		this.complete = !this.defaultRollback;
+		this.complete = !this.isDefaultRollback();
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Began transaction (" + this.transactionsStarted + "): transaction manager [" +
-					this.transactionManager + "]; default rollback = " + this.defaultRollback);
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("Began transaction (" + this.transactionsStarted + "): transaction manager [" +
+					this.transactionManager + "]; default rollback = " + this.isDefaultRollback());
 		}
 	}
 
