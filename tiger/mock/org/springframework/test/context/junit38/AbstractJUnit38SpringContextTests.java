@@ -16,6 +16,13 @@
 package org.springframework.test.context.junit38;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import junit.framework.TestCase;
 
@@ -23,6 +30,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.test.annotation.ExpectedException;
+import org.springframework.test.annotation.Repeat;
+import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextManager;
@@ -55,7 +65,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * @see TestContextManager
  * @see TestExecutionListeners
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
@@ -93,9 +103,8 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Constructs a new AbstractJUnit38SpringContextTests with the supplied
-	 * <code>name</code>. Creates a new {@link TestContextManager} and calls
-	 * {@link TestContextManager#prepareTestInstance(Object)} accordingly.
+	 * Constructs a new AbstractJUnit38SpringContextTests instance with the
+	 * supplied <code>name</code>.
 	 *
 	 * @see TestCase#TestCase(String)
 	 * @param name The name of the current test to execute.
@@ -106,7 +115,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 
 		super(name);
 		this.testContextManager = new TestContextManager(getClass());
-		this.testContextManager.prepareTestInstance(this);
 	}
 
 	// ------------------------------------------------------------------------|
@@ -114,23 +122,94 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Overrides {@link TestCase#runBare()} by calling
-	 * {@link TestContextManager#beforeTestMethod(Object, Method)} and
-	 * {@link TestContextManager#afterTestMethod(Object, Method, Throwable)} at
-	 * the appropriate locations.
+	 * Get the current test method.
+	 *
+	 * @return The current test method.
+	 */
+	private Method getTestMethod() {
+
+		assertNotNull("TestCase.getName() cannot be null", getName());
+		Method testMethod = null;
+		try {
+			testMethod = getClass().getMethod(getName(), (Class[]) null);
+		}
+		catch (final NoSuchMethodException e) {
+			fail("Method \"" + getName() + "\" not found");
+		}
+		if (!Modifier.isPublic(testMethod.getModifiers())) {
+			fail("Method \"" + getName() + "\" should be public");
+		}
+		return testMethod;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Runs the <em>Spring Test Context Framework</em> test sequence.
+	 * </p>
+	 * <p>
+	 * In addition to standard {@link TestCase#runBare()} semantics, this
+	 * implementation performs the following:
+	 * </p>
+	 * <ul>
+	 * <li>Calls
+	 * {@link TestContextManager#prepareTestInstance(Object) prepareTestInstance()},
+	 * {@link TestContextManager#beforeTestMethod(Object, Method) beforeTestMethod()},
+	 * and
+	 * {@link TestContextManager#afterTestMethod(Object, Method, Throwable) afterTestMethod()}
+	 * on this test's {@link TestContextManager} at the appropriate test
+	 * execution points.</li>
+	 * <li>Provides support for {@link Repeat @Repeat}.</li>
+	 * <li>Provides support for {@link Timed @Timed}.</li>
+	 * <li>Provides support for {@link ExpectedException @ExpectedException}.</li>
+	 * </ul>
 	 *
 	 * @see junit.framework.TestCase#runBare()
 	 */
 	@Override
 	public void runBare() throws Throwable {
 
-		final Method testMethod = getClass().getMethod(getName(), (Class[]) null);
+		this.testContextManager.prepareTestInstance(this);
+
+		final Method testMethod = getTestMethod();
+
+		final Repeat repeat = testMethod.getAnnotation(Repeat.class);
+		final long runs = ((repeat != null) && (repeat.value() > 1)) ? repeat.value() : 1;
+		for (int i = 0; i < runs; i++) {
+			runManaged(testMethod);
+		}
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Calls {@link TestContextManager#beforeTestMethod(Object, Method)} and
+	 * {@link TestContextManager#afterTestMethod(Object, Method, Throwable)} at
+	 * the appropriate test execution points. Also provides support for
+	 * {@link Timed @Timed}.
+	 *
+	 * @see #runTimed(Method, long)
+	 * @see #runTest(Method)
+	 * @param testMethod The test method to run.
+	 * @throws Throwable If any exception is thrown.
+	 */
+	private void runManaged(final Method testMethod) throws Throwable {
 
 		Throwable exception = null;
 		this.testContextManager.beforeTestMethod(this, testMethod);
 		setUp();
 		try {
-			runTest();
+
+			final Timed timed = testMethod.getAnnotation(Timed.class);
+			final long timeout = ((timed != null) && (timed.millis() > 0)) ? timed.millis() : 0;
+
+			if (timeout > 0) {
+				runTimed(testMethod, timeout);
+			}
+			else {
+				runTest(testMethod);
+			}
 		}
 		catch (final Throwable running) {
 			exception = running;
@@ -148,6 +227,95 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 		this.testContextManager.afterTestMethod(this, testMethod, exception);
 		if (exception != null) {
 			throw exception;
+		}
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Runs the test with the supplied <code>timeout</code>.
+	 * </p>
+	 * <p>
+	 * The timeout functionality is based on JUnit 4.4's
+	 * {@link org.junit.internal.runners.MethodRoadie#runWithTimeout(long)}
+	 * method.
+	 * </p>
+	 *
+	 * @see Timed
+	 * @see #runTest(Method)
+	 * @param testMethod The test method to run.
+	 * @param timeout The timeout in milliseconds.
+	 * @throws Throwable if any exception is thrown.
+	 */
+	private void runTimed(final Method testMethod, final long timeout) throws Throwable {
+
+		final ExecutorService service = Executors.newSingleThreadExecutor();
+		final Callable<Object> callable = new Callable<Object>() {
+
+			public Object call() throws Exception {
+
+				try {
+					runTest(testMethod);
+				}
+				catch (final Throwable t) {
+					if (t instanceof Exception) {
+						throw (Exception) t;
+					}
+					throw new Exception(t);
+				}
+				return null;
+			}
+		};
+		final Future<Object> result = service.submit(callable);
+		service.shutdown();
+		try {
+			boolean terminated = service.awaitTermination(timeout, TimeUnit.MILLISECONDS);
+			if (!terminated) {
+				service.shutdownNow();
+			}
+			// throws the exception if one occurred during the invocation
+			result.get(0, TimeUnit.MILLISECONDS);
+		}
+		catch (final TimeoutException e) {
+			fail(String.format("test timed out after %d milliseconds", timeout));
+		}
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Runs the atomic test with support for
+	 * {@link ExpectedException @ExpectedException}.
+	 *
+	 * @see ExpectedException
+	 * @see junit.framework.TestCase#runTest()
+	 * @param testMethod The method on which to run the test.
+	 * @throws Throwable if any exception is thrown.
+	 */
+	private void runTest(final Method testMethod) throws Throwable {
+
+		final ExpectedException expectedExceptionAnnotation = testMethod.getAnnotation(ExpectedException.class);
+		final boolean exceptionIsExpected = (expectedExceptionAnnotation != null)
+				&& (expectedExceptionAnnotation.value() != null);
+		final Class<? extends Throwable> expectedException = exceptionIsExpected ? expectedExceptionAnnotation.value()
+				: null;
+
+		try {
+			super.runTest();
+			if (exceptionIsExpected) {
+				fail("Expected exception: " + expectedException.getName());
+			}
+		}
+		catch (final Throwable t) {
+			if (!exceptionIsExpected) {
+				throw t;
+			}
+			if (!expectedException.isAssignableFrom(t.getClass())) {
+				// Wrap the unexpected throwable with an explicit message.
+				throw new Exception(("Unexpected exception, expected<" + expectedException.getClass().getName()
+						+ "> but was<" + t.getClass().getName() + ">"), t);
+			}
 		}
 	}
 
