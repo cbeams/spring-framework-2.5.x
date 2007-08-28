@@ -19,7 +19,6 @@ import junit.framework.JUnit4TestAdapter;
 
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * Extension of {@link SpringJUnit4ClassRunnerAppCtxTests}, which verifies that
@@ -27,9 +26,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * application context.
  *
  * @see SpringJUnit4ClassRunnerAppCtxTests
+ * @see ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)

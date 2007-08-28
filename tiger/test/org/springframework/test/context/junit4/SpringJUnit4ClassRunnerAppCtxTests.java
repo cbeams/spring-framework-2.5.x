@@ -65,7 +65,7 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -77,7 +77,7 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Default resource path for the test application context configuration for
+	 * Default resource path for the application context configuration for
 	 * {@link SpringJUnit4ClassRunnerAppCtxTests}:
 	 * <code>&quot;/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>
 	 */

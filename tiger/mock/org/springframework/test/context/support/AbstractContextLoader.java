@@ -34,7 +34,7 @@ import org.springframework.util.StringUtils;
  * @see #generateDefaultLocations(Class)
  * @see #modifyLocations(Class, String...)
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 public abstract class AbstractContextLoader implements ContextLoader {
@@ -152,7 +152,10 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * classpath resource from the same package in which the specified class is
 	 * defined. A path starting with a slash is treated as a fully qualified
 	 * class path location, e.g.:
-	 * &quot;/org/springframework/whatever/foo.xml&quot;.
+	 * &quot;/org/springframework/whatever/foo.xml&quot;. A path which is
+	 * already a classpath resource (i.e., prefixed with
+	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX :classpath}) will be added to
+	 * the results unchanged.
 	 * </p>
 	 * <p>
 	 * Subclasses can override this method to implement a different
@@ -171,6 +174,9 @@ public abstract class AbstractContextLoader implements ContextLoader {
 			final String path = locations[i];
 			if (path.startsWith("/")) {
 				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
+			}
+			else if (path.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
+				modifiedLocations[i] = StringUtils.cleanPath(path);
 			}
 			else {
 				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX
