@@ -55,7 +55,7 @@ import org.springframework.test.context.TestContextManager;
  * </ul>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 class SpringMethodRoadie {
@@ -137,7 +137,7 @@ class SpringMethodRoadie {
 	 */
 	public void run() {
 
-		// XXX Optional: add support for Spring's @IfProfileValue & @Repeat
+		// XXX Optional: add support for @Repeat.
 
 		if (getTestMethod().isIgnored()) {
 			getNotifier().fireTestIgnored(getDescription());

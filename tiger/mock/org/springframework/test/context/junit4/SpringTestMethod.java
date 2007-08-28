@@ -45,7 +45,7 @@ import org.springframework.test.annotation.Timed;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 class SpringTestMethod {
@@ -270,6 +270,8 @@ class SpringTestMethod {
 	 * @return <code>true</code> if this test method should be ignored.
 	 */
 	public boolean isIgnored() {
+
+		// XXX Optional: add support for @IfProfileValue and @IfNotProfileValue.
 
 		return getMethod().getAnnotation(Ignore.class) != null;
 	}
