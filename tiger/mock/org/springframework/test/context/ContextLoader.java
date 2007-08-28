@@ -20,12 +20,23 @@ import org.springframework.context.ApplicationContext;
 /**
  * <p>
  * Strategy interface for loading an
- * {@link ApplicationContext application context} based on a supplied set of
- * <code>locations</code> and a {@link Class class}.
+ * {@link ApplicationContext application context}.
+ * </p>
+ * <p>
+ * Clients of a ContextLoader should call
+ * {@link #processLocations(Class, String...) processLocations()} prior to
+ * calling {@link #loadContext(String...) loadContext()} in case the
+ * ContextLoader provides custom support for modifying or generating locations.
+ * The results of {@link #processLocations(Class, String...) processLocations()}
+ * should then be supplied to {@link #loadContext(String...) loadContext()}.
+ * </p>
+ * <p>
+ * Concrete implementations must provide a <code>public</code> no-args
+ * constructor.
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 public interface ContextLoader {
@@ -35,26 +46,34 @@ public interface ContextLoader {
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Add comments for processLocations().
+	 * <p>
+	 * Processes application context resource locations for a specified class.
+	 * </p>
+	 * <p>
+	 * Concrete implementations may choose to modify the supplied locations,
+	 * generate new locations, or simply return the supplied locations
+	 * unchanged.
+	 * </p>
 	 *
-	 * @param locations
-	 * @param clazz
-	 * @return
+	 * @param clazz The class with which the locations are associated: used to
+	 *        determine how to process the supplied locations.
+	 * @param locations The unmodified locations to use for loading the
+	 *        application context; can be <code>null</code> or empty.
+	 * @return An array of application context resource locations.
 	 */
-	public abstract String[] processLocations(final String[] locations, final Class<?> clazz);
+	public abstract String[] processLocations(final Class<?> clazz, final String... locations);
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * TODO Revise JavaDoc!
 	 * <p>
 	 * Loads a new {@link ApplicationContext context} based on the supplied
 	 * <code>locations</code>, configures the context, and finally returns
 	 * the context, potentially <em>refreshed</em>.
 	 * </p>
 	 * <p>
-	 * Configuration locations should be considered to be classpath resources by
-	 * default.
+	 * Configuration locations are generally considered to be classpath
+	 * resources by default.
 	 * </p>
 	 * <p>
 	 * Concrete implementations should register annotation configuration

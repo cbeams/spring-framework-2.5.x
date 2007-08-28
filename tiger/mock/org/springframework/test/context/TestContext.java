@@ -34,7 +34,7 @@ import org.springframework.util.ObjectUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @since 2.1
  */
 public class TestContext {
@@ -125,7 +125,7 @@ public class TestContext {
 			Assert.state(contextLoaderClass != null,
 					"@ContextConfiguration has not been properly configured: loader is null.");
 			contextLoader = contextLoaderClass.newInstance();
-			locations = contextLoader.processLocations(contextConfiguration.locations(), declaringClass);
+			locations = contextLoader.processLocations(declaringClass, contextConfiguration.locations());
 		}
 
 		this.testClass = testClass;
