@@ -22,6 +22,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.util.StringUtils;
 
 /**
  * <p>
@@ -36,7 +37,7 @@ import org.springframework.context.support.GenericApplicationContext;
  *
  * @see #loadContext()
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 public abstract class AbstractGenericContextLoader extends AbstractContextLoader {
@@ -89,7 +90,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	public final ConfigurableApplicationContext loadContext(final String... locations) throws Exception {
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Loading ApplicationContext for locations [" + locations + "].");
+			LOG.debug("Loading ApplicationContext for locations [" + StringUtils.arrayToCommaDelimitedString(locations)
+					+ "].");
 		}
 
 		final GenericApplicationContext context = new GenericApplicationContext();
