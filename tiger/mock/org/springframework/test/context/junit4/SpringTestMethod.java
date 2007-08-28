@@ -33,9 +33,9 @@ import org.springframework.test.annotation.Timed;
 /**
  * <p>
  * SpringTestMethod is a custom implementation of JUnit 4.4's
- * {@link org.junit.internal.runners.TestMethod TestMethod}. Due to class and
- * method visibility constraints, it is necessary to duplicate the code of
- * TestMethod in a local Spring package instead of extending TestMethod.
+ * {@link org.junit.internal.runners.TestMethod TestMethod}. Due to method and
+ * field visibility constraints, the code of TestMethod has been duplicated here
+ * instead of subclassing TestMethod directly.
  * </p>
  * <p>
  * SpringTestMethod also provides support for
@@ -45,7 +45,7 @@ import org.springframework.test.annotation.Timed;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 class SpringTestMethod {

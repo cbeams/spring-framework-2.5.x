@@ -27,22 +27,17 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.Assume.AssumptionViolatedException;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunListener;
 import org.junit.runner.notification.RunNotifier;
 import org.springframework.test.context.TestContextManager;
 
 /**
  * <p>
- * SpringMethodRoadie is a custom, parameterized implementation of JUnit 4.4's
- * {@link org.junit.internal.runners.MethodRoadie}, which provides the
- * following enhancements:
+ * SpringMethodRoadie is a custom implementation of JUnit 4.4's
+ * {@link org.junit.internal.runners.MethodRoadie MethodRoadie}, which provides
+ * the following enhancements:
  * </p>
  * <ul>
  * <li>Notifies a {@link TestContextManager} of
@@ -50,12 +45,16 @@ import org.springframework.test.context.TestContextManager;
  * {@link TestContextManager#afterTestMethod(Object, Method, Throwable) after}
  * events.</li>
  * <li>Uses a {@link SpringTestMethod} instead of JUnit 4.4's
- * {@link org.junit.internal.runners.TestMethod}.</li>
+ * {@link org.junit.internal.runners.TestMethod TestMethod}.</li>
  * <li>Tracks the exception thrown during execution of the test method.</li>
  * </ul>
+ * <p>
+ * Due to method and field visibility constraints, the code of MethodRoadie has
+ * been duplicated here instead of subclassing MethodRoadie directly.
+ * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 class SpringMethodRoadie {
@@ -129,11 +128,11 @@ class SpringMethodRoadie {
 
 	/**
 	 * Runs the <em>test</em>, including notification of events to the
-	 * {@link RunListener} and {@link TestContextManager} as well as proper
-	 * handling of {@link Ignore @Ignore},
-	 * {@link Test#expected() expected exceptions},
-	 * {@link Test#timeout() test timeouts}, and
-	 * {@link Assume.AssumptionViolatedException assumptions}.
+	 * {@link RunNotifier} and {@link TestContextManager} as well as proper
+	 * handling of {@link org.junit.Ignore @Ignore},
+	 * {@link org.junit.Test#expected() expected exceptions},
+	 * {@link org.junit.Test#timeout() test timeouts}, and
+	 * {@link org.junit.Assume.AssumptionViolatedException assumptions}.
 	 */
 	public void run() {
 
@@ -455,7 +454,7 @@ class SpringMethodRoadie {
 
 	/**
 	 * Marker exception to signal that an exception was encountered while
-	 * executing an {@link Before @Before} method.
+	 * executing an {@link org.junit.Before @Before} method.
 	 */
 	protected static final class FailedBefore extends Exception {
 
