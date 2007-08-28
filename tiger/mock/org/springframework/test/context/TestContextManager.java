@@ -58,7 +58,7 @@ import org.springframework.util.Assert;
  * @see ContextConfiguration
  * @see org.springframework.test.context.transaction.TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  * @since 2.1
  */
 public class TestContextManager {
@@ -72,10 +72,10 @@ public class TestContextManager {
 	 * may be destroyed and recreated between running individual test methods,
 	 * for example with JUnit.
 	 */
-	private static final ContextCache<ContextConfigurationAttributes, ApplicationContext>	CONTEXT_CACHE			= new ContextCache<ContextConfigurationAttributes, ApplicationContext>();
+	private static final ContextCache<String, ApplicationContext>	CONTEXT_CACHE			= new ContextCache<String, ApplicationContext>();
 
 	/** Class Logger. */
-	private static final Log																LOG						= LogFactory.getLog(TestContextManager.class);
+	private static final Log										LOG						= LogFactory.getLog(TestContextManager.class);
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
@@ -89,9 +89,9 @@ public class TestContextManager {
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final TestContext																testContext;
+	private final TestContext										testContext;
 
-	private final Set<TestExecutionListener>												testExecutionListeners	= new LinkedHashSet<TestExecutionListener>();
+	private final Set<TestExecutionListener>						testExecutionListeners	= new LinkedHashSet<TestExecutionListener>();
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -343,7 +343,7 @@ public class TestContextManager {
 	 *
 	 * @return The context cache.
 	 */
-	protected ContextCache<ContextConfigurationAttributes, ApplicationContext> getContextCache() {
+	protected ContextCache<String, ApplicationContext> getContextCache() {
 
 		return TestContextManager.CONTEXT_CACHE;
 	}

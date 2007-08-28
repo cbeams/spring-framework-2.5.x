@@ -35,7 +35,7 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * @see ContextLoader
  * @see ApplicationContext
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -44,10 +44,6 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
 @Documented
 public @interface ContextConfiguration {
 
-	// ------------------------------------------------------------------------|
-	// --- ATTRIBUTES ---------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * <p>
 	 * The resource locations to use for loading the {@link ApplicationContext}.
@@ -55,39 +51,8 @@ public @interface ContextConfiguration {
 	 * <p>
 	 * Defaults to an empty array.
 	 * </p>
-	 *
-	 * @see #generateDefaultLocations()
-	 * @see #loaderClass()
 	 */
 	String[] locations() default {};
-
-	/**
-	 * <p>
-	 * Whether or not <em>default</em> resource locations should be generated
-	 * if no {@link #locations() locations} are explicitly defined.
-	 * </p>
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 * </p>
-	 *
-	 * @see #locations()
-	 * @see #loaderClass()
-	 * @see #resourceSuffix()
-	 */
-	boolean generateDefaultLocations() default true;
-
-	/**
-	 * <p>
-	 * The suffix to append to {@link ApplicationContext} resource locations
-	 * when generating default locations.
-	 * </p>
-	 * <p>
-	 * Defaults to &quot;<code>-context.xml</code>&quot;.
-	 * </p>
-	 *
-	 * @see #generateDefaultLocations()
-	 */
-	String resourceSuffix() default "-context.xml";
 
 	/**
 	 * <p>
@@ -97,10 +62,7 @@ public @interface ContextConfiguration {
 	 * <p>
 	 * Defaults to {@link GenericXmlContextLoader}.
 	 * </p>
-	 *
-	 * @see #locations()
-	 * @see #generateDefaultLocations()
 	 */
-	Class<? extends ContextLoader> loaderClass() default GenericXmlContextLoader.class;
+	Class<? extends ContextLoader> loader() default GenericXmlContextLoader.class;
 
 }

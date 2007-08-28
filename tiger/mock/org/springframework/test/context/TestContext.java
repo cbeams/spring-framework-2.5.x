@@ -17,6 +17,7 @@ package org.springframework.test.context;
 
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -24,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * <p>
@@ -32,7 +34,7 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @since 2.1
  */
 public class TestContext {
@@ -42,7 +44,7 @@ public class TestContext {
 	// ------------------------------------------------------------------------|
 
 	/** Class Logger. */
-	private static final Log														LOG	= LogFactory.getLog(TestContext.class);
+	private static final Log								LOG	= LogFactory.getLog(TestContext.class);
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC VARIABLES ---------------------------------------------------|
@@ -56,17 +58,19 @@ public class TestContext {
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final ContextConfigurationAttributes									configurationAttributes;
+	private final ContextCache<String, ApplicationContext>	contextCache;
 
-	private final ContextCache<ContextConfigurationAttributes, ApplicationContext>	contextCache;
+	private final ContextLoader								contextLoader;
 
-	private Throwable																testException;
+	private final String[]									locations;
 
-	private final Class<?>															testClass;
+	private Throwable										testException;
 
-	private Object																	testInstance;
+	private final Class<?>									testClass;
 
-	private Method																	testMethod;
+	private Object											testInstance;
+
+	private Method											testMethod;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE INITIALIZATION --------------------------------------------|
@@ -79,10 +83,7 @@ public class TestContext {
 	/**
 	 * Constructs a new test context for the supplied {@link Class test class}
 	 * and {@link ContextCache context cache} and parses the
-	 * {@link ContextConfigurationAttributes} configured for the test class via
-	 * the
-	 * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
-	 * annotation.
+	 * {@link ContextConfiguration} for the test class.
 	 *
 	 * @param testClass The {@link Class} object corresponding to the test class
 	 *        for which the test context should be constructed, not
@@ -90,88 +91,90 @@ public class TestContext {
 	 * @param contextCache The context cache from which the constructed test
 	 *        context should retrieve application contexts, not
 	 *        <code>null</code>.
+	 * @throws Exception If an error occurs while initializing the test context.
 	 */
-	public TestContext(final Class<?> testClass,
-			final ContextCache<ContextConfigurationAttributes, ApplicationContext> contextCache) {
+	public TestContext(final Class<?> testClass, final ContextCache<String, ApplicationContext> contextCache)
+			throws Exception {
 
 		super();
 
 		Assert.notNull(testClass, "The testClass can not be null.");
 		Assert.notNull(contextCache, "The contextCache can not be null.");
 
+		final Class<ContextConfiguration> annotationType = ContextConfiguration.class;
+		final ContextConfiguration contextConfiguration = testClass.getAnnotation(annotationType);
+		String[] locations = null;
+		ContextLoader contextLoader = null;
+
+		if (contextConfiguration == null) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("@ContextConfiguration not found for class [" + testClass + "].");
+			}
+		}
+		else {
+			final Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, testClass);
+			Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
+					+ annotationType + "] and class [" + testClass + "].");
+
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Retrieved @ContextConfiguration [" + contextConfiguration + "] for test class [" + testClass
+						+ "] and declaring class [" + declaringClass + "].");
+			}
+
+			final Class<? extends ContextLoader> contextLoaderClass = contextConfiguration.loader();
+			Assert.state(contextLoaderClass != null,
+					"@ContextConfiguration has not been properly configured: loader is null.");
+			contextLoader = contextLoaderClass.newInstance();
+			locations = contextLoader.processLocations(contextConfiguration.locations(), declaringClass);
+		}
+
 		this.testClass = testClass;
 		this.contextCache = contextCache;
-		this.configurationAttributes = retrieveContextConfigurationAttributes(testClass);
+		this.contextLoader = contextLoader;
+		this.locations = locations;
 	}
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
+	// ------------------------------------------------------------------------|
+	// --- INSTANCE METHODS ---------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
 	/**
 	 * <p>
-	 * Builds and configures an {@link ApplicationContext} based on the supplied
-	 * {@link ContextConfigurationAttributes}.
+	 * Builds an {@link ApplicationContext} for this test context.
 	 * </p>
 	 *
-	 * @param configAttributes the context configuration attributes to use to
-	 *        determine how to build and configure an appropriate application
-	 *        context.
 	 * @throws Exception if an error occurs while building the application
 	 *         context
 	 */
-	protected static ApplicationContext buildApplicationContext(final ContextConfigurationAttributes configAttributes)
-			throws Exception {
+	protected ApplicationContext buildApplicationContext() throws Exception {
 
-		Assert.notNull(configAttributes, "ContextConfigurationAttributes can not be null.");
-		final Class<? extends ContextLoader> contextLoaderClass = configAttributes.getLoaderClass();
-		Assert.state(contextLoaderClass != null,
-				"loaderClass is null: ContextConfigurationAttributes have not been properly initialized.");
-		final ContextLoader contextLoader = contextLoaderClass.newInstance();
-		return contextLoader.loadContext(configAttributes);
+		Assert.notNull(getContextLoader(), "contextLoader can not be null.");
+		Assert.notNull(getLocations(), "locations can not be null.");
+		return getContextLoader().loadContext(getLocations());
 	}
 
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Retrieves the {@link ContextConfigurationAttributes} for the supplied
-	 * {@link Class} which must declare or inherit
-	 * {@link ContextConfiguration @ContextConfiguration}.
+	 * <p>
+	 * Converts the supplied context <code>key</code> to a String.
+	 * </p>
+	 * <p>
+	 * Subclasses can override this to return a String representation of their
+	 * context key for use in caching, logging, etc.
+	 * </p>
 	 *
-	 * @param clazz The class for which the
-	 *        {@link ContextConfigurationAttributes} should be constructed.
-	 * @return a new ContextConfigurationAttributes instance.
-	 * @throws IllegalArgumentException if the supplied class is
-	 *         <code>null</code> or if a {@link ContextConfiguration}
-	 *         annotation is not present for the supplied class.
+	 * @param key The context key to convert to a String.
 	 */
-	protected static ContextConfigurationAttributes retrieveContextConfigurationAttributes(final Class<?> clazz) {
+	protected String contextKeyString(final Serializable key) {
 
-		Assert.notNull(clazz, "Can not retrieve ContextConfigurationAttributes for a NULL class.");
-		final Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		final Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, clazz);
-		final ContextConfiguration contextConfiguration = clazz.getAnnotation(annotationType);
-		Assert.notNull(contextConfiguration, "@ContextConfiguration must be present for class [" + clazz + "].");
-		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
-				+ annotationType + "] and class [" + clazz + "].");
-
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("ContextConfiguration: test class [" + clazz + "], annotation declaring class [" + declaringClass
-					+ "].");
-		}
-
-		final ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(
-				contextConfiguration.loaderClass(), contextConfiguration.locations(), declaringClass,
-				contextConfiguration.generateDefaultLocations(), contextConfiguration.resourceSuffix());
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Retrieved ContextConfigurationAttributes [" + configAttributes + "] for class [" + clazz + "].");
-		}
-
-		return configAttributes;
+		return ObjectUtils.nullSafeToString(key);
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	/**
@@ -180,40 +183,27 @@ public class TestContext {
 	 * context, possibly cached.
 	 * </p>
 	 *
-	 * @return The application context.
+	 * @return The application context; may be <code>null</code> if the
+	 *         current test context is not configured to use an application
+	 *         context.
 	 * @throws Exception if an error occurs while retrieving the application
 	 *         context.
 	 */
 	public ApplicationContext getApplicationContext() throws Exception {
 
 		ApplicationContext context;
-		final ContextCache<ContextConfigurationAttributes, ApplicationContext> cache = getContextCache();
+		final ContextCache<String, ApplicationContext> cache = getContextCache();
 
 		synchronized (cache) {
-			context = cache.get(getConfigurationAttributes());
+			context = cache.get(contextKeyString(getLocations()));
 
 			if (context == null) {
-				context = buildApplicationContext(getConfigurationAttributes());
-				cache.put(getConfigurationAttributes(), context);
+				context = buildApplicationContext();
+				cache.put(contextKeyString(getLocations()), context);
 			}
 		}
 
 		return context;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * <p>
-	 * Gets the {@link ContextConfigurationAttributes configuration attributes}
-	 * for this test context.
-	 * </p>
-	 *
-	 * @return The configuration attributes, never <code>null</code>.
-	 */
-	public final ContextConfigurationAttributes getConfigurationAttributes() {
-
-		return this.configurationAttributes;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -225,9 +215,42 @@ public class TestContext {
 	 *
 	 * @return The context cache, never <code>null</code>.
 	 */
-	protected final ContextCache<ContextConfigurationAttributes, ApplicationContext> getContextCache() {
+	protected final ContextCache<String, ApplicationContext> getContextCache() {
 
 		return this.contextCache;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Gets the {@link ContextLoader} to use for loading the
+	 * {@link ApplicationContext} for this test context.
+	 * </p>
+	 *
+	 * @return The context loader; may be <code>null</code> if the current
+	 *         test context is not configured to use an application context.
+	 */
+	protected final ContextLoader getContextLoader() {
+
+		return this.contextLoader;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Gets the resource locations to use for loading the
+	 * {@link ApplicationContext} for this test context.
+	 * </p>
+	 *
+	 * @return The application context resource locations; may be
+	 *         <code>null</code> if the current test context is not configured
+	 *         to use an application context.
+	 */
+	protected final String[] getLocations() {
+
+		return this.locations;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -311,7 +334,7 @@ public class TestContext {
 	 */
 	public void markApplicationContextDirty() {
 
-		getContextCache().setDirty(getConfigurationAttributes());
+		getContextCache().setDirty(contextKeyString(getLocations()));
 	}
 
 	// ------------------------------------------------------------------------|
@@ -330,6 +353,7 @@ public class TestContext {
 		synchronized (this) {
 			this.testInstance = testInstance;
 			this.testMethod = testMethod;
+			this.testException = testException;
 		}
 	}
 
@@ -338,7 +362,7 @@ public class TestContext {
 	/**
 	 * Provides a string representation of this test contexts's
 	 * {@link #getTestClass() test class},
-	 * {@link #getConfigurationAttributes() configuration attributes},
+	 * {@link #getLocations() application context resource locations},
 	 * {@link #getTestInstance() test instance},
 	 * {@link #getTestMethod() test method}, and
 	 * {@link #getTestException() test exception}.
@@ -352,7 +376,7 @@ public class TestContext {
 
 		.append("testClass", getTestClass())
 
-		.append("configurationAttributes", getConfigurationAttributes())
+		.append("locations", getLocations())
 
 		.append("testInstance", getTestInstance())
 

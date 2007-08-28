@@ -28,7 +28,6 @@ import org.springframework.beans.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.GenericPropertiesContextLoader;
 
 /**
@@ -36,7 +35,7 @@ import org.springframework.test.context.support.GenericPropertiesContextLoader;
  * JUnit 4 based test class, which verifies the expected functionality of
  * {@link SpringJUnit4ClassRunner} in conjunction with support for application
  * contexts loaded from Java {@link Properties} files. Specifically, the
- * {@link ContextConfiguration#loaderClass() loaderClass} and
+ * {@link ContextConfiguration#loader() loaderClass} and
  * {@link ContextConfiguration#resourceSuffix() resourceSuffix} attributes of
  * &#064;ContextConfiguration are tested.
  * </p>
@@ -54,11 +53,11 @@ import org.springframework.test.context.support.GenericPropertiesContextLoader;
  * @see GenericPropertiesContextLoader
  * @see SpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loaderClass = GenericPropertiesContextLoader.class, resourceSuffix = "-context.properties")
+@ContextConfiguration(loader = GenericPropertiesContextLoader.class)
 public class PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests {
 
 	// ------------------------------------------------------------------------|
@@ -76,10 +75,10 @@ public class PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests {
 	// ------------------------------------------------------------------------|
 
 	@Autowired()
-	private Pet cat;
+	private Pet		cat;
 
 	@Autowired()
-	private String testString;
+	private String	testString;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|

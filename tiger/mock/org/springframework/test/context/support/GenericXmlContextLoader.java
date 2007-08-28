@@ -26,7 +26,7 @@ import org.springframework.context.support.GenericApplicationContext;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public class GenericXmlContextLoader extends AbstractGenericContextLoader {
@@ -52,6 +52,22 @@ public class GenericXmlContextLoader extends AbstractGenericContextLoader {
 	protected BeanDefinitionReader createBeanDefinitionReader(final GenericApplicationContext context) {
 
 		return new XmlBeanDefinitionReader(context);
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Comments: Overrides getResourceSuffix().
+	 * <p>
+	 * Defaults to &quot;<code>-context.xml</code>&quot;.
+	 * </p>
+	 *
+	 * @see org.springframework.test.context.support.AbstractContextLoader#getResourceSuffix()
+	 */
+	@Override
+	public final String getResourceSuffix() {
+
+		return "-context.xml";
 	}
 
 	// ------------------------------------------------------------------------|

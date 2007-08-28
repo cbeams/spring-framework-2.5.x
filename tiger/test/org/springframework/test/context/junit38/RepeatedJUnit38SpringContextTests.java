@@ -18,14 +18,14 @@ package org.springframework.test.context.junit38;
 import junit.framework.TestCase;
 
 import org.springframework.test.annotation.Repeat;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 
 /**
  * Unit test for {@link AbstractJUnit38SpringContextTests} which focuses on
  * proper support of the {@link Repeat @Repeat} annotation.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class RepeatedJUnit38SpringContextTests extends TestCase {
@@ -68,8 +68,13 @@ public class RepeatedJUnit38SpringContextTests extends TestCase {
 	// --- TYPES --------------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	@ContextConfiguration(generateDefaultLocations = false)
-	public static class RepeatedTestCase extends AbstractJUnit38SpringContextTests {
+	/**
+	 * Note that {@link TestExecutionListeners @TestExecutionListeners} is
+	 * explicitly configured with an empty list, thus disabling all default
+	 * listeners.
+	 */
+	@TestExecutionListeners( {})
+	protected static class RepeatedTestCase extends AbstractJUnit38SpringContextTests {
 
 		int	invocationCount	= 0;
 

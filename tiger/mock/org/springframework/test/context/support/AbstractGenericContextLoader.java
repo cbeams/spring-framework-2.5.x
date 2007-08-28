@@ -22,14 +22,12 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.test.context.ContextConfigurationAttributes;
-import org.springframework.test.context.ContextLoader;
 
 /**
  * <p>
- * Abstract, generic implementation of the {@link ContextLoader} strategy which
- * loads a {@link GenericApplicationContext} from the <em>locations</em> in
- * the supplied {@link ContextConfigurationAttributes configuration attributes}.
+ * Abstract, generic extension of {@link AbstractContextLoader} which loads a
+ * {@link GenericApplicationContext} from the <em>locations</em> provided to
+ * {@link #loadContext(String...)}.
  * </p>
  * <p>
  * Concrete subclasses must provide an appropriate
@@ -38,10 +36,10 @@ import org.springframework.test.context.ContextLoader;
  *
  * @see #loadContext()
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
-public abstract class AbstractGenericContextLoader implements ContextLoader {
+public abstract class AbstractGenericContextLoader extends AbstractContextLoader {
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTANTS ----------------------------------------------------------|
@@ -51,18 +49,13 @@ public abstract class AbstractGenericContextLoader implements ContextLoader {
 	protected static final Log	LOG	= LogFactory.getLog(AbstractGenericContextLoader.class);
 
 	// ------------------------------------------------------------------------|
-	// --- CONSTRUCTORS -------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
-	 * Loads a Spring ApplicationContext from the <em>locations</em> defined
-	 * in the supplied
-	 * {@link ContextConfigurationAttributes configuration attributes}.
+	 * Loads a Spring ApplicationContext from the supplied
+	 * <code>locations</code>.
 	 * </p>
 	 * <p>
 	 * Implementation details:
@@ -93,16 +86,15 @@ public abstract class AbstractGenericContextLoader implements ContextLoader {
 	 * @return a new application context
 	 */
 	@Override
-	public final ConfigurableApplicationContext loadContext(final ContextConfigurationAttributes configAttributes)
-			throws Exception {
+	public final ConfigurableApplicationContext loadContext(final String... locations) throws Exception {
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Loading ApplicationContext for ContextConfigurationAttributes [" + configAttributes + "].");
+			LOG.debug("Loading ApplicationContext for locations [" + locations + "].");
 		}
 
 		final GenericApplicationContext context = new GenericApplicationContext();
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
-		createBeanDefinitionReader(context).loadBeanDefinitions(configAttributes.getLocations());
+		createBeanDefinitionReader(context).loadBeanDefinitions(locations);
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		context.registerShutdownHook();

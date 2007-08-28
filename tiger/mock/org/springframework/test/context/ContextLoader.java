@@ -21,11 +21,11 @@ import org.springframework.context.ApplicationContext;
  * <p>
  * Strategy interface for loading an
  * {@link ApplicationContext application context} based on a supplied set of
- * {@link ContextConfigurationAttributes configuration attributes}.
+ * <code>locations</code> and a {@link Class class}.
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 public interface ContextLoader {
@@ -35,15 +35,26 @@ public interface ContextLoader {
 	// ------------------------------------------------------------------------|
 
 	/**
+	 * TODO Add comments for processLocations().
+	 *
+	 * @param locations
+	 * @param clazz
+	 * @return
+	 */
+	public abstract String[] processLocations(final String[] locations, final Class<?> clazz);
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Revise JavaDoc!
 	 * <p>
 	 * Loads a new {@link ApplicationContext context} based on the supplied
-	 * {@link ContextConfigurationAttributes configuration attributes},
-	 * configures the context, and finally returns the context, potentially
-	 * <em>refreshed</em>.
+	 * <code>locations</code>, configures the context, and finally returns
+	 * the context, potentially <em>refreshed</em>.
 	 * </p>
 	 * <p>
-	 * {@link ContextConfigurationAttributes#getLocations() Configuration locations}
-	 * should be considered to be classpath resources by default.
+	 * Configuration locations should be considered to be classpath resources by
+	 * default.
 	 * </p>
 	 * <p>
 	 * Concrete implementations should register annotation configuration
@@ -55,18 +66,19 @@ public interface ContextLoader {
 	 * and {@link javax.annotation.Resource @Resource}.
 	 * </p>
 	 * <p>
-	 * Any ApplicationContext loaded by this method <strong>must</strong>
+	 * Any ApplicationContext loaded by a ContextLoader <strong>must</strong>
 	 * register a JVM shutdown hook for itself. Unless the context gets closed
 	 * early, all context instances will be automatically closed on JVM
 	 * shutdown. This allows for freeing external resources held by beans within
 	 * the context, e.g. temporary files.
 	 * </p>
 	 *
-	 * @param contextConfigurationAttributes The configuration attributes to use
-	 *        to determine how to load and configure the application context.
+	 * @param locations The resource locations to use to load the application
+	 *        context.
 	 * @return a new application context
 	 */
-	public abstract ApplicationContext loadContext(ContextConfigurationAttributes contextConfigurationAttributes)
-			throws Exception;
+	public abstract ApplicationContext loadContext(final String... locations) throws Exception;
+
+	// ------------------------------------------------------------------------|
 
 }

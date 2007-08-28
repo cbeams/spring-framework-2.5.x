@@ -28,7 +28,7 @@ import org.springframework.context.support.GenericApplicationContext;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public class GenericPropertiesContextLoader extends AbstractGenericContextLoader {
@@ -54,6 +54,19 @@ public class GenericPropertiesContextLoader extends AbstractGenericContextLoader
 	protected BeanDefinitionReader createBeanDefinitionReader(final GenericApplicationContext context) {
 
 		return new PropertiesBeanDefinitionReader(context);
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * TODO Comments: Overrides getResourceSuffix().
+	 *
+	 * @see org.springframework.test.context.support.AbstractContextLoader#getResourceSuffix()
+	 */
+	@Override
+	public final String getResourceSuffix() {
+
+		return "-context.properties";
 	}
 
 	// ------------------------------------------------------------------------|

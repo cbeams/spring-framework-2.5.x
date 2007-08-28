@@ -33,7 +33,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * {@link SpringJUnit4ClassRunner} and the {@link DirtiesContext} annotation.
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 @RunWith(SpringRunnerContextCacheTests.TestableSpringJUnit4ClassRunner.class)
@@ -81,7 +81,7 @@ public class SpringRunnerContextCacheTests {
 	@BeforeClass
 	public static void verifyInitialCacheState() {
 
-		final ContextCache<ContextConfigurationAttributes, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
+		final ContextCache<String, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
 		contextCache.clear();
 		contextCache.clearStatistics();
 		assertContextCacheStatistics(contextCache, "BeforeClass", 0, 0, 0);
@@ -92,7 +92,7 @@ public class SpringRunnerContextCacheTests {
 	@AfterClass
 	public static void verifyFinalCacheState() {
 
-		final ContextCache<ContextConfigurationAttributes, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
+		final ContextCache<String, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
 		assertContextCacheStatistics(contextCache, "AfterClass", 1, 0, 2);
 	}
 
@@ -104,7 +104,7 @@ public class SpringRunnerContextCacheTests {
 	@DirtiesContext
 	public void dirtyContext() {
 
-		final ContextCache<ContextConfigurationAttributes, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
+		final ContextCache<String, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
 		assertContextCacheStatistics(contextCache, "dirtyContext()", 1, 0, 1);
 	}
 
@@ -113,7 +113,7 @@ public class SpringRunnerContextCacheTests {
 	@Test
 	public void verifyDirtiesContext() {
 
-		final ContextCache<ContextConfigurationAttributes, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
+		final ContextCache<String, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
 		assertContextCacheStatistics(contextCache, "verifyDirtiesContext()", 1, 0, 2);
 	}
 
@@ -148,7 +148,7 @@ public class SpringRunnerContextCacheTests {
 			super(testClass);
 		}
 
-		ContextCache<ContextConfigurationAttributes, ApplicationContext> getVisibleContextCache() {
+		ContextCache<String, ApplicationContext> getVisibleContextCache() {
 
 			return super.getContextCache();
 		}

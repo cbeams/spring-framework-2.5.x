@@ -37,6 +37,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
+ * TODO Revise JavaDoc!
  * <p>
  * SpringJUnit4ClassRunnerAppCtxTests serves as a <em>proof of concept</em>
  * JUnit 4 based test class, which verifies the expected functionality of
@@ -57,7 +58,7 @@ import org.springframework.test.context.ContextConfiguration;
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
