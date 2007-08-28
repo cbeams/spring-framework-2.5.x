@@ -40,7 +40,7 @@ import org.springframework.test.context.SpringRunnerContextCacheTests;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 @RunWith(Suite.class)
@@ -58,6 +58,8 @@ ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests.class,
 AbsolutePathSpringJUnit4ClassRunnerAppCtxTests.class,
 
 RelativePathSpringJUnit4ClassRunnerAppCtxTests.class,
+
+MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.class,
 
 InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,
 
