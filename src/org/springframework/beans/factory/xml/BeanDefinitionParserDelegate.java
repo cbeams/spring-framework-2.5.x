@@ -442,7 +442,7 @@ public class BeanDefinitionParserDelegate {
 			}
 			else if (containingBean != null) {
 				// Take default from containing bean in case of an inner bean definition.
-				bd.setSingleton(containingBean.isSingleton());
+				bd.setScope(containingBean.getScope());
 			}
 
 			if (ele.hasAttribute(ABSTRACT_ATTRIBUTE)) {

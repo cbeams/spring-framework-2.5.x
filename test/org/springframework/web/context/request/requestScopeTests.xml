@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
-
-<beans>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+                http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
 	<bean id="requestScopedObject" class="org.springframework.beans.TestBean" scope="request"/>
 
@@ -16,5 +17,23 @@
 	<bean id="requestScopedObjectCircle2" class="org.springframework.beans.TestBean" scope="request">
 		<property name="spouse" ref="requestScopedObjectCircle1"/>
 	</bean>
+
+    <bean id="requestScopedOuterBean" class="org.springframework.beans.DerivedTestBean" scope="request">
+        <property name="name" value="outer"/>
+        <property name="spouse">
+            <bean class="org.springframework.beans.DerivedTestBean">
+                <property name="name" value="inner"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="singletonOuterBean" class="org.springframework.beans.DerivedTestBean" lazy-init="true">
+        <property name="name" value="outer"/>
+        <property name="spouse">
+            <bean class="org.springframework.beans.DerivedTestBean" scope="request">
+                <property name="name" value="inner"/>
+            </bean>
+        </property>
+    </bean>
 
 </beans>

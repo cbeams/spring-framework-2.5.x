@@ -273,12 +273,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 						public Object getObject() throws BeansException {
 							beforePrototypeCreation(beanName);
 							try {
-								Object bean = createBean(beanName, mbd, args);
-								if (requiresDestruction(bean, mbd)) {
-									scope.registerDestructionCallback(beanName,
-											new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors()));
-								}
-								return bean;
+								return createBean(beanName, mbd, args);
 							}
 							finally {
 								afterPrototypeCreation(beanName);
@@ -1039,7 +1034,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				// parent-child merging for the outer bean, in which case the original inner bean
 				// definition will not have inherited the merged outer bean's singleton status.
 				if (containingBd != null && !containingBd.isSingleton() && mbd.isSingleton()) {
-					mbd.setSingleton(false);
+					mbd.setScope(containingBd.getScope());
 				}
 
 				// Only cache the merged bean definition if we're already about to create an
@@ -1409,6 +1404,14 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 					registerDependentBean(dependsOn[i], beanName);
 				}
 			}
+		}
+		else if (!mbd.isPrototype() && requiresDestruction(bean, mbd)) {
+			Scope scope = (Scope) this.scopes.get(mbd.getScope());
+			if (scope == null) {
+				throw new IllegalStateException("No Scope registered for scope '" + mbd.getScope() + "'");
+			}
+			scope.registerDestructionCallback(beanName,
+					new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors()));
 		}
 	}
 

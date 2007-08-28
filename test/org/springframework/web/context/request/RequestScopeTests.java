@@ -31,6 +31,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 2.0
  */
 public class RequestScopeTests extends TestCase {
@@ -113,6 +114,55 @@ public class RequestScopeTests extends TestCase {
 		catch (BeanCreationException ex) {
 			// expected
 			assertTrue(ex.contains(BeanCurrentlyInCreationException.class));
+		}
+		finally {
+			RequestContextHolder.setRequestAttributes(null);
+		}
+	}
+
+	public void testInnerBeanInheritsContainingBeanScopeByDefault() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
+		RequestContextHolder.setRequestAttributes(requestAttributes);
+
+		try {
+			String outerBeanName = "requestScopedOuterBean";
+			assertNull(request.getAttribute(outerBeanName));
+			TestBean outer1 = (TestBean) this.beanFactory.getBean(outerBeanName);
+			assertNotNull(request.getAttribute(outerBeanName));
+			TestBean inner1 = (TestBean) outer1.getSpouse();
+			assertSame(outer1, this.beanFactory.getBean(outerBeanName));
+			requestAttributes.requestCompleted();
+			assertTrue(outer1.wasDestroyed());
+			assertTrue(inner1.wasDestroyed());
+			request = new MockHttpServletRequest();
+			requestAttributes = new ServletRequestAttributes(request);
+			RequestContextHolder.setRequestAttributes(requestAttributes);
+			TestBean outer2 = (TestBean) this.beanFactory.getBean(outerBeanName);
+			assertNotSame(outer1, outer2);
+			assertNotSame(inner1, outer2.getSpouse());
+		}
+		finally {
+			RequestContextHolder.setRequestAttributes(null);
+		}
+	}
+
+	public void testRequestScopedInnerBeanDestroyedWhileContainedBySingleton() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
+		RequestContextHolder.setRequestAttributes(requestAttributes);
+
+		try {
+			String outerBeanName = "singletonOuterBean";
+			TestBean outer1 = (TestBean) this.beanFactory.getBean(outerBeanName);
+			assertNull(request.getAttribute(outerBeanName));
+			TestBean inner1 = (TestBean) outer1.getSpouse();
+			TestBean outer2 = (TestBean) this.beanFactory.getBean(outerBeanName);
+			assertSame(outer1, outer2);
+			assertSame(inner1, outer2.getSpouse());
+			requestAttributes.requestCompleted();
+			assertTrue(inner1.wasDestroyed());
+			assertFalse(outer1.wasDestroyed());
 		}
 		finally {
 			RequestContextHolder.setRequestAttributes(null);
