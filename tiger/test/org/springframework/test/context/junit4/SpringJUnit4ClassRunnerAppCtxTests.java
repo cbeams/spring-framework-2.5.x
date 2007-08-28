@@ -35,22 +35,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.support.GenericXmlContextLoader;
 
 /**
- * TODO Revise JavaDoc!
  * <p>
  * SpringJUnit4ClassRunnerAppCtxTests serves as a <em>proof of concept</em>
  * JUnit 4 based test class, which verifies the expected functionality of
- * {@link SpringJUnit4ClassRunner} in conjunction with
- * {@link ContextConfiguration} and Spring's {@link Autowired} annotation.
+ * {@link SpringJUnit4ClassRunner} in conjunction with the following:
  * </p>
+ * <ul>
+ * <li>{@link ContextConfiguration @ContextConfiguration}</li>
+ * <li>{@link Autowired @Autowired}</li>
+ * <li>{@link Resource @Resource}</li>
+ * <li>{@link ApplicationContextAware}</li>
+ * <li>{@link BeanNameAware}</li>
+ * <li>{@link InitializingBean}</li>
+ * </ul>
  * <p>
- * Since no {@link ContextConfiguration#locations() locations} are explicitly
- * defined and
- * {@link ContextConfiguration#generateDefaultLocations() generateDefaultLocations}
- * is left set to its default value of <code>true</code>, this test class's
- * dependencies will be injected via
- * {@link Autowired annotation-based autowiring} from beans defined in the
+ * Since no application context resource
+ * {@link ContextConfiguration#locations() locations} are explicitly declared
+ * and since the {@link ContextConfiguration#loader() ContextLoader} is left set
+ * to the default value of {@link GenericXmlContextLoader}, this test class's
+ * dependencies will be injected via {@link Autowired @Autowired} and
+ * {@link Resource @Resource} from beans defined in the
  * {@link ApplicationContext} loaded from the default classpath resource: &quot;<code>/org/springframework/test/context/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml</code>&quot;.
  * </p>
  *
@@ -58,11 +65,11 @@ import org.springframework.test.context.ContextConfiguration;
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration()
+@ContextConfiguration
 public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAware, BeanNameAware, InitializingBean {
 
 	// ------------------------------------------------------------------------|
@@ -75,10 +82,6 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	 * <code>&quot;/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>
 	 */
 	public static final String	DEFAULT_CONTEXT_RESOURCE_PATH	= "/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml";
-
-	// ------------------------------------------------------------------------|
-	// --- CLASS VARIABLES ----------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	// ------------------------------------------------------------------------|
 	// --- CLASS METHODS ------------------------------------------------------|
@@ -98,7 +101,7 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 
 	private boolean				beanInitialized	= false;
 
-	private String				beanName		= "replace me with null";
+	private String				beanName		= "replace me with [" + getClass().getName() + "]";
 
 	private Employee			employee;
 
@@ -156,7 +159,7 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	// ------------------------------------------------------------------------|
 
 	@Test
-	public final void verifyApplicationContext() {
+	public final void verifyApplicationContextSet() {
 
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
 				this.applicationContext);
@@ -172,14 +175,14 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	@Test
 	public final void verifyBeanNameSet() {
 
-		assertEquals("The bean name of this test instance should have been set to the fully qualified class name "
-				+ "due to BeanNameAware semantics.", getClass().getName(), this.beanName);
+		assertEquals("The bean name of this test instance should have been set due to BeanNameAware semantics.",
+				getClass().getName(), this.beanName);
 	}
 
 	@Test
 	public final void verifyAnnotationAutowiredFields() {
 
-		assertNull("The nonrequiredLong property should NOT have been autowired.", this.nonrequiredLong);
+		assertNull("The nonrequiredLong field should NOT have been autowired.", this.nonrequiredLong);
 		assertNotNull("The pet field should have been autowired.", this.pet);
 		assertEquals("Fido", this.pet.getName());
 	}
