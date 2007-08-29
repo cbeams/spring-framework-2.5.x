@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 
 /**
  * <p>
- * TestContextManager is the central entry point into the
+ * TestContextManager is the main entry point into the
  * <em>Spring Test Context Framework</em>, which provides support for loading
  * and accessing {@link ApplicationContext application contexts}, dependency
  * injection of test instances, and {@link Transactional transactional}
@@ -58,7 +58,7 @@ import org.springframework.util.Assert;
  * @see ContextConfiguration
  * @see org.springframework.test.context.transaction.TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  * @since 2.1
  */
 public class TestContextManager {
@@ -82,20 +82,12 @@ public class TestContextManager {
 	// ------------------------------------------------------------------------|
 
 	// ------------------------------------------------------------------------|
-	// --- STATIC INITIALIZATION ----------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	private final TestContext										testContext;
 
 	private final Set<TestExecutionListener>						testExecutionListeners	= new LinkedHashSet<TestExecutionListener>();
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE INITIALIZATION --------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
@@ -179,21 +171,25 @@ public class TestContextManager {
 
 	/**
 	 * <p>
-	 * Prepares the supplied test instance (e.g., injecting dependencies, etc.).
+	 * Hook for preparing a test instance prior to execution of any individual
+	 * test methods, for example for injecting dependencies, etc. Should be
+	 * called immediately after instantiation of the test instance.
 	 * </p>
 	 * <p>
 	 * The managed {@link TestContext} will be updated with the supplied
 	 * <code>testInstance</code>.
 	 * </p>
 	 * <p>
-	 * The default implementation attempts to give each registered
+	 * An attempt will be made to give each registered
 	 * {@link TestExecutionListener} a chance to prepare the test instance. If a
 	 * listener throws an exception, however, the remaining registered listeners
-	 * will not be called.
+	 * will <strong>not</strong> be called.
 	 * </p>
 	 *
+	 * @see #getTestExecutionListeners()
 	 * @param testInstance The test instance to prepare, not <code>null</code>.
-	 * @throws Exception if an error occurs while preparing the test instance.
+	 * @throws Exception if a registered TestExecutionListener throws an
+	 *         exception.
 	 */
 	public void prepareTestInstance(final Object testInstance) throws Exception {
 
@@ -223,19 +219,21 @@ public class TestContextManager {
 
 	/**
 	 * <p>
-	 * Hook for pre-processing a test just <em>before</em> the execution of
-	 * the supplied {@link Method test method}, for example for setting up test
-	 * fixtures, transaction handling, etc.
+	 * Hook for pre-processing a test <em>before</em> execution of the
+	 * supplied {@link Method test method}, for example for setting up test
+	 * fixtures, starting a transaction, etc. Should be called prior to any
+	 * framework-specific <em>before methods</em> (e.g., JUnit's
+	 * <code>&#064;Before</code>).
 	 * </p>
 	 * <p>
 	 * The managed {@link TestContext} will be updated with the supplied
 	 * <code>testInstance</code> and <code>testMethod</code>.
 	 * </p>
 	 * <p>
-	 * The default implementation attempts to give each registered
+	 * An attempt will be made to give each registered
 	 * {@link TestExecutionListener} a chance to pre-process the test method
 	 * execution. If a listener throws an exception, however, the remaining
-	 * registered listeners will not be called.
+	 * registered listeners will <strong>not</strong> be called.
 	 * </p>
 	 *
 	 * @see #getTestExecutionListeners()
@@ -275,19 +273,21 @@ public class TestContextManager {
 
 	/**
 	 * <p>
-	 * Hook for post-processing a test just <em>after</em> the execution of
-	 * the supplied {@link Method test method}, for example for tearing down
-	 * test fixtures, transaction handling, etc.
+	 * Hook for post-processing a test <em>after</em> execution of the
+	 * supplied {@link Method test method}, for example for tearing down test
+	 * fixtures, ending a transaction, etc. Should be called after any
+	 * framework-specific <em>after methods</em> (e.g., JUnit's
+	 * <code>&#064;After</code>).
 	 * </p>
 	 * <p>
 	 * The managed {@link TestContext} will be updated with the supplied
-	 * <code>testInstance</code> and <code>testMethod</code>.
+	 * <code>testInstance</code>, <code>testMethod</code>, and
+	 * <code>exception</code>.
 	 * </p>
 	 * <p>
-	 * The default implementation gives each registered
-	 * {@link TestExecutionListener} a chance to post-process the test method
-	 * execution. Note that registered listeners will be executed in the
-	 * opposite order in which they were registered.
+	 * Each registered {@link TestExecutionListener} will be given a chance to
+	 * post-process the test method execution. Note that registered listeners
+	 * will be executed in the opposite order in which they were registered.
 	 * </p>
 	 *
 	 * @see #getTestExecutionListeners()
@@ -357,7 +357,7 @@ public class TestContextManager {
 	 *
 	 * @return The test context.
 	 */
-	public final TestContext getTestContext() {
+	protected final TestContext getTestContext() {
 
 		return this.testContext;
 	}
