@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -36,9 +37,11 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -103,6 +106,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since January 21, 2001
  * @see #refreshBeanFactory
  * @see #getBeanFactory
@@ -349,6 +353,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
+
+				// Initialize dependent beans for any lifecycle beans in this context.
+				initLifecycleDependentBeans();
 
 				// Initialize other special beans in specific context subclasses.
 				onRefresh();
@@ -649,6 +656,28 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				logger.debug("Unable to locate ApplicationEventMulticaster with name '" +
 						APPLICATION_EVENT_MULTICASTER_BEAN_NAME +
 						"': using default [" + this.applicationEventMulticaster + "]");
+			}
+		}
+	}
+
+	/**
+	 * Registers dependent beans for any singleton lifecycle beans in this
+	 * context, thus ensuring they are started and stopped in the correct order.
+	 */
+	protected void initLifecycleDependentBeans() {
+		String lifecycleBeans[] = this.getBeanNamesForType(Lifecycle.class, false, false);
+		for (int i = 0; i < lifecycleBeans.length; i++) {
+			String beanName = lifecycleBeans[i];
+			if (getBeanFactory().containsBeanDefinition(beanName)) {
+				BeanDefinition bd = getBeanFactory().getBeanDefinition(beanName);
+				if (bd instanceof AbstractBeanDefinition) {
+					String[] dependsOn = ((AbstractBeanDefinition) bd).getDependsOn();
+					if (dependsOn != null) {
+						for (int j = 0; j < dependsOn.length; j++) {
+							getBeanFactory().registerDependentBean(dependsOn[j], beanName);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -983,27 +1012,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	public void start() {
-		Iterator it = getLifecycleBeans().iterator();
-		while (it.hasNext()) {
-			Lifecycle lifecycle = (Lifecycle) it.next();
-			if (!lifecycle.isRunning()) {
-				lifecycle.start();
-			}
+		Map lifecycleBeans = Collections.unmodifiableMap(getLifecycleBeans());
+		for (Iterator it = lifecycleBeans.keySet().iterator(); it.hasNext();) {
+			String beanName = (String) it.next();
+			startLifecycleBean(beanName, (Lifecycle) lifecycleBeans.get(beanName));
 		}
 	}
 
 	public void stop() {
-		Iterator it = getLifecycleBeans().iterator();
-		while (it.hasNext()) {
-			Lifecycle lifecycle = (Lifecycle) it.next();
-			if (lifecycle.isRunning()) {
-				lifecycle.stop();
-			}
+		Map lifecycleBeans = Collections.unmodifiableMap(getLifecycleBeans());
+		for (Iterator it = lifecycleBeans.keySet().iterator(); it.hasNext();) {
+			String beanName = (String) it.next();
+			stopLifecycleBean(beanName, (Lifecycle) lifecycleBeans.get(beanName));
 		}
 	}
 
 	public boolean isRunning() {
-		Iterator it = getLifecycleBeans().iterator();
+		Iterator it = getLifecycleBeans().values().iterator();
 		while (it.hasNext()) {
 			Lifecycle lifecycle = (Lifecycle) it.next();
 			if (!lifecycle.isRunning()) {
@@ -1014,18 +1039,61 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Return a Collection of all singleton beans that implement the
-	 * Lifecycle interface in this context.
-	 * @return Collection of Lifecycle beans
+	 * Start a bean that implements the Lifecycle interface. Any other
+	 * lifecycle beans that this bean depends on will be started before it.
+	 * @param beanName name of the bean to start
+	 * @param bean the lifecycle instance
 	 */
-	protected Collection getLifecycleBeans() {
+	private void startLifecycleBean(String beanName, Lifecycle bean) {
+		BeanDefinition bd = this.getBeanFactory().getBeanDefinition(beanName);
+		if (bd instanceof AbstractBeanDefinition) {
+			String[] dependsOnBeans = ((AbstractBeanDefinition) bd).getDependsOn();
+			if (dependsOnBeans != null) {
+				for (int i = 0; i < dependsOnBeans.length; i++) {
+					Object dependsOn = getLifecycleBeans().get(dependsOnBeans[i]);
+					if (dependsOn != null && (dependsOn instanceof Lifecycle)) {
+						startLifecycleBean(dependsOnBeans[i], (Lifecycle) dependsOn);
+					}
+				}
+			}
+		}
+		if (!bean.isRunning()) {
+			bean.start();
+		}
+	}
+
+	/**
+	 * Stop a bean that implements the Lifecycle interface. Any other
+	 * lifecycle beans that depend on this bean will be stopped before it.
+	 * @param beanName name of the bean to stop
+	 * @param bean the lifecycle instance
+	 */
+	private void stopLifecycleBean(String beanName, Lifecycle bean) {
+		String[] dependentBeans = this.getBeanFactory().getDependentBeans(beanName);
+		for (int i = 0; i < dependentBeans.length; i++) {
+			Object dependent = getLifecycleBeans().get(dependentBeans[i]);
+			if (dependent != null && (dependent instanceof Lifecycle)) {
+				stopLifecycleBean(dependentBeans[i], (Lifecycle) dependent);
+			}
+		}
+		if (bean.isRunning()) {
+			bean.stop();
+		}
+	}
+
+	/**
+	 * Return a Map of all singleton beans that implement the
+	 * Lifecycle interface in this context.
+	 * @return Map of Lifecycle beans with bean name as key
+	 */
+	protected Map getLifecycleBeans() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		String[] beanNames = beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
-		Collection beans = new ArrayList(beanNames.length);
+		Map beans = new HashMap(beanNames.length);
 		for (int i = 0; i < beanNames.length; i++) {
 			Object bean = beanFactory.getSingleton(beanNames[i]);
 			if (bean != null) {
-				beans.add(bean);
+				beans.put(beanNames[i], bean);
 			}
 		}
 		return beans;
