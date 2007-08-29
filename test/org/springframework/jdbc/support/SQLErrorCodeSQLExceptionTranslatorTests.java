@@ -17,6 +17,7 @@
 package org.springframework.jdbc.support;
 
 import java.sql.SQLException;
+import java.sql.BatchUpdateException;
 
 import junit.framework.TestCase;
 
@@ -78,6 +79,18 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		assertTrue(exClass.isInstance(ex));
 		assertTrue(ex.getCause() == sex);
 	}
+
+	public void testBatchExceptionTranslation() {
+		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);
+
+		SQLException badSqlEx = new SQLException("", "", 1);
+		BatchUpdateException batchUdateEx = new BatchUpdateException();
+		batchUdateEx.setNextException(badSqlEx);
+		BadSqlGrammarException bsgex = (BadSqlGrammarException) sext.translate("task", "SQL", batchUdateEx);
+		assertEquals("SQL", bsgex.getSql());
+		assertEquals(badSqlEx, bsgex.getSQLException());
+	}
+
 
 	public void testCustomTranslateMethodTranslation() {
 		final String TASK = "TASK";

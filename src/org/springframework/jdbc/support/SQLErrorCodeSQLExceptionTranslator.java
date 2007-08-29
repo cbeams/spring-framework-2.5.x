@@ -18,6 +18,7 @@ package org.springframework.jdbc.support;
 
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
+import java.sql.BatchUpdateException;
 import java.util.Arrays;
 
 import javax.sql.DataSource;
@@ -216,16 +217,24 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 		if (sql == null) {
 			sql = "";
 		}
-		
+		SQLException sqlExToUse = sqlEx;
+		if (sqlEx instanceof BatchUpdateException && sqlEx.getNextException() != null) {
+			SQLException nestedSqlEx = sqlEx.getNextException();
+			if (nestedSqlEx.getErrorCode() > 0 || nestedSqlEx.getSQLState() != null) {
+				logger.debug("Using nested SQLException from the BatchUpdateException");
+				sqlExToUse = nestedSqlEx;
+			}
+		}
+
 		// First, try custom translation from overridden method.
-		DataAccessException dex = customTranslate(task, sql, sqlEx);
+		DataAccessException dex = customTranslate(task, sql, sqlExToUse);
 		if (dex != null) {
 			return dex;
 		}
 
 		// Second, try subclass translation - if we are in Java 6 or later then we should have one of these.
 		if (subclassTranslator != null) {
-			dex = subclassTranslator.translate(task, sql, sqlEx);
+			dex = subclassTranslator.translate(task, sql, sqlExToUse);
 			if (dex != null) {
 				return dex;
 			}
@@ -235,10 +244,10 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 		if (this.sqlErrorCodes != null) {
 			String errorCode = null;
 			if (this.sqlErrorCodes.isUseSqlStateForTranslation()) {
-				errorCode = sqlEx.getSQLState();
+				errorCode = sqlExToUse.getSQLState();
 			}
 			else {
-				errorCode = Integer.toString(sqlEx.getErrorCode());
+				errorCode = Integer.toString(sqlExToUse.getErrorCode());
 			}
 
 			if (errorCode != null) {
@@ -251,9 +260,9 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 						if (Arrays.binarySearch(customTranslation.getErrorCodes(), errorCode) >= 0) {
 							if (customTranslation.getExceptionClass() != null) {
 								DataAccessException customException = createCustomException(
-										task, sql, sqlEx, customTranslation.getExceptionClass());
+										task, sql, sqlExToUse, customTranslation.getExceptionClass());
 								if (customException != null) {
-									logTranslation(task, sql, sqlEx, true);
+									logTranslation(task, sql, sqlExToUse, true);
 									return customException;
 								}
 							}
@@ -263,36 +272,36 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 
 				// Next, look for grouped error codes.
 				if (Arrays.binarySearch(this.sqlErrorCodes.getBadSqlGrammarCodes(), errorCode) >= 0) {
-					logTranslation(task, sql, sqlEx, false);
-					return new BadSqlGrammarException(task, sql, sqlEx);
+					logTranslation(task, sql, sqlExToUse, false);
+					return new BadSqlGrammarException(task, sql, sqlExToUse);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getInvalidResultSetAccessCodes(), errorCode) >= 0) {
-					logTranslation(task, sql, sqlEx, false);
-					return new InvalidResultSetAccessException(task, sql, sqlEx);
+					logTranslation(task, sql, sqlExToUse, false);
+					return new InvalidResultSetAccessException(task, sql, sqlExToUse);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDataAccessResourceFailureCodes(), errorCode) >= 0) {
-					logTranslation(task, sql, sqlEx, false);
-					return new DataAccessResourceFailureException(buildMessage(task, sql, sqlEx), sqlEx);
+					logTranslation(task, sql, sqlExToUse, false);
+					return new DataAccessResourceFailureException(buildMessage(task, sql, sqlExToUse), sqlExToUse);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getPermissionDeniedCodes(), errorCode) >= 0) {
-					logTranslation(task, sql, sqlEx, false);
-					return new PermissionDeniedDataAccessException(buildMessage(task, sql, sqlEx), sqlEx);
+					logTranslation(task, sql, sqlExToUse, false);
+					return new PermissionDeniedDataAccessException(buildMessage(task, sql, sqlExToUse), sqlExToUse);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDataIntegrityViolationCodes(), errorCode) >= 0) {
-					logTranslation(task, sql, sqlEx, false);
-					return new DataIntegrityViolationException(buildMessage(task, sql, sqlEx), sqlEx);
+					logTranslation(task, sql, sqlExToUse, false);
+					return new DataIntegrityViolationException(buildMessage(task, sql, sqlExToUse), sqlExToUse);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getCannotAcquireLockCodes(), errorCode) >= 0) {
-					logTranslation(task, sql, sqlEx, false);
-					return new CannotAcquireLockException(buildMessage(task, sql, sqlEx), sqlEx);
+					logTranslation(task, sql, sqlExToUse, false);
+					return new CannotAcquireLockException(buildMessage(task, sql, sqlExToUse), sqlExToUse);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getDeadlockLoserCodes(), errorCode) >= 0) {
-					logTranslation(task, sql, sqlEx, false);
-					return new DeadlockLoserDataAccessException(buildMessage(task, sql, sqlEx), sqlEx);
+					logTranslation(task, sql, sqlExToUse, false);
+					return new DeadlockLoserDataAccessException(buildMessage(task, sql, sqlExToUse), sqlExToUse);
 				}
 				else if (Arrays.binarySearch(this.sqlErrorCodes.getCannotSerializeTransactionCodes(), errorCode) >= 0) {
-					logTranslation(task, sql, sqlEx, false);
-					return new CannotSerializeTransactionException(buildMessage(task, sql, sqlEx), sqlEx);
+					logTranslation(task, sql, sqlExToUse, false);
+					return new CannotSerializeTransactionException(buildMessage(task, sql, sqlExToUse), sqlExToUse);
 				}
 			}
 		}
@@ -301,16 +310,16 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 		if (logger.isDebugEnabled()) {
 			String codes = null;
 			if (this.sqlErrorCodes != null && this.sqlErrorCodes.isUseSqlStateForTranslation()) {
-				codes = "SQL state '" + sqlEx.getSQLState() +
-					"', error code '" + sqlEx.getErrorCode();
+				codes = "SQL state '" + sqlExToUse.getSQLState() +
+					"', error code '" + sqlExToUse.getErrorCode();
 			}
 			else {
-				codes = "Error code '" + sqlEx.getErrorCode() + "'";
+				codes = "Error code '" + sqlExToUse.getErrorCode() + "'";
 			}
 			logger.debug("Unable to translate SQLException with " + codes +
 					", will now try the fallback translator");
 		}
-		return this.fallbackTranslator.translate(task, sql, sqlEx);
+		return this.fallbackTranslator.translate(task, sql, sqlExToUse);
 	}
 
 	/**
