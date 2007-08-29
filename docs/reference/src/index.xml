@@ -105,10 +105,14 @@
 				<firstname>Costin</firstname>
 				<surname>Leau</surname>
 			</author>
-            <author>
-                <firstname>Mark</firstname>
-                <surname>Fisher</surname>
-            </author>
+			<author>
+				<firstname>Mark</firstname>
+				<surname>Fisher</surname>
+			</author>
+			<author>
+				<firstname>Sam</firstname>
+				<surname>Brannen</surname>
+			</author>
 		</authorgroup>
 		<legalnotice>
 			Copies of this document may be made for your own use and for
