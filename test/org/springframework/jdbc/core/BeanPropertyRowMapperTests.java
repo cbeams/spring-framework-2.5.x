@@ -18,6 +18,7 @@ package org.springframework.jdbc.core;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.test.Person;
+import org.springframework.jdbc.core.test.ConcretePerson;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -58,7 +59,20 @@ public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 
 		Person bean = (Person) result.get(0);
 
-		verify(bean);
+		verifyPerson(bean);
+
+	}
+
+	public void testMappingWithInheritance() throws SQLException {
+
+		List result = jdbcTemplate.query("select name, age, birth_date, balance from people",
+				new BeanPropertyRowMapper(ConcretePerson.class));
+
+		assertEquals(1, result.size());
+
+		ConcretePerson bean = (ConcretePerson) result.get(0);
+
+		verifyConcretePerson(bean);
 
 	}
 

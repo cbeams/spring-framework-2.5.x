@@ -188,16 +188,21 @@ public abstract class AbstractBeanPropertyRowMapper {
 					append(mappedClass.getName()).toString(), ex);
 		}
 		this.mappedFields = new HashMap();
-		Field[] f = mappedClass.getDeclaredFields();
-		for (int i = 0; i < f.length; i++) {
-			PersistentField pf = new PersistentField();
-			pf.setFieldName(f[i].getName());
-			pf.setJavaType(f[i].getType());
-			this.mappedFields.put(f[i].getName().toLowerCase(), pf);
-			String underscoredName = underscoreName(f[i].getName());
-			if (!f[i].getName().toLowerCase().equals(underscoredName)) {
-				this.mappedFields.put(underscoredName, pf);
+		Class metaDataClass = mappedClass;
+		while (metaDataClass != null) {
+			Field[] f = metaDataClass.getDeclaredFields();
+			for (int i = 0; i < f.length; i++) {
+				PersistentField pf = new PersistentField();
+				pf.setFieldName(f[i].getName());
+				pf.setJavaType(f[i].getType());
+				this.mappedFields.put(f[i].getName().toLowerCase(), pf);
+				String underscoredName = underscoreName(f[i].getName());
+				if (!f[i].getName().toLowerCase().equals(underscoredName)) {
+					this.mappedFields.put(underscoredName, pf);
+				}
 			}
+			// try any superclass
+			metaDataClass = metaDataClass.getSuperclass();
 		}
 	}
 

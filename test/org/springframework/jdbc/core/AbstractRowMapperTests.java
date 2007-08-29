@@ -19,6 +19,7 @@ package org.springframework.jdbc.core;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.springframework.jdbc.core.test.Person;
+import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 
@@ -121,16 +122,28 @@ public abstract class AbstractRowMapperTests extends TestCase {
 		jdbcTemplate.afterPropertiesSet();
 	}
 
-	protected void verify(Person bean) {
+	protected void verifyPerson(Person bean) {
+		verify();
+		assertEquals("Bubba", bean.getName());
+		assertEquals(22L, bean.getAge());
+		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
+		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+	}
+
+	protected void verifyConcretePerson(ConcretePerson bean) {
+		verify();
+		assertEquals("Bubba", bean.getName());
+		assertEquals(22L, bean.getAge());
+		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
+		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+	}
+
+	private void verify() {
 		conControl.verify();
 		rsControl.verify();
 		rsmdControl.verify();
 		stmtControl.verify();
 
-		assertEquals("Bubba", bean.getName());
-		assertEquals(22L, bean.getAge());
-		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
-		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
 	}
 
 }
