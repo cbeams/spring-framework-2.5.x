@@ -199,10 +199,6 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 */
 	public void addStaticAttribute(String name, Object value) {
 		this.staticAttributes.put(name, value);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Set static attribute with name '" + name + "' and value [" + value +
-					"] on view with name '" + getBeanName() + "'");
-		}
 	}
 
 	/**
