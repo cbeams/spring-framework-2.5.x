@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.0.7 (July 2007)
------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0.7 (September 2007)
+----------------------------------------------------
 http://www.springframework.org
 
 
@@ -99,14 +99,14 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2620 KB)
+* "spring" (~2640 KB)
 - Convenient jar file combining all standard modules (except for Portlet and Hibernate2 support)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
 
 MODULE JARS (dist/modules):
 
-* "spring-core" (~175 KB)
+* "spring-core" (~180 KB)
 - Contents: core abstractions and utilities
 - Dependencies: Commons Logging, (Log4J)
 
@@ -114,11 +114,11 @@ MODULE JARS (dist/modules):
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~295 KB)
+* "spring-aop" (~300 KB)
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, (spring-beans, AOP Alliance, CGLIB, Commons Attributes)
 
-* "spring-context" (~155 KB)
+* "spring-context" (~160 KB)
 - Contents: application context, JNDI support, instrumentation, scheduling, validation
 - Dependencies: spring-beans, (spring-aop)
 
@@ -126,7 +126,7 @@ MODULE JARS (dist/modules):
 - Contents: DAO support, transaction infrastructure
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API)
 
-* "spring-jdbc" (~220 KB)
+* "spring-jdbc" (~225 KB)
 - Contents: JDBC support
 - Dependencies: spring-beans, spring-dao
 
@@ -138,7 +138,7 @@ MODULE JARS (dist/modules):
 - Contents: web application context, multipart resolver, web utilities
 - Dependencies: spring-context, Servlet API, (JSP API, JSTL, Commons FileUpload, COS)
 
-* "spring-webmvc" (~275 KB)
+* "spring-webmvc" (~280 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-support, Tiles, iText, POI)
 
@@ -158,7 +158,7 @@ MODULE JARS (dist/modules):
 - Contents: JCA 1.0/1.5 support
 - Dependencies: spring-beans, spring-dao, JCA API, (spring-context)
 
-* "spring-jms" (~135 KB)
+* "spring-jms" (~140 KB)
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-beans, spring-dao, JMS API, (spring-remoting)
 

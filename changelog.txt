@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.7 (2007-08-20)
+Changes in version 2.0.7 (2007-09-05)
 -------------------------------------
 
 General
@@ -15,17 +15,21 @@ Package org.springframework.aop
 * "AopNamespaceUtils.registerAutoProxyCreatorIfNecessary" registers a plain InfrastructureAdvisorAutoProxyCreator now
 * fixed AspectJ pointcut handling to resolve bridge methods before matching
 * fixed AspectJ pointcut handling to correctly match generic return types
+* "target()" pointcut handles types implemented in superclasses correctly
+* changed RuntimeTestWalker's visibility to package-protected
 
 Package org.springframework.beans
 * added "charsToDelete" and "emptyArrayAsNull" options to StringArrayPropertyEditor
 * URIEditor trims whitespace before parsing the URI (allowing for XML formatting with whitespace)
 * TypeConverterDelegate protects its collection conversion process against misbehaving Collections with a null Iterator
+* TypeConverterDelegate protects its value conversion step against PropertyEditors which don't support "setValue" calls
 * deprecated superseded ResourceFactoryBean (String-to-Resource conversion has been implicitly available for years)
 * DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
 * DefaultListableBeanFactory logs FactoryBean type matching failures at warn level (except for circular references)
 * added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
 * BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
 * PropertyPathFactoryBean supports a null property value (removed historic restriction there)
+* fixed AbstractBeanFactory's type check to ignore a null value (as potentially exposed by a FactoryBean)
 * optimized DefaultListableBeanFactory's resolution of bean references during prototype creation
 * changed visibility of BeanDefinitionParserDelegate's "buildTypedStringValue(ForMap)" methods to protected
 
@@ -33,6 +37,7 @@ Package org.springframework.core
 * added "isAtLeastJava16()" convenience method to JdkVersion class
 * factored out protected "openStreamForClass" template method in OverridingClassLoader
 * fixed PathMatchingResourcePatternResolver to build correct JarFile URLs on WebLogic and WebSphere
+* PathMatchingResourcePatternResolver detects Oracle OC4J's "code-source" URLs as jar files now
 * PathMatchingResourcePatternResolver uses a static Log instance in order to avoid repeated synchronization overhead
 
 Package org.springframework.ejb
@@ -69,6 +74,9 @@ Package org.springframework.scheduling
 * Quartz SchedulerFactoryBean does not set default AdaptableJobFactory in case of RemoteScheduler (not supported there)
 * added "waitForTasksToCompleteOnShutdown" property to ScheduledExecutorFactoryBean
 
+Package org.springframework.test
+* fixed AbstractSpringContextTests's "hasCachedContext" implementation to use the context key String translation
+
 Package org.springframework.transaction
 * TransactionInterceptor only uses ThrowableHolderException if necessary and makes sure to expose the cause in any case
 * fixed "tx:annotation-driven" to not activate "aop:config"-style autodetection of application-defined Advisor beans
@@ -86,6 +94,7 @@ Package org.springframework.web
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
 * AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
+* AbstractView does not log static attributes anymore, in order to allow for scoped proxies to be used as attributes
 * JstlView properly allows for programmatic usage (added overloaded constructors; exposing a MessageSource is optional)
 * InternalResourceViewResolver uses JstlView as default (instead of InternalResourceView) if the JSTL API is present
 * fixed JSP CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
