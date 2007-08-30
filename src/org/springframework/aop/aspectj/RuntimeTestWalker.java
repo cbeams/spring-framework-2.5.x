@@ -62,10 +62,10 @@ class RuntimeTestWalker {
 			testField.setAccessible(true);
 			this.runtimeTest = (Test) testField.get(shadowMatch);
 		}
-		catch(NoSuchFieldException noSuchFieldEx) {
-			throw new IllegalStateException("the version of aspectjtools.jar / aspectjweaver.jar " +
-					"on the classpath is incompatible with this version of Spring:- expected field " +
-					"'runtimeTest' is not present on ShadowMatchImpl class");
+		catch (NoSuchFieldException noSuchFieldEx) {
+			throw new IllegalStateException("The version of aspectjtools.jar / aspectjweaver.jar " +
+					"on the classpath is incompatible with this version of Spring: Expected field " +
+					"'runtimeTest' is not present on ShadowMatchImpl class.");
 		}
 		catch (IllegalAccessException illegalAccessEx) {
 			// Famous last words... but I don't see how this can happen given the
