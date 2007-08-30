@@ -40,6 +40,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Mark Fisher
  * @since 1.0.2
  */
 public class MockHttpSession implements HttpSession {
@@ -49,7 +50,7 @@ public class MockHttpSession implements HttpSession {
 	private static int nextId = 1;
 
 
-	private final String id = Integer.toString(nextId++);
+	private final String id;
 
 	private final long creationTime = System.currentTimeMillis();
 
@@ -79,7 +80,17 @@ public class MockHttpSession implements HttpSession {
 	 * @param servletContext the ServletContext that the session runs in
 	 */
 	public MockHttpSession(ServletContext servletContext) {
+		this(servletContext, null);
+	}
+
+	/**
+	 * Create a new MockHttpSession.
+	 * @param servletContext the ServletContext that the session runs in
+	 * @param id a unique identifier for this session
+	 */
+	public MockHttpSession(ServletContext servletContext, String id) {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
+		this.id = (id != null ? id : Integer.toString(nextId++));
 	}
 
 

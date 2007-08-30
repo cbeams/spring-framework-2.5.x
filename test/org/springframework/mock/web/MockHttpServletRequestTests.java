@@ -17,11 +17,14 @@
 package org.springframework.mock.web;
 
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
 /**
  * @author Rick Evans
+ * @author Mark Fisher
  */
 public class MockHttpServletRequestTests extends TestCase {
 
@@ -32,6 +35,55 @@ public class MockHttpServletRequestTests extends TestCase {
 		Enumeration requestHeaders = request.getHeaderNames();
 		assertNotNull(requestHeaders);
 		assertEquals("HTTP header casing not being preserved", headerName, requestHeaders.nextElement());
+	}
+
+	public void testSetMultipleParameters() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setParameter("key1", "value1");
+		request.setParameter("key2", "value2");
+		Map params = new HashMap(2);
+		params.put("key1", "newValue1");
+		params.put("key3", new String[] { "value3A", "value3B" });
+		request.setParameters(params);
+		String[] values1 = request.getParameterValues("key1");
+		assertEquals(1, values1.length);
+		assertEquals("newValue1", request.getParameter("key1"));
+		assertEquals("value2", request.getParameter("key2"));
+		String[] values3 = request.getParameterValues("key3");
+		assertEquals(2, values3.length);
+		assertEquals("value3A", values3[0]);
+		assertEquals("value3B", values3[1]);
+	}
+
+	public void testAddMultipleParameters() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setParameter("key1", "value1");
+		request.setParameter("key2", "value2");
+		Map params = new HashMap(2);
+		params.put("key1", "newValue1");
+		params.put("key3", new String[] { "value3A", "value3B" });
+		request.addParameters(params);
+		String[] values1 = request.getParameterValues("key1");
+		assertEquals(2, values1.length);
+		assertEquals("value1", values1[0]);
+		assertEquals("newValue1", values1[1]);
+		assertEquals("value2", request.getParameter("key2"));
+		String[] values3 = request.getParameterValues("key3");
+		assertEquals(2, values3.length);
+		assertEquals("value3A", values3[0]);
+		assertEquals("value3B", values3[1]);
+	}
+
+	public void testRemoveAllParameters() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setParameter("key1", "value1");
+		Map params = new HashMap(2);
+		params.put("key2", "value2");
+		params.put("key3", new String[] { "value3A", "value3B" });
+		request.addParameters(params);
+		assertEquals(3, request.getParameterMap().size());
+		request.removeAllParameters();
+		assertEquals(0, request.getParameterMap().size());
 	}
 
 }

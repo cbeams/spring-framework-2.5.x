@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -54,6 +55,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Rick Evans
+ * @author Mark Fisher
  * @since 1.0.2
  */
 public class MockHttpServletRequest implements HttpServletRequest {
@@ -332,6 +334,31 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
+	 * Sets all provided parameters <emphasis>replacing</emphasis> any
+	 * existing values for the provided parameter names. To add without
+	 * replacing existing values, use {@link #addParameters(Map)}.
+	 */
+	public void setParameters(Map params) {
+		Assert.notNull(params, "Parameter map must not be null");
+		for (Iterator it = params.keySet().iterator(); it.hasNext();) {
+			Object key = it.next();
+			Assert.isInstanceOf(String.class, key, 
+					"Parameter map key must be of type [" + String.class.getName() + "]");
+			Object value = params.get(key);
+			if (value instanceof String) {
+				this.setParameter((String) key, (String) value);
+			}
+			else if (value instanceof String[]) {
+				this.setParameter((String) key, (String[]) value);
+			}
+			else {
+				throw new IllegalArgumentException("Parameter map value must be single value " +
+						" or array of type [" + String.class.getName() + "]");
+			}
+		}
+	}
+
+	/**
 	 * Add a single value for the specified HTTP parameter.
 	 * <p>If there are already one or more values registered for the given
 	 * parameter name, the given value will be added to the end of the list.
@@ -360,11 +387,43 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
+	 * Adds all provided parameters <emphasis>without</emphasis> replacing
+	 * any existing values. To replace existing values, use
+	 * {@link #setParameters(Map)}.
+	 */
+	public void addParameters(Map params) {
+		Assert.notNull(params, "Parameter map must not be null");
+		for (Iterator it = params.keySet().iterator(); it.hasNext();) {
+			Object key = it.next();
+			Assert.isInstanceOf(String.class, key, 
+					"Parameter map key must be of type [" + String.class.getName() + "]");
+			Object value = params.get(key);
+			if (value instanceof String) {
+				this.addParameter((String) key, (String) value);
+			}
+			else if (value instanceof String[]) {
+				this.addParameter((String) key, (String[]) value);
+			}
+			else {
+				throw new IllegalArgumentException("Parameter map value must be single value " +
+						" or array of type [" + String.class.getName() + "]");
+			}
+		}
+	}
+
+	/**
 	 * Remove already registered values for the specified HTTP parameter, if any.
 	 */
 	public void removeParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		this.parameters.remove(name);
+	}
+
+	/**
+	 * Removes all existing parameters. 
+	 */
+	public void removeAllParameters() {
+		this.parameters.clear();
 	}
 
 	public String getParameter(String name) {
