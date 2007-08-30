@@ -270,7 +270,7 @@ public abstract class NamedParameterUtils {
 	 * @param parsedSql the parsed SQL statement
 	 * @param paramSource the source for named parameters
 	 */
-	static int[] buildSqlTypeArray(ParsedSql parsedSql, SqlParameterSource paramSource) {
+	public static int[] buildSqlTypeArray(ParsedSql parsedSql, SqlParameterSource paramSource) {
 		int[] sqlTypes = new int[parsedSql.getTotalParameterCount()];
 		List paramNames = parsedSql.getParameterNames();
 		for (int i = 0; i < paramNames.size(); i++) {
