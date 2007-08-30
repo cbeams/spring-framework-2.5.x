@@ -362,7 +362,7 @@
 				]]></xsd:documentation>
 				<xsd:appinfo>
 					<tool:annotation kind="ref">
-						<tool:expected-type type="org.springframework.aop.Advisor"/>
+						<tool:expected-type type="org.aopalliance.aop.Advice"/>
 					</tool:annotation>
 				</xsd:appinfo>
 			</xsd:annotation>
