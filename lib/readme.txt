@@ -105,7 +105,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's Hibernate 2.1 support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.2.3 (http://www.hibernate.org)
+- Hibernate 3.2.5 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate 3.x support
 
@@ -115,7 +115,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's Hibernate Annotations support
 
 * hibernate/hibernate-entitymanager.jar
-- Hibernate EntityManager 3.3.0 (http://www.hibernate.org)
+- Hibernate EntityManager 3.3.1 (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate-specific JPA support
 
