@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M4 (2007-08-17)
+Changes in version 2.1 M4 (2007-09-04)
 --------------------------------------
 
 General
@@ -16,17 +16,23 @@ Package org.springframework.aop
 * ProxyFactoryBean and AbstractSingletonProxyFactoryBean are serializable if their target and interceptors are
 * made parts of ReflectiveMethodInvocation and other internal impl classes public again (for framework integration)
 * "AopNamespaceUtils.registerAutoProxyCreatorIfNecessary" registers a plain InfrastructureAdvisorAutoProxyCreator now
+* "target()" pointcut handles types implemented in superclasses correctly
 
 Package org.springframework.beans
+* TypeConverterDelegate protects its value conversion step against PropertyEditors which don't support "setValue" calls
 * exposed "String[] getDependentBeans(beanName)" method on ConfigurableBeanFactory interface
+* DefaultSingletonBeanRegistry uses a concurrent Map for managing dependent beans, avoiding unnecessary synchronization
 * removed superseded ResourceFactoryBean (String-to-Resource conversion has been implicitly available for years)
 * added overloaded "createBean(beanClass)" method to AutowireCapableBeanFactory interface
 * introduced "registerResolvableDependency" method on ConfigurableListableBeanFactory interface
 * introduced qualifier support, allowing to use custom parameter annotations for identifying specific target beans
 * introduced AutowireCandidateResolver mechanism and QualifierAnnotationAutowireCandidateResolver implementation
 * reworked Annotated/ScannedRootBeanDefinition into Annotated/ScannedGenericBeanDefinition
+* fixed AbstractBeanFactory's type check to ignore a null value (as potentially exposed by a FactoryBean)
 * optimized DefaultListableBeanFactory's shortcut access to cached merged bean definitions
 * optimized DefaultListableBeanFactory's resolution of bean references during prototype creation
+* DefaultListableBeanFactory performs SmartFactoryBean eager-init check even if the FactoryBean singleton already exists
+* CommonAnnotationBeanPostProcessor falls back to default type match if no bean found for @Resource field/property name
 * factored out "isCandidateComponent(beanDefinition)" template method in ClassPathScanningCandidateComponentProvider
 * ClassPathBeanDefinitionScanner does not apply scoped-proxy setting to prototypes (only to extended scopes)
 * "spring-beans-2.1.xsd" supports "default-autowire-candidates" attribute, accepting Spring-style bean name patterns
@@ -36,6 +42,8 @@ Package org.springframework.context
 
 Package org.springframework.core
 * factored out protected "openStreamForClass" template method in OverridingClassLoader
+* PathMatchingResourcePatternResolver's static "logger" variable is private now
+* PathMatchingResourcePatternResolver detects Oracle OC4J's "code-source" URLs as jar files now
 
 Package org.springframework.jdbc
 * strengthened SQLExceptionTranslator's contract to define root cause handling for returned DataAccessExceptions
@@ -51,6 +59,8 @@ Package org.springframework.orm
 * introduced EntityManagerProxy interface, allowing access to underlying EntityManager for shared/extended EM proxies
 * container-managed extended EntityManager gets explicitly closed on destruction of the containing bean
 * PersistenceUnitReader checks for well-known explicit schema resource locations instead of searching the classpath
+* added savepoint support to JpaDialect, implemented by OpenJpaDialect, supported by JpaTransactionManager
+* OpenJpaDialect exposes a special JDBC ConnectionHandle that immediately returns the Connection to the EntityManager
 
 Package org.springframework.scripting
 * ScriptCompilationException carries the ScriptSource of the offending script
@@ -58,6 +68,7 @@ Package org.springframework.scripting
 * added "autowire" and "dependency-check" attributes to "lang:bsh/jruby/groovy" XML configuration elements
 
 Package org.springframework.test
+* fixed AbstractSpringContextTests's "hasCachedContext" implementation to use the context key String translation
 * introduced generic annotation-based test execution framework
 * introduced JUnit4 support (SpringJUnit4ClassRunner)
 
@@ -71,6 +82,7 @@ Package org.springframework.util
 * ReflectionUtils provides a "findMethod" variant without parameter types argument
 
 Package org.springframework.web
+* AbstractView does not log static attributes anymore, in order to allow for scoped proxies to be used as attributes
 * factored out protected "isEligibleProperty(key, value)" template method in RedirectView
 * RedirectView only exposes Strings, primitives and primitive wrappers as query properties by default
 * JstlView properly allows for programmatic usage (added overloaded constructors; exposing a MessageSource is optional)
@@ -78,6 +90,7 @@ Package org.springframework.web
 * JSP MessageTag resolves arguments in default text even if no message code was specified
 * JSP tags in the form tag library default to htmlEscape=true in case of no defaultHtmlEscape setting given
 * added support for Tiles2 in the "org.springframework.web.servlet.view.tiles2" package (requiring Tiles 2.0.4+)
+* JasperReports View classes support JasperReports 2.0 while remaining compatible with JasperReports 1.3
 
 
 Changes in version 2.1 M3 (2007-07-31)
