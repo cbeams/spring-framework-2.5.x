@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,10 +86,10 @@ public abstract class AbstractSpringContextTests extends ConditionalTestCase {
 
 	/**
 	 * Return whether there is a cached context for the given key.
-	 * @param contextKey the context key
+	 * @param key the context key
 	 */
-	protected final boolean hasCachedContext(Object contextKey) {
-		return contextKeyToContextMap.containsKey(contextKey);
+	protected final boolean hasCachedContext(Object key) {
+		return contextKeyToContextMap.containsKey(contextKeyString(key));
 	}
 
 	/**
