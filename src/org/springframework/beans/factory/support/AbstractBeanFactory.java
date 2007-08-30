@@ -292,7 +292,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		}
 
 		// Check if required type matches the type of the actual bean instance.
-		if (requiredType != null && !requiredType.isAssignableFrom(bean.getClass())) {
+		if (requiredType != null && bean != null && !requiredType.isAssignableFrom(bean.getClass())) {
 			throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
 		}
 		return bean;
