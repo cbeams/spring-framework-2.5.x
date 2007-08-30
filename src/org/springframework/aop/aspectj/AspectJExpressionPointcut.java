@@ -255,7 +255,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 		else {
 		  // the maybe case
-		  return beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch) || matchesTarget(shadowMatch, targetClass);
+		  return (beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch) || matchesTarget(shadowMatch, targetClass));
 		}
 	}
 
@@ -303,7 +303,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 
 		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(thisObject, targetObject, args);
-		
+
 		/*
 		 * Do a final check to see if any this(TYPE) kind of residue match. For
 		 * this purpose, we use the original method's (proxy method's) shadow to
@@ -312,7 +312,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		 * type but not 'this' (as would be the case of JDK dynamic proxies).
 		 * <p>See SPR-2979 for the original bug.
 		 */
-		if(pmi != null) { // there is a current invocation
+		if (pmi != null) {  // there is a current invocation
 			RuntimeTestWalker originalMethodResidueTest = new RuntimeTestWalker(originalShadowMatch);
 			if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
 				return false;
