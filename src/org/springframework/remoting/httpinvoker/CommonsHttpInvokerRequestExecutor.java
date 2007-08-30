@@ -40,10 +40,16 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * Also designed for easy subclassing, providing specific template methods.
  *
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 1.1
  * @see SimpleHttpInvokerRequestExecutor
  */
 public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerRequestExecutor {
+
+	/**
+	 * Default timeout value if no HttpClient is explicitly provided.
+	 */
+	private static final int DEFAULT_READ_TIMEOUT_MILLISECONDS = (60 * 1000);
 
 	private HttpClient httpClient;
 
@@ -51,16 +57,19 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	/**
 	 * Create a new CommonsHttpInvokerRequestExecutor with a default
 	 * HttpClient that uses a default MultiThreadedHttpConnectionManager.
+	 * Sets the socket read timeout to {@link #DEFAULT_READ_TIMEOUT_MILLISECONDS}.
 	 * @see org.apache.commons.httpclient.HttpClient
 	 * @see org.apache.commons.httpclient.MultiThreadedHttpConnectionManager
 	 */
 	public CommonsHttpInvokerRequestExecutor() {
 		this.httpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
+		this.setReadTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS);
 	}
 
 	/**
 	 * Create a new CommonsHttpInvokerRequestExecutor with the given
-	 * HttpClient instance.
+	 * HttpClient instance. The socket read timeout of the provided
+	 * HttpClient will not be changed.
 	 * @param httpClient the HttpClient instance to use for this request executor
 	 */
 	public CommonsHttpInvokerRequestExecutor(HttpClient httpClient) {
@@ -80,6 +89,20 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	 */
 	public HttpClient getHttpClient() {
 		return this.httpClient;
+	}
+
+	/**
+	 * Set the socket read timeout for the underlying HttpClient. A value
+	 * of 0 means <emphasis>never</emphasis> timeout. 
+	 * @param timeout the timeout value in milliseconds
+	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setSoTimeout(int)
+	 * @see #DEFAULT_READ_TIMEOUT_MILLISECONDS
+	 */
+	public void setReadTimeout(int timeout) {
+		if (timeout < 0) {
+			throw new IllegalArgumentException("timeout must be a non-negative value");
+		}
+		this.httpClient.getHttpConnectionManager().getParams().setSoTimeout(timeout);
 	}
 
 
