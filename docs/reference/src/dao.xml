@@ -54,7 +54,7 @@
 		</para>
 		<para>
 			The exception hierarchy that Spring provides can be seen below.
-			(Please note that the class hierarchy detailed in the above image
+			(Please note that the class hierarchy detailed in the image
 			shows only a subset of the entire
 			<classname>DataAccessException</classname> hierarchy.)
 		</para>
