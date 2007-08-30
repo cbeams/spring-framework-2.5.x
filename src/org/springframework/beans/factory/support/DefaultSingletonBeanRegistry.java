@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.support;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -100,7 +99,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	private final Map disposableBeans = CollectionFactory.createLinkedMapIfPossible(16);
 
 	/** Map between dependent bean names: bean name --> dependent bean name */
-	private final Map dependentBeanMap = new HashMap();
+	private final Map dependentBeanMap = CollectionFactory.createConcurrentMapIfPossible(16);
 
 
 	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
@@ -289,13 +288,11 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	}
 
 	/**
-	 * Return whether a dependent bean has been registered under the given name.
+	 * Determine whether a dependent bean has been registered under the given name.
 	 * @param beanName the name of the bean
 	 */
 	protected boolean hasDependentBean(String beanName) {
-		synchronized (this.dependentBeanMap) {
-			return this.dependentBeanMap.containsKey(beanName);
-		}
+		return this.dependentBeanMap.containsKey(beanName);
 	}
 
 	/**
@@ -304,13 +301,11 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * @return the array of dependent bean names, or an empty array if none
 	 */
 	public String[] getDependentBeans(String beanName) {
-		synchronized (this.dependentBeanMap) {
-			Set dependentBeans = (Set) this.dependentBeanMap.get(beanName);
-			if (dependentBeans == null) {
-				return new String[0];
-			}
-			return (String[]) dependentBeans.toArray(new String[dependentBeans.size()]);
+		Set dependentBeans = (Set) this.dependentBeanMap.get(beanName);
+		if (dependentBeans == null) {
+			return new String[0];
 		}
+		return (String[]) dependentBeans.toArray(new String[dependentBeans.size()]);
 	}
 
 	public void destroySingletons() {
@@ -360,11 +355,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * @param bean the bean instance to destroy
 	 */
 	protected void destroyBean(String beanName, DisposableBean bean) {
-		Set dependencies = null;
-		synchronized (this.dependentBeanMap) {
-			dependencies = (Set) this.dependentBeanMap.remove(beanName);
-		}
-
+		Set dependencies = (Set) this.dependentBeanMap.remove(beanName);
 		if (dependencies != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Retrieved dependent beans for bean '" + beanName + "': " + dependencies);
@@ -374,7 +365,6 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 				destroySingleton(dependentBeanName);
 			}
 		}
-
 		if (bean != null) {
 			try {
 				bean.destroy();
