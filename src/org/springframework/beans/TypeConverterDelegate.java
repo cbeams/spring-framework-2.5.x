@@ -263,24 +263,32 @@ class TypeConverterDelegate {
 			// With standard PropertyEditors, this will return the very same object;
 			// we just want to allow special PropertyEditors to override setValue
 			// for type conversion from non-String values to the required type.
-			Object newConvertedValue = null;
-			if (sharedEditor) {
-				// Synchronized access to shared editor instance.
-				synchronized (editor) {
+			try {
+				Object newConvertedValue = null;
+				if (sharedEditor) {
+					// Synchronized access to shared editor instance.
+					synchronized (editor) {
+						editor.setValue(convertedValue);
+						newConvertedValue = editor.getValue();
+					}
+				}
+				else {
+					// Unsynchronized access to non-shared editor instance.
 					editor.setValue(convertedValue);
 					newConvertedValue = editor.getValue();
 				}
+				if (newConvertedValue != convertedValue) {
+					convertedValue = newConvertedValue;
+					// Reset PropertyEditor: It already did a proper conversion.
+					// Don't use it again for a setAsText call.
+					editor = null;
+				}
 			}
-			else {
-				// Unsynchronized access to non-shared editor instance.
-				editor.setValue(convertedValue);
-				newConvertedValue = editor.getValue();
-			}
-			if (newConvertedValue != convertedValue) {
-				convertedValue = newConvertedValue;
-				// Reset PropertyEditor: It already did a proper conversion.
-				// Don't use it again for a setAsText call.
-				editor = null;
+			catch (Exception ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("PropertyEditor [" + editor.getClass().getName() + "] does not support setValue call", ex);
+				}
+				// Swallow and proceed.
 			}
 		}
 
