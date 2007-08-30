@@ -72,6 +72,24 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifact>tiles-api</artifact>
+			<version>2.0.4</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifact>tiles-core</artifact>
+			<version>2.0.4</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tiles</groupId>
+			<artifact>tiles-jsp</artifact>
+			<version>2.0.4</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>struts</groupId>
 			<artifactId>struts</artifactId>
 			<version>1.2.9</version>
