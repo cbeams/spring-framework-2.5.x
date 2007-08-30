@@ -373,19 +373,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		synchronized (this.beanDefinitionMap) {
 			for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
 				String beanName = (String) it.next();
-				if (!containsSingleton(beanName) && containsBeanDefinition(beanName)) {
-					RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
-					if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
-						Class beanClass = resolveBeanClass(bd, beanName, true);
-						if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
-							FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
-							if (factory instanceof SmartFactoryBean && ((SmartFactoryBean) factory).isEagerInit()) {
-								getBean(beanName);
-							}
-						}
-						else {
+				RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+				if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+					if (isFactoryBean(beanName)) {
+						FactoryBean factory = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+						if (factory instanceof SmartFactoryBean && ((SmartFactoryBean) factory).isEagerInit()) {
 							getBean(beanName);
 						}
+					}
+					else {
+						getBean(beanName);
 					}
 				}
 			}
