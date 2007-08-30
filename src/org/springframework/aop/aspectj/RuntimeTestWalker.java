@@ -35,14 +35,14 @@ import org.aspectj.weaver.reflect.ShadowMatchImpl;
 import org.aspectj.weaver.tools.ShadowMatch;
 
 /**
- * <p>This class encapsulates some AspectJ internal knowledge that should be
+ * This class encapsulates some AspectJ internal knowledge that should be
  * pushed back into the AspectJ project in a future release. 
  *
  * <p>It relies on implementation specific knowledge in AspectJ to break
- * encapsulation and do something AspectJ was not designed to do :- query
+ * encapsulation and do something AspectJ was not designed to do: query
  * the types of runtime tests that will be performed. The code here should
- * migrate to ShadowMatch.getVariablesInvolvedInRuntimeTest() or some similar
- * operation. 
+ * migrate to <code>ShadowMatch.getVariablesInvolvedInRuntimeTest()</code>
+ * or some similar operation.
  *
  * <p>See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=151593"/>.
  *
@@ -50,10 +50,10 @@ import org.aspectj.weaver.tools.ShadowMatch;
  * @author Ramnivas Laddad
  * @since 2.0
  */
-public class RuntimeTestWalker {
+class RuntimeTestWalker {
 
 	private final Test runtimeTest;
-	
+
 
 	public RuntimeTestWalker(ShadowMatch shadowMatch) {
 		ShadowMatchImpl shadowMatchImplementation = (ShadowMatchImpl) shadowMatch;
@@ -83,13 +83,19 @@ public class RuntimeTestWalker {
 		return new SubtypeSensitiveVarTypeTestVisitor().testsSubtypeSensitiveVars(this.runtimeTest);
 	}
 
-	public boolean testThisInstanceOfResidue(Object thiz) {
-		return new ThisInstanceOfResidueTestVisitor(thiz).thisInstanceOfMatches(this.runtimeTest);
+	public boolean testThisInstanceOfResidue(Class thisClass) {
+		return new ThisInstanceOfResidueTestVisitor(thisClass).thisInstanceOfMatches(this.runtimeTest);
 	}
+
+	public boolean testTargetInstanceOfResidue(Class targetClass) {
+		return new TargetInstanceOfResidueTestVisitor(targetClass).targetInstanceOfMatches(this.runtimeTest);
+	}
+
 
 	private static class TestVisitorAdapter implements ITestVisitor {
 
 		protected static final int THIS_VAR = 0;
+		protected static final int TARGET_VAR = 1;
 		protected static final int AT_THIS_VAR = 3;
 		protected static final int AT_TARGET_VAR = 4;
 		protected static final int AT_ANNOTATION_VAR = 8;
@@ -147,20 +153,19 @@ public class RuntimeTestWalker {
 	}
 
 
-	/**
-	 * Check if residue of this(TYPE) kind. See SPR-2979 for more details.
-	 */
-	private static class ThisInstanceOfResidueTestVisitor extends TestVisitorAdapter {
+	private static abstract class InstanceOfResidueTestVisitor extends TestVisitorAdapter {
 
-		private Object thiz;
+		private Class matchClass;
+		private boolean matches;
+		private int matchVarType;
 
-		private boolean matches = true;
-		
-		public ThisInstanceOfResidueTestVisitor(Object thiz) {
-			this.thiz = thiz;
+		public InstanceOfResidueTestVisitor(Class matchClass, boolean defaultMatches, int matchVarType) {
+			this.matchClass = matchClass;
+			this.matches = defaultMatches;
+			this.matchVarType = matchVarType;
 		}
 		
-		public boolean thisInstanceOfMatches(Test test) {
+		public boolean instanceOfMatches(Test test) {
 			test.accept(this);
 			return matches;
 		}
@@ -168,21 +173,48 @@ public class RuntimeTestWalker {
 		public void visit(Instanceof i) {
 			ResolvedType type = (ResolvedType)i.getType();
 			int varType = getVarType((ReflectionVar)i.getVar());
-			// We are concerned only about this() pointcut.
-			// TODO: Optimization: Process only if this() specifies a type and not identifier.
-			if (varType != THIS_VAR) {
+			if (varType != matchVarType) {
 				return;
 			}
 			try {
 				Class typeClass = Class.forName(type.getName());
 				// Don't use ReflectionType.isAssignableFrom() as it won't be aware of (Spring) mixins
-				if (!typeClass.isAssignableFrom(thiz.getClass())) {
-					this.matches = false;
-				}
+				this.matches = typeClass.isAssignableFrom(matchClass);
 			}
 			catch (ClassNotFoundException ex) {
 				this.matches = false;
 			}
+		}
+	}
+
+
+	/**
+	 * Check if residue of target(TYPE) kind. See SPR-3783 for more details.
+	 */
+	private static class TargetInstanceOfResidueTestVisitor extends InstanceOfResidueTestVisitor {
+
+		public TargetInstanceOfResidueTestVisitor(Class targetClass) {
+			super(targetClass, false, TARGET_VAR);
+		}
+
+		public boolean targetInstanceOfMatches(Test test) {
+			return instanceOfMatches(test);
+		}
+	}
+
+
+	/**
+	 * Check if residue of this(TYPE) kind. See SPR-2979 for more details.
+	 */
+	private static class ThisInstanceOfResidueTestVisitor extends InstanceOfResidueTestVisitor {
+
+		public ThisInstanceOfResidueTestVisitor(Class thisClass) {
+			super(thisClass, true, THIS_VAR);
+		}
+
+		// TODO: Optimization: Process only if this() specifies a type and not an identifier.
+		public boolean thisInstanceOfMatches(Test test) {
+			return instanceOfMatches(test);
 		}
 	}
 
@@ -192,7 +224,6 @@ public class RuntimeTestWalker {
 		private final Object thisObj = new Object();
 		private final Object targetObj = new Object();
 		private final Object[] argsObjs = new Object[0];
-
 		private boolean testsSubtypeSensitiveVars = false;
 
 		public boolean testsSubtypeSensitiveVars(Test aTest) {

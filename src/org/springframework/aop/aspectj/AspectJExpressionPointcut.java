@@ -247,7 +247,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 		else {
 		  // the maybe case
-		  return (beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch));
+		  return (beanHasIntroductions || matchesIgnoringSubtypes(shadowMatch) || matchesTarget(shadowMatch, targetClass));
 		}
 	}
 
@@ -295,21 +295,21 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 
 		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(thisObject, targetObject, args);
-		
+
 		/*
 		 * Do a final check to see if any this(TYPE) kind of residue match. For
 		 * this purpose, we use the original method's (proxy method's) shadow to
 		 * ensure that 'this' is correctly checked against. Without this check,
 		 * we get incorrect match on this(TYPE) where TYPE matches the target
 		 * type but not 'this' (as would be the case of JDK dynamic proxies).
-		 * 
-		 * See SPR-2979 for the original bug.
+		 * <p>See SPR-2979 for the original bug.
 		 */
-		RuntimeTestWalker originalMethodResidueTest = new RuntimeTestWalker(originalShadowMatch);
-		if(!originalMethodResidueTest.testThisInstanceOfResidue(thisObject)) {
-			return false;
+		if (pmi != null) {  // there is a current invocation
+			RuntimeTestWalker originalMethodResidueTest = new RuntimeTestWalker(originalShadowMatch);
+			if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
+				return false;
+			}
 		}
-
 		if (joinPointMatch.matches() && pmi != null) {
 			bindParameters(pmi, joinPointMatch);
 		}
@@ -325,6 +325,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	 */
 	private boolean matchesIgnoringSubtypes(ShadowMatch shadowMatch) {
 		return !(new RuntimeTestWalker(shadowMatch).testsSubtypeSensitiveVars());
+	}
+
+	private boolean matchesTarget(ShadowMatch shadowMatch, Class targetClass) {
+		return new RuntimeTestWalker(shadowMatch).testTargetInstanceOfResidue(targetClass);
 	}
 
 	private void bindParameters(ProxyMethodInvocation invocation, JoinPointMatch jpm) {

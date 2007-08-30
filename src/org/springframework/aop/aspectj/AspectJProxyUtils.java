@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.aop.Advisor;
+import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 
 /**
  * Utility methods for working with AspectJ proxies.
  *
  * @author Rod Johnson
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 public abstract class AspectJProxyUtils {
@@ -46,8 +48,7 @@ public abstract class AspectJProxyUtils {
 				Advisor advisor = (Advisor) it.next();
 				// Be careful not to get the Advice without a guard, as
 				// this might eagerly instantiate a non-singleton AspectJ aspect
-				if (advisor instanceof InstantiationModelAwarePointcutAdvisor ||
-						advisor.getAdvice() instanceof AbstractAspectJAdvice) {
+				if (isAspectJAdvice(advisor)) {
 					foundAspectJAdvice = true;
 				}
 			}
@@ -57,6 +58,17 @@ public abstract class AspectJProxyUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Determine whether the given Advisor contains an AspectJ advice.
+	 * @param advisor the Advisor to check
+	 */
+	private static boolean isAspectJAdvice(Advisor advisor) {
+		return (advisor instanceof InstantiationModelAwarePointcutAdvisor ||
+			   advisor.getAdvice() instanceof AbstractAspectJAdvice ||
+			   (advisor instanceof PointcutAdvisor &&
+						 ((PointcutAdvisor) advisor).getPointcut() instanceof AspectJExpressionPointcut));
 	}
 
 }
