@@ -15,12 +15,9 @@
  */
 package org.springframework.test.context.support;
 
-import java.lang.reflect.Method;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestContext;
 
@@ -30,7 +27,7 @@ import org.springframework.test.context.TestContext;
  *
  * @see DirtiesContext
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 public class DirtiesContextTestExecutionListener extends AbstractTestExecutionListener {
@@ -59,7 +56,6 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * for methods annotated with {@link DirtiesContext}.
 	 * </p>
 	 *
-	 * @see AnnotationUtils#findAnnotation(Method, Class)
 	 * @see org.springframework.test.context.support.AbstractTestExecutionListener#afterTestMethod(TestContext)
 	 */
 	@Override
