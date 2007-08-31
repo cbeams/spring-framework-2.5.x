@@ -19,10 +19,13 @@ package org.springframework.beans.factory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -423,6 +426,59 @@ public abstract class BeanFactoryUtils {
 		}
 		else {
 			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
+		}
+	}
+	
+	/**
+	 * Return all beans that depend directly or indirectly (transitively), on the bean
+	 * identified by the beanName. Additional filtering can be executed through the type parameter.
+	 * If no filtering is required, then null should be passed.
+	 * 
+	 * @param beanFactory beans bean factory
+	 * @param beanName root bean name
+	 * @param type type of the beans returned (null to return all beans)
+	 * @return bean names
+	 */
+	public static String[] getTransitiveDependentBeans(ConfigurableListableBeanFactory beanFactory, String beanName,
+			Class type) {
+		Assert.notNull(beanFactory);
+		Assert.hasText(beanName);
+
+		Assert.isTrue(beanFactory.containsBean(beanName), "no bean by name [" + beanName + "] can be found");
+
+		Set beans = new LinkedHashSet();
+
+		getTransitiveBeans(beanFactory, beanName, beans);
+
+		if (type != null) {
+			// filter by type
+			for (Iterator iter = beans.iterator(); iter.hasNext();) {
+				String bean = (String) iter.next();
+				if (!type.isAssignableFrom(beanFactory.getType(bean))) {
+					iter.remove();
+				}
+			}
+		}
+
+		return (String[]) beans.toArray(new String[beans.size()]);
+	}
+
+	/**
+	 * Recursive method for discovering transitive dependent beans.
+	 * 
+	 * @param beanFactory
+	 * @param beanName
+	 * @param beanNames
+	 */
+	private static void getTransitiveBeans(ConfigurableListableBeanFactory beanFactory, String beanName, Set beanNames) {
+		String[] beans = beanFactory.getDependentBeans(beanName);
+
+		for (int i = 0; i < beans.length; i++) {
+			String bean = beans[i];
+			if (!beanNames.contains(bean)) {
+				beanNames.add(bean);
+				getTransitiveBeans(beanFactory, bean, beanNames);
+			}
 		}
 	}
 
