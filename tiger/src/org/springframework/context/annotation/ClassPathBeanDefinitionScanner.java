@@ -22,6 +22,8 @@ import java.util.Set;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.io.ResourceLoader;
@@ -45,6 +47,8 @@ import org.springframework.util.Assert;
 public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateComponentProvider {
 	
 	private final BeanDefinitionRegistry registry;
+
+	private BeanDefinitionDefaults beanDefinitionDefaults = new BeanDefinitionDefaults();
 
 	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
 
@@ -88,6 +92,14 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		}
 	}
 
+
+	/**
+	 * Set the defaults to use for detected beans.
+	 * @see BeanDefinitionDefaults
+	 */
+	public void setBeanDefinitionDefaults(BeanDefinitionDefaults beanDefinitionDefaults) {
+		this.beanDefinitionDefaults = (beanDefinitionDefaults != null ? beanDefinitionDefaults : new BeanDefinitionDefaults());
+	}
 
 	/**
 	 * Set the BeanNameGenerator to use for detected bean classes.
@@ -160,6 +172,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 			for (BeanDefinition candidate : candidates) {
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
 				if (checkBeanName(beanName, candidate)) {
+					if (candidate instanceof AbstractBeanDefinition) {
+						((AbstractBeanDefinition) candidate).applyDefaults(beanDefinitionDefaults);
+					}
 					ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 					BeanDefinition beanDefinition = applyScope(candidate, beanName, scopeMetadata);
 					beanDefinitions.add(new BeanDefinitionHolder(beanDefinition, beanName));

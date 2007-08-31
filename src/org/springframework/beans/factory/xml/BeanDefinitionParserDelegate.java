@@ -47,6 +47,7 @@ import org.springframework.beans.factory.parsing.ParseState;
 import org.springframework.beans.factory.parsing.PropertyEntry;
 import org.springframework.beans.factory.parsing.QualifierEntry;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.ManagedList;
@@ -313,6 +314,18 @@ public class BeanDefinitionParserDelegate {
 	 */
 	public DocumentDefaultsDefinition getDefaults() {
 		return this.defaults;
+	}
+
+	public BeanDefinitionDefaults getBeanDefinitionDefaults() {
+		BeanDefinitionDefaults bdd = new BeanDefinitionDefaults();
+		if (this.defaults != null) {
+			bdd.setLazyInit("TRUE".equalsIgnoreCase(this.defaults.getLazyInit()));
+			bdd.setDependencyCheck(this.getDependencyCheck(DEFAULT_VALUE));
+			bdd.setAutowireMode(this.getAutowireMode(DEFAULT_VALUE));
+			bdd.setInitMethodName(this.defaults.getInitMethod());
+			bdd.setDestroyMethodName(this.defaults.getDestroyMethod());
+		}
+		return bdd;
 	}
 
 

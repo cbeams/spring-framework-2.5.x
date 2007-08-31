@@ -635,6 +635,18 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		return this.primary;
 	}
 
+	/**
+	 * Apply the provided default values to this bean.
+	 * @param defaults the defaults to apply
+	 */
+	public void applyDefaults(BeanDefinitionDefaults defaults) {
+		this.setLazyInit(defaults.isLazyInit());
+		this.setDependencyCheck(defaults.getDependencyCheck());
+		this.setAutowireMode(defaults.getAutowireMode());
+		this.setInitMethodName(defaults.getInitMethodName());
+		this.setDestroyMethodName(defaults.getDestroyMethodName());
+	}
+
 
 	/**
 	 * Specify constructor argument values for this bean.
