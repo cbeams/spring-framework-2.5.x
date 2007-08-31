@@ -20,7 +20,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
- * @author trisberg
+ * Derby specific implementation for the {@link CallMetaDataProvider} interface.
+ * This class is intended for internal use by the Simple JDBC classes.
+ *
+ * @author Thomas Risberg
+ * @since 2.1
  */
 public class DerbyCallMetaDataProvider extends GenericCallMetaDataProvider {
 

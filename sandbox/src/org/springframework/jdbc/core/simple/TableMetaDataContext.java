@@ -27,12 +27,12 @@ import org.springframework.jdbc.core.SqlTypeValue;
 
 import javax.sql.DataSource;
 import java.util.*;
-import java.sql.Types;
 
 /**
  * Class to manage context metadata used for the configuration and execution of operations on the table.
  *
- * @author trisberg
+ * @author Thomas Risberg
+ * @since 2.1
  */
 public class TableMetaDataContext {
 
@@ -48,65 +48,107 @@ public class TableMetaDataContext {
 	/** name of schema for call **/
 	private String schemaName;
 
-	/** List of columns objects to be used in insert execution */
-	private List<String> insertColumns = new ArrayList<String>();
+	/** List of columns objects to be used in this context */
+	private List<String> tableColumns = new ArrayList<String>();
 
 	/** should we access insert parameter meta data info or not */
-	private boolean accessInsertParameterMetaData = true;
+	private boolean accessTableParameterMetaData = true;
 
 	/** the provider of call meta data */
 	private TableMetaDataProvider metaDataProvider;
 
 
+	/**
+	 * Get the name of the table for this context
+	 */
 	public String getTableName() {
 		return tableName;
 	}
 
+	/**
+	 * Set the name of the table for this context
+	 */
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
 	}
 
+	/**
+	 * Get the name of the catalog for this context
+	 */
 	public String getCatalogName() {
 		return catalogName;
 	}
 
+	/**
+	 * Set the name of the catalog for this context
+	 */
 	public void setCatalogName(String catalogName) {
 		this.catalogName = catalogName;
 	}
 
+	/**
+	 * Get the name of the schema for this context
+	 */
 	public String getSchemaName() {
 		return schemaName;
 	}
 
+	/**
+	 * Set the name of the schema for this context
+	 */
 	public void setSchemaName(String schemaName) {
 		this.schemaName = schemaName;
 	}
 
-	public boolean isAccessCallParameterMetaData() {
-		return accessInsertParameterMetaData;
+	/**
+	 * Are we accessing table meta data
+	 */
+	public boolean isAccessTableParameterMetaData() {
+		return accessTableParameterMetaData;
 	}
 
-	public void setAccessCallParameterMetaData(boolean accessInsertParameterMetaData) {
-		this.accessInsertParameterMetaData = accessInsertParameterMetaData;
+	/**
+	 * Specify whether we should access table column meta data
+	 */
+	public void setAccessTableParameterMetaData(boolean accessTableParameterMetaData) {
+		this.accessTableParameterMetaData = accessTableParameterMetaData;
 	}
 
-	public List<String> getInsertColumns() {
-		return insertColumns;
+	/**
+	 * Get a List of the table column names
+	 */
+	public List<String> getTableColumns() {
+		return tableColumns;
 	}
 
+	/**
+	 * Is a column name String array for retreiving generated keys supported
+	 * {@link java.sql.Connection#createStruct(String, Object[])}
+	 */
 	public boolean isGeneratedKeysColumnNameArraySupported() {
 		return metaDataProvider.isGeneratedKeysColumnNameArraySupported();
 	}
 
+	/**
+	 * Process the current meta data with the provided configuration options
+	 * @param dataSource the DataSource being used
+	 * @param declaredColumns any coluns that are declared
+	 * @param generatedKeyNames name of generated keys
+	 */
 	public void processMetaData(DataSource dataSource, List<String> declaredColumns, String[] generatedKeyNames) {
 
 		metaDataProvider =
 				TableMetaDataProviderFactory.createMetaDataProvider(dataSource, this);
 
-		insertColumns = reconcileColumnsToUse(declaredColumns, generatedKeyNames);
+		tableColumns = reconcileColumnsToUse(declaredColumns, generatedKeyNames);
 
 	}
 
+	/**
+	 * Compare columns created from metadata with declared columns and return a reconciled list
+	 * @param declaredColumns declared column names
+	 * @param generatedKeyNames names of generated key columns
+	 */
 	private List<String> reconcileColumnsToUse(List<String> declaredColumns, String[] generatedKeyNames) {
 		if (declaredColumns.size() > 0) {
 			return new ArrayList<String>(declaredColumns);
@@ -116,7 +158,7 @@ public class TableMetaDataContext {
 			keys.add(key.toUpperCase());
 		}
 		List<String> columns = new ArrayList<String>();
-		for (TableParameterMetaData meta : metaDataProvider.getInsertParameterMetaData()) {
+		for (TableParameterMetaData meta : metaDataProvider.getTableParameterMetaData()) {
 			if (!keys.contains(meta.getParameterName().toUpperCase())) {
 				columns.add(meta.getParameterName());
 			}
@@ -124,9 +166,15 @@ public class TableMetaDataContext {
 		return columns;
 	}
 
+	/**
+	 * Match the provided column names and values with the list of columns used
+	 *
+	 * @param parameterSource the parameter names and values
+	 */
+	//TODO provide a SqlParameterValue when sql type is specified
 	public List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
 		List<Object> values = new ArrayList<Object>();
-		for (String column : insertColumns) {
+		for (String column : tableColumns) {
 			if (parameterSource.hasValue(column.toLowerCase())) {
 				values.add(parameterSource.getValue(column.toLowerCase()));
 			}
@@ -143,21 +191,31 @@ public class TableMetaDataContext {
 		return values;
 	}
 
+	/**
+	 * Match the provided column names and values with the list of columns used
+	 *
+	 * @param inParameters the parameter names and values
+	 */
+	//TODO provide a SqlParameterValue when sql type is specified
 	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, Object> inParameters) {
 		List<Object> values = new ArrayList<Object>();
 		Map<String, Object> source = new HashMap<String, Object>();
 		for (String key : inParameters.keySet()) {
 			source.put(key.toLowerCase(), inParameters.get(key));
 		}
-		for (String column : insertColumns) {
+		for (String column : tableColumns) {
 			values.add(source.get(column.toLowerCase()));
 		}
 		return values;
 	}
 
 
+	/**
+	 * Build the insert string based on configuration and metadata information
+	 * @return the insert string to be used
+	 */
 	public String createInsertString(String[] generatedKeyNames) {
-		HashSet keys = new HashSet(generatedKeyNames.length);
+		HashSet<String> keys = new HashSet<String>(generatedKeyNames.length);
 		for (String key : generatedKeyNames) {
 			keys.add(key.toUpperCase());
 		}
@@ -170,7 +228,7 @@ public class TableMetaDataContext {
 		insertStatement.append(this.getTableName());
 		insertStatement.append(" (");
 		int columnCount = 0;
-		for (String columnName : this.getInsertColumns()) {
+		for (String columnName : this.getTableColumns()) {
 			if (!keys.contains(columnName.toUpperCase())) {
 				columnCount++;
 				if (columnCount > 1) {
@@ -193,18 +251,22 @@ public class TableMetaDataContext {
 		return insertStatement.toString();
 	}
 
+	/**
+	 * Build the array of {@link java.sql.Types} based on configuration and metadata information
+	 * @return the array of types to be used
+	 */
 	public int[] createInsertTypes() {
 
-		int[] types = new int[this.getInsertColumns().size()];
+		int[] types = new int[this.getTableColumns().size()];
 
-		List<TableParameterMetaData> parameters = this.metaDataProvider.getInsertParameterMetaData();
+		List<TableParameterMetaData> parameters = this.metaDataProvider.getTableParameterMetaData();
 		Map<String, TableParameterMetaData> parameterMap = new HashMap<String, TableParameterMetaData>(parameters.size());
 		for (TableParameterMetaData tpmd : parameters) {
 			parameterMap.put(tpmd.getParameterName().toUpperCase(), tpmd);
 		}
 
 		int typeIndx = 0;
-		for (String column : this.getInsertColumns()) {
+		for (String column : this.getTableColumns()) {
 			if (column == null) {
 				types[typeIndx] = SqlTypeValue.TYPE_UNKNOWN;
 			}

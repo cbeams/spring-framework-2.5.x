@@ -31,7 +31,7 @@ import java.sql.SQLException;
 /**
  * Factory used to create a {@link TableMetaDataProvider} implementation based on the type of databse being used.
  *
- * @author trisberg
+ * @author Thomas Risberg
  * @since 2.1
  */
 public class TableMetaDataProviderFactory {
@@ -53,7 +53,7 @@ public class TableMetaDataProviderFactory {
 
 				public Object processMetaData(DatabaseMetaData databaseMetaData)
 						throws SQLException, MetaDataAccessException {
-					boolean accessTableColumnMetaData = context.isAccessCallParameterMetaData();
+					boolean accessTableColumnMetaData = context.isAccessTableParameterMetaData();
 					TableMetaDataProvider provider = new GenericTableMetaDataProvider(databaseMetaData);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Using " + provider.getClass().getName());

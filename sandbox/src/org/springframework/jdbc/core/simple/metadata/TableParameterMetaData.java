@@ -19,7 +19,7 @@ package org.springframework.jdbc.core.simple.metadata;
 /**
  * Holder of metadata for a specific parameter that is used for table processing.
  *
- * @author trisberg
+ * @author Thomas Risberg
  * @since 2.1
  */
 public class TableParameterMetaData {
@@ -61,7 +61,7 @@ public class TableParameterMetaData {
 	}
 
 	/**
-	 * Get wheter the parameter/column is nullable.
+	 * Get whether the parameter/column is nullable.
 	 */
 	public boolean isNullable() {
 		return nullable;

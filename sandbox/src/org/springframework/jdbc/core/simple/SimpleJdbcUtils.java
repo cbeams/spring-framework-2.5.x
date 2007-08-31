@@ -19,7 +19,8 @@ package org.springframework.jdbc.core.simple;
 /**
  * Utility class used for the Simple JDBC functionality.
  *
- * @author trisberg
+ * @author Thomas Risberg
+ * @since 2.1
  */
 public class SimpleJdbcUtils {
 

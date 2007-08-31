@@ -29,7 +29,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author trisberg
+ * Generic implementation for the {@link CallMetaDataProvider} interface.
+ * This class can be extended to provide database specific behavior.
+ * This class is intended for internal use by the Simple JDBC classes.
+ *
+ * @author Thomas Risberg
+ * @since 2.1
  */
 public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
@@ -50,6 +55,11 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
 	private List<CallParameterMetaData> callParameterMetaData = new ArrayList<CallParameterMetaData>();
 
+	/**
+	 * Constructor used to initialize with provided database meta data.
+	 * @param databaseMetaData meta data to be used
+	 * @throws SQLException
+	 */
 	protected GenericCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		userName = databaseMetaData.getUserName();
 	}
@@ -187,38 +197,66 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		return procedureColumnMetaDataUsed;
 	}
 
+
+	/**
+	 * Does the database support the use of catalog name in procedure calls
+	 */
 	protected boolean isSupportsCatalogsInProcedureCalls() {
 		return supportsCatalogsInProcedureCalls;
 	}
 
+	/**
+	 * Specify whether the database supports the use of catalog name in procedure calls
+	 */
 	protected void setSupportsCatalogsInProcedureCalls(boolean supportsCatalogsInProcedureCalls) {
 		this.supportsCatalogsInProcedureCalls = supportsCatalogsInProcedureCalls;
 	}
 
+	/**
+	 * Does the database support the use of schema name in procedure calls
+	 */
 	protected boolean isSupportsSchemasInProcedureCalls() {
 		return supportsSchemasInProcedureCalls;
 	}
 
+	/**
+	 * Specify whether the database supports the use of schema name in procedure calls
+	 */
 	protected void setSupportsSchemasInProcedureCalls(boolean supportsSchemasInProcedureCalls) {
 		this.supportsSchemasInProcedureCalls = supportsSchemasInProcedureCalls;
 	}
 
+	/**
+	 * Does the database use upper case for identifiers
+	 */
 	protected boolean isStoresUpperCaseIdentifiers() {
 		return storesUpperCaseIdentifiers;
 	}
 
+	/**
+	 * Specify whether the database uses upper case for identifiers
+	 */
 	protected void setStoresUpperCaseIdentifiers(boolean storesUpperCaseIdentifiers) {
 		this.storesUpperCaseIdentifiers = storesUpperCaseIdentifiers;
 	}
 
+	/**
+	 * Does the database use lower case for identifiers
+	 */
 	protected boolean isStoresLowerCaseIdentifiers() {
 		return storesLowerCaseIdentifiers;
 	}
 
+	/**
+	 * Specify whether the database uses lower case for identifiers
+	 */
 	protected void setStoresLowerCaseIdentifiers(boolean storesLowerCaseIdentifiers) {
 		this.storesLowerCaseIdentifiers = storesLowerCaseIdentifiers;
 	}
 
+	/**
+	 * Process the procedure column metadata
+	 */
 	private void processProcedureColumns(DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String procedureName) {
 		ResultSet procs = null;
 		String metaDataCatalogName = metaDataCatalogNameToUse(catalogName);

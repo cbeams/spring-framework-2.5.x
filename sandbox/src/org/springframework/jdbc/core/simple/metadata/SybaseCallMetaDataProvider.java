@@ -20,7 +20,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
- * @author trisberg
+ * Sybase specific implementation for the {@link CallMetaDataProvider} interface.
+ * This class is intended for internal use by the Simple JDBC classes.
+ *
+ * @author Thomas Risberg
+ * @since 2.1
  */
 public class SybaseCallMetaDataProvider extends GenericCallMetaDataProvider {
 

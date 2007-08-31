@@ -27,7 +27,7 @@ import java.util.Map;
  * Interface specifying the API for a Simple JDBC Call implemented by {@link SimpleJdbcCall}.
  * This interface is not often used directly, but provides the
  * option to enhance testability, as it can easily be mocked or stubbed.
- * @author trisberg
+ * @author Thomas Risberg
  * @simce 2.1
  */
 public interface SimpleJdbcCallOperations {

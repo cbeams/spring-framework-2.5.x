@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * Factory used to create a {@link CallMetaDataProvider} implementation based on the type of databse being used.
  *
- * @author trisberg
+ * @author Thomas Risberg
  * @since 2.1
  */
 public class CallMetaDataProviderFactory {

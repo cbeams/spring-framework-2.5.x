@@ -29,7 +29,7 @@ import java.util.*;
  * A generic implementation of the {@link TableMetaDataProvider} that should provide enough features for all supported
  * databases.
  *
- * @author trisberg
+ * @author Thomas Risberg
  * @since 2.1
  */
 public class GenericTableMetaDataProvider implements TableMetaDataProvider {
@@ -60,8 +60,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 
 	/**
-	 * Construct a new instance
-	 * @param databaseMetaData database metadata to be used
+	 * Constructor used to initialize with provided database meta data.
+	 * @param databaseMetaData meta data to be used
 	 * @throws SQLException
 	 */
 	protected GenericTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
@@ -100,7 +100,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		return tableColumnMetaDataUsed;
 	}
 
-	public List<TableParameterMetaData> getInsertParameterMetaData() {
+	public List<TableParameterMetaData> getTableParameterMetaData() {
 		return insertParameterMetaData;
 	}
 

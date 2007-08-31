@@ -37,7 +37,7 @@ import java.util.Map;
  * Many of the configuration methods return the current instance of the SimpleJdbcInsert to provide the ablity
  * to string multiple ones together in a "fluid" interface style.
  *
- * @author trisberg
+ * @author Thomas Risberg
  * @since 2.1
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see java.sql.DatabaseMetaData

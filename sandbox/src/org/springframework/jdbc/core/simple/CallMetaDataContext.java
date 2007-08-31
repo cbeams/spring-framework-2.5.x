@@ -34,7 +34,8 @@ import java.sql.DatabaseMetaData;
 /**
  * Class to manage context metadata used for the configuration and execution of the call.
  *
- * @author trisberg
+ * @author Thomas Risberg
+ * @since 2.1
  */
 public class CallMetaDataContext {
 
@@ -392,6 +393,7 @@ public class CallMetaDataContext {
 	 * @param parameterSource the input values
 	 * @return a Map containing the matched parameter names with the value taken from the input
 	 */
+	//TODO provide a SqlParameterValue when sql type is specified	
 	public Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
 		Map<String, Object> matchedParameters = new HashMap<String, Object>(callParameters.size());
 		for (SqlParameter parameter : callParameters) {
