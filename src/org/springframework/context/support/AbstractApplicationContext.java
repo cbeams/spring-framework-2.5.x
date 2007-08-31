@@ -58,6 +58,8 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.context.event.ComponentStartedEvent;
+import org.springframework.context.event.ComponentStoppedEvent;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
@@ -1059,6 +1061,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 		if (!bean.isRunning()) {
 			bean.start();
+			publishEvent(new ComponentStartedEvent(bean));
 		}
 	}
 
@@ -1078,6 +1081,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 		if (bean.isRunning()) {
 			bean.stop();
+			publishEvent(new ComponentStoppedEvent(bean));
 		}
 	}
 
