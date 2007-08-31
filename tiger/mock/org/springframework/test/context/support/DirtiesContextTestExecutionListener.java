@@ -30,7 +30,7 @@ import org.springframework.test.context.TestContext;
  *
  * @see DirtiesContext
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class DirtiesContextTestExecutionListener extends AbstractTestExecutionListener {
@@ -65,8 +65,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	@Override
 	public void afterTestMethod(final TestContext testContext) throws Exception {
 
-		final boolean dirtiesContext = (AnnotationUtils.findAnnotation(testContext.getTestMethod(),
-				DirtiesContext.class) != null);
+		final boolean dirtiesContext = testContext.getTestMethod().isAnnotationPresent(DirtiesContext.class);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("After test method: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
 		}
