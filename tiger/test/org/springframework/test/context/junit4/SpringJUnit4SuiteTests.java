@@ -20,7 +20,6 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.springframework.test.context.InheritedDirtiesContextSpringRunnerContextCacheTests;
 import org.springframework.test.context.SpringRunnerContextCacheTests;
 
 /**
@@ -40,7 +39,7 @@ import org.springframework.test.context.SpringRunnerContextCacheTests;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 @RunWith(Suite.class)
@@ -66,8 +65,6 @@ InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,
 PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests.class,
 
 SpringRunnerContextCacheTests.class,
-
-InheritedDirtiesContextSpringRunnerContextCacheTests.class,
 
 ClassLevelTransactionalSpringRunnerTests.class,
 
