@@ -46,7 +46,7 @@ import org.springframework.test.utils.SimpleJdbcTestUtils;
  * {@link AbstractTransactionalJUnit4SpringContextTests}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 @ContextConfiguration
@@ -171,7 +171,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	public final void verifyApplicationContext() {
 
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
-				getApplicationContext());
+				super.applicationContext);
 	}
 
 	@Test
@@ -228,39 +228,39 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 		this.inTransaction = true;
 		assertEquals("Verifying the number of rows in the person table before a transactional test method.", 1,
-				countRowsInPersonTable(getSimpleJdbcTemplate()));
-		assertEquals("Adding yoda", 1, addPerson(getSimpleJdbcTemplate(), YODA));
+				countRowsInPersonTable(super.simpleJdbcTemplate));
+		assertEquals("Adding yoda", 1, addPerson(super.simpleJdbcTemplate, YODA));
 	}
 
 	@Before
 	public void setUp() throws Exception {
 
 		assertEquals("Verifying the number of rows in the person table before a test method.", (this.inTransaction ? 2
-				: 1), countRowsInPersonTable(getSimpleJdbcTemplate()));
+				: 1), countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 	@Test
 	public void modifyTestDataWithinTransaction() {
 
-		assertEquals("Adding jane", 1, addPerson(getSimpleJdbcTemplate(), JANE));
-		assertEquals("Adding sue", 1, addPerson(getSimpleJdbcTemplate(), SUE));
+		assertEquals("Adding jane", 1, addPerson(super.simpleJdbcTemplate, JANE));
+		assertEquals("Adding sue", 1, addPerson(super.simpleJdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table in modifyTestDataWithinTransaction().", 4,
-				countRowsInPersonTable(getSimpleJdbcTemplate()));
+				countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 	@After
 	public void tearDown() throws Exception {
 
 		assertEquals("Verifying the number of rows in the person table after a test method.", (this.inTransaction ? 4
-				: 1), countRowsInPersonTable(getSimpleJdbcTemplate()));
+				: 1), countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 	@AfterTransaction
 	public void afterTransaction() {
 
-		assertEquals("Deleting yoda", 1, deletePerson(getSimpleJdbcTemplate(), YODA));
+		assertEquals("Deleting yoda", 1, deletePerson(super.simpleJdbcTemplate, YODA));
 		assertEquals("Verifying the number of rows in the person table after a transactional test method.", 1,
-				countRowsInPersonTable(getSimpleJdbcTemplate()));
+				countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 	// ------------------------------------------------------------------------|

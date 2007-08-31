@@ -43,7 +43,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 /**
  * <p>
  * Abstract {@link TestCase} which integrates the
- * <em>Spring Test Context Framework</em> with explicit
+ * <em>Spring TestContext Framework</em> with explicit
  * {@link ApplicationContext} testing support in a JUnit 3.8 environment.
  * </p>
  * <p>
@@ -65,7 +65,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * @see TestContextManager
  * @see TestExecutionListeners
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
@@ -75,7 +75,11 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private ApplicationContext			applicationContext;
+	/**
+	 * The {@link ApplicationContext} that was injected into this test instance
+	 * via {@link #setApplicationContext(ApplicationContext)}.
+	 */
+	protected ApplicationContext		applicationContext;
 
 	/** Logger available to subclasses. */
 	protected final Log					logger	= LogFactory.getLog(getClass());
@@ -320,19 +324,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 						+ "> but was<" + t.getClass().getName() + ">"), t);
 			}
 		}
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * Return the {@link ApplicationContext} that was injected into this test
-	 * instance via {@link #setApplicationContext(ApplicationContext)}.
-	 *
-	 * @return The application context.
-	 */
-	public final ApplicationContext getApplicationContext() {
-
-		return this.applicationContext;
 	}
 
 	// ------------------------------------------------------------------------|

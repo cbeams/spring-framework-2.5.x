@@ -26,14 +26,16 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.utils.SimpleJdbcTestUtils;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
  * Abstract {@link Transactional transactional} extension of
  * {@link AbstractJUnit38SpringContextTests} that also adds some convenience
- * functionality for JDBC access. Expects a {@link javax.sql.DataSource} bean to
- * be defined in the Spring {@link ApplicationContext application context}.
+ * functionality for JDBC access. Expects a {@link javax.sql.DataSource} bean
+ * and a {@link PlatformTransactionManager} bean to be defined in the Spring
+ * {@link ApplicationContext application context}.
  * </p>
  * <p>
  * This class exposes a {@link SimpleJdbcTemplate} and provides an easy way to
@@ -54,7 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.annotation.Rollback
  * @see org.springframework.test.utils.SimpleJdbcTestUtils
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
@@ -66,6 +68,10 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
+	/**
+	 * The SimpleJdbcTemplate that this base class manages, available to
+	 * subclasses.
+	 */
 	protected SimpleJdbcTemplate	simpleJdbcTemplate;
 
 	// ------------------------------------------------------------------------|
@@ -120,18 +126,6 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	// ------------------------------------------------------------------------|
 
 	/**
-	 * Get the SimpleJdbcTemplate that this base class manages.
-	 *
-	 * @return the SimpleJdbcTemplate
-	 */
-	public final SimpleJdbcTemplate getSimpleJdbcTemplate() {
-
-		return this.simpleJdbcTemplate;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
 	 * Count the rows in the given table.
 	 *
 	 * @param tableName table name to count rows in
@@ -139,7 +133,7 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	 */
 	protected int countRowsInTable(final String tableName) {
 
-		return SimpleJdbcTestUtils.countRowsInTable(getSimpleJdbcTemplate(), tableName);
+		return SimpleJdbcTestUtils.countRowsInTable(this.simpleJdbcTemplate, tableName);
 	}
 
 	// ------------------------------------------------------------------------|
@@ -157,7 +151,7 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	 */
 	protected int deleteFromTables(final String... names) {
 
-		return SimpleJdbcTestUtils.deleteFromTables(getSimpleJdbcTemplate(), names);
+		return SimpleJdbcTestUtils.deleteFromTables(this.simpleJdbcTemplate, names);
 	}
 
 	// ------------------------------------------------------------------------|
@@ -182,7 +176,7 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	protected void executeSqlScript(final String sqlResourcePath, final boolean continueOnError)
 			throws DataAccessException {
 
-		SimpleJdbcTestUtils.executeSqlScript(getSimpleJdbcTemplate(), getApplicationContext(), sqlResourcePath,
+		SimpleJdbcTestUtils.executeSqlScript(this.simpleJdbcTemplate, super.applicationContext, sqlResourcePath,
 				continueOnError);
 	}
 
