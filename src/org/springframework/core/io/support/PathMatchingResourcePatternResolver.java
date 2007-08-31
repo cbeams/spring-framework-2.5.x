@@ -62,7 +62,7 @@ import org.springframework.util.StringUtils;
  * Examples are real URLs such as "<code>file:C:/context.xml</code>", pseudo-URLs
  * such as "<code>classpath:/context.xml</code>", and simple unprefixed paths
  * such as "<code>/WEB-INF/context.xml</code>". The latter will resolve in a
- * fashion specific to the underlaying <code>ResourceLoader</code> (e.g. 
+ * fashion specific to the underlying <code>ResourceLoader</code> (e.g. 
  * <code>ServletContextResource</code> for a <code>WebApplicationContext</code>).
  *
  * <p><b>Ant-style Patterns:</b>
@@ -88,7 +88,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>If the specified path is already a file URL (either explicitly, or
  * implicitly because the base <code>ResourceLoader</code> is a filesystem one,
- * then wildcarding is guaranteed to work in a completely poratable fashion.
+ * then wildcarding is guaranteed to work in a completely portable fashion.
  *
  * <p>If the specified path is a classpath location, then the resolver must
  * obtain the last non-wildcard path segment URL via a
@@ -123,7 +123,7 @@ import org.springframework.util.StringUtils;
  * In this case, the resolution strategy is fairly simple: a
  * <code>ClassLoader.getResources()</code> call is used on the last non-wildcard
  * path segment to get all the matching resources in the class loader hierarchy,
- * and then off each resource the same PathMatcher resoltion strategy described
+ * and then off each resource the same PathMatcher resolution strategy described
  * above is used for the wildcard subpath.
  *
  * <p><b>Other notes:</b>
