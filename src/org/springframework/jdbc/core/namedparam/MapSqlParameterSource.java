@@ -19,8 +19,10 @@ package org.springframework.jdbc.core.namedparam;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
 
 import org.springframework.util.Assert;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 /**
  * {@link SqlParameterSource} implementation that holds a given Map of parameters.
@@ -83,6 +85,9 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	public MapSqlParameterSource addValue(String paramName, Object value) {
 		Assert.notNull(paramName, "Parameter name must not be null");
 		this.values.put(paramName, value);
+		if (value != null && value instanceof SqlParameterValue) {
+			registerSqlType(paramName, ((SqlParameterValue)value).getSqlType());
+		}
 		return this;
 	}
 
@@ -110,6 +115,13 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	public MapSqlParameterSource addValues(Map values) {
 		if (values != null) {
 			this.values.putAll(values);
+			for (Iterator iter = values.keySet().iterator(); iter.hasNext();) {
+				Object k =  iter.next();
+				Object o = values.get(k);
+				if (o != null && k instanceof String && o instanceof SqlParameterValue) {
+					registerSqlType((String)k, ((SqlParameterValue)o).getSqlType());
+				}
+			}
 		}
 		return this;
 	}

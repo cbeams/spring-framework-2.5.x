@@ -19,6 +19,7 @@ package org.springframework.jdbc.core.namedparam;
 import junit.framework.TestCase;
 
 import org.springframework.test.AssertThrows;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 /**
  * @author Rick Evans
@@ -36,6 +37,14 @@ public final class MapSqlParameterSourceTests extends TestCase {
 				source.getValue("pechorin was right!");
 			}
 		}.runTest();
+	}
+
+	public void testSqlParameterValueRegistersSqlType() throws Exception {
+		MapSqlParameterSource msps = new MapSqlParameterSource("FOO", new SqlParameterValue(2, "Foo"));
+		assertEquals("Correct SQL Type not registered", 2, msps.getSqlType("FOO"));
+		MapSqlParameterSource msps2 = new MapSqlParameterSource();
+		msps2.addValues(msps.getValues());
+		assertEquals("Correct SQL Type not registered", 2, msps2.getSqlType("FOO"));
 	}
 
 }
