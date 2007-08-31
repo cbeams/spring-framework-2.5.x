@@ -37,7 +37,7 @@ public class SqlParameterSourceUtils {
 		MapSqlParameterSource[] batch = new MapSqlParameterSource[valueMaps.length];
 		for (int i = 0; i < valueMaps.length; i++) {
 			Map valueMap = valueMaps[i];
-			batch[i++] = new MapSqlParameterSource(valueMap);
+			batch[i] = new MapSqlParameterSource(valueMap);
 		}
 		return batch;
 	}
@@ -53,7 +53,7 @@ public class SqlParameterSourceUtils {
 		BeanPropertySqlParameterSource[] batch = new BeanPropertySqlParameterSource[beans.length];
 		for (int i = 0; i < beans.length; i++) {
 			Object bean = beans[i];
-			batch[i++] = new BeanPropertySqlParameterSource(bean);
+			batch[i] = new BeanPropertySqlParameterSource(bean);
 		}
 		return batch;
 	}
