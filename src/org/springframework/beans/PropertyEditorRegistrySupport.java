@@ -427,7 +427,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @param target the target registry to copy to
 	 * @param nestedProperty the nested property path of the target registry, if any.
 	 * If this is non-null, only editors registered for a path below this nested property
-	 * will be copied.
+	 * will be copied. If this is null, all editors will be copied.
 	 */
 	protected void copyCustomEditorsTo(PropertyEditorRegistry target, String nestedProperty) {
 		String actualPropertyName =
@@ -440,17 +440,23 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 					PropertyEditor editor = (PropertyEditor) entry.getValue();
 					target.registerCustomEditor(requiredType, editor);
 				}
-				else if (entry.getKey() instanceof String & nestedProperty != null) {
+				else if (entry.getKey() instanceof String) {
 					String editorPath = (String) entry.getKey();
-					int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(editorPath);
-					if (pos != -1) {
-						String editorNestedProperty = editorPath.substring(0, pos);
-						String editorNestedPath = editorPath.substring(pos + 1);
-						if (editorNestedProperty.equals(nestedProperty) || editorNestedProperty.equals(actualPropertyName)) {
-							CustomEditorHolder editorHolder = (CustomEditorHolder) entry.getValue();
-							target.registerCustomEditor(
-									editorHolder.getRegisteredType(), editorNestedPath, editorHolder.getPropertyEditor());
+					CustomEditorHolder editorHolder = (CustomEditorHolder) entry.getValue();
+					if (nestedProperty != null) {
+						int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(editorPath);
+						if (pos != -1) {
+							String editorNestedProperty = editorPath.substring(0, pos);
+							String editorNestedPath = editorPath.substring(pos + 1);
+							if (editorNestedProperty.equals(nestedProperty) || editorNestedProperty.equals(actualPropertyName)) {
+								target.registerCustomEditor(
+										editorHolder.getRegisteredType(), editorNestedPath, editorHolder.getPropertyEditor());
+							}
 						}
+					}
+					else {
+						target.registerCustomEditor(
+								editorHolder.getRegisteredType(), editorPath, editorHolder.getPropertyEditor());
 					}
 				}
 			}
