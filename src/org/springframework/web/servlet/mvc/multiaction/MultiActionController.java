@@ -48,7 +48,7 @@ import org.springframework.web.util.NestedServletException;
  * class. Subclasses of this class can handle several different types of
  * request with methods of the form
  *
- * <pre class="code">(ModelAndView | Map | void) actionName(HttpServletRequest request, HttpServletResponse response);</pre>
+ * <pre class="code">public (ModelAndView | Map | void) actionName(HttpServletRequest request, HttpServletResponse response);</pre>
  *
  * May take a third parameter (of type {@link HttpSession}) in which an
  * existing session will be required, or a third parameter of an arbitrary
@@ -86,7 +86,7 @@ import org.springframework.web.util.NestedServletException;
  * <p>Subclasses can implement custom exception handler methods with names such
  * as:
  *
- * <pre class="code">ModelAndView anyMeaningfulName(HttpServletRequest request, HttpServletResponse response, ExceptionClass exception);</pre>
+ * <pre class="code">public ModelAndView anyMeaningfulName(HttpServletRequest request, HttpServletResponse response, ExceptionClass exception);</pre>
  *
  * The third parameter can be any subclass or {@link Exception} or
  * {@link RuntimeException}.
@@ -94,14 +94,15 @@ import org.springframework.web.util.NestedServletException;
  * <p>There can also be an optional <code>xxxLastModified</code> method for
  * handlers, of signature:
  *
- * <pre class="code">long anyMeaningfulNameLastModified(HttpServletRequest request)</pre>
+ * <pre class="code">public long anyMeaningfulNameLastModified(HttpServletRequest request)</pre>
  *
  * If such a method is present, it will be invoked. Default return from
  * <code>getLastModified</code> is -1, meaning that the content must always be
  * regenerated.
  *
- * <p>Note that method overloading is <i>not</i> allowed.
- * 
+ * <p><b>Note that all handler methods need to be public and that
+ * method overloading is <i>not</i> allowed.</b>
+ *
  * <p>See also the description of the workflow performed by
  * {@link AbstractController the superclass} (in that section of the class
  * level Javadoc entitled 'workflow').
@@ -218,7 +219,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * Return the Validators for this controller.
 	 */
 	public final Validator[] getValidators() {
-		return validators;
+		return this.validators;
 	}
 
 	/**
