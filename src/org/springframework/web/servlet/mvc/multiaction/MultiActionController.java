@@ -43,67 +43,76 @@ import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.util.NestedServletException;
 
 /**
- * Controller implementation that allows multiple request types to be
- * handled by the same class. Subclasses of this class can handle several
- * different types of request with methods of the form
+ * {@link org.springframework.web.servlet.mvc.Controller Controller}
+ * implementation that allows multiple request types to be handled by the same
+ * class. Subclasses of this class can handle several different types of
+ * request with methods of the form
  *
- * <pre>
- * (ModelAndView | Map | void) actionName(HttpServletRequest request, HttpServletResponse response);</pre>
+ * <pre class="code">public (ModelAndView | Map | void) actionName(HttpServletRequest request, HttpServletResponse response);</pre>
  *
- * May take a third parameter HttpSession in which an existing session will be required,
- * or a third parameter of an arbitrary class that gets treated as command
- * (i.e. an instance of the class gets created, and request parameters get bound to it)
+ * May take a third parameter (of type {@link HttpSession}) in which an
+ * existing session will be required, or a third parameter of an arbitrary
+ * class that gets treated as the command (that is, an instance of the class
+ * gets created, and request parameters get bound to it)
  *
- * <p>These methods can throw any kind of exception, but should only let propagate
- * those that they consider fatal, or which their class or superclass is prepared to
- * catch by implementing an exception handler.
+ * <p>These methods can throw any kind of exception, but should only let
+ * propagate those that they consider fatal, or which their class or superclass
+ * is prepared to catch by implementing an exception handler.
  *
- * <p>When returning just a {@link Map} instance view name translation will be used to generate
- * the view name. The configured {@link org.springframework.web.servlet.RequestToViewNameTranslator}
- * will be used to determine the view name.
+ * <p>When returning just a {@link Map} instance view name translation will be
+ * used to generate the view name. The configured
+ * {@link org.springframework.web.servlet.RequestToViewNameTranslator} will be
+ * used to determine the view name.
  *
- * <p>When returning <code>void</code> a return value of <code>null</code> is assumed
- * meaning that the handler method is responsible for writing the response directly to
- * the supplied {@link HttpServletResponse}.
+ * <p>When returning <code>void</code> a return value of <code>null</code> is
+ * assumed meaning that the handler method is responsible for writing the
+ * response directly to the supplied {@link HttpServletResponse}.
  *
- * <p>This model allows for rapid coding, but loses the advantage of compile-time
- * checking. It is similar to a Struts 1.1 DispatchAction, but more sophisticated.
- * Also supports delegation to another object.
+ * <p>This model allows for rapid coding, but loses the advantage of
+ * compile-time checking. It is similar to a Struts 1.1
+ * <code>DispatchAction</code>, but more sophisticated. Also supports
+ * delegation to another object.
  *
- * <p>An implementation of the MethodNameResolver interface defined in this package
- * should return a method name for a given request, based on any aspect of the request,
- * such as its URL or an "action" parameter. The actual strategy can be configured
- * via the "methodNameResolver" bean property, for each MultiActionController.
+ * <p>An implementation of the {@link MethodNameResolver} interface defined in
+ * this package should return a method name for a given request, based on any
+ * aspect of the request, such as its URL or an "action" parameter. The actual
+ * strategy can be configured via the "methodNameResolver" bean property, for
+ * each <code>MultiActionController</code>.
  *
- * <p>The default MethodNameResolver is InternalPathMethodNameResolver; further included
- * strategies are PropertiesMethodNameResolver and ParameterMethodNameResolver.
+ * <p>The default <code>MethodNameResolver</code> is
+ * {@link InternalPathMethodNameResolver}; further included strategies are
+ * {@link PropertiesMethodNameResolver} and {@link ParameterMethodNameResolver}.
  *
- * <p>Subclasses can implement custom exception handler methods with names such as:
+ * <p>Subclasses can implement custom exception handler methods with names such
+ * as:
  *
- * <pre>
- * ModelAndView anyMeaningfulName(HttpServletRequest request, HttpServletResponse response, ExceptionClass exception);</pre>
+ * <pre class="code">public ModelAndView anyMeaningfulName(HttpServletRequest request, HttpServletResponse response, ExceptionClass exception);</pre>
  *
- * The third parameter can be any subclass or Exception or RuntimeException.
+ * The third parameter can be any subclass or {@link Exception} or
+ * {@link RuntimeException}.
  *
- * <p>There can also be an optional lastModified method for handlers, of signature:
+ * <p>There can also be an optional <code>xxxLastModified</code> method for
+ * handlers, of signature:
  *
- * <pre>
- * long anyMeaningfulNameLastModified(HttpServletRequest request)</pre>
+ * <pre class="code">public long anyMeaningfulNameLastModified(HttpServletRequest request)</pre>
  *
- * If such a method is present, it will be invoked. Default return from getLastModified
- * is -1, meaning that the content must always be regenerated.
+ * If such a method is present, it will be invoked. Default return from
+ * <code>getLastModified</code> is -1, meaning that the content must always be
+ * regenerated.
  *
- * <p>Note that method overloading isn't allowed.
- * 
+ * <p><b>Note that all handler methods need to be public and that
+ * method overloading is <i>not</i> allowed.</b>
+ *
  * <p>See also the description of the workflow performed by
  * {@link AbstractController the superclass} (in that section of the class
  * level Javadoc entitled 'workflow').
  *
  * <p><b>Note:</b> For maximum data binding flexibility, consider direct usage
- * of a ServletRequestDataBinder in your controller method, instead of relying
- * on a declared command argument. This allows for full control over the entire
- * binder setup and usage, including the invocation of Validators and the
- * subsequent evaluation of binding/validation errors.
+ * of a {@link ServletRequestDataBinder} in your controller method, instead of
+ * relying on a declared command argument. This allows for full control over
+ * the entire binder setup and usage, including the invocation of
+ * {@link Validator Validators} and the subsequent evaluation of
+ * binding/validation errors.
  * 
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -124,16 +133,22 @@ public class MultiActionController extends AbstractController implements LastMod
 	/** Default command name used for binding command objects: "command" */
 	public static final String DEFAULT_COMMAND_NAME = "command";
 
-	/** Log category to use when no mapped handler is found for a request */
+	/**
+	 * Log category to use when no mapped handler is found for a request.
+	 * @see #pageNotFoundLogger
+	 */
 	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
 
-	/** Additional logger to use when no mapped handler is found for a request */
+	/**
+	 * Additional logger to use when no mapped handler is found for a request.
+	 * @see #PAGE_NOT_FOUND_LOG_CATEGORY
+	 */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
 
 	/**
 	 * Helper object that knows how to return method names from incoming requests.
-	 * Can be overridden via the methodNameResolver bean property
+	 * <p>Can be overridden via the methodNameResolver bean property.
 	 */
 	private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
 
@@ -154,9 +169,10 @@ public class MultiActionController extends AbstractController implements LastMod
 
 
 	/**
-	 * Constructor for MultiActionController that looks for handler methods
-	 * in the present subclass. Caches methods for quick invocation later.
-	 * This class's use of reflection will impose little overhead at runtime.
+	 * Constructor for <code>MultiActionController</code> that looks for
+	 * handler methods in the present subclass.
+	 * <p>Caches methods for quick invocation later. This class's use of
+	 * reflection will impose little overhead at runtime.
 	 */
 	public MultiActionController() {
 		this.delegate = this;
@@ -165,10 +181,11 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 	
 	/**
-	 * Constructor for MultiActionController that looks for handler methods in delegate,
-	 * rather than a subclass of this class. Caches methods for quick invocation later.
-	 * @param delegate handler object. This doesn't need to implement any particular
-	 * interface, as everything is done using reflection.
+	 * Constructor for <code>MultiActionController</code> that looks for
+	 * handler methods in delegate, rather than a subclass of this class.
+	 * <p>Caches methods for quick invocation later.
+	 * @param delegate handler object; this does not need to implement any
+	 * particular interface, as everything is done using reflection.
 	 */
 	public MultiActionController(Object delegate) {
 		setDelegate(delegate);
@@ -177,7 +194,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	
 	/**
 	 * Set the method name resolver that this class should use.
-	 * Allows parameterization of handler method mappings.
+	 * <p>Allows parameterization of handler method mappings.
 	 */
 	public final void setMethodNameResolver(MethodNameResolver methodNameResolver) {
 		this.methodNameResolver = methodNameResolver;
@@ -191,8 +208,8 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 	
 	/**
-	 * Set the Validators for this controller.
-	 * The Validator must support the specified command class.
+	 * Set the {@link Validator Validators} for this controller.
+	 * <p>The <code>Validators</code> must support the specified command class.
 	 */
 	public final void setValidators(Validator[] validators) {
 		this.validators = validators;
@@ -202,14 +219,15 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * Return the Validators for this controller.
 	 */
 	public final Validator[] getValidators() {
-		return validators;
+		return this.validators;
 	}
 
 	/**
-	 * Set the delegate used by this class. The default is <code>this</code>,
+	 * Set the delegate used by this class; the default is <code>this</code>,
 	 * assuming that handler methods have been added by a subclass.
 	 * <p>This method does not get invoked once the class is configured.
 	 * @param delegate an object containing handler methods
+	 * @throws IllegalStateException if no handler methods are found
 	 */
 	public final void setDelegate(Object delegate) {
 		Assert.notNull(delegate, "Delegate must not be null");
