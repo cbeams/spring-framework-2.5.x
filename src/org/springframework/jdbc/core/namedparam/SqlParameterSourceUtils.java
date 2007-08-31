@@ -23,7 +23,6 @@ import java.util.Map;
  *
  * @author Thomas Risberg
  * @since 2.1
- * @see org.springframework.jdbc.core.simple.SimpleJdbcInsert
  */
 public class SqlParameterSourceUtils {
 
@@ -36,8 +35,8 @@ public class SqlParameterSourceUtils {
 	 */
 	public static SqlParameterSource[] createBatch(Map[] valueMaps) {
 		MapSqlParameterSource[] batch = new MapSqlParameterSource[valueMaps.length];
-		int i = 0;
-		for (Map valueMap : valueMaps) {
+		for (int i = 0; i < valueMaps.length; i++) {
+			Map valueMap = valueMaps[i];
 			batch[i++] = new MapSqlParameterSource(valueMap);
 		}
 		return batch;
@@ -52,8 +51,8 @@ public class SqlParameterSourceUtils {
 	 */
 	public static SqlParameterSource[] createBatch(Object[] beans) {
 		BeanPropertySqlParameterSource[] batch = new BeanPropertySqlParameterSource[beans.length];
-		int i = 0;
-		for (Object bean : beans) {
+		for (int i = 0; i < beans.length; i++) {
+			Object bean = beans[i];
 			batch[i++] = new BeanPropertySqlParameterSource(bean);
 		}
 		return batch;

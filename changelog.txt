@@ -47,6 +47,7 @@ Package org.springframework.core
 
 Package org.springframework.jdbc
 * strengthened SQLExceptionTranslator's contract to define root cause handling for returned DataAccessExceptions
+* added batch update support to SimpleJdbcTemplate
 
 Package org.springframework.jms
 * MessageListenerAdapter logs at warn level if a listener method returned a result but no response message can be sent

@@ -37,7 +37,7 @@ import java.util.Map;
  * @see SimpleJdbcTemplate
  * @see org.springframework.jdbc.core.JdbcOperations
  */
-public interface SimpleJdbcOperations {
+public interface 	SimpleJdbcOperations {
 
 	/**
 	 * Expose the classic Spring JdbcTemplate to allow invocation of less
@@ -319,8 +319,7 @@ public interface SimpleJdbcOperations {
 	 * @param sql the SQL statement to execute.
 	 * @param args the map containing the arguments for the query.
 	 * @return the numbers of rows affected by the update.
-	 * @see JdbcOperations#update(String)
-	 * @see JdbcOperations#update(String, Object[])
+	 * @see NamedParameterJdbcOperations#update(String, Map)
 	 */
 	int update(String sql, Map args) throws DataAccessException;
 
@@ -331,15 +330,13 @@ public interface SimpleJdbcOperations {
 	 * @param sql the SQL statement to execute.
 	 * @param args the <code>SqlParameterSource</code> containing the arguments for the statement.
 	 * @return the numbers of rows affected by the update.
-	 * @see JdbcOperations#update(String)
-	 * @see JdbcOperations#update(String, Object[])
+	 * @see NamedParameterJdbcOperations#update(String, SqlParameterSource)
 	 */
 	int update(String sql, SqlParameterSource args) throws DataAccessException;
 
 	/**
 	 * Executes the supplied SQL statement with supplied arguments.
 	 * Uses sql with the standard '?' placeholders for parameters
-	 * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}
 	 * @param sql the SQL statement to execute.
 	 * @param args the variable number of arguments for the query.
 	 * @return the numbers of rows affected by the update.
@@ -347,5 +344,43 @@ public interface SimpleJdbcOperations {
 	 * @see JdbcOperations#update(String, Object[])
 	 */
 	int update(String sql, Object... args) throws DataAccessException;
+
+	/**
+	 * Executes a batch using the supplied SQL statement with the batch of supplied arguments.
+	 * Uses sql with the named parameter support.
+	 * @param sql the SQL statement to execute.
+	 * @param batchValues the array of Maps containing the batch of arguments for the query.
+	 * @return an array containing the numbers of rows affected by each update in the batch.
+	 */
+	public int[] batchUpdate(String sql, Map[] batchValues);
+
+	/**
+	 * Executes a batch using the supplied SQL statement with the batch of supplied arguments.
+	 * Uses sql with the named parameter support.
+	 * @param sql the SQL statement to execute.
+	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of arguments for the query.
+	 * @return an array containing the numbers of rows affected by each update in the batch.
+	 */
+	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs);
+
+	/**
+	 * Executes a batch using the supplied SQL statement with the batch of supplied arguments.
+	 * Uses sql with the standard '?' placeholders for parameters
+	 * @param sql the SQL statement to execute.
+	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query.
+	 * @return an array containing the numbers of rows affected by each update in the batch.
+	 */
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs);
+
+	/**
+	 * Executes a batch using the supplied SQL statement with the batch of supplied arguments.
+	 * Uses sql with the standard '?' placeholders for parameters
+	 * @param sql the SQL statement to execute.
+	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query.
+	 * @param argTypes SQL types of the arguments
+	 * (constants from <code>java.sql.Types</code>)
+	 * @return an array containing the numbers of rows affected by each update in the batch.
+	 */
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes);
 
 }
