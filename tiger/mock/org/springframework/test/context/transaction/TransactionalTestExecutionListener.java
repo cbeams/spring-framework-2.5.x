@@ -76,7 +76,7 @@ import org.springframework.util.Assert;
  * @see BeforeTransaction
  * @see AfterTransaction
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 public class TransactionalTestExecutionListener extends AbstractTestExecutionListener {
@@ -620,7 +620,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	protected final boolean isRollback(final TestContext testContext) throws Exception {
 
 		boolean rollback = isDefaultRollback(testContext);
-		final Rollback rollbackAnnotation = AnnotationUtils.findAnnotation(testContext.getTestMethod(), Rollback.class);
+		final Rollback rollbackAnnotation = testContext.getTestMethod().getAnnotation(Rollback.class);
 		if (rollbackAnnotation != null) {
 
 			final boolean rollbackOverride = rollbackAnnotation.value();
