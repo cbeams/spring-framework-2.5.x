@@ -430,17 +430,26 @@ public abstract class BeanFactoryUtils {
 	}
 	
 	/**
-	 * Return all beans that depend directly or indirectly (transitively), on the bean
-	 * identified by the beanName. Additional filtering can be executed through the type parameter.
-	 * If no filtering is required, then null should be passed.
+	 * Return all beans that depend directly or indirectly (transitively), on
+	 * the bean identified by the 'beanName'. When dealing with a {@link FactoryBean}, the
+	 * factory itself can be returned or its product. Additional filtering can
+	 * be executed through the type parameter. If no filtering is required, then
+	 * null can be passed.
+	 * 
+	 * Note that depending on the #rawFactoryBeans parameter, the type of
+	 * factoryBean or its product can be used when doing the type filtering.
+	 *
+	 * @see BeanFactory#FACTORY_BEAN_PREFIX
 	 * 
 	 * @param beanFactory beans bean factory
 	 * @param beanName root bean name
+	 * @param rawFactoryBeans consider the factory bean itself or its product
 	 * @param type type of the beans returned (null to return all beans)
-	 * @return bean names
+	 * @return bean names names of beans trasitively depending on the given one
+	 * 
 	 */
 	public static String[] getTransitiveDependentBeans(ConfigurableListableBeanFactory beanFactory, String beanName,
-			Class type) {
+			boolean rawFactoryBeans, Class type) {
 		Assert.notNull(beanFactory);
 		Assert.hasText(beanName);
 
@@ -448,13 +457,13 @@ public abstract class BeanFactoryUtils {
 
 		Set beans = new LinkedHashSet();
 
-		getTransitiveBeans(beanFactory, beanName, beans);
+		getTransitiveBeans(beanFactory, beanName, rawFactoryBeans, beans);
 
 		if (type != null) {
 			// filter by type
 			for (Iterator iter = beans.iterator(); iter.hasNext();) {
 				String bean = (String) iter.next();
-				if (!type.isAssignableFrom(beanFactory.getType(bean))) {
+				if (!beanFactory.isTypeMatch(bean, type)) {
 					iter.remove();
 				}
 			}
@@ -468,18 +477,24 @@ public abstract class BeanFactoryUtils {
 	 * 
 	 * @param beanFactory
 	 * @param beanName
+	 * @param rawFactoryBeans 
 	 * @param beanNames
 	 */
-	private static void getTransitiveBeans(ConfigurableListableBeanFactory beanFactory, String beanName, Set beanNames) {
-		String[] beans = beanFactory.getDependentBeans(beanName);
+	private static void getTransitiveBeans(ConfigurableListableBeanFactory beanFactory, String beanName,
+			boolean rawFactoryBeans, Set beanNames) {
+		// strip out & just in case
+		String[] beans = beanFactory.getDependentBeans(org.springframework.beans.factory.BeanFactoryUtils.transformedBeanName(beanName));
 
 		for (int i = 0; i < beans.length; i++) {
 			String bean = beans[i];
+			// & if needed
+			if (rawFactoryBeans && beanFactory.isFactoryBean(beanName))
+				bean = BeanFactory.FACTORY_BEAN_PREFIX + beans[i];
+
 			if (!beanNames.contains(bean)) {
 				beanNames.add(bean);
-				getTransitiveBeans(beanFactory, bean, beanNames);
+				getTransitiveBeans(beanFactory, bean, rawFactoryBeans, beanNames);
 			}
 		}
 	}
-
 }
