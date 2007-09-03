@@ -2601,8 +2601,8 @@ public class Account {
 	   by at least one of the patterns will be used for Spring AOP autoproxy configuration:</para>
 
    	  <programlisting><![CDATA[<aop:aspectj-autoproxy>
-  <include name="thisBean"/>
-  <include name="thatBean"/>
+  <aop:include name="thisBean"/>
+  <aop:include name="thatBean"/>
 </aop:aspectj-autoproxy>]]></programlisting>
 		  
 		  
