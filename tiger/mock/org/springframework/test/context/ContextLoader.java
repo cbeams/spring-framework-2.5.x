@@ -34,9 +34,16 @@ import org.springframework.context.ApplicationContext;
  * Concrete implementations must provide a <code>public</code> no-args
  * constructor.
  * </p>
+ * <p>
+ * Spring provides the following out-of-the-box implementations:
+ * </p>
+ * <ul>
+ * <li>{@link org.springframework.test.context.support.GenericXmlContextLoader GenericXmlContextLoader}</li>
+ * <li>{@link org.springframework.test.context.support.GenericPropertiesContextLoader GenericPropertiesContextLoader}</li>
+ * </ul>
  *
  * @author Sam Brannen
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 2.1
  */
 public interface ContextLoader {
