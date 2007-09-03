@@ -18,8 +18,7 @@ package org.springframework.test.context;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +30,7 @@ import org.springframework.util.Assert;
 /**
  * <p>
  * TestContextManager is the main entry point into the
- * <em>Spring Test Context Framework</em>, which provides support for loading
+ * <em>Spring TestContext Framework</em>, which provides support for loading
  * and accessing {@link ApplicationContext application contexts}, dependency
  * injection of test instances, and {@link Transactional transactional}
  * execution of test methods.
@@ -58,7 +57,7 @@ import org.springframework.util.Assert;
  * @see ContextConfiguration
  * @see org.springframework.test.context.transaction.TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  * @since 2.1
  */
 public class TestContextManager {
@@ -87,7 +86,7 @@ public class TestContextManager {
 
 	private final TestContext										testContext;
 
-	private final Set<TestExecutionListener>						testExecutionListeners	= new LinkedHashSet<TestExecutionListener>();
+	private final List<TestExecutionListener>						testExecutionListeners	= new ArrayList<TestExecutionListener>();
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
@@ -310,11 +309,11 @@ public class TestContextManager {
 
 		// Traverse the TestExecutionListeners in reverse order to ensure proper
 		// "wrapper"-style execution ordering of listeners.
-		final ArrayList<TestExecutionListener> listenersList = new ArrayList<TestExecutionListener>(
+		final List<TestExecutionListener> listenersReversed = new ArrayList<TestExecutionListener>(
 				getTestExecutionListeners());
-		Collections.reverse(listenersList);
+		Collections.reverse(listenersReversed);
 
-		for (final TestExecutionListener testExecutionListener : listenersList) {
+		for (final TestExecutionListener testExecutionListener : listenersReversed) {
 			try {
 				testExecutionListener.afterTestMethod(getTestContext());
 			}
@@ -366,16 +365,16 @@ public class TestContextManager {
 
 	/**
 	 * <p>
-	 * Gets an {@link Collections#unmodifiableSet(Set) unmodifiable} copy of the
-	 * {@link TestExecutionListener TestExecutionListeners} registered for this
-	 * {@link TestContextManager}.
+	 * Gets an {@link Collections#unmodifiableList(List) unmodifiable} copy of
+	 * the {@link TestExecutionListener TestExecutionListeners} registered for
+	 * this {@link TestContextManager}.
 	 * </p>
 	 *
 	 * @return A copy of the TestExecutionListeners.
 	 */
-	public final Set<TestExecutionListener> getTestExecutionListeners() {
+	public final List<TestExecutionListener> getTestExecutionListeners() {
 
-		return Collections.unmodifiableSet(this.testExecutionListeners);
+		return Collections.unmodifiableList(this.testExecutionListeners);
 	}
 
 	// ------------------------------------------------------------------------|
