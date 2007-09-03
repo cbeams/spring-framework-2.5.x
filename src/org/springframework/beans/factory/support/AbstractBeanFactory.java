@@ -1389,13 +1389,23 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @see #registerDependentBean
 	 */
 	protected void registerDisposableBeanIfNecessary(String beanName, Object bean, RootBeanDefinition mbd) {
-		if (mbd.isSingleton() && requiresDestruction(bean, mbd)) {
-			// Register a DisposableBean implementation that performs all destruction
-			// work for the given bean: DestructionAwareBeanPostProcessors,
-			// DisposableBean interface, custom destroy method.
-			registerDisposableBean(beanName,
-					new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors()));
-
+		if (!mbd.isPrototype() && requiresDestruction(bean, mbd)) {
+			if (mbd.isSingleton()) {
+				// Register a DisposableBean implementation that performs all destruction
+				// work for the given bean: DestructionAwareBeanPostProcessors,
+				// DisposableBean interface, custom destroy method.
+				registerDisposableBean(beanName,
+						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors()));
+			}
+			else {
+				// A bean with a custom scope...
+				Scope scope = (Scope) this.scopes.get(mbd.getScope());
+				if (scope == null) {
+					throw new IllegalStateException("No Scope registered for scope '" + mbd.getScope() + "'");
+				}
+				scope.registerDestructionCallback(beanName,
+						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors()));
+			}
 			// Register bean as dependent on other beans, if necessary,
 			// for correct shutdown order.
 			String[] dependsOn = mbd.getDependsOn();
@@ -1404,14 +1414,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 					registerDependentBean(dependsOn[i], beanName);
 				}
 			}
-		}
-		else if (!mbd.isPrototype() && requiresDestruction(bean, mbd)) {
-			Scope scope = (Scope) this.scopes.get(mbd.getScope());
-			if (scope == null) {
-				throw new IllegalStateException("No Scope registered for scope '" + mbd.getScope() + "'");
-			}
-			scope.registerDestructionCallback(beanName,
-					new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors()));
 		}
 	}
 
