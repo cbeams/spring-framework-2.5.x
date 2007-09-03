@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +56,14 @@ public class ClassUtilsTests extends TestCase {
 	public void testForName() throws ClassNotFoundException {
 		assertEquals(String.class, ClassUtils.forName("java.lang.String"));
 		assertEquals(String[].class, ClassUtils.forName("java.lang.String[]"));
+		assertEquals(String[].class, ClassUtils.forName(String[].class.getName()));
+		assertEquals(String[][].class, ClassUtils.forName(String[][].class.getName()));
+		assertEquals(String[][][].class, ClassUtils.forName(String[][][].class.getName()));
 		assertEquals(TestBean.class, ClassUtils.forName("org.springframework.beans.TestBean"));
 		assertEquals(TestBean[].class, ClassUtils.forName("org.springframework.beans.TestBean[]"));
+		assertEquals(TestBean[].class, ClassUtils.forName(TestBean[].class.getName()));
 		assertEquals(TestBean[][].class, ClassUtils.forName("org.springframework.beans.TestBean[][]"));
+		assertEquals(TestBean[][].class, ClassUtils.forName(TestBean[][].class.getName()));
 	}
 
 	public void testForNameWithPrimitiveClasses() throws ClassNotFoundException {
@@ -81,6 +86,17 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals(long[].class, ClassUtils.forName("long[]"));
 		assertEquals(float[].class, ClassUtils.forName("float[]"));
 		assertEquals(double[].class, ClassUtils.forName("double[]"));
+	}
+
+	public void testForNameWithPrimitiveArraysInternalName() throws ClassNotFoundException {
+		assertEquals(boolean[].class, ClassUtils.forName(boolean[].class.getName()));
+		assertEquals(byte[].class, ClassUtils.forName(byte[].class.getName()));
+		assertEquals(char[].class, ClassUtils.forName(char[].class.getName()));
+		assertEquals(short[].class, ClassUtils.forName(short[].class.getName()));
+		assertEquals(int[].class, ClassUtils.forName(int[].class.getName()));
+		assertEquals(long[].class, ClassUtils.forName(long[].class.getName()));
+		assertEquals(float[].class, ClassUtils.forName(float[].class.getName()));
+		assertEquals(double[].class, ClassUtils.forName(double[].class.getName()));
 	}
 
 	public void testGetQualifiedName() {
