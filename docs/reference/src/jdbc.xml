@@ -784,19 +784,6 @@ jdbcTemplate.update(
 				support for thread-bound connections, for example for use with
 				<classname>DataSourceTransactionManager</classname>.
 			</para>
-			<note>
-				<para>The <methodname>getDataSourceFromJndi(..)</methodname> methods are
-				targeted at applications that do not use the Spring Framework's IoC container.
-				With the latter, it is preferable to preconfigure one's beans or
-				even <classname>JdbcTemplate</classname> instances in the
-				container itself: a <classname>JndiObjectFactoryBean</classname> instance
-				can be used to fetch a <interfacename>DataSource</interfacename> from JNDI and give the
-				<interfacename>DataSource</interfacename> bean reference to other
-				beans. Switching to another <interfacename>DataSource</interfacename>
-				then becomes just a matter of configuration; one can even replace the definition
-				of the <interfacename>FactoryBean</interfacename> with a non-JNDI
-				<interfacename>DataSource</interfacename>!</para>
-			</note>
 		</section>
 		<section id="jdbc-SmartDataSource">
 			<title><interfacename>SmartDataSource</interfacename></title>
