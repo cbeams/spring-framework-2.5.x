@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -50,8 +51,11 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class ClassUtils {
 
-	/** Suffix for array class names */
+	/** Suffix for array class names: "[]" */
 	public static final String ARRAY_SUFFIX = "[]";
+
+	/** Prefix for internal array class names: "[L" */
+	private static final String INTERNAL_ARRAY_PREFIX = "[L";
 
 	/** The package separator character '.' */
 	private static final char PACKAGE_SEPARATOR = '.';
@@ -78,7 +82,8 @@ public abstract class ClassUtils {
 	 * Map with primitive type name as key and corresponding primitive
 	 * type as value, for example: "int" -> "int.class".
 	 */
-	private static final Map primitiveTypeNameMap = new HashMap(8);
+	private static final Map primitiveTypeNameMap = new HashMap(16);
+
 
 	static {
 		primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
@@ -90,7 +95,12 @@ public abstract class ClassUtils {
 		primitiveWrapperTypeMap.put(Long.class, long.class);
 		primitiveWrapperTypeMap.put(Short.class, short.class);
 
-		for (Iterator it = primitiveWrapperTypeMap.values().iterator(); it.hasNext();) {
+		Set primitiveTypeNames = new HashSet(16);
+		primitiveTypeNames.addAll(primitiveWrapperTypeMap.values());
+		primitiveTypeNames.addAll(Arrays.asList(new Class[] {
+				boolean[].class, byte[].class, char[].class, double[].class,
+				float[].class, int[].class, long[].class, short[].class}));
+		for (Iterator it = primitiveTypeNames.iterator(); it.hasNext();) {
 			Class primitiveClass = (Class) it.next();
 			primitiveTypeNameMap.put(primitiveClass.getName(), primitiveClass);
 		}
@@ -186,16 +196,33 @@ public abstract class ClassUtils {
 	 */
 	public static Class forName(String name, ClassLoader classLoader) throws ClassNotFoundException, LinkageError {
 		Assert.notNull(name, "Name must not be null");
+
 		Class clazz = resolvePrimitiveClassName(name);
 		if (clazz != null) {
 			return clazz;
 		}
+
+		// "java.lang.String[]" style arrays
 		if (name.endsWith(ARRAY_SUFFIX)) {
-			// special handling for array class names
 			String elementClassName = name.substring(0, name.length() - ARRAY_SUFFIX.length());
 			Class elementClass = forName(elementClassName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
+
+		// "[Ljava.lang.String;" style arrays
+		int internalArrayMarker = name.indexOf(INTERNAL_ARRAY_PREFIX);
+		if (internalArrayMarker != -1 && name.endsWith(";")) {
+			String elementClassName = null;
+			if (internalArrayMarker == 0) {
+				elementClassName = name.substring(INTERNAL_ARRAY_PREFIX.length(), name.length() - 1);
+			}
+			else if (name.startsWith("[")) {
+				elementClassName = name.substring(1);
+			}
+			Class elementClass = forName(elementClassName, classLoader);
+			return Array.newInstance(elementClass, 0).getClass();
+		}
+
 		ClassLoader classLoaderToUse = classLoader;
 		if (classLoaderToUse == null) {
 			classLoaderToUse = getDefaultClassLoader();
@@ -231,10 +258,14 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Resolve the given class name as primitive class, if appropriate.
+	 * Resolve the given class name as primitive class, if appropriate,
+	 * according to the JVM's naming rules for primitive classes.
+	 * <p>Also supports the JVM's internal class names for primitive arrays.
+	 * Does <i>not</i> support the "[]" suffix notation for primitive arrays;
+	 * this is only supported by {@link #forName}.
 	 * @param name the name of the potentially primitive class
 	 * @return the primitive class, or <code>null</code> if the name does not denote
-	 * a primitive class
+	 * a primitive class or primitive array class
 	 */
 	public static Class resolvePrimitiveClassName(String name) {
 		Class result = null;
