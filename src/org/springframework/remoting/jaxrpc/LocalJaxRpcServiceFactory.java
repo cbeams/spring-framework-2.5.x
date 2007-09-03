@@ -46,7 +46,7 @@ import org.springframework.beans.BeanUtils;
  */
 public class LocalJaxRpcServiceFactory {
 
-	/** Logger that is available to subclasses */
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private ServiceFactory serviceFactory;
@@ -123,7 +123,7 @@ public class LocalJaxRpcServiceFactory {
 	 * Corresponds to the WSDL "targetNamespace".
 	 */
 	public void setNamespaceUri(String namespaceUri) {
-		this.namespaceUri = namespaceUri;
+		this.namespaceUri = (namespaceUri != null ? namespaceUri.trim() : null);
 	}
 
 	/**
