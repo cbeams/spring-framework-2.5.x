@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,21 @@ import org.springframework.beans.BeansException;
 import org.springframework.core.Ordered;
 
 /**
- * Simple {@link BeanFactoryPostProcessor} implementation that effects the
- * registration of custom {@link Scope Scope(s)} in a {@link ConfigurableBeanFactory}.
- * 
+ * Simple {@link BeanFactoryPostProcessor} implementation that registers
+ * custom {@link Scope Scope(s)} with the containing {@link ConfigurableBeanFactory}.
+ *
  * <p>Will register all of the supplied {@link #setScopes(java.util.Map) scopes}
  * with the {@link ConfigurableListableBeanFactory} that is passed to the
  * {@link #postProcessBeanFactory(ConfigurableListableBeanFactory)} method.
  *
+ * <p>This class allows for <i>declarative</i> registration of custom scopes.
+ * Alternatively, consider implementing a custom {@link BeanFactoryPostProcessor}
+ * that calls {@link ConfigurableBeanFactory#registerScope} programmatically.
+ *
  * @author Rick Evans
+ * @author Juergen Hoeller
  * @since 2.0
+ * @see ConfigurableBeanFactory#registerScope
  */
 public class CustomScopeConfigurer implements BeanFactoryPostProcessor, Ordered {
 
@@ -54,7 +60,7 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, Ordered 
 	}
 
 	public int getOrder() {
-		return order;
+		return this.order;
 	}
 
 
