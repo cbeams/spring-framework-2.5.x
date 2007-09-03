@@ -18,7 +18,7 @@ package org.springframework.test.context;
 /**
  * <p>
  * TestExecutionListener defines a <em>listener</em> API for reacting to test
- * execution events published by a {@link TestContextManager} with which a
+ * execution events published by the {@link TestContextManager} with which the
  * listener is registered.
  * </p>
  * <p>
@@ -36,7 +36,7 @@ package org.springframework.test.context;
  * </ul>
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.2
  */
 public interface TestExecutionListener {
