@@ -326,11 +326,11 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 			try {
 				if (commit) {
 					this.transactionManager.commit(this.transactionStatus);
-					this.logger.info("Committed transaction after test execution");
+					this.logger.debug("Committed transaction after test execution");
 				}
 				else {
 					this.transactionManager.rollback(this.transactionStatus);
-					this.logger.info("Rolled back transaction after test execution");
+					this.logger.debug("Rolled back transaction after test execution");
 				}
 			}
 			finally {
@@ -358,8 +358,8 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 		++this.transactionsStarted;
 		this.complete = !this.isDefaultRollback();
 
-		if (this.logger.isInfoEnabled()) {
-			this.logger.info("Began transaction (" + this.transactionsStarted + "): transaction manager [" +
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("Began transaction (" + this.transactionsStarted + "): transaction manager [" +
 					this.transactionManager + "]; default rollback = " + this.isDefaultRollback());
 		}
 	}
