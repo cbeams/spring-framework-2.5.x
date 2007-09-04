@@ -66,7 +66,6 @@ import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
-import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -456,11 +455,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			catch (ClassNotFoundException ex) {
 				throw new IllegalStateException("Spring's LoadTimeWeaverAwareProcessor class is not available");
 			}
-
 			// Set a temporary ClassLoader for type matching.
-			OverridingClassLoader overridingClassLoader = new OverridingClassLoader(beanFactory.getBeanClassLoader());
-			overridingClassLoader.excludePackage("org.springframework");
-			beanFactory.setTempClassLoader(overridingClassLoader);
+			beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
 		}
 	}
 

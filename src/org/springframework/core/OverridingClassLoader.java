@@ -89,26 +89,9 @@ public class OverridingClassLoader extends ClassLoader {
 
 	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
 		Class result = null;
-
 		if (isEligibleForOverriding(name)) {
-			result = findLoadedClass(name);
-			if (result == null) {
-				InputStream is = openStreamForClass(name);
-				if (is != null) {
-					try {
-						// Load the raw bytes.
-						byte[] bytes = FileCopyUtils.copyToByteArray(is);
-						// Transform if necessary and use the potentially transformed bytes.
-						byte[] transformed = transformIfNecessary(name, bytes);
-						result = defineClass(name, transformed, 0, transformed.length);
-					}
-					catch (IOException ex) {
-						throw new ClassNotFoundException("Cannot load resource for class [" + name + "]", ex);
-					}
-				}
-			}
+			result = loadClassForOverriding(name);
 		}
-
 		if (result != null) {
 			if (resolve) {
 				resolveClass(result);
@@ -140,6 +123,51 @@ public class OverridingClassLoader extends ClassLoader {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Load the specified class for overriding purposes in this ClassLoader.
+	 * <p>The default implementation delegates to {@link #findLoadedClass},
+	 * {@link #loadBytesForClass} and {@link #defineClass}.
+	 * @param name the name of the class
+	 * @return the Class object, or <code>null</code> if no class defined for that name
+	 * @throws ClassNotFoundException if the class for the given name couldn't be loaded
+	 */
+	protected Class loadClassForOverriding(String name) throws ClassNotFoundException {
+		Class result = findLoadedClass(name);
+		if (result == null) {
+			byte[] bytes = loadBytesForClass(name);
+			if (bytes != null) {
+				result = defineClass(name, bytes, 0, bytes.length);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Load the defining bytes for the given class,
+	 * to be turned into a Class object through a {@link #defineClass} call.
+	 * <p>The default implementation delegates to {@link #openStreamForClass}
+	 * and {@link #transformIfNecessary}.
+	 * @param name the name of the class
+	 * @return the byte content (with transformers already applied),
+	 * or <code>null</code> if no class defined for that name
+	 * @throws ClassNotFoundException if the class for the given name couldn't be loaded
+	 */
+	protected byte[] loadBytesForClass(String name) throws ClassNotFoundException {
+		InputStream is = openStreamForClass(name);
+		if (is == null) {
+			return null;
+		}
+		try {
+			// Load the raw bytes.
+			byte[] bytes = FileCopyUtils.copyToByteArray(is);
+			// Transform if necessary and use the potentially transformed bytes.
+			return transformIfNecessary(name, bytes);
+		}
+		catch (IOException ex) {
+			throw new ClassNotFoundException("Cannot load resource for class [" + name + "]", ex);
+		}
 	}
 
 	/**
