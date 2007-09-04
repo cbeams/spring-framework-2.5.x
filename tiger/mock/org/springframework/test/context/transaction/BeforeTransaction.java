@@ -18,12 +18,9 @@ package org.springframework.test.context.transaction;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
@@ -37,14 +34,13 @@ import org.springframework.transaction.annotation.Transactional;
  * executed before those of the current class.
  * </p>
  *
- * @see Transactional
+ * @see org.springframework.transaction.annotation.Transactional
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @Target( { ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
 @Documented
 public @interface BeforeTransaction {
 

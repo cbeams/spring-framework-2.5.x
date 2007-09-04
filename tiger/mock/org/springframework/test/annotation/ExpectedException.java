@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,23 @@ package org.springframework.test.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Test annotation to indicate that a test method is required
- * to throw one or more of these exceptions.
+ * Test annotation to indicate that a test method is required to throw the
+ * specified exception.
  *
-* @author Rod Johnson
-* @since 2.0
-*/
-@Target({ElementType.METHOD})
+ * @author Rod Johnson
+ * @author Sam Brannen
+ * @since 2.0
+ */
+@Target( { ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
 @Documented
 public @interface ExpectedException {
-	
+
 	Class<? extends Throwable> value();
 
 }

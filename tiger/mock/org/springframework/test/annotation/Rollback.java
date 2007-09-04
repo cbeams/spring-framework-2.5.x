@@ -18,7 +18,6 @@ package org.springframework.test.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -30,12 +29,11 @@ import java.lang.annotation.Target;
  * otherwise, the transaction will be committed.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @Target( { ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
 @Documented
 public @interface Rollback {
 

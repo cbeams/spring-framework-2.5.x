@@ -18,31 +18,34 @@ package org.springframework.test.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * <p>
  * Test-specific annotation to indicate that a test method has to finish
  * execution in a {@link #millis() specified time period}.
- *
- * <p>If the text execution time takes longer than the specified time
- * period, then the test is to be considered failed.
+ * </p>
+ * <p>
+ * If the text execution takes longer than the specified time period, then the
+ * test is to be considered failed.
+ * </p>
  *
  * @author Rod Johnson
+ * @author Sam Brannen
  * @since 2.0
  * @see AbstractAnnotationAwareTransactionalTests
  */
-@Target({ElementType.METHOD})
+@Target( { ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
 @Documented
 public @interface Timed {
 
 	/**
-	 * The maximum amount of time (in milliseconds) that a test execution
-	 * can take without being marked as failed due to taking too long.
+	 * The maximum amount of time (in milliseconds) that a test execution can
+	 * take without being marked as failed due to taking too long.
+	 *
 	 * @return said maximum time
 	 */
 	long millis();
