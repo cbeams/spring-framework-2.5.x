@@ -198,7 +198,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	 * @throws Exception If an error occurs while determining the rollback flag.
 	 */
 	@Override
-	protected boolean isRollback() throws Exception {
+	protected boolean isRollback() {
 
 		boolean rollback = isDefaultRollback();
 		final Rollback rollbackAnnotation = getTestMethod().getAnnotation(Rollback.class);
