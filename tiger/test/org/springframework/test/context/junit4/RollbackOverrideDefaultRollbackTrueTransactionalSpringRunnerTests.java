@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @see Rollback
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @ContextConfiguration
@@ -89,6 +89,7 @@ public class RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests e
 	@Rollback(false)
 	public void modifyTestDataWithinTransaction() {
 
+		assertInTransaction(true);
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table within a transaction.", 3,

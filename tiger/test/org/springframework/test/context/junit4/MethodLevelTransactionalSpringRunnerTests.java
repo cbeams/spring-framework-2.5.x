@@ -30,7 +30,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
@@ -59,7 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @see ClassLevelTransactionalSpringRunnerTests
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -108,6 +107,7 @@ public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransacti
 	@Transactional
 	public void modifyTestDataWithinTransaction() {
 
+		assertInTransaction(true);
 		assertEquals("Deleting bob", 1, deletePerson(simpleJdbcTemplate, BOB));
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
@@ -118,6 +118,7 @@ public class MethodLevelTransactionalSpringRunnerTests extends AbstractTransacti
 	@Test
 	public void modifyTestDataWithoutTransaction() {
 
+		assertInTransaction(false);
 		assertEquals("Adding luke", 1, addPerson(simpleJdbcTemplate, LUKE));
 		assertEquals("Adding leia", 1, addPerson(simpleJdbcTemplate, LEIA));
 		assertEquals("Adding yoda", 1, addPerson(simpleJdbcTemplate, YODA));

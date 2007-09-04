@@ -15,10 +15,14 @@
  */
 package org.springframework.test.context.junit4;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * <p>
@@ -31,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see Transactional
  * @see NotTransactional
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 public abstract class AbstractTransactionalSpringRunnerTests {
@@ -55,6 +59,18 @@ public abstract class AbstractTransactionalSpringRunnerTests {
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
+
+	public static final void assertInTransaction(final boolean inTransaction) {
+
+		if (inTransaction) {
+			assertTrue("The current thread should be associated with a transaction.",
+					TransactionSynchronizationManager.isActualTransactionActive());
+		}
+		else {
+			assertFalse("The current thread should not be associated with a transaction",
+					TransactionSynchronizationManager.isActualTransactionActive());
+		}
+	}
 
 	protected static int clearPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
 

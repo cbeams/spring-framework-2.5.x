@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.test.context.junit4.AbstractTransactionalSpringRunnerTests.assertInTransaction;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -46,7 +47,7 @@ import org.springframework.test.utils.SimpleJdbcTestUtils;
  * {@link AbstractTransactionalJUnit4SpringContextTests}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 @ContextConfiguration
@@ -170,6 +171,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@NotTransactional
 	public final void verifyApplicationContext() {
 
+		assertInTransaction(false);
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
 				super.applicationContext);
 	}
@@ -178,6 +180,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@NotTransactional
 	public final void verifyBeanInitialized() {
 
+		assertInTransaction(false);
 		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
 				this.beanInitialized);
 	}
@@ -186,6 +189,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@NotTransactional
 	public final void verifyBeanNameSet() {
 
+		assertInTransaction(false);
 		assertEquals("The bean name of this test instance should have been set to the fully qualified class name "
 				+ "due to BeanNameAware semantics.", getClass().getName(), this.beanName);
 	}
@@ -194,6 +198,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@NotTransactional
 	public final void verifyAnnotationAutowiredFields() {
 
+		assertInTransaction(false);
 		assertNull("The nonrequiredLong property should NOT have been autowired.", this.nonrequiredLong);
 		assertNotNull("The pet field should have been autowired.", this.pet);
 		assertEquals("Fido", this.pet.getName());
@@ -203,6 +208,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@NotTransactional
 	public final void verifyAnnotationAutowiredMethods() {
 
+		assertInTransaction(false);
 		assertNotNull("The employee setter method should have been autowired.", this.employee);
 		assertEquals("John Smith", this.employee.getName());
 	}
@@ -211,6 +217,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@NotTransactional
 	public final void verifyResourceAnnotationWiredFields() {
 
+		assertInTransaction(false);
 		assertEquals("The foo field should have been wired via @Resource.", "Foo", this.foo);
 	}
 
@@ -218,6 +225,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@NotTransactional
 	public final void verifyResourceAnnotationWiredMethods() {
 
+		assertInTransaction(false);
 		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
 	}
 
@@ -242,6 +250,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Test
 	public void modifyTestDataWithinTransaction() {
 
+		assertInTransaction(true);
 		assertEquals("Adding jane", 1, addPerson(super.simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(super.simpleJdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table in modifyTestDataWithinTransaction().", 4,

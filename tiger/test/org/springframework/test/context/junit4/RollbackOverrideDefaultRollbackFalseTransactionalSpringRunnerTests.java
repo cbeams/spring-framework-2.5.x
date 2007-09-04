@@ -38,7 +38,7 @@ import org.springframework.test.context.ContextConfiguration;
  *
  * @see Rollback
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @ContextConfiguration
@@ -89,6 +89,7 @@ public class RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests 
 	@Rollback(true)
 	public void modifyTestDataWithinTransaction() {
 
+		assertInTransaction(true);
 		assertEquals("Deleting bob", 1, deletePerson(simpleJdbcTemplate, BOB));
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
