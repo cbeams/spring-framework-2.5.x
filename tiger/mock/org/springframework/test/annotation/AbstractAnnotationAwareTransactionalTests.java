@@ -24,7 +24,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
 import org.springframework.transaction.TransactionDefinition;
@@ -202,7 +201,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	protected boolean isRollback() throws Exception {
 
 		boolean rollback = isDefaultRollback();
-		final Rollback rollbackAnnotation = AnnotationUtils.findAnnotation(getTestMethod(), Rollback.class);
+		final Rollback rollbackAnnotation = getTestMethod().getAnnotation(Rollback.class);
 		if (rollbackAnnotation != null) {
 
 			final boolean rollbackOverride = rollbackAnnotation.value();
