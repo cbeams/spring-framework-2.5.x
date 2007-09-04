@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Simple implementation of the standard JDBC DataSource interface, configuring
@@ -140,9 +140,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * @see java.sql.DriverManager#registerDriver(java.sql.Driver)
 	 */
 	public void setDriverClassName(String driverClassName) throws CannotGetJdbcConnectionException {
-		if (!StringUtils.hasText(driverClassName)) {
-			throw new IllegalArgumentException("driverClassName must not be empty");
-		}
+		Assert.hasText(driverClassName, "Property 'driverClassName' must not be empty");
 		this.driverClassName = driverClassName.trim();
 		try {
 			Class.forName(this.driverClassName, true, ClassUtils.getDefaultClassLoader());
@@ -160,7 +158,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * Return the JDBC driver class name, if any.
 	 */
 	public String getDriverClassName() {
-		return driverClassName;
+		return this.driverClassName;
 	}
 
 	/**
@@ -168,9 +166,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
 	public void setUrl(String url) {
-		if (!StringUtils.hasText(url)) {
-			throw new IllegalArgumentException("url must not be empty");
-		}
+		Assert.hasText(url, "Property 'url' must not be empty");
 		this.url = url.trim();
 	}
 
@@ -178,7 +174,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * Return the JDBC URL to use for accessing the DriverManager.
 	 */
 	public String getUrl() {
-		return url;
+		return this.url;
 	}
 
 	/**
@@ -193,7 +189,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * Return the JDBC username to use for accessing the DriverManager.
 	 */
 	public String getUsername() {
-		return username;
+		return this.username;
 	}
 
 	/**
@@ -208,7 +204,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * Return the JDBC password to use for accessing the DriverManager.
 	 */
 	public String getPassword() {
-		return password;
+		return this.password;
 	}
 
 	/**
@@ -227,7 +223,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * Return the connection properties to be passed to the DriverManager, if any.
 	 */
 	public Properties getConnectionProperties() {
-		return connectionProperties;
+		return this.connectionProperties;
 	}
 
 
@@ -264,9 +260,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * and password (if any).
 	 * @see #getConnectionFromDriverManager(String, java.util.Properties)
 	 */
-	protected Connection getConnectionFromDriverManager(String username, String password)
-	    throws SQLException {
-
+	protected Connection getConnectionFromDriverManager(String username, String password) throws SQLException {
 		Properties props = new Properties(getConnectionProperties());
 		if (username != null) {
 			props.setProperty("user", username);
@@ -282,9 +276,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * into a protected method to allow for easy unit testing.
 	 * @see java.sql.DriverManager#getConnection(String, java.util.Properties)
 	 */
-	protected Connection getConnectionFromDriverManager(String url, Properties props)
-	    throws SQLException {
-
+	protected Connection getConnectionFromDriverManager(String url, Properties props) throws SQLException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating new JDBC Connection to [" + url + "]");
 		}
