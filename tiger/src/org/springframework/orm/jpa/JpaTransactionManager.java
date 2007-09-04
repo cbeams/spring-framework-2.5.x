@@ -35,6 +35,8 @@ import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
+import org.springframework.transaction.NestedTransactionNotSupportedException;
+import org.springframework.transaction.SavepointManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
@@ -120,6 +122,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #setEntityManagerFactory
 	 */
 	public JpaTransactionManager() {
+		setNestedTransactionAllowed(true);
 	}
 
 	/**
@@ -127,6 +130,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * @param emf EntityManagerFactory to manage transactions for
 	 */
 	public JpaTransactionManager(EntityManagerFactory emf) {
+		this();
 		this.entityManagerFactory = emf;
 		afterPropertiesSet();
 	}
@@ -517,11 +521,6 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * JPA transaction object, representing a EntityManagerHolder.
 	 * Used as transaction object by JpaTransactionManager.
-	 *
-	 * <p>Derives from JdbcTransactionObjectSupport in order to inherit the
-	 * capability to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
-	 *
-	 * @see EntityManagerHolder
 	 */
 	private static class JpaTransactionObject extends JdbcTransactionObjectSupport {
 
@@ -553,6 +552,9 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		public void setTransactionData(Object transactionData) {
 			this.transactionData = transactionData;
+			if (transactionData instanceof SavepointManager) {
+				this.entityManagerHolder.setSavepointManager((SavepointManager) transactionData);
+			}
 		}
 
 		public Object getTransactionData() {
@@ -572,6 +574,31 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		public boolean isRollbackOnly() {
 			EntityTransaction tx = this.entityManagerHolder.getEntityManager().getTransaction();
 			return tx.getRollbackOnly();
+		}
+
+		public Object createSavepoint() throws TransactionException {
+			return getSavepointManager().createSavepoint();
+		}
+
+		public void rollbackToSavepoint(Object savepoint) throws TransactionException {
+			getSavepointManager().rollbackToSavepoint(savepoint);
+		}
+
+		public void releaseSavepoint(Object savepoint) throws TransactionException {
+			getSavepointManager().releaseSavepoint(savepoint);
+		}
+
+		private SavepointManager getSavepointManager() {
+			if (!isSavepointAllowed()) {
+				throw new NestedTransactionNotSupportedException(
+						"Transaction manager does not allow nested transactions");
+			}
+			SavepointManager savepointManager = getEntityManagerHolder().getSavepointManager();
+			if (savepointManager == null) {
+				throw new NestedTransactionNotSupportedException(
+						"JpaDialect does not support savepoints - check your JPA provider's capabilities");
+			}
+			return savepointManager;
 		}
 	}
 

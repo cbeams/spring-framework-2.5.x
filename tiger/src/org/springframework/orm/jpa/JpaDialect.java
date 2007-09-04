@@ -114,10 +114,15 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * <p>Implementations can also use the Spring transaction name, as exposed by the
 	 * passed-in TransactionDefinition, to optimize for specific data access use cases
 	 * (effectively using the current transaction name as use case identifier).
+	 * <p>This method also allows for exposing savepoint capabilities if supported by
+	 * the persistence provider, through returning an Object that implements Spring's
+	 * {@link org.springframework.transaction.SavepointManager} interface.
+	 * {@link JpaTransactionManager} will use this capability if needed.
 	 * @param entityManager the EntityManager to begin a JPA transaction on
 	 * @param definition the Spring transaction definition that defines semantics
 	 * @return an arbitrary object that holds transaction data, if any
-	 * (to be passed into cleanupTransaction)
+	 * (to be passed into {@link #cleanupTransaction}). May implement the
+	 * {@link org.springframework.transaction.SavepointManager} interface.
 	 * @throws javax.persistence.PersistenceException if thrown by JPA methods
 	 * @throws java.sql.SQLException if thrown by JDBC methods
 	 * @throws org.springframework.transaction.TransactionException in case of invalid arguments

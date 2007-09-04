@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import javax.persistence.EntityManager;
 
+import org.springframework.transaction.SavepointManager;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 
@@ -37,6 +38,8 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 
 	private final EntityManager entityManager;
 
+	private SavepointManager savepointManager;
+
 
 	public EntityManagerHolder(EntityManager entityManager) {
 		Assert.notNull(entityManager, "EntityManager must not be null");
@@ -46,6 +49,19 @@ public class EntityManagerHolder extends ResourceHolderSupport {
 
 	public EntityManager getEntityManager() {
 		return this.entityManager;
+	}
+
+	public void setSavepointManager(SavepointManager savepointManager) {
+		this.savepointManager = savepointManager;
+	}
+
+	public SavepointManager getSavepointManager() {
+		return this.savepointManager;
+	}
+
+	public void clear() {
+		super.clear();
+		this.savepointManager = null;
 	}
 
 }

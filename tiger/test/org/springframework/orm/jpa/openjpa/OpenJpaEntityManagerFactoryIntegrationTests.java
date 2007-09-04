@@ -16,12 +16,21 @@
 
 package org.springframework.orm.jpa.openjpa;
 
+import java.util.List;
+
+import javax.persistence.FlushModeType;
+import javax.persistence.Query;
+
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
 import org.apache.openjpa.persistence.OpenJPAEntityManagerFactory;
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
+import org.springframework.orm.jpa.domain.Person;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * OpenJPA-specific JPA tests.
@@ -47,6 +56,27 @@ public class OpenJpaEntityManagerFactoryIntegrationTests extends AbstractContain
 		OpenJPAEntityManager openJPAEntityManager = (OpenJPAEntityManager) SharedEntityManagerCreator.createSharedEntityManager(
 				entityManagerFactory, null, OpenJPAEntityManager.class);
 		assertNotNull(openJPAEntityManager.getDelegate());
+	}
+
+	public void testSavepoint() {
+		TransactionTemplate tt = new TransactionTemplate(transactionManager);
+		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_NESTED);
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				Person tony = new Person();
+				tony.setFirstName("Tony");
+				sharedEntityManager.merge(tony);
+				Query q = sharedEntityManager.createQuery("select p from Person as p");
+				q.setFlushMode(FlushModeType.COMMIT);
+				List<Person> people = q.getResultList();
+				assertEquals(1, people.size());
+				assertEquals("Tony", people.get(0).getFirstName());
+				status.setRollbackOnly();
+			}
+		});
+		Query q = sharedEntityManager.createQuery("select p from Person as p");
+		List<Person> people = q.getResultList();
+		assertEquals(0, people.size());
 	}
 
 }
