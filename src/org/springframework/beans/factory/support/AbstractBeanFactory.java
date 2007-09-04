@@ -1237,7 +1237,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	private Object getObjectFromFactoryBean(FactoryBean factory, String beanName, RootBeanDefinition mbd)
+	protected Object getObjectFromFactoryBean(FactoryBean factory, String beanName, RootBeanDefinition mbd)
 			throws BeanCreationException {
 
 		Object object;

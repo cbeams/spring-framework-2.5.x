@@ -28,6 +28,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
@@ -216,7 +217,12 @@ class BeanDefinitionValueResolver {
 			if (mbd.isSingleton()) {
 				this.beanFactory.registerDependentBean(actualInnerBeanName, this.beanName);
 			}
-			return this.beanFactory.getObjectForBeanInstance(innerBean, actualInnerBeanName, mbd);
+			if (innerBean instanceof FactoryBean) {
+				return this.beanFactory.getObjectFromFactoryBean((FactoryBean) innerBean, actualInnerBeanName, mbd);
+			}
+			else {
+				return innerBean;
+			}
 		}
 		catch (BeansException ex) {
 			throw new BeanCreationException(
