@@ -316,6 +316,10 @@ public class BeanDefinitionParserDelegate {
 		return this.defaults;
 	}
 
+	/**
+	 * Return the default settings for bean definitions as indicated within
+	 * the attributes of the top-level <code>&lt;beans/&gt;</code> element.
+	 */
 	public BeanDefinitionDefaults getBeanDefinitionDefaults() {
 		BeanDefinitionDefaults bdd = new BeanDefinitionDefaults();
 		if (this.defaults != null) {
@@ -326,6 +330,15 @@ public class BeanDefinitionParserDelegate {
 			bdd.setDestroyMethodName(this.defaults.getDestroyMethod());
 		}
 		return bdd;
+	}
+
+	/**
+	 * Return any patterns provided in the 'default-autowire-candidates'
+	 * attribute of the top-level <code>&lt;beans/&gt;</code> element.
+	 */
+	public String[] getAutowireCandidatePatterns() {
+		String candidatePattern = this.defaults.getAutowireCandidates();
+		return candidatePattern == null ? null : StringUtils.commaDelimitedListToStringArray(candidatePattern);
 	}
 
 

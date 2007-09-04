@@ -28,6 +28,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.PatternMatchUtils;
 
 /**
  * A bean definition scanner that detects bean candidates on the classpath,
@@ -53,6 +54,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
 
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
+
+	private String[] autowireCandidatePatterns;
 
 	private boolean includeAnnotationConfig = true;
 
@@ -99,6 +102,14 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 */
 	public void setBeanDefinitionDefaults(BeanDefinitionDefaults beanDefinitionDefaults) {
 		this.beanDefinitionDefaults = (beanDefinitionDefaults != null ? beanDefinitionDefaults : new BeanDefinitionDefaults());
+	}
+
+	/**
+	 * Set the name-matching patterns for determining autowire candidates.
+	 * @param autowireCandidatePatterns the patterns to match against
+	 */
+	public void setAutowireCandidatePatterns(String[] autowireCandidatePatterns) {
+		this.autowireCandidatePatterns = autowireCandidatePatterns;
 	}
 
 	/**
@@ -174,6 +185,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				if (checkBeanName(beanName, candidate)) {
 					if (candidate instanceof AbstractBeanDefinition) {
 						((AbstractBeanDefinition) candidate).applyDefaults(beanDefinitionDefaults);
+						if (this.autowireCandidatePatterns != null) {
+							((AbstractBeanDefinition) candidate).setAutowireCandidate(
+									PatternMatchUtils.simpleMatch(this.autowireCandidatePatterns, beanName));
+						}
 					}
 					ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 					BeanDefinition beanDefinition = applyScope(candidate, beanName, scopeMetadata);

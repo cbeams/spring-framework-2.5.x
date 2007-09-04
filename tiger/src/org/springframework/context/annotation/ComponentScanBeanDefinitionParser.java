@@ -86,6 +86,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 				new ClassPathBeanDefinitionScanner(parserContext.getRegistry(), useDefaultFilters);
 		scanner.setResourceLoader(resourceLoader);
 		scanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());
+		scanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());
 
 		String basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);
 		String[] basePackages = StringUtils.commaDelimitedListToStringArray(basePackage);

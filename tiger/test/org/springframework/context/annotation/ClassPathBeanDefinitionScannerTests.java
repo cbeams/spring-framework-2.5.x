@@ -20,6 +20,8 @@ import junit.framework.TestCase;
 import org.aspectj.lang.annotation.Aspect;
 
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -323,6 +325,34 @@ public class ClassPathBeanDefinitionScannerTests extends TestCase {
 			fail("NullPointerException expected; fooDao must not have been set");
 		}
 		catch (NullPointerException expected) {
+		}
+	}
+
+	public void testAutowireCandidatePatternMatches() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
+		scanner.setIncludeAnnotationConfig(true);
+		scanner.setBeanNameGenerator(new TestBeanNameGenerator());
+		scanner.setAutowireCandidatePatterns(new String[] { "*FooDao" });
+		scanner.scan(BASE_PACKAGE);
+		context.refresh();
+		FooService fooService = (FooService) context.getBean("fooService");
+		assertEquals("bar", fooService.foo(123));
+	}
+
+	public void testAutowireCandidatePatternDoesNotMatch() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
+		scanner.setIncludeAnnotationConfig(true);
+		scanner.setBeanNameGenerator(new TestBeanNameGenerator());
+		scanner.setAutowireCandidatePatterns(new String[] { "*NoSuchDao" });
+		scanner.scan(BASE_PACKAGE);
+		try {
+			context.refresh();
+			fail("BeanCreationException expected; fooDao should not have been an autowire-candidate");
+		}
+		catch (BeanCreationException expected) {
+			assertTrue(expected.getMostSpecificCause() instanceof NoSuchBeanDefinitionException);
 		}
 	}
 
