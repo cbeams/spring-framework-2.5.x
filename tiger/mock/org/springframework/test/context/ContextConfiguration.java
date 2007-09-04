@@ -22,20 +22,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.support.GenericXmlContextLoader;
 
 /**
  * ContextConfiguration defines class-level metadata which can be used to
  * instruct client code with regard to how to load and configure an
- * {@link ApplicationContext}. Although the annotated class will generally be
- * an integration or unit test, the use of ContextConfiguration is not
- * necessarily limited to testing scenarios.
+ * {@link org.springframework.context.ApplicationContext ApplicationContext}.
+ * Although the annotated class will generally be an integration or unit test,
+ * the use of ContextConfiguration is not necessarily limited to testing
+ * scenarios.
  *
  * @see ContextLoader
- * @see ApplicationContext
+ * @see org.springframework.context.ApplicationContext
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 2.1
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -46,7 +46,8 @@ public @interface ContextConfiguration {
 
 	/**
 	 * <p>
-	 * The resource locations to use for loading the {@link ApplicationContext}.
+	 * The resource locations to use for loading the
+	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * </p>
 	 * <p>
 	 * Defaults to an empty array.
@@ -57,7 +58,7 @@ public @interface ContextConfiguration {
 	/**
 	 * <p>
 	 * The {@link ContextLoader} type to use for loading the
-	 * {@link ApplicationContext}.
+	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * </p>
 	 * <p>
 	 * Defaults to {@link GenericXmlContextLoader}.
