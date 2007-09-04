@@ -1018,7 +1018,7 @@ public void testProcessWithoutTransaction() {
         test progresses and delegating to
         <interfacename>TestExecutionListener</interfacename>s, which
         instrument the actual test execution (e.g., providing dependency
-        injection, handling transactions, etc.). Consult the JavaDoc and the
+        injection, managing transactions, etc.). Consult the JavaDoc and the
         Spring test suite for further information and examples of various
         configurations.</para>
 
@@ -1244,7 +1244,7 @@ public final class HibernateTitleDaoTests {
     <lineannotation>// this instance will be dependency injected <emphasis
               role="bold">by type</emphasis></lineannotation>
     private HibernateTitleDao titleDao;
-    
+
     <emphasis role="bold">@Autowired</emphasis>
     public void setTitleDao(HibernateTitleDao titleDao) {
         this.titleDao = titleDao;
@@ -1270,10 +1270,6 @@ public final class HibernateTitleDaoTests {
               role="bold">by name</emphasis></lineannotation>
     <emphasis role="bold">@Resource</emphasis>
     private HibernateTitleDao titleDao;
-    
-    public void setTitleDao(HibernateTitleDao titleDao) {
-        this.titleDao = titleDao;
-    }
 
     public void testLoadTitle() throws Exception {
         Title title = this.titleDao.loadTitle(new Long(10));
@@ -1611,7 +1607,7 @@ public class SimpleTest {
           <para><emphasis>Note: These classes serve only as a convenience for
           extension. If you do not wish for your test classes to be tied to a
           Spring-specific class hierarchy - for example, if you wish to 
-          directly extend the class you are testing -- you may configure your 
+          directly extend the class you are testing - you may configure your 
           own custom test classes by using
           <interfacename>@RunWith(SpringJUnit4ClassRunner.class)</interfacename>,
           <interfacename>@ContextConfiguration</interfacename>,
