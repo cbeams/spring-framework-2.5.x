@@ -456,10 +456,11 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	protected EntityManagerFactory findNamedEntityManagerFactory(String unitName, String requestingBeanName)
 			throws NoSuchBeanDefinitionException {
 
+		EntityManagerFactory emf = EntityManagerFactoryUtils.findEntityManagerFactory(this.beanFactory, unitName);
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
 			((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(unitName, requestingBeanName);
 		}
-		return EntityManagerFactoryUtils.findEntityManagerFactory(this.beanFactory, unitName);
+		return emf;
 	}
 
 	/**
