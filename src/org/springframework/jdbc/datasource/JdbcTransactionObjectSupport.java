@@ -28,7 +28,6 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.TransactionUsageException;
 import org.springframework.transaction.support.SmartTransactionObject;
-import org.springframework.util.ClassUtils;
 
 /**
  * Convenient base class for JDBC-aware transaction objects.
@@ -52,17 +51,12 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 
 	private static final Log logger = LogFactory.getLog(JdbcTransactionObjectSupport.class);
 
-	// Determine whether JDK 1.4's Savepoint interface is available,
-	// indicating that Spring's transaction savepoints are supported.
-	private static boolean savepointClassAvailable =
-			ClassUtils.isPresent("java.sql.Savepoint", JdbcTransactionObjectSupport.class.getClassLoader());
-
 
 	private ConnectionHolder connectionHolder;
 
 	private Integer previousIsolationLevel;
 
-	private boolean savepointAllowed;
+	private boolean savepointAllowed = false;
 
 
 	public void setConnectionHolder(ConnectionHolder connectionHolder) {
@@ -103,10 +97,6 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	 * @see java.sql.Connection#setSavepoint
 	 */
 	public Object createSavepoint() throws TransactionException {
-		if (!savepointClassAvailable) {
-			throw new NestedTransactionNotSupportedException(
-					"Cannot create a nested JDBC transaction because you are not running on JDK 1.4 or higher");
-		}
 		ConnectionHolder conHolder = getConnectionHolderForSavepoint();
 		try {
 			if (!conHolder.supportsSavepoints()) {
