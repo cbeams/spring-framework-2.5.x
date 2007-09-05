@@ -252,8 +252,8 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		final int runs = (repeat != null) ? repeat.value() : 1;
 		for (int i = 0; i < runs; i++) {
 			try {
-				if (i > 0 && logger != null) {
-					logger.info("Repetition " + i + " of test " + testMethod.getName());
+				if ((runs > 1) && (logger != null) && (logger.isInfoEnabled())) {
+					logger.info("Repetition " + (i + 1) + " of test " + testMethod.getName());
 				}
 				tec.run();
 				if (ee != null) {
