@@ -118,7 +118,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @return the default editor, or <code>null</code> if none found
 	 * @see #registerDefaultEditors
 	 */
-	protected PropertyEditor getDefaultEditor(Class requiredType) {
+	public PropertyEditor getDefaultEditor(Class requiredType) {
 		if (!this.defaultEditorsActive) {
 			return null;
 		}
