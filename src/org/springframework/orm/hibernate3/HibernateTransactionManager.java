@@ -724,11 +724,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	/**
 	 * Hibernate transaction object, representing a SessionHolder.
 	 * Used as transaction object by HibernateTransactionManager.
-	 *
-	 * <p>Derives from JdbcTransactionObjectSupport in order to inherit the
-	 * capability to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
-	 *
-	 * @see SessionHolder
 	 */
 	private static class HibernateTransactionObject extends JdbcTransactionObjectSupport {
 

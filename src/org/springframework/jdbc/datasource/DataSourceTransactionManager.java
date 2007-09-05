@@ -323,11 +323,6 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	/**
 	 * DataSource transaction object, representing a ConnectionHolder.
 	 * Used as transaction object by DataSourceTransactionManager.
-	 *
-	 * <p>Derives from JdbcTransactionObjectSupport to inherit the capability
-	 * to manage JDBC 3.0 Savepoints.
-	 *
-	 * @see ConnectionHolder
 	 */
 	private static class DataSourceTransactionObject extends JdbcTransactionObjectSupport {
 

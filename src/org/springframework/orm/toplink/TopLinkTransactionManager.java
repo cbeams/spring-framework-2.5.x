@@ -471,9 +471,6 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	/**
 	 * TopLink transaction object, representing a SessionHolder.
 	 * Used as transaction object by TopLinkTransactionManager.
-	 *
-	 * <p>Derives from JdbcTransactionObjectSupport in order to inherit the
-	 * capability to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
 	 */
 	private static class TopLinkTransactionObject extends JdbcTransactionObjectSupport {
 

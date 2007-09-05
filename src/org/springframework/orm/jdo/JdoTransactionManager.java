@@ -501,11 +501,6 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * JDO transaction object, representing a PersistenceManagerHolder.
 	 * Used as transaction object by JdoTransactionManager.
-	 *
-	 * <p>Derives from JdbcTransactionObjectSupport in order to inherit the
-	 * capability to manage JDBC 3.0 Savepoints for underlying JDBC Connections.
-	 *
-	 * @see PersistenceManagerHolder
 	 */
 	private static class JdoTransactionObject extends JdbcTransactionObjectSupport {
 
