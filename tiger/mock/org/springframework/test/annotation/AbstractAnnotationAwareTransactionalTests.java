@@ -108,9 +108,9 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		final Method testMethod = getClass().getMethod(getName(), (Class[]) null);
 
 		if (isDisabledInThisEnvironment(testMethod)) {
+			recordDisabled();
 			this.logger.info("**** " + getClass().getName() + "." + getName() + " disabled in this environment: "
 					+ "Total disabled tests=" + getDisabledTestCount());
-			recordDisabled();
 			return;
 		}
 
