@@ -333,9 +333,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeanCreationException {
 
 		// Guarantee initialization of beans that the current one depends on.
-		if (mbd.getDependsOn() != null) {
-			for (int i = 0; i < mbd.getDependsOn().length; i++) {
-				getBean(mbd.getDependsOn()[i]);
+		String[] dependsOn = mbd.getDependsOn();
+		if (dependsOn != null) {
+			for (int i = 0; i < dependsOn.length; i++) {
+				getBean(dependsOn[i]);
 			}
 		}
 

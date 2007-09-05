@@ -93,7 +93,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	/** Disposable bean instances: bean name --> disposable instance */
 	private final Map disposableBeans = CollectionFactory.createLinkedMapIfPossible(16);
 
-	/** Map between dependent bean names: bean name --> dependent bean name */
+	/** Map between dependent bean names: bean name --> Set of dependent bean names */
 	private final Map dependentBeanMap = new HashMap();
 
 
