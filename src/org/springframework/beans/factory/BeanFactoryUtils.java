@@ -288,8 +288,6 @@ public abstract class BeanFactoryUtils {
 	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if no single bean could be found for the given type
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfTypeIncludingAncestors(ListableBeanFactory lbf, Class type)
@@ -327,8 +325,6 @@ public abstract class BeanFactoryUtils {
 	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if no single bean could be found for the given type
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfTypeIncludingAncestors(
@@ -358,8 +354,6 @@ public abstract class BeanFactoryUtils {
 	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if no single bean could be found for the given type
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfType(ListableBeanFactory lbf, Class type) throws BeansException {
@@ -395,8 +389,6 @@ public abstract class BeanFactoryUtils {
 	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if no single bean could be found for the given type
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfType(
