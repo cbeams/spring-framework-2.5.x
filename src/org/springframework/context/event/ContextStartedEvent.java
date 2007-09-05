@@ -19,20 +19,21 @@ package org.springframework.context.event;
 import org.springframework.context.ApplicationContext;
 
 /**
- * Event raised when an <code>ApplicationContext</code> gets initialized or refreshed.
+ * Event raised when an <code>ApplicationContext</code> gets started.
  *
+ * @author Mark Fisher
  * @author Juergen Hoeller
- * @since 04.03.2003
- * @see ContextClosedEvent
+ * @since 2.1
+ * @see ContextStoppedEvent
  */
-public class ContextRefreshedEvent extends ApplicationContextEvent {
+public class ContextStartedEvent extends ApplicationContextEvent {
 
 	/**
-	 * Create a new ContextRefreshedEvent.
-	 * @param source the <code>ApplicationContext</code> that has been initialized
-	 * or refreshed (must not be <code>null</code>)
+	 * Create a new ContextStartedEvent.
+	 * @param source the <code>ApplicationContext</code> that has been started
+	 * (must not be <code>null</code>)
 	 */
-	public ContextRefreshedEvent(ApplicationContext source) {
+	public ContextStartedEvent(ApplicationContext source) {
 		super(source);
 	}
 

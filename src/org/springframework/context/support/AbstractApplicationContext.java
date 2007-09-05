@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -58,10 +59,10 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.event.ApplicationEventMulticaster;
-import org.springframework.context.event.ComponentStartedEvent;
-import org.springframework.context.event.ComponentStoppedEvent;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.OrderComparator;
@@ -1010,19 +1011,21 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	//---------------------------------------------------------------------
 
 	public void start() {
-		Map lifecycleBeans = Collections.unmodifiableMap(getLifecycleBeans());
-		for (Iterator it = lifecycleBeans.keySet().iterator(); it.hasNext();) {
+		Map lifecycleBeans = getLifecycleBeans();
+		for (Iterator it = new HashSet(lifecycleBeans.keySet()).iterator(); it.hasNext();) {
 			String beanName = (String) it.next();
-			startLifecycleBean(beanName, (Lifecycle) lifecycleBeans.get(beanName));
+			doStart(lifecycleBeans, beanName);
 		}
+		publishEvent(new ContextStartedEvent(this));
 	}
 
 	public void stop() {
-		Map lifecycleBeans = Collections.unmodifiableMap(getLifecycleBeans());
-		for (Iterator it = lifecycleBeans.keySet().iterator(); it.hasNext();) {
+		Map lifecycleBeans = getLifecycleBeans();
+		for (Iterator it = new HashSet(lifecycleBeans.keySet()).iterator(); it.hasNext();) {
 			String beanName = (String) it.next();
-			stopLifecycleBean(beanName, (Lifecycle) lifecycleBeans.get(beanName));
+			doStop(lifecycleBeans, beanName);
 		}
+		publishEvent(new ContextStoppedEvent(this));
 	}
 
 	public boolean isRunning() {
@@ -1037,56 +1040,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Start a bean that implements the Lifecycle interface. Any other
-	 * lifecycle beans that this bean depends on will be started before it.
-	 * @param beanName name of the bean to start
-	 * @param bean the lifecycle instance
-	 */
-	private void startLifecycleBean(String beanName, Lifecycle bean) {
-		BeanDefinition bd = this.getBeanFactory().getBeanDefinition(beanName);
-		if (bd instanceof AbstractBeanDefinition) {
-			String[] dependsOnBeans = ((AbstractBeanDefinition) bd).getDependsOn();
-			if (dependsOnBeans != null) {
-				for (int i = 0; i < dependsOnBeans.length; i++) {
-					Object dependsOn = getLifecycleBeans().get(dependsOnBeans[i]);
-					if (dependsOn != null && (dependsOn instanceof Lifecycle)) {
-						startLifecycleBean(dependsOnBeans[i], (Lifecycle) dependsOn);
-					}
-				}
-			}
-		}
-		if (!bean.isRunning()) {
-			bean.start();
-			publishEvent(new ComponentStartedEvent(bean));
-		}
-	}
-
-	/**
-	 * Stop a bean that implements the Lifecycle interface. Any other
-	 * lifecycle beans that depend on this bean will be stopped before it.
-	 * @param beanName name of the bean to stop
-	 * @param bean the lifecycle instance
-	 */
-	private void stopLifecycleBean(String beanName, Lifecycle bean) {
-		String[] dependentBeans = this.getBeanFactory().getDependentBeans(beanName);
-		for (int i = 0; i < dependentBeans.length; i++) {
-			Object dependent = getLifecycleBeans().get(dependentBeans[i]);
-			if (dependent != null && (dependent instanceof Lifecycle)) {
-				stopLifecycleBean(dependentBeans[i], (Lifecycle) dependent);
-			}
-		}
-		if (bean.isRunning()) {
-			bean.stop();
-			publishEvent(new ComponentStoppedEvent(bean));
-		}
-	}
-
-	/**
 	 * Return a Map of all singleton beans that implement the
 	 * Lifecycle interface in this context.
 	 * @return Map of Lifecycle beans with bean name as key
 	 */
-	protected Map getLifecycleBeans() {
+	private Map getLifecycleBeans() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		String[] beanNames = beanFactory.getBeanNamesForType(Lifecycle.class, false, false);
 		Map beans = new HashMap(beanNames.length);
@@ -1097,6 +1055,46 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		return beans;
+	}
+
+	/**
+	 * Start the specified bean as part of the given set of Lifecycle beans,
+	 * making sure that any beans that it depends on are started first.
+	 * @param lifecycleBeans Map with bean name as key and Lifecycle instance as value
+	 * @param beanName the name of the bean to start
+	 */
+	private void doStart(Map lifecycleBeans, String beanName) {
+		Lifecycle bean = (Lifecycle) lifecycleBeans.get(beanName);
+		if (bean != null) {
+			String[] dependenciesForBean = getBeanFactory().getDependenciesForBean(beanName);
+			for (int i = 0; i < dependenciesForBean.length; i++) {
+				doStart(lifecycleBeans, dependenciesForBean[i]);
+			}
+			if (!bean.isRunning()) {
+				bean.start();
+			}
+			lifecycleBeans.remove(beanName);
+		}
+	}
+
+	/**
+	 * Stop the specified bean as part of the given set of Lifecycle beans,
+	 * making sure that any beans that depends on it are stopped first.
+	 * @param lifecycleBeans Map with bean name as key and Lifecycle instance as value
+	 * @param beanName the name of the bean to stop
+	 */
+	private void doStop(Map lifecycleBeans, String beanName) {
+		Lifecycle bean = (Lifecycle) lifecycleBeans.get(beanName);
+		if (bean != null) {
+			String[] dependentBeans = getBeanFactory().getDependentBeans(beanName);
+			for (int i = 0; i < dependentBeans.length; i++) {
+				doStop(lifecycleBeans, dependentBeans[i]);
+			}
+			if (bean.isRunning()) {
+				bean.stop();
+			}
+			lifecycleBeans.remove(beanName);
+		}
 	}
 
 

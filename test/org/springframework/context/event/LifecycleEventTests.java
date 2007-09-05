@@ -16,19 +16,21 @@
 
 package org.springframework.context.event;
 
+import junit.framework.TestCase;
+
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.support.StaticApplicationContext;
 
-import junit.framework.TestCase;
-
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class LifecycleEventTests extends TestCase {
 
-	public void testComponentStartedEvent() {
+	public void testContextStartedEvent() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerSingleton("lifecycle", LifecycleTestBean.class);
 		context.registerSingleton("listener", LifecycleListener.class);
@@ -40,10 +42,10 @@ public class LifecycleEventTests extends TestCase {
 		context.start();
 		assertTrue(lifecycleBean.isRunning());
 		assertEquals(1, listener.getStartedCount());
-		assertSame(lifecycleBean, listener.getComponent());
+		assertSame(context, listener.getApplicationContext());
 	}
 
-	public void testComponentStoppedEvent() {
+	public void testContextStoppedEvent() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerSingleton("lifecycle", LifecycleTestBean.class);
 		context.registerSingleton("listener", LifecycleListener.class);
@@ -57,31 +59,31 @@ public class LifecycleEventTests extends TestCase {
 		context.stop();
 		assertFalse(lifecycleBean.isRunning());
 		assertEquals(1, listener.getStoppedCount());
-		assertSame(lifecycleBean, listener.getComponent());
+		assertSame(context, listener.getApplicationContext());
 	}
 
 
 	private static class LifecycleListener implements ApplicationListener {
 
-		private Lifecycle component;
+		private ApplicationContext context;
 
 		private int startedCount;
 
 		private int stoppedCount;
 
 		public void onApplicationEvent(ApplicationEvent event) {
-			if (event instanceof ComponentStartedEvent) {
-				this.component = ((ComponentStartedEvent) event).getComponent();
+			if (event instanceof ContextStartedEvent) {
+				this.context = ((ContextStartedEvent) event).getApplicationContext();
 				this.startedCount++;
 			}
-			else if (event instanceof ComponentStoppedEvent) {
-				this.component = ((ComponentStoppedEvent) event).getComponent();
+			else if (event instanceof ContextStoppedEvent) {
+				this.context = ((ContextStoppedEvent) event).getApplicationContext();
 				this.stoppedCount++;
 			}
 		}
 
-		public Lifecycle getComponent() {
-			return this.component;
+		public ApplicationContext getApplicationContext() {
+			return this.context;
 		}
 
 		public int getStartedCount() {

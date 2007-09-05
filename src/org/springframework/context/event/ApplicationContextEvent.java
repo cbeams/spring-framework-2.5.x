@@ -16,31 +16,31 @@
 
 package org.springframework.context.event;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.Lifecycle;
 
 /**
- * Event raised when a Lifecycle component is stopped.
+ * Base class for events raised for an <code>ApplicationContext</code>.
  *
- * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 2.1
  */
-public class ComponentStoppedEvent extends ApplicationEvent {
+public abstract class ApplicationContextEvent extends ApplicationEvent {
 
 	/**
-	 * Creates a new ComponentStoppedEvent.
-	 * @param source the Lifecycle instance
+	 * Create a new ContextStartedEvent.
+	 * @param source the <code>ApplicationContext</code> that the event is raised for
+	 * (must not be <code>null</code>)
 	 */
-	public ComponentStoppedEvent(Lifecycle source) {
+	public ApplicationContextEvent(ApplicationContext source) {
 		super(source);
 	}
 
 	/**
-	 * Retrieves the <code>Lifecycle</code> instance that has been stopped.
-	 * @return the <code>Lifecycle</code> instance that has been stopped
+	 * Get the <code>ApplicationContext</code> that the event was raised for.
 	 */
-	public Lifecycle getComponent() {
-		return (Lifecycle) getSource();
+	public final ApplicationContext getApplicationContext() {
+		return (ApplicationContext) getSource();
 	}
 
 }
