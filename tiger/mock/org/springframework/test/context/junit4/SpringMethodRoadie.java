@@ -31,6 +31,7 @@ import org.junit.Assume.AssumptionViolatedException;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
+import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestContextManager;
 
@@ -55,7 +56,7 @@ import org.springframework.test.context.TestContextManager;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 class SpringMethodRoadie {
@@ -137,8 +138,6 @@ class SpringMethodRoadie {
 	 */
 	public void run() {
 
-		// TODO Add support for @Repeat.
-
 		if (getTestMethod().isIgnored()) {
 			getNotifier().fireTestIgnored(getDescription());
 			return;
@@ -188,12 +187,13 @@ class SpringMethodRoadie {
 	 * Runs the test method on the test instance with the specified
 	 * <code>timeout</code>.
 	 *
+	 * @see #runWithRepetitions(Runnable)
 	 * @see #runTestMethod()
 	 * @param timeout The timeout in milliseconds.
 	 */
 	protected void runWithTimeout(final long timeout) {
 
-		runBeforesThenTestThenAfters(new Runnable() {
+		runWithRepetitions(new Runnable() {
 
 			public void run() {
 
@@ -233,18 +233,47 @@ class SpringMethodRoadie {
 	 * Runs the test, including {@link #runBefores() @Before} and
 	 * {@link #runAfters() @After} methods.
 	 *
-	 * @see #runBeforesThenTestThenAfters(Runnable)
+	 * @see #runWithRepetitions(Runnable)
 	 * @see #runTestMethod()
 	 */
 	protected void runTest() {
 
-		runBeforesThenTestThenAfters(new Runnable() {
+		runWithRepetitions(new Runnable() {
 
 			public void run() {
 
 				runTestMethod();
 			}
 		});
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * <p>
+	 * Runs the supplied <code>test</code> with repetitions. Checks for the
+	 * presence of {@link Repeat @Repeat} to determine if the test should be run
+	 * more than once and delegates to
+	 * {@link #runBeforesThenTestThenAfters(Runnable)} for each repetition. The
+	 * test will be run at least once.
+	 * </p>
+	 *
+	 * @see Repeat
+	 * @see #runBeforesThenTestThenAfters(Runnable)
+	 * @param test The runnable test.
+	 */
+	protected void runWithRepetitions(final Runnable test) {
+
+		final Method method = this.getTestMethod().getMethod();
+		final Repeat repeat = method.getAnnotation(Repeat.class);
+		final int runs = ((repeat != null) && (repeat.value() > 1)) ? repeat.value() : 1;
+
+		for (int i = 0; i < runs; i++) {
+			if ((runs > 1) && (LOG != null) && (LOG.isInfoEnabled())) {
+				LOG.info("Repetition " + (i + 1) + " of test " + method.getName());
+			}
+			runBeforesThenTestThenAfters(test);
+		}
 	}
 
 	// ------------------------------------------------------------------------|
