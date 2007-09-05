@@ -31,6 +31,7 @@ import org.junit.Assume.AssumptionViolatedException;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
+import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestContextManager;
 
 /**
@@ -54,7 +55,7 @@ import org.springframework.test.context.TestContextManager;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 2.1
  */
 class SpringMethodRoadie {
@@ -136,7 +137,7 @@ class SpringMethodRoadie {
 	 */
 	public void run() {
 
-		// XXX Optional: add support for @Repeat.
+		// TODO Add support for @Repeat.
 
 		if (getTestMethod().isIgnored()) {
 			getNotifier().fireTestIgnored(getDescription());
@@ -144,9 +145,33 @@ class SpringMethodRoadie {
 		}
 		getNotifier().fireTestStarted(getDescription());
 		try {
-			final long timeout = getTestMethod().getTimeout();
-			if (timeout > 0) {
-				runWithTimeout(timeout);
+			final Timed timedAnnotation = getTestMethod().getMethod().getAnnotation(Timed.class);
+			final long springTimeout = ((timedAnnotation != null) && (timedAnnotation.millis() > 0)) ? timedAnnotation.millis()
+					: 0;
+			final long junitTimeout = getTestMethod().getTimeout();
+
+			if ((springTimeout > 0) && (junitTimeout > 0)) {
+				final String msg = "Test method [" + getTestMethod().getMethod()
+						+ "] has been configured with Spring's @Timed(millis=" + springTimeout
+						+ ") and JUnit's @Test(timeout=" + junitTimeout
+						+ ") annotations. Only one declaration of a 'timeout' is permitted per test method.";
+				LOG.error(msg);
+				throw new IllegalStateException(msg);
+			}
+			else if (springTimeout > 0) {
+				final long startTime = System.currentTimeMillis();
+				try {
+					runTest();
+				}
+				finally {
+					final long elapsed = System.currentTimeMillis() - startTime;
+					if (elapsed > springTimeout) {
+						addFailure(new Exception("Took " + elapsed + " ms; limit was " + springTimeout));
+					}
+				}
+			}
+			else if (junitTimeout > 0) {
+				runWithTimeout(junitTimeout);
 			}
 			else {
 				runTest();

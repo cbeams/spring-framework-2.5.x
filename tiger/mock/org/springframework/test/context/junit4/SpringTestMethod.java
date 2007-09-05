@@ -48,7 +48,7 @@ import org.springframework.test.annotation.Timed;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 class SpringTestMethod {
@@ -212,9 +212,7 @@ class SpringTestMethod {
 	 * Gets the configured <code>timeout</code> for this test method.
 	 * </p>
 	 * <p>
-	 * Supports both Spring's {@link Timed @Timed(millis=...)} and JUnit's
-	 * {@link Test#timeout() @Test(timeout=...)} annotations, but not both
-	 * simultaneously.
+	 * Supports JUnit's {@link Test#timeout() @Test(timeout=...)} annotation.
 	 * </p>
 	 *
 	 * @return The timeout, or <code>0</code> if none was specified.
@@ -223,29 +221,9 @@ class SpringTestMethod {
 	 */
 	public long getTimeout() throws IllegalStateException {
 
-		final Timed timedAnnotation = getMethod().getAnnotation(Timed.class);
 		final Test testAnnotation = getMethod().getAnnotation(Test.class);
-
-		long timeout = 0;
-		final long springTimeout = ((timedAnnotation != null) && (timedAnnotation.millis() > 0)) ? timedAnnotation.millis()
+		final long timeout = ((testAnnotation != null) && (testAnnotation.timeout() > 0)) ? testAnnotation.timeout()
 				: 0;
-		final long junitTimeout = ((testAnnotation != null) && (testAnnotation.timeout() > 0)) ? testAnnotation.timeout()
-				: 0;
-
-		if ((springTimeout > 0) && (junitTimeout > 0)) {
-			final String msg = "Test method [" + getMethod() + "] has been configured with Spring's @Timed(millis="
-					+ springTimeout + ") and JUnit's @Test(timeout=" + junitTimeout
-					+ ") annotations. Only one declaration of a 'timeout' is permitted per test method.";
-			LOG.error(msg);
-			throw new IllegalStateException(msg);
-		}
-		else if (springTimeout > 0) {
-			timeout = springTimeout;
-		}
-		else if (junitTimeout > 0) {
-			timeout = junitTimeout;
-		}
-
 		return timeout;
 	}
 

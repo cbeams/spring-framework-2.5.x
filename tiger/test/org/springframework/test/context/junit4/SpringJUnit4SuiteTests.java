@@ -39,7 +39,7 @@ import org.springframework.test.context.SpringRunnerContextCacheTests;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 @RunWith(Suite.class)
@@ -80,7 +80,9 @@ RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests.class,
 
 RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests.class,
 
-BeforeAndAfterTransactionAnnotationTests.class
+BeforeAndAfterTransactionAnnotationTests.class,
+
+TimedTransactionalSpringRunnerTests.class
 
 })
 public class SpringJUnit4SuiteTests {
