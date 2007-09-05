@@ -21,6 +21,7 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.annotation.NotTransactional;
+import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -56,13 +57,16 @@ public class TimedTransactionalSpringRunnerTests {
 	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
+	@Test
 	@Timed(millis = 10000)
+	@Repeat(5)
 	public void transactionalWithSpringTimeout() {
 
 		assertInTransaction(true);
 	}
 
 	@Test(timeout = 10000)
+	@Repeat(5)
 	public void transactionalWithJUnitTimeout() {
 
 		// Note: the combination of JUnit's @Test(timeout=...) and Spring's
@@ -75,6 +79,7 @@ public class TimedTransactionalSpringRunnerTests {
 	@Test
 	@NotTransactional
 	@Timed(millis = 10000)
+	@Repeat(5)
 	public void notTransactionalWithSpringTimeout() {
 
 		assertInTransaction(false);
@@ -82,6 +87,7 @@ public class TimedTransactionalSpringRunnerTests {
 
 	@Test(timeout = 10000)
 	@NotTransactional
+	@Repeat(5)
 	public void notTransactionalWithJUnitTimeout() {
 
 		assertInTransaction(false);
