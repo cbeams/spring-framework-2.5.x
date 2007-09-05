@@ -40,7 +40,7 @@ import org.springframework.test.context.TestContextManager;
  * the {@link Repeat @Repeat} annotation.
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(JUnit4ClassRunner.class)
@@ -72,11 +72,11 @@ public class RepeatedSpringMethodRoadieTests {
 	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private void assertRepetitions(final Class<RepeatedTests> clazz, final String methodName,
-			final int expectedNumInvocations) throws Exception {
+	private void assertRepetitions(final String methodName, final int expectedNumInvocations) throws Exception {
 
+		final Class<RepeatedTestCase> clazz = RepeatedTestCase.class;
 		final TestClass testClass = new TestClass(clazz);
-		final RepeatedTests testInstance = clazz.newInstance();
+		final RepeatedTestCase testInstance = clazz.newInstance();
 		final Method method = clazz.getMethod(methodName, (Class[]) null);
 		final SpringTestMethod testMethod = new SpringTestMethod(method, testClass);
 
@@ -93,17 +93,17 @@ public class RepeatedSpringMethodRoadieTests {
 	@Test
 	public void testRepeatAnnotationSupport() throws Exception {
 
-		assertRepetitions(RepeatedTests.class, "testNonAnnotated", 1);
-		assertRepetitions(RepeatedTests.class, "testNegativeRepeatValue", 1);
-		assertRepetitions(RepeatedTests.class, "testDefaultRepeatValue", 1);
-		assertRepetitions(RepeatedTests.class, "testRepeatedFiveTimes", 5);
+		assertRepetitions("testNonAnnotated", 1);
+		assertRepetitions("testNegativeRepeatValue", 1);
+		assertRepetitions("testDefaultRepeatValue", 1);
+		assertRepetitions("testRepeatedFiveTimes", 5);
 	}
 
 	// ------------------------------------------------------------------------|
 	// --- TYPES --------------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected static class RepeatedTests {
+	protected static class RepeatedTestCase {
 
 		int	beforeCount		= 0;
 
