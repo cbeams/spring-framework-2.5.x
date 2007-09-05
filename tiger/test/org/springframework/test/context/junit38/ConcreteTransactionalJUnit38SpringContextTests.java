@@ -29,6 +29,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
@@ -40,7 +41,7 @@ import org.springframework.test.utils.SimpleJdbcTestUtils;
  * {@link AbstractTransactionalJUnit38SpringContextTests}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 @RunWith(JUnit38ClassRunner.class)
@@ -59,6 +60,10 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 	protected static final String	SUE				= "sue";
 
 	protected static final String	YODA			= "yoda";
+
+	private static final String		NAME			= "test.if_profile_value.name";
+
+	private static final String		VALUE			= "enigma";
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE VARIABLES -------------------------------------------------|
@@ -89,12 +94,13 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 
 	public ConcreteTransactionalJUnit38SpringContextTests() throws Exception {
 
-		super();
+		this(null);
 	}
 
 	public ConcreteTransactionalJUnit38SpringContextTests(final String name) throws Exception {
 
 		super(name);
+		System.setProperty(NAME, VALUE);
 	}
 
 	// ------------------------------------------------------------------------|
@@ -170,6 +176,20 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 	}
 
 	// ------------------------------------------------------------------------|
+
+	@NotTransactional
+	@IfProfileValue(name = NAME, value = VALUE + "X")
+	public void testDisabledIfProfileValueAnnotation() {
+
+		fail("The body of a disabled test should never be executed!");
+	}
+
+	@NotTransactional
+	@IfProfileValue(name = NAME, value = VALUE)
+	public void testEnabledIfProfileValueAnnotation() {
+
+		assertTrue(true);
+	}
 
 	@NotTransactional
 	public void testApplicationContext() {

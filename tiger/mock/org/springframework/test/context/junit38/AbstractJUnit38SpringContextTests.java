@@ -31,7 +31,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.ExpectedException;
+import org.springframework.test.annotation.IfProfileValue;
+import org.springframework.test.annotation.ProfileValueSource;
 import org.springframework.test.annotation.Repeat;
+import org.springframework.test.annotation.SystemProfileValueSource;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
@@ -65,11 +68,17 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * @see TestContextManager
  * @see TestExecutionListeners
  * @author Sam Brannen
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 2.1
  */
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
 public class AbstractJUnit38SpringContextTests extends TestCase implements ApplicationContextAware {
+
+	// ------------------------------------------------------------------------|
+	// --- STATIC VARIABLES ---------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	private static int					disabledTestCount	= 0;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE VARIABLES -------------------------------------------------|
@@ -82,7 +91,9 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	protected ApplicationContext		applicationContext;
 
 	/** Logger available to subclasses. */
-	protected final Log					logger	= LogFactory.getLog(getClass());
+	protected final Log					logger				= LogFactory.getLog(getClass());
+
+	protected ProfileValueSource		profileValueSource	= SystemProfileValueSource.getInstance();
 
 	private final TestContextManager	testContextManager;
 
@@ -119,6 +130,18 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 
 		super(name);
 		this.testContextManager = new TestContextManager(getClass());
+	}
+
+	// ------------------------------------------------------------------------|
+	// --- STATIC METHODS -----------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Return the number of tests disabled in this environment.
+	 */
+	public static int getDisabledTestCount() {
+
+		return disabledTestCount;
 	}
 
 	// ------------------------------------------------------------------------|
@@ -177,6 +200,11 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 		this.testContextManager.prepareTestInstance(this);
 
 		final Method testMethod = getTestMethod();
+
+		if (isDisabledInThisEnvironment(testMethod)) {
+			recordDisabled(testMethod);
+			return;
+		}
 
 		final Repeat repeat = testMethod.getAnnotation(Repeat.class);
 		final long runs = ((repeat != null) && (repeat.value() > 1)) ? repeat.value() : 1;
@@ -337,6 +365,53 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	public final void setApplicationContext(final ApplicationContext applicationContext) {
 
 		this.applicationContext = applicationContext;
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Determines if the supplied test method is <em>disabled</em> in the
+	 * current environment (i.e., whether or not the test should be executed) by
+	 * evaluating the {@link IfProfileValue @IfProfileValue} annotation, if
+	 * present.
+	 *
+	 * @see #isIgnored()
+	 * @param testMethod The test method to test against.
+	 * @return whether the test method should execute in the current environment
+	 */
+	protected boolean isDisabledInThisEnvironment(final Method testMethod) {
+
+		IfProfileValue ifProfileValue = testMethod.getAnnotation(IfProfileValue.class);
+		if (ifProfileValue == null) {
+			ifProfileValue = getClass().getAnnotation(IfProfileValue.class);
+		}
+
+		if (ifProfileValue != null) {
+			// May be true
+			return !this.profileValueSource.get(ifProfileValue.name()).equals(ifProfileValue.value());
+		}
+
+		// else
+		return false;
+
+		// XXX Optional: add support for @IfNotProfileValue.
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
+	 * Records the supplied test method as <em>disabled</em> in the current
+	 * environment by incrementing the total number of disabled tests and
+	 * logging a debug message.
+	 *
+	 * @see #getDisabledTestCount()
+	 * @param testMethod The test method that is disabled.
+	 */
+	protected void recordDisabled(final Method testMethod) {
+
+		disabledTestCount++;
+		this.logger.info("**** " + getClass().getName() + "." + getName() + "() is disabled in this environment: "
+				+ "Total disabled tests = " + getDisabledTestCount());
 	}
 
 	// ------------------------------------------------------------------------|
