@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M4 (2007-09-04)
+Changes in version 2.1 M4 (2007-09-06)
 --------------------------------------
 
 General
@@ -20,6 +20,8 @@ Package org.springframework.aop
 
 Package org.springframework.beans
 * TypeConverterDelegate protects its value conversion step against PropertyEditors which don't support "setValue" calls
+* TypeConverterDelegate falls back to "toString()" conversion for a primitive value type if the required type is String
+* PropertyEditorRegistrySupport's "copyCustomEditorsTo" copies all editors if 'nestedProperty' argument is null
 * exposed "String[] getDependentBeans(beanName)" method on ConfigurableBeanFactory interface
 * DefaultSingletonBeanRegistry uses a concurrent Map for managing dependent beans, avoiding unnecessary synchronization
 * removed superseded ResourceFactoryBean (String-to-Resource conversion has been implicitly available for years)
@@ -29,16 +31,19 @@ Package org.springframework.beans
 * introduced AutowireCandidateResolver mechanism and QualifierAnnotationAutowireCandidateResolver implementation
 * reworked Annotated/ScannedRootBeanDefinition into Annotated/ScannedGenericBeanDefinition
 * fixed AbstractBeanFactory's type check to ignore a null value (as potentially exposed by a FactoryBean)
+* fixed AbstractBeanFactory to never cache FactoryBean-exposed objects for inner beans (avoiding name conflicts)
 * optimized DefaultListableBeanFactory's shortcut access to cached merged bean definitions
 * optimized DefaultListableBeanFactory's resolution of bean references during prototype creation
 * DefaultListableBeanFactory performs SmartFactoryBean eager-init check even if the FactoryBean singleton already exists
 * CommonAnnotationBeanPostProcessor falls back to default type match if no bean found for @Resource field/property name
 * factored out "isCandidateComponent(beanDefinition)" template method in ClassPathScanningCandidateComponentProvider
 * ClassPathBeanDefinitionScanner does not apply scoped-proxy setting to prototypes (only to extended scopes)
+* scoped inner beans are now eligible for scoped destruction callbacks, despite not living as scoped attributes
 * "spring-beans-2.1.xsd" supports "default-autowire-candidates" attribute, accepting Spring-style bean name patterns
 
 Package org.springframework.context
 * AbstractApplicationContext registers BeanFactory, ApplicationContext etc as resolvable dependency types for @Autowired
+* fixed AbstractApplicationContext's temporary ClassLoader to work for by-type autowiring in ApplicationListeners etc
 
 Package org.springframework.core
 * factored out protected "openStreamForClass" template method in OverridingClassLoader
@@ -63,6 +68,9 @@ Package org.springframework.orm
 * added savepoint support to JpaDialect, implemented by OpenJpaDialect, supported by JpaTransactionManager
 * OpenJpaDialect exposes a special JDBC ConnectionHandle that immediately returns the Connection to the EntityManager
 
+Package org.springframework.remoting
+* LocalJaxRpcServiceFactory trims whitespace from "namespaceUri" values
+
 Package org.springframework.scripting
 * ScriptCompilationException carries the ScriptSource of the offending script
 * GroovyScriptFactory passes script source description to GroovyClassLoader.parseClass (for descriptive error messages)
@@ -70,6 +78,7 @@ Package org.springframework.scripting
 
 Package org.springframework.test
 * fixed AbstractSpringContextTests's "hasCachedContext" implementation to use the context key String translation
+* reduced AbstractTransactionalSpringContextTests's log level for transaction management from INFO to DEBUG
 * introduced generic annotation-based test execution framework
 * introduced JUnit4 support (SpringJUnit4ClassRunner)
 
@@ -80,6 +89,7 @@ Package org.springframework.ui
 * ModelMap extends LinkedHashMap, exposing model elements in registration order
 
 Package org.springframework.util
+* "ClassUtils.forName" supports the JDK's internal names for primitive array classes as well (for JMX compatibility)
 * ReflectionUtils provides a "findMethod" variant without parameter types argument
 
 Package org.springframework.web
