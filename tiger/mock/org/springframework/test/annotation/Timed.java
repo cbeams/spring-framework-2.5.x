@@ -31,7 +31,13 @@ import java.lang.annotation.Target;
  * If the text execution takes longer than the specified time period, then the
  * test is to be considered failed.
  * </p>
+ * <p>
+ * Note that the time period includes execution of the test method itself, any
+ * {@link Repeat repetitions} of the test, and any <em>set up</em> or
+ * <em>tear down</em> of the test fixture.
+ * </p>
  *
+ * @see Repeat
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
