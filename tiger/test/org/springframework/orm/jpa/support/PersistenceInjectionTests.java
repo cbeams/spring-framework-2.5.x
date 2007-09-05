@@ -33,6 +33,7 @@ import javax.persistence.PersistenceUnit;
 
 import org.easymock.MockControl;
 
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.SimpleMapScope;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -60,11 +61,16 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 				new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
 		gac.registerBeanDefinition(DefaultPrivatePersistenceContextField.class.getName(),
 				new RootBeanDefinition(DefaultPrivatePersistenceContextField.class));
+		gac.registerBeanDefinition(FactoryBeanWithPersistenceContextField.class.getName(),
+				new RootBeanDefinition(FactoryBeanWithPersistenceContextField.class));
 		gac.refresh();
 
 		DefaultPrivatePersistenceContextField bean = (DefaultPrivatePersistenceContextField) gac.getBean(
 				DefaultPrivatePersistenceContextField.class.getName());
+		FactoryBeanWithPersistenceContextField bean2 = (FactoryBeanWithPersistenceContextField) gac.getBean(
+				"&" + FactoryBeanWithPersistenceContextField.class.getName());
 		assertNotNull(bean.em);
+		assertNotNull(bean2.em);
 	}
 
 	public void testPublicExtendedPersistenceContextSetter() throws Exception {
@@ -653,6 +659,25 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 		@PersistenceContext
 		private EntityManager em;
+	}
+
+
+	public static class FactoryBeanWithPersistenceContextField implements FactoryBean {
+
+		@PersistenceContext
+		private EntityManager em;
+
+		public Object getObject() throws Exception {
+			return null;
+		}
+
+		public Class getObjectType() {
+			return null;
+		}
+
+		public boolean isSingleton() {
+			return true;
+		}
 	}
 
 
