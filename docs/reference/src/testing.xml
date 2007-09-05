@@ -1680,7 +1680,7 @@ public class SimpleTest {
             execution timeouts (i.e., by executing the test method in a
             separate <interfacename>Thread</interfacename>), one can not use
             JUnit's <interfacename>@Test(timeout=...)</interfacename>
-            configuration on a test method which is executes in a
+            configuration on a test method which is executed in a
             transactional context. Therefore, if you wish to configure a test
             method to be both <emphasis>timed</emphasis> <emphasis
             role="bold">and</emphasis> <emphasis>transactional</emphasis>, you
