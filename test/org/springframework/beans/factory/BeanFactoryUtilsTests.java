@@ -263,22 +263,11 @@ public class BeanFactoryUtilsTests extends TestCase {
 	public void testCDependencies() {
 		String[] deps = this.dependentBeansBF.getDependentBeans("c");
 		assertTrue(Arrays.equals(new String[] { "int", "long" }, deps));
-
 	}
 
 	public void testIntDependencies() {
 		String[] deps = this.dependentBeansBF.getDependentBeans("int");
 		assertTrue(Arrays.equals(new String[] { "buffer" }, deps));
-	}
-
-	public void testTransitiveDependenciesForInt() {
-		String[] deps = BeanFactoryUtils.getTransitiveDependentBeans(this.dependentBeansBF, "b", false, null);
-		assertTrue(Arrays.equals(new String[] { "c", "int", "buffer", "long" }, deps));
-	}
-
-	public void testTransitiveFBDependencies() {
-		String[] deps = BeanFactoryUtils.getTransitiveDependentBeans(this.dependentBeansBF, "thread", true, null);
-		assertTrue(Arrays.equals(new String[] { "field", "&secondBuffer" }, deps));
 	}
 
 }

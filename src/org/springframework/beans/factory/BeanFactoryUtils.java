@@ -19,13 +19,10 @@ package org.springframework.beans.factory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -304,8 +301,6 @@ public abstract class BeanFactoryUtils {
 	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if no single bean could be found for the given type
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfTypeIncludingAncestors(ListableBeanFactory lbf, Class type)
@@ -343,8 +338,6 @@ public abstract class BeanFactoryUtils {
 	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if no single bean could be found for the given type
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfTypeIncludingAncestors(
@@ -374,8 +367,6 @@ public abstract class BeanFactoryUtils {
 	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if no single bean could be found for the given type
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfType(ListableBeanFactory lbf, Class type) throws BeansException {
@@ -411,8 +402,6 @@ public abstract class BeanFactoryUtils {
 	 * @return the matching bean instance
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if no single bean could be found for the given type
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfType(
@@ -428,73 +417,5 @@ public abstract class BeanFactoryUtils {
 			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
 		}
 	}
-	
-	/**
-	 * Return all beans that depend directly or indirectly (transitively), on
-	 * the bean identified by the 'beanName'. When dealing with a {@link FactoryBean}, the
-	 * factory itself can be returned or its product. Additional filtering can
-	 * be executed through the type parameter. If no filtering is required, then
-	 * null can be passed.
-	 * 
-	 * Note that depending on the #rawFactoryBeans parameter, the type of
-	 * factoryBean or its product can be used when doing the type filtering.
-	 *
-	 * @see BeanFactory#FACTORY_BEAN_PREFIX
-	 * 
-	 * @param beanFactory beans bean factory
-	 * @param beanName root bean name
-	 * @param rawFactoryBeans consider the factory bean itself or its product
-	 * @param type type of the beans returned (null to return all beans)
-	 * @return bean names names of beans trasitively depending on the given one
-	 * 
-	 */
-	public static String[] getTransitiveDependentBeans(ConfigurableListableBeanFactory beanFactory, String beanName,
-			boolean rawFactoryBeans, Class type) {
-		Assert.notNull(beanFactory);
-		Assert.hasText(beanName);
 
-		Assert.isTrue(beanFactory.containsBean(beanName), "no bean by name [" + beanName + "] can be found");
-
-		Set beans = new LinkedHashSet();
-
-		getTransitiveBeans(beanFactory, beanName, rawFactoryBeans, beans);
-
-		if (type != null) {
-			// filter by type
-			for (Iterator iter = beans.iterator(); iter.hasNext();) {
-				String bean = (String) iter.next();
-				if (!beanFactory.isTypeMatch(bean, type)) {
-					iter.remove();
-				}
-			}
-		}
-
-		return (String[]) beans.toArray(new String[beans.size()]);
-	}
-
-	/**
-	 * Recursive method for discovering transitive dependent beans.
-	 * 
-	 * @param beanFactory
-	 * @param beanName
-	 * @param rawFactoryBeans 
-	 * @param beanNames
-	 */
-	private static void getTransitiveBeans(ConfigurableListableBeanFactory beanFactory, String beanName,
-			boolean rawFactoryBeans, Set beanNames) {
-		// strip out & just in case
-		String[] beans = beanFactory.getDependentBeans(org.springframework.beans.factory.BeanFactoryUtils.transformedBeanName(beanName));
-
-		for (int i = 0; i < beans.length; i++) {
-			String bean = beans[i];
-			// & if needed
-			if (rawFactoryBeans && beanFactory.isFactoryBean(beanName))
-				bean = BeanFactory.FACTORY_BEAN_PREFIX + beans[i];
-
-			if (!beanNames.contains(bean)) {
-				beanNames.add(bean);
-				getTransitiveBeans(beanFactory, bean, rawFactoryBeans, beanNames);
-			}
-		}
-	}
 }
