@@ -15,6 +15,8 @@
  */
 package org.springframework.test.context.junit38;
 
+import java.util.ArrayList;
+
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
@@ -29,8 +31,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.NotTransactional;
+import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
@@ -41,7 +45,7 @@ import org.springframework.test.utils.SimpleJdbcTestUtils;
  * {@link AbstractTransactionalJUnit38SpringContextTests}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 2.1
  */
 @RunWith(JUnit38ClassRunner.class)
@@ -176,6 +180,20 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 	}
 
 	// ------------------------------------------------------------------------|
+
+	@NotTransactional
+	@Timed(millis = 10000)
+	public void testNoOpShouldNotTimeOut() throws Exception {
+
+		/* no-op */
+	}
+
+	@NotTransactional
+	@ExpectedException(IndexOutOfBoundsException.class)
+	public void testExpectedExceptionAnnotation() {
+
+		new ArrayList<Object>().get(1);
+	}
 
 	@NotTransactional
 	@IfProfileValue(name = NAME, value = VALUE + "X")
