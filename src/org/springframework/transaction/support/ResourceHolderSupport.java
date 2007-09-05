@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.transaction.TransactionTimedOutException;
 /**
  * Convenient base class for resource holders.
  *
- * <p>Features rollback-only support for nested Hibernate transactions.
+ * <p>Features rollback-only support for nested transactions.
  * Can expire after a certain number of seconds or milliseconds,
  * to determine transactional timeouts.
  *
@@ -54,7 +54,7 @@ public abstract class ResourceHolderSupport {
 	 * Return whether the resource is synchronized with a transaction.
 	 */
 	public boolean isSynchronizedWithTransaction() {
-		return synchronizedWithTransaction;
+		return this.synchronizedWithTransaction;
 	}
 
 	/**
@@ -68,7 +68,7 @@ public abstract class ResourceHolderSupport {
 	 * Return whether the resource transaction is marked as rollback-only.
 	 */
 	public boolean isRollbackOnly() {
-		return rollbackOnly;
+		return this.rollbackOnly;
 	}
 
 	/**
@@ -99,7 +99,7 @@ public abstract class ResourceHolderSupport {
 	 * @return the deadline as Date object
 	 */
 	public Date getDeadline() {
-		return deadline;
+		return this.deadline;
 	}
 
 	/**
