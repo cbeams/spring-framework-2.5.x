@@ -192,40 +192,42 @@ class TypeConverterDelegate {
 			convertedValue = doConvertValue(oldValue, convertedValue, requiredType, editor);
 		}
 
-		if (requiredType != null && convertedValue != null) {
+		if (requiredType != null) {
 			// Try to apply some standard type conversion rules if appropriate.
 
-			if (String.class.equals(requiredType) && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
-				// We can stringify any primitive value...
-				return convertedValue.toString();
-			}
-			else if (requiredType.isArray()) {
-				// Array required -> apply appropriate conversion of elements.
-				return convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
-			}
-			else if (convertedValue instanceof Collection && CollectionFactory.isApproximableCollectionType(requiredType)) {
-				// Convert elements to target type, if determined.
-				convertedValue = convertToTypedCollection((Collection) convertedValue, propertyName, methodParam);
-			}
-			else if (convertedValue instanceof Map && CollectionFactory.isApproximableMapType(requiredType)) {
-				// Convert keys and values to respective target type, if determined.
-				convertedValue = convertToTypedMap((Map) convertedValue, propertyName, methodParam);
-			}
-			else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
-				if (JdkVersion.isAtLeastJava15() && requiredType.isEnum() && "".equals(convertedValue)) {
-					// It's an empty enum identifier: reset the enum value to null.
-					return null;
+			if (convertedValue != null) {
+				if (String.class.equals(requiredType) && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
+					// We can stringify any primitive value...
+					return convertedValue.toString();
 				}
-				// Try field lookup as fallback: for JDK 1.5 enum or custom enum
-				// with values defined as static fields. Resulting value still needs
-				// to be checked, hence we don't return it right away.
-				try {
-					Field enumField = requiredType.getField((String) convertedValue);
-					convertedValue = enumField.get(null);
+				else if (requiredType.isArray()) {
+					// Array required -> apply appropriate conversion of elements.
+					return convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
 				}
-				catch (Throwable ex) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Field [" + convertedValue + "] isn't an enum value", ex);
+				else if (convertedValue instanceof Collection && CollectionFactory.isApproximableCollectionType(requiredType)) {
+					// Convert elements to target type, if determined.
+					convertedValue = convertToTypedCollection((Collection) convertedValue, propertyName, methodParam);
+				}
+				else if (convertedValue instanceof Map && CollectionFactory.isApproximableMapType(requiredType)) {
+					// Convert keys and values to respective target type, if determined.
+					convertedValue = convertToTypedMap((Map) convertedValue, propertyName, methodParam);
+				}
+				else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
+					if (JdkVersion.isAtLeastJava15() && requiredType.isEnum() && "".equals(convertedValue)) {
+						// It's an empty enum identifier: reset the enum value to null.
+						return null;
+					}
+					// Try field lookup as fallback: for JDK 1.5 enum or custom enum
+					// with values defined as static fields. Resulting value still needs
+					// to be checked, hence we don't return it right away.
+					try {
+						Field enumField = requiredType.getField((String) convertedValue);
+						convertedValue = enumField.get(null);
+					}
+					catch (Throwable ex) {
+						if (logger.isTraceEnabled()) {
+							logger.trace("Field [" + convertedValue + "] isn't an enum value", ex);
+						}
 					}
 				}
 			}
