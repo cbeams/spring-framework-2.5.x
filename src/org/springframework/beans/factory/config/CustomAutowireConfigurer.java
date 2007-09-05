@@ -21,20 +21,15 @@ import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
 /**
  * {@link BeanFactoryPostProcessor} implementation that allows for convenient
- * registration of custom autowire qualifier types. It also allows for setting a
- * custom implementation of {@link AutowireCandidateResolver}.
+ * registration of custom autowire qualifier types.
  * 
  * <pre class="code">
  * &lt;bean id="customAutowireConfigurer" class="org.springframework.beans.factory.config.CustomAutowireConfigurer"&gt;
- *   &lt;property name="autowireCandidateResolver"&gt;
- *     &lt;bean class="mypackage.MyCustomAutowireCandidateResolver"/&gt;
- *   &lt;/property&gt;
  *   &lt;property name="customQualifierTypes"&gt;
  *     &lt;set&gt;
  *       &lt;value&gt;mypackage.MyQualifier&lt;/value&gt;
@@ -43,15 +38,13 @@ import org.springframework.util.ClassUtils;
  * &lt;/bean&gt;</pre>
  * 
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 2.1
- * @see AutowireCandidateResolver
  * @see org.springframework.beans.factory.annotation.Qualifier
  */
 public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanClassLoaderAware, Ordered {
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
-
-	private AutowireCandidateResolver autowireCandidateResolver;
 
 	private Set customQualifierTypes;
 
@@ -70,18 +63,12 @@ public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanC
 		this.beanClassLoader = beanClassLoader;
 	}
 
-	public void setAutowireCandidateResolver(AutowireCandidateResolver autowireCandidateResolver) {
-		this.autowireCandidateResolver = autowireCandidateResolver;
-	}
-
 	public void setCustomQualifierTypes(Set customQualifierTypes) {
 		this.customQualifierTypes = customQualifierTypes;
 	}
 
+
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		if (this.autowireCandidateResolver != null) {
-			beanFactory.setAutowireCandidateResolver(autowireCandidateResolver);
-		}
 		if (this.customQualifierTypes != null) {
 			for (Iterator it = customQualifierTypes.iterator(); it.hasNext();) {
 				Class customType = null;

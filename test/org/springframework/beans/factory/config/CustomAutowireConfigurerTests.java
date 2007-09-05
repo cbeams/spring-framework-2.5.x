@@ -31,6 +31,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class CustomAutowireConfigurerTests extends TestCase {
 
@@ -44,20 +45,21 @@ public class CustomAutowireConfigurerTests extends TestCase {
 		reader.loadBeanDefinitions(CONFIG_LOCATION);
 		CustomAutowireConfigurer cac = new CustomAutowireConfigurer();
 		CustomResolver customResolver = new CustomResolver();
-		cac.setAutowireCandidateResolver(customResolver);
+		bf.setAutowireCandidateResolver(customResolver);
 		cac.postProcessBeanFactory(bf);
 		TestBean testBean = (TestBean) bf.getBean("testBean");
 		assertEquals("#1!", testBean.getName());
 	}
 
 	public void testCustomTypesRegistered() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomAutowireConfigurer cac = new CustomAutowireConfigurer();
 		CustomResolver customResolver = new CustomResolver();
-		cac.setAutowireCandidateResolver(customResolver);
+		bf.setAutowireCandidateResolver(customResolver);
 		Set customQualifierTypes = new HashSet();
 		customQualifierTypes.add("java.lang.Integer");
 		cac.setCustomQualifierTypes(customQualifierTypes);
-		cac.postProcessBeanFactory(new DefaultListableBeanFactory());
+		cac.postProcessBeanFactory(bf);
 		assertEquals(1, customResolver.getCustomTypes().size());
 		assertTrue(customResolver.getCustomTypes().contains(Integer.class));
 	}
