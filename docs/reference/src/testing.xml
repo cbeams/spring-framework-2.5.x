@@ -459,6 +459,12 @@ public void testProcessRainyDayScenario() {
           execution time takes longer than the specified time period, the test
           fails.</para>
 
+          <para>Note that the time period includes execution of the test
+          method itself, any repetitions of the test (see
+          <interfacename>@Repeat</interfacename>), as well as any
+          <emphasis>set up</emphasis> or <emphasis>tear down</emphasis> of the
+          test fixture.</para>
+
           <programlisting>@Timed(1000)
 public void testProcessWithOneSecondTimeout() {
     <lineannotation>// some logic that should not take longer than 1 second to execute</lineannotation>
@@ -472,6 +478,11 @@ public void testProcessWithOneSecondTimeout() {
           <para>Indicates that the annotated test method must be executed
           repeatedly. The number of times that the test method is to be
           executed is specified in the annotation.</para>
+
+          <para>Note that the scope of execution to be repeated includes
+          execution of the test method itself as well as any <emphasis>set
+          up</emphasis> or <emphasis>tear down</emphasis> of the test
+          fixture.</para>
 
           <programlisting>@Repeat(10)
 public void testProcessRepeatedly() {
@@ -525,13 +536,20 @@ public void testProcessWithoutTransaction() {
 
         <listitem>
           <para><link linkend="testcontext-annotations">The TestContext
-          Framework</link>: supports a subset of the common annotations listed
+          Framework</link>: supports all of the common annotations listed
           above while providing additional TestContext-specific and
           transactional annotations (e.g.,
           <interfacename>@ContextConfiguration</interfacename>,
-          <interfacename>@BeforeTransaction</interfacename>, etc.). Refer to
-          the documentation in the <emphasis>TestContext Framework</emphasis>
-          section for further details.</para>
+          <interfacename>@BeforeTransaction</interfacename>, etc.). Note,
+          however, that some of the common annotations are only supported when
+          used in conjunction with JUnit (e.g., with the <link
+          linkend="testcontext-junit4-runner">SpringJUnit4ClassRunner</link>
+          or the <link linkend="testcontext-superclasses-junit38">JUnit
+          3.8</link> and <link
+          linkend="testcontext-superclasses-junit44">JUnit 4.4</link> base
+          test classes). Refer to the documentation in the
+          <emphasis>TestContext Framework</emphasis> section for further
+          details.</para>
         </listitem>
       </itemizedlist>
     </section>
@@ -991,11 +1009,11 @@ public void testProcessWithoutTransaction() {
 
       <para>The following section provides an overview of the internals of the
       TestContext framework. If you are only interested in using the framework
-      and not necessarily interested in extending it with your own custom 
-      listeners, feel free to skip ahead to the configuration
-      (<link linkend="testcontext-ctx-management">context management</link>,
-      <link linkend="testcontext-fixture-di">dependency injection</link>,
-      <link linkend="testcontext-tx">transaction management</link>), <link
+      and not necessarily interested in extending it with your own custom
+      listeners, feel free to skip ahead to the configuration (<link
+      linkend="testcontext-ctx-management">context management</link>, <link
+      linkend="testcontext-fixture-di">dependency injection</link>, <link
+      linkend="testcontext-tx">transaction management</link>), <link
       linkend="testcontext-superclasses">base test classes</link>, and <link
       linkend="testcontext-annotations">annotation support</link>
       sections.</para>
@@ -1606,8 +1624,8 @@ public class SimpleTest {
 
           <para><emphasis>Note: These classes serve only as a convenience for
           extension. If you do not wish for your test classes to be tied to a
-          Spring-specific class hierarchy - for example, if you wish to 
-          directly extend the class you are testing - you may configure your 
+          Spring-specific class hierarchy - for example, if you wish to
+          directly extend the class you are testing - you may configure your
           own custom test classes by using
           <interfacename>@RunWith(SpringJUnit4ClassRunner.class)</interfacename>,
           <interfacename>@ContextConfiguration</interfacename>,
@@ -1623,53 +1641,64 @@ public class SimpleTest {
 
         <!-- =============================================================== -->
 
-        <para>The Spring TestContext Framework fully supports the following
-        annotations as outlined in the <link
+        <para>The Spring TestContext Framework supports all annotations as
+        outlined in the <link
         linkend="integration-testing-common-annotations">common
-        annotations</link> section. Common annotations not listed here are not
-        supported.</para>
+        annotations</link> section. The following annotations, however, are
+        <emphasis>only supported when used in conjunction with JUnit (e.g.,
+        with the <link
+        linkend="testcontext-junit4-runner">SpringJUnit4ClassRunner</link> or
+        the <link linkend="testcontext-superclasses-junit38">JUnit 3.8</link>
+        and <link linkend="testcontext-superclasses-junit44">JUnit 4.4</link>
+        base test classes.</emphasis></para>
 
         <itemizedlist>
           <listitem>
-            <para><interfacename>@DirtiesContext</interfacename></para>
+            <para><interfacename>@IfProfileValue</interfacename></para>
           </listitem>
 
           <listitem>
             <para><interfacename>@ExpectedException</interfacename></para>
 
-            <para>Note: using Spring's
+            <para>Using Spring's
             <interfacename>@ExpectedException</interfacename> annotation in
             conjunction with JUnit 4's
             <interfacename>@Test(expected=...)</interfacename> configuration
             would lead to an unresolvable conflict. Developers must therefore
-            choose one or the other when integrating with JUnit 4.</para>
+            choose one or the other when integrating with JUnit 4, in which
+            case it is generally preferable to use the explicit JUnit 4
+            configuration.</para>
           </listitem>
 
           <listitem>
             <para><interfacename>@Timed</interfacename></para>
 
-            <para>Note: using Spring's <interfacename>@Timed</interfacename>
-            annotation in conjunction with JUnit 4's
-            <interfacename>@Test(timeout=...)</interfacename> configuration
-            would lead to an unresolvable conflict. Developers must therefore
-            choose one or the other when integrating with JUnit 4.</para>
+            <para>Spring's <interfacename>@Timed</interfacename> annotation
+            has different semantics than JUnit 4's
+            <interfacename>@Test(timeout=...)</interfacename> support.
+            Specifically, due to the manner in which JUnit 4 handles test
+            execution timeouts (i.e., by executing the test method in a
+            separate <interfacename>Thread</interfacename>), one can not use
+            JUnit's <interfacename>@Test(timeout=...)</interfacename>
+            configuration on a test method which is executes in a
+            transactional context. Therefore, if you wish to configure a test
+            method to be both <emphasis>timed</emphasis> <emphasis
+            role="bold">and</emphasis> <emphasis>transactional</emphasis>, you
+            must use a combination of Spring's
+            <interfacename>@Timed</interfacename> and
+            <interfacename>@Transactional</interfacename> annotations. It also
+            worth noting that
+            <interfacename>@Test(timeout=...)</interfacename> times only the
+            execution of the test method itself and preemptively fails the
+            test if the test takes too long; whereas,
+            <interfacename>@Timed</interfacename> times the <emphasis>total
+            </emphasis> test execution time (including set up and tear down
+            operations as well as repetitions) and does not preemptively fail
+            the test.</para>
           </listitem>
 
           <listitem>
             <para><interfacename>@Repeat</interfacename></para>
-
-            <para>Note: <interfacename>@Repeat</interfacename> is only
-            supported in tests which extend one of the <link
-            linkend="testcontext-superclasses-junit38">JUnit 3.8 base test
-            classes</link>.</para>
-          </listitem>
-
-          <listitem>
-            <para><interfacename>@Rollback</interfacename></para>
-          </listitem>
-
-          <listitem>
-            <para><interfacename>@NotTransactional</interfacename></para>
           </listitem>
         </itemizedlist>
 
