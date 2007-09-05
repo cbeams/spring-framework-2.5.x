@@ -23,6 +23,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -235,6 +236,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						public void doWith(Field field) {
 							Annotation annotation = field.getAnnotation(getAutowiredAnnotationType());
 							if (annotation != null) {
+								if (Modifier.isStatic(field.getModifiers())) {
+									throw new IllegalStateException("Autowired annotation is not supported on static fields");
+								}
 								boolean required = determineRequiredStatus(annotation);
 								newMetadata.addInjectedField(new AutowiredElement(field, required, null));
 							}
@@ -244,6 +248,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						public void doWith(Method method) {
 							Annotation annotation = method.getAnnotation(getAutowiredAnnotationType());
 							if (annotation != null) {
+								if (Modifier.isStatic(method.getModifiers())) {
+									throw new IllegalStateException("Autowired annotation is not supported on static methods");
+								}
 								if (method.getParameterTypes().length == 0) {
 									throw new IllegalStateException("Autowired annotation requires at least one argument: " + method);
 								}

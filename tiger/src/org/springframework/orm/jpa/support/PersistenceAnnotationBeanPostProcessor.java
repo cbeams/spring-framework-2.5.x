@@ -22,6 +22,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -331,6 +332,9 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 							PersistenceContext pc = field.getAnnotation(PersistenceContext.class);
 							PersistenceUnit pu = field.getAnnotation(PersistenceUnit.class);
 							if (pc != null || pu != null) {
+								if (Modifier.isStatic(field.getModifiers())) {
+									throw new IllegalStateException("Persistence annotations are not supported on static fields");
+								}
 								newMetadata.addInjectedField(new PersistenceElement(field, null));
 							}
 						}
@@ -340,6 +344,9 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 							PersistenceContext pc = method.getAnnotation(PersistenceContext.class);
 							PersistenceUnit pu = method.getAnnotation(PersistenceUnit.class);
 							if (pc != null || pu != null) {
+								if (Modifier.isStatic(method.getModifiers())) {
+									throw new IllegalStateException("Persistence annotations are not supported on static methods");
+								}
 								if (method.getParameterTypes().length != 1) {
 									throw new IllegalStateException("Persistence annotation requires a single-arg method: " + method);
 								}

@@ -23,6 +23,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -192,6 +193,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
 						public void doWith(Field field) {
 							if (field.getAnnotation(Resource.class) != null) {
+								if (Modifier.isStatic(field.getModifiers())) {
+									throw new IllegalStateException("Resource annotation is not supported on static fields");
+								}
 								newMetadata.addInjectedField(new ResourceElement(field, null));
 							}
 						}
@@ -199,6 +203,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
 						public void doWith(Method method) {
 							if (method.getAnnotation(Resource.class) != null) {
+								if (Modifier.isStatic(method.getModifiers())) {
+									throw new IllegalStateException("Resource annotation is not supported on static methods");
+								}
 								if (method.getParameterTypes().length != 1) {
 									throw new IllegalStateException("Resource annotation requires a single-arg method: " + method);
 								}
