@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple.metadata;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.DataAccessResourceFailureException;
+package org.springframework.jdbc.core.metadata;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * A generic implementation of the {@link TableMetaDataProvider} that should provide enough features for all supported
@@ -206,9 +211,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	 * Method supporting the metedata processing for a table
 	 */
 	private void locateTableAndProcessMetaData(DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String tableName) {
-
 		Map<String, TableMetaData> tableMeta = new HashMap<String, TableMetaData>();
-
 		ResultSet tables = null;
 
 		try {
@@ -293,7 +296,6 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 				TableParameterMetaData meta = new TableParameterMetaData(
 						tableColumns.getString("COLUMN_NAME"),
 						tableColumns.getInt("DATA_TYPE"),
-						false,
 						tableColumns.getBoolean("NULLABLE")
 				);
 				insertParameterMetaData.add(meta);

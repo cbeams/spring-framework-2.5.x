@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple.metadata;
+package org.springframework.jdbc.core.metadata;
 
 /**
- * Holder of metadata for a specific parameter that is used for call processing.
+ * Holder of metadata for a specific parameter that is used for table processing.
  *
  * @author Thomas Risberg
  * @since 2.1
  */
-public class CallParameterMetaData {
-	private String parameterName;
-	private int parameterType;
-	private int sqlType;
-	private String typeName;
-	private boolean nullable;
+public class TableParameterMetaData {
+
+	private final String parameterName;
+
+	private final int sqlType;
+
+	private final boolean nullable;
+
 
 	/**
-	 * Constructor taking all the properties
+	 * Constructor taking all the properties.
 	 */
-	public CallParameterMetaData(String columnName, int columnType, int sqlType, String typeName, boolean nullable) {
+	public TableParameterMetaData(String columnName, int sqlType, boolean nullable) {
 		this.parameterName = columnName;
-		this.parameterType = columnType;
 		this.sqlType = sqlType;
-		this.typeName = typeName;
 		this.nullable = nullable;
 	}
 
@@ -45,34 +45,21 @@ public class CallParameterMetaData {
 	 * Get the parameter name.
 	 */
 	public String getParameterName() {
-		return parameterName;
-	}
-
-	/**
-	 * Get the parameter type.
-	 */
-	public int getParameterType() {
-		return parameterType;
+		return this.parameterName;
 	}
 
 	/**
 	 * Get the parameter SQL type.
 	 */
 	public int getSqlType() {
-		return sqlType;
+		return this.sqlType;
 	}
 
 	/**
-	 * Get the parameter type name.
-	 */
-	public String getTypeName() {
-		return typeName;
-	}
-
-	/**
-	 * Get whether the parameter is nullable.
+	 * Get whether the parameter/column is nullable.
 	 */
 	public boolean isNullable() {
-		return nullable;
+		return this.nullable;
 	}
+
 }

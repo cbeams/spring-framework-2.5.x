@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple.metadata;
+package org.springframework.jdbc.core.metadata;
+
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.jdbc.core.simple.TableMetaDataContext;
 import org.springframework.jdbc.support.DatabaseMetaDataCallback;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
-
-import javax.sql.DataSource;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 
 /**
  * Factory used to create a {@link TableMetaDataProvider} implementation based on the type of databse being used.

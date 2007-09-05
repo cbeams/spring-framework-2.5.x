@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple.metadata;
+package org.springframework.jdbc.core.metadata;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -32,6 +32,8 @@ public class Db2CallMetaDataProvider extends GenericCallMetaDataProvider {
 		super(databaseMetaData);
 	}
 
+
+	@Override
 	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 		try {
 			setSupportsCatalogsInProcedureCalls(databaseMetaData.supportsCatalogsInProcedureCalls());
@@ -64,4 +66,5 @@ public class Db2CallMetaDataProvider extends GenericCallMetaDataProvider {
 		// Use current user schema if no schema specified
 		return schemaName == null ? getUserName().toUpperCase() : super.metaDataSchemaNameToUse(schemaName);
 	}
+
 }

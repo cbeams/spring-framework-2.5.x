@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple.metadata;
+package org.springframework.jdbc.core.metadata;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;

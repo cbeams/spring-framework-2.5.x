@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple.metadata;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.jdbc.core.SqlOutParameter;
-import org.springframework.jdbc.core.SqlParameter;
+package org.springframework.jdbc.core.metadata;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -28,10 +23,15 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
+
 /**
  * Generic implementation for the {@link CallMetaDataProvider} interface.
  * This class can be extended to provide database specific behavior.
- * This class is intended for internal use by the Simple JDBC classes.
  *
  * @author Thomas Risberg
  * @since 2.1
@@ -55,17 +55,17 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
 	private List<CallParameterMetaData> callParameterMetaData = new ArrayList<CallParameterMetaData>();
 
+
 	/**
 	 * Constructor used to initialize with provided database meta data.
 	 * @param databaseMetaData meta data to be used
-	 * @throws SQLException
 	 */
 	protected GenericCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
-		userName = databaseMetaData.getUserName();
+		this.userName = databaseMetaData.getUserName();
 	}
 
-	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 
+	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 		try {
 			setSupportsCatalogsInProcedureCalls(databaseMetaData.supportsCatalogsInProcedureCalls());
 		}
@@ -90,18 +90,14 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		catch (SQLException se) {
 			logger.warn("Error retrieving 'DatabaseMetaData.storesLowerCaseIdentifiers' - " + se.getMessage());
 		}
-
 	}
 
 	public void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String procedureName)
 			throws SQLException {
 
-		procedureColumnMetaDataUsed = true;
-
+		this.procedureColumnMetaDataUsed = true;
 		processProcedureColumns(databaseMetaData, catalogName, schemaName,  procedureName);
-
 	}
-
 
 	public List<CallParameterMetaData> getCallParameterMetaData() {
 		return callParameterMetaData;
@@ -141,28 +137,36 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	public String metaDataCatalogNameToUse(String catalogName) {
-		if (isSupportsCatalogsInProcedureCalls())
+		if (isSupportsCatalogsInProcedureCalls()) {
 			return catalogNameToUse(catalogName);
-		else
+		}
+		else {
 			return null;
+		}
 	}
 
 	public String metaDataSchemaNameToUse(String schemaName) {
-		if (isSupportsSchemasInProcedureCalls())
+		if (isSupportsSchemasInProcedureCalls()) {
 			return schemaNameToUse(schemaName);
-		else
+		}
+		else {
 			return null;
+		}
 	}
 
 	public String parameterNameToUse(String parameterName) {
-		if (parameterName == null)
+		if (parameterName == null) {
 			return null;
-		else if (isStoresUpperCaseIdentifiers())
+		}
+		else if (isStoresUpperCaseIdentifiers()) {
 			return parameterName.toUpperCase();
-		else if(isStoresLowerCaseIdentifiers())
+		}
+		else if(isStoresLowerCaseIdentifiers()) {
 			return parameterName.toLowerCase();
-		else
-		return parameterName;
+		}
+		else {
+			return parameterName;
+		}
 	}
 
 	public boolean byPassReturnParameter(String parameterName) {
@@ -178,7 +182,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	public String getUserName() {
-		return userName;
+		return this.userName;
 	}
 
 	public boolean isReturnResultSetSupported() {
@@ -194,16 +198,9 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	public boolean isProcedureColumnMetaDataUsed() {
-		return procedureColumnMetaDataUsed;
+		return this.procedureColumnMetaDataUsed;
 	}
 
-
-	/**
-	 * Does the database support the use of catalog name in procedure calls
-	 */
-	protected boolean isSupportsCatalogsInProcedureCalls() {
-		return supportsCatalogsInProcedureCalls;
-	}
 
 	/**
 	 * Specify whether the database supports the use of catalog name in procedure calls
@@ -213,10 +210,10 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	/**
-	 * Does the database support the use of schema name in procedure calls
+	 * Does the database support the use of catalog name in procedure calls
 	 */
-	protected boolean isSupportsSchemasInProcedureCalls() {
-		return supportsSchemasInProcedureCalls;
+	protected boolean isSupportsCatalogsInProcedureCalls() {
+		return this.supportsCatalogsInProcedureCalls;
 	}
 
 	/**
@@ -227,10 +224,10 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	/**
-	 * Does the database use upper case for identifiers
+	 * Does the database support the use of schema name in procedure calls
 	 */
-	protected boolean isStoresUpperCaseIdentifiers() {
-		return storesUpperCaseIdentifiers;
+	protected boolean isSupportsSchemasInProcedureCalls() {
+		return this.supportsSchemasInProcedureCalls;
 	}
 
 	/**
@@ -241,10 +238,10 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	/**
-	 * Does the database use lower case for identifiers
+	 * Does the database use upper case for identifiers
 	 */
-	protected boolean isStoresLowerCaseIdentifiers() {
-		return storesLowerCaseIdentifiers;
+	protected boolean isStoresUpperCaseIdentifiers() {
+		return this.storesUpperCaseIdentifiers;
 	}
 
 	/**
@@ -253,6 +250,14 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	protected void setStoresLowerCaseIdentifiers(boolean storesLowerCaseIdentifiers) {
 		this.storesLowerCaseIdentifiers = storesLowerCaseIdentifiers;
 	}
+
+	/**
+	 * Does the database use lower case for identifiers
+	 */
+	protected boolean isStoresLowerCaseIdentifiers() {
+		return this.storesLowerCaseIdentifiers;
+	}
+
 
 	/**
 	 * Process the procedure column metadata
@@ -304,7 +309,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 				logger.warn("Problem closing resultset for procedure column metadata " + se.getMessage());
 			}
 		}
-
 	}
 
 }

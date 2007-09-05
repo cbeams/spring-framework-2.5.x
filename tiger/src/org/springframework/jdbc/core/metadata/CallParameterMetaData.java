@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple.metadata;
+package org.springframework.jdbc.core.metadata;
 
 /**
- * Holder of metadata for a specific parameter that is used for table processing.
+ * Holder of metadata for a specific parameter that is used for call processing.
  *
  * @author Thomas Risberg
  * @since 2.1
  */
-public class TableParameterMetaData {
+public class CallParameterMetaData {
 	private String parameterName;
+	private int parameterType;
 	private int sqlType;
-	private boolean generated;
+	private String typeName;
 	private boolean nullable;
-
 
 	/**
 	 * Constructor taking all the properties
 	 */
-	public TableParameterMetaData(String columnName, int sqlType, boolean generated, boolean nullable) {
+	public CallParameterMetaData(String columnName, int columnType, int sqlType, String typeName, boolean nullable) {
 		this.parameterName = columnName;
+		this.parameterType = columnType;
 		this.sqlType = sqlType;
+		this.typeName = typeName;
 		this.nullable = nullable;
 	}
 
@@ -47,6 +49,13 @@ public class TableParameterMetaData {
 	}
 
 	/**
+	 * Get the parameter type.
+	 */
+	public int getParameterType() {
+		return parameterType;
+	}
+
+	/**
 	 * Get the parameter SQL type.
 	 */
 	public int getSqlType() {
@@ -54,14 +63,14 @@ public class TableParameterMetaData {
 	}
 
 	/**
-	 * Get the parameter/column is auto generated.
+	 * Get the parameter type name.
 	 */
-	public boolean isGenerated() {
-		return generated;
+	public String getTypeName() {
+		return typeName;
 	}
 
 	/**
-	 * Get whether the parameter/column is nullable.
+	 * Get whether the parameter is nullable.
 	 */
 	public boolean isNullable() {
 		return nullable;

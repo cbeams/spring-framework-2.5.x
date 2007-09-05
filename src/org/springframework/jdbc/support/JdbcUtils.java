@@ -18,7 +18,15 @@ package org.springframework.jdbc.support;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.*;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 
 import javax.sql.DataSource;
 
@@ -27,7 +35,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Generic utility methods for working with JDBC. Mainly for internal use
@@ -275,6 +282,23 @@ public abstract class JdbcUtils {
 	}
 
 	/**
+	 * Extract a common name for the database in use even if various drivers/platforms provide varying names.
+	 * @param source the name as provided in database metedata
+	 * @return the common name to be used
+	 */
+	public static String commonDatabaseName(String source) {
+		String name = source;
+		if (source != null && source.startsWith("DB2")) {
+			name = "DB2";
+		}
+		else if ("Sybase SQL Server".equals(source) ||
+				"Adaptive Server Enterprise".equals(source) || "sql server".equals(source) ) {
+			name = "Sybase";
+		}
+		return name;
+	}
+
+	/**
 	 * Check whether the given SQL type is numeric.
 	 * @param sqlType the SQL type to be checked
 	 * @return whether the type is numeric
@@ -287,16 +311,16 @@ public abstract class JdbcUtils {
 	}
 
 	/**
-	 * Determine the column name to use. The column name is determined based on a lookup using ResultSetMetaData.
-	 * <br/>
-	 * This method implementation takes into account recent clarifications expressed in the JDBC 4.0
-	 * specification - <br/>
-	 * <br/><i>columnLabel - the label for the column specified with the SQL AS clause. If the SQL AS clause was not
-	 * specified, then the label is the name of the column</i><br/>
+	 * Determine the column name to use. The column name is determined based on a
+	 * lookup using ResultSetMetaData.
+	 * <p>This method implementation takes into account recent clarifications
+	 * expressed in the JDBC 4.0 specification:
+	 * <p><i>columnLabel - the label for the column specified with the SQL AS clause.
+	 * If the SQL AS clause was not specified, then the label is the name of the column</i>.
 	 * @return the column name to use
 	 * @param resultSetMetaData the current meta data to use
 	 * @param columnIndex the index of the column for the look up
-	 * @throws java.sql.SQLException
+	 * @throws SQLException in case of lookup failure
 	 */
 	public static String lookupColumnName(ResultSetMetaData resultSetMetaData, int columnIndex) throws SQLException {
 		String name = resultSetMetaData.getColumnLabel(columnIndex);
@@ -304,6 +328,39 @@ public abstract class JdbcUtils {
 			name = resultSetMetaData.getColumnName(columnIndex);
 		}
 		return name;
+	}
+
+	/**
+	 * Convert a column name with undercores to the corresponding property name using "camel case".  A name
+	 * like "customer_number" would match a "customerNumber" property name.
+	 * @param name the column name to be converted
+	 * @return the name using "camel case"
+	 */
+	public static String convertUnderscoreNameToPropertyName(String name) {
+		StringBuffer result = new StringBuffer();
+		boolean nextIsUpper = false;
+		if (name != null && name.length() > 0) {
+			if (name.length() > 1 && name.substring(1,2).equals("_"))
+				result.append(name.substring(0, 1).toUpperCase());
+			else
+				result.append(name.substring(0, 1).toLowerCase());
+			for (int i = 1; i < name.length(); i++) {
+				String s = name.substring(i, i + 1);
+				if (s.equals("_")) {
+					nextIsUpper = true;
+				}
+				else {
+					if (nextIsUpper) {
+						result.append(s.toUpperCase());
+						nextIsUpper = false;
+					}
+					else {
+						result.append(s.toLowerCase());
+					}
+				}
+			}
+		}
+		return result.toString();
 	}
 
 }

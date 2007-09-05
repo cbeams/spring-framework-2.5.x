@@ -14,43 +14,46 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple.metadata;
+package org.springframework.jdbc.core.metadata;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
- * Sybase specific implementation for the {@link CallMetaDataProvider} interface.
+ * SQL Server specific implementation for the {@link CallMetaDataProvider} interface.
  * This class is intended for internal use by the Simple JDBC classes.
  *
  * @author Thomas Risberg
  * @since 2.1
  */
-public class SybaseCallMetaDataProvider extends GenericCallMetaDataProvider {
+public class SqlServerCallMetaDataProvider extends GenericCallMetaDataProvider {
 
 	private static final String REMOVABLE_COLUMN_PREFIX = "@";
-	private static final String RETURN_VALUE_NAME = "RETURN_VALUE";
 
-	public SybaseCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
+	private static final String RETURN_VALUE_NAME = "@RETURN_VALUE";
+
+
+	public SqlServerCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		super(databaseMetaData);
 	}
 
 
 	@Override
 	public String parameterNameToUse(String parameterName) {
-		if (parameterName == null)
+		if (parameterName == null) {
 			return null;
-		if (parameterName.length() > 1 && parameterName.startsWith(REMOVABLE_COLUMN_PREFIX))
+		}
+		else if (parameterName.length() > 1 && parameterName.startsWith(REMOVABLE_COLUMN_PREFIX)) {
 			return super.parameterNameToUse(parameterName.substring(1));
-		else
+		}
+		else {
 			return super.parameterNameToUse(parameterName);
+		}
 	}
 
 	@Override
 	public boolean byPassReturnParameter(String parameterName) {
-		if (RETURN_VALUE_NAME.equals(parameterName) || RETURN_VALUE_NAME.equals(parameterNameToUse(parameterName)))
-			return true;
-		else
-			return super.byPassReturnParameter(parameterName);
+		return (RETURN_VALUE_NAME.equals(parameterName) || super.byPassReturnParameter(parameterName));
 	}
+
 }

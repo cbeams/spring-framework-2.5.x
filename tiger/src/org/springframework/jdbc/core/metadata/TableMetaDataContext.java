@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple;
+package org.springframework.jdbc.core.metadata;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.simple.metadata.TableMetaDataProvider;
-import org.springframework.jdbc.core.simple.metadata.TableMetaDataProviderFactory;
-import org.springframework.jdbc.core.simple.metadata.TableParameterMetaData;
-import org.springframework.jdbc.core.SqlTypeValue;
 
-import javax.sql.DataSource;
-import java.util.*;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.SqlTypeValue;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Class to manage context metadata used for the configuration and execution of operations on the table.
@@ -153,7 +158,7 @@ public class TableMetaDataContext {
 		if (declaredColumns.size() > 0) {
 			return new ArrayList<String>(declaredColumns);
 		}
-		HashSet keys = new HashSet(generatedKeyNames.length);
+		Set keys = new HashSet(generatedKeyNames.length);
 		for (String key : generatedKeyNames) {
 			keys.add(key.toUpperCase());
 		}
@@ -179,7 +184,7 @@ public class TableMetaDataContext {
 				values.add(parameterSource.getValue(column.toLowerCase()));
 			}
 			else {
-				String propertyName = SimpleJdbcUtils.convertUnderscoreNameToPropertyName(column);
+				String propertyName = JdbcUtils.convertUnderscoreNameToPropertyName(column);
 				if (parameterSource.hasValue(propertyName)) {
 					values.add(parameterSource.getValue(propertyName));
 				}

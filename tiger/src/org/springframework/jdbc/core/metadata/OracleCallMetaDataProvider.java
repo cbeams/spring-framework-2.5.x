@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple.metadata;
-
-import org.springframework.jdbc.core.ColumnMapRowMapper;
-import org.springframework.jdbc.core.SqlOutParameter;
-import org.springframework.jdbc.core.SqlParameter;
+package org.springframework.jdbc.core.metadata;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+
+import org.springframework.jdbc.core.ColumnMapRowMapper;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
 
 /**
  * Oracle specific implementation for the {@link CallMetaDataProvider} interface.
@@ -35,9 +35,11 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 
 	private static final String REF_CURSOR_NAME = "REF CURSOR";
 
+
 	public OracleCallMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
 		super(databaseMetaData);
 	}
+
 
 	@Override
 	public boolean isReturnResultSetSupported() {
@@ -68,9 +70,12 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 
 	@Override
 	public SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta) {
-		if(meta.getSqlType() == Types.OTHER && REF_CURSOR_NAME.equals(meta.getTypeName()))
+		if (meta.getSqlType() == Types.OTHER && REF_CURSOR_NAME.equals(meta.getTypeName())) {
 			return new SqlOutParameter(parameterName, getRefCursorSqlType(), new ColumnMapRowMapper());
-		else
+		}
+		else {
 			return super.createDefaultOutParameter(parameterName, meta);
+		}
 	}
+
 }

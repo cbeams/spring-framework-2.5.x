@@ -16,17 +16,17 @@
 
 package org.springframework.jdbc.core.simple;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.SqlReturnResultSet;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Arrays;
-import java.util.HashSet;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 /**
  * A SimpleJdbcCall is a multi-threaded, reusable object representing a call to a stored procedure or a
@@ -35,7 +35,7 @@ import java.util.HashSet;
  * containing the parameters when you execute the call.  The names of the supplied parameters will be matched
  * up with in and out parameters declared when the stored procedure was created.
  *
- * The meta data processing is based on the DatabaseMetaData provided by the JDBC driver.  Since we rely 
+ * <p>The meta data processing is based on the DatabaseMetaData provided by the JDBC driver.  Since we rely
  * on the JDBC driver this "auto-detection" can only be used for databases that are known to provide accurate
  * meta data.  These currently include Derby, MySQL, Microsoft SQL Server, Oracle and DB2.
  * For any other databases you are required to declare all parameters explicitly.  You can of course declare all
@@ -43,11 +43,11 @@ import java.util.HashSet;
  * will take precedence.  You can also turn off any mete data processing if you want to use parameter names that do not
  * match what is declared during the stored procedure compilation.
  *
- * The actual call is being handled via the standard call method of the JdbcTemplate.
+ * <p>The actual call is being handled via the standard call method of the JdbcTemplate.
  *
- * Many of the configuration methods return the current instance of the SimpleJdbcCall to provide the ablity
+ * <p>Many of the configuration methods return the current instance of the SimpleJdbcCall to provide the ablity
  * to string multiple ones together in a "fluid" interface style.
- * 
+ *
  * @author Thomas Risberg
  * @since 2.1
  * @see org.springframework.jdbc.core.JdbcTemplate
@@ -110,7 +110,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 	public SimpleJdbcCall useInParameterNames(String... inParameterNames) {
-		super.setInParameterNames(new HashSet(Arrays.asList(inParameterNames)));
+		setInParameterNames(new HashSet(Arrays.asList(inParameterNames)));
 		return this;
 	}
 

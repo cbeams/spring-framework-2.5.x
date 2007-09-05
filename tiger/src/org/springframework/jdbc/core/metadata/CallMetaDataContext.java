@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple;
+package org.springframework.jdbc.core.metadata;
+
+import java.sql.DatabaseMetaData;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.jdbc.core.SqlParameter;
+
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlReturnResultSet;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.simple.metadata.CallMetaDataProvider;
-import org.springframework.jdbc.core.simple.metadata.CallMetaDataProviderFactory;
-import org.springframework.jdbc.core.simple.metadata.CallParameterMetaData;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
-
-import javax.sql.DataSource;
-import java.util.*;
-import java.sql.DatabaseMetaData;
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Class to manage context metadata used for the configuration and execution of the call.
@@ -58,7 +65,7 @@ public class CallMetaDataContext {
 	private String functionReturnName = "return";
 
 	/** Set of in parameter names to exclude use for any not listed */
-	private HashSet<String> limitedInParameterNames = new HashSet<String>();
+	private Set<String> limitedInParameterNames = new HashSet<String>();
 
 	/** List of SqlParameter names for out parameters */
 	private List<String> outParameterNames = new ArrayList<String>();
@@ -75,134 +82,142 @@ public class CallMetaDataContext {
 	/** the provider of call meta data */
 	private CallMetaDataProvider metaDataProvider;
 
-	/**
-	 * Get the name used for the return value of the function
-	 */
-	public String getFunctionReturnName() {
-		return functionReturnName;
-	}
 
 	/**
-	 * Specify the name used for the return value of the function
+	 * Specify the name used for the return value of the function.
 	 */
 	public void setFunctionReturnName(String functionReturnName) {
 		this.functionReturnName = functionReturnName;
 	}
 
 	/**
-	 * Speicfy a limited set of in parameters to be used
+	 * Get the name used for the return value of the function.
 	 */
-	public void setLimitedInParameterNames(HashSet<String> limitedInParameterNames) {
+	public String getFunctionReturnName() {
+		return this.functionReturnName;
+	}
+
+	/**
+	 * Specify a limited set of in parameters to be used.
+	 */
+	public void setLimitedInParameterNames(Set<String> limitedInParameterNames) {
 		this.limitedInParameterNames = limitedInParameterNames;
 	}
 
 	/**
-	 * Get a list of the out parameter names
+	 * Get a limited set of in parameters to be used.
 	 */
-	public List<String> getOutParameterNames() {
-		return outParameterNames;
+	public Set<String> getLimitedInParameterNames() {
+		return this.limitedInParameterNames;
 	}
 
 	/**
-	 * Specify the names of the out parameters
+	 * Specify the names of the out parameters.
 	 */
 	public void setOutParameterNames(List<String> outParameterNames) {
 		this.outParameterNames = outParameterNames;
 	}
 
 	/**
-	 * Get the name of the procedure
+	 * Get a list of the out parameter names.
 	 */
-	public String getProcedureName() {
-		return procedureName;
+	public List<String> getOutParameterNames() {
+		return this.outParameterNames;
 	}
 
 	/**
-	 * Specify the name of the procedure
+	 * Specify the name of the procedure.
 	 */
 	public void setProcedureName(String procedureName) {
 		this.procedureName = procedureName;
 	}
 
 	/**
-	 * Get the name of the catalog
+	 * Get the name of the procedure.
 	 */
-	public String getCatalogName() {
-		return catalogName;
+	public String getProcedureName() {
+		return this.procedureName;
 	}
 
 	/**
-	 * Specify the name of the catalog
+	 * Specify the name of the catalog.
 	 */
 	public void setCatalogName(String catalogName) {
 		this.catalogName = catalogName;
 	}
 
 	/**
-	 * Get the name of the schema
+	 * Get the name of the catalog.
 	 */
-	public String getSchemaName() {
-		return schemaName;
+	public String getCatalogName() {
+		return this.catalogName;
 	}
 
 	/**
-	 * Secify the name of the schema
+	 * Secify the name of the schema.
 	 */
 	public void setSchemaName(String schemaName) {
 		this.schemaName = schemaName;
 	}
 
 	/**
-	 * Check whether this call is a function call
+	 * Get the name of the schema.
 	 */
-	public boolean isFunction() {
-		return function;
+	public String getSchemaName() {
+		return this.schemaName;
 	}
 
 	/**
-	 * Specify whether this call is a function call
+	 * Specify whether this call is a function call.
 	 */
 	public void setFunction(boolean function) {
 		this.function = function;
 	}
 
 	/**
-	 * Check whether a return value is required
+	 * Check whether this call is a function call.
 	 */
-	public boolean isReturnValueRequired() {
-		return returnValueRequired;
+	public boolean isFunction() {
+		return this.function;
 	}
 
 	/**
-	 * Specify whether a return value is required
+	 * Specify whether a return value is required.
 	 */
 	public void setReturnValueRequired(boolean returnValueRequired) {
 		this.returnValueRequired = returnValueRequired;
 	}
 
 	/**
-	 * Check whether call parameter metadata should be accessed
+	 * Check whether a return value is required.
 	 */
-	public boolean isAccessCallParameterMetaData() {
-		return accessCallParameterMetaData;
+	public boolean isReturnValueRequired() {
+		return this.returnValueRequired;
 	}
 
 	/**
-	 * Specify whether call parameter metadata should be accessed
+	 * Specify whether call parameter metadata should be accessed.
 	 */
 	public void setAccessCallParameterMetaData(boolean accessCallParameterMetaData) {
 		this.accessCallParameterMetaData = accessCallParameterMetaData;
 	}
 
 	/**
+	 * Check whether call parameter metadata should be accessed.
+	 */
+	public boolean isAccessCallParameterMetaData() {
+		return this.accessCallParameterMetaData;
+	}
+
+
+	/**
 	 * Create a ReturnResultSetParameter/SqlOutParameter depending on the support provided by the JDBC driver
 	 * used for the database in use.
-	 *
 	 * @param parameterName the name of the parameter.  Also be used as the name of the List returned in the output.
 	 * @param rowMapper a RowMapper iplementation used to map the data retuned in the result set
 	 * @return the appropriate SqlParameter
 	 */
-	public SqlParameter createReturnResultSetParameter(String parameterName, ParameterizedRowMapper rowMapper) {
+	public SqlParameter createReturnResultSetParameter(String parameterName, RowMapper rowMapper) {
 		if (this.metaDataProvider.isReturnResultSetSupported()) {
 			return new SqlReturnResultSet(parameterName, rowMapper);
 		}
@@ -222,16 +237,13 @@ public class CallMetaDataContext {
 	 */
 	public String getScalarOutParameterName() {
 		if (isFunction()) {
-			return functionReturnName;
+			return this.functionReturnName;
 		}
 		else {
-			if (outParameterNames.size() > 1) {
+			if (this.outParameterNames.size() > 1) {
 				logger.warn("Accessing single output value when procedure has more than one output parameter");
 			}
-			if (outParameterNames.size() > 0)
-				return outParameterNames.get(0);
-			else
-				return null;
+			return (this.outParameterNames.size() > 0 ? this.outParameterNames.get(0) : null);
 		}
 	}
 
@@ -239,7 +251,7 @@ public class CallMetaDataContext {
 	 * Get the List of SqlParameter objects to be used in call execution
 	 */
 	public List<SqlParameter> getCallParameters() {
-		return callParameters;
+		return this.callParameters;
 	}
 
 	/**
@@ -247,10 +259,7 @@ public class CallMetaDataContext {
 	 * @param dataSource the DataSource used to retrieve metadata
 	 */
 	public void initializeMetaData(DataSource dataSource) {
-
-		metaDataProvider =
-				CallMetaDataProviderFactory.createMetaDataProvider(dataSource, this);
-
+		this.metaDataProvider = CallMetaDataProviderFactory.createMetaDataProvider(dataSource, this);
 	}
 
 	/**
@@ -260,9 +269,7 @@ public class CallMetaDataContext {
 	 * @param parameters the list of parameters ti use as a base
 	 */
 	public void processParameters(List<SqlParameter> parameters) {
-
-		callParameters = reconcileParameters(parameters);
-
+		this.callParameters = reconcileParameters(parameters);
 	}
 
 	/**
@@ -405,7 +412,7 @@ public class CallMetaDataContext {
 					match = true;
 				}
 				else {
-					String propertyName = SimpleJdbcUtils.convertUnderscoreNameToPropertyName(parameter.getName());
+					String propertyName = JdbcUtils.convertUnderscoreNameToPropertyName(parameter.getName());
 					if (parameterSource.hasValue(propertyName)) {
 						value = parameterSource.getValue(propertyName);
 						match = true;

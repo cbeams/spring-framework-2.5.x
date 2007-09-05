@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple.metadata;
+package org.springframework.jdbc.core.metadata;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.jdbc.core.simple.CallMetaDataContext;
-import org.springframework.jdbc.core.simple.SimpleJdbcUtils;
-import org.springframework.jdbc.support.DatabaseMetaDataCallback;
-import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.jdbc.support.MetaDataAccessException;
-
-import javax.sql.DataSource;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.support.DatabaseMetaDataCallback;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.MetaDataAccessException;
 
 /**
  * Factory used to create a {@link CallMetaDataProvider} implementation based on the type of databse being used.
@@ -64,21 +64,18 @@ public class CallMetaDataProviderFactory {
 	 * @param context the class that holds configuration and metedata
 	 * @return instance of the CallMetaDataProvider implementation to be used 
 	 */
-	static public CallMetaDataProvider createMetaDataProvider(DataSource dataSource,
-															 final CallMetaDataContext context) {
+	static public CallMetaDataProvider createMetaDataProvider(DataSource dataSource, final CallMetaDataContext context) {
 		try {
-			return (CallMetaDataProvider)JdbcUtils.extractDatabaseMetaData(
-					dataSource, new DatabaseMetaDataCallback() {
-
-				public Object processMetaData(DatabaseMetaData databaseMetaData)
-						throws SQLException, MetaDataAccessException {
-					String databaseProductName =
-							SimpleJdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
+			return (CallMetaDataProvider) JdbcUtils.extractDatabaseMetaData(dataSource, new DatabaseMetaDataCallback() {
+				public Object processMetaData(DatabaseMetaData databaseMetaData) throws SQLException, MetaDataAccessException {
+					String databaseProductName = JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
 					boolean accessProcedureColumnMetaData = context.isAccessCallParameterMetaData();
 					if (context.isFunction()) {
 						if (!supportedDatabaseProductsForFunctions.contains(databaseProductName)) {
-							logger.warn(databaseProductName + " is not one of the databases fully supported for function calls -- supported are: " +
-									supportedDatabaseProductsForFunctions);
+							if (logger.isWarnEnabled()) {
+								logger.warn(databaseProductName + " is not one of the databases fully supported for function calls " +
+										"-- supported are: " + supportedDatabaseProductsForFunctions);
+							}
 							if (accessProcedureColumnMetaData) {
 								logger.warn("Metadata processing disabled - you must specify all parameters explicitly");
 								accessProcedureColumnMetaData = false;
@@ -87,8 +84,10 @@ public class CallMetaDataProviderFactory {
 					}
 					else {
 						if (!supportedDatabaseProductsForProcedures.contains(databaseProductName)) {
-							logger.warn(databaseProductName + " is not one of the databases fully supported for procedure calls -- supported are: " +
-									supportedDatabaseProductsForProcedures);
+							if (logger.isWarnEnabled()) {
+								logger.warn(databaseProductName + " is not one of the databases fully supported for procedure calls " +
+										"-- supported are: " + supportedDatabaseProductsForProcedures);
+							}
 							if (accessProcedureColumnMetaData) {
 								logger.warn("Metadata processing disabled - you must specify all parameters explicitly");
 								accessProcedureColumnMetaData = false;
@@ -120,13 +119,15 @@ public class CallMetaDataProviderFactory {
 					}
 					provider.initializeWithMetaData(databaseMetaData);
 					if (accessProcedureColumnMetaData) {
-						provider.initializeWithProcedureColumnMetaData(databaseMetaData, context.getCatalogName(), context.getSchemaName(), context.getProcedureName());
+						provider.initializeWithProcedureColumnMetaData(
+								databaseMetaData, context.getCatalogName(), context.getSchemaName(), context.getProcedureName());
 					}
 					return provider;
 				}
 			});
-		} catch (MetaDataAccessException e) {
-			throw new DataAccessResourceFailureException("Error retreiving database metadata", e);
+		}
+		catch (MetaDataAccessException ex) {
+			throw new DataAccessResourceFailureException("Error retreiving database metadata", ex);
 		}
 
 	}

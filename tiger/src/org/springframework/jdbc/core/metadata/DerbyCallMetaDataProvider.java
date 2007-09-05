@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.core.simple.metadata;
+package org.springframework.jdbc.core.metadata;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -32,9 +32,11 @@ public class DerbyCallMetaDataProvider extends GenericCallMetaDataProvider {
 		super(databaseMetaData);
 	}
 
+
 	@Override
 	public String metaDataSchemaNameToUse(String schemaName) {
 		// Use current user schema if no schema specified
 		return schemaName == null ? getUserName().toUpperCase() : super.metaDataSchemaNameToUse(schemaName);
 	}
+
 }

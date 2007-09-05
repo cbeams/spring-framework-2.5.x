@@ -16,19 +16,29 @@
 
 package org.springframework.jdbc.core.simple;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.CallableStatementCreator;
+import org.springframework.jdbc.core.CallableStatementCreatorFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.metadata.CallMetaDataContext;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
-import javax.sql.DataSource;
-import java.util.*;
-
 /**
- * Abstract class to provide base functionality for easy stored procedure calls based on configuration options and
- * database metadata.
+ * Abstract class to provide base functionality for easy stored procedure calls
+ * based on configuration options and database metadata.
  * This class provides the base SPI for {@link SimpleJdbcCall}.
  *
  * @author Thomas Risberg
@@ -67,18 +77,17 @@ public abstract class AbstractJdbcCall {
 	 */
 	private CallableStatementCreatorFactory callableStatementFactory;
 
+
 	/**
-	 * Constructor to be used when initializing using a {@link DataSource}
-	 *
+	 * Constructor to be used when initializing using a {@link DataSource}.
 	 * @param dataSource the DataSource to be used
 	 */
 	protected AbstractJdbcCall(DataSource dataSource) {
-		jdbcTemplate = new JdbcTemplate(dataSource);
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	/**
-	 * Constructor to be used when initializing using a {@link JdbcTemplate}
-	 *
+	 * Constructor to be used when initializing using a {@link JdbcTemplate}.
 	 * @param jdbcTemplate the JdbcTemplate to use
 	 */
 	protected AbstractJdbcCall(JdbcTemplate jdbcTemplate) {
@@ -87,97 +96,102 @@ public abstract class AbstractJdbcCall {
 
 
 	/**
-	 * Get the name of the stored procedure
-	 */
-	public String getProcedureName() {
-		return callMetaDataContext.getProcedureName();
-	}
-
-
-	/**
-	 * Set the name of the stored procedure
-	 * @param procedureName name of stored procedure
-	 */
-	public void setProcedureName(String procedureName) {
-		callMetaDataContext.setProcedureName(procedureName);
-	}
-
-	/**
-	 * Set the names of in parameters to be used
-	 * @param inParameterNames
-	 */
-	public void setInParameterNames(HashSet inParameterNames) {
-		callMetaDataContext.setLimitedInParameterNames(inParameterNames);
-	}
-
-	/**
-	 * Get the catalog name used
-	 */
-	public String getCatalogName() {
-		return callMetaDataContext.getCatalogName();
-	}
-
-	/**
-	 * Set the catalog name to use
-	 */
-	public void setCatalogName(String catalogName) {
-		callMetaDataContext.setCatalogName(catalogName);
-	}
-
-	/**
-	 * Get the schema name used 
-	 */
-	public String getSchemaName() {
-		return callMetaDataContext.getSchemaName();
-	}
-
-	/**
-	 * Set the schema name to use
-	 */
-	public void setSchemaName(String schemaName) {
-		callMetaDataContext.setSchemaName(schemaName);
-	}
-
-	/**
-	 * Is this call a function call
-	 */
-	public boolean isFunction() {
-		return callMetaDataContext.isFunction();
-	}
-
-	/**
-	 * Specify whether this call is a function call
-	 */
-	public void setFunction(boolean b) {
-		this.callMetaDataContext.setFunction(b);
-	}
-
-	/**
-	 * Does the call require a return value
-	 */
-	public boolean isReturnValueRequired() {
-		return callMetaDataContext.isReturnValueRequired();
-	}
-
-	/**
-	 * Specify whether the call requires a rerurn value
-	 */
-	public void setReturnValueRequired(boolean b) {
-		this.callMetaDataContext.setReturnValueRequired(b);
-	}
-
-	/**
-	 * get the configured {@link JdbcTemplate}
+	 * Get the configured {@link JdbcTemplate}
 	 */
 	public JdbcTemplate getJdbcTemplate() {
-		return jdbcTemplate;
+		return this.jdbcTemplate;
 	}
 
 	/**
 	 * Get the {@link CallableStatementCreatorFactory} being used
 	 */
 	protected CallableStatementCreatorFactory getCallableStatementFactory() {
-		return callableStatementFactory;
+		return this.callableStatementFactory;
+	}
+
+
+	/**
+	 * Set the name of the stored procedure.
+	 */
+	public void setProcedureName(String procedureName) {
+		this.callMetaDataContext.setProcedureName(procedureName);
+	}
+
+	/**
+	 * Get the name of the stored procedure.
+	 */
+	public String getProcedureName() {
+		return this.callMetaDataContext.getProcedureName();
+	}
+
+	/**
+	 * Set the names of in parameters to be used.
+	 */
+	public void setInParameterNames(Set<String> inParameterNames) {
+		this.callMetaDataContext.setLimitedInParameterNames(inParameterNames);
+	}
+
+	/**
+	 * Get the names of in parameters to be used.
+	 */
+	public Set<String> getInParameterNames() {
+		return this.callMetaDataContext.getLimitedInParameterNames();
+	}
+
+	/**
+	 * Set the catalog name to use.
+	 */
+	public void setCatalogName(String catalogName) {
+		this.callMetaDataContext.setCatalogName(catalogName);
+	}
+
+	/**
+	 * Get the catalog name used.
+	 */
+	public String getCatalogName() {
+		return this.callMetaDataContext.getCatalogName();
+	}
+
+	/**
+	 * Set the schema name to use,
+	 */
+	public void setSchemaName(String schemaName) {
+		this.callMetaDataContext.setSchemaName(schemaName);
+	}
+
+	/**
+	 * Get the schema name used.
+	 */
+	public String getSchemaName() {
+		return this.callMetaDataContext.getSchemaName();
+	}
+
+	/**
+	 * Specify whether this call is a function call.
+	 */
+	public void setFunction(boolean function) {
+		this.callMetaDataContext.setFunction(function);
+	}
+
+	/**
+	 * Is this call a function call?
+	 */
+	public boolean isFunction() {
+		return this.callMetaDataContext.isFunction();
+	}
+
+	/**
+	 * Specify whether the call requires a rerurn value.
+	 */
+	public void setReturnValueRequired(boolean b) {
+		this.callMetaDataContext.setReturnValueRequired(b);
+	}
+
+	/**
+	 * Does the call require a return value?
+	 */
+	public boolean isReturnValueRequired() {
+		return this.callMetaDataContext.isReturnValueRequired();
 	}
 
 	/**
@@ -192,7 +206,7 @@ public abstract class AbstractJdbcCall {
 	}
 
 	/**
-	 * Add a {@link RowMapper} for the specified parameter or column
+	 * Add a {@link org.springframework.jdbc.core.RowMapper} for the specified parameter or column
 	 * @param parameterName name of parameter or column
 	 * @param rowMapper the RowMapper implementation to use
 	 */
@@ -207,7 +221,7 @@ public abstract class AbstractJdbcCall {
 	 * Get the call string that should be used based on parameters and meta data
 	 */
 	public String getCallString() {
-		return callString;
+		return this.callString;
 	}
 
 	/**
@@ -256,27 +270,23 @@ public abstract class AbstractJdbcCall {
 	 * their own compilation.  Invoked after this base class's compilation is complete.
 	 */
 	protected void compileInternal() {
-
-		callMetaDataContext.initializeMetaData(getJdbcTemplate().getDataSource());
+		this.callMetaDataContext.initializeMetaData(getJdbcTemplate().getDataSource());
 
 		// iterate over the declared RowMappers and register the corresponding SqlParameter
-		for (Map.Entry<String, ParameterizedRowMapper> entry : declaredRowMappers.entrySet()) {
+		for (Map.Entry<String, ParameterizedRowMapper> entry : this.declaredRowMappers.entrySet()) {
 			SqlParameter resultSetParameter =
-					callMetaDataContext.createReturnResultSetParameter(entry.getKey(), entry.getValue());
-			declaredParameters.add(resultSetParameter);
+					this.callMetaDataContext.createReturnResultSetParameter(entry.getKey(), entry.getValue());
+			this.declaredParameters.add(resultSetParameter);
 		}
+		callMetaDataContext.processParameters(this.declaredParameters);
 
-		callMetaDataContext.processParameters(declaredParameters);
-
-		callString = callMetaDataContext.createCallString();
-		
+		this.callString = this.callMetaDataContext.createCallString();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Compiled stored procedure. Call string is [" + getCallString() + "]");
+			logger.debug("Compiled stored procedure. Call string is [" + this.callString + "]");
 		}
 
 		this.callableStatementFactory =
-				new CallableStatementCreatorFactory(getCallString(), callMetaDataContext.getCallParameters());
-
+				new CallableStatementCreatorFactory(getCallString(), this.callMetaDataContext.getCallParameters());
 		this.callableStatementFactory.setNativeJdbcExtractor(getJdbcTemplate().getNativeJdbcExtractor());
 
 		onCompileInternal();
@@ -335,7 +345,6 @@ public abstract class AbstractJdbcCall {
 
 	/**
 	 * Method that provides execution of the call using the passed in Map of parameters
-	 *
 	 * @param args Map of parameter name and values
 	 * @return Map of out parameters
 	 */
@@ -365,29 +374,27 @@ public abstract class AbstractJdbcCall {
 	 * Get the name of a single out parameter or return value. Used for functions or procedures with one out parameter
 	 */
 	protected String getScalarOutParameterName() {
-		return callMetaDataContext.getScalarOutParameterName();
+		return this.callMetaDataContext.getScalarOutParameterName();
 	}
 
 	/**
 	 * Match the provided in parameter values with regitered parameters and parameters defined via metedata
 	 * processing.
-	 *
 	 * @param parameterSource the parameter vakues provided as a {@link SqlParameterSource}
 	 * @return Map with parameter names and values
 	 */
 	protected Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
-		return callMetaDataContext.matchInParameterValuesWithCallParameters(parameterSource);
+		return this.callMetaDataContext.matchInParameterValuesWithCallParameters(parameterSource);
 	}
 
 	/**
 	 * Match the provided in parameter values with regitered parameters and parameters defined via metedata
 	 * processing.
-	 *
 	 * @param args the parameter values provided in a Map
 	 * @return Map with parameter names and values
 	 */
 	protected Map<String, Object> matchInParameterValuesWithCallParameters(Map<String, Object> args) {
-		return callMetaDataContext.matchInParameterValuesWithCallParameters(args);
+		return this.callMetaDataContext.matchInParameterValuesWithCallParameters(args);
 	}
 
 	/**
@@ -395,6 +402,6 @@ public abstract class AbstractJdbcCall {
 	 * based on meta data processing.
 	 */
 	protected List<SqlParameter> getCallParameters() {
-		return callMetaDataContext.getCallParameters();
+		return this.callMetaDataContext.getCallParameters();
 	}
 }
