@@ -55,6 +55,8 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String BASE_PACKAGE_ATTRIBUTE = "base-package";
 
+	private static final String RESOURCE_PATTERN_ATTRIBUTE = "resource-pattern";
+
 	private static final String USE_DEFAULT_FILTERS_ATTRIBUTE = "use-default-filters";
 
 	private static final String ANNOTATION_CONFIG_ATTRIBUTE = "annotation-config";
@@ -90,6 +92,10 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 		String basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);
 		String[] basePackages = StringUtils.commaDelimitedListToStringArray(basePackage);
+
+		if (element.hasAttribute(RESOURCE_PATTERN_ATTRIBUTE)) {
+			scanner.setResourcePattern(element.getAttribute(RESOURCE_PATTERN_ATTRIBUTE));
+		}
 
 		// Parse exclude and include filter elements.
 		NodeList nodeList = element.getChildNodes();

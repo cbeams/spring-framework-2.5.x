@@ -39,6 +39,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -57,6 +58,11 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.core.type.asm.AnnotationMetadataReadingVisitor
  */
 public class ClassPathScanningCandidateComponentProvider implements ResourceLoaderAware {
+
+	protected static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
+
+
+	private String resourcePattern = DEFAULT_RESOURCE_PATTERN;
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
@@ -91,6 +97,17 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.classReaderFactory = new CachingClassReaderFactory(resourceLoader);
+	}
+
+	/**
+	 * Set the resource pattern to use when scanning the classpath.
+	 * This value will be appended to each base package name.
+	 * @see #findCandidateComponents(String)
+	 * @see #DEFAULT_RESOURCE_PATTERN
+	 */
+	public void setResourcePattern(String resourcePattern) {
+		Assert.notNull(resourcePattern, "'resourcePattern' must not be null");
+		this.resourcePattern = resourcePattern;
 	}
 
 	/**
@@ -142,7 +159,7 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 		Set<BeanDefinition> candidates = new LinkedHashSet<BeanDefinition>();
 		try {
 			String packageSearchPath =
-					"classpath*:" + ClassUtils.convertClassNameToResourcePath(basePackage) + "/**/*.class";
+					"classpath*:" + ClassUtils.convertClassNameToResourcePath(basePackage) + "/" + this.resourcePattern;
 			Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
 			for (int i = 0; i < resources.length; i++) {
 				Resource resource = resources[i];

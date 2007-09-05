@@ -33,5 +33,17 @@ public class ComponentScanParserTests extends TestCase {
 		assertTrue(context.containsBean("stubFooDao"));
 		assertFalse(context.containsBean("scopedProxyTestBean"));
 	}
-	
+
+	public void testNonMatchingResourcePattern() {
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"org/springframework/context/annotation/nonMatchingResourcePatternTests.xml");
+		assertFalse(context.containsBean("fooServiceImpl"));
+	}
+
+	public void testMatchingResourcePattern() {
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"org/springframework/context/annotation/matchingResourcePatternTests.xml");
+		assertTrue(context.containsBean("fooServiceImpl"));
+	}
+
 }

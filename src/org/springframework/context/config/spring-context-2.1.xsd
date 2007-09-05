@@ -70,6 +70,7 @@
 				<xsd:element name="exclude-filter" type="filterType" minOccurs="0" maxOccurs="unbounded"/>
 			</xsd:sequence>
 			<xsd:attribute name="base-package" type="xsd:string" use="required"/>
+            <xsd:attribute name="resource-pattern" type="xsd:string"/>
 			<xsd:attribute name="use-default-filters" type="xsd:boolean" default="true"/>
 			<xsd:attribute name="annotation-config" type="xsd:boolean" default="true"/>
 			<xsd:attribute name="name-generator" type="xsd:string"/>
