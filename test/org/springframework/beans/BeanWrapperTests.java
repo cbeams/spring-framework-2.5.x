@@ -257,8 +257,31 @@ public class BeanWrapperTests extends TestCase {
 	public void testIgnoringIndexedProperty() {
 		MutablePropertyValues values = new MutablePropertyValues();
 		values.addPropertyValue("toBeIgnored[0]", new Integer(42));
-		BeanWrapper wrapper = new BeanWrapperImpl(new Object());
-		wrapper.setPropertyValues(values, true);
+		BeanWrapper bw = new BeanWrapperImpl(new Object());
+		bw.setPropertyValues(values, true);
+	}
+
+	public void testConvertPrimitiveToString() {
+		MutablePropertyValues values = new MutablePropertyValues();
+		values.addPropertyValue("name", new Integer(42));
+		TestBean tb = new TestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.setPropertyValues(values);
+		assertEquals("42", tb.getName());
+	}
+
+	public void testConvertClassToString() {
+		MutablePropertyValues values = new MutablePropertyValues();
+		values.addPropertyValue("name", Integer.class);
+		TestBean tb = new TestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
+			public void setValue(Object value) {
+				super.setValue(value.toString());
+			}
+		});
+		bw.setPropertyValues(values);
+		assertEquals(Integer.class.toString(), tb.getName());
 	}
 
 	public void testBooleanObject() {

@@ -192,10 +192,14 @@ class TypeConverterDelegate {
 			convertedValue = doConvertValue(oldValue, convertedValue, requiredType, editor);
 		}
 
-		if (requiredType != null) {
+		if (requiredType != null && convertedValue != null) {
 			// Try to apply some standard type conversion rules if appropriate.
 
-			if (convertedValue != null && requiredType.isArray()) {
+			if (String.class.equals(requiredType) && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
+				// We can stringify any primitive value...
+				return convertedValue.toString();
+			}
+			else if (requiredType.isArray()) {
 				// Array required -> apply appropriate conversion of elements.
 				return convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
 			}
