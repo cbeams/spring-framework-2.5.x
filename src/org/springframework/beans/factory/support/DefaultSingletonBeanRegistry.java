@@ -98,8 +98,11 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	/** Disposable bean instances: bean name --> disposable instance */
 	private final Map disposableBeans = CollectionFactory.createLinkedMapIfPossible(16);
 
-	/** Map between dependent bean names: bean name --> dependent bean name */
+	/** Map between dependent bean names: bean name --> Set of dependent bean names */
 	private final Map dependentBeanMap = CollectionFactory.createConcurrentMapIfPossible(16);
+
+	/** Map between depending bean names: bean name --> Set of bean names for the bean's dependencies */
+	private final Map dependenciesForBeanMap = CollectionFactory.createConcurrentMapIfPossible(16);
 
 
 	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
@@ -278,12 +281,20 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 */
 	public void registerDependentBean(String beanName, String dependentBeanName) {
 		synchronized (this.dependentBeanMap) {
-			Set dependencies = (Set) this.dependentBeanMap.get(beanName);
-			if (dependencies == null) {
-				dependencies = CollectionFactory.createLinkedSetIfPossible(8);
-				this.dependentBeanMap.put(beanName, dependencies);
+			Set dependentBeans = (Set) this.dependentBeanMap.get(beanName);
+			if (dependentBeans == null) {
+				dependentBeans = CollectionFactory.createLinkedSetIfPossible(8);
+				this.dependentBeanMap.put(beanName, dependentBeans);
 			}
-			dependencies.add(dependentBeanName);
+			dependentBeans.add(dependentBeanName);
+		}
+		synchronized (this.dependenciesForBeanMap) {
+			Set dependenciesForBean = (Set) this.dependenciesForBeanMap.get(dependentBeanName);
+			if (dependenciesForBean == null) {
+				dependenciesForBean = CollectionFactory.createLinkedSetIfPossible(8);
+				this.dependenciesForBeanMap.put(dependentBeanName, dependenciesForBean);
+			}
+			dependenciesForBean.add(beanName);
 		}
 	}
 
@@ -306,6 +317,20 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 			return new String[0];
 		}
 		return (String[]) dependentBeans.toArray(new String[dependentBeans.size()]);
+	}
+
+	/**
+	 * Return the names of all beans that the specified bean depends on, if any.
+	 * @param beanName the name of the bean
+	 * @return the array of names of beans which the bean depends on,
+	 * or an empty array if none
+	 */
+	public String[] getDependenciesForBean(String beanName) {
+		Set dependenciesForBean = (Set) this.dependenciesForBeanMap.get(beanName);
+		if (dependenciesForBean == null) {
+			return new String[0];
+		}
+		return (String[]) dependenciesForBean.toArray(new String[dependenciesForBean.size()]);
 	}
 
 	public void destroySingletons() {

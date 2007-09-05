@@ -1378,8 +1378,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * Add the given bean to the list of disposable beans in this factory,
 	 * registering its DisposableBean interface and/or the given destroy method
 	 * to be called on factory shutdown (if applicable). Only applies to singletons.
-	 * <p>Also registers bean as dependent on other beans, according to the
-	 * "depends-on" configuration in the bean definition.
 	 * @param beanName the name of the bean
 	 * @param bean the bean instance
 	 * @param mbd the bean definition for the bean
@@ -1405,14 +1403,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				}
 				scope.registerDestructionCallback(beanName,
 						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors()));
-			}
-			// Register bean as dependent on other beans, if necessary,
-			// for correct shutdown order.
-			String[] dependsOn = mbd.getDependsOn();
-			if (dependsOn != null) {
-				for (int i = 0; i < dependsOn.length; i++) {
-					registerDependentBean(dependsOn[i], beanName);
-				}
 			}
 		}
 	}
