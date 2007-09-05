@@ -39,7 +39,7 @@ import org.springframework.test.context.SpringRunnerContextCacheTests;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 @RunWith(Suite.class)
@@ -49,6 +49,8 @@ import org.springframework.test.context.SpringRunnerContextCacheTests;
 StandardJUnit4FeaturesTests.class,
 
 StandardJUnit4FeaturesSpringRunnerTests.class,
+
+EnabledAndIgnoredSpringRunnerTests.class,
 
 SpringJUnit4ClassRunnerAppCtxTests.class,
 

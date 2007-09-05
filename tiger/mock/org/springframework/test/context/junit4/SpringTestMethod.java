@@ -28,6 +28,9 @@ import org.junit.Test;
 import org.junit.Test.None;
 import org.junit.internal.runners.TestClass;
 import org.springframework.test.annotation.ExpectedException;
+import org.springframework.test.annotation.IfProfileValue;
+import org.springframework.test.annotation.ProfileValueSource;
+import org.springframework.test.annotation.SystemProfileValueSource;
 import org.springframework.test.annotation.Timed;
 
 /**
@@ -45,7 +48,7 @@ import org.springframework.test.annotation.Timed;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 2.1
  */
 class SpringTestMethod {
@@ -55,15 +58,17 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/** Class Logger. */
-	private static final Log	LOG	= LogFactory.getLog(SpringTestMethod.class);
+	private static final Log		LOG					= LogFactory.getLog(SpringTestMethod.class);
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private final Method		method;
+	private final Method			method;
 
-	private final TestClass		testClass;
+	protected ProfileValueSource	profileValueSource	= SystemProfileValueSource.getInstance();
+
+	private final TestClass			testClass;
 
 	// ------------------------------------------------------------------------|
 	// --- CONSTRUCTORS -------------------------------------------------------|
@@ -265,15 +270,45 @@ class SpringTestMethod {
 	// ------------------------------------------------------------------------|
 
 	/**
+	 * Determines if this test method is <em>disabled</em> in the current
+	 * environment (i.e., whether or not the test should be executed) by
+	 * evaluating the {@link IfProfileValue @IfProfileValue} annotation, if
+	 * present.
+	 *
+	 * @see #isIgnored()
+	 * @return whether the test should execute in the current environment
+	 */
+	protected boolean isDisabledInThisEnvironment() {
+
+		IfProfileValue ifProfileValue = getMethod().getAnnotation(IfProfileValue.class);
+		if (ifProfileValue == null) {
+			ifProfileValue = getClass().getAnnotation(IfProfileValue.class);
+		}
+
+		if (ifProfileValue != null) {
+			// May be true
+			return !this.profileValueSource.get(ifProfileValue.name()).equals(ifProfileValue.value());
+		}
+
+		// else
+		return false;
+
+		// XXX Optional: add support for @IfNotProfileValue.
+	}
+
+	// ------------------------------------------------------------------------|
+
+	/**
 	 * Determines if this test method should be ignored.
 	 *
+	 * @see #isDisabledInThisEnvironment()
 	 * @return <code>true</code> if this test method should be ignored.
 	 */
 	public boolean isIgnored() {
 
-		// XXX Optional: add support for @IfProfileValue and @IfNotProfileValue.
+		final boolean ignoreAnnotationPresent = getMethod().isAnnotationPresent(Ignore.class);
 
-		return getMethod().getAnnotation(Ignore.class) != null;
+		return ignoreAnnotationPresent || isDisabledInThisEnvironment();
 	}
 
 	// ------------------------------------------------------------------------|
