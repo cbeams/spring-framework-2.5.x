@@ -16,14 +16,12 @@
 
 package org.springframework.context.support;
 
-import junit.framework.TestCase;
-
 import org.springframework.context.Lifecycle;
 
 /**
  * @author Mark Fisher
  */
-public class LifecycleTestBean extends TestCase implements Lifecycle {
+public class LifecycleTestBean implements Lifecycle {
 
 	private static int startCounter;
 
