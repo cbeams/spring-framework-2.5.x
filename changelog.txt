@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.7 (2007-09-05)
+Changes in version 2.0.7 (2007-09-08)
 -------------------------------------
 
 General
@@ -23,6 +23,7 @@ Package org.springframework.beans
 * URIEditor trims whitespace before parsing the URI (allowing for XML formatting with whitespace)
 * TypeConverterDelegate protects its collection conversion process against misbehaving Collections with a null Iterator
 * TypeConverterDelegate protects its value conversion step against PropertyEditors which don't support "setValue" calls
+* PropertyEditorRegistrySupport's "copyCustomEditorsTo" copies all editors if 'nestedProperty' argument is null
 * deprecated superseded ResourceFactoryBean (String-to-Resource conversion has been implicitly available for years)
 * DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
 * DefaultListableBeanFactory logs FactoryBean type matching failures at warn level (except for circular references)
@@ -30,6 +31,7 @@ Package org.springframework.beans
 * BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
 * PropertyPathFactoryBean supports a null property value (removed historic restriction there)
 * fixed AbstractBeanFactory's type check to ignore a null value (as potentially exposed by a FactoryBean)
+* fixed AbstractBeanFactory to never cache FactoryBean-exposed objects for inner beans (avoiding name conflicts)
 * optimized DefaultListableBeanFactory's resolution of bean references during prototype creation
 * changed visibility of BeanDefinitionParserDelegate's "buildTypedStringValue(ForMap)" methods to protected
 
@@ -69,6 +71,7 @@ Package org.springframework.mock
 
 Package org.springframework.remoting
 * (Jndi)RmiClientInterceptor resets stub before a refresh attempt, avoiding race condition in case of registry restart
+* LocalJaxRpcServiceFactory trims whitespace from "namespaceUri" values
 
 Package org.springframework.scheduling
 * Quartz SchedulerFactoryBean does not set default AdaptableJobFactory in case of RemoteScheduler (not supported there)
@@ -92,6 +95,8 @@ Package org.springframework.web
 * factored out "invokeDelegate" template method in DelegatingFilterProxy
 * fixed Servlet/PortletContextResourcePatternResolver to correctly match bounded patterns
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
+* RequestContext uses a full ResourceBundleThemeSource as default again (for backwards compatibility)
+* RequestContext lazily obtains the Theme instance (for more efficiency when theme support is not used)
 * AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
 * AbstractView does not log static attributes anymore, in order to allow for scoped proxies to be used as attributes

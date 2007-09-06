@@ -55,7 +55,7 @@ The Spring Framework 2.0 requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, J
 required for building the framework; for the full build including all aspects, AspectJ is required as well.
 J2EE 1.2 (Servlet 2.2, JSP 1.1) is sufficient when not using Spring's JSP tag libraries or the EJB support.
 
-Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1/2.2, AspectJ 5, JMX 1.0/1.2,
+Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1/2.2, AspectJ 1.5, JMX 1.0/1.2,
 JCA 1.0/1.5, Hibernate 2.1/3.0/3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, iBATIS SQL Maps 2.1/2.2/2.3,
 Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5/1.6, EHCache 1.2, JSTL 1.0/1.1, Velocity 1.3/1.4/1.5,
 FreeMarker 2.3, JasperReports 1.2/1.3, Struts/Tiles 1.1/1.2/1.3, JSF 1.1, Jakarta Commons FileUpload 1.1/1.2, etc.
@@ -99,7 +99,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2640 KB)
+* "spring" (~2645 KB)
 - Convenient jar file combining all standard modules (except for Portlet and Hibernate2 support)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
@@ -212,7 +212,7 @@ WEAVER JARS (dist/weavers)
 - Contents: extension of Tomcat's ClassLoader, capable of class instrumentation
 - Dependencies: none (for deployment into Tomcat's "server/lib" directory)
 
-Note: To use the JSP expression language for arguments of Spring's web MVC tags, JSP 2.0 is required.
+Note: In order to use the JSP expression language for arguments of Spring's web MVC tags, JSP 2.0 is required.
 Alternatively, the Jakarta implementation of the JSTL (standard.jar) has to be available on the class path.
 
 
