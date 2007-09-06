@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Locale;
 import org.springframework.web.servlet.LocaleResolver;
 
 /**
- * Abstract base class for LocaleResolver implementations.
+ * Abstract base class for {@link LocaleResolver} implementations.
  * Provides support for a default locale.
  *
  * @author Juergen Hoeller
@@ -43,7 +43,7 @@ public abstract class AbstractLocaleResolver implements LocaleResolver {
 	 * Return the default Locale that this resolver is supposed to fall back to, if any.
 	 */
 	protected Locale getDefaultLocale() {
-		return defaultLocale;
+		return this.defaultLocale;
 	}
 
 }

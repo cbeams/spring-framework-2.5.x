@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.web.servlet.theme;
 import org.springframework.web.servlet.ThemeResolver;
 
 /**
- * Abstract base class for ThemeResolver implementations.
+ * Abstract base class for {@link ThemeResolver} implementations.
  * Provides support for a default theme name.
  *
  * @author Juergen Hoeller
@@ -48,7 +48,7 @@ public abstract class AbstractThemeResolver implements ThemeResolver {
 	 * Return the name of the default theme.
 	 */
 	public String getDefaultThemeName() {
-		return defaultThemeName;
+		return this.defaultThemeName;
 	}
 
 }
