@@ -148,7 +148,7 @@
 		<exclude name="org/springframework/orm/hibernate3/support/Open*InView*.*"/>
 	</patternset>
 
-	<patternset id="spring.mock.packages">
+	<patternset id="spring.test.packages">
 		<include name="META-INF/**"/>
 		<include name="org/springframework/**"/>
 	</patternset>
@@ -575,9 +575,9 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-mock.jar">
+		<jar jarfile="${dist.dir}/modules/spring-test.jar">
 			<fileset dir="${target.mockclasses.dir}">
-				<patternset refid="spring.mock.packages"/>
+				<patternset refid="spring.test.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -780,12 +780,12 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/module-sources/spring-mock-sources.jar">
+		<jar jarfile="${dist.dir}/module-sources/spring-test-sources.jar">
 			<fileset dir="${mock.dir}">
-				<patternset refid="spring.mock.packages"/>
+				<patternset refid="spring.test.packages"/>
 			</fileset>
 			<fileset dir="${tiger.mock.dir}">
-				<patternset refid="spring.mock.packages"/>
+				<patternset refid="spring.test.packages"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -1070,15 +1070,15 @@
 			<attach file="${dist.dir}/module-sources/spring-jms-sources.jar" classifier="sources"/>
 		</maven:install>
 
-		<maven:install file="${dist.dir}/modules/spring-mock.jar">
-			<pom file="${dist.dir}/maven/spring-mock.pom"/>
-			<attach file="${dist.dir}/module-sources/spring-mock-sources.jar" classifier="sources"/>
-		</maven:install>
-
 		<maven:install file="${dist.dir}/modules/spring-orm.jar">
 			<pom file="${dist.dir}/maven/spring-orm.pom"/>
 			<attach file="${dist.dir}/module-sources/spring-orm-sources.jar" classifier="sources"/>
 		</maven:install>
+
+    <maven:install file="${dist.dir}/modules/spring-test.jar">
+      <pom file="${dist.dir}/maven/spring-test.pom"/>
+      <attach file="${dist.dir}/module-sources/spring-test-sources.jar" classifier="sources"/>
+    </maven:install>
 
 		<maven:install file="${dist.dir}/modules/spring-tx.jar">
 			<pom file="${dist.dir}/maven/spring-tx.pom"/>

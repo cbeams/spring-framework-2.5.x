@@ -3,12 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M4 (2007-09-06)
+Changes in version 2.1 M4 (2007-09-07)
 --------------------------------------
 
 General
 * updated build to use JUnit 4.4 for the tiger test suite while sticking with JUnit 3.8 for the main test suite
 * moved GlassFish and OC4J instrumentation support from spring-context-support.jar to spring-context.jar
+* renamed spring-mock.jar to spring-test.jar, reflecting the focus on the test context framework
 * factored out Struts 1.x support (including Tiles 1.x support) into spring-webmvc-struts.jar
 * Spring-style pattern matching ("*xxx", "xxx*", "*xxx*") supports multi-part patterns as well now ("xxx*yyy")
 
@@ -21,8 +22,10 @@ Package org.springframework.aop
 Package org.springframework.beans
 * TypeConverterDelegate protects its value conversion step against PropertyEditors which don't support "setValue" calls
 * TypeConverterDelegate falls back to "toString()" conversion for a primitive value type if the required type is String
+* changed visibility of PropertyEditorRegistrySupport's "getDefaultEditor(requiredType)" method to public
 * PropertyEditorRegistrySupport's "copyCustomEditorsTo" copies all editors if 'nestedProperty' argument is null
 * exposed "String[] getDependentBeans(beanName)" method on ConfigurableBeanFactory interface
+* introduced "String[] getDependenciesForBean(beanName)" method on ConfigurableBeanFactory interface
 * DefaultSingletonBeanRegistry uses a concurrent Map for managing dependent beans, avoiding unnecessary synchronization
 * removed superseded ResourceFactoryBean (String-to-Resource conversion has been implicitly available for years)
 * added overloaded "createBean(beanClass)" method to AutowireCapableBeanFactory interface
@@ -36,6 +39,7 @@ Package org.springframework.beans
 * optimized DefaultListableBeanFactory's resolution of bean references during prototype creation
 * DefaultListableBeanFactory performs SmartFactoryBean eager-init check even if the FactoryBean singleton already exists
 * CommonAnnotationBeanPostProcessor falls back to default type match if no bean found for @Resource field/property name
+* Common/Autowired/PersistenceAnnotationBeanPostProcessor reject injection annotations on static fields/methods
 * factored out "isCandidateComponent(beanDefinition)" template method in ClassPathScanningCandidateComponentProvider
 * ClassPathBeanDefinitionScanner does not apply scoped-proxy setting to prototypes (only to extended scopes)
 * scoped inner beans are now eligible for scoped destruction callbacks, despite not living as scoped attributes
@@ -44,6 +48,8 @@ Package org.springframework.beans
 Package org.springframework.context
 * AbstractApplicationContext registers BeanFactory, ApplicationContext etc as resolvable dependency types for @Autowired
 * fixed AbstractApplicationContext's temporary ClassLoader to work for by-type autowiring in ApplicationListeners etc
+* AbstractApplicationContext propagates "start()"/"stop()" call to LifecycleBeans according to inter-bean dependencies
+* AbstractApplicationContext sends ContextStartedEvent/ContextStoppedEvent when propagating "start()"/"stop()" call
 
 Package org.springframework.core
 * factored out protected "openStreamForClass" template method in OverridingClassLoader
@@ -80,8 +86,8 @@ Package org.springframework.scripting
 Package org.springframework.test
 * fixed AbstractSpringContextTests's "hasCachedContext" implementation to use the context key String translation
 * reduced AbstractTransactionalSpringContextTests's log level for transaction management from INFO to DEBUG
-* introduced generic annotation-based test execution framework
-* introduced JUnit4 support (SpringJUnit4ClassRunner)
+* introduced annotation-oriented test context framework based on test execution listeners
+* introduced JUnit4 support (SpringJUnit4ClassRunner) based on the new test context framework
 
 Package org.springframework.transaction
 * fixed "tx:annotation-driven" to not activate "aop:config"-style autodetection of application-defined Advisor beans
@@ -94,6 +100,8 @@ Package org.springframework.util
 * ReflectionUtils provides a "findMethod" variant without parameter types argument
 
 Package org.springframework.web
+* RequestContext uses a full ResourceBundleThemeSource as default again (for backwards compatibility)
+* RequestContext lazily obtains the Theme instance (for more efficiency when theme support is not used)
 * AbstractView does not log static attributes anymore, in order to allow for scoped proxies to be used as attributes
 * factored out protected "isEligibleProperty(key, value)" template method in RedirectView
 * RedirectView only exposes Strings, primitives and primitive wrappers as query properties by default
@@ -351,7 +359,7 @@ Package org.springframework.jdbc
 * added named parameter support to SimpleJdbcTemplate
 * added ParameterizedBeanPropertyRowMapper, providing automatic mapping between columns and bean properties
 * added new SqlReturnUpdateCount parameter to provide name for update counts from stored procedures
-* added stored proc support for retrieving update counts and storing the retrieved int in the output map
+* added stored procedure support for retrieving update counts and storing the retrieved int in the output map
 * added automatic processing of stored proc returned resultsets (will create default one if declared parameter missing)
 * added automatic processing of stored proc update counts (will create default one if declared parameter missing)
 

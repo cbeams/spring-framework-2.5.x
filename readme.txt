@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.1 M4 (August 2007)
---------------------------------------------------
+THE SPRING FRAMEWORK, release 2.1 M4 (September 2007)
+-----------------------------------------------------
 http://www.springframework.org
 
 
@@ -98,18 +98,18 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2850 KB)
-- Convenient jar file combining all standard modules (except for the mock module and the Portlet/Struts support)
+* "spring" (~2915 KB)
+- Convenient jar file combining all standard modules (except for the test module and the Portlet/Struts support)
 - Also includes the AOP Alliance interfaces (as a convenience)!
-- Does not include contents of spring-aspects.jar, spring-mock.jar, spring-webmvc-portlet and spring-webmvc-struts.jar!
+- Does not include contents of spring-aspects.jar, spring-test.jar, spring-webmvc-portlet and spring-webmvc-struts.jar!
 
 MODULE JARS (dist/modules):
 
-* "spring-aop" (~310 KB)
+* "spring-aop" (~315 KB)
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, (spring-beans, AOP Alliance)
 
-* "spring-beans" (~440 KB)
+* "spring-beans" (~445 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core
 
@@ -125,7 +125,7 @@ MODULE JARS (dist/modules):
 - Contents: core abstractions and utilities
 - Dependencies: Commons Logging
 
-* "spring-jdbc" (~240 KB)
+* "spring-jdbc" (~290 KB)
 - Contents: JDBC support
 - Dependencies: spring-beans, spring-tx
 
@@ -133,13 +133,13 @@ MODULE JARS (dist/modules):
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-beans, spring-tx, JMS API
 
-* "spring-mock" (~125 KB)
-- Contents: JNDI mocks, Servlet API mocks, Portlet API mocks, JUnit support
-- Dependencies: spring-core, (spring-context, spring-jdbc, spring-web, Servlet API, Portlet API, JUnit)
-
-* "spring-orm" (~335 KB)
+* "spring-orm" (~340 KB)
 - Contents: JDO support, JPA support, Hibernate support, TopLink support, iBATIS support
 - Dependencies: spring-jdbc, (spring-web)
+
+* "spring-test" (~160 KB)
+- Contents: test context framework, JUnit support, JNDI mocks, Servlet API mocks, Portlet API mocks
+- Dependencies: spring-core, (spring-context, spring-jdbc, spring-web, JUnit, Servlet API, Portlet API)
 
 * "spring-tx" (~205 KB)
 - Contents: transaction infrastructure, JCA support, DAO support
@@ -175,7 +175,7 @@ WEAVING JARS (dist/weaving)
 - Contents: extension of Tomcat's ClassLoader, capable of class instrumentation
 - Dependencies: none (for deployment into Tomcat's "server/lib" directory)
 
-Note: To use the JSP expression language for arguments of Spring's web MVC tags, JSP 2.0 is required.
+Note: In order to use the JSP expression language for arguments of Spring's web MVC tags, JSP 2.0 is required.
 Alternatively, the Jakarta implementation of the JSTL (standard.jar) has to be available on the class path.
 
 

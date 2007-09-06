@@ -2,9 +2,5 @@ Export-Package: org.springframework*;version=${spring-version-osgi}
 Import-Package: org.apache.commons.logging*,*;resolution:=optional
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
-Bundle-Name: spring-mock
-Bundle-SymbolicName: org.springframework.mock
-
-
-
-
+Bundle-Name: spring-test
+Bundle-SymbolicName: spring-test

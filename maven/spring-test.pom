@@ -6,11 +6,11 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework</groupId>
-	<artifactId>spring-mock</artifactId>
+	<artifactId>spring-test</artifactId>
 	<packaging>jar</packaging>
-	<name>Spring Framework: Mock</name>
+	<name>Spring Framework: Test</name>
 	<version>2.1-m4</version>
-	<description>Spring Framework: Mock</description>
+	<description>Spring Framework: Test</description>
 	<url>http://www.springframework.org</url>
 	<licenses>
 		<license>

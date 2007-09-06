@@ -125,7 +125,7 @@
 
       <para>The Spring Framework provides first class support for integration
       testing in the form of the classes that are packaged in the <filename
-      class="libraryfile">spring-mock.jar</filename> library. In this library,
+      class="libraryfile">spring-test.jar</filename> library. In this library,
       you will find the <literal>org.springframework.test</literal> package
       which contains valuable classes for integration testing using a Spring
       container, while at the same time not being reliant on an application
