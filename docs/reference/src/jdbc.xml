@@ -1198,7 +1198,7 @@ jdbcTemplate.update(
     }
 
     public void add(Actor actor) {
-        Map&lt;String, Object&gt; parameters = new HashMap&lt;String, Object&gt;(3);
+        Map&lt;String, Object&gt; parameters = new HashMap&lt;String, Object&gt;(2);
         parameters.put("first_name", actor.getFirstName());
         parameters.put("last_name", actor.getLastName());
         Number newId = insertActor.executeAndReturnKey(parameters);
@@ -1241,7 +1241,7 @@ jdbcTemplate.update(
     }
 
     public void add(Actor actor) {
-        Map&lt;String, Object&gt; parameters = new HashMap&lt;String, Object&gt;(3);
+        Map&lt;String, Object&gt; parameters = new HashMap&lt;String, Object&gt;(2);
         parameters.put("first_name", actor.getFirstName());
         parameters.put("last_name", actor.getLastName());
         Number newId = insertActor.executeAndReturnKey(parameters);
@@ -1254,9 +1254,16 @@ jdbcTemplate.update(
     </section>
 
     <section id="jdbc-simple-jdbc-call-1">
-      <title>Calling a stored procedure using SimpleJdbcCall</title>
+      <title>Using SqlParameterSource to provide parameter values</title>
 
-      <para>... ToDo ...</para>
+      <para>Using a Map to provide parameter values works fine, but it's not
+      the most convenient class to use. Spring provides a couple of
+      implementations of the <classname>SqlParameterSource</classname>
+      interface that can be used instead. The first one we'll look at is
+      <classname>BeanPropertySqlParameterSource</classname> which is a very
+      convenient class as long as you have a JavaBean compliant class that
+      contains your values. It will use the corresponding getter method to
+      extract the parameter values. Here is an example:</para>
 
       <para><programlisting>public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
@@ -1264,13 +1271,48 @@ jdbcTemplate.update(
 
     public void setDataSource(DataSource dataSource) {
         this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        this.insertActor =
+                new SimpleJdbcInsert(dataSource)
+                        .withTableName("t_actor")
+                        .usingGeneratedKeyColumns("id");
     }
 
-    public void callXXX() {
+    public void add(Actor actor) {
+        SqlParameterSource parameters = new BeanPropertySqlParameterSource(actor);
+        Number newId = insertActor.executeAndReturnKey(parameters);
+        actor.setId(newId.longValue());
     }
 
     //  ... additional methods
-}</programlisting>The execution of the call...</para>
+}</programlisting>Another option is the
+      <classname>MapSqlParameterSource</classname> that resembles a Map but
+      provides a more convenient <classname>addValue</classname> method that
+      can be chained.</para>
+
+      <para><programlisting>public class JdbcActorDao implements ActorDao {
+    private SimpleJdbcTemplate simpleJdbcTemplate;
+    private SimpleJdbcInsert insertActor;
+
+    public void setDataSource(DataSource dataSource) {
+        this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        this.insertActor =
+                new SimpleJdbcInsert(dataSource)
+                        .withTableName("t_actor")
+                        .usingGeneratedKeyColumns("id");
+    }
+
+    public void add(Actor actor) {
+        SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("first_name", actor.getFirstName())
+                .addValue("last_name", actor.getLastName());
+        Number newId = insertActor.executeAndReturnKey(parameters);
+        actor.setId(newId.longValue());
+    }
+
+    //  ... additional methods
+}</programlisting>As you can see, the configuration is the same, it;s just the
+      executing code that has to change to use these alternative input
+      classes. </para>
     </section>
 
     <section id="jdbc-simple-jdbc-call-2">
@@ -1280,7 +1322,7 @@ jdbcTemplate.update(
 
       <para><programlisting>public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
-    private SimpleJdbcInsert insertActor;
+    private SimpleJdbcCall actorCall;
 
     public void setDataSource(DataSource dataSource) {
         this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
