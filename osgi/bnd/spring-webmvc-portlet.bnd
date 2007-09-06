@@ -3,8 +3,4 @@ Import-Package: org.apache.commons.logging*,javax.servlet*, javax.portlet*, *;re
 Bundle-Version: ${spring-version}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-webmvc-portlet
-Bundle-SymbolicName: org.springframework.web.portlet
-
-
-
-
+Bundle-SymbolicName: spring-webmvc-portlet

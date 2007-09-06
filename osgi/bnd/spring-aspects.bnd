@@ -4,7 +4,4 @@ Export-Package: org.springframework*;version=${spring-version-osgi}
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-aspects
-Bundle-SymbolicName: org.springframework.aspects
-
-
-
+Bundle-SymbolicName: spring-aspects

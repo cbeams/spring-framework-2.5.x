@@ -6,8 +6,4 @@ Import-Package: org.apache.commons.logging*, \
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-orm
-Bundle-SymbolicName: org.springframework.orm
-
-
-
-
+Bundle-SymbolicName: spring-orm

@@ -3,8 +3,4 @@ Import-Package: org.apache.commons.logging*,javax.jms*, *;resolution:=optional
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-jms
-Bundle-SymbolicName: org.springframework.jms
-
-
-
-
+Bundle-SymbolicName: spring-jms

@@ -6,8 +6,4 @@ Import-Package: org.apache.commons.logging*, \
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-jdbc
-Bundle-SymbolicName: org.springframework.jdbc
-
-
-
-
+Bundle-SymbolicName: spring-jdbc

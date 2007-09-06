@@ -3,8 +3,4 @@ Import-Package: org.apache.commons.logging*,*;resolution:=optional
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-context-support
-Bundle-SymbolicName: org.springframework.context.support
-
-
-
-
+Bundle-SymbolicName: spring-context-support
