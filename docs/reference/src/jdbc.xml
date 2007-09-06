@@ -1253,7 +1253,7 @@ jdbcTemplate.update(
       on the metadata for determining what columns to use.</para>
     </section>
 
-    <section id="jdbc-simple-jdbc-call-1">
+    <section id="jdbc-simple-jdbc-parameters">
       <title>Using SqlParameterSource to provide parameter values</title>
 
       <para>Using a Map to provide parameter values works fine, but it's not
@@ -1312,10 +1312,10 @@ jdbcTemplate.update(
     //  ... additional methods
 }</programlisting>As you can see, the configuration is the same, it;s just the
       executing code that has to change to use these alternative input
-      classes. </para>
+      classes.</para>
     </section>
 
-    <section id="jdbc-simple-jdbc-call-2">
+    <section id="jdbc-simple-jdbc-call-1">
       <title>Calling a stored procedure using SimpleJdbcCall</title>
 
       <para>Let's now turn our attention to calling stored procedures using
@@ -1422,6 +1422,67 @@ END;</programlisting>As you can see there are four parameters. One is an in
     //  ... additional methods
 }</programlisting>By doing this, you don't have to worry about the case used
       for the names of your returned out parameters.</para>
+    </section>
+
+    <section id="jdbc-simple-jdbc-call-2">
+      <title>Declaring parameters to use for a SimpleJdbcCall
+      explicitly</title>
+
+      <para>We have seen how the parameters are decuced based on metadata, but
+      you can declare then explicitly if you wish. This is done when the
+      <classname>SimpleJdbcCall</classname> is created and configured using
+      the <classname>declareParameters</classname> method that takes a
+      variable number of <classname>SqlParameter</classname> objects as input.
+      See the next section for details on how to define an
+      <classname>SqlParameter</classname>.</para>
+
+      <para>We can opt to declare one, some or all of the parameters
+      explicitly. The parameter metedata is still beeing used. By calling the
+      method <classname>withoutProcedureColumnMetaDataAccess</classname> we
+      can specify that we would like to bypass any processing of the metadata
+      lookups for potential parameters and only use the declared ones. Another
+      situation that can arise is that one or more in parameters have default
+      values and we would like to leave them out of the call. To do that we
+      will just call the <classname>useInParameterNames</classname> to specify
+      the list of in parameter names to include. </para>
+
+      <para>This is what a fully declared procedure call declaration of our
+      earlier example would look like: </para>
+
+      <para><programlisting>public class JdbcActorDao implements ActorDao {
+    private SimpleJdbcCall procReadActor;
+
+    public void setDataSource(DataSource dataSource) {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        jdbcTemplate.setResultsMapCaseInsensitive(true);
+        this.procReadActor =
+                new SimpleJdbcCall(jdbcTemplate)
+                        .withProcedureName("read_actor")
+                        .withoutProcedureColumnMetaDataAccess()
+                        .useInParameterNames("in_id")
+                        .declareParameters(
+                                new SqlParameter("in_id", Types.NUMERIC),
+                                new SqlOutParameter("out_first_name", Types.VARCHAR),
+                                new SqlOutParameter("out_last_name", Types.VARCHAR),
+                                new SqlOutParameter("out_birth_date", Types.DATE)
+                        );
+    }
+
+
+    //  ... additional methods
+}</programlisting>The execution and end results are the same, we are just
+      specifying all the details explicitly rather than relying on metadata.
+      This will be necessary if the database we use is not part of the
+      supported databases. Currently we support metadata lookup of stored
+      procedure calls for the following databases: Apache Derby, DB2, MySQL,
+      Microsoft SQL Server, Oracle and Sybase. We also support metadata lookup
+      of stored functions for: MySQL, Microsoft SQL Server and Oracle.</para>
+    </section>
+
+    <section>
+      <title>How to define SqlParameters</title>
+
+      <para>... ToDo ...</para>
     </section>
   </section>
 
