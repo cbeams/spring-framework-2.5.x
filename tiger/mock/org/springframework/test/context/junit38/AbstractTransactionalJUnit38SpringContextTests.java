@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context.junit38;
 
 import javax.sql.DataSource;
@@ -25,7 +26,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
-import org.springframework.test.utils.SimpleJdbcTestUtils;
+import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link AbstractJUnit38SpringContextTests}.
  * </p>
  *
+ * @author Sam Brannen
  * @see AbstractJUnit38SpringContextTests
  * @see org.springframework.test.context.ContextConfiguration
  * @see org.springframework.test.context.TestExecutionListeners
@@ -54,63 +56,49 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.transaction.annotation.Transactional
  * @see org.springframework.test.annotation.NotTransactional
  * @see org.springframework.test.annotation.Rollback
- * @see org.springframework.test.utils.SimpleJdbcTestUtils
- * @author Sam Brannen
- * @version $Revision: 1.4 $
+ * @see org.springframework.test.jdbc.SimpleJdbcTestUtils
  * @since 2.1
  */
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-		TransactionalTestExecutionListener.class })
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
+		TransactionalTestExecutionListener.class})
 @Transactional
 public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUnit38SpringContextTests {
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * The SimpleJdbcTemplate that this base class manages, available to
 	 * subclasses.
 	 */
-	protected SimpleJdbcTemplate	simpleJdbcTemplate;
+	protected SimpleJdbcTemplate simpleJdbcTemplate;
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTRUCTORS -------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Default <em>no argument</em> constructor which delegates to
 	 * {@link AbstractTransactionalJUnit38SpringContextTests#AbstractTransactionalJUnit38SpringContextTests(String) AbstractTransactionalJUnit38SpringContextTests(String)},
 	 * passing a value of <code>null</code> for the test name.
 	 *
-	 * @see AbstractTransactionalJUnit38SpringContextTests#AbstractTransactionalJUnit38SpringContextTests(String)
 	 * @throws Exception If an error occurs while initializing the test
-	 *         instance.
+	 * instance.
+	 * @see AbstractTransactionalJUnit38SpringContextTests#AbstractTransactionalJUnit38SpringContextTests(String)
 	 */
 	public AbstractTransactionalJUnit38SpringContextTests() throws Exception {
 
 		this(null);
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Delegates to
 	 * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String) AbstractJUnit38SpringContextTests(String)}.
 	 *
-	 * @see AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String)
 	 * @param name The name of the current test to execute.
 	 * @throws Exception If an error occurs while initializing the test
-	 *         instance.
+	 * instance.
+	 * @see AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String)
 	 */
 	public AbstractTransactionalJUnit38SpringContextTests(final String name) throws Exception {
 
 		super(name);
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Set the DataSource, typically provided via Dependency Injection.
@@ -123,8 +111,6 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 		this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Count the rows in the given table.
 	 *
@@ -135,8 +121,6 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 
 		return SimpleJdbcTestUtils.countRowsInTable(this.simpleJdbcTemplate, tableName);
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -154,8 +138,6 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 		return SimpleJdbcTestUtils.deleteFromTables(this.simpleJdbcTemplate, names);
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * <p>
 	 * Execute the given SQL script.
@@ -165,13 +147,13 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	 * </p>
 	 *
 	 * @param sqlResourcePath Spring resource path for the SQL script. Should
-	 *        normally be loaded by classpath. There should be one statement per
-	 *        line. Any semicolons will be removed. <b>Do not use this method to
-	 *        execute DDL if you expect rollback.</b>
+	 * normally be loaded by classpath. There should be one statement per
+	 * line. Any semicolons will be removed. <b>Do not use this method to
+	 * execute DDL if you expect rollback.</b>
 	 * @param continueOnError whether or not to continue without throwing an
-	 *        exception in the event of an error.
+	 * exception in the event of an error.
 	 * @throws DataAccessException if there is an error executing a statement
-	 *         and continueOnError was <code>false</code>.
+	 * and continueOnError was <code>false</code>.
 	 */
 	protected void executeSqlScript(final String sqlResourcePath, final boolean continueOnError)
 			throws DataAccessException {
@@ -179,7 +161,5 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 		SimpleJdbcTestUtils.executeSqlScript(this.simpleJdbcTemplate, super.applicationContext, sqlResourcePath,
 				continueOnError);
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

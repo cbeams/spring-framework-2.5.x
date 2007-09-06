@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,11 @@ import java.lang.annotation.Target;
  * executed after those of the current class.
  * </p>
  *
- * @see org.springframework.transaction.annotation.Transactional
  * @author Sam Brannen
- * @version $Revision: 1.2 $
+ * @see org.springframework.transaction.annotation.Transactional
  * @since 2.1
  */
-@Target( { ElementType.METHOD })
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface AfterTransaction {

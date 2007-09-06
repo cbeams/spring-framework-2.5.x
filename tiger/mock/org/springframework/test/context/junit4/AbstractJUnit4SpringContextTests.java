@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context.junit4;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.runner.RunWith;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
@@ -48,33 +50,27 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * {@link ContextConfiguration#locations() resource locations}.
  * </p>
  *
+ * @author Sam Brannen
  * @see ContextConfiguration
  * @see TestContext
  * @see TestContextManager
- * @author Sam Brannen
- * @version $Revision: 1.3 $
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class})
 public class AbstractJUnit4SpringContextTests implements ApplicationContextAware {
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	/**
+	 * Logger available to subclasses.
+	 */
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
 	 * The {@link ApplicationContext} that was injected into this test instance
 	 * via {@link #setApplicationContext(ApplicationContext)}.
 	 */
-	protected ApplicationContext	applicationContext;
+	protected ApplicationContext applicationContext;
 
-	/** Logger available to subclasses. */
-	protected final Log				logger	= LogFactory.getLog(getClass());
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Sets the {@link ApplicationContext} to be used by this test instance,
@@ -86,7 +82,5 @@ public class AbstractJUnit4SpringContextTests implements ApplicationContextAware
 
 		this.applicationContext = applicationContext;
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

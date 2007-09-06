@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
@@ -67,11 +68,12 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
 public abstract class AbstractAnnotationAwareTransactionalTests extends
 		AbstractTransactionalDataSourceSpringContextTests {
 
-	protected SimpleJdbcTemplate				simpleJdbcTemplate;
+	protected SimpleJdbcTemplate simpleJdbcTemplate;
 
-	private final TransactionAttributeSource	transactionAttributeSource	= new AnnotationTransactionAttributeSource();
+	private final TransactionAttributeSource transactionAttributeSource = new AnnotationTransactionAttributeSource();
 
-	protected ProfileValueSource				profileValueSource			= SystemProfileValueSource.getInstance();
+	protected ProfileValueSource profileValueSource = SystemProfileValueSource.getInstance();
+
 
 	@Override
 	public void setDataSource(final DataSource dataSource) {
@@ -186,8 +188,6 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		return testMethod;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Determines whether or not to rollback transactions for the current test
 	 * by taking into consideration the
@@ -221,7 +221,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		return rollback;
 	}
 
-	private static void runTestTimed(final TestExecutionCallback tec, final Method testMethod, final Log logger)
+	private void runTestTimed(final TestExecutionCallback tec, final Method testMethod, final Log logger)
 			throws Throwable {
 
 		final Timed timed = testMethod.getAnnotation(Timed.class);
@@ -243,7 +243,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		}
 	}
 
-	private static void runTest(final TestExecutionCallback tec, final Method testMethod, final Log logger)
+	private void runTest(final TestExecutionCallback tec, final Method testMethod, final Log logger)
 			throws Throwable {
 
 		final ExpectedException ee = testMethod.getAnnotation(ExpectedException.class);
@@ -274,6 +274,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 			}
 		}
 	}
+
 
 	private static interface TestExecutionCallback {
 

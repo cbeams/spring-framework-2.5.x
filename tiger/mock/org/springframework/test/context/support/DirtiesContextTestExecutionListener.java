@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestContext;
@@ -25,23 +27,14 @@ import org.springframework.test.context.TestContext;
  * TestExecutionListener which processes methods configured with the
  * &#064;DirtiesContext annotation.
  *
- * @see DirtiesContext
  * @author Sam Brannen
- * @version $Revision: 1.3 $
+ * @see DirtiesContext
  * @since 2.1
  */
 public class DirtiesContextTestExecutionListener extends AbstractTestExecutionListener {
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	private static final Log logger = LogFactory.getLog(DirtiesContextTestExecutionListener.class);
 
-	/** Class Logger. */
-	private static final Log	LOG	= LogFactory.getLog(DirtiesContextTestExecutionListener.class);
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -62,15 +55,13 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	public void afterTestMethod(final TestContext testContext) throws Exception {
 
 		final boolean dirtiesContext = testContext.getTestMethod().isAnnotationPresent(DirtiesContext.class);
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("After test method: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
+		if (logger.isDebugEnabled()) {
+			logger.debug("After test method: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
 		}
 
 		if (dirtiesContext) {
 			testContext.markApplicationContextDirty();
 		}
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

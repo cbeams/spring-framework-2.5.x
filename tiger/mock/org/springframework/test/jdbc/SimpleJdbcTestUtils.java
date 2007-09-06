@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.utils;
+
+package org.springframework.test.jdbc;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -39,40 +41,19 @@ import org.springframework.util.StringUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @author Juergen Hoeller
  * @since 2.1
  */
 public abstract class SimpleJdbcTestUtils {
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	private static final Log logger = LogFactory.getLog(SimpleJdbcTestUtils.class);
 
-	/** Class Logger. */
-	private static final Log	LOG	= LogFactory.getLog(SimpleJdbcTestUtils.class);
-
-	// ------------------------------------------------------------------------|
-	// --- CONSTRUCTORS -------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * Private, default constructor to enforce the <em>utility class</em>
-	 * pattern.
-	 */
-	private SimpleJdbcTestUtils() {
-
-		/* no-op */
-	}
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Count the rows in the given table.
 	 *
 	 * @param simpleJdbcTemplate The SimpleJdbcTemplate with which to perform
-	 *        JDBC operations.
+	 * JDBC operations.
 	 * @param tableName table name to count rows in
 	 * @return the number of rows in the table
 	 */
@@ -81,13 +62,11 @@ public abstract class SimpleJdbcTestUtils {
 		return simpleJdbcTemplate.queryForInt("SELECT COUNT(0) FROM " + tableName);
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Deletes all rows from the specified tables.
 	 *
 	 * @param simpleJdbcTemplate The SimpleJdbcTemplate with which to perform
-	 *        JDBC operations.
+	 * JDBC operations.
 	 * @param tableNames The names of the tables from which to delete.
 	 * @return The total number of rows deleted from all specified tables.
 	 */
@@ -97,14 +76,12 @@ public abstract class SimpleJdbcTestUtils {
 		for (int i = 0; i < tableNames.length; i++) {
 			final int rowCount = simpleJdbcTemplate.update("DELETE FROM " + tableNames[i]);
 			totalRowCount += rowCount;
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Deleted " + rowCount + " rows from table " + tableNames[i]);
+			if (logger.isInfoEnabled()) {
+				logger.info("Deleted " + rowCount + " rows from table " + tableNames[i]);
 			}
 		}
 		return totalRowCount;
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -112,25 +89,25 @@ public abstract class SimpleJdbcTestUtils {
 	 * </p>
 	 *
 	 * @param simpleJdbcTemplate The SimpleJdbcTemplate with which to perform
-	 *        JDBC operations.
+	 * JDBC operations.
 	 * @param resourceLoader The resource loader (e.g., an
-	 *        {@link ApplicationContextException}) with which to load the SQL
-	 *        script.
+	 * {@link ApplicationContextException}) with which to load the SQL
+	 * script.
 	 * @param sqlResourcePath Spring resource path for the SQL script. Should
-	 *        normally be loaded by classpath. There should be one statement per
-	 *        line. Any semicolons will be removed. <b>Do not use this method to
-	 *        execute DDL if you expect rollback.</b>
+	 * normally be loaded by classpath. There should be one statement per
+	 * line. Any semicolons will be removed. <b>Do not use this method to
+	 * execute DDL if you expect rollback.</b>
 	 * @param continueOnError whether or not to continue without throwing an
-	 *        exception in the event of an error.
+	 * exception in the event of an error.
 	 * @throws DataAccessException if there is an error executing a statement
-	 *         and continueOnError was <code>false</code>.
+	 * and continueOnError was <code>false</code>.
 	 */
 	public static final void executeSqlScript(final SimpleJdbcTemplate simpleJdbcTemplate,
 			final ResourceLoader resourceLoader, final String sqlResourcePath, final boolean continueOnError)
 			throws DataAccessException {
 
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Executing SQL script '" + sqlResourcePath + "'");
+		if (logger.isInfoEnabled()) {
+			logger.info("Executing SQL script '" + sqlResourcePath + "'");
 		}
 
 		final long startTime = System.currentTimeMillis();
@@ -149,14 +126,14 @@ public abstract class SimpleJdbcTestUtils {
 				final String statement = itr.next();
 				try {
 					final int rowsAffected = simpleJdbcTemplate.update(statement);
-					if (LOG.isDebugEnabled()) {
-						LOG.debug(rowsAffected + " rows affected by SQL: " + statement);
+					if (logger.isDebugEnabled()) {
+						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
 					}
 				}
 				catch (final DataAccessException ex) {
 					if (continueOnError) {
-						if (LOG.isWarnEnabled()) {
-							LOG.warn("SQL: " + statement + " failed", ex);
+						if (logger.isWarnEnabled()) {
+							logger.warn("SQL: " + statement + " failed", ex);
 						}
 					}
 					else {
@@ -165,15 +142,13 @@ public abstract class SimpleJdbcTestUtils {
 				}
 			}
 			final long elapsedTime = System.currentTimeMillis() - startTime;
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Done executing SQL script '" + sqlResourcePath + "' in " + elapsedTime + " ms.");
+			if (logger.isInfoEnabled()) {
+				logger.info("Done executing SQL script '" + sqlResourcePath + "' in " + elapsedTime + " ms.");
 			}
 		}
 		catch (final IOException ex) {
 			throw new DataAccessResourceFailureException("Failed to open SQL script '" + sqlResourcePath + "'.", ex);
 		}
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

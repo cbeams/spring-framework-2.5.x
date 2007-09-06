@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,12 +63,11 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * {@link ApplicationContext} loaded from the default classpath resource: &quot;<code>/org/springframework/test/context/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml</code>&quot;.
  * </p>
  *
+ * @author Sam Brannen
+ * @since 2.1
  * @see AbsolutePathSpringJUnit4ClassRunnerAppCtxTests
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests
- * @author Sam Brannen
- * @version $Revision: 1.5 $
- * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration

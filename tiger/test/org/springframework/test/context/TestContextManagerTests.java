@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.context;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+package org.springframework.test.context;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -24,18 +22,20 @@ import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.JUnit4TestAdapter;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.internal.runners.JUnit4ClassRunner;
 import org.junit.runner.RunWith;
+
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
@@ -44,65 +44,32 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * {@link TestExecutionListener TestExecutionListeners}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.5 $
  * @since 2.1
  */
 @RunWith(JUnit4ClassRunner.class)
 public class TestContextManagerTests {
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	private static final String FIRST = "veni";
 
-	private static final String			FIRST					= "veni";
+	private static final String SECOND = "vidi";
 
-	private static final String			SECOND					= "vidi";
+	private static final String THIRD = "vici";
 
-	private static final String			THIRD					= "vici";
+	private static final List<String> afterTestMethodCalls = new ArrayList<String>();
 
-	private static final List<String>	afterTestMethodCalls	= new ArrayList<String>();
+	private static final List<String> beforeTestMethodCalls = new ArrayList<String>();
 
-	private static final List<String>	beforeTestMethodCalls	= new ArrayList<String>();
+	protected static final Log logger = LogFactory.getLog(TestContextManagerTests.class);
 
-	/** Class Logger. */
-	protected static final Log			LOG						= LogFactory.getLog(TestContextManagerTests.class);
+	private TestContextManager testContextManager = null;
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	private TestContextManager			testContextManager		= null;
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC INITIALIZATION ----------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE INITIALIZATION --------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- CONSTRUCTORS -------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Asserts the <em>execution order</em> of 'before' and 'after' test
 	 * method calls on {@link TestExecutionListener listeners} registered for
 	 * the configured {@link TestContextManager}.
-	 *
 	 * @see #beforeTestMethodCalls
 	 * @see #afterTestMethodCalls
-	 * @param expectedBeforeTestMethodCalls
-	 * @param expectedAfterTestMethodCalls
-	 * @param usageContext
 	 */
 	private static void assertExecutionOrder(List<String> expectedBeforeTestMethodCalls,
 			List<String> expectedAfterTestMethodCalls, final String usageContext) {
@@ -114,12 +81,12 @@ public class TestContextManagerTests {
 			expectedAfterTestMethodCalls = new ArrayList<String>();
 		}
 
-		if (LOG.isDebugEnabled()) {
+		if (logger.isDebugEnabled()) {
 			for (final String listenerName : beforeTestMethodCalls) {
-				LOG.debug("'before' listener [" + listenerName + "] (" + usageContext + ").");
+				logger.debug("'before' listener [" + listenerName + "] (" + usageContext + ").");
 			}
 			for (final String listenerName : afterTestMethodCalls) {
-				LOG.debug("'after' listener [" + listenerName + "] (" + usageContext + ").");
+				logger.debug("'after' listener [" + listenerName + "] (" + usageContext + ").");
 			}
 		}
 
@@ -128,8 +95,6 @@ public class TestContextManagerTests {
 		assertTrue("Verifying execution order of 'after' listeners' (" + usageContext + ").",
 				CollectionUtils.isEqualCollection(expectedAfterTestMethodCalls, afterTestMethodCalls));
 	}
-
-	// ------------------------------------------------------------------------|
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -140,33 +105,24 @@ public class TestContextManagerTests {
 		assertExecutionOrder(null, null, "BeforeClass");
 	}
 
-	// ------------------------------------------------------------------------|
-
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
+
 	public static junit.framework.Test suite() {
 
 		return new JUnit4TestAdapter(TestContextManagerTests.class);
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Verifies the expected {@link TestExecutionListener}
 	 * <em>execution order</em> after all test methods have completed.
-	 *
-	 * @see #verifyListenerExecutionOrder()
-	 * @throws java.lang.Exception
 	 */
 	@AfterClass
 	public static void verifyListenerExecutionOrderAfterClass() throws Exception {
 
-		assertExecutionOrder(Arrays.<String> asList(FIRST, SECOND, THIRD),
-				Arrays.<String> asList(THIRD, SECOND, FIRST), "AfterClass");
+		assertExecutionOrder(Arrays.<String>asList(FIRST, SECOND, THIRD),
+				Arrays.<String>asList(THIRD, SECOND, FIRST), "AfterClass");
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	@Before
 	public void setUpTestContextManager() throws Exception {
@@ -192,7 +148,7 @@ public class TestContextManagerTests {
 	@Test
 	public void verifyListenerExecutionOrderWithinTestMethod() {
 
-		assertExecutionOrder(Arrays.<String> asList(FIRST, SECOND, THIRD), null, "Test");
+		assertExecutionOrder(Arrays.<String>asList(FIRST, SECOND, THIRD), null, "Test");
 	}
 
 	@After
@@ -204,12 +160,9 @@ public class TestContextManagerTests {
 		this.testContextManager = null;
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- TYPES --------------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	@ContextConfiguration
-	static class ExampleTest {
+	private static class ExampleTest {
 
 		public void exampleTestMethod() {
 
@@ -217,9 +170,10 @@ public class TestContextManagerTests {
 		}
 	}
 
-	static class NamedTestExecutionListener extends AbstractTestExecutionListener {
 
-		private final String	name;
+	private static class NamedTestExecutionListener extends AbstractTestExecutionListener {
+
+		private final String name;
 
 		public NamedTestExecutionListener(final String name) {
 
@@ -244,7 +198,5 @@ public class TestContextManagerTests {
 			return new ToStringBuilder(this).append("name", this.name).toString();
 		}
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

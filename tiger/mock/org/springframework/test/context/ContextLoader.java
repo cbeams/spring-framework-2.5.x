@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context;
 
 import org.springframework.context.ApplicationContext;
@@ -24,10 +25,10 @@ import org.springframework.context.ApplicationContext;
  * </p>
  * <p>
  * Clients of a ContextLoader should call
- * {@link #processLocations(Class, String...) processLocations()} prior to
+ * {@link #processLocations(Class,String...) processLocations()} prior to
  * calling {@link #loadContext(String...) loadContext()} in case the
  * ContextLoader provides custom support for modifying or generating locations.
- * The results of {@link #processLocations(Class, String...) processLocations()}
+ * The results of {@link #processLocations(Class,String...) processLocations()}
  * should then be supplied to {@link #loadContext(String...) loadContext()}.
  * </p>
  * <p>
@@ -43,14 +44,9 @@ import org.springframework.context.ApplicationContext;
  * </ul>
  *
  * @author Sam Brannen
- * @version $Revision: 1.7 $
  * @since 2.1
  */
 public interface ContextLoader {
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -63,14 +59,12 @@ public interface ContextLoader {
 	 * </p>
 	 *
 	 * @param clazz The class with which the locations are associated: used to
-	 *        determine how to process the supplied locations.
+	 * determine how to process the supplied locations.
 	 * @param locations The unmodified locations to use for loading the
-	 *        application context; can be <code>null</code> or empty.
+	 * application context; can be <code>null</code> or empty.
 	 * @return An array of application context resource locations.
 	 */
-	public abstract String[] processLocations(final Class<?> clazz, final String... locations);
-
-	// ------------------------------------------------------------------------|
+	String[] processLocations(Class<?> clazz, String... locations);
 
 	/**
 	 * <p>
@@ -100,11 +94,9 @@ public interface ContextLoader {
 	 * </p>
 	 *
 	 * @param locations The resource locations to use to load the application
-	 *        context.
+	 * context.
 	 * @return a new application context
 	 */
-	public abstract ApplicationContext loadContext(final String... locations) throws Exception;
-
-	// ------------------------------------------------------------------------|
+	ApplicationContext loadContext(String... locations) throws Exception;
 
 }

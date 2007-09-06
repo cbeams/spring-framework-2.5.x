@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.context;
 
-import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
+package org.springframework.test.context;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -34,51 +35,26 @@ import org.springframework.util.ObjectUtils;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.16 $
  * @since 2.1
  */
 public class TestContext {
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	private static final Log logger = LogFactory.getLog(TestContext.class);
 
-	/** Class Logger. */
-	private static final Log								LOG	= LogFactory.getLog(TestContext.class);
+	private final ContextCache<String, ApplicationContext> contextCache;
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	private final ContextLoader contextLoader;
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC INITIALIZATION ----------------------------------------------|
-	// ------------------------------------------------------------------------|
+	private final String[] locations;
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	private Throwable testException;
 
-	private final ContextCache<String, ApplicationContext>	contextCache;
+	private final Class<?> testClass;
 
-	private final ContextLoader								contextLoader;
+	private Object testInstance;
 
-	private final String[]									locations;
+	private Method testMethod;
 
-	private Throwable										testException;
-
-	private final Class<?>									testClass;
-
-	private Object											testInstance;
-
-	private Method											testMethod;
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE INITIALIZATION --------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- CONSTRUCTORS -------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Constructs a new test context for the supplied {@link Class test class}
@@ -86,11 +62,11 @@ public class TestContext {
 	 * {@link ContextConfiguration} for the test class.
 	 *
 	 * @param testClass The {@link Class} object corresponding to the test class
-	 *        for which the test context should be constructed, not
-	 *        <code>null</code>.
+	 * for which the test context should be constructed, not
+	 * <code>null</code>.
 	 * @param contextCache The context cache from which the constructed test
-	 *        context should retrieve application contexts, not
-	 *        <code>null</code>.
+	 * context should retrieve application contexts, not
+	 * <code>null</code>.
 	 * @throws Exception If an error occurs while initializing the test context.
 	 */
 	public TestContext(final Class<?> testClass, final ContextCache<String, ApplicationContext> contextCache)
@@ -107,17 +83,17 @@ public class TestContext {
 		ContextLoader contextLoader = null;
 
 		if (contextConfiguration == null) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("@ContextConfiguration not found for class [" + testClass + "].");
+			if (logger.isDebugEnabled()) {
+				logger.debug("@ContextConfiguration not found for class [" + testClass + "].");
 			}
 		}
 		else {
-			final Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, testClass);
+			final Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, testClass);
 			Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
 					+ annotationType + "] and class [" + testClass + "].");
 
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Retrieved @ContextConfiguration [" + contextConfiguration + "] for test class [" + testClass
+			if (logger.isDebugEnabled()) {
+				logger.debug("Retrieved @ContextConfiguration [" + contextConfiguration + "] for test class [" + testClass
 						+ "] and declaring class [" + declaringClass + "].");
 			}
 
@@ -134,13 +110,6 @@ public class TestContext {
 		this.locations = locations;
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -148,7 +117,7 @@ public class TestContext {
 	 * </p>
 	 *
 	 * @throws Exception if an error occurs while building the application
-	 *         context
+	 * context
 	 */
 	protected ApplicationContext buildApplicationContext() throws Exception {
 
@@ -156,8 +125,6 @@ public class TestContext {
 		Assert.notNull(getLocations(), "locations can not be null.");
 		return getContextLoader().loadContext(getLocations());
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -175,8 +142,6 @@ public class TestContext {
 		return ObjectUtils.nullSafeToString(key);
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * <p>
 	 * Gets the {@link ApplicationContext application context} for this test
@@ -187,7 +152,7 @@ public class TestContext {
 	 *         current test context is not configured to use an application
 	 *         context.
 	 * @throws Exception if an error occurs while retrieving the application
-	 *         context.
+	 * context.
 	 */
 	public ApplicationContext getApplicationContext() throws Exception {
 
@@ -206,8 +171,6 @@ public class TestContext {
 		return context;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * <p>
 	 * Gets the {@link ContextCache context cache} for this test context.
@@ -219,8 +182,6 @@ public class TestContext {
 
 		return this.contextCache;
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -235,8 +196,6 @@ public class TestContext {
 
 		return this.contextLoader;
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -253,8 +212,6 @@ public class TestContext {
 		return this.locations;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * <p>
 	 * Gets the {@link Class test class} for this test context.
@@ -267,8 +224,6 @@ public class TestContext {
 		return this.testClass;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * <p>
 	 * Gets the exception that was thrown during execution of the
@@ -278,16 +233,14 @@ public class TestContext {
 	 * Note: this is a mutable property.
 	 * </p>
 	 *
-	 * @see #updateState(Object, Method, Throwable)
 	 * @return The exception that was thrown, or <code>null</code> if no
 	 *         exception was thrown.
+	 * @see #updateState(Object,Method,Throwable)
 	 */
 	public final Throwable getTestException() {
 
 		return this.testException;
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -297,15 +250,13 @@ public class TestContext {
 	 * Note: this is a mutable property.
 	 * </p>
 	 *
-	 * @see #updateState(Object, Method, Throwable)
 	 * @return The current test instance; may be <code>null</code>.
+	 * @see #updateState(Object,Method,Throwable)
 	 */
 	public final Object getTestInstance() {
 
 		return this.testInstance;
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -315,15 +266,13 @@ public class TestContext {
 	 * Note: this is a mutable property.
 	 * </p>
 	 *
-	 * @see #updateState(Object, Method, Throwable)
 	 * @return The current test method; may be <code>null</code>.
+	 * @see #updateState(Object,Method,Throwable)
 	 */
 	public final Method getTestMethod() {
 
 		return this.testMethod;
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Call this method to signal that the
@@ -337,8 +286,6 @@ public class TestContext {
 		getContextCache().setDirty(contextKeyString(getLocations()));
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Updates this test context to reflect the state of the currently executing
 	 * test.
@@ -346,7 +293,7 @@ public class TestContext {
 	 * @param testInstance The current test instance; may be <code>null</code>.
 	 * @param testMethod The current test method; may be <code>null</code>.
 	 * @param testException The exception that was thrown in the test method, or
-	 *        <code>null</code> if no exception was thrown.
+	 * <code>null</code> if no exception was thrown.
 	 */
 	public final void updateState(final Object testInstance, final Method testMethod, final Throwable testException) {
 
@@ -356,8 +303,6 @@ public class TestContext {
 			this.testException = testException;
 		}
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Provides a string representation of this test contexts's
@@ -372,21 +317,13 @@ public class TestContext {
 	@Override
 	public String toString() {
 
-		return new ToStringBuilder(this)
-
-		.append("testClass", getTestClass())
-
-		.append("locations", getLocations())
-
-		.append("testInstance", getTestInstance())
-
-		.append("testMethod", getTestMethod())
-
-		.append("testException", getTestException())
-
-		.toString();
+		return new ToStringCreator(this)
+				.append("testClass", getTestClass())
+				.append("locations", getLocations())
+				.append("testInstance", getTestInstance())
+				.append("testMethod", getTestMethod())
+				.append("testException", getTestException())
+				.toString();
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

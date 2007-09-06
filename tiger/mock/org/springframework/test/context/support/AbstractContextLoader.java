@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context.support;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
@@ -28,26 +29,21 @@ import org.springframework.util.StringUtils;
  * Abstract application context loader, which provides a basis for all concrete
  * implementations of the {@link ContextLoader} strategy. Provides a
  * <em>Template Method</em> based approach for
- * {@link #processLocations(Class, String...) processing} locations.
+ * {@link #processLocations(Class,String...) processing} locations.
  * </p>
  *
- * @see #generateDefaultLocations(Class)
- * @see #modifyLocations(Class, String...)
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @see #generateDefaultLocations(Class)
+ * @see #modifyLocations(Class,String...)
  * @since 2.1
  */
 public abstract class AbstractContextLoader implements ContextLoader {
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
 	 * Determines whether or not <em>default</em> resource locations should be
 	 * generated if the <code>locations</code> provided to
-	 * {@link #processLocations(Class, String...) processLocations()} are
+	 * {@link #processLocations(Class,String...) processLocations()} are
 	 * <code>null</code> or empty.
 	 * </p>
 	 * <p>
@@ -61,8 +57,6 @@ public abstract class AbstractContextLoader implements ContextLoader {
 		return true;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * <p>
 	 * Gets the suffix to append to {@link ApplicationContext} resource
@@ -72,12 +66,10 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * Must be implemented by subclasses.
 	 * </p>
 	 *
-	 * @see #generateDefaultLocations(Class)
 	 * @return The resource suffix; should not be <code>null</code> or empty.
+	 * @see #generateDefaultLocations(Class)
 	 */
 	protected abstract String getResourceSuffix();
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -88,27 +80,25 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * {@link Class class} and the configured
 	 * {@link #getResourceSuffix() resource suffix}; otherwise, the supplied
 	 * <code>locations</code> will be
-	 * {@link #modifyLocations(Class, String...) modified} if necessary and
+	 * {@link #modifyLocations(Class,String...) modified} if necessary and
 	 * returned.
 	 * </p>
 	 *
-	 * @see #generateDefaultLocations(Class)
-	 * @see #modifyLocations(Class, String...)
-	 * @see org.springframework.test.context.ContextLoader#processLocations(java.lang.Class,
-	 *      java.lang.String[])
 	 * @param clazz The class with which the locations are associated: to be
-	 *        used when generating default locations.
+	 * used when generating default locations.
 	 * @param locations The unmodified locations to use for loading the
-	 *        application context; can be <code>null</code> or empty.
+	 * application context; can be <code>null</code> or empty.
 	 * @return An array of application context resource locations.
+	 * @see #generateDefaultLocations(Class)
+	 * @see #modifyLocations(Class,String...)
+	 * @see org.springframework.test.context.ContextLoader#processLocations(java.lang.Class,
+	 *java.lang.String[])
 	 */
 	public final String[] processLocations(final Class<?> clazz, final String... locations) {
 
-		return (ArrayUtils.isEmpty(locations) && isGenerateDefaultLocations()) ? generateDefaultLocations(clazz)
+		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ? generateDefaultLocations(clazz)
 				: modifyLocations(clazz, locations);
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -128,7 +118,7 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * </p>
 	 *
 	 * @param clazz The class for which the default locations are to be
-	 *        generated.
+	 * generated.
 	 * @return An array of default application context resource locations.
 	 */
 	protected String[] generateDefaultLocations(final Class<?> clazz) {
@@ -136,11 +126,9 @@ public abstract class AbstractContextLoader implements ContextLoader {
 		Assert.notNull(clazz, "clazz can not be null.");
 		Assert.hasText(getResourceSuffix(), "resourceSuffix can not be empty.");
 
-		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + "/"
-				+ ClassUtils.convertClassNameToResourcePath(clazz.getName()) + getResourceSuffix() };
+		return new String[]{ResourceUtils.CLASSPATH_URL_PREFIX + "/"
+				+ ClassUtils.convertClassNameToResourcePath(clazz.getName()) + getResourceSuffix()};
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -185,7 +173,5 @@ public abstract class AbstractContextLoader implements ContextLoader {
 		}
 		return modifiedLocations;
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

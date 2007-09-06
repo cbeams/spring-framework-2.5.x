@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context.junit4;
 
 import static org.junit.Assert.assertFalse;
@@ -30,13 +31,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * &#064;NotTransactional annotations.
  * </p>
  *
+ * @author Sam Brannen
+ * @since 2.1
  * @see ClassLevelTransactionalSpringRunnerTests
  * @see MethodLevelTransactionalSpringRunnerTests
  * @see Transactional
  * @see NotTransactional
- * @author Sam Brannen
- * @version $Revision: 1.2 $
- * @since 2.1
  */
 public abstract class AbstractTransactionalSpringRunnerTests {
 

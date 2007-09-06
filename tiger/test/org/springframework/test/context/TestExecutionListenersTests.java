@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 package org.springframework.test.context;
 
-import static org.junit.Assert.assertEquals;
 import junit.framework.JUnit4TestAdapter;
-
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.junit.internal.runners.JUnit4ClassRunner;
 import org.junit.runner.RunWith;
+
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
@@ -30,15 +30,10 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * {@link ContextConfiguration} annotation and a {@link TestContextManager}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
  * @since 2.1
  */
 @RunWith(JUnit4ClassRunner.class)
 public class TestExecutionListenersTests {
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
 	public static junit.framework.Test suite() {
@@ -46,9 +41,6 @@ public class TestExecutionListenersTests {
 		return new JUnit4TestAdapter(TestExecutionListenersTests.class);
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	@Test
 	public void verifyNumListenersRegistered() throws Exception {
@@ -58,28 +50,27 @@ public class TestExecutionListenersTests {
 				testContextManager.getTestExecutionListeners().size());
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- TYPES --------------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	@ContextConfiguration
 	@TestExecutionListeners( { FooTestExecutionListener.class, BarTestExecutionListener.class,
 			BazTestExecutionListener.class, QuuxTestExecutionListener.class })
-	private static class ExampleTest {
+	static class ExampleTest {
 	}
+
 
 	static class FooTestExecutionListener extends AbstractTestExecutionListener {
 	}
 
+
 	static class BarTestExecutionListener extends AbstractTestExecutionListener {
 	}
+
 
 	static class BazTestExecutionListener extends AbstractTestExecutionListener {
 	}
 
+
 	static class QuuxTestExecutionListener extends AbstractTestExecutionListener {
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

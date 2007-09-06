@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context.transaction;
 
-import java.io.Serializable;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.springframework.core.style.ToStringCreator;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 
@@ -28,43 +25,29 @@ import org.springframework.util.Assert;
  * Configuration attributes for configuring transactional tests.
  * </p>
  *
- * @see TransactionConfiguration
  * @author Sam Brannen
- * @version $Revision: 1.1 $
+ * @author Juergen Hoeller
  * @since 2.1
+ * @see TransactionConfiguration
  */
-public class TransactionConfigurationAttributes implements Serializable {
+public class TransactionConfigurationAttributes {
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	private final String transactionManagerName;
 
-	/** serialVersionUID. */
-	private static final long	serialVersionUID	= -9029260490495684447L;
+	private final boolean defaultRollback;
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	private final String		transactionManagerName;
-
-	private final boolean		defaultRollback;
-
-	// ------------------------------------------------------------------------|
-	// --- CONSTRUCTORS -------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Constructs a new TransactionConfigurationAttributes instance from the
 	 * supplied arguments.
 	 *
 	 * @param transactionManagerName The bean name of the
-	 *        {@link PlatformTransactionManager} that is to be used to drive
-	 *        transactions.
+	 * {@link PlatformTransactionManager} that is to be used to drive
+	 * transactions.
 	 * @param defaultRollback Boolean flag denoting whether or not transactions
-	 *        should be rolled back by default.
+	 * should be rolled back by default.
 	 * @throws IllegalArgumentException if the supplied transaction manager bean
-	 *         name is <code>null</code>.
+	 * name is <code>null</code>.
 	 */
 	public TransactionConfigurationAttributes(final String transactionManagerName, final boolean defaultRollback) {
 
@@ -73,60 +56,6 @@ public class TransactionConfigurationAttributes implements Serializable {
 		this.defaultRollback = defaultRollback;
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- CLASS METHODS ------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	@Override
-	public boolean equals(final Object object) {
-
-		if (!(object instanceof TransactionConfigurationAttributes)) {
-			return false;
-		}
-		final TransactionConfigurationAttributes that = (TransactionConfigurationAttributes) object;
-
-		return new EqualsBuilder()
-
-		.append(this.transactionManagerName, that.transactionManagerName)
-
-		.append(this.defaultRollback, that.defaultRollback)
-
-		.isEquals();
-	}
-
-	// ------------------------------------------------------------------------|
-
-	@Override
-	public int hashCode() {
-
-		return new HashCodeBuilder(268173669, -543589461)
-
-		.append(this.transactionManagerName)
-
-		.append(this.defaultRollback)
-
-		.toHashCode();
-	}
-
-	// ------------------------------------------------------------------------|
-
-	@Override
-	public String toString() {
-
-		return new ToStringBuilder(this)
-
-		.append("transactionManagerName", this.transactionManagerName)
-
-		.append("defaultRollback", this.defaultRollback)
-
-		.toString();
-	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Gets the bean name of the {@link PlatformTransactionManager} that is to
@@ -139,8 +68,6 @@ public class TransactionConfigurationAttributes implements Serializable {
 		return this.transactionManagerName;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Whether or not transactions should be rolled back by default.
 	 *
@@ -151,6 +78,13 @@ public class TransactionConfigurationAttributes implements Serializable {
 		return this.defaultRollback;
 	}
 
-	// ------------------------------------------------------------------------|
+	@Override
+	public String toString() {
+
+		return new ToStringCreator(this)
+				.append("transactionManagerName", this.transactionManagerName)
+				.append("defaultRollback", this.defaultRollback)
+				.toString();
+	}
 
 }

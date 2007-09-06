@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context.junit4;
 
 import junit.framework.JUnit4TestAdapter;
@@ -26,10 +27,9 @@ import org.springframework.util.ResourceUtils;
  * we can specify multiple resource locations for our application context, each
  * configured differently.
  *
- * @see SpringJUnit4ClassRunnerAppCtxTests
  * @author Sam Brannen
- * @version $Revision: 1.1 $
  * @since 2.1
+ * @see SpringJUnit4ClassRunnerAppCtxTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.CLASSPATH_RESOURCE_PATH,

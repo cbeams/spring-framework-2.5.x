@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context.junit4;
 
 import java.lang.reflect.InvocationTargetException;
@@ -27,6 +28,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.Test.None;
 import org.junit.internal.runners.TestClass;
+
 import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueSource;
@@ -48,31 +50,18 @@ import org.springframework.test.annotation.Timed;
  * </p>
  *
  * @author Sam Brannen
- * @version $Revision: 1.7 $
  * @since 2.1
  */
 class SpringTestMethod {
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	private static final Log logger = LogFactory.getLog(SpringTestMethod.class);
 
-	/** Class Logger. */
-	private static final Log		LOG					= LogFactory.getLog(SpringTestMethod.class);
+	private final Method method;
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	protected ProfileValueSource profileValueSource = SystemProfileValueSource.getInstance();
 
-	private final Method			method;
+	private final TestClass testClass;
 
-	protected ProfileValueSource	profileValueSource	= SystemProfileValueSource.getInstance();
-
-	private final TestClass			testClass;
-
-	// ------------------------------------------------------------------------|
-	// --- CONSTRUCTORS -------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Constructs a test method for the supplied {@link Method method} and
@@ -87,13 +76,6 @@ class SpringTestMethod {
 		this.testClass = testClass;
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Determines if this test method is {@link Test#expected() expected} to
@@ -107,8 +89,6 @@ class SpringTestMethod {
 		return getExpectedException() != null;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Gets the {@link After @After} methods for this test method.
 	 *
@@ -119,8 +99,6 @@ class SpringTestMethod {
 		return getTestClass().getAnnotatedMethods(After.class);
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Gets the {@link Before @Before} methods for this test method.
 	 *
@@ -130,8 +108,6 @@ class SpringTestMethod {
 
 		return getTestClass().getAnnotatedMethods(Before.class);
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -147,7 +123,7 @@ class SpringTestMethod {
 	 * @return The expected exception, or <code>null</code> if none was
 	 *         specified.
 	 * @throws IllegalStateException if both types of configuration are used
-	 *         simultaneously.
+	 * simultaneously.
 	 */
 	public Class<? extends Throwable> getExpectedException() throws IllegalStateException {
 
@@ -168,7 +144,7 @@ class SpringTestMethod {
 					+ ".class) and JUnit's @Test(expected="
 					+ junitExpectedException.getName()
 					+ ".class) annotations. Only one declaration of an 'expected exception' is permitted per test method.";
-			LOG.error(msg);
+			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}
 		else if (springExpectedException != null) {
@@ -181,8 +157,6 @@ class SpringTestMethod {
 		return expectedException;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Gets the actual {@link Method method} referenced by this test method.
 	 *
@@ -193,8 +167,6 @@ class SpringTestMethod {
 		return this.method;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Gets the {@link TestClass test class} for this test method.
 	 *
@@ -204,8 +176,6 @@ class SpringTestMethod {
 
 		return this.testClass;
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -225,17 +195,12 @@ class SpringTestMethod {
 		return timeout;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
-	 * Convenience method for {@link Method#invoke(Object, Object...) invoking}
+	 * Convenience method for {@link Method#invoke(Object,Object...) invoking}
 	 * the method associated with this test method. Throws exceptions consistent
-	 * with {@link Method#invoke(Object, Object...) Method.invoke()}.
+	 * with {@link Method#invoke(Object,Object...) Method.invoke()}.
 	 *
 	 * @param testInstance The test instance upon which to invoke the method.
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
 	 */
 	public void invoke(final Object testInstance) throws IllegalArgumentException, IllegalAccessException,
 			InvocationTargetException {
@@ -243,16 +208,14 @@ class SpringTestMethod {
 		getMethod().invoke(testInstance);
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Determines if this test method is <em>disabled</em> in the current
 	 * environment (i.e., whether or not the test should be executed) by
 	 * evaluating the {@link IfProfileValue @IfProfileValue} annotation, if
 	 * present.
 	 *
-	 * @see #isIgnored()
 	 * @return whether the test should execute in the current environment
+	 * @see #isIgnored()
 	 */
 	protected boolean isDisabledInThisEnvironment() {
 
@@ -272,13 +235,11 @@ class SpringTestMethod {
 		// XXX Optional: add support for @IfNotProfileValue.
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Determines if this test method should be ignored.
 	 *
-	 * @see #isDisabledInThisEnvironment()
 	 * @return <code>true</code> if this test method should be ignored.
+	 * @see #isDisabledInThisEnvironment()
 	 */
 	public boolean isIgnored() {
 
@@ -286,8 +247,6 @@ class SpringTestMethod {
 
 		return ignoreAnnotationPresent || isDisabledInThisEnvironment();
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Determines if this test method {@link Test#expected() expects} exceptions
@@ -301,7 +260,5 @@ class SpringTestMethod {
 
 		return !getExpectedException().isAssignableFrom(exception.getClass());
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

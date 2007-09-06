@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context.junit38;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.ExpectedException;
@@ -51,9 +52,9 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * annotation to configure the {@link ApplicationContext application context}
  * {@link ContextConfiguration#locations() resource locations}.</li>
  * <li>Declare public constructors which match the signatures of
- * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests() AbstractJUnit38SpringContextTests()}
+ * {@link AbstractJUnit38SpringContextTests() AbstractJUnit38SpringContextTests()}
  * and
- * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String) AbstractJUnit38SpringContextTests(String)}
+ * {@link AbstractJUnit38SpringContextTests(String) AbstractJUnit38SpringContextTests(String)}
  * and delegate to <code>super();</code> and <code>super(name);</code>
  * respectively.</li>
  * </ul>
@@ -70,83 +71,17 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * <li>{@link Repeat @Repeat}</li>
  * </ul>
  *
+ * @author Sam Brannen
  * @see TestContext
  * @see TestContextManager
  * @see TestExecutionListeners
- * @author Sam Brannen
- * @version $Revision: 1.8 $
  * @since 2.1
  */
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class})
 public class AbstractJUnit38SpringContextTests extends TestCase implements ApplicationContextAware {
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	private static int disabledTestCount = 0;
 
-	private static int					disabledTestCount	= 0;
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * The {@link ApplicationContext} that was injected into this test instance
-	 * via {@link #setApplicationContext(ApplicationContext)}.
-	 */
-	protected ApplicationContext		applicationContext;
-
-	/** Logger available to subclasses. */
-	protected final Log					logger				= LogFactory.getLog(getClass());
-
-	/**
-	 * Source of profile values available to subclasses.
-	 *
-	 * @see SystemProfileValueSource
-	 */
-	protected ProfileValueSource		profileValueSource	= SystemProfileValueSource.getInstance();
-
-	private final TestContextManager	testContextManager;
-
-	// ------------------------------------------------------------------------|
-	// --- CONSTRUCTORS -------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * Default <em>no argument</em> constructor which delegates to
-	 * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String) AbstractJUnit38SpringContextTests(String)},
-	 * passing a value of <code>null</code> for the test name.
-	 *
-	 * @see TestCase#TestCase()
-	 * @throws Exception If an error occurs while initializing the test
-	 *         instance.
-	 */
-	public AbstractJUnit38SpringContextTests() throws Exception {
-
-		this(null);
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * Constructs a new AbstractJUnit38SpringContextTests instance with the
-	 * supplied <code>name</code> and initializes the an internal
-	 * {@link TestContextManager} for the current test.
-	 *
-	 * @see TestCase#TestCase(String)
-	 * @param name The name of the current test to execute.
-	 * @throws Exception If an error occurs while initializing the test
-	 *         instance.
-	 */
-	public AbstractJUnit38SpringContextTests(final String name) throws Exception {
-
-		super(name);
-		this.testContextManager = new TestContextManager(getClass());
-	}
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Return the number of tests disabled in this environment.
@@ -156,21 +91,138 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 		return disabledTestCount;
 	}
 
-	// ------------------------------------------------------------------------|
+
+	/**
+	 * Logger available to subclasses.
+	 */
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	/**
+	 * The {@link ApplicationContext} that was injected into this test instance
+	 * via {@link #setApplicationContext(ApplicationContext)}.
+	 */
+	protected ApplicationContext applicationContext;
+
+	/**
+	 * Source of profile values available to subclasses.
+	 *
+	 * @see SystemProfileValueSource
+	 */
+	protected ProfileValueSource profileValueSource = SystemProfileValueSource.getInstance();
+
+	private final TestContextManager testContextManager;
+
+
+	/**
+	 * Default <em>no argument</em> constructor which delegates to
+	 * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String) AbstractJUnit38SpringContextTests(String)},
+	 * passing a value of <code>null</code> for the test name.
+	 *
+	 * @throws Exception If an error occurs while initializing the test
+	 * instance.
+	 * @see TestCase#TestCase()
+	 */
+	public AbstractJUnit38SpringContextTests() throws Exception {
+
+		this(null);
+	}
+
+	/**
+	 * Constructs a new AbstractJUnit38SpringContextTests instance with the
+	 * supplied <code>name</code> and initializes the an internal
+	 * {@link TestContextManager} for the current test.
+	 *
+	 * @param name The name of the current test to execute.
+	 * @throws Exception If an error occurs while initializing the test
+	 * instance.
+	 * @see TestCase#TestCase(String)
+	 */
+	public AbstractJUnit38SpringContextTests(final String name) throws Exception {
+
+		super(name);
+		this.testContextManager = new TestContextManager(getClass());
+	}
+
+
+	/**
+	 * <p>
+	 * Runs the <em>Spring Test Context Framework</em> test sequence.
+	 * </p>
+	 * <p>
+	 * In addition to standard {@link TestCase#runBare()} semantics, this
+	 * implementation performs the following:
+	 * </p>
+	 * <ul>
+	 * <li>Calls
+	 * {@link TestContextManager#prepareTestInstance(Object) prepareTestInstance()},
+	 * {@link TestContextManager#beforeTestMethod(Object,Method) beforeTestMethod()},
+	 * and
+	 * {@link TestContextManager#afterTestMethod(Object,Method,Throwable) afterTestMethod()}
+	 * on this test's {@link TestContextManager} at the appropriate test
+	 * execution points.</li>
+	 * <li>Provides support for {@link IfProfileValue @IfProfileValue}.</li>
+	 * <li>Provides support for {@link Repeat @Repeat}.</li>
+	 * <li>Provides support for {@link Timed @Timed}.</li>
+	 * <li>Provides support for {@link ExpectedException @ExpectedException}.</li>
+	 * </ul>
+	 *
+	 * @see junit.framework.TestCase#runBare()
+	 */
+	@Override
+	public void runBare() throws Throwable {
+
+		this.testContextManager.prepareTestInstance(this);
+
+		final Method testMethod = getTestMethod();
+
+		if (isDisabledInThisEnvironment(testMethod)) {
+			recordDisabled(testMethod);
+			return;
+		}
+
+		runTestTimed(new TestExecutionCallback() {
+
+			public void run() throws Throwable {
+
+				runManaged(testMethod);
+			}
+		}, testMethod, this.logger);
+	}
+
+	/**
+	 * Get the current test method.
+	 *
+	 * @return The current test method.
+	 */
+	private Method getTestMethod() {
+
+		assertNotNull("TestCase.getName() cannot be null", getName());
+		Method testMethod = null;
+		try {
+			testMethod = getClass().getMethod(getName(), (Class[]) null);
+		}
+		catch (final NoSuchMethodException e) {
+			fail("Method \"" + getName() + "\" not found");
+		}
+		if (!Modifier.isPublic(testMethod.getModifiers())) {
+			fail("Method \"" + getName() + "\" should be public");
+		}
+		return testMethod;
+	}
 
 	/**
 	 * Runs a <em>timed</em> test via the supplied
 	 * {@link TestExecutionCallback}, providing support for the
 	 * {@link Timed @Timed} annotation.
 	 *
-	 * @see Timed
-	 * @see #runTest(org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests.TestExecutionCallback,
-	 *      Method, Log)
 	 * @param tec The test execution callback to run.
 	 * @param testMethod The actual test method: used to retrieve the
-	 *        <code>timeout</code>.
+	 * <code>timeout</code>.
 	 * @param logger The logger to log to.
 	 * @throws Throwable if any exception is thrown.
+	 * @see Timed
+	 * @see #runTest(org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests.TestExecutionCallback,
+	 *Method,Log)
 	 */
 	private static void runTestTimed(final TestExecutionCallback tec, final Method testMethod, final Log logger)
 			throws Throwable {
@@ -194,21 +246,19 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 		}
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Runs a test via the supplied {@link TestExecutionCallback}, providing
 	 * support for the {@link ExpectedException @ExpectedException} and
 	 * {@link Repeat @Repeat} annotations.
 	 *
-	 * @see ExpectedException
-	 * @see Repeat
 	 * @param tec The test execution callback to run.
 	 * @param testMethod The actual test method: used to retrieve the
-	 *        {@link ExpectedException @ExpectedException} and
-	 *        {@link Repeat @Repeat} annotations.
+	 * {@link ExpectedException @ExpectedException} and
+	 * {@link Repeat @Repeat} annotations.
 	 * @param logger The logger to log to.
 	 * @throws Throwable if any exception is thrown.
+	 * @see ExpectedException
+	 * @see Repeat
 	 */
 	private static void runTest(final TestExecutionCallback tec, final Method testMethod, final Log logger)
 			throws Throwable {
@@ -245,89 +295,15 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 		}
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
 	/**
-	 * Get the current test method.
-	 *
-	 * @return The current test method.
-	 */
-	private Method getTestMethod() {
-
-		assertNotNull("TestCase.getName() cannot be null", getName());
-		Method testMethod = null;
-		try {
-			testMethod = getClass().getMethod(getName(), (Class[]) null);
-		}
-		catch (final NoSuchMethodException e) {
-			fail("Method \"" + getName() + "\" not found");
-		}
-		if (!Modifier.isPublic(testMethod.getModifiers())) {
-			fail("Method \"" + getName() + "\" should be public");
-		}
-		return testMethod;
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * <p>
-	 * Runs the <em>Spring Test Context Framework</em> test sequence.
-	 * </p>
-	 * <p>
-	 * In addition to standard {@link TestCase#runBare()} semantics, this
-	 * implementation performs the following:
-	 * </p>
-	 * <ul>
-	 * <li>Calls
-	 * {@link TestContextManager#prepareTestInstance(Object) prepareTestInstance()},
-	 * {@link TestContextManager#beforeTestMethod(Object, Method) beforeTestMethod()},
-	 * and
-	 * {@link TestContextManager#afterTestMethod(Object, Method, Throwable) afterTestMethod()}
-	 * on this test's {@link TestContextManager} at the appropriate test
-	 * execution points.</li>
-	 * <li>Provides support for {@link IfProfileValue @IfProfileValue}.</li>
-	 * <li>Provides support for {@link Repeat @Repeat}.</li>
-	 * <li>Provides support for {@link Timed @Timed}.</li>
-	 * <li>Provides support for {@link ExpectedException @ExpectedException}.</li>
-	 * </ul>
-	 *
-	 * @see junit.framework.TestCase#runBare()
-	 */
-	@Override
-	public void runBare() throws Throwable {
-
-		this.testContextManager.prepareTestInstance(this);
-
-		final Method testMethod = getTestMethod();
-
-		if (isDisabledInThisEnvironment(testMethod)) {
-			recordDisabled(testMethod);
-			return;
-		}
-
-		runTestTimed(new TestExecutionCallback() {
-
-			public void run() throws Throwable {
-
-				runManaged(testMethod);
-			}
-		}, testMethod, this.logger);
-	}
-
-	// ------------------------------------------------------------------------|
-
-	/**
-	 * Calls {@link TestContextManager#beforeTestMethod(Object, Method)} and
-	 * {@link TestContextManager#afterTestMethod(Object, Method, Throwable)} at
+	 * Calls {@link TestContextManager#beforeTestMethod(Object,Method)} and
+	 * {@link TestContextManager#afterTestMethod(Object,Method,Throwable)} at
 	 * the appropriate test execution points.
 	 *
-	 * @see #runBare()
-	 * @see TestCase#runTest()
 	 * @param testMethod The test method to run.
 	 * @throws Throwable If any exception is thrown.
+	 * @see #runBare()
+	 * @see TestCase#runTest()
 	 */
 	private void runManaged(final Method testMethod) throws Throwable {
 
@@ -356,8 +332,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 		}
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Sets the {@link ApplicationContext} to be used by this test instance,
 	 * provided via {@link ApplicationContextAware} semantics.
@@ -369,15 +343,12 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 		this.applicationContext = applicationContext;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Determines if the supplied test method is <em>disabled</em> in the
 	 * current environment (i.e., whether or not the test should be executed) by
 	 * evaluating the {@link IfProfileValue @IfProfileValue} annotation, if
 	 * present.
 	 *
-	 * @see #isIgnored()
 	 * @param testMethod The test method to test against.
 	 * @return whether the test method should execute in the current environment
 	 */
@@ -399,15 +370,13 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 		// XXX Optional: add support for @IfNotProfileValue.
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Records the supplied test method as <em>disabled</em> in the current
 	 * environment by incrementing the total number of disabled tests and
 	 * logging a debug message.
 	 *
-	 * @see #getDisabledTestCount()
 	 * @param testMethod The test method that is disabled.
+	 * @see #getDisabledTestCount()
 	 */
 	protected void recordDisabled(final Method testMethod) {
 
@@ -416,9 +385,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 				+ "Total disabled tests = " + getDisabledTestCount());
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- TYPES --------------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	private static interface TestExecutionCallback {
 

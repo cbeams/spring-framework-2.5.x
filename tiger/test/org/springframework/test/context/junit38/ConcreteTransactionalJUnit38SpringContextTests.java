@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context.junit38;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import junit.framework.JUnit4TestAdapter;
 
 import org.junit.internal.runners.JUnit38ClassRunner;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
@@ -38,14 +40,13 @@ import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
-import org.springframework.test.utils.SimpleJdbcTestUtils;
+import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 
 /**
  * Combined unit test for {@link AbstractJUnit38SpringContextTests} and
  * {@link AbstractTransactionalJUnit38SpringContextTests}.
  *
  * @author Sam Brannen
- * @version $Revision: 1.6 $
  * @since 2.1
  */
 @RunWith(JUnit38ClassRunner.class)
@@ -53,48 +54,38 @@ import org.springframework.test.utils.SimpleJdbcTestUtils;
 public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTransactionalJUnit38SpringContextTests
 		implements BeanNameAware, InitializingBean {
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	protected static final String BOB = "bob";
 
-	protected static final String	BOB				= "bob";
+	protected static final String JANE = "jane";
 
-	protected static final String	JANE			= "jane";
+	protected static final String SUE = "sue";
 
-	protected static final String	SUE				= "sue";
+	protected static final String YODA = "yoda";
 
-	protected static final String	YODA			= "yoda";
+	private static final String NAME = "test.if_profile_value.name";
 
-	private static final String		NAME			= "test.if_profile_value.name";
+	private static final String VALUE = "enigma";
 
-	private static final String		VALUE			= "enigma";
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	private boolean beanInitialized = false;
 
-	private boolean					beanInitialized	= false;
+	private String beanName = "replace me with [" + getClass().getName() + "]";
 
-	private String					beanName		= "replace me with [" + getClass().getName() + "]";
-
-	private Employee				employee;
+	private Employee employee;
 
 	@Autowired
-	private Pet						pet;
+	private Pet pet;
 
 	@Autowired(required = false)
-	protected Long					nonrequiredLong;
+	protected Long nonrequiredLong;
 
 	@Resource()
-	protected String				foo;
+	protected String foo;
 
-	protected String				bar;
+	protected String bar;
 
-	private boolean					inTransaction	= false;
+	private boolean inTransaction = false;
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTRUCTORS -------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	public ConcreteTransactionalJUnit38SpringContextTests() throws Exception {
 
@@ -107,11 +98,9 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 		System.setProperty(NAME, VALUE);
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
+
 	public static junit.framework.Test suite() {
 
 		return new JUnit4TestAdapter(ConcreteTransactionalJUnit38SpringContextTests.class);
@@ -147,21 +136,12 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
-	/**
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
 	public final void afterPropertiesSet() throws Exception {
 
 		this.beanInitialized = true;
 	}
 
-	/**
-	 * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
-	 */
 	public final void setBeanName(final String beanName) {
 
 		this.beanName = beanName;
@@ -179,7 +159,6 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 		this.bar = bar;
 	}
 
-	// ------------------------------------------------------------------------|
 
 	@NotTransactional
 	@Timed(millis = 10000)
@@ -257,8 +236,6 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
 	}
 
-	// ------------------------------------------------------------------------|
-
 	@BeforeTransaction
 	public void beforeTransaction() {
 
@@ -298,9 +275,6 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 				countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- TYPES --------------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	public static class DatabaseSetup {
 
@@ -313,7 +287,5 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 			addPerson(simpleJdbcTemplate, BOB);
 		}
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

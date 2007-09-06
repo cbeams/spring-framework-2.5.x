@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -35,23 +37,14 @@ import org.springframework.util.StringUtils;
  * {@link #createBeanDefinitionReader(GenericApplicationContext) BeanDefinitionReader}.
  * </p>
  *
- * @see #loadContext()
  * @author Sam Brannen
- * @version $Revision: 1.5 $
+ * @see #loadContext
  * @since 2.1
  */
 public abstract class AbstractGenericContextLoader extends AbstractContextLoader {
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	protected static final Log logger = LogFactory.getLog(AbstractGenericContextLoader.class);
 
-	/** Class Logger. */
-	protected static final Log	LOG	= LogFactory.getLog(AbstractGenericContextLoader.class);
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * <p>
@@ -79,18 +72,17 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * {@link #createBeanDefinitionReader(GenericApplicationContext)}.
 	 * </p>
 	 *
-	 * @see org.springframework.test.context.ContextLoader#loadContext()
+	 * @return a new application context
+	 * @see org.springframework.test.context.ContextLoader#loadContext
 	 * @see GenericApplicationContext
 	 * @see #customizeBeanFactory
 	 * @see #createBeanDefinitionReader(GenericApplicationContext)
 	 * @see BeanDefinitionReader
-	 * @return a new application context
 	 */
-	@Override
 	public final ConfigurableApplicationContext loadContext(final String... locations) throws Exception {
 
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Loading ApplicationContext for locations [" + StringUtils.arrayToCommaDelimitedString(locations)
+		if (logger.isDebugEnabled()) {
+			logger.debug("Loading ApplicationContext for locations [" + StringUtils.arrayToCommaDelimitedString(locations)
 					+ "].");
 		}
 
@@ -103,8 +95,6 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		return context;
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * <p>
 	 * Customize the internal bean factory of the ApplicationContext created by
@@ -116,7 +106,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * </p>
 	 *
 	 * @param beanFactory the newly created bean factory for this context
-	 * @see #loadContext()
+	 * @see #loadContext
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowEagerClassLoading
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
@@ -127,21 +117,17 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		/* no-op */
 	}
 
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Factory method for creating new {@link BeanDefinitionReader}s for
 	 * loading bean definitions into the supplied
 	 * {@link GenericApplicationContext context}.
 	 *
 	 * @param context The context for which the BeanDefinitionReader should be
-	 *        created.
-	 * @see #loadContext()
-	 * @see BeanDefinitionReader
+	 * created.
 	 * @return A BeanDefinitionReader for the supplied context.
+	 * @see #loadContext
+	 * @see BeanDefinitionReader
 	 */
 	protected abstract BeanDefinitionReader createBeanDefinitionReader(final GenericApplicationContext context);
-
-	// ------------------------------------------------------------------------|
 
 }

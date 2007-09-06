@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context.junit38;
 
 import junit.framework.TestCase;
@@ -25,14 +26,9 @@ import org.springframework.test.context.TestExecutionListeners;
  * proper support of the {@link Repeat @Repeat} annotation.
  *
  * @author Sam Brannen
- * @version $Revision: 1.2 $
  * @since 2.1
  */
 public class RepeatedJUnit38SpringContextTests extends TestCase {
-
-	// ------------------------------------------------------------------------|
-	// --- CONSTRUCTORS -------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	public RepeatedJUnit38SpringContextTests() throws Exception {
 
@@ -44,9 +40,6 @@ public class RepeatedJUnit38SpringContextTests extends TestCase {
 		super(name);
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	private void assertRepetitions(final String testName, final int expectedNumInvocations) throws Exception {
 
@@ -64,9 +57,6 @@ public class RepeatedJUnit38SpringContextTests extends TestCase {
 		assertRepetitions("testRepeatedFiveTimes", 5);
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- TYPES --------------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Note that {@link TestExecutionListeners @TestExecutionListeners} is
