@@ -16,18 +16,19 @@
 
 package org.springframework.test.context.junit4;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Arrays;
 import java.util.Collection;
 
 import junit.framework.JUnit4TestAdapter;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,36 +55,46 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class })
 public class ParameterizedDependencyInjectionTests implements ApplicationContextAware {
 
-	private ApplicationContext applicationContext;
+	private ApplicationContext       applicationContext;
+
+	private final String             employeeBeanName;
+
+	private final String             employeeName;
+
+	@Autowired
+	private Pet                      pet;
 
 	private final TestContextManager testContextManager;
 
-	private final String employeeBeanName;
-
-	private final String employeeName;
-
-	@Autowired
-	private Pet pet;
-
-
 	public ParameterizedDependencyInjectionTests(final String employeeBeanName, final String employeeName)
-			throws Exception {
+	        throws Exception {
 
 		this.testContextManager = new TestContextManager(getClass());
 		this.employeeBeanName = employeeBeanName;
 		this.employeeName = employeeName;
 	}
 
+	@Parameters
+	public static Collection<String[]> employeeData() {
 
-	public final void setApplicationContext(final ApplicationContext applicationContext) {
+		return Arrays.asList(new String[][] { { "employee1", "John Smith" }, { "employee2", "Jane Smith" } });
+	}
 
-		this.applicationContext = applicationContext;
+	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
+	public static junit.framework.Test suite() {
+
+		return new JUnit4TestAdapter(ParameterizedDependencyInjectionTests.class);
 	}
 
 	@Before
 	public void injectDependencies() throws Exception {
 
 		this.testContextManager.prepareTestInstance(this);
+	}
+
+	public final void setApplicationContext(final ApplicationContext applicationContext) {
+
+		this.applicationContext = applicationContext;
 	}
 
 	@Test
@@ -95,20 +106,7 @@ public class ParameterizedDependencyInjectionTests implements ApplicationContext
 		// Verifying 'parameterized' support:
 		final Employee employee = (Employee) this.applicationContext.getBean(this.employeeBeanName);
 		assertEquals("Verifying the name of the employee configured as bean [" + this.employeeBeanName + "].",
-				this.employeeName, employee.getName());
-	}
-
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-
-		return new JUnit4TestAdapter(ParameterizedDependencyInjectionTests.class);
-	}
-
-	@Parameters
-	public static Collection<String[]> employeeData() {
-
-		return Arrays.asList(new String[][] { { "employee1", "John Smith" }, { "employee2", "Jane Smith" } });
+		        this.employeeName, employee.getName());
 	}
 
 }
