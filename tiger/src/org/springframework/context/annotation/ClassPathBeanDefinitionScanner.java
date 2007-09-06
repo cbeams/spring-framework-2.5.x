@@ -184,10 +184,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
 				if (checkBeanName(beanName, candidate)) {
 					if (candidate instanceof AbstractBeanDefinition) {
-						((AbstractBeanDefinition) candidate).applyDefaults(beanDefinitionDefaults);
+						AbstractBeanDefinition abd = (AbstractBeanDefinition) candidate;
+						abd.applyDefaults(this.beanDefinitionDefaults);
 						if (this.autowireCandidatePatterns != null) {
-							((AbstractBeanDefinition) candidate).setAutowireCandidate(
-									PatternMatchUtils.simpleMatch(this.autowireCandidatePatterns, beanName));
+							abd.setAutowireCandidate(PatternMatchUtils.simpleMatch(this.autowireCandidatePatterns, beanName));
 						}
 					}
 					ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);

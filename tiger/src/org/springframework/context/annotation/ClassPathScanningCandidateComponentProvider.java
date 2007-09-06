@@ -62,11 +62,11 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	protected static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
 
 
-	private String resourcePattern = DEFAULT_RESOURCE_PATTERN;
-
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
 	private ClassReaderFactory classReaderFactory = new CachingClassReaderFactory(this.resourcePatternResolver);
+
+	private String resourcePattern = DEFAULT_RESOURCE_PATTERN;
 
 	private final List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
 
@@ -158,8 +158,8 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	public Set<BeanDefinition> findCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<BeanDefinition>();
 		try {
-			String packageSearchPath =
-					"classpath*:" + ClassUtils.convertClassNameToResourcePath(basePackage) + "/" + this.resourcePattern;
+			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
+					ClassUtils.convertClassNameToResourcePath(basePackage) + "/" + this.resourcePattern;
 			Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
 			for (int i = 0; i < resources.length; i++) {
 				Resource resource = resources[i];
