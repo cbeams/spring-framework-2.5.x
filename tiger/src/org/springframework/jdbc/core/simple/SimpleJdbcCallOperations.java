@@ -16,25 +16,24 @@
 
 package org.springframework.jdbc.core.simple;
 
+import java.util.Map;
+
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-
-import java.util.Map;
 
 /**
  * Interface specifying the API for a Simple JDBC Call implemented by {@link SimpleJdbcCall}.
  * This interface is not often used directly, but provides the
  * option to enhance testability, as it can easily be mocked or stubbed.
+ *
  * @author Thomas Risberg
- * @simce 2.1
+ * @since 2.1
  */
 public interface SimpleJdbcCallOperations {
 
 	/**
 	 * Specify the procedure name to be used - this implies that we will be calling a stored procedure.
-	 *
 	 * @param procedureName the name of the stored procedure
 	 * @return the instance of this SimpleJdbcCall
 	 */
@@ -42,7 +41,6 @@ public interface SimpleJdbcCallOperations {
 
 	/**
 	 * Specify the procedure name to be used - this implies that we will be calling a stored function.
-	 *
 	 * @param functionName the name of the stored function
 	 * @return the instance of this SimpleJdbcCall
 	 */
@@ -50,7 +48,6 @@ public interface SimpleJdbcCallOperations {
 
 	/**
 	 * Optionally, specify the name of the schema that contins the stored procedure.
-	 *
 	 * @param schemaName the name of the schema
 	 * @return the instance of this SimpleJdbcCall
 	 */
@@ -58,10 +55,8 @@ public interface SimpleJdbcCallOperations {
 
 	/**
 	 * Optionally, specify the name of the catalog that contins the stored procedure.
-	 *
 	 * To provide consistency with the Oracle DatabaseMetaData, this is used to specify the package name if
 	 * the procedure is declared as part of a package.
-	 *
 	 * @param catalogName the catalog or package name
 	 * @return the instance of this SimpleJdbcCall
 	 */
@@ -69,7 +64,6 @@ public interface SimpleJdbcCallOperations {
 
 	/**
 	 * Indicates the procedure's return value should be included in the results returned.
-	 *
 	 * @return the instance of this SimpleJdbcCall
 	 */
 	SimpleJdbcCall withReturnValue();
@@ -77,7 +71,6 @@ public interface SimpleJdbcCallOperations {
 	/**
 	 * Specify one or more parameters if desired.  These parameters will be supplemented with any
 	 * parameter information retrieved from the database meta data.
-	 *
 	 * @param sqlParameters the parameters to use
 	 * @return the instance of this SimpleJdbcCall
 	 */
@@ -86,12 +79,12 @@ public interface SimpleJdbcCallOperations {
 	/** Not used yet */
 	SimpleJdbcCall useInParameterNames(String... inParameterNames);
 
-	/** Used to specify when a ResultSet is returned by the stored procedure and you want it mapped
+	/**
+	 * Used to specify when a ResultSet is returned by the stored procedure and you want it mapped
 	 * by a RowMapper.  The results will be returned using the parameter name specified.  Multiple
 	 * ResultSets must be declared in the correct order. If the database you are using uses ref cursors
 	 * then the name specified must match the name of the parameter declared for the procedure in the
 	 * database.
-	 *
 	 * @param parameterName the name of the returned results and/or the name of the ref cursor parameter
 	 * @param rowMapper the RowMapper implementation that will map the data returned for each row
 	 * */
@@ -99,7 +92,6 @@ public interface SimpleJdbcCallOperations {
 
 	/**
 	 * Turn off any processing of parameter mete data information obtained via JDBC.
-	 *
 	 * @return the instance of this SimpleJdbcCall
 	 */
 	SimpleJdbcCall withoutProcedureColumnMetaDataAccess();
