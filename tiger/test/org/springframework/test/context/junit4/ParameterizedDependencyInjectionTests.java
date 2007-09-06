@@ -55,20 +55,20 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class })
 public class ParameterizedDependencyInjectionTests implements ApplicationContextAware {
 
-	private ApplicationContext       applicationContext;
+	private ApplicationContext applicationContext;
 
-	private final String             employeeBeanName;
+	private final String employeeBeanName;
 
-	private final String             employeeName;
+	private final String employeeName;
 
 	@Autowired
-	private Pet                      pet;
+	private Pet pet;
 
 	private final TestContextManager testContextManager;
 
+
 	public ParameterizedDependencyInjectionTests(final String employeeBeanName, final String employeeName)
 	        throws Exception {
-
 		this.testContextManager = new TestContextManager(getClass());
 		this.employeeBeanName = employeeBeanName;
 		this.employeeName = employeeName;
@@ -76,13 +76,11 @@ public class ParameterizedDependencyInjectionTests implements ApplicationContext
 
 	@Parameters
 	public static Collection<String[]> employeeData() {
-
 		return Arrays.asList(new String[][] { { "employee1", "John Smith" }, { "employee2", "Jane Smith" } });
 	}
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
 	public static junit.framework.Test suite() {
-
 		return new JUnit4TestAdapter(ParameterizedDependencyInjectionTests.class);
 	}
 
@@ -93,7 +91,6 @@ public class ParameterizedDependencyInjectionTests implements ApplicationContext
 	}
 
 	public final void setApplicationContext(final ApplicationContext applicationContext) {
-
 		this.applicationContext = applicationContext;
 	}
 
