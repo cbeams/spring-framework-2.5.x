@@ -70,6 +70,8 @@ PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests.class,
 
 SpringRunnerContextCacheTests.class,
 
+ParameterizedDependencyInjectionTests.class,
+
 ClassLevelTransactionalSpringRunnerTests.class,
 
 MethodLevelTransactionalSpringRunnerTests.class,
