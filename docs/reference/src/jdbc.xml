@@ -1318,21 +1318,110 @@ jdbcTemplate.update(
     <section id="jdbc-simple-jdbc-call-2">
       <title>Calling a stored procedure using SimpleJdbcCall</title>
 
-      <para>... ToDo ...</para>
+      <para>Let's now turn our attention to calling stored procedures using
+      the <classname>SimpleJdbcCall</classname> class. This class is designed
+      to make it as simple as possible to call a stored procedure. It takes
+      advantage of metedata present in the database to look up names of in and
+      out parameters. This means that you don't have to explicitly declare
+      parameters. You can of course still declare them if tyou prefer to do
+      that or if you have parameters that don't have an automatic mapping to a
+      Java class like ARRAY or STRUCT parameters. In our first example we will
+      look at a plain vanilla procedure that only returns scalar values in
+      form ov VARCHAR and DATE. I have added a birthDate property to the Actor
+      class to get some variety in terms of return values. The example
+      procedure reads a specified actor entry and returns first_name,
+      last_name, and birth_date columns in the form of out parameters. Here is
+      the source for the procedure as it would look when using MySQL as the
+      database:</para>
+
+      <para><programlisting>CREATE PROCEDURE read_actor ( 
+  IN in_id INTEGER, 
+  OUT out_first_name VARCHAR(100), 
+  OUT out_last_name VARCHAR(100), 
+  OUT out_birth_date DATE) 
+BEGIN 
+  SELECT first_name, last_name, birth_date 
+  INTO out_first_name, out_last_name, out_birth_date 
+  FROM t_actor where id = in_id;
+END;</programlisting>As you can see there are four parameters. One is an in
+      parameter "in_id" containing the id of the Actor we are looking up. The
+      remaining parameters are out parameters and they will be used to return
+      the data read from the table.</para>
+
+      <para>The <classname>SimpleJdbcCall</classname> is declared in a similar
+      manner to the <classname>SimpleJdbcInsert</classname>, no need to
+      subclass and we declare it in the initialization method. For this
+      example, all we need to specify is the name of the procedure.</para>
 
       <para><programlisting>public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
-    private SimpleJdbcCall actorCall;
+    private SimpleJdbcCall procReadActor;
 
     public void setDataSource(DataSource dataSource) {
         this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        this.procReadActor =
+                new SimpleJdbcCall(dataSource)
+                        .withProcedureName("read_actor");
     }
 
-    public void callXXX() {
+    public Actor readActor(Long id) {
+        SqlParameterSource in = new MapSqlParameterSource().addValue("in_id", id); 
+        Map out = procReadActor.execute(in);
+        Actor actor = new Actor();
+        actor.setId(id);
+        actor.setFirstName((String) out.get("out_first_name"));
+        actor.setLastName((String) out.get("out_last_name"));
+        actor.setBirthDate((Date) out.get("out_birth_date"));
+        return actor;
     }
 
     //  ... additional methods
-}</programlisting>The execution of the call...</para>
+}</programlisting>The execution of the call involves createing an
+      <classname>SqlParameterSource</classname> containing the in parameter.
+      It's important to match the name of the parameter declared in the stored
+      procedure. The case doesn't have to match since we use metadata to
+      determine how database objects should be referred to - what you specify
+      in your source for the stored procedure is not necessarilly the way it
+      is stored in the database, some databases transform names to all upper
+      case while others use lower case or the case as specified.</para>
+
+      <para>The <classname>execute</classname> method takes the in parameters
+      and returns a Map containing any out parameters keyed by the name as
+      specified in the stored procedure. In this case they are
+      <classname>out_first_name, out_last_name</classname> and
+      <classname>out_birth_date</classname>.</para>
+
+      <para>The last part of the <classname>execute</classname> method just
+      creates an Actor instance to use to return the data retreived. Again,
+      it's important to match the names of the out parameters here. Also, the
+      case used for the names of the out parameters stored in the results map
+      are as they were defined in the database. You will either have to do a
+      case-insensitive lookup or instruct Spring to use a
+      <classname>CaseInsensitiveMap</classname> from the Jakarta Commons
+      project. The way you do that is by creating your own
+      <classname>JdbcTemplate</classname> and setting the
+      <classname>setResultsMapCaseInsensitive</classname> property to
+      <classname>true</classname>. Then you pass this customized
+      <classname>JdbcTemplate</classname> instance into the constructor of
+      your <classname>SimpleJdbcCall</classname>. You also have to include the
+      <classname>commons-collections.jar</classname> on your classpath for
+      this to work. Here is an example of this configuration:</para>
+
+      <para><programlisting>public class JdbcActorDao implements ActorDao {
+    private SimpleJdbcCall procReadActor;
+
+    public void setDataSource(DataSource dataSource) {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        jdbcTemplate.setResultsMapCaseInsensitive(true);
+        this.procReadActor =
+                new SimpleJdbcCall(jdbcTemplate)
+                        .withProcedureName("read_actor");
+    }
+
+
+    //  ... additional methods
+}</programlisting>By doing this, you don't have to worry about the case used
+      for the names of your returned out parameters.</para>
     </section>
   </section>
 
