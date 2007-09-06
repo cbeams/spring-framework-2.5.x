@@ -16,16 +16,18 @@
 
 package org.springframework.test.context.support;
 
+import java.lang.reflect.Method;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestContext;
+import org.springframework.util.Assert;
 
 /**
- * TestExecutionListener which processes methods configured with the
- * &#064;DirtiesContext annotation.
+ * TestExecutionListener which processes test methods configured with the
+ * {@link DirtiesContext @DirtiesContext} annotation.
  *
  * @author Sam Brannen
  * @see DirtiesContext
@@ -33,28 +35,24 @@ import org.springframework.test.context.TestContext;
  */
 public class DirtiesContextTestExecutionListener extends AbstractTestExecutionListener {
 
-	private static final Log logger = LogFactory.getLog(DirtiesContextTestExecutionListener.class);
-
+	private static final Log	logger	= LogFactory.getLog(DirtiesContextTestExecutionListener.class);
 
 	/**
 	 * <p>
 	 * If the current test method of the supplied
 	 * {@link TestContext test context} has been annotated with
-	 * {@link DirtiesContext}, the
+	 * {@link DirtiesContext @DirtiesContext}, the
 	 * {@link ApplicationContext application context} of the test context will
 	 * be {@link TestContext#markApplicationContextDirty() marked as dirty}.
 	 * </p>
-	 * <p>
-	 * Note that this implementation allows for <em>annotation inheritance</em>
-	 * for methods annotated with {@link DirtiesContext}.
-	 * </p>
-	 *
-	 * @see org.springframework.test.context.support.AbstractTestExecutionListener#afterTestMethod(TestContext)
 	 */
 	@Override
 	public void afterTestMethod(final TestContext testContext) throws Exception {
 
-		final boolean dirtiesContext = testContext.getTestMethod().isAnnotationPresent(DirtiesContext.class);
+		final Method testMethod = testContext.getTestMethod();
+		Assert.notNull(testMethod, "The test method of the supplied TestContext can not be null.");
+
+		final boolean dirtiesContext = testMethod.isAnnotationPresent(DirtiesContext.class);
 		if (logger.isDebugEnabled()) {
 			logger.debug("After test method: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
 		}
