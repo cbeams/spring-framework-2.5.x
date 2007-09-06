@@ -271,14 +271,18 @@ public class RequestContext {
 	/**
 	 * Determine the fallback theme for this context.
 	 * <p>The default implementation returns the default theme (with name "theme").
-	 * @return the fallback theme
+	 * @return the fallback theme (never <code>null</code>)
 	 */
 	protected Theme getFallbackTheme() {
 		ThemeSource themeSource = RequestContextUtils.getThemeSource(getRequest());
 		if (themeSource == null) {
 			themeSource = new ResourceBundleThemeSource();
 		}
-		return themeSource.getTheme(DEFAULT_THEME_NAME);
+		Theme theme = themeSource.getTheme(DEFAULT_THEME_NAME);
+		if (theme == null) {
+			throw new IllegalStateException("No theme defined and no fallback theme found");
+		}
+		return theme;
 	}
 
 
@@ -313,7 +317,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * Return the current theme.
+	 * Return the current theme (never <code>null</code>).
 	 * Resolved lazily for more efficiency when theme support is not used.
 	 */
 	public final Theme getTheme() {
