@@ -74,7 +74,7 @@ public class ParameterizedDependencyInjectionTests implements ApplicationContext
 
 
 	public ParameterizedDependencyInjectionTests(final String employeeBeanName, final String employeeName)
-	        throws Exception {
+			throws Exception {
 		this.testContextManager = new TestContextManager(getClass());
 		this.employeeBeanName = employeeBeanName;
 		this.employeeName = employeeName;
@@ -115,13 +115,13 @@ public class ParameterizedDependencyInjectionTests implements ApplicationContext
 		final Employee employee = (Employee) this.applicationContext.getBean(this.employeeBeanName);
 		employees.add(employee);
 		assertEquals("Verifying the name of the employee configured as bean [" + this.employeeBeanName + "].",
-		        this.employeeName, employee.getName());
+				this.employeeName, employee.getName());
 	}
 
 	@AfterClass
 	public static void verifyNumParameterizedRuns() {
 		assertEquals("Verifying the number of times the parameterized test method was executed.",
-		        employeeData().size(), employees.size());
+				employeeData().size(), employees.size());
 	}
 
 }
