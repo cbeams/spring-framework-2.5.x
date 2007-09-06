@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,26 +55,30 @@ import org.springframework.util.Assert;
  * </ul>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
+ * @since 2.1
  * @see TestContext
  * @see TestExecutionListeners
  * @see ContextConfiguration
  * @see org.springframework.test.context.transaction.TransactionConfiguration
- * @since 2.1
  */
 public class TestContextManager {
 
-	private static final Log										logger					= LogFactory.getLog(TestContextManager.class);
+	private static final Log logger = LogFactory.getLog(TestContextManager.class);
 
 	/**
 	 * Cache of Spring application contexts. This needs to be static, as tests
 	 * may be destroyed and recreated between running individual test methods,
 	 * for example with JUnit.
 	 */
-	private static final ContextCache<String, ApplicationContext>	contextCache			= new ContextCache<String, ApplicationContext>();
+	private static final ContextCache<String, ApplicationContext> contextCache =
+			new ContextCache<String, ApplicationContext>();
 
-	private final TestContext										testContext;
+	private final TestContext testContext;
 
-	private final List<TestExecutionListener>						testExecutionListeners	= new ArrayList<TestExecutionListener>();
+	private final List<TestExecutionListener> testExecutionListeners =
+			new ArrayList<TestExecutionListener>();
+
 
 	/**
 	 * <p>
@@ -86,7 +91,7 @@ public class TestContextManager {
 	 * </p>
 	 *
 	 * @param testClass the Class object corresponding to the test class to be
-	 *        managed.
+	 * managed.
 	 * @throws Exception if an error occurs while processing the test class
 	 * @see #registerTestExecutionListeners(TestExecutionListener...)
 	 * @see #retrieveTestExecutionListeners(Class)
@@ -97,6 +102,7 @@ public class TestContextManager {
 		registerTestExecutionListeners(retrieveTestExecutionListeners(testClass));
 	}
 
+
 	/**
 	 * <p>
 	 * Retrieves an array of newly instantiated
@@ -105,10 +111,10 @@ public class TestContextManager {
 	 * </p>
 	 *
 	 * @param clazz The Class object corresponding to the test class for which
-	 *        the listeners should be retrieved.
+	 * the listeners should be retrieved.
 	 * @return an array of TestExecutionListeners for the specified class.
 	 * @throws IllegalArgumentException if the supplied class is
-	 *         <code>null</code>.
+	 * <code>null</code>.
 	 * @throws Exception if an error occurs while retrieving the listeners.
 	 */
 	@SuppressWarnings("unchecked")
@@ -161,7 +167,7 @@ public class TestContextManager {
 	 *
 	 * @param testInstance The test instance to prepare, not <code>null</code>.
 	 * @throws Exception if a registered TestExecutionListener throws an
-	 *         exception.
+	 * exception.
 	 * @see #getTestExecutionListeners()
 	 */
 	public void prepareTestInstance(final Object testInstance) throws Exception {
@@ -209,9 +215,9 @@ public class TestContextManager {
 	 *
 	 * @param testInstance The current test instance, not <code>null</code>.
 	 * @param testMethod The test method which is about to be executed on the
-	 *        test instance.
+	 * test instance.
 	 * @throws Exception if a registered TestExecutionListener throws an
-	 *         exception.
+	 * exception.
 	 * @see #getTestExecutionListeners()
 	 */
 	public void beforeTestMethod(final Object testInstance, final Method testMethod) throws Exception {
@@ -260,9 +266,9 @@ public class TestContextManager {
 	 *
 	 * @param testInstance The current test instance, not <code>null</code>.
 	 * @param testMethod The test method which has just been executed on the
-	 *        test instance.
+	 * test instance.
 	 * @param exception The exception that was thrown during execution of the
-	 *        test method, or <code>null</code> if none was thrown.
+	 * test method, or <code>null</code> if none was thrown.
 	 * @see #getTestExecutionListeners()
 	 */
 	public void afterTestMethod(final Object testInstance, final Method testMethod, final Throwable exception) {

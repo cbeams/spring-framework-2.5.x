@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestContext;
@@ -30,12 +31,13 @@ import org.springframework.util.Assert;
  * {@link DirtiesContext @DirtiesContext} annotation.
  *
  * @author Sam Brannen
- * @see DirtiesContext
  * @since 2.1
+ * @see DirtiesContext
  */
 public class DirtiesContextTestExecutionListener extends AbstractTestExecutionListener {
 
-	private static final Log	logger	= LogFactory.getLog(DirtiesContextTestExecutionListener.class);
+	private static final Log logger = LogFactory.getLog(DirtiesContextTestExecutionListener.class);
+
 
 	/**
 	 * <p>
