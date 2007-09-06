@@ -35,6 +35,7 @@ import org.springframework.util.ObjectUtils;
  * </p>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.1
  */
 public class TestContext {
@@ -149,8 +150,8 @@ public class TestContext {
 	 * </p>
 	 *
 	 * @return The application context; may be <code>null</code> if the
-	 *         current test context is not configured to use an application
-	 *         context.
+	 * current test context is not configured to use an application
+	 * context.
 	 * @throws Exception if an error occurs while retrieving the application
 	 * context.
 	 */
@@ -190,7 +191,7 @@ public class TestContext {
 	 * </p>
 	 *
 	 * @return The context loader; may be <code>null</code> if the current
-	 *         test context is not configured to use an application context.
+	 * test context is not configured to use an application context.
 	 */
 	protected final ContextLoader getContextLoader() {
 
@@ -204,8 +205,8 @@ public class TestContext {
 	 * </p>
 	 *
 	 * @return The application context resource locations; may be
-	 *         <code>null</code> if the current test context is not configured
-	 *         to use an application context.
+	 * <code>null</code> if the current test context is not configured
+	 * to use an application context.
 	 */
 	protected final String[] getLocations() {
 
@@ -234,7 +235,7 @@ public class TestContext {
 	 * </p>
 	 *
 	 * @return The exception that was thrown, or <code>null</code> if no
-	 *         exception was thrown.
+	 * exception was thrown.
 	 * @see #updateState(Object,Method,Throwable)
 	 */
 	public final Throwable getTestException() {
@@ -311,8 +312,6 @@ public class TestContext {
 	 * {@link #getTestInstance() test instance},
 	 * {@link #getTestMethod() test method}, and
 	 * {@link #getTestException() test exception}.
-	 *
-	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
