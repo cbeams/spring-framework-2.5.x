@@ -27,10 +27,9 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.context.support.StaticMessageSource;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
-import org.springframework.ui.context.support.SimpleTheme;
+import org.springframework.ui.context.support.ResourceBundleThemeSource;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -53,7 +52,7 @@ import org.springframework.web.util.WebUtils;
  * <p>Can be instantiated manually, or automatically exposed to views as
  * model attribute via AbstractView's "requestContextAttribute" property.
  *
- * <p>Will also work outside DispatcherServlet requests, accessing the root
+ * <p>Will also work outside of DispatcherServlet requests, accessing the root
  * WebApplicationContext and using an appropriate fallback for the locale
  * (the JSTL locale if available, or the HttpServletRequest locale else).
  *
@@ -74,11 +73,6 @@ public class RequestContext {
 	 * @see org.springframework.web.servlet.theme.AbstractThemeResolver#ORIGINAL_DEFAULT_THEME_NAME
 	 */
 	public final static String DEFAULT_THEME_NAME = "theme";
-
-	/**
-	 * Default (empty) Theme used if the RequestContext cannot find a ThemeSource.
-	 */
-	public final static Theme DEFAULT_THEME = new SimpleTheme(DEFAULT_THEME_NAME, new StaticMessageSource());
 
 	/**
 	 * JSTL locale attribute, as used by JSTL implementations to expose their
@@ -232,13 +226,6 @@ public class RequestContext {
 			this.locale = getFallbackLocale();
 		}
 
-		// Determine theme to use for this RequestContext.
-		this.theme = RequestContextUtils.getTheme(request);
-		if (this.theme == null) {
-			// No ThemeResolver and ThemeSource available -> try fallback.
-			this.theme = getFallbackTheme();
-		}
-
 		// Determine default HTML escape setting from the "defaultHtmlEscape"
 		// context-param in web.xml, if any.
 		this.defaultHtmlEscape = WebUtils.isDefaultHtmlEscape(this.webApplicationContext.getServletContext());
@@ -284,16 +271,14 @@ public class RequestContext {
 	/**
 	 * Determine the fallback theme for this context.
 	 * <p>The default implementation returns the default theme (with name "theme").
-	 * @return the fallback theme, or <code>null
+	 * @return the fallback theme
 	 */
 	protected Theme getFallbackTheme() {
 		ThemeSource themeSource = RequestContextUtils.getThemeSource(getRequest());
-		if (themeSource != null) {
-			return themeSource.getTheme(DEFAULT_THEME_NAME);
+		if (themeSource == null) {
+			themeSource = new ResourceBundleThemeSource();
 		}
-		else {
-			return DEFAULT_THEME;
-		}
+		return themeSource.getTheme(DEFAULT_THEME_NAME);
 	}
 
 
@@ -329,8 +314,17 @@ public class RequestContext {
 
 	/**
 	 * Return the current theme.
+	 * Resolved lazily for more efficiency when theme support is not used.
 	 */
 	public final Theme getTheme() {
+		if (this.theme == null) {
+			// Lazily determine theme to use for this RequestContext.
+			this.theme = RequestContextUtils.getTheme(this.request);
+			if (this.theme == null) {
+				// No ThemeResolver and ThemeSource available -> try fallback.
+				this.theme = getFallbackTheme();
+			}
+		}
 		return this.theme;
 	}
 
@@ -545,7 +539,7 @@ public class RequestContext {
 	 * @return the message
 	 */
 	public String getThemeMessage(String code, String defaultMessage) {
-		return this.theme.getMessageSource().getMessage(code, null, defaultMessage, this.locale);
+		return getTheme().getMessageSource().getMessage(code, null, defaultMessage, this.locale);
 	}
 
 	/**
@@ -558,7 +552,7 @@ public class RequestContext {
 	 * @return the message
 	 */
 	public String getThemeMessage(String code, Object[] args, String defaultMessage) {
-		return this.theme.getMessageSource().getMessage(code, args, defaultMessage, this.locale);
+		return getTheme().getMessageSource().getMessage(code, args, defaultMessage, this.locale);
 	}
 
 	/**
@@ -571,7 +565,7 @@ public class RequestContext {
 	 * @return the message
 	 */
 	public String getThemeMessage(String code, List args, String defaultMessage) {
-		return this.theme.getMessageSource().getMessage(
+		return getTheme().getMessageSource().getMessage(
 				code, (args != null ? args.toArray() : null), defaultMessage, this.locale);
 	}
 
@@ -584,7 +578,7 @@ public class RequestContext {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getThemeMessage(String code) throws NoSuchMessageException {
-		return this.theme.getMessageSource().getMessage(code, null, this.locale);
+		return getTheme().getMessageSource().getMessage(code, null, this.locale);
 	}
 
 	/**
@@ -597,7 +591,7 @@ public class RequestContext {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getThemeMessage(String code, Object[] args) throws NoSuchMessageException {
-		return this.theme.getMessageSource().getMessage(code, args, this.locale);
+		return getTheme().getMessageSource().getMessage(code, args, this.locale);
 	}
 
 	/**
@@ -610,7 +604,7 @@ public class RequestContext {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getThemeMessage(String code, List args) throws NoSuchMessageException {
-		return this.theme.getMessageSource().getMessage(
+		return getTheme().getMessageSource().getMessage(
 				code, (args != null ? args.toArray() : null), this.locale);
 	}
 
@@ -623,7 +617,7 @@ public class RequestContext {
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
 	public String getThemeMessage(MessageSourceResolvable resolvable) throws NoSuchMessageException {
-		return this.theme.getMessageSource().getMessage(resolvable, this.locale);
+		return getTheme().getMessageSource().getMessage(resolvable, this.locale);
 	}
 
 
