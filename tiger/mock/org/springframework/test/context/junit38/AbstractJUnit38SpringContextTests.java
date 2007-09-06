@@ -52,9 +52,9 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * annotation to configure the {@link ApplicationContext application context}
  * {@link ContextConfiguration#locations() resource locations}.</li>
  * <li>Declare public constructors which match the signatures of
- * {@link AbstractJUnit38SpringContextTests() AbstractJUnit38SpringContextTests()}
+ * {@link #AbstractJUnit38SpringContextTests() AbstractJUnit38SpringContextTests()}
  * and
- * {@link AbstractJUnit38SpringContextTests(String) AbstractJUnit38SpringContextTests(String)}
+ * {@link #AbstractJUnit38SpringContextTests(String) AbstractJUnit38SpringContextTests(String)}
  * and delegate to <code>super();</code> and <code>super(name);</code>
  * respectively.</li>
  * </ul>
@@ -224,7 +224,7 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * @see #runTest(org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests.TestExecutionCallback,
 	 *Method,Log)
 	 */
-	private static void runTestTimed(final TestExecutionCallback tec, final Method testMethod, final Log logger)
+	private void runTestTimed(final TestExecutionCallback tec, final Method testMethod, final Log logger)
 			throws Throwable {
 
 		final Timed timed = testMethod.getAnnotation(Timed.class);
@@ -260,7 +260,7 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * @see ExpectedException
 	 * @see Repeat
 	 */
-	private static void runTest(final TestExecutionCallback tec, final Method testMethod, final Log logger)
+	private void runTest(final TestExecutionCallback tec, final Method testMethod, final Log logger)
 			throws Throwable {
 
 		final ExpectedException expectedExceptionAnnotation = testMethod.getAnnotation(ExpectedException.class);
