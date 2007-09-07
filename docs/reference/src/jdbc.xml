@@ -1479,7 +1479,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       of stored functions for: MySQL, Microsoft SQL Server and Oracle.</para>
     </section>
 
-    <section>
+    <section id="jdbc-params">
       <title>How to define SqlParameters</title>
 
       <para>... ToDo ...</para>
