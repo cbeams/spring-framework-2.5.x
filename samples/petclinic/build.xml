@@ -124,7 +124,7 @@
 		</fileset>
 
 		<fileset dir="${spring.root}/dist/modules">
-			<include name="spring-mock.jar"/>
+			<include name="spring-test.jar"/>
 		</fileset>
 
 	</path>
@@ -422,7 +422,7 @@
 		<javac srcdir="${testsrc.dir}" destdir="${testbuild.dir}" debug="true" deprecation="true">
 			<classpath path="${build.dir}"/>
 			<classpath refid="master-classpath"/>
-			<classpath path="${spring.root}/lib/junit/junit.jar"/>
+			<classpath path="${spring.root}/lib/junit/junit-4.4.jar"/>
 			<classpath refid="test-classpath"/>
 		</javac>
 
