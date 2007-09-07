@@ -38,7 +38,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @see org.springframework.web.servlet.ModelAndView
  */
 public abstract class AbstractModelAndViewTests extends TestCase {
-	
+
 	/**
 	 * Assert whether or not a model attribute is available.
 	 */
@@ -47,18 +47,18 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 		assertTrue("Model attribute with name '" + key + "' is not available",
 				mav.getModel().containsKey(key));
 	}	
-	
+
 	/**
 	 * Compare each individual entry in a list, not sorting the lists first.
 	 */
 	protected void assertCompareListModelAttribute(ModelAndView mav, Object key, List assertionList) {
-		List modelList = (List)assertAndReturnModelAttributeOfType(mav, key, List.class);
+		List modelList = (List) assertAndReturnModelAttributeOfType(mav, key, List.class);
 		assertEquals("Size of model list is '" + modelList.size() +
 				"' while size of assertion list is '" + assertionList.size() + "'",
 				assertionList.size(), modelList.size());		
 		assertEquals("List in model under key '" + key + "' is not equals to given list", assertionList, modelList);
 	}
-	
+
 	/**
 	 * Compare each individual entry in a list after having sorted both lists
 	 * (optionally using a comparator).
@@ -68,7 +68,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	protected void assertSortAndCompareListModelAttribute(
 			ModelAndView mav, Object key, List assertionList, Comparator comp) {
 
-		List modelList = (List)assertAndReturnModelAttributeOfType(mav, key, List.class);
+		List modelList = (List) assertAndReturnModelAttributeOfType(mav, key, List.class);
 		assertEquals("Size of model list is '" + modelList.size() +
 				"' while size of assertion list is '" + assertionList.size() + "'",
 				assertionList.size(), modelList.size());
@@ -83,7 +83,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 		}		
 		assertEquals("List in model under key '" + key + "' is not equals to given list", assertionList, modelList);
 	}
-	
+
 	/**
 	 * Checks whether the given model key exists and checks it type, based
 	 * on the given type. If the model entry exists and the type matches,
@@ -105,7 +105,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 		assertEquals("View name is not equal to '" + name + "' but was '" + mav.getViewName() + "'",
 				name, mav.getViewName());
 	}
-	
+
 	/**
 	 * Compare a given Object to the value from the model bound under the given key.
 	 */
@@ -114,7 +114,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 		assertEquals("Model value with key '" + key + "' is not the same as given value which was '" + value + "'", 
 				value, modelValue);				
 	}
-	
+
 	/**
 	 * Inspect the given model to see if all elements in the model appear and are equal
 	 */
