@@ -165,10 +165,10 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param expectedName the name of the model value
 	 */
-	protected void assertViewName(ModelAndView mav, String name) {
+	protected void assertViewName(ModelAndView mav, String expectedName) {
 
 		try {
-			ModelAndViewAssert.assertViewName(mav, name);
+			ModelAndViewAssert.assertViewName(mav, expectedName);
 		}
 		catch (AssertionError e) {
 			throw new AssertionFailedError(e.getMessage());
