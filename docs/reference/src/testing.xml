@@ -39,7 +39,7 @@
     is that you often do not need this section of the testing chapter to help
     you write effective <emphasis>unit</emphasis> tests for your IoC-based
     applications. For certain unit testing scenarios, however, the Spring
-    Framework provides the following mock objects and base support
+    Framework provides the following mock objects and testing support
     classes.</para>
 
     <section id="mock-objects">
@@ -79,19 +79,26 @@
       </section>
     </section>
 
-    <section id="unit-testing-superclasses">
-      <title>Base test classes</title>
+    <section id="unit-testing-support-classes">
+      <title>Unit testing support classes</title>
 
       <section id="unit-testing-spring-mvc">
         <title>Spring MVC</title>
 
         <para>The <literal>org.springframework.test.web</literal> package
         contains <classname>AbstractModelAndViewTests</classname>, which
-        serves as a convenient base class for unit tests dealing with Spring
-        MVC <classname>ModelAndView</classname> objects.</para>
+        serves as a convenient base class for JUnit 3.8 based unit tests
+        dealing with Spring MVC <classname>ModelAndView</classname> objects.
+        When developing against Java 1.4 and higher (e.g., in combination with
+        JUnit 4+, TestNG, etc.), you have the option of using the
+        <classname>ModelAndViewAssert</classname> class (in the same package)
+        to test your <classname>ModelAndView</classname> related
+        functionality.</para>
 
-        <para>Tip: extend <classname>AbstractModelAndViewTests</classname> and
-        use <literal>MockHttpServletRequest</literal>,
+        <para>Tip: depending on your testing environment, either extend
+        <classname>AbstractModelAndViewTests</classname> or use
+        <classname>ModelAndViewAssert</classname> directly and then use
+        <literal>MockHttpServletRequest</literal>,
         <literal>MockHttpSession</literal>, etc. from the <link
         linkend="mock-objects-servlet"><literal>org.springframework.mock.web</literal></link>
         package to test your Spring MVC <literal>Controller</literal>s.</para>
@@ -182,9 +189,9 @@
         </listitem>
 
         <listitem>
-          <para><link linkend="testing-superclasses">Spring-specific base test
-          classes</link> that are really useful when writing integration
-          tests.</para>
+          <para><link linkend="testing-support-classes">Spring-specific
+          support classes</link> that are really useful when writing
+          integration tests.</para>
         </listitem>
       </itemizedlist>
 
@@ -339,13 +346,13 @@
         </itemizedlist>
       </section>
 
-      <section id="testing-superclasses">
-        <title>Base test classes</title>
+      <section id="testing-support-classes">
+        <title>Integration testing support classes</title>
 
         <para>The Spring integration testing support frameworks provide
-        several <literal>abstract</literal> base test classes that can
-        simplify writing integration tests. These base test classes provide
-        well defined hooks into the testing framework as well as convenient
+        several <literal>abstract</literal> support classes that can simplify
+        writing integration tests. These base test classes provide well
+        defined hooks into the testing framework as well as convenient
         instance variables and methods, allowing access to such things
         as:</para>
 
@@ -374,16 +381,16 @@
         integration tests that provides further useful instance variables used
         in many tests.</para>
 
-        <para>Base test classes for:</para>
+        <para>Support classes for:</para>
 
         <itemizedlist>
           <listitem>
-            <para><link linkend="junit38-legacy-superclasses">JUnit 3.8 legacy
-            support</link></para>
+            <para><link linkend="junit38-legacy-support-classes">JUnit 3.8
+            legacy support</link></para>
           </listitem>
 
           <listitem>
-            <para><link linkend="testcontext-superclasses">The TestContext
+            <para><link linkend="testcontext-support-classes">The TestContext
             Framework</link></para>
           </listitem>
         </itemizedlist>
@@ -544,9 +551,9 @@ public void testProcessWithoutTransaction() {
           however, that some of the common annotations are only supported when
           used in conjunction with JUnit (e.g., with the <link
           linkend="testcontext-junit4-runner">SpringJUnit4ClassRunner</link>
-          or the <link linkend="testcontext-superclasses-junit38">JUnit
+          or the <link linkend="testcontext-support-classes-junit38">JUnit
           3.8</link> and <link
-          linkend="testcontext-superclasses-junit44">JUnit 4.4</link> base
+          linkend="testcontext-support-classes-junit44">JUnit 4.4</link> base
           test classes). Refer to the documentation in the
           <emphasis>TestContext Framework</emphasis> section for further
           details.</para>
@@ -773,8 +780,8 @@ public void testProcessWithoutTransaction() {
         operation of the UI through your JUnit test suite.</para>
       </section>
 
-      <section id="junit38-legacy-superclasses">
-        <title>Base test classes</title>
+      <section id="junit38-legacy-support-classes">
+        <title>JUnit 3.8 legacy support classes</title>
 
         <para>When you extend the
         <classname>AbstractTransactionalDataSourceSpringContextTests</classname>
@@ -1001,11 +1008,10 @@ public void testProcessWithoutTransaction() {
 
       <para>In addition to generic testing infrastructure, the TestContext
       framework provides explicit support for JUnit 3.8 and JUnit 4.4 in the
-      form of <literal>abstract</literal> base test classes. For JUnit 4.4,
-      the framework also provides a custom
-      <interfacename>Runner</interfacename> which allows one to write test
-      cases that are not required to extend a particular class
-      hierarchy.</para>
+      form of <literal>abstract</literal> support classes. For JUnit 4.4, the
+      framework also provides a custom <interfacename>Runner</interfacename>
+      which allows one to write test cases that are not required to extend a
+      particular class hierarchy.</para>
 
       <para>The following section provides an overview of the internals of the
       TestContext framework. If you are only interested in using the framework
@@ -1014,7 +1020,7 @@ public void testProcessWithoutTransaction() {
       linkend="testcontext-ctx-management">context management</link>, <link
       linkend="testcontext-fixture-di">dependency injection</link>, <link
       linkend="testcontext-tx">transaction management</link>), <link
-      linkend="testcontext-superclasses">base test classes</link>, and <link
+      linkend="testcontext-support-classes">support classes</link>, and <link
       linkend="testcontext-annotations">annotation support</link>
       sections.</para>
 
@@ -1456,37 +1462,11 @@ public class FictitiousTransactionalTest {
 
       <!-- ================================================================= -->
 
-      <section id="testcontext-junit4-runner">
-        <title>Custom JUnit 4.4 Runner</title>
+      <section id="testcontext-support-classes">
+        <title>TestContext support classes</title>
 
-        <para>The <emphasis>Spring TestContext Framework</emphasis> offers
-        full integration with JUnit 4.4 via a custom runner. By annotating
-        test classes with
-        <literal>@Runwith(SpringJUnit4ClassRunner.class)</literal>, developers
-        can implement standard JUnit 4.4 unit and integration tests and
-        simultaneously reap the benefits of the TestContext framework such as
-        support for loading application contexts, dependency injection of test
-        instances, transactional test method execution, etc. The following
-        code listing displays the minimal requirements for configuring a test
-        class to run with the custom Spring Runner.</para>
-
-        <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
-public class SimpleTest {
-
-	@Test
-	public void testMethod() {
-		<lineannotation>// execute test logic...</lineannotation>
-	}
-}</programlisting>
-      </section>
-
-      <!-- ================================================================= -->
-
-      <section id="testcontext-superclasses">
-        <title>Base test classes</title>
-
-        <section id="testcontext-superclasses-junit38">
-          <title>JUnit 3.8 base test classes</title>
+        <section id="testcontext-support-classes-junit38">
+          <title>JUnit 3.8 support classes</title>
 
           <para>The
           <literal>org.springframework.test.context.junit38</literal> package
@@ -1552,8 +1532,8 @@ public class SimpleTest {
           </itemizedlist>
         </section>
 
-        <section id="testcontext-superclasses-junit44">
-          <title>JUnit 4.4 base test classes</title>
+        <section id="testcontext-support-classes-junit44">
+          <title>JUnit 4.4 support classes</title>
 
           <para>The <literal>org.springframework.test.context.junit4</literal>
           package provides support classes for JUnit 4.4 based test
@@ -1632,6 +1612,31 @@ public class SimpleTest {
           <interfacename>@TestExecutionListeners</interfacename>,
           etc.</emphasis></para>
         </section>
+
+        <section id="testcontext-junit4-runner">
+          <title>Custom JUnit 4.4 Runner</title>
+
+          <para>The <emphasis>Spring TestContext Framework</emphasis> offers
+          full integration with JUnit 4.4 via a custom runner. By annotating
+          test classes with
+          <literal>@Runwith(SpringJUnit4ClassRunner.class)</literal>,
+          developers can implement standard JUnit 4.4 unit and integration
+          tests and simultaneously reap the benefits of the TestContext
+          framework such as support for loading application contexts,
+          dependency injection of test instances, transactional test method
+          execution, etc. The following code listing displays the minimal
+          requirements for configuring a test class to run with the custom
+          Spring Runner.</para>
+
+          <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
+public class SimpleTest {
+
+	@Test
+	public void testMethod() {
+		<lineannotation>// execute test logic...</lineannotation>
+	}
+}</programlisting>
+        </section>
       </section>
 
       <!-- ================================================================= -->
@@ -1648,9 +1653,10 @@ public class SimpleTest {
         <emphasis>only supported when used in conjunction with JUnit (e.g.,
         with the <link
         linkend="testcontext-junit4-runner">SpringJUnit4ClassRunner</link> or
-        the <link linkend="testcontext-superclasses-junit38">JUnit 3.8</link>
-        and <link linkend="testcontext-superclasses-junit44">JUnit 4.4</link>
-        base test classes.</emphasis></para>
+        the <link linkend="testcontext-support-classes-junit38">JUnit
+        3.8</link> and <link
+        linkend="testcontext-support-classes-junit44">JUnit 4.4</link> support
+        classes.</emphasis></para>
 
         <itemizedlist>
           <listitem>
