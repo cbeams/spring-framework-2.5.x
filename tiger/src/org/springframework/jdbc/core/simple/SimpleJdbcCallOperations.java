@@ -91,35 +91,35 @@ public interface SimpleJdbcCallOperations {
 	SimpleJdbcCall returningResultSet(String parameterName, ParameterizedRowMapper rowMapper);
 
 	/**
-	 * Turn off any processing of parameter mete data information obtained via JDBC.
+	 * Turn off any processing of parameter meta data information obtained via JDBC.
 	 * @return the instance of this SimpleJdbcCall
 	 */
 	SimpleJdbcCall withoutProcedureColumnMetaDataAccess();
 
 	/**
 	 * Execute the stored function and return the results obtained as an Object of the specified return type.
-	 * @param returnType the type of the value tp return
+	 * @param returnType the type of the value to return
 	 * @param args Map containing the parameter values to be used in the call.
 	 */
 	<T> T executeFunction(Class<T> returnType, Map args);
 
 	/**
 	 * Execute the stored function and return the results obtained as an Object of the specified return type.
-	 * @param returnType the type of the value tp return
+	 * @param returnType the type of the value to return
 	 * @param args MapSqlParameterSource containing the parameter values to be used in the call.
 	 */
 	<T> T executeFunction(Class<T> returnType, MapSqlParameterSource args);
 
 	/**
 	 * Execute the stored procedure and return the single out parameter as an Object of the specified return type.
-	 * @param returnType the type of the value tp return
+	 * @param returnType the type of the value to return
 	 * @param args Map containing the parameter values to be used in the call.
 	 */
 	<T> T executeObject(Class<T> returnType, Map args);
 
 	/**
 	 * Execute the stored procedure and return the single out parameter as an Object of the specified return type.
-	 * @param returnType the type of the value tp return
+	 * @param returnType the type of the value to return
 	 * @param args MapSqlParameterSource containing the parameter values to be used in the call.
 	 */
 	<T> T executeObject(Class<T> returnType, MapSqlParameterSource args);
