@@ -27,11 +27,14 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * <p>
- * Convenient JUnit 3.8 base class for tests dealing with Spring web MVC
+ * Convenient JUnit 3.8 base class for tests dealing with Spring Web MVC
  * {@link org.springframework.web.servlet.ModelAndView ModelAndView} objects.
  * </p>
  * <p>
  * All <code>assert*()</code> methods throw {@link AssertionFailedError}s.
+ * </p>
+ * <p>
+ * Consider the use of {@link ModelAndViewAssert} with JUnit 4 and TestNG.
  * </p>
  *
  * @author Alef Arendsen
@@ -50,7 +53,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
-	 *        <code>null</code>)
+	 * <code>null</code>)
 	 * @param expectedType expected type of the model value
 	 * @return the model value
 	 */
@@ -69,7 +72,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
-	 *        <code>null</code>)
+	 * <code>null</code>)
 	 * @param expectedList the expected list
 	 */
 	protected void assertCompareListModelAttribute(ModelAndView mav, Object modelName, List expectedList) {
@@ -87,7 +90,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
-	 *        <code>null</code>)
+	 * <code>null</code>)
 	 */
 	protected void assertModelAttributeAvailable(ModelAndView mav, Object modelName) {
 
@@ -105,7 +108,7 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
-	 *        <code>null</code>)
+	 * <code>null</code>)
 	 * @param expectedValue the model value
 	 */
 	protected void assertModelAttributeValue(ModelAndView mav, Object modelName, Object expectedValue) {
@@ -141,14 +144,14 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
-	 *        <code>null</code>)
+	 * <code>null</code>)
 	 * @param expectedList the expected list
 	 * @param comparator the comparator to use (may be <code>null</code>). If
-	 *        not specifying the comparator, both lists will be sorted not using
-	 *        any comparator.
+	 * not specifying the comparator, both lists will be sorted not using
+	 * any comparator.
 	 */
-	protected void assertSortAndCompareListModelAttribute(ModelAndView mav, Object modelName, List expectedList,
-			Comparator comparator) {
+	protected void assertSortAndCompareListModelAttribute(
+			ModelAndView mav, Object modelName, List expectedList, Comparator comparator) {
 
 		try {
 			ModelAndViewAssert.assertSortAndCompareListModelAttribute(mav, modelName, expectedList, comparator);
