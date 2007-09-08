@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.easymock.MockControl;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.UnexpectedRollbackException;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -133,7 +133,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
-	public void testTransactionCommitWithUnexpectedRollback() {
+	public void testTransactionCommitWithRollbackException() {
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		txControl.expectAndReturn(tx.getRollbackOnly(), true);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
@@ -165,9 +165,9 @@ public class JpaTransactionManagerTests extends TestCase {
 			});
 			assertSame(l, result);
 		}
-		catch (UnexpectedRollbackException ure) {
+		catch (TransactionSystemException tse) {
 			// it's okay
-			assertTrue(ure.getCause() instanceof RollbackException);
+			assertTrue(tse.getCause() instanceof RollbackException);
 		}
 
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
@@ -446,9 +446,9 @@ public class JpaTransactionManagerTests extends TestCase {
 			});
 			fail("expected exception");
 		}
-		catch (UnexpectedRollbackException ure) {
+		catch (TransactionSystemException tse) {
 			// it's okay
-			assertTrue(ure.getCause() instanceof RollbackException);
+			assertTrue(tse.getCause() instanceof RollbackException);
 		}
 
 		assertTrue(!TransactionSynchronizationManager.hasResource(factory));

@@ -28,6 +28,7 @@ import javax.persistence.RollbackException;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
@@ -38,7 +39,6 @@ import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.ResourceTransactionManager;
@@ -434,12 +434,17 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			tx.commit();
 		}
 		catch (RollbackException ex) {
-			throw new UnexpectedRollbackException(
-					"JPA transaction unexpectedly rolled back (maybe marked rollback-only after a failed operation)", ex);
+			if (ex.getCause() instanceof RuntimeException) {
+				DataAccessException dex = getJpaDialect().translateExceptionIfPossible((RuntimeException) ex.getCause());
+				if (dex != null) {
+					throw dex;
+				}
+			}
+			throw new TransactionSystemException("Could not commit JPA transaction", ex);
 		}
-		catch (RuntimeException rawException) {
+		catch (RuntimeException ex) {
 			// Assumably failed to flush changes to database.
-			throw DataAccessUtils.translateIfNecessary(rawException, getJpaDialect());
+			throw DataAccessUtils.translateIfNecessary(ex, getJpaDialect());
 		}
 	}
 
