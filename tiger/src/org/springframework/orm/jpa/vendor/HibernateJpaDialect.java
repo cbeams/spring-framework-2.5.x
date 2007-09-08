@@ -23,12 +23,16 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import org.hibernate.FlushMode;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.ejb.HibernateEntityManager;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.SimpleConnectionHandle;
+import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.orm.jpa.DefaultJpaDialect;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
@@ -81,6 +85,16 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		Session session = getSession(entityManager);
 		Connection con = session.connection();
 		return (con != null ? new SimpleConnectionHandle(con) : null);
+	}
+
+	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+		if (ex instanceof HibernateException) {
+			return SessionFactoryUtils.convertHibernateAccessException((HibernateException) ex);
+		}
+		if (ex instanceof PersistenceException && ex.getCause() instanceof HibernateException) {
+			return SessionFactoryUtils.convertHibernateAccessException((HibernateException) ex.getCause());
+		}
+		return EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
 	}
 
 	protected Session getSession(EntityManager em) {
