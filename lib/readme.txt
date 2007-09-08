@@ -327,8 +327,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Oracle OC4J 10.1.3.1 ClassLoader API extract (http://www.oracle.com/technology/tech/java/oc4j)
 - required for building the framework
 
-* openjpa/openjpa-0.9.7-incubating.jar
-- OpenJPA 0.9.7 (http://incubator.apache.org/openjpa)
+* openjpa/openjpa-1.0.0.jar
+- OpenJPA 1.0.0 (http://openjpa.apache.org)
 - required for building the framework
 - required at runtime when using Spring's JPA support with OpenJPA as provider
 
@@ -352,8 +352,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
 
-* serp/serp-1.12.1.jar
-- Serp 1.12.1 (http://serp.sourceforge.net)
+* serp/serp-1.13.1.jar
+- Serp 1.13.1 (http://serp.sourceforge.net)
 - required at runtime when using OpenJPA
 
 * struts/struts.jar
