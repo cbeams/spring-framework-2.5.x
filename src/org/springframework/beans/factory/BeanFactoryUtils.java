@@ -18,12 +18,12 @@ package org.springframework.beans.factory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -207,7 +207,7 @@ public abstract class BeanFactoryUtils {
 	    throws BeansException {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Map result = CollectionFactory.createLinkedMapIfPossible(4);
+		Map result = new HashMap();
 		result.putAll(lbf.getBeansOfType(type));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
@@ -253,7 +253,7 @@ public abstract class BeanFactoryUtils {
 	    throws BeansException {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Map result = CollectionFactory.createLinkedMapIfPossible(4);
+		Map result = new HashMap();
 		result.putAll(lbf.getBeansOfType(type, includePrototypes, allowEagerInit));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
