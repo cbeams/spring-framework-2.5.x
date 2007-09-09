@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.spi.PersistenceProvider;
 
-import org.apache.openjpa.persistence.OpenJPAEntityManager;
+import org.apache.openjpa.persistence.OpenJPAEntityManagerSPI;
 import org.apache.openjpa.persistence.PersistenceProviderImpl;
 
 import org.springframework.orm.jpa.JpaDialect;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for
- * Apache OpenJPA. Developed and tested against OpenJPA 0.9.6.
+ * Apache OpenJPA. Developed and tested against OpenJPA 1.0.0.
  *
  * <p>Exposes OpenJPA's persistence provider and EntityManager extension interface,
  * and supports AbstractJpaVendorAdapter's common configuration settings.
@@ -96,7 +96,7 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	}
 
 	public Class<? extends EntityManager> getEntityManagerInterface() {
-		return OpenJPAEntityManager.class;
+		return OpenJPAEntityManagerSPI.class;
 	}
 
 	public JpaDialect getJpaDialect() {
