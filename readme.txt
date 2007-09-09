@@ -63,7 +63,7 @@ Basic release contents (~10 MB):
 * "dist" contains the Spring distribution jar files, as well as a zip of all Java source files
 * "docs" contains the Spring reference documentation as a PDF file
 
-Contents of the "-with-dependencies" distribution (~60 MB):
+Contents of the "-with-dependencies" distribution (~70 MB):
 * "dist" contains the Spring distribution jar files, as well as a zip of all Java source files
 * "docs" contains the Spring reference documentation in PDF and HTML format, as well as the complete API javadocs
 * "lib" contains all third-party libraries needed for building the framework and/or running the samples
@@ -98,7 +98,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2915 KB)
+* "spring" (~2920 KB)
 - Convenient jar file combining all standard modules (except for the test module and the Portlet/Struts support)
 - Also includes the AOP Alliance interfaces (as a convenience)!
 - Does not include contents of spring-aspects.jar, spring-test.jar, spring-webmvc-portlet and spring-webmvc-struts.jar!
