@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.1 M4 (2007-09-07)
+Changes in version 2.1 M4 (2007-09-09)
 --------------------------------------
 
 General
@@ -72,8 +72,12 @@ Package org.springframework.orm
 * introduced EntityManagerProxy interface, allowing access to underlying EntityManager for shared/extended EM proxies
 * container-managed extended EntityManager gets explicitly closed on destruction of the containing bean
 * PersistenceUnitReader checks for well-known explicit schema resource locations instead of searching the classpath
+* revised JpaTransactionManager to convert JPA RollbackExceptions into Spring TransactionSystemExceptions
+* JpaTransactionManager provides fine-grained commit exceptions through translating JPA RollbackException root causes
+* HibernateJpaDialect translates native HibernateExceptions (introspecting them as root causes of PersistenceExceptions)
 * added savepoint support to JpaDialect, implemented by OpenJpaDialect, supported by JpaTransactionManager
 * OpenJpaDialect exposes a special JDBC ConnectionHandle that immediately returns the Connection to the EntityManager
+* OpenJpaVendorAdapter supports OpenJPA 1.0.0 (exposing the full OpenJPAEntityManagerSPI interface)
 
 Package org.springframework.remoting
 * LocalJaxRpcServiceFactory trims whitespace from "namespaceUri" values
