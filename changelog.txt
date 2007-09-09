@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.7 (2007-09-08)
+Changes in version 2.0.7 (2007-09-10)
 -------------------------------------
 
 General
@@ -28,7 +28,6 @@ Package org.springframework.beans
 * DefaultListableBeanFactory does not invoke custom init/destroy method twice if pointing to Initializing/DisposableBean
 * DefaultListableBeanFactory logs FactoryBean type matching failures at warn level (except for circular references)
 * added "isEagerInit()" method to SmartFactoryBean interface, making post-processors apply to an exposed object eagerly
-* BeanFactoryUtils uses linked HashMaps for "beansOfTypeIncludingAncestors", preserving "getBeansOfType" order
 * PropertyPathFactoryBean supports a null property value (removed historic restriction there)
 * fixed AbstractBeanFactory's type check to ignore a null value (as potentially exposed by a FactoryBean)
 * fixed AbstractBeanFactory to never cache FactoryBean-exposed objects for inner beans (avoiding name conflicts)
@@ -63,6 +62,8 @@ Package org.springframework.orm
 * restored compatibility with Hibernate 3.0.x through reflectively checking for DataException in SessionFactoryUtils
 * Hibernate3 HibernateJdbcException extracts the SQL statement and explicitly builds it into the exception message
 * fixed Hibernate/JpaTransactionManager to clean up properly in case of transaction begin failure on pre-bound resource
+* revised JpaTransactionManager to convert JPA RollbackExceptions into Spring TransactionSystemExceptions
+* JpaTransactionManager provides fine-grained commit exceptions through translating JPA RollbackException root causes
 * ExtendedEntityManagerCreator's "joinTransaction()" checks whether there is an externally managed local transaction
 * ExtendedEntityManagerCreator's EntityManager proxies are serializable now
 
