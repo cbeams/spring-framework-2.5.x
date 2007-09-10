@@ -20,9 +20,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.ExpectedException;
@@ -40,9 +40,10 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 
 /**
  * <p>
- * Abstract {@link TestCase} which integrates the
+ * Abstract base {@link TestCase} which integrates the
  * <em>Spring TestContext Framework</em> with explicit
- * {@link ApplicationContext} testing support in a JUnit 3.8 environment.
+ * {@link ApplicationContext} testing support in a <strong>JUnit 3.8</strong>
+ * environment.
  * </p>
  * <p>
  * Concrete subclasses must:
@@ -75,9 +76,12 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * @see TestContext
  * @see TestContextManager
  * @see TestExecutionListeners
+ * @see AbstractTransactionalJUnit38SpringContextTests
+ * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
+ * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
  * @since 2.1
  */
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class})
+@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
 public class AbstractJUnit38SpringContextTests extends TestCase implements ApplicationContextAware {
 
 	private static int disabledTestCount = 0;
@@ -87,7 +91,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * Return the number of tests disabled in this environment.
 	 */
 	public static int getDisabledTestCount() {
-
 		return disabledTestCount;
 	}
 
@@ -117,32 +120,35 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * Default <em>no argument</em> constructor which delegates to
 	 * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String) AbstractJUnit38SpringContextTests(String)},
 	 * passing a value of <code>null</code> for the test name.
-	 *
-	 * @throws Exception If an error occurs while initializing the test
-	 * instance.
-	 * @see TestCase#TestCase()
 	 */
-	public AbstractJUnit38SpringContextTests() throws Exception {
-
+	public AbstractJUnit38SpringContextTests() {
 		this(null);
 	}
 
 	/**
 	 * Constructs a new AbstractJUnit38SpringContextTests instance with the
-	 * supplied <code>name</code> and initializes the an internal
+	 * supplied <code>name</code> and initializes the internal
 	 * {@link TestContextManager} for the current test.
 	 *
 	 * @param name The name of the current test to execute.
-	 * @throws Exception If an error occurs while initializing the test
-	 * instance.
+	 * @throws RuntimeException If an error occurs while initializing the
+	 *         TestContextManager.
 	 * @see TestCase#TestCase(String)
 	 */
-	public AbstractJUnit38SpringContextTests(final String name) throws Exception {
+	public AbstractJUnit38SpringContextTests(final String name) {
 
 		super(name);
-		this.testContextManager = new TestContextManager(getClass());
-	}
 
+		try {
+			this.testContextManager = new TestContextManager(getClass());
+		}
+		catch (Exception e) {
+			final String msg = "Exception caught while attempting to instantiate a new TestContextManager for test class ["
+					+ getClass() + "].";
+			this.logger.error(msg, e);
+			throw new RuntimeException(msg, e);
+		}
+	}
 
 	/**
 	 * <p>
@@ -186,7 +192,7 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 
 				runManaged(testMethod);
 			}
-		}, testMethod, this.logger);
+		}, testMethod);
 	}
 
 	/**
@@ -217,25 +223,23 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 *
 	 * @param tec The test execution callback to run.
 	 * @param testMethod The actual test method: used to retrieve the
-	 * <code>timeout</code>.
-	 * @param logger The logger to log to.
+	 *        <code>timeout</code>.
 	 * @throws Throwable if any exception is thrown.
 	 * @see Timed
 	 * @see #runTest(org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests.TestExecutionCallback,
-	 *Method,Log)
+	 *      Method,Log)
 	 */
-	private void runTestTimed(final TestExecutionCallback tec, final Method testMethod, final Log logger)
-			throws Throwable {
+	private void runTestTimed(final TestExecutionCallback tec, final Method testMethod) throws Throwable {
 
 		final Timed timed = testMethod.getAnnotation(Timed.class);
 
 		if (timed == null) {
-			runTest(tec, testMethod, logger);
+			runTest(tec, testMethod);
 		}
 		else {
 			final long startTime = System.currentTimeMillis();
 			try {
-				runTest(tec, testMethod, logger);
+				runTest(tec, testMethod);
 			}
 			finally {
 				final long elapsed = System.currentTimeMillis() - startTime;
@@ -253,15 +257,13 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 *
 	 * @param tec The test execution callback to run.
 	 * @param testMethod The actual test method: used to retrieve the
-	 * {@link ExpectedException @ExpectedException} and
-	 * {@link Repeat @Repeat} annotations.
-	 * @param logger The logger to log to.
+	 *        {@link ExpectedException @ExpectedException} and
+	 *        {@link Repeat @Repeat} annotations.
 	 * @throws Throwable if any exception is thrown.
 	 * @see ExpectedException
 	 * @see Repeat
 	 */
-	private void runTest(final TestExecutionCallback tec, final Method testMethod, final Log logger)
-			throws Throwable {
+	private void runTest(final TestExecutionCallback tec, final Method testMethod) throws Throwable {
 
 		final ExpectedException expectedExceptionAnnotation = testMethod.getAnnotation(ExpectedException.class);
 		final boolean exceptionIsExpected = (expectedExceptionAnnotation != null)
@@ -274,8 +276,8 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 
 		for (int i = 0; i < runs; i++) {
 			try {
-				if ((runs > 1) && (logger != null) && (logger.isInfoEnabled())) {
-					logger.info("Repetition " + (i + 1) + " of test " + testMethod.getName());
+				if ((runs > 1) && (this.logger.isInfoEnabled())) {
+					this.logger.info("Repetition " + (i + 1) + " of test " + testMethod.getName());
 				}
 				tec.run();
 				if (exceptionIsExpected) {
@@ -339,7 +341,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * @param applicationContext The applicationContext to set.
 	 */
 	public final void setApplicationContext(final ApplicationContext applicationContext) {
-
 		this.applicationContext = applicationContext;
 	}
 
@@ -379,7 +380,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * @see #getDisabledTestCount()
 	 */
 	protected void recordDisabled(final Method testMethod) {
-
 		disabledTestCount++;
 		this.logger.info("**** " + getClass().getName() + "." + getName() + "() is disabled in this environment: "
 				+ "Total disabled tests = " + getDisabledTestCount());
@@ -387,7 +387,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 
 
 	private static interface TestExecutionCallback {
-
 		void run() throws Throwable;
 	}
 

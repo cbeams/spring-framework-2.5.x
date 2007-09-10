@@ -59,10 +59,12 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.transaction.BeforeTransaction
  * @see org.springframework.test.context.transaction.AfterTransaction
  * @see org.springframework.test.jdbc.SimpleJdbcTestUtils
+ * @see org.springframework.test.context.junit38.AbstractTransactionalJUnit38SpringContextTests
+ * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
  * @since 2.1
  */
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-		TransactionalTestExecutionListener.class})
+@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
+	TransactionalTestExecutionListener.class })
 @Transactional
 public class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit4SpringContextTests {
 
@@ -120,13 +122,13 @@ public class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit
 	 * </p>
 	 *
 	 * @param sqlResourcePath Spring resource path for the SQL script. Should
-	 * normally be loaded by classpath. There should be one statement per
-	 * line. Any semicolons will be removed. <b>Do not use this method to
-	 * execute DDL if you expect rollback.</b>
+	 *        normally be loaded by classpath. There should be one statement per
+	 *        line. Any semicolons will be removed. <b>Do not use this method to
+	 *        execute DDL if you expect rollback.</b>
 	 * @param continueOnError whether or not to continue without throwing an
-	 * exception in the event of an error.
+	 *        exception in the event of an error.
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was <code>false</code>.
+	 *         and continueOnError was <code>false</code>.
 	 */
 	protected void executeSqlScript(final String sqlResourcePath, final boolean continueOnError)
 			throws DataAccessException {

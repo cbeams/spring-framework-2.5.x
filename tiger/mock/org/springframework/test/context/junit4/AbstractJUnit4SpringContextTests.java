@@ -19,7 +19,6 @@ package org.springframework.test.context.junit4;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.runner.RunWith;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,7 +32,8 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * <p>
  * Abstract base test class which integrates the
  * <em>Spring TestContext Framework</em> with explicit
- * {@link ApplicationContext} testing support in a JUnit 4.4 environment.
+ * {@link ApplicationContext} testing support in a <strong>JUnit 4.4</strong>
+ * environment.
  * </p>
  * <p>
  * This class serves only as a convenience for extension. If you do not wish for
@@ -54,10 +54,13 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * @see ContextConfiguration
  * @see TestContext
  * @see TestContextManager
+ * @see AbstractTransactionalJUnit4SpringContextTests
+ * @see org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests
+ * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
  * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class})
+@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
 public class AbstractJUnit4SpringContextTests implements ApplicationContextAware {
 
 	/**

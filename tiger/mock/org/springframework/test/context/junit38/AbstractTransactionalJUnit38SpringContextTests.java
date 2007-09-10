@@ -57,10 +57,12 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.annotation.NotTransactional
  * @see org.springframework.test.annotation.Rollback
  * @see org.springframework.test.jdbc.SimpleJdbcTestUtils
+ * @see org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests
+ * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
  * @since 2.1
  */
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-		TransactionalTestExecutionListener.class})
+@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
+	TransactionalTestExecutionListener.class })
 @Transactional
 public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUnit38SpringContextTests {
 
@@ -76,12 +78,9 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	 * {@link AbstractTransactionalJUnit38SpringContextTests#AbstractTransactionalJUnit38SpringContextTests(String) AbstractTransactionalJUnit38SpringContextTests(String)},
 	 * passing a value of <code>null</code> for the test name.
 	 *
-	 * @throws Exception If an error occurs while initializing the test
-	 * instance.
 	 * @see AbstractTransactionalJUnit38SpringContextTests#AbstractTransactionalJUnit38SpringContextTests(String)
 	 */
-	public AbstractTransactionalJUnit38SpringContextTests() throws Exception {
-
+	public AbstractTransactionalJUnit38SpringContextTests() {
 		this(null);
 	}
 
@@ -90,15 +89,11 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	 * {@link AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String) AbstractJUnit38SpringContextTests(String)}.
 	 *
 	 * @param name The name of the current test to execute.
-	 * @throws Exception If an error occurs while initializing the test
-	 * instance.
 	 * @see AbstractJUnit38SpringContextTests#AbstractJUnit38SpringContextTests(String)
 	 */
-	public AbstractTransactionalJUnit38SpringContextTests(final String name) throws Exception {
-
+	public AbstractTransactionalJUnit38SpringContextTests(final String name) {
 		super(name);
 	}
-
 
 	/**
 	 * Set the DataSource, typically provided via Dependency Injection.
@@ -107,7 +102,6 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	 */
 	@Autowired
 	public void setDataSource(final DataSource dataSource) {
-
 		this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 	}
 
@@ -118,7 +112,6 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	 * @return the number of rows in the table
 	 */
 	protected int countRowsInTable(final String tableName) {
-
 		return SimpleJdbcTestUtils.countRowsInTable(this.simpleJdbcTemplate, tableName);
 	}
 
@@ -134,7 +127,6 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	 * @return The total number of rows deleted from all specified tables.
 	 */
 	protected int deleteFromTables(final String... names) {
-
 		return SimpleJdbcTestUtils.deleteFromTables(this.simpleJdbcTemplate, names);
 	}
 
@@ -147,17 +139,16 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 	 * </p>
 	 *
 	 * @param sqlResourcePath Spring resource path for the SQL script. Should
-	 * normally be loaded by classpath. There should be one statement per
-	 * line. Any semicolons will be removed. <b>Do not use this method to
-	 * execute DDL if you expect rollback.</b>
+	 *        normally be loaded by classpath. There should be one statement per
+	 *        line. Any semicolons will be removed. <b>Do not use this method to
+	 *        execute DDL if you expect rollback.</b>
 	 * @param continueOnError whether or not to continue without throwing an
-	 * exception in the event of an error.
+	 *        exception in the event of an error.
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was <code>false</code>.
+	 *         and continueOnError was <code>false</code>.
 	 */
 	protected void executeSqlScript(final String sqlResourcePath, final boolean continueOnError)
 			throws DataAccessException {
-
 		SimpleJdbcTestUtils.executeSqlScript(this.simpleJdbcTemplate, super.applicationContext, sqlResourcePath,
 				continueOnError);
 	}
