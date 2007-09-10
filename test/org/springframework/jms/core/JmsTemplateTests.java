@@ -275,7 +275,7 @@ public class JmsTemplateTests extends TestCase {
 		template.setConnectionFactory(scf);
 
 		mockConnection.start();
-		connectionControl.setVoidCallable(1);
+		connectionControl.setVoidCallable(3);
 		// We're gonna call getTransacted 3 times, i.e. 2 more times.
 		mockSession.getTransacted();
 		sessionControl.setReturnValue(useTransactedSession(), 2);

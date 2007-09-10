@@ -133,7 +133,7 @@ public abstract class ConnectionFactoryUtils {
 			public boolean isSynchedLocalTransactionAllowed() {
 				return synchedLocalTransactionAllowed;
 			}
-		});
+		}, true);
 	}
 
 	/**
@@ -170,7 +170,7 @@ public abstract class ConnectionFactoryUtils {
 			public boolean isSynchedLocalTransactionAllowed() {
 				return synchedLocalTransactionAllowed;
 			}
-		});
+		}, true);
 	}
 
 	/**
@@ -207,7 +207,25 @@ public abstract class ConnectionFactoryUtils {
 			public boolean isSynchedLocalTransactionAllowed() {
 				return synchedLocalTransactionAllowed;
 			}
-		});
+		}, true);
+	}
+
+	/**
+	 * Obtain a JMS Session that is synchronized with the current transaction, if any.
+	 * <p>This <code>doGetTransactionalSession</code> variant always starts the underlying
+	 * JMS Connection, assuming that the Session will be used for receiving messages.
+	 * @param connectionFactory the JMS ConnectionFactory to bind for
+	 * (used as TransactionSynchronizationManager key)
+	 * @param resourceFactory the ResourceFactory to use for extracting or creating
+	 * JMS resources
+	 * @return the transactional Session, or <code>null</code> if none found
+	 * @throws JMSException in case of JMS failure
+	 * @see #doGetTransactionalSession(javax.jms.ConnectionFactory, ResourceFactory, boolean)
+	 */
+	public static Session doGetTransactionalSession(
+			ConnectionFactory connectionFactory, ResourceFactory resourceFactory) throws JMSException {
+
+		return doGetTransactionalSession(connectionFactory, resourceFactory, true);
 	}
 
 	/**
@@ -216,11 +234,14 @@ public abstract class ConnectionFactoryUtils {
 	 * (used as TransactionSynchronizationManager key)
 	 * @param resourceFactory the ResourceFactory to use for extracting or creating
 	 * JMS resources
+	 * @param startConnection whether the underlying JMS Connection approach should be
+	 * started in order to allow for receiving messages. Note that a reused Connection
+	 * may already have been started before, even if this flag is <code>false</code>.
 	 * @return the transactional Session, or <code>null</code> if none found
 	 * @throws JMSException in case of JMS failure
 	 */
 	public static Session doGetTransactionalSession(
-			ConnectionFactory connectionFactory, ResourceFactory resourceFactory)
+			ConnectionFactory connectionFactory, ResourceFactory resourceFactory, boolean startConnection)
 			throws JMSException {
 
 		Assert.notNull(connectionFactory, "ConnectionFactory must not be null");
@@ -230,8 +251,17 @@ public abstract class ConnectionFactoryUtils {
 				(JmsResourceHolder) TransactionSynchronizationManager.getResource(connectionFactory);
 		if (resourceHolder != null) {
 			Session session = resourceFactory.getSession(resourceHolder);
-			if (session != null || resourceHolder.isFrozen()) {
+			if (session != null) {
+				if (startConnection) {
+					Connection con = resourceFactory.getConnection(resourceHolder);
+					if (con != null) {
+						con.start();
+					}
+				}
 				return session;
+			}
+			if (resourceHolder.isFrozen()) {
+				return null;
 			}
 		}
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
@@ -251,7 +281,7 @@ public abstract class ConnectionFactoryUtils {
 			}
 			session = resourceFactory.createSession(con);
 			resourceHolderToUse.addSession(session, con);
-			if (!isExistingCon) {
+			if (startConnection) {
 				con.start();
 			}
 		}

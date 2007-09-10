@@ -276,7 +276,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			boolean transactional = false;
 			if (sessionToUse == null) {
 				sessionToUse = ConnectionFactoryUtils.doGetTransactionalSession(
-						getConnectionFactory(), this.transactionalResourceFactory);
+						getConnectionFactory(), this.transactionalResourceFactory, true);
 				transactional = (sessionToUse != null);
 			}
 			if (sessionToUse == null) {
