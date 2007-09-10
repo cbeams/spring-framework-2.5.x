@@ -4,8 +4,39 @@
 		<configExtension>xml</configExtension>
 	</configExtensions>
 	<configs>
-		<config>tiger/test/org/springframework/test/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/BeforeAndAfterTransactionAnnotationTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/ClassLevelTransactionalSpringRunnerTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/ConcreteTransactionalJUnit4SpringContextTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/DefaultRollbackFalseTransactionalSpringRunnerTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/DefaultRollbackTrueTransactionalSpringRunnerTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/MethodLevelTransactionalSpringRunnerTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context1.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context2.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context3.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/ParameterizedDependencyInjectionTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit4/transactionalTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/junit38/ConcreteTransactionalJUnit38SpringContextTests-context.xml</config>
+		<config>tiger/test/org/springframework/test/context/testng/ConcreteTransactionalTestNGSpringContextTests-context.xml</config>
 	</configs>
 	<configSets>
+		<configSet>
+			<name><![CDATA[TestContext - JUnit 3.8]]></name>
+			<allowBeanDefinitionOverriding>false</allowBeanDefinitionOverriding>
+			<incomplete>false</incomplete>
+			<configs>
+				<config>tiger/test/org/springframework/test/context/junit38/ConcreteTransactionalJUnit38SpringContextTests-context.xml</config>
+			</configs>
+		</configSet>
+		<configSet>
+			<name><![CDATA[TestContext - TestNG]]></name>
+			<allowBeanDefinitionOverriding>false</allowBeanDefinitionOverriding>
+			<incomplete>false</incomplete>
+			<configs>
+				<config>tiger/test/org/springframework/test/context/testng/ConcreteTransactionalTestNGSpringContextTests-context.xml</config>
+			</configs>
+		</configSet>
 	</configSets>
 </beansProjectDescription>
