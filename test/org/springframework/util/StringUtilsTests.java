@@ -543,7 +543,7 @@ public class StringUtilsTests extends TestCase {
 		final String variant = "proper_northern";
 		final String localeString = "en_GB_" + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
-		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant().toLowerCase());
 	}
 
 	/**
@@ -553,7 +553,7 @@ public class StringUtilsTests extends TestCase {
 		final String variant = "proper northern";
 		final String localeString = "en GB " + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
-		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant().toLowerCase());
 	}
 
 	/**
@@ -563,7 +563,7 @@ public class StringUtilsTests extends TestCase {
 		final String variant = "proper northern";
 		final String localeString = "en_GB_" + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
-		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant().toLowerCase());
 	}
 
 	/**
@@ -573,7 +573,7 @@ public class StringUtilsTests extends TestCase {
 		final String variant = "proper northern";
 		final String localeString = "en GB            " + variant; // lots of whitespace
 		Locale locale = StringUtils.parseLocaleString(localeString);
-		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant().toLowerCase());
 	}
 
 	/**
@@ -583,7 +583,7 @@ public class StringUtilsTests extends TestCase {
 		final String variant = "proper_northern";
 		final String localeString = "en_GB_____" + variant; // lots of underscores
 		Locale locale = StringUtils.parseLocaleString(localeString);
-		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant().toLowerCase());
 	}
 
 }
