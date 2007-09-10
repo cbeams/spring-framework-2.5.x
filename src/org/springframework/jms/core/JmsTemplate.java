@@ -415,7 +415,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		Session sessionToClose = null;
 		try {
 			Session sessionToUse = ConnectionFactoryUtils.doGetTransactionalSession(
-					getConnectionFactory(), this.transactionalResourceFactory);
+					getConnectionFactory(), this.transactionalResourceFactory, startConnection);
 			if (sessionToUse == null) {
 				conToClose = createConnection();
 				sessionToClose = createSession(conToClose);
