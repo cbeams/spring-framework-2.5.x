@@ -1424,7 +1424,7 @@
 
 		<mkdir dir="${target.testng.reports.dir}"/>
 
-		<testng outputdir="${target.testng.reports.dir}" parallel="tests" haltonfailure="true" haltonskipped="false">
+		<testng outputdir="${target.testng.reports.dir}" haltonfailure="true" haltonskipped="false">
 
 			<jvmarg line="-Djava.awt.headless=true -Xmx256m -XX:MaxPermSize=128m"/>
 
@@ -1438,7 +1438,7 @@
 			<classpath location="${test.dir}" />
 			<classpath refid="all-libs" />
 
-			<classfileset dir="${target.tigertestclasses.dir}" includes="${test.testng.includes}" />
+			<classfileset dir="${target.tigertestclasses.dir}" includes="${test.testng.includes}" excludes="${test.testng.excludes}"/>
 
 		</testng>
 
