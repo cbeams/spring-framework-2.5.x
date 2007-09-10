@@ -37,7 +37,7 @@ package org.springframework.test.context;
  * </ul>
  *
  * @author Sam Brannen
- * @since 2.2
+ * @since 2.1
  */
 public interface TestExecutionListener {
 
@@ -65,7 +65,7 @@ public interface TestExecutionListener {
 	 * </p>
 	 *
 	 * @param testContext The test context in which the test method will be
-	 * executed, not <code>null</code>.
+	 *        executed, not <code>null</code>.
 	 * @throws Exception Allows any exception to propagate.
 	 */
 	void beforeTestMethod(final TestContext testContext) throws Exception;
@@ -79,7 +79,7 @@ public interface TestExecutionListener {
 	 * </p>
 	 *
 	 * @param testContext The test context in which the test method was
-	 * executed, not <code>null</code>.
+	 *        executed, not <code>null</code>.
 	 * @throws Exception Allows any exception to propagate.
 	 */
 	void afterTestMethod(final TestContext testContext) throws Exception;
