@@ -53,6 +53,8 @@ Package org.springframework.jdbc
 Package org.springframework.jms
 * SingleConnectionFactory sets client ID before ExceptionListener (for providers with strict Connection state handling)
 * MessageListenerAdapter logs at warn level if a listener method returned a result but no response message can be sent
+* JmsTemplate only starts lazily created transactional Connections if actually necessary (-> "startConnection" flag)
+* JmsTransactionManager does not start transactional Connections until a transactional Session actually requires it
 
 Package org.springframework.jmx
 * MBeanExporter unregisters its MBeans in case of any kind of registration failure
