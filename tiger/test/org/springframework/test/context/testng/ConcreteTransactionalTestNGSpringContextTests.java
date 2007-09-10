@@ -38,7 +38,9 @@ import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -61,6 +63,15 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	private static final String JANE = "jane";
 	private static final String SUE = "sue";
 	private static final String YODA = "yoda";
+
+	// ------------------------------------------------------------------------|
+	// --- STATIC VARIABLES ---------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	private static int numSetUpCalls = 0;
+	private static int numSetUpCallsInTransaction = 0;
+	private static int numTearDownCalls = 0;
+	private static int numTearDownCallsInTransaction = 0;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE VARIABLES -------------------------------------------------|
@@ -159,6 +170,24 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 		assertEquals(addPerson(this.simpleJdbcTemplate, name), 1, "Adding '" + name + "'");
 	}
 
+	// ------------------------------------------------------------------------|
+
+	@BeforeClass
+	public void beforeClass() {
+		numSetUpCalls = 0;
+		numSetUpCallsInTransaction = 0;
+		numTearDownCalls = 0;
+		numTearDownCallsInTransaction = 0;
+	}
+
+	@AfterClass
+	public void afterClass() {
+		assertEquals(numSetUpCalls, 8, "Verifying number of calls to setUp().");
+		assertEquals(numSetUpCallsInTransaction, 1, "Verifying number of calls to setUp() within a transaction.");
+		assertEquals(numTearDownCalls, 8, "Verifying number of calls to tearDown().");
+		assertEquals(numTearDownCallsInTransaction, 1, "Verifying number of calls to tearDown() within a transaction.");
+	}
+
 	@Test
 	@NotTransactional
 	public void verifyApplicationContextSet() {
@@ -226,6 +255,10 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@BeforeMethod
 	public void setUp() throws Exception {
+		numSetUpCalls++;
+		if (inTransaction()) {
+			numSetUpCallsInTransaction++;
+		}
 		assertNumRowsInPersonTable((inTransaction() ? 2 : 1), "before a test method");
 	}
 
@@ -239,6 +272,10 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@AfterMethod
 	public void tearDown() throws Exception {
+		numTearDownCalls++;
+		if (inTransaction()) {
+			numTearDownCallsInTransaction++;
+		}
 		assertNumRowsInPersonTable((inTransaction() ? 4 : 1), "after a test method");
 	}
 
