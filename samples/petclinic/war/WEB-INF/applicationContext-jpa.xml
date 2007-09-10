@@ -38,13 +38,13 @@
 				<property name="showSql" value="true"/>
 			</bean>
 			<!--
-			<bean id="jpaAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
 				<property name="database" value="HSQL"/>
 				<property name="showSql" value="true"/>
 			</bean>
 			-->
 			<!--
-			<bean id="jpaAdapter" class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter">
 				<property name="database" value="HSQL"/>
 				<property name="showSql" value="true"/>
 			</bean>
