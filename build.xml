@@ -235,6 +235,7 @@
 		<delete dir="${target.clover.dir}"/>
 		<delete dir="${target.junit.reports.dir}"/>
 		<delete dir="${target.junit.summary.dir}"/>
+		<delete dir="${target.testng.reports.dir}"/>
 		<delete dir="${target.release.dir}"/>
 		<delete dir="${target.otherclasses.dir}"/>
 
@@ -365,7 +366,7 @@
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${mock.dir}"/>
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-3.8.2.jar"/>
+			<classpath location="${junit38.jar}"/>
 			<classpath location="${target.classes.dir}"/>
 		</javac>
 
@@ -388,7 +389,7 @@
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${tiger.mock.dir}"/>
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-4.4.jar"/>
+			<classpath location="${junit4.jar}"/>
 			<classpath location="${target.classes.dir}"/>
 		</javac>
 
@@ -1144,7 +1145,7 @@
 			<doctitle><![CDATA[<h1>Spring Framework API 2.1</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Copyright &copy; 2002-2007 <a href="http://www.springframework.org/" target="_top">The Spring Framework</a>.</i>]]></bottom>
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-4.4.jar"/>
+			<classpath location="${junit4.jar}"/>
 			<packageset dir="${src.dir}">
 				<include name="org/springframework/**"/>
 			</packageset>
@@ -1264,7 +1265,7 @@
 			<!-- Include Commons Attributes generated Java sources -->
 			<src path="${commons.attributes.tempdir.test}"/>
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-3.8.2.jar"/>
+			<classpath location="${junit38.jar}"/>
 			<classpath location="${target.classes.dir}"/>
 			<classpath location="${target.mockclasses.dir}"/>
 		</javac>
@@ -1290,7 +1291,7 @@
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${tiger.test.dir}"/>
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-4.4.jar"/>
+			<classpath location="${junit4.jar}"/>
 			<classpath location="${target.classes.dir}"/>
 			<classpath location="${target.mockclasses.dir}"/>
 			<classpath location="${target.testclasses.dir}"/>
@@ -1333,7 +1334,7 @@
 				source="1.5" target="1.5" destDir="${target.tigertestclasses.dir}">
 	  	<classpath>
 	  		<path refid="all-libs"/>
-				<path location="${lib.dir}/junit/junit-4.4.jar"/>
+				<path location="${junit4.jar}"/>
   			<path location="${target.classes.dir}"/>
 	  		<path location="${target.mockclasses.dir}"/>
 				<path location="${target.testclasses.dir}"/>
@@ -1373,7 +1374,7 @@
 			<classpath location="${test.dir}"/>
 
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-3.8.2.jar"/>
+			<classpath location="${junit38.jar}"/>
 
 			<formatter type="plain" usefile="false"/>
 
@@ -1384,7 +1385,6 @@
 		</junit>
 
 	</target>
-
 
 	<target name="tigertests" if="tiger.available" description="Run JDK 1.5 tests">
 
@@ -1404,7 +1404,7 @@
 			<classpath location="${test.dir}"/>
 
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-4.4.jar"/>
+			<classpath location="${junit4.jar}"/>
 
 			<formatter type="plain" usefile="false"/>
 
@@ -1413,9 +1413,36 @@
 			</batchtest>
 
 		</junit>
+		
+		<antcall target="testngtests" /> 
 
 	</target>
 
+	<target name="testngtests" if="tiger.available" description="Run TestNG tests">
+
+		<taskdef name="testng" classpath="${testng.jar}" classname="org.testng.TestNGAntTask" />
+
+		<mkdir dir="${target.testng.reports.dir}"/>
+
+		<testng outputdir="${target.testng.reports.dir}" parallel="tests" haltonfailure="true" haltonskipped="false">
+
+			<jvmarg line="-Djava.awt.headless=true -Xmx256m -XX:MaxPermSize=128m"/>
+
+			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
+			<classpath location="${target.tigertestclasses.dir}" />
+			<classpath location="${target.testclasses.dir}" />
+			<classpath location="${target.mockclasses.dir}" />
+			<classpath location="${target.classes.dir}" />
+
+			<!-- Need files loaded as resources -->
+			<classpath location="${test.dir}" />
+			<classpath refid="all-libs" />
+
+			<classfileset dir="${target.tigertestclasses.dir}" includes="${test.testng.includes}" />
+
+		</testng>
+
+	</target>
 
 	<!--
 		Run test suite. This and clover.tests take their includes and excludes from
@@ -1453,7 +1480,7 @@
 			<classpath location="${test.dir}"/>
 
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-4.4.jar"/>
+			<classpath location="${junit4.jar}"/>
 
 			<formatter type="plain" usefile="false"/>
 			<formatter type="xml"/>
@@ -1560,7 +1587,7 @@
 			<classpath location="${test.dir}"/>
 
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-4.4.jar"/>
+			<classpath location="${junit4.jar}"/>
 
 			<formatter type="plain" usefile="false"/>
 			<formatter type="xml"/>
@@ -1588,7 +1615,7 @@
 		<java classname="com.cenqua.clover.reporters.jfc.Viewer" fork="yes">
 			<arg value="${clover.initstring}"/>
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-4.4.jar"/>
+			<classpath location="${junit4.jar}"/>
 		</java>
 
 	</target>
@@ -1603,7 +1630,7 @@
 		<java classname="com.cenqua.clover.reporters.html.HtmlReporter" fork="yes">
 			<arg line="-o '${target.clover.html.dir}' -i '${clover.initstring}' -t 'Spring Framework - Clover Code Coverage Report'"/>
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-4.4.jar"/>
+			<classpath location="${junit4.jar}"/>
 		</java>
 
 	</target>
@@ -2153,7 +2180,7 @@
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${sandbox.test.dir}"/>
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-4.4.jar"/>
+			<classpath location="${junit4.jar}"/>
 			<classpath location="${target.classes.dir}"/>
 			<classpath location="${sandbox.target.classes.dir}"/>
 			<classpath location="${target.testclasses.dir}"/>
@@ -2197,7 +2224,7 @@
 			<classpath location="${sandbox.test.dir}"/>
 
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-4.4.jar"/>
+			<classpath location="${junit4.jar}"/>
 			<classpath location="${target.classes.dir}"/>
 
 			<formatter type="plain" usefile="false"/>
@@ -2237,7 +2264,7 @@
 			<classpath location="${sandbox.test.dir}"/>
 
 			<classpath refid="all-libs"/>
-			<classpath location="${lib.dir}/junit/junit-4.4.jar"/>
+			<classpath location="${junit4.jar}"/>
 			<classpath location="${target.classes.dir}"/>
 
 			<formatter type="plain" usefile="false"/>
