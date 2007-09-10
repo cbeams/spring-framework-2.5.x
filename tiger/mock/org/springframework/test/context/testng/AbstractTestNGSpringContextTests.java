@@ -30,8 +30,11 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
+import org.testng.ITestContext;
 import org.testng.ITestResult;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 
 /**
  * <p>
@@ -76,6 +79,8 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 
 	private final TestContextManager testContextManager;
 
+	private Throwable testException;
+
 
 	/**
 	 * Constructs a new AbstractTestNGSpringContextTests instance and
@@ -89,7 +94,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 			this.testContextManager = new TestContextManager(getClass());
 		}
 		catch (Exception e) {
-			final String msg = "Exception caught while attempting to instantiate a new TestContextManager for test class ["
+			final String msg = "Caught exception while attempting to instantiate a new TestContextManager for test class ["
 					+ getClass() + "].";
 			this.logger.error(msg, e);
 			throw new RuntimeException(msg, e);
@@ -113,31 +118,47 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	}
 
 	/**
-	 * Calls {@link TestContextManager#beforeTestMethod(Object,Method)} and
-	 * {@link TestContextManager#afterTestMethod(Object,Method,Throwable)} at
-	 * the appropriate test execution points and delegates to the
+	 * Delegates to the configured {@link TestContextManager} to
+	 * {@link TestContextManager#beforeTestMethod(Object,Method) pre-process}
+	 * the test method before the actual test is executed.
+	 *
+	 * @param testContext The current TestNG test context.
+	 * @param testMethod The test method which is about to be executed.
+	 * @throws Exception Allows all exceptions to propagate.
+	 */
+	@BeforeMethod(alwaysRun = true)
+	public void beforeTestMethod(final ITestContext testContext, final Method testMethod) throws Exception {
+		this.testContextManager.beforeTestMethod(this, testMethod);
+	}
+
+	/**
+	 * Delegates to the
 	 * {@link IHookCallBack#runTestMethod(ITestResult) test method} in the
-	 * supplied <code>callback</code> to execute the actual test.
+	 * supplied <code>callback</code> to execute the actual test and then
+	 * tracks the exception thrown during test execution, if any.
 	 *
 	 * @see org.testng.IHookable#run(org.testng.IHookCallBack,
 	 *      org.testng.ITestResult)
 	 */
 	public void run(final IHookCallBack callBack, final ITestResult testResult) {
+		callBack.runTestMethod(testResult);
+		this.testException = testResult.getThrowable();
+	}
 
-		Throwable exception = null;
-		try {
-			this.testContextManager.beforeTestMethod(this, testResult.getMethod().getMethod());
-			callBack.runTestMethod(testResult);
-		}
-		catch (final Throwable t) {
-			exception = t;
-		}
-
-		this.testContextManager.afterTestMethod(this, testResult.getMethod().getMethod(), exception);
-
-		if (exception != null) {
-			throw new RuntimeException(exception);
-		}
+	/**
+	 * Delegates to the configured {@link TestContextManager} to
+	 * {@link TestContextManager#afterTestMethod(Object, Method, Throwable) post-process}
+	 * the test method after the actual test has executed.
+	 *
+	 * @param testContext The current TestNG test context.
+	 * @param testMethod The test method which has just been executed on the
+	 *        test instance.
+	 * @throws Exception Allows all exceptions to propagate.
+	 */
+	@AfterMethod(alwaysRun = true)
+	public void afterTestMethod(final ITestContext testContext, final Method testMethod) throws Exception {
+		this.testContextManager.afterTestMethod(this, testMethod, this.testException);
+		this.testException = null;
 	}
 
 	/**
