@@ -6,6 +6,10 @@ http://www.springframework.org
 Changes in version 2.5 RC1 (2007-09-24)
 --------------------------------------
 
+Package org.springframework.jms
+* JmsTemplate only starts lazily created transactional Connections if actually necessary (-> "startConnection" flag)
+* JmsTransactionManager does not start transactional Connections until a transactional Session actually requires it
+
 Package org.springframework.test
 * introduced TestNG support based on the new test context framework
 
