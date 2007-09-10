@@ -112,6 +112,8 @@ public interface SimpleJdbcCallOperations {
 
 	/**
 	 * Execute the stored procedure and return the single out parameter as an Object of the specified return type.
+	 * In the case where there are multiple out parameters, the first one is returned and additional out parameters
+	 * are ignored.
 	 * @param returnType the type of the value to return
 	 * @param args Map containing the parameter values to be used in the call.
 	 */
@@ -119,6 +121,8 @@ public interface SimpleJdbcCallOperations {
 
 	/**
 	 * Execute the stored procedure and return the single out parameter as an Object of the specified return type.
+	 * In the case where there are multiple out parameters, the first one is returned and additional out parameters
+	 * are ignored.
 	 * @param returnType the type of the value to return
 	 * @param args MapSqlParameterSource containing the parameter values to be used in the call.
 	 */
