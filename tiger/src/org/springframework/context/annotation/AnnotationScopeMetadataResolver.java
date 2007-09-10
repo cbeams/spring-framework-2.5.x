@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * 
  * @author Mark Fisher
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see Scope
  */
 public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {

@@ -35,7 +35,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
  * databases.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 

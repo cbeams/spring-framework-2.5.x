@@ -38,7 +38,7 @@ import java.util.Map;
  * to string multiple ones together in a "fluid" interface style.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see java.sql.DatabaseMetaData
  */

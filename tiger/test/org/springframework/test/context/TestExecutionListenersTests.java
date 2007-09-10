@@ -30,7 +30,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * {@link ContextConfiguration} annotation and a {@link TestContextManager}.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  */
 @RunWith(JUnit4ClassRunner.class)
 public class TestExecutionListenersTests {

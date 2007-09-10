@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * {@link org.springframework.instrument.classloading.LoadTimeWeaver}.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class AspectJWeavingEnabler implements BeanFactoryPostProcessor, LoadTimeWeaverAware, Ordered {
 

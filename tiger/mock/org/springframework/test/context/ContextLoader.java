@@ -44,7 +44,7 @@ import org.springframework.context.ApplicationContext;
  * </ul>
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  */
 public interface ContextLoader {
 

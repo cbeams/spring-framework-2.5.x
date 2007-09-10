@@ -37,7 +37,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
  * @see TestExecutionListener
  * @see TestContextManager
  * @see ContextConfiguration
- * @since 2.1
+ * @since 2.5
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

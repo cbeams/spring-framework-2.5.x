@@ -78,7 +78,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * "uowManagerName" bean property.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see #setUowManager
  * @see #setUowManagerName
  * @see com.ibm.wsspi.uow.UOWManager

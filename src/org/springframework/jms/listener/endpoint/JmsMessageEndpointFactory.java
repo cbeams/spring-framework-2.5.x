@@ -39,7 +39,7 @@ import org.springframework.jca.endpoint.AbstractMessageEndpointFactory;
  * {@link javax.resource.spi.ResourceAdapter} instance.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see #setMessageListener
  * @see #setTransactionManager
  * @see JmsMessageEndpointManager

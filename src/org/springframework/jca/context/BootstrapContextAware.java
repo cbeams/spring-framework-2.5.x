@@ -24,7 +24,7 @@ import javax.resource.spi.BootstrapContext;
  * {@link ResourceAdapterApplicationContext}) that it runs in.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see javax.resource.spi.BootstrapContext
  */
 public interface BootstrapContextAware {

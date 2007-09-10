@@ -47,7 +47,7 @@ import org.testng.annotations.Test;
  * {@link AbstractTransactionalTestNGSpringContextTests}.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  */
 @ContextConfiguration
 public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests

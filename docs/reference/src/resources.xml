@@ -387,7 +387,7 @@
     interface, which can be considered a utility interface, and not the whole
     Spring <interfacename>ApplicationContext</interfacename> interface.</para>
 
-    <para>As of Spring 2.1, you can rely upon autowiring of the
+    <para>As of Spring 2.5, you can rely upon autowiring of the
     <interfacename>ResourceLoader</interfacename> as an alternative to
     implementing the <interfacename>ResourceLoaderAware</interfacename> interface.
     The "traditional" <literal>constructor</literal> and <literal>byType</literal>

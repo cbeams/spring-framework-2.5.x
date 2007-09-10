@@ -32,7 +32,7 @@ import javax.servlet.jsp.tagext.BodyContent;
  * applications when testing custom JSP tags.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class MockBodyContent extends BodyContent {
 

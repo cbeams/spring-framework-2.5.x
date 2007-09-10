@@ -20,7 +20,7 @@ package org.springframework.jdbc.core.metadata;
  * Holder of metadata for a specific parameter that is used for call processing.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public class CallParameterMetaData {
 	private String parameterName;

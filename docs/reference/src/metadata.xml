@@ -286,7 +286,7 @@ public @interface Mandatory {
 			other metadata providers.
 		</para>
 		<para>
-			<emphasis role="bold">Commons Attributes 2.1</emphasis>
+			<emphasis role="bold">Commons Attributes 2.2</emphasis>
 			(<ulink url="http://jakarta.apache.org/commons/attributes/">http://jakarta.apache.org/commons/attributes/</ulink>)
 			is a capable attributes solution. It supports attribute configuration via
 			constructor arguments and JavaBean properties, which offers better

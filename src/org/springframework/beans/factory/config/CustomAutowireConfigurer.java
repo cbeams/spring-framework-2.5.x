@@ -39,7 +39,7 @@ import org.springframework.util.ClassUtils;
  * 
  * @author Mark Fisher
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see org.springframework.beans.factory.annotation.Qualifier
  */
 public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanClassLoaderAware, Ordered {

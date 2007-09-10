@@ -33,7 +33,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * {@link #getPreparer(String, org.springframework.web.context.WebApplicationContext)}.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see #getPreparer(String, org.springframework.web.context.WebApplicationContext)
  * @see SimpleSpringPreparerFactory
  * @see SpringBeanPreparerFactory

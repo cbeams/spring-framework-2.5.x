@@ -48,7 +48,7 @@ import org.springframework.jdbc.support.KeyHolder;
  * This class provides the base SPI for {@link SimpleJdbcInsert}.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public abstract class AbstractJdbcInsert {
 

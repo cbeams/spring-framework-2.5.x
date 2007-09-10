@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
  * </p>
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  * @see Rollback
  */
 @ContextConfiguration

@@ -28,7 +28,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * application context.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  * @see SpringJUnit4ClassRunnerAppCtxTests
  * @see AbsolutePathSpringJUnit4ClassRunnerAppCtxTests
  */

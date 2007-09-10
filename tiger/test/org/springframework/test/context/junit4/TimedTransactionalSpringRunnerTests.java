@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  * </p>
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "transactionalTests-context.xml" })

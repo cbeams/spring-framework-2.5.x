@@ -27,7 +27,7 @@ import javax.jms.Session;
  * but not tied to it.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see JmsActivationSpecFactory
  * @see JmsMessageEndpointManager#setActivationSpecConfig
  * @see javax.resource.spi.ResourceAdapter#endpointActivation

@@ -53,7 +53,7 @@ import org.springframework.jndi.TypeMismatchNamingException;
  * in particular if BeanFactory-style type checking is required.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
  * @see org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor
  */

@@ -30,7 +30,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  * this processor with its underlying bean factory.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see BootstrapContextAware
  */
 class BootstrapContextAwareProcessor implements BeanPostProcessor {

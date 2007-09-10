@@ -27,7 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
  * application context.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  * @see SpringJUnit4ClassRunnerAppCtxTests
  * @see ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests

@@ -26,7 +26,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * scoped-proxies.
  * 
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  * @see ScopeMetadataResolver
  * @see ScopedProxyMode
  */

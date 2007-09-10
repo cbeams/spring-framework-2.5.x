@@ -48,7 +48,7 @@ import org.springframework.test.jdbc.SimpleJdbcTestUtils;
  * {@link AbstractTransactionalJUnit4SpringContextTests}.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  */
 @ContextConfiguration
 public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTransactionalJUnit4SpringContextTests

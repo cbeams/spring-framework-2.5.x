@@ -20,7 +20,7 @@ import java.lang.reflect.Modifier;
 
 /**
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class StandardClassMetadata implements ClassMetadata {
 

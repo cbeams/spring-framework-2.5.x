@@ -20,7 +20,7 @@ package org.springframework.dao;
  * Data access exception thrown when a resource fails completely and the failure is permamnet.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public class NonTransientDataAccessResourceException extends NonTransientDataAccessException {
 

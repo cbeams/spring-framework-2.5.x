@@ -40,7 +40,7 @@ import java.sql.SQLException;
  * For best performance consider using a custom RowMapper.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  * @see RowMapper
  */
 public class BeanPropertyRowMapper extends AbstractBeanPropertyRowMapper implements RowMapper {

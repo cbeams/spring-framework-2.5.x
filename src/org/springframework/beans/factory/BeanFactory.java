@@ -161,7 +161,7 @@ public interface BeanFactory {
 	 * @throws BeanDefinitionStoreException if arguments have been given but
 	 * the affected bean isn't a prototype
 	 * @throws BeansException if the bean could not be created
-	 * @since 2.1
+	 * @since 2.5
 	 */
 	Object getBean(String name, Object[] args) throws BeansException;
 

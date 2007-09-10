@@ -72,7 +72,7 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  * @see TransactionConfiguration
  * @see org.springframework.transaction.annotation.Transactional
  * @see org.springframework.test.annotation.NotTransactional

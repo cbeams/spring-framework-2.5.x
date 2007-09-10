@@ -32,7 +32,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * the {@link org.springframework.core.type.AnnotationMetadata} interface.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see ClassMetadataReadingVisitor
  */
 public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {

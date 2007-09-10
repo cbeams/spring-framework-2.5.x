@@ -27,7 +27,7 @@ import org.springframework.test.context.TestContext;
  * instances.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  */
 public class DependencyInjectionTestExecutionListener extends AbstractTestExecutionListener {
 

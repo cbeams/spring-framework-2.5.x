@@ -22,7 +22,7 @@ package org.springframework.aop.framework.autoproxy;
  *
  * @author Juergen Hoeller
  * @author Ramnivas Laddad
- * @since 2.1
+ * @since 2.5
  */
 public class ProxyCreationContext {
 

@@ -41,7 +41,7 @@ import java.sql.Statement;
  * the {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public class DerbyMaxValueIncrementer extends AbstractDataFieldMaxValueIncrementer {
 

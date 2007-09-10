@@ -30,7 +30,7 @@ import org.springframework.core.io.ResourceLoader;
  * caching a ClassReader per Spring Resource handle (i.e. per ".class" file).
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class CachingClassReaderFactory extends SimpleClassReaderFactory {
 

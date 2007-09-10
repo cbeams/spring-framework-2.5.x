@@ -22,7 +22,7 @@ import java.util.Map;
  * Class that provides helper methods for the use of SqlParameterSource with SimpleJdbc classes.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public class SqlParameterSourceUtils {
 

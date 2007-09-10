@@ -29,7 +29,7 @@ import javax.resource.spi.ResourceAdapter;
  * ActivationSpec objects based on common JMS configuration settings.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see JmsActivationSpecConfig
  * @see JmsMessageEndpointManager#setActivationSpecFactory
  * @see javax.resource.spi.ResourceAdapter#endpointActivation

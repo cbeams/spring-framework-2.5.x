@@ -29,7 +29,7 @@ import org.springframework.context.support.GenericApplicationContext;
  * </p>
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  */
 public class GenericPropertiesContextLoader extends AbstractGenericContextLoader {
 

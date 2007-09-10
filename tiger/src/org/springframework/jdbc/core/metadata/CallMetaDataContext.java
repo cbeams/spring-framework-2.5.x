@@ -42,7 +42,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  * Class to manage context metadata used for the configuration and execution of the call.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public class CallMetaDataContext {
 

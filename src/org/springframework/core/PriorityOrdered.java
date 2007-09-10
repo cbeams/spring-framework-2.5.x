@@ -28,7 +28,7 @@ package org.springframework.core;
  * {@link org.springframework.context.ApplicationContext}.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see org.springframework.beans.factory.config.PropertyResourceConfigurer
  */
 public interface PriorityOrdered extends Ordered {

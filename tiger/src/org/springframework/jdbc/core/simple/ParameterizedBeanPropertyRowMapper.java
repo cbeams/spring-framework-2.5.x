@@ -29,7 +29,7 @@ import java.sql.SQLException;
  * For best performance consider using a custom RowMapper.
  *
  * @author trisberg
- * @since 2.1
+ * @since 2.5
  * @see ParameterizedRowMapper
  */
 public class ParameterizedBeanPropertyRowMapper<T> extends AbstractBeanPropertyRowMapper implements ParameterizedRowMapper<T> {

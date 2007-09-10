@@ -34,9 +34,9 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * scenarios.
  *
  * @author Sam Brannen
+ * @since 2.5
  * @see ContextLoader
  * @see org.springframework.context.ApplicationContext
- * @since 2.1
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

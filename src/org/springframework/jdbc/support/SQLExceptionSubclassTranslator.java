@@ -29,7 +29,7 @@ import java.sql.*;
  * subclass that was returned.  This is only available with JDBC 4.0 and later drivers when using Java 6 or later.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  * @see java.sql.SQLException
  */
 public class SQLExceptionSubclassTranslator implements SQLExceptionTranslator {

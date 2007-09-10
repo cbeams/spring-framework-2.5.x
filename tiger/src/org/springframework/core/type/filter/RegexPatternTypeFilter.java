@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class RegexPatternTypeFilter extends AbstractClassTestingTypeFilter {
 

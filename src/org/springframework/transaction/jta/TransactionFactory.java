@@ -30,7 +30,7 @@ import javax.transaction.Transaction;
  * that adapt to vendor-specific JTA extensions.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see javax.transaction.TransactionManager#getTransaction()
  * @see SimpleTransactionFactory
  * @see JtaTransactionManager

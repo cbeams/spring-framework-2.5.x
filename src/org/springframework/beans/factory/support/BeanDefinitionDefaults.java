@@ -22,7 +22,7 @@ import org.springframework.util.StringUtils;
  * A simple holder for <code>BeanDefinition</code> property defaults.
  * 
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  */
 public class BeanDefinitionDefaults {
 

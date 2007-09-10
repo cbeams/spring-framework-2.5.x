@@ -42,7 +42,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * This class provides the base SPI for {@link SimpleJdbcCall}.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public abstract class AbstractJdbcCall {
 

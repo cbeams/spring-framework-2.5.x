@@ -27,7 +27,7 @@ import org.springframework.core.io.Resource;
  * Allows for caching a ClassReader per original resource.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see org.objectweb.asm.ClassReader
  */
 public interface ClassReaderFactory {

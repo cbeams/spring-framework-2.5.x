@@ -28,7 +28,7 @@ import org.springframework.util.ResourceUtils;
  * context.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  * @see SpringJUnit4ClassRunnerAppCtxTests
  * @see #CLASSPATH_CONTEXT_RESOURCE_PATH
  * @see AbsolutePathSpringJUnit4ClassRunnerAppCtxTests

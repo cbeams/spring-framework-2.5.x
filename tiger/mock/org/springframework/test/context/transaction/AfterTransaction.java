@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  *
  * @author Sam Brannen
  * @see org.springframework.transaction.annotation.Transactional
- * @since 2.1
+ * @since 2.5
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

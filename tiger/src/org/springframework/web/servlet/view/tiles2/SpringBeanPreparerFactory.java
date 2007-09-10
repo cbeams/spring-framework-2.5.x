@@ -29,7 +29,7 @@ import org.springframework.web.context.WebApplicationContext;
  * for the use of scoped beans etc.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see SimpleSpringPreparerFactory
  */
 public class SpringBeanPreparerFactory extends AbstractSpringPreparerFactory {

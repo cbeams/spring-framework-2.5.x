@@ -24,7 +24,7 @@ import org.springframework.dao.DataAccessException;
  * application-level functionality.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  * @see java.sql.SQLTransientException
  */
 public abstract class TransientDataAccessException extends DataAccessException {

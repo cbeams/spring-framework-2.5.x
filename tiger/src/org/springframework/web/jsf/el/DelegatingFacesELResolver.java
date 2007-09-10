@@ -68,7 +68,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  * &lt;/bean></pre>
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see org.springframework.web.jsf.WebApplicationContextVariableResolver
  * @see org.springframework.web.jsf.FacesContextUtils#getRequiredWebApplicationContext
  */

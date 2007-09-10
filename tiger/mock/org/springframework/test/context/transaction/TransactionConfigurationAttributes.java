@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see TransactionConfiguration
  */
 public class TransactionConfigurationAttributes {

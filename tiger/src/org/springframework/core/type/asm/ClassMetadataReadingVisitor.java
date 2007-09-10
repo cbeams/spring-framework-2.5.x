@@ -31,7 +31,7 @@ import org.springframework.util.ClassUtils;
  * @author Costin Leau
  * @author Mark Fisher
  * @author Ramnivas Laddad
- * @since 2.1
+ * @since 2.5
  * @see AnnotationMetadataReadingVisitor
  */
 public class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata {

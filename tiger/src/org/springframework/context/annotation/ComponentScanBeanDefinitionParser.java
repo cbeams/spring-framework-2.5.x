@@ -49,7 +49,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 

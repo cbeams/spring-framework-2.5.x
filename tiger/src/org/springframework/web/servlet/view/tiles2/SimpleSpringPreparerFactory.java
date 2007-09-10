@@ -33,7 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
  * Spring container callbacks and configured Spring BeanPostProcessors.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see SpringBeanPreparerFactory
  */
 public class SimpleSpringPreparerFactory extends AbstractSpringPreparerFactory {

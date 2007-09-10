@@ -36,7 +36,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class TestContext {
 

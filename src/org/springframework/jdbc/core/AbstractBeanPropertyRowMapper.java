@@ -42,7 +42,7 @@ import java.util.Map;
  * metadata and the actual mapping between bean properties and SQL table columns.
  *
  * @author trisberg
- * @since 2.1
+ * @since 2.5
  */
 public abstract class AbstractBeanPropertyRowMapper {
 

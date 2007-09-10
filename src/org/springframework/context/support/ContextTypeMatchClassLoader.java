@@ -28,7 +28,7 @@ import org.springframework.core.OverridingClassLoader;
  * in order to pick up recently loaded types in the parent ClassLoader.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see AbstractApplicationContext
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setTempClassLoader
  */

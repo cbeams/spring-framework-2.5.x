@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public abstract class SimpleJdbcTestUtils {
 

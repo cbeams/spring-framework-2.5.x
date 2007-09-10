@@ -9,7 +9,7 @@
 	<artifactId>spring-tx</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Framework: Transaction</name>
-	<version>2.1-m4</version>
+	<version>2.5-rc1</version>
 	<description>Spring Framework: Transaction</description>
 	<url>http://www.springframework.org</url>
 	<licenses>

@@ -37,7 +37,7 @@ import org.springframework.jca.endpoint.GenericMessageEndpointManager;
  * for obtaining the current JMS {@link javax.jms.Session}.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see javax.jms.MessageListener
  * @see #setActivationSpecConfig
  * @see JmsActivationSpecConfig

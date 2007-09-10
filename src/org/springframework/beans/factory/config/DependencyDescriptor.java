@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * allowing unified access to their metadata.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class DependencyDescriptor {
 

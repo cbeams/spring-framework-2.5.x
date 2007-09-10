@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @see #generateDefaultLocations(Class)
  * @see #modifyLocations(Class,String...)
- * @since 2.1
+ * @since 2.5
  */
 public abstract class AbstractContextLoader implements ContextLoader {
 

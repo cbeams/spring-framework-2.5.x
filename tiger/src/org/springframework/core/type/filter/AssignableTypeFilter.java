@@ -20,7 +20,7 @@ package org.springframework.core.type.filter;
  * @author Rod Johnson
  * @author Mark Fisher
  * @author Ramnivas Laddad
- * @since 2.1
+ * @since 2.5
  */
 public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter {
 

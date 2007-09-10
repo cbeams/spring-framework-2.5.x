@@ -35,7 +35,7 @@ import org.springframework.jdbc.support.MetaDataAccessException;
  * Factory used to create a {@link CallMetaDataProvider} implementation based on the type of databse being used.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public class CallMetaDataProviderFactory {
 

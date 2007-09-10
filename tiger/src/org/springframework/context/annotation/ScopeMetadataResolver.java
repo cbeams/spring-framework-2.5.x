@@ -22,7 +22,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * Strategy interface for resolving the scope of bean definitions.
  * 
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  * @see Scope
  */
 public interface ScopeMetadataResolver {

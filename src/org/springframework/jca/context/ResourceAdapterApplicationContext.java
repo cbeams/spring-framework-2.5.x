@@ -29,7 +29,7 @@ import org.springframework.context.support.GenericApplicationContext;
  * Spring-managed beans that implement {@link BootstrapContextAware}.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see SpringContextResourceAdapter
  * @see BootstrapContextAware
  */

@@ -24,7 +24,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * 
  * @author Mark Fisher
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class JmsNamespaceHandler extends NamespaceHandlerSupport {
 

@@ -31,7 +31,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * '<code>singleton</code>', '<code>prototype</code>', and so forth.
  * 
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

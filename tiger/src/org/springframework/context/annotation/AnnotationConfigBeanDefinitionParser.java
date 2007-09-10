@@ -31,7 +31,7 @@ import org.springframework.beans.factory.xml.ParserContext;
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see AnnotationConfigUtils
  */
 public class AnnotationConfigBeanDefinitionParser implements BeanDefinitionParser {

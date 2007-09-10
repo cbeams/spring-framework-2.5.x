@@ -33,7 +33,7 @@ import org.springframework.core.type.asm.ClassMetadataReadingVisitor;
  * 
  * @author Ramnivas Laddad
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  */
 public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilter {
 

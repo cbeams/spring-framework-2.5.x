@@ -32,7 +32,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * </p>
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  * @see ClassLevelTransactionalSpringRunnerTests
  * @see MethodLevelTransactionalSpringRunnerTests
  * @see Transactional

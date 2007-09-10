@@ -20,9 +20,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.ExpectedException;
@@ -73,13 +73,13 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * </ul>
  *
  * @author Sam Brannen
+ * @since 2.5
  * @see TestContext
  * @see TestContextManager
  * @see TestExecutionListeners
  * @see AbstractTransactionalJUnit38SpringContextTests
  * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
- * @since 2.1
  */
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
 public class AbstractJUnit38SpringContextTests extends TestCase implements ApplicationContextAware {

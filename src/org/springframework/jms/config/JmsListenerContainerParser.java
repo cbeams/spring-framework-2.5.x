@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * 
  * @author Mark Fisher
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 class JmsListenerContainerParser extends AbstractListenerContainerParser {
 

@@ -24,7 +24,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
  * annotation support is available. Simply checks the bean definition.
  * 
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  */
 public class DefaultAutowireCandidateResolver extends AbstractAutowireCandidateResolver {
 

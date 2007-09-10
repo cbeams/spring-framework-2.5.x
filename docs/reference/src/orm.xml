@@ -122,7 +122,7 @@
     Most of these patterns can be directly translated to all other supported ORM tools. The following sections in this
     chapter will then cover the other ORM technologies, showing briefer examples there.</para>
 
-    <para><emphasis>Note: As of Spring 2.1, Spring requires Hibernate 3.1 or higher.
+    <para><emphasis>Note: As of Spring 2.5, Spring requires Hibernate 3.1 or higher.
     Neither Hibernate 2.1 nor Hibernate 3.0 are supported anymore.</emphasis></para>
 
 	<section id="orm-resource-mngmnt">
@@ -2428,7 +2428,7 @@
 
       <para>Note: As alternative to defining a
       <classname>PersistenceAnnotationBeanPostProcessor</classname> explicitly,
-      consider using Spring 2.1's <literal>context:annotation-config</literal> XML
+      consider using Spring 2.5's <literal>context:annotation-config</literal> XML
       element in your application context configuration. This will automatically
       register all of Spring's standard post-processors for annotation-based
       configuration (including <classname>CommonAnnotationBeanPostProcessor</classname>

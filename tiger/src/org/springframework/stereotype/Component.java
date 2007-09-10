@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * {@link org.aspectj.lang.annotation.Aspect} annotation.
  *
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  * @see Repository
  * @see org.springframework.context.annotation.ClassPathBeanDefinitionScanner
  */

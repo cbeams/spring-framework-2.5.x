@@ -28,7 +28,7 @@ import org.springframework.core.type.asm.ClassReaderFactory;
  * @author Costin Leau
  * @author Rod Johnson
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  */
 public interface TypeFilter {
 	

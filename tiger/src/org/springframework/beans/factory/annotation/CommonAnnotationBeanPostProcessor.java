@@ -89,7 +89,7 @@ import org.springframework.util.StringUtils;
  * to specify a custom CommonAnnotationBeanPostProcessor bean definition.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see #setResourceFactory
  * @see InitDestroyAnnotationBeanPostProcessor
  * @see AutowiredAnnotationBeanPostProcessor

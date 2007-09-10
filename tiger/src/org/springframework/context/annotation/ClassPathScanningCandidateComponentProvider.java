@@ -53,7 +53,7 @@ import org.springframework.util.ClassUtils;
  * @author Costin Leau
  * @author Rod Johnson
  * @author Ramnivas Laddad
- * @since 2.1
+ * @since 2.5
  * @see org.objectweb.asm.ClassReader
  * @see org.springframework.core.type.asm.AnnotationMetadataReadingVisitor
  */

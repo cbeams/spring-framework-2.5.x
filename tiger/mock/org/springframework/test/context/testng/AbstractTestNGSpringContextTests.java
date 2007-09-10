@@ -52,13 +52,13 @@ import org.testng.annotations.BeforeClass;
  * </ul>
  *
  * @author Sam Brannen
+ * @since 2.5
  * @see TestContext
  * @see TestContextManager
  * @see TestExecutionListeners
  * @see AbstractTransactionalTestNGSpringContextTests
  * @see org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests
  * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
- * @since 2.1
  */
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
 public abstract class AbstractTestNGSpringContextTests implements IHookable, ApplicationContextAware {

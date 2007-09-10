@@ -32,7 +32,7 @@ import org.springframework.core.type.StandardAnnotationMetadata;
  * which also implements the AnnotatedBeanDefinition interface).
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see AnnotatedBeanDefinition#getMetadata()
  * @see org.springframework.core.type.StandardAnnotationMetadata
  */

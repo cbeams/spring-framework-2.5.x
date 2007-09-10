@@ -46,7 +46,7 @@ import java.lang.annotation.Target;
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  * @see AutowiredAnnotationBeanPostProcessor
  */
 @Retention(RetentionPolicy.RUNTIME)

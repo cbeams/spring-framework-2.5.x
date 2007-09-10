@@ -27,7 +27,7 @@ import org.springframework.jdbc.support.KeyHolder;
  * option to enhance testability, as it can easily be mocked or stubbed.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public interface SimpleJdbcInsertOperations {
 	

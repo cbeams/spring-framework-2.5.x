@@ -45,7 +45,7 @@ import org.springframework.beans.BeanWrapper;
  * detection rules may apply to other JMS providers as well.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see #setActivationSpecClass
  */
 public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFactory {

@@ -35,7 +35,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
  * @see org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor
  * @see org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor

@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * custom annotations that can then in turn be used as qualifiers.
  * 
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  */
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)

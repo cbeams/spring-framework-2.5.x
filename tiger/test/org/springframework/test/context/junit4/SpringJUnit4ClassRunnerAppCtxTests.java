@@ -64,7 +64,7 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * </p>
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  * @see AbsolutePathSpringJUnit4ClassRunnerAppCtxTests
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  * @see InheritedConfigSpringJUnit4ClassRunnerAppCtxTests

@@ -3010,7 +3010,7 @@ public class Main {
         </para>
                 <programlisting><![CDATA[x.y.NewsFeed@1292d26: '... that's fit to print!'
 x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
-                <para>As of Spring 2.1, you can rely upon autowiring of the
+                <para>As of Spring 2.5, you can rely upon autowiring of the
                 <interfacename>BeanFactory</interfacename> as yet another alternative to
                 implementing the <interfacename>BeanFactoryAware</interfacename> interface.
                 The "traditional" <literal>constructor</literal> and <literal>byType</literal>
@@ -3423,7 +3423,7 @@ cfg.postProcessBeanFactory(factory);]]></programlisting>
 jdbc.url=jdbc:hsqldb:hsql://production:9002
 jdbc.username=sa
 jdbc.password=root]]></programlisting>
-                <para>With the <literal>context</literal> namespace introduced in Spring 2.1,
+                <para>With the <literal>context</literal> namespace introduced in Spring 2.5,
                 it is possible to configure property placeholders with a single element (and
                 multiple locations may be provided as a comma-separated list):</para>
                 <programlisting><![CDATA[<context:property-placeholder location="classpath:com/foo/jdbc.properties"/>]]></programlisting>
@@ -4091,10 +4091,10 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
         is a common means of extending the Spring IoC container. For example, Spring 2.0 introduced 
         the possibility of enforcing required properties with the 
         <link linkend="metadata-annotations-required">@Required</link> annotation. As of Spring 
-        2.1, it is now possible to follow that same general approach to drive Spring's 
+        2.5, it is now possible to follow that same general approach to drive Spring's
         dependency injection. Essentially, the <interfacename>@Autowired</interfacename> annotation
         provides the same capabilities as described in <xref linkend="beans-factory-autowire"/> 
-        but with more fine-grained control and wider applicability. Spring 2.1 also adds
+        but with more fine-grained control and wider applicability. Spring 2.5 also adds
 		support for JSR-250 annotations such as 
         <interfacename>@Resource</interfacename>, <interfacename>@PostConstruct</interfacename>, 
         and <interfacename>@PreDestroy</interfacename>. Of course, these options are only available
@@ -4111,15 +4111,15 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
            http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd">
                
      ]]><lineannotation><![CDATA[<context:annotation-config/>]]></lineannotation><![CDATA[
      
 </beans>]]></programlisting>
         <para>(The implicitly registered post-processors include 
-        <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html">AutowiredAnnotationBeanPostProcessor</ulink></classname>,
-        <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/annotation/CommonAnnotationBeanPostProcessor.html">CommonAnnotationBeanPostProcessor</ulink></classname>,
-        <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html">PersistenceAnnotationBeanPostProcessor</ulink></classname>,
+        <classname><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html">AutowiredAnnotationBeanPostProcessor</ulink></classname>,
+        <classname><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/annotation/CommonAnnotationBeanPostProcessor.html">CommonAnnotationBeanPostProcessor</ulink></classname>,
+        <classname><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html">PersistenceAnnotationBeanPostProcessor</ulink></classname>,
         as well as the aforementioned
         <classname><ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html">RequiredAnnotationBeanPostProcessor</ulink></classname>.)
         </para>
@@ -4300,8 +4300,8 @@ public @interface Genre {
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
-        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.1.xsd
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
     <context:annotation-config/>
 
@@ -4401,8 +4401,8 @@ public @interface MovieQualifier {
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
-        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.1.xsd
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
     <context:annotation-config/>
 
@@ -4438,7 +4438,7 @@ public @interface MovieQualifier {
         </section>
         <section id="beans-custom-autowire-configurer">
             <title><classname>CustomAutowireConfigurer</classname></title>
-            The <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/config/CustomAutowireConfigurer.html">CustomAutowireConfigurer</ulink></classname>
+            The <classname><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/config/CustomAutowireConfigurer.html">CustomAutowireConfigurer</ulink></classname>
             is a <interfacename>BeanFactoryPostProcessor</interfacename> that enables customization of the autowiring process.
             For example, you can register your own custom qualifier annotation types even if they are
             not themselves annotated with Spring's <interfacename>@Qualifier</interfacename> annotation.
@@ -4452,7 +4452,7 @@ public @interface MovieQualifier {
             <para>It is also possible to supply your own implementation of the
             <interfacename>AutowireCandidateResolver</interfacename> interface (or subclass
             one of the existing implementations). As you can see by reviewing its
-            <ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/support/AutowireCandidateResolver.html">Javadoc</ulink>,
+            <ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/support/AutowireCandidateResolver.html">Javadoc</ulink>,
             the resolver provides customization opportunities for determining whether individual bean
             definitions should be considered as autowire candidates as well as the decision logic for
             resolving ambiguities in the case of multiple matches.</para>
@@ -4502,7 +4502,7 @@ public @interface MovieQualifier {
                 <interfacename>BeanFactory</interfacename> of which the 
                 <classname>CommonAnnotationBeanPostProcessor</classname> is aware. Note that the names 
                 may be resolved via JNDI if Spring's 
-                <classname><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/jndi/support/SimpleJndiBeanFactory.html">SimpleJndiBeanFactory</ulink></classname> 
+                <classname><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/jndi/support/SimpleJndiBeanFactory.html">SimpleJndiBeanFactory</ulink></classname>
                 is configured explicitly. However, it is recommended to rely on the default behavior and
                 simply use Spring's JNDI lookup capabilities to preserve the level of indirection.</para>
             </note>
@@ -4511,7 +4511,7 @@ public @interface MovieQualifier {
             <title><interfacename>@PostConstruct</interfacename> and <interfacename>@PreDestroy</interfacename></title>
             <para>The <classname>CommonAnnotationBeanPostProcessor</classname> not only recognizes the
             <interfacename>@Resource</interfacename> annotation but also the JSR-250 
-            <emphasis>lifecycle</emphasis> annotations. Introduced in Spring 2.1, the support for 
+            <emphasis>lifecycle</emphasis> annotations. Introduced in Spring 2.5, the support for
             these annotations offers yet another alternative to those described in the
             sections on <link linkend="beans-factory-lifecycle-initializingbean">initialization callbacks</link>
             and <link linkend="beans-factory-lifecycle-disposablebean">destruction callbacks</link>.
@@ -4553,7 +4553,7 @@ public @interface MovieQualifier {
             <emphasis>stereotype</emphasis> of a repository (a.k.a. Data Access Object or DAO).
             Among the possibilities for leveraging such a marker is the automatic translation of
             exceptions as described in the section entitled <xref linkend="orm-jpa-exceptions"/>.</para>
-            <para>Spring 2.1 introduces another stereotype annotation,
+            <para>Spring 2.5 introduces another stereotype annotation,
             <interfacename>@Component</interfacename>, and provides the capability of
             automatically detecting 'stereotyped' classes and registering corresponding
             <interfacename>BeanDefinition</interfacename>s with the <interfacename>ApplicationContext</interfacename>.
@@ -4584,7 +4584,7 @@ public class JpaMovieFinder implements MovieFinder {
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
            http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd">
                
      <context:component-scan base-package="org.example"/>
      
@@ -4682,7 +4682,7 @@ public class MovieFinderImpl implements MovieFinder {
 }]]></programlisting>
             <note>If you don't want to rely on that default bean-naming strategy, you may provide a custom
             bean-naming strategy. First, implement the 
-            <interfacename><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/beans/factory/support/BeanNameGenerator.html">BeanNameGenerator</ulink></interfacename>
+            <interfacename><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/support/BeanNameGenerator.html">BeanNameGenerator</ulink></interfacename>
             interface, and be sure to include a default no-arg constructor. Then, provide the 
             fully-qualified classname when configuring the scanner:
             <programlisting><![CDATA[<beans ...>
@@ -4700,7 +4700,7 @@ public class MovieFinderImpl implements MovieFinder {
             <title>Providing a scope for auto-detected beans</title>
             <para>As with Spring beans in general, the default and by far most common scope
             is 'singleton'. However, there are times when other scopes are needed. Therefore 
-            Spring 2.1 introduces a new <interfacename>@Scope</interfacename> annotation
+            Spring 2.5 introduces a new <interfacename>@Scope</interfacename> annotation
             as well. Simply provide the name of the scope within the annotation, such as:</para>
             <programlisting><![CDATA[@Scope("prototype")
 @Repository
@@ -4710,7 +4710,7 @@ public class MovieFinderImpl implements MovieFinder {
 }]]></programlisting>
             <note>If you would like to provide a custom strategy for scope resolution rather
             than relying on the annotation-based approach, implement the 
-            <interfacename><ulink url="http://static.springframework.org/spring/docs/2.1.x/api/org/springframework/context/annotation/ScopeMetadataResolver.html">ScopeMetadataResolver</ulink></interfacename>
+            <interfacename><ulink url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/context/annotation/ScopeMetadataResolver.html">ScopeMetadataResolver</ulink></interfacename>
             interface, and be sure to include a default no-arg constructor. Then, provide the 
             fully-qualified classname when configuring the scanner:
             <programlisting><![CDATA[<beans ...>
@@ -4737,7 +4737,7 @@ public class MovieFinderImpl implements MovieFinder {
     
     <section id="context-load-time-weaver">
         <title>Registering a <interfacename>LoadTimeWeaver</interfacename></title>
-        <para>The <literal>context</literal> namespace introduced in Spring 2.1 provides a
+        <para>The <literal>context</literal> namespace introduced in Spring 2.5 provides a
         <literal>load-time-weaver</literal> element.</para>
         <programlisting><![CDATA[<beans ...>
      

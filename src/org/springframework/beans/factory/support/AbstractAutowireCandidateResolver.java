@@ -24,7 +24,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  */
 public abstract class AbstractAutowireCandidateResolver implements AutowireCandidateResolver {
 

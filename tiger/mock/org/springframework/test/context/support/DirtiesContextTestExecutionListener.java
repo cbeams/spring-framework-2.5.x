@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * {@link DirtiesContext @DirtiesContext} annotation.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  * @see DirtiesContext
  */
 public class DirtiesContextTestExecutionListener extends AbstractTestExecutionListener {

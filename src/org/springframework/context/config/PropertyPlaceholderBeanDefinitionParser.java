@@ -28,7 +28,7 @@ import org.springframework.util.StringUtils;
  * Parser for the &lt;context:property-placeholder/&gt; element.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 class PropertyPlaceholderBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 

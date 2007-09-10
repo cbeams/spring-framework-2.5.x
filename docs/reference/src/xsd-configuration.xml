@@ -653,7 +653,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        ]]><emphasis role="bold">xmlns:jms="http://www.springframework.org/schema/jms"</emphasis><![CDATA[
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-2.1.xsd"</emphasis><![CDATA[>
+]]><emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-2.5.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
@@ -736,13 +736,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	   ]]><emphasis role="bold">xmlns:context="http://www.springframework.org/schema/context"</emphasis><![CDATA[
 	   xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.1.xsd"</emphasis><![CDATA[>
+]]><emphasis role="bold">http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
 			<note>
-				<para>The <literal>context</literal> schema was only introduced in Spring 2.1.</para>
+				<para>The <literal>context</literal> schema was only introduced in Spring 2.5.</para>
 			</note>
 			<section id="xsd-config-body-schemas-context-pphc">
 				<title><literal>&lt;property-placeholder/&gt;</literal></title>

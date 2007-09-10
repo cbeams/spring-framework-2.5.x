@@ -40,7 +40,7 @@ import org.springframework.test.context.SpringRunnerContextCacheTests;
  * </p>
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  */
 @RunWith(Suite.class)
 // Note: the following 'multi-line' layout is for enhanced code readability.

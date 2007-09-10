@@ -37,7 +37,7 @@ import org.springframework.test.context.TestContextManager;
  * </p>
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  * @see TestContextManager
  */
 public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {

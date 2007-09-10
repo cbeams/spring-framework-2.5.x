@@ -31,7 +31,7 @@ import org.springframework.util.ClassUtils;
  * creating a new ClassReader for every request.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class SimpleClassReaderFactory implements ClassReaderFactory {
 

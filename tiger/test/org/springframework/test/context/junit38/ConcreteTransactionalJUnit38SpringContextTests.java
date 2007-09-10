@@ -47,7 +47,7 @@ import org.springframework.test.jdbc.SimpleJdbcTestUtils;
  * {@link AbstractTransactionalJUnit38SpringContextTests}.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  */
 @RunWith(JUnit38ClassRunner.class)
 @ContextConfiguration

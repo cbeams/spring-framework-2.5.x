@@ -42,7 +42,7 @@ import org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver;
  * (for example the <code>TomcatInstrumentableClassLoader</code>).
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see org.springframework.context.ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME
  */
 public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLoaderAware {

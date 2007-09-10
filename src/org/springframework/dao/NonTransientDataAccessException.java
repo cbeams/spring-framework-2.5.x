@@ -21,7 +21,7 @@ package org.springframework.dao;
  * operation would fail unless the cause of the Exception is corrected.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  * @see java.sql.SQLNonTransientException
  */
 public abstract class NonTransientDataAccessException extends DataAccessException {

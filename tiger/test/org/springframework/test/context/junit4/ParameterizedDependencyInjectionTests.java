@@ -52,7 +52,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
  * <em>parameterized test instance</em>.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  */
 @RunWith(Parameterized.class)
 @ContextConfiguration

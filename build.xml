@@ -1132,7 +1132,7 @@
 		<delete dir="${javadoc.dir}" failonerror="false"/>
 		<mkdir dir="${javadoc.dir}"/>
 
-		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" windowtitle="Spring Framework API 2.1"
+		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" windowtitle="Spring Framework API 2.5"
 				source="1.5" access="protected" author="true" version="true" use="true"
 				defaultexcludes="true" stylesheetfile="${doc.dir}/stylesheet.css"
 				overview="${doc.dir}/overview.html"
@@ -1142,7 +1142,7 @@
 			<arg value="-J-XX:MaxPermSize=128m"/>
 			<arg value="-J-Dhttp.proxyHost=${javadoc.proxyhost}"/>
 			<arg value="-J-Dhttp.proxyPort=${javadoc.proxyport}"/>
-			<doctitle><![CDATA[<h1>Spring Framework API 2.1</h1>]]></doctitle>
+			<doctitle><![CDATA[<h1>Spring Framework API 2.5</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Copyright &copy; 2002-2007 <a href="http://www.springframework.org/" target="_top">The Spring Framework</a>.</i>]]></bottom>
 			<classpath refid="all-libs"/>
 			<classpath location="${junit4.jar}"/>

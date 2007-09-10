@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
  * @author Sam Brannen
  * @param <KEY> {@link Serializable serializable} context key type
  * @param <CONTEXT> {@link ApplicationContext application context} type
- * @since 2.1
+ * @since 2.5
  */
 class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext> {
 

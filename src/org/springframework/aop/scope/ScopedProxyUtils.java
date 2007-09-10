@@ -27,7 +27,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  */
 public abstract class ScopedProxyUtils {
 

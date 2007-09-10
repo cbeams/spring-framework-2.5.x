@@ -40,7 +40,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Sam Brannen
  * @author Alef Arendsen
  * @author Bram Smeets
- * @since 2.1
+ * @since 2.5
  * @see org.springframework.web.servlet.ModelAndView
  */
 public abstract class ModelAndViewAssert {

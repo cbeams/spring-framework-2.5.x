@@ -32,7 +32,7 @@ import java.sql.Statement;
  * JDBC 4.0 API calls and passes them through to the underlying driver)!
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see java.sql.Wrapper#unwrap
  * @see SimpleNativeJdbcExtractor
  * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor

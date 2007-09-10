@@ -25,7 +25,7 @@ import java.util.List;
  * by the Simple JDBC classes.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public interface TableMetaDataProvider {
 

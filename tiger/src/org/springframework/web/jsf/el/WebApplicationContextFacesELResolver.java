@@ -51,7 +51,7 @@ import org.springframework.web.jsf.FacesContextUtils;
  * &lt;/application></pre>
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see DelegatingFacesELResolver
  * @see org.springframework.web.jsf.FacesContextUtils#getWebApplicationContext
  */

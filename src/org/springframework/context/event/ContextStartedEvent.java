@@ -23,7 +23,7 @@ import org.springframework.context.ApplicationContext;
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see ContextStoppedEvent
  */
 public class ContextStartedEvent extends ApplicationContextEvent {

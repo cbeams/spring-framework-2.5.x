@@ -31,9 +31,9 @@ import org.springframework.transaction.PlatformTransactionManager;
  * transactional tests.
  *
  * @author Sam Brannen
+ * @since 2.5
  * @see ContextConfiguration
  * @see TransactionalTestExecutionListener
- * @since 2.1
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

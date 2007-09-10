@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * parsed with the ASM ClassReader.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see #getMetadata()
  * @see #getBeanClassName()
  * @see org.objectweb.asm.ClassReader

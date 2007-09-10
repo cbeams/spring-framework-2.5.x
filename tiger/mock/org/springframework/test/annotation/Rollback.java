@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * otherwise, the transaction will be committed.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  */
 @Target( { ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)

@@ -23,7 +23,7 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
  * of the application context's default {@link LoadTimeWeaver}.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see org.springframework.context.ConfigurableApplicationContext#LOAD_TIME_WEAVER_BEAN_NAME
  */
 public interface LoadTimeWeaverAware {

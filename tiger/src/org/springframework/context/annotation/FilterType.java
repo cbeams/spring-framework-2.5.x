@@ -20,7 +20,7 @@ package org.springframework.context.annotation;
  * Enumeration of the valid type filters to be added for annotation-driven configuration.
  * 
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  */
 public enum FilterType {
 

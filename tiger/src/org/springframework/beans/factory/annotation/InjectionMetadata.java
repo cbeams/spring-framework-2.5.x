@@ -38,7 +38,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor}.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class InjectionMetadata {
 

@@ -28,7 +28,7 @@ import org.springframework.util.ClassUtils;
  * JDK 1.6 {@link java.util.ServiceLoader} facility.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see java.util.ServiceLoader
  */
 public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFactoryBean

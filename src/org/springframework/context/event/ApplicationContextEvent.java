@@ -23,7 +23,7 @@ import org.springframework.context.ApplicationEvent;
  * Base class for events raised for an <code>ApplicationContext</code>.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public abstract class ApplicationContextEvent extends ApplicationEvent {
 

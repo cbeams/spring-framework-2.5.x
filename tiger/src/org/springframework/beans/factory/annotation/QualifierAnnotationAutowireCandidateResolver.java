@@ -37,7 +37,7 @@ import org.springframework.util.ClassUtils;
  * 
  * @author Mark Fisher
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see Qualifier
  */
 public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowireCandidateResolver {

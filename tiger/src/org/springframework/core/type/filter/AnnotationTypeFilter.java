@@ -31,7 +31,7 @@ import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
  * @author Mark Fisher
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter {
 	

@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * expecting them to be of type <code>javax.jms.Destination</code>.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see org.springframework.beans.factory.BeanFactory
  */
 public class BeanFactoryDestinationResolver implements DestinationResolver, BeanFactoryAware {

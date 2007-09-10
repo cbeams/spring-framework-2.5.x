@@ -750,7 +750,7 @@ public interface SessionAwareMessageListener {
   <section id="jms-namespace">
     <title>JMS Namespace Support</title>
     
-    <para>Spring 2.1 introduces a namespace for simplifying JMS configuration. To use the
+    <para>Spring 2.5 introduces a namespace for simplifying JMS configuration. To use the
 	JMS namespace elements you will need to reference the JMS schema:</para>
 
 	<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -759,7 +759,7 @@ public interface SessionAwareMessageListener {
        ]]><emphasis role="bold">xmlns:jms="http://www.springframework.org/schema/jms"</emphasis><![CDATA[
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-2.1.xsd"</emphasis><![CDATA[>
+]]><emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-2.5.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 

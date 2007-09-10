@@ -24,7 +24,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 
 /**
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  */
 public interface AutowireCandidateResolver {
 

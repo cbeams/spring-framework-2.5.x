@@ -19,6 +19,7 @@ package org.springframework.test.context.junit4;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.runner.RunWith;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
@@ -51,13 +52,13 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * </p>
  *
  * @author Sam Brannen
+ * @since 2.5
  * @see ContextConfiguration
  * @see TestContext
  * @see TestContextManager
  * @see AbstractTransactionalJUnit4SpringContextTests
  * @see org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
- * @since 2.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })

@@ -24,7 +24,7 @@ import java.util.Set;
  * class, in a form that does not require that class to be loaded yet.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see StandardAnnotationMetadata
  * @see org.springframework.core.type.asm.AnnotationMetadataReadingVisitor
  */

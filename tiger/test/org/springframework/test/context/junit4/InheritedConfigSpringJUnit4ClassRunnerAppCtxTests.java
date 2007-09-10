@@ -29,7 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
  * {@link ContextConfiguration configuration} is {@link Inherited inherited}.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  * @see SpringJUnit4ClassRunnerAppCtxTests
  */
 public class InheritedConfigSpringJUnit4ClassRunnerAppCtxTests extends SpringJUnit4ClassRunnerAppCtxTests {

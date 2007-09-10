@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.1 M4 (September 2007)
------------------------------------------------------
+THE SPRING FRAMEWORK, release 2.5 RC1 (September 2007)
+------------------------------------------------------
 http://www.springframework.org
 
 
@@ -51,7 +51,7 @@ knowledge about it immediately.
 
 2. RELEASE INFO
 
-The Spring Framework 2.1 requires JDK 1.4.2 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). JDK 1.6 is
+The Spring Framework 2.5 requires JDK 1.4.2 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1.0, EJB 2.0). JDK 1.6 is
 required for building the framework; for the full build including all aspects, AspectJ is required as well.
 
 Integration is provided with Log4J 1.2, CGLIB 2.1, AspectJ 1.5.3, Commons Attributes 2.2, JMX 1.0/1.2,

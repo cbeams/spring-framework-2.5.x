@@ -26,7 +26,7 @@ import org.springframework.test.context.TestExecutionListeners;
  * proper support of the {@link Repeat @Repeat} annotation.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  */
 public class RepeatedJUnit38SpringContextTests extends TestCase {
 

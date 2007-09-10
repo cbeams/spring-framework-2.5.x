@@ -82,7 +82,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
- * @since 2.1
+ * @since 2.5
  * @see #setAutowiredAnnotationType
  * @see Autowired
  * @see CommonAnnotationBeanPostProcessor

@@ -30,7 +30,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * Parser for the &lt;context:load-time-weaver/&gt; element.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 

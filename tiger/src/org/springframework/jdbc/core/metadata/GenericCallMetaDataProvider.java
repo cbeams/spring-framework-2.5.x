@@ -34,7 +34,7 @@ import org.springframework.jdbc.core.SqlParameter;
  * This class can be extended to provide database specific behavior.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 

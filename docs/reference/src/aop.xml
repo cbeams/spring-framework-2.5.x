@@ -2739,7 +2739,7 @@ public class ProfilingAspect {
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
     ]]><lineannotation>&lt;!-- a service object; we will be profiling it's methods --&gt;</lineannotation><![CDATA[
     <bean id="entitlementCalculationService"
@@ -2883,7 +2883,7 @@ public final class Main {
 				AspectJ LTW:</para>
 				<orderedlist>
 					<listitem>
-						<para><filename class="libraryfile">spring.jar</filename> (version 2.1 or later)</para>
+						<para><filename class="libraryfile">spring.jar</filename> (version 2.5 or later)</para>
 					</listitem>
 					<listitem>
 						<para><filename class="libraryfile">aspectjrt.jar</filename> (version 1.5 or later)</para>
@@ -2946,7 +2946,7 @@ public final class Main {
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
     <context:load-time-weaver/>
 
@@ -2960,7 +2960,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 				<literal>&lt;context:load-time-weaver/&gt;</literal> is defined
 				in the '<literal>context</literal>' namespace; note also that the
 				referenced XML Schema file is only available in versions of
-				Spring 2.1 and later.</para>
+				Spring 2.5 and later.</para>
 
 				<para>What the above configuration does is define and register
 				a default <interfacename>LoadTimeWeaver</interfacename> bean for
@@ -2970,8 +2970,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 				<interfacename>LoadTimeWeaver</interfacename>: the exact type of
 				<interfacename>LoadTimeWeaver</interfacename> that will be
 				'automatically detected' is dependent upon your runtime environment
-				(summarised in the following table, correct at the time of writing
-				2.1 M3).</para>
+				(summarised in the following table).</para>
 
 				<table pgwide="1" id="aop-aj-ltw-spring-env-impls">
 					<title><classname>DefaultContextLoadTimeWeaver</classname> <interfacename>LoadTimeWeavers</interfacename></title>
@@ -3035,7 +3034,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.1.xsd">
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
     <context:load-time-weaver
             ]]><emphasis role="bold">weaver-class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"</emphasis><![CDATA[/>

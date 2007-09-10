@@ -28,7 +28,7 @@ import org.springframework.util.ResourceUtils;
  * configured differently.
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  * @see SpringJUnit4ClassRunnerAppCtxTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)

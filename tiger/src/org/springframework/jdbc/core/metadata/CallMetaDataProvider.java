@@ -28,7 +28,7 @@ import org.springframework.jdbc.core.SqlParameter;
  * {@link org.springframework.jdbc.core.simple.SimpleJdbcTemplate}.
  *
  * @author Thomas Risberg
- * @since 2.1
+ * @since 2.5
  */
 public interface CallMetaDataProvider {
 

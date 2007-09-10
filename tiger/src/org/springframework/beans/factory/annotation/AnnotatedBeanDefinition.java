@@ -25,7 +25,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * about its bean class - without requiring the class to be loaded yet.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see AnnotatedGenericBeanDefinition
  * @see org.springframework.core.type.AnnotationMetadata
  */

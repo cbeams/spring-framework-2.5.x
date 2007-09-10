@@ -52,7 +52,7 @@ import org.springframework.test.context.support.GenericPropertiesContextLoader;
  * </p>
  *
  * @author Sam Brannen
- * @since 2.1
+ * @since 2.5
  * @see GenericPropertiesContextLoader
  * @see SpringJUnit4ClassRunnerAppCtxTests
  */

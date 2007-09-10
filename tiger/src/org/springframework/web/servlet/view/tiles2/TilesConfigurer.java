@@ -79,7 +79,7 @@ import org.springframework.web.context.ServletContextAware;
  * The values in the list are the actual files containing the definitions.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see TilesView
  * @see org.springframework.web.servlet.view.UrlBasedViewResolver
  */

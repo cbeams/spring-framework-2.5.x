@@ -48,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
  * </p>
  *
  * @author Sam Brannen
+ * @since 2.5
  * @see AbstractJUnit4SpringContextTests
  * @see org.springframework.test.context.ContextConfiguration
  * @see org.springframework.test.context.TestExecutionListeners
@@ -61,10 +62,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.jdbc.SimpleJdbcTestUtils
  * @see org.springframework.test.context.junit38.AbstractTransactionalJUnit38SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
- * @since 2.1
  */
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-	TransactionalTestExecutionListener.class })
+		TransactionalTestExecutionListener.class })
 @Transactional
 public class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit4SpringContextTests {
 

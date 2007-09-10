@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
  * common properties that are identical for all listener container variants.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 

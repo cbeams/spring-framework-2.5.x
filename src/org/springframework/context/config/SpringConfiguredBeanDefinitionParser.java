@@ -29,7 +29,7 @@ import org.springframework.beans.factory.xml.ParserContext;
  * <code>&lt;context:spring-configured/&gt;</code> tag.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 

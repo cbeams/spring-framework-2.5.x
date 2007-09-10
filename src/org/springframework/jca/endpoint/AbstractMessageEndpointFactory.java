@@ -40,7 +40,7 @@ import org.springframework.transaction.jta.TransactionFactory;
  * exposure for endpoint invocations.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see #setTransactionManager
  */
 public abstract class AbstractMessageEndpointFactory implements MessageEndpointFactory {

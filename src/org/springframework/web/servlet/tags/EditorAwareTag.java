@@ -25,7 +25,7 @@ import javax.servlet.jsp.JspException;
  * PropertyEditor for a property that they are currently bound to.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see BindTag
  * @see org.springframework.web.servlet.tags.form.AbstractDataBoundFormElementTag
  */

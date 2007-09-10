@@ -27,7 +27,7 @@ import javax.persistence.EntityManager;
  * method to access native functionality of the underlying resource.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  */
 public interface EntityManagerProxy extends EntityManager {
 

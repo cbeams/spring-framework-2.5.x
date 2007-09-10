@@ -30,7 +30,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * <code>ChildBeanDefinition</code> where parent/child relationships happen to be pre-determined.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see #setParentName
  * @see RootBeanDefinition
  * @see ChildBeanDefinition

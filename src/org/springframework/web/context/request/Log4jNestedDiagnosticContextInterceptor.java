@@ -27,7 +27,7 @@ import org.springframework.ui.ModelMap;
  * removing it again after the request is processed.
  *
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see org.apache.log4j.NDC#push(String)
  * @see org.apache.log4j.NDC#pop()
  */

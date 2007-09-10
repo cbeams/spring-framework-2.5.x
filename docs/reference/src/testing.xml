@@ -140,9 +140,9 @@
       than unit tests but much faster to run than the equivalent Cactus tests
       or remote tests relying on deployment to an application server.</para>
 
-      <para>Prior to the 2.1 release of the framework, Spring provided <link
+      <para>Prior to the 2.5 release of the framework, Spring provided <link
       linkend="junit38-legacy-support">integration testing support specific to
-      JUnit 3.8</link>. As of the 2.1 release, Spring offers support for unit
+      JUnit 3.8</link>. As of the 2.5 release, Spring offers support for unit
       and integration testing in the form of the <link
       linkend="testcontext-framework">Spring TestContext Framework</link>,
       which is agnostic of the actual testing framework in use, thus allowing
@@ -1189,7 +1189,7 @@ public class MyTest {
         <interfacename>@ContextConfiguration</interfacename> by Setter
         Injection, Field Injection, or both, depending on which annotations
         you choose and whether you place them on setter methods or fields. For
-        consistency with annotation support in Spring 2.1, you may choose
+        consistency with annotation support in Spring 2.5, you may choose
         either Spring's <interfacename>@Autowired</interfacename> annotation
         or the <interfacename>@Resource</interfacename> annotation from JSR
         250. The semantics for both are consistent throughout the Spring

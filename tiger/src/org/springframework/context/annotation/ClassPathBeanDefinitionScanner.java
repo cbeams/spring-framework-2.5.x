@@ -41,7 +41,7 @@ import org.springframework.util.PatternMatchUtils;
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
- * @since 2.1
+ * @since 2.5
  * @see org.springframework.stereotype.Component
  * @see org.springframework.stereotype.Repository
  */
