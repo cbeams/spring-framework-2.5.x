@@ -48,18 +48,12 @@ public @interface TransactionConfiguration {
 	 * to be specified explicitly if the bean name of the desired
 	 * PlatformTransactionManager is not &quot;transactionManager&quot;.
 	 * </p>
-	 * <p>
-	 * Defaults to &quot;transactionManager&quot;.
-	 * </p>
 	 */
 	String transactionManager() default "transactionManager";
 
 	/**
 	 * <p>
 	 * Should transactions be rolled back by default?
-	 * </p>
-	 * <p>
-	 * Defaults to <code>true</code>.
 	 * </p>
 	 */
 	boolean defaultRollback() default true;

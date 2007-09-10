@@ -49,9 +49,6 @@ public @interface ContextConfiguration {
 	 * The resource locations to use for loading the
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * </p>
-	 * <p>
-	 * Defaults to an empty array.
-	 * </p>
 	 */
 	String[] locations() default {};
 
@@ -60,9 +57,8 @@ public @interface ContextConfiguration {
 	 * The {@link ContextLoader} type to use for loading the
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * </p>
-	 * <p>
-	 * Defaults to {@link GenericXmlContextLoader}.
-	 * </p>
+	 *
+	 * @see GenericXmlContextLoader
 	 */
 	Class<? extends ContextLoader> loader() default GenericXmlContextLoader.class;
 

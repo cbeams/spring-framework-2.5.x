@@ -50,13 +50,12 @@ public @interface TestExecutionListeners {
 	 * The {@link TestExecutionListener TestExecutionListeners} to register with
 	 * a {@link TestContextManager}.
 	 * </p>
-	 * <p>
-	 * Defaults to {@link DependencyInjectionTestExecutionListener},
-	 * {@link DirtiesContextTestExecutionListener}, and
-	 * {@link TransactionalTestExecutionListener}.
-	 * </p>
+	 *
+	 * @see DependencyInjectionTestExecutionListener
+	 * @see DirtiesContextTestExecutionListener
+	 * @see TransactionalTestExecutionListener
 	 */
-	Class<? extends TestExecutionListener>[] value() default {DependencyInjectionTestExecutionListener.class,
-			DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class};
+	Class<? extends TestExecutionListener>[] value() default { DependencyInjectionTestExecutionListener.class,
+		DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class };
 
 }

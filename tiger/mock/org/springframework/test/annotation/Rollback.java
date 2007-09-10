@@ -41,9 +41,6 @@ public @interface Rollback {
 	 * Whether or not the transaction for the annotated method should be rolled
 	 * back after the method has completed.
 	 * </p>
-	 * <p>
-	 * Defaults to <code>true</code>.
-	 * </p>
 	 */
 	boolean value() default true;
 
