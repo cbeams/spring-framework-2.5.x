@@ -422,6 +422,16 @@
 public void testProcessWhichRunsOnlyOnSunJvm() {
     <lineannotation>// some logic that should run only on Java VMs from Sun Microsystems</lineannotation>
 }</programlisting>
+
+          <para>Alternatively <interfacename>@IfProfileValue</interfacename>
+          may be configured with a list of <literal>values</literal> to
+          achieve TestNG-like support for <emphasis>test groups</emphasis>.
+          Consider the following example:</para>
+
+          <programlisting>@IfProfileValue(name="test-groups", values={"unit-tests", "integration-tests"})
+public void testProcessWhichRunsForUnitAndIntegrationTestGroups() {
+    <lineannotation>// some logic that should run only for unit and integration test groups</lineannotation>
+}</programlisting>
         </listitem>
 
         <listitem>
