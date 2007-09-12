@@ -23,13 +23,13 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
+import org.springframework.util.Assert;
 
 /**
  * <p>
@@ -75,6 +75,20 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	protected ProfileValueSource profileValueSource = SystemProfileValueSource.getInstance();
 
 
+	/**
+	 * Default constructor for AbstractAnnotationAwareTransactionalTests.
+	 */
+	public AbstractAnnotationAwareTransactionalTests() {
+	}
+
+	/**
+	 * Constructor for AbstractAnnotationAwareTransactionalTests with a JUnit
+	 * name.
+	 */
+	public AbstractAnnotationAwareTransactionalTests(String name) {
+		super(name);
+	}
+
 	@Override
 	public void setDataSource(final DataSource dataSource) {
 
@@ -104,10 +118,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 			return;
 		}
 
-		// Use same algorithm as JUnit itself to retrieve the test method about
-		// to be executed (the method name is returned by getName). It has to be
-		// public so we can retrieve it.
-		final Method testMethod = getClass().getMethod(getName(), (Class[]) null);
+		final Method testMethod = getTestMethod();
 
 		if (isDisabledInThisEnvironment(testMethod)) {
 			recordDisabled();
@@ -119,8 +130,8 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		final TransactionDefinition explicitTransactionDefinition = this.transactionAttributeSource.getTransactionAttribute(
 				testMethod, getClass());
 		if (explicitTransactionDefinition != null) {
-			this.logger.info("Custom transaction definition [" + explicitTransactionDefinition + " for test method "
-					+ getName());
+			this.logger.info("Custom transaction definition [" + explicitTransactionDefinition + "] for test method ["
+					+ getName() + "].");
 			setTransactionDefinition(explicitTransactionDefinition);
 		}
 		else if (testMethod.isAnnotationPresent(NotTransactional.class)) {
@@ -149,7 +160,23 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		}, testMethod, this.logger);
 	}
 
+	/**
+	 * <p>
+	 * Determines if the test for the supplied <code>testMethod</code> should
+	 * run in the current environment.
+	 * </p>
+	 * <p>
+	 * The default implementation is based on
+	 * {@link IfProfileValue @IfProfileValue} semantics.
+	 * </p>
+	 *
+	 * @param testMethod the test method
+	 * @return <code>true</code> if the test should be <em>disabled</em> in
+	 *         the current environment
+	 */
 	protected boolean isDisabledInThisEnvironment(final Method testMethod) {
+
+		boolean disabled = false;
 
 		IfProfileValue inProfile = testMethod.getAnnotation(IfProfileValue.class);
 		if (inProfile == null) {
@@ -157,12 +184,19 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		}
 
 		if (inProfile != null) {
-			// May be true
-			return !this.profileValueSource.get(inProfile.name()).equals(inProfile.value());
+			final String name = inProfile.name();
+			Assert.hasText(name, "The name attribute supplied to @IfProfileValue must not be empty.");
+
+			final String annotatedValue = inProfile.value();
+			final String environmentValue = this.profileValueSource.get(name);
+			final boolean bothValuesAreNull = (environmentValue == null) && (annotatedValue == null);
+
+			final boolean enabled = bothValuesAreNull
+					|| ((environmentValue != null) && environmentValue.equals(annotatedValue));
+			disabled = !enabled;
 		}
-		else {
-			return false;
-		}
+
+		return disabled;
 
 		// XXX Optional: add support for @IfNotProfileValue.
 	}
@@ -177,6 +211,9 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		assertNotNull("TestCase.getName() cannot be null", getName());
 		Method testMethod = null;
 		try {
+			// Use same algorithm as JUnit itself to retrieve the test method
+			// about to be executed (the method name is returned by getName). It
+			// has to be public so we can retrieve it.
 			testMethod = getClass().getMethod(getName(), (Class[]) null);
 		}
 		catch (final NoSuchMethodException e) {
@@ -243,8 +280,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		}
 	}
 
-	private void runTest(final TestExecutionCallback tec, final Method testMethod, final Log logger)
-			throws Throwable {
+	private void runTest(final TestExecutionCallback tec, final Method testMethod, final Log logger) throws Throwable {
 
 		final ExpectedException ee = testMethod.getAnnotation(ExpectedException.class);
 		final Repeat repeat = testMethod.getAnnotation(Repeat.class);
