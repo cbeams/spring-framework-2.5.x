@@ -86,6 +86,13 @@ public class EnabledAndIgnoredSpringRunnerTests {
 	// ------------------------------------------------------------------------|
 
 	@Test
+	@IfProfileValue(name = NAME, value = "")
+	public void testIfProfileValueEmpty() {
+		numTestsExecuted++;
+		fail("The body of a disabled test should never be executed!");
+	}
+
+	@Test
 	@IfProfileValue(name = NAME, value = VALUE + "X")
 	public void testIfProfileValueDisabled() {
 		numTestsExecuted++;
