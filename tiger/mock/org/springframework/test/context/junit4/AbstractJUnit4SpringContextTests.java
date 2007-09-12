@@ -19,7 +19,6 @@ package org.springframework.test.context.junit4;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.runner.RunWith;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
@@ -45,10 +44,15 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * {@link TestExecutionListeners @TestExecutionListeners}, etc.
  * </p>
  * <p>
- * Concrete subclasses must declare a class-level
+ * Concrete subclasses should typically declare a class-level
  * {@link ContextConfiguration @ContextConfiguration} annotation to configure
  * the {@link ApplicationContext application context}
  * {@link ContextConfiguration#locations() resource locations}.
+ * <em>If your test does not need to load an application context, you may choose
+ * to omit the {@link ContextConfiguration @ContextConfiguration} declaration
+ * and to configure the appropriate
+ * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners}
+ * manually.</em>
  * </p>
  *
  * @author Sam Brannen
@@ -83,7 +87,6 @@ public class AbstractJUnit4SpringContextTests implements ApplicationContextAware
 	 * @param applicationContext The applicationContext to set.
 	 */
 	public final void setApplicationContext(final ApplicationContext applicationContext) {
-
 		this.applicationContext = applicationContext;
 	}
 

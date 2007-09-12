@@ -35,6 +35,7 @@ import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -47,13 +48,17 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * environment.
  * </p>
  * <p>
- * Concrete subclasses must:
+ * Concrete subclasses:
  * </p>
  * <ul>
- * <li>Declare a class-level {@link ContextConfiguration @ContextConfiguration}
- * annotation to configure the {@link ApplicationContext application context}
- * {@link ContextConfiguration#locations() resource locations}.</li>
- * <li>Declare public constructors which match the signatures of
+ * <li>Typically declare a class-level
+ * {@link ContextConfiguration @ContextConfiguration} annotation to configure
+ * the {@link ApplicationContext application context}
+ * {@link ContextConfiguration#locations() resource locations}.
+ * <em>If your test does not need to load an
+ * application context, you may choose to omit the
+ * {@link ContextConfiguration @ContextConfiguration} declaration and to configure the appropriate {@link TestExecutionListener TestExecutionListeners} manually.</em></li>
+ * <li>Must declare public constructors which match the signatures of
  * {@link #AbstractJUnit38SpringContextTests() AbstractJUnit38SpringContextTests()}
  * and
  * {@link #AbstractJUnit38SpringContextTests(String) AbstractJUnit38SpringContextTests(String)}
@@ -66,7 +71,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * </p>
  * <ul>
  * <li>{@link org.springframework.test.annotation.DirtiesContext @DirtiesContext}
- * (via the {@link DirtiesContextTestExecutionListener})</li>
+ * (via the configured {@link DirtiesContextTestExecutionListener})</li>
  * <li>{@link IfProfileValue @IfProfileValue}</li>
  * <li>{@link ExpectedException @ExpectedException}</li>
  * <li>{@link Timed @Timed}</li>

@@ -44,13 +44,19 @@ import org.testng.annotations.BeforeMethod;
  * environment.
  * </p>
  * <p>
- * Concrete subclasses must:
+ * Concrete subclasses:
  * </p>
  * <ul>
- * <li>Declare a class-level {@link ContextConfiguration @ContextConfiguration}
- * annotation to configure the {@link ApplicationContext application context}
- * {@link ContextConfiguration#locations() resource locations}.</li>
- * <li>Declare a <code>public</code> no-args constructor which either
+ * <li>Typically declare a class-level
+ * {@link ContextConfiguration @ContextConfiguration} annotation to configure
+ * the {@link ApplicationContext application context}
+ * {@link ContextConfiguration#locations() resource locations}.
+ * <em>If your test does not need to load an application context, you may choose
+ * to omit the {@link ContextConfiguration @ContextConfiguration} declaration
+ * and to configure the appropriate
+ * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners}
+ * manually.</em></li>
+ * <li>Must declare a <code>public</code> no-args constructor which either
  * implicitly or explicitly delegates to <code>super();</code>.</li>
  * </ul>
  *
