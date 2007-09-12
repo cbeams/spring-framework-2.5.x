@@ -25,7 +25,6 @@ import org.junit.internal.runners.InitializationError;
 import org.junit.internal.runners.JUnit4ClassRunner;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
-
 import org.springframework.test.context.TestContextManager;
 
 /**
@@ -35,6 +34,21 @@ import org.springframework.test.context.TestContextManager;
  * means of the {@link TestContextManager} and associated support classes and
  * annotations.
  * </p>
+ * <p>
+ * The following list constitutes all annotations currently supported directly
+ * by SpringJUnit4ClassRunner.
+ * <em>(Note that additional annotations may be supported by the
+ * {@link TestContextManager} and associated support classes)</em>
+ * </p>
+ * <ul>
+ * <li>{@link org.junit.Test#expected() @Test(expected=...)}</li>
+ * <li>{@link org.springframework.test.annotation.ExpectedException @ExpectedException}</li>
+ * <li>{@link org.junit.Test#timeout() @Test(timeout=...)}</li>
+ * <li>{@link org.springframework.test.annotation.Timed @Timed}</li>
+ * <li>{@link org.springframework.test.annotation.Repeat @Repeat}</li>
+ * <li>{@link org.junit.Ignore @Ignore}</li>
+ * <li>{@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}</li>
+ * </ul>
  *
  * @author Sam Brannen
  * @since 2.5
@@ -54,7 +68,7 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	 *
 	 * @param clazz the Class object corresponding to the test class to be run.
 	 * @throws InitializationError if an error occurs while initializing the
-	 * runner.
+	 *         runner.
 	 * @see #createTestContextManager(Class)
 	 */
 	public SpringJUnit4ClassRunner(final Class<?> clazz) throws InitializationError {
@@ -69,12 +83,10 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 			this.testContextManager = createTestContextManager(clazz);
 		}
 		catch (final Exception e) {
-			logger.error("Caught an exception while attempting to instantiate a new TestContextManager for test class ["
-					+ clazz + "].", e);
+			logger.error("Caught an exception while attempting to instantiate a new TestContextManager for test class [" + clazz + "].", e);
 			throw new InitializationError(e);
 		}
 	}
-
 
 	/**
 	 * Delegates to {@link JUnit4ClassRunner#createTest()} to create the test
@@ -84,13 +96,12 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	 *
 	 * @return A new test instance.
 	 * @throws Exception if an error occurs while creating or preparing the test
-	 * instance.
+	 *         instance.
 	 * @see JUnit4ClassRunner#createTest()
 	 * @see TestContextManager#prepareTestInstance(Object)
 	 */
 	@Override
 	protected Object createTest() throws Exception {
-
 		final Object testInstance = super.createTest();
 		getTestContextManager().prepareTestInstance(testInstance);
 		return testInstance;
@@ -101,13 +112,12 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	 * subclasses.
 	 *
 	 * @param clazz the Class object corresponding to the test class to be
-	 * managed.
+	 *        managed.
 	 * @return A new TestContextManager
 	 * @throws Exception if an error occurs while creating a new
-	 * TestContextManager.
+	 *         TestContextManager.
 	 */
 	protected TestContextManager createTestContextManager(final Class<?> clazz) throws Exception {
-
 		return new TestContextManager(clazz);
 	}
 
@@ -117,7 +127,6 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	 * @return The TestContextManager.
 	 */
 	protected final TestContextManager getTestContextManager() {
-
 		return this.testContextManager;
 	}
 
