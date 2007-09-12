@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.context.junit4.AbstractTransactionalSpringRunnerTests.assertInTransaction;
+import static org.springframework.test.context.junit4.AbstractTransactionalSpringRunnerTests.inTransaction;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -59,15 +60,10 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	// ------------------------------------------------------------------------|
 
 	protected static final String	BOB				= "bob";
-
 	protected static final String	JANE			= "jane";
-
 	protected static final String	SUE				= "sue";
-
 	protected static final String	LUKE			= "luke";
-
 	protected static final String	LEIA			= "leia";
-
 	protected static final String	YODA			= "yoda";
 
 	// ------------------------------------------------------------------------|
@@ -91,25 +87,20 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 	protected String				bar;
 
-	private boolean					inTransaction	= false;
-
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
 	public static junit.framework.Test suite() {
-
 		return new JUnit4TestAdapter(ConcreteTransactionalJUnit4SpringContextTests.class);
 	}
 
 	protected static int clearPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
-
 		return SimpleJdbcTestUtils.deleteFromTables(simpleJdbcTemplate, "person");
 	}
 
 	protected static void createPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
-
 		try {
 			simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
 		}
@@ -119,17 +110,14 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	}
 
 	protected static int countRowsInPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
-
 		return SimpleJdbcTestUtils.countRowsInTable(simpleJdbcTemplate, "person");
 	}
 
 	protected static int addPerson(final SimpleJdbcTemplate simpleJdbcTemplate, final String name) {
-
 		return simpleJdbcTemplate.update("INSERT INTO person VALUES(?)", name);
 	}
 
 	protected static int deletePerson(final SimpleJdbcTemplate simpleJdbcTemplate, final String name) {
-
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
@@ -137,11 +125,11 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
+
 	/**
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
 	 */
 	public final void afterPropertiesSet() throws Exception {
-
 		this.beanInitialized = true;
 	}
 
@@ -149,19 +137,16 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	 * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
 	 */
 	public final void setBeanName(final String beanName) {
-
 		this.beanName = beanName;
 	}
 
 	@Autowired
 	protected final void setEmployee(final Employee employee) {
-
 		this.employee = employee;
 	}
 
 	@Resource
 	protected final void setBar(final String bar) {
-
 		this.bar = bar;
 	}
 
@@ -170,7 +155,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Test
 	@NotTransactional
 	public final void verifyApplicationContext() {
-
 		assertInTransaction(false);
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
 				super.applicationContext);
@@ -179,7 +163,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Test
 	@NotTransactional
 	public final void verifyBeanInitialized() {
-
 		assertInTransaction(false);
 		assertTrue("This test bean should have been initialized due to InitializingBean semantics.",
 				this.beanInitialized);
@@ -188,7 +171,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Test
 	@NotTransactional
 	public final void verifyBeanNameSet() {
-
 		assertInTransaction(false);
 		assertEquals("The bean name of this test instance should have been set to the fully qualified class name "
 				+ "due to BeanNameAware semantics.", getClass().getName(), this.beanName);
@@ -197,7 +179,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Test
 	@NotTransactional
 	public final void verifyAnnotationAutowiredFields() {
-
 		assertInTransaction(false);
 		assertNull("The nonrequiredLong property should NOT have been autowired.", this.nonrequiredLong);
 		assertNotNull("The pet field should have been autowired.", this.pet);
@@ -207,7 +188,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Test
 	@NotTransactional
 	public final void verifyAnnotationAutowiredMethods() {
-
 		assertInTransaction(false);
 		assertNotNull("The employee setter method should have been autowired.", this.employee);
 		assertEquals("John Smith", this.employee.getName());
@@ -216,7 +196,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Test
 	@NotTransactional
 	public final void verifyResourceAnnotationWiredFields() {
-
 		assertInTransaction(false);
 		assertEquals("The foo field should have been wired via @Resource.", "Foo", this.foo);
 	}
@@ -224,7 +203,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Test
 	@NotTransactional
 	public final void verifyResourceAnnotationWiredMethods() {
-
 		assertInTransaction(false);
 		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
 	}
@@ -233,8 +211,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 	@BeforeTransaction
 	public void beforeTransaction() {
-
-		this.inTransaction = true;
 		assertEquals("Verifying the number of rows in the person table before a transactional test method.", 1,
 				countRowsInPersonTable(super.simpleJdbcTemplate));
 		assertEquals("Adding yoda", 1, addPerson(super.simpleJdbcTemplate, YODA));
@@ -242,14 +218,12 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 	@Before
 	public void setUp() throws Exception {
-
-		assertEquals("Verifying the number of rows in the person table before a test method.", (this.inTransaction ? 2
+		assertEquals("Verifying the number of rows in the person table before a test method.", (inTransaction() ? 2
 				: 1), countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 	@Test
 	public void modifyTestDataWithinTransaction() {
-
 		assertInTransaction(true);
 		assertEquals("Adding jane", 1, addPerson(super.simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(super.simpleJdbcTemplate, SUE));
@@ -259,14 +233,12 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 	@After
 	public void tearDown() throws Exception {
-
-		assertEquals("Verifying the number of rows in the person table after a test method.", (this.inTransaction ? 4
+		assertEquals("Verifying the number of rows in the person table after a test method.", (inTransaction() ? 4
 				: 1), countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 	@AfterTransaction
 	public void afterTransaction() {
-
 		assertEquals("Deleting yoda", 1, deletePerson(super.simpleJdbcTemplate, YODA));
 		assertEquals("Verifying the number of rows in the person table after a transactional test method.", 1,
 				countRowsInPersonTable(super.simpleJdbcTemplate));
@@ -280,7 +252,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 		@Autowired
 		void setDataSource(final DataSource dataSource) {
-
 			final SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			createPersonTable(simpleJdbcTemplate);
 			clearPersonTable(simpleJdbcTemplate);

@@ -27,8 +27,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * <p>
- * Abstract base class for verifying support of Spring's &#064;Transactional and
- * &#064;NotTransactional annotations.
+ * Abstract base class for verifying support of Spring's
+ * {@link Transactional @Transactional} and
+ * {@link NotTransactional @NotTransactional} annotations.
  * </p>
  *
  * @author Sam Brannen
@@ -44,41 +45,36 @@ public abstract class AbstractTransactionalSpringRunnerTests {
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected static final String	BOB		= "bob";
+	protected static final String BOB = "bob";
+	protected static final String JANE = "jane";
+	protected static final String SUE = "sue";
+	protected static final String LUKE = "luke";
+	protected static final String LEIA = "leia";
+	protected static final String YODA = "yoda";
 
-	protected static final String	JANE	= "jane";
-
-	protected static final String	SUE		= "sue";
-
-	protected static final String	LUKE	= "luke";
-
-	protected static final String	LEIA	= "leia";
-
-	protected static final String	YODA	= "yoda";
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	public static final void assertInTransaction(final boolean inTransaction) {
+	public static boolean inTransaction() {
+		return TransactionSynchronizationManager.isActualTransactionActive();
+	}
 
+	public static final void assertInTransaction(final boolean inTransaction) {
 		if (inTransaction) {
-			assertTrue("The current thread should be associated with a transaction.",
-					TransactionSynchronizationManager.isActualTransactionActive());
+			assertTrue("The current thread should be associated with a transaction.", inTransaction());
 		}
 		else {
-			assertFalse("The current thread should not be associated with a transaction",
-					TransactionSynchronizationManager.isActualTransactionActive());
+			assertFalse("The current thread should not be associated with a transaction", inTransaction());
 		}
 	}
 
 	protected static int clearPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
-
 		return simpleJdbcTemplate.update("DELETE FROM person");
 	}
 
 	protected static void createPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
-
 		try {
 			simpleJdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
 		}
@@ -88,17 +84,14 @@ public abstract class AbstractTransactionalSpringRunnerTests {
 	}
 
 	protected static int countRowsInPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
-
 		return simpleJdbcTemplate.queryForInt("SELECT COUNT(0) FROM person");
 	}
 
 	protected static int addPerson(final SimpleJdbcTemplate simpleJdbcTemplate, final String name) {
-
 		return simpleJdbcTemplate.update("INSERT INTO person VALUES(?)", name);
 	}
 
 	protected static int deletePerson(final SimpleJdbcTemplate simpleJdbcTemplate, final String name) {
-
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
