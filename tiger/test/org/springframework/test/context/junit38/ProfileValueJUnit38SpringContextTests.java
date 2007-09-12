@@ -61,6 +61,11 @@ public class ProfileValueJUnit38SpringContextTests extends AbstractJUnit38Spring
 		return new JUnit4TestAdapter(ProfileValueJUnit38SpringContextTests.class);
 	}
 
+	@IfProfileValue(name = NAME, value = "")
+	public void testIfProfileValueEmpty() {
+		fail("The body of a disabled test should never be executed!");
+	}
+
 	@IfProfileValue(name = NAME, value = VALUE + "X")
 	public void testIfProfileValueDisabled() {
 		fail("The body of a disabled test should never be executed!");
@@ -68,11 +73,11 @@ public class ProfileValueJUnit38SpringContextTests extends AbstractJUnit38Spring
 
 	@IfProfileValue(name = NAME, value = VALUE)
 	public void testIfProfileValueEnabled() {
-		assertTrue(true);
+		/* no-op */
 	}
 
 	public void testIfProfileValueNotConfigured() {
-		assertTrue(true);
+		/* no-op */
 	}
 
 }
