@@ -48,38 +48,37 @@ import org.springframework.test.context.TestExecutionListeners;
 public class EnabledAndIgnoredSpringRunnerTests {
 
 	// ------------------------------------------------------------------------|
-	// --- CLASS VARIABLES ----------------------------------------------------|
+	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private static int			numTestsExecuted	= 0;
-
-	private static final String	NAME				= "test.if_profile_value.name";
-
-	private static final String	VALUE				= "enigma";
+	private static final String NAME = "test.if_profile_value.name";
+	private static final String VALUE = "enigma";
 
 	// ------------------------------------------------------------------------|
-	// --- CLASS METHODS ------------------------------------------------------|
+	// --- STATIC VARIABLES ---------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	private static int numTestsExecuted = 0;
+
+
+	// ------------------------------------------------------------------------|
+	// --- STATIC METHODS -----------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
 	public static junit.framework.Test suite() {
-
 		return new JUnit4TestAdapter(EnabledAndIgnoredSpringRunnerTests.class);
 	}
 
-	// ------------------------------------------------------------------------|
-
 	@BeforeClass
 	public static void setProfileValue() {
-
 		numTestsExecuted = 0;
 		System.setProperty(NAME, VALUE);
 	}
 
 	@AfterClass
 	public static void verifyNumTestsExecuted() {
-
-		assertEquals("Verifying the number of tests executed.", 1, numTestsExecuted);
+		assertEquals("Verifying the number of tests executed.", 2, numTestsExecuted);
 	}
 
 	// ------------------------------------------------------------------------|
@@ -88,23 +87,25 @@ public class EnabledAndIgnoredSpringRunnerTests {
 
 	@Test
 	@IfProfileValue(name = NAME, value = VALUE + "X")
-	public void testDisabledIfProfileValueAnnotation() {
-
+	public void testIfProfileValueDisabled() {
 		numTestsExecuted++;
 		fail("The body of a disabled test should never be executed!");
 	}
 
 	@Test
 	@IfProfileValue(name = NAME, value = VALUE)
-	public void testEnabledIfProfileValueAnnotation() {
+	public void testIfProfileValueEnabled() {
+		numTestsExecuted++;
+	}
 
+	@Test
+	public void testIfProfileValueNotConfigured() {
 		numTestsExecuted++;
 	}
 
 	@Test
 	@Ignore
 	public void testJUnitIgnoreAnnotation() {
-
 		numTestsExecuted++;
 		fail("The body of an ignored test should never be executed!");
 	}
