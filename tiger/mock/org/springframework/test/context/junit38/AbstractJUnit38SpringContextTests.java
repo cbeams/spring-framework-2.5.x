@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueSource;
+import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.SystemProfileValueSource;
 import org.springframework.test.annotation.Timed;
@@ -37,7 +38,6 @@ import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.util.Assert;
 
 /**
  * <p>
@@ -173,6 +173,8 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * <li>Provides support for {@link ExpectedException @ExpectedException}.</li>
 	 * </ul>
 	 *
+	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource,
+	 *      Method)
 	 * @see junit.framework.TestCase#runBare()
 	 */
 	@Override
@@ -182,7 +184,7 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 
 		final Method testMethod = getTestMethod();
 
-		if (isDisabledInThisEnvironment(testMethod)) {
+		if (!ProfileValueUtils.isTestEnabledInThisEnvironment(this.profileValueSource, testMethod)) {
 			recordDisabled(testMethod);
 			return;
 		}
@@ -343,43 +345,6 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 */
 	public final void setApplicationContext(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
-	}
-
-	/**
-	 * Determines if the supplied test method is <em>disabled</em> in the
-	 * current environment (i.e., whether or not the test should be executed) by
-	 * evaluating the {@link IfProfileValue @IfProfileValue} annotation, if
-	 * present.
-	 *
-	 * @param testMethod The test method to test against.
-	 * @return <code>true</code> if the test should be <em>disabled</em> in
-	 *         the current environment
-	 */
-	protected boolean isDisabledInThisEnvironment(final Method testMethod) {
-
-		boolean disabled = false;
-
-		IfProfileValue inProfile = testMethod.getAnnotation(IfProfileValue.class);
-		if (inProfile == null) {
-			inProfile = getClass().getAnnotation(IfProfileValue.class);
-		}
-
-		if (inProfile != null) {
-			final String name = inProfile.name();
-			Assert.hasText(name, "The name attribute supplied to @IfProfileValue must not be empty.");
-
-			final String annotatedValue = inProfile.value();
-			final String environmentValue = this.profileValueSource.get(name);
-			final boolean bothValuesAreNull = (environmentValue == null) && (annotatedValue == null);
-
-			final boolean enabled = bothValuesAreNull
-					|| ((environmentValue != null) && environmentValue.equals(annotatedValue));
-			disabled = !enabled;
-		}
-
-		return disabled;
-
-		// XXX Optional: add support for @IfNotProfileValue.
 	}
 
 	/**

@@ -18,7 +18,6 @@ package org.springframework.test.annotation;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -29,7 +28,6 @@ import org.springframework.test.AbstractTransactionalDataSourceSpringContextTest
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
-import org.springframework.util.Assert;
 
 /**
  * <p>
@@ -91,17 +89,27 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 
 	@Override
 	public void setDataSource(final DataSource dataSource) {
-
 		super.setDataSource(dataSource);
 		// JdbcTemplate will be identically configured
 		this.simpleJdbcTemplate = new SimpleJdbcTemplate(this.jdbcTemplate);
 	}
 
-	protected void findUniqueProfileValueSourceFromContext(final ApplicationContext ac) {
-
-		final Map<?, ?> beans = ac.getBeansOfType(ProfileValueSource.class);
-		if (beans.size() == 1) {
-			this.profileValueSource = (ProfileValueSource) beans.values().iterator().next();
+	/**
+	 * <p>
+	 * Searches for a unique {@link ProfileValueSource} in the supplied
+	 * {@link ApplicationContext}. If found, the
+	 * <code>profileValueSource</code> for this test will be set to the unique
+	 * {@link ProfileValueSource}.
+	 * </p>
+	 *
+	 * @param applicationContext the ApplicationContext in which to search for
+	 *        the ProfileValueSource.
+	 * @see ProfileValueUtils#findUniqueProfileValueSource(ApplicationContext)
+	 */
+	protected void findUniqueProfileValueSourceFromContext(final ApplicationContext applicationContext) {
+		final ProfileValueSource uniqueProfileValueSource = ProfileValueUtils.findUniqueProfileValueSource(applicationContext);
+		if (uniqueProfileValueSource != null) {
+			this.profileValueSource = uniqueProfileValueSource;
 		}
 	}
 
@@ -171,34 +179,13 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	 * </p>
 	 *
 	 * @param testMethod the test method
-	 * @return <code>true</code> if the test should be <em>disabled</em> in
-	 *         the current environment
+	 * @return <code>true</code> if the test is <em>disabled</em> in the
+	 *         current environment
+	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource,
+	 *      Method)
 	 */
 	protected boolean isDisabledInThisEnvironment(final Method testMethod) {
-
-		boolean disabled = false;
-
-		IfProfileValue inProfile = testMethod.getAnnotation(IfProfileValue.class);
-		if (inProfile == null) {
-			inProfile = getClass().getAnnotation(IfProfileValue.class);
-		}
-
-		if (inProfile != null) {
-			final String name = inProfile.name();
-			Assert.hasText(name, "The name attribute supplied to @IfProfileValue must not be empty.");
-
-			final String annotatedValue = inProfile.value();
-			final String environmentValue = this.profileValueSource.get(name);
-			final boolean bothValuesAreNull = (environmentValue == null) && (annotatedValue == null);
-
-			final boolean enabled = bothValuesAreNull
-					|| ((environmentValue != null) && environmentValue.equals(annotatedValue));
-			disabled = !enabled;
-		}
-
-		return disabled;
-
-		// XXX Optional: add support for @IfNotProfileValue.
+		return !ProfileValueUtils.isTestEnabledInThisEnvironment(this.profileValueSource, testMethod);
 	}
 
 	/**
@@ -207,7 +194,6 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	 * @return The current test method.
 	 */
 	protected Method getTestMethod() {
-
 		assertNotNull("TestCase.getName() cannot be null", getName());
 		Method testMethod = null;
 		try {
@@ -313,7 +299,6 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 
 
 	private static interface TestExecutionCallback {
-
 		void run() throws Throwable;
 	}
 

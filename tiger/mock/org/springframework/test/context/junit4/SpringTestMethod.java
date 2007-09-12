@@ -29,11 +29,10 @@ import org.junit.Test;
 import org.junit.Test.None;
 import org.junit.internal.runners.TestClass;
 import org.springframework.test.annotation.ExpectedException;
-import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueSource;
+import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.annotation.SystemProfileValueSource;
 import org.springframework.test.annotation.Timed;
-import org.springframework.util.Assert;
 
 /**
  * <p>
@@ -200,51 +199,16 @@ class SpringTestMethod {
 	}
 
 	/**
-	 * Determines if this test method is <em>disabled</em> in the current
-	 * environment (i.e., whether or not the test should be executed) by
-	 * evaluating the {@link IfProfileValue @IfProfileValue} annotation, if
-	 * present.
-	 *
-	 * @return <code>true</code> if the test should be <em>disabled</em> in
-	 *         the current environment
-	 * @see #isIgnored()
-	 */
-	protected boolean isDisabledInThisEnvironment() {
-
-		boolean disabled = false;
-
-		IfProfileValue inProfile = this.getMethod().getAnnotation(IfProfileValue.class);
-		if (inProfile == null) {
-			inProfile = getClass().getAnnotation(IfProfileValue.class);
-		}
-
-		if (inProfile != null) {
-			final String name = inProfile.name();
-			Assert.hasText(name, "The name attribute supplied to @IfProfileValue must not be empty.");
-
-			final String annotatedValue = inProfile.value();
-			final String environmentValue = this.profileValueSource.get(name);
-			final boolean bothValuesAreNull = (environmentValue == null) && (annotatedValue == null);
-
-			final boolean enabled = bothValuesAreNull
-					|| ((environmentValue != null) && environmentValue.equals(annotatedValue));
-			disabled = !enabled;
-		}
-
-		return disabled;
-
-		// XXX Optional: add support for @IfNotProfileValue.
-	}
-
-	/**
 	 * Determines if this test method should be ignored.
 	 *
 	 * @return <code>true</code> if this test method should be ignored.
-	 * @see #isDisabledInThisEnvironment()
+	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource,
+	 *      Method)
 	 */
 	public boolean isIgnored() {
 		final boolean ignoreAnnotationPresent = getMethod().isAnnotationPresent(Ignore.class);
-		return ignoreAnnotationPresent || isDisabledInThisEnvironment();
+		return ignoreAnnotationPresent
+				|| !ProfileValueUtils.isTestEnabledInThisEnvironment(this.profileValueSource, this.getMethod());
 	}
 
 	/**
