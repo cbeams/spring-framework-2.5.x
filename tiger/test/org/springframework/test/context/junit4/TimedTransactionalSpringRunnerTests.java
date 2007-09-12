@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.springframework.test.context.junit4.AbstractTransactionalSpringRunnerTests.assertInTransaction;
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;

@@ -17,6 +17,7 @@
 package org.springframework.test.context.junit4;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 import javax.sql.DataSource;
 
@@ -49,9 +50,10 @@ public class RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests 
 	// --- STATIC VARIABLES ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected static int				originalNumRows;
+	protected static int originalNumRows;
 
-	protected static SimpleJdbcTemplate	simpleJdbcTemplate;
+	protected static SimpleJdbcTemplate simpleJdbcTemplate;
+
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
@@ -96,6 +98,7 @@ public class RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests 
 		assertEquals("Verifying the number of rows in the person table within a transaction.", 2,
 				countRowsInPersonTable(simpleJdbcTemplate));
 	}
+
 
 	// ------------------------------------------------------------------------|
 	// --- TYPES --------------------------------------------------------------|

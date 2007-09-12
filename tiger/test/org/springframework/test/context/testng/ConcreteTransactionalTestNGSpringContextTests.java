@@ -16,8 +16,9 @@
 
 package org.springframework.test.context.testng;
 
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
+import static org.springframework.test.transaction.TransactionTestUtils.inTransaction;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -37,7 +38,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.jdbc.SimpleJdbcTestUtils;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -148,19 +148,6 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	// ------------------------------------------------------------------------|
 
-	private boolean inTransaction() {
-		return TransactionSynchronizationManager.isActualTransactionActive();
-	}
-
-	private void assertInTransaction(boolean transactionRequired) {
-		if (transactionRequired) {
-			assertTrue(inTransaction(), "The current thread should be associated with a transaction.");
-		}
-		else {
-			assertFalse(inTransaction(), "The current thread should not be associated with a transaction");
-		}
-	}
-
 	private void assertNumRowsInPersonTable(int expectedNumRows, String testState) {
 		assertEquals(countRowsInPersonTable(this.simpleJdbcTemplate), expectedNumRows,
 				"Verifying the number of rows in the person table (" + testState + ").");
@@ -188,7 +175,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 		assertEquals(numTearDownCallsInTransaction, 1, "Verifying number of calls to tearDown() within a transaction.");
 	}
 
-	@Test(enabled=false)
+	@Test(enabled = false)
 	@NotTransactional
 	public void verifyApplicationContextSet() {
 		assertInTransaction(false);
@@ -198,7 +185,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 		assertEquals(employeeBean.getName(), "John Smith", "Verifying employee's name.");
 	}
 
-	@Test(enabled=false)
+	@Test(enabled = false)
 	@NotTransactional
 	public void verifyBeanInitialized() {
 		assertInTransaction(false);
@@ -206,7 +193,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 				"This test instance should have been initialized due to InitializingBean semantics.");
 	}
 
-	@Test(enabled=false)
+	@Test(enabled = false)
 	@NotTransactional
 	public void verifyBeanNameSet() {
 		assertInTransaction(false);
@@ -214,7 +201,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 				"The bean name of this test instance should have been set due to BeanNameAware semantics.");
 	}
 
-	@Test(enabled=false)
+	@Test(enabled = false)
 	@NotTransactional
 	public void verifyAnnotationAutowiredFields() {
 		assertInTransaction(false);
@@ -223,7 +210,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 		assertEquals(this.pet.getName(), "Fido", "Verifying pet's name.");
 	}
 
-	@Test(enabled=false)
+	@Test(enabled = false)
 	@NotTransactional
 	public void verifyAnnotationAutowiredMethods() {
 		assertInTransaction(false);
@@ -231,14 +218,14 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 		assertEquals(this.employee.getName(), "John Smith", "Verifying employee's name.");
 	}
 
-	@Test(enabled=false)
+	@Test(enabled = false)
 	@NotTransactional
 	public void verifyResourceAnnotationInjectedFields() {
 		assertInTransaction(false);
 		assertEquals(this.foo, "Foo", "The foo field should have been injected via @Resource.");
 	}
 
-	@Test(enabled=false)
+	@Test(enabled = false)
 	@NotTransactional
 	public void verifyResourceAnnotationInjectedMethods() {
 		assertInTransaction(false);
@@ -262,7 +249,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 		assertNumRowsInPersonTable((inTransaction() ? 2 : 1), "before a test method");
 	}
 
-	@Test(enabled=false)
+	@Test(enabled = false)
 	public void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
 		assertAddPerson(JANE);

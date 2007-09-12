@@ -17,6 +17,7 @@
 package org.springframework.test.context.junit4;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 import javax.sql.DataSource;
 
@@ -55,17 +56,18 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	// --- STATIC VARIABLES ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected static SimpleJdbcTemplate	simpleJdbcTemplate;
+	protected static SimpleJdbcTemplate simpleJdbcTemplate;
 
-	protected static int				numBeforeTransactionCalls	= 0;
+	protected static int numBeforeTransactionCalls = 0;
 
-	protected static int				numAfterTransactionCalls	= 0;
+	protected static int numAfterTransactionCalls = 0;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected boolean					inTransaction				= false;
+	protected boolean inTransaction = false;
+
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
@@ -158,6 +160,7 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 		assertEquals("Verifying the number of rows in the person table without a transaction.", 3,
 				countRowsInPersonTable(simpleJdbcTemplate));
 	}
+
 
 	// ------------------------------------------------------------------------|
 	// --- TYPES --------------------------------------------------------------|

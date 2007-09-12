@@ -17,6 +17,7 @@
 package org.springframework.test.context.junit4;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 
 import javax.sql.DataSource;
 
@@ -64,7 +65,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-		TransactionalTestExecutionListener.class })
+	TransactionalTestExecutionListener.class })
 @Transactional
 public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactionalSpringRunnerTests {
 
@@ -72,7 +73,8 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 	// --- STATIC VARIABLES ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected static SimpleJdbcTemplate	simpleJdbcTemplate;
+	protected static SimpleJdbcTemplate simpleJdbcTemplate;
+
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
@@ -126,6 +128,7 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 		assertEquals("Verifying the number of rows in the person table without a transaction.", 4,
 				countRowsInPersonTable(simpleJdbcTemplate));
 	}
+
 
 	// ------------------------------------------------------------------------|
 	// --- TYPES --------------------------------------------------------------|

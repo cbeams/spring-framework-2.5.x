@@ -20,8 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.test.context.junit4.AbstractTransactionalSpringRunnerTests.assertInTransaction;
-import static org.springframework.test.context.junit4.AbstractTransactionalSpringRunnerTests.inTransaction;
+import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
+import static org.springframework.test.transaction.TransactionTestUtils.inTransaction;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -59,33 +59,34 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	protected static final String	BOB				= "bob";
-	protected static final String	JANE			= "jane";
-	protected static final String	SUE				= "sue";
-	protected static final String	LUKE			= "luke";
-	protected static final String	LEIA			= "leia";
-	protected static final String	YODA			= "yoda";
+	protected static final String BOB = "bob";
+	protected static final String JANE = "jane";
+	protected static final String SUE = "sue";
+	protected static final String LUKE = "luke";
+	protected static final String LEIA = "leia";
+	protected static final String YODA = "yoda";
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private boolean					beanInitialized	= false;
+	private boolean beanInitialized = false;
 
-	private String					beanName		= "replace me with [" + getClass().getName() + "]";
+	private String beanName = "replace me with [" + getClass().getName() + "]";
 
-	private Employee				employee;
+	private Employee employee;
 
 	@Autowired
-	private Pet						pet;
+	private Pet pet;
 
 	@Autowired(required = false)
-	protected Long					nonrequiredLong;
+	protected Long nonrequiredLong;
 
 	@Resource()
-	protected String				foo;
+	protected String foo;
 
-	protected String				bar;
+	protected String bar;
+
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
@@ -124,7 +125,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
-
 
 	/**
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
@@ -218,8 +218,8 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 	@Before
 	public void setUp() throws Exception {
-		assertEquals("Verifying the number of rows in the person table before a test method.", (inTransaction() ? 2
-				: 1), countRowsInPersonTable(super.simpleJdbcTemplate));
+		assertEquals("Verifying the number of rows in the person table before a test method.",
+				(inTransaction() ? 2 : 1), countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 	@Test
@@ -233,8 +233,8 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 	@After
 	public void tearDown() throws Exception {
-		assertEquals("Verifying the number of rows in the person table after a test method.", (inTransaction() ? 4
-				: 1), countRowsInPersonTable(super.simpleJdbcTemplate));
+		assertEquals("Verifying the number of rows in the person table after a test method.",
+				(inTransaction() ? 4 : 1), countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
 
 	@AfterTransaction
@@ -243,6 +243,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		assertEquals("Verifying the number of rows in the person table after a transactional test method.", 1,
 				countRowsInPersonTable(super.simpleJdbcTemplate));
 	}
+
 
 	// ------------------------------------------------------------------------|
 	// --- TYPES --------------------------------------------------------------|
