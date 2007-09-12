@@ -28,12 +28,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.Test.None;
 import org.junit.internal.runners.TestClass;
-
 import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueSource;
 import org.springframework.test.annotation.SystemProfileValueSource;
 import org.springframework.test.annotation.Timed;
+import org.springframework.util.Assert;
 
 /**
  * <p>
@@ -71,11 +71,9 @@ class SpringTestMethod {
 	 * @param testClass The test class.
 	 */
 	public SpringTestMethod(final Method method, final TestClass testClass) {
-
 		this.method = method;
 		this.testClass = testClass;
 	}
-
 
 	/**
 	 * Determines if this test method is {@link Test#expected() expected} to
@@ -85,7 +83,6 @@ class SpringTestMethod {
 	 *         exception.
 	 */
 	public boolean expectsException() {
-
 		return getExpectedException() != null;
 	}
 
@@ -95,7 +92,6 @@ class SpringTestMethod {
 	 * @return The <em>after</em> methods.
 	 */
 	public List<Method> getAfters() {
-
 		return getTestClass().getAnnotatedMethods(After.class);
 	}
 
@@ -105,7 +101,6 @@ class SpringTestMethod {
 	 * @return The <em>before</em> methods.
 	 */
 	public List<Method> getBefores() {
-
 		return getTestClass().getAnnotatedMethods(Before.class);
 	}
 
@@ -123,7 +118,7 @@ class SpringTestMethod {
 	 * @return The expected exception, or <code>null</code> if none was
 	 *         specified.
 	 * @throws IllegalStateException if both types of configuration are used
-	 * simultaneously.
+	 *         simultaneously.
 	 */
 	public Class<? extends Throwable> getExpectedException() throws IllegalStateException {
 
@@ -163,7 +158,6 @@ class SpringTestMethod {
 	 * @return The test method.
 	 */
 	public final Method getMethod() {
-
 		return this.method;
 	}
 
@@ -173,7 +167,6 @@ class SpringTestMethod {
 	 * @return The test class.
 	 */
 	public final TestClass getTestClass() {
-
 		return this.testClass;
 	}
 
@@ -188,7 +181,6 @@ class SpringTestMethod {
 	 * @return The timeout, or <code>0</code> if none was specified.
 	 */
 	public long getTimeout() {
-
 		final Test testAnnotation = getMethod().getAnnotation(Test.class);
 		final long timeout = ((testAnnotation != null) && (testAnnotation.timeout() > 0)) ? testAnnotation.timeout()
 				: 0;
@@ -204,7 +196,6 @@ class SpringTestMethod {
 	 */
 	public void invoke(final Object testInstance) throws IllegalArgumentException, IllegalAccessException,
 			InvocationTargetException {
-
 		getMethod().invoke(testInstance);
 	}
 
@@ -214,23 +205,33 @@ class SpringTestMethod {
 	 * evaluating the {@link IfProfileValue @IfProfileValue} annotation, if
 	 * present.
 	 *
-	 * @return whether the test should execute in the current environment
+	 * @return <code>true</code> if the test should be <em>disabled</em> in
+	 *         the current environment
 	 * @see #isIgnored()
 	 */
 	protected boolean isDisabledInThisEnvironment() {
 
-		IfProfileValue ifProfileValue = getMethod().getAnnotation(IfProfileValue.class);
-		if (ifProfileValue == null) {
-			ifProfileValue = getClass().getAnnotation(IfProfileValue.class);
+		boolean disabled = false;
+
+		IfProfileValue inProfile = this.getMethod().getAnnotation(IfProfileValue.class);
+		if (inProfile == null) {
+			inProfile = getClass().getAnnotation(IfProfileValue.class);
 		}
 
-		if (ifProfileValue != null) {
-			// May be true
-			return !this.profileValueSource.get(ifProfileValue.name()).equals(ifProfileValue.value());
+		if (inProfile != null) {
+			final String name = inProfile.name();
+			Assert.hasText(name, "The name attribute supplied to @IfProfileValue must not be empty.");
+
+			final String annotatedValue = inProfile.value();
+			final String environmentValue = this.profileValueSource.get(name);
+			final boolean bothValuesAreNull = (environmentValue == null) && (annotatedValue == null);
+
+			final boolean enabled = bothValuesAreNull
+					|| ((environmentValue != null) && environmentValue.equals(annotatedValue));
+			disabled = !enabled;
 		}
 
-		// else
-		return false;
+		return disabled;
 
 		// XXX Optional: add support for @IfNotProfileValue.
 	}
@@ -242,9 +243,7 @@ class SpringTestMethod {
 	 * @see #isDisabledInThisEnvironment()
 	 */
 	public boolean isIgnored() {
-
 		final boolean ignoreAnnotationPresent = getMethod().isAnnotationPresent(Ignore.class);
-
 		return ignoreAnnotationPresent || isDisabledInThisEnvironment();
 	}
 
@@ -257,7 +256,6 @@ class SpringTestMethod {
 	 *         type.
 	 */
 	public boolean isUnexpected(final Throwable exception) {
-
 		return !getExpectedException().isAssignableFrom(exception.getClass());
 	}
 
