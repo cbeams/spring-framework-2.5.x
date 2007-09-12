@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,30 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Superclass for tests that allows conditional test execution
- * at individual test method level.
- *
- * The <code>isDisabledInThisEnvironment</code> method is invoked before the
- * execution of each test method. Subclasses can override that method to return
- * whether or not the given test should be executed. Note that the tests will
- * still appear to have executed and passed; log output will show that the test
- * was not executed.
+ * Superclass for tests that allows conditional test execution at individual
+ * test method level.
+ * {@link #isDisabledInThisEnvironment(String) isDisabledInThisEnvironment()}
+ * method is invoked before the execution of each test method. Subclasses can
+ * override that method to return whether or not the given test should be
+ * executed. Note that the tests will still appear to have executed and passed;
+ * log output will show that the test was not executed.
  *
  * @author Rod Johnson
  * @since 2.0
  * @see #isDisabledInThisEnvironment
  */
 public abstract class ConditionalTestCase extends TestCase {
-	
+
 	private static int disabledTestCount;
+
+
+	/**
+	 * Return the number of tests disabled in this environment.
+	 */
+	public static int getDisabledTestCount() {
+		return disabledTestCount;
+	}
+
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -55,24 +63,24 @@ public abstract class ConditionalTestCase extends TestCase {
 		super(name);
 	}
 
-	
 	public void runBare() throws Throwable {
 		// getName will return the name of the method being run
 		if (isDisabledInThisEnvironment(getName())) {
 			recordDisabled();
-			logger.info("**** " + getClass().getName() + "." + getName() + " disabled in this environment: " +
-					"Total disabled tests=" + getDisabledTestCount());
+			this.logger.info("**** " + getClass().getName() + "." + getName() + " disabled in this environment: "
+					+ "Total disabled tests = " + getDisabledTestCount());
 			return;
 		}
-		
+
 		// Let JUnit handle execution
 		super.runBare();
 	}
 
 	/**
 	 * Should this test run?
+	 *
 	 * @param testMethodName name of the test method
-	 * @return whether the test should execute in the current envionment
+	 * @return whether the test should execute in the current environment
 	 */
 	protected boolean isDisabledInThisEnvironment(String testMethodName) {
 		return false;
@@ -80,18 +88,11 @@ public abstract class ConditionalTestCase extends TestCase {
 
 	/**
 	 * Record a disabled test.
+	 *
 	 * @return the current disabled test count
 	 */
 	protected int recordDisabled() {
 		return ++disabledTestCount;
-	}
-
-
-	/**
-	 * Return the number of tests disabled in this environment.
-	 */
-	public static int getDisabledTestCount() {
-		return disabledTestCount;
 	}
 
 }
