@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * <p>
@@ -45,7 +47,6 @@ public abstract class ProfileValueUtils {
 	 *         found or if multiple ProfileValueSources were found.
 	 */
 	public static final ProfileValueSource findUniqueProfileValueSource(final ApplicationContext applicationContext) {
-
 		final Map<?, ?> beans = applicationContext.getBeansOfType(ProfileValueSource.class);
 		if (beans.size() == 1) {
 			return (ProfileValueSource) beans.values().iterator().next();
@@ -74,20 +75,39 @@ public abstract class ProfileValueUtils {
 
 		boolean enabled = true;
 
-		IfProfileValue inProfile = testMethod.getAnnotation(IfProfileValue.class);
-		if (inProfile == null) {
-			inProfile = testMethod.getDeclaringClass().getAnnotation(IfProfileValue.class);
+		IfProfileValue ifProfileValue = testMethod.getAnnotation(IfProfileValue.class);
+		if (ifProfileValue == null) {
+			ifProfileValue = testMethod.getDeclaringClass().getAnnotation(IfProfileValue.class);
 		}
 
-		if (inProfile != null) {
-			final String name = inProfile.name();
+		if (ifProfileValue != null) {
+			final String name = ifProfileValue.name();
 			Assert.hasText(name, "The name attribute supplied to @IfProfileValue must not be empty.");
 
-			final String annotatedValue = inProfile.value();
 			final String environmentValue = profileValueSource.get(name);
-			final boolean bothValuesAreNull = (environmentValue == null) && (annotatedValue == null);
+			final String annotatedValue = ifProfileValue.value();
+			final String[] annotatedValues = ifProfileValue.values();
+			final boolean annotatedValueEmpty = !StringUtils.hasText(annotatedValue);
+			final boolean annotatedValuesEmpty = ObjectUtils.isEmpty(annotatedValues);
 
-			enabled = bothValuesAreNull || ((environmentValue != null) && environmentValue.equals(annotatedValue));
+			if (annotatedValueEmpty && annotatedValuesEmpty) {
+				throw new IllegalArgumentException(
+						"Either the 'value' or 'values' attribute of @IfProfileValue must be set.");
+			}
+
+			if (!annotatedValueEmpty && !annotatedValuesEmpty) {
+				throw new IllegalArgumentException(
+						"Setting both the 'value' and 'values' attributes of @IfProfileValue is not allowed: choose one or the other.");
+			}
+
+			final String[] values = (!annotatedValuesEmpty ? annotatedValues : new String[] { annotatedValue });
+			for (String value : values) {
+				boolean bothValuesAreNull = (environmentValue == null) && (value == null);
+				enabled = bothValuesAreNull || ((environmentValue != null) && environmentValue.equals(value));
+				if (enabled) {
+					break;
+				}
+			}
 		}
 
 		// XXX Optional: add support for @IfNotProfileValue.

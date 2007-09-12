@@ -51,7 +51,7 @@ public class EnabledAndIgnoredSpringRunnerTests {
 	// --- CONSTANTS ----------------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
-	private static final String NAME = "test.if_profile_value.name";
+	private static final String NAME = "EnabledAndIgnoredSpringRunnerTests.profile_value.name";
 	private static final String VALUE = "enigma";
 
 	// ------------------------------------------------------------------------|
@@ -78,19 +78,12 @@ public class EnabledAndIgnoredSpringRunnerTests {
 
 	@AfterClass
 	public static void verifyNumTestsExecuted() {
-		assertEquals("Verifying the number of tests executed.", 2, numTestsExecuted);
+		assertEquals("Verifying the number of tests executed.", 3, numTestsExecuted);
 	}
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
-
-	@Test
-	@IfProfileValue(name = NAME, value = "")
-	public void testIfProfileValueEmpty() {
-		numTestsExecuted++;
-		fail("The body of a disabled test should never be executed!");
-	}
 
 	@Test
 	@IfProfileValue(name = NAME, value = VALUE + "X")
@@ -101,7 +94,13 @@ public class EnabledAndIgnoredSpringRunnerTests {
 
 	@Test
 	@IfProfileValue(name = NAME, value = VALUE)
-	public void testIfProfileValueEnabled() {
+	public void testIfProfileValueEnabledViaSingleValue() {
+		numTestsExecuted++;
+	}
+
+	@Test
+	@IfProfileValue(name = NAME, values = { "foo", VALUE, "bar" })
+	public void testIfProfileValueEnabledViaMultipleValues() {
 		numTestsExecuted++;
 	}
 

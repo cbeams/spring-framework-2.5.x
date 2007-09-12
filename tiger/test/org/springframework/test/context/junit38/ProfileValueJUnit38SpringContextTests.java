@@ -16,12 +16,10 @@
 
 package org.springframework.test.context.junit38;
 
-import junit.framework.JUnit4TestAdapter;
+import junit.framework.TestCase;
+import junit.framework.TestResult;
 
-import org.junit.internal.runners.JUnit38ClassRunner;
-import org.junit.runner.RunWith;
 import org.springframework.test.annotation.IfProfileValue;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 
 /**
@@ -29,23 +27,11 @@ import org.springframework.test.context.TestExecutionListeners;
  * Verifies proper handling of {@link IfProfileValue @IfProfileValue} in
  * conjunction with {@link AbstractJUnit38SpringContextTests}.
  * </p>
- * <p>
- * Note that {@link TestExecutionListeners @TestExecutionListeners} is
- * explicitly configured with an empty list, thus disabling all default
- * listeners.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
  */
-@RunWith(JUnit38ClassRunner.class)
-@ContextConfiguration
-@TestExecutionListeners( {})
-public class ProfileValueJUnit38SpringContextTests extends AbstractJUnit38SpringContextTests {
-
-	private static final String NAME = "test.if_profile_value.name";
-	private static final String VALUE = "enigma";
-
+public class ProfileValueJUnit38SpringContextTests extends TestCase {
 
 	public ProfileValueJUnit38SpringContextTests() throws Exception {
 		this(null);
@@ -53,31 +39,74 @@ public class ProfileValueJUnit38SpringContextTests extends AbstractJUnit38Spring
 
 	public ProfileValueJUnit38SpringContextTests(final String name) throws Exception {
 		super(name);
-		System.setProperty(NAME, VALUE);
 	}
 
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(ProfileValueJUnit38SpringContextTests.class);
+	private void assertInvocationCount(final String testName, final int expectedInvocationCount,
+			final int expectedErrorCount, final int expectedFailureCount) throws Exception {
+		final ProfileValueTestCase profileValueTestCase = new ProfileValueTestCase(testName);
+		final TestResult testResult = profileValueTestCase.run();
+		assertEquals("Verifying number of invocations for test method [" + testName + "].", expectedInvocationCount,
+				profileValueTestCase.invocationCount);
+		assertEquals("Verifying number of errors for test method [" + testName + "].", expectedErrorCount,
+				testResult.errorCount());
+		assertEquals("Verifying number of failures for test method [" + testName + "].", expectedFailureCount,
+				testResult.failureCount());
 	}
 
-	@IfProfileValue(name = NAME, value = "")
-	public void testIfProfileValueEmpty() {
-		fail("The body of a disabled test should never be executed!");
+	public void testIfProfileValueAnnotationSupport() throws Exception {
+		assertInvocationCount("testIfProfileValueEmpty", 0, 1, 0);
+		assertInvocationCount("testIfProfileValueDisabled", 0, 0, 0);
+		assertInvocationCount("testIfProfileValueEnabledViaSingleValue", 1, 0, 0);
+		assertInvocationCount("testIfProfileValueEnabledViaMultipleValues", 1, 0, 0);
+		assertInvocationCount("testIfProfileValueNotConfigured", 1, 0, 0);
 	}
 
-	@IfProfileValue(name = NAME, value = VALUE + "X")
-	public void testIfProfileValueDisabled() {
-		fail("The body of a disabled test should never be executed!");
-	}
 
-	@IfProfileValue(name = NAME, value = VALUE)
-	public void testIfProfileValueEnabled() {
-		/* no-op */
-	}
+	/**
+	 * <p>
+	 * Note that {@link TestExecutionListeners @TestExecutionListeners} is
+	 * explicitly configured with an empty list, thus disabling all default
+	 * listeners.
+	 * </p>
+	 */
+	@TestExecutionListeners( {})
+	protected static class ProfileValueTestCase extends AbstractJUnit38SpringContextTests {
 
-	public void testIfProfileValueNotConfigured() {
-		/* no-op */
-	}
+		private static final String NAME = "ProfileValueJUnit38SpringContextTests.profile_value.name";
+		private static final String VALUE = "enigma";
 
+		int invocationCount = 0;
+
+
+		public ProfileValueTestCase(final String name) throws Exception {
+			super(name);
+			System.setProperty(NAME, VALUE);
+		}
+
+		@IfProfileValue(name = NAME, value = "")
+		public void testIfProfileValueEmpty() {
+			this.invocationCount++;
+			fail("An empty profile value should throw an IllegalArgumentException.");
+		}
+
+		@IfProfileValue(name = NAME, value = VALUE + "X")
+		public void testIfProfileValueDisabled() {
+			this.invocationCount++;
+			fail("The body of a disabled test should never be executed!");
+		}
+
+		@IfProfileValue(name = NAME, value = VALUE)
+		public void testIfProfileValueEnabledViaSingleValue() {
+			this.invocationCount++;
+		}
+
+		@IfProfileValue(name = NAME, values = { "foo", VALUE, "bar" })
+		public void testIfProfileValueEnabledViaMultipleValues() {
+			this.invocationCount++;
+		}
+
+		public void testIfProfileValueNotConfigured() {
+			this.invocationCount++;
+		}
+	}
 }

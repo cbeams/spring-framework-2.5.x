@@ -16,6 +16,9 @@
 
 package org.springframework.test.annotation;
 
+import junit.framework.TestCase;
+import junit.framework.TestResult;
+
 /**
  * <p>
  * Verifies proper handling of {@link IfProfileValue @IfProfileValue} in
@@ -25,11 +28,7 @@ package org.springframework.test.annotation;
  * @author Sam Brannen
  * @since 2.5
  */
-public class ProfileValueAnnotationAwareTransactionalTests extends AbstractAnnotationAwareTransactionalTests {
-
-	private static final String NAME = "ProfileValueAnnotationAwareTransactionalTests.profile_value.name";
-	private static final String VALUE = "enigma";
-
+public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 
 	public ProfileValueAnnotationAwareTransactionalTests() throws Exception {
 		this(null);
@@ -37,35 +36,76 @@ public class ProfileValueAnnotationAwareTransactionalTests extends AbstractAnnot
 
 	public ProfileValueAnnotationAwareTransactionalTests(final String name) throws Exception {
 		super(name);
-		System.setProperty(NAME, VALUE);
 	}
 
-	@Override
-	protected String getConfigPath() {
-		return "ProfileValueAnnotationAwareTransactionalTests-context.xml";
+	private void assertInvocationCount(final String testName, final int expectedInvocationCount,
+			final int expectedErrorCount, final int expectedFailureCount) throws Exception {
+		final ProfileValueTestCase profileValueTestCase = new ProfileValueTestCase(testName);
+		final TestResult testResult = profileValueTestCase.run();
+		assertEquals("Verifying number of invocations for test method [" + testName + "].", expectedInvocationCount,
+				profileValueTestCase.invocationCount);
+		assertEquals("Verifying number of errors for test method [" + testName + "].", expectedErrorCount,
+				testResult.errorCount());
+		assertEquals("Verifying number of failures for test method [" + testName + "].", expectedFailureCount,
+				testResult.failureCount());
 	}
 
-	@NotTransactional
-	@IfProfileValue(name = NAME, value = "")
-	public void testIfProfileValueEmpty() {
-		fail("The body of a disabled test should never be executed!");
+	public void testIfProfileValueAnnotationSupport() throws Exception {
+		assertInvocationCount("testIfProfileValueEmpty", 0, 1, 0);
+		assertInvocationCount("testIfProfileValueDisabled", 0, 0, 0);
+		assertInvocationCount("testIfProfileValueEnabledViaSingleValue", 1, 0, 0);
+		assertInvocationCount("testIfProfileValueEnabledViaMultipleValues", 1, 0, 0);
+		assertInvocationCount("testIfProfileValueNotConfigured", 1, 0, 0);
 	}
 
-	@NotTransactional
-	@IfProfileValue(name = NAME, value = VALUE + "X")
-	public void testIfProfileValueDisabled() {
-		fail("The body of a disabled test should never be executed!");
-	}
 
-	@NotTransactional
-	@IfProfileValue(name = NAME, value = VALUE)
-	public void testIfProfileValueEnabled() {
-		/* no-op */
-	}
+	protected static class ProfileValueTestCase extends AbstractAnnotationAwareTransactionalTests {
 
-	@NotTransactional
-	public void testIfProfileValueNotConfigured() {
-		/* no-op */
-	}
+		private static final String NAME = "ProfileValueAnnotationAwareTransactionalTests.profile_value.name";
+		private static final String VALUE = "enigma";
 
+		int invocationCount = 0;
+
+
+		public ProfileValueTestCase(final String name) throws Exception {
+			super(name);
+			System.setProperty(NAME, VALUE);
+		}
+
+		@Override
+		protected String getConfigPath() {
+			return "ProfileValueAnnotationAwareTransactionalTests-context.xml";
+		}
+
+		@NotTransactional
+		@IfProfileValue(name = NAME, value = "")
+		public void testIfProfileValueEmpty() {
+			this.invocationCount++;
+			fail("An empty profile value should throw an IllegalArgumentException.");
+		}
+
+		@NotTransactional
+		@IfProfileValue(name = NAME, value = VALUE + "X")
+		public void testIfProfileValueDisabled() {
+			this.invocationCount++;
+			fail("The body of a disabled test should never be executed!");
+		}
+
+		@NotTransactional
+		@IfProfileValue(name = NAME, value = VALUE)
+		public void testIfProfileValueEnabledViaSingleValue() {
+			this.invocationCount++;
+		}
+
+		@NotTransactional
+		@IfProfileValue(name = NAME, values = { "foo", VALUE, "bar" })
+		public void testIfProfileValueEnabledViaMultipleValues() {
+			this.invocationCount++;
+		}
+
+		@NotTransactional
+		public void testIfProfileValueNotConfigured() {
+			this.invocationCount++;
+		}
+	}
 }

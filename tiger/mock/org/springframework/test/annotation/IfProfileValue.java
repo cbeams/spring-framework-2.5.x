@@ -26,19 +26,22 @@ import java.lang.annotation.Target;
 /**
  * <p>
  * Test annotation to indicate that a test is enabled for a specific testing
- * profile. If the configured {@link ProfileValueSource} returns a matching
- * {@link #value() value} for the provided {@link #name() name}, the test will
- * be enabled. This annotation can be applied at either the class or method
- * level.
+ * profile or environment. If the configured {@link ProfileValueSource} returns
+ * a matching {@link #value() value} for the provided {@link #name() name}, the
+ * test will be enabled.
+ * </p>
+ * <p>
+ * Note: {@link IfProfileValue @IfProfileValue} can be applied at either the
+ * class or method level.
  * </p>
  * <p>
  * Example: when using {@link SystemProfileValueSource} as the
- * {@link ProfileValueSource} implementation, you could configure a test method
- * to run only on Java VMs from Sun Microsystems as follows:
+ * {@link ProfileValueSource} implementation, you can configure a test method to
+ * run only on Java VMs from Sun Microsystems as follows:
  * </p>
  *
  * <pre class="code">
- * &#064;IfProfileValue(name=&quot;java.vendor&quot;, value=&quot;Sun Microsystems Inc.&quot;)
+ * {@link IfProfileValue @IfProfileValue}(name=&quot;java.vendor&quot;, value=&quot;Sun Microsystems Inc.&quot;)
  * testSomething() {
  *     // ...
  * }
@@ -49,6 +52,9 @@ import java.lang.annotation.Target;
  * @since 2.0
  * @see ProfileValueSource
  * @see AbstractAnnotationAwareTransactionalTests
+ * @see org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests
+ * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
+ * @see org.springframework.test.context.junit4.SpringJUnit4ClassRunner
  */
 @Target( { ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
@@ -57,15 +63,35 @@ import java.lang.annotation.Target;
 public @interface IfProfileValue {
 
 	/**
+	 * <p>
 	 * The <code>name</code> of the <em>profile value</em> against which to
 	 * test.
+	 * </p>
 	 */
 	String name();
 
 	/**
-	 * The required <code>value</code> of the <em>profile value</em> for the
-	 * given {@link #name() name}.
+	 * <p>
+	 * A single, permissible <code>value</code> of the <em>profile value</em>
+	 * for the given {@link #name() name}.
+	 * </p>
+	 * <p>
+	 * Note: assigning values to both {@link #value()} and {@link #values()}
+	 * will lead to a configuration conflict.
+	 * </p>
 	 */
-	String value();
+	String value() default "";
+
+	/**
+	 * <p>
+	 * A list of all permissible <code>values</code> of the
+	 * <em>profile value</em> for the given {@link #name() name}.
+	 * </p>
+	 * <p>
+	 * Note: assigning values to both {@link #value()} and {@link #values()}
+	 * will lead to a configuration conflict.
+	 * </p>
+	 */
+	String[] values() default {};
 
 }
