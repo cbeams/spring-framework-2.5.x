@@ -20,9 +20,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.ExpectedException;
@@ -37,6 +37,7 @@ import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import org.springframework.util.Assert;
 
 /**
  * <p>
@@ -351,22 +352,32 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * present.
 	 *
 	 * @param testMethod The test method to test against.
-	 * @return whether the test method should execute in the current environment
+	 * @return <code>true</code> if the test should be <em>disabled</em> in
+	 *         the current environment
 	 */
 	protected boolean isDisabledInThisEnvironment(final Method testMethod) {
 
-		IfProfileValue ifProfileValue = testMethod.getAnnotation(IfProfileValue.class);
-		if (ifProfileValue == null) {
-			ifProfileValue = getClass().getAnnotation(IfProfileValue.class);
+		boolean disabled = false;
+
+		IfProfileValue inProfile = testMethod.getAnnotation(IfProfileValue.class);
+		if (inProfile == null) {
+			inProfile = getClass().getAnnotation(IfProfileValue.class);
 		}
 
-		if (ifProfileValue != null) {
-			// May be true
-			return !this.profileValueSource.get(ifProfileValue.name()).equals(ifProfileValue.value());
+		if (inProfile != null) {
+			final String name = inProfile.name();
+			Assert.hasText(name, "The name attribute supplied to @IfProfileValue must not be empty.");
+
+			final String annotatedValue = inProfile.value();
+			final String environmentValue = this.profileValueSource.get(name);
+			final boolean bothValuesAreNull = (environmentValue == null) && (annotatedValue == null);
+
+			final boolean enabled = bothValuesAreNull
+					|| ((environmentValue != null) && environmentValue.equals(annotatedValue));
+			disabled = !enabled;
 		}
 
-		// else
-		return false;
+		return disabled;
 
 		// XXX Optional: add support for @IfNotProfileValue.
 	}
@@ -387,6 +398,7 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 
 
 	private static interface TestExecutionCallback {
+
 		void run() throws Throwable;
 	}
 
