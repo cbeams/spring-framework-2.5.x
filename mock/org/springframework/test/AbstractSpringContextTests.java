@@ -161,7 +161,7 @@ public abstract class AbstractSpringContextTests extends ConditionalTestCase {
 
 	/**
 	 * Subclasses can override this to return a String representation of their
-	 * context key for use in logging.
+	 * context key for use in caching and logging.
 	 *
 	 * @param contextKey the context key
 	 */
