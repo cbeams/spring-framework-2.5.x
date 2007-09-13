@@ -16,6 +16,7 @@
 
 package org.springframework.test;
 
+import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -189,8 +190,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * @return the corresponding ApplicationContext instance (potentially
 	 *         cached)
 	 * @throws Exception if context loading failed
-	 * @see #createApplicationContext
-	 * @see #customizeBeanFactory
+	 * @see #createApplicationContext(String[])
 	 */
 	protected ConfigurableApplicationContext loadContextLocations(String[] locations) throws Exception {
 		++this.loadCount;
@@ -201,24 +201,33 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * Create a Spring ApplicationContext for use by this test.
 	 * <p>
-	 * The default implementation creates a standard GenericApplicationContext
-	 * instance, populates it from the specified config locations through a
-	 * {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader},
-	 * and calls {@link #customizeBeanFactory} to allow for customizing the
-	 * context's DefaultListableBeanFactory.
+	 * Create a Spring {@link ConfigurableApplicationContext} for use by this
+	 * test.
+	 * </p>
+	 * <p>
+	 * The default implementation creates a standard
+	 * {@link GenericApplicationContext} instance, calls
+	 * {@link #customizeBeanFactory(DefaultListableBeanFactory) customizeBeanFactory()}
+	 * to allow for customizing the context's DefaultListableBeanFactory,
+	 * populates the context from the specified config <code>locations</code>
+	 * through the configured
+	 * {@link #createBeanDefinitionReader(GenericApplicationContext) BeanDefinitionReader},
+	 * and finally {@link ConfigurableApplicationContext#refresh() refreshes}
+	 * the context.
+	 * </p>
 	 *
 	 * @param locations the config locations (as Spring resource locations, e.g.
 	 *        full classpath locations or any kind of URL)
 	 * @return the GenericApplicationContext instance
-	 * @see #loadContextLocations
-	 * @see #customizeBeanFactory
+	 * @see #loadContextLocations(String[])
+	 * @see #customizeBeanFactory(DefaultListableBeanFactory)
+	 * @see #createBeanDefinitionReader(GenericApplicationContext)
 	 */
-	protected ConfigurableApplicationContext createApplicationContext(String[] locations) {
+	protected ConfigurableApplicationContext createApplicationContext(final String[] locations) {
 		GenericApplicationContext context = new GenericApplicationContext();
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
-		new XmlBeanDefinitionReader(context).loadBeanDefinitions(locations);
+		createBeanDefinitionReader(context).loadBeanDefinitions(locations);
 		context.refresh();
 		return context;
 	}
@@ -239,6 +248,29 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
 	 */
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
+	}
+
+	/**
+	 * <p>
+	 * Factory method for creating new {@link BeanDefinitionReader}s for
+	 * loading bean definitions into the supplied
+	 * {@link GenericApplicationContext context}.
+	 * </p>
+	 * <p>
+	 * The default implementation creates a new {@link XmlBeanDefinitionReader}.
+	 * Can be overridden in subclasses to provide a different
+	 * BeanDefinitionReader implementation.
+	 * </p>
+	 *
+	 * @param context The context for which the BeanDefinitionReader should be
+	 *        created.
+	 * @return A BeanDefinitionReader for the supplied context.
+	 * @see #createApplicationContext(String[])
+	 * @see BeanDefinitionReader
+	 * @see XmlBeanDefinitionReader
+	 */
+	protected BeanDefinitionReader createBeanDefinitionReader(final GenericApplicationContext context) {
+		return new XmlBeanDefinitionReader(context);
 	}
 
 	/**
