@@ -23,8 +23,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
- * Convenient base class for tests that should occur in a transaction, but
- * normally will roll the transaction back on the completion of each test.
+ * Convenient base class for JUnit 3.8 based tests that should occur in a
+ * transaction, but normally will roll the transaction back on the completion of
+ * each test.
  * <p>
  * This is useful in a range of circumstances, allowing the following benefits:
  * <ul>
@@ -57,10 +58,10 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * when the test case is torn down.
  * <p>
  * Transactional behavior requires a single bean in the context implementing the
- * {@link org.springframework.transaction.PlatformTransactionManager} interface.
- * This will be set by the superclass's Dependency Injection mechanism. If using
- * the superclass's Field Injection mechanism, the implementation should be
- * named "transactionManager". This mechanism allows the use of the
+ * {@link PlatformTransactionManager} interface. This will be set by the
+ * superclass's Dependency Injection mechanism. If using the superclass's Field
+ * Injection mechanism, the implementation should be named "transactionManager".
+ * This mechanism allows the use of the
  * {@link AbstractDependencyInjectionSpringContextTests} superclass even when
  * there is more than one transaction manager in the context.
  * <p>

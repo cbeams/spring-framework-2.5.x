@@ -21,13 +21,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Superclass for tests that allows conditional test execution at individual
- * test method level.
+ * Superclass for JUnit 3.8 based tests that allows conditional test execution
+ * at the individual test method level. The
  * {@link #isDisabledInThisEnvironment(String) isDisabledInThisEnvironment()}
  * method is invoked before the execution of each test method. Subclasses can
  * override that method to return whether or not the given test should be
  * executed. Note that the tests will still appear to have executed and passed;
- * log output will show that the test was not executed.
+ * however, log output will show that the test was not executed.
  *
  * @author Rod Johnson
  * @since 2.0
