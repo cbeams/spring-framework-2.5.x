@@ -42,11 +42,13 @@ public abstract class ProfileValueUtils {
 	 * </p>
 	 *
 	 * @param applicationContext the ApplicationContext in which to search for
-	 *        the ProfileValueSource.
+	 *        the ProfileValueSource, not <code>null</code>.
 	 * @return the unique ProfileValueSource; or <code>null</code> if not
 	 *         found or if multiple ProfileValueSources were found.
 	 */
 	public static final ProfileValueSource findUniqueProfileValueSource(final ApplicationContext applicationContext) {
+		Assert.notNull(applicationContext,
+				"findUniqueProfileValueSource() can not search in a null ApplicationContext.");
 		final Map<?, ?> beans = applicationContext.getBeansOfType(ProfileValueSource.class);
 		if (beans.size() == 1) {
 			return (ProfileValueSource) beans.values().iterator().next();
