@@ -25,30 +25,40 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract JUnit test class that holds and exposes a single Spring
+ * <p>
+ * Abstract JUnit 3.8 test class that holds and exposes a single Spring
  * {@link org.springframework.context.ApplicationContext ApplicationContext}.
- *
- * <p>This class will cache contexts based on a <i>context key</i>: normally the
- * config locations String array describing the Spring resource descriptors making
- * up the context. Unless the {@link #setDirty()} method is called by a test, the
- * context will not be reloaded, even across different subclasses of this test.
- * This is particularly beneficial if your context is slow to construct, for example
- * if you are using Hibernate and the time taken to load the mappings is an issue.
- *
- * <p>For such standard usage, simply override the {@link #getConfigLocations()}
- * method and provide the desired config files.
- *
- * <p>If you don't want to load a standard context from an array of config locations,
- * you can override the {@link #contextKey()} method. In conjunction with this you
- * typically need to override the {@link #loadContext(Object)} method, which by
- * default loads the locations specified in the {@link #getConfigLocations()} method.
- *
- * <p><b>WARNING:</b> When doing integration tests from within Eclipse, only use
+ * </p>
+ * <p>
+ * This class will cache contexts based on a <i>context key</i>: normally the
+ * config locations String array describing the Spring resource descriptors
+ * making up the context. Unless the {@link #setDirty()} method is called by a
+ * test, the context will not be reloaded, even across different subclasses of
+ * this test. This is particularly beneficial if your context is slow to
+ * construct, for example if you are using Hibernate and the time taken to load
+ * the mappings is an issue.
+ * </p>
+ * <p>
+ * For such standard usage, simply override the {@link #getConfigLocations()}
+ * method and provide the desired config files. For alternative configuration
+ * options, see {@link #getConfigPath()} and {@link #getConfigPaths()}.
+ * </p>
+ * <p>
+ * If you don't want to load a standard context from an array of config
+ * locations, you can override the {@link #contextKey()} method. In conjunction
+ * with this you typically need to override the {@link #loadContext(Object)}
+ * method, which by default loads the locations specified in the
+ * {@link #getConfigLocations()} method.
+ * </p>
+ * <p>
+ * <b>WARNING:</b> When doing integration tests from within Eclipse, only use
  * classpath resource URLs. Else, you may see misleading failures when changing
  * context locations.
+ * </p>
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Sam Brannen
  * @since 2.0
  * @see #getConfigLocations()
  * @see #contextKey()
@@ -64,23 +74,24 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 
 
 	/**
-	 * Default constructor for AbstractDependencyInjectionSpringContextTests.
+	 * Default constructor for AbstractSingleSpringContextTests.
 	 */
 	public AbstractSingleSpringContextTests() {
 	}
 
 	/**
-	 * Constructor for AbstractDependencyInjectionSpringContextTests with a JUnit name.
+	 * Constructor for AbstractSingleSpringContextTests with a JUnit name.
+	 *
 	 * @param name the name of this text fixture
 	 */
 	public AbstractSingleSpringContextTests(String name) {
 		super(name);
 	}
 
-
 	/**
-	 * This implementation is final.
-	 * Override <code>onSetUp</code> for custom behavior.
+	 * This implementation is final. Override <code>onSetUp</code> for custom
+	 * behavior.
+	 *
 	 * @see #onSetUp()
 	 */
 	protected final void setUp() throws Exception {
@@ -90,35 +101,38 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * Prepare this test instance, for example populating its fields.
-	 * The context has already been loaded at the time of this callback.
-	 * <p>The default implementation does nothing.
+	 * Prepare this test instance, for example populating its fields. The
+	 * context has already been loaded at the time of this callback.
+	 * <p>
+	 * The default implementation does nothing.
+	 *
 	 * @throws Exception in case of preparation failure
 	 */
 	protected void prepareTestInstance() throws Exception {
 	}
 
 	/**
-	 * Subclasses can override this method in place of the
-	 * <code>setUp()</code> method, which is final in this class.
-	 * This implementation does nothing.
+	 * Subclasses can override this method in place of the <code>setUp()</code>
+	 * method, which is final in this class. This implementation does nothing.
+	 *
 	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onSetUp() throws Exception {
 	}
 
 	/**
-	 * Called to say that the "applicationContext" instance variable is dirty and
-	 * should be reloaded. We need to do this if a test has modified the context
-	 * (for example, by replacing a bean definition).
+	 * Called to say that the "applicationContext" instance variable is dirty
+	 * and should be reloaded. We need to do this if a test has modified the
+	 * context (for example, by replacing a bean definition).
 	 */
 	protected void setDirty() {
 		setDirty(contextKey());
 	}
 
 	/**
-	 * This implementation is final.
-	 * Override <code>onTearDown</code> for custom behavior.
+	 * This implementation is final. Override <code>onTearDown</code> for
+	 * custom behavior.
+	 *
 	 * @see #onTearDown()
 	 */
 	protected final void tearDown() throws Exception {
@@ -127,18 +141,20 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 
 	/**
 	 * Subclasses can override this to add custom behavior on teardown.
+	 *
 	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onTearDown() throws Exception {
 	}
 
-
 	/**
-	 * Return a key for this context. Default is the config location array
-	 * as determined by {@link #getConfigLocations()}.
-	 * <p>If you override this method, you will typically have to override
+	 * Return a key for this context. Default is the config location array as
+	 * determined by {@link #getConfigLocations()}.
+	 * <p>
+	 * If you override this method, you will typically have to override
 	 * {@link #loadContext(Object)} as well, being able to handle the key type
 	 * that this method returns.
+	 *
 	 * @return the context key
 	 * @see #getConfigLocations()
 	 */
@@ -147,11 +163,13 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * This implementation assumes a key of type String array and loads
-	 * a context from the given locations.
-	 * <p>If you override {@link #contextKey()}, you will typically have to
-	 * override this method as well, being able to handle the key type
-	 * that <code>contextKey()</code> returns.
+	 * This implementation assumes a key of type String array and loads a
+	 * context from the given locations.
+	 * <p>
+	 * If you override {@link #contextKey()}, you will typically have to
+	 * override this method as well, being able to handle the key type that
+	 * <code>contextKey()</code> returns.
+	 *
 	 * @see #getConfigLocations()
 	 */
 	protected ConfigurableApplicationContext loadContext(Object key) throws Exception {
@@ -160,34 +178,39 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 
 	/**
 	 * Load a Spring ApplicationContext from the given config locations.
-	 * <p>The default implementation creates a standard
-	 * {@link #createApplicationContext GenericApplicationContext},
-	 * allowing for customizing the internal bean factory through
+	 * <p>
+	 * The default implementation creates a standard
+	 * {@link #createApplicationContext GenericApplicationContext}, allowing
+	 * for customizing the internal bean factory through
 	 * {@link #customizeBeanFactory}.
-	 * @param locations the config locations (as Spring resource locations,
-	 * e.g. full classpath locations or any kind of URL)
-	 * @return the corresponding ApplicationContext instance (potentially cached)
+	 *
+	 * @param locations the config locations (as Spring resource locations, e.g.
+	 *        full classpath locations or any kind of URL)
+	 * @return the corresponding ApplicationContext instance (potentially
+	 *         cached)
 	 * @throws Exception if context loading failed
 	 * @see #createApplicationContext
 	 * @see #customizeBeanFactory
 	 */
 	protected ConfigurableApplicationContext loadContextLocations(String[] locations) throws Exception {
 		++this.loadCount;
-		if (logger.isInfoEnabled()) {
-			logger.info("Loading context for locations: " + StringUtils.arrayToCommaDelimitedString(locations));
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("Loading context for locations: " + StringUtils.arrayToCommaDelimitedString(locations));
 		}
 		return createApplicationContext(locations);
 	}
 
 	/**
 	 * Create a Spring ApplicationContext for use by this test.
-	 * <p>The default implementation creates a standard GenericApplicationContext
+	 * <p>
+	 * The default implementation creates a standard GenericApplicationContext
 	 * instance, populates it from the specified config locations through a
 	 * {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader},
 	 * and calls {@link #customizeBeanFactory} to allow for customizing the
 	 * context's DefaultListableBeanFactory.
-	 * @param locations the config locations (as Spring resource locations,
-	 * e.g. full classpath locations or any kind of URL)
+	 *
+	 * @param locations the config locations (as Spring resource locations, e.g.
+	 *        full classpath locations or any kind of URL)
 	 * @return the GenericApplicationContext instance
 	 * @see #loadContextLocations
 	 * @see #customizeBeanFactory
@@ -201,9 +224,12 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * Customize the internal bean factory of the ApplicationContext used by this test.
-	 * <p>The default implementation is empty. Can be overridden in subclasses
-	 * to customize DefaultListableBeanFactory's standard settings.
+	 * Customize the internal bean factory of the ApplicationContext used by
+	 * this test.
+	 * <p>
+	 * The default implementation is empty. Can be overridden in subclasses to
+	 * customize DefaultListableBeanFactory's standard settings.
+	 *
 	 * @param beanFactory the newly created bean factory for this context
 	 * @see #loadContextLocations
 	 * @see #createApplicationContext
@@ -215,19 +241,22 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
 	}
 
-
 	/**
 	 * Subclasses can override this method to return the locations of their
 	 * config files, unless they override {@link #contextKey()} and
 	 * {@link #loadContext(Object)} instead.
-	 * <p>A plain path will be treated as class path location, e.g.:
-	 * "org/springframework/whatever/foo.xml". Note however that you may prefix path
-	 * locations with standard Spring resource prefixes. Therefore, a config location
-	 * path prefixed with "classpath:" with behave the same as a plain path, but a
-	 * config location such as "file:/some/path/path/location/appContext.xml" will
-	 * be treated as a filesystem location.
-	 * <p>The default implementation builds config locations for the config paths
+	 * <p>
+	 * A plain path will be treated as class path location, e.g.:
+	 * "org/springframework/whatever/foo.xml". Note however that you may prefix
+	 * path locations with standard Spring resource prefixes. Therefore, a
+	 * config location path prefixed with "classpath:" with behave the same as a
+	 * plain path, but a config location such as
+	 * "file:/some/path/path/location/appContext.xml" will be treated as a
+	 * filesystem location.
+	 * <p>
+	 * The default implementation builds config locations for the config paths
 	 * specified through {@link #getConfigPaths()}.
+	 *
 	 * @return an array of config locations
 	 * @see #getConfigPaths()
 	 * @see org.springframework.core.io.ResourceLoader#getResource(String)
@@ -241,39 +270,45 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 				locations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
 			}
 			else {
-				locations[i] = ResourceUtils.CLASSPATH_URL_PREFIX +
-						StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(getClass()) + "/" + path);
+				locations[i] = ResourceUtils.CLASSPATH_URL_PREFIX
+						+ StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(getClass()) + "/" + path);
 			}
 		}
 		return locations;
 	}
 
 	/**
-	 * Subclasses can override this method to return paths to their
-	 * config files, relative to the concrete test class.
-	 * <p>A plain path, e.g. "context.xml", will be loaded as classpath resource
-	 * from the same package that the concrete test class is defined in.
-	 * A path starting with a slash is treated as fully qualified class path
-	 * location, e.g.: "/org/springframework/whatever/foo.xml".
-	 * <p>The default implementation builds an array for the config path
-	 * specified through {@link #getConfigPath()}.
+	 * Subclasses can override this method to return paths to their config
+	 * files, relative to the concrete test class.
+	 * <p>
+	 * A plain path, e.g. "context.xml", will be loaded as classpath resource
+	 * from the same package that the concrete test class is defined in. A path
+	 * starting with a slash is treated as fully qualified class path location,
+	 * e.g.: "/org/springframework/whatever/foo.xml".
+	 * <p>
+	 * The default implementation builds an array for the config path specified
+	 * through {@link #getConfigPath()}.
+	 *
 	 * @return an array of config locations
 	 * @see #getConfigPath()
 	 * @see java.lang.Class#getResource(String)
 	 */
 	protected String[] getConfigPaths() {
 		String path = getConfigPath();
-		return (path != null ? new String[] {path} : new String[0]);
+		return (path != null ? new String[] { path } : new String[0]);
 	}
 
 	/**
-	 * Subclasses can override this method to return a single path to a
-	 * config file, relative to the concrete test class.
-	 * <p>A plain path, e.g. "context.xml", will be loaded as classpath resource
-	 * from the same package that the concrete test class is defined in.
-	 * A path starting with a slash is treated as fully qualified class path
-	 * location, e.g.: "/org/springframework/whatever/foo.xml".
-	 * <p>The default implementation simply returns <code>null</code>.
+	 * Subclasses can override this method to return a single path to a config
+	 * file, relative to the concrete test class.
+	 * <p>
+	 * A plain path, e.g. "context.xml", will be loaded as classpath resource
+	 * from the same package that the concrete test class is defined in. A path
+	 * starting with a slash is treated as fully qualified class path location,
+	 * e.g.: "/org/springframework/whatever/foo.xml".
+	 * <p>
+	 * The default implementation simply returns <code>null</code>.
+	 *
 	 * @return an array of config locations
 	 * @see #getConfigPath()
 	 * @see java.lang.Class#getResource(String)
@@ -281,7 +316,6 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	protected String getConfigPath() {
 		return null;
 	}
-
 
 	/**
 	 * Return the ApplicationContext that this base class manages.
