@@ -19,33 +19,41 @@ package org.springframework.test;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.util.Assert;
 
 /**
- * Convenient superclass for tests depending on a Spring context.
- * The test instance itself is populated by Dependency Injection.
- *
- * <p>Really for integration testing, not unit testing.
- * You should <i>not</i> normally use the Spring container
- * for unit tests: simply populate your POJOs in plain JUnit tests!
- *
- * <p>This supports two modes of populating the test:
+ * <p>
+ * Convenient superclass for JUnit 3.8 based tests depending on a Spring
+ * context. The test instance itself is populated by Dependency Injection.
+ * </p>
+ * <p>
+ * Really for integration testing, not unit testing. You should <i>not</i>
+ * normally use the Spring container for unit tests: simply populate your POJOs
+ * in plain JUnit tests!
+ * </p>
+ * <p>
+ * This supports two modes of populating the test:
+ * </p>
  * <ul>
  * <li>Via Setter Dependency Injection. Simply express dependencies on objects
  * in the test fixture, and they will be satisfied by autowiring by type.
  * <li>Via Field Injection. Declare protected variables of the required type
- * which match named beans in the context. This is autowire by name,
- * rather than type. This approach is based on an approach originated by
- * Ara Abrahmian. Setter Dependency Injection is the default: set the
- * "populateProtectedVariables" property to true in the constructor to switch
- * on Field Injection.
+ * which match named beans in the context. This is autowire by name, rather than
+ * type. This approach is based on an approach originated by Ara Abrahmian.
+ * Setter Dependency Injection is the default: set the
+ * <code>populateProtectedVariables</code> property to <code>true</code> in
+ * the constructor to switch on Field Injection.
  * </ul>
  *
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Sam Brannen
  * @since 1.1.1
  * @see #setDirty
  * @see #contextKey
@@ -56,22 +64,24 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 	/**
 	 * Constant that indicates no autowiring at all.
+	 *
 	 * @see #setAutowireMode
 	 */
 	public static final int AUTOWIRE_NO = 0;
 
 	/**
 	 * Constant that indicates autowiring bean properties by name.
+	 *
 	 * @see #setAutowireMode
 	 */
 	public static final int AUTOWIRE_BY_NAME = AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
 
 	/**
 	 * Constant that indicates autowiring bean properties by type.
+	 *
 	 * @see #setAutowireMode
 	 */
 	public static final int AUTOWIRE_BY_TYPE = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
-
 
 	private boolean populateProtectedVariables = false;
 
@@ -89,17 +99,18 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	}
 
 	/**
-	 * Constructor for AbstractDependencyInjectionSpringContextTests with a JUnit name.
+	 * Constructor for AbstractDependencyInjectionSpringContextTests with a
+	 * JUnit name.
+	 *
 	 * @param name the name of this text fixture
 	 */
 	public AbstractDependencyInjectionSpringContextTests(String name) {
 		super(name);
 	}
 
-
 	/**
-	 * Set whether to populate protected variables of this test case.
-	 * Default is "false".
+	 * Set whether to populate protected variables of this test case. Default is
+	 * <code>false</code>.
 	 */
 	public final void setPopulateProtectedVariables(boolean populateFields) {
 		this.populateProtectedVariables = populateFields;
@@ -113,14 +124,19 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	}
 
 	/**
+	 * <p>
 	 * Set the autowire mode for test properties set by Dependency Injection.
-	 * <p>The default is "AUTOWIRE_BY_TYPE". Can be set to "AUTOWIRE_BY_NAME"
-	 * or "AUTOWIRE_NO" instead.
+	 * </p>
+	 * <p>
+	 * The default is {@link #AUTOWIRE_BY_TYPE}. Can be set to
+	 * {@link #AUTOWIRE_BY_NAME} or {@link #AUTOWIRE_NO} instead.
+	 * </p>
+	 *
 	 * @see #AUTOWIRE_BY_TYPE
 	 * @see #AUTOWIRE_BY_NAME
 	 * @see #AUTOWIRE_NO
 	 */
-	public final void setAutowireMode(int autowireMode) {
+	public final void setAutowireMode(final int autowireMode) {
 		this.autowireMode = autowireMode;
 	}
 
@@ -132,43 +148,78 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	}
 
 	/**
-	 * Set whether or not dependency checking should be performed
-	 * for test properties set by Dependency Injection.
-	 * <p>The default is "true", meaning that tests cannot be run
+	 * <p>
+	 * Set whether or not dependency checking should be performed for test
+	 * properties set by Dependency Injection.
+	 * </p>
+	 * <p>
+	 * The default is <code>true</code>, meaning that tests cannot be run
 	 * unless all properties are populated.
+	 * </p>
 	 */
-	public final void setDependencyCheck(boolean dependencyCheck) {
+	public final void setDependencyCheck(final boolean dependencyCheck) {
 		this.dependencyCheck = dependencyCheck;
 	}
 
 	/**
-	 * Return whether or not dependency checking should be performed
-	 * for test properties set by Dependency Injection.
+	 * Return whether or not dependency checking should be performed for test
+	 * properties set by Dependency Injection.
 	 */
 	public final boolean isDependencyCheck() {
 		return this.dependencyCheck;
 	}
 
-
 	/**
-	 * Prepare this test instance, injecting dependencies into its
-	 * protected fields and its bean properties.
+	 * <p>
+	 * Prepare this test instance, injecting dependencies into its protected
+	 * fields and its bean properties.
+	 * </p>
+	 * <p>
+	 * Note: if the {@link ApplicationContext} for this test instance has not
+	 * been configured (e.g., is <code>null</code>), dependency injection
+	 * will naturally <strong>not</strong> be performed, but an informational
+	 * message will be written to the log.
+	 * </p>
+	 *
+	 * @see #injectDependencies()
 	 */
 	protected void prepareTestInstance() throws Exception {
-		injectDependencies();
+
+		if (getApplicationContext() == null) {
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info("ApplicationContext has not been configured for test [" + getClass().getName()
+						+ "]: dependency injection will NOT be performed.");
+			}
+		}
+		else {
+			injectDependencies();
+		}
 	}
 
 	/**
+	 * <p>
 	 * Inject dependencies into 'this' instance (that is, this test instance).
-	 * <p>The default implementation populates protected variables if the
-	 * {@link #populateProtectedVariables() appropriate flag is set}, else
-	 * uses autowiring if autowiring is switched on (which it is by default).
-	 * <p>Override this method if you need full control over how
-	 * dependencies are injected into the test instance.
-	 * @throws Exception in case of dependency injection failure
-	 * @see #populateProtectedVariables() 
+	 * </p>
+	 * <p>
+	 * The default implementation populates protected variables if the
+	 * {@link #populateProtectedVariables() appropriate flag is set}, else uses
+	 * autowiring if autowiring is switched on (which it is by default).
+	 * </p>
+	 * <p>
+	 * Override this method if you need full control over how dependencies are
+	 * injected into the test instance.
+	 * </p>
+	 *
+	 * @throws Exception in case of dependency injection failure.
+	 * @throws IllegalStateException if the {@link ApplicationContext} for this
+	 *         test instance has not been configured.
+	 * @see #populateProtectedVariables()
 	 */
 	protected void injectDependencies() throws Exception {
+
+		Assert.state(getApplicationContext() != null,
+				"injectDependencies() called without first configuring an ApplicationContext.");
+
 		if (isPopulateProtectedVariables()) {
 			if (this.managedVariableNames == null) {
 				initManagedVariableNames();
@@ -176,44 +227,42 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 			populateProtectedVariables();
 		}
 
-		getApplicationContext().getBeanFactory().autowireBeanProperties(
-				this, getAutowireMode(), isDependencyCheck());
+		getApplicationContext().getBeanFactory().autowireBeanProperties(this, getAutowireMode(), isDependencyCheck());
 	}
 
 	private void initManagedVariableNames() throws IllegalAccessException {
-		LinkedList managedVarNames = new LinkedList();
+		List managedVarNames = new LinkedList();
 		Class clazz = getClass();
 
 		do {
 			Field[] fields = clazz.getDeclaredFields();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Found " + fields.length + " fields on " + clazz);
+			if (this.logger.isDebugEnabled()) {
+				this.logger.debug("Found " + fields.length + " fields on " + clazz);
 			}
 
 			for (int i = 0; i < fields.length; i++) {
 				Field field = fields[i];
 				field.setAccessible(true);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Candidate field: " + field);
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("Candidate field: " + field);
 				}
 				if (isProtectedInstanceField(field)) {
 					Object oldValue = field.get(this);
 					if (oldValue == null) {
 						managedVarNames.add(field.getName());
-						if (logger.isDebugEnabled()) {
-							logger.debug("Added managed variable '" + field.getName() + "'");
+						if (this.logger.isDebugEnabled()) {
+							this.logger.debug("Added managed variable '" + field.getName() + "'");
 						}
 					}
 					else {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Rejected managed variable '" + field.getName() + "'");
+						if (this.logger.isDebugEnabled()) {
+							this.logger.debug("Rejected managed variable '" + field.getName() + "'");
 						}
 					}
 				}
 			}
 			clazz = clazz.getSuperclass();
-		}
-		while (!clazz.equals(AbstractDependencyInjectionSpringContextTests.class));
+		} while (!clazz.equals(AbstractDependencyInjectionSpringContextTests.class));
 
 		this.managedVariableNames = (String[]) managedVarNames.toArray(new String[managedVarNames.size()]);
 	}
@@ -232,18 +281,18 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 				bean = getApplicationContext().getBean(varName, field.getType());
 				field.setAccessible(true);
 				field.set(this, bean);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Populated field: " + field);
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("Populated field: " + field);
 				}
 			}
 			catch (NoSuchFieldException ex) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("No field with name '" + varName + "'");
+				if (this.logger.isWarnEnabled()) {
+					this.logger.warn("No field with name '" + varName + "'");
 				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("No bean with name '" + varName + "'");
+				if (this.logger.isWarnEnabled()) {
+					this.logger.warn("No bean with name '" + varName + "'");
 				}
 			}
 		}
