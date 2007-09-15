@@ -415,8 +415,8 @@
           testing environment. If the configured
           <classname>ProfileValueSource</classname> returns a matching
           <literal>value</literal> for the provided <literal>name</literal>,
-          the test will be enabled. This annotation can be applied at the
-          class-level or method-level.</para>
+          the test will be enabled. This annotation can be applied to an
+          entire class or individual methods.</para>
 
           <programlisting>@IfProfileValue(name="java.vendor", value="Sun Microsystems Inc.")
 public void testProcessWhichRunsOnlyOnSunJvm() {
@@ -424,13 +424,33 @@ public void testProcessWhichRunsOnlyOnSunJvm() {
 }</programlisting>
 
           <para>Alternatively <interfacename>@IfProfileValue</interfacename>
-          may be configured with a list of <literal>values</literal> to
-          achieve TestNG-like support for <emphasis>test groups</emphasis>.
+          may be configured with a list of <literal>values</literal> (with
+          <emphasis>OR</emphasis> semantics) to achieve TestNG-like support
+          for <emphasis>test groups</emphasis> in a JUnit environment.
           Consider the following example:</para>
 
           <programlisting>@IfProfileValue(name="test-groups", values={"unit-tests", "integration-tests"})
-public void testProcessWhichRunsForUnitAndIntegrationTestGroups() {
+public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
     <lineannotation>// some logic that should run only for unit and integration test groups</lineannotation>
+}</programlisting>
+        </listitem>
+
+        <listitem>
+          <para><emphasis
+          role="bold"><interfacename>@ProfileValueSourceConfiguration</interfacename></emphasis></para>
+
+          <para>Class-level annotation which is used to specify what type of
+          <literal>ProfileValueSource</literal> to use when retrieving
+          <emphasis>profile values</emphasis> configured via the
+          <interfacename>@IfProfileValue</interfacename> annotation. If
+          <interfacename>@ProfileValueSourceConfiguration</interfacename> is
+          not declared for a test,
+          <classname>SystemProfileValueSource</classname> will be used by
+          default.</para>
+
+          <programlisting>@ProfileValueSourceConfiguration(CustomProfileValueSource.class)
+public class CustomProfileValueSourceTests() {
+    <lineannotation>// class body...</lineannotation>
 }</programlisting>
         </listitem>
 
@@ -482,7 +502,7 @@ public void testProcessRainyDayScenario() {
           <emphasis>set up</emphasis> or <emphasis>tear down</emphasis> of the
           test fixture.</para>
 
-          <programlisting>@Timed(1000)
+          <programlisting>@Timed(millis=1000)
 public void testProcessWithOneSecondTimeout() {
     <lineannotation>// some logic that should not take longer than 1 second to execute</lineannotation>
 }</programlisting>
@@ -1065,7 +1085,7 @@ public void testProcessWithoutTransaction() {
 
           <listitem>
             <para><classname>TestContextManager</classname>: the main entry
-            point into the <emphasis>Spring Test Context Framework</emphasis>,
+            point into the <emphasis>Spring TestContext Framework</emphasis>,
             which is responsible for managing a single
             <classname>TestContext</classname> and signaling events to all
             registered <interfacename>TestExecutionListener</interfacename>s
@@ -1671,6 +1691,10 @@ public class SimpleTest {
         <itemizedlist>
           <listitem>
             <para><interfacename>@IfProfileValue</interfacename></para>
+          </listitem>
+
+          <listitem>
+            <para><interfacename>@ProfileValueSourceConfiguration</interfacename></para>
           </listitem>
 
           <listitem>
