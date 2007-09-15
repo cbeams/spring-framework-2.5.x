@@ -54,6 +54,8 @@ RepeatedSpringMethodRoadieTests.class,
 
 EnabledAndIgnoredSpringRunnerTests.class,
 
+HardCodedProfileValueSourceSpringRunnerTests.class,
+
 SpringJUnit4ClassRunnerAppCtxTests.class,
 
 ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests.class,
