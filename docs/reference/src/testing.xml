@@ -449,7 +449,7 @@ public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
           default.</para>
 
           <programlisting>@ProfileValueSourceConfiguration(CustomProfileValueSource.class)
-public class CustomProfileValueSourceTests() {
+public class CustomProfileValueSourceTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
         </listitem>
@@ -1786,7 +1786,7 @@ public class SimpleTest {
             loading the context.</para>
 
             <programlisting>@ContextConfiguration(locations={"example/test-context.xml"}, loader=CustomContextLoader.class)
-public class CustomConfiguredApplicationContextTests() {
+public class CustomConfiguredApplicationContextTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
           </listitem>
@@ -1804,7 +1804,7 @@ public class CustomConfiguredApplicationContextTests() {
 
             <programlisting>@ContextConfiguration
 @TestExecutionListeners({CustomTestExecutionListener.class, AnotherTestExecutionListener.class})
-public class CustomTestExecutionListenerTests() {
+public class CustomTestExecutionListenerTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
           </listitem>
@@ -1827,7 +1827,7 @@ public class CustomTestExecutionListenerTests() {
 
             <programlisting>@ContextConfiguration
 @TransactionConfiguration(transactionManager="txMgr", defaultRollback=false)
-public class CustomConfiguredTransactionalTests() {
+public class CustomConfiguredTransactionalTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
           </listitem>
