@@ -31,8 +31,6 @@ import org.junit.internal.runners.TestClass;
 import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.ProfileValueSource;
 import org.springframework.test.annotation.ProfileValueUtils;
-import org.springframework.test.annotation.SystemProfileValueSource;
-import org.springframework.test.annotation.Timed;
 
 /**
  * <p>
@@ -43,9 +41,9 @@ import org.springframework.test.annotation.Timed;
  * </p>
  * <p>
  * SpringTestMethod also provides support for
- * {@link ExpectedException @ExpectedException} and {@link Timed @Timed}. See
- * {@link #getExpectedException()} and {@link #getTimeout()} for further
- * details.
+ * {@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}
+ * and {@link ExpectedException @ExpectedException}. See {@link #isIgnored()}
+ * and {@link #getExpectedException()} for further details.
  * </p>
  *
  * @author Sam Brannen
@@ -57,14 +55,15 @@ class SpringTestMethod {
 
 	private final Method method;
 
-	protected ProfileValueSource profileValueSource = SystemProfileValueSource.getInstance();
+	private final ProfileValueSource profileValueSource;
 
 	private final TestClass testClass;
 
 
 	/**
 	 * Constructs a test method for the supplied {@link Method method} and
-	 * {@link TestClass test class}.
+	 * {@link TestClass test class}; and retrieves the configured (or default)
+	 * {@link ProfileValueSource}.
 	 *
 	 * @param method The test method.
 	 * @param testClass The test class.
@@ -72,6 +71,7 @@ class SpringTestMethod {
 	public SpringTestMethod(final Method method, final TestClass testClass) {
 		this.method = method;
 		this.testClass = testClass;
+		this.profileValueSource = ProfileValueUtils.retrieveProfileValueSource(testClass.getJavaClass());
 	}
 
 	/**

@@ -30,15 +30,15 @@ import org.springframework.test.context.TestContextManager;
 /**
  * <p>
  * SpringJUnit4ClassRunner is a custom extension of {@link JUnit4ClassRunner}
- * which provides Spring testing functionality to standard JUnit 4.4+ tests by
- * means of the {@link TestContextManager} and associated support classes and
- * annotations.
+ * which provides functionality of the <em>Spring TestContext Framework</em>
+ * to standard JUnit 4.4+ tests by means of the {@link TestContextManager} and
+ * associated support classes and annotations.
  * </p>
  * <p>
  * The following list constitutes all annotations currently supported directly
  * by SpringJUnit4ClassRunner.
- * <em>(Note that additional annotations may be supported by the
- * {@link TestContextManager} and associated support classes)</em>
+ * <em>(Note that additional annotations may be supported by various
+ * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners})</em>
  * </p>
  * <ul>
  * <li>{@link org.junit.Test#expected() @Test(expected=...)}</li>
@@ -47,6 +47,7 @@ import org.springframework.test.context.TestContextManager;
  * <li>{@link org.springframework.test.annotation.Timed @Timed}</li>
  * <li>{@link org.springframework.test.annotation.Repeat @Repeat}</li>
  * <li>{@link org.junit.Ignore @Ignore}</li>
+ * <li>{@link org.springframework.test.annotation.ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}</li>
  * <li>{@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}</li>
  * </ul>
  *
@@ -83,7 +84,9 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 			this.testContextManager = createTestContextManager(clazz);
 		}
 		catch (final Exception e) {
-			logger.error("Caught an exception while attempting to instantiate a new TestContextManager for test class [" + clazz + "].", e);
+			logger.error(
+					"Caught an exception while attempting to instantiate a new TestContextManager for test class ["
+							+ clazz + "].", e);
 			throw new InitializationError(e);
 		}
 	}

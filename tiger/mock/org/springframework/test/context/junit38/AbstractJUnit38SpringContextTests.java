@@ -28,9 +28,9 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueSource;
+import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.annotation.Repeat;
-import org.springframework.test.annotation.SystemProfileValueSource;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
@@ -72,6 +72,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * <ul>
  * <li>{@link org.springframework.test.annotation.DirtiesContext @DirtiesContext}
  * (via the configured {@link DirtiesContextTestExecutionListener})</li>
+ * <li>{@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}</li>
  * <li>{@link IfProfileValue @IfProfileValue}</li>
  * <li>{@link ExpectedException @ExpectedException}</li>
  * <li>{@link Timed @Timed}</li>
@@ -113,11 +114,17 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	protected ApplicationContext applicationContext;
 
 	/**
-	 * Source of profile values available to subclasses.
-	 *
-	 * @see SystemProfileValueSource
+	 * <p>
+	 * {@link ProfileValueSource} available to subclasses but primarily intended
+	 * for internal use to provide support for
+	 * {@link IfProfileValue @IfProfileValue}.
+	 * </p>
+	 * <p>
+	 * Set in the {@link #AbstractJUnit38SpringContextTests(String)}
+	 * constructor.
+	 * </p>
 	 */
-	protected ProfileValueSource profileValueSource = SystemProfileValueSource.getInstance();
+	protected final ProfileValueSource profileValueSource;
 
 	private final TestContextManager testContextManager;
 
@@ -133,8 +140,9 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 
 	/**
 	 * Constructs a new AbstractJUnit38SpringContextTests instance with the
-	 * supplied <code>name</code> and initializes the internal
-	 * {@link TestContextManager} for the current test.
+	 * supplied <code>name</code>; initializes the internal
+	 * {@link TestContextManager} for the current test; and retrieves the
+	 * configured (or default) {@link ProfileValueSource}.
 	 *
 	 * @param name The name of the current test to execute.
 	 * @throws RuntimeException If an error occurs while initializing the
@@ -154,11 +162,12 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 			this.logger.error(msg, e);
 			throw new RuntimeException(msg, e);
 		}
+		this.profileValueSource = ProfileValueUtils.retrieveProfileValueSource(getClass());
 	}
 
 	/**
 	 * <p>
-	 * Runs the <em>Spring Test Context Framework</em> test sequence.
+	 * Runs the <em>Spring TestContext Framework</em> test sequence.
 	 * </p>
 	 * <p>
 	 * In addition to standard {@link TestCase#runBare()} semantics, this
