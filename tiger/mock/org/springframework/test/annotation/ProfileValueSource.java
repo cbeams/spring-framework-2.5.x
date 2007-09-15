@@ -17,11 +17,13 @@
 package org.springframework.test.annotation;
 
 /**
+ * <p>
  * Strategy interface for retrieving <em>profile values</em> for a given
  * testing environment.
- *
- * <p>Spring provides the following out-of-the-box implementations:
- *
+ * </p>
+ * <p>
+ * Spring provides the following out-of-the-box implementations:
+ * </p>
  * <ul>
  * <li>{@link SystemProfileValueSource}</li>
  * </ul>
@@ -29,17 +31,21 @@ package org.springframework.test.annotation;
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
- * @see AbstractAnnotationAwareTransactionalTests
+ * @see ProfileValueSourceConfiguration
+ * @see IfProfileValue
+ * @see ProfileValueUtils
  */
 public interface ProfileValueSource {
 
 	/**
 	 * Get the <em>profile value</em> indicated by the specified key.
+	 *
 	 * @param key The name of the <em>profile value</em>.
-	 * @return The string value of the <em>profile value</em>, or <code>null</code>
-	 * if there is no <em>profile value</em> with that key
-	 * @exception IllegalArgumentException if <code>key</code> is
-	 * <code>null</code> or empty
+	 * @return The string value of the <em>profile value</em>, or
+	 *         <code>null</code> if there is no <em>profile value</em> with
+	 *         that key
+	 * @throws IllegalArgumentException if <code>key</code> is
+	 *         <code>null</code> or empty
 	 */
 	String get(String key);
 

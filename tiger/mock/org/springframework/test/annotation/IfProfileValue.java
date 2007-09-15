@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  * class or method level.
  * </p>
  * <p>
- * Example: when using {@link SystemProfileValueSource} as the
+ * Examples: when using {@link SystemProfileValueSource} as the
  * {@link ProfileValueSource} implementation, you can configure a test method to
  * run only on Java VMs from Sun Microsystems as follows:
  * </p>
@@ -47,10 +47,26 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  *
+ * <p>
+ * You can alternatively configure {@link IfProfileValue @IfProfileValue} with
+ * <em>OR</em> semantics for multiple {@link #values() values} as follows
+ * (assuming a {@link ProfileValueSource} has been appropriately configured for
+ * the &quot;test-groups&quot; name):
+ * </p>
+ *
+ * <pre class="code">
+ * {@link IfProfileValue @IfProfileValue}(name=&quot;test-groups&quot;, values={&quot;unit-tests&quot;, &quot;integration-tests&quot;})
+ *  public void testWhichRunsForUnitOrIntegrationTestGroups() {
+ *      // ...
+ *  }
+ * </pre>
+ *
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
  * @see ProfileValueSource
+ * @see ProfileValueSourceConfiguration
+ * @see ProfileValueUtils
  * @see AbstractAnnotationAwareTransactionalTests
  * @see org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests
  * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests

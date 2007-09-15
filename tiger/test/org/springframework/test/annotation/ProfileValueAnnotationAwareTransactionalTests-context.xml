@@ -13,4 +13,9 @@
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
 		p:data-source-ref="dataSource" />
 
+	<!--  
+		<bean id="hardCodedProfileValueSource"
+		class="org.springframework.test.annotation.ProfileValueAnnotationAwareTransactionalTests$HardCodedProfileValueSource" />
+	-->
+
 </beans>

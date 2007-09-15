@@ -21,7 +21,8 @@ import junit.framework.TestResult;
 
 /**
  * <p>
- * Verifies proper handling of {@link IfProfileValue @IfProfileValue} in
+ * Verifies proper handling of {@link IfProfileValue @IfProfileValue} and
+ * {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration} in
  * conjunction with {@link AbstractAnnotationAwareTransactionalTests}.
  * </p>
  *
@@ -30,46 +31,67 @@ import junit.framework.TestResult;
  */
 public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 
+	private static final String NAME = "ProfileValueAnnotationAwareTransactionalTests.profile_value.name";
+	private static final String VALUE = "enigma";
+
+
 	public ProfileValueAnnotationAwareTransactionalTests() throws Exception {
 		this(null);
 	}
 
 	public ProfileValueAnnotationAwareTransactionalTests(final String name) throws Exception {
 		super(name);
+		// Set system property for DefaultProfileValueSourceTestCase.
+		System.setProperty(NAME, VALUE);
 	}
 
-	private void assertInvocationCount(final String testName, final int expectedInvocationCount,
-			final int expectedErrorCount, final int expectedFailureCount) throws Exception {
-		final ProfileValueTestCase profileValueTestCase = new ProfileValueTestCase(testName);
-		final TestResult testResult = profileValueTestCase.run();
+	private void runTestAndAssertCounters(final Class<? extends DefaultProfileValueSourceTestCase> testCaseType,
+			final String testName, final int expectedInvocationCount, final int expectedErrorCount,
+			final int expectedFailureCount) throws Exception {
+
+		final DefaultProfileValueSourceTestCase testCase = testCaseType.newInstance();
+		testCase.setName(testName);
+		TestResult testResult = testCase.run();
 		assertEquals("Verifying number of invocations for test method [" + testName + "].", expectedInvocationCount,
-				profileValueTestCase.invocationCount);
+				testCase.invocationCount);
 		assertEquals("Verifying number of errors for test method [" + testName + "].", expectedErrorCount,
 				testResult.errorCount());
 		assertEquals("Verifying number of failures for test method [" + testName + "].", expectedFailureCount,
 				testResult.failureCount());
 	}
 
-	public void testIfProfileValueAnnotationSupport() throws Exception {
-		assertInvocationCount("testIfProfileValueEmpty", 0, 1, 0);
-		assertInvocationCount("testIfProfileValueDisabled", 0, 0, 0);
-		assertInvocationCount("testIfProfileValueEnabledViaSingleValue", 1, 0, 0);
-		assertInvocationCount("testIfProfileValueEnabledViaMultipleValues", 1, 0, 0);
-		assertInvocationCount("testIfProfileValueNotConfigured", 1, 0, 0);
+	private void runTests(final Class<? extends DefaultProfileValueSourceTestCase> testCaseType) throws Exception {
+		runTestAndAssertCounters(testCaseType, "testIfProfileValueEmpty", 0, 1, 0);
+		runTestAndAssertCounters(testCaseType, "testIfProfileValueDisabledViaWrongName", 0, 0, 0);
+		runTestAndAssertCounters(testCaseType, "testIfProfileValueDisabledViaWrongValue", 0, 0, 0);
+		runTestAndAssertCounters(testCaseType, "testIfProfileValueEnabledViaSingleValue", 1, 0, 0);
+		runTestAndAssertCounters(testCaseType, "testIfProfileValueEnabledViaMultipleValues", 1, 0, 0);
+		runTestAndAssertCounters(testCaseType, "testIfProfileValueNotConfigured", 1, 0, 0);
+	}
+
+	public void testDefaultProfileValueSource() throws Exception {
+		assertEquals("Verifying the type of the configured ProfileValueSource.", SystemProfileValueSource.class,
+				new DefaultProfileValueSourceTestCase().getProfileValueSource().getClass());
+		runTests(DefaultProfileValueSourceTestCase.class);
+	}
+
+	public void testHardCodedProfileValueSource() throws Exception {
+		assertEquals("Verifying the type of the configured ProfileValueSource.", HardCodedProfileValueSource.class,
+				new HardCodedProfileValueSourceTestCase().getProfileValueSource().getClass());
+		runTests(HardCodedProfileValueSourceTestCase.class);
 	}
 
 
-	protected static class ProfileValueTestCase extends AbstractAnnotationAwareTransactionalTests {
-
-		private static final String NAME = "ProfileValueAnnotationAwareTransactionalTests.profile_value.name";
-		private static final String VALUE = "enigma";
+	protected static class DefaultProfileValueSourceTestCase extends AbstractAnnotationAwareTransactionalTests {
 
 		int invocationCount = 0;
 
 
-		public ProfileValueTestCase(final String name) throws Exception {
-			super(name);
-			System.setProperty(NAME, VALUE);
+		public DefaultProfileValueSourceTestCase() {
+		}
+
+		public ProfileValueSource getProfileValueSource() {
+			return super.profileValueSource;
 		}
 
 		@Override
@@ -85,8 +107,15 @@ public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 		}
 
 		@NotTransactional
+		@IfProfileValue(name = NAME + "X", value = VALUE)
+		public void testIfProfileValueDisabledViaWrongName() {
+			this.invocationCount++;
+			fail("The body of a disabled test should never be executed!");
+		}
+
+		@NotTransactional
 		@IfProfileValue(name = NAME, value = VALUE + "X")
-		public void testIfProfileValueDisabled() {
+		public void testIfProfileValueDisabledViaWrongValue() {
 			this.invocationCount++;
 			fail("The body of a disabled test should never be executed!");
 		}
@@ -106,6 +135,17 @@ public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 		@NotTransactional
 		public void testIfProfileValueNotConfigured() {
 			this.invocationCount++;
+		}
+	}
+
+	@ProfileValueSourceConfiguration(HardCodedProfileValueSource.class)
+	protected static class HardCodedProfileValueSourceTestCase extends DefaultProfileValueSourceTestCase {
+	}
+
+	static class HardCodedProfileValueSource implements ProfileValueSource {
+
+		public String get(final String key) {
+			return (key.equals(NAME) ? VALUE : null);
 		}
 	}
 }

@@ -17,53 +17,105 @@
 package org.springframework.test.annotation;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 
-import org.springframework.context.ApplicationContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * <p>
- * General testing utility methods for working with
- * {@link ProfileValueSource ProfileValueSources}.
+ * General utility methods for working with <em>profile values</em>.
  * </p>
  *
  * @author Sam Brannen
  * @since 2.5
+ * @see ProfileValueSource
+ * @see ProfileValueSourceConfiguration
+ * @see IfProfileValue
  */
 public abstract class ProfileValueUtils {
 
+	/** Class Logger. */
+	private static final Log logger = LogFactory.getLog(ProfileValueUtils.class);
+
+
 	/**
 	 * <p>
-	 * Searches for a unique {@link ProfileValueSource} in the supplied
-	 * {@link ApplicationContext}.
+	 * Retrieves the {@link ProfileValueSource} type for the specified
+	 * {@link Class test class} as configured via the
+	 * {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}
+	 * annotation and instantiates a new instance of that type.
+	 * </p>
+	 * <p>
+	 * If
+	 * {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}
+	 * is not present on the specified class or if a custom
+	 * {@link ProfileValueSource} is not declared, the default
+	 * {@link SystemProfileValueSource} will be returned instead.
 	 * </p>
 	 *
-	 * @param applicationContext the ApplicationContext in which to search for
-	 *        the ProfileValueSource, not <code>null</code>.
-	 * @return the unique ProfileValueSource; or <code>null</code> if not
-	 *         found or if multiple ProfileValueSources were found.
+	 * @param testClass The test class for which the ProfileValueSource should
+	 *        be retrieved.
+	 * @return The configured (or default) ProfileValueSource for the specified
+	 *         class.
+	 * @see SystemProfileValueSource
 	 */
-	public static final ProfileValueSource findUniqueProfileValueSource(final ApplicationContext applicationContext) {
-		Assert.notNull(applicationContext,
-				"findUniqueProfileValueSource() can not search in a null ApplicationContext.");
-		final Map<?, ?> beans = applicationContext.getBeansOfType(ProfileValueSource.class);
-		if (beans.size() == 1) {
-			return (ProfileValueSource) beans.values().iterator().next();
+	@SuppressWarnings("unchecked")
+	public static final ProfileValueSource retrieveProfileValueSource(final Class<?> testClass) {
+
+		Assert.notNull(testClass, "Can not retrieve a ProfileValueSource for a NULL class.");
+		final Class<ProfileValueSourceConfiguration> annotationType = ProfileValueSourceConfiguration.class;
+		final ProfileValueSourceConfiguration config = testClass.getAnnotation(annotationType);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieved @ProfileValueSourceConfiguration [" + config + "] for test class [" + testClass
+					+ "].");
 		}
-		return null;
+
+		Class<? extends ProfileValueSource> profileValueSourceType;
+		if (config != null) {
+			profileValueSourceType = config.value();
+		}
+		else {
+			profileValueSourceType = (Class<? extends ProfileValueSource>) AnnotationUtils.getDefaultValue(annotationType);
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieved ProfileValueSource type [" + profileValueSourceType + "] for class [" + testClass
+					+ "].");
+		}
+
+		ProfileValueSource profileValueSource;
+		if (SystemProfileValueSource.class.equals(profileValueSourceType)) {
+			profileValueSource = SystemProfileValueSource.getInstance();
+		}
+		else {
+			try {
+				profileValueSource = profileValueSourceType.newInstance();
+			}
+			catch (Exception e) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Could not instantiate a ProfileValueSource of type [" + profileValueSourceType
+							+ "] for class [" + testClass + "]: using default.", e);
+				}
+				profileValueSource = SystemProfileValueSource.getInstance();
+			}
+		}
+
+		return profileValueSource;
 	}
 
 	/**
 	 * <p>
-	 * Determines if the test for the supplied <code>testMethod</code> is
-	 * <em>enabled</em> in the current environment, as specified by the
-	 * {@link IfProfileValue @IfProfileValue} annotation, which may be present
-	 * on the test method itself or at the class-level. Defaults to
-	 * <code>true</code> if no {@link IfProfileValue @IfProfileValue}
-	 * annotation is present.
+	 * Determines if the supplied <code>testMethod</code> is <em>enabled</em>
+	 * in the current environment, as specified by the
+	 * {@link IfProfileValue @IfProfileValue} annotation, which may be declared
+	 * on the test method itself or at the class-level.
+	 * </p>
+	 * <p>
+	 * Defaults to <code>true</code> if no
+	 * {@link IfProfileValue @IfProfileValue} annotation is declared.
 	 * </p>
 	 *
 	 * @param profileValueSource the ProfileValueSource to use to determine if

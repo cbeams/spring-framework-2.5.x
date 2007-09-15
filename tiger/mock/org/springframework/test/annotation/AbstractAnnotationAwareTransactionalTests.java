@@ -18,16 +18,17 @@ package org.springframework.test.annotation;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
+import org.springframework.util.Assert;
 
 /**
  * <p>
@@ -50,6 +51,7 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
  * </p>
  * <ul>
  * <li>{@link DirtiesContext @DirtiesContext}</li>
+ * <li>{@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}</li>
  * <li>{@link IfProfileValue @IfProfileValue}</li>
  * <li>{@link ExpectedException @ExpectedException}</li>
  * <li>{@link Timed @Timed}</li>
@@ -70,21 +72,39 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 
 	private final TransactionAttributeSource transactionAttributeSource = new AnnotationTransactionAttributeSource();
 
+	/**
+	 * <p>
+	 * {@link ProfileValueSource} available to subclasses but primarily intended
+	 * for use in {@link #isDisabledInThisEnvironment(Method)}.
+	 * </p>
+	 * <p>
+	 * Set to {@link SystemProfileValueSource} by default for backwards
+	 * compatibility; however, the value may be changed in the
+	 * {@link #AbstractAnnotationAwareTransactionalTests(String)} constructor.
+	 * </p>
+	 */
 	protected ProfileValueSource profileValueSource = SystemProfileValueSource.getInstance();
 
 
 	/**
-	 * Default constructor for AbstractAnnotationAwareTransactionalTests.
+	 * Default constructor for AbstractAnnotationAwareTransactionalTests, which
+	 * delegates to {@link #AbstractAnnotationAwareTransactionalTests(String)}.
 	 */
 	public AbstractAnnotationAwareTransactionalTests() {
+		this(null);
 	}
 
 	/**
-	 * Constructor for AbstractAnnotationAwareTransactionalTests with a JUnit
-	 * name.
+	 * Constructs a new AbstractAnnotationAwareTransactionalTests instance with
+	 * the specified JUnit <code>name</code> and retrieves the configured (or
+	 * default) {@link ProfileValueSource}.
+	 *
+	 * @param name the name of the current test.
+	 * @see ProfileValueUtils#retrieveProfileValueSource(Class)
 	 */
-	public AbstractAnnotationAwareTransactionalTests(String name) {
+	public AbstractAnnotationAwareTransactionalTests(final String name) {
 		super(name);
+		this.profileValueSource = ProfileValueUtils.retrieveProfileValueSource(getClass());
 	}
 
 	@Override
@@ -103,11 +123,19 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	 * </p>
 	 *
 	 * @param applicationContext the ApplicationContext in which to search for
-	 *        the ProfileValueSource.
-	 * @see ProfileValueUtils#findUniqueProfileValueSource(ApplicationContext)
+	 *        the ProfileValueSource; may not be <code>null</code>.
+	 * @deprecated Use
+	 *             {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}
+	 *             instead.
 	 */
+	@Deprecated
 	protected void findUniqueProfileValueSourceFromContext(final ApplicationContext applicationContext) {
-		final ProfileValueSource uniqueProfileValueSource = ProfileValueUtils.findUniqueProfileValueSource(applicationContext);
+		Assert.notNull(applicationContext, "Can not search for a ProfileValueSource in a null ApplicationContext.");
+		ProfileValueSource uniqueProfileValueSource = null;
+		final Map<?, ?> beans = applicationContext.getBeansOfType(ProfileValueSource.class);
+		if (beans.size() == 1) {
+			uniqueProfileValueSource = (ProfileValueSource) beans.values().iterator().next();
+		}
 		if (uniqueProfileValueSource != null) {
 			this.profileValueSource = uniqueProfileValueSource;
 		}
@@ -165,7 +193,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 					}
 				}
 			}
-		}, testMethod, this.logger);
+		}, testMethod);
 	}
 
 	/**
@@ -244,18 +272,17 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		return rollback;
 	}
 
-	private void runTestTimed(final TestExecutionCallback tec, final Method testMethod, final Log logger)
-			throws Throwable {
+	private void runTestTimed(final TestExecutionCallback tec, final Method testMethod) throws Throwable {
 
 		final Timed timed = testMethod.getAnnotation(Timed.class);
 
 		if (timed == null) {
-			runTest(tec, testMethod, logger);
+			runTest(tec, testMethod);
 		}
 		else {
 			final long startTime = System.currentTimeMillis();
 			try {
-				runTest(tec, testMethod, logger);
+				runTest(tec, testMethod);
 			}
 			finally {
 				final long elapsed = System.currentTimeMillis() - startTime;
@@ -266,16 +293,16 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		}
 	}
 
-	private void runTest(final TestExecutionCallback tec, final Method testMethod, final Log logger) throws Throwable {
+	private void runTest(final TestExecutionCallback tec, final Method testMethod) throws Throwable {
 
 		final ExpectedException ee = testMethod.getAnnotation(ExpectedException.class);
 		final Repeat repeat = testMethod.getAnnotation(Repeat.class);
 
-		final int runs = (repeat != null) ? repeat.value() : 1;
+		final int runs = ((repeat != null) && (repeat.value() > 1)) ? repeat.value() : 1;
 		for (int i = 0; i < runs; i++) {
 			try {
-				if ((runs > 1) && (logger != null) && (logger.isInfoEnabled())) {
-					logger.info("Repetition " + (i + 1) + " of test " + testMethod.getName());
+				if ((runs > 1) && (this.logger != null) && (this.logger.isInfoEnabled())) {
+					this.logger.info("Repetition " + (i + 1) + " of test " + testMethod.getName());
 				}
 				tec.run();
 				if (ee != null) {
@@ -299,6 +326,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 
 
 	private static interface TestExecutionCallback {
+
 		void run() throws Throwable;
 	}
 
