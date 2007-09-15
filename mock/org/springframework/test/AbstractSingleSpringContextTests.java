@@ -96,7 +96,10 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * @see #onSetUp()
 	 */
 	protected final void setUp() throws Exception {
-		this.applicationContext = getContext(contextKey());
+		// lazy load, in case getApplicationContext() has not yet been called.
+		if (this.applicationContext == null) {
+			this.applicationContext = getContext(contextKey());
+		}
 		prepareTestInstance();
 		onSetUp();
 	}
@@ -350,9 +353,25 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * Return the ApplicationContext that this base class manages.
+	 * Return the ApplicationContext that this base class manages; may be
+	 * <code>null</code>.
 	 */
 	public final ConfigurableApplicationContext getApplicationContext() {
+
+		// lazy load, in case setUp() has not yet been called.
+		if (this.applicationContext == null) {
+			try {
+				this.applicationContext = getContext(contextKey());
+			}
+			catch (Exception e) {
+				// log and continue...
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("Caught exception while retrieving the ApplicationContext for test ["
+							+ getClass().getName() + "." + getName() + "].", e);
+				}
+			}
+		}
+
 		return this.applicationContext;
 	}
 
