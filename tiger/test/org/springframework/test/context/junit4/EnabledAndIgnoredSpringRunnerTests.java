@@ -26,13 +26,18 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.annotation.IfProfileValue;
+import org.springframework.test.annotation.ProfileValueSource;
+import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 
 /**
  * <p>
- * Verifies the correct handling of JUnit's {@link Ignore @Ignore} and Spring's
- * {@link IfProfileValue @IfProfileValue} annotations in conjunction with the
- * {@link SpringJUnit4ClassRunner}.
+ * Verifies proper handling of JUnit's {@link org.junit.Ignore @Ignore} and
+ * Spring's
+ * {@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}
+ * and {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}
+ * (with the <em>implicit, default {@link ProfileValueSource}</em>)
+ * annotations in conjunction with the {@link SpringJUnit4ClassRunner}.
  * </p>
  * <p>
  * Note that {@link TestExecutionListeners @TestExecutionListeners} is
@@ -42,28 +47,17 @@ import org.springframework.test.context.TestExecutionListeners;
  *
  * @author Sam Brannen
  * @since 2.5
+ * @see HardCodedProfileValueSourceSpringRunnerTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners( {})
 public class EnabledAndIgnoredSpringRunnerTests {
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	protected static final String NAME = "EnabledAndIgnoredSpringRunnerTests.profile_value.name";
+	protected static final String VALUE = "enigma";
 
-	private static final String NAME = "EnabledAndIgnoredSpringRunnerTests.profile_value.name";
-	private static final String VALUE = "enigma";
+	protected static int numTestsExecuted = 0;
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	private static int numTestsExecuted = 0;
-
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
 	public static junit.framework.Test suite() {
@@ -80,10 +74,6 @@ public class EnabledAndIgnoredSpringRunnerTests {
 	public static void verifyNumTestsExecuted() {
 		assertEquals("Verifying the number of tests executed.", 3, numTestsExecuted);
 	}
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	@Test
 	@IfProfileValue(name = NAME, value = VALUE + "X")
@@ -115,5 +105,4 @@ public class EnabledAndIgnoredSpringRunnerTests {
 		numTestsExecuted++;
 		fail("The body of an ignored test should never be executed!");
 	}
-
 }
