@@ -22,6 +22,10 @@ package org.springframework.test.annotation;
  * testing environment.
  * </p>
  * <p>
+ * Concrete implementations must provide a <code>public</code> no-args
+ * constructor.
+ * </p>
+ * <p>
  * Spring provides the following out-of-the-box implementations:
  * </p>
  * <ul>
