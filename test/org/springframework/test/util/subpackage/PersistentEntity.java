@@ -17,7 +17,7 @@
 package org.springframework.test.util.subpackage;
 
 /**
- * Abstract base class for <em>persistent entities</em>; inteded for use in
+ * Abstract base class for <em>persistent entities</em>; intended for use in
  * unit tests.
  *
  * @author Sam Brannen
