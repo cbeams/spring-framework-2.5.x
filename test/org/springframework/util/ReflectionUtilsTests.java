@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.rmi.ConnectException;
@@ -27,12 +28,63 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
+import org.springframework.test.AssertThrows;
 
 /**
+ * <p>
+ * JUnit 3.8 based unit tests for {@link ReflectionUtils}.
+ * </p>
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class ReflectionUtilsTests extends TestCase {
+
+	public void testFindField() {
+		Field field;
+
+		field = ReflectionUtils.findField(TestBeanSubclassWithPublicField.class, "publicField", String.class);
+		assertNotNull(field);
+		assertEquals("publicField", field.getName());
+		assertEquals(String.class, field.getType());
+		assertTrue("Field should be public.", Modifier.isPublic(field.getModifiers()));
+
+		field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "prot", String.class);
+		assertNotNull(field);
+		assertEquals("prot", field.getName());
+		assertEquals(String.class, field.getType());
+		assertTrue("Field should be protected.", Modifier.isProtected(field.getModifiers()));
+
+		field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "name", String.class);
+		assertNotNull(field);
+		assertEquals("name", field.getName());
+		assertEquals(String.class, field.getType());
+		assertTrue("Field should be private.", Modifier.isPrivate(field.getModifiers()));
+	}
+
+	public void testSetField() {
+		final TestBeanSubclassWithNewField testBean = new TestBeanSubclassWithNewField();
+		final Field field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "name", String.class);
+
+		new AssertThrows(IllegalStateException.class,
+				"Calling setField() with on a private field without making it accessible should throw an IllegalStateException.") {
+
+			public void test() throws Exception {
+				ReflectionUtils.setField(field, testBean, "FooBar");
+			}
+		}.runTest();
+
+		ReflectionUtils.makeAccessible(field);
+
+		ReflectionUtils.setField(field, testBean, "FooBar");
+		assertNotNull(testBean.getName());
+		assertEquals("FooBar", testBean.getName());
+
+		ReflectionUtils.setField(field, testBean, null);
+		assertNull(testBean.getName());
+	}
+
 
 	public void testInvokeMethod() throws Exception {
 		String rob = "Rob Harrop";
@@ -154,16 +206,16 @@ public class ReflectionUtilsTests extends TestCase {
 		private List methods = new LinkedList();
 
 		public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {
-			methodNames.add(m.getName());
-			methods.add(m);
+			this.methodNames.add(m.getName());
+			this.methods.add(m);
 		}
 
 		public List getMethodNames() {
-			return methodNames;
+			return this.methodNames;
 		}
 
 		public List getMethods() {
-			return methods;
+			return this.methods;
 		}
 	};
 
@@ -206,28 +258,27 @@ public class ReflectionUtilsTests extends TestCase {
 	}
 
 
+	public static class TestBeanSubclassWithPublicField extends TestBean {
+		public String publicField = "foo";
+	}
+
 	public static class TestBeanSubclassWithNewField extends TestBean {
-
 		private int magic;
-
 		protected String prot = "foo";
 	}
 
 
 	public static class TestBeanSubclassWithFinalField extends TestBean {
-
 		private final String foo = "will break naive copy that doesn't exclude statics";
 	}
 
 
 	private static class A {
-
 		private void foo(Integer i) throws RemoteException {}
 	}
 
 
 	private static class B extends A {
-
 		void bar(String s) throws IllegalArgumentException {}
 	}
 
