@@ -91,4 +91,11 @@
 		</dependency>
 <!-- Spring Dependencies -->
 	</dependencies>
+	<distributionManagement>
+		<snapshotRepository>
+			<id>spring-snapshot</id>
+			<name>Spring Snapshot Repository</name>
+			<url>s3://maven.springframework.org/snapshot</url>
+		</snapshotRepository>
+	</distributionManagement>
 </project>
