@@ -1483,7 +1483,7 @@ public class SimpleProfiler implements Ordered {
     ]]><lineannotation>&lt;!-- this is the aspect --&gt;</lineannotation><![CDATA[
     <bean id="profiler" class="x.y.SimpleProfiler">
         ]]><lineannotation>&lt;!-- execute before the transactional advice (hence the lower order number) --&gt;</lineannotation><![CDATA[
-        <property name="order" ]]><emphasis role="bold">order="1"</emphasis><![CDATA[/>
+        <property name="order" ]]><emphasis role="bold">value="1"</emphasis><![CDATA[/>
     </bean>
     
     <tx:annotation-driven transaction-manager="txManager" ]]><emphasis role="bold">order="200"</emphasis><![CDATA[/>
