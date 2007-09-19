@@ -1915,7 +1915,7 @@ public class CommandManager implements BeanFactoryAware {
    }
 }]]></programlisting>
             
-            <para>The above example is generally is not a desirable solution since the
+            <para>The above example is generally not a desirable solution since the
             business code is then aware of and coupled to the Spring Framework. Method Injection,
             a somewhat advanced feature of the Spring IoC container, allows this use case to be
             handled in a clean fashion.</para>
