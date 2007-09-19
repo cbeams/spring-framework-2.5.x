@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,14 @@ package org.springframework.orm.toplink.support;
 
 import java.lang.reflect.Method;
 
+import oracle.toplink.internal.databaseaccess.Accessor;
 import oracle.toplink.logging.AbstractSessionLog;
 import oracle.toplink.logging.SessionLogEntry;
+import oracle.toplink.publicinterface.Session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.util.ReflectionUtils;
 
 /**
  * TopLink 10.1.3+ SessionLog implementation that logs through Commons Logging.
@@ -57,9 +61,17 @@ public class CommonsLoggingSessionLog extends AbstractSessionLog {
 	public static final String DEFAULT_SEPARATOR = "--";
 
 
+	private static Method getSessionMethod;
+
 	private static Method getExceptionMethod;
 
 	static {
+		try {
+			getSessionMethod = SessionLogEntry.class.getMethod("getSession", new Class[0]);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("Could not find method SessionLogEntry.getSession()");
+		}
 		try {
 			getExceptionMethod = SessionLogEntry.class.getMethod("getException", new Class[0]);
 		}
@@ -85,7 +97,7 @@ public class CommonsLoggingSessionLog extends AbstractSessionLog {
 	 * (session, connection) and the log message itself. Default is "--".
 	 */
 	public String getSeparator() {
-		return separator;
+		return this.separator;
 	}
 
 
@@ -154,10 +166,8 @@ public class CommonsLoggingSessionLog extends AbstractSessionLog {
 	 * will be used.
 	 */
 	protected String getCategory(SessionLogEntry entry) {
-		if (entry.getNameSpace() != null) {
-			return NAMESPACE_PREFIX + entry.getNameSpace();
-		}
-		return NAMESPACE_PREFIX + DEFAULT_NAMESPACE;
+		String namespace = entry.getNameSpace();
+		return NAMESPACE_PREFIX + (namespace != null ? namespace : DEFAULT_NAMESPACE);
 	}
 
 	/**
@@ -170,12 +180,14 @@ public class CommonsLoggingSessionLog extends AbstractSessionLog {
 	 */
 	protected String getMessageString(SessionLogEntry entry) {
 		StringBuffer buf = new StringBuffer();
-		if (entry.getSession() != null) {
-			buf.append(getSessionString(entry.getSession()));
+		Session session = getSession(entry);
+		if (session != null) {
+			buf.append(getSessionString(session));
 			buf.append(getSeparator());
 		}
-		if (entry.getConnection() != null) {
-			buf.append(getConnectionString(entry.getConnection()));
+		Accessor connection = entry.getConnection();
+		if (connection != null) {
+			buf.append(getConnectionString(connection));
 			buf.append(getSeparator());
 		}
 		buf.append(formatMessage(entry));
@@ -184,32 +196,22 @@ public class CommonsLoggingSessionLog extends AbstractSessionLog {
 
 	/**
 	 * Extract the exception from the given log entry.
-	 * <p>Default implementations calls <code>SessionLogEntry.getException</code>
-	 * via reflection: The return type varies between TopLink 9.0.4 and 10.1.3
-	 * (<code>Exception</code> vs <code>Throwable</code>, respectively),
-	 * which does not allow us to compile both CommonsLoggingSessionLog904 and
-	 * CommonsLoggingSessionLog against the same <code>getException</code> method.
+	 * <p>The default implementation calls <code>SessionLogEntry.getSession</code>
+	 * via reflection: The return type varies between TopLink 10.1.3 and 11
+	 * (<code>Session</code> vs <code>AbstractSession</code>, respectively).
 	 */
-	protected Throwable getException(SessionLogEntry entry) {
-		try {
-			return (Throwable) getExceptionMethod.invoke(entry, new Object[0]);
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(
-					"Could not invoke method SessionLogEntry.getException(): " + ex.getMessage());
-		}
+	protected Session getSession(SessionLogEntry entry) {
+		return (Session) ReflectionUtils.invokeMethod(getSessionMethod, entry);
 	}
 
-
 	/**
-	 * Throws an UnsupportedOperationException: This method is not
-	 * called any longer as of TopLink 10.1.3, but abstract in
-	 * 10.1.3 Preview 3 (which we want to be able to compile against).
-	 * <p>Do not remove this method for the time being, even if the
-	 * superclass method is no longer abstract in <code>toplink-api.jar</code>!
+	 * Extract the exception from the given log entry.
+	 * <p>The default implementation calls <code>SessionLogEntry.getException</code>
+	 * via reflection: The return type varies between TopLink 9.0.4 and 10.1.3
+	 * (<code>Exception</code> vs <code>Throwable</code>, respectively).
 	 */
-	public void log(oracle.toplink.sessions.SessionLogEntry entry) {
-		throw new UnsupportedOperationException("oracle.toplink.sessions.SessionLogEntry not supported");
+	protected Throwable getException(SessionLogEntry entry) {
+		return (Throwable) ReflectionUtils.invokeMethod(getExceptionMethod, entry);
 	}
 
 }
