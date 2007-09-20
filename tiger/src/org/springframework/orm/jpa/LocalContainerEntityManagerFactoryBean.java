@@ -23,7 +23,6 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.core.io.ResourceLoader;
@@ -79,7 +78,7 @@ import org.springframework.util.ClassUtils;
  * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
  */
 public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean
-		implements BeanClassLoaderAware, ResourceLoaderAware, LoadTimeWeaverAware {
+		implements ResourceLoaderAware, LoadTimeWeaverAware {
 
 	private PersistenceUnitManager persistenceUnitManager;
 
@@ -184,10 +183,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.internalPersistenceUnitManager.setResourceLoader(resourceLoader);
-	}
-
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
-		this.beanClassLoader = beanClassLoader;
+		this.beanClassLoader = resourceLoader.getClassLoader();
 	}
 
 
