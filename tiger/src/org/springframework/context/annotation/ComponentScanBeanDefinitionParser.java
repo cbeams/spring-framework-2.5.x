@@ -80,8 +80,14 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		ResourceLoader resourceLoader = parserContext.getReaderContext().getResourceLoader();
 		Object source = parserContext.extractSource(element);
 
-		boolean useDefaultFilters = Boolean.valueOf(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
-		boolean annotationConfig = Boolean.valueOf(element.getAttribute(ANNOTATION_CONFIG_ATTRIBUTE));
+		boolean useDefaultFilters = true;
+		if (element.hasAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE)) {
+			useDefaultFilters = Boolean.valueOf(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
+		}
+		boolean annotationConfig = true;
+		if (element.hasAttribute(ANNOTATION_CONFIG_ATTRIBUTE)) {
+			annotationConfig = Boolean.valueOf(element.getAttribute(ANNOTATION_CONFIG_ATTRIBUTE));
+		}
 
 		// Delegate bean definition registration to scanner class.
 		ClassPathBeanDefinitionScanner scanner =

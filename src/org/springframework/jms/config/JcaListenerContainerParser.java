@@ -42,10 +42,13 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
 		RootBeanDefinition containerDef = new RootBeanDefinition(JmsMessageEndpointManager.class);
 
-		String resourceAdapterBeanName = containerEle.getAttribute(RESOURCE_ADAPTER_ATTRIBUTE);
-		if (!StringUtils.hasText(resourceAdapterBeanName)) {
-			parserContext.getReaderContext().error(
-					"Listener container 'resource-adapter' attribute contains empty value.", containerEle);
+		String resourceAdapterBeanName = "resourceAdapter";
+		if (containerEle.hasAttribute(RESOURCE_ADAPTER_ATTRIBUTE)) {
+			resourceAdapterBeanName = containerEle.getAttribute(RESOURCE_ADAPTER_ATTRIBUTE);
+			if (!StringUtils.hasText(resourceAdapterBeanName)) {
+				parserContext.getReaderContext().error(
+						"Listener container 'resource-adapter' attribute contains empty value.", containerEle);
+			}
 		}
 		containerDef.getPropertyValues().addPropertyValue("resourceAdapter",
 				new RuntimeBeanReference(resourceAdapterBeanName));

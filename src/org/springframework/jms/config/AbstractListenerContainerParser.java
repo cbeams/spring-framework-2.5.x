@@ -195,23 +195,24 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 	protected void parseContainerConfiguration(Element ele, ParserContext parserContext, BeanDefinition configDef) {
 		String destinationType = ele.getAttribute(DESTINATION_TYPE_ATTRIBUTE);
-		if (StringUtils.hasText(destinationType)) {
-			boolean pubSubDomain = false;
-			boolean subscriptionDurable = false;
-			if (DESTINATION_TYPE_DURABLE_TOPIC.equals(destinationType)) {
-				pubSubDomain = true;
-				subscriptionDurable = true;
-			}
-			else if (DESTINATION_TYPE_TOPIC.equals(destinationType)) {
-				pubSubDomain = true;
-			}
-			else if (!DESTINATION_TYPE_QUEUE.equals(destinationType)) {
-				parserContext.getReaderContext().error("Invalid listener container 'destination-type': " +
-						"only \"queue\", \"topic\" and \"durableTopic\" supported.", ele);
-			}
-			configDef.getPropertyValues().addPropertyValue("pubSubDomain", Boolean.valueOf(pubSubDomain));
-			configDef.getPropertyValues().addPropertyValue("subscriptionDurable", Boolean.valueOf(subscriptionDurable));
+		boolean pubSubDomain = false;
+		boolean subscriptionDurable = false;
+		if (DESTINATION_TYPE_DURABLE_TOPIC.equals(destinationType)) {
+			pubSubDomain = true;
+			subscriptionDurable = true;
 		}
+		else if (DESTINATION_TYPE_TOPIC.equals(destinationType)) {
+			pubSubDomain = true;
+		}
+		else if ("".equals(destinationType) || DESTINATION_TYPE_QUEUE.equals(destinationType)) {
+			// the default: queue
+		}
+		else {
+			parserContext.getReaderContext().error("Invalid listener container 'destination-type': " +
+					"only \"queue\", \"topic\" and \"durableTopic\" supported.", ele);
+		}
+		configDef.getPropertyValues().addPropertyValue("pubSubDomain", Boolean.valueOf(pubSubDomain));
+		configDef.getPropertyValues().addPropertyValue("subscriptionDurable", Boolean.valueOf(subscriptionDurable));
 
 		if (ele.hasAttribute(CLIENT_ID_ATTRIBUTE)) {
 			String clientId = ele.getAttribute(CLIENT_ID_ATTRIBUTE);

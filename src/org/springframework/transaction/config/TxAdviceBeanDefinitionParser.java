@@ -69,8 +69,9 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		// Set the transaction manager property.
-		builder.addPropertyReference(TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY,
-				element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE));
+		String transactionManagerName = (element.hasAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE) ?
+				element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE) : "transactionManager");
+		builder.addPropertyReference(TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, transactionManagerName);
 
 		List txAttributes = DomUtils.getChildElementsByTagName(element, ATTRIBUTES);
 		if (txAttributes.size() > 1) {

@@ -493,18 +493,16 @@ public class BeanDefinitionParserDelegate {
 				bd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, BEAN_NAME_DELIMITERS));
 			}
 
-			if (ele.hasAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE)) {
-				String autowireCandidate = ele.getAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE);
-				if (DEFAULT_VALUE.equals(autowireCandidate)) {
-					String candidatePattern = this.defaults.getAutowireCandidates();
-					if (candidatePattern != null) {
-						String[] patterns = StringUtils.commaDelimitedListToStringArray(candidatePattern);
-						bd.setAutowireCandidate(PatternMatchUtils.simpleMatch(patterns, beanName));
-					}
+			String autowireCandidate = ele.getAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE);
+			if ("".equals(autowireCandidate) || DEFAULT_VALUE.equals(autowireCandidate)) {
+				String candidatePattern = this.defaults.getAutowireCandidates();
+				if (candidatePattern != null) {
+					String[] patterns = StringUtils.commaDelimitedListToStringArray(candidatePattern);
+					bd.setAutowireCandidate(PatternMatchUtils.simpleMatch(patterns, beanName));
 				}
-				else {
-					bd.setAutowireCandidate(TRUE_VALUE.equals(autowireCandidate));
-				}
+			}
+			else {
+				bd.setAutowireCandidate(TRUE_VALUE.equals(autowireCandidate));
 			}
 
 			if (ele.hasAttribute(PRIMARY_ATTRIBUTE)) {

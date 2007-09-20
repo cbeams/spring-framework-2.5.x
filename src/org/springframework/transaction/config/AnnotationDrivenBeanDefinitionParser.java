@@ -84,11 +84,16 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			RootBeanDefinition def = new RootBeanDefinition();
 			def.setBeanClassName(TRANSACTION_ASPECT_CLASS_NAME);
 			def.setFactoryMethodName("aspectOf");
-			String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
-			def.getPropertyValues().addPropertyValue(
-					TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
+			registerTransactionManager(element, def);
 			parserContext.registerBeanComponent(new BeanComponentDefinition(def, TRANSACTION_ASPECT_BEAN_NAME));
 		}
+	}
+
+	private static void registerTransactionManager(Element element, BeanDefinition def) {
+		String transactionManagerName = (element.hasAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE) ?
+				element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE) : "transactionManager");
+		def.getPropertyValues().addPropertyValue(
+				TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
 	}
 
 
@@ -105,9 +110,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				RootBeanDefinition interceptorDef = new RootBeanDefinition(TransactionInterceptor.class);
 				interceptorDef.setSource(parserContext.extractSource(element));
 				interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-				String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
-				interceptorDef.getPropertyValues().addPropertyValue(
-						TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
+				registerTransactionManager(element, interceptorDef);
+
 				Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();
 				interceptorDef.getPropertyValues().addPropertyValue(
 						TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(sourceClass));
