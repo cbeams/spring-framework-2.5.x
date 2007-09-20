@@ -17,6 +17,8 @@
 package org.springframework.orm.jdo;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.jdo.JDOException;
@@ -45,13 +47,11 @@ import org.springframework.util.CollectionUtils;
  * PersistenceManagerFactory instance is just a matter of configuration!
  *
  * <p>Configuration settings can either be read from a properties file,
- * specified as "configLocation", or completely via this class. Properties
+ * specified as "configLocation", or locally specified. Properties
  * specified as "jdoProperties" here will override any settings in a file.
- *
- * <p>This PersistenceManager handling strategy is most appropriate for
- * applications which solely use JDO for data access. In this case,
- * {@link JdoTransactionManager} is more convenient than setting up your
- * JDO provider for JTA transactions (which might involve a JCA connector).
+ * On JDO 2.1, you may alternatively specify a "persistenceManagerFactoryName",
+ * referring to a PMF definition in "META-INF/jdoconfig.xml"
+ * (see {@link #setPersistenceManagerFactoryName}).
  *
  * <p><b>NOTE: This class requires JDO 2.0 or higher, as of Spring 2.5.</b>
  *
@@ -110,9 +110,11 @@ public class LocalPersistenceManagerFactoryBean
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private String persistenceManagerFactoryName;
+
 	private Resource configLocation;
 
-	private Properties jdoProperties;
+	private final Map jdoPropertyMap = new HashMap();
 
 	private ClassLoader beanClassLoader;
 
@@ -120,6 +122,21 @@ public class LocalPersistenceManagerFactoryBean
 
 	private JdoDialect jdoDialect;
 
+
+	/**
+	 * Specify the name of the desired PersistenceManagerFactory.
+	 * <p>This may either be a properties resource in the classpath if such a resource exists
+	 * (JDO 2.0), or a PMF definition with that name from "META-INF/jdoconfig.xml" (JDO 2.1),
+	 * or a JPA EntityManagerFactory cast to a PersistenceManagerFactory based on the
+	 * persistence-unit name from "META-INF/persistence.xml" (JDO 2.1 / JPA 1.0).
+	 * <p>Default is none: Either 'persistenceManagerFactoryName' or 'configLocation'
+	 * or 'jdoProperties' needs to be specified.
+	 * @see #setConfigLocation
+	 * @see #setJdoProperties
+	 */
+	public void setPersistenceManagerFactoryName(String persistenceManagerFactoryName) {
+		this.persistenceManagerFactoryName = persistenceManagerFactoryName;
+	}
 
 	/**
 	 * Set the location of the JDO properties config file, for example
@@ -135,22 +152,34 @@ public class LocalPersistenceManagerFactoryBean
 	 * Set JDO properties, such as"javax.jdo.PersistenceManagerFactoryClass".
 	 * <p>Can be used to override values in a JDO properties config file,
 	 * or to specify all necessary properties locally.
+	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
+	 * or a "props" element in XML bean definitions.
 	 */
 	public void setJdoProperties(Properties jdoProperties) {
-		this.jdoProperties = jdoProperties;
+		CollectionUtils.mergePropertiesIntoMap(jdoProperties, this.jdoPropertyMap);
 	}
 
 	/**
-	 * Return the JDO properties, if any. Mainly available for
-	 * configuration through property paths that specify individual keys.
+	 * Specify JDO properties as a Map, to be passed into
+	 * <code>JDOHelper.getPersistenceManagerFactory</code> (if any).
+	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
+	 * @see javax.jdo.JDOHelper#getPersistenceManagerFactory(java.util.Map)
 	 */
-	public Properties getJdoProperties() {
-		if (this.jdoProperties == null) {
-			this.jdoProperties = new Properties();
+	public void setJdoPropertyMap(Map jdoProperties) {
+		if (jdoProperties != null) {
+			this.jdoPropertyMap.putAll(jdoProperties);
 		}
-		return this.jdoProperties;
 	}
 
+	/**
+	 * Allow Map access to the JDO properties to be passed to the JDOHelper,
+	 * with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via
+	 * "jdoPropertyMap[myKey]".
+	 */
+	public Map getJdoPropertyMap() {
+		return this.jdoPropertyMap;
+	}
 	/**
 	 * Set the JDO dialect to use for the PersistenceExceptionTranslator
 	 * functionality of this factory.
@@ -176,24 +205,34 @@ public class LocalPersistenceManagerFactoryBean
 	 * @throws JDOException in case of JDO initialization errors
 	 */
 	public void afterPropertiesSet() throws IllegalArgumentException, IOException, JDOException {
-		if (this.configLocation == null && this.jdoProperties == null) {
-			throw new IllegalArgumentException("Either configLocation or jdoProperties must be set");
-		}
-
-		Properties mergedProps = new Properties();
-
-		if (this.configLocation != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Loading JDO config from [" + this.configLocation + "]");
+		if (this.persistenceManagerFactoryName != null) {
+			if (this.configLocation != null || !this.jdoPropertyMap.isEmpty()) {
+				throw new IllegalStateException("'configLocation'/'jdoProperties' not supported in " +
+						"combination with 'persistenceManagerFactoryName' - specify one or the other, not both");
 			}
-			PropertiesLoaderUtils.fillProperties(mergedProps, this.configLocation);
+			if (logger.isInfoEnabled()) {
+				logger.info("Building new JDO PersistenceManagerFactory for name '" +
+						this.persistenceManagerFactoryName + "'");
+			}
+			this.persistenceManagerFactory = newPersistenceManagerFactory(this.persistenceManagerFactoryName);
 		}
 
-		CollectionUtils.mergePropertiesIntoMap(this.jdoProperties, mergedProps);
+		else {
+			Map mergedProps = new HashMap();
 
-		// Build PersistenceManagerFactory instance.
-		logger.info("Building new JDO PersistenceManagerFactory");
-		this.persistenceManagerFactory = newPersistenceManagerFactory(mergedProps);
+			if (this.configLocation != null) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Loading JDO config from [" + this.configLocation + "]");
+				}
+				mergedProps.putAll(PropertiesLoaderUtils.loadProperties(this.configLocation));
+			}
+
+			mergedProps.putAll(this.jdoPropertyMap);
+
+			// Build PersistenceManagerFactory instance.
+			logger.info("Building new JDO PersistenceManagerFactory");
+			this.persistenceManagerFactory = newPersistenceManagerFactory(mergedProps);
+		}
 
 		// Build default JdoDialect if none explicitly specified.
 		if (this.jdoDialect == null) {
@@ -203,17 +242,32 @@ public class LocalPersistenceManagerFactoryBean
 
 	/**
 	 * Subclasses can override this to perform custom initialization of the
+	 * PersistenceManagerFactory instance, creating it for the specified name.
+	 * <p>The default implementation invokes JDOHelper's
+	 * <code>getPersistenceManagerFactory(String)</code> method.
+	 * A custom implementation could prepare the instance in a specific way,
+	 * or use a custom PersistenceManagerFactory implementation.
+	 * @param name the name of the desired PersistenceManagerFactory
+	 * @return the PersistenceManagerFactory instance
+	 * @see javax.jdo.JDOHelper#getPersistenceManagerFactory(String)
+	 */
+	protected PersistenceManagerFactory newPersistenceManagerFactory(String name) {
+		return JDOHelper.getPersistenceManagerFactory(name, this.beanClassLoader);
+	}
+
+	/**
+	 * Subclasses can override this to perform custom initialization of the
 	 * PersistenceManagerFactory instance, creating it via the given Properties
 	 * that got prepared by this LocalPersistenceManagerFactoryBean.
 	 * <p>The default implementation invokes JDOHelper's
-	 * <code>getPersistenceManagerFactory</code> method.
+	 * <code>getPersistenceManagerFactory(Map)</code> method.
 	 * A custom implementation could prepare the instance in a specific way,
 	 * or use a custom PersistenceManagerFactory implementation.
-	 * @param props the merged Properties prepared by this LocalPersistenceManagerFactoryBean
+	 * @param props the merged properties prepared by this LocalPersistenceManagerFactoryBean
 	 * @return the PersistenceManagerFactory instance
 	 * @see javax.jdo.JDOHelper#getPersistenceManagerFactory(java.util.Map)
 	 */
-	protected PersistenceManagerFactory newPersistenceManagerFactory(Properties props) {
+	protected PersistenceManagerFactory newPersistenceManagerFactory(Map props) {
 		return JDOHelper.getPersistenceManagerFactory(props, this.beanClassLoader);
 	}
 
