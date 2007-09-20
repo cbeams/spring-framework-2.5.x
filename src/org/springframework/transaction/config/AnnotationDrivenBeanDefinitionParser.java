@@ -46,14 +46,6 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	/**
-	 * Bean property name for injecting the {@link TransactionInterceptor}.
-	 */
-	private static final String TRANSACTION_INTERCEPTOR = "transactionInterceptor";
-
-	private static final String ORDER = "order";
-
-
-	/**
 	 * Parses the '<code>&lt;tx:annotation-driven/>&gt;</code>' tag. Will
 	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary register an AutoProxyCreator} in
 	 * the container as necessary.
@@ -65,7 +57,8 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 		RootBeanDefinition interceptorDef = new RootBeanDefinition(TransactionInterceptor.class);
 		interceptorDef.setSource(parserContext.extractSource(element));
 		interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
+		String transactionManagerName = (element.hasAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE) ?
+				element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE) : "transactionManager");
 		interceptorDef.getPropertyValues().addPropertyValue(
 				TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
 		Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();

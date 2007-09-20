@@ -55,8 +55,13 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 		RootBeanDefinition scopedProxyDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);
 		scopedProxyDefinition.getPropertyValues().addPropertyValue("targetBeanName", targetBeanName);
 
-		boolean proxyTargetClass = (!(node instanceof Element) ||
-				Boolean.valueOf(((Element) node).getAttribute(PROXY_TARGET_CLASS)).booleanValue());
+		boolean proxyTargetClass = true;
+		if (node instanceof Element) {
+			Element ele = (Element) node;
+			if (ele.hasAttribute(PROXY_TARGET_CLASS)) {
+				proxyTargetClass = Boolean.valueOf(ele.getAttribute(PROXY_TARGET_CLASS)).booleanValue();
+			}
+		}
 		if (proxyTargetClass) {
 			targetDefinition.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
 			// ScopedFactoryBean's "proxyTargetClass" default is TRUE, so we don't need to set it explicitly here.
