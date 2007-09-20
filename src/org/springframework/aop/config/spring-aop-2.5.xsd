@@ -222,19 +222,6 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="type" default="aspectj">
-			<xsd:annotation>
-				<xsd:documentation><![CDATA[
-	The type of pointcut expression (see the associated enumeration).
-				]]></xsd:documentation>
-			</xsd:annotation>
-			<xsd:simpleType>
-				<xsd:restriction base="xsd:string">
-					<xsd:enumeration value="aspectj"/>
-					<xsd:enumeration value="regex"/>
-				</xsd:restriction>
-			</xsd:simpleType>
-		</xsd:attribute>
 	</xsd:complexType>
 
 	<xsd:complexType name="declareParentsType">

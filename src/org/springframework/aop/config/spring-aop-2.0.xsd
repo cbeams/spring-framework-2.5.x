@@ -239,6 +239,7 @@
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	The type of pointcut expression (see the associated enumeration).
+	DEPRECATED: Only AspectJ expression pointcuts are supported.
 				]]></xsd:documentation>
 			</xsd:annotation>
 			<xsd:simpleType>
