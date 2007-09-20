@@ -3,12 +3,39 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5 RC1 (2007-09-24)
---------------------------------------
+Changes in version 2.5 RC1 (2007-10-01)
+---------------------------------------
+
+General
+* updated Spring's JDO support to require JDO 2.0 or higher, with early support for JDO 2.1 features
+* revised default handling in BeanDefinitionParsers for XML config namespaces to work without XSD validation as well
+
+Package org.springframework.aop
+* removed unused pointcut type attribute from "spring-aop-2.5.xsd"
+
+Package org.springframework.beans
+* URIEditor only tries to resolve "classpath:" locations if explicitly constructed with a ClassLoader
+* URIEditor converts spaces in location values into "%20" quotes (as required by the URI format)
+* XmlBeanDefinitionReader initializes default EntityResolver lazily, avoiding classpath scan in case of custom resolver
+* AbstractSingleBeanDefinitionParser applies full scope to inner beans, making them eligible for destruction callbacks
+
+Package org.springframework.context
+* ClassPathXmlApplicationContext and FileSystemXmlApplicationContext trim passed-in config location Strings
 
 Package org.springframework.jms
 * JmsTemplate only starts lazily created transactional Connections if actually necessary (-> "startConnection" flag)
 * JmsTransactionManager does not start transactional Connections until a transactional Session actually requires it
+* added DestinationResolver support to StandardJmsActivationSpecFactory, for Destination objects on JCA ActivationSpecs
+* "spring-jms.xsd" supports "destination-resolver" attribute for "jca-listener-container" element as well
+
+Package org.springframework.orm
+* removed custom detach/attach/newNamedQuery hooks from JdoDialect, expecting providers to follow the final JDO 2.0 API
+* deprecated JdoTemplate's "attachCopy" methods in favor of revised "makePersistent" with a JDO2-style return value
+* LocalPersistenceManagerFactoryBean passes the application ClassLoader into "JDOHelper.getPersistenceManagerFactory"
+* added "persistenceManagerFactoryName" property to LocalPersistenceManagerFactoryBean, supporting JDO 2.1 PMF lookup
+* added "jdoPropertyMap" property to LocalPersistenceManagerFactoryBean, allowing for non-String JDO property values
+* JPA support exposes the application ClassLoader as PersistenceUnitInfo ClassLoader even without a LoadTimeWeaver
+* revised CommonsLoggingSessionLog to work with TopLink 11 as well (remaining compatible with TopLink 10.1.3)
 
 Package org.springframework.test
 * introduced TestNG support based on the new test context framework
