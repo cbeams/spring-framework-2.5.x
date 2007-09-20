@@ -34,10 +34,10 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
  * will be used in conjunction with &#064;ContextConfiguration.
  *
  * @author Sam Brannen
+ * @since 2.5
  * @see TestExecutionListener
  * @see TestContextManager
  * @see ContextConfiguration
- * @since 2.5
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -56,6 +56,6 @@ public @interface TestExecutionListeners {
 	 * @see TransactionalTestExecutionListener
 	 */
 	Class<? extends TestExecutionListener>[] value() default { DependencyInjectionTestExecutionListener.class,
-		DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class };
+			DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class };
 
 }

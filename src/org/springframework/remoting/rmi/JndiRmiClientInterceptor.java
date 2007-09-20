@@ -176,7 +176,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 
 	/**
 	 * Fetches the RMI stub on startup, if necessary.
-	 * <p>Note: As of Spring 2.1, this method will always throw
+	 * <p>Note: As of Spring 2.5, this method will always throw
 	 * RemoteLookupFailureException and not declare NamingException anymore.
 	 * @throws NamingException if the JNDI lookup failed
 	 * @throws RemoteLookupFailureException if RMI stub creation failed

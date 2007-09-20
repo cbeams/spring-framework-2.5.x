@@ -181,7 +181,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Create a new AbstractBeanDefinition as deep copy of the given
 	 * bean definition.
 	 * @param original the original bean definition to copy from
-	 * @deprecated in favor of {@link #AbstractBeanDefinition(BeanDefinition)} as of Spring 2.1
+	 * @deprecated in favor of {@link #AbstractBeanDefinition(BeanDefinition)} as of Spring 2.5
 	 */
 	protected AbstractBeanDefinition(AbstractBeanDefinition original) {
 		this((BeanDefinition) original);
@@ -232,7 +232,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Override settings in this bean definition (assumably a copied parent
 	 * from a parent-child inheritance relationship) from the given bean
 	 * definition (assumably the child).
-	 * @deprecated in favor of {@link #overrideFrom(BeanDefinition)} as of Spring 2.1
+	 * @deprecated in favor of {@link #overrideFrom(BeanDefinition)} as of Spring 2.5
 	 */
 	public void overrideFrom(AbstractBeanDefinition other) {
 		overrideFrom((BeanDefinition) other);

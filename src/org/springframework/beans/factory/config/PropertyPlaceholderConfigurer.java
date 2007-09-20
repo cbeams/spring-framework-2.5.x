@@ -254,7 +254,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 			}
 		}
 
-		// New in Spring 2.1: resolve placeholders in alias target names and aliases as well.
+		// New in Spring 2.5: resolve placeholders in alias target names and aliases as well.
 		beanFactoryToProcess.resolveAliases(valueResolver);
 	}
 

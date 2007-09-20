@@ -162,7 +162,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * created if none is found, which needs to be closed at the end of the operation.
 	 * If <code>false</code>, an {@link IllegalStateException} will get thrown in
 	 * this case.
-	 * <p><b>NOTE: As of Spring 2.1, switching <code>allowCreate</code>
+	 * <p><b>NOTE: As of Spring 2.5, switching <code>allowCreate</code>
 	 * to <code>false</code> will delegate to Hibernate's
 	 * {@link org.hibernate.SessionFactory#getCurrentSession()} method,</b>
 	 * which - with Spring-based setup - will by default delegate to Spring's

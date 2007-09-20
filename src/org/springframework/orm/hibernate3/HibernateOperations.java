@@ -442,7 +442,7 @@ public interface HibernateOperations {
 	 * @param entities the persistent instances to save or update
 	 * (to be associated with the Hibernate <code>Session</code>)
 	 * @throws DataAccessException in case of Hibernate errors
-	 * @deprecated as of Spring 2.1, in favor of individual
+	 * @deprecated as of Spring 2.5, in favor of individual
 	 * <code>saveOrUpdate</code> or <code>merge</code> usage
 	 */
 	void saveOrUpdateAll(Collection entities) throws DataAccessException;

@@ -95,7 +95,7 @@
 	LoadTimeWeaverAware interface will then receive the LoadTimeWeaver reference
 	automatically; for example, Spring's JPA bootstrap support.
 
-	The default weaver is determined automatically. As of Spring 2.1: detecting
+	The default weaver is determined automatically. As of Spring 2.5: detecting
 	Sun's GlassFish, Oracle's OC4J, Spring's VM agent and any ClassLoader
 	supported by Spring's ReflectiveLoadTimeWeaver (for example, the
 	TomcatInstrumentableClassLoader).

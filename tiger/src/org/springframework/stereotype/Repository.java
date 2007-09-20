@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * annotated class is also clarified as to its role in the overall
  * application architecture for the purpose of tools, aspects, etc.
  *
- * <p>As of Spring 2.1, this annotation also serves as a specialization
+ * <p>As of Spring 2.5, this annotation also serves as a specialization
  * of <code>@Component</code>, allowing for implementation classes
  * to be autodetected through classpath scanning.
  *

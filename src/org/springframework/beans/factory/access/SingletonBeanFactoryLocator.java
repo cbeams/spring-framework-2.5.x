@@ -395,7 +395,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				bean = groupContext.getBean(beanName);
 				if (bean instanceof String) {
 					logger.warn("You're using the deprecated alias-through-String-bean feature, " +
-							"which will be removed as of Spring 2.1. It is recommended to replace this " +
+							"which will be removed as of Spring 2.5. It is recommended to replace this " +
 							"with an <alias> tag (see SingletonBeanFactoryLocator javadoc).");
 					beanName = (String) bean;
 					bean = groupContext.getBean(beanName);

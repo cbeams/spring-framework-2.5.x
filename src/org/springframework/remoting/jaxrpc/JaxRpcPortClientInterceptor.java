@@ -361,7 +361,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * <p><code>postProcessJaxRpcService</code> and <code>postProcessPortStub</code>
 	 * hooks are available for customization in subclasses. When using dynamic calls,
 	 * each can be post-processed via <code>postProcessJaxRpcCall</code>.
-	 * <p>Note: As of Spring 2.1, this method will always throw
+	 * <p>Note: As of Spring 2.5, this method will always throw
 	 * RemoteLookupFailureException and not declare ServiceException anymore.
 	 * @throws ServiceException in case of service initialization failure
 	 * @throws RemoteLookupFailureException if port stub creation failed

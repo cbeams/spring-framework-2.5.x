@@ -215,7 +215,7 @@ public class DefaultPersistenceUnitManager
 	 * VM agent specified on JVM startup, and ReflectiveLoadTimeWeaver, which interacts
 	 * with an underlying ClassLoader based on specific extended methods being available
 	 * on it (for example, interacting with Spring's TomcatInstrumentableClassLoader).
-	 * <p><b>NOTE:</b> As of Spring 2.1, the context's default LoadTimeWeaver (defined
+	 * <p><b>NOTE:</b> As of Spring 2.5, the context's default LoadTimeWeaver (defined
 	 * as bean with name "loadTimeWeaver") will be picked up automatically, if available,
 	 * removing the need for LoadTimeWeaver configuration on each affected target bean.</b>
 	 * Consider using the <code>context:load-time-weaver</code> XML tag for creating

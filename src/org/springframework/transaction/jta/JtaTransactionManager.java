@@ -121,7 +121,7 @@ import org.springframework.util.StringUtils;
  * monitoring; with standard JTA, transaction names will simply be ignored.
  *
  * <p>JTA 1.1 adds the TransactionSynchronizationRegistry facility, as public Java EE 5
- * API in addition to the standard JTA UserTransaction handle. As of Spring 2.1, this
+ * API in addition to the standard JTA UserTransaction handle. As of Spring 2.5, this
  * JtaTransactionManager autodetects the TransactionSynchronizationRegistry and uses
  * it for registering Spring-managed synchronizations when participating in an existing
  * JTA transaction (e.g. controlled by EJB CMT). If no TransactionSynchronizationRegistry

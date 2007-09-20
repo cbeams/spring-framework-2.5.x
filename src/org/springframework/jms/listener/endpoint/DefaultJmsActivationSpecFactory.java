@@ -39,7 +39,7 @@ import org.springframework.beans.BeanWrapper;
  * JCA 1.5 specification (Appendix B). Specify the 'activationSpecClass'
  * property explicitly if these default naming rules do not apply.
  *
- * <p>Note: As of Spring 2.1, only ActiveMQ and JORAM are supported in terms
+ * <p>Note: As of Spring 2.5, only ActiveMQ and JORAM are supported in terms
  * of extended settings (through the detection of ActiveMQ's and JORAM's
  * bean property naming conventions). The default ActivationSpec class
  * detection rules may apply to other JMS providers as well.

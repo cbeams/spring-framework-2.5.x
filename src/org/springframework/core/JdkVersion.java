@@ -21,7 +21,7 @@ package org.springframework.core;
  * that Spring is operating on, to allow for automatically
  * adapting to the present platform's capabilities.
  *
- * <p>Note that Spring requires JVM 1.4 or higher, as of Spring 2.1.
+ * <p>Note that Spring requires JVM 1.4 or higher, as of Spring 2.5.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

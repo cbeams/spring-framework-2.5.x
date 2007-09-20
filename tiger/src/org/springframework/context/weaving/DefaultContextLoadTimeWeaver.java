@@ -35,7 +35,7 @@ import org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver;
  * Spring's <code>&lt;context:load-time-weaver&gt;</code> XML tag.
  *
  * <p>This class implements a runtime environment check for obtaining the
- * appropriate weaver implementation: As of Spring 2.1, it detects Sun's
+ * appropriate weaver implementation: As of Spring 2.5, it detects Sun's
  * GlassFish, Oracle's OC4J,
  * {@link InstrumentationSavingAgent Spring's VM agent} and any
  * {@link ClassLoader} supported by Spring's {@link ReflectiveLoadTimeWeaver}

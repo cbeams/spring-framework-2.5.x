@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
  * and standalone.
  *
  * <p>There is only one concrete implementation included in Spring,
- * as of Spring 2.1:
+ * as of Spring 2.5:
  * <ul>
  * <li>{@link org.springframework.web.multipart.commons.CommonsMultipartResolver} for Jakarta Commons FileUpload
  * </ul>
