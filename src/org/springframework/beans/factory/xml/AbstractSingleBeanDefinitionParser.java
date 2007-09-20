@@ -71,8 +71,8 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 		}
 		builder.setSource(parserContext.extractSource(element));
 		if (parserContext.isNested()) {
-			// Inner bean definition must receive same singleton status as containing bean.
-			builder.setSingleton(parserContext.getContainingBeanDefinition().isSingleton());
+			// Inner bean definition must receive same scope as containing bean.
+			builder.setScope(parserContext.getContainingBeanDefinition().getScope());
 		}
 		if (parserContext.isDefaultLazyInit()) {
 			// Default-lazy-init applies to custom bean definitions as well.
