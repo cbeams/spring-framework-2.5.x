@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: ref1.xml,v 1.4 2006-08-20 19:08:40 jhoeller Exp $ -->
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
-<!-- we are only using one definition file for the purposes of this test, since we do not have multiple
+<!-- We are only using one definition file for the purposes of this test, since we do not have multiple
 	classloaders available in the environment to allow combining multiple files of the same name, but
 	of course the contents within could be spread out across multiple files of the same name withing
 	different jars -->
@@ -11,9 +10,11 @@
 
   <!-- this definition could be inside one beanRefFactory.xml file -->
   <bean id="a.qualified.name.of.some.sort"
-  	    class="org.springframework.context.support.ClassPathXmlApplicationContext">
+      class="org.springframework.context.support.ClassPathXmlApplicationContext">
     <constructor-arg>
-      <value>org/springframework/beans/factory/access/beans1.xml</value>
+      <value>
+        org/springframework/beans/factory/access/beans1.xml
+      </value>
    	</constructor-arg>
   </bean>
   
@@ -21,7 +22,7 @@
 	perhaps coming from another component jar -->
   
   <bean id="another.qualified.name"
-  	    class="org.springframework.context.support.ClassPathXmlApplicationContext">
+      class="org.springframework.context.support.ClassPathXmlApplicationContext">
     <constructor-arg>
       <list><value>org/springframework/beans/factory/access/beans2.xml</value></list>
    	</constructor-arg>

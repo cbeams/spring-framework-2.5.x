@@ -20,6 +20,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 /**
  * Standalone XML application context, taking the context definition files
@@ -64,7 +65,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * @throws BeansException if context creation failed
 	 */
 	public FileSystemXmlApplicationContext(String configLocation) throws BeansException {
-		this(new String[] {configLocation});
+		this(new String[] {configLocation}, true, null);
 	}
 
 	/**
@@ -74,7 +75,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * @throws BeansException if context creation failed
 	 */
 	public FileSystemXmlApplicationContext(String[] configLocations) throws BeansException {
-		this(configLocations, null);
+		this(configLocations, true, null);
 	}
 
 	/**
@@ -85,14 +86,9 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * @param parent the parent context
 	 * @throws BeansException if context creation failed
 	 */
-	public FileSystemXmlApplicationContext(String[] configLocations, ApplicationContext parent)
-			throws BeansException {
-
-		super(parent);
-		this.configLocations = configLocations;
-		refresh();
+	public FileSystemXmlApplicationContext(String[] configLocations, ApplicationContext parent) throws BeansException {
+		this(configLocations, true, parent);
 	}
-
 
 	/**
 	 * Create a new FileSystemXmlApplicationContext, loading the definitions
@@ -123,7 +119,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 			throws BeansException {
 
 		super(parent);
-		this.configLocations = configLocations;
+		this.configLocations = StringUtils.trimArrayElements(configLocations);
 		if (refresh) {
 			refresh();
 		}

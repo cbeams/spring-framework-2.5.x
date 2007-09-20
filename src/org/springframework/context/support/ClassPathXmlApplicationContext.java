@@ -21,6 +21,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Standalone XML application context, taking the context definition files
@@ -62,7 +63,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * @throws BeansException if context creation failed
 	 */
 	public ClassPathXmlApplicationContext(String configLocation) throws BeansException {
-		this(new String[] {configLocation});
+		this(new String[] {configLocation}, true, null);
 	}
 
 	/**
@@ -72,7 +73,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * @throws BeansException if context creation failed
 	 */
 	public ClassPathXmlApplicationContext(String[] configLocations) throws BeansException {
-		this(configLocations, (ApplicationContext) null);
+		this(configLocations, true, null);
 	}
 
 	/**
@@ -83,14 +84,9 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * @param parent the parent context
 	 * @throws BeansException if context creation failed
 	 */
-	public ClassPathXmlApplicationContext(String[] configLocations, ApplicationContext parent)
-			throws BeansException {
-
-		super(parent);
-		this.configLocations = configLocations;
-		refresh();
+	public ClassPathXmlApplicationContext(String[] configLocations, ApplicationContext parent) throws BeansException {
+		this(configLocations, true, parent);
 	}
-
 
 	/**
 	 * Create a new ClassPathXmlApplicationContext, loading the definitions
@@ -121,7 +117,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 			throws BeansException {
 
 		super(parent);
-		this.configLocations = configLocations;
+		this.configLocations = StringUtils.trimArrayElements(configLocations);
 		if (refresh) {
 			refresh();
 		}
