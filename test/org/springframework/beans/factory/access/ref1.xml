@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: ref1.xml,v 1.4 2006-08-20 19:08:40 jhoeller Exp $ -->
+<!-- $Id: ref1.xml,v 1.5 2007-09-20 08:04:35 jhoeller Exp $ -->
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!-- we are only using one definition file for the purposes of this test, since we do not have multiple
@@ -13,7 +13,9 @@
   <bean id="a.qualified.name.of.some.sort"
   	    class="org.springframework.context.support.ClassPathXmlApplicationContext">
     <constructor-arg>
-      <value>org/springframework/beans/factory/access/beans1.xml</value>
+      <value>
+        org/springframework/beans/factory/access/beans1.xml
+      </value>
    	</constructor-arg>
   </bean>
   
