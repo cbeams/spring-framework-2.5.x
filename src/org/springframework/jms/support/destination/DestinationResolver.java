@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,12 @@ public interface DestinationResolver {
 	 * Resolve the given destination name, either as located resource
 	 * or as dynamic destination.
 	 * @param session the current JMS Session
+	 * (may be <code>null</code> if the resolver implementation is able to work without it)
 	 * @param destinationName the name of the destination
 	 * @param pubSubDomain <code>true</code> if the domain is pub-sub, <code>false</code> if P2P
 	 * @return the JMS destination (either a topic or a queue)
-	 * @throws javax.jms.JMSException if resolution failed
+	 * @throws javax.jms.JMSException if the JMS Session failed to resolve the destination
+	 * @throws DestinationResolutionException in case of general destination resolution failure
 	 */
 	Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException;
