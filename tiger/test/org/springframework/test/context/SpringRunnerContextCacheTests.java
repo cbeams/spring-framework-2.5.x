@@ -17,6 +17,7 @@
 package org.springframework.test.context;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import junit.framework.JUnit4TestAdapter;
 
 import org.junit.AfterClass;
@@ -25,6 +26,7 @@ import org.junit.Test;
 import org.junit.internal.runners.InitializationError;
 import org.junit.runner.RunWith;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -38,11 +40,20 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringRunnerContextCacheTests.TestableSpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml" })
-public class SpringRunnerContextCacheTests {
+public class SpringRunnerContextCacheTests implements ApplicationContextAware {
+
+	// ------------------------------------------------------------------------|
+	// --- STATIC VARIABLES ---------------------------------------------------|
+	// ------------------------------------------------------------------------|
+
+	private static ApplicationContext dirtiedApplicationContext;
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
+
+	protected ApplicationContext applicationContext;
+
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC METHODS -----------------------------------------------------|
@@ -50,11 +61,8 @@ public class SpringRunnerContextCacheTests {
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
 	public static junit.framework.Test suite() {
-
 		return new JUnit4TestAdapter(SpringRunnerContextCacheTests.class);
 	}
-
-	// ------------------------------------------------------------------------|
 
 	/**
 	 * Asserts the statistics of the supplied context cache.
@@ -67,7 +75,6 @@ public class SpringRunnerContextCacheTests {
 	 */
 	public static final void assertContextCacheStatistics(final ContextCache<?, ?> contextCache,
 			final String usageScenario, final int expectedSize, final int expectedHitCount, final int expectedMissCount) {
-
 		assertEquals("Verifying number of contexts in cache (" + usageScenario + ").", expectedSize,
 				contextCache.size());
 		assertEquals("Verifying number of cache hits (" + usageScenario + ").", expectedHitCount,
@@ -76,22 +83,17 @@ public class SpringRunnerContextCacheTests {
 				contextCache.getMissCount());
 	}
 
-	// ------------------------------------------------------------------------|
-
 	@BeforeClass
 	public static void verifyInitialCacheState() {
-
+		dirtiedApplicationContext = null;
 		final ContextCache<String, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
 		contextCache.clear();
 		contextCache.clearStatistics();
 		assertContextCacheStatistics(contextCache, "BeforeClass", 0, 0, 0);
 	}
 
-	// ------------------------------------------------------------------------|
-
 	@AfterClass
 	public static void verifyFinalCacheState() {
-
 		final ContextCache<String, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
 		assertContextCacheStatistics(contextCache, "AfterClass", 1, 0, 2);
 	}
@@ -100,22 +102,32 @@ public class SpringRunnerContextCacheTests {
 	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
+	/**
+	 * Sets the {@link ApplicationContext} to be used by this test instance,
+	 * provided via {@link ApplicationContextAware} semantics.
+	 *
+	 * @param applicationContext The applicationContext to set.
+	 */
+	public final void setApplicationContext(final ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
 	@Test
 	@DirtiesContext
 	public void dirtyContext() {
-
 		final ContextCache<String, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
 		assertContextCacheStatistics(contextCache, "dirtyContext()", 1, 0, 1);
+		SpringRunnerContextCacheTests.dirtiedApplicationContext = this.applicationContext;
 	}
-
-	// ------------------------------------------------------------------------|
 
 	@Test
 	public void verifyDirtiesContext() {
-
 		final ContextCache<String, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
 		assertContextCacheStatistics(contextCache, "verifyDirtiesContext()", 1, 0, 2);
+		assertNotSame("The application context should have been 'dirtied'.",
+				SpringRunnerContextCacheTests.dirtiedApplicationContext, this.applicationContext);
 	}
+
 
 	// ------------------------------------------------------------------------|
 	// --- STATIC CLASSES -----------------------------------------------------|
@@ -123,33 +135,28 @@ public class SpringRunnerContextCacheTests {
 
 	public static class TestableSpringJUnit4ClassRunner extends SpringJUnit4ClassRunner {
 
-		static TestableTestContextManager	testableTestContextManager;
+		static TestableTestContextManager testableTestContextManager;
+
 
 		public TestableSpringJUnit4ClassRunner(final Class<?> clazz) throws InitializationError {
-
 			super(clazz);
 		}
 
 		@Override
 		protected TestContextManager createTestContextManager(final Class<?> clazz) throws Exception {
-
 			final TestableTestContextManager testableTestContextManager = new TestableTestContextManager(clazz);
 			TestableSpringJUnit4ClassRunner.testableTestContextManager = testableTestContextManager;
 			return testableTestContextManager;
 		}
 	}
 
-	// ------------------------------------------------------------------------|
-
 	private static class TestableTestContextManager extends TestContextManager {
 
 		public TestableTestContextManager(final Class<?> testClass) throws Exception {
-
 			super(testClass);
 		}
 
 		ContextCache<String, ApplicationContext> getVisibleContextCache() {
-
 			return super.getContextCache();
 		}
 	}
