@@ -2332,17 +2332,23 @@ public class ReplacementComputeValue implements MethodReplacer {
 
 			<section id="beans-factory-scopes-other-web-configuration">
 			    <title>Initial web configuration</title>
-                <para>In order to effect the scoping of beans at the <literal>request</literal>,
+                <para>In order to support the scoping of beans at the <literal>request</literal>,
                 <literal>session</literal>, and <literal>global session</literal> levels
                 (web-scoped beans), some minor initial configuration is required
                 before you can set about defining your bean definitions. Please note that
-                this extra setup is <emphasis>not</emphasis> required if you just want to use the
-                'standard' scopes (namely singleton and prototype).</para>
+                this extra setup is <emphasis>not</emphasis> required if you just want to
+                use the 'standard' scopes (namely singleton and prototype).</para>
                 <para>Now as things stand, there are a couple of ways to effect this
-                initial setup depending on your particular servlet environment. If you are
-                using a Servlet 2.4+ web container, then you need only add the following
-                <interfacename>ContextListener</interfacename> to the XML declarations in
-                your web application's <literal>'web.xml'</literal> file.</para>
+                initial setup depending on your particular Servlet environment...</para>
+                <para>If you are accessing scoped beans within Spring Web MVC, i.e.
+                within a request that is processed by the Spring <classname>DispatcherServlet</classname>,
+                or <classname>DispatcherPortlet</classname>, then no special setup is necessary:
+                <classname>DispatcherServlet</classname> and <classname>DispatcherPortlet</classname>
+                already expose all relevant state.</para>
+                <para>When using a Servlet 2.4+ web container, with requests processed
+                outside of Spring's DispatcherServlet (e.g. when using JSF or Struts),
+                you need to add the following <interfacename>javax.servlet.ServletRequestListener</interfacename>
+                to the declarations in your web application's <literal>'web.xml'</literal> file.</para>
                 <programlisting><![CDATA[<web-app>
   ...
   <listener>
@@ -2350,13 +2356,14 @@ public class ReplacementComputeValue implements MethodReplacer {
   </listener>
   ...
 </web-app>]]></programlisting>
-                <para>If you are using an older web container (before Servlet 2.4), you will need to use
-                a (provided) <interfacename>javax.servlet.Filter</interfacename> implementation.
+                <para>If you are using an older web container (Servlet 2.3), you will need to use
+                the provided <interfacename>javax.servlet.Filter</interfacename> implementation.
                 Find below a snippet of XML configuration that has to be included
                 in the <literal>'web.xml'</literal> file of your web application if you
-                want to have access to web-scoped beans (the filter settings depend on
+                want to have access to web-scoped beans in requests outside of Spring's
+                DispatcherServlet on a Servlet 2.3 container. (The filter mapping depends on
                 the surrounding web application configuration and so you will have to change
-                them as appropriate).</para>
+                it as appropriate.)</para>
                 <programlisting><![CDATA[<web-app>
   ..
   <filter> 
@@ -2369,8 +2376,9 @@ public class ReplacementComputeValue implements MethodReplacer {
   </filter-mapping>
   ...
 </web-app>]]></programlisting>
-                <para>That's it. The <classname>RequestContextListener</classname> and
-                <classname>RequestContextFilter</classname> classes both do exactly the
+                <para>That's it. <classname>DispatcherServlet</classname>,
+                <classname>RequestContextListener</classname> and
+                <classname>RequestContextFilter</classname> all do exactly the
                 same thing, namely bind the HTTP request object to the
                 <classname>Thread</classname> that is servicing that request. This makes
                 beans that are request- and session-scoped available further down the
