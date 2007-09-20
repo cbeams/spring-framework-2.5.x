@@ -62,7 +62,7 @@
 
         <para>The <literal>org.springframework.mock.web</literal> package
         contains a comprehensive set of Servlet API mock objects, targeted at
-        usage with Spring's web MVC framework, which are useful for testing
+        usage with Spring's Web MVC framework, which are useful for testing
         web contexts and controllers. These mock objects are generally more
         convenient to use than dynamic mock objects (e.g., <ulink
         url="http://www.easymock.org">EasyMock</ulink>) or existing Servlet
@@ -81,6 +81,37 @@
 
     <section id="unit-testing-support-classes">
       <title>Unit testing support classes</title>
+
+      <section id="unit-testing-utilities">
+        <title>General utilities</title>
+
+        <para>The <literal>org.springframework.test.util</literal> package
+        contains <classname>ReflectionTestUtils</classname>, which is a
+        collection of reflection-based utility methods for use in unit and
+        integration testing scenarios in which the developer would benefit
+        from being able to set a non-<literal>public</literal> field or invoke
+        a non-<literal>public</literal> setter method when testing application
+        code involving, for example:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>ORM frameworks such as JPA and Hibernate which condone the
+            usage of <literal>private</literal> or
+            <literal>protected</literal> field access as opposed to
+            <literal>public</literal> setter methods for properties in a
+            domain entity</para>
+          </listitem>
+
+          <listitem>
+            <para>Spring's support for annotations such as
+            <interfacename>@Autowired</interfacename> and
+            <interfacename>@Resource</interfacename> which provides dependency
+            injection for <literal>private</literal> or
+            <literal>protected</literal> fields, setter methods, and
+            configuration methods</para>
+          </listitem>
+        </itemizedlist>
+      </section>
 
       <section id="unit-testing-spring-mvc">
         <title>Spring MVC</title>
@@ -395,6 +426,20 @@
           </listitem>
         </itemizedlist>
       </section>
+    </section>
+
+    <section id="integration-testing-support-jdbc">
+      <title>JDBC testing support</title>
+
+      <para>The <literal>org.springframework.test.jdbc</literal> package
+      contains <classname>SimpleJdbcTestUtils</classname>, which is a
+      Java-5-based collection of JDBC related utility functions intended to
+      simplify standard database testing scenarios. <emphasis>Note that <link
+      linkend="testcontext-support-classes-junit38"><classname>AbstractTransactionalJUnit38SpringContextTests</classname></link>
+      and <link
+      linkend="testcontext-support-classes-junit44"><classname>AbstractTransactionalJUnit4SpringContextTests</classname></link>
+      provide convenience methods which delegate to
+      <classname>SimpleJdbcTestUtils</classname> internally.</emphasis></para>
     </section>
 
     <section id="integration-testing-common-annotations">
