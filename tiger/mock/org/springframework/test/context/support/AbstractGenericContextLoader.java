@@ -18,7 +18,6 @@ package org.springframework.test.context.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -38,8 +37,8 @@ import org.springframework.util.StringUtils;
  * </p>
  *
  * @author Sam Brannen
- * @see #loadContext
  * @since 2.5
+ * @see #loadContext
  */
 public abstract class AbstractGenericContextLoader extends AbstractContextLoader {
 
@@ -82,8 +81,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	public final ConfigurableApplicationContext loadContext(final String... locations) throws Exception {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Loading ApplicationContext for locations [" + StringUtils.arrayToCommaDelimitedString(locations)
-					+ "].");
+			logger.debug("Loading ApplicationContext for locations ["
+					+ StringUtils.arrayToCommaDelimitedString(locations) + "].");
 		}
 
 		final GenericApplicationContext context = new GenericApplicationContext();
@@ -113,7 +112,6 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
 	 */
 	protected void customizeBeanFactory(final DefaultListableBeanFactory beanFactory) {
-
 		/* no-op */
 	}
 
@@ -123,7 +121,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * {@link GenericApplicationContext context}.
 	 *
 	 * @param context The context for which the BeanDefinitionReader should be
-	 * created.
+	 *        created.
 	 * @return A BeanDefinitionReader for the supplied context.
 	 * @see #loadContext
 	 * @see BeanDefinitionReader

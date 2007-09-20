@@ -41,9 +41,9 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Sam Brannen
+ * @since 2.5
  * @param <KEY> {@link Serializable serializable} context key type
  * @param <CONTEXT> {@link ApplicationContext application context} type
- * @since 2.5
  */
 class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext> {
 
@@ -53,7 +53,6 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	private final Map<KEY, CONTEXT> contextKeyToContextMap = Collections.synchronizedMap(new HashMap<KEY, CONTEXT>());
 
 	private int hitCount;
-
 	private int missCount;
 
 
@@ -61,7 +60,6 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 * Clears all contexts from the cache.
 	 */
 	void clear() {
-
 		this.contextKeyToContextMap.clear();
 	}
 
@@ -70,7 +68,6 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 * to zero).
 	 */
 	void clearStatistics() {
-
 		this.hitCount = 0;
 		this.missCount = 0;
 	}
@@ -83,7 +80,6 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 * @param key The context key, not <code>null</code>.
 	 */
 	final boolean contains(final KEY key) {
-
 		Assert.notNull(key, "Key must not be null.");
 		return this.contextKeyToContextMap.containsKey(key);
 	}
@@ -103,7 +99,6 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 * @see #remove(Serializable)
 	 */
 	final CONTEXT get(final KEY key) throws Exception {
-
 		Assert.notNull(key, "Key must not be null.");
 		final CONTEXT context = this.contextKeyToContextMap.get(key);
 
@@ -122,7 +117,6 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 * cache, which returned a non-null context for a queried key.
 	 */
 	protected final void incrementHitCount() {
-
 		this.hitCount++;
 	}
 
@@ -131,7 +125,6 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 * cache, which returned a <code>null</code> context for a queried key.
 	 */
 	protected final void incrementMissCount() {
-
 		this.missCount++;
 	}
 
@@ -142,7 +135,6 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 * @return The hit count.
 	 */
 	final int getHitCount() {
-
 		return this.hitCount;
 	}
 
@@ -154,7 +146,6 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 * @return The miss count.
 	 */
 	final int getMissCount() {
-
 		return this.missCount;
 	}
 
@@ -168,7 +159,6 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 * @param context The ApplicationContext instance, not <code>null</code>.
 	 */
 	final void put(final KEY key, final CONTEXT context) {
-
 		Assert.notNull(key, "Key must not be null.");
 		Assert.notNull(context, "ConfigurableApplicationContext must not be null.");
 		this.contextKeyToContextMap.put(key, context);
@@ -181,11 +171,10 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 *
 	 * @param key The context key, not <code>null</code>.
 	 * @return the corresponding ApplicationContext instance, or
-	 * <code>null</code> if not found in the cache.
+	 *         <code>null</code> if not found in the cache.
 	 * @see #setDirty(Serializable)
 	 */
 	final CONTEXT remove(final KEY key) {
-
 		return this.contextKeyToContextMap.remove(key);
 	}
 
@@ -206,7 +195,6 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 * @see #remove(Serializable)
 	 */
 	final void setDirty(final KEY key) {
-
 		Assert.notNull(key, "Key must not be null.");
 		final CONTEXT context = remove(key);
 
@@ -223,7 +211,6 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 * @return the number of contexts stored in the cache.
 	 */
 	int size() {
-
 		return this.contextKeyToContextMap.size();
 	}
 
@@ -232,12 +219,11 @@ class ContextCache<KEY extends Serializable, CONTEXT extends ApplicationContext>
 	 * as the {@link #hitCount hit} and {@link #missCount miss} counts.
 	 */
 	public String toString() {
-
 		return new ToStringCreator(this)
-				.append("size", size())
-				.append("hitCount", getHitCount())
-				.append("missCount", getMissCount())
-				.toString();
+			.append("size", size())
+			.append("hitCount", getHitCount())
+			.append("missCount",getMissCount())
+			.toString();
 	}
 
 }

@@ -33,9 +33,9 @@ import org.springframework.util.StringUtils;
  * </p>
  *
  * @author Sam Brannen
+ * @since 2.5
  * @see #generateDefaultLocations(Class)
  * @see #modifyLocations(Class,String...)
- * @since 2.5
  */
 public abstract class AbstractContextLoader implements ContextLoader {
 
@@ -53,7 +53,6 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * @return <code>true</code>.
 	 */
 	protected boolean isGenerateDefaultLocations() {
-
 		return true;
 	}
 
@@ -85,17 +84,16 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * </p>
 	 *
 	 * @param clazz The class with which the locations are associated: to be
-	 * used when generating default locations.
+	 *        used when generating default locations.
 	 * @param locations The unmodified locations to use for loading the
-	 * application context; can be <code>null</code> or empty.
+	 *        application context; can be <code>null</code> or empty.
 	 * @return An array of application context resource locations.
 	 * @see #generateDefaultLocations(Class)
 	 * @see #modifyLocations(Class,String...)
 	 * @see org.springframework.test.context.ContextLoader#processLocations(java.lang.Class,
-	 *java.lang.String[])
+	 *      java.lang.String[])
 	 */
 	public final String[] processLocations(final Class<?> clazz, final String... locations) {
-
 		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ? generateDefaultLocations(clazz)
 				: modifyLocations(clazz, locations);
 	}
@@ -118,16 +116,14 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * </p>
 	 *
 	 * @param clazz The class for which the default locations are to be
-	 * generated.
+	 *        generated.
 	 * @return An array of default application context resource locations.
 	 */
 	protected String[] generateDefaultLocations(final Class<?> clazz) {
-
 		Assert.notNull(clazz, "clazz can not be null.");
 		Assert.hasText(getResourceSuffix(), "resourceSuffix can not be empty.");
-
-		return new String[]{ResourceUtils.CLASSPATH_URL_PREFIX + "/"
-				+ ClassUtils.convertClassNameToResourcePath(clazz.getName()) + getResourceSuffix()};
+		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + "/"
+				+ ClassUtils.convertClassNameToResourcePath(clazz.getName()) + getResourceSuffix() };
 	}
 
 	/**

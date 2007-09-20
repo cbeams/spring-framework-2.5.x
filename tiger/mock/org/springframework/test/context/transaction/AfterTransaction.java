@@ -35,10 +35,10 @@ import java.lang.annotation.Target;
  * </p>
  *
  * @author Sam Brannen
- * @see org.springframework.transaction.annotation.Transactional
  * @since 2.5
+ * @see org.springframework.transaction.annotation.Transactional
  */
-@Target({ElementType.METHOD})
+@Target( { ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface AfterTransaction {
