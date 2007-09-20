@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,7 @@ public class ReflectionTestUtilsTests extends TestCase {
 		// ---------------------------------------------------------------------
 		// Null - primitives
 
-		new AssertThrows(IllegalArgumentException.class,
+		new AssertThrows(RuntimeException.class,
 				"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
 			public void test() throws Exception {
@@ -178,7 +178,7 @@ public class ReflectionTestUtilsTests extends TestCase {
 			}
 		}.runTest();
 
-		new AssertThrows(IllegalArgumentException.class,
+		new AssertThrows(RuntimeException.class,
 				"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
 			public void test() throws Exception {
@@ -186,13 +186,13 @@ public class ReflectionTestUtilsTests extends TestCase {
 			}
 		}.runTest();
 
-		new AssertThrows(IllegalArgumentException.class,
+		new AssertThrows(RuntimeException.class,
 				"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
 			public void test() throws Exception {
 				ReflectionTestUtils.invokeSetterMethod(person, "likesPets", null, boolean.class);
 			}
 		}.runTest();
-
 	}
+
 }
