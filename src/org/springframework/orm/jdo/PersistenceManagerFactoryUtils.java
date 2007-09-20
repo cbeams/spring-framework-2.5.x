@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,15 +46,14 @@ import org.springframework.util.Assert;
  * allowing for reuse of PersistenceManager instances within transactions.
  * Also provides support for exception translation.
  *
- * <p>Used by JdoTemplate, JdoInterceptor, and JdoTransactionManager.
- * Can also be used directly in application code, e.g. in combination
- * with JdoInterceptor.
+ * <p>Used internally by {@link JdoTemplate}, {@link JdoInterceptor} and
+ * {@link JdoTransactionManager}. Can also be used directly in application code.
  *
  * @author Juergen Hoeller
  * @since 03.06.2003
- * @see JdoTemplate
- * @see JdoInterceptor
  * @see JdoTransactionManager
+ * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public abstract class PersistenceManagerFactoryUtils {
 
@@ -196,6 +195,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @param pmf JDO PersistenceManagerFactory that the Query was created for
 	 * @param jdoDialect the JdoDialect to use for applying a query timeout
 	 * (must not be <code>null</code>)
+	 * @throws JDOException if thrown by JDO methods
 	 * @see JdoDialect#applyQueryTimeout
 	 */
 	public static void applyTransactionTimeout(
