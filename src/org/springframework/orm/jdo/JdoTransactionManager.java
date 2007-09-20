@@ -101,21 +101,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
 
-	private static boolean jdoSetRollbackOnlyAvailable;
-
-	static {
-		// Determine whether the JDO 2.0 Transaction.setRollbackOnly method
-		// is available, for use in this JdoTransactionManager.
-		try {
-			Transaction.class.getMethod("setRollbackOnly", new Class[0]);
-			jdoSetRollbackOnlyAvailable = true;
-		}
-		catch (NoSuchMethodException ex) {
-			jdoSetRollbackOnlyAvailable = false;
-		}
-	}
-
-
 	private PersistenceManagerFactory persistenceManagerFactory;
 
 	private DataSource dataSource;
@@ -398,12 +383,11 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
-	 * This implementation returns "true" for JDO 2.0: a JDO2 commit will properly
-	 * handle transactions that have been marked rollback-only at a global level.
-	 * On JDO 1.0, the rollback-only flag will be managed in Spring's resource holder.
+	 * This implementation returns "true": a JDO2 commit will properly handle
+	 * transactions that have been marked rollback-only at a global level.
 	 */
 	protected boolean shouldCommitOnGlobalRollbackOnly() {
-		return jdoSetRollbackOnlyAvailable;
+		return true;
 	}
 
 	protected void doCommit(DefaultTransactionStatus status) {
@@ -539,14 +523,9 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		public void setRollbackOnly() {
-			if (jdoSetRollbackOnlyAvailable) {
-				Transaction tx = this.persistenceManagerHolder.getPersistenceManager().currentTransaction();
-				if (tx.isActive()) {
-					tx.setRollbackOnly();
-				}
-			}
-			else {
-				getPersistenceManagerHolder().setRollbackOnly();
+			Transaction tx = this.persistenceManagerHolder.getPersistenceManager().currentTransaction();
+			if (tx.isActive()) {
+				tx.setRollbackOnly();
 			}
 			if (hasConnectionHolder()) {
 				getConnectionHolder().setRollbackOnly();
@@ -554,13 +533,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		}
 
 		public boolean isRollbackOnly() {
-			if (jdoSetRollbackOnlyAvailable) {
-				Transaction tx = this.persistenceManagerHolder.getPersistenceManager().currentTransaction();
-				return tx.getRollbackOnly();
-			}
-			else {
-				return getPersistenceManagerHolder().isRollbackOnly();
-			}
+			Transaction tx = this.persistenceManagerHolder.getPersistenceManager().currentTransaction();
+			return tx.getRollbackOnly();
 		}
 	}
 

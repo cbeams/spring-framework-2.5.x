@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,7 @@ import org.springframework.dao.DataAccessException;
  * Furthermore, some operations just make sense within transactions,
  * for example: <code>evict</code>, <code>evictAll</code>, <code>flush</code>.
  *
- * <p>Updated to expose JDO 2.0 functionality, as of Spring 1.2:
- * <code>detachCopy</code>, <code>attachCopy</code>, <code>findByNamedQuery</code>, etc.
- * Those operations will by default only work on top of the standard JDO 2.0 API.
- * Since Spring 1.2.2, the execution of those operations can also be adapted through
- * the JdoDialect mechanism (for example, for vendor-specific pre-JDO2 methods).
+ * <p>Updated to build on JDO 2.0 or higher, as of Spring 2.5.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -167,19 +163,23 @@ public interface JdoOperations {
 
 	/**
 	 * Make the given transient instance persistent.
+	 * Attach the given entity if the instance is detached.
 	 * @param entity the transient instance to make persistent
+	 * @return the persistent instance
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#makePersistent(Object)
 	 */
-	void makePersistent(Object entity) throws DataAccessException;
+	Object makePersistent(Object entity) throws DataAccessException;
 
 	/**
 	 * Make the given transient instances persistent.
+	 * Attach the given entities if the instances are detached.
 	 * @param entities the transient instances to make persistent
+	 * @return the persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#makePersistentAll(java.util.Collection)
 	 */
-	void makePersistentAll(Collection entities) throws DataAccessException;
+	Collection makePersistentAll(Collection entities) throws DataAccessException;
 
 	/**
 	 * Delete the given persistent instance.
@@ -202,8 +202,8 @@ public interface JdoOperations {
 	/**
 	 * Detach a copy of the given persistent instance from the current JDO transaction,
 	 * for use outside a JDO transaction (for example, as web form object).
-	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
 	 * @param entity the persistent instance to detach
+	 * @return the corresponding detached instance
 	 * @see javax.jdo.PersistenceManager#detachCopy(Object)
 	 */
 	Object detachCopy(Object entity);
@@ -211,8 +211,8 @@ public interface JdoOperations {
 	/**
 	 * Detach copies of the given persistent instances from the current JDO transaction,
 	 * for use outside a JDO transaction (for example, as web form objects).
-	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
 	 * @param entities the persistent instances to detach
+	 * @return the corresponding detached instances
 	 * @see javax.jdo.PersistenceManager#detachCopyAll(Collection)
 	 */
 	Collection detachCopyAll(Collection entities);
@@ -221,14 +221,13 @@ public interface JdoOperations {
 	 * Reattach the given detached instance (for example, a web form object) with
 	 * the current JDO transaction, merging its changes into the current persistence
 	 * instance that represents the corresponding entity.
-	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
-	 * Note that as of JDO 2.0 final, this operation is equivalent to a
-	 * <code>makePersistent</code> call. This dedicated reattach operation
-	 * now solely serves as distinction point for custom JdoDialects.
-	 * It is still recommended to call this operation for enhanced adaptability.
+	 * <p>Note that as of JDO 2.0 final, this operation is equivalent to a
+	 * <code>makePersistent</code> call, with the latter method returning the
+	 * persistence instance.
 	 * @param detachedEntity the detached instance to attach
 	 * @return the corresponding persistent instance
-	 * @see javax.jdo.PersistenceManager#makePersistent(Object)
+	 * @deprecated in favor of {@link #makePersistent(Object)}.
+	 * To be removed in Spring 3.0.
 	 */
 	Object attachCopy(Object detachedEntity);
 
@@ -236,14 +235,13 @@ public interface JdoOperations {
 	 * Reattach the given detached instances (for example, web form objects) with
 	 * the current JDO transaction, merging their changes into the current persistence
 	 * instances that represent the corresponding entities.
-	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
-	 * Note that as of JDO 2.0 final, this operation is equivalent to a
-	 * <code>makePersistentAll</code> call. This dedicated reattach operation
-	 * now solely serves as distinction point for custom JdoDialects.
-	 * It is still recommended to call this operation for enhanced adaptability.
+	 * <p>Note that as of JDO 2.0 final, this operation is equivalent to a
+	 * <code>makePersistentAll</code> call, with the latter method returning the
+	 * persistence instance.
 	 * @param detachedEntities the detached instances to reattach
 	 * @return the corresponding persistent instances
-	 * @see javax.jdo.PersistenceManager#makePersistentAll(java.util.Collection)
+	 * @deprecated in favor of {@link #makePersistentAll(java.util.Collection)}.
+	 * To be removed in Spring 3.0.
 	 */
 	Collection attachCopyAll(Collection detachedEntities);
 
@@ -252,7 +250,6 @@ public interface JdoOperations {
 	 * <p>Only invoke this for selective eager flushing, for example when JDBC code
 	 * needs to see certain changes within the same transaction. Else, it's preferable
 	 * to rely on auto-flushing at transaction completion.
-	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#flush()
 	 * @see JdoDialect#flush(javax.jdo.PersistenceManager)
@@ -370,7 +367,6 @@ public interface JdoOperations {
 	/**
 	 * Find persistent instances through the given query object
 	 * in the specified query language.
-	 * <p>Only available on JDO 2.0 and higher.
 	 * @param language the query language (<code>javax.jdo.Query#JDOQL</code>
 	 * or <code>javax.jdo.Query#SQL</code>, for example)
 	 * @param queryObject the query object for the specified language
@@ -384,7 +380,6 @@ public interface JdoOperations {
 
 	/**
 	 * Find persistent instances through the given single-string JDOQL query.
-	 * <p>Only available on JDO 2.0 and higher.
 	 * @param queryString the single-string JDOQL query
 	 * @return the persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
@@ -394,7 +389,6 @@ public interface JdoOperations {
 
 	/**
 	 * Find persistent instances through the given single-string JDOQL query.
-	 * <p>Only available on JDO 2.0 and higher.
 	 * @param queryString the single-string JDOQL query
 	 * @param values the corresponding parameter values
 	 * @return the persistent instances
@@ -405,7 +399,6 @@ public interface JdoOperations {
 
 	/**
 	 * Find persistent instances through the given single-string JDOQL query.
-	 * <p>Only available on JDO 2.0 and higher.
 	 * @param queryString the single-string JDOQL query
 	 * @param values a Map with parameter names as keys and parameter values
 	 * @return the persistent instances
@@ -416,7 +409,6 @@ public interface JdoOperations {
 
 	/**
 	 * Find persistent instances through the given named query.
-	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
 	 * @param entityClass a persistent class
 	 * @param queryName the name of the query
 	 * @return the persistent instances
@@ -427,7 +419,6 @@ public interface JdoOperations {
 
 	/**
 	 * Find persistent instances through the given named query.
-	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
 	 * @param entityClass a persistent class
 	 * @param queryName the name of the query
 	 * @param values the corresponding parameter values
@@ -439,7 +430,6 @@ public interface JdoOperations {
 
 	/**
 	 * Find persistent instances through the given named query.
-	 * <p>Only available on JDO 2.0+ or through a vendor-specific JdoDialect.
 	 * @param entityClass a persistent class
 	 * @param queryName the name of the query
 	 * @param values a Map with parameter names as keys and parameter values

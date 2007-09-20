@@ -33,7 +33,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class that simplifies JDO data access code, and converts
@@ -77,12 +76,7 @@ import org.springframework.util.ReflectionUtils;
  * Furthermore, some operations just make sense within transactions,
  * for example: <code>evict</code>, <code>evictAll</code>, <code>flush</code>.
  *
- * <p><b>NOTE:</b> This class is compatible with both JDO 1.0 and JDO 2.0,
- * as far as possible. It uses reflection to adapt to the actual API present
- * on the class path (concretely: for the <code>newObjectIdInstance</code>,
- * <code>makePersistent</code> and <code>makePersistentAll</code> methods).
- * Make sure that the JDO API jar on your class path matches the one that
- * your JDO provider has been compiled against!
+ * <p><b>NOTE: This class requires JDO 2.0 or higher, as of Spring 2.5.</b>
  *
  * @author Juergen Hoeller
  * @since 03.06.2003
@@ -96,45 +90,6 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewInterceptor
  */
 public class JdoTemplate extends JdoAccessor implements JdoOperations {
-
-	private static Method newObjectIdInstanceMethod;
-
-	private static Method makePersistentMethod;
-
-	private static Method makePersistentAllMethod;
-
-	static {
-		// Determine whether the JDO 1.0 newObjectIdInstance(Class, String) method
-		// is available, for use in JdoTemplate's getObjectById implementation.
-		try {
-			newObjectIdInstanceMethod = PersistenceManager.class.getMethod(
-					"newObjectIdInstance", new Class[] {Class.class, String.class});
-		}
-		catch (NoSuchMethodException ex) {
-			newObjectIdInstanceMethod = null;
-		}
-		// Fetch makePersistent(Object) method through reflection
-		// for use in JdoTemplate's makePersistent implementation.
-		// Return value is void in JDO 1.0 but Object in JDO 2.0.
-		try {
-			makePersistentMethod = PersistenceManager.class.getMethod(
-					"makePersistent", new Class[] {Object.class});
-		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalStateException("JDO makePersistent(Object) method not available");
-		}
-		// Fetch makePersistent(Object) method through reflection
-		// for use in JdoTemplate's makePersistent implementation.
-		// Return value is void in JDO 1.0 but Collection in JDO 2.0.
-		try {
-			makePersistentAllMethod = PersistenceManager.class.getMethod(
-					"makePersistentAll", new Class[] {Collection.class});
-		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalStateException("JDO makePersistentAll(Collection) method not available");
-		}
-	}
-
 
 	private boolean allowCreate = true;
 
@@ -195,10 +150,9 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * suppressing <code>close</code> calls and automatically applying transaction
 	 * timeouts (if any).
 	 * <p>As there is often a need to cast to a provider-specific PersistenceManager
-	 * class in DAOs that use the JDO 1.0 API, for JDO 2.0 previews and other
-	 * provider-specific functionality, the exposed proxy implements all interfaces
-	 * implemented by the original PersistenceManager. If this is not sufficient,
-	 * turn this flag to "true".
+	 * class in DAOs that use provider-specific functionality, the exposed proxy
+	 * implements all interfaces implemented by the original PersistenceManager.
+	 * If this is not sufficient, turn this flag to "true".
 	 * @see JdoCallback
 	 * @see javax.jdo.PersistenceManager
 	 * @see #prepareQuery
@@ -314,13 +268,6 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public Object getObjectById(final Class entityClass, final Object idValue) throws DataAccessException {
 		return execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				// Use JDO 1.0 newObjectIdInstance(Class, String) method, if available.
-				if (newObjectIdInstanceMethod != null) {
-					Object id = ReflectionUtils.invokeMethod(
-							newObjectIdInstanceMethod, pm, new Object[] {entityClass, idValue.toString()});
-					return pm.getObjectById(id, true);
-				}
-				// Use JDO 2.0 getObjectById(Class, Object) method.
 				return pm.getObjectById(entityClass, idValue);
 			}
 		}, true);
@@ -380,18 +327,18 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		}, true);
 	}
 
-	public void makePersistent(final Object entity) throws DataAccessException {
-		execute(new JdoCallback() {
+	public Object makePersistent(final Object entity) throws DataAccessException {
+		return execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				return ReflectionUtils.invokeMethod(makePersistentMethod, pm, new Object[] {entity});
+				return pm.makePersistent(entity);
 			}
 		}, true);
 	}
 
-	public void makePersistentAll(final Collection entities) throws DataAccessException {
-		execute(new JdoCallback() {
+	public Collection makePersistentAll(final Collection entities) throws DataAccessException {
+		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				return ReflectionUtils.invokeMethod(makePersistentAllMethod, pm, new Object[] {entities});
+				return pm.makePersistentAll(entities);
 			}
 		}, true);
 	}
@@ -417,7 +364,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public Object detachCopy(final Object entity) {
 		return execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				return getJdoDialect().detachCopy(pm, entity);
+				return pm.detachCopy(entity);
 			}
 		}, true);
 	}
@@ -425,25 +372,25 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public Collection detachCopyAll(final Collection entities) {
 		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				return getJdoDialect().detachCopyAll(pm, entities);
+				return pm.detachCopyAll(entities);
 			}
 		}, true);
 	}
 
-	public Object attachCopy(final Object detachedEntity) {
-		return execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				return getJdoDialect().attachCopy(pm, detachedEntity);
-			}
-		}, true);
+	/**
+	 * @deprecated in favor of {@link #makePersistent(Object)}.
+	 * To be removed in Spring 3.0.
+	 */
+	public Object attachCopy(Object detachedEntity) {
+		return makePersistent(detachedEntity);
 	}
 
-	public Collection attachCopyAll(final Collection detachedEntities) {
-		return (Collection) execute(new JdoCallback() {
-			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				return getJdoDialect().attachCopyAll(pm, detachedEntities);
-			}
-		}, true);
+	/**
+	 * @deprecated in favor of {@link #makePersistentAll(java.util.Collection)}.
+	 * To be removed in Spring 3.0.
+	 */
+	public Collection attachCopyAll(Collection detachedEntities) {
+		return makePersistentAll(detachedEntities);
 	}
 
 	public void flush() throws DataAccessException {
@@ -572,7 +519,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public Collection findByNamedQuery(final Class entityClass, final String queryName) throws DataAccessException {
 		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				Query query = getJdoDialect().newNamedQuery(pm, entityClass, queryName);
+				Query query = pm.newNamedQuery(entityClass, queryName);
 				prepareQuery(query);
 				return query.execute();
 			}
@@ -584,7 +531,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				Query query = getJdoDialect().newNamedQuery(pm, entityClass, queryName);
+				Query query = pm.newNamedQuery(entityClass, queryName);
 				prepareQuery(query);
 				return query.executeWithArray(values);
 			}
@@ -596,7 +543,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 
 		return (Collection) execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				Query query = getJdoDialect().newNamedQuery(pm, entityClass, queryName);
+				Query query = pm.newNamedQuery(entityClass, queryName);
 				prepareQuery(query);
 				return query.executeWithMap(values);
 			}

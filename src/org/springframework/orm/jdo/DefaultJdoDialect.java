@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.jdo;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
@@ -38,14 +37,13 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * Default implementation of the JdoDialect interface.
- * Updated to leverage the JDO 2.0 API when available, as of Spring 1.2.
- * Used as default dialect by JdoAccessor and JdoTransactionManager.
+ * Default implementation of the {@link JdoDialect} interface.
+ * Updated to build on JDO 2.0 or higher, as of Spring 2.5.
+ * Used as default dialect by {@link JdoAccessor} and {@link JdoTransactionManager}.
  *
  * <p>Simply begins a standard JDO transaction in <code>beginTransaction</code>.
  * Returns a handle for a JDO2 DataStoreConnection on <code>getJdbcConnection</code>.
- * Calls the corresponding JDO2 operations on <code>detachCopy(All)</code>,
- * <code>attachCopy(All)</code>, <code>flush</code> and <code>newNamedQuery</code>.
+ * Calls the corresponding JDO2 PersistenceManager operation on <code>flush</code>
  * Ignores a given query timeout in <code>applyQueryTimeout</code>.
  * Uses a Spring SQLExceptionTranslator for exception translation, if applicable.
  *
@@ -183,61 +181,6 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 			throws JDOException, SQLException {
 	}
 
-
-	//-------------------------------------------------------------------------
-	// Hooks for special data access operations (used by JdoTemplate)
-	//-------------------------------------------------------------------------
-
-	/**
-	 * This implementation delegates to JDO 2.0's <code>detachCopy</code> method.
-	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
-	 * vendor-specific mechanism there.
-	 * @see javax.jdo.PersistenceManager#detachCopy(Object)
-	 */
-	public Object detachCopy(PersistenceManager pm, Object entity) throws JDOException {
-		return pm.detachCopy(entity);
-	}
-
-	/**
-	 * This implementation delegates to JDO 2.0's <code>detachCopyAll</code> method.
-	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
-	 * vendor-specific mechanism there.
-	 * @see javax.jdo.PersistenceManager#detachCopyAll(java.util.Collection)
-	 */
-	public Collection detachCopyAll(PersistenceManager pm, Collection entities) throws JDOException {
-		return pm.detachCopyAll(entities);
-	}
-
-	/**
-	 * This implementation delegates to JDO 2.0's <code>makePersistent</code> method,
-	 * which also serves as facility for reattaching objects as of JDO 2.0 final draft.
-	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
-	 * vendor-specific mechanism there.
-	 * <p>Note that previous JDO 2.0 drafts specified a dedicated <code>attachCopy</code>
-	 * method for this purpose, which Spring's DefaultJdoDialect used to delegate to.
-	 * As of Spring 2.0, this has been adapted to the final JDO 2.0 API. You can still
-	 * create a custom JdoDialect that uses the pre-final API methods, of course.
-	 * @see javax.jdo.PersistenceManager#makePersistent(Object)
-	 */
-	public Object attachCopy(PersistenceManager pm, Object detachedEntity) throws JDOException {
-		return pm.makePersistent(detachedEntity);
-	}
-
-	/**
-	 * This implementation delegates to JDO 2.0's <code>makePersistentAll</code> method,
-	 * which also serves as facility for reattaching objects as of JDO 2.0 final draft.
-	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
-	 * vendor-specific mechanism there.
-	 * <p>Note that previous JDO 2.0 drafts specified a dedicated <code>attachCopy</code>
-	 * method for this purpose, which Spring's DefaultJdoDialect used to delegate to.
-	 * As of Spring 2.0, this has been adapted to the final JDO 2.0 API. You can still
-	 * create a custom JdoDialect that uses the pre-final API methods, of course.
-	 * @see javax.jdo.PersistenceManager#makePersistentAll(java.util.Collection)
-	 */
-	public Collection attachCopyAll(PersistenceManager pm, Collection detachedEntities) throws JDOException {
-		return pm.makePersistentAll(detachedEntities);
-	}
-
 	/**
 	 * This implementation delegates to JDO 2.0's <code>flush</code> method.
 	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
@@ -246,16 +189,6 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	 */
 	public void flush(PersistenceManager pm) throws JDOException {
 		pm.flush();
-	}
-
-	/**
-	 * This implementation delegates to JDO 2.0's <code>newNamedQuery</code> method.
-	 * <p>To be overridden for pre-JDO2 implementations, using the corresponding
-	 * vendor-specific mechanism there.
-	 * @see javax.jdo.PersistenceManager#newNamedQuery(Class, String)
-	 */
-	public Query newNamedQuery(PersistenceManager pm, Class entityClass, String queryName) throws JDOException {
-		return pm.newNamedQuery(entityClass, queryName);
 	}
 
 	/**
