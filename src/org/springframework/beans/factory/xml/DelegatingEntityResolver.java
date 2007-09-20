@@ -55,7 +55,7 @@ public class DelegatingEntityResolver implements EntityResolver {
 	 * <p>Configures the {@link PluggableSchemaResolver} with the supplied
 	 * {@link ClassLoader}.
 	 * @param classLoader the ClassLoader to use for loading
-	 * @throws IllegalArgumentException if the supplied class loader is <code>null</code> 
+	 * (can be <code>null</code>) to use the default ClassLoader)
 	 */
 	public DelegatingEntityResolver(ClassLoader classLoader) {
 		this.dtdResolver = new BeansDtdResolver();
@@ -67,11 +67,10 @@ public class DelegatingEntityResolver implements EntityResolver {
 	 * the given {@link EntityResolver EntityResolvers}.
 	 * @param dtdResolver the EntityResolver to resolve DTDs with
 	 * @param schemaResolver the EntityResolver to resolve XML schemas with
-	 * @throws IllegalArgumentException if either of the supplied resolvers is <code>null</code>
 	 */
 	public DelegatingEntityResolver(EntityResolver dtdResolver, EntityResolver schemaResolver) {
-		Assert.notNull(dtdResolver);
-		Assert.notNull(schemaResolver);
+		Assert.notNull(dtdResolver, "'dtdResolver' is required");
+		Assert.notNull(schemaResolver, "'schemaResolver' is required");
 		this.dtdResolver = dtdResolver;
 		this.schemaResolver = schemaResolver;
 	}

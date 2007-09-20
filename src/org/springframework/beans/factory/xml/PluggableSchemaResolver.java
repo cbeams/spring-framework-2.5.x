@@ -64,8 +64,10 @@ public class PluggableSchemaResolver implements EntityResolver {
 
 	private final ClassLoader classLoader;
 
+	private final String schemaMappingsLocation;
+
 	/** Stores the mapping of schema URL -> local schema path */
-	private final Properties schemaMappings;
+	private Properties schemaMappings;
 
 
 	/**
@@ -76,7 +78,8 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
 	 */
 	public PluggableSchemaResolver(ClassLoader classLoader) {
-		this(classLoader, DEFAULT_SCHEMA_MAPPINGS_LOCATION);
+		this.classLoader = classLoader;
+		this.schemaMappingsLocation = DEFAULT_SCHEMA_MAPPINGS_LOCATION;
 	}
 
 	/**
@@ -91,20 +94,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 	public PluggableSchemaResolver(ClassLoader classLoader, String schemaMappingsLocation) {
 		Assert.hasText(schemaMappingsLocation, "'schemaMappingsLocation' must not be empty");
 		this.classLoader = classLoader;
-		if (logger.isDebugEnabled()) {
-			logger.debug("Loading schema mappings from [" + schemaMappingsLocation + "]");
-		}
-		try {
-			this.schemaMappings =
-					PropertiesLoaderUtils.loadAllProperties(schemaMappingsLocation, classLoader);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Loaded schema mappings: " + this.schemaMappings);
-			}
-		}
-		catch (IOException e) {
-			throw new FatalBeanException(
-					"Unable to load schema mappings from location [" + schemaMappingsLocation + "]", e);
-		}
+		this.schemaMappingsLocation = schemaMappingsLocation;
 	}
 
 
@@ -114,7 +104,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 					"] and system id [" + systemId + "]");
 		}
 		if (systemId != null) {
-			String resourceLocation = this.schemaMappings.getProperty(systemId);
+			String resourceLocation = getSchemaMapping(systemId);
 			if (resourceLocation != null) {
 				Resource resource = new ClassPathResource(resourceLocation, this.classLoader);
 				InputSource source = new InputSource(resource.getInputStream());
@@ -127,6 +117,26 @@ public class PluggableSchemaResolver implements EntityResolver {
 			}
 		}
 		return null;
+	}
+
+	protected String getSchemaMapping(String systemId) {
+		if (this.schemaMappings == null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loading schema mappings from [" + this.schemaMappingsLocation + "]");
+			}
+			try {
+				this.schemaMappings =
+						PropertiesLoaderUtils.loadAllProperties(this.schemaMappingsLocation, this.classLoader);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Loaded schema mappings: " + this.schemaMappings);
+				}
+			}
+			catch (IOException ex) {
+				throw new FatalBeanException(
+						"Unable to load schema mappings from location [" + this.schemaMappingsLocation + "]", ex);
+			}
+		}
+		return this.schemaMappings.getProperty(systemId);
 	}
 
 }
