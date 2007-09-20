@@ -55,15 +55,15 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 
 	private List<String> mappingFileNames = new LinkedList<String>();
 
-	private List<String> managedClassNames = new LinkedList<String>();
-
 	private List<URL> jarFileUrls = new LinkedList<URL>();
+
+	private URL persistenceUnitRootUrl;
+
+	private List<String> managedClassNames = new LinkedList<String>();
 
 	private boolean excludeUnlistedClasses = false;
 
 	private Properties properties = new Properties();
-
-	private URL persistenceUnitRootUrl;
 
 
 	public void setPersistenceUnitName(String persistenceUnitName) {
@@ -133,7 +133,7 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	}
 
 	public URL getPersistenceUnitRootUrl() {
-		return persistenceUnitRootUrl;
+		return this.persistenceUnitRootUrl;
 	}
 
 	public void addManagedClassName(String managedClassName) {
@@ -168,14 +168,24 @@ public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
 	}
 
 
+	/**
+	 * This implementation returns the default ClassLoader.
+	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
+	 */
 	public ClassLoader getClassLoader() {
 		return ClassUtils.getDefaultClassLoader();
 	}
 
+	/**
+	 * This implementation throws an UnsupportedOperationException.
+	 */
 	public void addTransformer(ClassTransformer classTransformer) {
 		throw new UnsupportedOperationException("addTransformer not supported");
 	}
 
+	/**
+	 * This implementation throws an UnsupportedOperationException.
+	 */
 	public ClassLoader getNewTempClassLoader() {
 		throw new UnsupportedOperationException("getNewTempClassLoader not supported");
 	}

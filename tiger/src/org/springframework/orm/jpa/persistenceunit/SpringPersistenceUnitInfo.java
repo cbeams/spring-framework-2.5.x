@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,47 +20,57 @@ import javax.persistence.spi.ClassTransformer;
 
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
-import org.springframework.util.ClassUtils;
+import org.springframework.util.Assert;
 
 /**
- * Subclass of MutablePersistenceUnitInfo that adds instrumentation
- * hooks based on Spring's LoadTimeWeaver abstraction.
+ * Subclass of {@link MutablePersistenceUnitInfo} that adds instrumentation hooks based on
+ * Spring's {@link org.springframework.instrument.classloading.LoadTimeWeaver} abstraction.
  *
- * <p>This class is restricted to package visibility, in contrast
- * to its superclass.
+ * <p>This class is restricted to package visibility, in contrast to its superclass.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Costin Leau
  * @since 2.0
- * @see #setLoadTimeWeaver
  * @see PersistenceUnitManager
  */
 class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 
 	private LoadTimeWeaver loadTimeWeaver;
 
+	private ClassLoader classLoader;
+
 
 	/**
-	 * Set the LoadTimeWeaver SPI strategy interface used by Spring
-	 * to add instrumentation to the current class loader.
+	 * Initialize this PersistenceUnitInfo with the LoadTimeWeaver SPI interface
+	 * used by Spring to add instrumentation to the current class loader.
 	 */
-	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
+	public void init(LoadTimeWeaver loadTimeWeaver) {
+		Assert.notNull(loadTimeWeaver, "LoadTimeWeaver must not be null");
 		this.loadTimeWeaver = loadTimeWeaver;
-	}
-
-	public ClassLoader getClassLoader() {
-		if (this.loadTimeWeaver != null) {
-			return this.loadTimeWeaver.getInstrumentableClassLoader();
-		}
-		else {
-			return ClassUtils.getDefaultClassLoader();
-		}
+		this.classLoader = loadTimeWeaver.getInstrumentableClassLoader();
 	}
 
 	/**
-	 * Method called by PersistenceProvider to add instrumentation to
-	 * the current environment.
+	 * Initialize this PersistenceUnitInfo with the current class loader
+	 * (instead of with a LoadTimeWeaver).
+	 */
+	public void init(ClassLoader classLoader) {
+		Assert.notNull(classLoader, "ClassLoader must not be null");
+		this.classLoader = classLoader;
+	}
+
+
+	/**
+	 * This implementation returns the LoadTimeWeaver's instrumentable ClassLoader,
+	 * if specified.
+	 */
+	public ClassLoader getClassLoader() {
+		return this.classLoader;
+	}
+
+	/**
+	 * This implementation delegates to the LoadTimeWeaver, if specified.
 	 */
 	public void addTransformer(ClassTransformer classTransformer) {
 		if (this.loadTimeWeaver == null) {
@@ -69,12 +79,15 @@ class SpringPersistenceUnitInfo extends MutablePersistenceUnitInfo {
 		this.loadTimeWeaver.addTransformer(new ClassFileTransformerAdapter(classTransformer));
 	}
 
+	/**
+	 * This implementation delegates to the LoadTimeWeaver, if specified.
+	 */
 	public ClassLoader getNewTempClassLoader() {
 		if (this.loadTimeWeaver != null) {
 			return this.loadTimeWeaver.getThrowawayClassLoader();
 		}
 		else {
-			return new SimpleThrowawayClassLoader(ClassUtils.getDefaultClassLoader());
+			return new SimpleThrowawayClassLoader(this.classLoader);
 		}
 	}
 

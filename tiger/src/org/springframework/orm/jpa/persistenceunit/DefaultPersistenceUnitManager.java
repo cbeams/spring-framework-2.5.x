@@ -268,7 +268,12 @@ public class DefaultPersistenceUnitManager
 			if (pui.getNonJtaDataSource() == null) {
 				pui.setNonJtaDataSource(this.defaultDataSource);
 			}
-			pui.setLoadTimeWeaver(this.loadTimeWeaver);
+			if (this.loadTimeWeaver != null) {
+				pui.init(this.loadTimeWeaver);
+			}
+			else {
+				pui.init(this.resourcePatternResolver.getClassLoader());
+			}
 			postProcessPersistenceUnitInfo(pui);
 			String name = pui.getPersistenceUnitName();
 			this.persistenceUnitInfoNames.add(name);
