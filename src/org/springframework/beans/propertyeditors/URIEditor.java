@@ -49,31 +49,33 @@ public class URIEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * Create a new URIEditor,
-	 * using the default ClassLoader for "classpath:" resources.
+	 * Create a new URIEditor, converting "classpath:" locations into
+	 * standard URIs (not trying to resolve them into physical resources).
 	 */
 	public URIEditor() {
-		this.classLoader = ClassUtils.getDefaultClassLoader();
+		this.classLoader = null;
 	}
 
 	/**
-	 * Create a new URIEditor,
-	 * using the given ClassLoader for "classpath:" resources.
-	 * @param classLoader the ClassLoader to use
+	 * Create a new URIEditor, using the given ClassLoader to resolve
+	 * "classpath:" locations into physical resource URLs.
+	 * @param classLoader the ClassLoader to use for resolving "classpath:" locations
+	 * (may be <code>null</code> to indicate the default ClassLoader)
 	 */
 	public URIEditor(ClassLoader classLoader) {
-		this.classLoader = classLoader;
+		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 
 
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (StringUtils.hasText(text)) {
 			String uri = text.trim();
-			if (uri.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
+			if (this.classLoader != null && uri.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
 				ClassPathResource resource =
 						new ClassPathResource(uri.substring(ResourceUtils.CLASSPATH_URL_PREFIX.length()), this.classLoader);
 				try {
-					setValue(new URI(resource.getURL().toString()));
+					String url = resource.getURL().toString();
+					setValue(createURI(url));
 				}
 				catch (IOException ex) {
 					throw new IllegalArgumentException("Could not retrieve URI for " + resource + ": " + ex.getMessage());
@@ -84,7 +86,7 @@ public class URIEditor extends PropertyEditorSupport {
 			}
 			else {
 				try {
-					setValue(new URI(uri));
+					setValue(createURI(uri));
 				}
 				catch (URISyntaxException ex) {
 					throw new IllegalArgumentException("Invalid URI syntax: " + ex);
@@ -95,6 +97,19 @@ public class URIEditor extends PropertyEditorSupport {
 			setValue(null);
 		}
 	}
+
+	/**
+	 * Create a URI instance for the given (resolved) String value.
+	 * <p>The default implementation uses the <code>URI(String)</code>
+	 * constructor, replacing spaces with "%20" quotes first.
+	 * @param value the value to convert into a URI instance
+	 * @return the URI instance
+	 * @throws URISyntaxException if URI conversion failed
+	 */
+	protected URI createURI(String value) throws URISyntaxException {
+		return new URI(StringUtils.replace(value, " ", "%20"));
+	}
+
 
 	public String getAsText() {
 		URI value = (URI) getValue();

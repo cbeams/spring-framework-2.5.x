@@ -56,7 +56,7 @@ public class URIEditorTests extends TestCase {
 	}
 
 	public void testClasspathURL() throws Exception {
-		PropertyEditor uriEditor = new URIEditor();
+		PropertyEditor uriEditor = new URIEditor(getClass().getClassLoader());
 		uriEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class");
 		Object value = uriEditor.getValue();
@@ -66,8 +66,8 @@ public class URIEditorTests extends TestCase {
 		assertTrue(!uri.getScheme().startsWith("classpath"));
 	}
 
-	public void testClasspathURLWithWidespace() throws Exception {
-		PropertyEditor uriEditor = new URIEditor();
+	public void testClasspathURLWithWhitespace() throws Exception {
+		PropertyEditor uriEditor = new URIEditor(getClass().getClassLoader());
 		uriEditor.setAsText("  classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class  ");
 		Object value = uriEditor.getValue();
@@ -75,6 +75,16 @@ public class URIEditorTests extends TestCase {
 		URI uri = (URI) value;
 		assertEquals(uri.toString(), uriEditor.getAsText());
 		assertTrue(!uri.getScheme().startsWith("classpath"));
+	}
+
+	public void testClasspathURLAsIs() throws Exception {
+		PropertyEditor uriEditor = new URIEditor();
+		uriEditor.setAsText("classpath:test.txt");
+		Object value = uriEditor.getValue();
+		assertTrue(value instanceof URI);
+		URI uri = (URI) value;
+		assertEquals(uri.toString(), uriEditor.getAsText());
+		assertTrue(uri.getScheme().startsWith("classpath"));
 	}
 
 	public void testWithNonExistentResource() throws Exception {
