@@ -188,6 +188,16 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+      <xsd:attribute name="destination-resolver" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation><![CDATA[
+  A reference to the DestinationResolver strategy for resolving destination names.
+  Default is to pass in the destination name Strings into the JCA ActivationSpec as-is.
+  Alternatively, specify a reference to a JndiDestinationResolver (typically in a J2EE
+  environment, in particular if the server insists on receiving Destination objects).
+          ]]></xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
 			<xsd:attribute name="message-converter" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
@@ -276,7 +286,7 @@
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	The destination name for this listener, resolved through the
-	container-wide DestinationResolver strategy. Required.
+	container-wide DestinationResolver strategy (if any). Required.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>

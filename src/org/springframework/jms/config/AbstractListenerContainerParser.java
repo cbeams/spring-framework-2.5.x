@@ -54,6 +54,8 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 	protected static final String METHOD_ATTRIBUTE = "method";
 
+	protected static final String DESTINATION_RESOLVER_ATTRIBUTE = "destination-resolver";
+
 	protected static final String MESSAGE_CONVERTER_ATTRIBUTE = "message-converter";
 
 	protected static final String RESPONSE_DESTINATION_ATTRIBUTE = "response-destination";

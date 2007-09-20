@@ -18,6 +18,7 @@ package org.springframework.jms.listener.endpoint;
 
 import java.util.Properties;
 
+import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.Topic;
@@ -26,6 +27,8 @@ import javax.resource.spi.ResourceAdapter;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.jms.support.destination.DestinationResolutionException;
+import org.springframework.jms.support.destination.DestinationResolver;
 
 /**
  * Standard implementation of the {@link JmsActivationSpecFactory} interface.
@@ -51,6 +54,8 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 
 	private Properties defaultProperties;
 
+	private DestinationResolver destinationResolver;
+
 
 	/**
 	 * Specify the fully-qualified ActivationSpec class name for the target
@@ -68,6 +73,21 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 */
 	public void setDefaultProperties(Properties defaultProperties) {
 		this.defaultProperties = defaultProperties;
+	}
+
+	/**
+	 * Set the DestinationResolver to use for resolving destination names
+	 * into the JCA 1.5 ActivationSpec "destination" property.
+	 * <p>If not specified, destination names will simply be passed in as Strings.
+	 * If specified, destination names will be resolved into Destination objects first.
+	 * <p>Note that a DestinationResolver for use with this factory must be
+	 * able to work <i>without</i> an active JMS Session: e.g.
+	 * {@link org.springframework.jms.support.destination.JndiDestinationResolver}
+	 * or {@link org.springframework.jms.support.destination.BeanFactoryDestinationResolver}
+	 * but not {@link org.springframework.jms.support.destination.DynamicDestinationResolver}.
+	 */
+	public void setDestinationResolver(DestinationResolver destinationResolver) {
+		this.destinationResolver = destinationResolver;
 	}
 
 
@@ -109,8 +129,21 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * @param config the configured object holding common JMS settings
 	 */
 	protected void populateActivationSpecProperties(BeanWrapper bw, JmsActivationSpecConfig config) {
-		bw.setPropertyValue("destination", config.getDestinationName());
-		bw.setPropertyValue("destinationType", config.isPubSubDomain() ? Topic.class.getName() : Queue.class.getName());
+		String destinationName = config.getDestinationName();
+		boolean pubSubDomain = config.isPubSubDomain();
+
+		Object destination = destinationName;
+		if (this.destinationResolver != null) {
+			try {
+				destination = this.destinationResolver.resolveDestinationName(null, destinationName, pubSubDomain);
+			}
+			catch (JMSException ex) {
+				throw new DestinationResolutionException("Cannot resolve destination name [" + destinationName + "]", ex);
+			}
+		}
+		bw.setPropertyValue("destination", destination);
+
+		bw.setPropertyValue("destinationType", pubSubDomain ? Topic.class.getName() : Queue.class.getName());
 		bw.setPropertyValue("subscriptionDurability", config.isSubscriptionDurable() ? "Durable" : "NonDurable");
 
 		if (config.getDurableSubscriptionName() != null) {

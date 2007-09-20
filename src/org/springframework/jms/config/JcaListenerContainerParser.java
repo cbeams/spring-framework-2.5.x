@@ -54,9 +54,19 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 				new RuntimeBeanReference(resourceAdapterBeanName));
 
 		String activationSpecFactoryBeanName = containerEle.getAttribute(ACTIVATION_SPEC_FACTORY_ATTRIBUTE);
+		String destinationResolverBeanName = containerEle.getAttribute(DESTINATION_RESOLVER_ATTRIBUTE);
 		if (StringUtils.hasText(activationSpecFactoryBeanName)) {
+			if (StringUtils.hasText(destinationResolverBeanName)) {
+				parserContext.getReaderContext().error("Specify either 'activation-spec-factory' or " +
+						"'destination-resolver', not both. If you define a dedicated JmsActivationSpecFactory bean, " +
+						"specify the custom DestinationResolver there (if possible).", containerEle);
+			}
 			containerDef.getPropertyValues().addPropertyValue("activationSpecFactory",
 					new RuntimeBeanReference(activationSpecFactoryBeanName));
+		}
+		if (StringUtils.hasText(destinationResolverBeanName)) {
+			containerDef.getPropertyValues().addPropertyValue("destinationResolver",
+					new RuntimeBeanReference(destinationResolverBeanName));
 		}
 
 		RootBeanDefinition configDef = new RootBeanDefinition(JmsActivationSpecConfig.class);

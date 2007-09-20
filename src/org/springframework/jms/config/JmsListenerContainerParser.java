@@ -45,8 +45,6 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 	private static final String TASK_EXECUTOR_ATTRIBUTE = "task-executor";
 
-	private static final String DESTINATION_RESOLVER_ATTRIBUTE = "destination-resolver";
-
 
 	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
 		RootBeanDefinition containerDef = new RootBeanDefinition();
