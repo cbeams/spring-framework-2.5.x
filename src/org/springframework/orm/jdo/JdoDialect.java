@@ -165,6 +165,7 @@ public interface JdoDialect {
 	 * for use outside a JDO transaction (for example, as web form object).
 	 * @param pm the current JDO PersistenceManager
 	 * @param entity the persistent instance to detach
+	 * @return the corresponding detached instance
 	 * @throws JDOException in case of errors
 	 * @see javax.jdo.PersistenceManager#detachCopy(Object)
 	 */
@@ -175,6 +176,7 @@ public interface JdoDialect {
 	 * for use outside a JDO transaction (for example, as web form objects).
 	 * @param pm the current JDO PersistenceManager
 	 * @param entities the persistent instances to detach
+	 * @return the corresponding detached instances
 	 * @throws JDOException in case of errors
 	 * @see javax.jdo.PersistenceManager#detachCopyAll(java.util.Collection)
 	 */
