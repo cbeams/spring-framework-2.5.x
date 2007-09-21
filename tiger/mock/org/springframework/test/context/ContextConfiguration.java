@@ -26,12 +26,11 @@ import java.lang.annotation.Target;
 import org.springframework.test.context.support.GenericXmlContextLoader;
 
 /**
+ * <p>
  * ContextConfiguration defines class-level metadata which can be used to
  * instruct client code with regard to how to load and configure an
  * {@link org.springframework.context.ApplicationContext ApplicationContext}.
- * Although the annotated class will generally be an integration or unit test,
- * the use of ContextConfiguration is not necessarily limited to testing
- * scenarios.
+ * </p>
  *
  * @author Sam Brannen
  * @since 2.5
@@ -46,7 +45,7 @@ public @interface ContextConfiguration {
 
 	/**
 	 * <p>
-	 * The resource locations to use for loading the
+	 * The resource locations to use for loading an
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * </p>
 	 */
@@ -58,18 +57,19 @@ public @interface ContextConfiguration {
 	 * should be <em>inherited</em>.
 	 * </p>
 	 * <p>
-	 * The default value is <code>false</code>, which means that resource
-	 * locations defined in the annotated class will override those defined by a
-	 * superclass. If this value is set to <code>true</code>, however, the
-	 * resource locations for the annotated class will be appended to the list
-	 * of resource locations defined by a superclass. Thus, subclasses have the
-	 * option of <em>extending</em> the list of resource locations. In the
-	 * following example, the
+	 * The default value is <code>true</code>, which means that an annotated
+	 * class will <em>inherit</em> the resource locations defined by an
+	 * annotated superclass. Specifically, the resource locations for an
+	 * annotated class will be appended to the list of resource locations
+	 * defined by an annotated superclass. Thus, subclasses have the option of
+	 * <em>extending</em> the list of resource locations. In the following
+	 * example, the
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}
-	 * for <code>ExtendedTest</code> would be loaded from
-	 * &quot;base-context.xml&quot; and &quot;extended-context.xml&quot;. In
-	 * addition, beans defined in &quot;base-context.xml&quot; may be overridden
-	 * in &quot;extended-context.xml&quot;.
+	 * for <code>ExtendedTest</code> will be loaded from
+	 * &quot;base-context.xml&quot; <strong>and</strong>
+	 * &quot;extended-context.xml&quot;, in that order. Beans defined in
+	 * &quot;extended-context.xml&quot; may therefore override those defined in
+	 * &quot;base-context.xml&quot;.
 	 * </p>
 	 *
 	 * <pre class="code">
@@ -77,17 +77,23 @@ public @interface ContextConfiguration {
 	 * public class BaseTest {
 	 *     // ...
 	 * }
-	 * {@link ContextConfiguration @ContextConfiguration}(locations={&quot;extended-context.xml&quot;}, inheritLocations=true)
+	 * {@link ContextConfiguration @ContextConfiguration}(locations={&quot;extended-context.xml&quot;})
 	 * public class ExtendedTest extends BaseTest {
 	 *     // ...
 	 * }
 	 * </pre>
+	 *
+	 * <p>
+	 * If <code>inheritLocations</code> is set to <code>false</code>, the
+	 * resource locations for the annotated class will <em>shadow</em> and
+	 * effectively replace any resource locations defined by a superclass.
+	 * </p>
 	 */
-	boolean inheritLocations() default false;
+	boolean inheritLocations() default true;
 
 	/**
 	 * <p>
-	 * The {@link ContextLoader} type to use for loading the
+	 * The {@link Class type} of {@link ContextLoader} to use for loading an
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * </p>
 	 *

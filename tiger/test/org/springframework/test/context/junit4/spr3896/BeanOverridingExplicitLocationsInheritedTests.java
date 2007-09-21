@@ -35,7 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Sam Brannen
  * @since 2.5
  */
-@ContextConfiguration(locations = { "BeanOverridingDefaultLocationsInheritedTests-context.xml" }, inheritLocations = true)
+@ContextConfiguration(locations = { "BeanOverridingDefaultLocationsInheritedTests-context.xml" })
 public class BeanOverridingExplicitLocationsInheritedTests extends ExplicitLocationsBaseTests {
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
