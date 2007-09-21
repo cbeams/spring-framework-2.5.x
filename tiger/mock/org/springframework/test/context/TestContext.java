@@ -19,6 +19,7 @@ package org.springframework.test.context;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -115,7 +116,7 @@ public class TestContext {
 	 * locations.
 	 * </p>
 	 * <p>
-	 * Note that
+	 * Note that the
 	 * {@link ContextConfiguration#inheritLocations() inheritLocations} flag of
 	 * {@link ContextConfiguration @ContextConfiguration} will be taken into
 	 * consideration. Specifically, if the <code>inheritLocations</code> flag
@@ -154,7 +155,7 @@ public class TestContext {
 			}
 
 			final String[] locations = contextLoader.processLocations(declaringClass, contextConfiguration.locations());
-			locationsList.addAll(0, java.util.Arrays.<String> asList(locations));
+			locationsList.addAll(0, Arrays.<String> asList(locations));
 
 			declaringClass = contextConfiguration.inheritLocations() ? AnnotationUtils.findAnnotationDeclaringClass(
 					annotationType, declaringClass.getSuperclass()) : null;
