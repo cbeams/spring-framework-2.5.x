@@ -23,8 +23,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -61,8 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
  */
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-		TransactionalTestExecutionListener.class })
+@TestExecutionListeners( { TransactionalTestExecutionListener.class })
 @Transactional
 public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUnit38SpringContextTests {
 
@@ -152,5 +149,4 @@ public class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUni
 		SimpleJdbcTestUtils.executeSqlScript(this.simpleJdbcTemplate, super.applicationContext, sqlResourcePath,
 				continueOnError);
 	}
-
 }

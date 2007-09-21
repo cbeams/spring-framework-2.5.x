@@ -23,8 +23,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -63,8 +61,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.junit38.AbstractTransactionalJUnit38SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
  */
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-		TransactionalTestExecutionListener.class })
+@TestExecutionListeners( { TransactionalTestExecutionListener.class })
 @Transactional
 public class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit4SpringContextTests {
 
@@ -82,7 +79,6 @@ public class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit
 	 */
 	@Autowired
 	public void setDataSource(final DataSource dataSource) {
-
 		this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 	}
 
@@ -93,7 +89,6 @@ public class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit
 	 * @return the number of rows in the table
 	 */
 	protected int countRowsInTable(final String tableName) {
-
 		return SimpleJdbcTestUtils.countRowsInTable(this.simpleJdbcTemplate, tableName);
 	}
 
@@ -109,7 +104,6 @@ public class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit
 	 * @return The total number of rows deleted from all specified tables.
 	 */
 	protected int deleteFromTables(final String... names) {
-
 		return SimpleJdbcTestUtils.deleteFromTables(this.simpleJdbcTemplate, names);
 	}
 
@@ -132,9 +126,7 @@ public class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit
 	 */
 	protected void executeSqlScript(final String sqlResourcePath, final boolean continueOnError)
 			throws DataAccessException {
-
 		SimpleJdbcTestUtils.executeSqlScript(this.simpleJdbcTemplate, this.applicationContext, sqlResourcePath,
 				continueOnError);
 	}
-
 }

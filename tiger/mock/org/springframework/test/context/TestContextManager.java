@@ -18,12 +18,12 @@ package org.springframework.test.context;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,13 +71,11 @@ public class TestContextManager {
 	 * may be destroyed and recreated between running individual test methods,
 	 * for example with JUnit.
 	 */
-	private static final ContextCache<String, ApplicationContext> contextCache =
-			new ContextCache<String, ApplicationContext>();
+	private static final ContextCache<String, ApplicationContext> contextCache = new ContextCache<String, ApplicationContext>();
 
 	private final TestContext testContext;
 
-	private final List<TestExecutionListener> testExecutionListeners =
-			new ArrayList<TestExecutionListener>();
+	private final List<TestExecutionListener> testExecutionListeners = new ArrayList<TestExecutionListener>();
 
 
 	/**
@@ -91,7 +89,7 @@ public class TestContextManager {
 	 * </p>
 	 *
 	 * @param testClass the Class object corresponding to the test class to be
-	 * managed.
+	 *        managed.
 	 * @throws Exception if an error occurs while processing the test class
 	 * @see #registerTestExecutionListeners(TestExecutionListener...)
 	 * @see #retrieveTestExecutionListeners(Class)
@@ -102,49 +100,72 @@ public class TestContextManager {
 		registerTestExecutionListeners(retrieveTestExecutionListeners(testClass));
 	}
 
-
 	/**
 	 * <p>
 	 * Retrieves an array of newly instantiated
 	 * {@link TestExecutionListener TestExecutionListeners} for the specified
-	 * {@link Class class}.
+	 * {@link Class class}. If
+	 * {@link TestExecutionListeners @TestExecutionListeners} is not
+	 * <em>present</em> on the supplied class, the default listeners will be
+	 * returned.
+	 * </p>
+	 * <p>
+	 * Note that the
+	 * {@link TestExecutionListeners#inheritListeners() inheritListeners} flag
+	 * of {@link TestExecutionListeners @TestExecutionListeners} will be taken
+	 * into consideration. Specifically, if the <code>inheritListeners</code>
+	 * flag is set to <code>true</code>, listeners defined in the annotated
+	 * class will be appended to the listeners defined in superclasses.
 	 * </p>
 	 *
 	 * @param clazz The Class object corresponding to the test class for which
-	 * the listeners should be retrieved.
+	 *        the listeners should be retrieved.
 	 * @return an array of TestExecutionListeners for the specified class.
 	 * @throws IllegalArgumentException if the supplied class is
-	 * <code>null</code>.
+	 *         <code>null</code>.
 	 * @throws Exception if an error occurs while retrieving the listeners.
 	 */
-	@SuppressWarnings("unchecked")
 	private TestExecutionListener[] retrieveTestExecutionListeners(final Class<?> clazz) throws Exception {
 
 		Assert.notNull(clazz, "Can not retrieve TestExecutionListeners for a NULL class.");
-		final TestExecutionListeners testExecutionListeners = clazz.getAnnotation(TestExecutionListeners.class);
-		Class<? extends TestExecutionListener>[] classes;
+		final Class<TestExecutionListeners> annotationType = TestExecutionListeners.class;
+		final List<Class<? extends TestExecutionListener>> classesList = new ArrayList<Class<? extends TestExecutionListener>>();
+		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
 
-		if (testExecutionListeners != null) {
-			classes = testExecutionListeners.value();
-		}
-		else {
+		// Use defaults?
+		if (declaringClass == null) {
 			if (logger.isInfoEnabled()) {
 				logger.info("@TestExecutionListeners is not present for class [" + clazz + "]: using defaults.");
 			}
-			classes = (Class<? extends TestExecutionListener>[]) AnnotationUtils.getDefaultValue(TestExecutionListeners.class);
+			@SuppressWarnings("unchecked")
+			Class<? extends TestExecutionListener>[] classes = (Class<? extends TestExecutionListener>[]) AnnotationUtils.getDefaultValue(TestExecutionListeners.class);
+			classesList.addAll(Arrays.<Class<? extends TestExecutionListener>> asList(classes));
 		}
+		else {
+			// Traverse the class hierarchy
+			while (declaringClass != null) {
 
-		final TestExecutionListener[] listeners = new TestExecutionListener[classes.length];
+				final TestExecutionListeners testExecutionListeners = declaringClass.getAnnotation(annotationType);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Retrieved @TestExecutionListeners [" + testExecutionListeners
+							+ "] for declaring class [" + declaringClass + "].");
+				}
 
-		for (int i = 0; i < classes.length; i++) {
-			final Class<? extends TestExecutionListener> listenerClass = classes[i];
-			if (logger.isDebugEnabled()) {
-				logger.debug("Retrieved TestExecutionListener class [" + listenerClass + "] for annotated class ["
-						+ clazz + "].");
+				@SuppressWarnings("unchecked")
+				Class<? extends TestExecutionListener>[] classes = (Class<? extends TestExecutionListener>[]) AnnotationUtils.getValue(testExecutionListeners);
+				classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(classes));
+
+				declaringClass = testExecutionListeners.inheritListeners() ? AnnotationUtils.findAnnotationDeclaringClass(
+						annotationType, declaringClass.getSuperclass())
+						: null;
 			}
-			listeners[i] = listenerClass.newInstance();
 		}
 
+		final TestExecutionListener[] listeners = new TestExecutionListener[classesList.size()];
+		int i = 0;
+		for (final Class<? extends TestExecutionListener> listenerClass : classesList) {
+			listeners[i++] = listenerClass.newInstance();
+		}
 		return listeners;
 	}
 
@@ -167,7 +188,7 @@ public class TestContextManager {
 	 *
 	 * @param testInstance The test instance to prepare, not <code>null</code>.
 	 * @throws Exception if a registered TestExecutionListener throws an
-	 * exception.
+	 *         exception.
 	 * @see #getTestExecutionListeners()
 	 */
 	public void prepareTestInstance(final Object testInstance) throws Exception {
@@ -215,9 +236,9 @@ public class TestContextManager {
 	 *
 	 * @param testInstance The current test instance, not <code>null</code>.
 	 * @param testMethod The test method which is about to be executed on the
-	 * test instance.
+	 *        test instance.
 	 * @throws Exception if a registered TestExecutionListener throws an
-	 * exception.
+	 *         exception.
 	 * @see #getTestExecutionListeners()
 	 */
 	public void beforeTestMethod(final Object testInstance, final Method testMethod) throws Exception {
@@ -266,9 +287,9 @@ public class TestContextManager {
 	 *
 	 * @param testInstance The current test instance, not <code>null</code>.
 	 * @param testMethod The test method which has just been executed on the
-	 * test instance.
+	 *        test instance.
 	 * @param exception The exception that was thrown during execution of the
-	 * test method, or <code>null</code> if none was thrown.
+	 *        test method, or <code>null</code> if none was thrown.
 	 * @see #getTestExecutionListeners()
 	 */
 	public void afterTestMethod(final Object testInstance, final Method testMethod, final Throwable exception) {
@@ -282,7 +303,7 @@ public class TestContextManager {
 		getTestContext().updateState(testInstance, testMethod, exception);
 
 		// Traverse the TestExecutionListeners in reverse order to ensure proper
-		// "wrapper"-style execution ordering of listeners.
+		// "wrapper"-style execution of listeners.
 		final List<TestExecutionListener> listenersReversed = new ArrayList<TestExecutionListener>(
 				getTestExecutionListeners());
 		Collections.reverse(listenersReversed);

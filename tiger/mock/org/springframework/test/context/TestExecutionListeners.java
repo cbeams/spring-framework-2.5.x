@@ -30,8 +30,9 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 /**
  * TestExecutionListeners defines class-level metadata for configuring which
  * {@link TestExecutionListener TestExecutionListeners} should be registered
- * with a {@link TestContextManager}. Typically, &#064;TestExecutionListeners
- * will be used in conjunction with &#064;ContextConfiguration.
+ * with a {@link TestContextManager}. Typically,
+ * {@link TestExecutionListeners @TestExecutionListeners} will be used in
+ * conjunction with {@link ContextConfiguration @ContextConfiguration}.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -56,6 +57,47 @@ public @interface TestExecutionListeners {
 	 * @see TransactionalTestExecutionListener
 	 */
 	Class<? extends TestExecutionListener>[] value() default { DependencyInjectionTestExecutionListener.class,
-			DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class };
+		DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class };
+
+	/**
+	 * <p>
+	 * Whether or not {@link #value() TestExecutionListeners} from superclasses
+	 * should be <em>inherited</em>.
+	 * </p>
+	 * <p>
+	 * The default value is <code>true</code>, which means that an annotated
+	 * class will <em>inherit</em> the listeners defined by an annotated
+	 * superclass. Specifically, the listeners for an annotated class will be
+	 * appended to the list of listeners defined by an annotated superclass.
+	 * Thus, subclasses have the option of <em>extending</em> the list of
+	 * listeners. In the following example, <code>AbstractBaseTest</code> will
+	 * be configured with <code>DependencyInjectionTestExecutionListener</code>
+	 * and <code>DirtiesContextTestExecutionListener</code>; whereas,
+	 * <code>TransactionalTest</code> will be configured with
+	 * <code>DependencyInjectionTestExecutionListener</code>,
+	 * <code>DirtiesContextTestExecutionListener</code>, <strong>and</strong>
+	 * <code>TransactionalTestExecutionListener</code>, in that order.
+	 * </p>
+	 *
+	 * <pre class="code">
+	 * {@link TestExecutionListeners @TestExecutionListeners}({ DependencyInjectionTestExecutionListener.class,
+	 *     DirtiesContextTestExecutionListener.class })
+	 * public abstract class AbstractBaseTest {
+	 *     // ...
+	 * }
+	 *
+	 * {@link TestExecutionListeners @TestExecutionListeners}({ TransactionalTestExecutionListener.class })
+	 * public class TransactionalTest extends BaseTest {
+	 *     // ...
+	 * }
+	 * </pre>
+	 *
+	 * <p>
+	 * If <code>inheritListeners</code> is set to <code>false</code>, the
+	 * listeners for the annotated class will <em>shadow</em> and effectively
+	 * replace any listeners defined by a superclass.
+	 * </p>
+	 */
+	boolean inheritListeners() default true;
 
 }

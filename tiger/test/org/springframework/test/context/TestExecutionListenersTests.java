@@ -13,21 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.context;
 
-import junit.framework.JUnit4TestAdapter;
 import static org.junit.Assert.assertEquals;
+import junit.framework.JUnit4TestAdapter;
+
 import org.junit.Test;
 import org.junit.internal.runners.JUnit4ClassRunner;
 import org.junit.runner.RunWith;
-
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
- * JUnit 4 based unit test for the {@link TestExecutionListeners} annotation.
- * This test verifies proper registering of
- * {@link TestExecutionListener listeners} in conjunction with the
- * {@link ContextConfiguration} annotation and a {@link TestContextManager}.
+ * <p>
+ * JUnit 4 based unit test for the
+ * {@link TestExecutionListeners @TestExecutionListeners} annotation, which
+ * verifies:
+ * </p>
+ * <ul>
+ * <li>Proper registering of {@link TestExecutionListener listeners} in
+ * conjunction with a {@link TestContextManager}</li>
+ * <li><em>Inherited</em> functionality proposed in <a
+ * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3896"
+ * target="_blank">SPR-3896</a></li>
+ * </ul>
  *
  * @author Sam Brannen
  * @since 2.5
@@ -37,38 +46,52 @@ public class TestExecutionListenersTests {
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
 	public static junit.framework.Test suite() {
-
 		return new JUnit4TestAdapter(TestExecutionListenersTests.class);
 	}
 
-
 	@Test
 	public void verifyNumListenersRegistered() throws Exception {
+		TestContextManager testContextManager = new TestContextManager(ExampleTest.class);
+		assertEquals("Verifying the number of registered TestExecutionListeners for ExampleTest.", 3,
+				testContextManager.getTestExecutionListeners().size());
+	}
 
-		final TestContextManager testContextManager = new TestContextManager(ExampleTest.class);
-		assertEquals("Verifying the number of registered TestExecutionListeners", 4,
+	@Test
+	public void verifyNumNonInheritedListenersRegistered() throws Exception {
+		TestContextManager testContextManager = new TestContextManager(NonInheritedListenersExampleTest.class);
+		assertEquals("Verifying the number of registered TestExecutionListeners for NonInheritedListenersExampleTest.",
+				1, testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void verifyNumInheritedListenersRegistered() throws Exception {
+		TestContextManager testContextManager = new TestContextManager(InheritedListenersExampleTest.class);
+		assertEquals("Verifying the number of registered TestExecutionListeners for InheritedListenersExampleTest.", 4,
 				testContextManager.getTestExecutionListeners().size());
 	}
 
 
-	@ContextConfiguration
 	@TestExecutionListeners( { FooTestExecutionListener.class, BarTestExecutionListener.class,
-			BazTestExecutionListener.class, QuuxTestExecutionListener.class })
+		BazTestExecutionListener.class })
 	static class ExampleTest {
 	}
 
+	@TestExecutionListeners( { QuuxTestExecutionListener.class })
+	static class InheritedListenersExampleTest extends ExampleTest {
+	}
+
+	@TestExecutionListeners(value = { QuuxTestExecutionListener.class }, inheritListeners = false)
+	static class NonInheritedListenersExampleTest extends InheritedListenersExampleTest {
+	}
 
 	static class FooTestExecutionListener extends AbstractTestExecutionListener {
 	}
 
-
 	static class BarTestExecutionListener extends AbstractTestExecutionListener {
 	}
 
-
 	static class BazTestExecutionListener extends AbstractTestExecutionListener {
 	}
-
 
 	static class QuuxTestExecutionListener extends AbstractTestExecutionListener {
 	}
