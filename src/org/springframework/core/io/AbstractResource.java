@@ -20,7 +20,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+
+import org.springframework.core.NestedIOException;
 
 /**
  * Convenience base class for {@link Resource} implementations,
@@ -71,6 +75,20 @@ public abstract class AbstractResource implements Resource {
 	 */
 	public URL getURL() throws IOException {
 		throw new FileNotFoundException(getDescription() + " cannot be resolved to URL");
+	}
+
+	/**
+	 * This implementation builds a URI based on the URL returned
+	 * by {@link #getURL()}.
+	 */
+	public URI getURI() throws IOException {
+		String url = getURL().toString();
+		try {
+			return new URI(url);
+		}
+		catch (URISyntaxException ex) {
+			throw new NestedIOException("Invalid URI [" + url + "]", ex);
+		}
 	}
 
 	/**

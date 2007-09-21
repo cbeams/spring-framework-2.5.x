@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -57,6 +58,17 @@ public class UrlResource extends AbstractResource {
 		Assert.notNull(url, "URL must not be null");
 		this.url = url;
 		this.cleanedUrl = getCleanedUrl(this.url, url.toString());
+	}
+
+	/**
+	 * Create a new UrlResource.
+	 * @param uri a URI
+	 * @throws MalformedURLException if the given URL path is not valid
+	 */
+	public UrlResource(URI uri) throws MalformedURLException {
+		Assert.notNull(uri, "URI must not be null");
+		this.url = uri.toURL();
+		this.cleanedUrl = getCleanedUrl(this.url, this.url.toString());
 	}
 
 	/**

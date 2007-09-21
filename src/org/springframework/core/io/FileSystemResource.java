@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -87,17 +87,25 @@ public class FileSystemResource extends AbstractResource {
 
 	/**
 	 * This implementation returns a URL for the underlying file.
-	 * @see java.io.File#getAbsolutePath()
+	 * @see java.io.File#toURI()
 	 */
 	public URL getURL() throws IOException {
-		return new URL(ResourceUtils.FILE_URL_PREFIX + this.file.getAbsolutePath());
+		return this.file.toURI().toURL();
+	}
+
+	/**
+	 * This implementation returns a URI for the underlying file.
+	 * @see java.io.File#toURI()
+	 */
+	public URI getURI() throws IOException {
+		return this.file.toURI();
 	}
 
 	/**
 	 * This implementation returns the underlying File reference.
 	 */
 	public File getFile() {
-		return file;
+		return this.file;
 	}
 
 	/**

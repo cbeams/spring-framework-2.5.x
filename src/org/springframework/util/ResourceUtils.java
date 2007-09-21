@@ -126,7 +126,7 @@ public abstract class ResourceUtils {
 		catch (MalformedURLException ex) {
 			// no URL -> treat as file path
 			try {
-				return new URL(FILE_URL_PREFIX + resourceLocation);
+				return new File(resourceLocation).toURI().toURL();
 			}
 			catch (MalformedURLException ex2) {
 				throw new FileNotFoundException("Resource location [" + resourceLocation +
