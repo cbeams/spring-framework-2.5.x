@@ -37,12 +37,11 @@ public class GenericXmlContextLoader extends AbstractGenericContextLoader {
 	 * </p>
 	 *
 	 * @return a new XmlBeanDefinitionReader.
-	 * @see org.springframework.test.context.support.AbstractGenericContextLoader#createBeanDefinitionReader(org.springframework.context.support.GenericApplicationContext)
+	 * @see AbstractGenericContextLoader#createBeanDefinitionReader(GenericApplicationContext)
 	 * @see XmlBeanDefinitionReader
 	 */
 	@Override
 	protected BeanDefinitionReader createBeanDefinitionReader(final GenericApplicationContext context) {
-
 		return new XmlBeanDefinitionReader(context);
 	}
 
@@ -53,7 +52,6 @@ public class GenericXmlContextLoader extends AbstractGenericContextLoader {
 	 */
 	@Override
 	public String getResourceSuffix() {
-
 		return "-context.xml";
 	}
 

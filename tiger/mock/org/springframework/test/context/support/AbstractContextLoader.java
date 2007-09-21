@@ -107,8 +107,8 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * For example, if the supplied class is <code>com.example.MyTest</code>,
 	 * the generated locations will contain a single string with a value of
 	 * &quot;classpath:/com/example/MyTest<code>&lt;suffix&gt;</code>&quot;,
-	 * where <code>&lt;suffix&gt;</code> is the value of the supplied
-	 * <code>resourceSuffix</code> string.
+	 * where <code>&lt;suffix&gt;</code> is the value of the
+	 * {@link #getResourceSuffix() resource suffix} string.
 	 * </p>
 	 * <p>
 	 * Subclasses can override this method to implement a different
@@ -118,6 +118,7 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * @param clazz The class for which the default locations are to be
 	 *        generated.
 	 * @return An array of default application context resource locations.
+	 * @see #getResourceSuffix()
 	 */
 	protected String[] generateDefaultLocations(final Class<?> clazz) {
 		Assert.notNull(clazz, "clazz can not be null.");
@@ -138,7 +139,7 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * class path location, e.g.:
 	 * &quot;/org/springframework/whatever/foo.xml&quot;. A path which is
 	 * already a classpath resource (i.e., prefixed with
-	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX :classpath}) will be added to
+	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:}) will be added to
 	 * the results unchanged.
 	 * </p>
 	 * <p>

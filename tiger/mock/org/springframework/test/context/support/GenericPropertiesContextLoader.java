@@ -39,12 +39,11 @@ public class GenericPropertiesContextLoader extends AbstractGenericContextLoader
 	 * </p>
 	 *
 	 * @return a new PropertiesBeanDefinitionReader.
-	 * @see org.springframework.test.context.support.AbstractGenericContextLoader#createBeanDefinitionReader(org.springframework.context.support.GenericApplicationContext)
+	 * @see AbstractGenericContextLoader#createBeanDefinitionReader(GenericApplicationContext)
 	 * @see PropertiesBeanDefinitionReader
 	 */
 	@Override
 	protected BeanDefinitionReader createBeanDefinitionReader(final GenericApplicationContext context) {
-
 		return new PropertiesBeanDefinitionReader(context);
 	}
 
@@ -55,7 +54,6 @@ public class GenericPropertiesContextLoader extends AbstractGenericContextLoader
 	 */
 	@Override
 	public String getResourceSuffix() {
-
 		return "-context.properties";
 	}
 
