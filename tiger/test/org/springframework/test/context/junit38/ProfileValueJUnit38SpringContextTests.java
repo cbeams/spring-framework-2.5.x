@@ -95,7 +95,7 @@ public class ProfileValueJUnit38SpringContextTests extends TestCase {
 	 * listeners.
 	 * </p>
 	 */
-	@TestExecutionListeners( {})
+	@TestExecutionListeners(value = {}, inheritListeners = false)
 	public static class DefaultProfileValueSourceTestCase extends AbstractJUnit38SpringContextTests {
 
 		int invocationCount = 0;

@@ -31,18 +31,14 @@ import org.springframework.test.context.TestExecutionListeners;
 public class RepeatedJUnit38SpringContextTests extends TestCase {
 
 	public RepeatedJUnit38SpringContextTests() throws Exception {
-
 		super();
 	}
 
 	public RepeatedJUnit38SpringContextTests(final String name) throws Exception {
-
 		super(name);
 	}
 
-
 	private void assertRepetitions(final String testName, final int expectedNumInvocations) throws Exception {
-
 		final RepeatedTestCase repeatedTestCase = new RepeatedTestCase(testName);
 		repeatedTestCase.run();
 		assertEquals("Verifying number of invocations for test method [" + testName + "].", expectedNumInvocations,
@@ -50,7 +46,6 @@ public class RepeatedJUnit38SpringContextTests extends TestCase {
 	}
 
 	public void testRepeatAnnotationSupport() throws Exception {
-
 		assertRepetitions("testNonAnnotated", 1);
 		assertRepetitions("testNegativeRepeatValue", 1);
 		assertRepetitions("testDefaultRepeatValue", 1);
@@ -63,44 +58,38 @@ public class RepeatedJUnit38SpringContextTests extends TestCase {
 	 * explicitly configured with an empty list, thus disabling all default
 	 * listeners.
 	 */
-	@TestExecutionListeners( {})
+	@TestExecutionListeners(value = {}, inheritListeners = false)
 	protected static class RepeatedTestCase extends AbstractJUnit38SpringContextTests {
 
-		int	invocationCount	= 0;
+		int invocationCount = 0;
+
 
 		public RepeatedTestCase(final String name) throws Exception {
-
 			super(name);
 		}
 
 		@Override
 		protected void setUp() throws Exception {
-
 			this.invocationCount++;
 		}
 
 		public void testNonAnnotated() {
-
 			/* no-op */
 		}
 
 		@Repeat(-5)
 		public void testNegativeRepeatValue() {
-
 			/* no-op */
 		}
 
 		@Repeat
 		public void testDefaultRepeatValue() {
-
 			/* no-op */
 		}
 
 		@Repeat(5)
 		public void testRepeatedFiveTimes() {
-
 			/* no-op */
 		}
 	}
-
 }
