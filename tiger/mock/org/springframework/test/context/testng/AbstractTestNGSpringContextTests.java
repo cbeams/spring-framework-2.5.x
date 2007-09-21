@@ -56,8 +56,8 @@ import org.testng.annotations.BeforeMethod;
  * and to configure the appropriate
  * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners}
  * manually.</em></li>
- * <li>Must declare a <code>public</code> no-args constructor which either
- * implicitly or explicitly delegates to <code>super();</code>.</li>
+ * <li>Must have constructors which either implicitly or explicitly delegate to
+ * <code>super();</code>.</li>
  * </ul>
  *
  * @author Sam Brannen
