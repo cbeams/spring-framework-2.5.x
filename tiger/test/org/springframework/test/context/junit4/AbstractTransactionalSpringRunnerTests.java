@@ -19,6 +19,7 @@ package org.springframework.test.context.junit4;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.NotTransactional;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -35,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see Transactional
  * @see NotTransactional
  */
+@ContextConfiguration(locations = { "transactionalTests-context.xml" })
 public abstract class AbstractTransactionalSpringRunnerTests {
 
 	// ------------------------------------------------------------------------|
