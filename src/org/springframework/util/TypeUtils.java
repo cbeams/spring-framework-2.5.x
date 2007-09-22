@@ -35,7 +35,7 @@ public abstract class TypeUtils {
 	 * type following the Java generics rules.
 	 * @param lhsType the target type
 	 * @param rhsType	the value type that should be assigned to the target type
-	 * @return true if rhs is assiganble to lhs
+	 * @return true if rhs is assignable to lhs
 	 */
 	public static boolean isAssignable(Type lhsType, Type rhsType) {
 		Assert.notNull(lhsType, "Left-hand side type must not be null");
@@ -56,16 +56,20 @@ public abstract class TypeUtils {
 	}
 
 	private static boolean isAssignable(ParameterizedType lhsType, ParameterizedType rhsType) {
+		if (lhsType.equals(rhsType)) {
+			return true;
+		}
 		Type[] lhsTypeArguments = lhsType.getActualTypeArguments();
 		Type[] rhsTypeArguments = rhsType.getActualTypeArguments();
 		if (lhsTypeArguments.length != rhsTypeArguments.length) {
 			return false;
 		}
 		for (int size = lhsTypeArguments.length, i = 0; i < size; ++i) {
-			if (lhsTypeArguments != rhsTypeArguments) {
-				if (!isAssignable(lhsTypeArguments[i], rhsTypeArguments[i])) {
-					return false;
-				}
+			Type lhsArg = lhsTypeArguments[i];
+			Type rhsArg = rhsTypeArguments[i];
+			if (!lhsArg.equals(rhsArg) &&
+					!(lhsArg instanceof WildcardType && isAssignable((WildcardType) lhsArg, rhsArg))) {
+				return false;
 			}
 		}
 		return true;
@@ -75,12 +79,12 @@ public abstract class TypeUtils {
 		Type[] upperBounds = lhsType.getUpperBounds();
 		Type[] lowerBounds = lhsType.getLowerBounds();
 		for (int size = upperBounds.length, i = 0; i < size; ++i) {
-			if (!ClassUtils.isAssignable((Class) upperBounds[i], (Class) rhsType)) {
+			if (!isAssignable(upperBounds[i], rhsType)) {
 				return false;
 			}
 		}
 		for (int size = lowerBounds.length, i = 0; i < size; ++i) {
-			if (!ClassUtils.isAssignable((Class) rhsType, (Class) lowerBounds[i])) {
+			if (!isAssignable(rhsType, lowerBounds[i])) {
 				return false;
 			}
 		}
