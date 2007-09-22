@@ -61,7 +61,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 	/**
 	 * Following AspectJ semantics, if a returning clause was specified, then the
 	 * advice is only invoked if the returned value is an instance of the given
-	 * returning type and genetic type parameters, if any, match the assignment
+	 * returning type and generic type parameters, if any, match the assignment
 	 * rules. If the returning type is Object, the advice is *always* invoked.
 	 * @param returnValue the return value of the target method
 	 * @return whether to invoke the advice method for the given return value
@@ -76,7 +76,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 
 
 	/**
-	 * Inner class to avoid static JDK 1.5 dependency for generic type matching.
+	 * Inner class to avoid a static JDK 1.5 dependency for generic type matching.
 	 */
 	private static class GenericTypeMatcher {
 
