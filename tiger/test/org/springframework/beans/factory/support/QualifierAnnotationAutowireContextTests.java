@@ -132,6 +132,21 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		assertEquals(JUERGEN, bean.getPerson().getName());
 	}
 
+	public void testAutowiredMethodParameterWithStaticallyQualifiedCandidate() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
+		cavs.addGenericArgumentValue(JUERGEN);
+		RootBeanDefinition person = new RootBeanDefinition(QualifiedPerson.class, cavs, null);
+		context.registerBeanDefinition(JUERGEN, person);
+		context.registerBeanDefinition("autowired",
+				new RootBeanDefinition(QualifiedMethodParameterTestBean.class));
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+		context.refresh();
+		QualifiedMethodParameterTestBean bean =
+				(QualifiedMethodParameterTestBean) context.getBean("autowired");
+		assertEquals(JUERGEN, bean.getPerson().getName());
+	}
+
 	public void testAutowiredConstructorArgumentWithSingleQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
@@ -627,11 +642,19 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		public String getName() {
 			return this.name;
 		}
-
 	}
 
 
-	@Target({ElementType.FIELD, ElementType.PARAMETER})
+	@TestQualifier
+	private static class QualifiedPerson extends Person {
+
+		public QualifiedPerson(String name) {
+			super(name);
+		}
+	}
+
+
+	@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Qualifier
 	public static @interface TestQualifier {

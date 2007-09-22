@@ -101,6 +101,14 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 				if (qualifier == null) {
 					qualifier = mbd.getQualifier(ClassUtils.getShortName(type));
 				}
+				if (qualifier == null && mbd.hasBeanClass()) {
+					// look for matching annotation on the target class
+					Class<?> beanClass = mbd.getBeanClass();
+					Annotation targetAnnotation = beanClass.getAnnotation(type);
+					if (targetAnnotation != null && targetAnnotation.equals(annotation)) {
+						return true;
+					}
+				}
 				Map<String, Object> attributes = AnnotationUtils.getAnnotationAttributes(annotation);
 				if (attributes.size() == 0 && qualifier == null) {
 					// if no attributes, the qualifier must be present
@@ -111,7 +119,6 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 					String attributeName = entry.getKey();
 					Object expectedValue = entry.getValue();
 					Object actualValue = null;
-
 					// check qualifier first
 					if (qualifier != null) {
 						actualValue = qualifier.getAttribute(attributeName);
@@ -124,21 +131,17 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 							actualValue = typeConverter.convertIfNecessary(attr, expectedValue.getClass());
 						}
 					}
-
 					if (actualValue == null && attributeName.equals("value") && expectedValue.equals(beanName)) {
 						// fall back on bean name match
 						continue;
 					}
-
 					if (actualValue == null && qualifier != null) {
 						// fall back on default, but only if the qualifier is present
 						actualValue = AnnotationUtils.getDefaultValue(annotation, attributeName);
 					}
-
 					if (actualValue != null) {
 						actualValue = typeConverter.convertIfNecessary(actualValue, expectedValue.getClass());
 					}
-
 					if (!expectedValue.equals(actualValue)) {
 						return false;
 					}
