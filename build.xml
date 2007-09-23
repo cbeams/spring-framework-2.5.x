@@ -50,7 +50,7 @@
 		</fileset>
 
 	</path>
-	
+
 	<path id="attribute-compiler-classpath">
 
 		<fileset dir="lib/jakarta-commons">
@@ -62,7 +62,7 @@
 		</fileset>
 
 	</path>
-	
+
 
 	<patternset id="spring.full.packages">
 		<include name="META-INF/**"/>
@@ -425,7 +425,7 @@
 		<mkdir dir="${dist.dir}/weaving-sources"/>
 
 	</target>
-	
+
 
 	<target name="fulljar" depends="build,initdist" description="Create JAR file with all core Spring classes">
 
@@ -451,12 +451,12 @@
 		<move file="${dist.dir}/spring.bar" tofile="${dist.dir}/spring.jar"/>
 
 	</target>
-	
+
 
 	<target name="fullsources" depends="initdist" description="Create source JAR file with all core Spring classes">
 
 		<delete file="${dist.dir}/spring-sources.jar"/>
-		
+
 		<jar jarfile="${dist.dir}/spring-sources.jar">
 			<fileset dir="${src.dir}">
 				<patternset refid="spring.full.packages"/>
@@ -474,7 +474,7 @@
 			</manifest>
 		</jar>
 	</target>
-	
+
 
 	<target name="modulejars" depends="build,initdist" description="Create module-specific JAR files">
 
@@ -647,16 +647,16 @@
 		<bndwrap definitions="${basedir}/osgi/bnd" output="${dist.dir}/modules">
 			<fileset dir="${dist.dir}/modules" includes="*.jar"/>
 		</bndwrap>
-		
+
 		<move todir="${dist.dir}/modules">
 			<fileset dir="${dist.dir}/modules">
 		      <include name="*.bar"/>
 		    </fileset>
 			<mapper type="glob" from="*.bar" to="*.jar"/>
 		</move>
-		
+
 	</target>
-	
+
 
 	<target name="modulesources" depends="initdist" description="Create module-specific source JAR files">
 		<delete>
@@ -664,7 +664,7 @@
 				<include name="module-sources/*.jar"/>
 			</fileset>
 		</delete>
-		
+
 		<jar jarfile="${dist.dir}/module-sources/spring-aop-sources.jar">
 			<fileset dir="${src.dir}">
 				<patternset refid="spring.aop.packages"/>
@@ -679,7 +679,7 @@
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
-		
+
 		<jar jarfile="${dist.dir}/module-sources/spring-beans-sources.jar">
 			<fileset dir="${src.dir}">
 				<patternset refid="spring.beans.packages"/>
@@ -867,7 +867,7 @@
 		</jar>
 
 	</target>
-	
+
 
 	<target name="weavingjars" depends="build,initdist" description="Create weaver JAR files (for specific platforms)">
 
@@ -915,7 +915,7 @@
 		<bndwrap definitions="${basedir}/osgi/bnd" output="${dist.dir}/weaving">
 			<fileset dir="${dist.dir}/weaving" includes="spring-aspects.jar"/>
 		</bndwrap>
-		
+
 		<move todir="${dist.dir}/weaving">
 			<fileset dir="${dist.dir}/weaving">
 		      <include name="*.bar"/>
@@ -924,10 +924,10 @@
 		</move>
 
 	</target>
-	
+
 
 	<target name="weavingsources" depends="initdist" description="Create weaver source JAR files (for specific platforms)">
-		
+
 		<delete>
 			<fileset dir="${dist.dir}">
 				<include name="weaving-sources/*.jar"/>
@@ -1309,7 +1309,7 @@
 
 	</target>
 
-	
+
 	<target name="buildaspecttests" depends="buildmaintests" if="aspectj.available"
 			description="Compile AspectJ test source files">
 
@@ -1413,8 +1413,8 @@
 			</batchtest>
 
 		</junit>
-		
-		<antcall target="testngtests" /> 
+
+		<antcall target="testngtests" />
 
 	</target>
 
@@ -1424,7 +1424,7 @@
 
 		<mkdir dir="${target.testng.reports.dir}"/>
 
-		<testng outputdir="${target.testng.reports.dir}" haltonfailure="true" haltonskipped="false">
+		<testng outputdir="${target.testng.reports.dir}" haltonfailure="true" haltonskipped="true" verbose="2">
 
 			<jvmarg line="-Djava.awt.headless=true -Xmx256m -XX:MaxPermSize=128m"/>
 
@@ -1438,7 +1438,7 @@
 			<classpath location="${test.dir}" />
 			<classpath refid="all-libs" />
 
-			<classfileset dir="${target.tigertestclasses.dir}" includes="${test.testng.includes}" excludes="${test.testng.excludes}"/>
+			<classfileset dir="${target.tigertestclasses.dir}" includes="${test.testng.includes}" excludes="${test.testng.excludes}" />
 
 		</testng>
 
@@ -1791,7 +1791,7 @@
 
 	<target name="doc.html" depends="doc.prepare"
 			description="Compile reference documentation to chunked html">
-        
+
 		<mkdir dir="${dist.ref.dir}/html/images"/>
 
 		<copy todir="${basedir}/${dist.ref.dir}/html/images">
@@ -1926,7 +1926,7 @@
 	</target>
 
 	<target name="mvcstep.html" depends="mvcstep.prepare" description="Compile MVC step-by-step guide to chunked html">
-        
+
 		<mkdir dir="${dist.mvcstep.dir}/html/images"/>
 
 		<copy todir="${basedir}/${dist.mvcstep.dir}/html/images">
