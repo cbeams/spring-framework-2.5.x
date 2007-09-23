@@ -348,19 +348,19 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	/**
 	 * Perform a rollback, handling rollback exceptions properly.
 	 * @param status object representing the transaction
-	 * @param ex the thrown application exception or error
+	 * @param ex the thrown listener exception or error
 	 */
 	private void rollbackOnException(TransactionStatus status, Throwable ex) {
-		logger.debug("Initiating transaction rollback on application exception", ex);
+		logger.debug("Initiating transaction rollback on listener exception", ex);
 		try {
 			this.transactionManager.rollback(status);
 		}
 		catch (RuntimeException ex2) {
-			logger.error("Application exception overridden by rollback exception", ex);
+			logger.error("Listener exception overridden by rollback exception", ex);
 			throw ex2;
 		}
 		catch (Error err) {
-			logger.error("Application exception overridden by rollback error", ex);
+			logger.error("Listener exception overridden by rollback error", ex);
 			throw err;
 		}
 	}
