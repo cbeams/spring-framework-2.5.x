@@ -30,7 +30,6 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
-import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -118,7 +117,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * @throws Exception if a registered TestExecutionListener throws an
 	 *         exception.
 	 */
-	@BeforeClass(alwaysRun = true)
+	@BeforeClass(groups = { "SpringTestContext" })
 	public void prepareTestInstance() throws Exception {
 		this.testContextManager.prepareTestInstance(this);
 	}
@@ -132,8 +131,8 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * @param testMethod The test method which is about to be executed.
 	 * @throws Exception Allows all exceptions to propagate.
 	 */
-	@BeforeMethod(alwaysRun = true)
-	public void beforeTestMethod(final ITestContext testContext, final Method testMethod) throws Exception {
+	@BeforeMethod(groups = { "SpringTestContext" })
+	public void beforeTestMethod(final Method testMethod) throws Exception {
 		this.testContextManager.beforeTestMethod(this, testMethod);
 	}
 
@@ -161,8 +160,8 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 *        test instance.
 	 * @throws Exception Allows all exceptions to propagate.
 	 */
-	@AfterMethod(alwaysRun = true)
-	public void afterTestMethod(final ITestContext testContext, final Method testMethod) throws Exception {
+	@AfterMethod(groups = { "SpringTestContext" })
+	public void afterTestMethod(final Method testMethod) throws Exception {
 		this.testContextManager.afterTestMethod(this, testMethod, this.testException);
 		this.testException = null;
 	}
@@ -176,5 +175,4 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	public final void setApplicationContext(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
-
 }
