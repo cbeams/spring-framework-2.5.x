@@ -31,8 +31,6 @@
    	</constructor-arg>
   </bean>
 
-  <bean id="a.qualified.name.which.is.an.alias" class="java.lang.String">
-    <constructor-arg><value>another.qualified.name</value></constructor-arg>
-  </bean>
+  <alias name="another.qualified.name" alias="a.qualified.name.which.is.an.alias"/>
 
 </beans>
