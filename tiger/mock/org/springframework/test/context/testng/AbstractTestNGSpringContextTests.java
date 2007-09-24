@@ -99,7 +99,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 			this.testContextManager = new TestContextManager(getClass());
 		}
 		catch (Exception e) {
-			final String msg = "Caught exception while attempting to instantiate a new TestContextManager for test class ["
+			final String msg = "Caught an exception while attempting to instantiate a new TestContextManager for test class ["
 					+ getClass() + "].";
 			this.logger.error(msg, e);
 			throw new RuntimeException(msg, e);
