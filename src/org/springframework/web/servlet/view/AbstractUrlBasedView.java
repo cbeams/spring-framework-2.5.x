@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,9 +61,18 @@ public abstract class AbstractUrlBasedView extends AbstractView implements Initi
 	}
 
 	public void afterPropertiesSet() throws Exception {
-		if (getUrl() == null) {
+		if (isUrlRequired() && getUrl() == null) {
 			throw new IllegalArgumentException("Property 'url' is required");
 		}
+	}
+
+	/**
+	 * Return whether the 'url' property is required.
+	 * <p>The default implementation returns <code>true</code.
+	 * This can be overridden in subclasses.
+	 */
+	protected boolean isUrlRequired() {
+		return true;
 	}
 
 
