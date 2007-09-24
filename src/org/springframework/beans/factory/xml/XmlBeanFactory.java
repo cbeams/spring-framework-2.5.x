@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.Resource;
 
 /**
- * Convenience extension of DefaultListableBeanFactory that reads bean definitions
- * from an XML document. Delegates to XmlBeanDefinitionReader underneath; effectively
+ * Convenience extension of {@link DefaultListableBeanFactory} that reads bean definitions
+ * from an XML document. Delegates to {@link XmlBeanDefinitionReader} underneath; effectively
  * equivalent to using an XmlBeanDefinitionReader with a DefaultListableBeanFactory.
  *
  * <p>The structure, element and attribute names of the required XML document
@@ -31,13 +31,13 @@ import org.springframework.core.io.Resource;
  * to produce this format). "beans" doesn't need to be the root element of the XML
  * document: This class will parse all bean definition elements in the XML file.
  *
- * <p>This class registers each bean definition with the DefaultListableBeanFactory
- * superclass, and relies on the latter's implementation of the BeanFactory interface.
+ * <p>This class registers each bean definition with the {@link DefaultListableBeanFactory}
+ * superclass, and relies on the latter's implementation of the {@link BeanFactory} interface.
  * It supports singletons, prototypes, and references to either of these kinds of bean.
- * See "spring-beans_2_0.dtd" for details on options and configuration style.
+ * See "spring-beans-2.0.dtd" for details on options and configuration style.
  *
- * <p><b>For advanced needs, consider using a DefaultListableBeanFactory with
- * an XmlBeanDefinitionReader.</b> The latter allows for reading from multiple XML
+ * <p><b>For advanced needs, consider using a {@link DefaultListableBeanFactory} with
+ * an {@link XmlBeanDefinitionReader}.</b> The latter allows for reading from multiple XML
  * resources and is highly configurable in its actual XML parsing behavior.
  *
  * @author Rod Johnson
