@@ -206,7 +206,7 @@
       <itemizedlist>
         <listitem>
           <para><link linkend="testing-ctx-management">Spring IoC container
-          caching</link> between test case execution.</para>
+          caching</link> between test execution.</para>
         </listitem>
 
         <listitem>
@@ -242,8 +242,8 @@
         will themselves take time to instantiate. For example, a project with
         50-100 Hibernate mapping files might take 10-20 seconds to load the
         mapping files, and incurring that cost before running every single
-        test case in every single test fixture will lead to slower overall
-        test runs that could reduce productivity.</para>
+        test in every single test fixture will lead to slower overall test
+        runs that could reduce productivity.</para>
 
         <para>Test classes will generally provide an array containing the
         resource locations of XML configuration metadata - typically on the
@@ -252,15 +252,15 @@
         in <literal>web.xml</literal> or other deployment
         configuration.</para>
 
-        <para>By default, once loaded, the configuration file set will be
-        reused for each test case. Thus the setup cost will be incurred only
-        once (per test fixture), and subsequent test execution will be much
-        faster. In the unlikely case that a test may 'dirty' the application
-        context, requiring reloading - for example, by changing a bean
-        definition or the state of an application object - Spring's testing
-        support provides mechanisms to cause the test fixture to reload the
-        configurations and rebuild the application context before executing
-        the next test case.</para>
+        <para>By default, once loaded, the configured
+        <interfacename>ApplicationContext</interfacename> will be reused for
+        each test. Thus the setup cost will be incurred only once (per test
+        fixture), and subsequent test execution will be much faster. In the
+        unlikely case that a test may 'dirty' the application context,
+        requiring reloading - for example, by changing a bean definition or
+        the state of an application object - Spring's testing support provides
+        mechanisms to cause the test fixture to reload the configurations and
+        rebuild the application context before executing the next test.</para>
 
         <para>Context management and caching with:</para>
 
@@ -1085,7 +1085,7 @@ public void testProcessWithoutTransaction() {
       framework provides explicit support for JUnit 3.8 and JUnit 4.4 in the
       form of <literal>abstract</literal> support classes. For JUnit 4.4, the
       framework also provides a custom <interfacename>Runner</interfacename>
-      which allows one to write test cases that are not required to extend a
+      which allows one to write test classes that are not required to extend a
       particular class hierarchy.</para>
 
       <para>The following section provides an overview of the internals of the
@@ -1236,17 +1236,56 @@ public class MyTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
-        <para>By default, once loaded, the configuration file set will be
-        reused for each test case. Thus the setup cost will be incurred only
-        once (per test fixture), and subsequent test execution will be much
-        faster. In the unlikely case that a test may 'dirty' the application
-        context, requiring reloading - for example, by changing a bean
-        definition or the state of an application object - you may annotate
-        your test method with <interfacename>@DirtiesContext</interfacename>
-        (assuming <classname>DirtiesContextTestExecutionListener</classname>
-        has been configured, which is the default) to cause the test fixture
-        to reload the configurations and rebuild the application context
-        before executing the next test case.</para>
+        <para><interfacename>@ContextConfiguration</interfacename> also
+        supports a boolean <literal>inheritLocations</literal> attribute which
+        denotes whether or not resource locations from superclasses should be
+        <emphasis>inherited</emphasis>. The default value is
+        <literal>true</literal>, which means that an annotated class will
+        <emphasis>inherit</emphasis> the resource locations defined by an
+        annotated superclass. Specifically, the resource locations for an
+        annotated class will be appended to the list of resource locations
+        defined by an annotated superclass. Thus, subclasses have the option
+        of <emphasis>extending</emphasis> the list of resource locations. In
+        the following example, the
+        <interfacename>ApplicationContext</interfacename> for
+        <classname>ExtendedTest</classname> will be loaded from
+        "base-context.xml" <emphasis role="bold">and</emphasis>
+        "extended-context.xml", in that order. Beans defined in
+        "extended-context.xml" may therefore override those defined in
+        "base-context.xml".</para>
+
+        <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
+<lineannotation>// ApplicationContext will be loaded from <literal>"/base-context.xml"</literal> in the root of the classpath</lineannotation>
+<emphasis role="bold">@ContextConfiguration(locations={"/base-context.xml"})</emphasis>
+public class BaseTest {
+    <lineannotation>// class body...</lineannotation>
+}
+
+<lineannotation>// ApplicationContext will be loaded from <literal>"/base-context.xml"</literal> and <literal>"extended-context.xml""</literal></lineannotation>
+<lineannotation>// in the root of the classpath</lineannotation>
+<emphasis role="bold">@ContextConfiguration(locations={"extended-context.xml"})</emphasis>
+public class ExtendedTest extends BaseTest {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
+        <para>If <literal>inheritLocations</literal> is set to
+        <literal>false</literal>, the resource locations for the annotated
+        class will <emphasis>shadow</emphasis> and effectively replace any
+        resource locations defined by a superclass.</para>
+
+        <para>By default, once loaded, the configured
+        <interfacename>ApplicationContext</interfacename> will be reused for
+        each test. Thus the setup cost will be incurred only once (per test
+        fixture), and subsequent test execution will be much faster. In the
+        unlikely case that a test may <emphasis>dirty</emphasis> the
+        application context, requiring reloading - for example, by changing a
+        bean definition or the state of an application object - you may
+        annotate your test method with
+        <interfacename>@DirtiesContext</interfacename> (assuming
+        <classname>DirtiesContextTestExecutionListener</classname> has been
+        configured, which is the default) to cause the test fixture to reload
+        the configurations and rebuild the application context before
+        executing the next test.</para>
       </section>
 
       <!-- ================================================================= -->
@@ -1834,6 +1873,13 @@ public class SimpleTest {
 public class CustomConfiguredApplicationContextTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
+
+            <para>Note: <interfacename>@ContextConfiguration</interfacename>
+            also provides support for <emphasis>inherited</emphasis> resource
+            locations. See the <link
+            linkend="testcontext-ctx-management">Context management and
+            caching</link> section and JavaDoc for an example and further
+            details.</para>
           </listitem>
 
           <listitem>
@@ -1852,6 +1898,11 @@ public class CustomConfiguredApplicationContextTests {
 public class CustomTestExecutionListenerTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
+
+            <para>Note: <interfacename>@TestExecutionListeners</interfacename>
+            also provides support for <emphasis>inherited</emphasis>
+            listeners. See the JavaDoc for an example and further
+            details.</para>
           </listitem>
 
           <listitem>
