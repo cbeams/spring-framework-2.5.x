@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -314,13 +314,11 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	/**
 	 * Checks to see that a valid report file URL is supplied in the
 	 * configuration. Compiles the report file is necessary.
-	 * <p/>Subclasses can add custom initialization logic by overriding
+	 * <p>Subclasses can add custom initialization logic by overriding
 	 * the {@link #onInit} method.
-	 * @see #onInit() 
 	 */
 	protected final void initApplicationContext() throws ApplicationContextException {
-		Resource mainReport = getApplicationContext().getResource(getUrl());
-		this.report = loadReport(mainReport);
+		this.report = loadReport();
 
 		// Load sub reports if required, and check data source parameters.
 		if (this.subReportUrls != null) {
@@ -475,13 +473,25 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Loads a <code>JasperReport</code> from the specified <code>Resource</code>. If
-	 * the <code>Resource</code> points to an uncompiled report design file then the
+	 * Load the main <code>JasperReport</code> from the specified <code>Resource</code>.
+	 * If the <code>Resource</code> points to an uncompiled report design file then the
 	 * report file is compiled dynamically and loaded into memory.
+	 * @return a <code>JasperReport</code> instance, or <code>null</code> if no main
+	 * report has been statically defined
+	 */
+	protected JasperReport loadReport() {
+		Resource mainReport = getApplicationContext().getResource(getUrl());
+		return loadReport(mainReport);
+	}
+
+	/**
+	 * Loads a <code>JasperReport</code> from the specified <code>Resource</code>.
+	 * If the <code>Resource</code> points to an uncompiled report design file then
+	 * the report file is compiled dynamically and loaded into memory.
 	 * @param resource the <code>Resource</code> containing the report definition or design
 	 * @return a <code>JasperReport</code> instance
 	 */
-	private JasperReport loadReport(Resource resource) throws ApplicationContextException {
+	protected final JasperReport loadReport(Resource resource) {
 		try {
 			String fileName = resource.getFilename();
 			if (fileName.endsWith(".jasper")) {
