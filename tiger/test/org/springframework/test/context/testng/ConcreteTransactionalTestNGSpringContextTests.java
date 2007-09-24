@@ -159,7 +159,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
     // ------------------------------------------------------------------------|
 
-    @BeforeClass(dependsOnGroups = { "SpringTestContext" })
+    @BeforeClass
     public void beforeClass() {
         numSetUpCalls = 0;
         numSetUpCallsInTransaction = 0;
@@ -240,7 +240,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
         assertAddPerson(YODA);
     }
 
-    @BeforeMethod(dependsOnGroups = { "SpringTestContext" })
+    @BeforeMethod
     public void setUp() throws Exception {
         numSetUpCalls++;
         if (inTransaction()) {
