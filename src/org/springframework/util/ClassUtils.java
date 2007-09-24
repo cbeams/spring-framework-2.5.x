@@ -330,14 +330,17 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Return the short string name of a Java class in decapitalized
-	 * JavaBeans property format.
+	 * Return the short string name of a Java class in decapitalized JavaBeans
+	 * property format. Strips the outer class name in case of an inner class.
 	 * @param clazz the class
 	 * @return the short name rendered in a standard JavaBeans property format
 	 * @see java.beans.Introspector#decapitalize(String)
 	 */
 	public static String getShortNameAsProperty(Class clazz) {
-		return Introspector.decapitalize(getShortName(clazz));
+		String shortName = ClassUtils.getShortName(clazz);
+		int dotIndex = shortName.lastIndexOf('.');
+		shortName = (dotIndex != -1 ? shortName.substring(dotIndex + 1) : shortName);
+		return Introspector.decapitalize(shortName);
 	}
 
 	/**

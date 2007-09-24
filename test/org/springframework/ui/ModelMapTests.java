@@ -191,6 +191,13 @@ public final class ModelMapTests extends TestCase {
 		assertSame(inner, map.get("someInnerClass"));
 	}
 
+	public void testInnerClassWithTwoUpperCaseLetters() throws Exception {
+		ModelMap map = new ModelMap();
+		UKInnerClass inner = new UKInnerClass();
+		map.addObject(inner);
+		assertSame(inner, map.get("UKInnerClass"));
+	}
+
 	public void testAopCglibProxy() throws Exception {
 		ModelMap map = new ModelMap();
 		ProxyFactory factory = new ProxyFactory();
@@ -252,6 +259,10 @@ public final class ModelMapTests extends TestCase {
 
 
 	private static class SomeInnerClass {
+	}
+
+
+	private static class UKInnerClass {
 	}
 
 }

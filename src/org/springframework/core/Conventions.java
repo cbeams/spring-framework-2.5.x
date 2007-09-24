@@ -26,7 +26,6 @@ import java.util.Set;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Provides methods to support various naming and other conventions used
@@ -60,9 +59,12 @@ public abstract class Conventions {
 
 	/**
 	 * Determine the conventional variable name for the supplied
-	 * code>Object</code> based on its concrete type. The convention
-	 * used is to return the uncapitalized short name of the <code>Class</code>.
-	 * So, <code>com.myapp.Product</code> becomes <code>product</code>.
+	 * <code>Object</code> based on its concrete type. The convention
+	 * used is to return the uncapitalized short name of the <code>Class</code>,
+	 * according to JavaBeans property naming rules: So,
+	 * <code>com.myapp.Product</code> becomes <code>product</code>;
+	 * <code>com.myapp.MyProduct</code> becomes <code>myProduct</code>;
+	 * <code>com.myapp.UKProduct</code> becomes <code>UKProduct</code>.
 	 * <p>For arrays, we use the pluralized version of the array component type.
 	 * For <code>Collection</code>s we attempt to 'peek ahead' in the
 	 * <code>Collection</code> to determine the component type and
@@ -90,7 +92,7 @@ public abstract class Conventions {
 			valueClass = getClassForValue(value);
 		}
 
-		String name = StringUtils.uncapitalize(getShortName(valueClass));
+		String name = ClassUtils.getShortNameAsProperty(valueClass);
 		return (pluralize ? pluralize(name) : name);
 	}
 
@@ -125,7 +127,7 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Determine the class to use for naming a variable that contains
+	 * Determines the class to use for naming a variable that contains
 	 * the given value.
 	 * <p>Will return the class of the given value, except when
 	 * encountering a JDK proxy, in which case it will determine
@@ -147,18 +149,6 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Determine the short name of the given class: without package qualification,
-	 * and without the outer class name in case of an inner class.
-	 * @param valueClass the class to determine a name for
-	 * @return the short name
-	 */
-	private static String getShortName(Class valueClass) {
-		String shortName = ClassUtils.getShortName(valueClass);
-		int dotIndex = shortName.lastIndexOf('.');
-		return (dotIndex != -1 ? shortName.substring(dotIndex + 1) : shortName);
-	}
-
-	/**
 	 * Pluralize the given name.
 	 */
 	private static String pluralize(String name) {
@@ -166,7 +156,7 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Retrieve the <code>Class</code> of an element in the <code>Collection</code>.
+	 * Retrieves the <code>Class</code> of an element in the <code>Collection</code>.
 	 * The exact element for which the <code>Class</code> is retreived will depend
 	 * on the concrete <code>Collection</code> implementation.
 	 */
