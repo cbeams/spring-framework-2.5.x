@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestContext;
@@ -45,7 +44,10 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * {@link TestContext test context} has been annotated with
 	 * {@link DirtiesContext @DirtiesContext}, the
 	 * {@link ApplicationContext application context} of the test context will
-	 * be {@link TestContext#markApplicationContextDirty() marked as dirty}.
+	 * be {@link TestContext#markApplicationContextDirty() marked as dirty},
+	 * and the
+	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
+	 * will be set to <code>true</code> in the test context.
 	 * </p>
 	 */
 	@Override
@@ -61,6 +63,8 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 
 		if (dirtiesContext) {
 			testContext.markApplicationContextDirty();
+			testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE,
+					Boolean.TRUE);
 		}
 	}
 

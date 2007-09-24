@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
@@ -40,7 +41,10 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class TestContext {
+public class TestContext extends AttributeAccessorSupport {
+
+	/** serialVersionUID. */
+	private static final long serialVersionUID = -5827157174866681233L;
 
 	private static final Log logger = LogFactory.getLog(TestContext.class);
 
