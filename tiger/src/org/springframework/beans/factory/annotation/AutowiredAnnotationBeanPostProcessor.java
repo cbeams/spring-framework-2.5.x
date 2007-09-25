@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,8 +46,9 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -88,7 +90,7 @@ import org.springframework.util.ReflectionUtils;
  * @see CommonAnnotationBeanPostProcessor
  */
 public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements BeanFactoryAware {
+		implements PriorityOrdered, BeanFactoryAware {
 
 	protected final Log logger = LogFactory.getLog(AutowiredAnnotationBeanPostProcessor.class);
 
@@ -97,6 +99,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private String requiredParameterName = "required";
 	
 	private boolean requiredParameterValue = true;
+
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
 	private ConfigurableListableBeanFactory beanFactory;
 
@@ -143,6 +147,14 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	 */
 	public void setRequiredParameterValue(boolean requiredParameterValue) {
 		this.requiredParameterValue = requiredParameterValue;
+	}
+
+	public void setOrder(int order) {
+	  this.order = order;
+	}
+
+	public int getOrder() {
+	  return this.order;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -320,7 +332,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		@Override
 		protected void inject(Object bean, String beanName, PropertyValues pvs) throws Throwable {
-			Set autowiredBeanNames = CollectionFactory.createLinkedSetIfPossible(4);
+			Set autowiredBeanNames = new LinkedHashSet(4);
 			TypeConverter typeConverter = beanFactory.getTypeConverter();
 
 			if (this.isField) {

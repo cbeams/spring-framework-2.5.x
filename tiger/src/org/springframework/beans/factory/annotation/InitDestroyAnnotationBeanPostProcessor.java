@@ -28,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -59,11 +61,14 @@ import org.springframework.util.ReflectionUtils;
  * @see #setDestroyAnnotationType
  * @see CommonAnnotationBeanPostProcessor
  */
-public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareBeanPostProcessor, Serializable {
+public class InitDestroyAnnotationBeanPostProcessor
+		implements DestructionAwareBeanPostProcessor, PriorityOrdered, Serializable {
 
 	private Class<? extends Annotation> initAnnotationType;
 
 	private Class<? extends Annotation> destroyAnnotationType;
+
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
 	private transient final Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache =
 			new ConcurrentHashMap<Class<?>, LifecycleMetadata>();
@@ -89,6 +94,14 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	 */
 	public void setDestroyAnnotationType(Class<? extends Annotation> destroyAnnotationType) {
 		this.destroyAnnotationType = destroyAnnotationType;
+	}
+
+	public void setOrder(int order) {
+	  this.order = order;
+	}
+
+	public int getOrder() {
+	  return this.order;
 	}
 
 

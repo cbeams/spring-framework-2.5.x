@@ -48,6 +48,8 @@ import org.springframework.beans.factory.annotation.InjectionMetadata;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
@@ -156,7 +158,8 @@ import org.springframework.util.ReflectionUtils;
  * @see javax.persistence.PersistenceContext
  */
 public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
-		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor, BeanFactoryAware, Serializable {
+		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
+		PriorityOrdered, BeanFactoryAware, Serializable {
 
 	private transient Map<String, String> persistenceUnits;
 
@@ -165,6 +168,8 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	private transient Map<String, String> extendedPersistenceContexts;
 
 	private transient String defaultPersistenceUnitName = "";
+
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
 	private transient ListableBeanFactory beanFactory;
 
@@ -266,6 +271,14 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 	 */
 	public void setDefaultPersistenceUnitName(String unitName) {
 		this.defaultPersistenceUnitName = (unitName != null ? unitName : "");
+	}
+
+	public void setOrder(int order) {
+	  this.order = order;
+	}
+
+	public int getOrder() {
+	  return this.order;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
