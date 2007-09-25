@@ -43,9 +43,10 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * </p>
 	 * <p>
 	 * Clients of a {@link TestContext} (e.g., other
-	 * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners}) may therefore
-	 * choose to set this attribute if it is desirable for dependencies to be
-	 * reinjected <em>between</em> execution of individual test methods.
+	 * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners})
+	 * may therefore choose to set this attribute to signal that dependencies
+	 * should be reinjected <em>between</em> execution of individual test
+	 * methods.
 	 * </p>
 	 * <p>
 	 * Permissible values include {@link Boolean#TRUE} and {@link Boolean#FALSE}.
@@ -59,15 +60,19 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 
 	/**
 	 * <p>
-	 * Injects dependencies into the test instance of the supplied
-	 * {@link TestContext test context}.
+	 * Performs dependency injection on the
+	 * {@link TestContext#getTestInstance() test instance} of the supplied
+	 * {@link TestContext test context} by
+	 * {@link AutowireCapableBeanFactory#autowireBeanProperties(Object, int, boolean) autowiring}
+	 * and
+	 * {@link AutowireCapableBeanFactory#initializeBean(Object, String) initializing}
+	 * the test instance via its own
+	 * {@link TestContext#getApplicationContext() application context} (without
+	 * checking dependencies).
 	 * </p>
 	 * <p>
-	 * {@link AutowireCapableBeanFactory#autowireBeanProperties(Object, int, boolean) Autowires}
-	 * the test instance via the application context of the supplied
-	 * {@link TestContext}, without checking dependencies. The resulting bean
-	 * will also be
-	 * {@link AutowireCapableBeanFactory#initializeBean(Object, String) initialized}.
+	 * The {@link #REINJECT_DEPENDENCIES_ATTRIBUTE} will be subsequently removed
+	 * from the test context, regardless of its value.
 	 * </p>
 	 */
 	@Override
@@ -81,11 +86,10 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	/**
 	 * <p>
 	 * If the {@link #REINJECT_DEPENDENCIES_ATTRIBUTE} in the supplied
-	 * {@link TestContext test context} is {@value Boolean#TRUE}, this method
-	 * will have the same effect as
-	 * {@link #prepareTestInstance(TestContext) prepareTestInstance()} and will
-	 * subsequently remove the {@link #REINJECT_DEPENDENCIES_ATTRIBUTE} from the
-	 * test context; otherwise, this method will have no effect.
+	 * {@link TestContext test context} has a value of {@link Boolean#TRUE},
+	 * this method will have the same effect as
+	 * {@link #prepareTestInstance(TestContext) prepareTestInstance()};
+	 * otherwise, this method will have no effect.
 	 * </p>
 	 */
 	@Override
@@ -95,12 +99,19 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 				logger.debug("Reinjecting dependencies for test context [" + testContext + "].");
 			}
 			injectDependencies(testContext);
-			testContext.removeAttribute(REINJECT_DEPENDENCIES_ATTRIBUTE);
 		}
 	}
 
 	/**
-	 * Performs the actual dependency injection and bean initialization.
+	 * <p>
+	 * Performs dependency injection and bean initialization for the supplied
+	 * {@link TestContext} as described in
+	 * {@link #prepareTestInstance(TestContext) prepareTestInstance()}.
+	 * </p>
+	 * <p>
+	 * The {@link #REINJECT_DEPENDENCIES_ATTRIBUTE} will be subsequently removed
+	 * from the test context, regardless of its value.
+	 * </p>
 	 *
 	 * @param testContext The test context for which dependency injection should
 	 *        be performed; may not be <code>null</code>.
@@ -108,11 +119,13 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * @see #prepareTestInstance(TestContext)
 	 * @see #beforeTestMethod(TestContext)
 	 */
-	private void injectDependencies(final TestContext testContext) throws Exception {
+	protected void injectDependencies(final TestContext testContext) throws Exception {
 		final Object bean = testContext.getTestInstance();
 		final AutowireCapableBeanFactory beanFactory = testContext.getApplicationContext().getAutowireCapableBeanFactory();
 		beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 		beanFactory.initializeBean(bean, testContext.getTestClass().getName());
+
+		testContext.removeAttribute(REINJECT_DEPENDENCIES_ATTRIBUTE);
 	}
 
 }

@@ -96,7 +96,7 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 
 	@AfterClass
 	public static void verifyFinalCacheState() {
-		assertContextCacheStatistics("AfterClass", 1, 2, 2);
+		assertContextCacheStatistics("AfterClass", 1, 1, 2);
 	}
 
 	// ------------------------------------------------------------------------|
@@ -124,7 +124,7 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 
 	@Test
 	public void verifyContextWasDirtied() {
-		assertContextCacheStatistics("verifyContextWasDirtied()", 1, 1, 2);
+		assertContextCacheStatistics("verifyContextWasDirtied()", 1, 0, 2);
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
 				this.applicationContext);
 		assertNotSame("The application context should have been 'dirtied'.",
@@ -134,7 +134,7 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 
 	@Test
 	public void verifyContextWasNotDirtied() {
-		assertContextCacheStatistics("verifyContextWasNotDirtied()", 1, 2, 2);
+		assertContextCacheStatistics("verifyContextWasNotDirtied()", 1, 1, 2);
 		assertNotNull("The application context should have been set due to ApplicationContextAware semantics.",
 				this.applicationContext);
 		assertSame("The application context should NOT have been 'dirtied'.",
