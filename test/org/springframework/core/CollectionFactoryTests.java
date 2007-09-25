@@ -23,9 +23,6 @@ import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
-import org.apache.commons.collections.map.IdentityMap;
-import org.apache.commons.collections.map.LinkedMap;
-import org.apache.commons.collections.set.ListOrderedSet;
 
 /**
  * @author Darren Davison
@@ -33,63 +30,32 @@ import org.apache.commons.collections.set.ListOrderedSet;
  */
 public class CollectionFactoryTests extends TestCase {
 
-	private String javaVersion = System.getProperty("java.version");
-
 	public void testLinkedSet() {
 		Set set = CollectionFactory.createLinkedSetIfPossible(16);
-		if (javaVersion.indexOf("1.3.") == -1) {
-			assertTrue(set instanceof LinkedHashSet);
-		}
-		else {
-			assertTrue(set instanceof ListOrderedSet);
-		}
+		assertTrue(set instanceof LinkedHashSet);
 	}
 
 	public void testLinkedMap() {
 		Map map = CollectionFactory.createLinkedMapIfPossible(16);
-		if (javaVersion.indexOf("1.3.") == -1) {
-			assertTrue(map instanceof LinkedHashMap);
-		}
-		else {
-			assertTrue(map instanceof LinkedMap);
-		}
+		assertTrue(map instanceof LinkedHashMap);
 	}
 
 	public void testIdentityMap() {
 		Map map = CollectionFactory.createIdentityMapIfPossible(16);
-		if (javaVersion.indexOf("1.3.") == -1) {
-			assertTrue(map instanceof IdentityHashMap);
-		}
-		else {
-			assertTrue(map instanceof IdentityMap);
-		}
+		assertTrue(map instanceof IdentityHashMap);
 	}
 
-	/**
-	 * Initial capacity of 0 works with JDK 1.4 classes, but not the Commons
-	 * Collections (which will be used under the hood in a JDK 1.3 platform).
-	 */
-	public void testLinkedSetWithZeroCapacity() {
-		Set set = CollectionFactory.createLinkedSetIfPossible(0);
-		assertNotNull(set);
+	public void testConcurrentMap() {
+		Map map = CollectionFactory.createConcurrentMapIfPossible(16);
+		assertTrue(map.getClass().getName().endsWith("ConcurrentHashMap"));
 	}
 
-	/**
-	 * Initial capacity of 0 works with JDK 1.4 classes, but not the Commons
-	 * Collections (which will be used under the hood in a JDK 1.3 platform).
-	 */
-	public void testLinkedMapWithZeroCapacity() {
-		Map map = CollectionFactory.createLinkedMapIfPossible(0);
-		assertNotNull(map);
-	}
-
-	/**
-	 * Initial capacity of 0 works with JDK 1.4 classes, but not the Commons
-	 * Collections (which will be used under the hood in a JDK 1.3 platform).
-	 */
-	public void testIdentityMapWithZeroCapacity() {
-		Map map = CollectionFactory.createIdentityMapIfPossible(0);
-		assertNotNull(map);
+	public void testConcurrentMapWithExplicitInterface() {
+		ConcurrentMap map = CollectionFactory.createConcurrentMap(16);
+		assertTrue(map.getClass().getSuperclass().getName().endsWith("ConcurrentHashMap"));
+		map.putIfAbsent("key", "value1");
+		map.putIfAbsent("key", "value2");
+		assertEquals("value1", map.get("key"));
 	}
 
 }

@@ -61,7 +61,7 @@ public abstract class CollectionFactory {
 
 	/** Whether the Commons Collections 3.x library is present on the classpath */
 	private static final boolean commonsCollections3Available =
-			ClassUtils.isPresent("org.apache.commons.collections.map.LinkedMap",
+			ClassUtils.isPresent("org.apache.commons.collections.map.CaseInsensitiveMap",
 					CollectionFactory.class.getClassLoader());
 
 	/** Whether the backport-concurrent library is present on the classpath */
@@ -109,11 +109,11 @@ public abstract class CollectionFactory {
 	}
 
 	/**
-	 * Create a linked case-insensitive map if possible: if Commons Collections
+	 * Create a linked case-insensitive Map if possible: if Commons Collections
 	 * 3.x is available, a CaseInsensitiveMap with ListOrderedMap decorator will
 	 * be created. Else, a JDK {@link java.util.LinkedHashMap} will be used.
-	 * @param initialCapacity the initial capacity of the map
-	 * @return the new map instance
+	 * @param initialCapacity the initial capacity of the Map
+	 * @return the new Map instance
 	 * @see org.apache.commons.collections.map.CaseInsensitiveMap
 	 * @see org.apache.commons.collections.map.ListOrderedMap
 	 */
@@ -139,11 +139,12 @@ public abstract class CollectionFactory {
 	}
 
 	/**
-	 * Create a concurrent map if possible: that is, if running on JDK >= 1.5
+	 * Create a concurrent Map if possible: that is, if running on JDK >= 1.5
 	 * or if the backport-concurrent library is available. Prefers a JDK 1.5+
-	 * ConcurrentHashMap to its backport-concurrent equivalent.
-	 * @param initialCapacity the initial capacity of the map
-	 * @return the new map instance
+	 * ConcurrentHashMap to its backport-concurrent equivalent. Falls back
+	 * to a plain synchronized HashMap if no concurrent Map is available.
+	 * @param initialCapacity the initial capacity of the Map
+	 * @return the new Map instance
 	 * @see java.util.concurrent.ConcurrentHashMap
 	 * @see edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap
 	 */
@@ -159,6 +160,32 @@ public abstract class CollectionFactory {
 		else {
 			logger.debug("Falling back to plain synchronized [java.util.HashMap] for concurrent map");
 			return Collections.synchronizedMap(new HashMap(initialCapacity));
+		}
+	}
+
+	/**
+	 * Create a concurrent Map with a dedicated {@link ConcurrentMap} interface:
+	 * if running on JDK >= 1.5 or if the backport-concurrent library is available.
+	 * Prefers a JDK 1.5+ ConcurrentHashMap to its backport-concurrent equivalent.
+	 * Throws an IllegalStateException if no concurrent Map is available.
+	 * @param initialCapacity the initial capacity of the Map
+	 * @return the new ConcurrentMap instance
+	 * @throws IllegalStateException if no concurrent Map is available
+	 * @see java.util.concurrent.ConcurrentHashMap
+	 * @see edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap
+	 */
+	public static ConcurrentMap createConcurrentMap(int initialCapacity) {
+		if (JdkVersion.isAtLeastJava15()) {
+			logger.trace("Creating [java.util.concurrent.ConcurrentHashMap]");
+			return new JdkConcurrentHashMap(initialCapacity);
+		}
+		else if (backportConcurrentAvailable) {
+			logger.trace("Creating [edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap]");
+			return new BackportConcurrentHashMap(initialCapacity);
+		}
+		else {
+			throw new IllegalStateException("Cannot create ConcurrentMap - " +
+					"neither JDK 1.5 nor backport-concurrent available on the classpath");
 		}
 	}
 
@@ -260,6 +287,30 @@ public abstract class CollectionFactory {
 
 		private static Map createConcurrentHashMap(int initialCapacity) {
 			return new edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap(initialCapacity);
+		}
+	}
+
+
+	/**
+	 * ConcurrentMap adapter for the JDK ConcurrentHashMap class.
+	 */
+	private static class JdkConcurrentHashMap extends ConcurrentHashMap implements ConcurrentMap {
+
+		public JdkConcurrentHashMap(int initialCapacity) {
+			super(initialCapacity);
+		}
+	}
+
+
+	/**
+	 * ConcurrentMap adapter for the backport-concurrent ConcurrentHashMap class.
+	 */
+	private static class BackportConcurrentHashMap
+			extends edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap
+			implements ConcurrentMap {
+
+		public BackportConcurrentHashMap(int initialCapacity) {
+			super(initialCapacity);
 		}
 	}
 
