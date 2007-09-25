@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,23 +31,22 @@ import org.springframework.util.ObjectUtils;
  * i.e. a properties file. Useful for custom config files targetted at system
  * administrators that override bean properties configured in the application context.
  *
- * <p>2 concrete implementations are provided in the distribution:
+ * <p>Two concrete implementations are provided in the distribution:
  * <ul>
- * <li>PropertyOverrideConfigurer for "beanName.property=value" style overriding
+ * <li>{@link PropertyOverrideConfigurer} for "beanName.property=value" style overriding
  * (<i>pushing</i> values from a properties file into bean definitions)
- * <li>PropertyPlaceholderConfigurer for replacing "${...}" placeholders
+ * <li>{@link PropertyPlaceholderConfigurer} for replacing "${...}" placeholders
  * (<i>pulling</i> values from a properties file into bean definitions)
  * </ul>
  *
  * <p>Property values can be converted after reading them in, through overriding
- * the <code>convertPropertyValue</code> method. For example, encrypted values
+ * the {@link #convertPropertyValue} method. For example, encrypted values
  * can be detected and decrypted accordingly before processing them.
  *
  * @author Juergen Hoeller
  * @since 02.10.2003
  * @see PropertyOverrideConfigurer
  * @see PropertyPlaceholderConfigurer
- * @see #convertPropertyValue
  */
 public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 		implements BeanFactoryPostProcessor, Ordered {
@@ -60,7 +59,7 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 	}
 
 	public int getOrder() {
-	  return order;
+	  return this.order;
 	}
 
 
@@ -82,9 +81,9 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 	/**
 	 * Convert the given merged properties, converting property values
 	 * if necessary. The result will then be processed.
-	 * <p>Default implementation will invoke <code>convertPropertyValue</code>
+	 * <p>The default implementation will invoke {@link #convertPropertyValue}
 	 * for each property value, replacing the original with the converted value.
-	 * @see #convertPropertyValue
+	 * @param props the Properties to convert
 	 * @see #processProperties
 	 */
 	protected void convertProperties(Properties props) {
@@ -102,7 +101,7 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 	/**
 	 * Convert the given property value from the properties source
 	 * to the value that should be applied.
-	 * <p>Default implementation simply returns the original value.
+	 * <p>The default implementation simply returns the original value.
 	 * Can be overridden in subclasses, for example to detect
 	 * encrypted values and decrypt them accordingly.
 	 * @param originalValue the original value from the properties source
@@ -117,8 +116,8 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 	}
 
 	/**
-	 * Apply the given Properties to the bean factory.
-	 * @param beanFactory	the bean factory used by the application context
+	 * Apply the given Properties to the given BeanFactory.
+	 * @param beanFactory	the BeanFactory used by the application context
 	 * @param props the Properties to apply
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
