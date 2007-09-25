@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,14 +61,13 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * to a default implementation of the given Map type.
 	 * If the value is anything else, a target Map with that single
 	 * value will be created.
-	 * <p>The default Map implementations are: ArrayList for List,
-	 * TreeSet for SortedSet, and LinkedHashSet or HashSet for Set.
+	 * <p>The default Map implementations are: TreeMap for SortedMap,
+	 * and LinkedHashMap or HashMap for Map.
 	 * @param mapType the target type, which needs to be a
 	 * sub-interface of Map or a concrete Map class
 	 * @param nullAsEmptyMap ap whether to convert an incoming <code>null</code>
 	 * value to an empty Map (of the appropriate type)
 	 * @see java.util.Map
-	 * @see java.util.HashMap
 	 * @see java.util.TreeMap
 	 * @see org.springframework.core.CollectionFactory#createLinkedMapIfPossible
 	 */
