@@ -76,7 +76,7 @@ public class AnnotationConfigUtils {
 			ClassUtils.isPresent("javax.annotation.Resource", AnnotationConfigUtils.class.getClassLoader());
 
 	private static final boolean jpaPresent =
-			ClassUtils.isPresent("javax.persistence.PersistenceContext", AnnotationConfigUtils.class.getClassLoader()) &&
+			ClassUtils.isPresent("javax.persistence.EntityManagerFactory", AnnotationConfigUtils.class.getClassLoader()) &&
 			ClassUtils.isPresent(PERSISTENCE_ANNOTATION_PROCESSOR_CLASS_NAME, AnnotationConfigUtils.class.getClassLoader());
 
 
