@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.mock.web;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -40,7 +40,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  */
 public class MockMultipartHttpServletRequest extends MockHttpServletRequest implements MultipartHttpServletRequest {
 
-	private final Map multipartFiles = CollectionFactory.createLinkedMapIfPossible(4);
+	private final Map multipartFiles = new LinkedHashMap(4);
 
 
 	/**

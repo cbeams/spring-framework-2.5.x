@@ -547,16 +547,14 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	}
 
 	/**
-	 * Set whether this bean is a candidate for getting autowired into
-	 * some other bean.
+	 * Set whether this bean is a candidate for getting autowired into some other bean.
 	 */
 	public void setAutowireCandidate(boolean autowireCandidate) {
 		this.autowireCandidate = autowireCandidate;
 	}
 
 	/**
-	 * Return whether this bean is a candidate for getting autowired into
-	 * some other bean.
+	 * Return whether this bean is a candidate for getting autowired into some other bean.
 	 */
 	public boolean isAutowireCandidate() {
 		return this.autowireCandidate;
@@ -564,7 +562,6 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 	/**
 	 * Add a qualifier to be used for autowire candidate resolution.
-	 * 
 	 * <p>Use this version when the qualifier has no attributes.</p>
 	 */
 	public void addQualifier(String typeName) {
@@ -573,7 +570,6 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 	/**
 	 * Add a qualifier to be used for autowire candidate resolution.
-	 * 
 	 * <p>Use this version when the qualifier has a single attribute named "value".</p>
 	 */
 	public void addQualifier(String typeName, Object value) {
@@ -582,7 +578,6 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 	/**
 	 * Add a qualifier to be used for autowire candidate resolution.
-	 * 
 	 * <p>Use this version when the qualifier has one or more named attributes.</p>
 	 */
 	public void addQualifier(String typeName, Map attributes) {

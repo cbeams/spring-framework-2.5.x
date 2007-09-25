@@ -16,29 +16,21 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
-import org.springframework.core.CollectionFactory;
 
 /**
  * Tag collection class used to hold managed Map values, which may
  * include runtime bean references (to be resolved into bean objects).
  *
- * <p>Wraps a target Map, which will be a linked map if possible
- * (that is, if running on JDK 1.4 or if Commons Collections 3.x is available).
- *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 27.05.2003
- * @see org.springframework.core.CollectionFactory#createLinkedMapIfPossible
  */
-public class ManagedMap implements Map, Mergeable, BeanMetadataElement {
-
-	private final Map targetMap;
+public class ManagedMap extends LinkedHashMap implements Mergeable, BeanMetadataElement {
 
 	private Object source;
 
@@ -46,15 +38,10 @@ public class ManagedMap implements Map, Mergeable, BeanMetadataElement {
 
 
 	public ManagedMap() {
-		this(16);
 	}
 
 	public ManagedMap(int initialCapacity) {
-		this.targetMap = CollectionFactory.createLinkedMapIfPossible(initialCapacity);
-	}
-
-	public ManagedMap(Map targetMap) {
-		this.targetMap = targetMap;
+		super(initialCapacity);
 	}
 
 
@@ -96,67 +83,6 @@ public class ManagedMap implements Map, Mergeable, BeanMetadataElement {
 		merged.putAll((Map) parent);
 		merged.putAll(this);
 		return merged;
-	}
-
-
-	public int size() {
-		return this.targetMap.size();
-	}
-
-	public boolean isEmpty() {
-		return this.targetMap.isEmpty();
-	}
-
-	public boolean containsKey(Object key) {
-		return this.targetMap.containsKey(key);
-	}
-
-	public boolean containsValue(Object value) {
-		return this.targetMap.containsValue(value);
-	}
-
-	public Object get(Object key) {
-		return this.targetMap.get(key);
-	}
-
-	public Object put(Object key, Object value) {
-		return this.targetMap.put(key, value);
-	}
-
-	public Object remove(Object key) {
-		return this.targetMap.remove(key);
-	}
-
-	public void putAll(Map t) {
-		this.targetMap.putAll(t);
-	}
-
-	public void clear() {
-		this.targetMap.clear();
-	}
-
-	public Set keySet() {
-		return this.targetMap.keySet();
-	}
-
-	public Collection values() {
-		return this.targetMap.values();
-	}
-
-	public Set entrySet() {
-		return this.targetMap.entrySet();
-	}
-
-	public int hashCode() {
-		return this.targetMap.hashCode();
-	}
-
-	public boolean equals(Object obj) {
-		return this.targetMap.equals(obj);
-	}
-
-	public String toString() {
-		return this.targetMap.toString();
 	}
 
 }

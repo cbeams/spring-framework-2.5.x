@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate3;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,7 +55,6 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -693,7 +693,7 @@ public abstract class SessionFactoryUtils {
 			holderMap = new HashMap();
 			deferredCloseHolder.set(holderMap);
 		}
-		holderMap.put(sessionFactory, CollectionFactory.createLinkedSetIfPossible(4));
+		holderMap.put(sessionFactory, new LinkedHashSet(4));
 	}
 
 	/**

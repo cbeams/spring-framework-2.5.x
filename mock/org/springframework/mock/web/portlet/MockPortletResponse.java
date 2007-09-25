@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.mock.web.portlet;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 import javax.portlet.PortalContext;
 import javax.portlet.PortletResponse;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -36,7 +36,7 @@ public class MockPortletResponse implements PortletResponse {
 
 	private final PortalContext portalContext;
 
-	private final Map properties = CollectionFactory.createLinkedMapIfPossible(16);
+	private final Map properties = new LinkedHashMap(16);
 
 
 	/**

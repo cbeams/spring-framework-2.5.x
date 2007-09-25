@@ -34,6 +34,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.collections.map.CaseInsensitiveMap;
 import org.apache.commons.collections.map.ListOrderedMap;
@@ -43,14 +44,16 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.ClassUtils;
 
 /**
- * Factory for collections, being aware of Commons Collection 3.x's
- * extended collections as well as of JDK 1.5+ concurrent collections
- * and backport-concurrent collections.
- * Mainly for internal use within the framework.
+ * Factory for collections, being aware of Commons Collection 3.x's extended
+ * collections as well as of JDK 1.5+ concurrent collections and backport-concurrent
+ * collections. Mainly for internal use within the framework.
  *
- * <p>The goal of this class is to avoid runtime dependencies on JDK 1.5+
- * and Commons Collections 3.x, simply using the best collection
- * implementation that is available at runtime.
+ * <p>The goal of this class is to avoid runtime dependencies on JDK 1.5+ and
+ * Commons Collections 3.x, simply using the best collection implementation
+ * that is available at runtime. As of Spring 2.5, JDK 1.4 is required,
+ * so former adapter methods for JDK 1.3/1.4 always return the JDK 1.4
+ * collections now. The adapter methods are still kept for supporting
+ * Spring-based applications/frameworks which were built to support JDK 1.3.
  *
  * @author Juergen Hoeller
  * @since 1.1.1
@@ -87,22 +90,50 @@ public abstract class CollectionFactory {
 		}
 	}
 
-
 	/**
 	 * Create a linked Set if possible: This implementation always
-	 * creates a {@link java.util.LinkedHashSet}.
+	 * creates a {@link java.util.LinkedHashSet}, since Spring 2.5
+	 * requires JDK 1.4 anyway.
 	 * @param initialCapacity the initial capacity of the Set
 	 * @return the new Set instance
+	 * @deprecated as of Spring 2.5, for usage on JDK 1.4 or higher
 	 */
 	public static Set createLinkedSetIfPossible(int initialCapacity) {
 		return new LinkedHashSet(initialCapacity);
 	}
 
 	/**
+	 * Create a copy-on-write Set (allowing for synchronization-less iteration),
+	 * requiring JDK >= 1.5 or the backport-concurrent library on the classpath.
+	 * Prefers a JDK 1.5+ CopyOnWriteArraySet to its backport-concurrent equivalent.
+	 * Throws an IllegalStateException if no copy-on-write Set is available.
+	 * @return the new Set instance
+	 * @throws IllegalStateException if no copy-on-write Set is available
+	 * @see java.util.concurrent.ConcurrentHashMap
+	 * @see edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap
+	 */
+	public static Set createCopyOnWriteSet() {
+		if (JdkVersion.isAtLeastJava15()) {
+			logger.trace("Creating [java.util.concurrent.CopyOnWriteArraySet]");
+			return JdkConcurrentCollectionFactory.createCopyOnWriteArraySet();
+		}
+		else if (backportConcurrentAvailable) {
+			logger.trace("Creating [edu.emory.mathcs.backport.java.util.concurrent.CopyOnWriteArraySet]");
+			return BackportConcurrentCollectionFactory.createCopyOnWriteArraySet();
+		}
+		else {
+			throw new IllegalStateException("Cannot create CopyOnWriteArraySet - " +
+					"neither JDK 1.5 nor backport-concurrent available on the classpath");
+		}
+	}
+
+	/**
 	 * Create a linked Map if possible: This implementation always
-	 * creates a {@link java.util.LinkedHashMap}.
+	 * creates a {@link java.util.LinkedHashMap}, since Spring 2.5
+	 * requires JDK 1.4 anyway.
 	 * @param initialCapacity the initial capacity of the Map
 	 * @return the new Map instance
+	 * @deprecated as of Spring 2.5, for usage on JDK 1.4 or higher
 	 */
 	public static Map createLinkedMapIfPossible(int initialCapacity) {
 		return new LinkedHashMap(initialCapacity);
@@ -129,10 +160,12 @@ public abstract class CollectionFactory {
 	}
 
 	/**
-	 * Create a identity Map if possible: This implementation always
-	 * creates a {@link java.util.IdentityHashMap}.
+	 * Create an identity Map if possible: This implementation always
+	 * creates a {@link java.util.IdentityHashMap}, since Spring 2.5
+	 * requires JDK 1.4 anyway.
 	 * @param initialCapacity the initial capacity of the Map
 	 * @return the new Map instance
+	 * @deprecated as of Spring 2.5, for usage on JDK 1.4 or higher
 	 */
 	public static Map createIdentityMapIfPossible(int initialCapacity) {
 		return new IdentityHashMap(initialCapacity);
@@ -164,8 +197,8 @@ public abstract class CollectionFactory {
 	}
 
 	/**
-	 * Create a concurrent Map with a dedicated {@link ConcurrentMap} interface:
-	 * if running on JDK >= 1.5 or if the backport-concurrent library is available.
+	 * Create a concurrent Map with a dedicated {@link ConcurrentMap} interface,
+	 * requiring JDK >= 1.5 or the backport-concurrent library on the classpath.
 	 * Prefers a JDK 1.5+ ConcurrentHashMap to its backport-concurrent equivalent.
 	 * Throws an IllegalStateException if no concurrent Map is available.
 	 * @param initialCapacity the initial capacity of the Map
@@ -184,7 +217,7 @@ public abstract class CollectionFactory {
 			return new BackportConcurrentHashMap(initialCapacity);
 		}
 		else {
-			throw new IllegalStateException("Cannot create ConcurrentMap - " +
+			throw new IllegalStateException("Cannot create ConcurrentHashMap - " +
 					"neither JDK 1.5 nor backport-concurrent available on the classpath");
 		}
 	}
@@ -210,7 +243,7 @@ public abstract class CollectionFactory {
 	 * @return the new collection instance
 	 * @see java.util.ArrayList
 	 * @see java.util.TreeSet
-	 * @see #createLinkedSetIfPossible
+	 * @see java.util.LinkedHashSet
 	 */
 	public static Collection createApproximateCollection(Object collection, int initialCapacity) {
 		if (collection instanceof List) {
@@ -220,7 +253,7 @@ public abstract class CollectionFactory {
 			return new TreeSet(((SortedSet) collection).comparator());
 		}
 		else {
-			return createLinkedSetIfPossible(initialCapacity);
+			return new LinkedHashSet(initialCapacity);
 		}
 	}
 
@@ -242,14 +275,14 @@ public abstract class CollectionFactory {
 	 * @param initialCapacity the initial capacity
 	 * @return the new collection instance
 	 * @see java.util.TreeMap
-	 * @see #createLinkedMapIfPossible
+	 * @see java.util.LinkedHashMap
 	 */
 	public static Map createApproximateMap(Object map, int initialCapacity) {
 		if (map instanceof SortedMap) {
 			return new TreeMap(((SortedMap) map).comparator());
 		}
 		else {
-			return createLinkedMapIfPossible(initialCapacity);
+			return new LinkedHashMap(initialCapacity);
 		}
 	}
 
@@ -273,6 +306,10 @@ public abstract class CollectionFactory {
 	 */
 	private static abstract class JdkConcurrentCollectionFactory {
 
+		private static Set createCopyOnWriteArraySet() {
+			return new CopyOnWriteArraySet();
+		}
+
 		private static Map createConcurrentHashMap(int initialCapacity) {
 			return new ConcurrentHashMap(initialCapacity);
 		}
@@ -284,6 +321,10 @@ public abstract class CollectionFactory {
 	 * In separate inner class to avoid runtime dependency on the backport-concurrent library.
 	 */
 	private static abstract class BackportConcurrentCollectionFactory {
+
+		private static Set createCopyOnWriteArraySet() {
+			return new edu.emory.mathcs.backport.java.util.concurrent.CopyOnWriteArraySet();
+		}
 
 		private static Map createConcurrentHashMap(int initialCapacity) {
 			return new edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap(initialCapacity);

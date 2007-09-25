@@ -17,11 +17,11 @@
 package org.springframework.beans.factory.config;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.JdkVersion;
 
@@ -52,9 +52,7 @@ public class MapFactoryBean extends AbstractFactoryBean {
 	 * Set the class to use for the target Map. Can be populated with a fully
 	 * qualified class name when defined in a Spring application context.
 	 * <p>Default is a linked HashMap, keeping the registration order.
-	 * If no linked Map implementation is available, a plain HashMap will
-	 * be used as fallback (not keeping the registration order).
-	 * @see org.springframework.core.CollectionFactory#createLinkedMapIfPossible
+	 * @see java.util.LinkedHashMap
 	 */
 	public void setTargetMapClass(Class targetMapClass) {
 		if (targetMapClass == null) {
@@ -80,7 +78,7 @@ public class MapFactoryBean extends AbstractFactoryBean {
 			result = (Map) BeanUtils.instantiateClass(this.targetMapClass);
 		}
 		else {
-			result = CollectionFactory.createLinkedMapIfPossible(this.sourceMap.size());
+			result = new LinkedHashMap(this.sourceMap.size());
 		}
 		Class keyType = null;
 		Class valueType = null;

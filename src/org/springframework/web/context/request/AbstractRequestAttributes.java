@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.web.context.request;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
 public abstract class AbstractRequestAttributes implements RequestAttributes {
 
 	/** Map from attribute name String to destruction callback Runnable */
-	protected final Map requestDestructionCallbacks = CollectionFactory.createLinkedMapIfPossible(8);
+	protected final Map requestDestructionCallbacks = new LinkedHashMap(8);
 
 
 	/**

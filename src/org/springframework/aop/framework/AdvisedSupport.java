@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +37,6 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -121,7 +121,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Initialize the method cache.
 	 */
 	private void initMethodCache() {
-		this.methodCache = CollectionFactory.createIdentityMapIfPossible(32);
+		this.methodCache = new IdentityHashMap(32);
 	}
 
 

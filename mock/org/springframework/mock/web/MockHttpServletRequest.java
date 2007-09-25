@@ -30,6 +30,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -42,7 +43,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -106,7 +106,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String contentType;
 
-	private final Map parameters = CollectionFactory.createLinkedMapIfPossible(16);
+	private final Map parameters = new LinkedHashMap(16);
 
 	private String protocol = DEFAULT_PROTOCOL;
 

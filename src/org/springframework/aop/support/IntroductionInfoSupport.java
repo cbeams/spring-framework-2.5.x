@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.IntroductionInfo;
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -94,7 +94,7 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	}
 
 	private Map createRememberedMethodMap() {
-		return CollectionFactory.createIdentityMapIfPossible(32);
+		return new IdentityHashMap(32);
 	}
 
 	/**

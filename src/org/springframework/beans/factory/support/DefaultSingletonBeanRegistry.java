@@ -19,10 +19,12 @@ package org.springframework.beans.factory.support;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.LinkedHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -84,7 +86,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	private final Map singletonObjects = CollectionFactory.createConcurrentMapIfPossible(16);
 
 	/** Set of registered singletons, containing the bean names in registration order */
-	private final Set registeredSingletons = CollectionFactory.createLinkedSetIfPossible(16);
+	private final Set registeredSingletons = new LinkedHashSet(16);
 
 	/** Names of beans that are currently in creation */
 	private final Set singletonsCurrentlyInCreation = Collections.synchronizedSet(new HashSet());
@@ -96,7 +98,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	private boolean singletonsCurrentlyInDestruction = false;
 
 	/** Disposable bean instances: bean name --> disposable instance */
-	private final Map disposableBeans = CollectionFactory.createLinkedMapIfPossible(16);
+	private final Map disposableBeans = new LinkedHashMap(16);
 
 	/** Map between dependent bean names: bean name --> Set of dependent bean names */
 	private final Map dependentBeanMap = CollectionFactory.createConcurrentMapIfPossible(16);
@@ -283,7 +285,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 		synchronized (this.dependentBeanMap) {
 			Set dependentBeans = (Set) this.dependentBeanMap.get(beanName);
 			if (dependentBeans == null) {
-				dependentBeans = CollectionFactory.createLinkedSetIfPossible(8);
+				dependentBeans = new LinkedHashSet(8);
 				this.dependentBeanMap.put(beanName, dependentBeans);
 			}
 			dependentBeans.add(dependentBeanName);
@@ -291,7 +293,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 		synchronized (this.dependenciesForBeanMap) {
 			Set dependenciesForBean = (Set) this.dependenciesForBeanMap.get(dependentBeanName);
 			if (dependenciesForBean == null) {
-				dependenciesForBean = CollectionFactory.createLinkedSetIfPossible(8);
+				dependenciesForBean = new LinkedHashSet(8);
 				this.dependenciesForBeanMap.put(dependentBeanName, dependenciesForBean);
 			}
 			dependenciesForBean.add(beanName);

@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,7 +36,6 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.TypedStringValue;
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -452,7 +452,7 @@ abstract class ConstructorResolver {
 
 		ArgumentsHolder args = new ArgumentsHolder(paramTypes.length);
 		Set usedValueHolders = new HashSet(paramTypes.length);
-		Set autowiredBeanNames = CollectionFactory.createLinkedSetIfPossible(4);
+		Set autowiredBeanNames = new LinkedHashSet(4);
 		boolean resolveNecessary = false;
 
 		for (int paramIndex = 0; paramIndex < paramTypes.length; paramIndex++) {

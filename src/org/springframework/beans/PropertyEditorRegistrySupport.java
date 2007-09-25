@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -54,7 +55,6 @@ import org.springframework.beans.propertyeditors.PropertiesEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
 import org.springframework.util.ClassUtils;
@@ -234,7 +234,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			throw new IllegalArgumentException("Either requiredType or propertyPath is required");
 		}
 		if (this.customEditors == null) {
-			this.customEditors = CollectionFactory.createLinkedMapIfPossible(16);
+			this.customEditors = new LinkedHashMap(16);
 		}
 		if (propertyPath != null) {
 			this.customEditors.put(propertyPath, new CustomEditorHolder(propertyEditor, requiredType));

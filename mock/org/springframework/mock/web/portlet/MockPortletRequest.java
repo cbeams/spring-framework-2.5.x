@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -37,7 +38,6 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.WindowState;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -64,11 +64,11 @@ public class MockPortletRequest implements PortletRequest {
 
 	private PortletPreferences portletPreferences = new MockPortletPreferences();
 
-	private final Map properties = CollectionFactory.createLinkedMapIfPossible(16);
+	private final Map properties = new LinkedHashMap(16);
 
 	private final Hashtable attributes = new Hashtable();
 
-	private final Map parameters = CollectionFactory.createLinkedMapIfPossible(16);
+	private final Map parameters = new LinkedHashMap(16);
 
 	private String authType = null;
 

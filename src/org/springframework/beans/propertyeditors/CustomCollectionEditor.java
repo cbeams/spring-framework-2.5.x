@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,10 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import org.springframework.core.CollectionFactory;
 
 /**
  * Property editor for Collections, converting any source Collection
@@ -57,7 +56,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	 * @see java.util.Collection
 	 * @see java.util.ArrayList
 	 * @see java.util.TreeSet
-	 * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
+	 * @see java.util.LinkedHashSet
 	 */
 	public CustomCollectionEditor(Class collectionType) {
 		this(collectionType, false);
@@ -71,7 +70,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	 * If the value is anything else, a target Collection with that single
 	 * value will be created.
 	 * <p>The default Collection implementations are: ArrayList for List,
-	 * TreeSet for SortedSet, and LinkedHashSet or HashSet for Set.
+	 * TreeSet for SortedSet, and LinkedHashSet for Set.
 	 * @param collectionType the target type, which needs to be a
 	 * sub-interface of Collection or a concrete Collection class
 	 * @param nullAsEmptyCollection whether to convert an incoming <code>null</code>
@@ -79,7 +78,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	 * @see java.util.Collection
 	 * @see java.util.ArrayList
 	 * @see java.util.TreeSet
-	 * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
+	 * @see java.util.LinkedHashSet
 	 */
 	public CustomCollectionEditor(Class collectionType, boolean nullAsEmptyCollection) {
 		if (collectionType == null) {
@@ -162,7 +161,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 			return new TreeSet();
 		}
 		else {
-			return CollectionFactory.createLinkedSetIfPossible(initialCapacity);
+			return new LinkedHashSet(initialCapacity);
 		}
 	}
 

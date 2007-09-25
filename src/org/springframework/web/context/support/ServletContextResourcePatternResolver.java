@@ -18,11 +18,11 @@ package org.springframework.web.context.support;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -81,7 +81,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 				// Only try the following on Servlet containers >= 2.3:
 				// ServletContext.getResourcePaths() is not available before that version.
 				String fullPattern = scResource.getPath() + subPattern;
-				Set result = CollectionFactory.createLinkedSetIfPossible(8);
+				Set result = new LinkedHashSet(8);
 				doRetrieveMatchingServletContextResources(sc, fullPattern, scResource.getPath(), result);
 				return result;
 			}

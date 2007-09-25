@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,7 +32,6 @@ import javax.portlet.PortletURL;
 import javax.portlet.WindowState;
 import javax.portlet.WindowStateException;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -59,7 +59,7 @@ public class MockPortletURL implements PortletURL {
 
 	private PortletMode portletMode;
 
-	private final Map parameters = CollectionFactory.createLinkedMapIfPossible(16);
+	private final Map parameters = new LinkedHashMap(16);
 
 	private boolean secure = false;
 

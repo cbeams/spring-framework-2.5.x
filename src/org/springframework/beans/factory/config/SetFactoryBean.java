@@ -17,11 +17,11 @@
 package org.springframework.beans.factory.config;
 
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.JdkVersion;
 
@@ -52,9 +52,7 @@ public class SetFactoryBean extends AbstractFactoryBean {
 	 * Set the class to use for the target Set. Can be populated with a fully
 	 * qualified class name when defined in a Spring application context.
 	 * <p>Default is a linked HashSet, keeping the registration order.
-	 * If no linked Set implementation is available, a plain HashSet will
-	 * be used as fallback (not keeping the registration order).
-	 * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
+	 * @see java.util.LinkedHashSet
 	 */
 	public void setTargetSetClass(Class targetSetClass) {
 		if (targetSetClass == null) {
@@ -80,7 +78,7 @@ public class SetFactoryBean extends AbstractFactoryBean {
 			result = (Set) BeanUtils.instantiateClass(this.targetSetClass);
 		}
 		else {
-			result = CollectionFactory.createLinkedSetIfPossible(this.sourceSet.size());
+			result = new LinkedHashSet(this.sourceSet.size());
 		}
 		Class valueType = null;
 		if (this.targetSetClass != null && JdkVersion.isAtLeastJava15()) {
