@@ -1806,8 +1806,8 @@ ms     %     Task name
 		<programlisting><![CDATA[<aop:aspect id="usageTrackerAspect" ref="usageTracking">
 
   <aop:declare-parents
-      types-matching="com.xzy.myapp.service.*+",
-      implement-interface="UsageTracked"
+      types-matching="com.xzy.myapp.service.*+"
+      implement-interface="com.xyz.myapp.service.tracking.UsageTracked"
       default-impl="com.xyz.myapp.service.tracking.DefaultUsageTracked"/>
   
   <aop:before
