@@ -52,7 +52,6 @@ public class ScopedProxyAutowireTests extends TestCase {
 		public TestBean getChild() {
 			return this.child;
 		}
-
 	}
 
 }
