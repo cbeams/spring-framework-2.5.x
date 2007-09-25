@@ -70,9 +70,11 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 			scopedProxyDefinition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.FALSE);
 		}
 
-		// The target bean should be ignored in favor of the scoped proxy.
 		if (targetDefinition instanceof AbstractBeanDefinition) {
-			((AbstractBeanDefinition) targetDefinition).setAutowireCandidate(false);
+			AbstractBeanDefinition abd = (AbstractBeanDefinition) targetDefinition;
+			scopedProxyDefinition.setAutowireCandidate(abd.isAutowireCandidate());
+			// The target bean should be ignored in favor of the scoped proxy.
+			abd.setAutowireCandidate(false);
 		}
 
 		// Register the target bean as separate bean in the factory.
