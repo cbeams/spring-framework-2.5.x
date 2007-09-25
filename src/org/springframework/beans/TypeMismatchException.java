@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class TypeMismatchException extends PropertyAccessException {
 	public static final String ERROR_CODE = "typeMismatch";
 
 
-	private Object value;
+	private transient Object value;
 
 	private Class requiredType;
 
@@ -99,14 +99,14 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * Return the offending value (may be <code>null</code>)
 	 */
 	public Object getValue() {
-		return value;
+		return this.value;
 	}
 
 	/**
 	 * Return the required target type, if any.
 	 */
 	public Class getRequiredType() {
-		return requiredType;
+		return this.requiredType;
 	}
 
 	public String getErrorCode() {
