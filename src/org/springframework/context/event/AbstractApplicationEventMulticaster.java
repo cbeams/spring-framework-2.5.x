@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.CollectionFactory;
 
 /**
- * Abstract implementation of the ApplicationEventMulticaster interface,
+ * Abstract implementation of the {@link ApplicationEventMulticaster} interface,
  * providing the basic listener registration facility.
  *
  * <p>Doesn't permit multiple instances of the same listener by default,
@@ -45,8 +45,8 @@ import org.springframework.core.CollectionFactory;
  * listener multiple times). Those classes provide a thread-safe Iterator,
  * optimized for read-mostly usage - matching this use case nicely.
  *
- * <p>Implementing ApplicationEventMulticaster's actual <code>multicastEvent</code>
- * method is left to subclasses. SimpleApplicationEventMulticaster simply multicasts
+ * <p>Implementing ApplicationEventMulticaster's actual {@link #multicastEvent} method
+ * is left to subclasses. {@link SimpleApplicationEventMulticaster} simply multicasts
  * all events to all registered listeners, invoking them in the calling thread.
  * Alternative implementations could be more sophisticated in those respects.
  *
@@ -72,23 +72,23 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 * of the same listener, while a List class will allow for registering
 	 * the same listener multiple times.
 	 * <p>Consider Doug Lea's <code>java.util.concurrent.CopyOnWriteArraySet</code> or its
-	 * non-JDK predecessor, <code>EDU.oswego.cs.dl.util.concurrent.CopyOnWriteArraySet</code>
+	 * JDK 1.4 backport, <code>edu.emory.mathcs.backport.java.util.concurrent.CopyOnWriteArraySet</code>
 	 * (or the respective CopyOnWriteArrayList version). Those classes provide a thread-safe
 	 * Iterator, optimized for read-mostly usage - matching this use case nicely.
 	 * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
 	 * @see java.util.concurrent.CopyOnWriteArraySet
-	 * @see EDU.oswego.cs.dl.util.concurrent.CopyOnWriteArraySet
+	 * @see edu.emory.mathcs.backport.java.util.concurrent.CopyOnWriteArraySet
 	 */
 	public void setCollectionClass(Class collectionClass) {
 		if (collectionClass == null) {
-			throw new IllegalArgumentException("collectionClass must not be null");
+			throw new IllegalArgumentException("'collectionClass' must not be null");
 		}
 		if (!Collection.class.isAssignableFrom(collectionClass)) {
-			throw new IllegalArgumentException("collectionClass must implement [java.util.Collection]");
+			throw new IllegalArgumentException("'collectionClass' must implement [java.util.Collection]");
 		}
 		// Create desired collection instance.
-		// Add all previously registered listeners (usually none).
 		Collection newColl = (Collection) BeanUtils.instantiateClass(collectionClass);
+		// Add all previously registered listeners (usually none).
 		newColl.addAll(this.applicationListeners);
 		this.applicationListeners = newColl;
 	}
@@ -115,7 +115,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	 * @see org.springframework.context.ApplicationListener
 	 */
 	protected Collection getApplicationListeners() {
-		return applicationListeners;
+		return this.applicationListeners;
 	}
 
 }
