@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5 RC1 (2007-10-01)
+Changes in version 2.5 RC1 (2007-10-08)
 ---------------------------------------
 
 General
@@ -11,16 +11,34 @@ General
 * revised default handling in BeanDefinitionParsers for XML config namespaces to work without XSD validation as well
 
 Package org.springframework.aop
+* fixed AspectJ pointcut handling to strictly match generic return types according to Java language rules
 * removed unused pointcut type attribute from "spring-aop-2.5.xsd"
 
 Package org.springframework.beans
+* TypeMismatchException and MethodInvocationException are serializable even in case of non-serializable property values
 * URIEditor only tries to resolve "classpath:" locations if explicitly constructed with a ClassLoader
 * URIEditor converts spaces in location values into "%20" quotes (as required by the URI format)
+* exposed "autowireCandidate" property in BeanDefinition interface (avoiding casts to AbstractBeanDefinition)
+* DefaultListableBeanFactory removes a singleton bean instance if a new bean definition gets registered
+* DefaultListableBeanFactory fully destroys singleton bean instance when the corresponding bean definition gets replaced
 * XmlBeanDefinitionReader initializes default EntityResolver lazily, avoiding classpath scan in case of custom resolver
 * AbstractSingleBeanDefinitionParser applies full scope to inner beans, making them eligible for destruction callbacks
+* @Autowired qualifier annotations may be defined with target 'type' as well, marking the target bean class
+* Autowired/Common/PersistenceAnnotationBeanPostProcessor implement PriorityOrdered and expose an "order" bean property
+* "depends-on" kicks in before the affected bean is entering its creation phase; can be used to resolve circular refs
 
 Package org.springframework.context
 * ClassPathXmlApplicationContext and FileSystemXmlApplicationContext trim passed-in config location Strings
+* added "concurrentUpdates" flag to AbstractApplicationEventMulticaster, enabling copy-on-write for the listener set
+* AnnotationConfigUtils checks for EntityManagerFactory class instead of PersistenceContext (for Tomcat 6 compatibility)
+
+Package org.springframework.core
+* added "ConcurrentMap createConcurrentMap" method to CollectionFactory, exposing a common ConcurrentMap interface
+* deprecated CollectionFactory's "createLinkedSet/LinkedMap/IdentityMapIfPossible" (for usage on JDK 1.4 or higher)
+* "Conventions.getVariableName" follows JavaBeans property naming rules in case of multiple upper case letters
+* added "getURI()" method to Resource interface
+* added constructor with URI argument to UrlResource class
+* FileSystemResource's "getURL()" builds URLs that can be converted to an URI
 
 Package org.springframework.jms
 * JmsTemplate only starts lazily created transactional Connections if actually necessary (-> "startConnection" flag)
@@ -40,6 +58,17 @@ Package org.springframework.orm
 Package org.springframework.test
 * introduced TestNG support based on the new test context framework
 
+Package org.springframework.ui
+* "ModelMap.addObject(Object)" follows JavaBeans property naming rules in case of multiple upper case letters
+
+Package org.springframework.util
+* "ClassUtils.getShortNameAsProperty" strips the outer class name in case of an inner class
+
+Package org.springframework.web
+* factored out a "loadReport()" method in AbstractJasperReportsView (called by "initApplicationContext()")
+* revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
+* JSP CheckboxTag caches converted candidate value when comparing it with collection elements
+
 
 Changes in version 2.1 M4 (2007-09-09)
 --------------------------------------
@@ -56,6 +85,7 @@ Package org.springframework.aop
 * made parts of ReflectiveMethodInvocation and other internal impl classes public again (for framework integration)
 * "AopNamespaceUtils.registerAutoProxyCreatorIfNecessary" registers a plain InfrastructureAdvisorAutoProxyCreator now
 * "target()" pointcut handles types implemented in superclasses correctly
+* "aop:scoped-proxy" applies a specified "autowire-candidate" flag to the proxy
 
 Package org.springframework.beans
 * TypeConverterDelegate protects its value conversion step against PropertyEditors which don't support "setValue" calls
