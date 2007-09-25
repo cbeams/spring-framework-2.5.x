@@ -77,11 +77,11 @@ public abstract class CollectionFactory {
 
 
 	/**
-	 * Create a linked set if possible: that is, if running on JDK >= 1.4
+	 * Create a linked Set if possible: that is, if running on JDK >= 1.4
 	 * or if Commons Collections 3.x is available. Prefers a JDK 1.4+
 	 * LinkedHashSet to a Commons Collections 3.x ListOrderedSet.
-	 * @param initialCapacity the initial capacity of the set
-	 * @return the new set instance
+	 * @param initialCapacity the initial capacity of the Set
+	 * @return the new Set instance
 	 * @see java.util.LinkedHashSet
 	 * @see org.apache.commons.collections.set.ListOrderedSet
 	 */
@@ -101,11 +101,11 @@ public abstract class CollectionFactory {
 	}
 
 	/**
-	 * Create a linked map if possible: that is, if running on JDK >= 1.4
+	 * Create a linked Map if possible: that is, if running on JDK >= 1.4
 	 * or if Commons Collections 3.x is available. Prefers a JDK 1.4+
 	 * LinkedHashMap to a Commons Collections 3.x LinkedMap.
-	 * @param initialCapacity the initial capacity of the map
-	 * @return the new map instance
+	 * @param initialCapacity the initial capacity of the Map
+	 * @return the new Map instance
 	 * @see java.util.LinkedHashMap
 	 * @see org.apache.commons.collections.map.LinkedMap
 	 */
@@ -125,11 +125,11 @@ public abstract class CollectionFactory {
 	}
 
 	/**
-	 * Create a linked case-insensitive map if possible: if Commons Collections
+	 * Create a linked case-insensitive Map if possible: if Commons Collections
 	 * 3.x is available, a CaseInsensitiveMap with ListOrderedMap decorator will
-	 * be created. Else, a JDK 1.4+ LinkedHashMap or plain HashMap will be used.
-	 * @param initialCapacity the initial capacity of the map
-	 * @return the new map instance
+	 * be created. Else, a JDK {@link java.util.LinkedHashMap} will be used.
+	 * @param initialCapacity the initial capacity of the Map
+	 * @return the new Map instance
 	 * @see org.apache.commons.collections.map.CaseInsensitiveMap
 	 * @see org.apache.commons.collections.map.ListOrderedMap
 	 */
@@ -149,11 +149,11 @@ public abstract class CollectionFactory {
 	}
 
 	/**
-	 * Create an identity map if possible: that is, if running on JDK >= 1.4
+	 * Create an identity Map if possible: that is, if running on JDK >= 1.4
 	 * or if Commons Collections 3.x is available. Prefers a JDK 1.4+
 	 * IdentityHashMap to a Commons Collections 3.x IdentityMap.
-	 * @param initialCapacity the initial capacity of the map
-	 * @return the new map instance
+	 * @param initialCapacity the initial capacity of the Map
+	 * @return the new Map instance
 	 * @see java.util.IdentityHashMap
 	 * @see org.apache.commons.collections.map.IdentityMap
 	 */
@@ -173,11 +173,12 @@ public abstract class CollectionFactory {
 	}
 
 	/**
-	 * Create a concurrent map if possible: that is, if running on JDK >= 1.5
+	 * Create a concurrent Map if possible: that is, if running on JDK >= 1.5
 	 * or if the backport-concurrent library is available. Prefers a JDK 1.5+
-	 * ConcurrentHashMap to its backport-concurrent equivalent.
-	 * @param initialCapacity the initial capacity of the map
-	 * @return the new map instance
+	 * ConcurrentHashMap to its backport-concurrent equivalent. Falls back
+	 * to a plain synchronized HashMap if no concurrent Map is available.
+	 * @param initialCapacity the initial capacity of the Map
+	 * @return the new Map instance
 	 * @see java.util.concurrent.ConcurrentHashMap
 	 * @see edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap
 	 */
