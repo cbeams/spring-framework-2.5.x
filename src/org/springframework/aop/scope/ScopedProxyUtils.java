@@ -19,14 +19,16 @@ package org.springframework.aop.scope;
 import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
- * @author Rob Harrop
- * @author Juergen Hoeller
+ * Utility class for creating a scoped proxy.
+ * Used by ScopedProxyBeanDefinitionDecorator and ClassPathBeanDefinitionScanner.
+ *
  * @author Mark Fisher
+ * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 2.5
  */
 public abstract class ScopedProxyUtils {
@@ -64,12 +66,9 @@ public abstract class ScopedProxyUtils {
 			scopedProxyDefinition.getPropertyValues().addPropertyValue("proxyTargetClass", Boolean.FALSE);
 		}
 
-		if (targetDefinition instanceof AbstractBeanDefinition) {
-			AbstractBeanDefinition abd = (AbstractBeanDefinition) targetDefinition;
-			scopedProxyDefinition.setAutowireCandidate(abd.isAutowireCandidate());
-			// The target bean should be ignored in favor of the scoped proxy.
-			abd.setAutowireCandidate(false);
-		}
+		scopedProxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
+		// The target bean should be ignored in favor of the scoped proxy.
+		targetDefinition.setAutowireCandidate(false);
 
 		// Register the target bean as separate bean in the factory.
 		registry.registerBeanDefinition(targetBeanName, targetDefinition);

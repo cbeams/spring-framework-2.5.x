@@ -143,6 +143,16 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 */
 	void setScope(String scope);
 
+	/**
+	 * Return whether this bean is a candidate for getting autowired into some other bean.
+	 */
+	boolean isAutowireCandidate();
+
+	/**
+	 * Set whether this bean is a candidate for getting autowired into some other bean.
+	 */
+	void setAutowireCandidate(boolean autowireCandidate);
+
 
 	/**
 	 * Return the constructor argument values for this bean.
