@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -286,7 +287,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			throws BeansException {
 
 		String[] beanNames = getBeanNamesForType(type, includePrototypes, allowEagerInit);
-		Map result = CollectionFactory.createLinkedMapIfPossible(beanNames.length);
+		Map result = new LinkedHashMap(beanNames.length);
 		for (int i = 0; i < beanNames.length; i++) {
 			String beanName = beanNames[i];
 			try {
@@ -433,13 +434,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// Remove the merged bean definition for the given bean, if already created.
 			clearMergedBeanDefinition(beanName);
 
-			if (oldBeanDefinition == null) {
-				// Remove corresponding bean from singleton cache, if any. Shouldn't usually
-				// be necessary, rather just meant for overriding a context's default beans
-				// (e.g. the default StaticMessageSource in a StaticApplicationContext).
-				synchronized (getSingletonMutex()) {
-					removeSingleton(beanName);
-				}
+			// Remove corresponding bean from singleton cache, if any. Shouldn't usually
+			// be necessary, rather just meant for overriding a context's default beans
+			// (e.g. the default StaticMessageSource in a StaticApplicationContext).
+			synchronized (getSingletonMutex()) {
+				destroySingleton(beanName);
 			}
 		}
 	}
@@ -464,7 +463,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// be necessary, rather just meant for overriding a context's default beans
 			// (e.g. the default StaticMessageSource in a StaticApplicationContext).
 			synchronized (getSingletonMutex()) {
-				removeSingleton(beanName);
+				destroySingleton(beanName);
 			}
 		}
 	}
@@ -476,7 +475,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	protected Map findAutowireCandidates(String beanName, Class requiredType, DependencyDescriptor descriptor) {
 		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType);
-		Map result = CollectionFactory.createLinkedMapIfPossible(candidateNames.length);
+		Map result = new LinkedHashMap(candidateNames.length);
 		for (Iterator it = this.resolvableDependencies.keySet().iterator(); it.hasNext();) {
 			Class autowiringType = (Class) it.next();
 			if (autowiringType.isAssignableFrom(requiredType)) {
