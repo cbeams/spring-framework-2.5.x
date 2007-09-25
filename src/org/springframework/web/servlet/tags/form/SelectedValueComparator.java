@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditor;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -91,7 +92,7 @@ abstract class SelectedValueComparator {
 				selected = true;
 			}
 			else {
-				selected = exhaustiveCompare(boundValue, candidateValue, bindStatus.getEditor());
+				selected = exhaustiveCompare(boundValue, candidateValue, bindStatus.getEditor(), null);
 			}
 		}
 
@@ -137,20 +138,23 @@ abstract class SelectedValueComparator {
 		if (bindStatus.getErrors() instanceof BindingResult) {
 			editorRegistry = ((BindingResult) bindStatus.getErrors()).getPropertyEditorRegistry();
 		}
+		Map convertedValueCache = new HashMap(1);
 		for (Iterator it = collection.iterator(); it.hasNext();) {
 			Object element = it.next();
 			PropertyEditor propertyEditor = null;
 			if (element != null && editorRegistry != null) {
 				propertyEditor = editorRegistry.findCustomEditor(element.getClass(), bindStatus.getPath());
 			}
-			if (exhaustiveCompare(element, candidateValue, propertyEditor)) {
+			if (exhaustiveCompare(element, candidateValue, propertyEditor, convertedValueCache)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private static boolean exhaustiveCompare(Object boundValue, Object candidate, PropertyEditor propertyEditor) {
+	private static boolean exhaustiveCompare(
+			Object boundValue, Object candidate, PropertyEditor propertyEditor, Map convertedValueCache) {
+
 		String candidateDisplayString = ObjectUtils.getDisplayString(candidate);
 		if (boundValue instanceof LabeledEnum) {
 			LabeledEnum labeledEnum = (LabeledEnum) boundValue;
@@ -179,18 +183,27 @@ abstract class SelectedValueComparator {
 		}
 		else if (propertyEditor != null && candidate instanceof String) {
 			// Try PE-based comparison (PE should *not* be allowed to escape creating thread)
-			Object originalValue = propertyEditor.getValue();
 			String candidateAsString = (String) candidate;
-			try {
-				propertyEditor.setAsText(candidateAsString);
-				if (ObjectUtils.nullSafeEquals(boundValue, propertyEditor.getValue())) {
-					return true;
+			Object candidateAsValue = null;
+			if (convertedValueCache != null && convertedValueCache.containsKey(propertyEditor)) {
+				candidateAsValue = (String) convertedValueCache.get(propertyEditor);
+			}
+			else {
+				Object originalValue = propertyEditor.getValue();
+				try {
+					propertyEditor.setAsText(candidateAsString);
+					candidateAsValue = propertyEditor.getValue();
+					if (convertedValueCache != null) {
+						convertedValueCache.put(propertyEditor, candidateAsValue);
+					}
+				}
+				finally {
+					propertyEditor.setValue(originalValue);
 				}
 			}
-			finally {
-				propertyEditor.setValue(originalValue);
+			if (ObjectUtils.nullSafeEquals(boundValue, candidateAsValue)) {
+				return true;
 			}
-
 			if (propertyEditor.getValue() != null) {
 				return ObjectUtils.nullSafeEquals(candidateAsString, propertyEditor.getAsText());
 			}
