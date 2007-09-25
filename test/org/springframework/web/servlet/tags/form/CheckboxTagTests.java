@@ -252,11 +252,13 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setPath("stringArray");
 		this.tag.setValue("   foo");
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
-		bindingResult.getPropertyEditorRegistry().registerCustomEditor(String.class, new StringTrimmerEditor(false));
+		MyStringTrimmerEditor editor = new MyStringTrimmerEditor();
+		bindingResult.getPropertyEditorRegistry().registerCustomEditor(String.class, editor);
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
 
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(1, editor.count);
 
 		String output = getWriter().toString();
 
@@ -525,7 +527,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.bean.setName("Rob Harrop");
 		this.bean.setJedi(true);
 		this.bean.setSomeBoolean(new Boolean(true));
-		this.bean.setStringArray(new String[]{"foo", "bar"});
+		this.bean.setStringArray(new String[] {"bar", "foo"});
 		this.bean.setOtherColours(colours);
 		this.bean.setPets(pets);
 		List list = new ArrayList();
@@ -535,5 +537,19 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		return this.bean;
 	}
 
+
+	private class MyStringTrimmerEditor extends StringTrimmerEditor {
+
+		public int count = 0;
+
+		public MyStringTrimmerEditor() {
+			super(false);
+		}
+
+		public void setAsText(String text) {
+			this.count++;
+			super.setAsText(text);
+		}
+	}
 
 }
