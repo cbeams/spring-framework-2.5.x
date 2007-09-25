@@ -18,6 +18,8 @@ package org.springframework.beans.factory.support;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -35,7 +37,6 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
-import org.springframework.core.CollectionFactory;
 
 /**
  * Helper class for use in bean factory implementations,
@@ -206,6 +207,15 @@ class BeanDefinitionValueResolver {
 			if (mbd.isSingleton()) {
 				actualInnerBeanName = adaptInnerBeanName(innerBeanName);
 			}
+			// Guarantee initialization of beans that the inner bean depends on.
+			String[] dependsOn = mbd.getDependsOn();
+			if (dependsOn != null) {
+				for (int i = 0; i < dependsOn.length; i++) {
+					String dependsOnBean = dependsOn[i];
+					this.beanFactory.getBean(dependsOnBean);
+					this.beanFactory.registerDependentBean(dependsOnBean, actualInnerBeanName);
+				}
+			}
 			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mbd, null);
 			this.beanFactory.registerDependentBean(actualInnerBeanName, this.beanName);
 			if (innerBean instanceof FactoryBean) {
@@ -285,7 +295,7 @@ class BeanDefinitionValueResolver {
 	 * For each element in the ManagedList, resolve reference if necessary.
 	 */
 	private Set resolveManagedSet(Object argName, Set ms) {
-		Set resolved = CollectionFactory.createLinkedSetIfPossible(ms.size());
+		Set resolved = new LinkedHashSet(ms.size());
 		int i = 0;
 		for (Iterator it = ms.iterator(); it.hasNext();) {
 			resolved.add(
@@ -301,7 +311,7 @@ class BeanDefinitionValueResolver {
 	 * For each element in the ManagedMap, resolve reference if necessary.
 	 */
 	private Map resolveManagedMap(Object argName, Map mm) {
-		Map resolved = CollectionFactory.createLinkedMapIfPossible(mm.size());
+		Map resolved = new LinkedHashMap(mm.size());
 		Iterator it = mm.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();

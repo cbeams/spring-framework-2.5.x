@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,6 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.TypedStringValue;
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -454,16 +454,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected Object createBean(String beanName, RootBeanDefinition mbd, Object[] args)
 			throws BeanCreationException {
-
-		// Guarantee initialization of beans that the current one depends on.
-		String[] dependsOn = mbd.getDependsOn();
-		if (dependsOn != null) {
-			for (int i = 0; i < dependsOn.length; i++) {
-				String dependsOnBean = dependsOn[i];
-				getBean(dependsOnBean);
-				registerDependentBean(dependsOnBean, beanName);
-			}
-		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating instance of bean '" + beanName + "' with merged definition [" + mbd + "]");
@@ -1037,7 +1027,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (converter == null) {
 			converter = bw;
 		}
-		Set autowiredBeanNames = CollectionFactory.createLinkedSetIfPossible(4);
+		Set autowiredBeanNames = new LinkedHashSet(4);
 		String[] propertyNames = unsatisfiedNonSimpleProperties(mbd, bw);
 		for (int i = 0; i < propertyNames.length; i++) {
 			String propertyName = propertyNames[i];

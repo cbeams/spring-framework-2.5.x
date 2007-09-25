@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -110,7 +111,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	private final Map customEditors = new HashMap();
 
 	/** Custom PropertyEditorRegistrars to apply to the beans of this factory */
-	private final Set propertyEditorRegistrars = CollectionFactory.createLinkedSetIfPossible(16);
+	private final Set propertyEditorRegistrars = new LinkedHashSet(16);
 
 	/** A custom TypeConverter to use, overriding the default PropertyEditor mechanism */
 	private TypeConverter typeConverter;
@@ -229,6 +230,16 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 			final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 			checkMergedBeanDefinition(mbd, beanName, args);
+
+			// Guarantee initialization of beans that the current one depends on.
+			String[] dependsOn = mbd.getDependsOn();
+			if (dependsOn != null) {
+				for (int i = 0; i < dependsOn.length; i++) {
+					String dependsOnBean = dependsOn[i];
+					getBean(dependsOnBean);
+					registerDependentBean(dependsOnBean, beanName);
+				}
+			}
 
 			// Create bean instance.
 			if (mbd.isSingleton()) {
