@@ -3,10 +3,11 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.7 (2007-09-10)
+Changes in version 2.0.7 (2007-09-27)
 -------------------------------------
 
 General
+* revised default handling in BeanDefinitionParsers for XML config namespaces to work without XSD validation as well
 * fixed and updated reference documentation on JMS listener container configuration and transaction participation
 
 Package org.springframework.aop
@@ -16,11 +17,13 @@ Package org.springframework.aop
 * fixed AspectJ pointcut handling to resolve bridge methods before matching
 * fixed AspectJ pointcut handling to correctly match generic return types
 * "target()" pointcut handles types implemented in superclasses correctly
+* "aop:scoped-proxy" applies a specified "autowire-candidate" flag to the proxy
 * changed RuntimeTestWalker's visibility to package-protected
 
 Package org.springframework.beans
 * added "charsToDelete" and "emptyArrayAsNull" options to StringArrayPropertyEditor
 * URIEditor trims whitespace before parsing the URI (allowing for XML formatting with whitespace)
+* URIEditor converts spaces in location values into "%20" quotes (as required by the URI format)
 * TypeConverterDelegate protects its collection conversion process against misbehaving Collections with a null Iterator
 * TypeConverterDelegate protects its value conversion step against PropertyEditors which don't support "setValue" calls
 * PropertyEditorRegistrySupport's "copyCustomEditorsTo" copies all editors if 'nestedProperty' argument is null
@@ -32,7 +35,11 @@ Package org.springframework.beans
 * fixed AbstractBeanFactory's type check to ignore a null value (as potentially exposed by a FactoryBean)
 * fixed AbstractBeanFactory to never cache FactoryBean-exposed objects for inner beans (avoiding name conflicts)
 * optimized DefaultListableBeanFactory's resolution of bean references during prototype creation
+* XmlBeanDefinitionReader initializes default EntityResolver lazily, avoiding classpath scan in case of custom resolver
 * changed visibility of BeanDefinitionParserDelegate's "buildTypedStringValue(ForMap)" methods to protected
+
+Package org.springframework.context
+* ClassPathXmlApplicationContext and FileSystemXmlApplicationContext trim passed-in config location Strings
 
 Package org.springframework.core
 * added "isAtLeastJava16()" convenience method to JdkVersion class
@@ -105,8 +112,10 @@ Package org.springframework.web
 * AbstractView does not log static attributes anymore, in order to allow for scoped proxies to be used as attributes
 * JstlView properly allows for programmatic usage (added overloaded constructors; exposing a MessageSource is optional)
 * InternalResourceViewResolver uses JstlView as default (instead of InternalResourceView) if the JSTL API is present
-* fixed JSP CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
 * JSP MessageTag resolves arguments in default text even if no message code was specified
+* JSP CheckboxTag caches converted candidate value when comparing it with collection elements
+* fixed JSP CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
+* factored out a "loadReport()" method in AbstractJasperReportsView (called by "initApplicationContext()")
 
 
 Changes in version 2.0.6 (2007-06-18)
