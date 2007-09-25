@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 
 /**
- * Simple implementation of the ApplicationEventMulticaster interface.
+ * Simple implementation of the {@link ApplicationEventMulticaster} interface.
  *
  * <p>Multicasts all events to all registered listeners, leaving it up to
  * the listeners to ignore events that they are not interested in.
@@ -39,6 +39,7 @@ import org.springframework.core.task.TaskExecutor;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setTaskExecutor
+ * @see #setConcurrentUpdates
  */
 public class SimpleApplicationEventMulticaster extends AbstractApplicationEventMulticaster {
 
@@ -65,7 +66,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	 * Return the current TaskExecutor for this multicaster.
 	 */
 	protected TaskExecutor getTaskExecutor() {
-		return taskExecutor;
+		return this.taskExecutor;
 	}
 
 
