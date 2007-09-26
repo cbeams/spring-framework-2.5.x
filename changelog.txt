@@ -21,6 +21,7 @@ Package org.springframework.aop
 * changed RuntimeTestWalker's visibility to package-protected
 
 Package org.springframework.beans
+* BeanWrapperImpl obtains old value with converted key in case of a Map with non-String keys
 * added "charsToDelete" and "emptyArrayAsNull" options to StringArrayPropertyEditor
 * URIEditor trims whitespace before parsing the URI (allowing for XML formatting with whitespace)
 * URIEditor converts spaces in location values into "%20" quotes (as required by the URI format)
@@ -115,6 +116,7 @@ Package org.springframework.web
 * JSP MessageTag resolves arguments in default text even if no message code was specified
 * JSP CheckboxTag caches converted candidate value when comparing it with collection elements
 * fixed JSP CheckboxTag to apply the custom PropertyEditor (if any) to rendered values
+* JSP SelectTag, OptionTag and OptionsTag properly detect a selected value even for Maps with converted keys
 * factored out a "loadReport()" method in AbstractJasperReportsView (called by "initApplicationContext()")
 
 
