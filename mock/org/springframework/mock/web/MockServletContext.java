@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -80,10 +81,10 @@ public class MockServletContext implements ServletContext {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	private final String resourceBasePath;
-	
 	private final ResourceLoader resourceLoader;
 
+	private final String resourceBasePath;
+	
 	private final Properties initParameters = new Properties();
 
 	private final Hashtable attributes = new Hashtable();
@@ -124,8 +125,8 @@ public class MockServletContext implements ServletContext {
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 */
 	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
-		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
+		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
 
 		// Use JVM temp dir as ServletContext temp dir.
 		String tempDir = System.getProperty(TEMP_DIR_SYSTEM_PROPERTY);
@@ -133,6 +134,7 @@ public class MockServletContext implements ServletContext {
 			this.attributes.put(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File(tempDir));
 		}
 	}
+
 
 	/**
 	 * Build a full resource location for the given path,
@@ -228,19 +230,19 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public RequestDispatcher getNamedDispatcher(String path) {
-		throw new UnsupportedOperationException("getNamedDispatcher");
+		return null;
 	}
 
 	public Servlet getServlet(String name) {
-		throw new UnsupportedOperationException("getServlet");
+		return null;
 	}
 
 	public Enumeration getServlets() {
-		throw new UnsupportedOperationException("getServlets");
+		return Collections.enumeration(Collections.EMPTY_SET);
 	}
 
 	public Enumeration getServletNames() {
-		throw new UnsupportedOperationException("getServletNames");
+		return Collections.enumeration(Collections.EMPTY_SET);
 	}
 
 	public void log(String message) {
@@ -313,7 +315,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public String getServletContextName() {
-		return servletContextName;
+		return this.servletContextName;
 	}
 
 }
