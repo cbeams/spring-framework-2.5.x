@@ -937,9 +937,9 @@ public class AfterFinallyExample {
 	passed to proceed must match the number of arguments passed to the around advice (not the 
 	number of arguments taken by the underlying join point), and the value passed to proceed
 	in a given argument position supplants the original value at the join point for the entity
-	the value was bound to. (Don't worry if this doesn't make sense right now!) The 
-	approach taken by Spring is simpler and a better match to its proxy-based, execution only
-	semantics. You only need to be aware of this difference if you compiling @AspectJ aspects
+	the value was bound to (Don't worry if this doesn't make sense right now!). The approach 
+	taken by Spring is simpler and a better match to its proxy-based, execution only semantics.
+	You only need to be aware of this difference if you are compiling @AspectJ aspects
 	written for Spring and using proceed with arguments with the AspectJ compiler and weaver.
 	There is a way to write such aspects that is 100% compatible across both Spring AOP and 
 	AspectJ, and this is discussed in the following section on advice parameters. 
