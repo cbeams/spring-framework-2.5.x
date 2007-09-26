@@ -20,13 +20,13 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 
-/** 
+/**
  * Root bean definitions are the most common type of bean definition.
  * They do not derive from a parent bean definition, and usually have a
  * class plus optionally constructor argument values and property values.
  *
  * <p>Note that root bean definitions do not have to specify a bean class:
- * This can be useful for deriving childs from such definitions, each with
+ * This can be useful for deriving children from such definitions, each with
  * its own bean class but inheriting common property values and other settings.
  *
  * @author Rod Johnson
