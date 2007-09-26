@@ -36,16 +36,13 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * associated with the current {@link javax.servlet.jsp.PageContext}.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 
-	/** Helper for rendering values into HTML */
-	private final ValueFormatter valueFormatter = new ValueFormatter();
-
-
 	/**
-	 * Evaluates the supplied value for the supplied attribute name. If the supplied value
+	 * Evaluate the supplied value for the supplied attribute name. If the supplied value
 	 * is <code>null</code> then <code>null</code> is returned, otherwise evaluation is
 	 * handled using {@link ExpressionEvaluationUtils#evaluate(String, String, javax.servlet.jsp.PageContext)}.
 	 */
@@ -75,7 +72,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	}
 
 	/**
-	 * Creates the {@link TagWriter} which all output will be written to. By default,
+	 * Create the {@link TagWriter} which all output will be written to. By default,
 	 * the {@link TagWriter} writes its output to the {@link javax.servlet.jsp.JspWriter}
 	 * for the current {@link javax.servlet.jsp.PageContext}. Subclasses may choose to
 	 * change the {@link java.io.Writer} to which output is actually written.
@@ -85,7 +82,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	}
 
 	/**
-	 * Provides a simple template method that calls {@link #createTagWriter()} and passes
+	 * Provide a simple template method that calls {@link #createTagWriter()} and passes
 	 * the created {@link TagWriter} to the {@link #writeTagContent(TagWriter)} method.
 	 * @return the value returned by {@link #writeTagContent(TagWriter)}
 	 */
@@ -94,21 +91,21 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	}
 
 	/**
-	 * Gets the display value of the supplied <code>Object</code>, HTML escaped
+	 * Get the display value of the supplied <code>Object</code>, HTML escaped
 	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
 	 */
 	protected String getDisplayString(Object value) {
-		return this.valueFormatter.getDisplayString(value, isHtmlEscape());
+		return ValueFormatter.getDisplayString(value, isHtmlEscape());
 	}
 
 	/**
-	 * Gets the display value of the supplied <code>Object</code>, HTML escaped
+	 * Get the display value of the supplied <code>Object</code>, HTML escaped
 	 * as required. If the supplied value is not a {@link String} and the supplied
 	 * {@link PropertyEditor} is not null then the {@link PropertyEditor} is used
 	 * to obtain the display value.
 	 */
 	protected String getDisplayString(Object value, PropertyEditor propertyEditor) {
-		return this.valueFormatter.getDisplayString(value, propertyEditor, isHtmlEscape());
+		return ValueFormatter.getDisplayString(value, propertyEditor, isHtmlEscape());
 	}
 
 

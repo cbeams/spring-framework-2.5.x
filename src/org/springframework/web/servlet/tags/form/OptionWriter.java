@@ -53,11 +53,10 @@ import org.springframework.web.servlet.support.BindStatus;
  * is bound to the tag instance.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 final class OptionWriter {
-
-	private final ValueFormatter valueFormatter = new ValueFormatter();
 
 	private final Object optionSource;
 
@@ -187,10 +186,9 @@ final class OptionWriter {
 	/**
 	 * Determines the display value of the supplied <code>Object</code>,
 	 * HTML-escaped as required.
-	 * @see ValueFormatter
 	 */
 	private String getDisplayString(Object value) {
-		return this.valueFormatter.getDisplayString(value, this.bindStatus.getEditor(), this.htmlEscape);
+		return ValueFormatter.getDisplayString(value, this.bindStatus.getEditor(), this.htmlEscape);
 	}
 
 }

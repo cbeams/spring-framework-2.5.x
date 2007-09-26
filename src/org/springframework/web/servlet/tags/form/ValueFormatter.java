@@ -33,16 +33,17 @@ import org.springframework.web.util.HtmlUtils;
  * default rules of plain formatting.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
-class ValueFormatter {
+abstract class ValueFormatter {
 
 	/**
 	 * Build the display value of the supplied <code>Object</code>, HTML escaped
 	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
 	 * @see #getDisplayString(Object, java.beans.PropertyEditor, boolean)
 	 */
-	public String getDisplayString(Object value, boolean htmlEscape) {
+	public static String getDisplayString(Object value, boolean htmlEscape) {
 		String displayValue = ObjectUtils.getDisplayString(value);
 		return (htmlEscape ? HtmlUtils.htmlEscape(displayValue) : displayValue);
 	}
@@ -54,22 +55,19 @@ class ValueFormatter {
 	 * to obtain the display value.
 	 * @see #getDisplayString(Object, boolean)
 	 */
-	public String getDisplayString(Object value, PropertyEditor propertyEditor, boolean htmlEscape) {
-		if (value instanceof String || propertyEditor == null) {
+	public static String getDisplayString(Object value, PropertyEditor propertyEditor, boolean htmlEscape) {
+		if (propertyEditor != null && (!(value instanceof String))) {
+			try {
+				propertyEditor.setValue(value);
+				return getDisplayString(propertyEditor.getAsText(), htmlEscape);
+			}
+			catch (Throwable ex) {
+				// The PropertyEditor might not support this value... pass through.
+				return getDisplayString(value, htmlEscape);
+			}
+		}
+		else {
 			return getDisplayString(value, htmlEscape);
-		}
-
-		Object originalValue = propertyEditor.getValue();
-		try {
-			propertyEditor.setValue(value);
-			return getDisplayString(propertyEditor.getAsText(), htmlEscape);
-		}
-		catch (Exception ex) {
-			// The PropertyEditor might not support this value... pass through
-			return getDisplayString(value, htmlEscape);
-		}
-		finally {
-			propertyEditor.setValue(originalValue);
 		}
 	}
 
