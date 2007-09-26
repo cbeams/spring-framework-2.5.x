@@ -104,7 +104,7 @@ public abstract class AbstractSessionFactoryBean
 	 * Return whether to expose a transaction-aware proxy for the SessionFactory.
 	 */
 	protected boolean isExposeTransactionAwareSessionFactory() {
-		return exposeTransactionAwareSessionFactory;
+		return this.exposeTransactionAwareSessionFactory;
 	}
 
 	/**
@@ -259,6 +259,7 @@ public abstract class AbstractSessionFactoryBean
 	 * successfully created. The SessionFactory is already available through
 	 * <code>getSessionFactory()</code> at this point.
 	 * <p>This implementation is empty.
+	 * @throws Exception in case of initialization failure
 	 * @see #getSessionFactory()
 	 */
 	protected void afterSessionFactoryCreation() throws Exception {
