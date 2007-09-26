@@ -78,8 +78,19 @@ public interface PlatformTransactionManager {
 	 * <p>Note that when the commit call completes, no matter if normally or
 	 * throwing an exception, the transaction must be fully completed and
 	 * cleaned up. No rollback call should be expected in such a case.
+	 * <p>If this method throws an exception other than a TransactionException,
+	 * then some before-commit error caused the commit attempt to fail. For
+	 * example, an O/R Mapping tool might have tried to flush changes to the
+	 * database right before commit, with the resulting DataAccessException
+	 * causing the transaction to fail. The original exception will be
+	 * propagated to the caller of this commit method in such a case.
 	 * @param status object returned by the <code>getTransaction</code> method
-	 * @throws TransactionException in case of commit or system errors
+	 * @throws UnexpectedRollbackException in case of an unexpected rollback
+	 * that the transaction coordinator initiated
+	 * @throws HeuristicCompletionException in case of a transaction failure
+	 * caused by a heuristic decision on the side of the transaction coordinator
+	 * @throws TransactionSystemException in case of commit or system errors
+	 * (typically caused by fundamental resource failures)
 	 * @throws IllegalTransactionStateException if the given transaction
 	 * is already completed (that is, committed or rolled back)
 	 * @see TransactionStatus#setRollbackOnly
@@ -97,7 +108,8 @@ public interface PlatformTransactionManager {
 	 * returns, even in case of a commit exception. Consequently, a rollback call
 	 * after commit failure will lead to an IllegalTransactionStateException.
 	 * @param status object returned by the <code>getTransaction</code> method
-	 * @throws TransactionException in case of system errors
+	 * @throws TransactionSystemException in case of rollback or system errors
+	 * (typically caused by fundamental resource failures)
 	 * @throws IllegalTransactionStateException if the given transaction
 	 * is already completed (that is, committed or rolled back)
 	 */
