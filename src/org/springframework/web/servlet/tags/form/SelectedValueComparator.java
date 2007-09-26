@@ -146,14 +146,7 @@ abstract class SelectedValueComparator {
 	private static boolean exhaustiveCompare(
 			Object boundValue, Object candidate, PropertyEditor propertyEditor, Map convertedValueCache) {
 
-		String candidateDisplayString = null;
-		if (propertyEditor != null && (!(candidate instanceof String))) {
-			propertyEditor.setValue(candidate);
-			candidateDisplayString = propertyEditor.getAsText();
-		}
-		else {
-			candidateDisplayString = ObjectUtils.getDisplayString(candidate);
-		}
+		String candidateDisplayString = ValueFormatter.getDisplayString(candidate, propertyEditor, false);
 		if (boundValue instanceof LabeledEnum) {
 			LabeledEnum labeledEnum = (LabeledEnum) boundValue;
 			String enumCodeAsString = ObjectUtils.getDisplayString(labeledEnum.getCode());

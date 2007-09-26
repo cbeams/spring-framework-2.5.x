@@ -41,10 +41,6 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  */
 public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 
-	/** Helper for rendering values into HTML */
-	private final ValueFormatter valueFormatter = new ValueFormatter();
-
-
 	/**
 	 * Evaluate the supplied value for the supplied attribute name. If the supplied value
 	 * is <code>null</code> then <code>null</code> is returned, otherwise evaluation is
@@ -99,7 +95,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
 	 */
 	protected String getDisplayString(Object value) {
-		return this.valueFormatter.getDisplayString(value, isHtmlEscape());
+		return ValueFormatter.getDisplayString(value, isHtmlEscape());
 	}
 
 	/**
@@ -109,7 +105,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * to obtain the display value.
 	 */
 	protected String getDisplayString(Object value, PropertyEditor propertyEditor) {
-		return this.valueFormatter.getDisplayString(value, propertyEditor, isHtmlEscape());
+		return ValueFormatter.getDisplayString(value, propertyEditor, isHtmlEscape());
 	}
 
 	/**
