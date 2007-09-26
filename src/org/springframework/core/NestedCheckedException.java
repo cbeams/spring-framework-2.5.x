@@ -19,11 +19,6 @@ package org.springframework.core;
 /**
  * Handy class for wrapping checked <code>Exceptions</code> with a root cause.
  *
- * <p>This time-honored technique is no longer necessary in Java 1.4, which
- * finally provides built-in support for exception nesting. Thus exceptions in
- * applications written to use Java 1.4 need not extend this class. To ease
- * migration, this class mirrors Java 1.4's nested exceptions as closely as possible.
- *
  * <p>This class is <code>abstract</code> to force the programmer to extend
  * the class. <code>getMessage</code> will include nested exception
  * information; <code>printStackTrace</code> and other like methods will
@@ -78,11 +73,11 @@ public abstract class NestedCheckedException extends Exception {
 	 * @return the innermost exception, or <code>null</code> if none
 	 */
 	public Throwable getRootCause() {
-		Throwable rootCause = getCause();
-		if (rootCause != null) {
-			while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-				rootCause = rootCause.getCause();
-			}
+		Throwable rootCause = null;
+		Throwable cause = getCause();
+		while (cause != null && cause != rootCause) {
+			rootCause = cause;
+			cause = cause.getCause();
 		}
 		return rootCause;
 	}
@@ -104,8 +99,6 @@ public abstract class NestedCheckedException extends Exception {
 	 * Check whether this exception contains an exception of the given type:
 	 * either it is of the given class itself or it contains a nested cause
 	 * of the given type.
-	 * <p>Currently just traverses <code>NestedCheckedException</code> causes.
-	 * Will use the JDK 1.4 exception cause mechanism once Spring requires JDK 1.4.
 	 * @param exType the exception type to look for
 	 * @return whether there is a nested exception of the specified type
 	 */
@@ -117,11 +110,23 @@ public abstract class NestedCheckedException extends Exception {
 			return true;
 		}
 		Throwable cause = getCause();
+		if (cause == this) {
+			return false;
+		}
 		if (cause instanceof NestedCheckedException) {
 			return ((NestedCheckedException) cause).contains(exType);
 		}
 		else {
-			return (cause != null && exType.isInstance(cause));
+			while (cause != null) {
+				if (exType.isInstance(cause)) {
+					return true;
+				}
+				if (cause.getCause() == cause) {
+					break;
+				}
+				cause = cause.getCause();
+			}
+			return false;
 		}
 	}
 
