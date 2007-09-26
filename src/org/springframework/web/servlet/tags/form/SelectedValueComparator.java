@@ -119,16 +119,7 @@ abstract class SelectedValueComparator {
 	}
 
 	private static Object getBoundValue(BindStatus bindStatus) {
-		if (bindStatus == null) {
-			return null;
-		}
-		if (bindStatus.getEditor() != null) {
-			Object editorValue = bindStatus.getEditor().getValue();
-			if (editorValue != null) {
-				return editorValue;
-			}
-		}
-		return bindStatus.getValue();
+		return (bindStatus != null ? bindStatus.getValue() : null);
 	}
 
 	private static boolean exhaustiveCollectionCompare(
@@ -155,7 +146,14 @@ abstract class SelectedValueComparator {
 	private static boolean exhaustiveCompare(
 			Object boundValue, Object candidate, PropertyEditor propertyEditor, Map convertedValueCache) {
 
-		String candidateDisplayString = ObjectUtils.getDisplayString(candidate);
+		String candidateDisplayString = null;
+		if (propertyEditor != null && (!(candidate instanceof String))) {
+			propertyEditor.setValue(candidate);
+			candidateDisplayString = propertyEditor.getAsText();
+		}
+		else {
+			candidateDisplayString = ObjectUtils.getDisplayString(candidate);
+		}
 		if (boundValue instanceof LabeledEnum) {
 			LabeledEnum labeledEnum = (LabeledEnum) boundValue;
 			String enumCodeAsString = ObjectUtils.getDisplayString(labeledEnum.getCode());
@@ -189,23 +187,14 @@ abstract class SelectedValueComparator {
 				candidateAsValue = (String) convertedValueCache.get(propertyEditor);
 			}
 			else {
-				Object originalValue = propertyEditor.getValue();
-				try {
-					propertyEditor.setAsText(candidateAsString);
-					candidateAsValue = propertyEditor.getValue();
-					if (convertedValueCache != null) {
-						convertedValueCache.put(propertyEditor, candidateAsValue);
-					}
-				}
-				finally {
-					propertyEditor.setValue(originalValue);
+				propertyEditor.setAsText(candidateAsString);
+				candidateAsValue = propertyEditor.getValue();
+				if (convertedValueCache != null) {
+					convertedValueCache.put(propertyEditor, candidateAsValue);
 				}
 			}
 			if (ObjectUtils.nullSafeEquals(boundValue, candidateAsValue)) {
 				return true;
-			}
-			if (propertyEditor.getValue() != null) {
-				return ObjectUtils.nullSafeEquals(candidateAsString, propertyEditor.getAsText());
 			}
 		}
 		return false;
