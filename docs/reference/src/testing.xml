@@ -435,9 +435,11 @@
       contains <classname>SimpleJdbcTestUtils</classname>, which is a
       Java-5-based collection of JDBC related utility functions intended to
       simplify standard database testing scenarios. <emphasis>Note that <link
-      linkend="testcontext-support-classes-junit38"><classname>AbstractTransactionalJUnit38SpringContextTests</classname></link>
+      linkend="testcontext-support-classes-junit38"><classname>AbstractTransactionalJUnit38SpringContextTests</classname></link>,
+      <link
+      linkend="testcontext-support-classes-junit44"><classname>AbstractTransactionalJUnit4SpringContextTests</classname></link>,
       and <link
-      linkend="testcontext-support-classes-junit44"><classname>AbstractTransactionalJUnit4SpringContextTests</classname></link>
+      linkend="testcontext-support-classes-testng"><classname>AbstractTransactionalTestNGSpringContextTests</classname></link>
       provide convenience methods which delegate to
       <classname>SimpleJdbcTestUtils</classname> internally.</emphasis></para>
     </section>
@@ -1082,11 +1084,12 @@ public void testProcessWithoutTransaction() {
       configuration.</para>
 
       <para>In addition to generic testing infrastructure, the TestContext
-      framework provides explicit support for JUnit 3.8 and JUnit 4.4 in the
-      form of <literal>abstract</literal> support classes. For JUnit 4.4, the
-      framework also provides a custom <interfacename>Runner</interfacename>
-      which allows one to write test classes that are not required to extend a
-      particular class hierarchy.</para>
+      framework provides explicit support for JUnit 3.8, JUnit 4.4, and TestNG
+      in the form of <literal>abstract</literal> support classes. For JUnit
+      4.4, the framework also provides a custom
+      <interfacename>Runner</interfacename> which allows one to write test
+      classes that are not required to extend a particular class
+      hierarchy.</para>
 
       <para>The following section provides an overview of the internals of the
       TestContext framework. If you are only interested in using the framework
@@ -1183,8 +1186,9 @@ public void testProcessWithoutTransaction() {
         supplied to the test instance (provided the
         <classname>DependencyInjectionTestExecutionListener</classname> has
         been configured, which is the default). Note that
-        <classname>AbstractJUnit38SpringContextTests</classname> and
-        <classname>AbstractJUnit4SpringContextTests</classname> already
+        <classname>AbstractJUnit38SpringContextTests</classname>,
+        <classname>AbstractJUnit4SpringContextTests</classname>, and
+        <classname>AbstractTestNGSpringContextTests</classname> already
         implement <interfacename>ApplicationContextAware</interfacename> and
         therefore provide this functionality out-of-the-box.</para>
 
@@ -1249,10 +1253,10 @@ public class MyTest {
         the following example, the
         <interfacename>ApplicationContext</interfacename> for
         <classname>ExtendedTest</classname> will be loaded from
-        "base-context.xml" <emphasis role="bold">and</emphasis>
-        "extended-context.xml", in that order. Beans defined in
-        "extended-context.xml" may therefore override those defined in
-        "base-context.xml".</para>
+        "/base-context.xml" <emphasis role="bold">and</emphasis>
+        "/extended-context.xml", in that order. Beans defined in
+        "/extended-context.xml" may therefore override those defined in
+        "/base-context.xml".</para>
 
         <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// ApplicationContext will be loaded from <literal>"/base-context.xml"</literal> in the root of the classpath</lineannotation>
@@ -1261,9 +1265,9 @@ public class BaseTest {
     <lineannotation>// class body...</lineannotation>
 }
 
-<lineannotation>// ApplicationContext will be loaded from <literal>"/base-context.xml"</literal> and <literal>"extended-context.xml""</literal></lineannotation>
+<lineannotation>// ApplicationContext will be loaded from <literal>"/base-context.xml"</literal> and <literal>"/extended-context.xml"</literal></lineannotation>
 <lineannotation>// in the root of the classpath</lineannotation>
-<emphasis role="bold">@ContextConfiguration(locations={"extended-context.xml"})</emphasis>
+<emphasis role="bold">@ContextConfiguration(locations={"/extended-context.xml"})</emphasis>
 public class ExtendedTest extends BaseTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
@@ -1501,6 +1505,15 @@ public final class HibernateTitleDaoTests {
         or not a transaction should commit for a particular test method, you
         may use the <interfacename>@Rollback</interfacename> annotation to
         override the class-level default rollback setting.</para>
+
+        <para><emphasis>Note that <link
+        linkend="testcontext-support-classes-junit38"><classname>AbstractTransactionalJUnit38SpringContextTests</classname></link>,
+        <link
+        linkend="testcontext-support-classes-junit44"><classname>AbstractTransactionalJUnit4SpringContextTests</classname></link>,
+        and <link
+        linkend="testcontext-support-classes-testng"><classname>AbstractTransactionalTestNGSpringContextTests</classname></link>
+        are pre-configured for transactional support at the class level.
+        </emphasis></para>
 
         <para>You will occasionally find that you need to execute certain code
         before or after a transactional test method but outside the
@@ -1751,6 +1764,88 @@ public class SimpleTest {
 	}
 }</programlisting>
         </section>
+
+        <section id="testcontext-support-classes-testng">
+          <title>TestNG support classes</title>
+
+          <para>The <literal>org.springframework.test.context.testng</literal>
+          package provides support classes for TestNG based test cases.</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><classname>AbstractTestNGSpringContextTests</classname>:</para>
+
+              <para>Abstract base test class which integrates the
+              <emphasis>Spring TestContext Framework</emphasis> with explicit
+              <classname>ApplicationContext</classname> testing support in a
+              TestNG environment.</para>
+
+              <para>When you extend
+              <classname>AbstractTestNGSpringContextTests</classname> you will
+              have access to the following <literal>protected</literal>
+              instance variables:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>applicationContext</literal>: use this to
+                  perform explicit bean lookups or to test the state of the
+                  context as a whole.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para><classname>AbstractTransactionalTestNGSpringContextTests</classname>:</para>
+
+              <para>Abstract <emphasis>transactional</emphasis> extension of
+              <classname>AbstractTestNGSpringContextTests</classname> that
+              adds some convenience functionality for JDBC access. Expects a
+              <classname>javax.sql.DataSource</classname> bean and a
+              <interfacename>PlatformTransactionManager</interfacename> bean
+              to be defined in the
+              <classname>ApplicationContext</classname>.</para>
+
+              <para>When you extend
+              <classname>AbstractTransactionalTestNGSpringContextTests</classname>
+              you will have access to the following
+              <literal>protected</literal> instance variables:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>applicationContext</literal>: inherited from
+                  the <classname>AbstractTestNGSpringContextTests</classname>
+                  superclass. Use this to perform explicit bean lookups or to
+                  test the state of the context as a whole.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>simpleJdbcTemplate</literal>: useful for
+                  querying to confirm state. For example, you might query
+                  before and after testing application code that creates an
+                  object and persists it using an ORM tool, to verify that the
+                  data appears in the database. (Spring will ensure that the
+                  query runs in the scope of the same transaction.) You will
+                  need to tell your ORM tool to 'flush' its changes for this
+                  to work correctly, for example using the
+                  <methodname>flush()</methodname> method on Hibernate's
+                  <classname>Session</classname> interface.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+
+          <para><emphasis>Note: These classes serve only as a convenience for
+          extension. If you do not wish for your test classes to be tied to a
+          Spring-specific class hierarchy - for example, if you wish to
+          directly extend the class you are testing - you may configure your
+          own custom test classes by using
+          <interfacename>@ContextConfiguration</interfacename>,
+          <interfacename>@TestExecutionListeners</interfacename>, etc. and by
+          manually instrumenting your test class with a
+          <classname>TestContextManager</classname>. See the source code of
+          <classname>AbstractTestNGSpringContextTests</classname> for an
+          example of how to instrument your test class.</emphasis></para>
+        </section>
       </section>
 
       <!-- ================================================================= -->
@@ -1875,8 +1970,8 @@ public class CustomConfiguredApplicationContextTests {
 }</programlisting>
 
             <para>Note: <interfacename>@ContextConfiguration</interfacename>
-            also provides support for <emphasis>inherited</emphasis> resource
-            locations. See the <link
+            provides support for <emphasis>inherited</emphasis> resource
+            locations by default. See the <link
             linkend="testcontext-ctx-management">Context management and
             caching</link> section and JavaDoc for an example and further
             details.</para>
@@ -1900,8 +1995,8 @@ public class CustomTestExecutionListenerTests {
 }</programlisting>
 
             <para>Note: <interfacename>@TestExecutionListeners</interfacename>
-            also provides support for <emphasis>inherited</emphasis>
-            listeners. See the JavaDoc for an example and further
+            provides support for <emphasis>inherited</emphasis> listeners by
+            default. See the JavaDoc for an example and further
             details.</para>
           </listitem>
 
