@@ -759,10 +759,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 							pd.getReadMethod(), tokens.keys.length);
 				}
 				Map map = (Map) propValue;
-				Object oldValue = null;
-				if (isExtractOldValueForEditor()) {
-					oldValue = map.get(key);
-				}
 				Object convertedMapKey = null;
 				Object convertedMapValue = null;
 				try {
@@ -772,8 +768,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 				catch (IllegalArgumentException ex) {
 					PropertyChangeEvent pce =
-							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, pv.getValue());
+							new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, null, pv.getValue());
 					throw new TypeMismatchException(pce, mapKeyType, ex);
+				}
+				Object oldValue = null;
+				if (isExtractOldValueForEditor()) {
+					oldValue = map.get(convertedMapKey);
 				}
 				try {
 					// Pass full property name and old value in here, since we want full
