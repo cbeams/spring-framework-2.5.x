@@ -21,12 +21,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.activation.FileTypeMap;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -85,6 +89,8 @@ public class MockServletContext implements ServletContext {
 	private final String resourceBasePath;
 
 	private String contextPath = "";
+
+	private final Map contexts = new HashMap();
 
 	private final Properties initParameters = new Properties();
 
@@ -151,16 +157,24 @@ public class MockServletContext implements ServletContext {
 	}
 
 
-	public ServletContext getContext(String name) {
-		throw new UnsupportedOperationException("getContext");
-	}
-
 	public void setContextPath(String contextPath) {
-		this.contextPath = contextPath;
+		this.contextPath = (contextPath != null ? contextPath : "");
 	}
 
+	/* This is a Servlet API 2.5 method. */
 	public String getContextPath() {
 		return this.contextPath;
+	}
+
+	public void registerContext(String contextPath, ServletContext context) {
+		this.contexts.put(contextPath, context);
+	}
+
+	public ServletContext getContext(String contextPath) {
+		if (this.contextPath.equals(contextPath)) {
+			return this;
+		}
+		return (ServletContext) this.contexts.get(contextPath);
 	}
 
 	public int getMajorVersion() {
@@ -168,11 +182,11 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public int getMinorVersion() {
-		return 4;
+		return 5;
 	}
 
 	public String getMimeType(String filePath) {
-		throw new UnsupportedOperationException("getMimeType");
+		return MimeTypeResolver.getMimeType(filePath);
 	}
 
 	public Set getResourcePaths(String path) {
@@ -239,19 +253,19 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public RequestDispatcher getNamedDispatcher(String path) {
-		throw new UnsupportedOperationException("getNamedDispatcher");
+		return null;
 	}
 
 	public Servlet getServlet(String name) {
-		throw new UnsupportedOperationException("getServlet");
+		return null;
 	}
 
 	public Enumeration getServlets() {
-		throw new UnsupportedOperationException("getServlets");
+		return Collections.enumeration(Collections.EMPTY_SET);
 	}
 
 	public Enumeration getServletNames() {
-		throw new UnsupportedOperationException("getServletNames");
+		return Collections.enumeration(Collections.EMPTY_SET);
 	}
 
 	public void log(String message) {
@@ -325,6 +339,18 @@ public class MockServletContext implements ServletContext {
 
 	public String getServletContextName() {
 		return this.servletContextName;
+	}
+
+
+	/**
+	 * Inner factory class used to just introduce a Java Activation Framework
+	 * dependency when actually asked to resolve a MIME type.
+	 */
+	private static class MimeTypeResolver {
+
+		public static String getMimeType(String filePath) {
+			return FileTypeMap.getDefaultFileTypeMap().getContentType(filePath);
+		}
 	}
 
 }
