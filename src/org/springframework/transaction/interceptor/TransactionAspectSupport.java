@@ -26,6 +26,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -331,6 +332,11 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 				try {
 					getTransactionManager().rollback(txInfo.getTransactionStatus());
 				}
+				catch (TransactionSystemException ex2) {
+					logger.error("Application exception overridden by rollback exception", ex);
+					ex2.initApplicationException(ex);
+					throw ex2;
+				}
 				catch (RuntimeException ex2) {
 					logger.error("Application exception overridden by rollback exception", ex);
 					throw ex2;
@@ -345,6 +351,11 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 				// Will still roll back if TransactionStatus.isRollbackOnly() is true.
 				try {
 					getTransactionManager().commit(txInfo.getTransactionStatus());
+				}
+				catch (TransactionSystemException ex2) {
+					logger.error("Application exception overridden by commit exception", ex);
+					ex2.initApplicationException(ex);
+					throw ex2;
 				}
 				catch (RuntimeException ex2) {
 					logger.error("Application exception overridden by commit exception", ex);

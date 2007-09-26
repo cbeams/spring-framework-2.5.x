@@ -24,6 +24,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.TransactionSystemException;
 
 /**
  * Template class that simplifies programmatic transaction demarcation and
@@ -151,6 +152,11 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 		logger.debug("Initiating transaction rollback on application exception", ex);
 		try {
 			this.transactionManager.rollback(status);
+		}
+		catch (TransactionSystemException ex2) {
+			logger.error("Application exception overridden by rollback exception", ex);
+			ex2.initApplicationException(ex);
+			throw ex2;
 		}
 		catch (RuntimeException ex2) {
 			logger.error("Application exception overridden by rollback exception", ex);
