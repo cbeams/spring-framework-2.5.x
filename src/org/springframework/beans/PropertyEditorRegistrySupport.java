@@ -159,13 +159,11 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(File.class, new FileEditor());
 		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
 		this.defaultEditors.put(Locale.class, new LocaleEditor());
+		this.defaultEditors.put(Pattern.class, new PatternEditor());
 		this.defaultEditors.put(Properties.class, new PropertiesEditor());
 		this.defaultEditors.put(Resource[].class, new ResourceArrayPropertyEditor());
-		this.defaultEditors.put(URL.class, new URLEditor());
-
-		// Register JDK-1.4-specific editors.
 		this.defaultEditors.put(URI.class, new URIEditor());
-		this.defaultEditors.put(Pattern.class, new PatternEditor());
+		this.defaultEditors.put(URL.class, new URLEditor());
 
 		// Default instances of collection editors.
 		// Can be overridden by registering custom instances of those as custom editors.
