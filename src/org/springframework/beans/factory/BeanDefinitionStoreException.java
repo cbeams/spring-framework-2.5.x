@@ -17,7 +17,6 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.core.io.Resource;
 
 /**
  * Exception thrown when a BeanFactory encounters an internal error, and
@@ -96,35 +95,6 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 		super("Error registering bean with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, cause);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
-	}
-
-	/**
-	 * Create a new BeanDefinitionStoreException.
-	 * @param documentLocation descriptor of the resource location that the bean definition came from
-	 * @param beanName the name of the bean requested
-	 * @param msg the detail message (appended to an introductory message that indicates
-	 * the resource and the name of the bean)
-	 * @deprecated as of Spring 2.0,
-	 * in favor of the constructor variant with a resource description argument
-	 * @see #BeanDefinitionStoreException(String, String, String)
-	 */
-	public BeanDefinitionStoreException(Resource documentLocation, String beanName, String msg) {
-		this(documentLocation.getDescription(), beanName, msg, null);
-	}
-
-	/**
-	 * Create a new BeanDefinitionStoreException.
-	 * @param documentLocation descriptor of the resource location that the bean definition came from
-	 * @param beanName the name of the bean requested
-	 * @param msg the detail message (appended to an introductory message that indicates
-	 * the resource and the name of the bean)
-	 * @param cause the root cause
-	 * @deprecated as of Spring 2.0,
-	 * in favor of the constructor variant with a resource description argument
-	 * @see #BeanDefinitionStoreException(String, String, String, Throwable)
-	 */
-	public BeanDefinitionStoreException(Resource documentLocation, String beanName, String msg, Throwable cause) {
-		this(documentLocation.getDescription(), beanName, msg, cause);
 	}
 
 
