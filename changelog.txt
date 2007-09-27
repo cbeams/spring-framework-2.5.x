@@ -83,6 +83,7 @@ Package org.springframework.orm
 
 Package org.springframework.remoting
 * (Jndi)RmiClientInterceptor resets stub before a refresh attempt, avoiding race condition in case of registry restart
+* fixed Hessian/BurlapClientInterceptor's "convertHessian/BurlapAccessException" method to return the exception properly
 * LocalJaxRpcServiceFactory trims whitespace from "namespaceUri" values
 
 Package org.springframework.scheduling
