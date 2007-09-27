@@ -570,7 +570,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	/**
 	 * Initialize the given binder instance, for example with custom editors.
 	 * @deprecated since Spring 2.0:
-	 * use <code>initBinder(HttpServletRequest, ServletRequestDataBinder) instead
+	 * use <code>initBinder(HttpServletRequest, ServletRequestDataBinder)</code> instead
 	 */
 	protected void initBinder(ServletRequest request, ServletRequestDataBinder binder)
 	    throws Exception {
