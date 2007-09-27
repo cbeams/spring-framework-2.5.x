@@ -107,9 +107,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * <p>Such a registrar creates new PropertyEditor instances and registers them
 	 * on the given registry, fresh for each bean creation attempt. This avoids
 	 * the need for synchronization on custom editors; hence, it is generally
-	 * preferable to use this method instead of <code>registerCustomEditor</code>.
+	 * preferable to use this method instead of {@link #registerCustomEditor}.
 	 * @param registrar the PropertyEditorRegistrar to register
-	 * @see #registerCustomEditor
 	 */
 	void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar);
 
@@ -118,11 +117,11 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * given type. To be invoked during factory configuration.
 	 * <p>Note that this method will register a shared custom editor instance;
 	 * access to that instance will be synchronized for thread-safety. It is
-	 * generally prefable to use <code>addPropertyEditorRegistrar</code> instead
+	 * generally prefable to use {@link #addPropertyEditorRegistrar} instead
 	 * of this method, to avoid for the need for synchronization on custom editors.
 	 * @param requiredType type of the property
 	 * @param propertyEditor editor to register
-	 * @see #addPropertyEditorRegistrar
+	 * @deprecated as of Spring 2.0.7, in favor of {@link #addPropertyEditorRegistrar}
 	 */
 	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
 
