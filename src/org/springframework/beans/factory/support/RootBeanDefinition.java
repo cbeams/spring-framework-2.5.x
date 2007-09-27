@@ -16,24 +16,37 @@
 
 package org.springframework.beans.factory.support;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 
 /**
- * Root bean definitions are the most common type of bean definition.
- * They do not derive from a parent bean definition, and usually have a
- * class plus optionally constructor argument values and property values.
+ * A root bean definition represents the merged bean definition that backs
+ * a specific bean in a Spring BeanFactory at runtime. It might have been created
+ * from multiple original bean definitions that inherit from each other,
+ * typically registered as {@link GenericBeanDefinition GenericBeanDefinitions}.
+ * A root bean definition is essentially the 'unified' bean definition view at runtime.
  *
- * <p>Note that root bean definitions do not have to specify a bean class:
- * This can be useful for deriving children from such definitions, each with
- * its own bean class but inheriting common property values and other settings.
+ * <p>Root bean definitions may also be used for registering individual bean definitions
+ * in the configuration phase. However, since Spring 2.5, the preferred way to register
+ * bean definitions programmatically is the {@link GenericBeanDefinition} class.
+ * GenericBeanDefinition has the advantage that it allows to dynamically define
+ * parent dependencies, not 'hard-coding' the role as a root bean definition.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see GenericBeanDefinition
  * @see ChildBeanDefinition
  */
 public class RootBeanDefinition extends AbstractBeanDefinition {
+
+	private final Set externallyManagedInitMethods = Collections.synchronizedSet(new HashSet());
+
+	private final Set externallyManagedDestroyMethods = Collections.synchronizedSet(new HashSet());
 
 	/** Package-visible field for caching the resolved constructor or factory method */
 	volatile Object resolvedConstructorOrFactoryMethod;
@@ -185,6 +198,23 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		if (parentName != null) {
 			throw new IllegalArgumentException("Root bean cannot be changed into a child bean with parent reference");
 		}
+	}
+
+
+	public void registerExternallyManagedInitMethod(String initMethod) {
+		this.externallyManagedInitMethods.add(initMethod);
+	}
+
+	public boolean isExternallyManagedInitMethod(String initMethod) {
+		return this.externallyManagedInitMethods.contains(initMethod);
+	}
+
+	public void registerExternallyManagedDestroyMethod(String destroyMethod) {
+		this.externallyManagedDestroyMethods.add(destroyMethod);
+	}
+
+	public boolean isExternallyManagedDestroyMethod(String destroyMethod) {
+		return this.externallyManagedDestroyMethods.contains(destroyMethod);
 	}
 
 

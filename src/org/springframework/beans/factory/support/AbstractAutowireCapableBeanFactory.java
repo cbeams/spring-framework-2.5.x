@@ -298,15 +298,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	public Object configureBean(Object existingBean, String beanName) throws BeansException {
 		BeanDefinition bd = getMergedBeanDefinition(beanName);
-		if (!(bd instanceof AbstractBeanDefinition)) {
-			throw new BeanDefinitionStoreException(
-					"configureBean only supported for a BeanDefinition that extends AbstractBeanDefinition");
+		if (!(bd instanceof RootBeanDefinition)) {
+			throw new BeanDefinitionStoreException("configureBean only supported for a merged RootBeanDefinition");
 		}
-		AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
+		RootBeanDefinition rbd = (RootBeanDefinition) bd;
 		BeanWrapper bw = new BeanWrapperImpl(existingBean);
 		initBeanWrapper(bw);
-		populateBean(beanName, abd, bw);
-		return initializeBean(beanName, existingBean, abd);
+		populateBean(beanName, rbd, bw);
+		return initializeBean(beanName, existingBean, rbd);
 	}
 
 	public Object initializeBean(Object existingBean, String beanName) {
@@ -471,6 +470,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Validation of method overrides failed", ex);
 		}
 
+		applyMergedBeanDefinitionPostProcessors(mbd, beanName);
+
 		String errorMessage = null;
 
 		try {
@@ -478,8 +479,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			errorMessage = "BeanPostProcessor before instantiation of bean failed";
 
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-			if (beanClass != null &&
-					!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+			if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 				Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
 				if (bean != null) {
 					bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
@@ -589,6 +589,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * type checking to avoid creation of the target bean.
 	 * @param beanName the name of the bean (for error handling purposes)
 	 * @param mbd the merged bean definition for the bean
+	 * @param typeMatchOnly whether the returned {@link Class} is only used
+	 * for internal type matching purposes (that is, never exposed to application code)
 	 * @return the type for the bean if determinable, or <code>null</code> else
 	 * @see #createBean
 	 */
@@ -754,6 +756,26 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					"Bean instance of type [" + instance.getClass() + "] is not a FactoryBean");
 		}
 		return (FactoryBean) instance;
+	}
+
+	/**
+	 * Apply MergedBeanDefinitionPostProcessors to the specified bean definition,
+	 * invoking their <code>postProcessMergedBeanDefinition</code> methods.
+	 * @param mbd the merged bean definition for the bean
+	 * @param beanName the name of the bean
+	 * @throws BeansException if any post-processing failed
+	 * @see MergedBeanDefinitionPostProcessor#postProcessMergedBeanDefinition
+	 */
+	protected void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, String beanName)
+			throws BeansException {
+
+		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
+			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
+			if (beanProcessor instanceof MergedBeanDefinitionPostProcessor) {
+				MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) beanProcessor;
+				bdp.postProcessMergedBeanDefinition(mbd, beanName);
+			}
+		}
 	}
 
 	/**
@@ -1271,7 +1293,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #invokeInitMethods
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
-	protected Object initializeBean(String beanName, Object bean, AbstractBeanDefinition mbd) {
+	protected Object initializeBean(String beanName, Object bean, RootBeanDefinition mbd) {
 		if (bean instanceof BeanNameAware) {
 			((BeanNameAware) bean).setBeanName(beanName);
 		}
@@ -1316,16 +1338,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @throws Throwable if thrown by init methods or by the invocation process
 	 * @see #invokeCustomInitMethod
 	 */
-	protected void invokeInitMethods(String beanName, Object bean, AbstractBeanDefinition mbd)
+	protected void invokeInitMethods(String beanName, Object bean, RootBeanDefinition mbd)
 			throws Throwable {
 
 		boolean isInitializingBean = (bean instanceof InitializingBean);
-		if (isInitializingBean) {
+		if (isInitializingBean && (mbd == null || !mbd.isExternallyManagedInitMethod("afterPropertiesSet"))) {
 			((InitializingBean) bean).afterPropertiesSet();
 		}
 
 		String initMethodName = (mbd != null ? mbd.getInitMethodName() : null);
-		if (initMethodName != null && !(isInitializingBean && "afterPropertiesSet".equals(initMethodName))) {
+		if (initMethodName != null && !(isInitializingBean && "afterPropertiesSet".equals(initMethodName)) &&
+				!mbd.isExternallyManagedInitMethod(initMethodName)) {
 			invokeCustomInitMethod(beanName, bean, initMethodName, mbd.isEnforceInitMethod());
 		}
 	}

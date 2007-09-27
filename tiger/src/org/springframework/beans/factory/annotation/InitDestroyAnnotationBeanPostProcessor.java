@@ -28,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ReflectionUtils;
@@ -62,7 +64,7 @@ import org.springframework.util.ReflectionUtils;
  * @see CommonAnnotationBeanPostProcessor
  */
 public class InitDestroyAnnotationBeanPostProcessor
-		implements DestructionAwareBeanPostProcessor, PriorityOrdered, Serializable {
+		implements DestructionAwareBeanPostProcessor, MergedBeanDefinitionPostProcessor, PriorityOrdered, Serializable {
 
 	private Class<? extends Annotation> initAnnotationType;
 
@@ -104,6 +106,16 @@ public class InitDestroyAnnotationBeanPostProcessor
 	  return this.order;
 	}
 
+
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, String beanName) {
+		LifecycleMetadata metadata = findLifecycleMetadata(beanDefinition.getBeanClass());
+		for (LifecycleElement lifecycleElement : metadata.getInitMethods()) {
+			beanDefinition.registerExternallyManagedInitMethod(lifecycleElement.getMethod().getName());
+		}
+		for (LifecycleElement lifecycleElement : metadata.getDestroyMethods()) {
+			beanDefinition.registerExternallyManagedDestroyMethod(lifecycleElement.getMethod().getName());
+		}
+	}
 
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		LifecycleMetadata metadata = findLifecycleMetadata(bean.getClass());
@@ -184,14 +196,22 @@ public class InitDestroyAnnotationBeanPostProcessor
 			this.initMethods.add(new LifecycleElement(method));
 		}
 
-		public void addDestroyMethod(Method method) {
-			this.destroyMethods.add(new LifecycleElement(method));
+		public Set<LifecycleElement> getInitMethods() {
+			return this.initMethods;
 		}
 
 		public void invokeInitMethods(Object target) throws Throwable {
 			for (LifecycleElement lifecycleElement : this.initMethods) {
 				lifecycleElement.invoke(target);
 			}
+		}
+
+		public void addDestroyMethod(Method method) {
+			this.destroyMethods.add(new LifecycleElement(method));
+		}
+
+		public Set<LifecycleElement> getDestroyMethods() {
+			return this.destroyMethods;
 		}
 
 		public void invokeDestroyMethods(Object target) throws Throwable {
@@ -214,6 +234,10 @@ public class InitDestroyAnnotationBeanPostProcessor
 				throw new IllegalStateException("Lifecycle method annotation requires a no-arg method: " + method);
 			}
 			this.method = method;
+		}
+
+		public Method getMethod() {
+			return this.method;
 		}
 
 		public void invoke(Object target) throws Throwable {

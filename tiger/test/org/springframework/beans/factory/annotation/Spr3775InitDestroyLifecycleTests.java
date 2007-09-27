@@ -24,9 +24,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -131,8 +131,7 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 				bean.destroyMethods);
 	}
 
-	// TODO 'Enable' test if shadowed init/destroy methods aren't called twice.
-	public void XXX_testJsr250AnnotationsWithShadowedMethods() {
+	public void testJsr250AnnotationsWithShadowedMethods() {
 		final Class<?> beanClass = CustomAnnotatedInitDestroyWithShadowedMethodsBean.class;
 		final DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit",
 				"customDestroy");
@@ -150,7 +149,6 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		final List<String> initMethods = new ArrayList<String>();
 		final List<String> destroyMethods = new ArrayList<String>();
 
-
 		public void afterPropertiesSet() throws Exception {
 			this.initMethods.add("afterPropertiesSet");
 		}
@@ -160,8 +158,9 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		}
 	}
 
-	public static class InitializingDisposableWithShadowedMethodsBean extends InitDestroyBean implements
-			InitializingBean, DisposableBean {
+
+	public static class InitializingDisposableWithShadowedMethodsBean extends InitDestroyBean
+			implements InitializingBean, DisposableBean {
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
@@ -174,11 +173,11 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		}
 	}
 
+
 	public static class CustomInitDestroyBean {
 
 		final List<String> initMethods = new ArrayList<String>();
 		final List<String> destroyMethods = new ArrayList<String>();
-
 
 		public void customInit() throws Exception {
 			this.initMethods.add("customInit");
@@ -189,8 +188,9 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		}
 	}
 
-	public static class CustomInitializingDisposableBean extends CustomInitDestroyBean implements InitializingBean,
-			DisposableBean {
+
+	public static class CustomInitializingDisposableBean extends CustomInitDestroyBean
+			implements InitializingBean, DisposableBean {
 
 		public void afterPropertiesSet() throws Exception {
 			this.initMethods.add("afterPropertiesSet");
@@ -200,6 +200,7 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 			this.destroyMethods.add("destroy");
 		}
 	}
+
 
 	public static class CustomAnnotatedInitDestroyBean extends CustomInitializingDisposableBean {
 
@@ -213,6 +214,7 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 			this.destroyMethods.add("preDestroy");
 		}
 	}
+
 
 	public static class CustomAnnotatedInitDestroyWithShadowedMethodsBean extends CustomInitializingDisposableBean {
 

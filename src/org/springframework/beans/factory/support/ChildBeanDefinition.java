@@ -23,22 +23,24 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Bean definition for beans which inherit settings from their parent.
- *
- * <p>Will use the bean class of the parent if none specified, but can
- * also override it. In the latter case, the child bean class must be
- * compatible with the parent, i.e. accept the parent's property values
- * and constructor argument values, if any.
+ * Child bean definitions have a fixed dependency on a parent bean definition.
  *
  * <p>A child bean definition will inherit constructor argument values,
  * property values and method overrides from the parent, with the option
  * to add new values. If init method, destroy method and/or static factory
  * method are specified, they will override the corresponding parent settings.
- *
- * <p>The remaining settings will <i>always</i> be taken from the child definition:
+ * The remaining settings will <i>always</i> be taken from the child definition:
  * depends on, autowire mode, dependency check, singleton, lazy init.
+ *
+ * <p><b>NOTE:</b> Since Spring 2.5, the preferred way to register bean
+ * definitions programmatically is the {@link GenericBeanDefinition} class,
+ * which allows to dynamically define parent dependencies through the
+ * {@link GenericBeanDefinition#setParentName} method. This effectively
+ * supersedes the ChildBeanDefinition class for most use cases.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @see GenericBeanDefinition
  * @see RootBeanDefinition
  */
 public class ChildBeanDefinition extends AbstractBeanDefinition {
