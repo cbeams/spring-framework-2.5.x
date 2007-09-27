@@ -35,7 +35,7 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Interceptor for accessing a Hessian service.
+ * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a Hessian service.
  * Supports authentication via username and password.
  * The service URL must be an HTTP URL exposing a Hessian service.
  *
@@ -189,11 +189,11 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	 */
 	protected RemoteAccessException convertHessianAccessException(Throwable ex) {
 		if (ex instanceof ConnectException) {
-			throw new RemoteConnectFailureException(
+			return new RemoteConnectFailureException(
 					"Cannot connect to Hessian remote service at [" + getServiceUrl() + "]", ex);
 		}
 		else {
-			throw new RemoteAccessException(
+			return new RemoteAccessException(
 			    "Cannot access Hessian remote service at [" + getServiceUrl() + "]", ex);
 		}
 	}
