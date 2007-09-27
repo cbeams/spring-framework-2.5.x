@@ -16,16 +16,14 @@
 
 package org.springframework.remoting.jaxrpc;
 
-import javax.xml.rpc.ServiceException;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.util.ClassUtils;
 
 /**
- * FactoryBean for a specific port of a JAX-RPC service.
- * Exposes a proxy for the port, to be used for bean references.
+ * {@link org.springframework.beans.factory.FactoryBean} for a specific port of a
+ * JAX-RPC service. Exposes a proxy for the port, to be used for bean references.
  * Inherits configuration properties from {@link JaxRpcPortClientInterceptor}.
  *
  * <p>This factory is typically used with an RMI service interface. Alternatively,
@@ -58,7 +56,7 @@ public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor
 		this.beanClassLoader = classLoader;
 	}
 
-	public void afterPropertiesSet() throws ServiceException {
+	public void afterPropertiesSet() {
 		if (getServiceInterface() == null) {
 			// Use JAX-RPC port interface (a traditional RMI interface)
 			// as service interface if none explicitly specified.

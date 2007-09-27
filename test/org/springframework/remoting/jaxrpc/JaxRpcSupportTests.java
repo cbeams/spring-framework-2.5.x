@@ -252,9 +252,9 @@ public class JaxRpcSupportTests extends TestCase {
 		factory.setServiceInterface(IRemoteBean.class);
 		try {
 			factory.afterPropertiesSet();
-			fail("Should have thrown ServiceException");
+			fail("Should have thrown RemoteLookupFailureException");
 		}
-		catch (ServiceException ex) {
+		catch (RemoteLookupFailureException ex) {
 			// expected
 		}
 	}
@@ -375,9 +375,9 @@ public class JaxRpcSupportTests extends TestCase {
 		factory.setServiceInterface(IRemoteBean.class);
 		try {
 			factory.afterPropertiesSet();
-			fail("Should have thrown ServiceException");
+			fail("Should have thrown RemoteLookupFailureException");
 		}
-		catch (ServiceException ex) {
+		catch (RemoteLookupFailureException ex) {
 			// expected
 		}
 	}

@@ -347,7 +347,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Prepares the JAX-RPC service and port if the "lookupServiceOnStartup"
 	 * is turned on (which it is by default).
 	 */
-	public void afterPropertiesSet() throws ServiceException {
+	public void afterPropertiesSet() {
 		if (this.lookupServiceOnStartup) {
 			prepare();
 		}
@@ -356,21 +356,14 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	/**
 	 * Create and initialize the JAX-RPC service for the specified port.
 	 * <p>Prepares a JAX-RPC stub if possible (if an RMI interface is available);
-	 * falls back to JAX-RPC dynamic calls else. Using dynamic calls can be
-	 * enforced through overriding <code>alwaysUseJaxRpcCall</code> to return true.
-	 * <p><code>postProcessJaxRpcService</code> and <code>postProcessPortStub</code>
+	 * falls back to JAX-RPC dynamic calls else. Using dynamic calls can be enforced
+	 * through overriding {@link #alwaysUseJaxRpcCall} to return <code>true</code>.
+	 * <p>{@link #postProcessJaxRpcService} and {@link #postProcessPortStub}
 	 * hooks are available for customization in subclasses. When using dynamic calls,
-	 * each can be post-processed via <code>postProcessJaxRpcCall</code>.
-	 * <p>Note: As of Spring 2.5, this method will always throw
-	 * RemoteLookupFailureException and not declare ServiceException anymore.
-	 * @throws ServiceException in case of service initialization failure
-	 * @throws RemoteLookupFailureException if port stub creation failed
-	 * @see #alwaysUseJaxRpcCall
-	 * @see #postProcessJaxRpcService
-	 * @see #postProcessPortStub
-	 * @see #postProcessJaxRpcCall
+	 * each can be post-processed via {@link #postProcessJaxRpcCall}.
+	 * @throws RemoteLookupFailureException if service initialization or port stub creation failed
 	 */
-	public void prepare() throws ServiceException, RemoteLookupFailureException {
+	public void prepare() throws RemoteLookupFailureException {
 		if (getPortName() == null) {
 			throw new IllegalArgumentException("Property 'portName' is required");
 		}
@@ -381,56 +374,62 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			// Cache the QName for the port.
 			this.portQName = getQName(getPortName());
 
-			Service service = getJaxRpcService();
-			if (service == null) {
-				service = createJaxRpcService();
-			}
-			else {
-				postProcessJaxRpcService(service);
-			}
-
-			Class portInterface = getPortInterface();
-			if (portInterface != null && !alwaysUseJaxRpcCall()) {
-				// JAX-RPC-compliant port interface -> using JAX-RPC stub for port.
-
-				if (logger.isDebugEnabled()) {
-					logger.debug("Creating JAX-RPC proxy for JAX-RPC port [" + this.portQName +
-							"], using port interface [" + portInterface.getName() + "]");
+			try {
+				Service service = getJaxRpcService();
+				if (service == null) {
+					service = createJaxRpcService();
 				}
-				Remote remoteObj = service.getPort(this.portQName, portInterface);
+				else {
+					postProcessJaxRpcService(service);
+				}
 
-				if (logger.isDebugEnabled()) {
-					Class serviceInterface = getServiceInterface();
-					if (serviceInterface != null) {
-						boolean isImpl = serviceInterface.isInstance(remoteObj);
-						logger.debug("Using service interface [" + serviceInterface.getName() + "] for JAX-RPC port [" +
-								this.portQName + "] - " + (!isImpl ? "not" : "") + " directly implemented");
+				Class portInterface = getPortInterface();
+				if (portInterface != null && !alwaysUseJaxRpcCall()) {
+					// JAX-RPC-compliant port interface -> using JAX-RPC stub for port.
+
+					if (logger.isDebugEnabled()) {
+						logger.debug("Creating JAX-RPC proxy for JAX-RPC port [" + this.portQName +
+								"], using port interface [" + portInterface.getName() + "]");
+					}
+					Remote remoteObj = service.getPort(this.portQName, portInterface);
+
+					if (logger.isDebugEnabled()) {
+						Class serviceInterface = getServiceInterface();
+						if (serviceInterface != null) {
+							boolean isImpl = serviceInterface.isInstance(remoteObj);
+							logger.debug("Using service interface [" + serviceInterface.getName() + "] for JAX-RPC port [" +
+									this.portQName + "] - " + (!isImpl ? "not" : "") + " directly implemented");
+						}
+					}
+
+					if (!(remoteObj instanceof Stub)) {
+						throw new RemoteLookupFailureException("Port stub of class [" + remoteObj.getClass().getName() +
+								"] is not a valid JAX-RPC stub: it does not implement interface [javax.xml.rpc.Stub]");
+					}
+					Stub stub = (Stub) remoteObj;
+
+					// Apply properties to JAX-RPC stub.
+					preparePortStub(stub);
+
+					// Allow for custom post-processing in subclasses.
+					postProcessPortStub(stub);
+
+					this.portStub = remoteObj;
+				}
+
+				else {
+					// No JAX-RPC-compliant port interface -> using JAX-RPC dynamic calls.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Using JAX-RPC dynamic calls for JAX-RPC port [" + this.portQName + "]");
 					}
 				}
 
-				if (!(remoteObj instanceof Stub)) {
-					throw new RemoteLookupFailureException("Port stub of class [" + remoteObj.getClass().getName() +
-							"] is not a valid JAX-RPC stub: it does not implement interface [javax.xml.rpc.Stub]");
-				}
-				Stub stub = (Stub) remoteObj;
-
-				// Apply properties to JAX-RPC stub.
-				preparePortStub(stub);
-
-				// Allow for custom post-processing in subclasses.
-				postProcessPortStub(stub);
-
-				this.portStub = remoteObj;
+				this.serviceToUse = service;
 			}
-
-			else {
-				// No JAX-RPC-compliant port interface -> using JAX-RPC dynamic calls.
-				if (logger.isDebugEnabled()) {
-					logger.debug("Using JAX-RPC dynamic calls for JAX-RPC port [" + this.portQName + "]");
-				}
+			catch (ServiceException ex) {
+				throw new RemoteLookupFailureException(
+						"Failed to initialize service for JAX-RPC port [" + this.portQName + "]", ex);
 			}
-
-			this.serviceToUse = service;
 		}
 	}
 
@@ -475,7 +474,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @see #setPortName
 	 * @see #getQName
 	 */
-	protected QName getPortQName() {
+	protected final QName getPortQName() {
 		return this.portQName;
 	}
 
@@ -556,12 +555,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		if (!this.lookupServiceOnStartup || this.refreshServiceAfterConnectFailure) {
 			synchronized (this.preparationMonitor) {
 				if (!isPrepared()) {
-					try {
-						prepare();
-					}
-					catch (ServiceException ex) {
-						throw new RemoteLookupFailureException("Preparation of JAX-RPC service failed", ex);
-					}
+					prepare();
 				}
 			}
 		}
@@ -651,19 +645,19 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Perform a JAX-RPC dynamic call for the given AOP method invocation.
 	 * Delegates to {@link #prepareJaxRpcCall} and
 	 * {@link #postProcessJaxRpcCall} for setting up the call object.
-	 * <p>Default implementation uses method name as JAX-RPC operation name
+	 * <p>The default implementation uses method name as JAX-RPC operation name
 	 * and method arguments as arguments for the JAX-RPC call. Can be
 	 * overridden in subclasses for custom operation names and/or arguments.
 	 * @param invocation the current AOP MethodInvocation that should
 	 * be converted to a JAX-RPC call
+	 * @param service the JAX-RPC Service to use for the call
 	 * @return the return value of the invocation, if any
 	 * @throws Throwable the exception thrown by the invocation, if any
-	 * @see #getPortQName
 	 * @see #prepareJaxRpcCall
 	 * @see #postProcessJaxRpcCall
 	 */
 	protected Object performJaxRpcCall(MethodInvocation invocation, Service service) throws Throwable {
-		QName portQName = getPortQName();
+		QName portQName = this.portQName;
 
 		// Create JAX-RPC call object, using the method name as operation name.
 		// Synchronized because of non-thread-safe Axis implementation!
