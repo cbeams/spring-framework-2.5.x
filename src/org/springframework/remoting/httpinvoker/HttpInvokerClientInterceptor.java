@@ -32,8 +32,9 @@ import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.util.ClassUtils;
 
 /**
- * Interceptor for accessing an HTTP invoker service.
- * The service URL must be an HTTP URL exposing an HTTP invoker service.
+ * {@link org.aopalliance.intercept.MethodInterceptor} for accessing an
+ * HTTP invoker service. The service URL must be an HTTP URL exposing
+ * an HTTP invoker service.
  *
  * <p>Serializes remote invocation objects and deserializes remote invocation
  * result objects. Uses Java serialization just like RMI, but provides the
