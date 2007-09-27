@@ -24,8 +24,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.util.ClassUtils;
 
 /**
- * FactoryBean for a specific port of a JAX-RPC service.
- * Exposes a proxy for the port, to be used for bean references.
+ * {@link org.springframework.beans.factory.FactoryBean} for a specific port of a
+ * JAX-RPC service. Exposes a proxy for the port, to be used for bean references.
  * Inherits configuration properties from {@link JaxRpcPortClientInterceptor}.
  *
  * <p>This factory is typically used with an RMI service interface. Alternatively,

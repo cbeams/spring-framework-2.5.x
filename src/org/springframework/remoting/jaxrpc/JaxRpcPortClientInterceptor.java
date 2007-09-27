@@ -111,7 +111,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	/**
 	 * Set a reference to an existing JAX-RPC Service instance,
 	 * for example obtained via {@link org.springframework.jndi.JndiObjectFactoryBean}.
-	 * If not set, LocalJaxRpcServiceFactory's properties have to be specified.
+	 * If not set, {@link LocalJaxRpcServiceFactory}'s properties have to be specified.
 	 * @see #setServiceFactoryClass
 	 * @see #setWsdlDocumentUrl
 	 * @see #setNamespaceUri
@@ -356,19 +356,15 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	/**
 	 * Create and initialize the JAX-RPC service for the specified port.
 	 * <p>Prepares a JAX-RPC stub if possible (if an RMI interface is available);
-	 * falls back to JAX-RPC dynamic calls else. Using dynamic calls can be
-	 * enforced through overriding <code>alwaysUseJaxRpcCall</code> to return true.
-	 * <p><code>postProcessJaxRpcService</code> and <code>postProcessPortStub</code>
+	 * falls back to JAX-RPC dynamic calls else. Using dynamic calls can be enforced
+	 * through overriding {@link #alwaysUseJaxRpcCall} to return <code>true</code>.
+	 * <p>{@link #postProcessJaxRpcService} and {@link #postProcessPortStub}
 	 * hooks are available for customization in subclasses. When using dynamic calls,
-	 * each can be post-processed via <code>postProcessJaxRpcCall</code>.
-	 * <p>Note: As of Spring 2.1, this method will always throw
+	 * each can be post-processed via {@link #postProcessJaxRpcCall}.
+	 * <p>Note: In the next major revision of Spring, this method will always throw
 	 * RemoteLookupFailureException and not declare ServiceException anymore.
 	 * @throws ServiceException in case of service initialization failure
 	 * @throws RemoteLookupFailureException if port stub creation failed
-	 * @see #alwaysUseJaxRpcCall
-	 * @see #postProcessJaxRpcService
-	 * @see #postProcessPortStub
-	 * @see #postProcessJaxRpcCall
 	 */
 	public void prepare() throws ServiceException, RemoteLookupFailureException {
 		if (getPortName() == null) {
@@ -651,11 +647,12 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Perform a JAX-RPC dynamic call for the given AOP method invocation.
 	 * Delegates to {@link #prepareJaxRpcCall} and
 	 * {@link #postProcessJaxRpcCall} for setting up the call object.
-	 * <p>Default implementation uses method name as JAX-RPC operation name
+	 * <p>The default implementation uses method name as JAX-RPC operation name
 	 * and method arguments as arguments for the JAX-RPC call. Can be
 	 * overridden in subclasses for custom operation names and/or arguments.
 	 * @param invocation the current AOP MethodInvocation that should
 	 * be converted to a JAX-RPC call
+	 * @param service the JAX-RPC Service to use for the call
 	 * @return the return value of the invocation, if any
 	 * @throws Throwable the exception thrown by the invocation, if any
 	 * @see #getPortQName

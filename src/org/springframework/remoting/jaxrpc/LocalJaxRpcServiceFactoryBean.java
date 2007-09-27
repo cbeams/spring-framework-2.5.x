@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,8 +23,9 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * FactoryBean for locally defined JAX-RPC Service references.
- * Uses LocalJaxRpcServiceFactory's facilities underneath.
+ * {@link org.springframework.beans.factory.FactoryBean} for locally
+ * defined JAX-RPC Service references.
+ * Uses {@link LocalJaxRpcServiceFactory}'s facilities underneath.
  *
  * <p>Alternatively, JAX-RPC Service references can be looked up
  * in the JNDI environment of the J2EE container.
@@ -40,9 +41,11 @@ public class LocalJaxRpcServiceFactoryBean extends LocalJaxRpcServiceFactory
 
 	private Service service;
 
+
 	public void afterPropertiesSet() throws ServiceException {
 		this.service = createJaxRpcService();
 	}
+
 
 	public Object getObject() throws Exception {
 		return this.service;
