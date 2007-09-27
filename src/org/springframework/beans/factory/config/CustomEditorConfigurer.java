@@ -123,6 +123,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 	 * class name of the required type as the key and the {@link PropertyEditor}
 	 * instance as the value.
 	 * @param customEditors said <code>Map</code> of editors (can be <code>null</code>) 
+	 * @deprecated as of Spring 2.0.7, in favor of {@link #setPropertyEditorRegistrars}
 	 * @see ConfigurableListableBeanFactory#registerCustomEditor
 	 */
 	public void setCustomEditors(Map customEditors) {
