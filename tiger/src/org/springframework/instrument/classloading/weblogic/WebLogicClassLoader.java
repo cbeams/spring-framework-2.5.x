@@ -33,7 +33,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Costin Leau
  * 
  */
-public class WebLogicClassLoader {
+class WebLogicClassLoader {
 
 	private static final String WL_CLASSLOADER_CLASSNAME = "weblogic.utils.classloaders.GenericClassLoader";
 
@@ -49,18 +49,20 @@ public class WebLogicClassLoader {
 
 	private final ClassLoader loader;
 
+	private final Class<?> wlGenericClassLoaderClass;
+
 	public WebLogicClassLoader(ClassLoader classLoader) {
 		Assert.notNull(classLoader);
 
-		Class wlClassLoader;
 		try {
-			wlClassLoader = classLoader.loadClass(WL_CLASSLOADER_CLASSNAME);
+			wlGenericClassLoaderClass = classLoader.loadClass(WL_CLASSLOADER_CLASSNAME);
 		}
 		catch (ClassNotFoundException ex) {
 			throw new IllegalArgumentException(EXCEPTION_MSG + classLoader, ex);
 		}
 
-		Assert.isInstanceOf(wlClassLoader, "ClassLoader must be instanceof " + wlClassLoader.getName());
+		Assert.isInstanceOf(wlGenericClassLoaderClass, classLoader, "ClassLoader must be instanceof "
+				+ wlGenericClassLoaderClass.getName());
 
 		this.loader = classLoader;
 	}
@@ -75,7 +77,7 @@ public class WebLogicClassLoader {
 		try {
 			// arguments for 'clone'-like method
 			Class[] constructorArgs = new Class[] { getClassFinderMethod.getReturnType(), ClassLoader.class };
-			Constructor constructor = loader.getClass().getConstructor(constructorArgs);
+			Constructor<?> constructor = wlGenericClassLoaderClass.getConstructor(constructorArgs);
 
 			return (ClassLoader) constructor.newInstance(new Object[] { classFinder, parent });
 		}
@@ -111,7 +113,9 @@ public class WebLogicClassLoader {
 		Object adapterInstance = Proxy.newProxyInstance(wlPreProcessorClass.getClassLoader(),
 			new Class[] { wlPreProcessorClass }, adapter);
 
-		Method addPreProcessor = ReflectionUtils.findMethod(loader.getClass(), ADD_PREPROCESSOR_METHOD);
+		Method addPreProcessor = ReflectionUtils.findMethod(loader.getClass(), ADD_PREPROCESSOR_METHOD,
+			new Class[] { wlPreProcessorClass });
+		
 		ReflectionUtils.invokeMethod(addPreProcessor, loader, new Object[] { adapterInstance });
 	}
 

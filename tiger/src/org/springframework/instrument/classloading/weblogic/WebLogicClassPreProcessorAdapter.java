@@ -18,7 +18,6 @@ package org.springframework.instrument.classloading.weblogic;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 
@@ -35,11 +34,15 @@ import org.springframework.util.Assert;
  * @author Costin Leau
  * 
  */
-public class WebLogicClassPreProcessorAdapter implements InvocationHandler {
+class WebLogicClassPreProcessorAdapter implements InvocationHandler {
 
 	private final ClassFileTransformer transformer;
 
 	private final ClassLoader loader;
+
+	private final String INITIALIZE_METHOD = "initialize";
+
+	private final String PREPROCESS_METHOD = "preProcess";
 
 	/**
 	 * Creates a new instance of the {@link WebLogicClassPreProcessorAdapter}
@@ -77,14 +80,17 @@ public class WebLogicClassPreProcessorAdapter implements InvocationHandler {
 		if (AopUtils.isHashCodeMethod(method)) {
 			return new Integer(hashCode());
 		}
-		// Invoke method on target Session.
-		try {
-			return method.invoke(this, args);
-		}
-		catch (InvocationTargetException ex) {
-			throw ex.getTargetException();
+
+		if (INITIALIZE_METHOD.equals(method.getName())) {
+			initialize((Hashtable) args[0]);
+			return null;
 		}
 
+		else if (PREPROCESS_METHOD.equals(method.getName())) {
+			return preProcess((String) args[0], (byte[]) args[1]);
+		}
+
+		throw new IllegalArgumentException("unknown method " + method);
 	}
 
 	@Override
