@@ -34,7 +34,7 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Interceptor for accessing a Burlap service.
+ * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a Burlap service.
  * Supports authentication via username and password.
  * The service URL must be an HTTP URL exposing a Burlap service.
  *
@@ -171,11 +171,11 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 	 */
 	protected RemoteAccessException convertBurlapAccessException(Throwable ex) {
 		if (ex instanceof ConnectException) {
-			throw new RemoteConnectFailureException(
+			return new RemoteConnectFailureException(
 					"Cannot connect to Burlap remote service at [" + getServiceUrl() + "]", ex);
 		}
 		else {
-			throw new RemoteAccessException(
+			return new RemoteAccessException(
 			    "Cannot access Burlap remote service at [" + getServiceUrl() + "]", ex);
 		}
 	}
