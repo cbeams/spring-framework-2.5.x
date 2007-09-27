@@ -111,7 +111,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	/**
 	 * Set a reference to an existing JAX-RPC Service instance,
 	 * for example obtained via {@link org.springframework.jndi.JndiObjectFactoryBean}.
-	 * If not set, LocalJaxRpcServiceFactory's properties have to be specified.
+	 * If not set, {@link LocalJaxRpcServiceFactory}'s properties have to be specified.
 	 * @see #setServiceFactoryClass
 	 * @see #setWsdlDocumentUrl
 	 * @see #setNamespaceUri
