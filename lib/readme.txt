@@ -30,7 +30,7 @@ NOTE: aspectjtools.jar is not included in the Spring distribution because of its
 It needs to be taken from the AspectJ distribution or from Spring CVS. Note that this
 is only necessary if you want to rebuild the Spring jars including the AspectJ aspects.
 
-* axis/axis.jar, axis/saaj.jar, axis/wsdl4j.jar
+* axis/axis.jar, axis/wsdl4j.jar
 - Apache Axis 1.4 (http://ws.apache.org/axis)
 - required for building the framework
 - required for running JPetStore
@@ -276,6 +276,10 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - JasperReports 2.0.0 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
+
+* jaxws/jws-api.jar, jaxws/jaxws-*.jar, jaxws/jaxb-*.jar, jaxws/saaj-*.jar, jaxws/streambuffer.jar
+- JAX-WS 2.1.2 (https://jax-ws.dev.java.net)
+- required at runtime when using Spring's JAX-WS support on JDK < 1.6
 
 * jdo/jdo2-api.jar
 - JDO API 2.0 (http://db.apache.org/jdo)
