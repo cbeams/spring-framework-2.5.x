@@ -2064,6 +2064,7 @@
 				<include name="lib/jakarta-taglibs/**"/>
 				<include name="lib/jamon/**"/>
 				<include name="lib/jasperreports/**"/>
+        <include name="lib/jaxws/**"/>
 				<include name="lib/jexcelapi/**"/>
 				<include name="lib/jdo/**"/>
 				<include name="lib/jmx/**"/>
