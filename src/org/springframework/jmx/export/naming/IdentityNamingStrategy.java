@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.util.ObjectUtils;
  * <i>package</i>:class=<i>class name</i>,hashCode=<i>identity hash (in hex)</i>
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 1.2
  */
 public class IdentityNamingStrategy implements ObjectNamingStrategy {
@@ -47,12 +48,10 @@ public class IdentityNamingStrategy implements ObjectNamingStrategy {
 	 * of the managed resource.
 	 */
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
-		String domain = managedBean.getClass().getPackage().getName();
-
+		String domain = ClassUtils.getPackageName(managedBean.getClass());
 		Hashtable keys = new Hashtable();
 		keys.put(TYPE_KEY, ClassUtils.getShortName(managedBean.getClass()));
 		keys.put(HASH_CODE_KEY, ObjectUtils.getIdentityHexString(managedBean));
-
 		return ObjectNameManager.getInstance(domain, keys);
 	}
 

@@ -99,31 +99,6 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals(double[].class, ClassUtils.forName(double[].class.getName()));
 	}
 
-	public void testGetQualifiedName() {
-		String className = ClassUtils.getQualifiedName(getClass());
-		assertEquals("Class name did not match", "org.springframework.util.ClassUtilsTests", className);
-	}
-
-	public void testGetQualifiedNameForObjectArrayClass() {
-		String className = ClassUtils.getQualifiedName(Object[].class);
-		assertEquals("Class name did not match", "java.lang.Object[]", className);
-	}
-
-	public void testGetQualifiedNameForMultiDimensionalObjectArrayClass() {
-		String className = ClassUtils.getQualifiedName(Object[][].class);
-		assertEquals("Class name did not match", "java.lang.Object[][]", className);
-	}
-
-	public void testGetQualifiedNameForPrimitiveArrayClass() {
-		String className = ClassUtils.getQualifiedName(byte[].class);
-		assertEquals("Class name did not match", "byte[]", className);
-	}
-
-	public void testGetQualifiedNameForMultiDimensionalPrimitiveArrayClass() {
-		String className = ClassUtils.getQualifiedName(byte[][].class);
-		assertEquals("Class name did not match", "byte[][]", className);
-	}
-
 	public void testGetShortName() {
 		String className = ClassUtils.getShortName(getClass());
 		assertEquals("Class name did not match", "ClassUtilsTests", className);
@@ -167,6 +142,41 @@ public class ClassUtilsTests extends TestCase {
 	public void testGetShortNameAsProperty() {
 		String shortName = ClassUtils.getShortNameAsProperty(this.getClass());
 		assertEquals("Class name did not match", "classUtilsTests", shortName);
+	}
+
+	public void testGetClassFileName() {
+		assertEquals("String.class", ClassUtils.getClassFileName(String.class));
+		assertEquals("ClassUtilsTests.class", ClassUtils.getClassFileName(getClass()));
+	}
+
+	public void testGetPackageName() {
+		assertEquals("java.lang", ClassUtils.getPackageName(String.class));
+		assertEquals(getClass().getPackage().getName(), ClassUtils.getPackageName(getClass()));
+	}
+
+	public void testGetQualifiedName() {
+		String className = ClassUtils.getQualifiedName(getClass());
+		assertEquals("Class name did not match", "org.springframework.util.ClassUtilsTests", className);
+	}
+
+	public void testGetQualifiedNameForObjectArrayClass() {
+		String className = ClassUtils.getQualifiedName(Object[].class);
+		assertEquals("Class name did not match", "java.lang.Object[]", className);
+	}
+
+	public void testGetQualifiedNameForMultiDimensionalObjectArrayClass() {
+		String className = ClassUtils.getQualifiedName(Object[][].class);
+		assertEquals("Class name did not match", "java.lang.Object[][]", className);
+	}
+
+	public void testGetQualifiedNameForPrimitiveArrayClass() {
+		String className = ClassUtils.getQualifiedName(byte[].class);
+		assertEquals("Class name did not match", "byte[]", className);
+	}
+
+	public void testGetQualifiedNameForMultiDimensionalPrimitiveArrayClass() {
+		String className = ClassUtils.getQualifiedName(byte[][].class);
+		assertEquals("Class name did not match", "byte[][]", className);
 	}
 
 	public void testHasMethod() throws Exception {
