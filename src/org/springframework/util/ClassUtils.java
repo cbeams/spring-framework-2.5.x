@@ -353,6 +353,20 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Determine the name of the package of the given class:
+	 * e.g. "java.lang" for the <code>java.lang.String</code> class.
+	 * @param clazz the class
+	 * @return the package name, or the empty String if the class
+	 * is defined in the default package
+	 */
+	public static String getPackageName(Class clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		String className = clazz.getName();
+		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR);
+		return (lastDotIndex != -1 ? className.substring(0, lastDotIndex) : "");
+	}
+
+	/**
 	 * Return the qualified name of the given class: usually simply
 	 * the class name, but component type class name + "[]" for arrays.
 	 * @param clazz the class
