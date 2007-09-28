@@ -419,6 +419,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setValue(new TestBean("foo"));
 		this.tag.doStartTag();
 		this.tag.doEndTag();
+
+		assertEquals(getOutput(), "<option value=\"foo\">foo</option>");
 	}
 
 	public void testOptionTagNotNestedWithinSelectTag() throws Exception {

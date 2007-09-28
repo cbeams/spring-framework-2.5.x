@@ -663,6 +663,9 @@ public class RequestContext {
 			if (errors == null) {
 				errors = (Errors) getModelObject(BindException.ERROR_KEY_PREFIX + name);
 			}
+			if (errors instanceof BindException) {
+				errors = ((BindException) errors).getBindingResult();
+			}
 			if (errors == null) {
 				return null;
 			}

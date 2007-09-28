@@ -119,7 +119,15 @@ abstract class SelectedValueComparator {
 	}
 
 	private static Object getBoundValue(BindStatus bindStatus) {
-		return (bindStatus != null ? bindStatus.getValue() : null);
+		if (bindStatus == null) {
+			return null;
+		}
+		else if (bindStatus.getActualValue() != null) {
+			return bindStatus.getActualValue();
+		}
+		else {
+			return bindStatus.getValue();
+		}
 	}
 
 	private static boolean exhaustiveCollectionCompare(
