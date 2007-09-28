@@ -29,7 +29,7 @@ import org.springframework.test.AssertThrows;
  * @author Juergen Hoeller
  * @author Rick Evans
  */
-public final class NamedParameterUtilsTests extends TestCase {
+public class NamedParameterUtilsTests extends TestCase {
 
 	public void testParseSql() {
 		String sql = "xxx :a yyyy :b :c :a zzzzz";
@@ -123,6 +123,15 @@ public final class NamedParameterUtilsTests extends TestCase {
 	 */
 	public void testSubstituteNamedParametersWithLogicalAnd() throws Exception {
 		String expectedSql = "xxx & yyyy";
+		String newSql = NamedParameterUtils.substituteNamedParameters(expectedSql, new MapSqlParameterSource());
+		assertEquals(expectedSql, newSql);
+	}
+
+	/*
+	 * SPR-3173
+	 */
+	public void testVariableAssignmentOperator() throws Exception {
+		String expectedSql = "x := 1";
 		String newSql = NamedParameterUtils.substituteNamedParameters(expectedSql, new MapSqlParameterSource());
 		assertEquals(expectedSql, newSql);
 	}
