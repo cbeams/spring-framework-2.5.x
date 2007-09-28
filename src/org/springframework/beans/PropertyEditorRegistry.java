@@ -56,8 +56,11 @@ public interface PropertyEditorRegistry {
 	 * <p>For example, if you wanted to register an editor for "items[n].quantity"
 	 * (for all values n), you would use "items.quality" as the value of the
 	 * 'propertyPath' argument to this method.
-	 * @param requiredType the type of the property (can be <code>null</code> if a property
-	 * is given but should be specified in any case for consistency checking)
+	 * @param requiredType the type of the property. This may be <code>null</code>
+	 * if a property is given but should be specified in any case, in particular in
+	 * case of a Collection - making clear whether the editor is supposed to apply
+	 * to the entire Collection itself or to each of its entries. So as a general rule:
+	 * <b>Do not specify <code>null</code> here in case of a Collection/array!</b>
 	 * @param propertyPath the path of the property (name or nested path), or
 	 * <code>null</code> if registering an editor for all properties of the given type
 	 * @param propertyEditor editor to register
