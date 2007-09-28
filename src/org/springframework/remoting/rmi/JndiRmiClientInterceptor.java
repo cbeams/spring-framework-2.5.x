@@ -42,7 +42,7 @@ import org.springframework.remoting.support.RemoteInvocationFactory;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Interceptor for accessing RMI services from JNDI.
+ * {@link org.aopalliance.intercept.MethodInterceptor} for accessing RMI services from JNDI.
  * Typically used for RMI-IIOP (CORBA), but can also be used for EJB home objects
  * (for example, a Stateful Session Bean home). In contrast to a plain JNDI lookup,
  * this accessor also performs narrowing through PortableRemoteObject.

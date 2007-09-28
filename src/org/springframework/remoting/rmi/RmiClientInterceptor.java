@@ -41,8 +41,9 @@ import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
 import org.springframework.remoting.support.RemoteInvocationUtils;
 
 /**
- * Interceptor for accessing conventional RMI services or RMI invokers.
- * The service URL must be a valid RMI URL like "rmi://localhost:1099/myservice".
+ * {@link org.aopalliance.intercept.MethodInterceptor} for accessing conventional
+ * RMI services or RMI invokers. The service URL must be a valid RMI URL
+ * (e.g. "rmi://localhost:1099/myservice").
  *
  * <p>RMI invokers work at the RmiInvocationHandler level, needing only one stub for
  * any service. Service interfaces do not have to extend <code>java.rmi.Remote</code>
