@@ -176,14 +176,11 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 
 	/**
 	 * Fetches the RMI stub on startup, if necessary.
-	 * <p>Note: As of Spring 2.5, this method will always throw
-	 * RemoteLookupFailureException and not declare NamingException anymore.
-	 * @throws NamingException if the JNDI lookup failed
 	 * @throws RemoteLookupFailureException if RMI stub creation failed
 	 * @see #setLookupStubOnStartup
 	 * @see #lookupStub
 	 */
-	public void prepare() throws NamingException, RemoteLookupFailureException {
+	public void prepare() throws RemoteLookupFailureException {
 		// Cache RMI stub on initialization?
 		if (this.lookupStubOnStartup) {
 			Remote remoteObj = lookupStub();
@@ -211,27 +208,31 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * <p>The default implementation retrieves the service from the
 	 * JNDI environment. This can be overridden in subclasses.
 	 * @return the RMI stub to store in this interceptor
-	 * @throws NamingException if the JNDI lookup failed
 	 * @throws RemoteLookupFailureException if RMI stub creation failed
 	 * @see #setCacheStub
 	 * @see #lookup
 	 */
-	protected Remote lookupStub() throws NamingException, RemoteLookupFailureException {
-		Object stub = lookup();
-		if (getServiceInterface() != null && Remote.class.isAssignableFrom(getServiceInterface())) {
-			try {
-				stub = PortableRemoteObject.narrow(stub, getServiceInterface());
+	protected Remote lookupStub() throws RemoteLookupFailureException {
+		try {
+			Object stub = lookup();
+			if (getServiceInterface() != null && Remote.class.isAssignableFrom(getServiceInterface())) {
+				try {
+					stub = PortableRemoteObject.narrow(stub, getServiceInterface());
+				}
+				catch (ClassCastException ex) {
+					throw new RemoteLookupFailureException(
+							"Could not narrow RMI stub to service interface [" + getServiceInterface().getName() + "]", ex);
+				}
 			}
-			catch (ClassCastException ex) {
-				throw new RemoteLookupFailureException(
-						"Could not narrow RMI stub to service interface [" + getServiceInterface().getName() + "]", ex);
+			if (!(stub instanceof Remote)) {
+				throw new RemoteLookupFailureException("Located RMI stub of class [" + stub.getClass().getName() +
+						"], with JNDI name [" + getJndiName() + "], does not implement interface [java.rmi.Remote]");
 			}
+			return (Remote) stub;
 		}
-		if (!(stub instanceof Remote)) {
-			throw new RemoteLookupFailureException("Located RMI stub of class [" + stub.getClass().getName() +
-					"], with JNDI name [" + getJndiName() + "], does not implement interface [java.rmi.Remote]");
+		catch (NamingException ex) {
+			throw new RemoteLookupFailureException("JNDI lookup for RMI service [" + getJndiName() + "] failed", ex);
 		}
-		return (Remote) stub;
 	}
 
 	/**
@@ -361,12 +362,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 		Remote freshStub = null;
 		synchronized (this.stubMonitor) {
 			this.cachedStub = null;
-			try {
-				freshStub = lookupStub();
-			}
-			catch (NamingException ex) {
-				throw new RemoteLookupFailureException("JNDI lookup for RMI service [" + getJndiName() + "] failed", ex);
-			}
+			freshStub = lookupStub();
 			if (this.cacheStub) {
 				this.cachedStub = freshStub;
 			}
