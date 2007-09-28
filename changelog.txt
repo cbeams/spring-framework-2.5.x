@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.7 (2007-09-27)
+Changes in version 2.0.7 (2007-09-30)
 -------------------------------------
 
 General
@@ -68,6 +68,7 @@ Package org.springframework.jms
 Package org.springframework.jmx
 * MBeanExporter unregisters its MBeans in case of any kind of registration failure
 * revised reflective class loading to always use the correct ClassLoader
+* fixed IdentityNamingStrategy to obtain the package name through class name inspection rather than "Class.getPackage()"
 
 Package org.springframework.mock
 * MockHttpServletResponse automatically flushes the Writer in case of a "write(int)" call too
@@ -110,6 +111,7 @@ Package org.springframework.web
 * fixed FrameworkServlet to always refresh its BeanNameUrlHandlerMapping with the correct context
 * RequestContext uses a full ResourceBundleThemeSource as default again (for backwards compatibility)
 * RequestContext lazily obtains the Theme instance (for more efficiency when theme support is not used)
+* added "getActualValue()" method to BindStatus, exposing the raw property value for comparison purposes
 * AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
 * AbstractView does not log static attributes anymore, in order to allow for scoped proxies to be used as attributes
