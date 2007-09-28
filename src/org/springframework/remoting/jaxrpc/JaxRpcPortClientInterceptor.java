@@ -42,9 +42,9 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Interceptor for accessing a specific port of a JAX-RPC service.
- * Uses either {@link LocalJaxRpcServiceFactory}'s facilities underneath,
- * or takes an explicit reference to an existing JAX-RPC Service instance
+ * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a specific port
+ * of a JAX-RPC service. Uses either {@link LocalJaxRpcServiceFactory}'s facilities
+ * underneath or takes an explicit reference to an existing JAX-RPC Service instance
  * (e.g. obtained via {@link org.springframework.jndi.JndiObjectFactoryBean}).
  *
  * <p>Allows to set JAX-RPC's standard stub properties directly, via the

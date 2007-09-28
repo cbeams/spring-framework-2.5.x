@@ -55,9 +55,9 @@ import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.ClassUtils;
 
 /**
- * <code>MethodInterceptor</code> implementation that routes calls to an MBean
- * running on the supplied <code>MBeanServerConnection</code>. Works for both
- * local and remote <code>MBeanServerConnection</code>s.
+ * {@link org.aopalliance.intercept.MethodInterceptor} that routes calls to an
+ * MBean running on the supplied <code>MBeanServerConnection</code>.
+ * Works for both local and remote <code>MBeanServerConnection</code>s.
  *
  * <p>By default, the <code>MBeanClientInterceptor</code> will connect to the
  * <code>MBeanServer</code> and cache MBean metadata at startup. This can

@@ -44,7 +44,8 @@ import org.springframework.remoting.support.RemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocationResult;
 
 /**
- * Interceptor for accessing a JMS-based remote service.
+ * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a
+ * JMS-based remote service.
  *
  * <p>Serializes remote invocation objects and deserializes remote invocation
  * result objects. Uses Java serialization just like RMI, but with the JMS

@@ -42,7 +42,7 @@ import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
 
 /**
- * Interceptor for accessing RMI services from JNDI.
+ * {@link org.aopalliance.intercept.MethodInterceptor} for accessing RMI services from JNDI.
  * Typically used for RMI-IIOP (CORBA), but can also be used for EJB home objects
  * (for example, a Stateful Session Bean home). In contrast to a plain JNDI lookup,
  * this accessor also performs narrowing through PortableRemoteObject.
@@ -176,7 +176,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 
 	/**
 	 * Fetches the RMI stub on startup, if necessary.
-	 * <p>Note: As of Spring 2.1, this method will always throw
+	 * <p>Note: As of the next major revision of Spring, this method will always throw
 	 * RemoteLookupFailureException and not declare NamingException anymore.
 	 * @throws NamingException if the JNDI lookup failed
 	 * @throws RemoteLookupFailureException if RMI stub creation failed
