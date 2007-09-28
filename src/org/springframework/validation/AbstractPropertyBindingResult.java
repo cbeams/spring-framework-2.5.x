@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,10 @@ import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyEditorRegistry;
 
 /**
- * Abstract base class for BindingResult implementations that work with
- * Spring's PropertyAccessor mechanism. Pre-implements field access
- * through delegation to the corresponding PropertyAccessor methods.
+ * Abstract base class for {@link BindingResult} implementations that work with
+ * Spring's {@link org.springframework.beans.PropertyAccessor} mechanism.
+ * Pre-implements field access through delegation to the corresponding
+ * PropertyAccessor methods.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -73,7 +74,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * Fetches the field value from the PropertyAccessor.
 	 * @see #getPropertyAccessor()
 	 */
-	protected Object getActualFieldValue(String field) {
+	public Object getActualFieldValue(String field) {
 		return getPropertyAccessor().getPropertyValue(field);
 	}
 

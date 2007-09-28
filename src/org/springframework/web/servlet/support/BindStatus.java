@@ -61,6 +61,8 @@ public class BindStatus {
 
 	private Class valueType;
 
+	private Object actualValue;
+
 	private PropertyEditor editor;
 
 	private List objectErrors;
@@ -116,7 +118,16 @@ public class BindStatus {
 					this.objectErrors = this.errors.getFieldErrors(this.expression);
 					this.value = this.errors.getFieldValue(this.expression);
 					this.valueType = this.errors.getFieldType(this.expression);
-					this.editor = getCustomEditor(this.errors, this.expression);
+					Errors bindingResult = this.errors;
+					// Unwrap BindException for backwards compatibility.
+					if (this.errors instanceof BindException) {
+						bindingResult = ((BindException) this.errors).getBindingResult();
+					}
+					if (bindingResult instanceof AbstractPropertyBindingResult) {
+						AbstractPropertyBindingResult apbr = ((AbstractPropertyBindingResult) bindingResult);
+						this.actualValue = apbr.getActualFieldValue(this.expression);
+						this.editor = apbr.getCustomEditor(this.expression);
+					}
 				}
 			}
 
@@ -151,22 +162,6 @@ public class BindStatus {
 		if (htmlEscape && this.value instanceof String) {
 			this.value = HtmlUtils.htmlEscape((String) this.value);
 		}
-	}
-
-	/**
-	 * Find a custom editor for the given field, if any.
-	 * @see org.springframework.validation.AbstractPropertyBindingResult#getCustomEditor(String)
-	 */
-	private PropertyEditor getCustomEditor(Errors errors, String field) {
-		Errors bindingResult = errors;
-		// Unwrap BindException for backwards compatibility.
-		if (errors instanceof BindException) {
-			bindingResult = ((BindException) errors).getBindingResult();
-		}
-		if (bindingResult instanceof AbstractPropertyBindingResult) {
-			return ((AbstractPropertyBindingResult) bindingResult).getCustomEditor(field);
-		}
-		return null;
 	}
 
 	/**
@@ -224,7 +219,7 @@ public class BindStatus {
 	}
 
 	/**
-	 * Gets the '<code>Class</code>' type of the field. Favour this instead of
+	 * Get the '<code>Class</code>' type of the field. Favor this instead of
 	 * '<code>getValue().getClass()</code>' since '<code>getValue()</code>' may
 	 * return '<code>null</code>'.
 	 */
@@ -232,7 +227,15 @@ public class BindStatus {
 		return this.valueType;
 	}
 
-    /**
+	/**
+	 * Return the actual value of the field, i.e. the raw property value,
+	 * or <code>null</code> if not available.
+	 */
+	public Object getActualValue() {
+		return this.actualValue;
+	}
+
+	/**
 	 * Return a suitable display value for the field, i.e. the stringified
 	 * value if not null, and an empty string in case of a null value.
 	 * <p>This value will be an HTML-escaped String if the original value
