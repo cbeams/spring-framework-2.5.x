@@ -47,7 +47,6 @@
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-2.3.0.677.jar"/>
 	<classpathentry kind="lib" path="lib/freemarker/freemarker.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aopalliance/aopalliance.jar"/>
-	<classpathentry kind="lib" path="lib/axis/saaj.jar"/>
 	<classpathentry kind="lib" path="lib/axis/wsdl4j.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hsqldb/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-discovery.jar"/>
