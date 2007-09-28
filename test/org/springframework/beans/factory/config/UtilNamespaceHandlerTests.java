@@ -36,6 +36,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Mark Fisher
  */
 public class UtilNamespaceHandlerTests extends TestCase {
 
@@ -284,6 +285,24 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		Properties props = (Properties) this.beanFactory.getBean("myMergedProperties");
 		assertEquals("Incorrect property value", "bar", props.get("foo"));
 		assertEquals("Incorrect property value", "bar2", props.get("foo2"));
+	}
+
+	public void testLocalOverrideDefault() {
+		Properties props = (Properties) this.beanFactory.getBean("defaultLocalOverrideProperties");
+		assertEquals("Incorrect property value", "bar", props.get("foo"));
+		assertEquals("Incorrect property value", "local2", props.get("foo2"));
+	}
+
+	public void testLocalOverrideFalse() {
+		Properties props = (Properties) this.beanFactory.getBean("falseLocalOverrideProperties");
+		assertEquals("Incorrect property value", "bar", props.get("foo"));
+		assertEquals("Incorrect property value", "local2", props.get("foo2"));
+	}
+
+	public void testLocalOverrideTrue() {
+		Properties props = (Properties) this.beanFactory.getBean("trueLocalOverrideProperties");
+		assertEquals("Incorrect property value", "local", props.get("foo"));
+		assertEquals("Incorrect property value", "local2", props.get("foo2"));
 	}
 
 }

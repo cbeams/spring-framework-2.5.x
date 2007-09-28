@@ -2,8 +2,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:util="http://www.springframework.org/schema/util"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
 
 	<util:constant id="min" static-field="
 			java.lang.Integer.
@@ -156,6 +156,26 @@
 	<util:properties id="myMergedProperties"
 			location="classpath:org/springframework/beans/factory/config/util.properties">
 		<prop key="foo2">bar2</prop>
+	</util:properties>
+
+	<util:properties id="defaultLocalOverrideProperties" 
+			location="classpath:org/springframework/beans/factory/config/util.properties">
+		<prop key="foo">local</prop>
+		<prop key="foo2">local2</prop>
+	</util:properties>
+
+	<util:properties id="trueLocalOverrideProperties" 
+			location="classpath:org/springframework/beans/factory/config/util.properties"
+			local-override="true">
+		<prop key="foo">local</prop>
+		<prop key="foo2">local2</prop>
+	</util:properties>
+
+	<util:properties id="falseLocalOverrideProperties"
+			location="classpath:org/springframework/beans/factory/config/util.properties"
+			local-override="false">
+		<prop key="foo">local</prop>
+		<prop key="foo2">local2</prop>
 	</util:properties>
 
 </beans>
