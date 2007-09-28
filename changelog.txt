@@ -15,14 +15,17 @@ Package org.springframework.aop
 * removed unused pointcut type attribute from "spring-aop-2.5.xsd"
 
 Package org.springframework.beans
+* BeanWrapperImpl obtains old value with converted key in case of a Map with non-String keys
 * TypeMismatchException and MethodInvocationException are serializable even in case of non-serializable property values
 * URIEditor only tries to resolve "classpath:" locations if explicitly constructed with a ClassLoader
 * URIEditor converts spaces in location values into "%20" quotes (as required by the URI format)
 * exposed "autowireCandidate" property in BeanDefinition interface (avoiding casts to AbstractBeanDefinition)
+* deprecated ConfigurableBeanFactory's "registerCustomEditor" in favor of "addPropertyEditorRegistrar"
 * DefaultListableBeanFactory removes a singleton bean instance if a new bean definition gets registered
 * DefaultListableBeanFactory fully destroys singleton bean instance when the corresponding bean definition gets replaced
 * XmlBeanDefinitionReader initializes default EntityResolver lazily, avoiding classpath scan in case of custom resolver
 * AbstractSingleBeanDefinitionParser applies full scope to inner beans, making them eligible for destruction callbacks
+* @PostConstruct/@PreDestroy methods are only called once even if they are specified as standard init/destroy methods
 * @Autowired qualifier annotations may be defined with target 'type' as well, marking the target bean class
 * Autowired/Common/PersistenceAnnotationBeanPostProcessor implement PriorityOrdered and expose an "order" bean property
 * "depends-on" kicks in before the affected bean is entering its creation phase; can be used to resolve circular refs
@@ -33,6 +36,7 @@ Package org.springframework.context
 * AnnotationConfigUtils checks for EntityManagerFactory class instead of PersistenceContext (for Tomcat 6 compatibility)
 
 Package org.springframework.core
+* NestedRuntimeException/NestedCheckedException's "contains" checks the nested causes of any kind of wrapped exception
 * added "ConcurrentMap createConcurrentMap" method to CollectionFactory, exposing a common ConcurrentMap interface
 * deprecated CollectionFactory's "createLinkedSet/LinkedMap/IdentityMapIfPossible" (for usage on JDK 1.4 or higher)
 * "Conventions.getVariableName" follows JavaBeans property naming rules in case of multiple upper case letters
@@ -46,6 +50,14 @@ Package org.springframework.jms
 * added DestinationResolver support to StandardJmsActivationSpecFactory, for Destination objects on JCA ActivationSpecs
 * "spring-jms.xsd" supports "destination-resolver" attribute for "jca-listener-container" element as well
 
+Package org.springframework.jmx
+* MBeanExporter's "exposeManagedResourceClassLoader" defaults to "true" now, for interaction with third-party MBeans
+* fixed IdentityNamingStrategy to obtain the package name through class name inspection rather than "Class.getPackage()"
+
+Package org.springframework.mock
+* MockServletContext supports "getContext" (allowing to register contexts through the new "registerContext" method)
+* MockServletContext supports "getMimeType" if the Java Activation Framework is present on the classpath
+
 Package org.springframework.orm
 * removed custom detach/attach/newNamedQuery hooks from JdoDialect, expecting providers to follow the final JDO 2.0 API
 * deprecated JdoTemplate's "attachCopy" methods in favor of revised "makePersistent" with a JDO2-style return value
@@ -55,8 +67,17 @@ Package org.springframework.orm
 * JPA support exposes the application ClassLoader as PersistenceUnitInfo ClassLoader even without a LoadTimeWeaver
 * revised CommonsLoggingSessionLog to work with TopLink 11 as well (remaining compatible with TopLink 10.1.3)
 
+Package org.springframework.remoting
+* fixed Hessian/BurlapClientInterceptor's "convertHessian/BurlapAccessException" method to return the exception properly
+* JndiRmiClientInterceptor's "prepare()" doesn't declare NamingException anymore (just RemoteLookupFailureException)
+* JaxRpcPortClientInterceptor's "prepare()" doesn't declare ServiceException anymore (just RemoteLookupFailureException)
+* introduced JAX-WS 2.0/2.1 support in package "org.springframework.remoting.jaxws"
+
 Package org.springframework.test
 * introduced TestNG support based on the new test context framework
+
+Package org.springframework.transaction
+* TransactionSystemException preserves the original application exception, if any, in case of commit/rollback failure
 
 Package org.springframework.ui
 * "ModelMap.addObject(Object)" follows JavaBeans property naming rules in case of multiple upper case letters
@@ -65,9 +86,11 @@ Package org.springframework.util
 * "ClassUtils.getShortNameAsProperty" strips the outer class name in case of an inner class
 
 Package org.springframework.web
+* added "getActualValue()" method to BindStatus, exposing the raw property value for comparison purposes
 * factored out a "loadReport()" method in AbstractJasperReportsView (called by "initApplicationContext()")
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
 * JSP CheckboxTag caches converted candidate value when comparing it with collection elements
+* JSP SelectTag, OptionTag and OptionsTag properly detect a selected value even for Maps with converted keys
 
 
 Changes in version 2.1 M4 (2007-09-09)
