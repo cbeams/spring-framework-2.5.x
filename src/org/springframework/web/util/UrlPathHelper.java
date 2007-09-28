@@ -30,15 +30,14 @@ import org.springframework.util.StringUtils;
  * Helper class for URL path matching. Provides support for URL paths in
  * RequestDispatcher includes and support for consistent URL decoding.
  *
- * <p>Used by AbstractUrlHandlerMapping, AbstractUrlMethodNameResolver
- * and RequestContext for path matching and/or URI determination.
+ * <p>Used by {@link org.springframework.web.servlet.handler.AbstractUrlHandlerMapping},
+ * {@link org.springframework.web.servlet.mvc.multiaction.AbstractUrlMethodNameResolver}
+ * and {@link org.springframework.web.servlet.support.RequestContext} for path matching
+ * and/or URI determination.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 14.01.2004
- * @see org.springframework.web.servlet.handler.AbstractUrlHandlerMapping
- * @see org.springframework.web.servlet.mvc.multiaction.AbstractUrlMethodNameResolver
- * @see org.springframework.web.servlet.support.RequestContext
  */
 public class UrlPathHelper {
 
@@ -90,7 +89,7 @@ public class UrlPathHelper {
 	 * @see #getContextPath
 	 * @see #getRequestUri
 	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
-	 * @see javax.servlet.ServletRequest#getCharacterEncoding
+	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
 	 * @see java.net.URLDecoder#decode(String, String)
 	 * @see java.net.URLDecoder#decode(String)
 	 */
@@ -104,11 +103,11 @@ public class UrlPathHelper {
 	 * <p>If the request specifies a character encoding itself, the request
 	 * encoding will override this setting. This also allows for generically
 	 * overriding the character encoding in a filter that invokes the
-	 * ServletRequest.setCharacterEncoding method.
+	 * <code>ServletRequest.setCharacterEncoding</code> method.
 	 * @param defaultEncoding the character encoding to use
 	 * @see #determineEncoding
-	 * @see javax.servlet.ServletRequest#getCharacterEncoding
-	 * @see javax.servlet.ServletRequest#setCharacterEncoding
+	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
+	 * @see javax.servlet.ServletRequest#setCharacterEncoding(String)
 	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
 	 */
 	public void setDefaultEncoding(String defaultEncoding) {
@@ -232,8 +231,8 @@ public class UrlPathHelper {
 	/**
 	 * Return the servlet path for the given request, regarding an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by request.getServletPath() is already decoded by
-	 * the servlet container, this method will not attempt to decode it.
+	 * <p>As the value returned by <code>request.getServletPath()</code> is already
+	 * decoded by the servlet container, this method will not attempt to decode it.
 	 * @param request current HTTP request
 	 * @return the servlet path
 	 */
@@ -250,7 +249,7 @@ public class UrlPathHelper {
 	 * Return the request URI for root of the given request. If this is a forwarded request,
 	 * correctly resolves to the request URI of the original request. Relies on the Servlet
 	 * 2.4 'forward' attributes. These attributes may be set by other components when
-	 * running in a Servlet 2.3- environment.
+	 * running in a Servlet 2.3 environment.
 	 */
 	public String getOriginatingRequestUri(HttpServletRequest request) {
 		String uri = (String) request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE);
@@ -280,7 +279,7 @@ public class UrlPathHelper {
 	 * Return the request URI for root of the given request. If this is a forwarded request,
 	 * correctly resolves to the request URI of the original request. Relies on the Servlet
 	 * 2.4 'forward' attributes. These attributes may be set by other components when
-	 * running in a Servlet 2.3- environment.
+	 * running in a Servlet 2.3 environment.
 	 */
 	public String getOriginatingQueryString(HttpServletRequest request) {
 		String queryString = (String) request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE);
@@ -336,7 +335,7 @@ public class UrlPathHelper {
 	 * falling back to the default encoding specified for this resolver.
 	 * @param request current HTTP request
 	 * @return the encoding for the request (never <code>null</code>)
-	 * @see javax.servlet.ServletRequest#getCharacterEncoding
+	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
 	 * @see #setDefaultEncoding
 	 */
 	protected String determineEncoding(HttpServletRequest request) {
