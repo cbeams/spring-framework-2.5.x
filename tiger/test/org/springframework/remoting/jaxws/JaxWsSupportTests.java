@@ -2,6 +2,7 @@ package org.springframework.remoting.jaxws;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
 
@@ -46,8 +47,13 @@ public class JaxWsSupportTests extends TestCase {
 				ac.close();
 			}
 		}
-		catch (UnsupportedOperationException ex) {
-			// ignore - probably running on JDK < 1.6
+		catch (BeanCreationException ex) {
+			if ("exporter".equals(ex.getBeanName()) && ex.getRootCause() instanceof ClassNotFoundException) {
+				// ignore - probably running on JDK < 1.6 without the JAX-WS impl present
+			}
+			else {
+				throw ex;
+			}
 		}
 	}
 

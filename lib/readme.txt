@@ -277,9 +277,9 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
-* jaxws/jws-api.jar, jaxws/jaxws-*.jar, jaxws/jaxb-*.jar, jaxws/saaj-*.jar, jaxws/streambuffer.jar
-- JAX-WS 2.1.2 (https://jax-ws.dev.java.net)
-- required at runtime when using Spring's JAX-WS support on JDK < 1.6
+* jaxws/jws-api.jar, jaxws/jaxws-api.jar, jaxws/jaxb-api.jar, jaxws/saaj-api.jar
+- JAX-WS 2.1.2 API (https://jax-ws.dev.java.net)
+- required at runtime when running Spring's JAX-WS support tests on JDK < 1.6
 
 * jdo/jdo2-api.jar
 - JDO API 2.0 (http://db.apache.org/jdo)
