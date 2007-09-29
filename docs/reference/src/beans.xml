@@ -434,7 +434,7 @@ BeanFactory factory = (BeanFactory) context;</programlisting>
 
               <entry>
                 <para>
-                  <xref linkend="beans-factory-lifecycle" />
+                  <xref linkend="beans-factory-lifecycle-initializingbean" />
                 </para>
               </entry>
             </row>
@@ -444,7 +444,7 @@ BeanFactory factory = (BeanFactory) context;</programlisting>
 
               <entry>
                 <para>
-                  <xref linkend="beans-factory-lifecycle" />
+                  <xref linkend="beans-factory-lifecycle-disposablebean" />
                 </para>
               </entry>
             </row>
@@ -3344,7 +3344,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <title>Customizing the nature of a bean</title>
 
     <section id="beans-factory-lifecycle">
-      <title>Lifecycle interfaces</title>
+      <title>Lifecycle callbacks</title>
 
       <para>The Spring Framework provides several marker interfaces to change
       the behavior of your bean in the container; they include
@@ -3383,10 +3383,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 
         <para>Generally, the use of the
         <interfacename>InitializingBean</interfacename> interface can be
-        avoided (and is discouraged since it unnecessarily couples the code to
-        Spring). As an alternative, a bean definition provides support for a generic
-        initialization method to be specified. In the case of XML-based
-        configuration metadata, this is done using the
+        avoided and is actually discouraged since it unnecessarily couples the
+        code to Spring. As an alternative, bean definitions provide support
+        for a generic initialization method to be specified. In the case of
+        XML-based configuration metadata, this is done using the
         <literal>'init-method'</literal> attribute. For example, the following
         definition:</para>
 
@@ -3399,7 +3399,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     }
 }</programlisting>
 
-        <para>Is exactly the same as...</para>
+        <para>...is exactly the same as...</para>
 
         <programlisting>&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;</programlisting>
 
@@ -3420,18 +3420,19 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <interfacename>org.springframework.beans.factory.DisposableBean</interfacename>
         interface allows a bean to get a callback when the container
         containing it is destroyed. The
-        <interfacename>DisposableBean</interfacename> interface specifies one
-        method:</para>
+        <interfacename>DisposableBean</interfacename> interface specifies a
+        single method:</para>
 
         <programlisting>void destroy() throws Exception;</programlisting>
 
         <para>Generally, the use of the
         <interfacename>DisposableBean</interfacename> marker interface can be
-        avoided (and is discouraged since it unnecessarily couples the code to
-        Spring). As an alternative, a bean definition provides support for a generic destroy
-        method to be specified. When using XML-based configuration metadata
-        this is done via the <literal>'destroy-method'</literal> attribute on
-        the <literal>&lt;bean/&gt;</literal>. For example, the following
+        avoided and is actually discouraged since it unnecessarily couples the
+        code to Spring. As an alternative, bean definitions provide support
+        for a generic destroy method to be specified. When using XML-based
+        configuration metadata this is done via the
+        <literal>'destroy-method'</literal> attribute on the
+        <literal>&lt;bean/&gt;</literal>. For example, the following
         definition:</para>
 
         <programlisting>&lt;bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/&gt;</programlisting>
@@ -3443,7 +3444,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     }
 }</programlisting>
 
-        <para>Is exactly the same as...</para>
+        <para>...is exactly the same as...</para>
 
         <programlisting>&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;</programlisting>
 
@@ -3455,44 +3456,43 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 }</programlisting>
 
         <para>... but does not couple the code to Spring.</para>
+      </section>
 
-        <section id="beans-factory-lifecycle-default-init-destroy-methods">
-          <title>Default initialization &amp; destroy methods</title>
+      <section id="beans-factory-lifecycle-default-init-destroy-methods">
+        <title>Default initialization &amp; destroy methods</title>
 
-          <para>When writing initialization and destroy method
-          callbacks that do not use the Spring-specific
-          <interfacename>InitializingBean</interfacename> and
-          <interfacename>DisposableBean</interfacename> callback interfaces,
-          one typically finds oneself
-          writing methods with names such as <literal>init()</literal>,
-          <literal>initialize()</literal>, <literal>dispose()</literal>, etc.
-          The names of such lifecycle callback methods are (hopefully!)
-          standardized across a project so that all developers on a team use
-          the same method names and thus ensure some level of
-          consistency.</para>
+        <para>When writing initialization and destroy method callbacks that do
+        not use the Spring-specific
+        <interfacename>InitializingBean</interfacename> and
+        <interfacename>DisposableBean</interfacename> callback interfaces, one
+        typically finds oneself writing methods with names such as
+        <literal>init()</literal>, <literal>initialize()</literal>,
+        <literal>dispose()</literal>, etc. The names of such lifecycle
+        callback methods are (hopefully!) standardized across a project so
+        that all developers on a team use the same method names and thus
+        ensure some level of consistency.</para>
 
-          <para>The Spring container can be configured to
-          <literal>'look'</literal> for named initialization and destroy
-          callback method names on <emphasis>every</emphasis> bean. This means
-          that you, as an application developer, can simply write your
-          application classes, use a convention of having an initialization
-          callback called <literal>init()</literal>, and then (without having
-          to configure each and every bean with, in the case of XML-based
-          configuration, an <literal>'init-method="init"'</literal> attribute)
-          be safe in the knowledge that the Spring IoC container
-          <emphasis>will</emphasis> call that method when the bean is being
-          created (and in accordance with the standard lifecycle callback
-          contract described previously).</para>
+        <para>The Spring container can be configured to
+        <literal>'look'</literal> for named initialization and destroy
+        callback method names on <emphasis>every</emphasis> bean. This means
+        that you, as an application developer, can simply write your
+        application classes, use a convention of having an initialization
+        callback called <literal>init()</literal>, and then (without having to
+        configure each and every bean with, in the case of XML-based
+        configuration, an <literal>'init-method="init"'</literal> attribute)
+        be safe in the knowledge that the Spring IoC container
+        <emphasis>will</emphasis> call that method when the bean is being
+        created (and in accordance with the standard lifecycle callback
+        contract described previously).</para>
 
-          <para>Let's look at an example to make the use of this feature
-          completely clear. For the sake of the example, let us say that one
-          of the coding conventions on a project is that all initialization
-          callback methods are to be named <literal>init()</literal> and that
-          destroy callback methods are to be called
-          <literal>destroy()</literal>. This leads to classes like
-          so...</para>
+        <para>Let's look at an example to make the use of this feature
+        completely clear. For the sake of the example, let us say that one of
+        the coding conventions on a project is that all initialization
+        callback methods are to be named <literal>init()</literal> and that
+        destroy callback methods are to be called
+        <literal>destroy()</literal>. This leads to classes like so...</para>
 
-          <programlisting>public class DefaultBlogService implements BlogService {
+        <programlisting>public class DefaultBlogService implements BlogService {
 
     private BlogDao blogDao;
 
@@ -3508,7 +3508,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     }
 }</programlisting>
 
-          <programlisting>&lt;beans <emphasis role="bold">default-init-method="init"</emphasis>&gt;
+        <programlisting>&lt;beans <emphasis role="bold">default-init-method="init"</emphasis>&gt;
 
     &lt;bean id="blogService" class="com.foo.DefaultBlogService"&gt;
         &lt;property name="blogDao" ref="blogDao" /&gt;
@@ -3516,82 +3516,146 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 
 &lt;/beans&gt;</programlisting>
 
-          <para>Notice the use of the <literal>'default-init-method'</literal>
-          attribute on the top-level <literal>&lt;beans/&gt;</literal>
-          element. The presence of this attribute means that the Spring IoC
-          container will recognize a method called <literal>'init'</literal>
-          on beans as being the initialization method callback, and when a
-          bean is being created and assembled, if the bean's class has such a
-          method, it will be invoked at the appropriate time.</para>
+        <para>Notice the use of the <literal>'default-init-method'</literal>
+        attribute on the top-level <literal>&lt;beans/&gt;</literal> element.
+        The presence of this attribute means that the Spring IoC container
+        will recognize a method called <literal>'init'</literal> on beans as
+        being the initialization method callback, and when a bean is being
+        created and assembled, if the bean's class has such a method, it will
+        be invoked at the appropriate time.</para>
 
-          <para>Destroy method callbacks are configured similarly (in XML that
-          is) using the <literal>'default-destroy-method'</literal> attribute
-          on the top-level <literal>&lt;beans/&gt;</literal> element.</para>
+        <para>Destroy method callbacks are configured similarly (in XML that
+        is) using the <literal>'default-destroy-method'</literal> attribute on
+        the top-level <literal>&lt;beans/&gt;</literal> element.</para>
 
-          <para>The use of this feature can save you the (small) housekeeping
-          chore of specifying an initialization and destroy method callback on
-          each and every bean, and it is great for enforcing a consistent
-          naming convention for initialization and destroy method callbacks, as 
-          consistency is something that should always be aimed for.</para>
+        <para>The use of this feature can save you the (small) housekeeping
+        chore of specifying an initialization and destroy method callback on
+        each and every bean, and it is great for enforcing a consistent naming
+        convention for initialization and destroy method callbacks, as
+        consistency is something that should always be aimed for.</para>
 
-          <para>Consider the case where you have some existing beans where the
-          underlying classes already have initialization callback methods that
-          are named at variance with the convention. You can
-          <emphasis>always</emphasis> override the default by specifying (in
-          XML that is) the method name using the
-          <literal>'init-method'</literal> and
-          <literal>'destroy-method'</literal> attributes on the
-          <literal>&lt;bean/&gt;</literal> element itself.</para>
+        <para>Consider the case where you have some existing beans where the
+        underlying classes already have initialization callback methods that
+        are named at variance with the convention. You can
+        <emphasis>always</emphasis> override the default by specifying (in XML
+        that is) the method name using the <literal>'init-method'</literal>
+        and <literal>'destroy-method'</literal> attributes on the
+        <literal>&lt;bean/&gt;</literal> element itself.</para>
 
-          <para>Finally, please be aware that the Spring container guarantees
-          that a configured initialization callback is called immediately
-          after a bean has been supplied with all of it's dependencies. This
-          means that the initialization callback will be called on the raw
-          bean reference, which means that any AOP interceptors or suchlike
-          that will ultimately be applied to the bean will not yet be in
-          place. A target bean is fully created <emphasis>first</emphasis>,
-          <emphasis>then</emphasis> an AOP proxy (for example) with its
-          interceptor chain is applied. Note that, if the target bean and the
-          proxy are defined separately, your code can even interact with the raw
-          target bean, bypassing the proxy. Hence, it would be very
-          inconsistent to apply the interceptors to the init method, since
-          that would couple the lifecycle of the target bean with its
-          proxy/interceptors and leave strange semantics when talking to the
-          raw target bean directly.</para>
-        </section>
+        <para>Finally, please be aware that the Spring container guarantees
+        that a configured initialization callback is called immediately after
+        a bean has been supplied with all of its dependencies. This means that
+        the initialization callback will be called on the raw bean reference,
+        which means that any AOP interceptors or suchlike that will ultimately
+        be applied to the bean will not yet be in place. A target bean is
+        fully created <emphasis>first</emphasis>, <emphasis>then</emphasis> an
+        AOP proxy (for example) with its interceptor chain is applied. Note
+        that, if the target bean and the proxy are defined separately, your
+        code can even interact with the raw target bean, bypassing the proxy.
+        Hence, it would be very inconsistent to apply the interceptors to the
+        init method, since that would couple the lifecycle of the target bean
+        with its proxy/interceptors and leave strange semantics when talking
+        to the raw target bean directly.</para>
+      </section>
 
-        <section id="beans-factory-shutdown">
-          <title>Shutting down the Spring IoC container gracefully in non-web
-          applications</title>
+      <section id="beans-factory-lifecycle-combined-effects">
+        <title>Combining lifecycle mechanisms</title>
 
-          <note>
-            <para>This next section does not apply to web applications (in
-            case the title of this section did not make that abundantly
-            clear). Spring's web-based
-            <interfacename>ApplicationContext</interfacename> implementations
-            already have code in place to handle shutting down the Spring IoC
-            container gracefully when the relevant web application is being
-            shutdown.</para>
-          </note>
+        <para>As of Spring 2.5, there are three options for controlling bean
+        lifecycle behavior: the <link
+        linkend="beans-factory-lifecycle-initializingbean"><interfacename>InitializingBean</interfacename></link>
+        and <link
+        linkend="beans-factory-lifecycle-disposablebean"><interfacename>DisposableBean</interfacename></link>
+        callback interfaces; custom <literal>init()</literal> and
+        <literal>destroy()</literal> methods; and the <link
+        linkend="beans-postconstruct-and-predestroy-annotations"><interfacename>@PostConstruct</interfacename>
+        and <interfacename>@PreDestroy</interfacename>
+        annotations</link>.</para>
 
-          <para>If you are using Spring's IoC container in a non-web
-          application environment, for example in a rich client desktop
-          environment, and you want the container to shutdown gracefully and
-          call the relevant destroy callbacks on your singleton beans, you
-          will need to register a shutdown hook with the JVM. This is quite
-          easy to do (see below), and will ensure that your Spring IoC
-          container shuts down gracefully and that all resources held by your
-          singletons are released. Of course it is still up to you to both
-          configure the destroy callbacks for your singletons and implement
-          such destroy callbacks correctly.</para>
+        <para>When combining different lifecycle mechanisms - for example, in
+        a class hierarchy in which various lifecycle mechanisms are in use -
+        developers should be aware of the order in which these mechanisms are
+        applied. The following is the ordering for initialization
+        methods:</para>
 
-          <para>So to register a shutdown hook that enables the graceful
-          shutdown of the relevant Spring IoC container, you simply need to
-          call the <methodname>registerShutdownHook()</methodname> method that
-          is declared on the <classname>AbstractApplicationContext</classname>
-          class. To wit...</para>
+        <itemizedlist>
+          <listitem>
+            <para>Methods annotated with
+            <interfacename>@PostConstruct</interfacename></para>
+          </listitem>
 
-          <programlisting>import org.springframework.context.support.AbstractApplicationContext;
+          <listitem>
+            <para><literal>afterPropertiesSet()</literal> as defined by the
+            <interfacename>InitializingBean</interfacename> callback
+            interface</para>
+          </listitem>
+
+          <listitem>
+            <para>A custom configured <literal>init()</literal> method</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>Destroy methods are called in the same order:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Methods annotated with
+            <interfacename>@PreDestroy</interfacename></para>
+          </listitem>
+
+          <listitem>
+            <para><literal>destroy()</literal> as defined by the
+            <interfacename>DisposableBean</interfacename> callback
+            interface</para>
+          </listitem>
+
+          <listitem>
+            <para>A custom configured <literal>destroy()</literal>
+            method</para>
+          </listitem>
+        </itemizedlist>
+
+        <note>
+          <para>If multiple lifecycle mechanisms are configured for a given 
+          bean, and each mechanism is configured with a different method name, 
+          then each configured method will be executed in the order listed
+          above; however, if the same method name is configured - for example, 
+          <literal>init()</literal> for an initialization method - for more than 
+          one of the aforementioned lifecycle mechanisms, that method will only 
+          be executed once.</para>
+        </note>
+      </section>
+
+      <section id="beans-factory-shutdown">
+        <title>Shutting down the Spring IoC container gracefully in non-web
+        applications</title>
+
+        <note>
+          <para>This next section does not apply to web applications (in case
+          the title of this section did not make that abundantly clear).
+          Spring's web-based <interfacename>ApplicationContext</interfacename>
+          implementations already have code in place to handle shutting down
+          the Spring IoC container gracefully when the relevant web
+          application is being shutdown.</para>
+        </note>
+
+        <para>If you are using Spring's IoC container in a non-web application
+        environment, for example in a rich client desktop environment, and you
+        want the container to shutdown gracefully and call the relevant
+        destroy callbacks on your singleton beans, you will need to register a
+        shutdown hook with the JVM. This is quite easy to do (see below), and
+        will ensure that your Spring IoC container shuts down gracefully and
+        that all resources held by your singletons are released. Of course it
+        is still up to you to both configure the destroy callbacks for your
+        singletons and implement such destroy callbacks correctly.</para>
+
+        <para>So to register a shutdown hook that enables the graceful
+        shutdown of the relevant Spring IoC container, you simply need to call
+        the <methodname>registerShutdownHook()</methodname> method that is
+        declared on the <classname>AbstractApplicationContext</classname>
+        class. To wit...</para>
+
+        <programlisting>import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public final class Boot {
@@ -3608,7 +3672,6 @@ public final class Boot {
         <lineannotation>// main method exits, hook is called prior to the app shutting down...</lineannotation>
     }
 }</programlisting>
-        </section>
       </section>
     </section>
 
@@ -5146,9 +5209,10 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
     access to source level annotations. Use of these annotations also requires
     that certain <interfacename>BeanPostProcessors</interfacename> be
     registered within the Spring container. As always, these can be registered
-    as individual bean definitions, but they can also be implicitly registered by
-    including the following tag in an XML-based Spring configuration (notice
-    the inclusion of the '<literal>context</literal>' namespace):</para>
+    as individual bean definitions, but they can also be implicitly registered
+    by including the following tag in an XML-based Spring configuration
+    (notice the inclusion of the '<literal>context</literal>'
+    namespace):</para>
 
     <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -5409,9 +5473,10 @@ public @interface Genre {
       <para>In some cases, it may be sufficient to use an annotation without a
       value. This may be useful when the annotation serves a more generic
       purpose and could be applied across several different types of
-      dependencies. For example, you may provide an <emphasis>offline</emphasis>
-      catalog that would be searched when no Internet connection is available.
-      First define the simple annotation:</para>
+      dependencies. For example, you may provide an
+      <emphasis>offline</emphasis> catalog that would be searched when no
+      Internet connection is available. First define the simple
+      annotation:</para>
 
       <programlisting>@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
@@ -5667,6 +5732,13 @@ public @interface MovieQualifier {
         <lineannotation>// clears the movie cache upon destruction...</lineannotation>
     }
 }</programlisting>
+
+        <note>
+          <para>For details regarding the effects of combining various lifecycle 
+          mechanisms, see <xref 
+          linkend="beans-factory-lifecycle-combined-effects" />.</para>
+        </note>
+
     </section>
   </section>
 
