@@ -31,8 +31,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Default implementation of the {@link NamespaceHandler}. Resolves namespace URIs
- * to implementation classes based on the mappings contained in mapping file.
+ * Default implementation of the {@link NamespaceHandler} interface.
+ * Resolves namespace URIs to implementation classes based on the mappings
+ * contained in mapping file.
  *
  * <p>By default, this implementation looks for the mapping file at
  * <code>META-INF/spring.handlers</code>, but this can be changed using the
@@ -49,7 +50,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	/**
 	 * The location to look for the mapping files. Can be present in multiple JAR files.
 	 */
-	private static final String SPRING_HANDLER_MAPPINGS_LOCATION = "META-INF/spring.handlers";
+	public static final String DEFAULT_HANDLER_MAPPINGS_LOCATION = "META-INF/spring.handlers";
 
 
 	/** Logger available to subclasses */
@@ -64,10 +65,10 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * default mapping file location.
 	 * <p>This constructor will result in the thread context ClassLoader being used
 	 * to load resources.
-	 * @see #SPRING_HANDLER_MAPPINGS_LOCATION
+	 * @see #DEFAULT_HANDLER_MAPPINGS_LOCATION
 	 */
 	public DefaultNamespaceHandlerResolver() {
-		this(null, SPRING_HANDLER_MAPPINGS_LOCATION);
+		this(null, DEFAULT_HANDLER_MAPPINGS_LOCATION);
 	}
 
 
@@ -76,10 +77,10 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * default mapping file location.
 	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources (may be <code>null</code>, in
 	 * which case the thread context ClassLoader will be used) 
-	 * @see #SPRING_HANDLER_MAPPINGS_LOCATION
+	 * @see #DEFAULT_HANDLER_MAPPINGS_LOCATION
 	 */
 	public DefaultNamespaceHandlerResolver(ClassLoader classLoader) {
-		this(classLoader, SPRING_HANDLER_MAPPINGS_LOCATION);
+		this(classLoader, DEFAULT_HANDLER_MAPPINGS_LOCATION);
 	}
 
 	/**
@@ -88,7 +89,6 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources (may be <code>null</code>, in
 	 * which case the thread context ClassLoader will be used)
 	 * @param handlerMappingsLocation the mapping file location
-	 * @see #SPRING_HANDLER_MAPPINGS_LOCATION
 	 */
 	public DefaultNamespaceHandlerResolver(ClassLoader classLoader, String handlerMappingsLocation) {
 		Assert.notNull(handlerMappingsLocation, "Handler mappings location must not be null");
