@@ -24,9 +24,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -119,7 +119,7 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		assertMethodOrdering(beanClass, "destroy-methods", Arrays.asList("DisposableBean.destroy"), bean.destroyMethods);
 	}
 
-	public void testJsr250LifecycleAnnotations() {
+	public void testJsr250Annotations() {
 		final Class<?> beanClass = CustomAnnotatedInitDestroyBean.class;
 		final DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit",
 				"customDestroy");
@@ -143,11 +143,22 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 				bean.destroyMethods);
 	}
 
+	public void testAllLifecycleMechanismsAtOnce() {
+		final Class<?> beanClass = AllInOneBean.class;
+		final DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass,
+				"afterPropertiesSet", "destroy");
+		final AllInOneBean bean = (AllInOneBean) beanFactory.getBean(LIFECYCLE_TEST_BEAN);
+		assertMethodOrdering(beanClass, "init-methods", Arrays.asList("afterPropertiesSet"), bean.initMethods);
+		beanFactory.destroySingletons();
+		assertMethodOrdering(beanClass, "destroy-methods", Arrays.asList("destroy"), bean.destroyMethods);
+	}
+
 
 	public static class InitDestroyBean {
 
 		final List<String> initMethods = new ArrayList<String>();
 		final List<String> destroyMethods = new ArrayList<String>();
+
 
 		public void afterPropertiesSet() throws Exception {
 			this.initMethods.add("afterPropertiesSet");
@@ -158,9 +169,8 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		}
 	}
 
-
-	public static class InitializingDisposableWithShadowedMethodsBean extends InitDestroyBean
-			implements InitializingBean, DisposableBean {
+	public static class InitializingDisposableWithShadowedMethodsBean extends InitDestroyBean implements
+			InitializingBean, DisposableBean {
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
@@ -173,11 +183,11 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		}
 	}
 
-
 	public static class CustomInitDestroyBean {
 
 		final List<String> initMethods = new ArrayList<String>();
 		final List<String> destroyMethods = new ArrayList<String>();
+
 
 		public void customInit() throws Exception {
 			this.initMethods.add("customInit");
@@ -188,9 +198,8 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		}
 	}
 
-
-	public static class CustomInitializingDisposableBean extends CustomInitDestroyBean
-			implements InitializingBean, DisposableBean {
+	public static class CustomInitializingDisposableBean extends CustomInitDestroyBean implements InitializingBean,
+			DisposableBean {
 
 		public void afterPropertiesSet() throws Exception {
 			this.initMethods.add("afterPropertiesSet");
@@ -200,7 +209,6 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 			this.destroyMethods.add("destroy");
 		}
 	}
-
 
 	public static class CustomAnnotatedInitDestroyBean extends CustomInitializingDisposableBean {
 
@@ -215,7 +223,6 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		}
 	}
 
-
 	public static class CustomAnnotatedInitDestroyWithShadowedMethodsBean extends CustomInitializingDisposableBean {
 
 		@PostConstruct
@@ -228,6 +235,23 @@ public class Spr3775InitDestroyLifecycleTests extends TestCase {
 		@Override
 		public void destroy() throws Exception {
 			this.destroyMethods.add("@PreDestroy.destroy");
+		}
+	}
+
+	public static class AllInOneBean implements InitializingBean, DisposableBean {
+
+		final List<String> initMethods = new ArrayList<String>();
+		final List<String> destroyMethods = new ArrayList<String>();
+
+
+		@PostConstruct
+		public void afterPropertiesSet() throws Exception {
+			this.initMethods.add("afterPropertiesSet");
+		}
+
+		@PreDestroy
+		public void destroy() throws Exception {
+			this.destroyMethods.add("destroy");
 		}
 	}
 
