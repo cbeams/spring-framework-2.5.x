@@ -170,15 +170,21 @@ public class TestContext extends AttributeAccessorSupport {
 
 	/**
 	 * <p>
-	 * Builds an {@link ApplicationContext} for this test context.
+	 * Builds an {@link ApplicationContext} for this test context using the
+	 * configured {@link #getContextLoader() ContextLoader} and
+	 * {@link #getLocations() resource locations}.
 	 * </p>
 	 *
 	 * @throws Exception if an error occurs while building the application
 	 *         context
 	 */
 	protected ApplicationContext buildApplicationContext() throws Exception {
-		Assert.notNull(getContextLoader(), "contextLoader can not be null.");
-		Assert.notNull(getLocations(), "locations can not be null.");
+		Assert.notNull(
+				getContextLoader(),
+				"Can not build an ApplicationContext with a NULL 'contextLoader'. Consider annotating your test class with @ContextConfiguration.");
+		Assert.notNull(
+				getLocations(),
+				"Can not build an ApplicationContext with a NULL 'locations' array. Consider annotating your test class with @ContextConfiguration.");
 		return getContextLoader().loadContext(getLocations());
 	}
 
