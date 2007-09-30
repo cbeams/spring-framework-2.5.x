@@ -185,7 +185,7 @@ abstract class SelectedValueComparator {
 			String candidateAsString = (String) candidate;
 			Object candidateAsValue = null;
 			if (convertedValueCache != null && convertedValueCache.containsKey(propertyEditor)) {
-				candidateAsValue = (String) convertedValueCache.get(propertyEditor);
+				candidateAsValue = convertedValueCache.get(propertyEditor);
 			}
 			else {
 				propertyEditor.setAsText(candidateAsString);

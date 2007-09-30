@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.beans.PropertyEditorSupport;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -275,6 +276,33 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("   foo", checkboxElement.attribute("value").getValue());
 	}
 
+	public void testWithMultiValueIntegerWithEditor() throws Exception {
+		this.tag.setPath("someIntegerArray");
+		this.tag.setValue("   1");
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
+		MyIntegerEditor editor = new MyIntegerEditor();
+		bindingResult.getPropertyEditorRegistry().registerCustomEditor(Integer.class, editor);
+		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+		assertEquals(1, editor.count);
+
+		String output = getOutput();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("someIntegerArray", checkboxElement.attribute("name").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
+		assertEquals("   1", checkboxElement.attribute("value").getValue());
+	}
+
 	public void testWithCollection() throws Exception {
 		this.tag.setPath("someList");
 		this.tag.setValue("foo");
@@ -528,6 +556,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.bean.setJedi(true);
 		this.bean.setSomeBoolean(new Boolean(true));
 		this.bean.setStringArray(new String[] {"bar", "foo"});
+		this.bean.setSomeIntegerArray(new Integer[] {new Integer(2), new Integer(1)});
 		this.bean.setOtherColours(colours);
 		this.bean.setPets(pets);
 		List list = new ArrayList();
@@ -549,6 +578,17 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		public void setAsText(String text) {
 			this.count++;
 			super.setAsText(text);
+		}
+	}
+
+
+	private class MyIntegerEditor extends PropertyEditorSupport {
+
+		public int count = 0;
+
+		public void setAsText(String text) {
+			this.count++;
+			setValue(new Integer(text.trim()));
 		}
 	}
 
