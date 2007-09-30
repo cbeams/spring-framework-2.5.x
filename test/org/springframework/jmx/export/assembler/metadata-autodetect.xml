@@ -23,13 +23,13 @@
 
 	<bean id="metadataAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
 		<property name="attributeSource">
-			<ref local="attributeSource"/>>
+			<ref local="attributeSource"/>
 		</property>
 	</bean>
 
 	<bean id="namingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
 		<property name="attributeSource">
-			<ref local="attributeSource"/>>
+			<ref local="attributeSource"/>
 		</property>
 	</bean>
 
