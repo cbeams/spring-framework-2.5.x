@@ -1753,9 +1753,15 @@ public class FictitiousTransactionalTest {
           dependency injection of test instances, transactional test method
           execution, etc. The following code listing displays the minimal
           requirements for configuring a test class to run with the custom
-          Spring Runner.</para>
+          Spring Runner. <emphasis>Note that 
+          <interfacename>@TestExecutionListeners</interfacename> has been 
+          configured with an empty list in order to disable the default 
+          listeners, which would otherwise require that an 
+          <interfacename>ApplicationContext</interfacename> be configured via 
+          <interfacename>@ContextConfiguration</interfacename>.</emphasis></para>
 
           <programlisting>@RunWith(SpringJUnit4ClassRunner.class)
+@TestExecutionListeners({})
 public class SimpleTest {
 
 	@Test
