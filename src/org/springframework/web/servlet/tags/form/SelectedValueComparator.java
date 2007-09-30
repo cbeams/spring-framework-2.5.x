@@ -69,14 +69,30 @@ abstract class SelectedValueComparator {
 	 * is described in more detail <a href="#equality-contract">here</a>.
 	 */
 	public static boolean isSelected(BindStatus bindStatus, Object candidateValue) {
-		Object boundValue = getBoundValue(bindStatus);
-
-		if (boundValue == null) {
+		if (bindStatus == null) {
 			return (candidateValue == null);
 		}
 
-		boolean selected = false;
+		// Check obvious equality matches with the candidate first,
+		// both with the rendered value and with the original value.
+		Object boundValue = bindStatus.getValue();
+		if (ObjectUtils.nullSafeEquals(boundValue, candidateValue)) {
+			return true;
+		}
+		Object actualValue = bindStatus.getActualValue();
+		if (actualValue != boundValue && ObjectUtils.nullSafeEquals(actualValue, candidateValue)) {
+			return true;
+		}
+		if (actualValue != null) {
+			boundValue = actualValue;
+		}
+		else if (boundValue == null) {
+			return false;
+		}
 
+		// Non-null value but no obvious equality with the candidate value:
+		// go into more exhaustive comparisons.
+		boolean selected = false;
 		if (boundValue.getClass().isArray()) {
 			selected = collectionCompare(CollectionUtils.arrayToList(boundValue), candidateValue, bindStatus);
 		}
@@ -86,48 +102,20 @@ abstract class SelectedValueComparator {
 		else if (boundValue instanceof Map) {
 			selected = mapCompare((Map) boundValue, candidateValue, bindStatus);
 		}
-
 		if (!selected) {
-			if (ObjectUtils.nullSafeEquals(boundValue, candidateValue)) {
-				selected = true;
-			}
-			else {
-				selected = exhaustiveCompare(boundValue, candidateValue, bindStatus.getEditor(), null);
-			}
+			selected = exhaustiveCompare(boundValue, candidateValue, bindStatus.getEditor(), null);
 		}
-
 		return selected;
 	}
 
+	private static boolean collectionCompare(Collection boundCollection, Object candidateValue, BindStatus bindStatus) {
+		return (boundCollection.contains(candidateValue) ||
+				exhaustiveCollectionCompare(boundCollection, candidateValue, bindStatus));
+	}
 
 	private static boolean mapCompare(Map boundMap, Object candidateValue, BindStatus bindStatus) {
-		if (boundMap.containsKey(candidateValue)) {
-			return true;
-		}
-		else {
-			return exhaustiveCollectionCompare(boundMap.keySet(), candidateValue, bindStatus);
-		}
-	}
-
-	private static boolean collectionCompare(Collection boundCollection, Object candidateValue, BindStatus bindStatus) {
-		if (boundCollection.contains(candidateValue)) {
-			return true;
-		}
-		else {
-			return exhaustiveCollectionCompare(boundCollection, candidateValue, bindStatus);
-		}
-	}
-
-	private static Object getBoundValue(BindStatus bindStatus) {
-		if (bindStatus == null) {
-			return null;
-		}
-		else if (bindStatus.getActualValue() != null) {
-			return bindStatus.getActualValue();
-		}
-		else {
-			return bindStatus.getValue();
-		}
+		return (boundMap.containsKey(candidateValue) ||
+				exhaustiveCollectionCompare(boundMap.keySet(), candidateValue, bindStatus));
 	}
 
 	private static boolean exhaustiveCollectionCompare(
