@@ -25,18 +25,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
+import org.easymock.MockControl;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
  * Tests for redirect view, and query string construction.
- * Doesn't test URL encoding, although it does check it's called.
+ * Doesn't test URL encoding, although it does check that it's called.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 27.05.2003
  */
 public class RedirectViewTests extends TestCase {
@@ -81,6 +82,16 @@ public class RedirectViewTests extends TestCase {
 		m.put(key, val);
 		String expectedUrlForEncoding = url + "?" + key + "=" + val;
 		doTest(m, url, false, expectedUrlForEncoding);
+	}
+
+	public void testSingleParamWithoutExposingModelAttributes() throws Exception {
+		String url = "http://url.somewhere.com";
+		String key = "foo";
+		String val = "bar";
+		Map m = new HashMap();
+		m.put(key, val);
+		String expectedUrlForEncoding = url; // + "?" + key + "=" + val;
+		doTest(m, url, false, false, expectedUrlForEncoding);
 	}
 
 	public void testParamWithAnchor() throws Exception {
@@ -129,19 +140,25 @@ public class RedirectViewTests extends TestCase {
 		doTest(m, url, false, expectedUrlForEncoding);
 	}
 
-	private void doTest(final Map map, String url, boolean contextRelative, String expectedUrlForEncoding)
+	private void doTest(final Map map, final String url, final boolean contextRelative, String expectedUrlForEncoding)
 			throws Exception {
+		doTest(map, url, contextRelative, true, expectedUrlForEncoding);
+	}
+
+	private void doTest(final Map map, final String url, final boolean contextRelative,
+			final boolean exposeModelAttributes, String expectedUrlForEncoding) throws Exception {
 
 		class TestRedirectView extends RedirectView {
-			public boolean valid;
+
+			public boolean queryPropertiesCalled = false;
 
 			/**
 			 * Test whether this callback method is called with correct args
 			 */
 			protected Map queryProperties(Map model) {
 				// They may not be the same model instance, but they're still equal
-				assertTrue(map.equals(model));
-				valid = true;
+				assertTrue("Map and model must be equal.", map.equals(model));
+				this.queryPropertiesCalled = true;
 				return super.queryProperties(model);
 			}
 		}
@@ -149,6 +166,7 @@ public class RedirectViewTests extends TestCase {
 		TestRedirectView rv = new TestRedirectView();
 		rv.setUrl(url);
 		rv.setContextRelative(contextRelative);
+		rv.setExposeModelAttributes(exposeModelAttributes);
 
 		MockControl rc = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) rc.getMock();
@@ -168,7 +186,9 @@ public class RedirectViewTests extends TestCase {
 		mc.replay();
 
 		rv.render(map, request, resp);
-		assertTrue(rv.valid);
+		if (exposeModelAttributes) {
+			assertTrue("queryProperties() should have been called.", rv.queryPropertiesCalled);
+		}
 		mc.verify();
 	}
 

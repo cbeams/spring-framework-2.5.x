@@ -30,7 +30,8 @@ import org.springframework.util.ClassUtils;
 
 /**
  * <p>View that redirects to an absolute, context relative, or current request
- * relative URL, exposing all model attributes as HTTP query parameters.
+ * relative URL, by default exposing all model attributes as HTTP query
+ * parameters.
  *
  * <p>A URL for this view is supposed to be a HTTP redirect URL, i.e.
  * suitable for HttpServletResponse's <code>sendRedirect</code> method, which
@@ -41,15 +42,18 @@ import org.springframework.util.ClassUtils;
  * you will probably want to almost always set it to true. With the flag off,
  * URLs starting with "/" are considered relative to the web server root, while
  * with the flag on, they are considered relative to the web application root.
- * Since most web apps will never know or care what their context path actually
- * is, they are much better off setting this flag to true, and submitting paths
- * which are to be considered relative to the web application root.
+ * Since most web applications will never know or care what their context path
+ * actually is, they are much better off setting this flag to true, and
+ * submitting paths which are to be considered relative to the web application
+ * root.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
- * @see #setContextRelative
- * @see #setHttp10Compatible
+ * @author Sam Brannen
+ * @see #setContextRelative(boolean)
+ * @see #setHttp10Compatible(boolean)
+ * @see #setExposeModelAttributes(boolean)
  * @see javax.servlet.http.HttpServletResponse#sendRedirect
  */
 public class RedirectView extends AbstractUrlBasedView {
@@ -63,6 +67,8 @@ public class RedirectView extends AbstractUrlBasedView {
 	private boolean http10Compatible = true;
 
 	private String encodingScheme = DEFAULT_ENCODING_SCHEME;
+
+	private boolean exposeModelAttributes = true;
 
 
 	/**
@@ -106,6 +112,21 @@ public class RedirectView extends AbstractUrlBasedView {
 		this.http10Compatible = http10Compatible;
 	}
 
+	/**
+	 * Create a new RedirectView with the given URL.
+	 * @param url the URL to redirect to
+	 * @param contextRelative whether to interpret the given URL as
+	 * relative to the current ServletContext
+	 * @param http10Compatible whether to stay compatible with HTTP 1.0 clients
+	 * @param exposeModelAttributes whether or not model attributes should be
+	 * exposed as query parameters
+	 */
+	public RedirectView(String url, boolean contextRelative, boolean http10Compatible, boolean exposeModelAttributes) {
+		super(url);
+		this.contextRelative = contextRelative;
+		this.http10Compatible = http10Compatible;
+		this.exposeModelAttributes = exposeModelAttributes;
+	}
 
 	/**
 	 * Set whether to interpret a given URL that starts with a slash ("/")
@@ -142,6 +163,14 @@ public class RedirectView extends AbstractUrlBasedView {
 		this.encodingScheme = encodingScheme;
 	}
 
+	/**
+	 * Set the <code>exposeModelAttributes</code> flag which denotes whether
+	 * or not model attributes should be exposed as HTTP query parameters.
+	 * <p>Defaults to <code>true</code>.
+	 */
+	public void setExposeModelAttributes(final boolean exposeModelAttributes) {
+		this.exposeModelAttributes = exposeModelAttributes;
+	}
 
 	/**
 	 * Convert model to request parameters and redirect to the given URL.
@@ -158,7 +187,9 @@ public class RedirectView extends AbstractUrlBasedView {
 			targetUrl.append(request.getContextPath());
 		}
 		targetUrl.append(getUrl());
-		appendQueryProperties(targetUrl, model, this.encodingScheme);
+		if (this.exposeModelAttributes) {
+			appendQueryProperties(targetUrl, model, this.encodingScheme);
+		}
 
 		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
 	}
