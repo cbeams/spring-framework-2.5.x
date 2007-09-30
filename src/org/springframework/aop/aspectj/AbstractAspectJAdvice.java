@@ -61,7 +61,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	/**
 	 * Key used in ReflectiveMethodInvocation userAtributes map for the current joinpoint.
 	 */
-	protected final static String JOIN_POINT_KEY = JoinPoint.class.getName();
+	protected static final String JOIN_POINT_KEY = JoinPoint.class.getName();
+
+	private static final String ASM_CLASS_NAME = "org.objectweb.asm.ClassVisitor";
 
 
 	/**
@@ -360,8 +362,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 	private boolean maybeBindJoinPoint(Class candidateParameterType) {
-		if ((candidateParameterType.equals(JoinPoint.class)) ||
-			(candidateParameterType.equals(ProceedingJoinPoint.class))) {
+		if (candidateParameterType.equals(JoinPoint.class) || candidateParameterType.equals(ProceedingJoinPoint.class)) {
 			this.joinPointArgumentIndex = 0;
 			return true;
 		}
@@ -405,7 +406,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		// We need to discover them, or if that fails, guess,
 		// and if we can't guess with 100% accuracy, fail.
 		PrioritizedParameterNameDiscoverer discoverer = new PrioritizedParameterNameDiscoverer();
-		discoverer.addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+		if (ClassUtils.isPresent(ASM_CLASS_NAME, getClass().getClassLoader())) {
+			discoverer.addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+		}
 		AspectJAdviceParameterNameDiscoverer adviceParameterNameDiscoverer =
 				new AspectJAdviceParameterNameDiscoverer(this.pointcut.getExpression());
 		adviceParameterNameDiscoverer.setReturningName(this.returningName);
