@@ -16,6 +16,7 @@ Package org.springframework.aop
 * "AopNamespaceUtils.registerAutoProxyCreatorIfNecessary" registers a plain InfrastructureAdvisorAutoProxyCreator now
 * fixed AspectJ pointcut handling to resolve bridge methods before matching
 * fixed AspectJ pointcut handling to correctly match generic return types
+* AspectJ pointcut matching only registers LocalVariableTableParameterNameDiscoverer if ASM is present on the classpath
 * "target()" pointcut handles types implemented in superclasses correctly
 * "aop:scoped-proxy" applies a specified "autowire-candidate" flag to the proxy
 * changed RuntimeTestWalker's visibility to package-protected
@@ -38,6 +39,7 @@ Package org.springframework.beans
 * fixed AbstractBeanFactory to never cache FactoryBean-exposed objects for inner beans (avoiding name conflicts)
 * optimized DefaultListableBeanFactory's resolution of bean references during prototype creation
 * XmlBeanDefinitionReader initializes default EntityResolver lazily, avoiding classpath scan in case of custom resolver
+* DefaultNamespaceHandlerResolver exposes public DEFAULT_HANDLER_MAPPINGS_LOCATION constant
 * changed visibility of BeanDefinitionParserDelegate's "buildTypedStringValue(ForMap)" methods to protected
 
 Package org.springframework.context
