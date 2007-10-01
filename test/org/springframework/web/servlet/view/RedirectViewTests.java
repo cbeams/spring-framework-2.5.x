@@ -25,8 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;

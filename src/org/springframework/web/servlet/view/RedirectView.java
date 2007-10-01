@@ -66,9 +66,9 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	private boolean http10Compatible = true;
 
-	private String encodingScheme = DEFAULT_ENCODING_SCHEME;
-
 	private boolean exposeModelAttributes = true;
+
+	private String encodingScheme = DEFAULT_ENCODING_SCHEME;
 
 
 	/**
@@ -157,13 +157,6 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Set the encoding scheme for this view. Default is UTF-8.
-	 */
-	public void setEncodingScheme(String encodingScheme) {
-		this.encodingScheme = encodingScheme;
-	}
-
-	/**
 	 * Set the <code>exposeModelAttributes</code> flag which denotes whether
 	 * or not model attributes should be exposed as HTTP query parameters.
 	 * <p>Defaults to <code>true</code>.
@@ -171,6 +164,14 @@ public class RedirectView extends AbstractUrlBasedView {
 	public void setExposeModelAttributes(final boolean exposeModelAttributes) {
 		this.exposeModelAttributes = exposeModelAttributes;
 	}
+
+	/**
+	 * Set the encoding scheme for this view. Default is UTF-8.
+	 */
+	public void setEncodingScheme(String encodingScheme) {
+		this.encodingScheme = encodingScheme;
+	}
+
 
 	/**
 	 * Convert model to request parameters and redirect to the given URL.
