@@ -57,6 +57,11 @@
 	A reference to the JMS ConnectionFactory bean.
 	Default is "connectionFactory".
 					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="javax.jms.ConnectionFactory"/>
+						</tool:annotation>
+					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="task-executor" type="xsd:string">
@@ -65,6 +70,11 @@
 	A reference to the Spring TaskExecutor for the JMS listener invokers.
 	Default is a SimpleAsyncTaskExecutor, using internally managed threads.
 					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.core.task.TaskExecutor"/>
+						</tool:annotation>
+					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="destination-resolver" type="xsd:string">
@@ -75,6 +85,11 @@
 	name resolution. Alternatively, specify a reference to a JndiDestinationResolver
 	(typically in a J2EE environment).
 					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.jms.support.destination.DestinationResolver"/>
+						</tool:annotation>
+					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="message-converter" type="xsd:string">
@@ -83,6 +98,11 @@
 	A reference to the MessageConverter strategy for converting JMS Messages to
 	listener method arguments. Default is a SimpleMessageConverter.
 					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.jms.support.converter.MessageConverter"/>
+						</tool:annotation>
+					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="destination-type" default="queue">
@@ -132,6 +152,11 @@
 	XA-based transaction coordinator, e.g. Spring's JtaTransactionManager).
 	If not specified, native acknowledging will be used (see "acknowledge" attribute).
 					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.transaction.PlatformTransactionManager"/>
+						</tool:annotation>
+					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="concurrency" type="xsd:int">
@@ -177,6 +202,11 @@
 	A reference to the JCA ResourceAdapter bean for the JMS provider.
 	Default is "resourceAdapter".
 					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="javax.resource.spi.ResourceAdapter"/>
+						</tool:annotation>
+					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="activation-spec-factory" type="xsd:string">
@@ -186,6 +216,11 @@
 	Default is to autodetect the JMS provider and its ActivationSpec class
 	(see DefaultJmsActivationSpecFactory).
 					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.jms.listener.endpoint.JmsActivationSpecFactory"/>
+						</tool:annotation>
+					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
       <xsd:attribute name="destination-resolver" type="xsd:string">
@@ -196,6 +231,11 @@
   Alternatively, specify a reference to a JndiDestinationResolver (typically in a J2EE
   environment, in particular if the server insists on receiving Destination objects).
           ]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.jms.support.destination.DestinationResolver"/>
+						</tool:annotation>
+					</xsd:appinfo>
         </xsd:annotation>
       </xsd:attribute>
 			<xsd:attribute name="message-converter" type="xsd:string">
@@ -204,6 +244,11 @@
 	A reference to the MessageConverter strategy for converting JMS Messages to
 	listener method arguments. Default is a SimpleMessageConverter.
 					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.jms.support.converter.MessageConverter"/>
+						</tool:annotation>
+					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="destination-type" default="queue">
@@ -253,6 +298,9 @@
 	for kicking off an XA transaction for each incoming message.
 	If not specified, native acknowledging will be used (see "acknowledge" attribute).
 					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref"/>
+					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="concurrency" type="xsd:int">
@@ -311,6 +359,9 @@
 	the MessageListener/SessionAwareMessageListener interface
 	or defining the specified listener method. Required.
 				]]></xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation kind="ref"/>
+				</xsd:appinfo>
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attribute name="method" type="xsd:string">
