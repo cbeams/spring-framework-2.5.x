@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="jmxAdapter" class="org.springframework.jmx.export.MBeanExporter">
+	<bean class="org.springframework.jmx.export.MBeanExporter" autowire="byName">
 		<property name="beans">
 			<map>
 				<entry key="bean:name=testBean5">

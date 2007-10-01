@@ -33,8 +33,7 @@
 		</property>
 	</bean>
 
-	<!-- Comment out the JMX adapter and the test will pass -->
-	<bean id="jmxAdapter" class="org.springframework.jmx.export.MBeanExporter">
+	<bean class="org.springframework.jmx.export.MBeanExporter">
 		<property name="beans">
 			<map>
 				<entry key="bean:name=dateRange">
@@ -42,6 +41,7 @@
 				</entry>
 			</map>
 		</property>
-	</bean>
+    <property name="server" ref="server"/>
+  </bean>
 
 </beans>

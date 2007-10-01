@@ -17,6 +17,9 @@
 package org.springframework.jmx.access;
 
 import java.beans.PropertyDescriptor;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Method;
 import java.net.BindException;
 import java.util.HashMap;
@@ -28,6 +31,8 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.core.JdkVersion;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
@@ -176,6 +181,32 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		finally {
 			connector.stop();
 		}
+	}
+
+	public void XtestMXBeanAttributeAccess() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			return;
+		}
+
+		MBeanClientInterceptor interceptor = new MBeanClientInterceptor();
+		interceptor.setServer(ManagementFactory.getPlatformMBeanServer());
+		interceptor.setObjectName("java.lang:type=Memory");
+		interceptor.setManagementInterface(MemoryMXBean.class);
+		MemoryMXBean proxy = (MemoryMXBean) ProxyFactory.getProxy(MemoryMXBean.class, interceptor);
+		assertTrue(proxy.getHeapMemoryUsage().getMax() > 0);
+	}
+
+	public void XtestMXBeanOperationAccess() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+			return;
+		}
+
+		MBeanClientInterceptor interceptor = new MBeanClientInterceptor();
+		interceptor.setServer(ManagementFactory.getPlatformMBeanServer());
+		interceptor.setObjectName("java.lang:type=Threading");
+		//interceptor.setManagementInterface(ThreadMXBean.class);
+		ThreadMXBean proxy = (ThreadMXBean) ProxyFactory.getProxy(ThreadMXBean.class, interceptor);
+		assertTrue(proxy.getThreadInfo(Thread.currentThread().getId()).getStackTrace() != null);
 	}
 
 
