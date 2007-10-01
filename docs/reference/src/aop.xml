@@ -1469,12 +1469,47 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 
 </aop:config>]]></programlisting>
 	
+	<para>Much the same way in an @AspectJ aspect, pointcuts declared using the schema based 
+	definition style may collect join point context. For example, the following pointcut 
+	collects the 'this' object as the join point context and passes it to advice:</para>
+
+	<programlisting><![CDATA[<aop:config>
+
+  <aop:aspect id="myAspect" ref="aBean">
+
+    <aop:pointcut id="businessService" 
+          expression="execution(* com.xyz.myapp.service.*.*(..)) &amp;&amp; this(service)"/>
+    <aop:before pointcut-ref="businessService" method="monitor"/>
+    ...
+    
+  </aop:aspect>
+
+</aop:config>]]></programlisting>
+
+	<para>The advice must be declared to receive the collected join point context by including parameters of the matching names:</para>
+<programlisting><![CDATA[public void monitor(Object service) {
+    ...
+}]]></programlisting>
+	
 	<para>When combining pointcut sub-expressions, '&amp;&amp;' is awkward within an XML
 	document, and so the keywords 'and', 'or' and 'not' can be used in place
-	of '&amp;&amp;', '||' and '!' respectively.</para>
+	of '&amp;&amp;', '||' and '!' respectively. For example, the previous pointcut may
+	be better written as:</para>
+	<programlisting><![CDATA[<aop:config>
+
+  <aop:aspect id="myAspect" ref="aBean">
+
+    <aop:pointcut id="businessService" 
+          expression="execution(* com.xyz.myapp.service.*.*(..)) ]]><emphasis role="bold">and</emphasis><![CDATA[ this(service)"/>
+    <aop:before pointcut-ref="businessService" method="monitor"/>
+    ...
+    
+  </aop:aspect>
+
+</aop:config>]]></programlisting>
 	
-	<para>Note that pointcuts defined in this way are referred to by their XML id, and
-	cannot define pointcut parameters. The named pointcut support in the schema based
+	<para>Note that pointcuts defined in this way are referred to by their XML id and
+	cannot be used as named pointcuts to form composite pointcuts. The named pointcut support in the schema based
 	definition style is thus more limited than that offered by the @AspectJ style.</para>
 
     </section>
