@@ -339,7 +339,7 @@ public class MBeanClientInterceptor
 		}
 		else if (invocation.getMethod().equals(pd.getWriteMethod())) {
 			if (inf.isWritable()) {
-				server.setAttribute(this.objectName, new Attribute(attributeName, invocation.getArguments()[0]));
+				this.server.setAttribute(this.objectName, new Attribute(attributeName, invocation.getArguments()[0]));
 				return null;
 			}
 			else {

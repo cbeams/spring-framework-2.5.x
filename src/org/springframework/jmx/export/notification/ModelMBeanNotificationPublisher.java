@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
  * @author Rob Harrop
  * @author Rick Evans
  * @since 2.0
- * @see ModelMBean
+ * @see javax.management.modelmbean.ModelMBean
  * @see NotificationPublisherAware
  */
 public class ModelMBeanNotificationPublisher implements NotificationPublisher {
@@ -56,7 +56,7 @@ public class ModelMBeanNotificationPublisher implements NotificationPublisher {
 
 
 	/**
-	 * Creates a new instance of the {@link ModelMBeanNotificationPublisher} class
+	 * Create a new instance of the {@link ModelMBeanNotificationPublisher} class
 	 * that will publish all {@link javax.management.Notification Notifications}
 	 * to the supplied {@link ModelMBean}.
 	 * @param modelMBean the target {@link ModelMBean}; must not be <code>null</code>
@@ -65,9 +65,9 @@ public class ModelMBeanNotificationPublisher implements NotificationPublisher {
 	 * @throws IllegalArgumentException if any of the parameters is <code>null</code> 
 	 */
 	public ModelMBeanNotificationPublisher(ModelMBean modelMBean, ObjectName objectName, Object managedResource) {
-		Assert.notNull(modelMBean, "The 'modelMBean' parameter must not be null.");
-		Assert.notNull(objectName, "The 'objectName' parameter must not be null.");
-		Assert.notNull(managedResource, "The 'managedResource' parameter must not be null.");
+		Assert.notNull(modelMBean, "'modelMBean' must not be null");
+		Assert.notNull(objectName, "'objectName' must not be null");
+		Assert.notNull(managedResource, "'managedResource' must not be null");
 		this.modelMBean = modelMBean;
 		this.objectName = objectName;
 		this.managedResource = managedResource;
@@ -75,7 +75,7 @@ public class ModelMBeanNotificationPublisher implements NotificationPublisher {
 
 
 	/**
-	 * Sends the supplied {@link Notification} using the wrapped
+	 * Send the supplied {@link Notification} using the wrapped
 	 * {@link ModelMBean} instance.
 	 * @param notification the {@link Notification} to be sent
 	 * @throws IllegalArgumentException if the supplied <code>notification</code> is <code>null</code>
@@ -98,15 +98,14 @@ public class ModelMBeanNotificationPublisher implements NotificationPublisher {
 	}
 
 	/**
-	 * From the {@link Notification class level Javadoc}:
-	 * <p><i>'It is strongly recommended that notification senders use the object name
-	 * rather than a reference to the MBean object as the source.'</i>
-	 *
-	 * @param notification the {@link Notification} whose {@link javax.management.Notification#getSource()} might need massaging
+	 * From the {@link Notification javadoc}:
+	 * <p><i>"It is strongly recommended that notification senders use the object name
+	 * rather than a reference to the MBean object as the source."</i>
+	 * @param notification the {@link Notification} whose
+	 * {@link javax.management.Notification#getSource()} might need massaging
 	 */
 	private void replaceNotificationSourceIfNecessary(Notification notification) {
-		if (notification.getSource() == null
-				|| notification.getSource().equals(this.managedResource)) {
+		if (notification.getSource() == null || notification.getSource().equals(this.managedResource)) {
 			notification.setSource(this.objectName);
 		}
 	}
