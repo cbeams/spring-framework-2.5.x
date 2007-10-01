@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5 RC1 (2007-10-08)
+Changes in version 2.5 RC1 (2007-10-09)
 ---------------------------------------
 
 General
@@ -12,6 +12,7 @@ General
 
 Package org.springframework.aop
 * fixed AspectJ pointcut handling to strictly match generic return types according to Java language rules
+* AspectJ pointcut matching only registers LocalVariableTableParameterNameDiscoverer if ASM is present on the classpath
 * removed unused pointcut type attribute from "spring-aop-2.5.xsd"
 
 Package org.springframework.beans
@@ -24,11 +25,14 @@ Package org.springframework.beans
 * DefaultListableBeanFactory removes a singleton bean instance if a new bean definition gets registered
 * DefaultListableBeanFactory fully destroys singleton bean instance when the corresponding bean definition gets replaced
 * XmlBeanDefinitionReader initializes default EntityResolver lazily, avoiding classpath scan in case of custom resolver
+* DefaultNamespaceHandlerResolver exposes public DEFAULT_HANDLER_MAPPINGS_LOCATION constant
+* fixed BeanDefinitionParserDelegate to correctly parse property sub-elements even with custom name for beans namespace
 * AbstractSingleBeanDefinitionParser applies full scope to inner beans, making them eligible for destruction callbacks
 * @PostConstruct/@PreDestroy methods are only called once even if they are specified as standard init/destroy methods
 * @Autowired qualifier annotations may be defined with target 'type' as well, marking the target bean class
 * Autowired/Common/PersistenceAnnotationBeanPostProcessor implement PriorityOrdered and expose an "order" bean property
 * "depends-on" kicks in before the affected bean is entering its creation phase; can be used to resolve circular refs
+* added "registers-scope" annotation to spring-tool.xsd, allowing a tool to determine valid scope names
 
 Package org.springframework.context
 * ClassPathXmlApplicationContext and FileSystemXmlApplicationContext trim passed-in config location Strings
@@ -44,15 +48,24 @@ Package org.springframework.core
 * added constructor with URI argument to UrlResource class
 * FileSystemResource's "getURL()" builds URLs that can be converted to an URI
 
+Package org.springframework.jdbc
+* SimpleJdbcTemplate's varargs handling always considers a single array argument as collection of arguments
+
 Package org.springframework.jms
 * JmsTemplate only starts lazily created transactional Connections if actually necessary (-> "startConnection" flag)
 * JmsTransactionManager does not start transactional Connections until a transactional Session actually requires it
 * added DestinationResolver support to StandardJmsActivationSpecFactory, for Destination objects on JCA ActivationSpecs
+* DefaultJmsActivationSpecFactory autodetects WebSphere's JMS ResourceAdapter and extended ActivationSpec properties
 * "spring-jms.xsd" supports "destination-resolver" attribute for "jca-listener-container" element as well
 
 Package org.springframework.jmx
 * MBeanExporter's "exposeManagedResourceClassLoader" defaults to "true" now, for interaction with third-party MBeans
 * fixed IdentityNamingStrategy to obtain the package name through class name inspection rather than "Class.getPackage()"
+* MBeanClientInterceptor automatically converts MXBean CompositeData/TabularData structures according to Java 5/6 rules
+* MBeanClientInterceptor uses the standard JDK MBeanServerInvocationHandler if possible (for full MXBean support)
+
+Package org.springframework.mail
+* added "getJavaMailProperties()" method to JavaMailSenderImpl, allowing for convenient configuration of specific keys
 
 Package org.springframework.mock
 * MockServletContext supports "getContext" (allowing to register contexts through the new "registerContext" method)
@@ -87,6 +100,7 @@ Package org.springframework.util
 
 Package org.springframework.web
 * added "getActualValue()" method to BindStatus, exposing the raw property value for comparison purposes
+* added "exposeModelAttributes" property to RedirectView, allowing to suppress model exposure completely
 * factored out a "loadReport()" method in AbstractJasperReportsView (called by "initApplicationContext()")
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
 * JSP CheckboxTag caches converted candidate value when comparing it with collection elements
