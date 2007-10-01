@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
-				"http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
+
 	<bean id="testBean1" class="org.springframework.beans.TestBean">
 		<meta key="foo" value="bar"/>
 	</bean>
+
 	<bean id="testBean2" class="org.springframework.beans.TestBean" parent="testBean1">
 		<meta key="abc" value="123"/>
 	</bean>
+
 	<bean id="testBean3" class="org.springframework.beans.TestBean">
 	  <property name="name">
 			<meta key="surname" value="Harrop"/>
 			<value>Rob</value>
 		</property>
 	</bean>
+
 </beans>
