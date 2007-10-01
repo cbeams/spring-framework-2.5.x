@@ -39,10 +39,13 @@ import org.springframework.beans.BeanWrapper;
  * JCA 1.5 specification (Appendix B). Specify the 'activationSpecClass'
  * property explicitly if these default naming rules do not apply.
  *
- * <p>Note: As of Spring 2.5, only ActiveMQ and JORAM are supported in terms
- * of extended settings (through the detection of ActiveMQ's and JORAM's
- * bean property naming conventions). The default ActivationSpec class
- * detection rules may apply to other JMS providers as well.
+ * <p>Note: ActiveMQ, JORAM and WebSphere are supported in terms of extended
+ * settings (through the detection of their bean property naming conventions).
+ * The default ActivationSpec class detection rules may apply to other
+ * JMS providers as well.
+ *
+ * <p>Thanks to Agim Emruli for pointing out the WebSphere JMS settings
+ * and contributing corresponding tests!
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -52,9 +55,11 @@ public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFa
 
 	private static final String RESOURCE_ADAPTER_SUFFIX = "ResourceAdapter";
 
+	private static final String RESOURCE_ADAPTER_IMPL_SUFFIX = "ResourceAdapterImpl";
+
 	private static final String ACTIVATION_SPEC_SUFFIX = "ActivationSpec";
 
-	private static final String ACTIVATION_SPEC_IMPL_NAME = "ActivationSpecImpl";
+	private static final String ACTIVATION_SPEC_IMPL_SUFFIX = "ActivationSpecImpl";
 
 
 	/** Logger available to subclasses */
@@ -84,10 +89,24 @@ public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFa
 			}
 		}
 
+		else if (adapterClassName.endsWith(RESOURCE_ADAPTER_IMPL_SUFFIX)){
+			//e.g. WebSphere
+			String providerName =
+					adapterClassName.substring(0, adapterClassName.length() - RESOURCE_ADAPTER_IMPL_SUFFIX.length());
+			String specClassName = providerName + ACTIVATION_SPEC_IMPL_SUFFIX;
+			try {
+				return adapter.getClass().getClassLoader().loadClass(specClassName);
+			}
+			catch (ClassNotFoundException ex) {
+				logger.debug("No explicit 'activationSpecClass' defined, " +
+						"and no default <Provider>ActivationSpec class found: " + specClassName);
+			}
+		}
+
 		else {
 			// e.g. JORAM
 			String providerPackage = adapterClassName.substring(0, adapterClassName.lastIndexOf('.') + 1);
-			String specClassName = providerPackage + ACTIVATION_SPEC_IMPL_NAME;
+			String specClassName = providerPackage + ACTIVATION_SPEC_IMPL_SUFFIX;
 			try {
 				return adapter.getClass().getClassLoader().loadClass(specClassName);
 			}
@@ -119,6 +138,10 @@ public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFa
 				// JORAM
 				bw.setPropertyValue("maxNumberOfWorks", Integer.toString(config.getMaxConcurrency()));
 			}
+			else if (bw.isWritableProperty("maxConcurrency")){
+				// WebSphere
+				bw.setPropertyValue("maxConcurrency", Integer.toString(config.getMaxConcurrency()));
+			}
 		}
 		if (config.getPrefetchSize() > 0) {
 			if (bw.isWritableProperty("maxMessagesPerSessions")) {
@@ -128,6 +151,10 @@ public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFa
 			else if (bw.isWritableProperty("maxMessages")) {
 				// JORAM
 				bw.setPropertyValue("maxMessages", Integer.toString(config.getPrefetchSize()));
+			}
+			else if(bw.isWritableProperty("maxBatchSize")){
+				// WebSphere
+				bw.setPropertyValue("maxBatchSize", Integer.toString(config.getPrefetchSize()));
 			}
 		}
 	}
