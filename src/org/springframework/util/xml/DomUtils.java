@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ public abstract class DomUtils {
 	public static boolean nodeNameEquals(Node node, String desiredName) {
 		Assert.notNull(node, "Node must not be null");
 		Assert.notNull(desiredName, "Desired name must not be null");
-		return desiredName.equals(node.getNodeName()) || desiredName.equals(node.getLocalName());
+		return (desiredName.equals(node.getNodeName()) || desiredName.equals(node.getLocalName()));
 	}
 
 	/**
@@ -120,8 +120,7 @@ public abstract class DomUtils {
 		NodeList nl = valueEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node item = nl.item(i);
-			if ((item instanceof CharacterData && !(item instanceof Comment)) ||
-					item instanceof EntityReference) {
+			if ((item instanceof CharacterData && !(item instanceof Comment)) || item instanceof EntityReference) {
 				value.append(item.getNodeValue());
 			}
 		}
