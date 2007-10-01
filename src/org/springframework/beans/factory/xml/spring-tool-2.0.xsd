@@ -38,23 +38,23 @@
 
 	<xsd:complexType name="exportsType">
 		<xsd:annotation>
-			<xsd:documentation>
-				Indicates that an annotated type exports an application visible component.
-			</xsd:documentation>
+			<xsd:documentation><![CDATA[
+	Indicates that an annotated type exports an application visible component.
+		]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:attribute name="type" type="xsd:string">
 			<xsd:annotation>
-				<xsd:documentation>
-					The type of the exported component. May be null if the type is not known until runtime.
-				</xsd:documentation>
+				<xsd:documentation><![CDATA[
+	The type of the exported component. May be null if the type is not known until runtime.
+		]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attribute name="identifier" type="xsd:string" default="@id">
 			<xsd:annotation>
-				<xsd:documentation>
-					Defines an XPath query that can be executed against the node annotated with this
-					type to determine the identifier of any exported component.
-				</xsd:documentation>
+				<xsd:documentation><![CDATA[
+	Defines an XPath query that can be executed against the node annotated with this
+	type to determine the identifier of any exported component.
+		]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 	</xsd:complexType>
