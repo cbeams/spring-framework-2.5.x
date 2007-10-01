@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.7 (2007-09-30)
+Changes in version 2.0.7 (2007-10-01)
 -------------------------------------
 
 General
@@ -41,6 +41,7 @@ Package org.springframework.beans
 * XmlBeanDefinitionReader initializes default EntityResolver lazily, avoiding classpath scan in case of custom resolver
 * DefaultNamespaceHandlerResolver exposes public DEFAULT_HANDLER_MAPPINGS_LOCATION constant
 * changed visibility of BeanDefinitionParserDelegate's "buildTypedStringValue(ForMap)" methods to protected
+* fixed BeanDefinitionParserDelegate to correctly parse property sub-elements even with custom name for beans namespace
 
 Package org.springframework.context
 * ClassPathXmlApplicationContext and FileSystemXmlApplicationContext trim passed-in config location Strings
@@ -117,6 +118,7 @@ Package org.springframework.web
 * AbstractWizardFormController's "showForm" method is not final anymore (can be overridden e.g. for exception handling)
 * added "transformerFactoryClass" property and "newTransformerFactory()" template method to (Abstract)XsltView
 * AbstractView does not log static attributes anymore, in order to allow for scoped proxies to be used as attributes
+* added "exposeModelAttributes" property to RedirectView, allowing to suppress model exposure completely
 * JstlView properly allows for programmatic usage (added overloaded constructors; exposing a MessageSource is optional)
 * InternalResourceViewResolver uses JstlView as default (instead of InternalResourceView) if the JSTL API is present
 * JSP MessageTag resolves arguments in default text even if no message code was specified
