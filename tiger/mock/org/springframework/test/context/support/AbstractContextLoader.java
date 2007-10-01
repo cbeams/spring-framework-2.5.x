@@ -137,10 +137,11 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * classpath resource from the same package in which the specified class is
 	 * defined. A path starting with a slash is treated as a fully qualified
 	 * class path location, e.g.:
-	 * &quot;/org/springframework/whatever/foo.xml&quot;. A path which is
-	 * already a classpath resource (i.e., prefixed with
-	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:}) will be added to
-	 * the results unchanged.
+	 * &quot;/org/springframework/whatever/foo.xml&quot;. A path which
+	 * references a URL (e.g., a path prefixed with
+	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
+	 * {@link ResourceUtils#FILE_URL_PREFIX file:}, <code>http:</code>,
+	 * etc.) will be added to the results unchanged.
 	 * </p>
 	 * <p>
 	 * Subclasses can override this method to implement a different
@@ -160,12 +161,12 @@ public abstract class AbstractContextLoader implements ContextLoader {
 			if (path.startsWith("/")) {
 				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
 			}
-			else if (path.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
-				modifiedLocations[i] = StringUtils.cleanPath(path);
+			else if (!ResourceUtils.isUrl(path)) {
+				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + "/"
+						+ StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + "/" + path);
 			}
 			else {
-				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX
-						+ StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + "/" + path);
+				modifiedLocations[i] = StringUtils.cleanPath(path);
 			}
 		}
 		return modifiedLocations;
