@@ -37,6 +37,7 @@ import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.JdkVersion;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.util.StringUtils;
 
 /**
@@ -88,6 +89,29 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		IndexedTestBean tb = (IndexedTestBean) ac.getBean("my.tb");
 		assertEquals(99, tb.getArray()[0].getAge());
 		assertEquals("test", ((TestBean) tb.getList().get(1)).getName());
+	}
+
+	public void testPropertyOverrideConfigurerWithNestedMapPropertyAndDotInMapKey() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb", IndexedTestBean.class);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "tb.map[key1]=99\ntb.map[key2.ext]=test");
+		ac.registerSingleton("configurer", PropertyOverrideConfigurer.class, pvs);
+		ac.refresh();
+		IndexedTestBean tb = (IndexedTestBean) ac.getBean("tb");
+		assertEquals("99", tb.getMap().get("key1"));
+		assertEquals("test", tb.getMap().get("key2.ext"));
+	}
+
+	public void testPropertyOverrideConfigurerWithJavaMailProperties() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		ac.registerSingleton("tb", JavaMailSenderImpl.class);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "tb.javaMailProperties[mail.smtp.auth]=true");
+		ac.registerSingleton("configurer", PropertyOverrideConfigurer.class, pvs);
+		ac.refresh();
+		JavaMailSenderImpl tb = (JavaMailSenderImpl) ac.getBean("tb");
+		assertEquals("true", tb.getJavaMailProperties().getProperty("mail.smtp.auth"));
 	}
 
 	public void testPropertyOverrideConfigurerWithPropertiesFile() {

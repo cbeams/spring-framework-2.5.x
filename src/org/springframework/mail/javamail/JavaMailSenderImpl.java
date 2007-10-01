@@ -78,7 +78,9 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	private static final String HEADER_MESSAGE_ID = "Message-ID";
 
 
-	private Session session = Session.getInstance(new Properties(), null);
+	private Properties javaMailProperties = new Properties();
+
+	private Session session;
 
 	private String protocol = DEFAULT_PROTOCOL;
 
@@ -106,6 +108,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 		this.defaultFileTypeMap = fileTypeMap;
 	}
 
+
 	/**
 	 * Set JavaMail properties for the <code>Session</code>.
 	 * <p>A new <code>Session</code> will be created with those properties.
@@ -114,7 +117,20 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * JavaMail properties.
 	 */
 	public void setJavaMailProperties(Properties javaMailProperties) {
-		this.session = Session.getInstance(javaMailProperties, null);
+		this.javaMailProperties = javaMailProperties;
+		synchronized (this) {
+			this.session = null;
+		}
+	}
+
+	/**
+	 * Allow Map access to the JavaMail properties of this sender,
+	 * with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via
+	 * "javaMailProperties[mail.smtp.auth]".
+	 */
+	public Properties getJavaMailProperties() {
+		return this.javaMailProperties;
 	}
 
 	/**
@@ -125,15 +141,19 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * in this instance will override the settings in the <code>Session</code>.
 	 * @see #setJavaMailProperties
 	 */
-	public void setSession(Session session) {
+	public synchronized void setSession(Session session) {
 		Assert.notNull(session, "Session must not be null");
 		this.session = session;
 	}
 
 	/**
-	 * Return the JavaMail <code>Session</code>.
+	 * Return the JavaMail <code>Session</code>,
+	 * lazily initializing it if hasn't been specified explicitly.
 	 */
-	public Session getSession() {
+	public synchronized Session getSession() {
+		if (this.session == null) {
+			this.session = Session.getInstance(this.javaMailProperties);
+		}
 		return this.session;
 	}
 
