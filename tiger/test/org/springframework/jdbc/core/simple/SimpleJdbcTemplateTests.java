@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,19 @@
 package org.springframework.jdbc.core.simple;
 
 import java.lang.reflect.Method;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import javax.sql.DataSource;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
@@ -27,19 +37,15 @@ import org.easymock.internal.ArrayMatcher;
 
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
-import javax.sql.DataSource;
-
 /**
- * Unit tests for the {@link SimpleJdbcTemplate} class.
- * 
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Juergen Hoeller
+ * @author Thomas Risberg
  */
 public class SimpleJdbcTemplateTests extends TestCase {
 
@@ -213,6 +219,27 @@ public class SimpleJdbcTemplateTests extends TestCase {
 
 		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
 		Date result = jth.queryForObject(sql, Date.class, arg1, arg2, arg3);
+		assertEquals(expectedResult, result);
+		mc.verify();
+	}
+
+	public void testQueryForObjectWithArgArray() throws Exception {
+		String sql = "SELECT SOMEDATE FROM BAR WHERE ID=? AND XY=?";
+		Date expectedResult = new Date();
+		double arg1 = 24.7;
+		String arg2 = "foo";
+		Object arg3 = new Object();
+
+		MockControl mc = MockControl.createControl(JdbcOperations.class);
+		JdbcOperations jo = (JdbcOperations) mc.getMock();
+		jo.queryForObject(sql, new Object[]{arg1, arg2, arg3}, Date.class);
+		mc.setDefaultMatcher(new ArrayMatcher());
+		mc.setReturnValue(expectedResult);
+		mc.replay();
+
+		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
+		Object args = new Object[] {arg1, arg2, arg3};
+		Date result = jth.queryForObject(sql, Date.class, args);
 		assertEquals(expectedResult, result);
 		mc.verify();
 	}

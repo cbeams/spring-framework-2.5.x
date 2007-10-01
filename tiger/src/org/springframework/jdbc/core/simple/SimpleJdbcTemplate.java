@@ -118,7 +118,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	public int queryForInt(String sql, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 					getJdbcOperations().queryForInt(sql) :
-					getJdbcOperations().queryForInt(sql, args));
+					getJdbcOperations().queryForInt(sql, getArguments(args)));
 	}
 
 	public long queryForLong(String sql, Map args) throws DataAccessException {
@@ -132,7 +132,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	public long queryForLong(String sql, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 					getJdbcOperations().queryForLong(sql) :
-					getJdbcOperations().queryForLong(sql, args));
+					getJdbcOperations().queryForLong(sql, getArguments(args)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -150,7 +150,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	public <T> T queryForObject(String sql, Class<T> requiredType, Object... args) throws DataAccessException {
 		return (T) (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForObject(sql, requiredType) :
-				getJdbcOperations().queryForObject(sql, args, requiredType));
+				getJdbcOperations().queryForObject(sql, getArguments(args), requiredType));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -168,7 +168,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
 		return (T) (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForObject(sql, rm):
-				getJdbcOperations().queryForObject(sql, args, rm));
+				getJdbcOperations().queryForObject(sql, getArguments(args), rm));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -186,7 +186,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
 		return (List<T>) (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().query(sql, rm) :
-				getJdbcOperations().query(sql, args, rm));
+				getJdbcOperations().query(sql, getArguments(args), rm));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -204,7 +204,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	public Map<String, Object> queryForMap(String sql, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForMap(sql) :
-				getJdbcOperations().queryForMap(sql, args));
+				getJdbcOperations().queryForMap(sql, getArguments(args)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -222,7 +222,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	public List<Map<String, Object>> queryForList(String sql, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForList(sql) :
-				getJdbcOperations().queryForList(sql, args));
+				getJdbcOperations().queryForList(sql, getArguments(args)));
 	}
 
 	public int update(String sql, Map args) throws DataAccessException {
@@ -236,7 +236,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	public int update(String sql, Object ... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().update(sql) :
-				getJdbcOperations().update(sql, args));
+				getJdbcOperations().update(sql, getArguments(args)));
 	}
 
 	public int[] batchUpdate(String sql, List<Object[]> batchArgs) {
@@ -260,6 +260,7 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
 		return doExecuteBatchUpdateWithNamedParameters(sql, batchArgs);
 	}
+
 
 	private int[] doExecuteBatchUpdate(String sql, final List<Object[]> batchValues, final int[] columnTypes) {
 		return getJdbcOperations().batchUpdate(
@@ -317,6 +318,20 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 				}
 				StatementCreatorUtils.setParameterValue(ps, colIndex, colType, value);
 			}
+		}
+	}
+
+
+	/**
+	 * Considers an Object array passed into a varargs parameter as
+	 * collection of arguments rather than as single argument.
+	 */
+	private Object[] getArguments(Object[] varArgs) {
+		if (varArgs.length == 1 && varArgs[0] instanceof Object[]) {
+			return (Object[]) varArgs[0];
+		}
+		else {
+			return varArgs;
 		}
 	}
 
