@@ -258,7 +258,7 @@ public abstract class JmxUtils {
 	 * Determine whether the given bean class qualifies as an MBean as-is.
 	 * <p>This implementation checks for {@link javax.management.DynamicMBean}
 	 * classes as well as classes with corresponding "*MBean" interface
-	 * (Standard MBeans).
+	 * (Standard MBeans) or corresponding "*MXBean" interface (Java 6 MXBeans).
 	 * @param beanClass the bean class to analyze
 	 * @return whether the class qualifies as an MBean
 	 * @see org.springframework.jmx.export.MBeanExporter#isMBean(Class)
