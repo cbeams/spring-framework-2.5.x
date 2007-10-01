@@ -28,14 +28,19 @@ import javax.management.Attribute;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.JMException;
+import javax.management.JMX;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerInvocationHandler;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.management.OperationsException;
 import javax.management.ReflectionException;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -49,10 +54,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.JdkVersion;
 import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} that routes calls to an
@@ -96,15 +103,21 @@ public class MBeanClientInterceptor
 
 	private boolean useStrictCasing = true;
 
+	private Class managementInterface;
+
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private JMXConnector connector;
+
+	private MBeanServerInvocationHandler invocationHandler;
 
 	private Map allowedAttributes;
 
 	private Map allowedOperations;
 
 	private final Map signatureCache = new HashMap();
+
+	private final Object preparationMonitor = new Object();
 
 
 	/**
@@ -161,20 +174,65 @@ public class MBeanClientInterceptor
 		this.useStrictCasing = useStrictCasing;
 	}
 
+	/**
+	 * Set the management interface of the target MBean, exposing bean property
+	 * setters and getters for MBean attributes and conventional Java methods
+	 * for MBean operations.
+	 */
+	public void setManagementInterface(Class managementInterface) {
+		this.managementInterface = managementInterface;
+	}
+
+	/**
+	 * Return the management interface of the target MBean,
+	 * or <code>null</code> if none specified.
+	 */
+	protected final Class getManagementInterface() {
+		return this.managementInterface;
+	}
+
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 
+
 	/**
-	 * Ensures that an <code>MBeanServerConnection</code> is configured and attempts to
-	 * detect a local connection if one is not supplied.
+	 * Prepares the <code>MBeanServerConnection</code> if the "connectOnStartup"
+	 * is turned on (which it is by default).
 	 */
-	public void afterPropertiesSet() throws MBeanServerNotFoundException, MBeanInfoRetrievalException {
+	public void afterPropertiesSet() {
 		if (this.connectOnStartup) {
+			prepare();
+		}
+	}
+
+	/**
+	 * Ensures that an <code>MBeanServerConnection</code> is configured and attempts
+	 * to detect a local connection if one is not supplied.
+	 */
+	public void prepare() {
+		synchronized (this.preparationMonitor) {
 			if (this.server == null) {
 				connect();
 			}
-			retrieveMBeanInfo();
+			this.invocationHandler = null;
+			if (this.useStrictCasing) {
+				// Use the JDK's own MBeanServerInvocationHandler,
+				// in particular for native MXBean support on Java 6.
+				if (JdkVersion.isAtLeastJava16()) {
+					this.invocationHandler =
+							new MBeanServerInvocationHandler(this.server, this.objectName,
+									(this.managementInterface != null && JMX.isMXBeanInterface(this.managementInterface)));
+				}
+				else {
+					this.invocationHandler = new MBeanServerInvocationHandler(this.server, this.objectName);
+				}
+			}
+			else {
+				// Non-strict asing can only be achieved through custom
+				// invocation handling. Only partial MXBean support available!
+				retrieveMBeanInfo();
+			}
 		}
 	}
 
@@ -226,7 +284,7 @@ public class MBeanClientInterceptor
 	 * This information is used by the proxy when determining whether an invocation matches
 	 * a valid operation or attribute on the management interface of the managed resource.
 	 */
-	private void retrieveMBeanInfo() throws MBeanServerNotFoundException, MBeanInfoRetrievalException {
+	private void retrieveMBeanInfo() throws MBeanInfoRetrievalException {
 		try {
 			MBeanInfo info = this.server.getMBeanInfo(this.objectName);
 
@@ -271,6 +329,16 @@ public class MBeanClientInterceptor
 		}
 	}
 
+	/**
+	 * Return whether this client interceptor has already been prepared,
+	 * i.e. has already looked up the server and cached all metadata.
+	 */
+	protected boolean isPrepared() {
+		synchronized (this.preparationMonitor) {
+			return (this.invocationHandler != null || this.allowedAttributes != null);
+		}
+	}
+
 
 	/**
 	 * Route the invocation to the configured managed resource. Correctly routes JavaBean property
@@ -285,29 +353,31 @@ public class MBeanClientInterceptor
 	 * @throws Throwable typically as the result of an error during invocation
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		// Lazily connect to MBeanServer?
-		if (!this.connectOnStartup) {
-			synchronized (this) {
-				if (this.server == null) {
-					logger.debug("Lazily establishing MBeanServer connection");
-					connect();
-				}
-
-				if (this.allowedAttributes == null) {
-					logger.debug("Lazily initializing MBeanInfo cache");
-					retrieveMBeanInfo();
-				}
+		// Lazily connect to MBeanServer if necessary.
+		synchronized (this.preparationMonitor) {
+			if (!isPrepared()) {
+				prepare();
 			}
 		}
-
 		try {
-			PropertyDescriptor pd = BeanUtils.findPropertyForMethod(invocation.getMethod());
-			if (pd != null) {
-				return invokeAttribute(pd, invocation);
+			Object result = null;
+			if (this.invocationHandler != null) {
+				result = this.invocationHandler.invoke(
+						invocation.getThis(), invocation.getMethod(), invocation.getArguments());
 			}
 			else {
-				return invokeOperation(invocation.getMethod(), invocation.getArguments());
+				PropertyDescriptor pd = BeanUtils.findPropertyForMethod(invocation.getMethod());
+				if (pd != null) {
+					result = invokeAttribute(pd, invocation);
+				}
+				else {
+					result = invokeOperation(invocation.getMethod(), invocation.getArguments());
+				}
 			}
+			return convertResultValueIfNecessary(result, invocation.getMethod().getReturnType());
+		}
+		catch (OperationsException ex) {
+			throw new InvalidInvocationException(ex.getMessage());
 		}
 		catch (JMException ex) {
 			throw new InvocationFailureException("JMX access failed", ex);
@@ -322,7 +392,6 @@ public class MBeanClientInterceptor
 
 		String attributeName = JmxUtils.getAttributeName(pd, this.useStrictCasing);
 		MBeanAttributeInfo inf = (MBeanAttributeInfo) this.allowedAttributes.get(attributeName);
-
 		// If no attribute is returned, we know that it is not defined in the
 		// management interface.
 		if (inf == null) {
@@ -339,7 +408,7 @@ public class MBeanClientInterceptor
 		}
 		else if (invocation.getMethod().equals(pd.getWriteMethod())) {
 			if (inf.isWritable()) {
-				server.setAttribute(this.objectName, new Attribute(attributeName, invocation.getArguments()[0]));
+				this.server.setAttribute(this.objectName, new Attribute(attributeName, invocation.getArguments()[0]));
 				return null;
 			}
 			else {
@@ -366,7 +435,6 @@ public class MBeanClientInterceptor
 			throw new InvalidInvocationException("Operation '" + method.getName() +
 					"' is not exposed on the management interface");
 		}
-
 		String[] signature = null;
 		synchronized (this.signatureCache) {
 			signature = (String[]) this.signatureCache.get(method);
@@ -377,6 +445,43 @@ public class MBeanClientInterceptor
 		}
 		return this.server.invoke(this.objectName, method.getName(), args, signature);
 	}
+
+	/**
+	 * Convert the given result object (from attribute access or operation invocation)
+	 * to the specified target class for returning from the proxy method.
+	 * @param result the result object as returned by the <code>MBeanServer</code>
+	 * @param targetClass the result type of the proxy method that's been invoked
+	 * @return the converted result object, or the passed-in object if no conversion
+	 * is necessary
+	 */
+	protected Object convertResultValueIfNecessary(Object result, Class targetClass) {
+		try {
+			if (result == null) {
+				return null;
+			}
+			if (ClassUtils.isAssignableValue(targetClass, result)) {
+				return result;
+			}
+			if (result instanceof CompositeData) {
+				Method fromMethod = targetClass.getMethod("from", new Class[] {CompositeData.class});
+				return ReflectionUtils.invokeMethod(fromMethod, null, new Object[] {result});
+			}
+			else if (result instanceof TabularData) {
+				Method fromMethod = targetClass.getMethod("from", new Class[] {TabularData.class});
+				return ReflectionUtils.invokeMethod(fromMethod, null, new Object[] {result});
+			}
+			else {
+				throw new InvocationFailureException(
+						"Incompatible result value [" + result + "] for target type [" + targetClass.getName() + "]");
+			}
+		}
+		catch (NoSuchMethodException ex) {
+			throw new InvocationFailureException(
+					"Could not obtain 'find(CompositeData)' / 'find(TabularData)' method on target type [" +
+							targetClass.getName() + "] for conversion of MXBean data structure [" + result + "]");
+		}
+	}
+
 
 	/**
 	 * Closes any <code>JMXConnector</code> that may be managed by this interceptor.

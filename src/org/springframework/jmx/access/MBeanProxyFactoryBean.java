@@ -65,8 +65,8 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 	 * conventional Java methods for MBean operations.
 	 * @see #setObjectName
 	 */
-	public void setProxyInterface(Class managementInterface) {
-		this.proxyInterface = managementInterface;
+	public void setProxyInterface(Class proxyInterface) {
+		this.proxyInterface = proxyInterface;
 	}
 
 	public void setBeanClassLoader(ClassLoader classLoader) {
@@ -81,7 +81,15 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 		super.afterPropertiesSet();
 
 		if (this.proxyInterface == null) {
-			throw new IllegalArgumentException("Property 'proxyInterface' is required");
+			this.proxyInterface = getManagementInterface();
+			if (this.proxyInterface == null) {
+				throw new IllegalArgumentException("Property 'proxyInterface' or 'managementInterface' is required");
+			}
+		}
+		else {
+			if (getManagementInterface() == null) {
+				setManagementInterface(this.proxyInterface);
+			}
 		}
 		this.mbeanProxy = new ProxyFactory(this.proxyInterface, this).getProxy(this.beanClassLoader);
 	}
