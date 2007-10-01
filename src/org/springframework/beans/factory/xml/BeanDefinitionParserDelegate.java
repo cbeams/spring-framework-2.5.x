@@ -846,12 +846,13 @@ public class BeanDefinitionParserDelegate {
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element candidateEle = (Element) nl.item(i);
-				if (DESCRIPTION_ELEMENT.equals(candidateEle.getTagName())) {
-					// Keep going: we don't use this value for now.
+				if (DomUtils.nodeNameEquals(candidateEle, DESCRIPTION_ELEMENT) ||
+						DomUtils.nodeNameEquals(candidateEle, META_ELEMENT)) {
+					// Keep going: we don't use these values for now.
 				}
 				else {
 					// Child element is what we're looking for.
-					if (subElement != null && !META_ELEMENT.equals(subElement.getTagName())) {
+					if (subElement != null) {
 						error(elementName + " must not contain more than one sub-element", ele);
 					}
 					else {
@@ -993,7 +994,7 @@ public class BeanDefinitionParserDelegate {
 		else if (DomUtils.nodeNameEquals(ele, PROPS_ELEMENT)) {
 			return parsePropsElement(ele);
 		}
-		error("Unknown property sub-element: [" + ele.getTagName() + "]", ele);
+		error("Unknown property sub-element: [" + ele.getNodeName() + "]", ele);
 		return null;
 	}
 
