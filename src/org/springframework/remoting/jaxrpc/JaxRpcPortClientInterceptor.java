@@ -550,22 +550,12 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		if (AopUtils.isToStringMethod(invocation.getMethod())) {
 			return "JAX-RPC proxy for port [" + getPortName() + "] of service [" + getServiceName() + "]";
 		}
-
-		// Lazily prepare service and stub if appropriate.
-		if (!this.lookupServiceOnStartup || this.refreshServiceAfterConnectFailure) {
-			synchronized (this.preparationMonitor) {
-				if (!isPrepared()) {
-					prepare();
-				}
-			}
-		}
-		else {
+		// Lazily prepare service and stub if necessary.
+		synchronized (this.preparationMonitor) {
 			if (!isPrepared()) {
-				throw new IllegalStateException("JaxRpcClientInterceptor is not properly initialized - " +
-						"invoke 'prepare' before attempting any operations");
+				prepare();
 			}
 		}
-
 		return doInvoke(invocation);
 	}
 
