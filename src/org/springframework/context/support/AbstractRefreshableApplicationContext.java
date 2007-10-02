@@ -81,20 +81,16 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	}
 
 
+	/**
+	 * This implementation performs an actual refresh of this context's underlying
+	 * bean factory, shutting down the previous bean factory (if any) and
+	 * initializing a fresh bean factory for the next phase of the context's lifecycle.
+	 */
 	protected final void refreshBeanFactory() throws BeansException {
-		// Shut down previous bean factory, if any.
-		ConfigurableListableBeanFactory oldBeanFactory = null;
-		synchronized (this.beanFactoryMonitor) {
-			oldBeanFactory = this.beanFactory;
+		if (hasBeanFactory()) {
+			destroyBeans();
+			closeBeanFactory();
 		}
-		if (oldBeanFactory != null) {
-			oldBeanFactory.destroySingletons();
-			synchronized (this.beanFactoryMonitor) {
-				this.beanFactory = null;
-			}
-		}
-
-		// Initialize fresh bean factory.
 		try {
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			customizeBeanFactory(beanFactory);
@@ -112,6 +108,16 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	protected final void closeBeanFactory() {
 		synchronized (this.beanFactoryMonitor) {
 			this.beanFactory = null;
+		}
+	}
+
+	/**
+	 * Determine whether this context currently holds a bean factory,
+	 * i.e. has been refreshed at least once and not been closed yet.
+	 */
+	protected final boolean hasBeanFactory() {
+		synchronized (this.beanFactoryMonitor) {
+			return (this.beanFactory != null);
 		}
 	}
 
