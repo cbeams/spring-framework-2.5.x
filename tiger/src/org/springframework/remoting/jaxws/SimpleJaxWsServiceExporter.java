@@ -28,6 +28,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.support.ConcurrentExecutorAdapter;
 
 /**
  * Simple exporter for JAX-WS services, autodetecting annotation service beans
@@ -59,19 +61,52 @@ public class SimpleJaxWsServiceExporter implements BeanFactoryAware, DisposableB
 	private final Set<Endpoint> publishedEndpoints = new LinkedHashSet<Endpoint>();
 
 
+	/**
+	 * Set the base address for exported services.
+	 * Default is "http://localhost:8080/".
+	 * <p>For each actual publication address, the service name will be
+	 * appended to this base address. E.g. service name "OrderService"
+	 * -> "http://localhost:8080/OrderService".
+	 * @see javax.xml.ws.Endpoint#publish(String)
+	 * @see javax.jws.WebService#serviceName()
+	 */
 	public void setBaseAddress(String baseAddress) {
 		this.baseAddress = baseAddress;
 	}
 
+	/**
+	 * Set the JDK concurrent executor to use for dispatching incoming requests
+	 * to exported service instances.
+	 * @see javax.xml.ws.Endpoint#setExecutor
+	 */
 	public void setExecutor(Executor executor) {
 		this.executor = executor;
 	}
 
+	/**
+	 * Set the Spring TaskExecutor to use for dispatching incoming requests
+	 * to exported service instances.
+	 * @see javax.xml.ws.Endpoint#setExecutor
+	 */
+	public void setTaskExecutor(TaskExecutor executor) {
+		this.executor = new ConcurrentExecutorAdapter(executor);
+	}
+
+	/**
+	 * Set the property bag for the endpoint, including properties such as
+	 * "javax.xml.ws.wsdl.service" or "javax.xml.ws.wsdl.port"
+	 * @see javax.xml.ws.Endpoint#setProperties
+	 * @see javax.xml.ws.Endpoint#WSDL_SERVICE
+	 * @see javax.xml.ws.Endpoint#WSDL_PORT
+	 */
 	public void setEndpointProperties(Map<String, Object> endpointProperties) {
 		this.endpointProperties = endpointProperties;
 	}
 
 
+	/**
+	 * Obtains all web service beans and publishes them as JAX-WS endpoints.
+	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ListableBeanFactory)) {
 			throw new IllegalStateException("SimpleJaxWsServiceExporter requires a ListableBeanFactory");
@@ -96,6 +131,9 @@ public class SimpleJaxWsServiceExporter implements BeanFactoryAware, DisposableB
 		}
 	}
 
+	/**
+	 * Stops all published endpoints, taking the web services offline.
+	 */
 	public void destroy() {
 		for (Endpoint endpoint : this.publishedEndpoints) {
 			endpoint.stop();

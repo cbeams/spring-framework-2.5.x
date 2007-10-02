@@ -23,6 +23,9 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.handler.HandlerResolver;
 
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.support.ConcurrentExecutorAdapter;
+
 /**
  * Factory for locally defined JAX-WS {@link javax.xml.ws.Service} references.
  * Uses the JAX-WS {@link javax.xml.ws.Service#create} factory API underneath.
@@ -94,15 +97,39 @@ public class LocalJaxWsServiceFactory {
 		return this.serviceName;
 	}
 
+	/**
+	 * Set the JDK concurrent executor to use for asynchronous executions
+	 * that require callbacks.
+	 * @see javax.xml.ws.Service#setExecutor
+	 */
 	public void setExecutor(Executor executor) {
 		this.executor = executor;
 	}
 
+	/**
+	 * Set the Spring TaskExecutor to use for asynchronous executions
+	 * that require callbacks.
+	 * @see javax.xml.ws.Service#setExecutor
+	 */
+	public void setTaskExecutor(TaskExecutor executor) {
+		this.executor = new ConcurrentExecutorAdapter(executor);
+	}
+
+	/**
+	 * Set the JAX-WS HandlerResolver to use for all proxies and dispatchers
+	 * created through this factory.
+	 * @see javax.xml.ws.Service#setHandlerResolver
+	 */
 	public void setHandlerResolver(HandlerResolver handlerResolver) {
 		this.handlerResolver = handlerResolver;
 	}
 
 
+	/**
+	 * Create a JAX-WS Service according to the parameters of this factory.
+	 * @see #setServiceName
+	 * @see #setWsdlDocumentUrl
+	 */
 	public Service createJaxWsService() {
 		Service service = (this.wsdlDocumentUrl != null ?
 				Service.create(this.wsdlDocumentUrl, getQName(this.serviceName)) :
