@@ -16,11 +16,12 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Rob Harrop
+ * @author Sam Brannen
  */
 public class Country {
 
@@ -45,11 +46,11 @@ public class Country {
 
 
 	public String getIsoCode() {
-		return isoCode;
+		return this.isoCode;
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 
@@ -57,6 +58,21 @@ public class Country {
 		return this.name + "(" + this.isoCode + ")";
 	}
 
+	public static Country getCountryWithIsoCode(final String isoCode) {
+		if (COUNTRY_AT.isoCode.equals(isoCode)) {
+			return COUNTRY_AT;
+		}
+		if (COUNTRY_NL.isoCode.equals(isoCode)) {
+			return COUNTRY_NL;
+		}
+		if (COUNTRY_UK.isoCode.equals(isoCode)) {
+			return COUNTRY_UK;
+		}
+		if (COUNTRY_US.isoCode.equals(isoCode)) {
+			return COUNTRY_US;
+		}
+		return null;
+	}
 
 	public static List getCountries() {
 		List countries = new ArrayList();
