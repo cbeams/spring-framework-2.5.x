@@ -91,7 +91,7 @@
       <para>There are several reasons why some projects will prefer to use
       other MVC implementations. Many teams expect to leverage their existing
       investment in skills and tools. In addition, there is a large body of
-      knowledge and experience avalailable for the Struts framework. Thus, if
+      knowledge and experience available for the Struts framework. Thus, if
       you can live with Struts' architectural flaws, it can still be a viable
       choice for the web layer; the same applies to WebWork and other web MVC
       frameworks.</para>
@@ -102,7 +102,7 @@
       root application context via its <classname>ContextLoaderListener</classname>,
       and access it via its <interfacename>ServletContext</interfacename> attribute
       (or Spring's respective helper method) from within a Struts or WebWork action.
-      Note that there aren't any "plugins" involved, so no dedicated integration
+      Note that there aren't any "plug-ins" involved, so no dedicated integration
       is necessary. From the web layer's point of view, you'll simply use Spring
       as a library, with the root application context instance as the entry point.</para>
 
@@ -119,7 +119,7 @@
     <section id="mvc-features">
       <title>Features of Spring Web MVC</title>
       
-      <!-- insert some content about Spring WebFlow here -->
+      <!-- insert some content about Spring Web Flow here -->
       &swf-sidebar;
 
       <para>Spring's web module provides a wealth of unique web support
@@ -2130,7 +2130,7 @@ public class FileUploadBean {
             <td><form:input path="lastName" /></td>
         </tr>
         <tr>
-            <td colspan="3">
+            <td colspan="2">
                 <input type="submit" value="Save Changes" />
             </td>
         </tr>
@@ -2150,15 +2150,13 @@ public class FileUploadBean {
       <tr>
           <td>First Name:</td>
           <td><input name="firstName" type="text" value="Harry"/></td>
-          <td></td>
       </tr>
       <tr>
           <td>Last Name:</td>
           <td><input name="lastName" type="text" value="Potter"/></td>
-          <td></td>
       </tr>
       <tr>
-          <td colspan="3">
+          <td colspan="2">
             <input type="submit" value="Save Changes" />
           </td>
       </tr>
@@ -2181,7 +2179,7 @@ public class FileUploadBean {
             <td><form:input path="lastName" /></td>
         </tr>
         <tr>
-            <td colspan="3">
+            <td colspan="2">
                 <input type="submit" value="Save Changes" />
             </td>
         </tr>
@@ -2244,7 +2242,6 @@ public class FileUploadBean {
             <td>Subscribe to newsletter?:</td>
             ]]><lineannotation>&lt;%-- Approach 1: Property is of type <classname>java.lang.Boolean</classname> --%&gt;</lineannotation><![CDATA[
             <td><form:checkbox path="preferences.receiveNewsletter"/></td>
-            <td>&nbsp;</td>
         </tr>
 
         <tr>
@@ -2256,7 +2253,6 @@ public class FileUploadBean {
                 Defence Against the Dark Arts: <form:checkbox path="preferences.interests"
                     value="Defence Against the Dark Arts"/>
             </td>
-            <td>&nbsp;</td>
         </tr>
         <tr>
             <td>Favourite Word:</td>
@@ -2264,7 +2260,6 @@ public class FileUploadBean {
                 ]]><lineannotation>&lt;%-- Approach 3: Property is of type <classname>java.lang.Object</classname> --%&gt;</lineannotation><![CDATA[
                 Magic: <form:checkbox path="preferences.favouriteWord" value="Magic"/>
             </td>
-            <td>&nbsp;</td>
         </tr>
     </table>
 </form:form>]]></programlisting>
@@ -2302,7 +2297,6 @@ public class FileUploadBean {
             value="Defence Against the Dark Arts"/>
         <input type="hidden" value="1" name="_preferences.interests"/>
     </td>
-    <td>&nbsp;</td>
 </tr>]]></programlisting>
 
     <para>What you might not expect to see is the additional hidden field after each checkbox.
@@ -2325,7 +2319,6 @@ public class FileUploadBean {
     <td>Sex:</td>
     <td>Male: <form:radiobutton path="sex" value="M"/> <br/>
         Female: <form:radiobutton path="sex" value="F"/> </td>
-    <td>&nbsp;</td>
 </tr>]]></programlisting>
   </section>
 
@@ -2360,7 +2353,6 @@ public class FileUploadBean {
     <programlisting><![CDATA[<tr>
     <td>Skills:</td>
     <td><form:select path="skills" items="${skills}"/></td>
-    <td></td>
 </tr>]]></programlisting>
 
     <para>If the <literal>User's</literal> skill were in Herbology, the HTML source of the 'Skills'
@@ -2370,9 +2362,9 @@ public class FileUploadBean {
     <td>Skills:</td>
     <td><select name="skills" multiple="true">
         <option value="Potions">Potions</option>
-        <option value="Herbology" selected="true">Herbology</option>
-        <option value="Quidditch">Quidditch</option></select></td>
-    <td></td>
+        <option value="Herbology" selected="selected">Herbology</option>
+        <option value="Quidditch">Quidditch</option></select>
+    </td>
 </tr>]]></programlisting>
 
   </section>
@@ -2400,7 +2392,7 @@ public class FileUploadBean {
     <td>House:</td>
     <td>
         <select name="house">
-            <option value="Gryffindor" selected="true">Gryffindor</option>
+            <option value="Gryffindor" selected="selected">Gryffindor</option>
             <option value="Hufflepuff">Hufflepuff</option>
             <option value="Ravenclaw">Ravenclaw</option>
             <option value="Slytherin">Slytherin</option>
@@ -2423,27 +2415,21 @@ public class FileUploadBean {
             <form:options items="${countryList}" itemValue="code" itemLabel="name"/>
         </form:select>
     </td>
-    <td></td>
 </tr>]]></programlisting>
 
     <para>If the <classname>User</classname> lived in the UK, the HTML source of the 'Country'
     row would look like:</para>
 
-    <programlisting><![CDATA[ <tr>
+    <programlisting><![CDATA[<tr>
     <td>Country:</td>
-    <tr>
-        <td>Country:</td>
-        <td>
-            <select name="country">
-                <option value="-">--Please Select</option>
-                <option value="AT">Austria</option>
-                <option value="UK" selected="true">United Kingdom</option>
-                <option value="US">United States</option>
-            </select>
-        </td>
-        <td></td>
-    </tr>
-    <td></td>
+    <td>
+        <select name="country">
+            <option value="-">--Please Select</option>
+            <option value="AT">Austria</option>
+            <option value="UK" selected="selected">United Kingdom</option>
+            <option value="US">United States</option>
+        </select>
+    </td>
 </tr>]]></programlisting>
 
       <para>As the example shows, the combined usage of an <literal>option</literal> tag with the
