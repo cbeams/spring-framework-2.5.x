@@ -31,29 +31,58 @@ import org.springframework.web.servlet.support.BindStatus;
 /**
  * Provides supporting functionality to render a list of '<code>option</code>'
  * tags based on some source object. This object can be either an array, a
- * {@link Collection} or a {@link Map}.
- *
- * <h3>Using an array or a {@link Collection}</h3>
- * In the first approach you specify an array or {@link Collection} source object
- * which are used to render the inner '<code>option</code>' tags. When using
- * this approach you specify the name of the property on the objects which
- * corresponds to the value of the rendered '<code>option</code>' and the name
- * of the property that corresponds to the label. These properties are then used
- * when rendering each element of the array/{@link Collection} as an '<code>option</code>'.
- * When the either property name is ommitted the name of the {@link Object#toString()} of
- * the array/{@link Collection} element is used.
- * Property names are specified as arguments to the constructor.
- * <h3>Using a {@link Map}</h3>
- * In the second approach, '<code>option</code>' tags are rendered from a source
- * {@link Map}. The key and value of the entries in the {@link Map} correspond
- * to the value and label of the rendered '<code>option</code>'.
- *
- * <p>When using any of these approaches, an '<code>option</code>' is marked
- * as 'selected' if its key {@link #isSelected matches} the value that
- * is bound to the tag instance.
+ * {@link Collection}, or a {@link Map}.
+ * <h3>Using an array or a {@link Collection}:</h3>
+ * <p>
+ * If you supply an array or {@link Collection} source object to render the
+ * inner '<code>option</code>' tags, you may optionally specify the name of
+ * the property on the objects which corresponds to the <em>value</em> of the
+ * rendered '<code>option</code>' (i.e., the <code>valueProperty</code>)
+ * and the name of the property that corresponds to the <em>label</em> (i.e.,
+ * the <code>labelProperty</code>). These properties are then used when
+ * rendering each element of the array/{@link Collection} as an '<code>option</code>'.
+ * If either property name is omitted, the value of {@link Object#toString()} of
+ * the corresponding array/{@link Collection} element is used instead.
+ * </p>
+ * <h3>Using a {@link Map}:</h3>
+ * <p>
+ * You can alternatively choose to render '<code>option</code>' tags by
+ * supplying a {@link Map} as the source object.
+ * </p>
+ * <p>
+ * If you <strong>omit</strong> property names for the <em>value</em> and
+ * <em>label</em>:
+ * </p>
+ * <ul>
+ * <li>the <code>key</code> of each {@link Map} entry will correspond to the
+ * <em>value</em> of the rendered '<code>option</code>', and</li>
+ * <li>the <code>value</code> of each {@link Map} entry will correspond to
+ * the <em>label</em> of the rendered '<code>option</code>'.</li>
+ * </ul>
+ * <p>
+ * If you <strong>supply</strong> property names for the <em>value</em> and
+ * <em>label</em>:
+ * </p>
+ * <ul>
+ * <li>the <em>value</em> of the rendered '<code>option</code>' will be
+ * retrieved from the <code>valueProperty</code> on the object
+ * corresponding to the <code>key</code> of each {@link Map} entry, and</li>
+ * <li>the <em>label</em> of the rendered '<code>option</code>' will be
+ * retrieved from the <code>labelProperty</code> on the object
+ * corresponding to the <code>value</code> of each {@link Map} entry.
+ * </ul>
+ * <h3>When using either of these approaches:</h3>
+ * <ul>
+ * <li>Property names for the <em>value</em> and <em>label</em> are
+ * specified as arguments to the
+ * {@link #OptionWriter(Object, BindStatus, String, String, boolean) constructor}.</li>
+ * <li>An '<code>option</code>' is marked as 'selected' if its key
+ * {@link #isSelected matches} the value that is bound to the tag instance.</li>
+ * </ul>
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.0
  */
 final class OptionWriter {
@@ -119,15 +148,24 @@ final class OptionWriter {
 	}
 
 	/**
-	 * Renders the inner '<code>option</code>' tags using the supplied {@link Map} as
-	 * the source.
-	 * @see #renderOption
+	 * Renders the inner '<code>option</code>' tags using the supplied
+	 * {@link Map} as the source.
+	 *
+	 * @see #renderOption(TagWriter, Object, Object, Object)
 	 */
-	private void renderFromMap(TagWriter tagWriter) throws JspException {
-		Map optionMap = (Map) this.optionSource;
+	private void renderFromMap(final TagWriter tagWriter) throws JspException {
+		final Map optionMap = (Map) this.optionSource;
 		for (Iterator iterator = optionMap.entrySet().iterator(); iterator.hasNext();) {
 			Map.Entry entry = (Map.Entry) iterator.next();
-			renderOption(tagWriter, entry, entry.getKey().toString(), entry.getValue().toString());
+			Object mapKey = entry.getKey();
+			Object mapValue = entry.getValue();
+			BeanWrapper mapKeyWrapper = new BeanWrapperImpl(mapKey);
+			BeanWrapper mapValueWrapper = new BeanWrapperImpl(mapValue);
+			Object renderValue = (this.valueProperty != null ? mapKeyWrapper.getPropertyValue(this.valueProperty)
+					: mapKey.toString());
+			Object renderLabel = (this.labelProperty != null ? mapValueWrapper.getPropertyValue(this.labelProperty)
+					: mapValue.toString());
+			renderOption(tagWriter, entry, renderValue, renderLabel);
 		}
 	}
 

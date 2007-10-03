@@ -21,10 +21,13 @@ import java.beans.PropertyEditorSupport;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
@@ -48,6 +51,9 @@ import org.springframework.web.servlet.tags.TransformTag;
  * @author Juergen Hoeller
  */
 public class SelectTagTests extends AbstractFormTagTests {
+
+	private static final Locale LOCALE_AT = new Locale("de", "AT");
+	private static final Locale LOCALE_NL = new Locale("nl", "NL");
 
 	private SelectTag tag;
 
@@ -396,6 +402,81 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals("F node not selected", "selected", e.attribute("selected").getValue());
 	}
 
+	/**
+	 * Tests new support added as a result of <a
+	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-2660"
+	 * target="_blank">SPR-2660</a>.
+	 * <p>
+	 * Specifically, if the <code>items</code> attribute is supplied a
+	 * {@link Map}, and <code>itemValue</code> and <code>itemLabel</code>
+	 * are supplied non-null values, then:
+	 * </p>
+	 * <ul>
+	 * <li><code>itemValue</code> will be used as the property name of the
+	 * map's <em>key</em>, and</li>
+	 * <li><code>itemLabel</code> will be used as the property name of the
+	 * map's <em>value</em>.</li>
+	 * </ul>
+	 */
+	public void testWithMultiMapWithItemValueAndItemLabel() throws Exception {
+
+		final Country austria = Country.COUNTRY_AT;
+		final Country usa = Country.COUNTRY_US;
+		final Map someMap = new HashMap();
+		someMap.put(austria, LOCALE_AT);
+		someMap.put(usa, Locale.US);
+		this.bean.setSomeMap(someMap);
+
+		this.tag.setPath("someMap"); // see: TestBean
+		this.tag.setItems("${countryToLocaleMap}"); // see: extendRequest()
+		this.tag.setItemValue("isoCode"); // from Map key: Country
+		this.tag.setItemLabel("displayLanguage"); // from Map value: Locale
+
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(getTestBean(), COMMAND_NAME);
+		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
+
+			public void setAsText(final String text) throws IllegalArgumentException {
+				setValue(Country.getCountryWithIsoCode(text));
+			}
+
+			public String getAsText() {
+				return ((Country) getValue()).getIsoCode();
+			}
+		});
+		exposeBindingResult(bindingResult);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getOutput();
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals(2, rootElement.elements().size());
+
+		Element selectElement = rootElement.element("select");
+		assertEquals("select", selectElement.getName());
+		assertEquals("someMap", selectElement.attribute("name").getValue());
+
+		List children = selectElement.elements();
+		assertEquals("Incorrect number of children", 3, children.size());
+
+		Element e;
+		e = (Element) selectElement.selectSingleNode("option[@value = '" + austria.getIsoCode() + "']");
+		assertNotNull("Option node not found with Country ISO code value [" + austria.getIsoCode() + "].", e);
+		assertEquals("AT node not selected.", "selected", e.attribute("selected").getValue());
+		assertEquals("AT Locale displayLanguage property not used for option label.", LOCALE_AT.getDisplayLanguage(),
+				e.getData());
+
+		e = (Element) selectElement.selectSingleNode("option[@value = '" + usa.getIsoCode() + "']");
+		assertNotNull("Option node not found with Country ISO code value [" + usa.getIsoCode() + "].", e);
+		assertEquals("US node not selected.", "selected", e.attribute("selected").getValue());
+		assertEquals("US Locale displayLanguage property not used for option label.", Locale.US.getDisplayLanguage(),
+				e.getData());
+	}
+
 	public void testMultiWithEmptyCollection() throws Exception {
 		this.bean.setSomeList(new ArrayList());
 
@@ -447,6 +528,18 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals("Rob node not selected", "selected", e.attribute("selected").getValue());
 	}
 
+	private Map getCountryToLocaleMap() {
+		Map map = new TreeMap(new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return ((Country)o1).getName().compareTo(((Country)o2).getName());
+			}
+		});
+		map.put(Country.COUNTRY_AT, LOCALE_AT);
+		map.put(Country.COUNTRY_NL, LOCALE_NL);
+		map.put(Country.COUNTRY_US, Locale.US);
+		return map;
+	}
+
 	private String[] getNames() {
 		return new String[]{"Rod", "Rob", "Juergen", "Adrian"};
 	}
@@ -461,6 +554,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	protected void extendRequest(MockHttpServletRequest request) {
 		super.extendRequest(request);
 		request.setAttribute("countries", Country.getCountries());
+		request.setAttribute("countryToLocaleMap", getCountryToLocaleMap());
 		request.setAttribute("sexes", getSexes());
 		request.setAttribute("other", new TestBean());
 		request.setAttribute("names", getNames());
