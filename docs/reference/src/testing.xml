@@ -523,7 +523,7 @@ public void testProcessWhichDirtiesAppCtx() {
 
           <para>Indicates that the annotated test method is expected to throw
           an exception during execution. The type of the expected exception is
-          provided in the annotation, and if an an instance of the exception
+          provided in the annotation, and if an instance of the exception
           is thrown during the test method execution then the test passes.
           Likewise if an instance of the exception is <emphasis>not</emphasis>
           thrown during the test method execution then the test fails.</para>
@@ -583,7 +583,7 @@ public void testProcessRepeatedly() {
           test method has completed. If <literal>true</literal>, the
           transaction will be rolled back; otherwise, the transaction will be
           committed. Use <interfacename>@Rollback</interfacename> to override
-          the default rollback flag configured at the class-level.</para>
+          the default rollback flag configured at the class level.</para>
 
           <programlisting>@Rollback(false)
 public void testProcessWithoutRollback() {
