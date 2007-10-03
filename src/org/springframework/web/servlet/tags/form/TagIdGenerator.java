@@ -45,7 +45,7 @@ final class TagIdGenerator {
 	}
 
 	/**
-	 * Gets the next unique ID (withing the given {@link PageContext}) for the supplied name.
+	 * Gets the next unique ID (within the given {@link PageContext}) for the supplied name.
 	 */
 	public static String nextId(String name, PageContext pageContext) {
 		String attributeName = PAGE_CONTEXT_ATTRIBUTE_PREFIX + "." + name;
