@@ -1177,7 +1177,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		public Object postProcessAfterInitialization(Object bean, String beanName) {
-			if (this.beanFactory.getBeanPostProcessorCount() < this.beanPostProcessorTargetCount) {
+			if (!(bean instanceof BeanPostProcessor) &&
+					this.beanFactory.getBeanPostProcessorCount() < this.beanPostProcessorTargetCount) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Bean '" + beanName + "' is not eligible for getting processed by all " +
 							"BeanPostProcessors (for example: not eligible for auto-proxying)");
