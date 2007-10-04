@@ -19,11 +19,15 @@ package org.springframework.beans.factory.annotation;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,18 +38,25 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceClient;
+import javax.xml.ws.WebServiceRef;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.core.MethodParameter;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -55,17 +66,25 @@ import org.springframework.util.StringUtils;
  *
  * <p>This includes support for the {@link javax.annotation.PostConstruct} and
  * {@link javax.annotation.PreDestroy} annotations (as init annotation and destroy
- * annotation, respectively). Also supports the {@link javax.annotation.Resource}
- * annotation for annotation-driven injection of named beans, either from the
- * containing BeanFactory or from a specified resource factory
- * (e.g. Spring's {@link org.springframework.jndi.support.SimpleJndiBeanFactory} for
- * JNDI lookup behavior equivalent to standard Java EE 5 resource injection}.
+ * annotation, respectively).
  *
- * <p>The common JSR-250 annotations supported by this post-processor are available
+ * <p>The central element is the {@link javax.annotation.Resource} annotation
+ * for annotation-driven injection of named beans, either from the containing
+ * BeanFactory or from a specified resource factory
+ * (e.g. Spring's {@link org.springframework.jndi.support.SimpleJndiBeanFactory}
+ * for JNDI lookup behavior equivalent to standard Java EE 5 resource injection}.
+ *
+ * <p>The JAX-WS {@link javax.xml.ws.WebServiceRef} annotation is supported as well,
+ * analogous to {@link javax.annotation.Resource} but with the capability of creating
+ * specific JAX-WS service endpoints. This may either point to an explicitly defined
+ * resource by name or work with a locally specified JAX-WS service class.
+ *
+ * <p>The common annotations supported by this post-processor are available
  * in Java 6 (JDK 1.6) as well as in Java EE 5 (which provides a standalone jar for
  * its common annotations as well, allowing for use in any Java 5 based application).
  * Hence, this post-processor works out of the box on JDK 1.6, and requires the
- * JSR-250 API jar to be added to the classpath on JDK 1.5.
+ * JSR-250 API jar (and optionally the JAX-WS API jar) to be added to the classpath
+ * on JDK 1.5 (when running outside of Java EE 5).
  *
  * <p>For default usage, resolving resource names as Spring bean names,
  * simply define the following in your application context:
@@ -96,6 +115,19 @@ import org.springframework.util.StringUtils;
  */
 public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Serializable {
+
+	private static Class<? extends Annotation> webServiceRefClass = null;
+
+	static {
+		try {
+			webServiceRefClass = ClassUtils.forName("javax.xml.ws.WebServiceRef",
+					CommonAnnotationBeanPostProcessor.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			webServiceRefClass = null;
+		}
+	}
+
 
 	private boolean fallbackToDefaultTypeMatch = true;
 
@@ -192,7 +224,13 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					final InjectionMetadata newMetadata = new InjectionMetadata();
 					ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
 						public void doWith(Field field) {
-							if (field.getAnnotation(Resource.class) != null) {
+							if (webServiceRefClass != null && field.isAnnotationPresent(webServiceRefClass)) {
+								if (Modifier.isStatic(field.getModifiers())) {
+									throw new IllegalStateException("WebServiceRef annotation is not supported on static fields");
+								}
+								newMetadata.addInjectedField(new WebServiceRefElement(field, null));
+							}
+							else if (field.isAnnotationPresent(Resource.class)) {
 								if (Modifier.isStatic(field.getModifiers())) {
 									throw new IllegalStateException("Resource annotation is not supported on static fields");
 								}
@@ -202,7 +240,17 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					});
 					ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
 						public void doWith(Method method) {
-							if (method.getAnnotation(Resource.class) != null) {
+							if (webServiceRefClass != null && method.isAnnotationPresent(webServiceRefClass)) {
+								if (Modifier.isStatic(method.getModifiers())) {
+									throw new IllegalStateException("WebServiceRef annotation is not supported on static methods");
+								}
+								if (method.getParameterTypes().length != 1) {
+									throw new IllegalStateException("WebServiceRef annotation requires a single-arg method: " + method);
+								}
+								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+								newMetadata.addInjectedMethod(new WebServiceRefElement(method, pd));
+							}
+							else if (method.isAnnotationPresent(Resource.class)) {
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("Resource annotation is not supported on static methods");
 								}
@@ -233,17 +281,17 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			throws BeansException {
 
 		if (this.resourceFactory == null) {
-			throw new IllegalStateException("No resource factory configured - " +
+			throw new FatalBeanException("No resource factory configured - " +
 					"override the getResource method or specify the 'resourceFactory' property");
 		}
 
 		Object resource = null;
 		Set autowiredBeanNames = null;
-		String name = resourceElement.getName();
-		Class type = resourceElement.getType();
+		String name = resourceElement.name;
+		Class type = resourceElement.lookupType;
 
 		if (this.fallbackToDefaultTypeMatch && this.resourceFactory instanceof AutowireCapableBeanFactory &&
-				resourceElement.isDefaultName() && !this.resourceFactory.containsBean(name)) {
+				resourceElement.isDefaultName && !this.resourceFactory.containsBean(name)) {
 			autowiredBeanNames = new HashSet();
 			resource = ((AutowireCapableBeanFactory) this.resourceFactory).resolveDependency(
 					resourceElement.getDependencyDescriptor(), requestingBeanName, autowiredBeanNames, null);
@@ -267,28 +315,31 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	/**
 	 * Class representing injection information about an annotated field
-	 * or setter method.
+	 * or setter method, supporting the @Resource annotation.
 	 */
-	protected class ResourceElement extends InjectionMetadata.InjectedElement {
+	private class ResourceElement extends InjectionMetadata.InjectedElement {
 
-		private final String name;
+		protected String name;
 
-		private final boolean isDefaultName;
+		protected boolean isDefaultName;
 
-		private final Class type;
+		protected Class<?> lookupType;
 
-		private final boolean shareable;
+		protected boolean shareable = true;
 
 		public ResourceElement(Member member, PropertyDescriptor pd) {
 			super(member, pd);
-			AnnotatedElement ae = (AnnotatedElement) member;
+			initAnnotation((AnnotatedElement) member);
+		}
+
+		protected void initAnnotation(AnnotatedElement ae) {
 			Resource resource = ae.getAnnotation(Resource.class);
 			String resourceName = resource.name();
 			Class resourceType = resource.type();
 			this.isDefaultName = !StringUtils.hasLength(resourceName);
 			if (this.isDefaultName) {
 				resourceName = member.getName();
-				if (member instanceof Method && resourceName.startsWith("set") && resourceName.length() > 3) {
+				if (this.member instanceof Method && resourceName.startsWith("set") && resourceName.length() > 3) {
 					resourceName = Introspector.decapitalize(resourceName.substring(3));
 				}
 			}
@@ -300,38 +351,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				resourceType = getResourceType();
 			}
 			this.name = resourceName;
-			this.type = resourceType;
+			this.lookupType = resourceType;
 			this.shareable = resource.shareable();
-		}
-
-		/**
-		 * Return the name of the target resource.
-		 */
-		public String getName() {
-			return this.name;
-		}
-
-		/**
-		 * Return whether the given name is a default name
-		 * (derived from the field name / method name)
-		 */
-		public boolean isDefaultName() {
-			return this.isDefaultName;
-		}
-
-		/**
-		 * Return the type of the target resource
-		 */
-		public Class getType() {
-			return this.type;
-		}
-
-		/**
-		 * Return whether the target resource is shareable
-		 * (as defined in the @Resource annotation)
-		 */
-		public boolean isShareable() {
-			return this.shareable;
 		}
 
 		/**
@@ -339,16 +360,103 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		 */
 		public DependencyDescriptor getDependencyDescriptor() {
 			if (this.isField) {
-				return new ResourceDependencyDescriptor((Field) this.member, this.type);
+				return new ResourceDependencyDescriptor((Field) this.member, this.lookupType);
 			}
 			else {
-				return new ResourceDependencyDescriptor((Method) this.member, this.type);
+				return new ResourceDependencyDescriptor((Method) this.member, this.lookupType);
 			}
 		}
 
 		@Override
 		protected Object getResourceToInject(Object target, String requestingBeanName) {
 			return getResource(this, requestingBeanName);
+		}
+	}
+
+
+	/**
+	 * Class representing injection information about an annotated field
+	 * or setter method, supporting the @WebServiceRef annotation.
+	 */
+	private class WebServiceRefElement extends ResourceElement {
+
+		private Class elementType;
+
+		private String wsdlLocation;
+
+		public WebServiceRefElement(Member member, PropertyDescriptor pd) {
+			super(member, pd);
+		}
+
+		protected void initAnnotation(AnnotatedElement ae) {
+			WebServiceRef resource = ae.getAnnotation(WebServiceRef.class);
+			String resourceName = resource.name();
+			Class resourceType = resource.type();
+			this.isDefaultName = !StringUtils.hasLength(resourceName);
+			if (this.isDefaultName) {
+				resourceName = member.getName();
+				if (this.member instanceof Method && resourceName.startsWith("set") && resourceName.length() > 3) {
+					resourceName = Introspector.decapitalize(resourceName.substring(3));
+				}
+			}
+			if (resourceType != null && !Object.class.equals(resourceType)) {
+				checkResourceType(resourceType);
+			}
+			else {
+				// No resource type specified... check field/method.
+				resourceType = getResourceType();
+			}
+			this.name = resourceName;
+			this.elementType = resourceType;
+			if (Service.class.isAssignableFrom(resourceType)) {
+				this.lookupType = resourceType;
+			}
+			else {
+				this.lookupType = (!Object.class.equals(resource.value()) ? resource.value() : Service.class);
+			}
+			this.wsdlLocation = resource.wsdlLocation();
+		}
+
+		@Override
+		protected Object getResourceToInject(Object target, String requestingBeanName) {
+			Service service = null;
+			try {
+				service = (Service) super.getResourceToInject(target, requestingBeanName);
+			}
+			catch (NoSuchBeanDefinitionException notFound) {
+				// Service to be created through generated class.
+				if (Service.class.equals(this.lookupType)) {
+					throw new IllegalStateException("No resource with name '" + this.name + "' found in context, " +
+							"and no specific JAX-WS Service subclass specified. The typical solution is to either specify " +
+							"a LocalJaxWsServiceFactoryBean with the given name or to specify the (generated) Service " +
+							"subclass as @WebServiceRef(...) value.");
+				}
+				if (StringUtils.hasLength(this.wsdlLocation)) {
+					try {
+						Constructor ctor = this.lookupType.getConstructor(new Class[] {URL.class, QName.class});
+						WebServiceClient clientAnn = this.lookupType.getAnnotation(WebServiceClient.class);
+						if (clientAnn == null) {
+							throw new IllegalStateException("JAX-WS Service class [" + this.lookupType.getName() +
+									"] does not carry a WebServiceClient annotation");
+						}
+						service = (Service) BeanUtils.instantiateClass(ctor,
+								new Object[] {new URL(this.wsdlLocation), new QName(clientAnn.targetNamespace(), clientAnn.name())});
+					}
+					catch (NoSuchMethodException ex) {
+						throw new IllegalStateException("JAX-WS Service class [" + this.lookupType.getName() +
+								"] does not have a (URL, QName) constructor. Cannot apply specified WSDL location [" +
+								this.wsdlLocation + "].");
+					}
+					catch (MalformedURLException ex) {
+						throw new IllegalArgumentException(
+								"Specified WSDL location [" + this.wsdlLocation + "] isn't a valid URL");
+					}
+				}
+				else {
+					service = (Service) BeanUtils.instantiateClass(this.lookupType);
+				}
+			}
+			return service.getPort(this.elementType);
 		}
 	}
 
