@@ -420,61 +420,74 @@ public class SelectTagTests extends AbstractFormTagTests {
 	 */
 	public void testWithMultiMapWithItemValueAndItemLabel() throws Exception {
 
-		final Country austria = Country.COUNTRY_AT;
-		final Country usa = Country.COUNTRY_US;
-		final Map someMap = new HashMap();
-		someMap.put(austria, LOCALE_AT);
-		someMap.put(usa, Locale.US);
-		this.bean.setSomeMap(someMap);
+		// Save original default locale.
+		final Locale defaultLocale = Locale.getDefault();
+		// Use a locale that doesn't result in the generation of HTML entities
+		// (e.g., not German, where ä becomes &auml;)
+		Locale.setDefault(Locale.US);
 
-		this.tag.setPath("someMap"); // see: TestBean
-		this.tag.setItems("${countryToLocaleMap}"); // see: extendRequest()
-		this.tag.setItemValue("isoCode"); // from Map key: Country
-		this.tag.setItemLabel("displayLanguage"); // from Map value: Locale
+		try {
+			final Country austria = Country.COUNTRY_AT;
+			final Country usa = Country.COUNTRY_US;
+			final Map someMap = new HashMap();
+			someMap.put(austria, LOCALE_AT);
+			someMap.put(usa, Locale.US);
+			this.bean.setSomeMap(someMap);
 
-		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(getTestBean(), COMMAND_NAME);
-		bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
+			this.tag.setPath("someMap"); // see: TestBean
+			this.tag.setItems("${countryToLocaleMap}"); // see: extendRequest()
+			this.tag.setItemValue("isoCode"); // Map key: Country
+			this.tag.setItemLabel("displayLanguage"); // Map value: Locale
 
-			public void setAsText(final String text) throws IllegalArgumentException {
-				setValue(Country.getCountryWithIsoCode(text));
-			}
+			BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(getTestBean(), COMMAND_NAME);
+			bindingResult.getPropertyAccessor().registerCustomEditor(Country.class, new PropertyEditorSupport() {
 
-			public String getAsText() {
-				return ((Country) getValue()).getIsoCode();
-			}
-		});
-		exposeBindingResult(bindingResult);
+				public void setAsText(final String text) throws IllegalArgumentException {
+					setValue(Country.getCountryWithIsoCode(text));
+				}
 
-		int result = this.tag.doStartTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+				public String getAsText() {
+					return ((Country) getValue()).getIsoCode();
+				}
+			});
+			exposeBindingResult(bindingResult);
 
-		String output = getOutput();
-		output = "<doc>" + output + "</doc>";
+			int result = this.tag.doStartTag();
+			assertEquals(Tag.EVAL_PAGE, result);
 
-		SAXReader reader = new SAXReader();
-		Document document = reader.read(new StringReader(output));
-		Element rootElement = document.getRootElement();
-		assertEquals(2, rootElement.elements().size());
+			String output = getOutput();
+			output = "<doc>" + output + "</doc>";
 
-		Element selectElement = rootElement.element("select");
-		assertEquals("select", selectElement.getName());
-		assertEquals("someMap", selectElement.attribute("name").getValue());
+			SAXReader reader = new SAXReader();
+			Document document = reader.read(new StringReader(output));
+			Element rootElement = document.getRootElement();
+			assertEquals(2, rootElement.elements().size());
 
-		List children = selectElement.elements();
-		assertEquals("Incorrect number of children", 3, children.size());
+			Element selectElement = rootElement.element("select");
+			assertEquals("select", selectElement.getName());
+			assertEquals("someMap", selectElement.attribute("name").getValue());
 
-		Element e;
-		e = (Element) selectElement.selectSingleNode("option[@value = '" + austria.getIsoCode() + "']");
-		assertNotNull("Option node not found with Country ISO code value [" + austria.getIsoCode() + "].", e);
-		assertEquals("AT node not selected.", "selected", e.attribute("selected").getValue());
-		assertEquals("AT Locale displayLanguage property not used for option label.", LOCALE_AT.getDisplayLanguage(),
-				e.getData());
+			List children = selectElement.elements();
+			assertEquals("Incorrect number of children", 3, children.size());
 
-		e = (Element) selectElement.selectSingleNode("option[@value = '" + usa.getIsoCode() + "']");
-		assertNotNull("Option node not found with Country ISO code value [" + usa.getIsoCode() + "].", e);
-		assertEquals("US node not selected.", "selected", e.attribute("selected").getValue());
-		assertEquals("US Locale displayLanguage property not used for option label.", Locale.US.getDisplayLanguage(),
-				e.getData());
+			Element e;
+			e = (Element) selectElement.selectSingleNode("option[@value = '" + austria.getIsoCode() + "']");
+			assertNotNull("Option node not found with Country ISO code value [" + austria.getIsoCode() + "].", e);
+			assertEquals("AT node not selected.", "selected", e.attribute("selected").getValue());
+			assertEquals("AT Locale displayLanguage property not used for option label.",
+					LOCALE_AT.getDisplayLanguage(), e.getData());
+
+			e = (Element) selectElement.selectSingleNode("option[@value = '" + usa.getIsoCode() + "']");
+			assertNotNull("Option node not found with Country ISO code value [" + usa.getIsoCode() + "].", e);
+			assertEquals("US node not selected.", "selected", e.attribute("selected").getValue());
+			assertEquals("US Locale displayLanguage property not used for option label.",
+					Locale.US.getDisplayLanguage(), e.getData());
+
+		}
+		finally {
+			// Restore original default locale.
+			Locale.setDefault(defaultLocale);
+		}
 	}
 
 	public void testMultiWithEmptyCollection() throws Exception {
