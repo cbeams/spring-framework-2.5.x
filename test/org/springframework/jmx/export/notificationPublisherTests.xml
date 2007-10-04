@@ -9,7 +9,7 @@
 
   <bean id="publisherStandardMBean" class="org.springframework.jmx.export.NotificationPublisherTests$MyNotificationPublisherStandardMBean"/>
 
-	<bean class="org.springframework.jmx.export.MBeanExporter">
+	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="beans">
 			<map>
 				<entry key="spring:type=Publisher" value-ref="publisher"/>
