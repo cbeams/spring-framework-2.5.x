@@ -18,11 +18,7 @@ package org.springframework.jdbc.object;
 
 import java.sql.ResultSet;
 import java.sql.Types;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.sql.DataSource;
 
@@ -281,6 +277,28 @@ public abstract class RdbmsOperation implements InitializingBean {
 			throw new InvalidDataAccessApiUsageException("Cannot add parameters once the query is compiled");
 		}
 		this.declaredParameters.add(param);
+	}
+
+	/**
+	 * Add one or more declared parameters. Used for configuring this operation 
+	 * when used in a bean factory.  Each parameter will specify SQL type and (optionally)
+	 * the parameter's name.
+	 * @param parameters Array containing the declared {@link SqlParameter} objects
+	 * @see #declaredParameters
+	 */
+	public void setParameters(SqlParameter[] parameters) {
+		if (isCompiled()) {
+			throw new InvalidDataAccessApiUsageException("Cannot add parameters once the query is compiled");
+		}
+		for (int i = 0; i < parameters.length; i++) {
+			if (parameters[i] != null) {
+				this.declaredParameters.add(parameters[i]);
+			}
+			else {
+				throw new InvalidDataAccessApiUsageException("Cannot add parameter at index " + i + " from " +
+						Arrays.asList(parameters) + " since it is 'null'");
+			}
+		}
 	}
 
 	/**

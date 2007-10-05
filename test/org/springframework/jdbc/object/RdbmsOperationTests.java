@@ -19,6 +19,8 @@ package org.springframework.jdbc.object;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.sql.DataSource;
 
@@ -184,6 +186,28 @@ public class RdbmsOperationTests extends TestCase {
 		operation.declareParameter(new SqlOutParameter("DUMMY_OUT_PARAM", Types.VARCHAR));
 		operation.declareParameter(new SqlInOutParameter("DUMMY_IN_OUT_PARAM", Types.VARCHAR));
 		operation.validateParameters(new Object[] {"DUMMY_VALUE1", "DUMMY_VALUE2"});
+	}
+
+	public void testParametersSetWithList() {
+		TestRdbmsOperation operation = new TestRdbmsOperation();
+		DataSource ds = new DriverManagerDataSource();
+		operation.setDataSource(ds);
+		operation.setSql("select * from mytable where one = ? and two = ?");
+		List l = new ArrayList();
+		l.add(new SqlParameter("one", Types.NUMERIC));
+		l.add(new SqlParameter("two", Types.VARCHAR));
+		operation.setParameters(new SqlParameter[] {
+				new SqlParameter("one", Types.NUMERIC),
+				new SqlParameter("two", Types.NUMERIC)});
+		operation.afterPropertiesSet();
+		try {
+			operation.validateParameters(new Object[] {new Integer(1), new String("2")});
+			assertEquals(2, operation.getDeclaredParameters().size());
+			// OK
+		}
+		catch (InvalidDataAccessApiUsageException idaauex) {
+			fail("Should have validated with parameters set using List: " + idaauex.getMessage());
+		}
 	}
 
 
