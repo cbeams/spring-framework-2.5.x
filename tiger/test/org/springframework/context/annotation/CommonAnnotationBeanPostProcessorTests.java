@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.annotation;
+package org.springframework.context.annotation;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import javax.ejb.EJB;
 
 import junit.framework.TestCase;
 
@@ -29,6 +30,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
@@ -220,6 +222,42 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		assertTrue(bean.destroy2Called);
 	}
 
+	public void testExtendedEjbInjection() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerResolvableDependency(BeanFactory.class, bf);
+
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ExtendedEjbInjectionBean.class));
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean2", tb2);
+		TestBean tb3 = new TestBean();
+		bf.registerSingleton("testBean3", tb3);
+		TestBean tb4 = new TestBean();
+		bf.registerSingleton("testBean4", tb4);
+		NestedTestBean tb6 = new NestedTestBean();
+		bf.registerSingleton("xy", tb6);
+		bf.registerAlias("xy", "testBean9");
+
+		ExtendedEjbInjectionBean bean = (ExtendedEjbInjectionBean) bf.getBean("annotatedBean");
+		assertTrue(bean.initCalled);
+		assertTrue(bean.init2Called);
+		assertSame(tb, bean.getTestBean());
+		assertSame(tb2, bean.getTestBean2());
+		assertSame(tb4, bean.getTestBean3());
+		assertSame(tb3, bean.getTestBean4());
+		assertSame(tb6, bean.testBean5);
+		assertSame(tb6, bean.testBean6);
+		assertSame(bf, bean.beanFactory);
+
+		bf.destroySingletons();
+		assertTrue(bean.destroyCalled);
+		assertTrue(bean.destroy2Called);
+	}
+
 
 	public static class AnnotatedInitDestroyBean {
 
@@ -319,6 +357,59 @@ public class CommonAnnotationBeanPostProcessorTests extends TestCase {
 		}
 
 		@Resource
+		public void setTestBean6(INestedTestBean testBean6) {
+			this.testBean6 = testBean6;
+		}
+
+		public ITestBean getTestBean3() {
+			return testBean3;
+		}
+
+		public ITestBean getTestBean4() {
+			return testBean4;
+		}
+
+		@PostConstruct
+		protected void init2() {
+			if (this.testBean3 == null || this.testBean4 == null) {
+				throw new IllegalStateException("Resources not injected");
+			}
+			super.init2();
+		}
+
+		@PreDestroy
+		protected void destroy2() {
+			super.destroy2();
+		}
+	}
+
+
+	public static class ExtendedEjbInjectionBean extends ResourceInjectionBean {
+
+		@EJB(name="testBean4", beanInterface=TestBean.class)
+		protected ITestBean testBean3;
+
+		private ITestBean testBean4;
+
+		@EJB
+		private INestedTestBean testBean5;
+
+		private INestedTestBean testBean6;
+
+		@Resource
+		private BeanFactory beanFactory;
+
+		@EJB
+		public void setTestBean2(TestBean testBean2) {
+			super.setTestBean2(testBean2);
+		}
+
+		@EJB(beanName="testBean3", beanInterface=ITestBean.class)
+		private void setTestBean4(ITestBean testBean4) {
+			this.testBean4 = testBean4;
+		}
+
+		@EJB
 		public void setTestBean6(INestedTestBean testBean6) {
 			this.testBean6 = testBean6;
 		}

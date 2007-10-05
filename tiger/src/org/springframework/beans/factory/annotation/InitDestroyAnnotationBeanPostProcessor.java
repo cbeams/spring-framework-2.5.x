@@ -51,8 +51,8 @@ import org.springframework.util.ReflectionUtils;
  * may be annotated, but it is recommended to only annotate one single
  * init method and destroy method, respectively.
  *
- * <p>Spring's {@link CommonAnnotationBeanPostProcessor} supports the JSR-250
- * {@link javax.annotation.PostConstruct} and {@link javax.annotation.PreDestroy}
+ * <p>Spring's {@link org.springframework.context.annotation.CommonAnnotationBeanPostProcessor}
+ * supports the JSR-250 {@link javax.annotation.PostConstruct} and {@link javax.annotation.PreDestroy}
  * annotations out of the box, as init annotation and destroy annotation, respectively.
  * Furthermore, it also supports the {@link javax.annotation.Resource} annotation
  * for annotation-driven injection of named beans.
@@ -61,7 +61,7 @@ import org.springframework.util.ReflectionUtils;
  * @since 2.5
  * @see #setInitAnnotationType
  * @see #setDestroyAnnotationType
- * @see CommonAnnotationBeanPostProcessor
+ * @see org.springframework.context.annotation.CommonAnnotationBeanPostProcessor
  */
 public class InitDestroyAnnotationBeanPostProcessor
 		implements DestructionAwareBeanPostProcessor, MergedBeanDefinitionPostProcessor, PriorityOrdered, Serializable {

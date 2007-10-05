@@ -87,7 +87,7 @@ import org.springframework.util.ReflectionUtils;
  * @since 2.5
  * @see #setAutowiredAnnotationType
  * @see Autowired
- * @see CommonAnnotationBeanPostProcessor
+ * @see org.springframework.context.annotation.CommonAnnotationBeanPostProcessor
  */
 public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
 		implements PriorityOrdered, BeanFactoryAware {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.annotation;
+package org.springframework.context.annotation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,9 +24,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
