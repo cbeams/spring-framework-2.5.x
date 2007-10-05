@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.metadata.Attributes;
@@ -25,11 +28,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Implementation of the <code>TransactionAttributeSource</code> interface that
- * reads metadata via Spring's <code>Attributes</code> abstraction.
+ * Implementation of the {@link TransactionAttributeSource} interface that reads
+ * metadata via Spring's {@link org.springframework.metadata.Attributes} abstraction.
  *
- * <p>Typically used for reading in source-level attributes via
- * Commons Attributes.
+ * <p>Typically used for reading in source-level attributes via Commons Attributes.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -58,9 +60,7 @@ public class AttributesTransactionAttributeSource extends AbstractFallbackTransa
 	 * @see org.springframework.metadata.commons.CommonsAttributes
 	 */
 	public AttributesTransactionAttributeSource(Attributes attributes) {
-		if (attributes == null) {
-			throw new IllegalArgumentException("Attributes is required");
-		}
+		Assert.notNull(attributes, "Attributes must not be null");
 		this.attributes = attributes;
 	}
 
@@ -73,20 +73,63 @@ public class AttributesTransactionAttributeSource extends AbstractFallbackTransa
 	}
 
 	public void afterPropertiesSet() {
-		if (this.attributes == null) {
-			throw new IllegalArgumentException("'attributes' is required");
+		Assert.notNull(this.attributes, "Property 'attributes' is required");
+	}
+
+
+	protected TransactionAttribute findTransactionAttribute(Method method) {
+		Assert.notNull(this.attributes, "Property 'attributes' is required");
+		return findTransactionAttribute(this.attributes.getAttributes(method));
+	}
+
+	protected TransactionAttribute findTransactionAttribute(Class clazz) {
+		Assert.notNull(this.attributes, "Property 'attributes' is required");
+		return findTransactionAttribute(this.attributes.getAttributes(clazz));
+	}
+
+	/**
+	 * Return the transaction attribute, given this set of attributes
+	 * attached to a method or class.
+	 * <p>Protected rather than private as subclasses may want to customize
+	 * how this is done: for example, returning a TransactionAttribute
+	 * affected by the values of other attributes.
+	 * <p>This implementation takes into account RollbackRuleAttributes,
+	 * if the TransactionAttribute is a RuleBasedTransactionAttribute.
+	 * @param atts attributes attached to a method or class (may be <code>null</code>)
+	 * @return TransactionAttribute the corresponding transaction attribute,
+	 * or <code>null</code> if none was found
+	 */
+	protected TransactionAttribute findTransactionAttribute(Collection atts) {
+		if (atts == null) {
+			return null;
 		}
-	}
 
+		TransactionAttribute txAttribute = null;
 
-	protected Collection findAllAttributes(Class clazz) {
-		Assert.notNull(this.attributes, "'attributes' is required");
-		return this.attributes.getAttributes(clazz);
-	}
+		// Check whether there is a transaction attribute.
+		for (Iterator it = atts.iterator(); it.hasNext() && txAttribute == null; ) {
+			Object att = it.next();
+			if (att instanceof TransactionAttribute) {
+				txAttribute = (TransactionAttribute) att;
+			}
+		}
 
-	protected Collection findAllAttributes(Method method) {
-		Assert.notNull(this.attributes, "'attributes' is required");
-		return this.attributes.getAttributes(method);
+		// Check if we have a RuleBasedTransactionAttribute.
+		if (txAttribute instanceof RuleBasedTransactionAttribute) {
+			RuleBasedTransactionAttribute rbta = (RuleBasedTransactionAttribute) txAttribute;
+			// We really want value: bit of a hack.
+			List rollbackRules = new LinkedList();
+			for (Iterator it = atts.iterator(); it.hasNext(); ) {
+				Object att = it.next();
+				if (att instanceof RollbackRuleAttribute) {
+					rollbackRules.add(att);
+				}
+			}
+			// Repeatedly setting this isn't elegant, but it works.
+			rbta.setRollbackRules(rollbackRules);
+		}
+
+		return txAttribute;
 	}
 
 

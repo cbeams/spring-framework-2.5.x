@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +24,7 @@ import java.util.Map;
  * Inherits fallback behavior from AbstractFallbackTransactionAttributeSource.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class MapTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource {
 	
@@ -39,18 +38,14 @@ public class MapTransactionAttributeSource extends AbstractFallbackTransactionAt
 	public void register(Class clazz, TransactionAttribute txAtt) {
 		this.attributeMap.put(clazz, txAtt);
 	}
-	
-	protected Collection findAllAttributes(Class clazz) {
-		return doFindAllAttributes(clazz);
+
+
+	protected TransactionAttribute findTransactionAttribute(Method method) {
+		return (TransactionAttribute) this.attributeMap.get(method);
 	}
-	
-	protected Collection findAllAttributes(Method m) {
-		return doFindAllAttributes(m);
+
+	protected TransactionAttribute findTransactionAttribute(Class clazz) {
+		return (TransactionAttribute) this.attributeMap.get(clazz);
 	}
-	
-	private Collection doFindAllAttributes(Object what) {
-		Object att = this.attributeMap.get(what);
-		return (att != null ? Collections.singleton(att) : null);
-	}
-	
+
 }

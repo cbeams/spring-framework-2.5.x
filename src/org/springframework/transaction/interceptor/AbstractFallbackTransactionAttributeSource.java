@@ -18,11 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -150,93 +146,48 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		}
 
 		// First try is the method in the target class.
-		TransactionAttribute txAtt = findTransactionAttribute(findAllAttributes(specificMethod));
+		TransactionAttribute txAtt = findTransactionAttribute(specificMethod);
 		if (txAtt != null) {
 			return txAtt;
 		}
 
 		// Second try is the transaction attribute on the target class.
-		txAtt = findTransactionAttribute(findAllAttributes(specificMethod.getDeclaringClass()));
+		txAtt = findTransactionAttribute(specificMethod.getDeclaringClass());
 		if (txAtt != null) {
 			return txAtt;
 		}
 
 		if (specificMethod != method) {
 			// Fallback is to look at the original method.
-			txAtt = findTransactionAttribute(findAllAttributes(method));
+			txAtt = findTransactionAttribute(method);
 			if (txAtt != null) {
 				return txAtt;
 			}
 			// Last fallback is the class of the original method.
-			return findTransactionAttribute(findAllAttributes(method.getDeclaringClass()));
+			return findTransactionAttribute(method.getDeclaringClass());
 		}
 		return null;
 	}
 
 
 	/**
-	 * Subclasses should implement this to return all attributes for this method.
-	 * We need all because of the need to analyze rollback rules.
-	 * @param method the method to retrieve attributes for
-	 * @return all attributes associated with this method (may be <code>null</code>)
+	 * Subclasses need to implement this to return the transaction attribute
+	 * for the given method, if any.
+	 * @param method the method to retrieve the attribute for
+	 * @return all transaction attribute associated with this method
+	 * (or <code>null</code> if none)
 	 */
-	protected abstract Collection findAllAttributes(Method method);
-	
-	/**
-	 * Subclasses should implement this to return all attributes for this class.	 
-	 * @param clazz class to retrieve attributes for
-	 * @return all attributes associated with this class (may be <code>null</code>)
-	 */
-	protected abstract Collection findAllAttributes(Class clazz);
-
+	protected abstract TransactionAttribute findTransactionAttribute(Method method);
 
 	/**
-	 * Return the transaction attribute, given this set of attributes
-	 * attached to a method or class.
-	 * <p>Protected rather than private as subclasses may want to customize
-	 * how this is done: for example, returning a TransactionAttribute
-	 * affected by the values of other attributes.
-	 * <p>This implementation takes into account RollbackRuleAttributes,
-	 * if the TransactionAttribute is a RuleBasedTransactionAttribute.
-	 * @param atts attributes attached to a method or class (may be <code>null</code>)
-	 * @return TransactionAttribute the corresponding transaction attribute,
-	 * or <code>null</code> if none was found
+	 * Subclasses need to implement this to return the transaction attribute
+	 * for the given class, if any.
+	 * @param clazz the class to retrieve the attribute for
+	 * @return all transaction attribute associated with this class
+	 * (or <code>null</code> if none)
 	 */
-	protected TransactionAttribute findTransactionAttribute(Collection atts) {
-		if (atts == null) {
-			return null;
-		}
+	protected abstract TransactionAttribute findTransactionAttribute(Class clazz);
 
-		TransactionAttribute txAttribute = null;
-
-		// Check whether there is a transaction attribute.
-		for (Iterator itr = atts.iterator(); itr.hasNext() && txAttribute == null; ) {
-			Object att = itr.next();
-			if (att instanceof TransactionAttribute) {
-				txAttribute = (TransactionAttribute) att;
-			}
-		}
-
-		// Check if we have a RuleBasedTransactionAttribute.
-		if (txAttribute instanceof RuleBasedTransactionAttribute) {
-			RuleBasedTransactionAttribute rbta = (RuleBasedTransactionAttribute) txAttribute;
-			// We really want value: bit of a hack.
-			List rollbackRules = new LinkedList();
-			for (Iterator it = atts.iterator(); it.hasNext(); ) {
-				Object att = it.next();
-				if (att instanceof RollbackRuleAttribute) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found rollback rule: " + att);
-					}
-					rollbackRules.add(att);
-				}
-			}
-			// Repeatedly setting this isn't elegant, but it works.
-			rbta.setRollbackRules(rollbackRules);
-		}
-		
-		return txAttribute;
-	}
 
 	/**
 	 * Should only public methods be allowed to have transactional semantics?
