@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5 RC1 (2007-10-09)
+Changes in version 2.5 RC1 (2007-10-17)
 ---------------------------------------
 
 General
@@ -28,16 +28,22 @@ Package org.springframework.beans
 * DefaultNamespaceHandlerResolver exposes public DEFAULT_HANDLER_MAPPINGS_LOCATION constant
 * fixed BeanDefinitionParserDelegate to correctly parse property sub-elements even with custom name for beans namespace
 * AbstractSingleBeanDefinitionParser applies full scope to inner beans, making them eligible for destruction callbacks
-* @PostConstruct/@PreDestroy methods are only called once even if they are specified as standard init/destroy methods
 * @Autowired qualifier annotations may be defined with target 'type' as well, marking the target bean class
 * Autowired/Common/PersistenceAnnotationBeanPostProcessor implement PriorityOrdered and expose an "order" bean property
 * "depends-on" kicks in before the affected bean is entering its creation phase; can be used to resolve circular refs
 * added "registers-scope" annotation to spring-tool.xsd, allowing a tool to determine valid scope names
 
 Package org.springframework.context
+* AbstractRefreshableApplicationContext calls the full "destroyBeans()" method when refreshing the bean factory
 * ClassPathXmlApplicationContext and FileSystemXmlApplicationContext trim passed-in config location Strings
 * added "concurrentUpdates" flag to AbstractApplicationEventMulticaster, enabling copy-on-write for the listener set
 * AnnotationConfigUtils checks for EntityManagerFactory class instead of PersistenceContext (for Tomcat 6 compatibility)
+* moved CommonAnnotationBeanPostProcessor class from package "beans.factory.annotation" to "context.annotation"
+* CommonAnnotationBeanPostProcessor supports @Resource's "mappedName" attribute as (potentially global) JNDI location
+* added "alwaysUseJndiLookup" flag to CommonAnnotationBeanPostProcessor, enforcing Java EE 5 JNDI lookups
+* CommonAnnotationBeanPostProcessor detects and processes the JAX-WS @WebServiceRef annotation as well
+* CommonAnnotationBeanPostProcessor detects and processes the EJB 3 @EJB reference annotation (if present) as well
+* @PostConstruct/@PreDestroy methods are only called once even if they are specified as standard init/destroy methods
 
 Package org.springframework.core
 * NestedRuntimeException/NestedCheckedException's "contains" checks the nested causes of any kind of wrapped exception
@@ -59,6 +65,7 @@ Package org.springframework.jms
 * "spring-jms.xsd" supports "destination-resolver" attribute for "jca-listener-container" element as well
 
 Package org.springframework.jmx
+* MBeanExporter applies NotificationPublisherAware callbacks to objects registered via "registerManagedResource" as well
 * MBeanExporter's "exposeManagedResourceClassLoader" defaults to "true" now, for interaction with third-party MBeans
 * fixed IdentityNamingStrategy to obtain the package name through class name inspection rather than "Class.getPackage()"
 * MBeanClientInterceptor automatically converts MXBean CompositeData/TabularData structures according to Java 5/6 rules
@@ -91,6 +98,9 @@ Package org.springframework.test
 
 Package org.springframework.transaction
 * TransactionSystemException preserves the original application exception, if any, in case of commit/rollback failure
+* revised AbstractFallbackTransactionAttributeSource's template methods for specific attribute/annotation retrieval
+* AnnotationTransactionAttributeSource supports a customizable TransactionAnnotationParser strategy
+* AnnotationTransactionAttributeSource supports EJB3's TransactionAttribute annotation (if present) as well
 
 Package org.springframework.ui
 * "ModelMap.addObject(Object)" follows JavaBeans property naming rules in case of multiple upper case letters
