@@ -143,8 +143,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - J2EE Connector Architecture 1.5 (http://java.sun.com/j2ee/connector)
 - required for building the framework
 
-* j2ee/ejb.jar
-- Enterprise JavaBeans API 2.0 (http://java.sun.com/products/ejb)
+* j2ee/ejb-api.jar
+- Enterprise JavaBeans API 3.0 (http://java.sun.com/products/ejb)
 - required for building the framework
 - required at runtime when using Spring's EJB support
 
