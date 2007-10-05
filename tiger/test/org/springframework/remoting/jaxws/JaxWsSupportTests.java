@@ -99,8 +99,12 @@ public class JaxWsSupportTests extends TestCase {
 		@WebServiceRef
 		public OrderService orderService;
 
-		@WebServiceRef(value=OrderServiceService.class, wsdlLocation = "http://localhost:9999/OrderService?wsdl")
 		public OrderService myService;
+
+		@WebServiceRef(value=OrderServiceService.class, wsdlLocation = "http://localhost:9999/OrderService?wsdl")
+		public void setMyService(OrderService myService) {
+			this.myService = myService;
+		}
 	}
 
 
