@@ -46,7 +46,7 @@ import org.springframework.jndi.TypeMismatchNamingException;
  * {@link #addShareableResource shareable resource}.
  *
  * <p>The main intent of this factory is usage in combination with Spring's
- * {@link org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor},
+ * {@link org.springframework.context.annotation.CommonAnnotationBeanPostProcessor},
  * configured as "resourceFactory" for resolving <code>@Resource</code>
  * annotations as JNDI objects without intermediate bean definitions.
  * It may be used for similar lookup scenarios as well, of course,
@@ -55,7 +55,7 @@ import org.springframework.jndi.TypeMismatchNamingException;
  * @author Juergen Hoeller
  * @since 2.5
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
- * @see org.springframework.beans.factory.annotation.CommonAnnotationBeanPostProcessor
+ * @see org.springframework.context.annotation.CommonAnnotationBeanPostProcessor
  */
 public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFactory {
 
