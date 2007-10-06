@@ -42,6 +42,7 @@ import javax.management.OperationsException;
 import javax.management.ReflectionException;
 import javax.management.RuntimeErrorException;
 import javax.management.RuntimeMBeanException;
+import javax.management.RuntimeOperationsException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
@@ -387,6 +388,19 @@ public class MBeanClientInterceptor
 		}
 		catch (RuntimeErrorException ex) {
 			throw ex.getTargetError();
+		}
+		catch (RuntimeOperationsException ex) {
+			// This one is only thrown by the JMX 1.2 RI, not by the JDK 1.5 JMX code.
+			RuntimeException rex = ex.getTargetException();
+			if (rex instanceof RuntimeMBeanException) {
+				throw ((RuntimeMBeanException) rex).getTargetException();
+			}
+			else if (rex instanceof RuntimeErrorException) {
+				throw ((RuntimeErrorException) rex).getTargetError();
+			}
+			else {
+				throw rex;
+			}
 		}
 		catch (OperationsException ex) {
 			throw new InvalidInvocationException(ex.getMessage());
