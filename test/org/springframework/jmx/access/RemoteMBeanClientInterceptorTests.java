@@ -42,7 +42,8 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 		this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, getServer());
 		try {
 			this.connectorServer.start();
-		} catch (BindException e) {
+		}
+		catch (BindException ex) {
 			// skipping tests, server already running at this port
 			runTests = false;
 		}
