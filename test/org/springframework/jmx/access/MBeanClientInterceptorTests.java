@@ -17,9 +17,6 @@
 package org.springframework.jmx.access;
 
 import java.beans.PropertyDescriptor;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Method;
 import java.net.BindException;
 import java.util.HashMap;
@@ -31,8 +28,6 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.core.JdkVersion;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
@@ -41,6 +36,7 @@ import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssem
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 
@@ -105,6 +101,18 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		IJmxTestBean proxy = getProxy();
 		proxy.setName("Rob Harrop");
 		assertEquals("The name of the bean should have been updated", "Rob Harrop", target.getName());
+	}
+
+	public void testSetAttributeValueWithException() throws Exception {
+		if (!runTests) return;
+		IJmxTestBean proxy = getProxy();
+		try {
+			proxy.setName("Juergen");
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 	public void testSetReadOnlyAttribute() throws Exception {
@@ -183,7 +191,9 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		}
 	}
 
-	public void XtestMXBeanAttributeAccess() throws Exception {
+	// Commented out because of a side effect with the the started platform MBeanServer.
+	/*
+	public void testMXBeanAttributeAccess() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
 			return;
 		}
@@ -196,7 +206,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assertTrue(proxy.getHeapMemoryUsage().getMax() > 0);
 	}
 
-	public void XtestMXBeanOperationAccess() throws Exception {
+	public void testMXBeanOperationAccess() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
 			return;
 		}
@@ -204,10 +214,10 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		MBeanClientInterceptor interceptor = new MBeanClientInterceptor();
 		interceptor.setServer(ManagementFactory.getPlatformMBeanServer());
 		interceptor.setObjectName("java.lang:type=Threading");
-		//interceptor.setManagementInterface(ThreadMXBean.class);
 		ThreadMXBean proxy = (ThreadMXBean) ProxyFactory.getProxy(ThreadMXBean.class, interceptor);
 		assertTrue(proxy.getThreadInfo(Thread.currentThread().getId()).getStackTrace() != null);
 	}
+	*/
 
 
 	private static class ProxyTestAssembler extends AbstractReflectiveMBeanInfoAssembler {

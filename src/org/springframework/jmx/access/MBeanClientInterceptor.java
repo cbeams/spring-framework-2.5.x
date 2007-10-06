@@ -30,6 +30,7 @@ import javax.management.IntrospectionException;
 import javax.management.JMException;
 import javax.management.JMX;
 import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
@@ -39,6 +40,8 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.OperationsException;
 import javax.management.ReflectionException;
+import javax.management.RuntimeErrorException;
+import javax.management.RuntimeMBeanException;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
@@ -76,7 +79,7 @@ import org.springframework.util.ReflectionUtils;
  * <p>Requires JMX 1.2's <code>MBeanServerConnection</code> feature.
  * As a consequence, this class will not work on JMX 1.0.
  *
- * <p>This functionality is usually used through <code>MBeanProxyFactoryBean</code>.
+ * <p>This functionality is usually used through {@link MBeanProxyFactoryBean}.
  * See the javadoc of that class for more information.
  *
  * @author Rob Harrop
@@ -375,6 +378,15 @@ public class MBeanClientInterceptor
 				}
 			}
 			return convertResultValueIfNecessary(result, invocation.getMethod().getReturnType());
+		}
+		catch (MBeanException ex) {
+			throw ex.getTargetException();
+		}
+		catch (RuntimeMBeanException ex) {
+			throw ex.getTargetException();
+		}
+		catch (RuntimeErrorException ex) {
+			throw ex.getTargetError();
 		}
 		catch (OperationsException ex) {
 			throw new InvalidInvocationException(ex.getMessage());
