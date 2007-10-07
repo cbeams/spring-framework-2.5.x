@@ -17,6 +17,7 @@
 package org.springframework.jmx.access;
 
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.BindException;
 import java.util.HashMap;
@@ -103,7 +104,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		assertEquals("The name of the bean should have been updated", "Rob Harrop", target.getName());
 	}
 
-	public void testSetAttributeValueWithException() throws Exception {
+	public void testSetAttributeValueWithRuntimeException() throws Exception {
 		if (!runTests) return;
 		IJmxTestBean proxy = getProxy();
 		try {
@@ -111,6 +112,30 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {
+			// expected
+		}
+	}
+
+	public void testSetAttributeValueWithCheckedException() throws Exception {
+		if (!runTests) return;
+		IJmxTestBean proxy = getProxy();
+		try {
+			proxy.setName("Juergen Class");
+			fail("Should have thrown ClassNotFoundException");
+		}
+		catch (ClassNotFoundException ex) {
+			// expected
+		}
+	}
+
+	public void testSetAttributeValueWithIOException() throws Exception {
+		if (!runTests) return;
+		IJmxTestBean proxy = getProxy();
+		try {
+			proxy.setName("Juergen IO");
+			fail("Should have thrown IOException");
+		}
+		catch (IOException ex) {
 			// expected
 		}
 	}

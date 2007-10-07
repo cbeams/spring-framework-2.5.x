@@ -363,22 +363,22 @@ public class MBeanClientInterceptor
 				prepare();
 			}
 		}
+		Method method = invocation.getMethod();
 		try {
 			Object result = null;
 			if (this.invocationHandler != null) {
-				result = this.invocationHandler.invoke(
-						invocation.getThis(), invocation.getMethod(), invocation.getArguments());
+				result = this.invocationHandler.invoke(invocation.getThis(), method, invocation.getArguments());
 			}
 			else {
-				PropertyDescriptor pd = BeanUtils.findPropertyForMethod(invocation.getMethod());
+				PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
 				if (pd != null) {
 					result = invokeAttribute(pd, invocation);
 				}
 				else {
-					result = invokeOperation(invocation.getMethod(), invocation.getArguments());
+					result = invokeOperation(method, invocation.getArguments());
 				}
 			}
-			return convertResultValueIfNecessary(result, invocation.getMethod().getReturnType());
+			return convertResultValueIfNecessary(result, method.getReturnType());
 		}
 		catch (MBeanException ex) {
 			throw ex.getTargetException();
@@ -403,13 +403,28 @@ public class MBeanClientInterceptor
 			}
 		}
 		catch (OperationsException ex) {
-			throw new InvalidInvocationException(ex.getMessage());
+			if (ReflectionUtils.declaresException(method, ex.getClass())) {
+				throw ex;
+			}
+			else {
+				throw new InvalidInvocationException(ex.getMessage());
+			}
 		}
 		catch (JMException ex) {
-			throw new InvocationFailureException("JMX access failed", ex);
+			if (ReflectionUtils.declaresException(method, ex.getClass())) {
+				throw ex;
+			}
+			else {
+				throw new InvocationFailureException("JMX access failed", ex);
+			}
 		}
 		catch (IOException ex) {
-			throw new InvocationFailureException("JMX access failed", ex);
+			if (ReflectionUtils.declaresException(method, ex.getClass())) {
+				throw ex;
+			}
+			else {
+				throw new InvocationFailureException("I/O failure during JMX access", ex);
+			}
 		}
 	}
 

@@ -16,6 +16,8 @@
 
 package org.springframework.jmx;
 
+import java.io.IOException;
+
 /**
  * @@org.springframework.jmx.export.metadata.ManagedResource
  *    (description="My Managed Bean", objectName="spring:bean=test",
@@ -61,9 +63,15 @@ public class JmxTestBean implements IJmxTestBean {
 	 *  (description="The Name Attribute",  currencyTimeLimit=20,
 	 *   defaultValue="bar", persistPolicy="OnUpdate")
 	 */
-	public void setName(String name) {
+	public void setName(String name) throws Exception {
 		if ("Juergen".equals(name)) {
 			throw new IllegalArgumentException("Juergen");
+		}
+		if ("Juergen Class".equals(name)) {
+			throw new ClassNotFoundException("Juergen");
+		}
+		if ("Juergen IO".equals(name)) {
+			throw new IOException("Juergen");
 		}
 		this.name = name;
 	}
