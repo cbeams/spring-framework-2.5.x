@@ -983,21 +983,12 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
         </listitem>
 
         <listitem>
-          <para><literal>urlPathHelper</literal>: using this property, you can
-          tweak the UrlPathHelper used when inspecting URLs. Normally, you
-          shouldn't have to change the default value.</para>
-        </listitem>
-
-        <listitem>
           <para><literal>urlDecode</literal>: the default value for this
-          property is <literal>false</literal>. The
-          <interfacename>HttpServletRequest</interfacename> returns request URLs and URIs
-          that are <emphasis>not</emphasis> decoded. If you do want them to be
-          decoded before a <interfacename>HandlerMapping</interfacename> uses them to find
-          an appropriate handler, you have to set this to
-          <literal>true</literal> (note that this requires JDK 1.4). The
-          decoding method uses either the encoding specified by the request or
-          the default ISO-8859-1 encoding scheme.</para>
+          property is <literal>true</literal>, as of Spring 2.5. If you prefer
+          to compare encoded paths, switch this flag to <literal>false</literal>.
+          However, note that the <interfacename>HttpServletRequest</interfacename>
+          always exposes the servlet path in decoded form. Be aware that the
+          servlet path will not match when compared with encoded paths.</para>
         </listitem>
 
         <listitem>
@@ -1008,7 +999,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
         </listitem>
       </itemizedlist>
       
-      <para>(<emphasis>Note: the last four properties are only available to subclasses of
+      <para>(<emphasis>Note: the last three properties are only available to subclasses of
         <classname>org.springframework.web.servlet.handler.AbstractUrlHandlerMapping</classname></emphasis>).</para>
 
     <section id="mvc-handlermapping-beanname">

@@ -64,7 +64,7 @@ public class UrlPathHelper {
 
 	private boolean alwaysUseFullPath = false;
 
-	private boolean urlDecode = false;
+	private boolean urlDecode = true;
 
 	private String defaultEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
@@ -85,13 +85,13 @@ public class UrlPathHelper {
 	 * in contrast to the servlet path.
 	 * <p>Uses either the request encoding or the default encoding according
 	 * to the Servlet spec (ISO-8859-1).
+	 * <p>Default is "true", as of Spring 2.5.
 	 * @see #getServletPath
 	 * @see #getContextPath
 	 * @see #getRequestUri
 	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
 	 * @see java.net.URLDecoder#decode(String, String)
-	 * @see java.net.URLDecoder#decode(String)
 	 */
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlDecode = urlDecode;
@@ -118,14 +118,14 @@ public class UrlPathHelper {
 	 * Return the default character encoding to use for URL decoding.
 	 */
 	protected String getDefaultEncoding() {
-		return defaultEncoding;
+		return this.defaultEncoding;
 	}
 
 
 	/**
 	 * Return the mapping lookup path for the given request, within the current
 	 * servlet mapping if applicable, else within the web application.
-	 * <p>Regards include request URL if called within a RequestDispatcher include.
+	 * <p>Detects include request URL if called within a RequestDispatcher include.
 	 * @param request current HTTP request
 	 * @return the lookup path
 	 * @see #getPathWithinApplication
@@ -150,7 +150,7 @@ public class UrlPathHelper {
 	 * Return the path within the servlet mapping for the given request,
 	 * i.e. the part of the request's URL beyond the part that called the servlet,
 	 * or "" if the whole URL has been used to identify the servlet.
-	 * <p>Regards include request URL if called within a RequestDispatcher include.
+	 * <p>Detects include request URL if called within a RequestDispatcher include.
 	 * <p>E.g.: servlet mapping = "/test/*"; request URI = "/test/a" -> "/a".
 	 * <p>E.g.: servlet mapping = "/test"; request URI = "/test" -> "".
 	 * <p>E.g.: servlet mapping = "/*.test"; request URI = "/a.test" -> "".
@@ -174,7 +174,7 @@ public class UrlPathHelper {
 
 	/**
 	 * Return the path within the web application for the given request.
-	 * <p>Regards include request URL if called within a RequestDispatcher include.
+	 * <p>Detects include request URL if called within a RequestDispatcher include.
 	 * @param request current HTTP request
 	 * @return the path within the web application
 	 */
