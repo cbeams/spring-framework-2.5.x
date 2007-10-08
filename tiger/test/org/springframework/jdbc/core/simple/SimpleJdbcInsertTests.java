@@ -28,7 +28,7 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 
 /**
- * Mock object based tests for SimpleJdbcCall.
+ * Mock object based tests for SimpleJdbcInsert.
  *
  * @author Thomas Risberg
  */
@@ -101,7 +101,7 @@ public class SimpleJdbcInsertTests extends TestCase {
 		SimpleJdbcInsert insert = new SimpleJdbcInsert(mockDataSource).withTableName(NO_SUCH_TABLE);
 		try {
 			insert.execute(new HashMap());
-			fail("Shouldn't succeed in running stored procedure which doesn't exist");
+			fail("Shouldn't succeed in inserting into table which doesn't exist");
 		} catch (DataAccessResourceFailureException ex) {
 			// OK
 		}

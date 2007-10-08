@@ -524,12 +524,7 @@ public abstract class AbstractJdbcInsert {
 	 * @return Map with parameter names and values
 	 */
 	protected List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
-		if (parameterSource instanceof MapSqlParameterSource) {
-			return matchInParameterValuesWithInsertColumns(((MapSqlParameterSource) parameterSource).getValues());
-		}
-		else {
-			return tableMetaDataContext.matchInParameterValuesWithInsertColumns(parameterSource);
-		}
+		return tableMetaDataContext.matchInParameterValuesWithInsertColumns(parameterSource);
 	}
 
 	/**

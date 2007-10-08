@@ -19,6 +19,11 @@ package org.springframework.jdbc.core.namedparam;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.NotReadablePropertyException;
+import org.springframework.beans.PropertyAccessor;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.beans.PropertyDescriptor;
 
 /**
  * SqlParameterSource implementation that obtains parameter values
@@ -37,6 +42,7 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 
 	private final BeanWrapper beanWrapper;
 
+	private String[] propertyNames = null;
 
 	/**
 	 * Create a new BeanPropertySqlParameterSource for the given bean.
@@ -58,6 +64,30 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 		catch (NotReadablePropertyException ex) {
 			throw new IllegalArgumentException(ex.getMessage());
 		}
+	}
+
+	/**
+	 * Provide access to the property names of the wrapped bean.
+	 * Uses support provided in the {@link PropertyAccessor} interface.
+	 * @return an array containing all the known property names
+	 */
+	public String[] getWritablePropertyNames() {
+
+		synchronized(this) {
+			if (propertyNames == null) {
+				List names = new ArrayList();
+				PropertyDescriptor[] props = beanWrapper.getPropertyDescriptors();
+				for  (int i = 0; i < props.length; i++) {
+					if (beanWrapper.isWritableProperty(props[i].getName())) {
+						names.add(props[i].getName());
+					}
+				}
+				propertyNames = (String[]) names.toArray(new String[names.size()]);
+			}
+
+		}
+
+		return propertyNames;
 	}
 
 }

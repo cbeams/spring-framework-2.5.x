@@ -31,6 +31,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
@@ -176,20 +178,37 @@ public class TableMetaDataContext {
 	 *
 	 * @param parameterSource the parameter names and values
 	 */
-	//TODO provide a SqlParameterValue when sql type is specified
 	public List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
 		List<Object> values = new ArrayList<Object>();
+		// for bean property lookups we need to provide caseinsensitive property lokup support since the
+		// database metadata is not necessarily providing case sensitive column names
+		// TODO make this instance level cached?
+		Map<String, String> caseInsensitiveParameterNames = new HashMap<String, String>();
+		if (parameterSource instanceof BeanPropertySqlParameterSource) {
+			String[] propertyNames = ((BeanPropertySqlParameterSource)parameterSource).getWritablePropertyNames();
+			for (String name : propertyNames) {
+				caseInsensitiveParameterNames.put(name.toLowerCase(), name);
+			}
+		}
 		for (String column : tableColumns) {
-			if (parameterSource.hasValue(column.toLowerCase())) {
-				values.add(parameterSource.getValue(column.toLowerCase()));
+			String lowerCaseName = column.toLowerCase();
+			if (parameterSource.hasValue(lowerCaseName)) {
+				values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, lowerCaseName));
 			}
 			else {
 				String propertyName = JdbcUtils.convertUnderscoreNameToPropertyName(column);
 				if (parameterSource.hasValue(propertyName)) {
-					values.add(parameterSource.getValue(propertyName));
+					values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, propertyName));
 				}
 				else {
-					values.add(null);
+					if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
+						values.add(
+								SqlParameterSourceUtils.getTypedValue(parameterSource,
+										caseInsensitiveParameterNames.get(lowerCaseName)));
+					}
+					else {
+						values.add(null);
+					}
 				}
 			}
 		}
@@ -201,7 +220,6 @@ public class TableMetaDataContext {
 	 *
 	 * @param inParameters the parameter names and values
 	 */
-	//TODO provide a SqlParameterValue when sql type is specified
 	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, Object> inParameters) {
 		List<Object> values = new ArrayList<Object>();
 		Map<String, Object> source = new HashMap<String, Object>();

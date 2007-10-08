@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core.namedparam;
 
+import org.springframework.jdbc.core.SqlParameterValue;
+
 import java.util.Map;
 
 /**
@@ -56,6 +58,22 @@ public class SqlParameterSourceUtils {
 			batch[i] = new BeanPropertySqlParameterSource(bean);
 		}
 		return batch;
+	}
+
+	/**
+	 * Create a wrapped value if parameter has type information, plain object if not.
+	 * @param source the source of paramer values and type information
+	 * @param parameterName the name of the parameter
+	 * @return
+	 */
+	public static Object getTypedValue(SqlParameterSource source, String parameterName) {
+		int sqlType = source.getSqlType(parameterName);
+		if (sqlType != SqlParameterSource.TYPE_UNKNOWN) {
+			return new SqlParameterValue(sqlType, source.getValue(parameterName));
+		}
+		else {
+			return source.getValue(parameterName);
+		}
 	}
 
 }
