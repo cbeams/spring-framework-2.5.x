@@ -31,6 +31,7 @@ import org.springframework.context.support.StaticApplicationContext;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class QualifierAnnotationTests extends TestCase {
 
@@ -45,11 +46,22 @@ public class QualifierAnnotationTests extends TestCase {
 		context.registerSingleton("testBean", NonQualifiedTestBean.class);
 		try {
 			context.refresh();
-			fail("should have thrown a BeanCreationException");
+			fail("Should have thrown a BeanCreationException");
 		}
 		catch (BeanCreationException e) {
-			assertTrue(e.getMessage().contains("found 4"));
+			assertTrue(e.getMessage().contains("found 6"));
 		}
+	}
+
+	public void testQualifiedByValue() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
+		reader.loadBeanDefinitions(CONFIG_LOCATION);
+		context.registerSingleton("testBean", QualifiedByValueTestBean.class);
+		context.refresh();
+		QualifiedByValueTestBean testBean = (QualifiedByValueTestBean) context.getBean("testBean");
+		Person person = testBean.getLarry();
+		assertEquals("Larry", person.getName());
 	}
 
 	public void testQualifiedByBeanName() {
@@ -60,18 +72,40 @@ public class QualifierAnnotationTests extends TestCase {
 		context.refresh();
 		QualifiedByBeanNameTestBean testBean = (QualifiedByBeanNameTestBean) context.getBean("testBean");
 		Person person = testBean.getLarry();
-		assertEquals("Larry", person.getName());
+		assertEquals("LarryBean", person.getName());
 	}
 
-	public void testQualifiedByValue() {
+	public void testQualifiedByAnnotation() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(CONFIG_LOCATION);
-		context.registerSingleton("testBean", QualifiedByValueTestBean.class);
+		context.registerSingleton("testBean", QualifiedByAnnotationTestBean.class);
 		context.refresh();
-		QualifiedByValueTestBean testBean = (QualifiedByValueTestBean) context.getBean("testBean");
+		QualifiedByAnnotationTestBean testBean = (QualifiedByAnnotationTestBean) context.getBean("testBean");
+		Person person = testBean.getLarry();
+		assertEquals("LarrySpecial", person.getName());
+	}
+
+	public void testQualifiedByCustomValue() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
+		reader.loadBeanDefinitions(CONFIG_LOCATION);
+		context.registerSingleton("testBean", QualifiedByCustomValueTestBean.class);
+		context.refresh();
+		QualifiedByCustomValueTestBean testBean = (QualifiedByCustomValueTestBean) context.getBean("testBean");
 		Person person = testBean.getCurly();
 		assertEquals("Curly", person.getName());
+	}
+
+	public void testQualifiedByAnnotationValue() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
+		reader.loadBeanDefinitions(CONFIG_LOCATION);
+		context.registerSingleton("testBean", QualifiedByAnnotationValueTestBean.class);
+		context.refresh();
+		QualifiedByAnnotationValueTestBean testBean = (QualifiedByAnnotationValueTestBean) context.getBean("testBean");
+		Person person = testBean.getLarry();
+		assertEquals("LarrySpecial", person.getName());
 	}
 
 	public void testQualifiedByAttributesFailsWithoutCustomQualifierRegistered() {
@@ -84,7 +118,7 @@ public class QualifierAnnotationTests extends TestCase {
 			fail("should have thrown a BeanCreationException");
 		}
 		catch (BeanCreationException e) {
-			assertTrue(e.getMessage().contains("found 4"));
+			assertTrue(e.getMessage().contains("found 6"));
 		}
 	}
 
@@ -111,11 +145,10 @@ public class QualifierAnnotationTests extends TestCase {
 		public Person getAnonymous() {
 			return anonymous;
 		}
-
 	}
 
 
-	private static class QualifiedByBeanNameTestBean {
+	private static class QualifiedByValueTestBean {
 
 		@Autowired @Qualifier("larry")
 		private Person larry;
@@ -123,11 +156,32 @@ public class QualifierAnnotationTests extends TestCase {
 		public Person getLarry() {
 			return larry;
 		}
-
 	}
 
 
-	private static class QualifiedByValueTestBean {
+	private static class QualifiedByBeanNameTestBean {
+
+		@Autowired @Qualifier("larryBean")
+		private Person larry;
+
+		public Person getLarry() {
+			return larry;
+		}
+	}
+
+
+	private static class QualifiedByAnnotationTestBean {
+
+		@Autowired @Qualifier("special")
+		private Person larry;
+
+		public Person getLarry() {
+			return larry;
+		}
+	}
+
+
+	private static class QualifiedByCustomValueTestBean {
 
 		@Autowired @SimpleValueQualifier("curly")
 		private Person curly;
@@ -135,7 +189,17 @@ public class QualifierAnnotationTests extends TestCase {
 		public Person getCurly() {
 			return curly;
 		}
+	}
 
+
+	private static class QualifiedByAnnotationValueTestBean {
+
+		@Autowired @SimpleValueQualifier("special")
+		private Person larry;
+
+		public Person getLarry() {
+			return larry;
+		}
 	}
 
 
@@ -154,14 +218,12 @@ public class QualifierAnnotationTests extends TestCase {
 		public Person getMoeJunior() {
 			return moeJunior;
 		}
-
 	}
 
 
 	private static class Person {
 
 		private String name;
-
 
 		public String getName() {
 			return name;
@@ -170,17 +232,21 @@ public class QualifierAnnotationTests extends TestCase {
 		public void setName(String name) {
 			this.name = name;
 		}
-
 	}
 
 
-	@Target(ElementType.FIELD)
+	@Qualifier("special")
+	@SimpleValueQualifier("special")
+	private static class SpecialPerson extends Person {
+	}
+
+
+	@Target({ElementType.FIELD, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Qualifier
 	public @interface SimpleValueQualifier {
 
 		String value() default "";
-
 	}
 
 
@@ -191,7 +257,6 @@ public class QualifierAnnotationTests extends TestCase {
 		String name();
 
 		int age();
-
 	}
 
 }
