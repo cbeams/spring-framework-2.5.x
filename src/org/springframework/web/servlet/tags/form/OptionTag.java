@@ -122,7 +122,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 * @return the value of the '<code>disabled</code>' attribute
 	 */
 	protected String getDisabled() {
-		return disabled;
+		return this.disabled;
 	}
 	
 	/**
@@ -201,15 +201,10 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		}
 	}
 
-
 	private void renderOption(Object value, String label, TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("option");
-
 		String renderedValue = getDisplayString(value, getBindStatus().getEditor());
-
-
 		tagWriter.writeAttribute(VALUE_ATTRIBUTE, renderedValue);
-
 		if (isSelected(value)) {
 			tagWriter.writeAttribute(SELECTED_ATTRIBUTE, SELECTED_ATTRIBUTE);
 		}
@@ -217,7 +212,6 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 			tagWriter.writeAttribute(DISABLED_ATTRIBUTE, "disabled");
 		}
 		tagWriter.appendValue(label);
-
 		tagWriter.endTag();
 	}
 

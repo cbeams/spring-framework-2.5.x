@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,21 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.StringUtils;
-
 import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTag;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Convenient super class for many html tags that render content using the databinding
  * features of the {@link AbstractHtmlElementTag AbstractHtmlElementTag}. The only thing sub tags
  * need to do is override {@link #renderDefaultContent(TagWriter)}. 
- * 
+ *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag implements BodyTag {
@@ -59,8 +60,7 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	 */
 	public int doEndTag() throws JspException {
 		if (shouldRender()) {
-			if (this.bodyContent != null
-					&& StringUtils.hasText(this.bodyContent.getString())) {
+			if (this.bodyContent != null && StringUtils.hasText(this.bodyContent.getString())) {
 				renderFromBodyContent(this.bodyContent, this.tagWriter);
 			}
 			else {
@@ -71,10 +71,10 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	}
 
 	/**
-	 * Render the tag contents based on the supplied {@link BodyContent}. The default
-	 * implementation simply {@link #flushBufferedBodyContent flushes} the {@link BodyContent}
-	 * directly to the output. Subclasses may choose to override this to add additional content
-	 * to the output.
+	 * Render the tag contents based on the supplied {@link BodyContent}.
+	 * <p>The default implementation simply {@link #flushBufferedBodyContent flushes}
+	 * the {@link BodyContent} directly to the output. Subclasses may choose to
+	 * override this to add additional content to the output.
 	 */
 	protected void renderFromBodyContent(BodyContent bodyContent, TagWriter tagWriter) throws JspException {
 		flushBufferedBodyContent(this.bodyContent);
@@ -92,7 +92,7 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 
 
 	//---------------------------------------------------------------------
-	// Strategy methods
+	// Template methods
 	//---------------------------------------------------------------------
 
 	/**
