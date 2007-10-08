@@ -201,7 +201,6 @@ public class QualifierAnnotationAutowireBeanFactoryTests extends TestCase {
 
 		public void autowireNonqualified(Person tpb) {
 		}
-
 	}
 
 
@@ -216,7 +215,6 @@ public class QualifierAnnotationAutowireBeanFactoryTests extends TestCase {
 		public String getName() {
 			return this.name;
 		}
-
 	}
 
 

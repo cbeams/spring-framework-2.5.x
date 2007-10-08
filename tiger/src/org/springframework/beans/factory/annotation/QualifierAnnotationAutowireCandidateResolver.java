@@ -50,12 +50,13 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 	}
 
 	public QualifierAnnotationAutowireCandidateResolver(Class<? extends Annotation> qualifierType) {
+		Assert.notNull(qualifierType, "'qualifierType' must not be null");
 		this.qualifierTypes = new HashSet();
 		this.qualifierTypes.add(qualifierType);
 	}
 
 	public QualifierAnnotationAutowireCandidateResolver(Set<Class<? extends Annotation>> qualifierTypes) {
-		Assert.notNull(qualifierTypes, "qualifierTypes must not be null");
+		Assert.notNull(qualifierTypes, "'qualifierTypes' must not be null");
 		this.qualifierTypes = qualifierTypes;
 	}
 
@@ -123,7 +124,6 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 					if (qualifier != null) {
 						actualValue = qualifier.getAttribute(attributeName);
 					}
-
 					if (actualValue == null) {
 						// fall back on bean definition attribute
 						Object attr = mbd.getAttribute(attributeName);
@@ -152,7 +152,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 	}
 
 	/**
-	 * Checks if an annotation type is a recognized qualifier type
+	 * Checks whether an annotation type is a recognized qualifier type.
 	 */
 	private boolean isQualifier(Class<? extends Annotation> annotationType) {
 		for (Class<? extends Annotation> qualifierType : this.qualifierTypes) {
