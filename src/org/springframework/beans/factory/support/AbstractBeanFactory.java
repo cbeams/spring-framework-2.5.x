@@ -933,7 +933,25 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		if (!this.propertyEditorRegistrars.isEmpty()) {
 			for (Iterator it = this.propertyEditorRegistrars.iterator(); it.hasNext();) {
 				PropertyEditorRegistrar registrar = (PropertyEditorRegistrar) it.next();
-				registrar.registerCustomEditors(registry);
+				try {
+					registrar.registerCustomEditors(registry);
+				}
+				catch (BeanCreationException ex) {
+					Throwable rootCause = ex.getMostSpecificCause();
+					if (rootCause instanceof BeanCurrentlyInCreationException) {
+						BeanCreationException bce = (BeanCreationException) rootCause;
+						if (isCurrentlyInCreation(bce.getBeanName())) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("PropertyEditorRegistrar [" + registrar.getClass().getName() +
+										"] failed because it tried to obtain currently created bean '" + ex.getBeanName() +
+										"': " + ex.getMessage());
+							}
+							onSuppressedException(ex);
+							continue;
+						}
+					}
+					throw ex;
+				}
 			}
 		}
 		if (!this.customEditors.isEmpty()) {
