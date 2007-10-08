@@ -27,7 +27,6 @@ import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -198,8 +197,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 		if (getTransactionAttributeSource() == null) {
 			throw new IllegalArgumentException(
 					"Either 'transactionAttributeSource' or 'transactionAttributes' is required: " +
-					"If there are no transactional methods, don't use a TransactionInterceptor " +
-					"or TransactionProxyFactoryBean.");
+					"If there are no transactional methods, then don't use a transaction aspect.");
 		}
 	}
 
@@ -259,8 +257,15 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 		TransactionStatus status = null;
 		if (txAttr != null) {
 			PlatformTransactionManager tm = getTransactionManager();
-			Assert.state(tm != null, "Property 'transactionManager' must be set on transaction aspect");
-			status = tm.getTransaction(txAttr);
+			if (tm != null) {
+				status = tm.getTransaction(txAttr);
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Skipping transactional joinpoint [" + joinpointIdentification +
+							"] because no transaction manager has been configured");
+				}
+			}
 		}
 		return prepareTransactionInfo(txAttr, joinpointIdentification, status);
 	}
@@ -279,10 +284,9 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 		TransactionInfo txInfo = new TransactionInfo(txAttr, joinpointIdentification);
 		if (txAttr != null) {
 			// We need a transaction for this method
-			if (logger.isDebugEnabled()) {
-				logger.debug("Getting transaction for [" + txInfo.getJoinpointIdentification() + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Getting transaction for [" + txInfo.getJoinpointIdentification() + "]");
 			}
-
 			// The transaction manager will flag an error if an incompatible tx already exists
 			txInfo.newTransactionStatus(status);
 		}
@@ -290,8 +294,8 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 			// The TransactionInfo.hasTransaction() method will return
 			// false. We created it only to preserve the integrity of
 			// the ThreadLocal stack maintained in this class.
-			if (logger.isDebugEnabled())
-				logger.debug("Don't need to create transaction for [" + joinpointIdentification +
+			if (logger.isTraceEnabled())
+				logger.trace("Don't need to create transaction for [" + joinpointIdentification +
 						"]: This method isn't transactional.");
 		}
 
@@ -309,8 +313,8 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	 */
 	protected void commitTransactionAfterReturning(TransactionInfo txInfo) {
 		if (txInfo != null && txInfo.hasTransaction()) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Completing transaction for [" + txInfo.getJoinpointIdentification() + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Completing transaction for [" + txInfo.getJoinpointIdentification() + "]");
 			}
 			getTransactionManager().commit(txInfo.getTransactionStatus());
 		}
@@ -324,8 +328,8 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	 */
 	protected void completeTransactionAfterThrowing(TransactionInfo txInfo, Throwable ex) {
 		if (txInfo != null && txInfo.hasTransaction()) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Completing transaction for [" + txInfo.getJoinpointIdentification() +
+			if (logger.isTraceEnabled()) {
+				logger.trace("Completing transaction for [" + txInfo.getJoinpointIdentification() +
 						"] after exception: " + ex);
 			}
 			if (txInfo.transactionAttribute.rollbackOn(ex)) {

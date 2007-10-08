@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,11 +60,7 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 	before(Object txObject) : transactionalMethodExecution(txObject) {
 		MethodSignature methodSignature = (MethodSignature) thisJoinPoint.getSignature();
 		Method method = methodSignature.getMethod();
-		//  Create transaction if necessary.
 		TransactionInfo txInfo = createTransactionIfNecessary(method, txObject.getClass());
-		if (logger.isDebugEnabled()) {
-			logger.debug("Aspect-created transaction: " + txInfo);
-		}
 	}
 	
 	@SuppressAjWarnings("adviceDidNotMatch")
@@ -72,8 +68,8 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
     try {
       completeTransactionAfterThrowing(TransactionAspectSupport.currentTransactionInfo(), t);
     }
-    catch (Throwable th) {
-      logger.error("Failed to close transaction after throwing in a Transactional method", th);
+    catch (Throwable t2) {
+      logger.error("Failed to close transaction after throwing in a transactional method", t2);
     }
   }
 	
@@ -86,9 +82,6 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 	after(Object txObject) : transactionalMethodExecution(txObject) {
 		cleanupTransactionInfo(TransactionAspectSupport.currentTransactionInfo());
 	}
-
-
-	// TODO extend TransactionAttributeSource to support join points besides methods
 
 	/**
 	 * Concrete subaspects must implement this pointcut, to identify

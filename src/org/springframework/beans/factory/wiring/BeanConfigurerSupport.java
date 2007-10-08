@@ -125,8 +125,8 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 		}
 
 		if (this.beanFactory == null) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("BeanFactory has not been set on " + ClassUtils.getShortName(getClass()) + ": " +
+			if (logger.isDebugEnabled()) {
+				logger.debug("BeanFactory has not been set on " + ClassUtils.getShortName(getClass()) + ": " +
 						"Make sure this configurer runs in a Spring container. Proceeding without injection.");
 			}
 			return;
