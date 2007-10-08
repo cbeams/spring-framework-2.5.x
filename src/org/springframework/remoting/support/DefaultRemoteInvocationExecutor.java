@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.lang.reflect.InvocationTargetException;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the RemoteInvocationExecutor interface.
- * Simply delegates to RemoteInvocation's invoke.
+ * Default implementation of the {@link RemoteInvocationExecutor} interface.
+ * Simply delegates to {@link RemoteInvocation}'s invoke method.
  *
  * @author Juergen Hoeller
  * @since 1.1

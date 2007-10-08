@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.remoting.support;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * Abstract base class for remote service exporters that are based on
- * deserialization of RemoteInvocation objects. Provides a "remoteInvocationExecutor"
- * property, with a DefaultRemoteInvocationExecutor as default.
+ * Abstract base class for remote service exporters that are based
+ * on deserialization of {@link RemoteInvocation} objects.
+ *
+ * <p>Provides a "remoteInvocationExecutor" property, with a
+ * {@link DefaultRemoteInvocationExecutor} as default strategy.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -47,7 +49,7 @@ public abstract class RemoteInvocationBasedExporter extends RemoteExporter {
 	 * Return the RemoteInvocationExecutor used by this exporter.
 	 */
 	public RemoteInvocationExecutor getRemoteInvocationExecutor() {
-		return remoteInvocationExecutor;
+		return this.remoteInvocationExecutor;
 	}
 
 
@@ -69,8 +71,8 @@ public abstract class RemoteInvocationBasedExporter extends RemoteExporter {
 	protected Object invoke(RemoteInvocation invocation, Object targetObject)
 			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Applying " + invocation);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Executing " + invocation);
 		}
 		try {
 			return getRemoteInvocationExecutor().invoke(invocation, targetObject);

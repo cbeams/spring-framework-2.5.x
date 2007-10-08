@@ -19,9 +19,11 @@ package org.springframework.remoting.support;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * Abstract base class for remote service accessors that are based on serialization
- * of {@link RemoteInvocation} objects. Provides a "remoteInvocationFactory" property,
- * with a {@link DefaultRemoteInvocationFactory} as default.
+ * Abstract base class for remote service accessors that are based
+ * on serialization of {@link RemoteInvocation} objects.
+ *
+ * Provides a "remoteInvocationFactory" property, with a
+ * {@link DefaultRemoteInvocationFactory} as default strategy.
  *
  * @author Juergen Hoeller
  * @since 1.1

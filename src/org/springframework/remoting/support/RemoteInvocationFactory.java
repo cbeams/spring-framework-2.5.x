@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ package org.springframework.remoting.support;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * Strategy interface for creating a RemoteInvocation from an AOP MethodInvocation.
- * Used by RmiClientInterceptor (for RMI invokers) and HttpInvokerServiceExporter.
+ * Strategy interface for creating a {@link RemoteInvocation} from an AOP Alliance
+ * {@link org.aopalliance.intercept.MethodInvocation}.
+ *
+ * <p>Used by {@link org.springframework.remoting.rmi.RmiClientInterceptor} (for RMI invokers)
+ * and by {@link org.springframework.remoting.httpinvoker.HttpInvokerClientInterceptor}.
  *
  * @author Juergen Hoeller
  * @since 1.1
