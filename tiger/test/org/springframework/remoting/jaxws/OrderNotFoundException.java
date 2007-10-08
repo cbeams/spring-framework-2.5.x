@@ -16,18 +16,27 @@
 
 package org.springframework.remoting.jaxws;
 
-import javax.jws.WebService;
+import javax.xml.ws.WebFault;
 
 /**
  * @author Juergen Hoeller
  */
-@WebService(serviceName="OrderService", portName="OrderService", endpointInterface = "org.springframework.remoting.jaxws.OrderService")
-public class OrderServiceImpl implements OrderService {
+@WebFault
+public class OrderNotFoundException extends Exception {
 
-	public String getOrder(int id) throws OrderNotFoundException {
-		if (id == 0) {
-			throw new OrderNotFoundException("Order 0 not found");
-		}
-		return "order " + id;
+	private String faultInfo;
+
+	public OrderNotFoundException(String message) {
+		super(message);
 	}
+
+	public OrderNotFoundException(String message, String faultInfo) {
+		super(message);
+		this.faultInfo = faultInfo;
+	}
+
+	public String getFaultInfo() {
+		return this.faultInfo;
+	}
+
 }

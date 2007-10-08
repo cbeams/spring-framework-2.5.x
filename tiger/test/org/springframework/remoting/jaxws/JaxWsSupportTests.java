@@ -38,7 +38,7 @@ import org.springframework.context.support.GenericApplicationContext;
  */
 public class JaxWsSupportTests extends TestCase {
 
-	public void testJaxWsPortAccess() {
+	public void testJaxWsPortAccess() throws Exception {
 		GenericApplicationContext ac = new GenericApplicationContext();
 
 		GenericBeanDefinition serviceDef = new GenericBeanDefinition();
@@ -75,10 +75,24 @@ public class JaxWsSupportTests extends TestCase {
 			OrderService orderService = (OrderService) ac.getBean("client", OrderService.class);
 			String order = orderService.getOrder(1000);
 			assertEquals("order 1000", order);
+			try {
+				orderService.getOrder(0);
+				fail("Should have thrown OrderNotFoundException");
+			}
+			catch (OrderNotFoundException ex) {
+				// expected
+			}
 
 			ServiceAccessor serviceAccessor = (ServiceAccessor) ac.getBean("accessor", ServiceAccessor.class);
 			order = serviceAccessor.orderService.getOrder(1000);
 			assertEquals("order 1000", order);
+			try {
+				serviceAccessor.orderService.getOrder(0);
+				fail("Should have thrown OrderNotFoundException");
+			}
+			catch (OrderNotFoundException ex) {
+				// expected
+			}
 		}
 		catch (BeanCreationException ex) {
 			if ("exporter".equals(ex.getBeanName()) && ex.getRootCause() instanceof ClassNotFoundException) {
