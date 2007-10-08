@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,15 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import junit.framework.TestCase;
-
 import java.io.StringWriter;
 
-import org.springframework.test.AssertThrows;
+import junit.framework.TestCase;
 
 /**
- * Unit tests for the {@link TagWriter} class.
- * 
  * @author Rob Harrop
  * @author Rick Evans
- * @since 2.0
  */
-public final class TagWriterTests extends TestCase {
+public class TagWriterTests extends TestCase {
 
 	private TagWriter writer;
 
@@ -121,14 +116,6 @@ public final class TagWriterTests extends TestCase {
 		this.writer.endTag();
 
 		assertEquals("<span>Rob Harrop</span>", this.data.toString());
-	}
-
-	public void testCtorWithNullWriter() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				new TagWriter(null);
-			}
-		}.runTest();
 	}
 
 }

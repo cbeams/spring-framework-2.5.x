@@ -21,6 +21,7 @@ import java.io.Writer;
 import java.util.Stack;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -44,14 +45,24 @@ public class TagWriter {
 	/**
 	 * Stores {@link TagStateEntry tag state}. Stack model naturally supports tag nesting.
 	 */
-	private Stack tagState = new Stack();
+	private final Stack tagState = new Stack();
+
 
 
 	/**
 	 * Create a new instance of the {@link TagWriter} class that writes to
 	 * the supplied {@link Writer}.
+	 * @param pageContext the JSP PageContext to obtain the {@link Writer} from
+	 */
+	public TagWriter(PageContext pageContext) {
+		Assert.notNull(pageContext, "PageContext must not be null");
+		this.writer = new SafeWriter(pageContext);
+	}
+
+	/**
+	 * Create a new instance of the {@link TagWriter} class that writes to
+	 * the supplied {@link Writer}.
 	 * @param writer the {@link Writer} to write tag content to
-	 * @throws IllegalArgumentException oif the supplied {@link Writer} is <code>null</code> 
 	 */
 	public TagWriter(Writer writer) {
 		Assert.notNull(writer, "Writer must not be null");
@@ -221,7 +232,13 @@ public class TagWriter {
 	 */
 	private static final class SafeWriter {
 
-		private final Writer writer;
+		private PageContext pageContext;
+
+		private Writer writer;
+
+		public SafeWriter(PageContext pageContext) {
+			this.pageContext = pageContext;
+		}
 
 		public SafeWriter(Writer writer) {
 			this.writer = writer;
@@ -229,12 +246,16 @@ public class TagWriter {
 
 		public SafeWriter append(String value) throws JspException {
 			try {
-				this.writer.write(String.valueOf(value));
+				getWriterToUse().write(String.valueOf(value));
 				return this;
 			}
 			catch (IOException ex) {
 				throw new JspException("Unable to write to JspWriter", ex);
 			}
+		}
+
+		private Writer getWriterToUse() {
+			return (this.pageContext != null ? this.pageContext.getOut() : this.writer);
 		}
 	}
 

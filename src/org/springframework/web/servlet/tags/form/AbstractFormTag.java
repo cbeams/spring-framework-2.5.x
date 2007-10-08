@@ -78,7 +78,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * change the {@link java.io.Writer} to which output is actually written.
 	 */
 	protected TagWriter createTagWriter() {
-		return new TagWriter(this.pageContext.getOut());
+		return new TagWriter(this.pageContext);
 	}
 
 	/**
