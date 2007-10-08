@@ -35,8 +35,8 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.remoting.RemoteInvocationFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
-import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
 import org.springframework.remoting.support.RemoteInvocationUtils;
 
@@ -348,8 +348,8 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 				throw exToThrow;
 			}
 			catch (Throwable ex) {
-				throw new RemoteProxyFailureException(
-						"Failed to invoke RMI stub for remote service [" + getServiceUrl() + "]", ex);
+				throw new RemoteInvocationFailureException("Invocation of method [" + invocation.getMethod() +
+						"] failed in RMI service [" + getServiceUrl() + "]", ex);
 			}
 		}
 		else {

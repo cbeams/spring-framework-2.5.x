@@ -40,6 +40,7 @@ import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.remoting.RemoteAccessException;
+import org.springframework.remoting.RemoteInvocationFailureException;
 import org.springframework.remoting.support.DefaultRemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
@@ -194,9 +195,20 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 			result = executeRequest(invocation);
 		}
 		catch (JMSException ex) {
-			throw new RemoteAccessException("Cannot access JMS invoker queue [" + this.queue + "]", ex);
+			throw convertJmsInvokerAccessException(ex);
 		}
-		return recreateRemoteInvocationResult(result);
+		try {
+			return recreateRemoteInvocationResult(result);
+		}
+		catch (Throwable ex) {
+			if (result.hasInvocationTargetException()) {
+				throw ex;
+			}
+			else {
+				throw new RemoteInvocationFailureException("Invocation of method [" + methodInvocation.getMethod() +
+						"] failed in JMS invoker remote service at queue [" + this.queue + "]", ex);
+			}
+		}
 	}
 
 	/**
@@ -364,6 +376,16 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 */
 	protected Object recreateRemoteInvocationResult(RemoteInvocationResult result) throws Throwable {
 		return result.recreate();
+	}
+
+	/**
+	 * Convert the given JMS invoker access exception to an appropriate
+	 * Spring RemoteAccessException.
+	 * @param ex the exception to convert
+	 * @return the RemoteAccessException to throw
+	 */
+	protected RemoteAccessException convertJmsInvokerAccessException(JMSException ex) {
+		throw new RemoteAccessException("Could not access JMS invoker queue [" + this.queue + "]", ex);
 	}
 
 }

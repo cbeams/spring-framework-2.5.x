@@ -17,6 +17,7 @@
 package org.springframework.remoting.httpinvoker;
 
 import java.io.IOException;
+import java.io.InvalidClassException;
 import java.net.ConnectException;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -26,6 +27,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.remoting.RemoteInvocationFailureException;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
 import org.springframework.remoting.support.RemoteInvocationResult;
@@ -157,7 +159,18 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 		catch (Throwable ex) {
 			throw convertHttpInvokerAccessException(ex);
 		}
-		return recreateRemoteInvocationResult(result);
+		try {
+			return recreateRemoteInvocationResult(result);
+		}
+		catch (Throwable ex) {
+			if (result.hasInvocationTargetException()) {
+				throw ex;
+			}
+			else {
+				throw new RemoteInvocationFailureException("Invocation of method [" + methodInvocation.getMethod() +
+						"] failed in HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
+			}
+		}
 	}
 
 	/**
@@ -187,15 +200,16 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	protected RemoteAccessException convertHttpInvokerAccessException(Throwable ex) {
 		if (ex instanceof ConnectException) {
 			throw new RemoteConnectFailureException(
-					"Cannot connect to HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
+					"Could not connect to HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
 		}
-		else if (ex instanceof ClassNotFoundException) {
+		else if (ex instanceof ClassNotFoundException || ex instanceof NoClassDefFoundError ||
+				ex instanceof InvalidClassException) {
 			throw new RemoteAccessException(
-					"Cannot deserialize result from HTTP invoker remote service [" + getServiceUrl() + "]", ex);
+					"Could not deserialize result from HTTP invoker remote service [" + getServiceUrl() + "]", ex);
 		}
 		else {
 			throw new RemoteAccessException(
-			    "Cannot access HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
+			    "Could not access HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
 		}
 	}
 

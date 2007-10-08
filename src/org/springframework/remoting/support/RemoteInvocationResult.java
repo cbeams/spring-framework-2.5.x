@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ public class RemoteInvocationResult implements Serializable {
 		this.exception = exception;
 	}
 
+
 	/**
 	 * Return the result value returned by a successful invocation
 	 * of the target method, if any.
@@ -86,6 +87,15 @@ public class RemoteInvocationResult implements Serializable {
 	 */
 	public boolean hasException() {
 		return (this.exception != null);
+	}
+
+	/**
+	 * Return whether this invocation result holds an InvocationTargetException,
+	 * thrown by an invocation of the target method itself.
+	 * @see #hasException()
+	 */
+	public boolean hasInvocationTargetException() {
+		return (this.exception instanceof InvocationTargetException);
 	}
 
 

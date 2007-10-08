@@ -34,8 +34,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiObjectLocator;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.remoting.RemoteInvocationFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
-import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.remoting.support.DefaultRemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
@@ -394,8 +394,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 				throw ex.getTargetException();
 			}
 			catch (Throwable ex) {
-				throw new RemoteProxyFailureException(
-						"Failed to invoke RMI stub for remote service [" + getJndiName() + "]", ex);
+				throw new RemoteInvocationFailureException("Invocation of method [" + invocation.getMethod() +
+						"] failed in RMI service [" + getJndiName() + "]", ex);
 			}
 		}
 		else {
