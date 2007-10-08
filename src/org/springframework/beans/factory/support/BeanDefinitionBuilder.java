@@ -34,6 +34,15 @@ import org.springframework.util.ObjectUtils;
 public class BeanDefinitionBuilder  {
 
 	/**
+	 * Create a new <code>BeanDefinitionBuilder</code> used to construct a {@link GenericBeanDefinition}.
+	 */
+	public static BeanDefinitionBuilder genericBeanDefinition() {
+		BeanDefinitionBuilder builder = new BeanDefinitionBuilder();
+		builder.beanDefinition = new GenericBeanDefinition();
+		return builder;
+	}
+
+	/**
 	 * Create a new <code>BeanDefinitionBuilder</code> used to construct a {@link RootBeanDefinition}.
 	 * @param beanClass the <code>Class</code> of the bean that the definition is being created for
 	 */

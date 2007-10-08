@@ -20,7 +20,6 @@ import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.util.Assert;
 
 /**
  * Base class for those {@link BeanDefinitionParser} implementations that
@@ -58,16 +57,20 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	 * @see #doParse
 	 */
 	protected final AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-		BeanDefinitionBuilder builder = null;
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition();
+		String parentName = getParentName(element);
+		if (parentName != null) {
+			builder.getRawBeanDefinition().setParentName(parentName);
+		}
 		Class beanClass = getBeanClass(element);
 		if (beanClass != null) {
-			builder = BeanDefinitionBuilder.rootBeanDefinition(beanClass);
+			builder.getRawBeanDefinition().setBeanClass(beanClass);
 		}
 		else {
 			String beanClassName = getBeanClassName(element);
-			Assert.state(beanClassName != null,
-					"Either 'getBeanClass' or 'getBeanClassName' must be overridden and return a non-null value");
-			builder = BeanDefinitionBuilder.rootBeanDefinition(beanClassName);
+			if (beanClassName != null) {
+				builder.getRawBeanDefinition().setBeanClassName(beanClassName);
+			}
 		}
 		builder.setSource(parserContext.extractSource(element));
 		if (parserContext.isNested()) {
@@ -83,6 +86,19 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	}
 
 	/**
+	 * Determine the name for the parent of the currently parsed bean,
+	 * in case of the current bean being defined as a child bean.
+	 * <p>The default implementation returns <code>null</code>,
+	 * indicating a root bean definition.
+	 * @param element the <code>Element</code> that is being parsed
+	 * @return the name of the parent bean for the currently parsed bean,
+	 * or <code>null</code> if none
+	 */
+	protected String getParentName(Element element) {
+		return null;
+	}
+
+	/**
 	 * Determine the bean class corresponding to the supplied {@link Element}.
 	 * <p>Note that, for application classes, it is generally preferable to
 	 * override {@link #getBeanClassName} instead, in order to avoid a direct
@@ -91,7 +107,7 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	 * if the application classes are not available on the plugin's classpath.
 	 * @param element the <code>Element</code> that is being parsed
 	 * @return the {@link Class} of the bean that is being defined via parsing
-	 * the supplied <code>Element</code>
+	 * the supplied <code>Element</code>, or <code>null</code> if none
 	 * @see #getBeanClassName
 	 */
 	protected Class getBeanClass(Element element) {
@@ -102,7 +118,7 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	 * Determine the bean class name corresponding to the supplied {@link Element}.
 	 * @param element the <code>Element</code> that is being parsed
 	 * @return the class name of the bean that is being defined via parsing
-	 * the supplied <code>Element</code>
+	 * the supplied <code>Element</code>, or <code>null</code> if none
 	 * @see #getBeanClass
 	 */
 	protected String getBeanClassName(Element element) {
