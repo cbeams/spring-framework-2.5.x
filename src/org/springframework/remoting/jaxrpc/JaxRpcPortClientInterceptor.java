@@ -17,6 +17,7 @@
 package org.springframework.remoting.jaxrpc;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a specific port
@@ -584,7 +586,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			if (logger.isTraceEnabled()) {
 				logger.trace("Invoking operation '" + invocation.getMethod().getName() + "' as JAX-RPC dynamic call");
 			}
-			return performJaxRpcCall(invocation);
+			return performJaxRpcCall(invocation, this.serviceToUse);
 		}
 	}
 
@@ -606,12 +608,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			Throwable targetEx = ex.getTargetException();
 			if (targetEx instanceof RemoteException) {
 				RemoteException rex = (RemoteException) targetEx;
-				boolean isConnectFailure = isConnectFailure(rex);
-				if (isConnectFailure && this.refreshServiceAfterConnectFailure) {
-					reset();
-				}
-				throw RmiClientInterceptorUtils.convertRmiAccessException(
-						invocation.getMethod(), rex, isConnectFailure, this.portQName.toString());
+				throw handleRemoteException(invocation.getMethod(), rex);
 			}
 			else if (targetEx instanceof JAXRPCException) {
 				throw new RemoteProxyFailureException("Invalid call on JAX-RPC port stub", targetEx);
@@ -620,15 +617,6 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 				throw targetEx;
 			}
 		}
-	}
-
-	/**
-	 * @deprecated as of Spring 2.0.3, in favor of the <code>performJaxRpcCall</code>
-	 * variant with an explicit Service argument
-	 * @see #performJaxRpcCall(org.aopalliance.intercept.MethodInvocation, javax.xml.rpc.Service)
-	 */
-	protected Object performJaxRpcCall(MethodInvocation invocation) throws Throwable {
-		return performJaxRpcCall(invocation, this.serviceToUse);
 	}
 
 	/**
@@ -647,13 +635,14 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @see #postProcessJaxRpcCall
 	 */
 	protected Object performJaxRpcCall(MethodInvocation invocation, Service service) throws Throwable {
+		Method method = invocation.getMethod();
 		QName portQName = this.portQName;
 
 		// Create JAX-RPC call object, using the method name as operation name.
 		// Synchronized because of non-thread-safe Axis implementation!
 		Call call = null;
 		synchronized (service) {
-			call = service.createCall(portQName, invocation.getMethod().getName());
+			call = service.createCall(portQName, method.getName());
 		}
 
 		// Apply properties to JAX-RPC stub.
@@ -667,12 +656,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			return call.invoke(invocation.getArguments());
 		}
 		catch (RemoteException ex) {
-			boolean isConnectFailure = isConnectFailure(ex);
-			if (isConnectFailure && this.refreshServiceAfterConnectFailure) {
-				reset();
-			}
-			throw RmiClientInterceptorUtils.convertRmiAccessException(
-					invocation.getMethod(), ex, isConnectFailure, portQName.toString());
+			throw handleRemoteException(method, ex);
 		}
 		catch (JAXRPCException ex) {
 			throw new RemoteProxyFailureException("Invalid JAX-RPC call configuration", ex);
@@ -733,16 +717,47 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	}
 
 	/**
+	 * Handle the given RemoteException that was thrown from a JAX-RPC port stub
+	 * or JAX-RPC call invocation.
+	 * @param method the service interface method that we invoked
+	 * @param ex the original RemoteException
+	 * @return the exception to rethrow (may be the original RemoteException
+	 * or an extracted/wrapped exception, but never <code>null</code>)
+	 */
+	protected Throwable handleRemoteException(Method method, RemoteException ex) {
+		boolean isConnectFailure = isConnectFailure(ex);
+		if (isConnectFailure && this.refreshServiceAfterConnectFailure) {
+			reset();
+		}
+		Throwable cause = ex.getCause();
+		if (cause != null && ReflectionUtils.declaresException(method, cause.getClass())) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Rethrowing wrapped exception of type [" + cause.getClass().getName() + "] as-is");
+			}
+			// Declared on the service interface: probably a wrapped business exception.
+			return ex.getCause();
+		}
+		else {
+			// Throw either a RemoteAccessException or the original RemoteException,
+			// depending on what the service interface declares.
+			return RmiClientInterceptorUtils.convertRmiAccessException(
+					method, ex, isConnectFailure, portQName.toString());
+		}
+	}
+
+	/**
 	 * Determine whether the given RMI exception indicates a connect failure.
-	 * <p>The default implementation always returns <code>true</code>,
-	 * assuming that the JAX-RPC provider only throws RemoteException
-	 * in case of connect failures.
+	 * <p>The default implementation returns <code>true</code> unless the
+	 * exception class name (or exception superclass name) contains the term
+	 * "Fault" (e.g. "AxisFault"), assuming that the JAX-RPC provider only
+	 * throws RemoteException in case of WSDL faults and connect failures.
 	 * @param ex the RMI exception to check
 	 * @return whether the exception should be treated as connect failure
 	 * @see org.springframework.remoting.rmi.RmiClientInterceptorUtils#isConnectFailure
 	 */
 	protected boolean isConnectFailure(RemoteException ex) {
-		return true;
+		return (ex.getClass().getName().indexOf("Fault") == -1 &&
+				ex.getClass().getSuperclass().getName().indexOf("Fault") == -1);
 	}
 
 }
