@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,12 +31,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.portlet.util.PortletUtils;
 
 /**
- * Resource implementation for PortletContext resources,
- * interpreting relative paths within the portlet application root.
+ * {@link org.springframework.core.io.Resource} implementation for
+ * {@link javax.portlet.PortletContext} resources, interpreting
+ * relative paths within the portlet application root directory.
  *
- * <p>Always supports stream access, but only allows java.io.File
- * access when the portlet application archive is expanded.
- * Always supports resolution as URL.
+ * <p>Always supports stream access and URL access, but only allows
+ * <code>java.io.File</code> access when the portlet application archive
+ * is expanded.
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
@@ -76,15 +77,15 @@ public class PortletContextResource extends AbstractResource {
 	/**
 	 * Return the PortletContext for this resource.
 	 */
-	public PortletContext getPortletContext() {
-		return portletContext;
+	public final PortletContext getPortletContext() {
+		return this.portletContext;
 	}
 
 	/**
 	 * Return the path for this resource.
 	 */
-	public String getPath() {
-		return path;
+	public final String getPath() {
+		return this.path;
 	}
 
 
