@@ -31,6 +31,7 @@ import javax.xml.rpc.JAXRPCException;
 import javax.xml.rpc.Service;
 import javax.xml.rpc.ServiceException;
 import javax.xml.rpc.Stub;
+import javax.xml.rpc.soap.SOAPFaultException;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -280,7 +281,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 */
 	public void setServiceInterface(Class serviceInterface) {
 		if (serviceInterface != null && !serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("serviceInterface must be an interface");
+			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}
 		this.serviceInterface = serviceInterface;
 	}
@@ -310,7 +311,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		if (portInterface != null &&
 				(!portInterface.isInterface() || !Remote.class.isAssignableFrom(portInterface))) {
 			throw new IllegalArgumentException(
-					"portInterface must be an interface derived from [java.rmi.Remote]");
+					"'portInterface' must be an interface derived from [java.rmi.Remote]");
 		}
 		this.portInterface = portInterface;
 	}
@@ -574,24 +575,35 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 */
 	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
 		Remote stub = getPortStub();
-		if (stub != null) {
-			// JAX-RPC port stub available -> traditional RMI stub invocation.
-			if (logger.isTraceEnabled()) {
-				logger.trace("Invoking operation '" + invocation.getMethod().getName() + "' on JAX-RPC port stub");
+		try {
+			if (stub != null) {
+				// JAX-RPC port stub available -> traditional RMI stub invocation.
+				if (logger.isTraceEnabled()) {
+					logger.trace("Invoking operation '" + invocation.getMethod().getName() + "' on JAX-RPC port stub");
+				}
+				return doInvoke(invocation, stub);
 			}
-			return doInvoke(invocation, stub);
+			else {
+				// No JAX-RPC stub -> using JAX-RPC dynamic calls.
+				if (logger.isTraceEnabled()) {
+					logger.trace("Invoking operation '" + invocation.getMethod().getName() + "' as JAX-RPC dynamic call");
+				}
+				return performJaxRpcCall(invocation, this.serviceToUse);
+			}
 		}
-		else {
-			// No JAX-RPC stub -> using JAX-RPC dynamic calls.
-			if (logger.isTraceEnabled()) {
-				logger.trace("Invoking operation '" + invocation.getMethod().getName() + "' as JAX-RPC dynamic call");
-			}
-			return performJaxRpcCall(invocation, this.serviceToUse);
+		catch (RemoteException ex) {
+			throw handleRemoteException(invocation.getMethod(), ex);
+		}
+		catch (SOAPFaultException ex) {
+			throw new JaxRpcSoapFaultException(ex);
+		}
+		catch (JAXRPCException ex) {
+			throw new RemoteProxyFailureException("Invalid JAX-RPC call configuration", ex);
 		}
 	}
 
 	/**
-	 * Perform a JAX-RPC service invocation based on the given port stub.
+	 * Perform a JAX-RPC service invocation on the given port stub.
 	 * @param invocation the AOP method invocation
 	 * @param portStub the RMI port stub to invoke
 	 * @return the invocation result, if any
@@ -605,17 +617,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			return RmiClientInterceptorUtils.doInvoke(invocation, portStub);
 		}
 		catch (InvocationTargetException ex) {
-			Throwable targetEx = ex.getTargetException();
-			if (targetEx instanceof RemoteException) {
-				RemoteException rex = (RemoteException) targetEx;
-				throw handleRemoteException(invocation.getMethod(), rex);
-			}
-			else if (targetEx instanceof JAXRPCException) {
-				throw new RemoteProxyFailureException("Invalid call on JAX-RPC port stub", targetEx);
-			}
-			else {
-				throw targetEx;
-			}
+			throw ex.getTargetException();
 		}
 	}
 
@@ -652,15 +654,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 		postProcessJaxRpcCall(call, invocation);
 
 		// Perform actual invocation.
-		try {
-			return call.invoke(invocation.getArguments());
-		}
-		catch (RemoteException ex) {
-			throw handleRemoteException(method, ex);
-		}
-		catch (JAXRPCException ex) {
-			throw new RemoteProxyFailureException("Invalid JAX-RPC call configuration", ex);
-		}
+		return call.invoke(invocation.getArguments());
 	}
 
 	/**

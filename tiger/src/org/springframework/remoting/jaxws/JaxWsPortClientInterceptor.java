@@ -17,11 +17,13 @@
 package org.springframework.remoting.jaxws;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.ProtocolException;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.SOAPFaultException;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -106,7 +108,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 */
 	public void setServiceInterface(Class serviceInterface) {
 		if (serviceInterface != null && !serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("serviceInterface must be an interface");
+			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}
 		this.serviceInterface = serviceInterface;
 	}
@@ -139,13 +141,13 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 		if (getServiceInterface() == null) {
 			throw new IllegalArgumentException("Property 'serviceInterface' is required");
 		}
-		Service service = getJaxWsService();
-		if (service == null) {
-			service = createJaxWsService();
+		Service serviceToUse = getJaxWsService();
+		if (serviceToUse == null) {
+			serviceToUse = createJaxWsService();
 		}
 		this.portQName = getQName(getPortName() != null ? getPortName() : getServiceInterface().getName());
 		this.portStub = (getPortName() != null ?
-				service.getPort(this.portQName, getServiceInterface()) : service.getPort(getServiceInterface()));
+				serviceToUse.getPort(this.portQName, getServiceInterface()) : serviceToUse.getPort(getServiceInterface()));
 	}
 
 	/**
@@ -158,56 +160,78 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 		}
 	}
 
+	/**
+	 * Return the prepared QName for the port.
+	 * @see #setPortName
+	 * @see #getQName
+	 */
+	protected final QName getPortQName() {
+		return this.portQName;
+	}
+
+	/**
+	 * Return the underlying JAX-WS port stub that this interceptor delegates to
+	 * for each method invocation on the proxy.
+	 */
+	protected Object getPortStub() {
+		return this.portStub;
+	}
+
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (AopUtils.isToStringMethod(invocation.getMethod())) {
 			return "JAX-WS proxy for port [" + getPortName() + "] of service [" + getServiceName() + "]";
 		}
-
-		// Lazily prepare service and stub if appropriate.
-		if (!this.lookupServiceOnStartup) {
-			synchronized (this.preparationMonitor) {
-				if (!isPrepared()) {
-					prepare();
-				}
-			}
-		}
-		else {
+		// Lazily prepare service and stub if necessary.
+		synchronized (this.preparationMonitor) {
 			if (!isPrepared()) {
-				throw new IllegalStateException("JaxRpcClientInterceptor is not properly initialized - " +
-						"invoke 'prepare' before attempting any operations");
+				prepare();
 			}
 		}
-
 		return doInvoke(invocation);
 	}
 
+	/**
+	 * Perform a JAX-WS service invocation based on the given method invocation.
+	 * @param invocation the AOP method invocation
+	 * @return the invocation result, if any
+	 * @throws Throwable in case of invocation failure
+	 * @see #getPortStub()
+	 * @see #doInvoke(org.aopalliance.intercept.MethodInvocation, Object)
+	 */
 	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
-		if (this.portStub == null) {
-			throw new IllegalStateException("HessianClientInterceptor is not properly initialized - " +
-					"invoke 'prepare' before attempting any operations");
-		}
-
 		try {
-			return invocation.getMethod().invoke(this.portStub, invocation.getArguments());
+			return doInvoke(invocation, getPortStub());
+		}
+		catch (SOAPFaultException ex) {
+			throw new JaxWsSoapFaultException(ex);
+		}
+		catch (ProtocolException ex) {
+			return new RemoteConnectFailureException("Could not connect to remote service [" + this.portQName + "]", ex);
+		}
+		catch (WebServiceException ex) {
+			throw new RemoteAccessException("Could not access remote service at [" + this.portQName + "]", ex);
+		}
+	}
+
+	/**
+	 * Perform a JAX-WS service invocation on the given port stub.
+	 * @param invocation the AOP method invocation
+	 * @param portStub the RMI port stub to invoke
+	 * @return the invocation result, if any
+	 * @throws Throwable in case of invocation failure
+	 * @see #getPortStub()
+	 */
+	protected Object doInvoke(MethodInvocation invocation, Object portStub) throws Throwable {
+		Method method = invocation.getMethod();
+		try {
+			return method.invoke(portStub, invocation.getArguments());
 		}
 		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof WebServiceException) {
-				WebServiceException wse = (WebServiceException) ex.getTargetException();
-				if (wse instanceof ProtocolException) {
-					return new RemoteConnectFailureException(
-							"Could not connect to remote service [" + this.portQName + "]", wse);
-				}
-				else {
-					throw new RemoteAccessException(
-							"Cannot access remote service at [" + this.portQName + "]", wse);
-				}
-			}
 			throw ex.getTargetException();
 		}
 		catch (Throwable ex) {
-			throw new RemoteProxyFailureException(
-					"Failed to invoke port proxy for remote service [" + this.portQName + "]", ex);
+			throw new RemoteProxyFailureException("Invocation of stub method failed: " + method, ex);
 		}
 	}
 
