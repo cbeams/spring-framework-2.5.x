@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.5 RC1 (September 2007)
-------------------------------------------------------
+THE SPRING FRAMEWORK, release 2.5 RC1 (October 2007)
+----------------------------------------------------
 http://www.springframework.org
 
 
@@ -98,32 +98,32 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2920 KB)
+* "spring" (~2730 KB)
 - Convenient jar file combining all standard modules (except for the test module and the Portlet/Struts support)
 - Also includes the AOP Alliance interfaces (as a convenience)!
 - Does not include contents of spring-aspects.jar, spring-test.jar, spring-webmvc-portlet and spring-webmvc-struts.jar!
 
 MODULE JARS (dist/modules):
 
-* "spring-aop" (~315 KB)
-- Contents: AOP framework, source-level metadata support
+* "spring-aop" (~310 KB)
+- Contents: AOP framework
 - Dependencies: spring-core, (spring-beans, AOP Alliance)
 
-* "spring-beans" (~445 KB)
+* "spring-beans" (~440 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core
 
-* "spring-context" (~390 KB)
+* "spring-context" (~420 KB)
 - Contents: application context, JNDI, JMX, instrumentation, remoting, scripting, scheduling, validation
 - Dependencies: spring-beans, (spring-aop, JMX API, EJB API)
 
-* "spring-context-support" (~120 KB)
-- Contents: Quartz and CommonJ scheduling, HTTP-based remoting proxies, UI templating, mail, caching
+* "spring-context-support" (~100 KB)
+- Contents: Quartz and CommonJ scheduling, JAX-WS support, UI templating, mail, caching
 - Dependencies: spring-context, (spring-aop, spring-jdbc)
 
-* "spring-core" (~200 KB)
-- Contents: core abstractions and utilities
-- Dependencies: Commons Logging
+* "spring-core" (~260 KB)
+- Contents: core abstractions and utilities, source-level metadata support, repackaged ASM library
+- Dependencies: Commons Logging, (Commons Attributes)
 
 * "spring-jdbc" (~290 KB)
 - Contents: JDBC support
@@ -133,7 +133,7 @@ MODULE JARS (dist/modules):
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-beans, spring-tx, JMS API
 
-* "spring-orm" (~340 KB)
+* "spring-orm" (~350 KB)
 - Contents: JDO support, JPA support, Hibernate support, TopLink support, iBATIS support
 - Dependencies: spring-jdbc, (spring-web)
 
@@ -145,11 +145,11 @@ MODULE JARS (dist/modules):
 - Contents: transaction infrastructure, JCA support, DAO support
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API, JCA API)
 
-* "spring-web" (~175 KB)
-- Contents: web application context, multipart resolver, HTTP-based remoting exporters
+* "spring-web" (~200 KB)
+- Contents: web application context, multipart resolver, HTTP-based remoting support
 - Dependencies: spring-context, Servlet API, (JSP API, JSTL)
 
-* "spring-webmvc" (~290 KB)
+* "spring-webmvc" (~300 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-context-support)
 

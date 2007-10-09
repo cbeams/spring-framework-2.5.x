@@ -65,21 +65,20 @@
 
 
 	<patternset id="spring.full.packages">
-		<include name="META-INF/**"/>
+		<include name="META-INF/*.handlers"/>
+		<include name="META-INF/*.schemas"/>
 		<include name="org/springframework/**"/>
 		<!-- exclude content of spring-aspects.jar -->
-		<exclude name="META-INF/aop.xml"/>
 		<exclude name="org/springframework/beans/factory/aspectj/**"/>
 		<exclude name="org/springframework/transaction/aspectj/**"/>
-		<!-- exclude content of spring-webmvc-portlet.jar and spring-webmvc-struts.jar -->
+		<!-- exclude content of spring-webmvc-*.jar -->
 		<exclude name="org/springframework/web/portlet/**"/>
+		<exclude name="org/springframework/web/servlet/**"/>
 		<exclude name="org/springframework/web/struts/**"/>
-		<exclude name="org/springframework/web/servlet/view/tiles/**"/>
 	</patternset>
 
 	<patternset id="spring.aop.packages">
 		<include name="org/springframework/aop/**"/>
-		<include name="org/springframework/metadata/**"/>
 	</patternset>
 
 	<patternset id="spring.beans.packages">
@@ -91,7 +90,7 @@
 	<patternset id="spring.context.packages">
 		<include name="org/springframework/context/**"/>
 		<include name="org/springframework/ejb/**"/>
-		<include name="org/springframework/instrument/classloading/**"/>
+		<include name="org/springframework/instrument/**"/>
 		<exclude name="org/springframework/instrument/classloading/tomcat/**"/>
 		<include name="org/springframework/jmx/**"/>
 		<include name="org/springframework/jndi/**"/>
@@ -99,6 +98,7 @@
 		<exclude name="org/springframework/remoting/caucho/**"/>
 		<exclude name="org/springframework/remoting/httpinvoker/**"/>
 		<exclude name="org/springframework/remoting/jaxrpc/**"/>
+		<exclude name="org/springframework/remoting/jaxws/**"/>
 		<include name="org/springframework/scheduling/**"/>
 		<exclude name="org/springframework/scheduling/commonj/**"/>
 		<exclude name="org/springframework/scheduling/quartz/**"/>
@@ -114,13 +114,7 @@
 	<patternset id="spring.context.support.packages">
 		<include name="org/springframework/cache/**"/>
 		<include name="org/springframework/mail/**"/>
-		<include name="org/springframework/remoting/caucho/**"/>
-		<exclude name="org/springframework/remoting/caucho/*ServiceExporter.*"/>
-		<include name="org/springframework/remoting/httpinvoker/**"/>
-		<exclude name="org/springframework/remoting/httpinvoker/*ServiceExporter.*"/>
-		<include name="org/springframework/remoting/jaxrpc/**"/>
-		<exclude name="org/springframework/remoting/jaxrpc/ServletEndpoint*.*"/>
-		<exclude name="org/springframework/remoting/jaxrpc/support/**"/>
+		<include name="org/springframework/remoting/jaxws/**"/>
 		<include name="org/springframework/scheduling/commonj/**"/>
 		<include name="org/springframework/scheduling/quartz/**"/>
 		<include name="org/springframework/ui/velocity/**"/>
@@ -130,6 +124,7 @@
 
 	<patternset id="spring.core.packages">
 		<include name="org/springframework/core/**"/>
+		<include name="org/springframework/metadata/**"/>
 		<include name="org/springframework/util/**"/>
 	</patternset>
 
@@ -143,14 +138,11 @@
 
 	<patternset id="spring.orm.packages">
 		<include name="org/springframework/orm/**"/>
-		<exclude name="org/springframework/orm/jdo/support/Open*InView*.*"/>
-		<exclude name="org/springframework/orm/jpa/support/Open*InView*.*"/>
-		<exclude name="org/springframework/orm/hibernate3/support/Open*InView*.*"/>
 	</patternset>
 
 	<patternset id="spring.test.packages">
-		<include name="META-INF/**"/>
-		<include name="org/springframework/**"/>
+		<include name="org/springframework/mock/**"/>
+		<include name="org/springframework/test/**"/>
 	</patternset>
 
 	<patternset id="spring.tx.packages">
@@ -166,13 +158,9 @@
 		<exclude name="org/springframework/web/servlet/**"/>
 		<exclude name="org/springframework/web/portlet/**"/>
 		<exclude name="org/springframework/web/struts/**"/>
-		<include name="org/springframework/orm/jdo/support/Open*InView*.*"/>
-		<include name="org/springframework/orm/jpa/support/Open*InView*.*"/>
-		<include name="org/springframework/orm/hibernate3/support/Open*InView*.*"/>
-		<include name="org/springframework/remoting/caucho/*ServiceExporter.*"/>
-		<include name="org/springframework/remoting/httpinvoker/*ServiceExporter.*"/>
-		<include name="org/springframework/remoting/jaxrpc/ServletEndpoint*.*"/>
-		<include name="org/springframework/remoting/jaxrpc/support/**"/>
+		<include name="org/springframework/remoting/caucho/**"/>
+		<include name="org/springframework/remoting/httpinvoker/**"/>
+		<include name="org/springframework/remoting/jaxrpc/**"/>
 	</patternset>
 
 	<patternset id="spring.webmvc.packages">
@@ -206,8 +194,11 @@
 	</patternset>
 
 
-	<!-- BND tool taskdef (required for the OSGi manifest entries -->
-	<taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="${lib.dir}/bnd/bnd.jar" />
+	<!-- BND tool taskdef (required for the OSGi manifest entries) -->
+	<taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="${lib.dir}/bnd/bnd.jar"/>
+
+	<!-- Jar Jar Links taskdef (required for repackaging ASM) -->
+	<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="${lib.dir}/jarjar/jarjar.jar"/>
 
 
 	<target name="usage">
@@ -431,11 +422,14 @@
 
 		<delete file="${dist.dir}/spring.jar"/>
 
-		<jar jarfile="${dist.dir}/spring.jar">
+		<jarjar jarfile="${dist.dir}/spring.jar">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.full.packages"/>
 			</fileset>
-			<zipfileset src="lib/aopalliance/aopalliance.jar"/>
+			<zipfileset src="${lib.dir}/aopalliance/aopalliance.jar"/>
+			<zipfileset src="${lib.dir}/asm/asm-2.2.3.jar"/>
+			<zipfileset src="${lib.dir}/asm/asm-commons-2.2.3.jar"/>
+			<rule pattern="org.objectweb.asm.**" result="org.springframework.asm.@1"/>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
 				<attribute name="Implementation-Version" value="${spring-version}"/>
@@ -443,7 +437,7 @@
 				<!-- allow for use of this JAR as a Java agent -->
 				<attribute name="Premain-Class" value="org.springframework.instrument.InstrumentationSavingAgent"/>
 			</manifest>
-		</jar>
+		</jarjar>
 
 		<bndwrap definitions="${basedir}/osgi/bnd" output="${dist.dir}">
 			<fileset dir="${dist.dir}" includes="spring.jar"/>
@@ -531,16 +525,19 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-core.jar">
+		<jarjar jarfile="${dist.dir}/modules/spring-core.jar">
 			<fileset dir="${target.classes.dir}">
 				<patternset refid="spring.core.packages"/>
 			</fileset>
+			<zipfileset src="${lib.dir}/asm/asm-2.2.3.jar"/>
+			<zipfileset src="${lib.dir}/asm/asm-commons-2.2.3.jar"/>
+			<rule pattern="org.objectweb.asm.**" result="org.springframework.asm.@1"/>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
 				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
-		</jar>
+		</jarjar>
 
 		<jar jarfile="${dist.dir}/modules/spring-jdbc.jar">
 			<fileset dir="${target.classes.dir}">
@@ -2036,7 +2033,6 @@
 				<include name="lib/*.txt"/>
 				<include name="lib/ant/**"/>
 				<include name="lib/antlr/**"/>
-				<include name="lib/asm/**"/>
 				<include name="lib/aspectj/**"/>
 				<!-- Do not include 8 MB aspectjtools.jar: Users need to download it separately -->
 				<exclude name="lib/aspectj/aspectjtools.jar"/>

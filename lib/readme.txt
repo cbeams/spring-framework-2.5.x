@@ -16,11 +16,6 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - included in spring.jar and spring-aop.jar
 
-* asm/asm*-2.2.3.jar
-- ObjectWeb ASM 2.2.3 (http://asm.objectweb.org)
-- required for building the framework
-- required at runtime when using parameter name discovery with AspectJ
-
 * aspectj/aspectjweaver.jar, aspectj/aspectjrt.jar, (aspectj/aspectjtools.jar)
 - AspectJ 1.5.3 (http://www.aspectj.org)
 - required for building the framework
@@ -271,6 +266,10 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - JAMon API (Java Application Monitor) 2.4 (http://www.jamonapi.com)
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
+
+* jarjar/jarjar.jar
+- Jar Jar Links 1.0 RC5 (http://code.google.com/p/jarjar)
+- required for building the framework jars
 
 * jasperreports/jasperreports-2.0.0.jar
 - JasperReports 2.0.0 (http://jasperreports.sourceforge.net)

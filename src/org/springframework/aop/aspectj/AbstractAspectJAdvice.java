@@ -63,9 +63,6 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 */
 	protected static final String JOIN_POINT_KEY = JoinPoint.class.getName();
 
-	private static final boolean ASM_AVAILABLE =
-			ClassUtils.isPresent("org.objectweb.asm.ClassReader", AbstractAspectJAdvice.class.getClassLoader());
-
 
 	/**
 	 * Lazily instantiate joinpoint for the current invocation.
@@ -431,9 +428,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		// We need to discover them, or if that fails, guess,
 		// and if we can't guess with 100% accuracy, fail.
 		PrioritizedParameterNameDiscoverer discoverer = new PrioritizedParameterNameDiscoverer();
-		if (ASM_AVAILABLE) {
-			discoverer.addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
-		}
+		discoverer.addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		AspectJAdviceParameterNameDiscoverer adviceParameterNameDiscoverer =
 				new AspectJAdviceParameterNameDiscoverer(this.pointcut.getExpression());
 		adviceParameterNameDiscoverer.setReturningName(this.returningName);
