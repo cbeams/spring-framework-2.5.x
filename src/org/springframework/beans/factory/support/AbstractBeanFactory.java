@@ -340,11 +340,12 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				return parentBeanFactory.isSingleton(originalBeanName(name));
 			}
 
-			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
 			// In case of FactoryBean, return singleton status of created object if not a dereference.
-			if (bd.isSingleton()) {
-				if (isBeanClassMatch(beanName, bd, FactoryBean.class)) {
+			if (mbd.isSingleton()) {
+				Class beanClass = predictBeanType(beanName, mbd, true);
+				if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
 					if (BeanFactoryUtils.isFactoryDereference(name)) {
 						return true;
 					}
@@ -370,16 +371,23 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			return parentBeanFactory.isPrototype(originalBeanName(name));
 		}
 
-		RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
-
-		// In case of FactoryBean, return singleton status of created object if not a dereference.
-		if (bd.isPrototype()) {
-			return (!BeanFactoryUtils.isFactoryDereference(name) || isBeanClassMatch(beanName, bd, FactoryBean.class));
+		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+		if (mbd.isPrototype()) {
+			// In case of FactoryBean, return singleton status of created object if not a dereference.
+			if (!BeanFactoryUtils.isFactoryDereference(name)) {
+				return true;
+			}
+			Class beanClass = predictBeanType(beanName, mbd, true);
+			return (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
 		}
 		else {
 			// Singleton or scoped - not a prototype.
 			// However, FactoryBean may still produce a prototype object...
-			if (!BeanFactoryUtils.isFactoryDereference(name) && isBeanClassMatch(beanName, bd, FactoryBean.class)) {
+			if (BeanFactoryUtils.isFactoryDereference(name)) {
+				return false;
+			}
+			Class beanClass = predictBeanType(beanName, mbd, true);
+			if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
 				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 				return ((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean) factoryBean).isPrototype()) ||
 						!factoryBean.isSingleton());
@@ -1156,27 +1164,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 
 	/**
-	 * Check whether the bean class of the given bean definition matches
-	 * the specified target type. Allows for lazy loading of the actual
-	 * bean class, provided that the type match can be determined otherwise.
-	 * <p>The default implementation simply delegates to the standard
-	 * <code>resolveBeanClass</code> method. Subclasses may override this
-	 * to use a different strategy, such as a throwaway class loaer.
-	 * @param beanName the name of the bean (for error handling purposes)
-	 * @param mbd the merged bean definition to determine the class for
-	 * @param targetType the type to match against (never <code>null</code>)
-	 * @return the resolved bean class (or <code>null</code> if none)
-	 * @throws CannotLoadBeanClassException if we failed to load the class
-	 * @see #resolveBeanClass
-	 */
-	protected boolean isBeanClassMatch(String beanName, RootBeanDefinition mbd, Class targetType)
-			throws CannotLoadBeanClassException {
-
-		Class beanClass = resolveBeanClass(mbd, beanName, true);
-		return (beanClass != null && targetType.isAssignableFrom(beanClass));
-	}
-
-	/**
 	 * Predict the eventual bean type (of the processed bean instance) for the
 	 * specified bean. Called by {@link #getType} and {@link #isTypeMatch}.
 	 * Does not need to handle FactoryBeans specifically, since it is only
@@ -1366,8 +1353,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			return ((ConfigurableBeanFactory) getParentBeanFactory()).isFactoryBean(name);
 		}
 
-		RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
-		return isBeanClassMatch(beanName, bd, FactoryBean.class);
+		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+		Class beanClass = predictBeanType(beanName, mbd, true);
+		return (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
 	}
 
 	/**
