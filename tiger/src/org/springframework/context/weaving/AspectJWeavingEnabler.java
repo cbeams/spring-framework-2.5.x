@@ -22,8 +22,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.Ordered;
+import org.springframework.instrument.InstrumentationSavingAgent;
+import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
-import org.springframework.util.Assert;
 
 /**
  * Post-processor that registers AspectJ's
@@ -49,9 +50,11 @@ public class AspectJWeavingEnabler implements BeanFactoryPostProcessor, LoadTime
 
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		Assert.state(this.loadTimeWeaver != null,
-				"LoadTimeWeaver must be available - typically autodetected as a bean with the name 'loadTimeWeaver'");
-		this.loadTimeWeaver.addTransformer(new ClassPreProcessorAgentAdapter());
+		LoadTimeWeaver weaverToUse = this.loadTimeWeaver;
+		if (weaverToUse == null && InstrumentationSavingAgent.getInstrumentation() != null) {
+			weaverToUse = new InstrumentationLoadTimeWeaver();
+		}
+		weaverToUse.addTransformer(new ClassPreProcessorAgentAdapter());
 	}
 
 }

@@ -35,6 +35,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.instrument.InstrumentationSavingAgent;
+import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
@@ -244,6 +246,9 @@ public class DefaultPersistenceUnitManager
 
 
 	public void afterPropertiesSet() {
+		if (this.loadTimeWeaver == null && InstrumentationSavingAgent.getInstrumentation() != null) {
+			this.loadTimeWeaver = new InstrumentationLoadTimeWeaver();
+		}
 		preparePersistenceUnitInfos();
 	}
 

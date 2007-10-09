@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.instrument.InstrumentationSavingAgent;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.ResourceOverridingShadowingClassLoader;
 import org.springframework.instrument.classloading.ShadowingClassLoader;
@@ -74,6 +75,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactionalTests {
@@ -123,18 +125,16 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	protected EntityManager createContainerManagedEntityManager() {
 		return ExtendedEntityManagerCreator.createContainerManagedEntityManager(this.entityManagerFactory);
 	}
-	
+
 	/**
-	 * Subclasses should override this method if they wish
-	 * to disable shadow class loading. Do this only
-	 * if instrumentation is not required in your
-	 * JPA implementation. 
-	 * @return whether to disable shadow loading functionality
+	 * Subclasses should override this method if they wish to disable shadow class loading.
+	 * <p>The default implementation deactivates shadow class loading if Spring's
+	 * InstrumentationSavingAgent has been configured on VM startup.
 	 */
 	protected boolean shouldUseShadowLoader() {
-		return true;
+		return (InstrumentationSavingAgent.getInstrumentation() == null);
 	}
-	
+
 	@Override
 	public void setDirty() {
 		super.setDirty();		
@@ -163,16 +163,17 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 			super.runBare();
 			return;
 		}
-		
+
 		String combinationOfContextLocationsForThisTestClass = cacheKeys(); 			
 		ClassLoader classLoaderForThisTestClass = getClass().getClassLoader();
 		// save the TCCL
 		ClassLoader initialClassLoader = Thread.currentThread().getContextClassLoader();
-		
+
 		if (this.shadowParent != null) {
 			Thread.currentThread().setContextClassLoader(classLoaderForThisTestClass);
 			super.runBare();
 		}
+
 		else {
 			ShadowingClassLoader shadowingClassLoader = (ShadowingClassLoader) classLoaderCache.get(combinationOfContextLocationsForThisTestClass);
 
@@ -206,7 +207,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 					// Load the bean definitions into the BeanFactory.
 					Method loadBeanDefinitions = beanDefinitionReaderClass.getMethod("loadBeanDefinitions", String[].class);
-					loadBeanDefinitions.invoke(reader, new Object[]{configLocations});
+					loadBeanDefinitions.invoke(reader, new Object[] {configLocations});
 
 					// Create LoadTimeWeaver-injecting BeanPostProcessor.
 					Class loadTimeWeaverInjectingBeanPostProcessorClass = shadowingClassLoader.loadClass(LoadTimeWeaverInjectingBeanPostProcessor.class.getName());
