@@ -1991,40 +1991,57 @@
 		<mkdir dir="${target.release.dir}"/>
 
 		<delete file="${target.release.dir}/${release.zip}"/>
+		<delete file="${target.release.dir}/${release-with-docs.zip}"/>
 		<delete file="${target.release.dir}/${release-with-dependencies.zip}"/>
 
 		<fileset id="main" dir=".">
-			<include name="dist/*.*"/>
+			<include name="dist/spring.jar"/>
 			<include name="dist/modules/*.*"/>
 			<include name="dist/resources/*.*"/>
 			<include name="dist/weaving/*.*"/>
-			<include name="docs/reference/pdf/*.pdf"/>
 			<include name="*.txt"/>
+		</fileset>
+
+		<fileset id="docs" dir=".">
+			<include name="dist/spring-sources.jar"/>
+			<include name="dist/module-sources/*.*"/>
+			<include name="dist/weaving-sources/*.*"/>
+			<include name="docs/api/**"/>
+			<include name="docs/taglib/**"/>
+			<include name="docs/MVC-step-by-step/**"/>
+			<include name="docs/reference/html_single/**"/>
+			<include name="docs/reference/images/admons/*.png"/>
+			<include name="docs/reference/images/admons/*.gif"/>
+			<include name="docs/reference/images/admons/*.tif"/>
+			<include name="docs/reference/pdf/*.pdf"/>
+			<include name="docs/reference/styles/html.css"/>
+			<include name="docs/reference/readme.txt"/>
+			<include name="samples/countries/**"/>
+			<include name="samples/imagedb/**"/>
+			<include name="samples/jpetstore/**"/>
+			<include name="samples/petclinic/**"/>
+			<include name="samples/showcases/**"/>
+			<include name="samples/petportal/**"/>
 		</fileset>
 
 		<zip zipfile="${target.release.dir}/${release.zip}">
 			<zipfileset refid="main" prefix="${release.path}"/>
 		</zip>
 
+		<zip zipfile="${target.release.dir}/${release-with-docs.zip}">
+			<zipfileset refid="main" prefix="${release.path}"/>
+			<zipfileset refid="docs" prefix="${release.path}"/>
+		</zip>
+
 		<zip zipfile="${target.release.dir}/${release-with-dependencies.zip}">
 			<zipfileset refid="main" prefix="${release.path}"/>
+			<zipfileset refid="docs" prefix="${release.path}"/>
 			<zipfileset dir="." prefix="${release.path}">
 				<include name="*.bat"/>
 				<include name="*.xml"/>
 				<include name="*.properties"/>
 				<exclude name="junit*.properties"/>
 				<include name="dist/maven/*.*"/>
-				<include name="dist/module-sources/*.*"/>
-				<include name="dist/weaving-sources/*.*"/>
-				<include name="docs/reference/html_single/**"/>
-				<include name="docs/reference/images/admons/*.png"/>
-				<include name="docs/reference/images/admons/*.gif"/>
-				<include name="docs/reference/images/admons/*.tif"/>
-				<include name="docs/reference/styles/html.css"/>
-				<include name="docs/reference/readme.txt"/>
-				<include name="docs/MVC-step-by-step/**"/>
-				<include name="docs/taglib/**"/>
-				<include name="docs/api/**"/>
 				<include name="src/**"/>
 				<include name="mock/**"/>
 				<include name="test/**"/>
@@ -2083,12 +2100,6 @@
 				<include name="lib/toplink/**"/>
 				<include name="lib/velocity/**"/>
 				<include name="lib/websphere/**"/>
-				<include name="samples/countries/**"/>
-				<include name="samples/imagedb/**"/>
-				<include name="samples/jpetstore/**"/>
-				<include name="samples/petclinic/**"/>
-				<include name="samples/showcases/**"/>
-				<include name="samples/petportal/**"/>
 			</zipfileset>
 		</zip>
 

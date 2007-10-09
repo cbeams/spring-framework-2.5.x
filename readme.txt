@@ -59,12 +59,15 @@ JCA 1.0/1.5, Hibernate 3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, iBAT
 Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5/1.6, EHCache 1.2, JSTL 1.0/1.1, Velocity 1.5,
 FreeMarker 2.3, JasperReports 1.3, Commons FileUpload 1.2, JSF 1.1/1.2, Struts 1.2/1.3, Tiles 2.0, etc.
 
-Basic release contents (~10 MB):
-* "dist" contains the Spring distribution jar files, as well as a zip of all Java source files
-* "docs" contains the Spring reference documentation as a PDF file
+Basic release contents (~5 MB):
+* "dist" contains the Spring binary jar files
 
-Contents of the "-with-dependencies" distribution (~70 MB):
-* "dist" contains the Spring distribution jar files, as well as a zip of all Java source files
+Basic release contents (~32 MB):
+* "dist" contains the Spring binary jar files, as well as corresponding source jars
+* "docs" contains the Spring reference documentation in PDF and HTML format, as well as the complete API javadocs
+
+Contents of the "-with-dependencies" distribution (~71 MB):
+* "dist" contains the Spring binary jar files, as well as corresponding source jars
 * "docs" contains the Spring reference documentation in PDF and HTML format, as well as the complete API javadocs
 * "lib" contains all third-party libraries needed for building the framework and/or running the samples
 * "src" contains the general Java source files for the framework
@@ -77,7 +80,7 @@ Contents of the "-with-dependencies" distribution (~70 MB):
 * "aspectj/test" contains the AspectJ-specific source files for Spring's test suite
 * "samples" contains various demo applications and showcases
 
-The "lib" directory is just included in the "-with-dependencies" download. Make sure to download this full
+The "lib" directory is only included in the "-with-dependencies" download. Make sure to download this full
 distribution ZIP file if you want to run the sample applications and/or build the framework yourself.
 Ant build scripts for the framework and the samples are provided. The standard samples can be built with
 the included Ant runtime by invoking the corresponding "build.bat" files (see samples subdirectories).
