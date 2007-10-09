@@ -71,14 +71,14 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 	 * Uses support provided in the {@link PropertyAccessor} interface.
 	 * @return an array containing all the known property names
 	 */
-	public String[] getWritablePropertyNames() {
+	public String[] getReadablePropertyNames() {
 
 		synchronized(this) {
 			if (propertyNames == null) {
 				List names = new ArrayList();
 				PropertyDescriptor[] props = beanWrapper.getPropertyDescriptors();
 				for  (int i = 0; i < props.length; i++) {
-					if (beanWrapper.isWritableProperty(props[i].getName())) {
+					if (beanWrapper.isReadableProperty(props[i].getName())) {
 						names.add(props[i].getName());
 					}
 				}

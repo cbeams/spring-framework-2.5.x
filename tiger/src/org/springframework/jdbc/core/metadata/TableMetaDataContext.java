@@ -185,7 +185,7 @@ public class TableMetaDataContext {
 		// TODO make this instance level cached?
 		Map<String, String> caseInsensitiveParameterNames = new HashMap<String, String>();
 		if (parameterSource instanceof BeanPropertySqlParameterSource) {
-			String[] propertyNames = ((BeanPropertySqlParameterSource)parameterSource).getWritablePropertyNames();
+			String[] propertyNames = ((BeanPropertySqlParameterSource)parameterSource).getReadablePropertyNames();
 			for (String name : propertyNames) {
 				caseInsensitiveParameterNames.put(name.toLowerCase(), name);
 			}
