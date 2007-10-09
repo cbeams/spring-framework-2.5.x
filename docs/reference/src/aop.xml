@@ -2583,7 +2583,7 @@ public class Account {
 		transaction management support but don't want to (or cannot) use annotations,
 		<filename class="libraryfile">spring-aspects.jar</filename> also contains
 		<literal>abstract</literal> aspects you can extend to provide your own
-		pointcut definitions. See the Javadocs for the
+		pointcut definitions. See the sources for the
 		<classname>AbstractBeanConfigurerAspect</classname> and 
 		<classname>AbstractTransactionAspect</classname> aspects for more information.
 		As an example, the following excerpt shows how you could write an aspect to
