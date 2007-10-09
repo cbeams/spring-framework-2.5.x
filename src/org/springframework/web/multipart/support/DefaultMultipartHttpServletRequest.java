@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,8 +26,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Default implementation of the MultipartHttpServletRequest interface.
- * Provides management of pre-generated parameter values.
+ * Default implementation of the
+ * {@link org.springframework.web.multipart.MultipartHttpServletRequest}
+ * interface. Provides management of pre-generated parameter values.
  *
  * @author Trevor D. Cook
  * @author Juergen Hoeller
@@ -36,7 +37,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
 
-	private final Map multipartParameters;
+	private Map multipartParameters;
 
 
 	/**
@@ -51,7 +52,15 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 
 		super(request);
 		setMultipartFiles(multipartFiles);
-		this.multipartParameters = multipartParameters;
+		setMultipartParameters(multipartParameters);
+	}
+
+	/**
+	 * Wrap the given HttpServletRequest in a MultipartHttpServletRequest.
+	 * @param request the servlet request to wrap
+	 */
+	public DefaultMultipartHttpServletRequest(HttpServletRequest request) {
+		super(request);
 	}
 
 
@@ -61,12 +70,12 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 		while (paramEnum.hasMoreElements()) {
 			paramNames.add(paramEnum.nextElement());
 		}
-		paramNames.addAll(this.multipartParameters.keySet());
+		paramNames.addAll(getMultipartParameters().keySet());
 		return Collections.enumeration(paramNames);
 	}
 
 	public String getParameter(String name) {
-		String[] values = (String[]) this.multipartParameters.get(name);
+		String[] values = (String[]) getMultipartParameters().get(name);
 		if (values != null) {
 			return (values.length > 0 ? values[0] : null);
 		}
@@ -74,7 +83,7 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	}
 
 	public String[] getParameterValues(String name) {
-		String[] values = (String[]) this.multipartParameters.get(name);
+		String[] values = (String[]) getMultipartParameters().get(name);
 		if (values != null) {
 			return values;
 		}
@@ -84,8 +93,29 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	public Map getParameterMap() {
 		Map paramMap = new HashMap();
 		paramMap.putAll(super.getParameterMap());
-		paramMap.putAll(this.multipartParameters);
+		paramMap.putAll(getMultipartParameters());
 		return paramMap;
+	}
+
+
+	/**
+	 * Set a Map with parameter names as keys and String array objects as values.
+	 * To be invoked by subclasses on initialization.
+	 */
+	protected final void setMultipartParameters(Map multipartParameters) {
+		this.multipartParameters = multipartParameters;
+	}
+
+	/**
+	 * Obtain the multipart parameter Map for retrieval,
+	 * lazily initializing it if necessary.
+	 * @see #initializeMultipart()
+	 */
+	protected Map getMultipartParameters() {
+		if (this.multipartParameters == null) {
+			initializeMultipart();
+		}
+		return this.multipartParameters;
 	}
 
 }

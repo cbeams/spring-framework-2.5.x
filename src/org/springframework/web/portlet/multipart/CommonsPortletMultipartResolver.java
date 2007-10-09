@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ import org.springframework.web.portlet.context.PortletContextAware;
 import org.springframework.web.portlet.util.PortletUtils;
 
 /**
- * PortletMultipartResolver implementation for
+ * {@link PortletMultipartResolver} implementation for
  * <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
  * 1.1 or higher.
  *
@@ -51,13 +51,16 @@ import org.springframework.web.portlet.util.PortletUtils;
  * @author Juergen Hoeller
  * @since 2.0
  * @see #CommonsPortletMultipartResolver(javax.portlet.PortletContext)
- * @see org.springframework.web.multipart.commons.CommonsMultipartFile
+ * @see #setResolveLazily
  * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
  * @see org.apache.commons.fileupload.portlet.PortletFileUpload
  * @see org.apache.commons.fileupload.disk.DiskFileItemFactory
  */
 public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		implements PortletMultipartResolver, PortletContextAware {
+
+	private boolean resolveLazily = false;
+
 
 	/**
 	 * Constructor for use as bean. Determines the portlet container's
@@ -80,6 +83,19 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		setPortletContext(portletContext);
 	}
 
+
+	/**
+	 * Set whether to resolve the multipart request lazily at the time of
+	 * file or parameter access.
+	 * <p>Default is "false", resolving the multipart elements immediately, throwing
+	 * corresponding exceptions at the time of the {@link #resolveMultipart} call.
+	 * Switch this to "true" for lazy multipart parsing, throwing parse exceptions
+	 * once the application attempts to obtain multipart files or parameters.
+	 */
+	public void setResolveLazily(boolean resolveLazily) {
+		this.resolveLazily = resolveLazily;
+	}
+
 	/**
 	 * Initialize the underlying <code>org.apache.commons.fileupload.portlet.PortletFileUpload</code>
 	 * instance. Can be overridden to use a custom subclass, e.g. for testing purposes.
@@ -100,14 +116,35 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		return PortletFileUpload.isMultipartContent(new PortletRequestContext(request));
 	}
 
-	public MultipartActionRequest resolveMultipart(ActionRequest request) throws MultipartException {
+	public MultipartActionRequest resolveMultipart(final ActionRequest request) throws MultipartException {
+		if (this.resolveLazily) {
+			return new DefaultMultipartActionRequest(request) {
+				protected void initializeMultipart() {
+					MultipartParsingResult parsingResult = parseRequest(request);
+					setMultipartFiles(parsingResult.getMultipartFiles());
+					setMultipartParameters(parsingResult.getMultipartParameters());
+				}
+			};
+		}
+		else {
+			MultipartParsingResult parsingResult = parseRequest(request);
+			return new DefaultMultipartActionRequest(
+					request, parsingResult.getMultipartFiles(), parsingResult.getMultipartParameters());
+		}
+	}
+
+	/**
+	 * Parse the given portlet request, resolving its multipart elements.
+	 * @param request the request to parse
+	 * @return the parsing result
+	 * @throws MultipartException if multipart resolution failed.
+	 */
+	protected MultipartParsingResult parseRequest(ActionRequest request) throws MultipartException {
 		String encoding = determineEncoding(request);
 		FileUpload fileUpload = prepareFileUpload(encoding);
 		try {
 			List fileItems = ((PortletFileUpload) fileUpload).parseRequest(request);
-			MultipartParsingResult parsingResult = parseFileItems(fileItems, encoding);
-			return new DefaultMultipartActionRequest(
-					request, parsingResult.getMultipartFiles(), parsingResult.getMultipartParameters());
+			return parseFileItems(fileItems, encoding);
 		}
 		catch (FileUploadBase.SizeLimitExceededException ex) {
 			throw new MaxUploadSizeExceededException(fileUpload.getSizeMax(), ex);

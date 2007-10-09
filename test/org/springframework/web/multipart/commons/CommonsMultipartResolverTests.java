@@ -53,7 +53,6 @@ import org.springframework.mock.web.PassThroughFilterChain;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
@@ -67,7 +66,15 @@ import org.springframework.web.util.WebUtils;
  */
 public class CommonsMultipartResolverTests extends TestCase {
 
-	public void testWithApplicationContext() throws MultipartException, IOException {
+	public void testWithApplicationContext() throws Exception {
+		doTestWithApplicationContext(false);
+	}
+
+	public void testWithApplicationContextAndLazyResolution() throws Exception {
+		doTestWithApplicationContext(true);
+	}
+
+	private void doTestWithApplicationContext(boolean lazy) throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
@@ -76,6 +83,9 @@ public class CommonsMultipartResolverTests extends TestCase {
 		resolver.setMaxUploadSize(1000);
 		resolver.setMaxInMemorySize(100);
 		resolver.setDefaultEncoding("enc");
+		if (lazy) {
+			resolver.setResolveLazily(false);
+		}
 		resolver.setServletContext(wac.getServletContext());
 		assertEquals(1000, resolver.getFileUpload().getSizeMax());
 		assertEquals(100, resolver.getFileItemFactory().getSizeThreshold());
@@ -213,7 +223,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		assertTrue(mtb2.getField1().length() == 0);
 	}
 
-	public void testWithServletContextAndFilter() throws ServletException, IOException {
+	public void testWithServletContextAndFilter() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 		wac.registerSingleton("filterMultipartResolver", MockCommonsMultipartResolver.class, new MutablePropertyValues());
@@ -251,7 +261,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		assertTrue(((MockFileItem) file2.getFileItem()).deleted);
 	}
 
-	public void testWithServletContextAndFilterWithCustomBeanName() throws ServletException, IOException {
+	public void testWithServletContextAndFilterWithCustomBeanName() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,8 +37,8 @@ import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequ
 import org.springframework.web.util.WebUtils;
 
 /**
- * Servlet-based MultipartResolver implementation for
- * <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
+ * Servlet-based {@link org.springframework.web.multipart.MultipartResolver} implementation
+ * for <a href="http://jakarta.apache.org/commons/fileupload">Jakarta Commons FileUpload</a>
  * 1.1 or higher.
  *
  * <p>Provides maxUploadSize, maxInMemorySize, and defaultEncoding settings as
@@ -50,22 +50,20 @@ import org.springframework.web.util.WebUtils;
  * Needs to be initialized <i>either</i> by an application context <i>or</i>
  * via the constructor that takes a ServletContext (for standalone usage).
  *
- * <p><b>NOTE:</b> As of Spring 2.0, this multipart resolver requires
- * Commons FileUpload 1.1 or higher. The implementation does not use
- * any deprecated FileUpload 1.0 API anymore, to be compatible with future
- * Commons FileUpload releases.
- *
  * @author Trevor D. Cook
  * @author Juergen Hoeller
  * @since 29.09.2003
  * @see #CommonsMultipartResolver(ServletContext)
- * @see CommonsMultipartFile
- * @see org.springframework.web.portlet.multipart.PortletMultipartResolver
+ * @see #setResolveLazily
+ * @see org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver
  * @see org.apache.commons.fileupload.servlet.ServletFileUpload
  * @see org.apache.commons.fileupload.disk.DiskFileItemFactory
  */
 public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		implements MultipartResolver, ServletContextAware {
+
+	private boolean resolveLazily = false;
+
 
 	/**
 	 * Constructor for use as bean. Determines the servlet container's
@@ -89,6 +87,19 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		setServletContext(servletContext);
 	}
 
+
+	/**
+	 * Set whether to resolve the multipart request lazily at the time of
+	 * file or parameter access.
+	 * <p>Default is "false", resolving the multipart elements immediately, throwing
+	 * corresponding exceptions at the time of the {@link #resolveMultipart} call.
+	 * Switch this to "true" for lazy multipart parsing, throwing parse exceptions
+	 * once the application attempts to obtain multipart files or parameters.
+	 */
+	public void setResolveLazily(boolean resolveLazily) {
+		this.resolveLazily = resolveLazily;
+	}
+
 	/**
 	 * Initialize the underlying <code>org.apache.commons.fileupload.servlet.ServletFileUpload</code>
 	 * instance. Can be overridden to use a custom subclass, e.g. for testing purposes.
@@ -110,14 +121,35 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		return ServletFileUpload.isMultipartContent(new ServletRequestContext(request));
 	}
 
-	public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
+	public MultipartHttpServletRequest resolveMultipart(final HttpServletRequest request) throws MultipartException {
+		if (this.resolveLazily) {
+			return new DefaultMultipartHttpServletRequest(request) {
+				protected void initializeMultipart() {
+					MultipartParsingResult parsingResult = parseRequest(request);
+					setMultipartFiles(parsingResult.getMultipartFiles());
+					setMultipartParameters(parsingResult.getMultipartParameters());
+				}
+			};
+		}
+		else {
+			MultipartParsingResult parsingResult = parseRequest(request);
+			return new DefaultMultipartHttpServletRequest(
+					request, parsingResult.getMultipartFiles(), parsingResult.getMultipartParameters());
+		}
+	}
+
+	/**
+	 * Parse the given servlet request, resolving its multipart elements.
+	 * @param request the request to parse
+	 * @return the parsing result
+	 * @throws MultipartException if multipart resolution failed.
+	 */
+	protected MultipartParsingResult parseRequest(HttpServletRequest request) throws MultipartException {
 		String encoding = determineEncoding(request);
 		FileUpload fileUpload = prepareFileUpload(encoding);
 		try {
 			List fileItems = ((ServletFileUpload) fileUpload).parseRequest(request);
-			MultipartParsingResult parsingResult = parseFileItems(fileItems, encoding);
-			return new DefaultMultipartHttpServletRequest(
-					request, parsingResult.getMultipartFiles(), parsingResult.getMultipartParameters());
+			return parseFileItems(fileItems, encoding);
 		}
 		catch (FileUploadBase.SizeLimitExceededException ex) {
 			throw new MaxUploadSizeExceededException(fileUpload.getSizeMax(), ex);

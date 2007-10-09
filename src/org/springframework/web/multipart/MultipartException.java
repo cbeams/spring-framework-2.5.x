@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,18 @@
 
 package org.springframework.web.multipart;
 
-import org.springframework.core.NestedIOException;
+import org.springframework.core.NestedRuntimeException;
 
 /**
- * Exception thrown on multipart resolution.
- *
- * <p>Extends IOException for convenient throwing in any Servlet/Portlet resource
- * (such as a Filter), and NestedIOException for proper root cause handling.
+ * Exception thrown when multipart resolution fails.
  *
  * @author Trevor D. Cook
  * @author Juergen Hoeller
  * @since 29.09.2003
  * @see MultipartResolver#resolveMultipart
  * @see org.springframework.web.multipart.support.MultipartFilter
- * @see org.springframework.core.NestedIOException
  */
-public class MultipartException extends NestedIOException {
+public class MultipartException extends NestedRuntimeException {
 
 	/**
 	 * Constructor for MultipartException.
