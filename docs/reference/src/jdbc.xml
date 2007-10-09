@@ -561,7 +561,7 @@ public int countOfActors(Actor exampleActor) {
       <note>
         <para><emphasis>The functionality offered by the
         <classname>SimpleJdbcTemplate</classname> is only available to you if
-        you are using Java 5 (Tiger).</emphasis></para>
+        you are using Java 5 or later.</emphasis></para>
       </note>
 
       <para>The <classname>SimpleJdbcTemplate</classname> class is a wrapper
@@ -1040,7 +1040,7 @@ jdbcTemplate.update(
       by a J2EE server.</para>
 
       <note>
-        <para>It should almost never be necessary or desireable to use this
+        <para>It should almost never be necessary or desirable to use this
         class, except when existing code exists which must be called and
         passed a standard JDBC <interfacename>DataSource</interfacename>
         interface implementation. In this case, it's possible to still have
@@ -1092,30 +1092,30 @@ jdbcTemplate.update(
   </section>
 
   <section id="jdbc-advanced-jdbc">
-    <title>Advanced JDBC operations</title>
+    <title>JDBC batch operations</title>
 
-    <para>Some more advanced operations or options have not been covered yet,
-    so this section will address this. The advanced operations include batch
-    processing and providing type information for parameters.</para>
+    <para>Most JDBC drivers provide improved performance if you batch multiple
+    calls to the same prepared statement. By grouping updates into batches you
+    limit the number of round trips to the database. This section will cover
+    batch processing using both the JdbcTemplate and the
+    SimpleJdbcTemplate.</para>
 
     <section id="jdbc-advanced-classic">
       <title>Batch operations with the JdbcTemplate</title>
 
-      <para>Most JDBC drivers provide improved performance if you batch
-      multiple calls to the same prepared statement. By grouping updates into
-      batches you limit the number of roundtrips to the database. Using the
-      JdbcTemplate batch processing is accomplished by implememting a special
-      interface, <classname>BatchPreparedStatementSetter</classname>, and
-      passing that in as the second parameter in your
-      <classname>batchUpdate</classname> method call. This interface has two
-      methods you must implement. One is named
-      <classname>getBatchSize</classname> and here you provide the size of the
-      current batch. The other method is <classname>setValues</classname> and
-      it allows you to set the values for the parameters of the prepared
-      statement and. This method will get called the number of times that you
-      specified in the <classname>getBatchSize</classname> call. Here is an
-      example of this where we update the actor table based on entries in a
-      list. The entire list is used as the batch in his example.</para>
+      <para>Using the JdbcTemplate batch processing is accomplished by
+      implementing a special interface,
+      <classname>BatchPreparedStatementSetter</classname>, and passing that in
+      as the second parameter in your <classname>batchUpdate</classname>
+      method call. This interface has two methods you must implement. One is
+      named <classname>getBatchSize</classname> and here you provide the size
+      of the current batch. The other method is
+      <classname>setValues</classname> and it allows you to set the values for
+      the parameters of the prepared statement and. This method will get
+      called the number of times that you specified in the
+      <classname>getBatchSize</classname> call. Here is an example of this
+      where we update the actor table based on entries in a list. The entire
+      list is used as the batch in his example.</para>
 
       <para><programlisting>public class JdbcActorDao implements ActorDao {
     private JdbcTemplate jdbcTemplate;
@@ -1164,7 +1164,7 @@ jdbcTemplate.update(
       of the batch. You can use the
       <classname>SqlParameterSource.createBatch</classname> method to create
       this array, passing in either an array of JavaBeans or an array of Maps
-      containing the parameter values. </para>
+      containing the parameter values.</para>
 
       <para>This example shows a batch update using named parameters:</para>
 
@@ -1220,47 +1220,6 @@ jdbcTemplate.update(
       the JDBC driver and it's not always available in which case the JDBC
       driver simply returns a -2 value.</para>
     </section>
-
-    <section id="jdbc-type-information">
-      <title>Providing SQL type information for parameters</title>
-
-      <para>Sometimes it's necessary to provide the SQL type to be used when
-      setting parameter values. This is sometimes necessary to correctly set
-      NULL values. There are a few different ways this can be accomplished:
-      </para>
-
-      <itemizedlist>
-        <listitem>
-          <para>Many of the update and query methods of the
-          <classname>JdbcTemplate</classname> take an additional parameter in
-          the forn of an int array. This array should contain the SQL type
-          using constabnt values from the
-          <classname>java.sql.Types</classname> class. There must be one entry
-          for each parameter.</para>
-        </listitem>
-      </itemizedlist>
-
-      <itemizedlist>
-        <listitem>
-          <para>You can wrap the parameter value that needs this additional
-          information using the <classname>SqlParameterValue</classname>
-          class. Create a new instance for each value and pass in the SQL type
-          and parameter value in the constructor. You can also provide an
-          optional scale parameter for numeric values.</para>
-        </listitem>
-      </itemizedlist>
-
-      <itemizedlist>
-        <listitem>
-          <para>For methods working with named parameters, you can use the
-          <classname>SqlParameterSource</classname> classes
-          <classname>BeanPropertySqlParameterSource</classname> or
-          <classname>MapSqlParameterSource</classname>. They both have methods
-          for registering the SQL type for any of the named parameter values.
-          </para>
-        </listitem>
-      </itemizedlist>
-    </section>
   </section>
 
   <section id="jdbc-simple-jdbc">
@@ -1269,9 +1228,9 @@ jdbcTemplate.update(
     <para>The <classname>SimpleJdbcInsert</classname> and
     <classname>SimpleJdbcCall</classname> classes provide simplified
     configuration by taking advantage of database metadata that can be
-    retreived via the JDBC driver. This means there is less to configure up
-    front, altough you can override or turn off the metedata processing if you
-    prefer to provide all the details in your code.</para>
+    retrieved via the JDBC driver. This means there is less to configure up
+    front, although you can override or turn off the metedata processing if
+    you prefer to provide all the details in your code.</para>
 
     <section id="jdbc-simple-jdbc-insert-1">
       <title>Inserting data using SimpleJdbcInsert</title>
@@ -1287,7 +1246,7 @@ jdbcTemplate.update(
       <classname>withTableName</classname> method. Configuration methods for
       this class follows the "fluid" style returning the instance of the
       <classname>SimpleJdbcInsert</classname> which allows you to chain all
-      configuration methods. In this case ther is only one configuration
+      configuration methods. In this case there is only one configuration
       method used but we will see examples of multiple ones soon.</para>
 
       <programlisting>public class JdbcActorDao implements ActorDao {
@@ -1320,7 +1279,7 @@ jdbcTemplate.update(
     </section>
 
     <section id="jdbc-simple-jdbc-insert-2">
-      <title>Retreiving auto-generated keys using SimpleJdbcInsert</title>
+      <title>Retrieving auto-generated keys using SimpleJdbcInsert</title>
 
       <para>Next we'll look at the same insert, but instead of passing in the
       id we will retrieve the auto-generated key and set it on the new Actor
@@ -1464,13 +1423,13 @@ jdbcTemplate.update(
       <para>Let's now turn our attention to calling stored procedures using
       the <classname>SimpleJdbcCall</classname> class. This class is designed
       to make it as simple as possible to call a stored procedure. It takes
-      advantage of metedata present in the database to look up names of in and
+      advantage of metadata present in the database to look up names of in and
       out parameters. This means that you don't have to explicitly declare
-      parameters. You can of course still declare them if tyou prefer to do
+      parameters. You can of course still declare them if you prefer to do
       that or if you have parameters that don't have an automatic mapping to a
       Java class like ARRAY or STRUCT parameters. In our first example we will
       look at a plain vanilla procedure that only returns scalar values in
-      form ov VARCHAR and DATE. I have added a birthDate property to the Actor
+      form of VARCHAR and DATE. I have added a birthDate property to the Actor
       class to get some variety in terms of return values. The example
       procedure reads a specified actor entry and returns first_name,
       last_name, and birth_date columns in the form of out parameters. Here is
@@ -1520,14 +1479,14 @@ END;</programlisting>As you can see there are four parameters. One is an in
     }
 
     //  ... additional methods
-}</programlisting>The execution of the call involves createing an
+}</programlisting>The execution of the call involves creating an
       <classname>SqlParameterSource</classname> containing the in parameter.
       It's important to match the name of the parameter declared in the stored
       procedure. The case doesn't have to match since we use metadata to
       determine how database objects should be referred to - what you specify
-      in your source for the stored procedure is not necessarilly the way it
-      is stored in the database, some databases transform names to all upper
-      case while others use lower case or the case as specified.</para>
+      in your source for the stored procedure is not necessarily the way it is
+      stored in the database, some databases transform names to all upper case
+      while others use lower case or the case as specified.</para>
 
       <para>The <classname>execute</classname> method takes the in parameters
       and returns a Map containing any out parameters keyed by the name as
@@ -1536,7 +1495,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       <classname>out_birth_date</classname>.</para>
 
       <para>The last part of the <classname>execute</classname> method just
-      creates an Actor instance to use to return the data retreived. Again,
+      creates an Actor instance to use to return the data retrieved. Again,
       it's important to match the names of the out parameters here. Also, the
       case used for the names of the out parameters stored in the results map
       are as they were defined in the database. You will either have to do a
@@ -1571,7 +1530,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
     <section id="jdbc-simple-jdbc-call-2">
       <title>Declaring parameters to use for a SimpleJdbcCall</title>
 
-      <para>We have seen how the parameters are decuced based on metadata, but
+      <para>We have seen how the parameters are deduced based on metadata, but
       you can declare then explicitly if you wish. This is done when the
       <classname>SimpleJdbcCall</classname> is created and configured using
       the <classname>declareParameters</classname> method that takes a
@@ -1627,10 +1586,10 @@ END;</programlisting>As you can see there are four parameters. One is an in
 
       <para>To define a parameter to be used for the SimpleJdbc classes, and
       also for the RDBMS operations classes covered in the following section,
-      you use an <classname>SqlParameter</classname> or one of its sublasses.
+      you use an <classname>SqlParameter</classname> or one of its subclasses.
       You typically specify the parameter name and SQL type in the
       constructor. The SQL type is specified using the
-      <classname>java.sql.Types</classname> constants. We have allrady seen
+      <classname>java.sql.Types</classname> constants. We have already seen
       declarations like:</para>
 
       <para><programlisting>   new SqlParameter("in_id", Types.NUMERIC),
@@ -1639,7 +1598,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       <para>The first line with the <classname>SqlParameter</classname>
       declares an in parameter. In parameters can be used for both stored
       procedure calls and for queries using the
-      <classname>SqlQuery</classname> and its sublasses covered in the
+      <classname>SqlQuery</classname> and its subclasses covered in the
       following section.</para>
 
       <para>The second line with the <classname>SqlOutParameter</classname>
@@ -1652,7 +1611,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       additional options. For in parameters you can specify a scale for
       numeric data or a type name for custom database types. For out
       parameters you can provide a <classname>RowMapper</classname> to handle
-      mapping of rows returned from a ref cursor. Another option is to specify
+      mapping of rows returned from a REF cursor. Another option is to specify
       an <classname>SqlReturnType</classname> that provides and opportunity to
       define customized handling of the return values.</para>
     </section>
@@ -1668,7 +1627,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       call string for a function call will be generated. There is also a
       specialized execute call <classname>executeFunction</classname> that
       will return the function return value as an object of a specified type.
-      This way you don't have to retreive the return value from the results
+      This way you don't have to retrieve the return value from the results
       map. A similar convenience method named
       <classname>executeObject</classname> is also available for stored
       procedures that only have one out parameter. The following example is
@@ -1687,7 +1646,8 @@ BEGIN
 END;</programlisting></para>
 
       <para>To call this function we again create a
-      <classname>SimpleJdbcCall</classname> in the inialization method.</para>
+      <classname>SimpleJdbcCall</classname> in the initialization
+      method.</para>
 
       <para><programlisting>public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
@@ -1716,12 +1676,12 @@ END;</programlisting></para>
     </section>
 
     <section>
-      <title>Returning ResultSet/Ref-Cursor from a SimpleJdbcCall</title>
+      <title>Returning ResultSet/REF Cursor from a SimpleJdbcCall</title>
 
       <para>Calling a stored procedure or function that returns a result set
       has always been a bit tricky. Some databases return result sets during
       the JDBC results processing while others require an explicitly
-      registered out parameter of a specific type. Both approches still needs
+      registered out parameter of a specific type. Both approaches still needs
       some additional processing to loop over the result set and process the
       returned rows. With the <classname>SimpleJdbcCall</classname> you use
       the <classname>returningResultSet</classname> metod and declare a
@@ -1769,7 +1729,7 @@ END;</programlisting>In order to call this procedure we need to declare the
 
     //  ... additional methods
 }</programlisting>The execute call passes in an empty Map since this call
-      doesn't take any parameters. The list of Actors is then retreived from
+      doesn't take any parameters. The list of Actors is then retrieved from
       the reults map and returned to the caller.</para>
     </section>
   </section>
@@ -2013,7 +1973,7 @@ public class TestStoredProcedure {
 }</programlisting>
 
       <para>Find below an example of a <classname>StoredProcedure</classname>
-      that has two output parameters (in this case Oracle cursors).</para>
+      that has two output parameters (in this case Oracle REF cursors).</para>
 
       <programlisting>import oracle.jdbc.driver.OracleTypes;
 import org.springframework.jdbc.core.SqlOutParameter;
@@ -2157,6 +2117,122 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
     sf.compile();
     return sf.run();
 }</programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Common issues with parameter and data value handling</title>
+
+    <para>There are some issues involving parameters and data values that are
+    common across all the different approaches provided by the Spring JDBC
+    Framework.</para>
+
+    <section id="jdbc-type-information">
+      <title>Providing SQL type information for parameters</title>
+
+      <para>Most of the time Spring will assume the SQL type of the parameters
+      based on the type of parameter passed in. It is possible to explicitly
+      provide the SQL type to be used when setting parameter values. This is
+      sometimes necessary to correctly set NULL values.</para>
+
+      <para>There are a few different ways this can be accomplished:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Many of the update and query methods of the
+          <classname>JdbcTemplate</classname> take an additional parameter in
+          the forn of an int array. This array should contain the SQL type
+          using constant values from the <classname>java.sql.Types</classname>
+          class. There must be one entry for each parameter.</para>
+        </listitem>
+      </itemizedlist>
+
+      <itemizedlist>
+        <listitem>
+          <para>You can wrap the parameter value that needs this additional
+          information using the <classname>SqlParameterValue</classname>
+          class. Create a new instance for each value and pass in the SQL type
+          and parameter value in the constructor. You can also provide an
+          optional scale parameter for numeric values.</para>
+        </listitem>
+      </itemizedlist>
+
+      <itemizedlist>
+        <listitem>
+          <para>For methods working with named parameters, you can use the
+          <classname>SqlParameterSource</classname> classes
+          <classname>BeanPropertySqlParameterSource</classname> or
+          <classname>MapSqlParameterSource</classname>. They both have methods
+          for registering the SQL type for any of the named parameter
+          values.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Handling BLOB and CLOB objects</title>
+
+      <para>You can store images and other binary objects as well and large
+      chunks of text. These large object are called BLOB for binary data nad
+      CLOB for character data. Spring lets you handle these large objects
+      using the JdbcTemplate directly and also when using the higher
+      abtractions provided by RDBMS Objects and the SimpleJdbc classes. All of
+      these approaches use an implementation of the LobHandler interface for
+      the actual management of the LOB data. </para>
+
+      <para>The LobHandler provides the following support for LOB in- and
+      output:</para>
+
+      <para><itemizedlist>
+          <listitem>
+            <para>BLOB</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>byte[] – getBlobAsBytes and setBlobAsBytes</para>
+              </listitem>
+
+              <listitem>
+                <para>InputStream – getBlobAsBinaryStream and
+                setBlobAsBinaryStream</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </itemizedlist><itemizedlist>
+          <listitem>
+            <para>CLOB</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>String – getClobAsString and setClobAsString</para>
+              </listitem>
+
+              <listitem>
+                <para>InputStream – getClobAsAsciiStream and
+                setClobAsAsciiStream</para>
+              </listitem>
+
+              <listitem>
+                <para>Reader – getClobAsCharacterStream and
+                setClobAsCharacterStream</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </itemizedlist></para>
+
+      <para>TODO</para>
+
+      <para></para>
+    </section>
+
+    <section>
+      <title>Handling STRUCT and ARRAY types</title>
+
+      <para></para>
+
+      <para>TODO</para>
+
+      <para></para>
     </section>
   </section>
 </chapter>
