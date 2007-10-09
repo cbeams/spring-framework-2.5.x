@@ -7,6 +7,11 @@ Changes in version 2.5 RC1 (2007-10-17)
 ---------------------------------------
 
 General
+* introduced spring-framework-with-docs.zip distribution; reduced spring-framework.zip to the minimal binaries
+* spring.jar does not include Servlet Web MVC support anymore; add spring-webmvc.jar separately
+* spring.jar and spring-core.jar include repackaged version of ASM 2.2.3 (avoiding side effects with other ASM versions)
+* spring-orm.jar contains the web ORM support (again), in order to avoid split packages across bundles
+* spring-web.jar includes the entire Hessian, Burlap, HTTP invoker and JAX-RPC support (avoiding split packages)
 * updated Spring's JDO support to require JDO 2.0 or higher, with early support for JDO 2.1 features
 * revised default handling in BeanDefinitionParsers for XML config namespaces to work without XSD validation as well
 
@@ -22,12 +27,15 @@ Package org.springframework.beans
 * URIEditor converts spaces in location values into "%20" quotes (as required by the URI format)
 * exposed "autowireCandidate" property in BeanDefinition interface (avoiding casts to AbstractBeanDefinition)
 * deprecated ConfigurableBeanFactory's "registerCustomEditor" in favor of "addPropertyEditorRegistrar"
+* AbstractBeanFactory ignores PropertyEditorRegistrars which tried to obtain a currently created bean
+* revised AbstractBeanFactory to detect FactoryBeans which are in turn created through factory methods
 * DefaultListableBeanFactory removes a singleton bean instance if a new bean definition gets registered
 * DefaultListableBeanFactory fully destroys singleton bean instance when the corresponding bean definition gets replaced
 * XmlBeanDefinitionReader initializes default EntityResolver lazily, avoiding classpath scan in case of custom resolver
 * DefaultNamespaceHandlerResolver exposes public DEFAULT_HANDLER_MAPPINGS_LOCATION constant
 * fixed BeanDefinitionParserDelegate to correctly parse property sub-elements even with custom name for beans namespace
 * AbstractSingleBeanDefinitionParser applies full scope to inner beans, making them eligible for destruction callbacks
+* added "getParentName" template method to AbstractSingleBeanDefinitionParser, allowing for child bean definitions
 * @Autowired qualifier annotations may be defined with target 'type' as well, marking the target bean class
 * Autowired/Common/PersistenceAnnotationBeanPostProcessor implement PriorityOrdered and expose an "order" bean property
 * "depends-on" kicks in before the affected bean is entering its creation phase; can be used to resolve circular refs
@@ -53,6 +61,8 @@ Package org.springframework.core
 * added "getURI()" method to Resource interface
 * added constructor with URI argument to UrlResource class
 * FileSystemResource's "getURL()" builds URLs that can be converted to an URI
+* reworked "core.asm.ClassReaderFactory" into "core.classreading.MetadataReaderFactory" (with internal ASM usage only)
+* AspectJTypeFilter uses a given ClassLoader instead of the default ClassLoader
 
 Package org.springframework.jdbc
 * SimpleJdbcTemplate's varargs handling always considers a single array argument as collection of arguments
@@ -70,6 +80,7 @@ Package org.springframework.jmx
 * fixed IdentityNamingStrategy to obtain the package name through class name inspection rather than "Class.getPackage()"
 * MBeanClientInterceptor automatically converts MXBean CompositeData/TabularData structures according to Java 5/6 rules
 * MBeanClientInterceptor uses the standard JDK MBeanServerInvocationHandler if possible (for full MXBean support)
+* MBeanClientInterceptor propagates exceptions thrown by the target MBean directly (i.e. not wrapped in a JmxException)
 
 Package org.springframework.mail
 * added "getJavaMailProperties()" method to JavaMailSenderImpl, allowing for convenient configuration of specific keys
@@ -85,13 +96,20 @@ Package org.springframework.orm
 * added "persistenceManagerFactoryName" property to LocalPersistenceManagerFactoryBean, supporting JDO 2.1 PMF lookup
 * added "jdoPropertyMap" property to LocalPersistenceManagerFactoryBean, allowing for non-String JDO property values
 * JPA support exposes the application ClassLoader as PersistenceUnitInfo ClassLoader even without a LoadTimeWeaver
+* JPA support uses InstrumentationLoadTimeWeaver as default weaver if InstrumentationSavingAgent is active
 * revised CommonsLoggingSessionLog to work with TopLink 11 as well (remaining compatible with TopLink 10.1.3)
 
 Package org.springframework.remoting
 * fixed Hessian/BurlapClientInterceptor's "convertHessian/BurlapAccessException" method to return the exception properly
 * JndiRmiClientInterceptor's "prepare()" doesn't declare NamingException anymore (just RemoteLookupFailureException)
 * JaxRpcPortClientInterceptor's "prepare()" doesn't declare ServiceException anymore (just RemoteLookupFailureException)
+* JaxRpcPortClientInterceptor extracts the original exception as far as provided by JAX-RPC in case of a SOAP fault
 * introduced JAX-WS 2.0/2.1 support in package "org.springframework.remoting.jaxws"
+* introduced RemoteInvocationFailureException, thrown by RMI/HTTP/JMS invoker proxies in case of server-side failure
+* introduced SoapFaultException, thrown by JAX-RPC/JAX-WS proxies in case of a SOAP fault being reported
+
+Package org.springframework.stereotype
+* added Service and Controller stereotypes to the existing Component and Repository annotations
 
 Package org.springframework.test
 * introduced TestNG support based on the new test context framework
@@ -101,6 +119,7 @@ Package org.springframework.transaction
 * revised AbstractFallbackTransactionAttributeSource's template methods for specific attribute/annotation retrieval
 * AnnotationTransactionAttributeSource supports a customizable TransactionAnnotationParser strategy
 * AnnotationTransactionAttributeSource supports EJB3's TransactionAttribute annotation (if present) as well
+* TransactionAspectSupport ignores transaction attributes when not configured with a transaction manager
 
 Package org.springframework.ui
 * "ModelMap.addObject(Object)" follows JavaBeans property naming rules in case of multiple upper case letters
@@ -109,10 +128,14 @@ Package org.springframework.util
 * "ClassUtils.getShortNameAsProperty" strips the outer class name in case of an inner class
 
 Package org.springframework.web
+* added "resolveLazily" flag to Commons(Portlet)MultipartResolver, allowing to switch to lazy multipart resolution
+* reworked MultipartException into a RuntimeException (it may be thrown from file/parameter access methods as well now)
+* changed UrlPathHelper's and AbstractUrlHandlerMapping's/AbstractUrlMethodNameResolver's "urlDecode" default to "true"
 * added "getActualValue()" method to BindStatus, exposing the raw property value for comparison purposes
 * added "exposeModelAttributes" property to RedirectView, allowing to suppress model exposure completely
 * factored out a "loadReport()" method in AbstractJasperReportsView (called by "initApplicationContext()")
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
+* TagWriter in JSP AbstractFormTag reobtains the Writer from the PageContext all the time (for FreeMarker compatibility)
 * JSP CheckboxTag caches converted candidate value when comparing it with collection elements
 * JSP SelectTag, OptionTag and OptionsTag properly detect a selected value even for Maps with converted keys
 
