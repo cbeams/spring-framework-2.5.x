@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.type.asm;
+package org.springframework.core.type.classreading;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -33,9 +33,8 @@ import org.springframework.core.type.AnnotationMetadata;
  *
  * @author Juergen Hoeller
  * @since 2.5
- * @see ClassMetadataReadingVisitor
  */
-public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
+class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
 
 	private final Map<String, Map<String, Object>> attributesMap = new LinkedHashMap<String, Map<String, Object>>();
 

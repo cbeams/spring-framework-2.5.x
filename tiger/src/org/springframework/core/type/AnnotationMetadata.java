@@ -26,7 +26,7 @@ import java.util.Set;
  * @author Juergen Hoeller
  * @since 2.5
  * @see StandardAnnotationMetadata
- * @see org.springframework.core.type.asm.AnnotationMetadataReadingVisitor
+ * @see org.springframework.core.type.classreading.MetadataReader#getAnnotationMetadata()
  */
 public interface AnnotationMetadata extends ClassMetadata {
 

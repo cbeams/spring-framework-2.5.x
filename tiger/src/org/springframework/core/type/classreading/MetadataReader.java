@@ -14,34 +14,28 @@
  * limitations under the License.
  */
 
-package org.springframework.core.type.filter;
+package org.springframework.core.type.classreading;
 
-import java.util.regex.Pattern;
-
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
-import org.springframework.util.Assert;
 
 /**
- * A simple filter for matching a fully-qualified class name with a regex {@link Pattern}.
+ * Simple facade for accessing class metadata,
+ * as read by an ASM {@link org.objectweb.asm.ClassReader}.
  *
- * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class RegexPatternTypeFilter extends AbstractClassTestingTypeFilter {
+public interface MetadataReader {
 
-	private final Pattern pattern;
+	/**
+	 * Read basic class metadata for the underlying class.
+	 */
+	ClassMetadata getClassMetadata();
 
-
-	public RegexPatternTypeFilter(Pattern pattern) {
-		Assert.notNull(pattern, "Pattern must not be null");
-		this.pattern = pattern;
-	}
-
-
-	@Override
-	protected boolean match(ClassMetadata metadata) {
-		return this.pattern.matcher(metadata.getClassName()).matches();
-	}
+	/**
+	 * Read full annotation metadata for the underlying class.
+	 */
+	AnnotationMetadata getAnnotationMetadata();
 
 }

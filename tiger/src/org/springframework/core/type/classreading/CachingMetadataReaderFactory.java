@@ -14,62 +14,61 @@
  * limitations under the License.
  */
 
-package org.springframework.core.type.asm;
+package org.springframework.core.type.classreading;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectweb.asm.ClassReader;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 /**
- * Caching implementation of the {@link ClassReaderFactory} interface,
- * caching a ClassReader per Spring Resource handle (i.e. per ".class" file).
+ * Caching implementation of the {@link MetadataReaderFactory} interface,
+ * caching an ASM {@link org.objectweb.asm.ClassReader} per Spring Resource handle
+ * (i.e. per ".class" file).
  *
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class CachingClassReaderFactory extends SimpleClassReaderFactory {
+public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
-	private final Map<Resource, ClassReader> classReaderCache = new HashMap<Resource, ClassReader>();
+	private final Map<Resource, MetadataReader> classReaderCache = new HashMap<Resource, MetadataReader>();
 
 
 	/**
-	 * Create a new CachingClassReaderFactory for the default class loader.
+	 * Create a new CachingMetadataReaderFactory for the default class loader.
 	 */
-	public CachingClassReaderFactory() {
+	public CachingMetadataReaderFactory() {
 		super();
 	}
 
 	/**
-	 * Create a new CachingClassReaderFactory for the given resource loader.
+	 * Create a new CachingMetadataReaderFactory for the given resource loader.
 	 * @param resourceLoader the Spring ResourceLoader to use
 	 * (also determines the ClassLoader to use)
 	 */
-	public CachingClassReaderFactory(ResourceLoader resourceLoader) {
+	public CachingMetadataReaderFactory(ResourceLoader resourceLoader) {
 		super(resourceLoader);
 	}
 
 	/**
-	 * Create a new CachingClassReaderFactory for the given class loader.
+	 * Create a new CachingMetadataReaderFactory for the given class loader.
 	 * @param classLoader the ClassLoader to use
 	 */
-	public CachingClassReaderFactory(ClassLoader classLoader) {
+	public CachingMetadataReaderFactory(ClassLoader classLoader) {
 		super(classLoader);
 	}
 
 
-	public ClassReader getClassReader(Resource resource) throws IOException {
+	public MetadataReader getMetadataReader(Resource resource) throws IOException {
 		synchronized (this.classReaderCache) {
-			ClassReader classReader = this.classReaderCache.get(resource);
-			if (classReader == null) {
-				classReader = super.getClassReader(resource);
-				this.classReaderCache.put(resource, classReader);
+			MetadataReader metadataReader = this.classReaderCache.get(resource);
+			if (metadataReader == null) {
+				metadataReader = super.getMetadataReader(resource);
+				this.classReaderCache.put(resource, metadataReader);
 			}
-			return classReader;
+			return metadataReader;
 		}
 	}
 

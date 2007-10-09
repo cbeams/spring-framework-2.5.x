@@ -19,14 +19,13 @@ package org.springframework.core.type.filter;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 
-import org.objectweb.asm.ClassReader;
-
-import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
+import org.springframework.core.type.classreading.MetadataReader;
 
 /**
- * Matches classes with a given annotation optionally including inherited annotations.
+ * A simple filter which matches classes with a given annotation,
+ * checking inherited annotations as well.
  *
- * The matching logic mirrors that of <code>Class.isAnnotationPresent()</code>.
+ * <p>The matching logic mirrors that of <code>Class.isAnnotationPresent()</code>.
  *
  * @author Mark Fisher
  * @author Ramnivas Laddad
@@ -34,24 +33,23 @@ import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
  * @since 2.5
  */
 public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter {
-	
-	private final Class<? extends Annotation> annotationClass;
+
+	private final Class<? extends Annotation> annotationType;
 
 
 	/**
-	 * @param annotationClass the annotation to match 
+	 * Create a new AnnotationTypeFilter for the given annotation type.
+	 * @param annotationType the annotation type to match
 	 */
-	public AnnotationTypeFilter(Class<? extends Annotation> annotationClass) {
-		super(annotationClass.isAnnotationPresent(Inherited.class), false);
-		this.annotationClass = annotationClass;
+	public AnnotationTypeFilter(Class<? extends Annotation> annotationType) {
+		super(annotationType.isAnnotationPresent(Inherited.class), false);
+		this.annotationType = annotationType;
 	}
 
 
 	@Override
-	protected boolean matchSelf(ClassReader classReader) {
-		AnnotationMetadataReadingVisitor annotationReader = new AnnotationMetadataReadingVisitor();
-		classReader.accept(annotationReader, true);
-		return annotationReader.hasAnnotation(this.annotationClass.getName());
+	protected boolean matchSelf(MetadataReader metadataReader) {
+		return metadataReader.getAnnotationMetadata().hasAnnotation(this.annotationType.getName());
 	}
 
 	@Override
@@ -62,7 +60,7 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 		else if (superClassName.startsWith("java.")) {
 			try {
 				Class clazz = getClass().getClassLoader().loadClass(superClassName);
-				return Boolean.valueOf(clazz.getAnnotation(this.annotationClass) != null);
+				return Boolean.valueOf(clazz.getAnnotation(this.annotationType) != null);
 			}
 			catch (ClassNotFoundException ex) {
 				// Class not found - can't determine a match that way.

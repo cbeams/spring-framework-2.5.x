@@ -19,11 +19,12 @@ package org.springframework.core.type;
 import java.lang.annotation.Inherited;
 
 import junit.framework.TestCase;
-import org.objectweb.asm.ClassReader;
 
-import org.springframework.stereotype.Component;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.core.type.asm.SimpleClassReaderFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Ramnivas Laddad
@@ -32,49 +33,54 @@ import org.springframework.core.type.asm.SimpleClassReaderFactory;
 public class AnnotationTypeFilterTests extends TestCase {
 	
 	public void testDirectAnnotationMatch() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeComponent";
-		ClassReader classReader = new ClassReader(classUnderTest);
-		AnnotationTypeFilter filter = new AnnotationTypeFilter(InheritedAnnotation.class);
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
 
-		assertTrue(filter.match(classReader, new SimpleClassReaderFactory()));
+		AnnotationTypeFilter filter = new AnnotationTypeFilter(InheritedAnnotation.class);
+		assertTrue(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
 	public void testInheritedAnnotationFromInterfaceDoesNotMatch() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeSubClassOfSomeComponentInterface";
-		ClassReader classReader = new ClassReader(classUnderTest);
-		AnnotationTypeFilter filter = new AnnotationTypeFilter(InheritedAnnotation.class);
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
 
+		AnnotationTypeFilter filter = new AnnotationTypeFilter(InheritedAnnotation.class);
 		// Must fail as annotation on interfaces should not be considered a match
-		assertFalse(filter.match(classReader, new SimpleClassReaderFactory()));
+		assertFalse(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 	
 	public void testInheritedAnnotationFromBaseClassDoesMatch() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeSubClassOfSomeComponent";
-		ClassReader classReader = new ClassReader(classUnderTest);
-		AnnotationTypeFilter filter = new AnnotationTypeFilter(InheritedAnnotation.class);
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
 
-		assertTrue(filter.match(classReader, new SimpleClassReaderFactory()));
+		AnnotationTypeFilter filter = new AnnotationTypeFilter(InheritedAnnotation.class);
+		assertTrue(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
 	public void testNonInheritedAnnotationDoesNotMatch() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation";
-		ClassReader classReader = new ClassReader(classUnderTest);
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
+
 		AnnotationTypeFilter filter = new AnnotationTypeFilter(NonInheritedAnnotation.class);
-		
 		// Must fail as annotation isn't inherited
-		assertFalse(filter.match(classReader, new SimpleClassReaderFactory()));
+		assertFalse(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 	
 	public void testNonAnnotatedClassDoesntMatch() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeNonCandidateClass";
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
+
 		AnnotationTypeFilter filter = new AnnotationTypeFilter(Component.class);
-		ClassReader classReader = new ClassReader(classUnderTest);
-		
-		assertFalse(filter.match(classReader, new SimpleClassReaderFactory()));
+		assertFalse(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
@@ -86,30 +92,37 @@ public class AnnotationTypeFilterTests extends TestCase {
 	private static @interface InheritedAnnotation {
 	}
 
+
 	@InheritedAnnotation
 	private static class SomeComponent {
 	}
+
 
 	@InheritedAnnotation
 	private static interface SomeComponentInterface {
 	}
 
+
 	private static class SomeSubClassOfSomeComponentInterface implements SomeComponentInterface {
 	}
+
 
 	private static class SomeSubClassOfSomeComponent extends SomeComponent {
 	}
 
+
 	private static @interface NonInheritedAnnotation {
 	}
+
 
 	@NonInheritedAnnotation
 	private static class SomeClassMarkedWithNonInheritedAnnotation {
 	}
 
+
 	private static class SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation extends SomeClassMarkedWithNonInheritedAnnotation {
 	}
-	//----
+
 
 	private static class SomeNonCandidateClass {
 	}

@@ -24,6 +24,9 @@ import java.util.Set;
 import org.springframework.core.annotation.AnnotationUtils;
 
 /**
+ * {@link AnnotationMetadata} implementation that uses standard reflection
+ * to introspect a given <code>Class</code>.
+ *
  * @author Juergen Hoeller
  * @since 2.5
  */

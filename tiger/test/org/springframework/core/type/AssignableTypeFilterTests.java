@@ -17,12 +17,13 @@
 package org.springframework.core.type;
 
 import junit.framework.TestCase;
-import org.objectweb.asm.ClassReader;
 
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
+import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
-import org.springframework.core.type.filter.AssignableTypeFilter;
-import org.springframework.core.type.asm.SimpleClassReaderFactory;
 
 /**
  * @author Ramnivas Laddad
@@ -31,39 +32,43 @@ import org.springframework.core.type.asm.SimpleClassReaderFactory;
 public class AssignableTypeFilterTests extends TestCase {
 
 	public void testDirectMatch() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$TestNonInheritingClass";
-		ClassReader classReader = new ClassReader(classUnderTest);
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
+
 		AssignableTypeFilter matchingFilter = new AssignableTypeFilter(TestNonInheritingClass.class);
 		AssignableTypeFilter notMatchingFilter = new AssignableTypeFilter(TestInterface.class);
-
-		assertFalse(notMatchingFilter.match(classReader, new SimpleClassReaderFactory()));
-		assertTrue(matchingFilter.match(classReader, new SimpleClassReaderFactory()));
+		assertFalse(notMatchingFilter.match(metadataReader, metadataReaderFactory));
+		assertTrue(matchingFilter.match(metadataReader, metadataReaderFactory));
 	}
 	
 	public void testInterfaceMatch() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$TestInterfaceImpl";
-		ClassReader classReader = new ClassReader(classUnderTest);
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
+
 		AssignableTypeFilter filter = new AssignableTypeFilter(TestInterface.class);
-		
-		assertTrue(filter.match(classReader, new SimpleClassReaderFactory()));
+		assertTrue(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 	
 	public void testSuperClassMatch() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$SomeDaoLikeImpl";
-		ClassReader classReader = new ClassReader(classUnderTest);
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
+
 		AssignableTypeFilter filter = new AssignableTypeFilter(SimpleJdbcDaoSupport.class);
-		
-		assertTrue(filter.match(classReader, new SimpleClassReaderFactory()));
+		assertTrue(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 	
 	public void testInterfaceThroughSuperClassMatch() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$SomeDaoLikeImpl";
-		ClassReader classReader = new ClassReader(classUnderTest);
-		AssignableTypeFilter filter = new AssignableTypeFilter(JdbcDaoSupport.class);
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
 
-		assertTrue(filter.match(classReader, new SimpleClassReaderFactory()));
+		AssignableTypeFilter filter = new AssignableTypeFilter(JdbcDaoSupport.class);
+		assertTrue(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
@@ -73,14 +78,18 @@ public class AssignableTypeFilterTests extends TestCase {
 	private static class TestNonInheritingClass {
 	}
 
+
 	private static interface TestInterface {
 	}
+
 
 	private static class TestInterfaceImpl implements TestInterface {
 	}
 
+
 	private static interface SomeDaoLikeInterface {
 	}
+
 
 	private static class SomeDaoLikeImpl extends SimpleJdbcDaoSupport implements SomeDaoLikeInterface {
 	}

@@ -17,6 +17,8 @@
 package org.springframework.core.type.filter;
 
 /**
+ * A simple filter which matches classes that are assignable to a given type.
+ *
  * @author Rod Johnson
  * @author Mark Fisher
  * @author Ramnivas Laddad
@@ -28,6 +30,7 @@ public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 
 
 	/**
+	 * Create a new AssignableTypeFilter for the given type.
 	 * @param targetType the type to match
 	 */
 	public AssignableTypeFilter(Class targetType) {

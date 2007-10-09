@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.type.asm;
+package org.springframework.core.type.classreading;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,53 +27,53 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ClassUtils;
 
 /**
- * Simple implementation of the {@link ClassReaderFactory} interface,
- * creating a new ClassReader for every request.
+ * Simple implementation of the {@link MetadataReaderFactory} interface,
+ * creating a new ASM {@link org.objectweb.asm.ClassReader} for every request.
  *
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class SimpleClassReaderFactory implements ClassReaderFactory {
+public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 
 	private final ResourceLoader resourceLoader;
 
 
 	/**
-	 * Create a new SimpleClassReaderFactory for the default class loader.
+	 * Create a new SimpleMetadataReaderFactory for the default class loader.
 	 */
-	public SimpleClassReaderFactory() {
+	public SimpleMetadataReaderFactory() {
 		this.resourceLoader = new DefaultResourceLoader();
 	}
 
 	/**
-	 * Create a new SimpleClassReaderFactory for the given resource loader.
+	 * Create a new SimpleMetadataReaderFactory for the given resource loader.
 	 * @param resourceLoader the Spring ResourceLoader to use
 	 * (also determines the ClassLoader to use)
 	 */
-	public SimpleClassReaderFactory(ResourceLoader resourceLoader) {
+	public SimpleMetadataReaderFactory(ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 	}
 
 	/**
-	 * Create a new SimpleClassReaderFactory for the given class loader.
+	 * Create a new SimpleMetadataReaderFactory for the given class loader.
 	 * @param classLoader the ClassLoader to use
 	 */
-	public SimpleClassReaderFactory(ClassLoader classLoader) {
+	public SimpleMetadataReaderFactory(ClassLoader classLoader) {
 		this.resourceLoader =
 				(classLoader != null ? new DefaultResourceLoader(classLoader) : new DefaultResourceLoader());
 	}
 
 
-	public ClassReader getClassReader(String className) throws IOException {
+	public MetadataReader getMetadataReader(String className) throws IOException {
 		String resourcePath = ResourceLoader.CLASSPATH_URL_PREFIX +
 				ClassUtils.convertClassNameToResourcePath(className) + ClassUtils.CLASS_FILE_SUFFIX;
-		return getClassReader(this.resourceLoader.getResource(resourcePath));
+		return getMetadataReader(this.resourceLoader.getResource(resourcePath));
 	}
 
-	public ClassReader getClassReader(Resource resource) throws IOException {
+	public MetadataReader getMetadataReader(Resource resource) throws IOException {
 		InputStream is = resource.getInputStream();
 		try {
-			return new ClassReader(is);
+			return new SimpleMetadataReader(new ClassReader(is));
 		}
 		finally {
 			is.close();

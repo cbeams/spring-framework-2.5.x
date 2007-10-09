@@ -18,10 +18,9 @@ package org.springframework.core.type.filter;
 
 import java.io.IOException;
 
-import org.objectweb.asm.ClassReader;
-
-import org.springframework.core.type.asm.ClassReaderFactory;
-import org.springframework.core.type.asm.ClassMetadataReadingVisitor;
+import org.springframework.core.type.ClassMetadata;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
 
 /**
  * Type filter that is aware of traversing over hierarchy.
@@ -48,24 +47,25 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 	}
 
 
-	public boolean match(ClassReader classReader, ClassReaderFactory classReaderFactory) throws IOException {
+	public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
+			throws IOException {
+
 		// This method optimizes avoiding unnecessary creation of ClassReaders
 		// as well as visiting over those readers.
-		if (matchSelf(classReader)) {
+		if (matchSelf(metadataReader)) {
 			return true;
 		}
-		ClassMetadataReadingVisitor typesReadingVisitor = new ClassMetadataReadingVisitor();
-		classReader.accept(typesReadingVisitor, true);
-		if (matchClassName(typesReadingVisitor.getClassName())) {
+		ClassMetadata metadata = metadataReader.getClassMetadata();
+		if (matchClassName(metadata.getClassName())) {
 			return true;
 		}
 
 		if (!this.considerInherited) {
 			return false;
 		}
-		if (typesReadingVisitor.hasSuperClass()) {
+		if (metadata.hasSuperClass()) {
 			// Optimization to avoid creating ClassReader for super class.
-			Boolean superClassMatch = matchSuperClass(typesReadingVisitor.getSuperClassName());
+			Boolean superClassMatch = matchSuperClass(metadata.getSuperClassName());
 			if (superClassMatch != null) {
 				if (superClassMatch.booleanValue()) {
 					return true;
@@ -73,7 +73,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 			}
 			else {
 				// Need to read super class to determine a match...
-				if (match(typesReadingVisitor.getSuperClassName(), classReaderFactory)) {
+				if (match(metadata.getSuperClassName(), metadataReaderFactory)) {
 					return true;
 				}
 			}
@@ -82,7 +82,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 		if (!this.considerInterfaces) {
 			return false;
 		}
-		for (String ifc : typesReadingVisitor.getInterfaceNames()) {
+		for (String ifc : metadata.getInterfaceNames()) {
 			// Optimization to avoid creating ClassReader for super class
 			Boolean interfaceMatch = matchInterface(ifc);
 			if (interfaceMatch != null) {
@@ -92,7 +92,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 			}
 			else {
 				// Need to read interface to determine a match...
-				if (match(ifc, classReaderFactory)) {
+				if (match(ifc, metadataReaderFactory)) {
 					return true;
 				}
 			}
@@ -101,8 +101,8 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 		return false;
 	}
 
-	private boolean match(String className, ClassReaderFactory classReaderFactory) throws IOException {
-		return match(classReaderFactory.getClassReader(className), classReaderFactory);
+	private boolean match(String className, MetadataReaderFactory metadataReaderFactory) throws IOException {
+		return match(metadataReaderFactory.getMetadataReader(className), metadataReaderFactory);
 	}
 
 	/**
@@ -110,7 +110,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 	 * the implementation will use a visitor to extract information
 	 * to perform matching.
 	 */
-	protected boolean matchSelf(ClassReader classReader) {
+	protected boolean matchSelf(MetadataReader metadataReader) {
 		return false;
 	}
 

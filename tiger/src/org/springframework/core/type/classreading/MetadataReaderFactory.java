@@ -14,38 +14,37 @@
  * limitations under the License.
  */
 
-package org.springframework.core.type.asm;
+package org.springframework.core.type.classreading;
 
 import java.io.IOException;
-
-import org.objectweb.asm.ClassReader;
 
 import org.springframework.core.io.Resource;
 
 /**
- * Factory interface for ASM {@link org.objectweb.asm.ClassReader} instances.
- * Allows for caching a ClassReader per original resource.
+ * Factory interface for {@link MetadataReader} instances.
+ * Allows for caching a MetadataReader per original resource.
  *
  * @author Juergen Hoeller
  * @since 2.5
- * @see org.objectweb.asm.ClassReader
+ * @see SimpleMetadataReaderFactory
+ * @see CachingMetadataReaderFactory
  */
-public interface ClassReaderFactory {
+public interface MetadataReaderFactory {
 
 	/**
-	 * Obtain a ClassReader for the given class name.
+	 * Obtain a MetadataReader for the given class name.
 	 * @param className the class name (to be resolved to a ".class" file)
-	 * @return the ClassReader instance (never <code>null</code>)
+	 * @return a holder for the ClassReader instance (never <code>null</code>)
 	 * @throws IOException in case of I/O failure
 	 */
-	ClassReader getClassReader(String className) throws IOException;
+	MetadataReader getMetadataReader(String className) throws IOException;
 
 	/**
-	 * Obtain a ClassReader for the given resource.
+	 * Obtain a MetadataReader for the given resource.
 	 * @param resource the resource (pointing to a ".class" file)
-	 * @return the ClassReader instance (never <code>null</code>)
+	 * @return a holder for the ClassReader instance (never <code>null</code>)
 	 * @throws IOException in case of I/O failure
 	 */
-	ClassReader getClassReader(Resource resource) throws IOException;
+	MetadataReader getMetadataReader(Resource resource) throws IOException;
 
 }

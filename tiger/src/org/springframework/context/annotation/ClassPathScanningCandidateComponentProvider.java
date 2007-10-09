@@ -22,8 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.objectweb.asm.ClassReader;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -33,12 +31,15 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.core.type.asm.CachingClassReaderFactory;
-import org.springframework.core.type.asm.ClassReaderFactory;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -46,16 +47,17 @@ import org.springframework.util.ClassUtils;
  * A component provider that scans the classpath from a base package.
  * It then applies exclude and include filters to the resulting classes to find candidates.
  *
- * <p>This implementation is based on the ASM {@link org.objectweb.asm.ClassReader}.
+ * <p>This implementation is based on Spring's
+ * {@link org.springframework.core.type.classreading.MetadataReader} facility,
+ * backed by an ASM {@link org.objectweb.asm.ClassReader}.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
- * @author Costin Leau
- * @author Rod Johnson
  * @author Ramnivas Laddad
  * @since 2.5
- * @see org.objectweb.asm.ClassReader
- * @see org.springframework.core.type.asm.AnnotationMetadataReadingVisitor
+ * @see org.springframework.core.type.classreading.MetadataReaderFactory
+ * @see org.springframework.core.type.AnnotationMetadata
+ * @see ScannedGenericBeanDefinition
  */
 public class ClassPathScanningCandidateComponentProvider implements ResourceLoaderAware {
 
@@ -64,7 +66,7 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
-	private ClassReaderFactory classReaderFactory = new CachingClassReaderFactory(this.resourcePatternResolver);
+	private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
 
 	private String resourcePattern = DEFAULT_RESOURCE_PATTERN;
 
@@ -96,7 +98,7 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	 */
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
-		this.classReaderFactory = new CachingClassReaderFactory(resourceLoader);
+		this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
 	}
 
 	/**
@@ -147,6 +149,8 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	protected void registerDefaultFilters() {
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
 		this.includeFilters.add(new AnnotationTypeFilter(Repository.class));
+		this.includeFilters.add(new AnnotationTypeFilter(Service.class));
+		this.includeFilters.add(new AnnotationTypeFilter(Controller.class));
 	}
 
 
@@ -163,9 +167,9 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 			Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
 			for (int i = 0; i < resources.length; i++) {
 				Resource resource = resources[i];
-				ClassReader classReader = this.classReaderFactory.getClassReader(resource);
-				if (isCandidateComponent(classReader)) {
-					ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(classReader);
+				MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
+				if (isCandidateComponent(metadataReader)) {
+					ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 					sbd.setSource(resource);
 					if (isCandidateComponent(sbd)) {
 						candidates.add(sbd);
@@ -182,17 +186,17 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	/**
 	 * Determine whether the given class does not match any exclude filter
 	 * and does match at least one include filter.
-	 * @param classReader the ASM ClassReader for the class
+	 * @param metadataReader the ASM ClassReader for the class
 	 * @return whether the class qualifies as a candidate component
 	 */
-	protected boolean isCandidateComponent(ClassReader classReader) throws IOException {
+	protected boolean isCandidateComponent(MetadataReader metadataReader) throws IOException {
 		for (TypeFilter tf : this.excludeFilters) {
-			if (tf.match(classReader, this.classReaderFactory)) {
+			if (tf.match(metadataReader, this.metadataReaderFactory)) {
 				return false;
 			}
 		}
 		for (TypeFilter tf : this.includeFilters) {
-			if (tf.match(classReader, this.classReaderFactory)) {
+			if (tf.match(metadataReader, this.metadataReaderFactory)) {
 				return true;
 			}
 		}

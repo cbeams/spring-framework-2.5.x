@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.type.asm;
+package org.springframework.core.type.classreading;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.EmptyVisitor;
@@ -32,9 +32,8 @@ import org.springframework.util.ClassUtils;
  * @author Mark Fisher
  * @author Ramnivas Laddad
  * @since 2.5
- * @see AnnotationMetadataReadingVisitor
  */
-public class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata {
+class ClassMetadataReadingVisitor extends EmptyVisitor implements ClassMetadata {
 
 	private String className;
 

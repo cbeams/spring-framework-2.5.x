@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.type.filter;
 
 import java.io.IOException;
@@ -28,46 +29,43 @@ import org.aspectj.weaver.patterns.PatternParser;
 import org.aspectj.weaver.patterns.SimpleScope;
 import org.aspectj.weaver.patterns.TypePattern;
 
-import org.objectweb.asm.ClassReader;
-
-import org.springframework.core.type.asm.ClassMetadataReadingVisitor;
-import org.springframework.core.type.asm.ClassReaderFactory;
-import org.springframework.util.ClassUtils;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
 
 /**
  * Type filter that uses AspectJ type pattern for matching.
- * 
- * A critical implementation details of this type fitler is that it does not
+ *
+ * <p>A critical implementation details of this type filter is that it does not
  * load the class being examined to match with a type pattern.
- * 
+ *
  * @author Ramnivas Laddad
- * 
+ * @author Juergen Hoeller
+ * @since 2.5
  */
 public class AspectJTypeFilter implements TypeFilter {
-    // TODO: Keep a soft reference to the world? Or make it an instance variable? Offer API to clear the world? Or all these?
-    private static final World world = new BcelWorld(ClassUtils.getDefaultClassLoader(), IMessageHandler.THROW, null);
 
-    static {
-    	world.setBehaveInJava5Way(true);
-    }
-    
-    private TypePattern typePattern;
+	private final World world;
 
-    public AspectJTypeFilter(String typePatternExpression) {
-        PatternParser patternParser = new PatternParser(typePatternExpression);
-        typePattern = patternParser.parseTypePattern();
-        typePattern.resolve(world);
-        IScope scope = new SimpleScope(world, new FormalBinding[0]);
-        typePattern = typePattern.resolveBindings(scope, Bindings.NONE, false, false);
-    }
+	private final TypePattern typePattern;
 
-    public boolean match(ClassReader classReader, ClassReaderFactory classReaderFactory) throws IOException {
-        ClassMetadataReadingVisitor typesReadingVisitor = new ClassMetadataReadingVisitor();
-        classReader.accept(typesReadingVisitor, true);
-        String className = typesReadingVisitor.getClassName();
 
-        ResolvedType resolvedType = world.resolve(className);
+	public AspectJTypeFilter(String typePatternExpression, ClassLoader classLoader) {
+		this.world = new BcelWorld(classLoader, IMessageHandler.THROW, null);
+		this.world.setBehaveInJava5Way(true);
+		PatternParser patternParser = new PatternParser(typePatternExpression);
+		TypePattern typePattern = patternParser.parseTypePattern();
+		typePattern.resolve(this.world);
+		IScope scope = new SimpleScope(this.world, new FormalBinding[0]);
+		this.typePattern = typePattern.resolveBindings(scope, Bindings.NONE, false, false);
+	}
 
-        return typePattern.matchesStatically(resolvedType);
-    }
+
+	public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
+			throws IOException {
+
+		String className = metadataReader.getClassMetadata().getClassName();
+		ResolvedType resolvedType = this.world.resolve(className);
+		return this.typePattern.matchesStatically(resolvedType);
+	}
+
 }

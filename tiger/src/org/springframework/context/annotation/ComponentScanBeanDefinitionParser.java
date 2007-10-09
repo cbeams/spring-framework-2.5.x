@@ -216,7 +216,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 				return new RegexPatternTypeFilter(Pattern.compile(expression));
 			}
 			else if ("aspectj".equals(filterType)) {
-				return new AspectJTypeFilter(expression);
+				return new AspectJTypeFilter(expression, classLoader);
 			}
 			else {
 				throw new IllegalArgumentException("Unsupported filter type: " + filterType);

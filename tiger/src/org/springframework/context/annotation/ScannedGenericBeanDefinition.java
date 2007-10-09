@@ -16,12 +16,10 @@
 
 package org.springframework.context.annotation;
 
-import org.objectweb.asm.ClassReader;
-
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
+import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.util.Assert;
 
 /**
@@ -37,26 +35,27 @@ import org.springframework.util.Assert;
  * @since 2.5
  * @see #getMetadata()
  * @see #getBeanClassName()
- * @see org.objectweb.asm.ClassReader
+ * @see org.springframework.core.type.classreading.MetadataReaderFactory
  */
 public class ScannedGenericBeanDefinition extends GenericBeanDefinition implements AnnotatedBeanDefinition {
 
-	private final AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor();
+	private final AnnotationMetadata metadata;
 
 
 	/**
-	 * Create a new ScannedGenericBeanDefinition for the given ASM ClassReader.
-	 * @param classReader the ASM ClassReader for the scanned target class
+	 * Create a new ScannedGenericBeanDefinition for the class that the
+	 * given MetadataReader describes.
+	 * @param metadataReader the MetadataReader for the scanned target class
 	 */
-	public ScannedGenericBeanDefinition(ClassReader classReader) {
-		Assert.notNull(classReader, "ClassReader must not be null");
-		classReader.accept(this.visitor, true);
-		setBeanClassName(this.visitor.getClassName());
+	public ScannedGenericBeanDefinition(MetadataReader metadataReader) {
+		Assert.notNull(metadataReader, "MetadataReader must not be null");
+		this.metadata = metadataReader.getAnnotationMetadata();
+		setBeanClassName(this.metadata.getClassName());
 	}
 
 
 	public final AnnotationMetadata getMetadata() {
-		return this.visitor;
+		return this.metadata;
 	}
 
 }

@@ -21,10 +21,11 @@ import java.io.Serializable;
 import java.util.Map;
 
 import junit.framework.TestCase;
-import org.objectweb.asm.ClassReader;
 
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -38,10 +39,9 @@ public class AnnotationMetadataTests extends TestCase {
 	}
 
 	public void testAsmAnnotationMetadata() throws IOException {
-		ClassReader classReader = new ClassReader(AnnotatedComponent.class.getName());
-		AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor();
-		classReader.accept(visitor, true);
-		doTestAnnotationInfo(visitor);
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(AnnotatedComponent.class.getName());
+		doTestAnnotationInfo(metadataReader.getAnnotationMetadata());
 	}
 
 	private void doTestAnnotationInfo(AnnotationMetadata metadata) {

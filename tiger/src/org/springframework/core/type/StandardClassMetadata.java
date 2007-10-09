@@ -19,6 +19,9 @@ package org.springframework.core.type;
 import java.lang.reflect.Modifier;
 
 /**
+ * {@link ClassMetadata} implementation that uses standard reflection
+ * to introspect a given <code>Class</code>.
+ *
  * @author Juergen Hoeller
  * @since 2.5
  */

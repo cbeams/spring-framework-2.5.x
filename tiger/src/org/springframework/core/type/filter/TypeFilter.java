@@ -18,20 +18,30 @@ package org.springframework.core.type.filter;
 
 import java.io.IOException;
 
-import org.objectweb.asm.ClassReader;
-
-import org.springframework.core.type.asm.ClassReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 
 /**
- * Base interface for type filters using an ASM {@link ClassReader}.
- * 
+ * Base interface for type filters using a
+ * {@link org.springframework.core.type.classreading.MetadataReader}.
+ *
  * @author Costin Leau
- * @author Rod Johnson
+ * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.5
  */
 public interface TypeFilter {
-	
-	boolean match(ClassReader classReader, ClassReaderFactory classReaderFactory) throws IOException;
+
+	/**
+	 * Determine whether this filter matches for the class described by
+	 * the given metadata.
+	 * @param metadataReader the metadata reader for the target class
+	 * @param metadataReaderFactory a factory for obtaining metadata readers
+	 * for other classes (such as superclasses and interfaces)
+	 * @return whether this filter matches
+	 * @throws IOException in case of I/O failure when reading metadata
+	 */
+	boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
+			throws IOException;
 
 }

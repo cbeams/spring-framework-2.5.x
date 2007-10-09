@@ -18,11 +18,9 @@ package org.springframework.core.type.filter;
 
 import java.io.IOException;
 
-import org.objectweb.asm.ClassReader;
-
 import org.springframework.core.type.ClassMetadata;
-import org.springframework.core.type.asm.ClassMetadataReadingVisitor;
-import org.springframework.core.type.asm.ClassReaderFactory;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
 
 /**
  * Type filter that exposes a
@@ -37,10 +35,10 @@ import org.springframework.core.type.asm.ClassReaderFactory;
  */
 public abstract class AbstractClassTestingTypeFilter implements TypeFilter {
 
-	public final boolean match(ClassReader classReader, ClassReaderFactory classReaderFactory) throws IOException {
-		ClassMetadataReadingVisitor visitor = new ClassMetadataReadingVisitor();
-		classReader.accept(visitor, true);
-		return match(visitor);
+	public final boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
+			throws IOException {
+
+		return match(metadataReader.getClassMetadata());
 	}
 
 	/**
