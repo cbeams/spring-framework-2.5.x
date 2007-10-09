@@ -1078,15 +1078,34 @@ public void audit(Auditable auditable) {
 		    the argument names of the annotated method - these argument names <emphasis>are</emphasis>
 		    available at runtime. For example:</para>
 		    <programlisting><![CDATA[@Before(
-   value="com.xyz.lib.Pointcuts.anyPublicMethod() && @annotation(auditable)",
-   argNames="auditable")
-public void audit(Auditable auditable) {
+   value="com.xyz.lib.Pointcuts.anyPublicMethod() && target(bean) && @annotation(auditable)",
+   argNames="bean,auditable")
+public void audit(Object bean, Auditable auditable) {
   AuditCode code = auditable.value();
-  ]]><lineannotation>// ...</lineannotation><![CDATA[
+  ]]><lineannotation>// ... use code and bean</lineannotation><![CDATA[
 }]]></programlisting>	
-		    <remark>If an @AspectJ aspect has been compiled by the AspectJ compiler (ajc) then
-		    there is no need to add the <literal>argNames</literal> attribute as the compiler will do this
-		    automatically.</remark>
+			<para>If the first parameter is of the <interfacename>JoinPoint</interfacename>, <interfacename>ProceedingJoinPoint</interfacename>, 
+			or <interfacename>JoinPoint.StaticPart</interfacename> type,
+			you may leave out the name of the parameter from the value of the "argNames" attribute.  
+			For example, if you modify the preceding advice to receive the join point object, the "argNames"
+			attribute need not include it:</para>
+		    <programlisting><![CDATA[@Before(
+   value="com.xyz.lib.Pointcuts.anyPublicMethod() && target(bean) && @annotation(auditable)",
+   argNames="bean,auditable")
+public void audit(JoinPoint jp, Object bean, Auditable auditable) {
+  AuditCode code = auditable.value();
+  ]]><lineannotation>// ... use code, bean, and jp</lineannotation><![CDATA[
+}]]></programlisting>	 
+			<para>The special treatment given to the first parameter of the <interfacename>JoinPoint</interfacename>, 
+			<interfacename>ProceedingJoinPoint</interfacename>,	and <interfacename>JoinPoint.StaticPart</interfacename> types
+			is particularly convenient for advice that do not collect any other join point context. In such situations, you
+			may simply omit the "argNames" attribute. For example, the following advice need not declare the "argNames"
+			attribute:</para>
+		    <programlisting><![CDATA[@Before(
+   "com.xyz.lib.Pointcuts.anyPublicMethod()")
+public void audit(JoinPoint jp) {
+  ]]><lineannotation>// ... use jp</lineannotation><![CDATA[
+}]]></programlisting>	 
 		    </listitem>
 		    <listitem>
 		        <para>Using the <literal>'argNames'</literal> attribute is a little clumsy, so if the
@@ -1100,6 +1119,11 @@ public void audit(Auditable auditable) {
 		        inconsequential), (3) the optimization to remove unused local variables will not be
 		        applied by your compiler. In other words, you should encounter no difficulties building
 		        with this flag on.</para>
+		        
+		        <remark>If an @AspectJ aspect has been compiled by the AspectJ compiler (ajc) even without the 
+		        debug information then there is no need to add the <literal>argNames</literal> attribute as the 
+		        compiler will retain the needed information.</remark>
+		        
 		    </listitem>
 		    <listitem>
 		        <para>If the code has been compiled without the necessary debug information, then Spring AOP
@@ -1160,7 +1184,7 @@ throws Throwable {
 	    <para>When two pieces of advice defined in <emphasis>the same</emphasis> aspect both need
 	    to run at the same join point, the ordering is undefined (since there is no way to retrieve
 	    the declaration order via reflection for javac-compiled classes). Consider collapsing
-	    such advice methods into one advice method per joinpoint in each aspect class, or refactor
+	    such advice methods into one advice method per join point in each aspect class, or refactor
 	    the pieces of advice into separate aspect classes - which can be ordered at the aspect level.</para>
 
 	   </section>
@@ -1713,12 +1737,11 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 	 <para>The schema based declaration style supports fully typed advice in the same way as 
 	 described for the @AspectJ support - by matching pointcut parameters by name 
 	 against advice method parameters. See <xref linkend="aop-ataspectj-advice-params" />
-	 for details.
-	 </para>
-	 
-	 <para>If you wish to explicity specify argument names for the advice methods (not
-	 relying on either of the detection strategies previously described) then this is
-	 done using the <literal>arg-names</literal> attribute of the advice element. For
+	 for details. If you wish to explicitly specify argument names for the advice methods (not
+	 relying on the detection strategies previously described) then this is
+	 done using the <literal>arg-names</literal> attribute of the advice element, which 
+	 is treated in the same manner to the "argNames" attribute in an advice annotation 
+	 as described in <xref linkend="aop-ataspectj-advice-params-names"/>. For
 	 example:</para>
 
 		<programlisting><![CDATA[<aop:before
@@ -1774,7 +1797,7 @@ public class SimpleProfiler {
 }]]></programlisting>
 
         <para>Finally, here is the XML configuration that is required to effect the
-        execution of the above advice for a particular joinpoint:</para>
+        execution of the above advice for a particular join point:</para>
         
         <programlisting><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

@@ -22,8 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.aopalliance.aop.Advice;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.DeclareParents;
@@ -53,6 +51,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Adrian Colyer
  * @author Juergen Hoeller
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFactory {
@@ -212,33 +211,13 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		// Now to configure the advice...
 		springAdvice.setAspectName(aspectName);
 		springAdvice.setDeclarationOrder(declarationOrderInAspect);
-		String[] argNames = getArgumentNames(candidateAdviceMethod);
+		String[] argNames = this.parameterNameDiscoverer.getParameterNames(candidateAdviceMethod);
 		if (argNames != null) {
 			springAdvice.setArgumentNamesFromStringArray(argNames);
 		}
 		springAdvice.calculateArgumentBindings();
 		return springAdvice;
 	}
-
-	private String[] getArgumentNames(Method forMethod) {
-		String[] argNames = this.parameterNameDiscoverer.getParameterNames(forMethod);
-		if (argNames != null) {
-			if (forMethod.getParameterTypes().length == argNames.length + 1) {
-				// May need to add implicit join point arg name...
-				Class firstArgType = forMethod.getParameterTypes()[0];
-				if (firstArgType == JoinPoint.class ||
-						firstArgType == ProceedingJoinPoint.class ||
-						firstArgType == JoinPoint.StaticPart.class) {
-					String[] oldNames = argNames;
-					argNames = new String[oldNames.length + 1];
-					argNames[0] = "THIS_JOIN_POINT";
-					System.arraycopy(oldNames, 0, argNames, 1, oldNames.length);
-				}
-			}
-		}
-		return argNames;
-	}
-
 
 	/**
 	 * Synthetic advisor that instantiates the aspect.

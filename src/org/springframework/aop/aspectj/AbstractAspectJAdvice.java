@@ -249,7 +249,21 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 						"'argumentNames' property of AbstractAspectJAdvice contains an argument name '" +
 						this.argumentNames[i] + "' that is not a valid Java identifier");
 			}
-		}		
+		}
+		if (argumentNames != null) {
+			if (aspectJAdviceMethod.getParameterTypes().length == argumentNames.length + 1) {
+				// May need to add implicit join point arg name...
+				Class firstArgType = aspectJAdviceMethod.getParameterTypes()[0];
+				if (firstArgType == JoinPoint.class ||
+						firstArgType == ProceedingJoinPoint.class ||
+						firstArgType == JoinPoint.StaticPart.class) {
+					String[] oldNames = argumentNames;
+					argumentNames = new String[oldNames.length + 1];
+					argumentNames[0] = "THIS_JOIN_POINT";
+					System.arraycopy(oldNames, 0, argumentNames, 1, oldNames.length);
+				}
+			}
+		}
 	}
 
 	public void setReturningName(String name) {
