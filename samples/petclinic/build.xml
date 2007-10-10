@@ -50,6 +50,7 @@
 
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
+			<include name="modules/spring-webmvc.jar"/>
 		</fileset>
 
 	</path>
