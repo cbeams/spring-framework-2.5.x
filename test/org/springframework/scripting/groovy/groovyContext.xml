@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
-
-<beans default-lazy-init="true">
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:lang="http://www.springframework.org/schema/lang"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+				http://www.springframework.org/schema/beans/spring-beans.xsd
+				http://www.springframework.org/schema/lang
+				http://www.springframework.org/schema/lang/spring-lang.xsd"
+ 		default-lazy-init="true">
 
 	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
 
@@ -42,5 +47,10 @@ class GroovyCalculator implements Calculator {
 	<bean id="myMessage" class="java.lang.String">
 		<constructor-arg value="Hello World!"/>
 	</bean>
+
+	<lang:groovy id="refreshableFactory" refresh-check-delay="5000"
+			script-source="org/springframework/scripting/groovy/TestFactoryBean.groovy"/>
+
+	<lang:groovy id="factory" script-source="classpath:org/springframework/scripting/groovy/TestFactoryBean.groovy"/>
 
 </beans>

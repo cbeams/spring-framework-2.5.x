@@ -27,11 +27,14 @@ import org.springframework.util.Assert;
  *
  * @author Rob Harrop
  * @author Rod Johnson
+ * @author Mark Fisher
  * @since 2.0
  */
 public class RefreshableScriptTargetSource extends BeanFactoryRefreshableTargetSource {
 
 	private final ScriptSource scriptSource;
+
+	private final boolean isFactoryBean;
 
 
 	/**
@@ -41,10 +44,11 @@ public class RefreshableScriptTargetSource extends BeanFactoryRefreshableTargetS
 	 * @param scriptSource the ScriptSource to delegate to
 	 * for determining whether a refresh is required
 	 */
-	public RefreshableScriptTargetSource(BeanFactory beanFactory, String beanName, ScriptSource scriptSource) {
+	public RefreshableScriptTargetSource(BeanFactory beanFactory, String beanName, ScriptSource scriptSource, boolean isFactoryBean) {
 		super(beanFactory, beanName);
 		Assert.notNull(scriptSource, "ScriptSource must not be null");
 		this.scriptSource = scriptSource;
+		this.isFactoryBean = isFactoryBean;
 	}
 
 	/**
@@ -54,6 +58,16 @@ public class RefreshableScriptTargetSource extends BeanFactoryRefreshableTargetS
 	 */
 	protected boolean requiresRefresh() {
 		return this.scriptSource.isModified();
+	}
+
+	/**
+	 * Obtain a fresh target object, retrieving a FactoryBean if necessary.
+	 */
+	protected Object obtainFreshBean(BeanFactory beanFactory, String beanName) {
+		if (isFactoryBean) {
+			beanName = BeanFactory.FACTORY_BEAN_PREFIX + beanName;
+		}
+		return super.obtainFreshBean(beanFactory, beanName);
 	}
 
 }

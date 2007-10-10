@@ -31,7 +31,7 @@ public final class RefreshableScriptTargetSourceTests extends TestCase {
 		MockControl mockFactory = MockControl.createNiceControl(BeanFactory.class);
 		mockFactory.replay();
 		try {
-			new RefreshableScriptTargetSource((BeanFactory) mockFactory.getMock(), "a.bean", null);
+			new RefreshableScriptTargetSource((BeanFactory) mockFactory.getMock(), "a.bean", null, false);
 			fail("Must have failed when passed a null ScriptSource.");
 		}
 		catch (IllegalArgumentException expected) {

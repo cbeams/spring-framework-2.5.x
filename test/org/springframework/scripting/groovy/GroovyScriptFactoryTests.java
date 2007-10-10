@@ -28,6 +28,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -47,6 +48,7 @@ import org.springframework.test.AssertThrows;
  * @author Rick Evans
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Mark Fisher
  */
 public class GroovyScriptFactoryTests extends TestCase {
 
@@ -377,6 +379,24 @@ public class GroovyScriptFactoryTests extends TestCase {
 		};
 		at.runTest();
 		assertEquals("Gotcha", at.getActualException().getMessage());
+	}
+
+	public void testFactoryBean() {
+		ApplicationContext context = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
+		Object factory = context.getBean("&factory");
+		assertTrue(factory instanceof FactoryBean);
+		Object result = context.getBean("factory");
+		assertTrue(result instanceof String);
+		assertEquals("test", result);
+	}
+
+	public void testRefreshableFactoryBean() {
+		ApplicationContext context = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
+		Object factory = context.getBean("&refreshableFactory");
+		assertTrue(factory instanceof FactoryBean);
+		Object result = context.getBean("refreshableFactory");
+		assertTrue(result instanceof String);
+		assertEquals("test", result);
 	}
 
 

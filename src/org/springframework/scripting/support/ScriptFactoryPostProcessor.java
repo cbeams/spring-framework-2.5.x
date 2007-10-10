@@ -33,10 +33,12 @@ import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -129,6 +131,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Mark Fisher
  * @since 2.0
  */
 public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
@@ -269,19 +272,34 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		String scriptedObjectBeanName = SCRIPTED_OBJECT_NAME_PREFIX + beanName;
 		prepareScriptBeans(bd, scriptFactoryBeanName, scriptedObjectBeanName);
 
+		ScriptFactory scriptFactory = 
+				(ScriptFactory) this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
+		ScriptSource scriptSource =
+				getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
+		boolean isFactoryBean = false;
+		try {
+			Class scriptedObjectType = scriptFactory.getScriptedObjectType(scriptSource);
+			// returned type may be null if the factory is unable to determine
+			if (scriptedObjectType != null) {
+				isFactoryBean = FactoryBean.class.isAssignableFrom(scriptedObjectType);
+			}
+		}
+		catch (Exception e) {
+			throw new BeanCreationException("Unable to create scripted object: " + beanName, e);
+		}
+
 		long refreshCheckDelay = resolveRefreshCheckDelay(bd);
 		if (refreshCheckDelay >= 0) {
-			ScriptFactory scriptFactory =
-					(ScriptFactory) this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
-			ScriptSource scriptSource =
-					getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
 			Class[] interfaces = scriptFactory.getScriptInterfaces();
 			RefreshableScriptTargetSource ts =
-					new RefreshableScriptTargetSource(this.scriptBeanFactory, scriptedObjectBeanName, scriptSource);
+					new RefreshableScriptTargetSource(this.scriptBeanFactory, scriptedObjectBeanName, scriptSource, isFactoryBean);
 			ts.setRefreshCheckDelay(refreshCheckDelay);
 			return createRefreshableProxy(ts, interfaces);
 		}
 
+		if (isFactoryBean) {
+			scriptedObjectBeanName = BeanFactory.FACTORY_BEAN_PREFIX + scriptedObjectBeanName;
+		}
 		return this.scriptBeanFactory.getBean(scriptedObjectBeanName);
 	}
 

@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  * @author Rob Harrop
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 2.0
  * @see org.springframework.beans.factory.BeanFactory
  * @see #requiresRefresh()
@@ -58,11 +59,21 @@ public class BeanFactoryRefreshableTargetSource extends AbstractRefreshableTarge
 
 
 	/**
-	 * Fetch a new target bean instance from the bean factory.
+	 * Retrieve a fresh target object.
+	 */
+	protected final Object freshTarget() {
+		return this.obtainFreshBean(this.beanFactory, this.beanName);
+	}
+
+	/**
+	 * A template method that subclasses may override to provide a
+	 * fresh target object for the given bean factory and bean name.
+	 * <p>This default implementation fetches a new target bean
+	 * instance from the bean factory.
 	 * @see org.springframework.beans.factory.BeanFactory#getBean
 	 */
-	protected Object freshTarget() {
-		return this.beanFactory.getBean(this.beanName);
+	protected Object obtainFreshBean(BeanFactory beanFactory, String beanName) {
+		return beanFactory.getBean(beanName);
 	}
 
 }
