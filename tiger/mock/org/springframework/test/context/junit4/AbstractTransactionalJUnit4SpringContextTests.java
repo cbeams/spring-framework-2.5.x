@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.jdbc.SimpleJdbcTestUtils;
@@ -31,18 +32,30 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * <p>
  * Abstract {@link Transactional transactional} extension of
- * {@link AbstractJUnit4SpringContextTests} that also adds some convenience
- * functionality for JDBC access. Expects a {@link DataSource} bean and a
+ * {@link AbstractJUnit4SpringContextTests} which adds convenience functionality
+ * for JDBC access. Expects a {@link DataSource} bean and a
  * {@link PlatformTransactionManager} bean to be defined in the Spring
  * {@link ApplicationContext application context}.
  * </p>
  * <p>
  * This class exposes a {@link SimpleJdbcTemplate} and provides an easy way to
- * delete from the database in a new transaction.
+ * {@link #countRowsInTable(String) count the number of rows in a table} ,
+ * {@link #deleteFromTables(String...) delete from the database} , and
+ * {@link #executeSqlScript(String, boolean) execute SQL scripts} within a
+ * transaction.
  * </p>
  * <p>
  * Concrete subclasses must fulfill the same requirements outlined in
  * {@link AbstractJUnit4SpringContextTests}.
+ * </p>
+ * <p>
+ * Note: this class serves only as a convenience for extension. If you do not
+ * wish for your test classes to be tied to a Spring-specific class hierarchy,
+ * you may configure your own custom test classes by using
+ * {@link SpringJUnit4ClassRunner},
+ * {@link ContextConfiguration @ContextConfiguration},
+ * {@link TestExecutionListeners @TestExecutionListeners},
+ * {@link Transactional @Transactional}, etc.
  * </p>
  *
  * @author Sam Brannen

@@ -19,6 +19,7 @@ package org.springframework.test.context.junit4;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.runner.RunWith;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
@@ -36,14 +37,6 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * environment.
  * </p>
  * <p>
- * This class serves only as a convenience for extension. If you do not wish for
- * your test classes to be tied to a Spring-specific class hierarchy, you may
- * configure your own custom test classes by using
- * {@link SpringJUnit4ClassRunner},
- * {@link ContextConfiguration @ContextConfiguration},
- * {@link TestExecutionListeners @TestExecutionListeners}, etc.
- * </p>
- * <p>
  * Concrete subclasses should typically declare a class-level
  * {@link ContextConfiguration @ContextConfiguration} annotation to configure
  * the {@link ApplicationContext application context}
@@ -53,6 +46,14 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * and to configure the appropriate
  * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners}
  * manually.</em>
+ * </p>
+ * <p>
+ * Note: this class serves only as a convenience for extension. If you do not
+ * wish for your test classes to be tied to a Spring-specific class hierarchy,
+ * you may configure your own custom test classes by using
+ * {@link SpringJUnit4ClassRunner},
+ * {@link ContextConfiguration @ContextConfiguration},
+ * {@link TestExecutionListeners @TestExecutionListeners}, etc.
  * </p>
  *
  * @author Sam Brannen

@@ -31,14 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * <p>
  * Abstract {@link Transactional transactional} extension of
- * {@link AbstractJUnit38SpringContextTests} that also adds some convenience
+ * {@link AbstractJUnit38SpringContextTests} which adds convenience
  * functionality for JDBC access. Expects a {@link javax.sql.DataSource} bean
  * and a {@link PlatformTransactionManager} bean to be defined in the Spring
  * {@link ApplicationContext application context}.
  * </p>
  * <p>
  * This class exposes a {@link SimpleJdbcTemplate} and provides an easy way to
- * delete from the database in a new transaction.
+ * {@link #countRowsInTable(String) count the number of rows in a table} ,
+ * {@link #deleteFromTables(String...) delete from the database} , and
+ * {@link #executeSqlScript(String, boolean) execute SQL scripts} within a
+ * transaction.
  * </p>
  * <p>
  * Concrete subclasses must fulfill the same requirements outlined in
@@ -55,6 +58,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.transaction.annotation.Transactional
  * @see org.springframework.test.annotation.NotTransactional
  * @see org.springframework.test.annotation.Rollback
+ * @see org.springframework.test.context.transaction.BeforeTransaction
+ * @see org.springframework.test.context.transaction.AfterTransaction
  * @see org.springframework.test.jdbc.SimpleJdbcTestUtils
  * @see org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests

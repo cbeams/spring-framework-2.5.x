@@ -31,14 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * <p>
  * Abstract {@link Transactional transactional} extension of
- * {@link AbstractTestNGSpringContextTests} that also adds some convenience
- * functionality for JDBC access. Expects a {@link DataSource} bean and a
+ * {@link AbstractTestNGSpringContextTests} which adds convenience functionality
+ * for JDBC access. Expects a {@link DataSource} bean and a
  * {@link PlatformTransactionManager} bean to be defined in the Spring
  * {@link ApplicationContext application context}.
  * </p>
  * <p>
  * This class exposes a {@link SimpleJdbcTemplate} and provides an easy way to
- * delete from the database in a new transaction.
+ * {@link #countRowsInTable(String) count the number of rows in a table} ,
+ * {@link #deleteFromTables(String...) delete from the database} , and
+ * {@link #executeSqlScript(String, boolean) execute SQL scripts} within a
+ * transaction.
  * </p>
  * <p>
  * Concrete subclasses must fulfill the same requirements outlined in
