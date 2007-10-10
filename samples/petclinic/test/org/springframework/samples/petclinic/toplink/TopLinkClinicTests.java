@@ -16,18 +16,23 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
 
 /**
- * Live unit tests for TopLinkClinic implementation.
- * "applicationContext-toplink.xml" determines the actual beans to test.
+ * <p>
+ * Integration tests for the {@link TopLinkClinic} implementation.
+ * </p>
+ * <p>
+ * &quot;TopLinkClinicTests-context.xml&quot; determines the actual beans to
+ * test.
+ * </p>
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 1.2
  */
-@ContextConfiguration(locations = { "applicationContext-toplink.xml" })
+@ContextConfiguration
 public class TopLinkClinicTests extends AbstractClinicTests {
 
-	protected String testMethodName = null;
 	protected int originalNumOwners = -1;
+	protected String testMethodName = null;
 
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
@@ -38,8 +43,8 @@ public class TopLinkClinicTests extends AbstractClinicTests {
 	@Test
 	@Rollback(false)
 	@Override
-	public void testInsertOwner() {
-		this.testMethodName = "testInsertOwner";
+	public void insertOwner() {
+		this.testMethodName = "insertOwner";
 		Collection<Owner> owners = this.clinic.findOwners("Schultz");
 		int found = owners.size();
 		this.originalNumOwners = found;
@@ -55,8 +60,8 @@ public class TopLinkClinicTests extends AbstractClinicTests {
 		// transaction) within the integration test.
 		//
 		// Also need to remove the @Rollback(false) declaration as well as the
-		// afterTransaction() method (and perhaps even the complete, overridden
-		// version of testInsertOwner() as well).
+		// verifyStateAfterTransaction() method (and perhaps even the complete,
+		// overridden version of insertOwner() as well).
 		//
 		// Note that TopLinkClinic.storeOwner(Owner) actually works fine when
 		// the transaction is committed (e.g., when deployed in a web app or
@@ -68,8 +73,8 @@ public class TopLinkClinicTests extends AbstractClinicTests {
 	}
 
 	@AfterTransaction
-	public void afterTransaction() {
-		if ("testInsertOwner".equals(this.testMethodName)) {
+	public void verifyStateAfterTransaction() {
+		if ("insertOwner".equals(this.testMethodName)) {
 			final Collection<Owner> owners = this.clinic.findOwners("Schultz");
 			assertEquals("Verifying number of owners with last name [" + "Schultz"
 					+ "] after the transaction has ended.", this.originalNumOwners + 1, owners.size());

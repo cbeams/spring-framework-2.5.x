@@ -7,42 +7,82 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.Date;
 
-import javax.sql.DataSource;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.samples.petclinic.util.EntityUtils;
-import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Base class for Clinic tests. Allows subclasses to specify context locations.
  * <p>
- * This class extends {@link AbstractTransactionalDataSourceSpringContextTests},
- * one of the valuable test superclasses provided in the
- * org.springframework.test package. This represents best practice for
- * integration tests with Spring.
+ * Base class for {@link Clinic} integration tests.
+ * </p>
  * <p>
- * The AbstractTransactionalDataSourceSpringContextTests superclass provides the
- * following services:
- * <li>Injects test dependencies, meaning that we don't need to perform
- * application context lookups. See the setClinic() method. Injection uses
- * autowiring by type.
- * <li>Executes each test method in its own transaction, which is automatically
- * rolled back by default. This means that even if tests insert or otherwise
- * change database state, there is no need for a teardown or cleanup script.
- * <li>Provides useful inherited protected fields, such as a JdbcTemplate that
- * can be used to verify database state after test operations, or verify the
- * results of queries performed by application code. An ApplicationContext is
- * also inherited, and can be used for explicit lookup if necessary.
+ * &quot;AbstractClinicTests-context.xml&quot; declares a common
+ * {@link javax.sql.DataSource DataSource}. Subclasses should specify
+ * additional context locations which declare a
+ * {@link org.springframework.transaction.PlatformTransactionManager PlatformTransactionManager}
+ * and a concrete implementation of {@link Clinic}.
+ * </p>
  * <p>
- * {@link AbstractTransactionalDataSourceSpringContextTests} and related classes
- * are shipped in <code>spring-mock.jar</code>.
+ * This class extends {@link AbstractTransactionalJUnit4SpringContextTests},
+ * one of the valuable testing support classes provided by the
+ * <em>Spring TestContext Framework</em> found in the
+ * <code>org.springframework.test.context</code> package. The
+ * annotation-driven configuration used here represents best practice for
+ * integration tests with Spring. Note, however, that
+ * AbstractTransactionalJUnit4SpringContextTests serves only as a convenience
+ * for extension. For example, if you do not wish for your test classes to be
+ * tied to a Spring-specific class hierarchy, you may configure your tests with
+ * annotations such as {@link ContextConfiguration @ContextConfiguration},
+ * {@link TestExecutionListeners @TestExecutionListeners},
+ * {@link Transactional @Transactional}, etc.
+ * </p>
+ * <p>
+ * AbstractClinicTests and its subclasses benefit from the following services
+ * provided by the Spring TestContext Framework:
+ * </p>
+ * <ul>
+ * <li><strong>Spring IoC container caching</strong> which spares us
+ * unnecessary set up time between test execution.</li>
+ * <li><strong>Dependency Injection</strong> of test fixture instances,
+ * meaning that we don't need to perform application context lookups. See the
+ * use of {@link Autowired @Autowired} on the <code>clinic</code> instance
+ * variable, which uses autowiring <em>by type</em>. As an alternative, we
+ * could annotate <code>clinic</code> with
+ * {@link javax.annotation.Resource @Resource} to achieve dependency injection
+ * <em>by name</em>.
+ * <em>(see: {@link ContextConfiguration @ContextConfiguration},
+ * {@link DependencyInjectionTestExecutionListener})</em></li>
+ * <li><strong>Transaction management</strong>, meaning each test method is
+ * executed in its own transaction, which is automatically rolled back by
+ * default. Thus, even if tests insert or otherwise change database state, there
+ * is no need for a teardown or cleanup script.
+ * <em>(see: {@link TransactionConfiguration @TransactionConfiguration},
+ * {@link Transactional @Transactional},
+ * {@link TransactionalTestExecutionListener})</em></li>
+ * <li><strong>Useful inherited protected fields</strong>, such as a
+ * {@link SimpleJdbcTemplate} that can be used to verify database state after
+ * test operations or to verify the results of queries performed by application
+ * code. An
+ * {@link org.springframework.context.ApplicationContext ApplicationContext} is
+ * also inherited and can be used for explicit bean lookup if necessary.
+ * <em>(see: {@link org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests AbstractJUnit4SpringContextTests},
+ * {@link AbstractTransactionalJUnit4SpringContextTests})</em></li>
+ * </ul>
+ * <p>
+ * The Spring TestContext Framework and related unit and integration testing
+ * support classes are shipped in <code>spring-test.jar</code>.
+ * </p>
  *
  * @author Ken Krebs
  * @author Rod Johnson
@@ -51,36 +91,20 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
-@ContextConfiguration(locations = { "applicationContext-dataSourceCommon.xml" })
-public abstract class AbstractClinicTests {
+@ContextConfiguration
+public abstract class AbstractClinicTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@Autowired
 	protected Clinic clinic;
 
-	/**
-	 * The SimpleJdbcTemplate that this base class manages, available to
-	 * subclasses.
-	 */
-	protected SimpleJdbcTemplate simpleJdbcTemplate;
-
-
-	/**
-	 * Set the DataSource, typically provided via Dependency Injection.
-	 *
-	 * @param dataSource The DataSource to inject.
-	 */
-	@Autowired
-	public void setDataSource(final DataSource dataSource) {
-		this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
-	}
 
 	@Test
-	public void testGetVets() {
+	public void getVets() {
 		Collection<Vet> vets = this.clinic.getVets();
 
-		// Use the inherited JdbcTemplate (from
-		// AbstractTransactionalDataSourceSpringContextTests)
-		// to verify the results of the query
+		// Use the inherited SimpleJdbcTemplate (from
+		// AbstractTransactionalJUnit4SpringContextTests) to verify the results
+		// of the query.
 		assertEquals("JDBC query must show the same number of vets",
 				this.simpleJdbcTemplate.queryForInt("SELECT COUNT(0) FROM VETS"), vets.size());
 		Vet v1 = EntityUtils.getById(vets, Vet.class, 2);
@@ -95,7 +119,7 @@ public abstract class AbstractClinicTests {
 	}
 
 	@Test
-	public void testGetPetTypes() {
+	public void getPetTypes() {
 		Collection<PetType> petTypes = this.clinic.getPetTypes();
 		assertEquals("JDBC query must show the same number of pet typess",
 				this.simpleJdbcTemplate.queryForInt("SELECT COUNT(0) FROM TYPES"), petTypes.size());
@@ -106,7 +130,7 @@ public abstract class AbstractClinicTests {
 	}
 
 	@Test
-	public void testFindOwners() {
+	public void findOwners() {
 		Collection<Owner> owners = this.clinic.findOwners("Davis");
 		assertEquals(2, owners.size());
 		owners = this.clinic.findOwners("Daviss");
@@ -114,7 +138,7 @@ public abstract class AbstractClinicTests {
 	}
 
 	@Test
-	public void testLoadOwner() {
+	public void loadOwner() {
 		Owner o1 = this.clinic.loadOwner(1);
 		assertTrue(o1.getLastName().startsWith("Franklin"));
 		Owner o10 = this.clinic.loadOwner(10);
@@ -123,7 +147,7 @@ public abstract class AbstractClinicTests {
 		// XXX: Add programmatic support for ending transactions with the
 		// TestContext Framework.
 
-		// Check lazy loading, by ending the transaction
+		// Check lazy loading, by ending the transaction:
 		// endTransaction();
 
 		// Now Owners are "disconnected" from the data store.
@@ -133,7 +157,7 @@ public abstract class AbstractClinicTests {
 	}
 
 	@Test
-	public void testInsertOwner() {
+	public void insertOwner() {
 		Collection<Owner> owners = this.clinic.findOwners("Schultz");
 		int found = owners.size();
 		Owner owner = new Owner();
@@ -145,7 +169,7 @@ public abstract class AbstractClinicTests {
 	}
 
 	@Test
-	public void testUpdateOwner() throws Exception {
+	public void updateOwner() throws Exception {
 		Owner o1 = this.clinic.loadOwner(1);
 		String old = o1.getLastName();
 		o1.setLastName(old + "X");
@@ -155,7 +179,7 @@ public abstract class AbstractClinicTests {
 	}
 
 	@Test
-	public void testLoadPet() {
+	public void loadPet() {
 		Collection<PetType> types = this.clinic.getPetTypes();
 		Pet p7 = this.clinic.loadPet(7);
 		assertTrue(p7.getName().startsWith("Samantha"));
@@ -168,7 +192,7 @@ public abstract class AbstractClinicTests {
 	}
 
 	@Test
-	public void testInsertPet() {
+	public void insertPet() {
 		Owner o6 = this.clinic.loadOwner(6);
 		int found = o6.getPets().size();
 		Pet pet = new Pet();
@@ -187,7 +211,7 @@ public abstract class AbstractClinicTests {
 	}
 
 	@Test
-	public void testUpdatePet() throws Exception {
+	public void updatePet() throws Exception {
 		Pet p7 = this.clinic.loadPet(7);
 		String old = p7.getName();
 		p7.setName(old + "X");
@@ -197,7 +221,7 @@ public abstract class AbstractClinicTests {
 	}
 
 	@Test
-	public void testInsertVisit() {
+	public void insertVisit() {
 		Pet p7 = this.clinic.loadPet(7);
 		int found = p7.getVisits().size();
 		Visit visit = new Visit();

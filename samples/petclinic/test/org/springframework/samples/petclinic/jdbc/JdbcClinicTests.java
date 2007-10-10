@@ -7,13 +7,17 @@ import org.springframework.samples.petclinic.AbstractClinicTests;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
- * Live unit tests for HsqlJdbcClinic implementation.
- * "applicationContext-jdbc.xml" determines the actual beans to test.
+ * <p>
+ * Integration tests for the {@link HsqlJdbcClinic} implementation.
+ * </p>
+ * <p>
+ * "JdbcClinicTests-context.xml" determines the actual beans to test.
+ * </p>
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-@ContextConfiguration(locations = { "applicationContext-jdbc.xml" })
+@ContextConfiguration
 public class JdbcClinicTests extends AbstractClinicTests {
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.

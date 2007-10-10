@@ -7,13 +7,17 @@ import org.springframework.samples.petclinic.AbstractClinicTests;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
- * Live unit tests for HibernateClinic implementation.
- * "applicationContext-hibernate.xml" determines the actual beans to test.
+ * <p>
+ * Integration tests for the {@link HibernateClinic} implementation.
+ * </p>
+ * <p>
+ * "HibernateClinicTests-context.xml" determines the actual beans to test.
+ * </p>
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-@ContextConfiguration(locations = { "applicationContext-hibernate.xml" })
+@ContextConfiguration
 public class HibernateClinicTests extends AbstractClinicTests {
 
 	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
