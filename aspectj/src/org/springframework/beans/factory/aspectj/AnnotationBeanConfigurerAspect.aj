@@ -39,7 +39,7 @@ import org.springframework.beans.factory.annotation.Configurable;
  *   <li>Normal object creation via the '<code>new</code>' operator: this is
  *       taken care of by advising <code>initialization()</code> join points.</li>
  *   <li>Object creation through deserialization: since no constructor is
- *       invoked during deserialzation, the aspect needs to advise a method that a
+ *       invoked during deserialization, the aspect needs to advise a method that a
  *       deserialization mechanism is going to invoke. Ideally, we should not
  *       require user classes to implement any specific method. This implies that
  *       we need to <i>introduce</i> the chosen method. We should also handle the cases
@@ -142,7 +142,7 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractBeanConfigurerAspec
 	 * type that is also <code>&#64;Configurable</code>.
 	 */
 	private pointcut configurableObjectResolution() :
-		execution(Object Serializable+.readResolve() throws ObjectStreamException) &&
+		execution(Object ConfigurableDeserializationSupport+.readResolve() throws ObjectStreamException) &&
 		@this(Configurable);
 		
 	/**
