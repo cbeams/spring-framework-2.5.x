@@ -1,3 +1,4 @@
+
 package org.springframework.samples.petclinic.web;
 
 import javax.servlet.ServletException;
@@ -10,7 +11,8 @@ import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * JavaBean form controller that is used to add a new <code>Visit</code> to the system.
+ * JavaBean form controller that is used to add a new <code>Visit</code> to
+ * the system.
  *
  * @author Ken Krebs
  */
@@ -22,7 +24,11 @@ public class AddVisitForm extends AbstractClinicForm {
 		setSessionForm(true);
 	}
 
-	/** Method creates a new <code>Visit</code> with the correct <code>Pet</code> info */
+	/**
+	 * Method creates a new <code>Visit</code> with the correct
+	 * <code>Pet</code> info
+	 */
+	@Override
 	protected Object formBackingObject(HttpServletRequest request) throws ServletException {
 		Pet pet = getClinic().loadPet(ServletRequestUtils.getRequiredIntParameter(request, "petId"));
 		Visit visit = new Visit();
@@ -31,6 +37,7 @@ public class AddVisitForm extends AbstractClinicForm {
 	}
 
 	/** Method inserts a new <code>Visit</code>. */
+	@Override
 	protected ModelAndView onSubmit(Object command) throws ServletException {
 		Visit visit = (Visit) command;
 		// delegate the insert to the Business layer
@@ -38,6 +45,7 @@ public class AddVisitForm extends AbstractClinicForm {
 		return new ModelAndView(getSuccessView(), "ownerId", visit.getPet().getOwner().getId());
 	}
 
+	@Override
 	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		return disallowDuplicateFormSubmission(request, response);

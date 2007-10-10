@@ -1,3 +1,4 @@
+
 package org.springframework.samples.petclinic.validation;
 
 import org.springframework.samples.petclinic.Pet;
@@ -13,6 +14,7 @@ import org.springframework.validation.Validator;
  */
 public class PetValidator implements Validator {
 
+	@SuppressWarnings("unchecked")
 	public boolean supports(Class clazz) {
 		return Pet.class.isAssignableFrom(clazz);
 	}

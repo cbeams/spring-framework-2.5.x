@@ -1,3 +1,4 @@
+
 package org.springframework.samples.petclinic.jdbc;
 
 import java.sql.ResultSet;
@@ -6,7 +7,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +18,8 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.object.MappingSqlQuery;
 import org.springframework.jdbc.object.SqlUpdate;
 import org.springframework.orm.ObjectRetrievalFailureException;
-import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.BaseEntity;
+import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
@@ -34,6 +34,7 @@ import org.springframework.samples.petclinic.util.EntityUtils;
  * @author Ken Krebs
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Sam Brannen
  */
 public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clinic, CachingClinic {
 
@@ -52,7 +53,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	private VisitsQuery visitsQuery;
 	private VisitInsert visitInsert;
 
-	private final List vets = new ArrayList();
+	private final List<Vet> vets = new ArrayList<Vet>();
 
 
 	protected void initDao() {
@@ -72,36 +73,32 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		this.visitInsert = new VisitInsert(getDataSource());
 	}
 
+	@SuppressWarnings("unchecked")
 	public void refreshVetsCache() throws DataAccessException {
 		synchronized (this.vets) {
-			logger.info("Refreshing vets cache");
-			
+			this.logger.info("Refreshing vets cache");
+
 			// Retrieve the list of all vets.
 			this.vets.clear();
 			this.vets.addAll(this.vetsQuery.execute());
 
 			// Retrieve the list of all possible specialties.
-			List specialties = this.specialtiesQuery.execute();
+			final List<Specialty> specialties = this.specialtiesQuery.execute();
 
-				// Build each vet's list of specialties.
-			Iterator vi = this.vets.iterator();
-			while (vi.hasNext()) {
-				Vet vet = (Vet) vi.next();
-				List vetSpecialtiesIds = this.vetSpecialtiesQuery.execute(vet.getId().intValue());
-				Iterator vsi = vetSpecialtiesIds.iterator();
-				while (vsi.hasNext()) {
-					int specialtyId = ((Integer) vsi.next()).intValue();
-					Specialty specialty = (Specialty) EntityUtils.getById(specialties, Specialty.class, specialtyId);
+			// Build each vet's list of specialties.
+			for (Vet vet : this.vets) {
+				final List<Integer> vetSpecialtiesIds = this.vetSpecialtiesQuery.execute(vet.getId().intValue());
+				for (int specialtyId : vetSpecialtiesIds) {
+					Specialty specialty = EntityUtils.getById(specialties, Specialty.class, specialtyId);
 					vet.addSpecialty(specialty);
 				}
 			}
 		}
 	}
 
-
 	// START of Clinic implementation section *******************************
 
-	public Collection getVets() throws DataAccessException {
+	public Collection<Vet> getVets() throws DataAccessException {
 		synchronized (this.vets) {
 			if (this.vets.isEmpty()) {
 				refreshVetsCache();
@@ -110,13 +107,15 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-	public Collection getPetTypes() throws DataAccessException {
+	@SuppressWarnings("unchecked")
+	public Collection<PetType> getPetTypes() throws DataAccessException {
 		return this.petTypesQuery.execute();
 	}
 
 	/** Method loads owners plus pets and visits if not already loaded */
-	public Collection findOwners(String lastName) throws DataAccessException {
-		List owners = this.ownersByNameQuery.execute(lastName + "%");
+	@SuppressWarnings("unchecked")
+	public Collection<Owner> findOwners(String lastName) throws DataAccessException {
+		List<Owner> owners = this.ownersByNameQuery.execute(lastName + "%");
 		loadOwnersPetsAndVisits(owners);
 		return owners;
 	}
@@ -171,17 +170,15 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 	// END of Clinic implementation section *******************************
 
-
 	/**
 	 * Method maps a List of BaseEntity objects keyed to their ids.
+	 *
 	 * @param list List containing BaseEntity objects
 	 * @return Map containing BaseEntity objects
 	 */
-	protected final Map mapEntityList(List list) {
-		Map map = new HashMap();
-		Iterator iterator = list.iterator();
-		while (iterator.hasNext()) {
-			BaseEntity entity = (BaseEntity) iterator.next();
+	protected final Map<Integer, BaseEntity> mapEntityList(final List<BaseEntity> list) {
+		final Map<Integer, BaseEntity> map = new HashMap<Integer, BaseEntity>();
+		for (BaseEntity entity : list) {
 			map.put(entity.getId(), entity);
 		}
 		return map;
@@ -190,48 +187,46 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	/**
 	 * Method to retrieve the <code>Visit</code> data for a <code>Pet</code>.
 	 */
+	@SuppressWarnings("unchecked")
 	protected void loadVisits(JdbcPet pet) {
-		pet.setType((PetType) EntityUtils.getById(getPetTypes(), PetType.class, pet.getTypeId()));
-		List visits = this.visitsQuery.execute(pet.getId().intValue());
-		Iterator vi = visits.iterator();
-		while (vi.hasNext()) {
-			Visit visit = (Visit) vi.next();
+		pet.setType(EntityUtils.getById(getPetTypes(), PetType.class, pet.getTypeId()));
+		final List<Visit> visits = this.visitsQuery.execute(pet.getId().intValue());
+		for (Visit visit : visits) {
 			pet.addVisit(visit);
 		}
 	}
 
 	/**
-	 * Method to retrieve the <code>Pet</code> and <code>Visit</code>
-	 * data for an <code>Owner</code>.
+	 * Method to retrieve the <code>Pet</code> and <code>Visit</code> data
+	 * for an <code>Owner</code>.
 	 */
-	protected void loadPetsAndVisits(Owner owner) {
-		List pets = this.petsByOwnerQuery.execute(owner.getId().intValue());
-		Iterator pi = pets.iterator();
-		while (pi.hasNext()) {
-			JdbcPet pet = (JdbcPet) pi.next();
+	@SuppressWarnings("unchecked")
+	protected void loadPetsAndVisits(final Owner owner) {
+		final List<JdbcPet> pets = this.petsByOwnerQuery.execute(owner.getId().intValue());
+		for (JdbcPet pet : pets) {
 			owner.addPet(pet);
 			loadVisits(pet);
 		}
 	}
 
 	/**
-	 * Method to retrieve a <code>List</code> of <code>Owner</code>s
-	 * and their <code>Pet</code> and <code>Visit</code> data.
+	 * Method to retrieve a <code>List</code> of <code>Owner</code>s and
+	 * their <code>Pet</code> and <code>Visit</code> data.
+	 *
 	 * @param owners <code>List</code>.
 	 * @see #loadPetsAndVisits(Owner)
 	 */
-	protected void loadOwnersPetsAndVisits(List owners) {
-		Iterator oi = owners.iterator();
-		while (oi.hasNext()) {
-			Owner owner = (Owner) oi.next();
+	protected void loadOwnersPetsAndVisits(List<Owner> owners) {
+		for (Owner owner : owners) {
 			loadPetsAndVisits(owner);
 		}
 	}
 
 	/**
-	 * Retrieve and set the identity for the given entity,
-	 * assuming that the last executed insert affected that entity
-	 * and generated an auto-increment value for it.
+	 * Retrieve and set the identity for the given entity, assuming that the
+	 * last executed insert affected that entity and generated an auto-increment
+	 * value for it.
+	 *
 	 * @param entity the entity object to retrieved the id for
 	 * @see #getIdentityQuery
 	 */
@@ -240,9 +235,9 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 	}
 
 	/**
-	 * Return the identity query for the particular database:
-	 * a query that can be used to retrieve the id of a row
-	 * that has just been inserted.
+	 * Return the identity query for the particular database: a query that can
+	 * be used to retrieve the id of a row that has just been inserted.
+	 *
 	 * @return the identity query
 	 */
 	protected abstract String getIdentityQuery();
@@ -257,6 +252,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of VetsQuery.
+		 *
 		 * @param ds the DataSource to use for the query
 		 * @param sql SQL string to use for the query
 		 */
@@ -266,6 +262,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of VetsQuery that returns all vets.
+		 *
 		 * @param ds the DataSource to use for the query
 		 */
 		protected VetsQuery(DataSource ds) {
@@ -282,7 +279,6 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-
 	/**
 	 * All <code>Vet</code>s specialties Query Object.
 	 */
@@ -290,6 +286,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of SpecialtiesQuery.
+		 *
 		 * @param ds the DataSource to use for the query
 		 */
 		protected SpecialtiesQuery(DataSource ds) {
@@ -305,7 +302,6 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-
 	/**
 	 * A particular <code>Vet</code>'s specialties Query Object.
 	 */
@@ -313,6 +309,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of VetSpecialtiesQuery.
+		 *
 		 * @param ds the DataSource to use for the query
 		 */
 		protected VetSpecialtiesQuery(DataSource ds) {
@@ -326,7 +323,6 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-
 	/**
 	 * Abstract base class for all <code>Owner</code> Query Objects.
 	 */
@@ -334,6 +330,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of OwnersQuery.
+		 *
 		 * @param ds the DataSource to use for the query
 		 * @param sql SQL string to use for the query
 		 */
@@ -353,7 +350,6 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-
 	/**
 	 * <code>Owner</code>s by last name Query Object.
 	 */
@@ -361,6 +357,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of OwnersByNameQuery.
+		 *
 		 * @param ds the DataSource to use for the query
 		 */
 		protected OwnersByNameQuery(DataSource ds) {
@@ -370,7 +367,6 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-
 	/**
 	 * <code>Owner</code> by id Query Object.
 	 */
@@ -378,6 +374,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of OwnerQuery.
+		 *
 		 * @param ds the DataSource to use for the query
 		 */
 		protected OwnerQuery(DataSource ds) {
@@ -387,7 +384,6 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-
 	/**
 	 * <code>Owner</code> Insert Object.
 	 */
@@ -395,6 +391,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of OwnerInsert.
+		 *
 		 * @param ds the DataSource to use for the insert
 		 */
 		protected OwnerInsert(DataSource ds) {
@@ -409,14 +406,12 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 
 		protected void insert(Owner owner) {
-			Object[] objs = new Object[] {
-				null, owner.getFirstName(), owner.getLastName(),
-				owner.getAddress(), owner.getCity(), owner.getTelephone()};
+			Object[] objs = new Object[] { null, owner.getFirstName(), owner.getLastName(), owner.getAddress(),
+				owner.getCity(), owner.getTelephone() };
 			super.update(objs);
 			retrieveIdentity(owner);
 		}
 	}
-
 
 	/**
 	 * <code>Owner</code> Update Object.
@@ -425,6 +420,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of OwnerUpdate.
+		 *
 		 * @param ds the DataSource to use for the update
 		 */
 		protected OwnerUpdate(DataSource ds) {
@@ -440,16 +436,15 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Method to update an <code>Owner</code>'s data.
+		 *
 		 * @param owner to update
 		 * @return the number of rows affected by the update
 		 */
 		protected int update(Owner owner) {
-			return this.update(new Object[] {
-				owner.getFirstName(), owner.getLastName(), owner.getAddress(),
-				owner.getCity(), owner.getTelephone(), owner.getId()});
+			return this.update(new Object[] { owner.getFirstName(), owner.getLastName(), owner.getAddress(),
+				owner.getCity(), owner.getTelephone(), owner.getId() });
 		}
 	}
-
 
 	/**
 	 * Abstract base class for all <code>Pet</code> Query Objects.
@@ -458,6 +453,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of PetsQuery.
+		 *
 		 * @param ds the DataSource to use for the query
 		 * @param sql SQL string to use for the query
 		 */
@@ -476,7 +472,6 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-
 	/**
 	 * <code>Pet</code>s by <code>Owner</code> Query Object.
 	 */
@@ -484,6 +479,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of PetsByOwnerQuery.
+		 *
 		 * @param ds the DataSource to use for the query
 		 */
 		protected PetsByOwnerQuery(DataSource ds) {
@@ -493,14 +489,14 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-
 	/**
 	 * <code>Pet</code> by id Query Object.
 	 */
-    protected class PetQuery extends PetsQuery {
+	protected class PetQuery extends PetsQuery {
 
 		/**
 		 * Create a new instance of PetQuery.
+		 *
 		 * @param ds the DataSource to use for the query
 		 */
 		protected PetQuery(DataSource ds) {
@@ -510,7 +506,6 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-
 	/**
 	 * <code>Pet</code> Insert Object.
 	 */
@@ -518,6 +513,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of PetInsert.
+		 *
 		 * @param ds the DataSource to use for the insert
 		 */
 		protected PetInsert(DataSource ds) {
@@ -532,17 +528,16 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Method to insert a new <code>Pet</code>.
+		 *
 		 * @param pet to insert
 		 */
 		protected void insert(Pet pet) {
-			Object[] objs = new Object[] {
-				null, pet.getName(), new java.sql.Date(pet.getBirthDate().getTime()),
-				pet.getType().getId(), pet.getOwner().getId()};
+			Object[] objs = new Object[] { null, pet.getName(), new java.sql.Date(pet.getBirthDate().getTime()),
+				pet.getType().getId(), pet.getOwner().getId() };
 			super.update(objs);
 			retrieveIdentity(pet);
 		}
 	}
-
 
 	/**
 	 * <code>Pet</code> Update Object.
@@ -551,6 +546,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of PetUpdate.
+		 *
 		 * @param ds the DataSource to use for the update
 		 */
 		protected PetUpdate(DataSource ds) {
@@ -565,16 +561,15 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Method to update an <code>Pet</code>'s data.
+		 *
 		 * @param pet to update
 		 * @return the number of rows affected by the update
 		 */
 		protected int update(Pet pet) {
-			return this.update(new Object[] {
-				pet.getName(), new java.sql.Date(pet.getBirthDate().getTime()),
-				pet.getType().getId(), pet.getOwner().getId(), pet.getId()});
+			return this.update(new Object[] { pet.getName(), new java.sql.Date(pet.getBirthDate().getTime()),
+				pet.getType().getId(), pet.getOwner().getId(), pet.getId() });
 		}
 	}
-
 
 	/**
 	 * All <code>Pet</code> types Query Object.
@@ -583,6 +578,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of PetTypesQuery.
+		 *
 		 * @param ds the DataSource to use for the query
 		 */
 		protected PetTypesQuery(DataSource ds) {
@@ -598,7 +594,6 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-
 	/**
 	 * <code>Visit</code>s by <code>Pet</code> Query Object.
 	 */
@@ -606,6 +601,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of VisitsQuery.
+		 *
 		 * @param ds the DataSource to use for the query
 		 */
 		protected VisitsQuery(DataSource ds) {
@@ -623,7 +619,6 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 		}
 	}
 
-
 	/**
 	 * <code>Visit</code> Insert Object.
 	 */
@@ -631,6 +626,7 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Create a new instance of VisitInsert.
+		 *
 		 * @param ds the DataSource to use for the insert
 		 */
 		protected VisitInsert(DataSource ds) {
@@ -644,12 +640,12 @@ public abstract class AbstractJdbcClinic extends JdbcDaoSupport implements Clini
 
 		/**
 		 * Method to insert a new <code>Visit</code>.
+		 *
 		 * @param visit to insert
 		 */
 		protected void insert(Visit visit) {
-			super.update(new Object[] {
-				null, visit.getPet().getId(), new java.sql.Date(visit.getDate().getTime()),
-				visit.getDescription()});
+			super.update(new Object[] { null, visit.getPet().getId(), new java.sql.Date(visit.getDate().getTime()),
+				visit.getDescription() });
 			retrieveIdentity(visit);
 		}
 	}

@@ -22,7 +22,7 @@
 	<property name="spring.root" value="../.."/>
 	<property name="domain.classes" value="org/springframework/samples/petclinic/*.class"/>
 	<property name="tomcat.context" value="tomcat/META-INF"/>
-	
+
 	<property file="build.properties"/>
 
 
@@ -51,7 +51,7 @@
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
-	
+
 	</path>
 
 
@@ -70,7 +70,6 @@
 
 
 	<path id="test-classpath">
-
 		<fileset dir="${db.dir}/mysql">
 			<include name="mysql*.jar"/>
 		</fileset>
@@ -121,14 +120,25 @@
 			<include name="toplink-essentials.jar"/>
 			<include name="toplink.jar"/>
 			<include name="xmlparserv2.jar"/>
+			<include name="doctools.jar"/>
 		</fileset>
-
 		<fileset dir="${spring.root}/dist/modules">
 			<include name="spring-test.jar"/>
 		</fileset>
-
+		<fileset dir="${spring.root}/lib/junit">
+			<include name="junit-4.4.jar"/>
+		</fileset>
 	</path>
 
+	<condition property="toplink.available">
+		<and>
+			<available file="${spring.root}/lib/toplink/toplink.jar" />
+			<or>
+				<available file="${spring.root}/lib/toplink/xmlparserv2.jar" />
+				<available file="${spring.root}/lib/toplink/doctools.jar" />
+			</or>
+		</and>
+	</condition>
 
 	<target name="usage">
 
@@ -269,6 +279,7 @@
 				<include name="toplink-essentials.jar"/>
 				<include name="toplink.jar"/>
 				<include name="xmlparserv2.jar"/>
+				<include name="doctools.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
@@ -422,7 +433,6 @@
 		<javac srcdir="${testsrc.dir}" destdir="${testbuild.dir}" debug="true" deprecation="true">
 			<classpath path="${build.dir}"/>
 			<classpath refid="master-classpath"/>
-			<classpath path="${spring.root}/lib/junit/junit-4.4.jar"/>
 			<classpath refid="test-classpath"/>
 		</javac>
 
@@ -432,23 +442,36 @@
 			</fileset>
 			<fileset dir="${testsrc.dir}">
 				<include name="**/*.xml"/>
+				<include name="**/*.properties"/>
 			</fileset>
 		</copy>
 
-		<junit printsummary="true" fork="yes">
-			<formatter type="xml"/>
-			<test name="org.springframework.samples.petclinic.OwnerTests" todir="${testreports.dir}"/>
-			<test name="org.springframework.samples.petclinic.jdbc.JdbcClinicTests" todir="${testreports.dir}"/>
-			<test name="org.springframework.samples.petclinic.hibernate.HibernateClinicTests" todir="${testreports.dir}"/>
-			<test name="org.springframework.samples.petclinic.toplink.TopLinkClinicTests" todir="${testreports.dir}"/>
-			<test name="org.springframework.samples.petclinic.jpa.JpaTemplateClinicTests" todir="${testreports.dir}"/>
-			<test name="org.springframework.samples.petclinic.jpa.EntityManagerClinicTests" todir="${testreports.dir}"/>
-			<test name="org.springframework.samples.petclinic.jpa.HibernateEntityManagerClinicTests" todir="${testreports.dir}"/>
-			<test name="org.springframework.samples.petclinic.jpa.OpenJpaEntityManagerClinicTests" todir="${testreports.dir}"/>
+		<junit forkmode="perBatch" printsummary="true" haltonfailure="yes" haltonerror="yes">
 			<classpath path="${build.dir}"/>
 			<classpath path="${testbuild.dir}"/>
 			<classpath refid="master-classpath"/>
 			<classpath refid="test-classpath"/>
+
+			<!--
+				<formatter type="plain" usefile="false"/>
+			-->
+			<formatter type="xml" />
+
+			<batchtest fork="yes" todir="${testreports.dir}">
+				<fileset dir="${testbuild.dir}">
+					<include name="**/*Tests.class"/>
+					<exclude name="**/Abstract*Tests.class"/>
+					<exclude name="**/*SuiteTests.class"/>
+					<exclude name="**/TopLinkClinicTests.class"/>
+				</fileset>
+			</batchtest>
+
+			<batchtest if="toplink.available" fork="yes" todir="${testreports.dir}">
+				<fileset dir="${testbuild.dir}">
+					<include name="**/TopLink*Tests.class"/>
+				</fileset>
+			</batchtest>
+
 		</junit>
 
 		<junitreport todir="${testhtml.dir}">

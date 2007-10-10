@@ -5,9 +5,9 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
-		p:dataSource-ref="dataSource" />
+	<tx:annotation-driven />
 
-	<bean class="org.springframework.samples.petclinic.jdbc.HsqlJdbcClinic" p:dataSource-ref="dataSource" />
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+		p:driverClassName="org.hsqldb.jdbcDriver" p:url="jdbc:hsqldb:hsql://localhost:9001" p:username="sa" p:password="" />
 
 </beans>

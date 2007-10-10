@@ -1,3 +1,4 @@
+
 package org.springframework.samples.petclinic.web;
 
 import java.util.HashMap;
@@ -27,24 +28,29 @@ public class EditPetForm extends AbstractClinicForm {
 		setBindOnNewForm(true);
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
 	protected Map referenceData(HttpServletRequest request) throws ServletException {
 		Map refData = new HashMap();
 		refData.put("types", getClinic().getPetTypes());
 		return refData;
 	}
 
+	@Override
 	protected Object formBackingObject(HttpServletRequest request) throws ServletException {
 		// get the Pet referred to by id in the request
 		return getClinic().loadPet(ServletRequestUtils.getRequiredIntParameter(request, "petId"));
 	}
 
+	@Override
 	protected void onBind(HttpServletRequest request, Object command) throws ServletException {
 		Pet pet = (Pet) command;
 		int typeId = ServletRequestUtils.getRequiredIntParameter(request, "typeId");
-		pet.setType((PetType) EntityUtils.getById(getClinic().getPetTypes(), PetType.class, typeId));
+		pet.setType(EntityUtils.getById(getClinic().getPetTypes(), PetType.class, typeId));
 	}
 
 	/** Method updates an existing Pet */
+	@Override
 	protected ModelAndView onSubmit(Object command) throws ServletException {
 		Pet pet = (Pet) command;
 		// delegate the update to the business layer

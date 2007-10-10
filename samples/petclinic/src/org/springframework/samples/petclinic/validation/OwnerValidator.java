@@ -1,3 +1,4 @@
+
 package org.springframework.samples.petclinic.validation;
 
 import org.springframework.samples.petclinic.Owner;
@@ -14,6 +15,7 @@ import org.springframework.validation.Validator;
  */
 public class OwnerValidator implements Validator {
 
+	@SuppressWarnings("unchecked")
 	public boolean supports(Class clazz) {
 		return Owner.class.isAssignableFrom(clazz);
 	}

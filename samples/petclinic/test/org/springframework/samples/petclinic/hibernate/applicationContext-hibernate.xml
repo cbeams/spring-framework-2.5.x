@@ -1,20 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-<beans>
-
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName"><value>org.hsqldb.jdbcDriver</value></property>
-		<property name="url"><value>jdbc:hsqldb:hsql://localhost:9001</value></property>
-		<property name="username"><value>sa</value></property>
-		<property name="password"><value></value></property>
-	</bean>
-
-	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
-		<property name="dataSource"><ref local="dataSource"/></property>
-		<property name="mappingResources">
-			<value>petclinic.hbm.xml</value>
-		</property>
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"
+		p:dataSource-ref="dataSource" p:mappingResources="petclinic.hbm.xml">
 		<property name="hibernateProperties">
 			<props>
 				<prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
@@ -24,33 +16,16 @@
 		<property name="eventListeners">
 			<map>
 				<entry key="merge">
-					<bean class="org.springframework.orm.hibernate3.support.IdTransferringMergeEventListener"/>
+					<bean class="org.springframework.orm.hibernate3.support.IdTransferringMergeEventListener" />
 				</entry>
 			</map>
 		</property>
 	</bean>
 
-	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
-		<property name="sessionFactory"><ref local="sessionFactory"/></property>
-	</bean>
+	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"
+		p:sessionFactory-ref="sessionFactory" />
 
-	<!--
-		Note the use of an inner bean for the "target" property.
-		This ensures that there is only one instance of this bean in the
-		factory, allowing us to use autowire by type if necessary.
-	-->
-	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="transactionManager"/></property>
-		<property name="target">
-			<bean class="org.springframework.samples.petclinic.hibernate.HibernateClinic">
-				<property name="sessionFactory"><ref local="sessionFactory"/></property>
-			</bean>
-		</property>
-		<property name="transactionAttributes">
-			<props>
-				<prop key="*">PROPAGATION_REQUIRED</prop>
-			</props>
-		</property>
-	</bean>
+	<bean class="org.springframework.samples.petclinic.hibernate.HibernateClinic"
+		p:sessionFactory-ref="sessionFactory" />
 
 </beans>

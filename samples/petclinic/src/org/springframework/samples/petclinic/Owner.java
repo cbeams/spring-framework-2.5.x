@@ -1,20 +1,22 @@
+
 package org.springframework.samples.petclinic;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
+import org.springframework.core.style.ToStringCreator;
 
 /**
  * Simple JavaBean domain object representing an owner.
- * 
+ *
  * @author Ken Krebs
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class Owner extends Person {
 
@@ -24,7 +26,8 @@ public class Owner extends Person {
 
 	private String telephone;
 
-	private Set pets;
+	private Set<Pet> pets;
+
 
 	public String getAddress() {
 		return this.address;
@@ -50,19 +53,19 @@ public class Owner extends Person {
 		this.telephone = telephone;
 	}
 
-	protected void setPetsInternal(Set pets) {
+	protected void setPetsInternal(Set<Pet> pets) {
 		this.pets = pets;
 	}
 
-	protected Set getPetsInternal() {
+	protected Set<Pet> getPetsInternal() {
 		if (this.pets == null) {
-			this.pets = new HashSet();
+			this.pets = new HashSet<Pet>();
 		}
 		return this.pets;
 	}
 
-	public List getPets() {
-		List sortedPets = new ArrayList(getPetsInternal());
+	public List<Pet> getPets() {
+		List<Pet> sortedPets = new ArrayList<Pet>(getPetsInternal());
 		PropertyComparator.sort(sortedPets, new MutableSortDefinition("name", true, true));
 		return Collections.unmodifiableList(sortedPets);
 	}
@@ -74,7 +77,7 @@ public class Owner extends Person {
 
 	/**
 	 * Return the Pet with the given name, or null if none found for this Owner.
-	 * 
+	 *
 	 * @param name to test
 	 * @return true if pet name is already in use
 	 */
@@ -84,14 +87,13 @@ public class Owner extends Person {
 
 	/**
 	 * Return the Pet with the given name, or null if none found for this Owner.
-	 * 
+	 *
 	 * @param name to test
 	 * @return true if pet name is already in use
 	 */
 	public Pet getPet(String name, boolean ignoreNew) {
 		name = name.toLowerCase();
-		for (Iterator it = getPetsInternal().iterator(); it.hasNext();) {
-			Pet pet = (Pet) it.next();
+		for (Pet pet : getPetsInternal()) {
 			if (!ignoreNew || !pet.isNew()) {
 				String compName = pet.getName();
 				compName = compName.toLowerCase();
@@ -103,4 +105,24 @@ public class Owner extends Person {
 		return null;
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringCreator(this)
+
+		.append("id", this.getId())
+
+		.append("new", this.isNew())
+
+		.append("lastName", this.getLastName())
+
+		.append("firstName", this.getFirstName())
+
+		.append("address", this.address)
+
+		.append("city", this.city)
+
+		.append("telephone", this.telephone)
+
+		.toString();
+	}
 }

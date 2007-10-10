@@ -2,18 +2,31 @@
  * OwnerTests.java
  *
  */
- 
+
 package org.springframework.samples.petclinic;
 
-import junit.framework.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import junit.framework.JUnit4TestAdapter;
+
+import org.junit.Test;
+import org.junit.internal.runners.JUnit4ClassRunner;
+import org.junit.runner.RunWith;
 
 /**
- * 	JUnit test for Owner
- * 
+ * JUnit test for Owner
+ *
  * @author Ken Krebs
  */
-public class OwnerTests extends TestCase {
+@RunWith(JUnit4ClassRunner.class)
+public class OwnerTests {
 
+	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
+	public static junit.framework.Test suite() {
+		return new JUnit4TestAdapter(OwnerTests.class);
+	}
+
+	@Test
 	public void testHasPet() {
 		Owner owner = new Owner();
 		Pet fido = new Pet();
@@ -24,5 +37,4 @@ public class OwnerTests extends TestCase {
 		assertEquals(fido, owner.getPet("Fido"));
 		assertEquals(fido, owner.getPet("fido"));
 	}
-
 }

@@ -1,3 +1,4 @@
+
 package org.springframework.samples.petclinic.web;
 
 import java.util.HashMap;
@@ -15,7 +16,8 @@ import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * JavaBean form controller that is used to add a new <code>Pet</code> to the system.
+ * JavaBean form controller that is used to add a new <code>Pet</code> to the
+ * system.
  *
  * @author Ken Krebs
  */
@@ -27,12 +29,15 @@ public class AddPetForm extends AbstractClinicForm {
 		setSessionForm(true);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
 	protected Map referenceData(HttpServletRequest request) throws ServletException {
 		Map refData = new HashMap();
 		refData.put("types", getClinic().getPetTypes());
 		return refData;
 	}
 
+	@Override
 	protected Object formBackingObject(HttpServletRequest request) throws ServletException {
 		Owner owner = getClinic().loadOwner(ServletRequestUtils.getRequiredIntParameter(request, "ownerId"));
 		Pet pet = new Pet();
@@ -40,13 +45,15 @@ public class AddPetForm extends AbstractClinicForm {
 		return pet;
 	}
 
+	@Override
 	protected void onBind(HttpServletRequest request, Object command) {
 		Pet pet = (Pet) command;
 		int typeId = Integer.parseInt(request.getParameter("typeId"));
-		pet.setType((PetType) EntityUtils.getById(getClinic().getPetTypes(), PetType.class, typeId));
+		pet.setType(EntityUtils.getById(getClinic().getPetTypes(), PetType.class, typeId));
 	}
 
 	/** Method inserts a new Pet */
+	@Override
 	protected ModelAndView onSubmit(Object command) throws ServletException {
 		Pet pet = (Pet) command;
 		// delegate the insert to the Business layer
@@ -54,6 +61,7 @@ public class AddPetForm extends AbstractClinicForm {
 		return new ModelAndView(getSuccessView(), "ownerId", pet.getOwner().getId());
 	}
 
+	@Override
 	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 		return disallowDuplicateFormSubmission(request, response);

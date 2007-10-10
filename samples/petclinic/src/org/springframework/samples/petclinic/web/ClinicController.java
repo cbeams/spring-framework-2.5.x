@@ -1,3 +1,4 @@
+
 package org.springframework.samples.petclinic.web;
 
 import java.util.Map;
@@ -5,7 +6,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.ui.ModelMap;
@@ -19,28 +20,24 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
  * @author Ken Krebs
  * @author Rob Harrop
  */
-public class ClinicController extends MultiActionController implements InitializingBean {
+public class ClinicController extends MultiActionController {
 
 	private Clinic clinic;
 
 
+	@Required
 	public void setClinic(Clinic clinic) {
 		this.clinic = clinic;
 	}
 
-	public void afterPropertiesSet() {
-		if (this.clinic == null) {
-			throw new IllegalArgumentException("Property 'clinic' is required");
-		}
-	}
-
-
 	/**
 	 * Custom handler for the welcome view.
-	 * <p>Note that this handler returns an empty ModelAndView object.
-	 * It relies on the RequestToViewNameTranslator to come up with
-	 * a view name based on the request URL: "/welcome.html" -> "welcome",
-	 * plus configured "View" suffix -> "welcomeView".
+	 * <p>
+	 * Note that this handler returns an empty ModelAndView object. It relies on
+	 * the RequestToViewNameTranslator to come up with a view name based on the
+	 * request URL: "/welcome.html" -> "welcome", plus configured "View" suffix ->
+	 * "welcomeView".
+	 *
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response
@@ -51,26 +48,31 @@ public class ClinicController extends MultiActionController implements Initializ
 
 	/**
 	 * Custom handler for vets display.
-	 * <p>Note that this handler returns a plain ModelMap object instead of
-	 * a ModelAndView, also leveraging convention-based model attribute names.
-	 * It relies on the RequestToViewNameTranslator to come up with
-	 * a view name based on the request URL: "/vets.html" -> "vets",
-	 * plus configured "View" suffix -> "vetsView".
+	 * <p>
+	 * Note that this handler returns a plain ModelMap object instead of a
+	 * ModelAndView, also leveraging convention-based model attribute names. It
+	 * relies on the RequestToViewNameTranslator to come up with a view name
+	 * based on the request URL: "/vets.html" -> "vets", plus configured "View"
+	 * suffix -> "vetsView".
+	 *
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response
 	 */
+	@SuppressWarnings("unchecked")
 	public Map vetsHandler(HttpServletRequest request, HttpServletResponse response) {
 		return new ModelMap(this.clinic.getVets());
 	}
 
 	/**
 	 * Custom handler for owner display.
-	 * <p>Note that this handler usually returns a ModelAndView object
-	 * without view, also leveraging convention-based model attribute names.
-	 * It relies on the RequestToViewNameTranslator to come up with
-	 * a view name based on the request URL: "/owner.html" -> "owner",
-	 * plus configured "View" suffix -> "ownerView".
+	 * <p>
+	 * Note that this handler usually returns a ModelAndView object without
+	 * view, also leveraging convention-based model attribute names. It relies
+	 * on the RequestToViewNameTranslator to come up with a view name based on
+	 * the request URL: "/owner.html" -> "owner", plus configured "View" suffix ->
+	 * "ownerView".
+	 *
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response

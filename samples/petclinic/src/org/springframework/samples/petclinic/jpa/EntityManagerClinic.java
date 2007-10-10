@@ -1,3 +1,4 @@
+
 package org.springframework.samples.petclinic.jpa;
 
 import java.util.Collection;
@@ -18,59 +19,68 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * JPA implementation of the Clinic interface using EntityManager.
- *
- * <p>The mappings are defined in "orm.xml"
- * located in the META-INF dir.
+ * <p>
+ * The mappings are defined in "orm.xml" located in the META-INF directory.
  *
  * @author Mike Keith
  * @author Rod Johnson
+ * @author Sam Brannen
  * @since 22.4.2006
  */
-@Repository
 @Transactional
+@Repository
 public class EntityManagerClinic implements Clinic {
-	
+
 	@PersistenceContext
 	private EntityManager em;
 
+
+	@Transactional(readOnly = true)
+	@SuppressWarnings("unchecked")
 	public Collection<Vet> getVets() throws DataAccessException {
-		return em.createQuery("SELECT vet FROM Vet vet ORDER BY vet.lastName, vet.firstName").getResultList();
+		return this.em.createQuery("SELECT vet FROM Vet vet ORDER BY vet.lastName, vet.firstName").getResultList();
 	}
 
+	@Transactional(readOnly = true)
+	@SuppressWarnings("unchecked")
 	public Collection<PetType> getPetTypes() throws DataAccessException {
-		return em.createQuery("SELECT ptype FROM PetType ptype ORDER BY ptype.name").getResultList();
+		return this.em.createQuery("SELECT ptype FROM PetType ptype ORDER BY ptype.name").getResultList();
 	}
 
+	@Transactional(readOnly = true)
+	@SuppressWarnings("unchecked")
 	public Collection<Owner> findOwners(String lastName) throws DataAccessException {
-		Query query = em.createQuery("SELECT owner FROM Owner owner WHERE owner.lastName LIKE :lastName");
+		Query query = this.em.createQuery("SELECT owner FROM Owner owner WHERE owner.lastName LIKE :lastName");
 		query.setParameter("lastName", lastName + "%");
 		return query.getResultList();
 	}
 
+	@Transactional(readOnly = true)
 	public Owner loadOwner(int id) throws DataAccessException {
-		return em.find(Owner.class, id);	
+		return this.em.find(Owner.class, id);
 	}
 
+	@Transactional(readOnly = true)
 	public Pet loadPet(int id) throws DataAccessException {
-		return em.find(Pet.class, id);
+		return this.em.find(Pet.class, id);
 	}
 
 	public void storeOwner(Owner owner) throws DataAccessException {
 		// Consider returning the persistent object here, for exposing
 		// a newly assigned id using any persistence provider...
-		em.merge(owner);
+		this.em.merge(owner);
 	}
 
 	public void storePet(Pet pet) throws DataAccessException {
 		// Consider returning the persistent object here, for exposing
 		// a newly assigned id using any persistence provider...
-		em.merge(pet);
+		this.em.merge(pet);
 	}
 
 	public void storeVisit(Visit visit) throws DataAccessException {
 		// Consider returning the persistent object here, for exposing
 		// a newly assigned id using any persistence provider...
-		em.merge(visit);
+		this.em.merge(visit);
 	}
 
 }

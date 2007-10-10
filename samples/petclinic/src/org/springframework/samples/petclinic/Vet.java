@@ -1,3 +1,4 @@
+
 package org.springframework.samples.petclinic;
 
 import java.util.ArrayList;
@@ -14,24 +15,26 @@ import org.springframework.beans.support.PropertyComparator;
  *
  * @author Ken Krebs
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class Vet extends Person {
 
-	private Set specialties;
+	private Set<Specialty> specialties;
 
-	protected void setSpecialtiesInternal(Set specialties) {
+
+	protected void setSpecialtiesInternal(Set<Specialty> specialties) {
 		this.specialties = specialties;
 	}
 
-	protected Set getSpecialtiesInternal() {
+	protected Set<Specialty> getSpecialtiesInternal() {
 		if (this.specialties == null) {
-			this.specialties = new HashSet();
+			this.specialties = new HashSet<Specialty>();
 		}
 		return this.specialties;
 	}
 
-	public List getSpecialties() {
-		List sortedSpecs = new ArrayList(getSpecialtiesInternal());
+	public List<Specialty> getSpecialties() {
+		List<Specialty> sortedSpecs = new ArrayList<Specialty>(getSpecialtiesInternal());
 		PropertyComparator.sort(sortedSpecs, new MutableSortDefinition("name", true, true));
 		return Collections.unmodifiableList(sortedSpecs);
 	}

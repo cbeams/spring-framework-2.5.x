@@ -1,3 +1,4 @@
+
 package org.springframework.samples.petclinic;
 
 import java.util.ArrayList;
@@ -13,8 +14,9 @@ import org.springframework.beans.support.PropertyComparator;
 /**
  * Simple JavaBean business object representing a pet.
  *
- * @author  Ken Krebs
+ * @author Ken Krebs
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class Pet extends NamedEntity {
 
@@ -24,7 +26,8 @@ public class Pet extends NamedEntity {
 
 	private Owner owner;
 
-	private Set visits;
+	private Set<Visit> visits;
+
 
 	public void setBirthDate(Date birthDate) {
 		this.birthDate = birthDate;
@@ -39,7 +42,7 @@ public class Pet extends NamedEntity {
 	}
 
 	public PetType getType() {
-		return type;
+		return this.type;
 	}
 
 	protected void setOwner(Owner owner) {
@@ -47,22 +50,22 @@ public class Pet extends NamedEntity {
 	}
 
 	public Owner getOwner() {
-		return owner;
+		return this.owner;
 	}
 
-	protected void setVisitsInternal(Set visits) {
+	protected void setVisitsInternal(Set<Visit> visits) {
 		this.visits = visits;
 	}
 
-	protected Set getVisitsInternal() {
+	protected Set<Visit> getVisitsInternal() {
 		if (this.visits == null) {
-			this.visits = new HashSet();
+			this.visits = new HashSet<Visit>();
 		}
 		return this.visits;
 	}
 
-	public List getVisits() {
-		List sortedVisits = new ArrayList(getVisitsInternal());
+	public List<Visit> getVisits() {
+		List<Visit> sortedVisits = new ArrayList<Visit>(getVisitsInternal());
 		PropertyComparator.sort(sortedVisits, new MutableSortDefinition("date", false, false));
 		return Collections.unmodifiableList(sortedVisits);
 	}
