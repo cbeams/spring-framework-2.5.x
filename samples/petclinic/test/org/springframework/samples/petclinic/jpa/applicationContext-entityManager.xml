@@ -9,8 +9,6 @@
 
 	<aop:aspectj-autoproxy />
 
-	<tx:annotation-driven />
-
 	<bean class="org.springframework.samples.petclinic.aspects.UsageLogAspect" p:historySize="300" />
 
 	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
