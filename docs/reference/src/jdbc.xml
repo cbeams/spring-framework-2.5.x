@@ -1089,6 +1089,58 @@ jdbcTemplate.update(
       required connection lookup pattern. Note that JTA does not support
       custom isolation levels!</para>
     </section>
+
+    <section>
+      <title>NativeJdbcExtractor</title>
+
+      <para>There are times when we need to access vendor specific JDBC
+      methods that differ from the standard JDBC API. This can be problematic
+      if we are running in an application server or with a
+      <classname>DataSource</classname> that wraps the
+      <classname>Connection</classname>, <classname>Statement</classname> and
+      <classname>ResultSet</classname> objects with its own wrapper objects.
+      To gain access to the native objects you can configure your
+      <classname>JdbcTemplate</classname> or
+      <classname>OracleLobHandler</classname> with a
+      <classname>NativeJdbcExtractor</classname>. </para>
+
+      <para>The NativeJdbcExtractor comes in a variety of flavors to match
+      your execution environment:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>SimpleNativeJdbcExtractor</para>
+        </listitem>
+
+        <listitem>
+          <para>C3P0NativeJdbcExtractor</para>
+        </listitem>
+
+        <listitem>
+          <para>CommonsDbcpNativeJdbcExtractor</para>
+        </listitem>
+
+        <listitem>
+          <para>JBossNativeJdbcExtractor</para>
+        </listitem>
+
+        <listitem>
+          <para>WebLogicNativeJdbcExtractor</para>
+        </listitem>
+
+        <listitem>
+          <para>WebSphereNativeJdbcExtractor</para>
+        </listitem>
+
+        <listitem>
+          <para>XAPoolNativeJdbcExtractor</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Usually the <classname>SimpleNativeJdbcExtractor</classname> is
+      sufficent for unwrapping a <classname>Connection</classname> object in
+      most environments. See the Java Docs for more details.</para>
+    </section>
   </section>
 
   <section id="jdbc-advanced-jdbc">
@@ -2141,7 +2193,7 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
         <listitem>
           <para>Many of the update and query methods of the
           <classname>JdbcTemplate</classname> take an additional parameter in
-          the forn of an int array. This array should contain the SQL type
+          the form of an int array. This array should contain the SQL type
           using constant values from the <classname>java.sql.Types</classname>
           class. There must be one entry for each parameter.</para>
         </listitem>
@@ -2177,11 +2229,15 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
       CLOB for character data. Spring lets you handle these large objects
       using the JdbcTemplate directly and also when using the higher
       abtractions provided by RDBMS Objects and the SimpleJdbc classes. All of
-      these approaches use an implementation of the LobHandler interface for
-      the actual management of the LOB data. </para>
+      these approaches use an implementation of the
+      <classname>LobHandler</classname> interface for the actual management of
+      the LOB data. The <classname>LobHandler</classname> provides access to a
+      <classname>LobCreator</classname>, via the
+      <classname>getLobCreator</classname> method, for creating new LOB
+      objects to be inserted.</para>
 
-      <para>The LobHandler provides the following support for LOB in- and
-      output:</para>
+      <para>The <classname>LobCreator/LobHandler</classname> provides the
+      following support for LOB in- and output:</para>
 
       <para><itemizedlist>
           <listitem>
@@ -2220,9 +2276,103 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
           </listitem>
         </itemizedlist></para>
 
-      <para>TODO</para>
+      <para>We will now show an example of how to create and insert a BLOB. We
+      will later see how to read it back from the database. </para>
 
-      <para></para>
+      <para>This example uses a JdbcTemplate and an implementation of the
+      AbstractLobCreatingPreparedStatementCallback. There is one method that
+      must be implemented and it is "setValues". In this method you will be
+      provided with a LobCreator that can be used to set the values for the
+      LOB columns in your SQL insert statement. </para>
+
+      <para>We are assuming that we have a variable named 'lobHandler' thet
+      already is set to an instance of a
+      <classname>DefaultLobHandler</classname>. This is typically done using
+      dependecy injection.</para>
+
+      <programlistingco>
+        <areaspec>
+          <area coords="8" id="jdbc.lobhandler.variableref" />
+
+          <area coords="12" id="jdbc.lobhandler.setClob" />
+
+          <area coords="13" id="jdbc.lobhandler.setBlob" />
+        </areaspec>
+
+        <programlisting>final File blobIn = new File("spring2004.jpg");
+final InputStream blobIs = new FileInputStream(blobIn);
+final File clobIn = new File("large.txt");
+final InputStream clobIs = new FileInputStream(clobIn);
+final InputStreamReader clobReader = new InputStreamReader(clobIs);
+jdbcTemplate.execute(
+  "INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
+  new AbstractLobCreatingPreparedStatementCallback(lobhandler) {
+      protected void setValues(PreparedStatement ps, LobCreator lobCreator) 
+          throws SQLException {
+        ps.setLong(1, 1L);
+        lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length());
+        lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length());
+      }
+  }
+);
+blobIs.close();
+clobReader.close();</programlisting>
+
+        <calloutlist>
+          <callout arearefs="jdbc.lobhandler.variableref">
+            <para>Here we use the lobHandler that in this example is a plain
+            <classname>DefaultLobHandler</classname></para>
+          </callout>
+
+          <callout arearefs="jdbc.lobhandler.setClob">
+            <para>Using the method <classname>setClobAsCharacterStream
+            </classname>we pass in the contents of the CLOB </para>
+          </callout>
+
+          <callout arearefs="jdbc.lobhandler.setBlob">
+            <para>Using the method
+            <classname>setBlobAsBinartStream</classname> we pass in the
+            contents of the BLOB</para>
+          </callout>
+        </calloutlist>
+      </programlistingco>
+
+      <para>Now it's time to read the LOB data from the database. Again, we
+      use a JdbcTempate and we have the same instance variable 'lobHandler'
+      with a reference to a <classname>DefaultLobHandler</classname>. </para>
+
+      <para><programlistingco>
+          <areaspec>
+            <area coords="5" id="jdbc.lobhandler.getClob" />
+
+            <area coords="7" id="jdbc.lobhandler.getBlob" />
+          </areaspec>
+
+          <programlisting>List l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
+    new RowMapper() {
+      public Object mapRow(ResultSet rs, int i) throws SQLException {
+        Map results = new HashMap();
+        String clobText = lobHandler.getClobAsString(rs, "a_clob");
+        results.put("CLOB", clobText);
+        byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob");
+        results.put("BLOB", blobBytes);
+        return results;
+      }
+    });
+</programlisting>
+
+          <calloutlist>
+            <callout arearefs="jdbc.lobhandler.setClob">
+              <para>Using the method <classname>getClobAsString </classname>we
+              retreive the contents of the CLOB</para>
+            </callout>
+
+            <callout arearefs="jdbc.lobhandler.setBlob">
+              <para>Using the method <classname>getBlobAsBytes</classname> we
+              retreive the contents of the BLOB</para>
+            </callout>
+          </calloutlist>
+        </programlistingco></para>
     </section>
 
     <section>
