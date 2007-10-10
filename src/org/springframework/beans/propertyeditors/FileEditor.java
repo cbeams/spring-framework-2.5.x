@@ -38,7 +38,14 @@ import org.springframework.util.StringUtils;
  * As of Spring 2.0, it takes a standard Spring resource location as input;
  * this is consistent with URLEditor and InputStreamEditor now.
  *
+ * <p><b>NOTE:</b> In Spring 2.5 the following modification was made.
+ * If a file name is specified without a URL prefix or without an absolute path
+ * then we try to locate the file using standard ResourceLoader semantics.
+ * If the file was not found, then a File instance is created assuming the file
+ * name refers to a relative file location.
+ *
  * @author Juergen Hoeller
+ * @author Thomas Risberg
  * @since 09.12.2003
  * @see java.io.File
  * @see org.springframework.core.io.ResourceEditor
@@ -84,12 +91,20 @@ public class FileEditor extends PropertyEditorSupport {
 		// Proceed with standard resource location parsing.
 		this.resourceEditor.setAsText(text);
 		Resource resource = (Resource) this.resourceEditor.getValue();
-		try {
-			setValue(resource != null ? resource.getFile() : null);
+		// Non URLs will be treated as relative paths if the resource was not found
+		if(ResourceUtils.isUrl(text) || resource.exists()) {
+			try {
+				setValue(resource != null ? resource.getFile() : null);
+			}
+			catch (IOException ex) {
+				throw new IllegalArgumentException(
+						"Could not retrieve File for " + resource + ": " + ex.getMessage());
+			}
 		}
-		catch (IOException ex) {
-			throw new IllegalArgumentException(
-					"Could not retrieve File for " + resource + ": " + ex.getMessage());
+		else {
+			// Create a relative File reference and hope for the best
+			File file = new File(text);
+			setValue(file);
 		}
 	}
 
