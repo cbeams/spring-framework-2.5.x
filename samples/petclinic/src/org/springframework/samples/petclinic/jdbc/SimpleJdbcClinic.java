@@ -5,9 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -23,7 +21,6 @@ import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.orm.ObjectRetrievalFailureException;
-import org.springframework.samples.petclinic.BaseEntity;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.Pet;
@@ -184,15 +181,6 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 		}
 	}
 
-	private MapSqlParameterSource createPetParameterSource(Pet pet) {
-		return new MapSqlParameterSource()
-			.addValue("id", pet.getId())
-			.addValue("name", pet.getName())
-			.addValue("birth_date", pet.getBirthDate())
-			.addValue("type_id", pet.getType().getId())
-			.addValue("owner_id", pet.getOwner().getId());
-	}
-
 	public void storeVisit(Visit visit) throws DataAccessException {
 		if (visit.isNew()) {
 			Number newKey = this.insertVisit.executeAndReturnKey(
@@ -204,6 +192,17 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 		}
 	}
 
+	// END of Clinic implementation section *******************************
+
+	private MapSqlParameterSource createPetParameterSource(Pet pet) {
+		return new MapSqlParameterSource()
+			.addValue("id", pet.getId())
+			.addValue("name", pet.getName())
+			.addValue("birth_date", pet.getBirthDate())
+			.addValue("type_id", pet.getType().getId())
+			.addValue("owner_id", pet.getOwner().getId());
+	}
+
 	private MapSqlParameterSource createVisitParameterSource(Visit visit) {
 		return new MapSqlParameterSource()
 			.addValue("id", visit.getId())
@@ -212,27 +211,10 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 			.addValue("pet_id", visit.getPet().getId());
 	}
 
-	// END of Clinic implementation section *******************************
-
-	/**
-	 * Method maps a List of BaseEntity objects keyed to their ids.
-	 *
-	 * @param list List containing BaseEntity objects
-	 * @return Map containing BaseEntity objects
-	 */
-	protected final Map<Integer, BaseEntity> mapEntityList(final List<BaseEntity> list) {
-		final Map<Integer, BaseEntity> map = new HashMap<Integer, BaseEntity>();
-		for (BaseEntity entity : list) {
-			map.put(entity.getId(), entity);
-		}
-		return map;
-	}
-
 	/**
 	 * Method to retrieve the <code>Visit</code> data for a <code>Pet</code>.
 	 */
-	@SuppressWarnings("unchecked")
-	protected void loadVisits(JdbcPet pet) {
+	private void loadVisits(JdbcPet pet) {
 		pet.setType(EntityUtils.getById(getPetTypes(), PetType.class, pet.getTypeId()));
 		final List<Visit> visits = this.simpleJdbcTemplate.query(
 				"SELECT id, visit_date, description FROM visits WHERE pet_id=?", 
@@ -257,8 +239,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	 * Method to retrieve the <code>Pet</code> and <code>Visit</code> data
 	 * for an <code>Owner</code>.
 	 */
-	@SuppressWarnings("unchecked")
-	protected void loadPetsAndVisits(final Owner owner) {
+	private void loadPetsAndVisits(final Owner owner) {
 		final List<JdbcPet> pets = this.simpleJdbcTemplate.query(
 				"SELECT id, name, birth_date, type_id, owner_id FROM pets WHERE owner_id=?",
 				new JdbcPetRowMapper(),
@@ -276,7 +257,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	 * @param owners <code>List</code>.
 	 * @see #loadPetsAndVisits(Owner)
 	 */
-	protected void loadOwnersPetsAndVisits(List<Owner> owners) {
+	private void loadOwnersPetsAndVisits(List<Owner> owners) {
 		for (Owner owner : owners) {
 			loadPetsAndVisits(owner);
 		}
@@ -286,7 +267,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 
 		public JdbcPet mapRow(ResultSet rs, int rownum) throws SQLException {
 			JdbcPet pet = new JdbcPet();
-			pet.setId(new Integer(rs.getInt("id")));
+			pet.setId(rs.getInt("id"));
 			pet.setName(rs.getString("name"));
 			pet.setBirthDate(rs.getDate("birth_date"));
 			pet.setTypeId(rs.getInt("type_id"));
