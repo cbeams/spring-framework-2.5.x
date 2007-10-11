@@ -54,8 +54,15 @@ public class TableMetaDataProviderFactory {
 
 				public Object processMetaData(DatabaseMetaData databaseMetaData)
 						throws SQLException, MetaDataAccessException {
+					String databaseProductName = JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
 					boolean accessTableColumnMetaData = context.isAccessTableParameterMetaData();
-					TableMetaDataProvider provider = new GenericTableMetaDataProvider(databaseMetaData);
+					TableMetaDataProvider provider;
+					if ("HSQL Database Engine".equals(databaseProductName)) {
+						provider = new HsqlTableMetaDataProvider(databaseMetaData);
+					}
+					else {
+						provider = new GenericTableMetaDataProvider(databaseMetaData);
+					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Using " + provider.getClass().getName());
 					}

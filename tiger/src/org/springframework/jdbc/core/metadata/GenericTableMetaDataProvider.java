@@ -54,6 +54,9 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	/** indicates whether the identifiers are lowercased */
 	private boolean storesLowerCaseIdentifiers = false;
 
+	/** indicates whether generated keys retrieval is supported */
+	private boolean getGeneratedKeysSupported = true;
+
 	/** indicates whether the use of a String[] for generated keys is supported */
 	private boolean generatedKeysColumnNameArraySupported = true;
 
@@ -109,6 +112,25 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		return insertParameterMetaData;
 	}
 
+	public boolean isGetGeneratedKeysSupported() {
+		return getGeneratedKeysSupported;
+	}
+
+	public boolean isGetGeneratedKeysSimulated(){
+		return false;
+	}
+
+	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
+		return null;
+	}
+
+	/**
+	 * Specify whether a column name array is supported for generated keys
+	 */
+	public void setGetGeneratedKeysSupported(boolean getGeneratedKeysSupported) {
+		this.getGeneratedKeysSupported = getGeneratedKeysSupported;
+	}
+
 	public boolean isGeneratedKeysColumnNameArraySupported() {
 		return generatedKeysColumnNameArraySupported;
 	}
@@ -123,6 +145,19 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 
+		try {
+			if (databaseMetaData.supportsGetGeneratedKeys()) {
+				logger.debug("GetGeneratedKeys is supported");
+				setGetGeneratedKeysSupported(true);
+			}
+			else {
+				logger.debug("GetGeneratedKeys is not supported");
+				setGetGeneratedKeysSupported(false);
+			}
+		}
+		catch (SQLException se) {
+			logger.warn("Error retrieving 'DatabaseMetaData.getGeneratedKeys' - " + se.getMessage());
+		}
 		try {
 			String databaseProductName = databaseMetaData.getDatabaseProductName();
 			if (productsNotSupportingGeneratedKeysColumnNameArray.contains(databaseProductName)) {

@@ -129,6 +129,32 @@ public class TableMetaDataContext {
 	}
 
 	/**
+	 * Does this database support the JDBC 3.0 feature of retreiving generated keys
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}
+	 */
+	public boolean isGetGeneratedKeysSupported() {
+		return metaDataProvider.isGetGeneratedKeysSupported();
+	}
+
+	/**
+	 * Does this database support simple query to retreive generated keys when the JDBC 3.0
+	 * feature is not supported
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}
+	 */
+	public boolean isGetGeneratedKeysSimulated() {
+		return metaDataProvider.isGetGeneratedKeysSimulated();
+	}
+
+	/**
+	 * Does this database support simple query to retreive generated keys when the JDBC 3.0
+	 * feature is not supported
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}
+	 */
+	public String getSimulationQueryForGetGeneratedKey(String tableName, String keyColumnName) {
+		return metaDataProvider.getSimpleQueryForGetGeneratedKey(tableName, keyColumnName);
+	}
+
+	/**
 	 * Is a column name String array for retreiving generated keys supported
 	 * {@link java.sql.Connection#createStruct(String, Object[])}
 	 */

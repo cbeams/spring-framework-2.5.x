@@ -98,6 +98,24 @@ public interface TableMetaDataProvider {
  	boolean isTableColumnMetaDataUsed();
 	
 	/**
+	 * Does this database support the JDBC 3.0 feature of retreiving generated keys
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}
+	 */
+ 	boolean isGetGeneratedKeysSupported();
+
+	/**
+	 * Does this database support a simple quey to retreive the generated key whe the JDBC 3.0 feature
+	 * of retreiving generated keys is not supported
+	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}
+	 */
+ 	boolean isGetGeneratedKeysSimulated();
+
+	/**
+	 * Get the simple query to retreive a generated key
+	 */
+	String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName);
+
+	/**
 	 * Does this database support a column name String array for retreiving generated keys
 	 * {@link java.sql.Connection#createStruct(String, Object[])}
 	 */

@@ -124,6 +124,10 @@ public class TableMetaDataContextTests extends TestCase {
 
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("MyDB");
+		mockDatabaseMetaData.supportsGetGeneratedKeys();
+		ctrlDatabaseMetaData.setReturnValue(false);
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("MyDB");
 		mockDatabaseMetaData.getUserName();
 		ctrlDatabaseMetaData.setReturnValue(USER);
 		mockDatabaseMetaData.storesUpperCaseIdentifiers();

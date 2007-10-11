@@ -20,8 +20,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.ResultSet;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,16 +33,19 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.core.metadata.TableMetaDataContext;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
 
 /**
@@ -407,20 +413,79 @@ public abstract class AbstractJdbcInsert {
 		if (logger.isDebugEnabled()) {
 			logger.debug("The following parameters are used for call " + getInsertString() + " with: " + values);
 		}
-		KeyHolder keyHolder = new GeneratedKeyHolder();
-		int updateCount = jdbcTemplate.update(
-				new PreparedStatementCreator() {
-					public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-						PreparedStatement ps = prepareStatementForGeneratedKeys(con);
+		final KeyHolder keyHolder = new GeneratedKeyHolder();
+		if (!this.tableMetaDataContext.isGetGeneratedKeysSupported()) {
+			if (!this.tableMetaDataContext.isGetGeneratedKeysSimulated()) {
+				throw new InvalidDataAccessResourceUsageException(
+						"The getGeneratedKeys feature is not supported by this database");
+			}
+			if (getGeneratedKeyNames().length < 1) {
+				throw new InvalidDataAccessApiUsageException("Generated Key Name(s) not specificed. " +
+						"Using the generated keys features requires specifying the name(s) of the generated column(s)");
+			}
+			if (getGeneratedKeyNames().length > 1) {
+				throw new InvalidDataAccessApiUsageException(
+						"Current database only supports retreiving the key for a single column. There are " +
+						getGeneratedKeyNames().length  + " columns specified: " + Arrays.asList(getGeneratedKeyNames()));
+			}
+			// This is a hack to be able to get the generated key from a database that doesn't support
+			// get generated keys feature.  HSQL is one, PostgreSQL is another.  Has to be done with the same
+			// connection.
+			jdbcTemplate.execute(new ConnectionCallback() {
+				public Object doInConnection(Connection con) throws SQLException, DataAccessException {
+					// Do the insert
+					PreparedStatement ps = null;
+					try {
+						ps = con.prepareStatement(getInsertString());
 						int colIndex = 0;
 						for (Object value : values) {
 							colIndex++;
 							StatementCreatorUtils.setParameterValue(ps, colIndex, SqlTypeValue.TYPE_UNKNOWN, value);
 						}
-						return ps;
+						ps.executeUpdate();
+					} finally {
+						JdbcUtils.closeStatement(ps);
 					}
-				},
-				keyHolder);
+					//Get the key
+					String keyQuery = tableMetaDataContext.getSimulationQueryForGetGeneratedKey(
+							tableMetaDataContext.getTableName(),
+							getGeneratedKeyNames()[0]);
+					Statement keyStmt = null;
+					ResultSet rs = null;
+					HashMap keys = new HashMap(1);
+					try {
+						keyStmt = con.createStatement();
+						rs = keyStmt.executeQuery(keyQuery);
+						if (rs.next()) {
+							long key = rs.getLong(1);
+							keys.put(getGeneratedKeyNames()[0], key);
+							keyHolder.getKeyList().add(keys);
+						}
+					} finally {
+						JdbcUtils.closeResultSet(rs);
+						JdbcUtils.closeStatement(keyStmt);
+					}
+					return null;
+				}
+			});
+			return keyHolder;
+		}
+		else {
+			//TODO Add support for SQL Type info
+			int updateCount = jdbcTemplate.update(
+					new PreparedStatementCreator() {
+						public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+							PreparedStatement ps = prepareStatementForGeneratedKeys(con);
+							int colIndex = 0;
+							for (Object value : values) {
+								colIndex++;
+								StatementCreatorUtils.setParameterValue(ps, colIndex, SqlTypeValue.TYPE_UNKNOWN, value);
+							}
+							return ps;
+						}
+					},
+					keyHolder);
+		}
 		return keyHolder;
 	}
 
