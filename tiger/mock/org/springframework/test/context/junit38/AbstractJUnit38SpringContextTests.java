@@ -20,9 +20,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import junit.framework.TestCase;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.ExpectedException;
@@ -145,25 +145,15 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * configured (or default) {@link ProfileValueSource}.
 	 *
 	 * @param name The name of the current test to execute.
-	 * @throws RuntimeException If an error occurs while initializing the
-	 *         TestContextManager.
 	 * @see TestCase#TestCase(String)
 	 */
 	public AbstractJUnit38SpringContextTests(final String name) {
 
 		super(name);
-
-		try {
-			this.testContextManager = new TestContextManager(getClass());
-		}
-		catch (Exception e) {
-			final String msg = "Exception caught while attempting to instantiate a new TestContextManager for test class ["
-					+ getClass() + "].";
-			this.logger.error(msg, e);
-			throw new RuntimeException(msg, e);
-		}
+		this.testContextManager = new TestContextManager(getClass());
 		this.profileValueSource = ProfileValueUtils.retrieveProfileValueSource(getClass());
 	}
+
 
 	/**
 	 * <p>
@@ -187,8 +177,7 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * <li>Provides support for {@link ExpectedException @ExpectedException}.</li>
 	 * </ul>
 	 *
-	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource,
-	 *      Method)
+	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource, Method)
 	 * @see junit.framework.TestCase#runBare()
 	 */
 	@Override
@@ -204,9 +193,7 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 		}
 
 		runTestTimed(new TestExecutionCallback() {
-
 			public void run() throws Throwable {
-
 				runManaged(testMethod);
 			}
 		}, testMethod);
@@ -243,8 +230,7 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 *        <code>timeout</code>.
 	 * @throws Throwable if any exception is thrown.
 	 * @see Timed
-	 * @see #runTest(org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests.TestExecutionCallback,
-	 *      Method,Log)
+	 * @see #runTest
 	 */
 	private void runTestTimed(final TestExecutionCallback tec, final Method testMethod) throws Throwable {
 
@@ -274,8 +260,8 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 *
 	 * @param tec The test execution callback to run.
 	 * @param testMethod The actual test method: used to retrieve the
-	 *        {@link ExpectedException @ExpectedException} and
-	 *        {@link Repeat @Repeat} annotations.
+	 * {@link ExpectedException @ExpectedException} and {@link Repeat @Repeat}
+	 * annotations.
 	 * @throws Throwable if any exception is thrown.
 	 * @see ExpectedException
 	 * @see Repeat

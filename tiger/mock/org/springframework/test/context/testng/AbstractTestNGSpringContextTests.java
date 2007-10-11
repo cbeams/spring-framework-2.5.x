@@ -20,6 +20,13 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.testng.IHookCallBack;
+import org.testng.IHookable;
+import org.testng.ITestResult;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
@@ -28,12 +35,6 @@ import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.testng.IHookCallBack;
-import org.testng.IHookable;
-import org.testng.ITestResult;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 
 /**
  * <p>
@@ -90,32 +91,29 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	/**
 	 * Constructs a new AbstractTestNGSpringContextTests instance and
 	 * initializes the internal {@link TestContextManager} for the current test.
-	 *
-	 * @throws RuntimeException If an error occurs while initializing the
-	 *         TestContextManager.
 	 */
 	public AbstractTestNGSpringContextTests() {
-		try {
-			this.testContextManager = new TestContextManager(getClass());
-		}
-		catch (Exception e) {
-			final String msg = "Caught an exception while attempting to instantiate a new TestContextManager for test class ["
-					+ getClass() + "].";
-			this.logger.error(msg, e);
-			throw new RuntimeException(msg, e);
-		}
+		this.testContextManager = new TestContextManager(getClass());
 	}
 
 	/**
-	 * <p>
+	 * Sets the {@link ApplicationContext} to be used by this test instance,
+	 * provided via {@link ApplicationContextAware} semantics.
+	 *
+	 * @param applicationContext The applicationContext to set.
+	 */
+	public final void setApplicationContext(final ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
+
+	/**
 	 * Delegates to the configured {@link TestContextManager} to
 	 * {@link TestContextManager#prepareTestInstance(Object) prepare} this test
 	 * instance prior to execution of any individual test methods, for example
 	 * for injecting dependencies, etc.
-	 * </p>
 	 *
-	 * @throws Exception if a registered TestExecutionListener throws an
-	 *         exception.
+	 * @throws Exception if a registered TestExecutionListener throws an exception.
 	 */
 	@BeforeClass(groups = { "SpringTestContext" })
 	protected void springTestContextPrepareTestInstance() throws Exception {
@@ -127,7 +125,6 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * {@link TestContextManager#beforeTestMethod(Object,Method) pre-process}
 	 * the test method before the actual test is executed.
 	 *
-	 * @param testContext The current TestNG test context.
 	 * @param testMethod The test method which is about to be executed.
 	 * @throws Exception Allows all exceptions to propagate.
 	 */
@@ -142,8 +139,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * supplied <code>callback</code> to execute the actual test and then
 	 * tracks the exception thrown during test execution, if any.
 	 *
-	 * @see org.testng.IHookable#run(org.testng.IHookCallBack,
-	 *      org.testng.ITestResult)
+	 * @see org.testng.IHookable#run(org.testng.IHookCallBack, org.testng.ITestResult)
 	 */
 	public void run(final IHookCallBack callBack, final ITestResult testResult) {
 		callBack.runTestMethod(testResult);
@@ -155,9 +151,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	 * {@link TestContextManager#afterTestMethod(Object, Method, Throwable) post-process}
 	 * the test method after the actual test has executed.
 	 *
-	 * @param testContext The current TestNG test context.
-	 * @param testMethod The test method which has just been executed on the
-	 *        test instance.
+	 * @param testMethod The test method which has just been executed on the test instance.
 	 * @throws Exception Allows all exceptions to propagate.
 	 */
 	@AfterMethod(groups = { "SpringTestContext" })
@@ -166,13 +160,4 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 		this.testException = null;
 	}
 
-	/**
-	 * Sets the {@link ApplicationContext} to be used by this test instance,
-	 * provided via {@link ApplicationContextAware} semantics.
-	 *
-	 * @param applicationContext The applicationContext to set.
-	 */
-	public final void setApplicationContext(final ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
 }

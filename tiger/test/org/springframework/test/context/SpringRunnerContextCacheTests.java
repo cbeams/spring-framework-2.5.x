@@ -16,17 +16,15 @@
 
 package org.springframework.test.context;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import junit.framework.JUnit4TestAdapter;
+import static org.junit.Assert.*;
 
+import junit.framework.JUnit4TestAdapter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.internal.runners.InitializationError;
 import org.junit.runner.RunWith;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.DirtiesContext;
@@ -76,6 +74,7 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 	 */
 	public static final void assertContextCacheStatistics(final String usageScenario, final int expectedSize,
 			final int expectedHitCount, final int expectedMissCount) {
+
 		final ContextCache<String, ApplicationContext> contextCache = TestableSpringJUnit4ClassRunner.testableTestContextManager.getVisibleContextCache();
 		assertEquals("Verifying number of contexts in cache (" + usageScenario + ").", expectedSize,
 				contextCache.size());
@@ -150,22 +149,22 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 
 		static TestableTestContextManager testableTestContextManager;
 
-
 		public TestableSpringJUnit4ClassRunner(final Class<?> clazz) throws InitializationError {
 			super(clazz);
 		}
 
 		@Override
-		protected TestContextManager createTestContextManager(final Class<?> clazz) throws Exception {
+		protected TestContextManager createTestContextManager(final Class<?> clazz) {
 			final TestableTestContextManager testableTestContextManager = new TestableTestContextManager(clazz);
 			TestableSpringJUnit4ClassRunner.testableTestContextManager = testableTestContextManager;
 			return testableTestContextManager;
 		}
 	}
 
+
 	private static class TestableTestContextManager extends TestContextManager {
 
-		public TestableTestContextManager(final Class<?> testClass) throws Exception {
+		public TestableTestContextManager(final Class<?> testClass) {
 			super(testClass);
 		}
 

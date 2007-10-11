@@ -23,10 +23,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
-
 /**
  * TestExecutionListeners defines class-level metadata for configuring which
  * {@link TestExecutionListener TestExecutionListeners} should be registered
@@ -52,12 +48,11 @@ public @interface TestExecutionListeners {
 	 * a {@link TestContextManager}.
 	 * </p>
 	 *
-	 * @see DependencyInjectionTestExecutionListener
-	 * @see DirtiesContextTestExecutionListener
-	 * @see TransactionalTestExecutionListener
+	 * @see org.springframework.test.context.support.DependencyInjectionTestExecutionListener
+	 * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
+	 * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
 	 */
-	Class<? extends TestExecutionListener>[] value() default { DependencyInjectionTestExecutionListener.class,
-		DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class };
+	Class<? extends TestExecutionListener>[] value();
 
 	/**
 	 * <p>

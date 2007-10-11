@@ -23,8 +23,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.test.context.support.GenericXmlContextLoader;
-
 /**
  * <p>
  * ContextConfiguration defines class-level metadata which can be used to
@@ -96,9 +94,7 @@ public @interface ContextConfiguration {
 	 * The {@link Class type} of {@link ContextLoader} to use for loading an
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * </p>
-	 *
-	 * @see GenericXmlContextLoader
 	 */
-	Class<? extends ContextLoader> loader() default GenericXmlContextLoader.class;
+	Class<? extends ContextLoader> loader() default ContextLoader.class;
 
 }

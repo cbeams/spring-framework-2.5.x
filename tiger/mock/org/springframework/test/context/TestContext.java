@@ -24,6 +24,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -43,7 +45,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class TestContext extends AttributeAccessorSupport {
 
-	/** serialVersionUID. */
+	private static final String DEFAULT_CONTEXT_LOADER_CLASS_NAME =
+			"org.springframework.test.context.support.GenericXmlContextLoader";
+
 	private static final long serialVersionUID = -5827157174866681233L;
 
 	private static final Log logger = LogFactory.getLog(TestContext.class);
@@ -75,16 +79,12 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @param contextCache The context cache from which the constructed test
 	 *        context should retrieve application contexts; may not be
 	 *        <code>null</code>.
-	 * @throws Exception If an error occurs while initializing the test context.
 	 */
-	public TestContext(final Class<?> testClass, final ContextCache<String, ApplicationContext> contextCache)
-			throws Exception {
-
+	public TestContext(final Class<?> testClass, final ContextCache<String, ApplicationContext> contextCache) {
 		Assert.notNull(testClass, "The testClass can not be null.");
 		Assert.notNull(contextCache, "The contextCache can not be null.");
 
-		final Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		final ContextConfiguration contextConfiguration = testClass.getAnnotation(annotationType);
+		final ContextConfiguration contextConfiguration = testClass.getAnnotation(ContextConfiguration.class);
 		String[] locations = null;
 		ContextLoader contextLoader = null;
 
@@ -99,10 +99,18 @@ public class TestContext extends AttributeAccessorSupport {
 						+ "].");
 			}
 
-			final Class<? extends ContextLoader> contextLoaderClass = contextConfiguration.loader();
-			Assert.state(contextLoaderClass != null,
-					"@ContextConfiguration has not been properly configured: loader is null.");
-			contextLoader = contextLoaderClass.newInstance();
+			Class contextLoaderClass = contextConfiguration.loader();
+			if (ContextLoader.class.equals(contextLoaderClass)) {
+				try {
+					contextLoaderClass = getClass().getClassLoader().loadClass(DEFAULT_CONTEXT_LOADER_CLASS_NAME);
+				}
+				catch (ClassNotFoundException ex) {
+					throw new IllegalStateException("Could not load default ContextLoader class [" +
+							DEFAULT_CONTEXT_LOADER_CLASS_NAME + "]. Specify ContextConfiguration's 'loader' " +
+							"attribute or make the default loader class available.");
+				}
+			}
+			contextLoader = (ContextLoader) BeanUtils.instantiateClass(contextLoaderClass);
 			locations = retrieveContextLocations(contextLoader, testClass);
 		}
 
@@ -141,6 +149,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 */
 	private String[] retrieveContextLocations(final ContextLoader contextLoader, final Class<?> clazz)
 			throws IllegalArgumentException {
+
 		Assert.notNull(contextLoader, "contextLoader can not be null.");
 		Assert.notNull(clazz, "clazz can not be null.");
 
@@ -366,18 +375,12 @@ public class TestContext extends AttributeAccessorSupport {
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)
-
-		.append("testClass", getTestClass())
-
-		.append("locations", getLocations())
-
-		.append("testInstance", getTestInstance())
-
-		.append("testMethod", getTestMethod())
-
-		.append("testException", getTestException())
-
-		.toString();
+				.append("testClass", getTestClass())
+				.append("locations", getLocations())
+				.append("testInstance", getTestInstance())
+				.append("testMethod", getTestMethod())
+				.append("testException", getTestException())
+				.toString();
 	}
 
 }

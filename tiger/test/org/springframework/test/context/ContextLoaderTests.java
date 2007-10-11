@@ -16,16 +16,16 @@
 
 package org.springframework.test.context;
 
-import static org.junit.Assert.assertArrayEquals;
 import junit.framework.JUnit4TestAdapter;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import static org.junit.Assert.assertArrayEquals;
 import org.junit.Test;
 import org.junit.internal.runners.JUnit4ClassRunner;
 import org.junit.runner.RunWith;
 
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.test.context.support.GenericXmlContextLoader;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -57,9 +57,7 @@ public class ContextLoaderTests {
 			throws Exception {
 
 		final ContextConfiguration contextConfig = testClass.getAnnotation(ContextConfiguration.class);
-		final Class<? extends ContextLoader> contextLoaderClass = (Class<? extends ContextLoader>) AnnotationUtils.getValue(
-				contextConfig, "loader");
-		final ContextLoader contextLoader = contextLoaderClass.newInstance();
+		final ContextLoader contextLoader = new GenericXmlContextLoader();
 		final String[] configuredLocations = (String[]) AnnotationUtils.getValue(contextConfig, "locations");
 		final String[] processedLocations = contextLoader.processLocations(testClass, configuredLocations);
 
