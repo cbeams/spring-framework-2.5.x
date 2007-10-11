@@ -432,15 +432,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			this.beanDefinitionMap.put(beanName, beanDefinition);
 
-			// Remove the merged bean definition for the given bean, if already created.
-			clearMergedBeanDefinition(beanName);
-
-			// Remove corresponding bean from singleton cache, if any. Shouldn't usually
-			// be necessary, rather just meant for overriding a context's default beans
-			// (e.g. the default StaticMessageSource in a StaticApplicationContext).
-			synchronized (getSingletonMutex()) {
-				destroySingleton(beanName);
-			}
+			resetBeanDefinition(beanName);
 		}
 	}
 
@@ -457,14 +449,35 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			this.beanDefinitionNames.remove(beanName);
 
-			// Remove the merged bean definition for the given bean, if already created.
-			clearMergedBeanDefinition(beanName);
+			resetBeanDefinition(beanName);
+		}
+	}
 
-			// Remove corresponding bean from singleton cache, if any. Shouldn't usually
-			// be necessary, rather just meant for overriding a context's default beans
-			// (e.g. the default StaticMessageSource in a StaticApplicationContext).
-			synchronized (getSingletonMutex()) {
-				destroySingleton(beanName);
+	/**
+	 * Reset all bean definition caches for the given bean,
+	 * including the caches of beans that are derived from it.
+	 * @param beanName the name of the bean to reset
+	 */
+	protected void resetBeanDefinition(String beanName) {
+		// Remove the merged bean definition for the given bean, if already created.
+		clearMergedBeanDefinition(beanName);
+
+		// Remove corresponding bean from singleton cache, if any. Shouldn't usually
+		// be necessary, rather just meant for overriding a context's default beans
+		// (e.g. the default StaticMessageSource in a StaticApplicationContext).
+		synchronized (getSingletonMutex()) {
+			destroySingleton(beanName);
+		}
+
+		// Reset all bean definitions that have the given bean as parent
+		// (recursively).
+		for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
+			String bdName = (String) it.next();
+			if (!beanName.equals(bdName)) {
+				BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.get(bdName);
+				if (beanName.equals(bd.getParentName())) {
+					resetBeanDefinition(bdName);
+				}
 			}
 		}
 	}
