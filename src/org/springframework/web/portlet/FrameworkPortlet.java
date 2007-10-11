@@ -437,6 +437,18 @@ public abstract class FrameworkPortlet extends GenericPortletBean implements App
 
 
 	/**
+	 * Overridden for friendlier behavior in unit tests.
+	 */
+	protected String getTitle(RenderRequest renderRequest) {
+		try {
+			return super.getTitle(renderRequest);
+		}
+		catch (NullPointerException ex) {
+			return getPortletName();
+		}
+	}
+
+	/**
 	 * Delegate render requests to processRequest/doRenderService.
 	 */
 	protected final void doDispatch(RenderRequest request, RenderResponse response)

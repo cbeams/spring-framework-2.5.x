@@ -263,38 +263,42 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	protected void registerHandler(String urlPath, Object handler) throws BeansException, IllegalStateException {
 		Assert.notNull(urlPath, "URL path must not be null");
 		Assert.notNull(handler, "Handler object must not be null");
-
-		Object mappedHandler = this.handlerMap.get(urlPath);
-		if (mappedHandler != null) {
-			throw new IllegalStateException(
-					"Cannot map handler [" + handler + "] to URL path [" + urlPath +
-					"]: There is already handler [" + mappedHandler + "] mapped.");
-		}
+		Object resolvedHandler = handler;
 
 		// Eagerly resolve handler if referencing singleton via name.
 		if (!this.lazyInitHandlers && handler instanceof String) {
 			String handlerName = (String) handler;
 			if (getApplicationContext().isSingleton(handlerName)) {
-				handler = getApplicationContext().getBean(handlerName);
+				resolvedHandler = getApplicationContext().getBean(handlerName);
 			}
 		}
 
-		if (urlPath.equals("/")) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Root mapping to handler [" + handler + "]");
+		Object mappedHandler = this.handlerMap.get(urlPath);
+		if (mappedHandler != null) {
+			if (mappedHandler != resolvedHandler) {
+				throw new IllegalStateException(
+						"Cannot map handler [" + handler + "] to URL path [" + urlPath +
+						"]: There is already handler [" + resolvedHandler + "] mapped.");
 			}
-			setRootHandler(handler);
-		}
-		else if (urlPath.equals("/*")) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Default mapping to handler [" + handler + "]");
-			}
-			setDefaultHandler(handler);
 		}
 		else {
-			this.handlerMap.put(urlPath, handler);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Mapped URL path [" + urlPath + "] onto handler [" + handler + "]");
+			if (urlPath.equals("/")) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Root mapping to handler [" + resolvedHandler + "]");
+				}
+				setRootHandler(resolvedHandler);
+			}
+			else if (urlPath.equals("/*")) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Default mapping to handler [" + resolvedHandler + "]");
+				}
+				setDefaultHandler(resolvedHandler);
+			}
+			else {
+				this.handlerMap.put(urlPath, resolvedHandler);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Mapped URL path [" + urlPath + "] onto handler [" + resolvedHandler + "]");
+				}
 			}
 		}
 	}

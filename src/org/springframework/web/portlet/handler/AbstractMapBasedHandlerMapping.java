@@ -103,26 +103,30 @@ public abstract class AbstractMapBasedHandlerMapping extends AbstractHandlerMapp
 	protected void registerHandler(Object lookupKey, Object handler) throws BeansException, IllegalStateException {
 		Assert.notNull(lookupKey, "Lookup key must not be null");
 		Assert.notNull(handler, "Handler object must not be null");
-
-		// Check for duplicate mapping.
-		Object mappedHandler = this.handlerMap.get(lookupKey);
-		if (mappedHandler != null) {
-			throw new IllegalStateException("Cannot map handler [" + handler + "] to key [" + lookupKey +
-					"]: There's already handler [" + mappedHandler + "] mapped.");
-		}
+		Object resolvedHandler = handler;
 
 		// Eagerly resolve handler if referencing singleton via name.
 		if (!this.lazyInitHandlers && handler instanceof String) {
 			String handlerName = (String) handler;
 			if (getApplicationContext().isSingleton(handlerName)) {
-				handler = getApplicationContext().getBean(handlerName);
+				resolvedHandler = getApplicationContext().getBean(handlerName);
 			}
 		}
 
-		// Add the handler to the map.
-		this.handlerMap.put(lookupKey, handler);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Mapped key [" + lookupKey + "] onto handler [" + handler + "]");
+		// Check for duplicate mapping.
+		Object mappedHandler = this.handlerMap.get(lookupKey);
+		if (mappedHandler != null) {
+			if (mappedHandler != resolvedHandler) {
+				throw new IllegalStateException("Cannot map handler [" + handler + "] to key [" + lookupKey +
+						"]: There's already handler [" + mappedHandler + "] mapped.");
+			}
+		}
+		else {
+			// Add the handler to the map.
+			this.handlerMap.put(lookupKey, resolvedHandler);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Mapped key [" + lookupKey + "] onto handler [" + resolvedHandler + "]");
+			}
 		}
 	}
 

@@ -45,6 +45,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -569,6 +570,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			strategies = new ArrayList(classNames.length);
 			for (int i = 0; i < classNames.length; i++) {
 				String className = classNames[i];
+				if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15 && className.indexOf("Annotation") != -1) {
+					// Skip Java 5 specific strategies when running on JDK 1.4...
+					continue;
+				}
 				try {
 					Class clazz = ClassUtils.forName(className, getClass().getClassLoader());
 					Object strategy = createDefaultStrategy(context, clazz);
@@ -1068,15 +1073,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			}
 		}
 
-		// Expose Portlet ApplicationContext to view objects.
-		request.setAttribute(ViewRendererServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, getPortletApplicationContext());
-
-		// These attributes are required by the ViewRendererServlet.
-		request.setAttribute(ViewRendererServlet.VIEW_ATTRIBUTE, view);
-		request.setAttribute(ViewRendererServlet.MODEL_ATTRIBUTE, mv.getModel());
-
-		// Unclude the content of the view in the render response.
-		getPortletContext().getRequestDispatcher(this.viewRendererUrl).include(request, response);
+		doRender(view, mv.getModelInternal(), request, response);
 	}
 
 	/**
@@ -1101,6 +1098,28 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Actually render the given view.
+	 * <p>The default implementation delegates to
+	 * {@link org.springframework.web.servlet.ViewRendererServlet}.
+	 * @param view the View to render
+	 * @param model the associated model
+	 * @param request current portlet render request
+	 * @param response current portlet render response
+	 * @throws Exception if there's a problem rendering the view
+	 */
+	protected void doRender(View view, Map model, RenderRequest request, RenderResponse response) throws Exception {
+		// Expose Portlet ApplicationContext to view objects.
+		request.setAttribute(ViewRendererServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, getPortletApplicationContext());
+
+		// These attributes are required by the ViewRendererServlet.
+		request.setAttribute(ViewRendererServlet.VIEW_ATTRIBUTE, view);
+		request.setAttribute(ViewRendererServlet.MODEL_ATTRIBUTE, model);
+
+		// Include the content of the view in the render response.
+		getPortletContext().getRequestDispatcher(this.viewRendererUrl).include(request, response);
 	}
 
 	/**

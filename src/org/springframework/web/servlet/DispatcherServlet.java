@@ -43,6 +43,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -706,6 +707,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			strategies = new ArrayList(classNames.length);
 			for (int i = 0; i < classNames.length; i++) {
 				String className = classNames[i];
+				if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15 && className.indexOf("Annotation") != -1) {
+					// Skip Java 5 specific strategies when running on JDK 1.4...
+					continue;
+				}
 				try {
 					Class clazz = ClassUtils.forName(className, getClass().getClassLoader());
 					Object strategy = createDefaultStrategy(context, clazz);
