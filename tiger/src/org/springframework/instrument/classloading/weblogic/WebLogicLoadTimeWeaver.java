@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.instrument.classloading.weblogic;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -22,18 +23,18 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link LoadTimeWeaver} implementation for WebLogic instrumentable
+ * {@link LoadTimeWeaver} implementation for WebLogic's instrumentable
  * ClassLoader.
- * 
- * <p>
- * <b>NOTE:</b> Requires BEA WebLogic version 10 or higher.
- * 
+ *
+ * <p><b>NOTE:</b> Requires BEA WebLogic version 10 or higher.
+ *
  * @author Costin Leau
- * 
+ * @since 2.5
  */
 public class WebLogicLoadTimeWeaver implements LoadTimeWeaver {
 
 	private final WebLogicClassLoader classLoader;
+
 
 	/**
 	 * Creates a new instance of thie {@link WebLogicLoadTimeWeaver} class using
@@ -55,9 +56,9 @@ public class WebLogicLoadTimeWeaver implements LoadTimeWeaver {
 	 */
 	public WebLogicLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
-
 		this.classLoader = new WebLogicClassLoader(classLoader);
 	}
+
 
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.classLoader.addTransformer(transformer);
@@ -68,7 +69,7 @@ public class WebLogicLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 	public ClassLoader getThrowawayClassLoader() {
-		return classLoader.getThrowawayClassLoader();
+		return this.classLoader.getThrowawayClassLoader();
 	}
 
 }

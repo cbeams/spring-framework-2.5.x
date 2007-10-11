@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.instrument.classloading.weblogic;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -23,7 +24,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Reflective wrapper around a WebLogic classloader. Used to encapsulate the
@@ -31,95 +31,84 @@ import org.springframework.util.ReflectionUtils;
  * the loadtime weaver.
  * 
  * @author Costin Leau
- * 
+ * @author Juergen Hoeller
+ * @since 2.5
  */
 class WebLogicClassLoader {
 
-	private static final String WL_CLASSLOADER_CLASSNAME = "weblogic.utils.classloaders.GenericClassLoader";
+	private static final String GENERIC_CLASS_LOADER_NAME = "weblogic.utils.classloaders.GenericClassLoader";
 
-	private static final String PREPROCESSOR_CLASSNAME = "weblogic.utils.classloaders.ClassPreProcessor";
+	private static final String CLASS_PRE_PROCESSOR_NAME = "weblogic.utils.classloaders.ClassPreProcessor";
 
-	private static final String GET_FINDER_METHOD = "getClassFinder";
 
-	private static final String GET_PARENT_METHOD = "getParent";
+	private final ClassLoader internalClassLoader;
 
-	private static final String ADD_PREPROCESSOR_METHOD = "addInstanceClassPreProcessor";
+	private final Class wlPreProcessorClass;
 
-	private static final String EXCEPTION_MSG = "cannot wrap WebLogic 10 classloader ";
+	private final Method addPreProcessorMethod;
 
-	private final ClassLoader loader;
+	private final Method getClassFinderMethod;
 
-	private final Class<?> wlGenericClassLoaderClass;
+	private final Method getParentMethod;
+
+	private final Constructor wlGenericClassLoaderConstructor;
+
 
 	public WebLogicClassLoader(ClassLoader classLoader) {
-		Assert.notNull(classLoader);
-
+		Class wlGenericClassLoaderClass = null;
 		try {
-			wlGenericClassLoaderClass = classLoader.loadClass(WL_CLASSLOADER_CLASSNAME);
+			wlGenericClassLoaderClass = classLoader.loadClass(GENERIC_CLASS_LOADER_NAME);
+			this.wlPreProcessorClass = classLoader.loadClass(CLASS_PRE_PROCESSOR_NAME);
+			this.addPreProcessorMethod = classLoader.getClass().getMethod(
+					"addInstanceClassPreProcessor", this.wlPreProcessorClass);
+			this.getClassFinderMethod = classLoader.getClass().getMethod("getClassFinder");
+			this.getParentMethod = classLoader.getClass().getMethod("getParent");
+			this.wlGenericClassLoaderConstructor = wlGenericClassLoaderClass.getConstructor(
+					this.getClassFinderMethod.getReturnType(), ClassLoader.class);
 		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalArgumentException(EXCEPTION_MSG + classLoader, ex);
+		catch (Exception ex) {
+			throw new IllegalStateException(
+					"Could not initialize WebLogic ClassLoader because WebLogic API classes are not available", ex);
 		}
-
-		Assert.isInstanceOf(wlGenericClassLoaderClass, classLoader, "ClassLoader must be instanceof "
-				+ wlGenericClassLoaderClass.getName());
-
-		this.loader = classLoader;
+		Assert.isInstanceOf(wlGenericClassLoaderClass, classLoader,
+				"ClassLoader must be instance of [" + wlGenericClassLoaderClass.getName() + "]");
+		this.internalClassLoader = classLoader;
 	}
 
-	public ClassLoader getThrowawayClassLoader() {
-		Method getClassFinderMethod = ReflectionUtils.findMethod(loader.getClass(), GET_FINDER_METHOD);
-		Object classFinder = ReflectionUtils.invokeMethod(getClassFinderMethod, loader);
-
-		Method getParentMethod = ReflectionUtils.findMethod(loader.getClass(), GET_PARENT_METHOD);
-		Object parent = ReflectionUtils.invokeMethod(getParentMethod, loader);
-
-		try {
-			// arguments for 'clone'-like method
-			Class[] constructorArgs = new Class[] { getClassFinderMethod.getReturnType(), ClassLoader.class };
-			Constructor<?> constructor = wlGenericClassLoaderClass.getConstructor(constructorArgs);
-
-			return (ClassLoader) constructor.newInstance(new Object[] { classFinder, parent });
-		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalArgumentException(EXCEPTION_MSG + loader, ex);
-		}
-
-		catch (IllegalAccessException ex) {
-			throw new IllegalArgumentException(EXCEPTION_MSG + loader, ex);
-		}
-
-		catch (InstantiationException ex) {
-			throw new IllegalArgumentException(EXCEPTION_MSG + loader, ex);
-		}
-
-		catch (InvocationTargetException ex) {
-			throw new IllegalArgumentException(EXCEPTION_MSG + loader, ex.getCause());
-		}
-
-	}
 
 	public void addTransformer(ClassFileTransformer transformer) {
-		Class wlPreProcessorClass = null;
+		Assert.notNull(transformer, "ClassFileTransformer must not be null");
 		try {
-			// create new ClassPreProcessor wrapper
-			wlPreProcessorClass = loader.loadClass(PREPROCESSOR_CLASSNAME);
+			InvocationHandler adapter = new WebLogicClassPreProcessorAdapter(transformer, this.internalClassLoader);
+			Object adapterInstance = Proxy.newProxyInstance(this.wlPreProcessorClass.getClassLoader(),
+					new Class[] {this.wlPreProcessorClass}, adapter);
+			this.addPreProcessorMethod.invoke(this.internalClassLoader, adapterInstance);
 		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalArgumentException(EXCEPTION_MSG + loader, ex);
+		catch (InvocationTargetException ex) {
+			throw new IllegalStateException("WebLogic addInstanceClassPreProcessor method threw exception", ex.getCause());
 		}
-
-		InvocationHandler adapter = new WebLogicClassPreProcessorAdapter(transformer, loader);
-		Object adapterInstance = Proxy.newProxyInstance(wlPreProcessorClass.getClassLoader(),
-			new Class[] { wlPreProcessorClass }, adapter);
-
-		Method addPreProcessor = ReflectionUtils.findMethod(loader.getClass(), ADD_PREPROCESSOR_METHOD,
-			new Class[] { wlPreProcessorClass });
-		
-		ReflectionUtils.invokeMethod(addPreProcessor, loader, new Object[] { adapterInstance });
+		catch (Exception ex) {
+			throw new IllegalStateException("Could not invoke WebLogic addInstanceClassPreProcessor method", ex);
+		}
 	}
 
 	public ClassLoader getInternalClassLoader() {
-		return loader;
+		return this.internalClassLoader;
 	}
+
+	public ClassLoader getThrowawayClassLoader() {
+		try {
+			Object classFinder = this.getClassFinderMethod.invoke(this.internalClassLoader);
+			Object parent = this.getParentMethod.invoke(this.internalClassLoader);
+			// arguments for 'clone'-like method
+			return (ClassLoader) this.wlGenericClassLoaderConstructor.newInstance(new Object[] {classFinder, parent});
+		}
+		catch (InvocationTargetException ex) {
+			throw new IllegalStateException("WebLogic GenericClassLoader constructor failed", ex.getCause());
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("Could not construct WebLogic GenericClassLoader", ex);
+		}
+	}
+
 }
