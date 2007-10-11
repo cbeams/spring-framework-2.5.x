@@ -8,19 +8,11 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.samples.petclinic.util.EntityUtils;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
@@ -44,8 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
  * for extension. For example, if you do not wish for your test classes to be
  * tied to a Spring-specific class hierarchy, you may configure your tests with
  * annotations such as {@link ContextConfiguration @ContextConfiguration},
- * {@link TestExecutionListeners @TestExecutionListeners},
- * {@link Transactional @Transactional}, etc.
+ * {@link org.springframework.test.context.TestExecutionListeners @TestExecutionListeners},
+ * {@link org.springframework.transaction.annotation.Transactional @Transactional}, etc.
  * </p>
  * <p>
  * AbstractClinicTests and its subclasses benefit from the following services
@@ -62,18 +54,18 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link javax.annotation.Resource @Resource} to achieve dependency injection
  * <em>by name</em>.
  * <em>(see: {@link ContextConfiguration @ContextConfiguration},
- * {@link DependencyInjectionTestExecutionListener})</em></li>
+ * {@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener DependencyInjectionTestExecutionListener})</em></li>
  * <li><strong>Transaction management</strong>, meaning each test method is
  * executed in its own transaction, which is automatically rolled back by
  * default. Thus, even if tests insert or otherwise change database state, there
  * is no need for a teardown or cleanup script.
- * <em>(see: {@link TransactionConfiguration @TransactionConfiguration},
- * {@link Transactional @Transactional},
- * {@link TransactionalTestExecutionListener})</em></li>
+ * <em>(see: {@link org.springframework.test.context.transaction.TransactionConfiguration @TransactionConfiguration},
+ * {@link org.springframework.transaction.annotation.Transactional @Transactional},
+ * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener TransactionalTestExecutionListener})</em></li>
  * <li><strong>Useful inherited protected fields</strong>, such as a
- * {@link SimpleJdbcTemplate} that can be used to verify database state after
- * test operations or to verify the results of queries performed by application
- * code. An
+ * {@link org.springframework.jdbc.core.simple.SimpleJdbcTemplate SimpleJdbcTemplate}
+ * that can be used to verify database state after test operations or to verify
+ * the results of queries performed by application code. An
  * {@link org.springframework.context.ApplicationContext ApplicationContext} is
  * also inherited and can be used for explicit bean lookup if necessary.
  * <em>(see: {@link org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests AbstractJUnit4SpringContextTests},
@@ -89,8 +81,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@Transactional
 @ContextConfiguration
 public abstract class AbstractClinicTests extends AbstractTransactionalJUnit4SpringContextTests {
 
