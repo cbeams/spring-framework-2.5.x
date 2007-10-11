@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.LobRetrievalFailureException;
 import org.springframework.jdbc.core.RowMapper;
@@ -18,6 +17,7 @@ import org.springframework.jdbc.core.support.AbstractLobStreamingResultSetExtrac
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -47,6 +47,7 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 		this.lobHandler = lobHandler;
 	}
 
+	@Transactional(readOnly=true)
 	public List getImages() throws DataAccessException {
 		return getJdbcTemplate().query(
 		    "SELECT image_name, description FROM imagedb",
@@ -59,6 +60,7 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 		    });
 	}
 
+	@Transactional(readOnly=true)
 	public void streamImage(final String name, final OutputStream contentStream) throws DataAccessException {
 		getJdbcTemplate().query(
 				"SELECT content FROM imagedb WHERE image_name=?", new Object[] {name},
@@ -77,6 +79,7 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 		);
 	}
 
+	@Transactional
 	public void storeImage(
 	    final String name, final InputStream contentStream, final int contentLength, final String description)
 	    throws DataAccessException {
@@ -98,6 +101,7 @@ public class DefaultImageDatabase extends JdbcDaoSupport implements ImageDatabas
 		logger.info("Checking images: not implemented but invoked by scheduling");
 	}
 
+	@Transactional
 	public void clearDatabase() throws DataAccessException {
 		getJdbcTemplate().update("DELETE FROM imagedb");
 	}

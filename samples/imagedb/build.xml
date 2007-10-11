@@ -27,6 +27,9 @@
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/dist/modules">
+			<include name="spring-webmvc.jar"/>
+		</fileset>
 
 	</path>
 
@@ -62,7 +65,7 @@
 
 		<mkdir dir="${build.dir}"/>
 
-		<javac destdir="${build.dir}" source="1.3" target="1.3" debug="true"
+		<javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<classpath refid="master-classpath"/>
@@ -105,6 +108,9 @@
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/dist/modules">
+				<include name="spring-webmvc.jar"/>
 			</fileset>
 		</copy>
 

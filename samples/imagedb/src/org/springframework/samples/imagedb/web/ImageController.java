@@ -1,13 +1,15 @@
 package org.springframework.samples.imagedb.web;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.imagedb.ImageDatabase;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
 /**
  * MultiActionController for the image list/upload UI.
@@ -15,35 +17,39 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
  * @author Juergen Hoeller
  * @since 07.01.2004
  */
-public class ImageController extends MultiActionController {
+@Controller
+public class ImageController {
 
 	private ImageDatabase imageDatabase;
 
+	@Autowired
 	public void setImageDatabase(ImageDatabase imageDatabase) {
 		this.imageDatabase = imageDatabase;
 	}
 
-	public ModelAndView showImageList(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	@RequestMapping("/imageList")
+	public ModelAndView showImageList() {
 		return new ModelAndView("imageList", "images", this.imageDatabase.getImages());
 	}
 
-	public ModelAndView streamImageContent(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		this.imageDatabase.streamImage(request.getParameter("name"), response.getOutputStream());
-		return null;
+	@RequestMapping("/imageContent")
+	public void streamImageContent(@RequestParam("name") String name, OutputStream outputStream) throws IOException {
+		this.imageDatabase.streamImage(name, outputStream);
 	}
 
-	public ModelAndView processImageUpload(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		String name = request.getParameter("name");
-		String description = request.getParameter("description");
-		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-		MultipartFile multipartFile = multipartRequest.getFile("image");
-		this.imageDatabase.storeImage(name, multipartFile.getInputStream(), (int) multipartFile.getSize(), description);
-		return new ModelAndView("redirect:imageList");
+	@RequestMapping("/imageUpload")
+	public String processImageUpload(
+			@RequestParam("name") String name, @RequestParam("description") String description,
+			@RequestParam("image") MultipartFile image) throws IOException {
+
+		this.imageDatabase.storeImage(name, image.getInputStream(), (int) image.getSize(), description);
+		return "redirect:imageList";
 	}
 
-	public ModelAndView clearDatabase(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	@RequestMapping("/clearDatabase")
+	public String clearDatabase() {
 		this.imageDatabase.clearDatabase();
-		return new ModelAndView("redirect:imageList");
+		return "redirect:imageList";
 	}
 
 }

@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
-
 <!--
   - Middle tier application context definition for the image database.
   -->
-<beans>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
 	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
 	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
-	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="locations">
-			<list>
-				<value>WEB-INF/jdbc.properties</value>
-				<value>WEB-INF/mail.properties</value>
-			</list>
-		</property>
-	</bean>
+	<context:property-placeholder location="WEB-INF/jdbc.properties,WEB-INF/mail.properties"/>
 
 	<!-- Local C3P0 DataSource that works in any environment -->
 	<!-- See JPetStore for an example of using Apache Commons DBCP as alternative -->
@@ -32,40 +29,14 @@
 		<property name="dataSource" ref="dataSource"/>
 	</bean>
 
-	<!-- NativeJdbcExtractor for the C3P0 connection pool above -->
-	<!-- (just needed for oracleLobHandler) -->
-	<bean id="nativeJdbcExtractor" class="org.springframework.jdbc.support.nativejdbc.C3P0NativeJdbcExtractor"
-			lazy-init="true"/>
-
-	<!-- LobHandler for Oracle JDBC drivers -->
-	<!-- (refers to the NativeJdbcExtractor above to get access to native OracleConnections) -->
-	<bean id="oracleLobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler" lazy-init="true">
-		<property name="nativeJdbcExtractor" ref="nativeJdbcExtractor"/>
-	</bean>
-
-	<!-- LobHandler for well-behaved JDBC drivers -->
-	<!-- (simply delegating to corresponding PreparedStatement and ResultSet methods) -->
-	<bean id="defaultLobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" lazy-init="true"/>
+	<!-- Activates @Transactional for DefaultImageDatabase -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
 
 	<!-- Default implementation of the ImageDatabase business interface -->
 	<!-- (refers to a LobHandler for handling BLOBs and CLOBs -->
-	<bean id="imageDatabaseTarget" class="org.springframework.samples.imagedb.DefaultImageDatabase">
+	<bean id="imageDatabase" class="org.springframework.samples.imagedb.DefaultImageDatabase">
 		<property name="dataSource" ref="dataSource"/>
 		<property name="lobHandler" ref="${imageDatabase.lobHandler}"/>
-	</bean>
-
-	<!-- Transactional proxy for the business object above -->
-	<bean id="imageDatabase" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager"/>
-		<property name="target" ref="imageDatabaseTarget"/>
-		<property name="transactionAttributes">
-			<props>
-				<prop key="getImages">PROPAGATION_REQUIRED,readOnly</prop>
-				<prop key="streamImage">PROPAGATION_REQUIRED,readOnly</prop>
-				<prop key="storeImage">PROPAGATION_REQUIRED</prop>
-				<prop key="clearDatabase">PROPAGATION_REQUIRED</prop>
-			</props>
-		</property>
 	</bean>
 
 	<!-- MailSender implementation for JavaMail -->
@@ -73,5 +44,20 @@
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="${mail.host}"/>
 	</bean>
+
+	<!-- LobHandler for well-behaved JDBC drivers -->
+	<!-- (simply delegating to corresponding PreparedStatement and ResultSet methods) -->
+	<bean id="defaultLobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" lazy-init="true"/>
+
+	<!-- LobHandler for Oracle JDBC drivers -->
+	<!-- (refers to the NativeJdbcExtractor above to get access to native OracleConnections) -->
+	<bean id="oracleLobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler" lazy-init="true">
+		<property name="nativeJdbcExtractor" ref="nativeJdbcExtractor"/>
+	</bean>
+
+	<!-- NativeJdbcExtractor for the C3P0 connection pool above -->
+	<!-- (just needed for oracleLobHandler) -->
+	<bean id="nativeJdbcExtractor" class="org.springframework.jdbc.support.nativejdbc.C3P0NativeJdbcExtractor"
+			lazy-init="true"/>
 
 </beans>
