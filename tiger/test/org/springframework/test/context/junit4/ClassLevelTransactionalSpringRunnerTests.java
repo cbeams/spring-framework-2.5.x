@@ -21,12 +21,11 @@ import static org.springframework.test.transaction.TransactionTestUtils.assertIn
 
 import javax.sql.DataSource;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.NotTransactional;
@@ -64,42 +63,22 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-	TransactionalTestExecutionListener.class })
 @Transactional
 public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactionalSpringRunnerTests {
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	protected static SimpleJdbcTemplate simpleJdbcTemplate;
 
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-
-		return new JUnit4TestAdapter(ClassLevelTransactionalSpringRunnerTests.class);
-	}
-
 	@AfterClass
 	public static void verifyFinalTestData() {
-
 		assertEquals("Verifying the final number of rows in the person table after all tests.", 4,
 				countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	@Before
 	public void verifyInitialTestData() {
-
 		clearPersonTable(simpleJdbcTemplate);
 		assertEquals("Adding bob", 1, addPerson(simpleJdbcTemplate, BOB));
 		assertEquals("Verifying the initial number of rows in the person table.", 1,
@@ -108,7 +87,6 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 
 	@Test
 	public void modifyTestDataWithinTransaction() {
-
 		assertInTransaction(true);
 		assertEquals("Deleting bob", 1, deletePerson(simpleJdbcTemplate, BOB));
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
@@ -120,7 +98,6 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 	@Test
 	@NotTransactional
 	public void modifyTestDataWithoutTransaction() {
-
 		assertInTransaction(false);
 		assertEquals("Adding luke", 1, addPerson(simpleJdbcTemplate, LUKE));
 		assertEquals("Adding leia", 1, addPerson(simpleJdbcTemplate, LEIA));
@@ -131,19 +108,14 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 
 
 	// ------------------------------------------------------------------------|
-	// --- TYPES --------------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	public static class DatabaseSetup {
 
 		@Autowired
 		void setDataSource(final DataSource dataSource) {
-
 			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			createPersonTable(simpleJdbcTemplate);
 		}
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

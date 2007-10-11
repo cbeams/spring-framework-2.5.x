@@ -26,11 +26,10 @@ import static org.springframework.test.transaction.TransactionTestUtils.inTransa
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
@@ -55,10 +54,6 @@ import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTransactionalJUnit4SpringContextTests
 		implements BeanNameAware, InitializingBean {
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
 	protected static final String BOB = "bob";
 	protected static final String JANE = "jane";
 	protected static final String SUE = "sue";
@@ -66,8 +61,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	protected static final String LEIA = "leia";
 	protected static final String YODA = "yoda";
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	private boolean beanInitialized = false;
@@ -82,20 +75,13 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 	@Autowired(required = false)
 	protected Long nonrequiredLong;
 
-	@Resource()
+	@Resource
 	protected String foo;
 
 	protected String bar;
 
 
 	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(ConcreteTransactionalJUnit4SpringContextTests.class);
-	}
 
 	protected static int clearPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {
 		return SimpleJdbcTestUtils.deleteFromTables(simpleJdbcTemplate, "person");
@@ -122,8 +108,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	/**
@@ -246,8 +230,6 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 
 
 	// ------------------------------------------------------------------------|
-	// --- TYPES --------------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	public static class DatabaseSetup {
 
@@ -259,7 +241,5 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 			addPerson(simpleJdbcTemplate, BOB);
 		}
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

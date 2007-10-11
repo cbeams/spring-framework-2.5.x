@@ -18,9 +18,9 @@ package org.springframework.test.context.junit4.spr3896;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
+
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -37,11 +37,6 @@ import org.springframework.test.context.ContextConfiguration;
  */
 @ContextConfiguration(locations = { "BeanOverridingDefaultLocationsInheritedTests-context.xml" })
 public class BeanOverridingExplicitLocationsInheritedTests extends ExplicitLocationsBaseTests {
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(BeanOverridingExplicitLocationsInheritedTests.class);
-	}
 
 	@Test
 	@Override

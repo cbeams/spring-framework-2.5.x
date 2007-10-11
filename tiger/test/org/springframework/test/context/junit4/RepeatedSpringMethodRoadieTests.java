@@ -20,8 +20,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.lang.reflect.Method;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.easymock.MockControl;
 import org.easymock.classextension.MockClassControl;
 import org.junit.After;
@@ -32,6 +30,7 @@ import org.junit.internal.runners.TestClass;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runner.notification.RunNotifier;
+
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestContextManager;
@@ -46,31 +45,18 @@ import org.springframework.test.context.TestContextManager;
 @RunWith(JUnit4ClassRunner.class)
 public class RepeatedSpringMethodRoadieTests {
 
-	protected final MockControl			notifierMockControl				= MockClassControl.createNiceControl(RunNotifier.class);
+	protected final MockControl notifierMockControl = MockClassControl.createNiceControl(RunNotifier.class);
 
-	protected final RunNotifier			notifier						= (RunNotifier) this.notifierMockControl.getMock();
+	protected final RunNotifier notifier = (RunNotifier) this.notifierMockControl.getMock();
 
-	protected final MockControl			descriptionMockControl			= MockClassControl.createNiceControl(Description.class);
+	protected final MockControl descriptionMockControl = MockClassControl.createNiceControl(Description.class);
 
-	protected final Description			description						= (Description) this.descriptionMockControl.getMock();
+	protected final Description description = (Description) this.descriptionMockControl.getMock();
 
-	protected final MockControl			testContextManagerMockControl	= MockClassControl.createNiceControl(TestContextManager.class);
+	protected final MockControl testContextManagerMockControl = MockClassControl.createNiceControl(TestContextManager.class);
 
-	protected final TestContextManager	testContextManager				= (TestContextManager) this.testContextManagerMockControl.getMock();
+	protected final TestContextManager testContextManager = (TestContextManager) this.testContextManagerMockControl.getMock();
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-
-		return new JUnit4TestAdapter(RepeatedSpringMethodRoadieTests.class);
-	}
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	private void assertRepetitions(final String methodName, final int expectedNumInvocations) throws Exception {
 
@@ -92,41 +78,33 @@ public class RepeatedSpringMethodRoadieTests {
 
 	@Test
 	public void testRepeatAnnotationSupport() throws Exception {
-
 		assertRepetitions("testNonAnnotated", 1);
 		assertRepetitions("testNegativeRepeatValue", 1);
 		assertRepetitions("testDefaultRepeatValue", 1);
 		assertRepetitions("testRepeatedFiveTimes", 5);
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- TYPES --------------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	protected static class RepeatedTestCase {
 
-		int	beforeCount		= 0;
+		int beforeCount = 0;
+		int afterCount = 0;
+		int invocationCount = 0;
 
-		int	afterCount		= 0;
-
-		int	invocationCount	= 0;
 
 		@Before
 		protected void setUp() throws Exception {
-
 			this.beforeCount++;
 		}
 
 		@After
 		protected void tearDown() throws Exception {
-
 			this.afterCount++;
 		}
 
 		@Test
 		@Timed(millis = 10000)
 		public void testNonAnnotated() {
-
 			this.invocationCount++;
 		}
 
@@ -134,7 +112,6 @@ public class RepeatedSpringMethodRoadieTests {
 		@Repeat(-5)
 		@Timed(millis = 10000)
 		public void testNegativeRepeatValue() {
-
 			this.invocationCount++;
 		}
 
@@ -142,7 +119,6 @@ public class RepeatedSpringMethodRoadieTests {
 		@Repeat
 		@Timed(millis = 10000)
 		public void testDefaultRepeatValue() {
-
 			this.invocationCount++;
 		}
 
@@ -150,11 +126,8 @@ public class RepeatedSpringMethodRoadieTests {
 		@Repeat(5)
 		@Timed(millis = 10000)
 		public void testRepeatedFiveTimes() {
-
 			this.invocationCount++;
 		}
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

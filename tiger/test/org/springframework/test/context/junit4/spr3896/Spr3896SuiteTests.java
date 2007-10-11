@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.junit4.spr3896;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -50,9 +48,4 @@ BeanOverridingExplicitLocationsInheritedTests.class
 
 })
 public class Spr3896SuiteTests {
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(Spr3896SuiteTests.class);
-	}
 }

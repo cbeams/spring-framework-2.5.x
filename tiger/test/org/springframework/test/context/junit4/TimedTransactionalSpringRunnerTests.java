@@ -17,10 +17,10 @@
 package org.springframework.test.context.junit4;
 
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
-import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
@@ -42,16 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 @ContextConfiguration(locations = { "transactionalTests-context.xml" })
 @Transactional
 public class TimedTransactionalSpringRunnerTests {
-
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-
-		return new JUnit4TestAdapter(TimedTransactionalSpringRunnerTests.class);
-	}
 
 	// ------------------------------------------------------------------------|
 	// --- INSTANCE METHODS ---------------------------------------------------|

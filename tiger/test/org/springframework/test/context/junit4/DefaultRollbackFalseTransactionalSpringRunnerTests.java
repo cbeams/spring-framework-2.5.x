@@ -21,20 +21,15 @@ import static org.springframework.test.transaction.TransactionTestUtils.assertIn
 
 import javax.sql.DataSource;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -52,54 +47,29 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-	TransactionalTestExecutionListener.class })
 @TransactionConfiguration(transactionManager = "txMgr", defaultRollback = false)
 @Transactional
 public class DefaultRollbackFalseTransactionalSpringRunnerTests extends AbstractTransactionalSpringRunnerTests {
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
 	protected static SimpleJdbcTemplate simpleJdbcTemplate;
 
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-
-		return new JUnit4TestAdapter(DefaultRollbackFalseTransactionalSpringRunnerTests.class);
-	}
-
 	@AfterClass
 	public static void verifyFinalTestData() {
-
 		assertEquals("Verifying the final number of rows in the person table after all tests.", 2,
 				countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
 	@Before
 	public void verifyInitialTestData() {
-
 		clearPersonTable(simpleJdbcTemplate);
 		assertEquals("Adding bob", 1, addPerson(simpleJdbcTemplate, BOB));
 		assertEquals("Verifying the initial number of rows in the person table.", 1,
 				countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
-	// ------------------------------------------------------------------------|
-
 	@Test
 	public void modifyTestDataWithinTransaction() {
-
 		assertInTransaction(true);
 		assertEquals("Deleting bob", 1, deletePerson(simpleJdbcTemplate, BOB));
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
@@ -109,20 +79,13 @@ public class DefaultRollbackFalseTransactionalSpringRunnerTests extends Abstract
 	}
 
 
-	// ------------------------------------------------------------------------|
-	// --- TYPES --------------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
 	public static class DatabaseSetup {
 
 		@Autowired
 		void setDataSource(final DataSource dataSource) {
-
 			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			createPersonTable(simpleJdbcTemplate);
 		}
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

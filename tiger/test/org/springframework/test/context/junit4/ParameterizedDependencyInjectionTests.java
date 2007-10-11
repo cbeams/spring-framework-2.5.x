@@ -24,8 +24,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -33,6 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,11 +82,6 @@ public class ParameterizedDependencyInjectionTests implements ApplicationContext
 	@Parameters
 	public static Collection<String[]> employeeData() {
 		return Arrays.asList(new String[][] { { "employee1", "John Smith" }, { "employee2", "Jane Smith" } });
-	}
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(ParameterizedDependencyInjectionTests.class);
 	}
 
 	@BeforeClass

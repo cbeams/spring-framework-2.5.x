@@ -21,10 +21,9 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Properties;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -60,40 +59,20 @@ import org.springframework.test.context.support.GenericPropertiesContextLoader;
 @ContextConfiguration(loader = GenericPropertiesContextLoader.class)
 public class PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests {
 
-	// ------------------------------------------------------------------------|
-	// --- CLASS METHODS ------------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	@Autowired
+	private Pet cat;
 
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
+	@Autowired
+	private String testString;
 
-		return new JUnit4TestAdapter(PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests.class);
-	}
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	@Autowired()
-	private Pet		cat;
-
-	@Autowired()
-	private String	testString;
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	@Test
 	public void verifyAnnotationAutowiredFields() {
-
 		assertNotNull("The cat field should have been autowired.", this.cat);
 		assertEquals("Garfield", this.cat.getName());
 
 		assertNotNull("The testString field should have been autowired.", this.testString);
 		assertEquals("Test String", this.testString);
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

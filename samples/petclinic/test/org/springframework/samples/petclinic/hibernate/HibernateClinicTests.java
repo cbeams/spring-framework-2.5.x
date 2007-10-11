@@ -1,8 +1,6 @@
 
 package org.springframework.samples.petclinic.hibernate;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.springframework.samples.petclinic.AbstractClinicTests;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -19,9 +17,4 @@ import org.springframework.test.context.ContextConfiguration;
  */
 @ContextConfiguration
 public class HibernateClinicTests extends AbstractClinicTests {
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(HibernateClinicTests.class);
-	}
 }

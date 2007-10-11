@@ -18,10 +18,10 @@ package org.springframework.test.context.junit4.spr3896;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -45,12 +45,6 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 @ContextConfiguration(locations = { "DefaultLocationsBaseTests-context.xml" })
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class })
 public class ExplicitLocationsBaseTests {
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(ExplicitLocationsBaseTests.class);
-	}
-
 
 	@Autowired
 	protected Employee employee;

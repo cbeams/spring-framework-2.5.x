@@ -16,9 +16,8 @@
 
 package org.springframework.test.context.junit4;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.runner.RunWith;
+
 import org.springframework.test.context.TestExecutionListeners;
 
 /**
@@ -39,13 +38,5 @@ import org.springframework.test.context.TestExecutionListeners;
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners( {})
 public class StandardJUnit4FeaturesSpringRunnerTests extends StandardJUnit4FeaturesTests {
-
 	/* all tests are in the parent class. */
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-
-		return new JUnit4TestAdapter(StandardJUnit4FeaturesSpringRunnerTests.class);
-	}
-
 }

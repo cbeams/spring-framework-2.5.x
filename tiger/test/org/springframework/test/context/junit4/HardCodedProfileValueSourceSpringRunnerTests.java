@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package org.springframework.test.context.junit4;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.BeforeClass;
+
 import org.springframework.test.annotation.ProfileValueSource;
 import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 
@@ -38,11 +37,6 @@ import org.springframework.test.annotation.ProfileValueSourceConfiguration;
  */
 @ProfileValueSourceConfiguration(HardCodedProfileValueSourceSpringRunnerTests.HardCodedProfileValueSource.class)
 public class HardCodedProfileValueSourceSpringRunnerTests extends EnabledAndIgnoredSpringRunnerTests {
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(HardCodedProfileValueSourceSpringRunnerTests.class);
-	}
 
 	@BeforeClass
 	public static void setProfileValue() {

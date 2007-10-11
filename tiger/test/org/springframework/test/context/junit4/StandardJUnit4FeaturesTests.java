@@ -23,8 +23,6 @@ import static org.junit.Assume.assumeTrue;
 
 import java.util.ArrayList;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -50,85 +48,57 @@ import org.junit.Test;
  */
 public class StandardJUnit4FeaturesTests {
 
-	// ------------------------------------------------------------------------|
-	// --- CLASS VARIABLES ----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
 	private static int staticBeforeCounter = 0;
 
-	// ------------------------------------------------------------------------|
-	// --- CLASS METHODS ------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	@BeforeClass
 	public static void incrementStaticBeforeCounter() {
-
 		StandardJUnit4FeaturesTests.staticBeforeCounter++;
 	}
 
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-
-		return new JUnit4TestAdapter(StandardJUnit4FeaturesTests.class);
-	}
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	private int beforeCounter = 0;
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	@Test
 	@Ignore
 	public void alwaysFailsButShouldBeIgnored() {
-
 		fail("The body of an ignored test should never be executed!");
 	}
 
 	@Test
 	public void alwaysSucceeds() {
-
 		assertTrue(true);
 	}
 
 	@Test(expected = IndexOutOfBoundsException.class)
 	public void expectingAnIndexOutOfBoundsException() {
-
 		new ArrayList<Object>().get(1);
 	}
 
 	@Test
 	public void failedAssumptionShouldPrecludeImminentFailure() {
-
 		assumeTrue(false);
 		fail("A failed assumption should preclude imminent failure!");
 	}
 
 	@Before
 	public void incrementBeforeCounter() {
-
 		this.beforeCounter++;
 	}
 
 	@Test(timeout = 10000)
 	public void noOpShouldNotTimeOut() {
-
 		/* no-op */
 	}
 
 	@Test
 	public void verifyBeforeAnnotation() {
-
 		assertEquals(1, this.beforeCounter);
 	}
 
 	@Test
 	public void verifyBeforeClassAnnotation() {
-
 		// Instead of testing for equality to 1, we just assert that the value
 		// was incremented at least once, since this test class may serve as a
 		// parent class to other tests in a suite, etc.

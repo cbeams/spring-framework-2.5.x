@@ -16,9 +16,11 @@
 
 package org.springframework.test.context;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 
-import junit.framework.JUnit4TestAdapter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,27 +44,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration(locations = { "/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml" })
 public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
 	private static ApplicationContext dirtiedApplicationContext;
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	protected ApplicationContext applicationContext;
 
 
 	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(SpringRunnerContextCacheTests.class);
-	}
 
 	/**
 	 * Asserts the statistics of the supplied context cache.
@@ -98,8 +85,6 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 		assertContextCacheStatistics("AfterClass", 1, 1, 2);
 	}
 
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
 	// ------------------------------------------------------------------------|
 
 	/**
@@ -142,12 +127,11 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 
 
 	// ------------------------------------------------------------------------|
-	// --- STATIC CLASSES -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	public static class TestableSpringJUnit4ClassRunner extends SpringJUnit4ClassRunner {
 
 		static TestableTestContextManager testableTestContextManager;
+
 
 		public TestableSpringJUnit4ClassRunner(final Class<?> clazz) throws InitializationError {
 			super(clazz);
@@ -160,7 +144,6 @@ public class SpringRunnerContextCacheTests implements ApplicationContextAware {
 			return testableTestContextManager;
 		}
 	}
-
 
 	private static class TestableTestContextManager extends TestContextManager {
 

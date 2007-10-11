@@ -21,10 +21,9 @@ import java.util.ArrayList;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.internal.runners.JUnit38ClassRunner;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.BeanNameAware;
@@ -83,11 +82,6 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 
 	public ConcreteTransactionalJUnit38SpringContextTests(final String name) throws Exception {
 		super(name);
-	}
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(ConcreteTransactionalJUnit38SpringContextTests.class);
 	}
 
 	protected static int clearPersonTable(final SimpleJdbcTemplate simpleJdbcTemplate) {

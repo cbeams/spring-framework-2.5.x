@@ -16,11 +16,10 @@
 
 package org.springframework.test.context.junit4;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+
 import org.springframework.test.context.SpringRunnerContextCacheTests;
 
 /**
@@ -92,12 +91,5 @@ TimedTransactionalSpringRunnerTests.class
 
 })
 public class SpringJUnit4SuiteTests {
-
 	/* this test case is comprised completely of tests loaded as a suite. */
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-
-		return new JUnit4TestAdapter(SpringJUnit4SuiteTests.class);
-	}
 }

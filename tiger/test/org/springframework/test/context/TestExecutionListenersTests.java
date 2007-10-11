@@ -17,11 +17,11 @@
 package org.springframework.test.context;
 
 import static org.junit.Assert.assertEquals;
-import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
 import org.junit.internal.runners.JUnit4ClassRunner;
 import org.junit.runner.RunWith;
+
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
@@ -44,9 +44,37 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 @RunWith(JUnit4ClassRunner.class)
 public class TestExecutionListenersTests {
 
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(TestExecutionListenersTests.class);
+	@Test
+	public void verifyNumDefaultListenersRegistered() throws Exception {
+		TestContextManager testContextManager = new TestContextManager(DefaultListenersExampleTest.class);
+		assertEquals("Verifying the number of registered TestExecutionListeners for DefaultListenersExampleTest.", 3,
+				testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void verifyNumNonInheritedDefaultListenersRegistered() throws Exception {
+		TestContextManager testContextManager = new TestContextManager(NonInheritedDefaultListenersExampleTest.class);
+		assertEquals(
+				"Verifying the number of registered TestExecutionListeners for NonInheritedDefaultListenersExampleTest.",
+				1, testContextManager.getTestExecutionListeners().size());
+	}
+
+	@Test
+	public void verifyNumInheritedDefaultListenersRegistered() throws Exception {
+		TestContextManager testContextManager = new TestContextManager(InheritedDefaultListenersExampleTest.class);
+		assertEquals(
+				"Verifying the number of registered TestExecutionListeners for InheritedDefaultListenersExampleTest.",
+				1, testContextManager.getTestExecutionListeners().size());
+
+		testContextManager = new TestContextManager(SubInheritedDefaultListenersExampleTest.class);
+		assertEquals(
+				"Verifying the number of registered TestExecutionListeners for SubInheritedDefaultListenersExampleTest.",
+				1, testContextManager.getTestExecutionListeners().size());
+
+		testContextManager = new TestContextManager(SubSubInheritedDefaultListenersExampleTest.class);
+		assertEquals(
+				"Verifying the number of registered TestExecutionListeners for SubSubInheritedDefaultListenersExampleTest.",
+				2, testContextManager.getTestExecutionListeners().size());
 	}
 
 	@Test
@@ -71,6 +99,24 @@ public class TestExecutionListenersTests {
 	}
 
 
+	static class DefaultListenersExampleTest {
+	}
+
+	@TestExecutionListeners( { QuuxTestExecutionListener.class })
+	static class InheritedDefaultListenersExampleTest extends DefaultListenersExampleTest {
+	}
+
+	static class SubInheritedDefaultListenersExampleTest extends InheritedDefaultListenersExampleTest {
+	}
+
+	@TestExecutionListeners( { EnigmaTestExecutionListener.class })
+	static class SubSubInheritedDefaultListenersExampleTest extends SubInheritedDefaultListenersExampleTest {
+	}
+
+	@TestExecutionListeners(value = { QuuxTestExecutionListener.class }, inheritListeners = false)
+	static class NonInheritedDefaultListenersExampleTest extends InheritedDefaultListenersExampleTest {
+	}
+
 	@TestExecutionListeners( { FooTestExecutionListener.class, BarTestExecutionListener.class,
 		BazTestExecutionListener.class })
 	static class ExampleTest {
@@ -94,6 +140,9 @@ public class TestExecutionListenersTests {
 	}
 
 	static class QuuxTestExecutionListener extends AbstractTestExecutionListener {
+	}
+
+	static class EnigmaTestExecutionListener extends AbstractTestExecutionListener {
 	}
 
 }

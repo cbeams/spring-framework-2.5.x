@@ -18,13 +18,13 @@ package org.springframework.test.context.junit4;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import junit.framework.JUnit4TestAdapter;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueSource;
 import org.springframework.test.annotation.ProfileValueSourceConfiguration;
@@ -58,11 +58,6 @@ public class EnabledAndIgnoredSpringRunnerTests {
 
 	protected static int numTestsExecuted = 0;
 
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(EnabledAndIgnoredSpringRunnerTests.class);
-	}
 
 	@BeforeClass
 	public static void setProfileValue() {

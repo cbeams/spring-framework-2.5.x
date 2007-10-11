@@ -16,10 +16,10 @@
 
 package org.springframework.test.context;
 
-import junit.framework.JUnit4TestAdapter;
+import static org.junit.Assert.assertArrayEquals;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import static org.junit.Assert.assertArrayEquals;
 import org.junit.Test;
 import org.junit.internal.runners.JUnit4ClassRunner;
 import org.junit.runner.RunWith;
@@ -46,11 +46,6 @@ public class ContextLoaderTests {
 
 	private static final Log logger = LogFactory.getLog(ContextLoaderTests.class);
 
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(ContextLoaderTests.class);
-	}
 
 	@SuppressWarnings("unchecked")
 	private void assertContextConfigurationLocations(final Class<?> testClass, final String[] expectedLocations)

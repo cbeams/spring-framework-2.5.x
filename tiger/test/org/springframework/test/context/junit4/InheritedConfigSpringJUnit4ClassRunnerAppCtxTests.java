@@ -18,8 +18,6 @@ package org.springframework.test.context.junit4;
 
 import java.lang.annotation.Inherited;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -33,13 +31,5 @@ import org.springframework.test.context.ContextConfiguration;
  * @see SpringJUnit4ClassRunnerAppCtxTests
  */
 public class InheritedConfigSpringJUnit4ClassRunnerAppCtxTests extends SpringJUnit4ClassRunnerAppCtxTests {
-
 	/* all tests are in the parent class. */
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-
-		return new JUnit4TestAdapter(InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class);
-	}
-
 }

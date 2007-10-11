@@ -16,14 +16,13 @@
 
 package org.springframework.samples.petclinic;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import org.springframework.samples.petclinic.hibernate.HibernateClinicTests;
 import org.springframework.samples.petclinic.jdbc.JdbcClinicTests;
+import org.springframework.samples.petclinic.jdbc.SimpleJdbcClinicTests;
 import org.springframework.samples.petclinic.jpa.EntityManagerClinicTests;
 import org.springframework.samples.petclinic.jpa.HibernateEntityManagerClinicTests;
 import org.springframework.samples.petclinic.jpa.JpaTemplateClinicTests;
@@ -47,6 +46,8 @@ HibernateClinicTests.class,
 
 JdbcClinicTests.class,
 
+SimpleJdbcClinicTests.class,
+
 EntityManagerClinicTests.class,
 
 HibernateEntityManagerClinicTests.class,
@@ -59,9 +60,4 @@ TopLinkClinicTests.class
 
 })
 public class PetClinicSuiteTests {
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(PetClinicSuiteTests.class);
-	}
 }

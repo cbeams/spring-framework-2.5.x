@@ -5,8 +5,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
 
 import org.springframework.samples.petclinic.AbstractClinicTests;
@@ -34,11 +32,6 @@ public class TopLinkClinicTests extends AbstractClinicTests {
 	protected int originalNumOwners = -1;
 	protected String testMethodName = null;
 
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(TopLinkClinicTests.class);
-	}
 
 	@Test
 	@Rollback(false)

@@ -21,13 +21,12 @@ import static org.springframework.test.transaction.TransactionTestUtils.assertIn
 
 import javax.sql.DataSource;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
@@ -52,43 +51,24 @@ import org.springframework.transaction.annotation.Transactional;
 @TestExecutionListeners( { TransactionalTestExecutionListener.class })
 public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactionalSpringRunnerTests {
 
-	// ------------------------------------------------------------------------|
-	// --- STATIC VARIABLES ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
 	protected static SimpleJdbcTemplate simpleJdbcTemplate;
 
 	protected static int numBeforeTransactionCalls = 0;
-
 	protected static int numAfterTransactionCalls = 0;
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE VARIABLES -------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	protected boolean inTransaction = false;
 
 
 	// ------------------------------------------------------------------------|
-	// --- STATIC METHODS -----------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-
-		return new JUnit4TestAdapter(BeforeAndAfterTransactionAnnotationTests.class);
-	}
 
 	@BeforeClass
 	public static void beforeClass() {
-
 		BeforeAndAfterTransactionAnnotationTests.numBeforeTransactionCalls = 0;
 		BeforeAndAfterTransactionAnnotationTests.numAfterTransactionCalls = 0;
 	}
 
 	@AfterClass
 	public static void afterClass() {
-
 		assertEquals("Verifying the final number of rows in the person table after all tests.", 3,
 				countRowsInPersonTable(simpleJdbcTemplate));
 		assertEquals("Verifying the total number of calls to beforeTransaction().", 2,
@@ -98,12 +78,9 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	}
 
 	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	@BeforeTransaction
 	public void beforeTransaction() {
-
 		assertInTransaction(false);
 		this.inTransaction = true;
 		BeforeAndAfterTransactionAnnotationTests.numBeforeTransactionCalls++;
@@ -113,7 +90,6 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 
 	@AfterTransaction
 	public void afterTransaction() {
-
 		assertInTransaction(false);
 		this.inTransaction = false;
 		BeforeAndAfterTransactionAnnotationTests.numAfterTransactionCalls++;
@@ -124,7 +100,6 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 
 	@Before
 	public void before() {
-
 		assertEquals("Verifying the number of rows in the person table before a test method.", (this.inTransaction ? 1
 				: 0), countRowsInPersonTable(simpleJdbcTemplate));
 	}
@@ -132,7 +107,6 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	@Test
 	@Transactional
 	public void transactionalMethod1() {
-
 		assertInTransaction(true);
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
 		assertEquals("Verifying the number of rows in the person table within transactionalMethod1().", 2,
@@ -142,7 +116,6 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 	@Test
 	@Transactional
 	public void transactionalMethod2() {
-
 		assertInTransaction(true);
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
@@ -152,7 +125,6 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 
 	@Test
 	public void nonTransactionalMethod() {
-
 		assertInTransaction(false);
 		assertEquals("Adding luke", 1, addPerson(simpleJdbcTemplate, LUKE));
 		assertEquals("Adding leia", 1, addPerson(simpleJdbcTemplate, LEIA));
@@ -163,19 +135,14 @@ public class BeforeAndAfterTransactionAnnotationTests extends AbstractTransactio
 
 
 	// ------------------------------------------------------------------------|
-	// --- TYPES --------------------------------------------------------------|
-	// ------------------------------------------------------------------------|
 
 	public static class DatabaseSetup {
 
 		@Autowired
 		void setDataSource(final DataSource dataSource) {
-
 			simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 			createPersonTable(simpleJdbcTemplate);
 		}
 	}
-
-	// ------------------------------------------------------------------------|
 
 }

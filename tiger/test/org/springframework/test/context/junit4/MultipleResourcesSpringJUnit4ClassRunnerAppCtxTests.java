@@ -16,9 +16,8 @@
 
 package org.springframework.test.context.junit4;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.runner.RunWith;
+
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
 
@@ -33,35 +32,14 @@ import org.springframework.util.ResourceUtils;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.CLASSPATH_RESOURCE_PATH,
-		MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.LOCAL_RESOURCE_PATH,
-		MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.ABSOLUTE_RESOURCE_PATH })
+	MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.LOCAL_RESOURCE_PATH,
+	MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.ABSOLUTE_RESOURCE_PATH })
 public class MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests extends SpringJUnit4ClassRunnerAppCtxTests {
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	public static final String	CLASSPATH_RESOURCE_PATH	= ResourceUtils.CLASSPATH_URL_PREFIX
-																+ "/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context1.xml";
-
-	public static final String	LOCAL_RESOURCE_PATH		= "MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context2.xml";
-
-	public static final String	ABSOLUTE_RESOURCE_PATH	= "/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context3.xml";
-
-	// ------------------------------------------------------------------------|
-	// --- CLASS METHODS ------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-
-		return new JUnit4TestAdapter(MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.class);
-	}
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	public static final String CLASSPATH_RESOURCE_PATH = ResourceUtils.CLASSPATH_URL_PREFIX
+			+ "/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context1.xml";
+	public static final String LOCAL_RESOURCE_PATH = "MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context2.xml";
+	public static final String ABSOLUTE_RESOURCE_PATH = "/org/springframework/test/context/junit4/MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests-context3.xml";
 
 	/* all tests are in the parent class. */
-
 }

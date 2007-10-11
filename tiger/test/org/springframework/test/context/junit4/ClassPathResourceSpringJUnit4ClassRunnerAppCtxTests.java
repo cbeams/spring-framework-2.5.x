@@ -16,9 +16,8 @@
 
 package org.springframework.test.context.junit4;
 
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.runner.RunWith;
+
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
 
@@ -38,10 +37,6 @@ import org.springframework.util.ResourceUtils;
 @ContextConfiguration(locations = { ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests.CLASSPATH_CONTEXT_RESOURCE_PATH })
 public class ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests extends SpringJUnit4ClassRunnerAppCtxTests {
 
-	// ------------------------------------------------------------------------|
-	// --- CONSTANTS ----------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
 	/**
 	 * Classpath-based resource path for the application context configuration
 	 * for {@link SpringJUnit4ClassRunnerAppCtxTests}:
@@ -50,23 +45,8 @@ public class ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests extends SpringJ
 	 * @see SpringJUnit4ClassRunnerAppCtxTests#DEFAULT_CONTEXT_RESOURCE_PATH
 	 * @see ResourceUtils#CLASSPATH_URL_PREFIX
 	 */
-	public static final String	CLASSPATH_CONTEXT_RESOURCE_PATH	= ResourceUtils.CLASSPATH_URL_PREFIX
-																		+ SpringJUnit4ClassRunnerAppCtxTests.DEFAULT_CONTEXT_RESOURCE_PATH;
-
-	// ------------------------------------------------------------------------|
-	// --- CLASS METHODS ------------------------------------------------------|
-	// ------------------------------------------------------------------------|
-
-	// XXX Remove suite() once we've migrated to Ant 1.7 with JUnit 4 support.
-	public static junit.framework.Test suite() {
-
-		return new JUnit4TestAdapter(ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests.class);
-	}
-
-	// ------------------------------------------------------------------------|
-	// --- INSTANCE METHODS ---------------------------------------------------|
-	// ------------------------------------------------------------------------|
+	public static final String CLASSPATH_CONTEXT_RESOURCE_PATH = ResourceUtils.CLASSPATH_URL_PREFIX
+			+ SpringJUnit4ClassRunnerAppCtxTests.DEFAULT_CONTEXT_RESOURCE_PATH;
 
 	/* all tests are in the parent class. */
-
 }
