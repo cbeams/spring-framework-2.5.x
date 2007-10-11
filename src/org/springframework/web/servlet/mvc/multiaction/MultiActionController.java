@@ -37,6 +37,8 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.bind.support.WebBindingInitializer;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.LastModified;
@@ -146,6 +148,9 @@ public class MultiActionController extends AbstractController implements LastMod
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
 
+	/** Object we'll invoke methods on. Defaults to this. */
+	private Object delegate;
+
 	/**
 	 * Helper object that knows how to return method names from incoming requests.
 	 * <p>Can be overridden via the methodNameResolver bean property.
@@ -155,8 +160,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	/** List of Validators to apply to commands */
 	private Validator[] validators;
 
-	/** Object we'll invoke methods on. Defaults to this. */
-	private Object delegate;
+	private WebBindingInitializer webBindingInitializer;
 
 	/** Methods, keyed by name */
 	private Map handlerMethodMap = new HashMap();
@@ -191,7 +195,24 @@ public class MultiActionController extends AbstractController implements LastMod
 		setDelegate(delegate);
 	}
 	
-	
+
+	/**
+	 * Set the delegate used by this class; the default is <code>this</code>,
+	 * assuming that handler methods have been added by a subclass.
+	 * <p>This method does not get invoked once the class is configured.
+	 * @param delegate an object containing handler methods
+	 * @throws IllegalStateException if no handler methods are found
+	 */
+	public final void setDelegate(Object delegate) {
+		Assert.notNull(delegate, "Delegate must not be null");
+		this.delegate = delegate;
+		registerHandlerMethods(this.delegate);
+		// There must be SOME handler methods.
+		if (this.handlerMethodMap.isEmpty()) {
+			throw new IllegalStateException("No handler methods in class [" + this.delegate.getClass() + "]");
+		}
+	}
+
 	/**
 	 * Set the method name resolver that this class should use.
 	 * <p>Allows parameterization of handler method mappings.
@@ -223,20 +244,21 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 
 	/**
-	 * Set the delegate used by this class; the default is <code>this</code>,
-	 * assuming that handler methods have been added by a subclass.
-	 * <p>This method does not get invoked once the class is configured.
-	 * @param delegate an object containing handler methods
-	 * @throws IllegalStateException if no handler methods are found
+	 * Specify a WebBindingInitializer which will apply pre-configured
+	 * configuration to every DataBinder that this controller uses.
+	 * <p>Allows for factoring out the entire binder configuration
+	 * to separate objects, as an alternative to {@link #initBinder}.
 	 */
-	public final void setDelegate(Object delegate) {
-		Assert.notNull(delegate, "Delegate must not be null");
-		this.delegate = delegate;
-		registerHandlerMethods(this.delegate);
-		// There must be SOME handler methods.
-		if (this.handlerMethodMap.isEmpty()) {
-			throw new IllegalStateException("No handler methods in class [" + this.delegate.getClass() + "]");
-		}
+	public final void setWebBindingInitializer(WebBindingInitializer webBindingInitializer) {
+		this.webBindingInitializer = webBindingInitializer;
+	}
+
+	/**
+	 * Return the WebBindingInitializer (if any) which will apply pre-configured
+	 * configuration to every DataBinder that this controller uses.
+	 */
+	public final WebBindingInitializer getWebBindingInitializer() {
+		return this.webBindingInitializer;
 	}
 
 
@@ -422,11 +444,12 @@ public class MultiActionController extends AbstractController implements LastMod
 		}
 
 		try {
+			Class[] paramTypes = method.getParameterTypes();
 			List params = new ArrayList(4);
 			params.add(request);
 			params.add(response);
-				
-			if (method.getParameterTypes().length >= 3 && method.getParameterTypes()[2].equals(HttpSession.class) ){
+
+			if (paramTypes.length >= 3 && paramTypes[2].equals(HttpSession.class) ){
 				HttpSession session = request.getSession(false);
 				if (session == null) {
 					throw new HttpSessionRequiredException(
@@ -434,11 +457,11 @@ public class MultiActionController extends AbstractController implements LastMod
 				}
 				params.add(session);
 			}
-			
+
 			// If last parameter isn't of HttpSession type, it's a command.
-			if (method.getParameterTypes().length >= 3 &&
-					!method.getParameterTypes()[method.getParameterTypes().length - 1].equals(HttpSession.class)) {
-				Object command = newCommandObject(method.getParameterTypes()[method.getParameterTypes().length - 1]);
+			if (paramTypes.length >= 3 &&
+					!paramTypes[paramTypes.length - 1].equals(HttpSession.class)) {
+				Object command = newCommandObject(paramTypes[paramTypes.length - 1]);
 				params.add(command);
 				bind(request, command);
 			}
@@ -467,6 +490,9 @@ public class MultiActionController extends AbstractController implements LastMod
 		}
 		else if (returnValue instanceof Map) {
 			return new ModelAndView().addAllObjects((Map) returnValue);
+		}
+		else if (returnValue instanceof String) {
+			return new ModelAndView((String) returnValue);
 		}
 		else {
 			// Either returned null or was 'void' return.
@@ -525,9 +551,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @see #bind
 	 * @see #initBinder
 	 */
-	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
-	    throws Exception {
-
+	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command) throws Exception {
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName(command));
 		initBinder(request, binder);
 		return binder;
@@ -561,9 +585,10 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
 	 * @see org.springframework.beans.propertyeditors.CustomDateEditor
 	 */
-	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
-	    throws Exception {
-
+	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) throws Exception {
+		if (this.webBindingInitializer != null) {
+			this.webBindingInitializer.initBinder(binder, new ServletWebRequest(request));
+		}
 		initBinder((ServletRequest) request, binder);
 	}
 
@@ -572,8 +597,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @deprecated since Spring 2.0:
 	 * use <code>initBinder(HttpServletRequest, ServletRequestDataBinder)</code> instead
 	 */
-	protected void initBinder(ServletRequest request, ServletRequestDataBinder binder)
-	    throws Exception {
+	protected void initBinder(ServletRequest request, ServletRequestDataBinder binder) throws Exception {
 	}
 
 

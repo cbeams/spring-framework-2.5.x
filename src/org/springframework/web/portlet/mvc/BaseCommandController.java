@@ -29,7 +29,9 @@ import org.springframework.validation.BindingErrorProcessor;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
+import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
+import org.springframework.web.portlet.context.PortletWebRequest;
 import org.springframework.web.portlet.handler.PortletSessionRequiredException;
 
 /**
@@ -181,6 +183,8 @@ public abstract class BaseCommandController extends AbstractController {
 
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
+	private WebBindingInitializer webBindingInitializer;
+
 
 	/**
 	 * Set the name of the command in the model.
@@ -271,7 +275,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Return the strategy to use for resolving errors into message codes.
+	 * Return the strategy to use for resolving errors into message codes (if any).
 	 */
 	public final MessageCodesResolver getMessageCodesResolver() {
 		return this.messageCodesResolver;
@@ -290,7 +294,7 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Return the strategy to use for processing binding errors.
+	 * Return the strategy to use for processing binding errors (if any).
 	 */
 	public final BindingErrorProcessor getBindingErrorProcessor() {
 		return this.bindingErrorProcessor;
@@ -319,11 +323,29 @@ public abstract class BaseCommandController extends AbstractController {
 	}
 
 	/**
-	 * Return the PropertyEditorRegistrars to be applied
+	 * Return the PropertyEditorRegistrars (if any) to be applied
 	 * to every DataBinder that this controller uses.
 	 */
 	public final PropertyEditorRegistrar[] getPropertyEditorRegistrars() {
 		return this.propertyEditorRegistrars;
+	}
+
+	/**
+	 * Specify a WebBindingInitializer which will apply pre-configured
+	 * configuration to every DataBinder that this controller uses.
+	 * <p>Allows for factoring out the entire binder configuration
+	 * to separate objects, as an alternative to {@link #initBinder}.
+	 */
+	public final void setWebBindingInitializer(WebBindingInitializer webBindingInitializer) {
+		this.webBindingInitializer = webBindingInitializer;
+	}
+
+	/**
+	 * Return the WebBindingInitializer (if any) which will apply pre-configured
+	 * configuration to every DataBinder that this controller uses.
+	 */
+	public final WebBindingInitializer getWebBindingInitializer() {
+		return this.webBindingInitializer;
 	}
 
 
@@ -498,8 +520,10 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @see org.springframework.validation.DataBinder#registerCustomEditor
 	 * @see org.springframework.beans.propertyeditors.CustomDateEditor
 	 */
-	protected void initBinder(PortletRequest request, PortletRequestDataBinder binder)
-			throws Exception {
+	protected void initBinder(PortletRequest request, PortletRequestDataBinder binder) throws Exception {
+		if (this.webBindingInitializer != null) {
+			this.webBindingInitializer.initBinder(binder, new PortletWebRequest(request));
+		}
 	}
 
 	/**
@@ -514,9 +538,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @see #bindAndValidate
 	 * @see #onBind(PortletRequest, Object)
 	 */
-	protected void onBind(PortletRequest request, Object command, BindException errors)
-			throws Exception {
-	    
+	protected void onBind(PortletRequest request, Object command, BindException errors) throws Exception {
 		onBind(request, command);
 	}
 
