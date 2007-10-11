@@ -56,7 +56,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	private final PortletContext portletContext;
 
-	private PortletSession session = null;
+	private PortletSession session;
 
 	private WindowState windowState = WindowState.NORMAL;
 
@@ -169,6 +169,7 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public void setPortletMode(PortletMode portletMode) {
+		Assert.notNull(portletMode, "PortletMode must not be null");
 		this.portletMode = portletMode;
 	}
 
@@ -177,6 +178,7 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public void setWindowState(WindowState windowState) {
+		Assert.notNull(windowState, "WindowState must not be null");
 		this.windowState = windowState;
 	}
 
@@ -185,6 +187,7 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public void setPreferences(PortletPreferences preferences) {
+		Assert.notNull(preferences, "PortletPreferences must not be null");
 		this.portletPreferences = preferences;
 	}
 
