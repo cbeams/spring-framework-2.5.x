@@ -16,6 +16,11 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
@@ -44,6 +49,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -118,7 +124,7 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 
 	protected Object[] resolveArguments(
 			Object handler, Method handlerMethod, HttpServletRequest request, HttpServletResponse response,
-			Map implicitModel) throws ServletException {
+			Map implicitModel) throws ServletException, IOException {
 
 		SimpleTypeConverter converter = new SimpleTypeConverter();
 		Object[] args = new Object[handlerMethod.getParameterTypes().length];
@@ -133,12 +139,18 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 					Annotation paramAnn = paramAnns[j];
 					if (RequestParam.class.isInstance(paramAnn)) {
 						RequestParam requestParam = (RequestParam) paramAnn;
-						String[] paramValues = request.getParameterValues(requestParam.value());
-						if (paramValues == null && requestParam.required()) {
+						Object paramValue = null;
+						if (request instanceof MultipartHttpServletRequest) {
+							paramValue = ((MultipartHttpServletRequest) request).getFile(requestParam.value());
+						}
+						if (paramValue == null) {
+							paramValue = request.getParameterValues(requestParam.value());
+						}
+						if (paramValue == null && requestParam.required()) {
 							throw new MissingServletRequestParameterException(
 									requestParam.value(), param.getParameterType().getName());
 						}
-						args[i] = converter.convertIfNecessary(paramValues, param.getParameterType());
+						args[i] = converter.convertIfNecessary(paramValue, param.getParameterType());
 						resolved = true;
 						break;
 					}
@@ -177,7 +189,7 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 	}
 
 	protected Object resolveStandardArgument(
-			Class parameterType, HttpServletRequest request, HttpServletResponse response) {
+			Class parameterType, HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		if (parameterType.isInstance(request)) {
 			return request;
@@ -193,6 +205,18 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 		}
 		else if (Locale.class.equals(parameterType)) {
 			return RequestContextUtils.getLocale(request);
+		}
+		else if (InputStream.class.equals(parameterType)) {
+			return request.getInputStream();
+		}
+		else if (Reader.class.equals(parameterType)) {
+			return request.getReader();
+		}
+		else if (OutputStream.class.equals(parameterType)) {
+			return response.getOutputStream();
+		}
+		else if (Writer.class.equals(parameterType)) {
+			return response.getWriter();
 		}
 		else {
 			return null;

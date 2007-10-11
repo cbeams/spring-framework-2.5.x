@@ -16,6 +16,11 @@
 
 package org.springframework.web.portlet.mvc.annotation;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
@@ -52,6 +57,7 @@ import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.bind.MissingPortletRequestParameterException;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
 import org.springframework.web.portlet.context.PortletWebRequest;
+import org.springframework.web.portlet.multipart.MultipartActionRequest;
 
 /**
  * Implementation of the {@link org.springframework.web.portlet.HandlerAdapter}
@@ -129,7 +135,7 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 
 	protected Object[] resolveArguments(
 			Object handler, Method handlerMethod, PortletRequest request, PortletResponse response,
-			Map implicitModel) throws PortletException {
+			Map implicitModel) throws PortletException, IOException {
 
 		SimpleTypeConverter converter = new SimpleTypeConverter();
 		Object[] args = new Object[handlerMethod.getParameterTypes().length];
@@ -144,12 +150,18 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 					Annotation paramAnn = paramAnns[j];
 					if (RequestParam.class.isInstance(paramAnn)) {
 						RequestParam requestParam = (RequestParam) paramAnn;
-						String[] paramValues = request.getParameterValues(requestParam.value());
-						if (paramValues == null && requestParam.required()) {
+						Object paramValue = null;
+						if (request instanceof MultipartActionRequest) {
+							paramValue = ((MultipartActionRequest) request).getFile(requestParam.value());
+						}
+						if (paramValue == null) {
+							paramValue = request.getParameterValues(requestParam.value());
+						}
+						if (paramValue == null && requestParam.required()) {
 							throw new MissingPortletRequestParameterException(
 									requestParam.value(), param.getParameterType().getName());
 						}
-						args[i] = converter.convertIfNecessary(paramValues, param.getParameterType());
+						args[i] = converter.convertIfNecessary(paramValue, param.getParameterType());
 						resolved = true;
 						break;
 					}
@@ -188,7 +200,7 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 	}
 
 	protected Object resolveStandardArgument(
-			Class parameterType, PortletRequest request, PortletResponse response) {
+			Class parameterType, PortletRequest request, PortletResponse response) throws IOException {
 
 		if (parameterType.isInstance(request)) {
 			return request;
@@ -204,6 +216,30 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 		}
 		else if (Locale.class.equals(parameterType)) {
 			return request.getLocale();
+		}
+		else if (InputStream.class.equals(parameterType)) {
+			if (!(request instanceof ActionRequest)) {
+				throw new IllegalStateException("InputStream can only get obtained for ActionRequest");
+			}
+			return ((ActionRequest) request).getPortletInputStream();
+		}
+		else if (Reader.class.equals(parameterType)) {
+			if (!(request instanceof ActionRequest)) {
+				throw new IllegalStateException("Reader can only get obtained for ActionRequest");
+			}
+			return ((ActionRequest) request).getReader();
+		}
+		else if (OutputStream.class.equals(parameterType)) {
+			if (!(response instanceof RenderResponse)) {
+				throw new IllegalStateException("OutputStream can only get obtained for RenderResponse");
+			}
+			return ((RenderResponse) response).getPortletOutputStream();
+		}
+		else if (Writer.class.equals(parameterType)) {
+			if (!(response instanceof RenderResponse)) {
+				throw new IllegalStateException("Writer can only get obtained for RenderResponse");
+			}
+			return ((RenderResponse) response).getWriter();
 		}
 		else {
 			return null;
