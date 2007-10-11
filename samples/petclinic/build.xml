@@ -285,6 +285,9 @@
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/dist/modules">
+				<include name="spring-webmvc.jar"/>
+			</fileset>
 
 		</copy>
 

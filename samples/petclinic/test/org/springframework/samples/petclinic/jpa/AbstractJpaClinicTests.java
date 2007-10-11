@@ -34,7 +34,7 @@ import org.springframework.test.jpa.AbstractJpaTests;
  * also inherited, and can be used for explicit lookup if necessary.
  * <p>
  * {@link AbstractJpaTests} and related classes are shipped in
- * <code>spring-mock.jar</code>.
+ * <code>spring-test.jar</code>.
  *
  * @author Rod Johnson
  * @see AbstractJpaTests
