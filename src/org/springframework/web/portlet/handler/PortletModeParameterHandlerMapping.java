@@ -31,11 +31,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Implementation of the HandlerMapping interface to map from
- * the current PortletMode and a request parameter to request handler beans.
- * The mapping consists of two levels: first the PortletMode and then the
- * parameter value.  In order to be mapped, both elements must
- * match the mapping definition.
+ * Implementation of the {@link org.springframework.web.portlet.HandlerMapping}
+ * interface to map from the current PortletMode and a request parameter to
+ * request handler beans. The mapping consists of two levels: first the
+ * PortletMode and then the parameter value. In order to be mapped,
+ * both elements must match the mapping definition.
  *
  * <p>This is a combination of the methods used in {@link PortletModeHandlerMapping PortletModeHandlerMapping}
  * and {@link ParameterHandlerMapping ParameterHandlerMapping}.  Unlike

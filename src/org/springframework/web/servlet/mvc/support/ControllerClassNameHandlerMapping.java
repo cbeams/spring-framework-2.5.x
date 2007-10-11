@@ -207,7 +207,7 @@ public class ControllerClassNameHandlerMapping extends AbstractUrlHandlerMapping
 	 */
 	protected String generatePathMapping(Class beanClass) {
 		StringBuffer pathMapping = new StringBuffer("/");
-		String className = ClassUtils.getShortName(beanClass.getName());
+		String className = ClassUtils.getShortName(beanClass);
 		String path = (className.endsWith(CONTROLLER_SUFFIX) ?
 				className.substring(0, className.indexOf(CONTROLLER_SUFFIX)) : className);
 		pathMapping.append(path.toLowerCase());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.util.CollectionUtils;
 
 /**
- * <p>Implementation of the HandlerMapping interface to map from
- * the current PortletMode to request handler beans.</p>
+ * Implementation of the {@link org.springframework.web.portlet.HandlerMapping}
+ * interface to map from the current PortletMode to request handler beans.
  *
- * <p>The bean configuration for this mapping will look something like this:</p>
+ * <p>The bean configuration for this mapping will look something like this:
  * <pre>
  * 	&lt;bean id="portletModeHandlerMapping" class="org.springframework.web.portlet.handler.PortletModeHandlerMapping"&gt;
  * 		&lt;property name="portletModeMap"&gt;

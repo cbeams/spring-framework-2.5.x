@@ -25,8 +25,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Implementation of the HandlerMapping interface to map from a request
- * parameter to request handler beans.
+ * Implementation of the {@link org.springframework.web.portlet.HandlerMapping}
+ * to map from a request parameter to request handler beans.
  *
  * <p>The default name of the parameter is "action", but can be changed using
  * {@link #setParameterName setParameterName()}.

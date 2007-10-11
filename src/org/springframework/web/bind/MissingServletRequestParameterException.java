@@ -17,7 +17,7 @@
 package org.springframework.web.bind;
 
 /**
- * ServletRequestBindingException subclass that indicates a missing parameter.
+ * {@link ServletRequestBindingException} subclass that indicates a missing parameter.
  *
  * @author Juergen Hoeller
  * @since 2.0.2
@@ -42,7 +42,7 @@ public class MissingServletRequestParameterException extends ServletRequestBindi
 
 
 	public String getMessage() {
-		return "Required " + this.parameterType + " parameter '" + parameterName + "' is not present";
+		return "Required " + this.parameterType + " parameter '" + this.parameterName + "' is not present";
 	}
 
 	/**
