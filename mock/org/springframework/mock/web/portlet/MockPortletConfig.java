@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,14 +39,29 @@ public class MockPortletConfig implements PortletConfig {
 	private final PortletContext portletContext;
 
 	private final String portletName;
-	
+
 	private final HashMap resourceBundles = new HashMap();
-	
+
 	private final Properties initParameters = new Properties();
 
 
 	/**
-	 * Create new MockPortletConfig with empty String as name.
+	 * Create a new MockPortletConfig with a default {@link MockPortletContext}.
+	 */
+	public MockPortletConfig() {
+		this(null, "");
+	}
+
+	/**
+	 * Create a new MockPortletConfig with a default {@link MockPortletContext}.
+	 * @param portletName the name of the portlet
+	 */
+	public MockPortletConfig(String portletName) {
+		this(null, portletName);
+	}
+
+	/**
+	 * Create a new MockPortletConfig.
 	 * @param portletContext the PortletContext that the portlet runs in
 	 */
 	public MockPortletConfig(PortletContext portletContext) {
@@ -54,7 +69,7 @@ public class MockPortletConfig implements PortletConfig {
 	}
 
 	/**
-	 * Create new MockPortletConfig.
+	 * Create a new MockPortletConfig.
 	 * @param portletContext the PortletContext that the portlet runs in
 	 * @param portletName the name of the portlet
 	 */
@@ -65,11 +80,11 @@ public class MockPortletConfig implements PortletConfig {
 
 	
 	public String getPortletName() {
-		return portletName;
+		return this.portletName;
 	}
 	
 	public PortletContext getPortletContext() {
-		return portletContext;
+		return this.portletContext;
 	}
 	
 	public void setResourceBundle(Locale locale, ResourceBundle resourceBundle) {

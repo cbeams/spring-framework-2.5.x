@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.mock.web.portlet;
 
 import javax.portlet.PortalContext;
 import javax.portlet.PortletContext;
+import javax.portlet.PortletMode;
 import javax.portlet.RenderRequest;
 
 /**
@@ -40,18 +41,27 @@ public class MockRenderRequest extends MockPortletRequest implements RenderReque
 	}
 
 	/**
+	 * Create a new MockRenderRequest with a default {@link MockPortalContext}
+	 * and a default {@link MockPortletContext}.
+	 * @param portletMode the mode that the portlet runs in
+	 */
+	public MockRenderRequest(PortletMode portletMode) {
+		super();
+		setPortletMode(portletMode);
+	}
+
+	/**
 	 * Create a new MockRenderRequest with a default {@link MockPortalContext}.
 	 * @param portletContext the PortletContext that the request runs in
-	 * @see MockPortalContext
 	 */
 	public MockRenderRequest(PortletContext portletContext) {
 		super(portletContext);
 	}
 
 	/**
-	 * Create a new MockRenderRequest with a default {@link MockPortalContext}.
+	 * Create a new MockRenderRequest.
+	 * @param portalContext the PortletContext that the request runs in
 	 * @param portletContext the PortletContext that the request runs in
-	 * @see MockPortalContext
 	 */
 	public MockRenderRequest(PortalContext portalContext, PortletContext portletContext) {
 		super(portalContext, portletContext);

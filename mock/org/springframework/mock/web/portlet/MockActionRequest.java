@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.io.UnsupportedEncodingException;
 import javax.portlet.ActionRequest;
 import javax.portlet.PortalContext;
 import javax.portlet.PortletContext;
+import javax.portlet.PortletMode;
 
 /**
  * Mock implementation of the {@link javax.portlet.ActionRequest} interface.
@@ -55,9 +56,18 @@ public class MockActionRequest extends MockPortletRequest implements ActionReque
 	}
 
 	/**
+	 * Create a new MockActionRequest with a default {@link MockPortalContext}
+	 * and a default {@link MockPortletContext}.
+	 * @param portletMode the mode that the portlet runs in
+	 */
+	public MockActionRequest(PortletMode portletMode) {
+		super();
+		setPortletMode(portletMode);
+	}
+
+	/**
 	 * Create a new MockActionRequest with a default {@link MockPortalContext}.
 	 * @param portletContext the PortletContext that the request runs in
-	 * @see MockPortalContext
 	 */
 	public MockActionRequest(PortletContext portletContext) {
 		super(portletContext);
