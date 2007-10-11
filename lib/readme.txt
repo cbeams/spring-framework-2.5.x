@@ -4,7 +4,7 @@ of these libraries is subject to the respective license; check the respective pr
 distribution/website before using any of them in your own applications.
 
 * ant/ant.jar, ant/ant-launcher.jar, ant-trax.jar, ant-junit.jar
-- Ant 1.6.5 (http://ant.apache.org)
+- Ant 1.7 (http://ant.apache.org)
 - used to build the framework and the sample apps
 
 * antlr/antlr-2.7.6.jar
