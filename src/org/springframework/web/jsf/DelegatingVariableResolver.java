@@ -28,9 +28,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * JSF <code>VariableResolver</code> that first delegates to the original
- * resolver of the underlying JSF implementation, then to the Spring root
- * <code>WebApplicationContext</code>.
+ * JSF 1.1 <code>VariableResolver</code> that first delegates to the Spring
+ * root <code>WebApplicationContext</code>, then to the original resolver
+ * of the underlying JSF implementation.
  *
  * <p>Configure this resolver in your <code>faces-config.xml</code> file as follows:
  *
@@ -102,18 +102,9 @@ public class DelegatingVariableResolver extends VariableResolver {
 	 * resolve the variable as Spring bean in the root WebApplicationContext.
 	 */
 	public Object resolveVariable(FacesContext facesContext, String name) throws EvaluationException {
-		// Ask original JSF variable resolver.
-		if (logger.isDebugEnabled()) {
-			logger.debug("Attempting to resolve variable '" + name + "' in via original VariableResolver");
-		}
-		Object originalResult = getOriginalVariableResolver().resolveVariable(facesContext, name);
-		if (originalResult != null) {
-			return originalResult;
-		}
-
 		// Ask Spring root application context.
-		if (logger.isDebugEnabled()) {
-			logger.debug("Attempting to resolve variable '" + name + "' in root WebApplicationContext");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Attempting to resolve variable '" + name + "' in root WebApplicationContext");
 		}
 		BeanFactory bf = getBeanFactory(facesContext);
 		if (bf.containsBean(name)) {
@@ -121,6 +112,15 @@ public class DelegatingVariableResolver extends VariableResolver {
 				logger.debug("Successfully resolved variable '" + name + "' in root WebApplicationContext");
 			}
 			return bf.getBean(name);
+		}
+
+		// Ask original JSF variable resolver.
+		if (logger.isTraceEnabled()) {
+			logger.trace("Attempting to resolve variable '" + name + "' in via original VariableResolver");
+		}
+		Object originalResult = getOriginalVariableResolver().resolveVariable(facesContext, name);
+		if (originalResult != null) {
+			return originalResult;
 		}
 
 		if (logger.isDebugEnabled()) {

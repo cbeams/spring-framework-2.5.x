@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ public class DelegatingVariableResolverTests extends TestCase {
 		wac.registerSingleton("var1", TestBean.class, null);
 		wac.refresh();
 		TestBean bean1 = (TestBean) wac.getBean("bean1");
+		TestBean var1 = (TestBean) wac.getBean("var1");
 
 		// We need to override the getWebApplicationContext method here:
 		// FacesContext and ExternalContext are hard to mock.
@@ -46,8 +47,8 @@ public class DelegatingVariableResolverTests extends TestCase {
 				return wac;
 			}
 		};
-		assertEquals("val1", resolver.resolveVariable(null, "var1"));
 		assertEquals(bean1, resolver.resolveVariable(null, "bean1"));
+		assertEquals(var1, resolver.resolveVariable(null, "var1"));
 	}
 
 
