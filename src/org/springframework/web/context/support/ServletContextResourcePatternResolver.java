@@ -34,12 +34,6 @@ import org.springframework.util.StringUtils;
  * via Servlet 2.3's <code>ServletContext.getResourcePaths</code>.
  * Falls back to the superclass' file system checking for other resources.
  *
- * <p>The advantage of using <code>ServletContext.getResourcePaths</code> to
- * find matching files is that it will work in a WAR file which has not been
- * expanded too. For Servlet containers that do not support Servlet 2.3 or
- * above, this resolver will always fall back to file system checking,
- * which requires an expanded WAR file.
- *
  * @author Juergen Hoeller
  * @since 1.1.2
  */
@@ -77,16 +71,14 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 		if (rootDirResource instanceof ServletContextResource) {
 			ServletContextResource scResource = (ServletContextResource) rootDirResource;
 			ServletContext sc = scResource.getServletContext();
-			if (sc.getMajorVersion() > 2 || (sc.getMajorVersion() == 2 && sc.getMinorVersion() > 2)) {
-				// Only try the following on Servlet containers >= 2.3:
-				// ServletContext.getResourcePaths() is not available before that version.
-				String fullPattern = scResource.getPath() + subPattern;
-				Set result = new LinkedHashSet(8);
-				doRetrieveMatchingServletContextResources(sc, fullPattern, scResource.getPath(), result);
-				return result;
-			}
+			String fullPattern = scResource.getPath() + subPattern;
+			Set result = new LinkedHashSet(8);
+			doRetrieveMatchingServletContextResources(sc, fullPattern, scResource.getPath(), result);
+			return result;
 		}
-		return super.doFindPathMatchingFileResources(rootDirResource, subPattern);
+		else {
+			return super.doFindPathMatchingFileResources(rootDirResource, subPattern);
+		}
 	}
 
 	/**

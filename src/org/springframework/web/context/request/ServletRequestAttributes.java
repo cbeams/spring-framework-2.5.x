@@ -30,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -55,11 +54,6 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	// We'll create a lot of these objects, so we don't want a new logger every time.
 	private static final Log logger = LogFactory.getLog(ServletRequestAttributes.class);
-
-	// Determine whether Servlet 2.3's HttpSessionBindingListener interface is available.
-	private final static boolean bindingListenerAvailable =
-			ClassUtils.isPresent(
-					"javax.servlet.http.HttpSessionBindingListener", ServletRequestAttributes.class.getClassLoader());
 
 
 	private final HttpServletRequest request;
@@ -218,17 +212,9 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * @param callback the callback to be executed for destruction
 	 */
 	private void registerSessionDestructionCallback(String name, Runnable callback) {
-		if (bindingListenerAvailable) {
-			HttpSession session = getSession(true);
-			session.setAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name,
-					new DestructionCallbackBindingListener(callback));
-		}
-		else {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Could not register destruction callback [" + callback + "] for attribute '" +
-						name + "' in session scope because Servlet 2.3 API is not available");
-			}
-		}
+		HttpSession session = getSession(true);
+		session.setAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name,
+				new DestructionCallbackBindingListener(callback));
 	}
 
 
