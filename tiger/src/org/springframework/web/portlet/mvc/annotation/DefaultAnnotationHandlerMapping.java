@@ -52,7 +52,7 @@ import org.springframework.web.portlet.handler.AbstractMapBasedHandlerMapping;
  * {@link org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter} apply.
  *
  * @author Juergen Hoeller
- * @since 2.0
+ * @since 2.5
  */
 public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapping {
 
