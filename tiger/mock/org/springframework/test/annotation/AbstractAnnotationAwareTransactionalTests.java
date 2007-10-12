@@ -99,7 +99,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	 * the specified JUnit <code>name</code> and retrieves the configured (or
 	 * default) {@link ProfileValueSource}.
 	 *
-	 * @param name the name of the current test.
+	 * @param name the name of the current test
 	 * @see ProfileValueUtils#retrieveProfileValueSource(Class)
 	 */
 	public AbstractAnnotationAwareTransactionalTests(final String name) {
@@ -123,10 +123,8 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	 * </p>
 	 *
 	 * @param applicationContext the ApplicationContext in which to search for
-	 *        the ProfileValueSource; may not be <code>null</code>.
-	 * @deprecated Use
-	 *             {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}
-	 *             instead.
+	 * the ProfileValueSource; may not be <code>null</code>.
+	 * @deprecated Use {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration} instead.
 	 */
 	@Deprecated
 	protected void findUniqueProfileValueSourceFromContext(final ApplicationContext applicationContext) {
@@ -178,9 +176,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		// Let JUnit handle execution. We're just changing the state of the test
 		// class first.
 		runTestTimed(new TestExecutionCallback() {
-
 			public void run() throws Throwable {
-
 				try {
 					AbstractAnnotationAwareTransactionalTests.super.runBare();
 				}
@@ -207,10 +203,8 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	 * </p>
 	 *
 	 * @param testMethod the test method
-	 * @return <code>true</code> if the test is <em>disabled</em> in the
-	 *         current environment
-	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource,
-	 *      Method)
+	 * @return <code>true</code> if the test is <em>disabled</em> in the current environment
+	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource, Method)
 	 */
 	protected boolean isDisabledInThisEnvironment(final Method testMethod) {
 		return !ProfileValueUtils.isTestEnabledInThisEnvironment(this.profileValueSource, testMethod);
@@ -219,7 +213,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	/**
 	 * Get the current test method.
 	 *
-	 * @return The current test method.
+	 * @return the current test method
 	 */
 	protected Method getTestMethod() {
 		assertNotNull("TestCase.getName() cannot be null", getName());
@@ -240,13 +234,14 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	}
 
 	/**
+	 * <p>
 	 * Determines whether or not to rollback transactions for the current test
 	 * by taking into consideration the
 	 * {@link #isDefaultRollback() default rollback} flag and a possible
 	 * method-level override via the {@link Rollback @Rollback} annotation.
+	 * </p>
 	 *
-	 * @return The <em>rollback</em> flag for the current test.
-	 * @throws Exception If an error occurs while determining the rollback flag.
+	 * @return the <em>rollback</em> flag for the current test
 	 */
 	@Override
 	protected boolean isRollback() {
@@ -275,7 +270,6 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	private void runTestTimed(final TestExecutionCallback tec, final Method testMethod) throws Throwable {
 
 		final Timed timed = testMethod.getAnnotation(Timed.class);
-
 		if (timed == null) {
 			runTest(tec, testMethod);
 		}
@@ -297,7 +291,6 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 
 		final ExpectedException ee = testMethod.getAnnotation(ExpectedException.class);
 		final Repeat repeat = testMethod.getAnnotation(Repeat.class);
-
 		final int runs = ((repeat != null) && (repeat.value() > 1)) ? repeat.value() : 1;
 		for (int i = 0; i < runs; i++) {
 			try {

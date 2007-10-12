@@ -233,7 +233,7 @@ public class FormControllerTests extends TestCase {
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name: expected '" + successView + "', not '" + mv.getViewName() + "'",
-			mv.getViewName().equals(successView));
+				mv.getViewName().equals(successView));
 		
 		TestBean person = (TestBean) mv.getModel().get(TestController.BEAN_NAME);
 		assertTrue("model is non null", person != null);
@@ -258,7 +258,7 @@ public class FormControllerTests extends TestCase {
 		HttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mv = mc.handleRequest(request, response);
 		assertTrue("returned correct view name: expected '" + formView + "', not '" + mv.getViewName() + "'",
-		mv.getViewName().equals(formView));
+				mv.getViewName().equals(formView));
 		
 		TestBean person = (TestBean) mv.getModel().get(mc.getCommandName());
 		assertTrue("model is non null", person != null);
@@ -310,8 +310,8 @@ public class FormControllerTests extends TestCase {
 		fe = errors.getFieldError("name");
 		assertTrue("Saved invalid value", fe.getRejectedValue().equals(name));
 		assertTrue("Correct field", fe.getField().equals("name"));
-		assertTrue("Correct validation code: expected '" +TestValidator.TOOSHORT + "', not '" 
-		+ fe.getCode() + "'", fe.getCode().equals(TestValidator.TOOSHORT));
+		assertTrue("Correct validation code: expected '" +TestValidator.TOOSHORT + "', not '"  +
+				fe.getCode() + "'", fe.getCode().equals(TestValidator.TOOSHORT));
 
 		// raised by second validator
 		ObjectError oe = errors.getGlobalError();

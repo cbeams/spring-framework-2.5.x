@@ -56,6 +56,7 @@ public abstract class AnnotationUtils {
 	/** The attribute name for annotations with a single element. */
 	static final String	VALUE	= "value";
 
+
 	/**
 	 * <p>
 	 * Get all {@link Annotation Annotations} from the supplied {@link Method}.
@@ -152,24 +153,19 @@ public abstract class AnnotationUtils {
 	 * {@link Annotation}, so we need to handle this explicitly.
 	 * </p>
 	 *
+	 * @param annotationType the Class object corresponding to the annotation type
+	 * @param clazz the Class object corresponding to the class on which to
+	 * check for the annotation, or <code>null</code>.
+	 * @return the first {@link Class} in the inheritance hierarchy of the
+	 * specified <code>clazz</code> which declares an annotation for the specified
+	 * <code>annotationType</code>, or <code>null</code> if not found.
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see Class#getDeclaredAnnotations()
-	 * @param annotationType the Class object corresponding to the annotation
-	 *        type
-	 * @param clazz the Class object corresponding to the class on which to
-	 *        check for the annotation, or <code>null</code>.
-	 * @return the first {@link Class} in the inheritance hierarchy of the
-	 *         specified <code>clazz</code> which declares an annotation for
-	 *         the specified <code>annotationType</code>, or
-	 *         <code>null</code> if not found.
-	 * @throws IllegalArgumentException if the supplied annotationType is
-	 *         <code>null</code>.
 	 */
-	public static Class<?> findAnnotationDeclaringClass(final Class<? extends Annotation> annotationType,
-			final Class<?> clazz) throws IllegalArgumentException {
+	public static Class<?> findAnnotationDeclaringClass(
+			final Class<? extends Annotation> annotationType, final Class<?> clazz) {
 
-		Assert.notNull(annotationType, "annotationType can not be null.");
-
+		Assert.notNull(annotationType, "annotationType must not be null");
 		if ((clazz == null) || clazz.equals(Object.class)) {
 			return null;
 		}
@@ -192,24 +188,19 @@ public abstract class AnnotationUtils {
 	 * {@link #isAnnotationInherited(Class, Class)} instead.
 	 * </p>
 	 *
-	 * @param annotationType the Class object corresponding to the annotation
-	 *        type
+	 * @param annotationType the Class object corresponding to the annotation type
 	 * @param clazz the Class object corresponding to the class on which to
-	 *        check for the annotation
+	 * check for the annotation
+	 * @return <code>true</code> if an annotation for the specified
+	 * <code>annotationType</code> is declared locally on the supplied <code>clazz</code>
 	 * @see Class#getDeclaredAnnotations()
 	 * @see #isAnnotationInherited(Class, Class)
-	 * @return <code>true</code> if an annotation for the specified
-	 *         <code>annotationType</code> is declared locally on the supplied
-	 *         <code>clazz</code>.
-	 * @throws IllegalArgumentException if a supplied argument is
-	 *         <code>null</code>.
 	 */
-	public static boolean isAnnotationDeclaredLocally(final Class<? extends Annotation> annotationType,
-			final Class<?> clazz) throws IllegalArgumentException {
+	public static boolean isAnnotationDeclaredLocally(
+			final Class<? extends Annotation> annotationType, final Class<?> clazz) {
 
-		Assert.notNull(annotationType, "annotationType can not be null.");
-		Assert.notNull(clazz, "clazz can not be null.");
-
+		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(clazz, "clazz must not be null");
 		boolean declaredLocally = false;
 		for (final Annotation annotation : Arrays.asList(clazz.getDeclaredAnnotations())) {
 			if (annotation.annotationType().equals(annotationType)) {
@@ -237,30 +228,29 @@ public abstract class AnnotationUtils {
 	 * inheritance.
 	 * </p>
 	 *
-	 * @param annotationType the Class object corresponding to the annotation
-	 *        type
+	 * @param annotationType the Class object corresponding to the annotation type
 	 * @param clazz the Class object corresponding to the class on which to
-	 *        check for the annotation
+	 * check for the annotation
+	 * @return <code>true</code> if an annotation for the specified
+	 * <code>annotationType</code> is present on the supplied <code>clazz</code>
+	 * and is {@link java.lang.annotation.Inherited inherited}
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see #isAnnotationDeclaredLocally(Class, Class)
-	 * @return <code>true</code> if an annotation for the specified
-	 *         <code>annotationType</code> is present on the supplied
-	 *         <code>clazz</code> and is
-	 *         {@link java.lang.annotation.Inherited inherited}.
-	 * @throws IllegalArgumentException if a supplied argument is
-	 *         <code>null</code>.
 	 */
-	public static boolean isAnnotationInherited(final Class<? extends Annotation> annotationType, final Class<?> clazz)
-			throws IllegalArgumentException {
+	public static boolean isAnnotationInherited(
+			final Class<? extends Annotation> annotationType, final Class<?> clazz) {
 
-		Assert.notNull(annotationType, "annotationType can not be null.");
-		Assert.notNull(clazz, "clazz can not be null.");
-
+		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(clazz, "clazz must not be null");
 		return (clazz.isAnnotationPresent(annotationType) && !isAnnotationDeclaredLocally(annotationType, clazz));
 	}
 
 	/**
-	 * Retrieve an Annotation's attributes as a Map.
+	 * Retrieve the given annotation's attributes as a Map.
+	 *
+	 * @param annotation the annotation to retrieve the attributes for
+	 * @return the Map of annotation attributes, with attribute names as keys
+	 * and corresponding attribute values as values
 	 */
 	public static Map<String, Object> getAnnotationAttributes(final Annotation annotation) {
 
@@ -284,10 +274,9 @@ public abstract class AnnotationUtils {
 	 * Retrieve the <em>value</em> of the <code>&quot;value&quot;</code>
 	 * attribute of a single-element Annotation, given an annotation instance.
 	 *
+	 * @param annotation the annotation instance from which to retrieve the value
+	 * @return the attribute value, or <code>null</code> if not found
 	 * @see #getValue(Annotation, String)
-	 * @param annotation The annotation instance from which to retrieve the
-	 *        value.
-	 * @return The attribute value, or <code>null</code> if not found.
 	 */
 	public static Object getValue(final Annotation annotation) {
 
@@ -299,10 +288,9 @@ public abstract class AnnotationUtils {
 	 * annotation instance.
 	 *
 	 * @see #getValue(Annotation)
-	 * @param annotation The annotation instance from which to retrieve the
-	 *        value.
-	 * @param attributeName The name of the attribute value to retrieve.
-	 * @return The attribute value, or <code>null</code> if not found.
+	 * @param annotation the annotation instance from which to retrieve the value
+	 * @param attributeName the name of the attribute value to retrieve
+	 * @return the attribute value, or <code>null</code> if not found
 	 */
 	public static Object getValue(final Annotation annotation, final String attributeName) {
 
@@ -320,10 +308,10 @@ public abstract class AnnotationUtils {
 	 * <code>&quot;value&quot;</code> attribute of a single-element
 	 * Annotation, given an annotation instance.
 	 *
+	 * @param annotation the annotation instance from which to retrieve
+	 * the default value
+	 * @return the default value, or <code>null</code> if not found
 	 * @see #getDefaultValue(Annotation, String)
-	 * @param annotation The annotation instance from which to retrieve the
-	 *        default value.
-	 * @return The default value, or <code>null</code> if not found.
 	 */
 	public static Object getDefaultValue(final Annotation annotation) {
 
@@ -334,12 +322,12 @@ public abstract class AnnotationUtils {
 	 * Retrieve the <em>default value</em> of a named Annotation attribute,
 	 * given an annotation instance.
 	 *
+	 * @param annotation the annotation instance from which to retrieve
+	 * the default value
+	 * @param attributeName the name of the attribute value to retrieve
+	 * @return the default value of the named attribute, or <code>null</code>
+	 * if not found.
 	 * @see #getDefaultValue(Class, String)
-	 * @param annotation The annotation instance from which to retrieve the
-	 *        default value.
-	 * @param attributeName The name of the attribute value to retrieve.
-	 * @return The default value of the named attribute, or <code>null</code>
-	 *         if not found.
 	 */
 	public static Object getDefaultValue(final Annotation annotation, final String attributeName) {
 
@@ -350,11 +338,10 @@ public abstract class AnnotationUtils {
 	 * Retrieve the <em>default value</em> of the
 	 * <code>&quot;value&quot;</code> attribute of a single-element
 	 * Annotation, given the {@link Class annotation type}.
-	 *
+	 * @param annotationType the <em>annotation type</em> for which the
+	 * default value should be retrieved
+	 * @return the default value, or <code>null</code> if not found
 	 * @see #getDefaultValue(Class, String)
-	 * @param annotationType The <em>annotation type</em> for which the
-	 *        default value should be retrieved.
-	 * @return The default value, or <code>null</code> if not found.
 	 */
 	public static Object getDefaultValue(final Class<? extends Annotation> annotationType) {
 
@@ -365,12 +352,12 @@ public abstract class AnnotationUtils {
 	 * Retrieve the <em>default value</em> of a named Annotation attribute,
 	 * given the {@link Class annotation type}.
 	 *
+	 * @param annotationType the <em>annotation type</em> for which the
+	 * default value should be retrieved
+	 * @param attributeName the name of the attribute value to retrieve.
+	 * @return the default value of the named attribute, or <code>null</code>
+	 * if not found
 	 * @see #getDefaultValue(Annotation, String)
-	 * @param annotationType The <em>annotation type</em> for which the
-	 *        default value should be retrieved.
-	 * @param attributeName The name of the attribute value to retrieve.
-	 * @return The default value of the named attribute, or <code>null</code>
-	 *         if not found.
 	 */
 	public static Object getDefaultValue(final Class<? extends Annotation> annotationType, final String attributeName) {
 

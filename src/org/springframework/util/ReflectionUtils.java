@@ -26,13 +26,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * <p>
  * Simple utility class for working with the reflection API and handling
  * reflection exceptions.
- * </p>
- * <p>
- * Only intended for internal use.
- * </p>
+ *
+ * <p>Only intended for internal use.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -44,25 +41,20 @@ import java.util.List;
 public abstract class ReflectionUtils {
 
 	/**
-	 * <p>
 	 * Attempt to find a {@link Field field} on the supplied {@link Class} with
 	 * the supplied <code>name</code> and {@link Class type}. Searches all
 	 * superclasses up to {@link Object}.
-	 * </p>
-	 *
-	 * @param clazz The class to introspect.
-	 * @param name The name of the field.
-	 * @param type The type of the field.
-	 * @return The corresponding Field object, or <code>null</code> if not
-	 *         found.
+	 * @param clazz the class to introspect
+	 * @param name the name of the field
+	 * @param type the type of the field
+	 * @return the corresponding Field object, or <code>null</code> if not found
 	 * @throws IllegalArgumentException if the class or field type is
-	 *         <code>null</code>; or if the field name is <em>empty</em>.
+	 * <code>null</code> or if the field name is <em>empty</em>
 	 */
-	public static final Field findField(final Class clazz, final String name, final Class type) {
+	public static Field findField(final Class clazz, final String name, final Class type) {
 		Assert.notNull(clazz, "The 'class to introspect' supplied to findField() can not be null.");
 		Assert.hasText(name, "The field name supplied to findField() can not be empty.");
 		Assert.notNull(type, "The field type supplied to findField() can not be null.");
-
 		Class searchType = clazz;
 		while (!Object.class.equals(searchType) && searchType != null) {
 			final Field[] fields = searchType.getDeclaredFields();
@@ -78,30 +70,25 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * <p>
 	 * Set the field represented by the supplied {@link Field field object} on
 	 * the specified {@link Object target object} to the specified
 	 * <code>value</code>. In accordance with
 	 * {@link Field#set(Object, Object)} semantics, the new value is
 	 * automatically unwrapped if the underlying field has a primitive type.
-	 * </p>
-	 * <p>
-	 * Thrown exceptions are handled via a call to
+	 * <p>Thrown exceptions are handled via a call to
 	 * {@link #handleReflectionException(Exception)}.
-	 * </p>
-	 *
-	 * @param field The field to set.
-	 * @param target The target object on which to set the field.
-	 * @param value The value to set; may be <code>null</code>.
+	 * @param field the field to set
+	 * @param target the target object on which to set the field
+	 * @param value the value to set; may be <code>null</code>
 	 */
-	public static final void setField(final Field field, final Object target, final Object value) {
+	public static void setField(Field field, Object target, Object value) {
 		try {
 			field.set(target, value);
 		}
 		catch (IllegalAccessException ex) {
 			handleReflectionException(ex);
-			throw new IllegalStateException("Unexpected reflection exception - " + ex.getClass().getName() + ": "
-					+ ex.getMessage());
+			throw new IllegalStateException("Unexpected reflection exception - " + ex.getClass().getName() + ": " +
+					ex.getMessage());
 		}
 	}
 

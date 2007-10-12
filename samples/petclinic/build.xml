@@ -47,10 +47,11 @@
 		<fileset dir="${spring.root}/lib/toplink">
 			<include name="toplink-essentials.jar"/>
 		</fileset>
-
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
-			<include name="modules/spring-webmvc.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/dist/modules">
+			<include name="spring-webmvc.jar"/>
 		</fileset>
 
 	</path>
@@ -123,11 +124,11 @@
 			<include name="xmlparserv2.jar"/>
 			<include name="doctools.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/dist/modules">
-			<include name="spring-test.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/lib/junit">
 			<include name="junit-4.4.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/dist/modules">
+			<include name="spring-test.jar"/>
 		</fileset>
 	</path>
 
