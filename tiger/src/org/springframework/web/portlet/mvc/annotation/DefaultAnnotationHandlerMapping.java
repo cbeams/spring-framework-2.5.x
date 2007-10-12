@@ -48,11 +48,13 @@ import org.springframework.web.portlet.handler.AbstractMapBasedHandlerMapping;
  *
  * <p>The {@link AnnotationMethodHandlerAdapter} is responsible for processing
  * annotated handler methods, as mapped by this HandlerMapping. For
- * {@link org.springframework.web.bind.annotation.RequestMapping} at the type level, specific HandlerAdapters such as
+ * {@link RequestMapping} at the type level, specific HandlerAdapters such as
  * {@link org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter} apply.
  *
  * @author Juergen Hoeller
  * @since 2.5
+ * @see RequestMapping
+ * @see AnnotationMethodHandlerAdapter
  */
 public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapping {
 

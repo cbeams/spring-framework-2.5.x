@@ -28,10 +28,14 @@ import java.lang.annotation.Target;
  *
  * <p>This annotation serves as a specialization of <code>@Component</code>,
  * allowing for implementation classes to be autodetected through classpath scanning.
+ * It is typically used in combination with annotated handler methods based on the
+ * {@link org.springframework.web.bind.annotation.RequestMapping} annotation.
  *
+ * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 2.5
  * @see org.springframework.stereotype.Component
+ * @see org.springframework.web.bind.annotation.RequestMapping
  * @see org.springframework.context.annotation.ClassPathBeanDefinitionScanner
  */
 @Target({ElementType.TYPE})

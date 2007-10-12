@@ -30,6 +30,7 @@ import java.lang.annotation.Target;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 2.5
+ * @see RequestMapping
  * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
  * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */

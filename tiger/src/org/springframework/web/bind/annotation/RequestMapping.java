@@ -34,10 +34,63 @@ import java.lang.annotation.Target;
  * multiple handler beans). It is strongly recommended to co-locate related
  * handler methods into the same bean.
  *
+ * <p>Handler methods which are annotated with this annotation are allowed
+ * to have very flexible signatures. They may have arguments of the following
+ * types, in arbitrary order (except for validation results, which need to
+ * follow right after the corresponding command object, if desired):
+ * <ul>
+ * <li>request / response / session (Servlet API or Portlet API).
+ * <li>{@link org.springframework.web.context.request.WebRequest}.
+ * <li>{@link java.util.Locale} for the current request locale.
+ * <li>{@link java.io.InputStream} / {@link java.io.Reader} for access
+ * to the request's content.
+ * <li>{@link java.io.OutputStream} / {@link java.io.Writer} for generating
+ * the response's content.
+ * <li>{@link RequestParam} annotated parameters for access to specific
+ * request parameters.
+ * <li>{@link java.util.Map} / {@link org.springframework.ui.ModelMap} for
+ * enriching the implicit model that will be exposed to the web view.
+ * <li>Command objects to bind parameters to (as bean properties or fields, with
+ * customizable type conversion, depending on the HandlerAdapter configuration -
+ * see the "webBindingInitializer" property on AnnotationMethodHandlerAdapter).
+ * Such command objects along with their validation results will be exposed
+ * as model attributes, by default using the non-qualified command class name
+ * in property notation (e.g. "orderAddress" for type "mypackage.OrderAddress").
+ * Specify a parameter-level {@link ModelAttribute} annotation for declaring
+ * a specific model attribute name.
+ * <li>{@link org.springframework.validation.Errors} /
+ * {@link org.springframework.validation.BindingResult} validation results
+ * for a preceding command object (the immediate preceding argument).
+ * </ul>
+ *
+ * <p>The following return types are supported for handler methods:
+ * <ul>
+ * <li>A <code>ModelAndView</code> object (Servlet MVC or Portlet MVC),
+ * with the model implicitly enriched with command objects and the results
+ * of {@link ModelAttribute} annotated reference data accessor methods.
+ * <li>A {@link java.util.Map} object for exposing a model,
+ * with the view name implicitly determined through a
+ * {@link org.springframework.web.servlet.RequestToViewNameTranslator}
+ * and the model implicitly enriched with command objects and the results
+ * of {@link ModelAttribute} annotated reference data accessor methods.
+ * <li>A {@link java.lang.String} value which is interpreted as view name,
+ * with the model implicitly determined through command objects and
+ * {@link ModelAttribute} annotated reference data accessor methods.
+ * The handler method may also programmatically enrich the model through
+ * declaring a {@link org.springframework.ui.ModelMap} attribute (see above).
+ * <li><code>void</code> if the method handles the response itself
+ * (e.g. through writing the response content directly).
+ * </ul>
+ *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 2.5
+ * @see RequestParam
+ * @see ModelAttribute
  * @see org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping
+ * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
  * @see org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping
+ * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

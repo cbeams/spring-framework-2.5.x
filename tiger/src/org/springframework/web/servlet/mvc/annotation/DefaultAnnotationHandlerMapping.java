@@ -51,6 +51,7 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
  * {@link org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter} apply.
  *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 2.5
  * @see RequestMapping
  * @see AnnotationMethodHandlerAdapter
