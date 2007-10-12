@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.context.support.ContextExposingHttpServletRequest;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -62,6 +63,8 @@ import org.springframework.web.util.WebUtils;
 public class InternalResourceView extends AbstractUrlBasedView {
 
 	private boolean alwaysInclude = false;
+
+	private boolean exposeContextBeansAsAttributes = false;
 
 
 	/**
@@ -104,6 +107,21 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		this.alwaysInclude = alwaysInclude;
 	}
 
+	/**
+	 * Set whether to make all Spring beans in the application context accessible
+	 * as request attributes, through lazy checking once an attribute gets accessed.
+	 * <p>This will make all such beans accessible in plain <code>${...}</code>
+	 * expressions in a JSP 2.0 page, as well as in JSTL's <code>c:out</code>
+	 * value expressions.
+	 * <p>Default is "false". Switch this flag on to transparently expose all
+	 * Spring beans in the request attribute namespace. The {@link JstlView}
+	 * subclass sets this flag to "true" by default.
+	 * @see #getRequestToExpose
+	 */
+	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
+		this.exposeContextBeansAsAttributes = exposeContextBeansAsAttributes;
+	}
+
 
 	/**
 	 * Render the internal resource given the specified model.
@@ -129,9 +147,12 @@ public class InternalResourceView extends AbstractUrlBasedView {
 					"Could not get RequestDispatcher for [" + getUrl() + "]: check that this file exists within your WAR");
 		}
 
+		// Determine which request handle to expose to the RequestDispatcher.
+		HttpServletRequest requestToExpose = getRequestToExpose(request);
+
 		// If already included or response already committed, perform include, else forward.
 		if (useInclude(request, response)) {
-			rd.include(request, response);
+			rd.include(requestToExpose, response);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Included resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
 			}
@@ -139,7 +160,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 
 		else {
 			exposeForwardRequestAttributes(request);
-			rd.forward(request, response);
+			rd.forward(requestToExpose, response);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Forwarded to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
 			}
@@ -181,6 +202,23 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * Get the request handle to expose to the RequestDispatcher, i.e. to the view.
+	 * <p>The default implementation wraps the original request for exposure of
+	 * Spring beans as request attributes (if demanded).
+	 * @param originalRequest the original servlet request as provided by the engine
+	 * @return the wrapped request, or the original request if no wrapping is necessary
+	 * @see #setExposeContextBeansAsAttributes
+	 * @see org.springframework.web.context.support.ContextExposingHttpServletRequest
+	 */
+	protected HttpServletRequest getRequestToExpose(HttpServletRequest originalRequest) {
+		if (this.exposeContextBeansAsAttributes &&
+				!(originalRequest instanceof ContextExposingHttpServletRequest)) {
+			return new ContextExposingHttpServletRequest(originalRequest, getWebApplicationContext());
+		}
+		return originalRequest;
+	}
+
+	/**
 	 * Determine whether to use RequestDispatcher's <code>include</code> or
 	 * <code>forward</code> method.
 	 * <p>Performs a check whether an include URI attribute is found in the request,
@@ -201,7 +239,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	/**
 	 * Expose the current request URI and paths as {@link HttpServletRequest}
 	 * attributes under the keys defined in the Servlet 2.4 specification,
-	 * for Servlet 2.3- containers.
+	 * for Servlet 2.3 containers.
 	 * <p>Does not override values if already present, to not conflict
 	 * with Servlet 2.4+ containers.
 	 * @see org.springframework.web.util.WebUtils#exposeForwardRequestAttributes

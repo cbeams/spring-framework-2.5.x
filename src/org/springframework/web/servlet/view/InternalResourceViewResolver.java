@@ -52,7 +52,9 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	private static final boolean jstlPresent =
 			ClassUtils.isPresent("javax.servlet.jsp.jstl.fmt.LocalizationContext");
 
-	private boolean alwaysInclude = false;
+	private Boolean alwaysInclude;
+
+	private Boolean exposeContextBeansAsAttributes;
 
 
 	/**
@@ -83,13 +85,32 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 	 * @see InternalResourceView#setAlwaysInclude
 	 */
 	public void setAlwaysInclude(boolean alwaysInclude) {
-		this.alwaysInclude = alwaysInclude;
+		this.alwaysInclude = Boolean.valueOf(alwaysInclude);
+	}
+
+	/**
+	 * Set whether to make all Spring beans in the application context accessible
+	 * as request attributes, through lazy checking once an attribute gets accessed.
+	 * <p>This will make all such beans accessible in plain <code>${...}</code>
+	 * expressions in a JSP 2.0 page, as well as in JSTL's <code>c:out</code>
+	 * value expressions.
+	 * <p>Default is "false" for a standard {@link InternalResourceView} and
+	 * "true" for a {@link JstlView} (used by default if the JSTL API is present).
+	 * @see InternalResourceView#setExposeContextBeansAsAttributes
+	 */
+	public void setExposeContextBeansAsAttributes(boolean exposeContextBeansAsAttributes) {
+		this.exposeContextBeansAsAttributes = Boolean.valueOf(exposeContextBeansAsAttributes);
 	}
 
 
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
 		InternalResourceView view = (InternalResourceView) super.buildView(viewName);
-		view.setAlwaysInclude(this.alwaysInclude);
+		if (this.alwaysInclude != null) {
+			view.setAlwaysInclude(this.alwaysInclude.booleanValue());
+		}
+		if (this.exposeContextBeansAsAttributes != null) {
+			view.setExposeContextBeansAsAttributes(this.exposeContextBeansAsAttributes.booleanValue());
+		}
 		return view;
 	}
 

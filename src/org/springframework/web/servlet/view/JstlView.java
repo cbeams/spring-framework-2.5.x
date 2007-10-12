@@ -55,9 +55,15 @@ import org.springframework.web.servlet.support.JstlUtils;
  * Of course, any other Spring components can share the same MessageSource.
  *
  * <p>This is a separate class mainly to avoid JSTL dependencies in
- * InternalResourceView itself. JSTL has not been part of standard
+ * {@link InternalResourceView} itself. JSTL has not been part of standard
  * J2EE up until J2EE 1.4, so we can't assume the JSTL API jar to be
  * available on the class path.
+ *
+ * <p><b>NOTE:</b> JstlView sets the {@link #setExposeContextBeansAsAttributes}
+ * flag to "true" by default, in order to make all Spring beans in the
+ * application context accessible within JSTL expressions (e.g. in a
+ * <code>c:out</code> value expression). This will also make all such beans
+ * accessible in plain <code>${...}</code> expressions in a JSP 2.0 page.
  *
  * @author Juergen Hoeller
  * @since 27.02.2003
@@ -76,6 +82,7 @@ public class JstlView extends InternalResourceView {
 	 * @see #setUrl
 	 */
 	public JstlView() {
+		setExposeContextBeansAsAttributes(true);
 	}
 
 	/**
@@ -84,6 +91,7 @@ public class JstlView extends InternalResourceView {
 	 */
 	public JstlView(String url) {
 		super(url);
+		setExposeContextBeansAsAttributes(true);
 	}
 
 	/**
@@ -95,7 +103,7 @@ public class JstlView extends InternalResourceView {
 	 * @see JstlUtils#getJstlAwareMessageSource
 	 */
 	public JstlView(String url, MessageSource messageSource) {
-		super(url);
+		this(url);
 		this.messageSource = messageSource;
 	}
 
