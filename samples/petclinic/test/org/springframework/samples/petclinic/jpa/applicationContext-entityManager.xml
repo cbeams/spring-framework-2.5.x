@@ -11,8 +11,6 @@
 
 	<bean class="org.springframework.samples.petclinic.aspects.UsageLogAspect" p:historySize="300" />
 
-	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
-
 	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
 
 	<bean id="clinic" class="org.springframework.samples.petclinic.jpa.EntityManagerClinic" />

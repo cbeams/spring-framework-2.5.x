@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<toplink-sessions version="10g Release 3 (10.1.3.0.0)" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-   <session xsi:type="server-session">
-      <name>Session</name>
-      <event-listener-classes/>
-      <primary-project xsi:type="xml">toplink-mappings.xml</primary-project>
-   </session>
-</toplink-sessions>
