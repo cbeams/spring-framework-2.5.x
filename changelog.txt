@@ -31,6 +31,7 @@ Package org.springframework.beans
 * revised AbstractBeanFactory to detect FactoryBeans which are in turn created through factory methods
 * DefaultListableBeanFactory removes a singleton bean instance if a new bean definition gets registered
 * DefaultListableBeanFactory fully destroys singleton bean instance when the corresponding bean definition gets replaced
+* DefaultListableBeanFactory resets the caches for all derived beans as well if a bean definition gets replaced
 * XmlBeanDefinitionReader initializes default EntityResolver lazily, avoiding classpath scan in case of custom resolver
 * DefaultNamespaceHandlerResolver exposes public DEFAULT_HANDLER_MAPPINGS_LOCATION constant
 * fixed BeanDefinitionParserDelegate to correctly parse property sub-elements even with custom name for beans namespace
@@ -64,6 +65,9 @@ Package org.springframework.core
 * reworked "core.asm.ClassReaderFactory" into "core.classreading.MetadataReaderFactory" (with internal ASM usage only)
 * AspectJTypeFilter uses a given ClassLoader instead of the default ClassLoader
 
+Package org.springframework.instrument
+* added WebLogicLoadTimeWeaver for BEA WebLogic version 10 or higher
+
 Package org.springframework.jdbc
 * SimpleJdbcTemplate's varargs handling always considers a single array argument as collection of arguments
 
@@ -88,6 +92,7 @@ Package org.springframework.mail
 Package org.springframework.mock
 * MockServletContext supports "getContext" (allowing to register contexts through the new "registerContext" method)
 * MockServletContext supports "getMimeType" if the Java Activation Framework is present on the classpath
+* added convenience constructors to MockPortletConfig, MockActionRequest and MockRenderRequest
 
 Package org.springframework.orm
 * removed custom detach/attach/newNamedQuery hooks from JdoDialect, expecting providers to follow the final JDO 2.0 API
@@ -109,7 +114,7 @@ Package org.springframework.remoting
 * introduced SoapFaultException, thrown by JAX-RPC/JAX-WS proxies in case of a SOAP fault being reported
 
 Package org.springframework.stereotype
-* added Service and Controller stereotypes to the existing Component and Repository annotations
+* added @Service and @Controller stereotypes to the existing Component and Repository annotations
 
 Package org.springframework.test
 * introduced TestNG support based on the new test context framework
@@ -131,13 +136,19 @@ Package org.springframework.web
 * added "resolveLazily" flag to Commons(Portlet)MultipartResolver, allowing to switch to lazy multipart resolution
 * reworked MultipartException into a RuntimeException (it may be thrown from file/parameter access methods as well now)
 * changed UrlPathHelper's and AbstractUrlHandlerMapping's/AbstractUrlMethodNameResolver's "urlDecode" default to "true"
+* introduced WebBindingInitializer interface, supported by BaseCommandController and MultiActionController
+* introduced annotation-based controller approach using @Controller, @RequestMapping, @RequestParam and @ModelAttribute
+* introduced DefaultAnnotationHandlerMapping and AnnotationMethodHandlerAdapter for Servlet MVC and Portlet MVC
 * added "getActualValue()" method to BindStatus, exposing the raw property value for comparison purposes
 * added "exposeModelAttributes" property to RedirectView, allowing to suppress model exposure completely
+* added "exposeContextBeansAsAttributes" property to InternalResourceView and InternalResourceViewResolver
+* JstlView sets "exposeContextBeansAsAttributes" to "true" by default, allowing JSTL expressions to access Spring beans
 * factored out a "loadReport()" method in AbstractJasperReportsView (called by "initApplicationContext()")
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
 * TagWriter in JSP AbstractFormTag reobtains the Writer from the PageContext all the time (for FreeMarker compatibility)
 * JSP CheckboxTag caches converted candidate value when comparing it with collection elements
 * JSP SelectTag, OptionTag and OptionsTag properly detect a selected value even for Maps with converted keys
+* JSF 1.1 DelegatingVariableResolver checks Spring bean match first (analogous to JSF 1.2 DelegatingFacesELResolver)
 
 
 Changes in version 2.1 M4 (2007-09-09)
