@@ -108,14 +108,30 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * <p>The default implementation supports class path locations. This should
 	 * be appropriate for standalone implementations but can be overridden,
 	 * e.g. for implementations targeted at a Servlet container.
-	 * @param path path to the resource
-	 * @return Resource handle
+	 * @param path the path to the resource
+	 * @return the corresponding Resource handle
 	 * @see ClassPathResource
 	 * @see org.springframework.context.support.FileSystemXmlApplicationContext#getResourceByPath
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext#getResourceByPath
 	 */
 	protected Resource getResourceByPath(String path) {
-		return new ClassPathResource(path, getClassLoader());
+		return new ClassPathContextResource(path, getClassLoader());
+	}
+
+
+	/**
+	 * ClassPathResource that explicitly expresses a context-relative path
+	 * through implementing the ContextResource interface.
+	 */
+	private static class ClassPathContextResource extends ClassPathResource implements ContextResource {
+
+		public ClassPathContextResource(String path, ClassLoader classLoader) {
+			super(path, classLoader);
+		}
+
+		public String getPathWithinContext() {
+			return getPath();
+		}
 	}
 
 }

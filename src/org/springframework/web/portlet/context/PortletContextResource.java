@@ -25,6 +25,7 @@ import java.net.URL;
 import javax.portlet.PortletContext;
 
 import org.springframework.core.io.AbstractResource;
+import org.springframework.core.io.ContextResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -45,7 +46,7 @@ import org.springframework.web.portlet.util.PortletUtils;
  * @see javax.portlet.PortletContext#getResourceAsStream
  * @see javax.portlet.PortletContext#getRealPath
  */
-public class PortletContextResource extends AbstractResource {
+public class PortletContextResource extends AbstractResource implements ContextResource {
 
 	private final PortletContext portletContext;
 
@@ -121,7 +122,7 @@ public class PortletContextResource extends AbstractResource {
 		return new File(realPath);
 	}
 
-	public Resource createRelative(String relativePath) throws IOException {
+	public Resource createRelative(String relativePath) {
 		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
 		return new PortletContextResource(this.portletContext, pathToUse);
 	}
@@ -132,6 +133,10 @@ public class PortletContextResource extends AbstractResource {
 
 	public String getDescription() {
 		return "PortletContext resource [" + this.path + "]";
+	}
+
+	public String getPathWithinContext() {
+		return this.path;
 	}
 
 

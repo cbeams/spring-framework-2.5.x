@@ -25,6 +25,7 @@ import java.net.URL;
 import javax.servlet.ServletContext;
 
 import org.springframework.core.io.AbstractResource;
+import org.springframework.core.io.ContextResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -45,7 +46,7 @@ import org.springframework.web.util.WebUtils;
  * @see javax.servlet.ServletContext#getResource
  * @see javax.servlet.ServletContext#getRealPath
  */
-public class ServletContextResource extends AbstractResource {
+public class ServletContextResource extends AbstractResource implements ContextResource {
 
 	private final ServletContext servletContext;
 
@@ -131,7 +132,7 @@ public class ServletContextResource extends AbstractResource {
 	 * relative to the path of the underlying file of this resource descriptor.
 	 * @see org.springframework.util.StringUtils#applyRelativePath(String, String)
 	 */
-	public Resource createRelative(String relativePath) throws IOException {
+	public Resource createRelative(String relativePath) {
 		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
 		return new ServletContextResource(this.servletContext, pathToUse);
 	}
@@ -151,6 +152,10 @@ public class ServletContextResource extends AbstractResource {
 	 */
 	public String getDescription() {
 		return "ServletContext resource [" + this.path + "]";
+	}
+
+	public String getPathWithinContext() {
+		return this.path;
 	}
 
 
