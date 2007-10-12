@@ -29,12 +29,15 @@ import org.springframework.samples.petclinic.Specialty;
 import org.springframework.samples.petclinic.Vet;
 import org.springframework.samples.petclinic.Visit;
 import org.springframework.samples.petclinic.util.EntityUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Class for SimpleJDBC implementation of the Clinic interface.
  *
  * @author Thomas Risberg
+ * @author Mark Fisher
  */
+@Transactional
 public class SimpleJdbcClinic implements Clinic, CachingClinic {
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -63,6 +66,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	}	
 
 
+	@Transactional(readOnly = true)
 	public void refreshVetsCache() throws DataAccessException {
 		synchronized (this.vets) {
 			this.logger.info("Refreshing vets cache");
@@ -97,6 +101,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 
 	// START of Clinic implementation section *******************************
 
+	@Transactional(readOnly = true)
 	public Collection<Vet> getVets() throws DataAccessException {
 		synchronized (this.vets) {
 			if (this.vets.isEmpty()) {
@@ -106,6 +111,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 		}
 	}
 
+	@Transactional(readOnly = true)
 	public Collection<PetType> getPetTypes() throws DataAccessException {
 		return this.simpleJdbcTemplate.query(
 				"SELECT id, name FROM types ORDER BY name", 
@@ -113,6 +119,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	}
 
 	/** Method loads owners plus pets and visits if not already loaded */
+	@Transactional(readOnly = true)
 	public Collection<Owner> findOwners(String lastName) throws DataAccessException {
 		List<Owner> owners = this.simpleJdbcTemplate.query(
 				"SELECT id, first_name, last_name, address, city, telephone FROM owners WHERE last_name like ?",
@@ -123,6 +130,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	}
 
 	/** Method loads an owner plus pets and visits if not already loaded */
+	@Transactional(readOnly = true)
 	public Owner loadOwner(int id) throws DataAccessException {
 		Owner owner;
 		try {
@@ -137,6 +145,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 		return owner;
 	}
 
+	@Transactional(readOnly = true)
 	public Pet loadPet(int id) throws DataAccessException {
 		JdbcPet pet;
 		try {

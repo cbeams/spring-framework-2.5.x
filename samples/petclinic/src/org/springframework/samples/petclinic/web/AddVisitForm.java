@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.Visit;
 import org.springframework.web.bind.ServletRequestUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Ken Krebs
  */
+@RequestMapping("/addVisit.htm")
 public class AddVisitForm extends AbstractClinicForm {
 
 	public AddVisitForm() {

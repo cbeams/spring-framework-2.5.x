@@ -13,6 +13,7 @@ import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
 import org.springframework.samples.petclinic.util.EntityUtils;
 import org.springframework.web.bind.ServletRequestUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -21,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Ken Krebs
  */
+@RequestMapping("/addPet.htm")
 public class AddPetForm extends AbstractClinicForm {
 
 	public AddPetForm() {

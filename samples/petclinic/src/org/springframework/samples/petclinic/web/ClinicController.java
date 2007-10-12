@@ -6,29 +6,28 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.ServletRequestUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
 /**
  * <code>MultiActionController</code> that handles all non-form URL's.
  *
  * @author Ken Krebs
  * @author Rob Harrop
+ * @author Mark Fisher
  */
-public class ClinicController extends MultiActionController {
+@Controller
+public class ClinicController {
 
+	@Autowired
 	private Clinic clinic;
 
-
-	@Required
-	public void setClinic(Clinic clinic) {
-		this.clinic = clinic;
-	}
 
 	/**
 	 * Custom handler for the welcome view.
@@ -42,6 +41,7 @@ public class ClinicController extends MultiActionController {
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response
 	 */
+	@RequestMapping("/welcome.htm")
 	public ModelAndView welcomeHandler(HttpServletRequest request, HttpServletResponse response) {
 		return new ModelAndView();
 	}
@@ -59,6 +59,7 @@ public class ClinicController extends MultiActionController {
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response
 	 */
+	@RequestMapping("/vets.htm")
 	@SuppressWarnings("unchecked")
 	public Map vetsHandler(HttpServletRequest request, HttpServletResponse response) {
 		return new ModelMap(this.clinic.getVets());
@@ -77,6 +78,7 @@ public class ClinicController extends MultiActionController {
 	 * @param response current HTTP response
 	 * @return a ModelAndView to render the response
 	 */
+	@RequestMapping("/owner.htm")
 	public ModelAndView ownerHandler(HttpServletRequest request, HttpServletResponse response) {
 		Owner owner = this.clinic.loadOwner(ServletRequestUtils.getIntParameter(request, "ownerId", 0));
 		if (owner == null) {

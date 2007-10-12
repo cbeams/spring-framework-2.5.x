@@ -6,14 +6,14 @@ package org.springframework.samples.petclinic.jdbc;
  * 
  * @author Rob Harrop
  * @since 1.2
- * @see AbstractJdbcClinic
+ * @see SimpleJdbcClinic
  */
 public interface CachingClinic {
 
 	/**
 	 * Refresh the cache of Vets that the Clinic is holding.
 	 * @see org.springframework.samples.petclinic.Clinic#getVets()
-	 * @see AbstractJdbcClinic#refreshVetsCache()
+	 * @see SimpleJdbcClinic#refreshVetsCache()
 	 */
 	void refreshVetsCache();
 

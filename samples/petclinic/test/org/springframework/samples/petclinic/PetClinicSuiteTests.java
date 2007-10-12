@@ -21,7 +21,6 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import org.springframework.samples.petclinic.hibernate.HibernateClinicTests;
-import org.springframework.samples.petclinic.jdbc.JdbcClinicTests;
 import org.springframework.samples.petclinic.jdbc.SimpleJdbcClinicTests;
 import org.springframework.samples.petclinic.jpa.EntityManagerClinicTests;
 import org.springframework.samples.petclinic.jpa.HibernateEntityManagerClinicTests;
@@ -43,8 +42,6 @@ import org.springframework.samples.petclinic.toplink.TopLinkClinicTests;
 OwnerTests.class,
 
 HibernateClinicTests.class,
-
-JdbcClinicTests.class,
 
 SimpleJdbcClinicTests.class,
 

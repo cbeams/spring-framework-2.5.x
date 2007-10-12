@@ -4,10 +4,11 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:p="http://www.springframework.org/schema/p" xmlns:jee="http://www.springframework.org/schema/jee"
-	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
 	<!--  
@@ -69,37 +70,17 @@
 
 	<!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
 
-	<!-- PetClinic's central data access object: HSQL JDBC implementation -->
-	<!-- (only initialized when referenced by the "clinic" proxy) -->
-	<bean id="hsqlClinic" class="org.springframework.samples.petclinic.jdbc.HsqlJdbcClinic" lazy-init="true"
-		p:dataSource-ref="dataSource" />
-
-	<!-- PetClinic's central data access object: MySQL JDBC implementation -->
-	<!-- (only initialized when referenced by the "clinic" proxy) -->
-	<bean id="mysqlClinic" class="org.springframework.samples.petclinic.jdbc.MySQLJdbcClinic" lazy-init="true"
-		p:dataSource-ref="dataSource" />
-
 	<!--
-		- Transactional proxy for PetClinic's central data access facade.
-		- Implements the CachingClinic management interface.
-		-
-		- Note that in a real-life app with multiple transaction proxies,
-		- you will probably want to use parent and child bean definitions
-		- as described in the manual, to reduce duplication.
+		- Instruct Spring to perform declarative transaction management 
+		- automatically on annotated classes. The SimpleJdbcClinic
+		- implementation declares @Transactional annotations.
 	-->
-	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager" />
-		<property name="target" ref="${petclinic.jdbcImplBeanName}" />
-		<property name="transactionAttributes">
-			<props>
-				<prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>
-				<prop key="find*">PROPAGATION_REQUIRED,readOnly</prop>
-				<prop key="load*">PROPAGATION_REQUIRED,readOnly</prop>
-				<prop key="store*">PROPAGATION_REQUIRED</prop>
-			</props>
-		</property>
-		<property name="preInterceptors" ref="callMonitor" />
-	</bean>
+	<tx:annotation-driven />
+
+	<!-- PetClinic's central data access object using Spring's SimpleJdbcTemplate -->
+	<!-- Implements the CachingClinic management interface -->
+	<bean id="clinic" class="org.springframework.samples.petclinic.jdbc.SimpleJdbcClinic" />
+
 
 	<!-- Call monitoring interceptor that monitors call count and call invocation time -->
 	<!-- Implements the CallMonitor management interface -->

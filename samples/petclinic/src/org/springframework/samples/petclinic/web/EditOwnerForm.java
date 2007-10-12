@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.web.bind.ServletRequestUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -13,6 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Ken Krebs
  */
+@RequestMapping("/editOwner.htm")
 public class EditOwnerForm extends AbstractClinicForm {
 
 	public EditOwnerForm() {

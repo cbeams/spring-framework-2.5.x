@@ -18,7 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>
  * The mappings are defined in "petclinic.hbm.xml", located in the root of the
  * class path.
- *
+ * <p>
+ * Note that transactions are declared with annotations and that some methods
+ * contain "readOnly = true" which is an optimization that is particularly
+ * valuable when using Hibernate (to suppress unnecessary flush attempts for
+ * read-only operations).
+ * 
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 19.10.2003

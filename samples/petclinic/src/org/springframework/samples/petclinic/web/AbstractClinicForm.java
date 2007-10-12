@@ -7,7 +7,7 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.samples.petclinic.Clinic;
@@ -24,13 +24,9 @@ import org.springframework.web.servlet.mvc.SimpleFormController;
  */
 public abstract class AbstractClinicForm extends SimpleFormController {
 
+	@Autowired
 	private Clinic clinic;
 
-
-	@Required
-	public void setClinic(final Clinic clinic) {
-		this.clinic = clinic;
-	}
 
 	protected Clinic getClinic() {
 		return this.clinic;

@@ -78,31 +78,9 @@
 	<!--
 		- PetClinic's central data access object: Hibernate implementation.
 	-->
-	<bean id="clinicTarget" class="org.springframework.samples.petclinic.hibernate.HibernateClinic"
+	<bean id="clinic" class="org.springframework.samples.petclinic.hibernate.HibernateClinic"
 		p:sessionFactory-ref="sessionFactory" />
 
-	<!--
-		- Transactional proxy for PetClinic's central data access object.
-		-
-		- Defines specific transaction attributes with "readOnly" markers,
-		- which is an optimization that is particularly valuable with Hibernate
-		- (to suppress unnecessary flush attempts for read-only operations).
-		-
-		- Note that in a real-life app with multiple transaction proxies,
-		- you will probably want to use parent and child bean definitions
-		- as described in the manual, to reduce duplication.
-	-->
-	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
-		p:transactionManager-ref="transactionManager" p:target-ref="clinicTarget">
-		<property name="transactionAttributes">
-			<props>
-				<prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>
-				<prop key="find*">PROPAGATION_REQUIRED,readOnly</prop>
-				<prop key="load*">PROPAGATION_REQUIRED,readOnly</prop>
-				<prop key="store*">PROPAGATION_REQUIRED</prop>
-			</props>
-		</property>
-	</bean>
 
 	<!-- Hibernate 3.0's JMX statistics service -->
 	<!-- Implements the StatisticsServiceMBean management interface -->

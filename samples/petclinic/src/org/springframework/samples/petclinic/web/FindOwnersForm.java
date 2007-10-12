@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.validation.BindException;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Ken Krebs
  */
+@RequestMapping("/findOwners.htm")
 public class FindOwnersForm extends AbstractClinicForm {
 
 	private String selectView;

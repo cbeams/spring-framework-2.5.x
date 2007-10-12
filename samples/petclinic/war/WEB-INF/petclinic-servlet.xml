@@ -30,24 +30,10 @@
 	<!-- ========================= MAPPING DEFINITIONS ========================= -->
 
 	<!--
-		- This bean is an explicit URL mapper that is used by the "petclinic" DispatcherServlet
-		- It is used instead of the default BeanNameUrlHandlerMapping.
+		- All handlers within this application provide @RequestMapping annotations.
+		- Handler-mapping (and method name resolution in the case of ClinicController)
+		- is driven by those annotations. This behavior is enabled by default with Java 5+.
 	-->
-	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-		<property name="mappings">
-			<props>
-				<prop key="/welcome.htm">clinicController</prop>
-				<prop key="/vets.htm">clinicController</prop>
-				<prop key="/findOwners.htm">findOwnersForm</prop>
-				<prop key="/owner.htm">clinicController</prop>
-				<prop key="/addOwner.htm">addOwnerForm</prop>
-				<prop key="/editOwner.htm">editOwnerForm</prop>
-				<prop key="/addPet.htm">addPetForm</prop>
-				<prop key="/editPet.htm">editPetForm</prop>
-				<prop key="/addVisit.htm">addVisitForm</prop>
-			</props>
-		</property>
-	</bean>
 
 	<!--
 		- This bean resolves specific types of exception to corresponding error views.
@@ -82,32 +68,17 @@
 		- using the respective properties file, which defines arbitrary mappings between
 		- view names and resources.
 	-->
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver" p:basename="views" />
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver"
+		p:basename="views" />
 
 
 	<!-- ========================= CONTROLLER DEFINITIONS ========================= -->
 
 	<!--
-		- This bean is a MultiActionController that manages general View rendering.
-		- It uses the "clinicControllerResolver" bean below for method name resolution.
+		- This controller is a POJO labeled with the @Controller annotation. It provides multiple
+		- handler methods (each marked with @RequestMapping) to manage general View rendering.
 	-->
-	<bean id="clinicController" class="org.springframework.samples.petclinic.web.ClinicController"
-		p:methodNameResolver-ref="clinicControllerResolver" p:clinic-ref="clinic" />
-
-	<!--
-		- This bean is a MethodNameResolver definition for a MultiActionController.
-		- It maps URLs to methods for the "clinicController" bean.
-	-->
-	<bean id="clinicControllerResolver"
-		class="org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver">
-		<property name="mappings">
-			<props>
-				<prop key="/welcome.htm">welcomeHandler</prop>
-				<prop key="/vets.htm">vetsHandler</prop>
-				<prop key="/owner.htm">ownerHandler</prop>
-			</props>
-		</property>
-	</bean>
+	<bean id="clinicController" class="org.springframework.samples.petclinic.web.ClinicController" />
 
 	<!--
 		- Validator for owner forms, implementing Spring's Validator interface.
@@ -135,42 +106,42 @@
 		- It uses the "findOwnersValidator" and "clinic" beans.
 	-->
 	<bean id="findOwnersForm" class="org.springframework.samples.petclinic.web.FindOwnersForm"
-		p:formView="findOwnersForm" p:selectView="selectOwnerView" p:successView="ownerRedirect" p:clinic-ref="clinic" />
+		p:formView="findOwnersForm" p:selectView="selectOwnerView" p:successView="ownerRedirect" />
 
 	<!--
 		- This bean is a SimpleFormController that manages the addOwner use case.
 		- It uses the "ownerValidator" and "clinic" beans.
 	-->
-	<bean id="addOwnerForm" class="org.springframework.samples.petclinic.web.AddOwnerForm" p:formView="ownerForm"
-		p:successView="ownerRedirect" p:validator-ref="ownerValidator" p:clinic-ref="clinic" />
+	<bean id="addOwnerForm" class="org.springframework.samples.petclinic.web.AddOwnerForm"
+		p:formView="ownerForm" p:successView="ownerRedirect" p:validator-ref="ownerValidator" />
 
 	<!--
 		- This bean is a SimpleFormController that manages the editOwner use case.
 		- It uses the "ownerValidator" and "clinic" beans.
 	-->
-	<bean id="editOwnerForm" class="org.springframework.samples.petclinic.web.EditOwnerForm" p:formView="ownerForm"
-		p:successView="ownerRedirect" p:validator-ref="ownerValidator" p:clinic-ref="clinic" />
+	<bean id="editOwnerForm" class="org.springframework.samples.petclinic.web.EditOwnerForm"
+		p:formView="ownerForm" p:successView="ownerRedirect" p:validator-ref="ownerValidator" />
 
 	<!--
 		- This bean is a SimpleFormController that manages the addPet use case.
 		- It uses the "petValidator" and "clinic" beans.
 	-->
-	<bean id="addPetForm" class="org.springframework.samples.petclinic.web.AddPetForm" p:formView="petForm"
-		p:successView="ownerRedirect" p:validator-ref="petValidator" p:clinic-ref="clinic" />
+	<bean id="addPetForm" class="org.springframework.samples.petclinic.web.AddPetForm"
+		p:formView="petForm" p:successView="ownerRedirect" p:validator-ref="petValidator" />
 
 	<!--
 		- This bean is a SimpleFormController that manages the editPet use case.
 		- It uses the "petValidator" and "clinic" beans.
 	-->
-	<bean id="editPetForm" class="org.springframework.samples.petclinic.web.EditPetForm" p:formView="petForm"
-		p:successView="ownerRedirect" p:validator-ref="petValidator" p:clinic-ref="clinic" />
+	<bean id="editPetForm" class="org.springframework.samples.petclinic.web.EditPetForm"
+		p:formView="petForm" p:successView="ownerRedirect" p:validator-ref="petValidator" />
 
 	<!--
 		- This bean is a SimpleFormController that manages the addVisit use case.
 		- It uses the "visitValidator" and "clinic" beans.
 	-->
-	<bean id="addVisitForm" class="org.springframework.samples.petclinic.web.AddVisitForm" p:formView="visitForm"
-		p:successView="ownerRedirect" p:validator-ref="visitValidator" p:clinic-ref="clinic" />
+	<bean id="addVisitForm" class="org.springframework.samples.petclinic.web.AddVisitForm"
+		p:formView="visitForm" p:successView="ownerRedirect" p:validator-ref="visitValidator" />
 
 
 </beans>
