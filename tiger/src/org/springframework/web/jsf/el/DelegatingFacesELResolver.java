@@ -82,8 +82,8 @@ public class DelegatingFacesELResolver extends ELResolver {
 		if (base == null) {
 			// Ask Spring root application context.
 			String beanName = property.toString();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Attempting to resolve variable '" + beanName + "' in root WebApplicationContext");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Attempting to resolve variable '" + beanName + "' in root WebApplicationContext");
 			}
 			BeanFactory bf = getBeanFactory(elContext);
 			if (bf.containsBean(beanName)) {

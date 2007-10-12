@@ -18,7 +18,6 @@ package org.springframework.beans.factory.annotation;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,9 +31,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Autowire candidate resolver that matches bean definition qualifiers
- * against qualifier annotations on the field or parameter to be autowired.
- * 
+ * {@link org.springframework.beans.factory.support.AutowireCandidateResolver}
+ * implementation that matches bean definition qualifiers against qualifier
+ * annotations on the field or parameter to be autowired.
+ *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
@@ -45,30 +45,44 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 	private final Set<Class<? extends Annotation>> qualifierTypes;
 
 
+	/**
+	 * Create a new QualifierAnnotationAutowireCandidateResolver
+	 * for Spring's standard {@link Qualifier} annotation.
+	 */
 	public QualifierAnnotationAutowireCandidateResolver() {
-		this(Qualifier.class);
+		this.qualifierTypes = new HashSet<Class<? extends Annotation>>(1);
+		this.qualifierTypes.add(Qualifier.class);
 	}
 
+	/**
+	 * Create a new QualifierAnnotationAutowireCandidateResolver
+	 * for the given qualifier annotation type.
+	 * @param qualifierType the qualifier annotation to look for
+	 */
 	public QualifierAnnotationAutowireCandidateResolver(Class<? extends Annotation> qualifierType) {
 		Assert.notNull(qualifierType, "'qualifierType' must not be null");
-		this.qualifierTypes = new HashSet();
+		this.qualifierTypes = new HashSet<Class<? extends Annotation>>(1);
 		this.qualifierTypes.add(qualifierType);
 	}
 
+	/**
+	 * Create a new QualifierAnnotationAutowireCandidateResolver
+	 * for the given qualifier annotation types.
+	 * @param qualifierTypes the qualifier annotations to look for
+	 */
 	public QualifierAnnotationAutowireCandidateResolver(Set<Class<? extends Annotation>> qualifierTypes) {
 		Assert.notNull(qualifierTypes, "'qualifierTypes' must not be null");
-		this.qualifierTypes = qualifierTypes;
+		this.qualifierTypes = new HashSet<Class<? extends Annotation>>(qualifierTypes);
 	}
 
 
 	/**
 	 * Register the given type to be used as a qualifier when autowiring.
+	 * <p>This implementation only supports annotations as qualifier types.
 	 * @param qualifierType the annotation type to register
 	 */
 	public void addQualifierType(Class qualifierType) {
-		if (!Annotation.class.isAssignableFrom(qualifierType)) {
-			throw new IllegalArgumentException("qualifierType must be an annotation type");
-		}
+		Assert.isAssignable(Annotation.class, qualifierType, "'qualifierType' must be an annotation type");
 		this.qualifierTypes.add(qualifierType);
 	}
 
@@ -111,12 +125,11 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 					}
 				}
 				Map<String, Object> attributes = AnnotationUtils.getAnnotationAttributes(annotation);
-				if (attributes.size() == 0 && qualifier == null) {
+				if (attributes.isEmpty() && qualifier == null) {
 					// if no attributes, the qualifier must be present
 					return false;
 				}
-				for (Iterator<Map.Entry<String, Object>> it = attributes.entrySet().iterator(); it.hasNext();) {
-					Map.Entry<String, Object> entry = it.next();
+				for (Map.Entry<String, Object> entry : attributes.entrySet()) {
 					String attributeName = entry.getKey();
 					Object expectedValue = entry.getValue();
 					Object actualValue = null;
@@ -152,7 +165,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 	}
 
 	/**
-	 * Checks whether an annotation type is a recognized qualifier type.
+	 * Checks whether the given annotation type is a recognized qualifier type.
 	 */
 	private boolean isQualifier(Class<? extends Annotation> annotationType) {
 		for (Class<? extends Annotation> qualifierType : this.qualifierTypes) {

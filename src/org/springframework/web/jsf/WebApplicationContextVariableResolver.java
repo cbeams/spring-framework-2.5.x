@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Special <code>VariableResolver</code> that exposes the Spring
+ * Special JSF 1.1 <code>VariableResolver</code> that exposes the Spring
  * <code>WebApplicationContext</code> instance under a variable named
  * "webApplicationContext".
  *

@@ -72,8 +72,8 @@ public class WebApplicationContextFacesELResolver extends ELResolver {
 			if (base instanceof WebApplicationContext) {
 				WebApplicationContext wac = (WebApplicationContext) base;
 				String beanName = property.toString();
-				if (logger.isDebugEnabled()) {
-					logger.debug("Attempting to resolve property '" + beanName + "' in root WebApplicationContext");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Attempting to resolve property '" + beanName + "' in root WebApplicationContext");
 				}
 				if (wac.containsBean(beanName)) {
 					if (logger.isDebugEnabled()) {
