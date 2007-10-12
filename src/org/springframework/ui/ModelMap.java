@@ -95,16 +95,6 @@ public class ModelMap extends LinkedHashMap {
 	}
 
 	/**
-	 * Copy all objects in the supplied <code>Map</code> into this <code>Map</code>.
-	 */
-	public ModelMap addAllObjects(Map objects) {
-		if (objects != null) {
-			this.putAll(objects);
-		}
-		return this;
-	}
-
-	/**
 	 * Copy all objects in the supplied <code>Collection</code> into this <code>Map</code>,
 	 * using attribute name generation for each element.
 	 * @see #addObject(Object)
@@ -113,6 +103,33 @@ public class ModelMap extends LinkedHashMap {
 		if (objects != null) {
 			for (Iterator it = objects.iterator(); it.hasNext();) {
 				addObject(it.next());
+			}
+		}
+		return this;
+	}
+
+	/**
+	 * Copy all objects in the supplied <code>Map</code> into this <code>Map</code>.
+	 */
+	public ModelMap addAllObjects(Map objects) {
+		if (objects != null) {
+			putAll(objects);
+		}
+		return this;
+	}
+
+	/**
+	 * Copy all objects in the supplied <code>Map</code> into this <code>Map</code>,
+	 * with existing objects of the same name taking precedence (i.e. not getting
+	 * replaced).
+	 */
+	public ModelMap mergeObjects(Map objects) {
+		if (objects != null) {
+			for (Iterator it = keySet().iterator(); it.hasNext();) {
+				Object key = it.next();
+				if (!containsKey(key)) {
+					put(key, objects.get(key));
+				}
 			}
 		}
 		return this;

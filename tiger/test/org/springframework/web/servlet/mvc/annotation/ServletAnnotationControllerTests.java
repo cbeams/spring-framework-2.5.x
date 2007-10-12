@@ -36,6 +36,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
@@ -138,7 +139,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 		request.addParameter("age", "value2");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("myView-name1-typeMismatch-tb1", response.getContentAsString());
+		assertEquals("myView-name1-typeMismatch-tb1-myValue", response.getContentAsString());
 	}
 
 	public void testCommandProvidingFormController() throws Exception {
@@ -162,7 +163,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 		request.addParameter("date", "2007-10-02");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("myView-myDefaultName-typeMismatch-tb1", response.getContentAsString());
+		assertEquals("myView-myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
 	}
 
 	public void testParameterDispatchingController() throws Exception {
@@ -275,7 +276,10 @@ public class ServletAnnotationControllerTests extends TestCase {
 		}
 
 		@RequestMapping("/myPath.do")
-		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors) {
+		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
+			if (!model.containsKey("myKey")) {
+				model.addObject("myKey", "myValue");
+			}
 			return "myView";
 		}
 	}
@@ -285,7 +289,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 	private static class MyCommandProvidingFormController extends MyFormController {
 
 		@ModelAttribute("myCommand")
-		private TestBean createTestBean(@RequestParam("defaultName") String name) {
+		private TestBean createTestBean(@RequestParam("defaultName") String name, Map<String, Object> model) {
+			model.put("myKey", "myOriginalValue");
 			return new TestBean(name);
 		}
 	}
@@ -342,7 +347,8 @@ public class ServletAnnotationControllerTests extends TestCase {
 					}
 					Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "myCommand");
 					List<TestBean> testBeans = (List<TestBean>) model.get("testBeans");
-					response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() + "-" + testBeans.get(0).getName());
+					response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
+							"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
 				}
 			};
 		}

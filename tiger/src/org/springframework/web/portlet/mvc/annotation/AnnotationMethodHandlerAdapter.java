@@ -23,7 +23,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,6 +43,7 @@ import javax.portlet.RenderResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.core.MethodParameter;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Errors;
@@ -69,6 +69,7 @@ import org.springframework.web.portlet.multipart.MultipartActionRequest;
  * values to the view.
  *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 2.5
  */
 public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
@@ -106,16 +107,16 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 	protected ModelAndView doHandle(PortletRequest request, PortletResponse response, Object handler) throws Exception {
 		AnnotationMethodHandlerAdapter.HandlerMethodResolver methodResolver = getMethodResolver(handler.getClass());
 		Method handlerMethod = methodResolver.resolveHandlerMethod(request);
-		Map<String, Object> implicitModel = new LinkedHashMap<String, Object>();
+		ModelMap implicitModel = new ModelMap();
 		for (Method attributeMethod : methodResolver.getModelAttributeMethods()) {
 			String attrName = attributeMethod.getAnnotation(ModelAttribute.class).value();
 			if (attrName == null) {
 				attrName = ClassUtils.getShortNameAsProperty(attributeMethod.getReturnType());
 			}
-			Object[] args = resolveArguments(handler, attributeMethod, request, response, null);
+			Object[] args = resolveArguments(handler, attributeMethod, request, response, implicitModel);
 			ReflectionUtils.makeAccessible(attributeMethod);
 			Object attrValue = ReflectionUtils.invokeMethod(attributeMethod, handler, args);
-			implicitModel.put(attrName, attrValue);
+			implicitModel.addObject(attrName, attrValue);
 		}
 		Object[] args = resolveArguments(handler, handlerMethod, request, response, implicitModel);
 		ReflectionUtils.makeAccessible(handlerMethod);
@@ -135,13 +136,16 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 
 	protected Object[] resolveArguments(
 			Object handler, Method handlerMethod, PortletRequest request, PortletResponse response,
-			Map implicitModel) throws PortletException, IOException {
+			ModelMap implicitModel) throws PortletException, IOException {
 
 		SimpleTypeConverter converter = new SimpleTypeConverter();
 		Object[] args = new Object[handlerMethod.getParameterTypes().length];
 		for (int i = 0; i < args.length; i++) {
 			MethodParameter param = new MethodParameter(handlerMethod, i);
 			args[i] = resolveStandardArgument(param.getParameterType(), request, response);
+			if (args[i] == null && param.getParameterType().isInstance(implicitModel)) {
+				args[i] = implicitModel;
+			}
 			if (args[i] == null) {
 				boolean resolved = false;
 				String attrName = ClassUtils.getShortNameAsProperty(param.getParameterType());
@@ -173,7 +177,7 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 					}
 				}
 				if (!resolved) {
-					Object command = (implicitModel != null ? implicitModel.get(attrName) : null);
+					Object command = implicitModel.get(attrName);
 					if (command == null) {
 						command = BeanUtils.instantiateClass(param.getParameterType());
 					}
@@ -183,12 +187,10 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 					}
 					binder.bind(request);
 					args[i] = command;
-					if (implicitModel != null) {
-						implicitModel.putAll(binder.getBindingResult().getModel());
-						if (args.length > i + 1 && Errors.class.isAssignableFrom(handlerMethod.getParameterTypes()[i + 1])) {
-							args[i + 1] = binder.getBindingResult();
-							i++;
-						}
+					implicitModel.putAll(binder.getBindingResult().getModel());
+					if (args.length > i + 1 && Errors.class.isAssignableFrom(handlerMethod.getParameterTypes()[i + 1])) {
+						args[i + 1] = binder.getBindingResult();
+						i++;
 					}
 					else {
 						binder.closeNoCatch();
@@ -246,14 +248,10 @@ public class AnnotationMethodHandlerAdapter implements HandlerAdapter {
 		}
 	}
 
-	protected ModelAndView getModelAndView(Object returnValue, Map<String, Object> implicitModel) {
+	protected ModelAndView getModelAndView(Object returnValue, ModelMap implicitModel) {
 		if (returnValue instanceof ModelAndView) {
 			ModelAndView mav = (ModelAndView) returnValue;
-			for (Map.Entry<String, Object> entry : implicitModel.entrySet()) {
-				if (!mav.getModel().containsKey(entry.getKey())) {
-					mav.addObject(entry.getKey(), entry.getValue());
-				}
-			}
+			mav.getModelMap().mergeObjects(implicitModel);
 			return mav;
 		}
 		else if (returnValue instanceof Map) {
