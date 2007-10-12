@@ -20,12 +20,8 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class ImageController {
 
-	private ImageDatabase imageDatabase;
-
 	@Autowired
-	public void setImageDatabase(ImageDatabase imageDatabase) {
-		this.imageDatabase = imageDatabase;
-	}
+	private ImageDatabase imageDatabase;
 
 	@RequestMapping("/imageList")
 	public ModelAndView showImageList() {
