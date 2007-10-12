@@ -92,8 +92,9 @@ public class CustomAutowireConfigurerTests extends TestCase {
 			return this.customTypes;
 		}
 
-		public boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd, DependencyDescriptor descriptor,
-				TypeConverter typeConverter) {
+		public boolean isAutowireCandidate(String beanName, String aliases[], RootBeanDefinition mbd,
+				DependencyDescriptor descriptor, TypeConverter typeConverter) {
+
 			if (!mbd.isAutowireCandidate()) {
 				return false;
 			}

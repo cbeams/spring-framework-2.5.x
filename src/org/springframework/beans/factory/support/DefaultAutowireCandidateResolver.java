@@ -28,12 +28,23 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
  */
 public class DefaultAutowireCandidateResolver extends AbstractAutowireCandidateResolver {
 
+	/**
+	 * This implementation is intended for an environment where the Java
+	 * version is less than 1.5 and therefore does not support qualifier
+	 * annotations.
+	 * @throws UnsupportedOperationException
+	 */
 	public void addQualifierType(Class qualifierType) {
 		throw new UnsupportedOperationException(getClass().getName() + 
 				" does not support registration of custom qualifier types.");
 	}
 
-	public boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd,
+	/**
+	 * Determine if the provided bean definition is an autowire candidate.
+	 * <p>To be considered a candidate the bean's <em>autowire-candidate</em>
+	 * attribute must not have been set to 'false'.
+	 */
+	public boolean isAutowireCandidate(String beanName, String[] aliases, RootBeanDefinition mbd,
 			DependencyDescriptor descriptor, TypeConverter typeConverter) {
 
 		return mbd.isAutowireCandidate();

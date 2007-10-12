@@ -349,7 +349,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @return whether the bean should be considered as autowire candidate
 	 */
 	protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd, DependencyDescriptor descriptor) {
-		return autowireCandidateResolver.isAutowireCandidate(beanName, mbd, descriptor, getTypeConverter());
+		return autowireCandidateResolver.isAutowireCandidate(beanName, this.getAliases(beanName), mbd,
+				descriptor, getTypeConverter());
 	}
 
 	protected String determinePrimaryCandidate(Map candidateBeans, Class type) {

@@ -30,7 +30,7 @@ public interface AutowireCandidateResolver {
 
 	void addQualifierType(Class qualifierType);
 
-	boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd,
+	boolean isAutowireCandidate(String beanName, String[] aliases, RootBeanDefinition mbd,
 			DependencyDescriptor descriptor, TypeConverter typeConverter);
 
 	String determinePrimaryCandidate(Map candidateBeans, Class type, ConfigurableListableBeanFactory beanFactory);

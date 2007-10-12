@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -94,10 +95,10 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 	 * as a <em>qualifier</em>, the bean must 'match' against the annotation as
 	 * well as any attributes it may contain. The bean definition must contain
 	 * the same qualifier or match by meta attributes. A "value" attribute will
-	 * fallback to match against the bean name if a qualifier or attribute does
-	 * not match.</p>
+	 * fallback to match against the bean name or an alias if a qualifier or
+	 * attribute does not match.</p>
 	 */
-	public boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd,
+	public boolean isAutowireCandidate(String beanName, String[] aliases, RootBeanDefinition mbd,
 			DependencyDescriptor descriptor, TypeConverter typeConverter) {
 
 		if (!mbd.isAutowireCandidate()) {
@@ -144,8 +145,9 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 							actualValue = typeConverter.convertIfNecessary(attr, expectedValue.getClass());
 						}
 					}
-					if (actualValue == null && attributeName.equals("value") && expectedValue.equals(beanName)) {
-						// fall back on bean name match
+					if (actualValue == null && attributeName.equals("value") &&
+							(expectedValue.equals(beanName) || (aliases != null && Arrays.asList(aliases).contains(expectedValue)))) {
+						// fall back on bean name (or alias) match
 						continue;
 					}
 					if (actualValue == null && qualifier != null) {
