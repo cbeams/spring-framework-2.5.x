@@ -101,7 +101,7 @@ class WebLogicClassLoader {
 			Object classFinder = this.getClassFinderMethod.invoke(this.internalClassLoader);
 			Object parent = this.getParentMethod.invoke(this.internalClassLoader);
 			// arguments for 'clone'-like method
-			return (ClassLoader) this.wlGenericClassLoaderConstructor.newInstance(new Object[] {classFinder, parent});
+			return (ClassLoader) this.wlGenericClassLoaderConstructor.newInstance(classFinder, parent);
 		}
 		catch (InvocationTargetException ex) {
 			throw new IllegalStateException("WebLogic GenericClassLoader constructor failed", ex.getCause());

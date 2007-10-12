@@ -29,6 +29,7 @@ import org.springframework.util.ClassUtils;
  * <p><b>NOTE:</b> Requires BEA WebLogic version 10 or higher.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public class WebLogicLoadTimeWeaver implements LoadTimeWeaver {
@@ -37,7 +38,7 @@ public class WebLogicLoadTimeWeaver implements LoadTimeWeaver {
 
 
 	/**
-	 * Creates a new instance of thie {@link WebLogicLoadTimeWeaver} class using
+	 * Creates a new instance of the {@link WebLogicLoadTimeWeaver} class using
 	 * the default {@link ClassLoader class loader}.
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */
@@ -50,9 +51,6 @@ public class WebLogicLoadTimeWeaver implements LoadTimeWeaver {
 	 * the supplied {@link ClassLoader}.
 	 * @param classLoader the <code>ClassLoader</code> to delegate to for
 	 * weaving (must not be <code>null</code>)
-	 * @throws IllegalArgumentException if the supplied <code>ClassLoader</code>
-	 * is <code>null</code>
-	 * @see #getInstrumentableClassLoader()
 	 */
 	public WebLogicLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");

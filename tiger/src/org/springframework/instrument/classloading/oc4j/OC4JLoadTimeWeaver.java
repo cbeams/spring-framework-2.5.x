@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.util.ClassUtils;
  * for his assistance.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
@@ -52,9 +53,7 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 	/**
 	 * Creates a new instance of the {@link OC4JLoadTimeWeaver} class
 	 * using the supplied {@link ClassLoader}.
-	 * @param classLoader the <code>ClassLoader</code> to delegate to for weaving (must not be <code>null</code>)
-	 * @throws IllegalArgumentException if the supplied <code>ClassLoader</code> is <code>null</code>
-	 * @see #getInstrumentableClassLoader()  
+	 * @param classLoader the <code>ClassLoader</code> to delegate to for weaving
 	 */
 	public OC4JLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
