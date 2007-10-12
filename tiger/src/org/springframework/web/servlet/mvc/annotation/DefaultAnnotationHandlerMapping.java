@@ -44,7 +44,7 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
  * specific handler beans, with any given HTTP path only allowed to be mapped
  * onto one specific handler bean (not spread across multiple handler beans).
  * It is strongly recommended to co-locate related handler methods into the same bean.
- * 
+ *
  * <p>The {@link AnnotationMethodHandlerAdapter} is responsible for processing
  * annotated handler methods, as mapped by this HandlerMapping. For
  * {@link RequestMapping} at the type level, specific HandlerAdapters such as
@@ -72,7 +72,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 			return mapping.value();
 		}
 		else if (handlerType.isAnnotationPresent(Controller.class)) {
-			final Set urls = new LinkedHashSet();
+			final Set<String> urls = new LinkedHashSet<String>();
 			ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
 				public void doWith(Method method) {
 					RequestMapping mapping = method.getAnnotation(RequestMapping.class);
