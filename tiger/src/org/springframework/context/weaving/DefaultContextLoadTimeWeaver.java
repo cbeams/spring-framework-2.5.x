@@ -25,6 +25,7 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver;
 import org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWeaver;
 import org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver;
+import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver;
 
 /**
  * Default {@link LoadTimeWeaver} bean for use in an application context,
@@ -36,10 +37,11 @@ import org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver;
  *
  * <p>This class implements a runtime environment check for obtaining the
  * appropriate weaver implementation: As of Spring 2.5, it detects Sun's
- * GlassFish, Oracle's OC4J,
+ * GlassFish, Oracle's OC4J, BEA's WebLogic 10,
  * {@link InstrumentationSavingAgent Spring's VM agent} and any
  * {@link ClassLoader} supported by Spring's {@link ReflectiveLoadTimeWeaver}
- * (for example the <code>TomcatInstrumentableClassLoader</code>).
+ * (for example the
+ * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}).
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -52,11 +54,15 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		try {
-			if (classLoader.getClass().getName().startsWith("com.sun.enterprise")) {
+			String loaderClassName = classLoader.getClass().getName();
+			if (loaderClassName.startsWith("com.sun.enterprise")) {
 				this.loadTimeWeaver = new GlassFishLoadTimeWeaver(classLoader);
 			}
-			else if (classLoader.getClass().getName().startsWith("oracle")) {
+			else if (loaderClassName.startsWith("oracle")) {
 				this.loadTimeWeaver = new OC4JLoadTimeWeaver(classLoader);
+			}
+			else if (loaderClassName.startsWith("weblogic")) {
+				this.loadTimeWeaver = new WebLogicLoadTimeWeaver(classLoader);
 			}
 			else if (InstrumentationSavingAgent.getInstrumentation() != null) {
 				this.loadTimeWeaver = new InstrumentationLoadTimeWeaver();
