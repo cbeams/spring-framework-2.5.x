@@ -16,23 +16,26 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Map;
-
-import org.springframework.beans.TypeConverter;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 
 /**
+ * Strategy interface for determining whether a specific bean definition
+ * qualifies as an autowire candidate for a specific dependency.
+ *
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public interface AutowireCandidateResolver {
 
-	void addQualifierType(Class qualifierType);
-
-	boolean isAutowireCandidate(String beanName, String[] aliases, RootBeanDefinition mbd,
-			DependencyDescriptor descriptor, TypeConverter typeConverter);
-
-	String determinePrimaryCandidate(Map candidateBeans, Class type, ConfigurableListableBeanFactory beanFactory);
+	/**
+	 * Determne whether the given bean definition qualifies as an
+	 * autowire candidate for the given dependency.
+	 * @param bdHolder the bean definition including bean name and aliases
+	 * @param descriptor the descriptor for the target method parameter or field
+	 * @return whether the bean definition qualifies as autowire candidate
+	 */
+	boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor);
 
 }

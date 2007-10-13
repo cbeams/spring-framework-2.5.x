@@ -17,19 +17,20 @@
 package org.springframework.beans.factory.annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.TypeConverter;
-import org.springframework.beans.factory.config.AutowireCandidateQualifier;
+import org.springframework.beans.SimpleTypeConverter;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.beans.factory.support.AbstractAutowireCandidateResolver;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.AutowireCandidateQualifier;
+import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * {@link org.springframework.beans.factory.support.AutowireCandidateResolver}
@@ -41,7 +42,7 @@ import org.springframework.util.ClassUtils;
  * @since 2.5
  * @see Qualifier
  */
-public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowireCandidateResolver {
+public class QualifierAnnotationAutowireCandidateResolver implements AutowireCandidateResolver {
 
 	private final Set<Class<? extends Annotation>> qualifierTypes;
 
@@ -82,8 +83,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 	 * <p>This implementation only supports annotations as qualifier types.
 	 * @param qualifierType the annotation type to register
 	 */
-	public void addQualifierType(Class qualifierType) {
-		Assert.isAssignable(Annotation.class, qualifierType, "'qualifierType' must be an annotation type");
+	public void addQualifierType(Class<? extends Annotation> qualifierType) {
 		this.qualifierTypes.add(qualifierType);
 	}
 
@@ -96,30 +96,30 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 	 * well as any attributes it may contain. The bean definition must contain
 	 * the same qualifier or match by meta attributes. A "value" attribute will
 	 * fallback to match against the bean name or an alias if a qualifier or
-	 * attribute does not match.</p>
+	 * attribute does not match.
 	 */
-	public boolean isAutowireCandidate(String beanName, String[] aliases, RootBeanDefinition mbd,
-			DependencyDescriptor descriptor, TypeConverter typeConverter) {
-
-		if (!mbd.isAutowireCandidate()) {
+	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
+		if (!bdHolder.getBeanDefinition().isAutowireCandidate()) {
 			// if explicitly false, do not proceed with qualifier check
 			return false;
 		}
-		if (descriptor == null || descriptor.getAnnotations() == null) {
+		if (descriptor == null || ObjectUtils.isEmpty(descriptor.getAnnotations())) {
 			// no qualification necessary
 			return true;
 		}
+		AbstractBeanDefinition bd = (AbstractBeanDefinition) bdHolder.getBeanDefinition();
+		SimpleTypeConverter typeConverter = new SimpleTypeConverter();
 		Annotation[] annotations = (Annotation[]) descriptor.getAnnotations();
 		for (Annotation annotation : annotations) {
 			Class<? extends Annotation> type = annotation.annotationType();
 			if (isQualifier(type)) {
-				AutowireCandidateQualifier qualifier = mbd.getQualifier(type.getName());
+				AutowireCandidateQualifier qualifier = bd.getQualifier(type.getName());
 				if (qualifier == null) {
-					qualifier = mbd.getQualifier(ClassUtils.getShortName(type));
+					qualifier = bd.getQualifier(ClassUtils.getShortName(type));
 				}
-				if (qualifier == null && mbd.hasBeanClass()) {
+				if (qualifier == null && bd.hasBeanClass()) {
 					// look for matching annotation on the target class
-					Class<?> beanClass = mbd.getBeanClass();
+					Class<?> beanClass = bd.getBeanClass();
 					Annotation targetAnnotation = beanClass.getAnnotation(type);
 					if (targetAnnotation != null && targetAnnotation.equals(annotation)) {
 						return true;
@@ -140,13 +140,14 @@ public class QualifierAnnotationAutowireCandidateResolver extends AbstractAutowi
 					}
 					if (actualValue == null) {
 						// fall back on bean definition attribute
-						Object attr = mbd.getAttribute(attributeName);
+						Object attr = bd.getAttribute(attributeName);
 						if (attr != null) {
 							actualValue = typeConverter.convertIfNecessary(attr, expectedValue.getClass());
 						}
 					}
 					if (actualValue == null && attributeName.equals("value") &&
-							(expectedValue.equals(beanName) || (aliases != null && Arrays.asList(aliases).contains(expectedValue)))) {
+							(expectedValue.equals(bdHolder.getBeanName()) ||
+									ObjectUtils.containsElement(bdHolder.getAliases(), expectedValue))) {
 						// fall back on bean name (or alias) match
 						continue;
 					}

@@ -26,6 +26,7 @@ import junit.framework.TestCase;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.support.StaticApplicationContext;
 
@@ -137,7 +138,9 @@ public class QualifierAnnotationTests extends TestCase {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(context);
 		reader.loadBeanDefinitions(CONFIG_LOCATION);
-		context.getDefaultListableBeanFactory().registerQualifierType(MultipleAttributeQualifier.class);
+		QualifierAnnotationAutowireCandidateResolver resolver = (QualifierAnnotationAutowireCandidateResolver)
+				context.getDefaultListableBeanFactory().getAutowireCandidateResolver();
+		resolver.addQualifierType(MultipleAttributeQualifier.class);
 		context.registerSingleton("testBean", QualifiedByAttributesTestBean.class);
 		context.refresh();
 		QualifiedByAttributesTestBean testBean = (QualifiedByAttributesTestBean) context.getBean("testBean");

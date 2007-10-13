@@ -16,38 +16,27 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.TypeConverter;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 
 /**
  * Resolver to use when Java version is less than 1.5 and therefore no
  * annotation support is available. Simply checks the bean definition.
- * 
+ *
  * @author Mark Fisher
  * @since 2.5
  */
-public class DefaultAutowireCandidateResolver extends AbstractAutowireCandidateResolver {
-
-	/**
-	 * This implementation is intended for an environment where the Java
-	 * version is less than 1.5 and therefore does not support qualifier
-	 * annotations.
-	 * @throws UnsupportedOperationException
-	 */
-	public void addQualifierType(Class qualifierType) {
-		throw new UnsupportedOperationException(getClass().getName() + 
-				" does not support registration of custom qualifier types.");
-	}
+public class DefaultAutowireCandidateResolver implements AutowireCandidateResolver {
 
 	/**
 	 * Determine if the provided bean definition is an autowire candidate.
 	 * <p>To be considered a candidate the bean's <em>autowire-candidate</em>
 	 * attribute must not have been set to 'false'.
 	 */
-	public boolean isAutowireCandidate(String beanName, String[] aliases, RootBeanDefinition mbd,
-			DependencyDescriptor descriptor, TypeConverter typeConverter) {
+	public boolean isAutowireCandidate(
+			BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 
-		return mbd.isAutowireCandidate();
+		return bdHolder.getBeanDefinition().isAutowireCandidate();
 	}
 
 }

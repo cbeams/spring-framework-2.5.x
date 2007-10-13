@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.config;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+package org.springframework.beans.factory.annotation;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.TypeConverter;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 
 /**
@@ -36,7 +32,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 public class CustomAutowireConfigurerTests extends TestCase {
 
 	private static final String CONFIG_LOCATION =
-			"classpath:org/springframework/beans/factory/config/customAutowireConfigurer.xml";
+			"classpath:org/springframework/beans/factory/annotation/customAutowireConfigurer.xml";
 
 
 	public void testCustomResolver() {
@@ -51,19 +47,6 @@ public class CustomAutowireConfigurerTests extends TestCase {
 		assertEquals("#1!", testBean.getName());
 	}
 
-	public void testCustomTypesRegistered() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		CustomAutowireConfigurer cac = new CustomAutowireConfigurer();
-		CustomResolver customResolver = new CustomResolver();
-		bf.setAutowireCandidateResolver(customResolver);
-		Set customQualifierTypes = new HashSet();
-		customQualifierTypes.add("java.lang.Integer");
-		cac.setCustomQualifierTypes(customQualifierTypes);
-		cac.postProcessBeanFactory(bf);
-		assertEquals(1, customResolver.getCustomTypes().size());
-		assertTrue(customResolver.getCustomTypes().contains(Integer.class));
-	}
-
 
 	public static class TestBean {
 
@@ -76,41 +59,23 @@ public class CustomAutowireConfigurerTests extends TestCase {
 		public String getName() {
 			return this.name;
 		}
-
 	}
 
 
 	public static class CustomResolver implements AutowireCandidateResolver {
 
-		private Set customTypes = new HashSet();
-
-		public void addQualifierType(Class qualifierType) {
-			customTypes.add(qualifierType);
-		}
-
-		public Set getCustomTypes() {
-			return this.customTypes;
-		}
-
-		public boolean isAutowireCandidate(String beanName, String aliases[], RootBeanDefinition mbd,
-				DependencyDescriptor descriptor, TypeConverter typeConverter) {
-
-			if (!mbd.isAutowireCandidate()) {
+		public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
+			if (!bdHolder.getBeanDefinition().isAutowireCandidate()) {
 				return false;
 			}
-			if (!beanName.matches("[a-z-]+")) {
+			if (!bdHolder.getBeanName().matches("[a-z-]+")) {
 				return false;
 			}
-			if (mbd.getAttribute("priority").equals("1")) {
+			if (bdHolder.getBeanDefinition().getAttribute("priority").equals("1")) {
 				return true;
 			}
 			return false;
 		}
-
-		public String determinePrimaryCandidate(Map candidateBeans, Class type, ConfigurableListableBeanFactory beanFactory) {
-			return null;
-		}
-
 	}
 
 }

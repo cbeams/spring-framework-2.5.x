@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.config;
+package org.springframework.beans.factory.support;
 
 import java.util.HashMap;
 import java.util.Map;

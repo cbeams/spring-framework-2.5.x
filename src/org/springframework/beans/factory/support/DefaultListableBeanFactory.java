@@ -34,6 +34,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
@@ -113,18 +114,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Set a custom autowire candidate resolver for this BeanFactory to use
 	 * when deciding whether a bean definition should be considered as a
 	 * candidate for autowiring.
-	 * @see #registerQualifierType
 	 */
 	public void setAutowireCandidateResolver(AutowireCandidateResolver autowireCandidateResolver) {
+		Assert.notNull(autowireCandidateResolver, "AutowireCandidateResolver must not be null");
 		this.autowireCandidateResolver = autowireCandidateResolver;
 	}
 
 	/**
-	 * Register the given type to be used as a qualifier when autowiring.
-	 * @param qualifierType the annotation type to register
+	 * Return the autowire candidate resolver for this BeanFactory (never <code>null</code>).
 	 */
-	public void registerQualifierType(Class qualifierType) {
-		this.autowireCandidateResolver.addQualifierType(qualifierType);
+	public AutowireCandidateResolver getAutowireCandidateResolver() {
+		return this.autowireCandidateResolver;
 	}
 
 	/**
@@ -349,12 +349,28 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @return whether the bean should be considered as autowire candidate
 	 */
 	protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd, DependencyDescriptor descriptor) {
-		return autowireCandidateResolver.isAutowireCandidate(beanName, this.getAliases(beanName), mbd,
-				descriptor, getTypeConverter());
+		return getAutowireCandidateResolver().isAutowireCandidate(
+				new BeanDefinitionHolder(mbd, beanName, getAliases(beanName)), descriptor);
+	}
+
+	public boolean isPrimary(String beanName, Object beanInstance) {
+		return (super.isPrimary(beanName, beanInstance) || this.resolvableDependencies.values().contains(beanInstance));
 	}
 
 	protected String determinePrimaryCandidate(Map candidateBeans, Class type) {
-		return autowireCandidateResolver.determinePrimaryCandidate(candidateBeans, type, this);
+		String primaryBeanName = null;
+		for (Iterator it = candidateBeans.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			String candidateBeanName = (String) entry.getKey();
+			if (isPrimary(candidateBeanName, entry.getValue())) {
+				if (primaryBeanName != null) {
+					throw new NoSuchBeanDefinitionException(type,
+							"more than one 'primary' bean found among candidates: " + candidateBeans.keySet());
+				}
+				primaryBeanName = candidateBeanName;
+			}
+		}
+		return primaryBeanName;
 	}
 
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
@@ -508,10 +524,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		return result;
-	}
-
-	public boolean isPrimary(String beanName, Object beanInstance) {
-		return (super.isPrimary(beanName, beanInstance) || this.resolvableDependencies.values().contains(beanInstance));
 	}
 
 

@@ -14,29 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.config;
+package org.springframework.beans.factory.annotation;
 
+import java.lang.annotation.Annotation;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link BeanFactoryPostProcessor} implementation that allows for convenient
- * registration of custom autowire qualifier types.
- * 
+ * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor}
+ * implementation that allows for convenient registration of custom autowire
+ * qualifier types.
+ *
  * <pre class="code">
- * &lt;bean id="customAutowireConfigurer" class="org.springframework.beans.factory.config.CustomAutowireConfigurer"&gt;
+ * &lt;bean id="customAutowireConfigurer" class="org.springframework.beans.factory.annotation.CustomAutowireConfigurer"&gt;
  *   &lt;property name="customQualifierTypes"&gt;
  *     &lt;set&gt;
  *       &lt;value&gt;mypackage.MyQualifier&lt;/value&gt;
  *     &lt;/set&gt;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
- * 
+ *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
@@ -70,7 +75,18 @@ public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanC
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.customQualifierTypes != null) {
-			for (Iterator it = customQualifierTypes.iterator(); it.hasNext();) {
+			if (!(beanFactory instanceof DefaultListableBeanFactory)) {
+				throw new IllegalStateException(
+						"CustomAutowireConfigurer needs to operate on a DefaultListableBeanFactory");
+			}
+			DefaultListableBeanFactory dlbf = (DefaultListableBeanFactory) beanFactory;
+			if (!(dlbf.getAutowireCandidateResolver() instanceof QualifierAnnotationAutowireCandidateResolver)) {
+				throw new IllegalStateException(
+						"CustomAutowireConfigurer needs to operate on a QualifierAnnotationAutowireCandidateResolver");
+			}
+			QualifierAnnotationAutowireCandidateResolver resolver =
+					(QualifierAnnotationAutowireCandidateResolver) dlbf.getAutowireCandidateResolver();
+			for (Iterator it = this.customQualifierTypes.iterator(); it.hasNext();) {
 				Class customType = null;
 				Object value = it.next();
 				if (value instanceof Class) {
@@ -84,7 +100,11 @@ public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanC
 					throw new IllegalArgumentException(
 							"Invalid value [" + value + "] for custom qualifier type: needs to be Class or String.");
 				}
-				beanFactory.registerQualifierType(customType);
+				if (!Annotation.class.isAssignableFrom(customType)) {
+					throw new IllegalArgumentException(
+							"Qualifier type [" + customType.getName() + "] needs to be annotation type");
+				}
+				resolver.addQualifierType(customType);
 			}
 		}
 	}
