@@ -19,6 +19,17 @@
 	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
+	<xsd:element name="defaults">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Default settings for any scripted beans registered within this context.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attributeGroup ref="defaultableAttributes"/>
+		</xsd:complexType>
+	</xsd:element>
+
 	<xsd:element name="groovy" type="customizableScriptType">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
@@ -66,14 +77,7 @@
 						</xsd:annotation>
 					</xsd:element>
 				</xsd:sequence>
-				<xsd:attribute name="refresh-check-delay" type="xsd:long">
-					<xsd:annotation>
-						<xsd:documentation><![CDATA[
-	The delay (in milliseconds) between checks for updated sources when
-	using the refreshable beans feature.
-						]]></xsd:documentation>
-					</xsd:annotation>
-				</xsd:attribute>
+				<xsd:attributeGroup ref="defaultableAttributes"/>
 				<xsd:attribute name="script-source" type="xsd:string">
 					<xsd:annotation>
 						<xsd:documentation source="java:org.springframework.core.io.Resource"><![CDATA[
@@ -177,5 +181,16 @@
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
+
+	<xsd:attributeGroup name="defaultableAttributes">
+		<xsd:attribute name="refresh-check-delay" type="xsd:long">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The delay (in milliseconds) between checks for updated sources when
+	using the refreshable beans feature.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
 
 </xsd:schema>

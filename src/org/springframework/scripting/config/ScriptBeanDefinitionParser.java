@@ -23,9 +23,8 @@ import org.w3c.dom.Element;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlReaderContext;
@@ -50,16 +49,10 @@ import org.springframework.util.xml.DomUtils;
  * @author Rob Harrop
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 2.0
  */
 class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
-
-	/**
-	 * The unique name under which the internally managed {@link ScriptFactoryPostProcessor} is
-	 * registered in the {@link BeanDefinitionRegistry}.
-	 */
-	private static final String SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME =
-			"org.springframework.scripting.config.scriptFactoryPostProcessor";
 
 	private static final String SCRIPT_SOURCE_ATTRIBUTE = "script-source";
 
@@ -111,7 +104,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		}
 
 		// Set up infrastructure.
-		registerScriptFactoryPostProcessorIfNecessary(parserContext.getRegistry());
+		LangNamespaceUtils.registerScriptFactoryPostProcessorIfNecessary(parserContext.getRegistry());
 
 		// Create script factory bean definition.
 		GenericBeanDefinition bd = new GenericBeanDefinition();
@@ -140,14 +133,25 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		String dependencyCheck = element.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
 		bd.setDependencyCheck(parserContext.getDelegate().getDependencyCheck(dependencyCheck));
 
+		// Retrieve the defaults for bean definitions within this parser context
+		BeanDefinitionDefaults beanDefinitionDefaults =
+				parserContext.getDelegate().getBeanDefinitionDefaults();
+
 		// Determine init method and destroy method.
 		String initMethod = element.getAttribute(INIT_METHOD_ATTRIBUTE);
 		if (StringUtils.hasLength(initMethod)) {
 			bd.setInitMethodName(initMethod);
 		}
+		else if (beanDefinitionDefaults.getInitMethodName() != null) {
+			bd.setInitMethodName(beanDefinitionDefaults.getInitMethodName());
+		}
+
 		String destroyMethod = element.getAttribute(DESTROY_METHOD_ATTRIBUTE);
 		if (StringUtils.hasLength(destroyMethod)) {
 			bd.setDestroyMethodName(destroyMethod);
+		}
+		else if (beanDefinitionDefaults.getDestroyMethodName() != null) {
+			bd.setDestroyMethodName(beanDefinitionDefaults.getDestroyMethodName());
 		}
 
 		// Attach any refresh metadata.
@@ -199,18 +203,6 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		else {
 			readerContext.error("Must specify either 'script-source' or 'inline-script'.", element);
 			return null;
-		}
-	}
-
-	/**
-	 * Registers a {@link ScriptFactoryPostProcessor} bean definition in the supplied
-	 * {@link BeanDefinitionRegistry} if the {@link ScriptFactoryPostProcessor} hasn't
-	 * already been registered.
-	 */
-	private static void registerScriptFactoryPostProcessorIfNecessary(BeanDefinitionRegistry registry) {
-		if (!registry.containsBeanDefinition(SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME)) {
-			RootBeanDefinition beanDefinition = new RootBeanDefinition(ScriptFactoryPostProcessor.class);
-			registry.registerBeanDefinition(SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME, beanDefinition);
 		}
 	}
 

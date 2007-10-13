@@ -34,6 +34,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * 
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 2.0
  */
 public class LangNamespaceHandler extends NamespaceHandlerSupport {
@@ -42,6 +43,7 @@ public class LangNamespaceHandler extends NamespaceHandlerSupport {
 		registerScriptBeanDefinitionParser("groovy", "org.springframework.scripting.groovy.GroovyScriptFactory");
 		registerScriptBeanDefinitionParser("jruby", "org.springframework.scripting.jruby.JRubyScriptFactory");
 		registerScriptBeanDefinitionParser("bsh", "org.springframework.scripting.bsh.BshScriptFactory");
+		registerBeanDefinitionParser("defaults", new ScriptingDefaultsParser());
 	}
 
 	private void registerScriptBeanDefinitionParser(String key, String scriptFactoryClassName) {
