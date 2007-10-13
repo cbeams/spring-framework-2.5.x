@@ -34,6 +34,19 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Class for SimpleJDBC implementation of the Clinic interface.
  *
+ * This class uses Java 5 features and the SimpleJdbcTemplate plus
+ * SimpleJdbcInsert.  It also to take advantage of classes like 
+ * BeanPropertySqlParameterSource and ParameterizedBeanPropertyRowMapper 
+ * that provide automatic mapping between JabaBean properties and JDBC 
+ * parameters or query reults.
+ * 
+ * This is a rewrite of the  AbstractJdbcClinic which was the base class 
+ * for JDBC implementations of the Clinic interface for Spring 2.0.
+ *
+ * @author Ken Krebs
+ * @author Juergen Hoeller
+ * @author Rob Harrop
+ * @author Sam Brannen
  * @author Thomas Risberg
  * @author Mark Fisher
  */
@@ -203,6 +216,10 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 
 	// END of Clinic implementation section *******************************
 
+	/**
+	 * Method to create a MapSqlParameterSource based on data values
+	 * from a Pet instance.
+	 */
 	private MapSqlParameterSource createPetParameterSource(Pet pet) {
 		return new MapSqlParameterSource()
 			.addValue("id", pet.getId())
@@ -212,6 +229,10 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 			.addValue("owner_id", pet.getOwner().getId());
 	}
 
+	/**
+	 * Method to create a MapSqlParameterSource based on data values
+	 * from a Visit instance.
+	 */
 	private MapSqlParameterSource createVisitParameterSource(Visit visit) {
 		return new MapSqlParameterSource()
 			.addValue("id", visit.getId())
@@ -272,6 +293,10 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 		}
 	}
 
+	/**
+	 * ParameterizedRowMapper implementation mapping data from the ResultSet to the
+	 * corresponding properties of the JdbcPet class. 
+	 */
 	private class JdbcPetRowMapper implements ParameterizedRowMapper<JdbcPet> {
 
 		public JdbcPet mapRow(ResultSet rs, int rownum) throws SQLException {
