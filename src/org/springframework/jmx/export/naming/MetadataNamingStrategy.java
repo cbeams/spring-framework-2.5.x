@@ -16,6 +16,8 @@
 
 package org.springframework.jmx.export.naming;
 
+import java.util.Hashtable;
+
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -25,6 +27,7 @@ import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.metadata.ManagedResource;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -53,6 +56,8 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 	 */
 	private JmxAttributeSource attributeSource;
 
+	private String defaultDomain;
+
 
 	/**
 	 * Create a new <code>MetadataNamingStrategy<code> which needs to be
@@ -74,11 +79,22 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 
 	/**
 	 * Set the implementation of the <code>JmxAttributeSource</code> interface to use
-	 * when reading the source level metadata.
+	 * when reading the source-level metadata.
 	 */
 	public void setAttributeSource(JmxAttributeSource attributeSource) {
 		Assert.notNull(attributeSource, "JmxAttributeSource must not be null");
 		this.attributeSource = attributeSource;
+	}
+
+	/**
+	 * Specify the default domain to be used for generating ObjectNames
+	 * when no source-level metadata has been specified.
+	 * <p>The default is to use the domain specified in the bean name
+	 * (if the bean name follows the JMX ObjectName syntax); else,
+	 * the package name of the managed bean class.
+	 */
+	public void setDefaultDomain(String defaultDomain) {
+		this.defaultDomain = defaultDomain;
 	}
 
 	public void afterPropertiesSet() {
@@ -89,7 +105,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 
 
 	/**
-	 * Reads the <code>ObjectName</code> from the source level metadata associated
+	 * Reads the <code>ObjectName</code> from the source-level metadata associated
 	 * with the managed resource's <code>Class</code>.
 	 */
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
@@ -97,16 +113,24 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 		ManagedResource mr = this.attributeSource.getManagedResource(managedClass);
 
 		// Check that an object name has been specified.
-		String objectName = null;
 		if (mr != null && StringUtils.hasText(mr.getObjectName())) {
-			objectName = mr.getObjectName();
+			return ObjectNameManager.getInstance(mr.getObjectName());
 		}
 		else {
-			objectName = beanKey;
+			try {
+				return ObjectNameManager.getInstance(beanKey);
+			}
+			catch (MalformedObjectNameException ex) {
+				String domain = this.defaultDomain;
+				if (domain == null) {
+					domain = ClassUtils.getPackageName(managedClass);
+				}
+				Hashtable properties = new Hashtable();
+				properties.put("type", ClassUtils.getShortName(managedClass));
+				properties.put("name", beanKey);
+				return ObjectNameManager.getInstance(domain, properties);
+			}
 		}
-
-		// Now try to parse the name.
-		return ObjectNameManager.getInstance(objectName);
 	}
 
 }

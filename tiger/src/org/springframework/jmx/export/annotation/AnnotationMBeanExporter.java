@@ -34,11 +34,33 @@ import org.springframework.jmx.export.naming.MetadataNamingStrategy;
  */
 public class AnnotationMBeanExporter extends MBeanExporter {
 
+	private final AnnotationJmxAttributeSource annotationSource =
+			new AnnotationJmxAttributeSource();
+
+	private final MetadataNamingStrategy metadataNamingStrategy =
+			new MetadataNamingStrategy(this.annotationSource);
+
+	private final MetadataMBeanInfoAssembler metadataAssembler =
+			new MetadataMBeanInfoAssembler(this.annotationSource);
+
+
 	public AnnotationMBeanExporter() {
-		AnnotationJmxAttributeSource source = new AnnotationJmxAttributeSource();
-		setNamingStrategy(new MetadataNamingStrategy(source));
-		setAssembler(new MetadataMBeanInfoAssembler(source));
+		setNamingStrategy(this.metadataNamingStrategy);
+		setAssembler(this.metadataAssembler);
 		setAutodetectMode(AUTODETECT_ALL);
+	}
+
+
+	/**
+	 * Specify the default domain to be used for generating ObjectNames
+	 * when no source-level metadata has been specified.
+	 * <p>The default is to use the domain specified in the bean name
+	 * (if the bean name follows the JMX ObjectName syntax); else,
+	 * the package name of the managed bean class.
+	 * @see MetadataNamingStrategy#setDefaultDomain
+	 */
+	public void setDefaultDomain(String defaultDomain) {
+		this.metadataNamingStrategy.setDefaultDomain(defaultDomain);
 	}
 
 }
