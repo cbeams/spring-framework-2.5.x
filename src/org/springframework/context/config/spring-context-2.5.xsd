@@ -157,6 +157,28 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:element name="mbean-export">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.jmx.export.annotation.AnnotationMBeanExporter"><![CDATA[
+	Activates exporting of MBeans by detecting @ManagedResource annotations on Spring beans.
+			]]></xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="org.springframework.jmx.export.annotation.AnnotationMBeanExporter"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="default-domain" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The default domain to use when generating JMX ObjectNames.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
 	<xsd:element name="spring-configured">
 		<xsd:annotation>
 			<xsd:documentation source="java:org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"><![CDATA[

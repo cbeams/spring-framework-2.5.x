@@ -44,6 +44,8 @@ public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 				"org.springframework.context.annotation.AnnotationConfigBeanDefinitionParser");
 		registerJava5DependentParser("component-scan",
 				"org.springframework.context.annotation.ComponentScanBeanDefinitionParser");
+		registerJava5DependentParser("mbean-export",
+				"org.springframework.jmx.export.annotation.MBeanExportBeanDefinitionParser");
 	}
 
 	private void registerJava5DependentParser(final String elementName, final String parserClassName) {
