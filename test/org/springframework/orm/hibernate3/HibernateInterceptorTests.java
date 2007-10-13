@@ -410,6 +410,38 @@ public class HibernateInterceptorTests extends TestCase {
 		sessionControl.verify();
 	}
 
+	public void testInterceptorWithThreadBoundEmptyHolder() {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		Session session = (Session) sessionControl.getMock();
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.flush();
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		SessionHolder holder = new SessionHolder("key", session);
+		holder.removeSession("key");
+		TransactionSynchronizationManager.bindResource(sf, holder);
+		HibernateInterceptor interceptor = new HibernateInterceptor();
+		interceptor.setSessionFactory(sf);
+		try {
+			interceptor.invoke(new TestInvocation(sf));
+		}
+		catch (Throwable t) {
+			fail("Should not have thrown Throwable: " + t.getMessage());
+		}
+
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
 	public void testInterceptorWithEntityInterceptor() throws HibernateException {
 		MockControl interceptorControl = MockControl.createControl(org.hibernate.Interceptor.class);
 		org.hibernate.Interceptor entityInterceptor = (org.hibernate.Interceptor) interceptorControl.getMock();

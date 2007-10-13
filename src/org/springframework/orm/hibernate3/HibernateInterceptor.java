@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,13 +88,20 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		Session session = getSession();
-		boolean existingTransaction = SessionFactoryUtils.isSessionTransactional(session, getSessionFactory());
+		SessionHolder sessionHolder =
+				(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
 
+		boolean existingTransaction = (sessionHolder != null && sessionHolder.containsSession(session));
 		if (existingTransaction) {
 			logger.debug("Found thread-bound Session for HibernateInterceptor");
 		}
 		else {
-			TransactionSynchronizationManager.bindResource(getSessionFactory(), new SessionHolder(session));
+			if (sessionHolder != null) {
+				sessionHolder.addSession(session);
+			}
+			else {
+				TransactionSynchronizationManager.bindResource(getSessionFactory(), new SessionHolder(session));
+			}
 		}
 
 		FlushMode previousFlushMode = null;
@@ -122,8 +129,10 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 				}
 			}
 			else {
-				TransactionSynchronizationManager.unbindResource(getSessionFactory());
 				SessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, getSessionFactory());
+				if (sessionHolder == null || sessionHolder.doesNotHoldNonDefaultSession()) {
+					TransactionSynchronizationManager.unbindResource(getSessionFactory());
+				}
 			}
 		}
 	}
