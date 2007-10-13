@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,26 +16,27 @@
 
 package org.springframework.jmx.export.naming;
 
-import org.springframework.jmx.JmxTestBean;
-import org.springframework.jmx.export.metadata.AttributesJmxAttributeSource;
-import org.springframework.jmx.export.JmxTestUtils;
-import org.springframework.metadata.commons.CommonsAttributes;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.jmx.IJmxTestBean;
+import org.springframework.jmx.JmxTestBean;
+import org.springframework.jmx.export.JmxTestUtils;
+import org.springframework.jmx.export.metadata.AttributesJmxAttributeSource;
+import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.metadata.commons.CommonsAttributes;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class CommonsAttributesMetadataNamingStrategyTests extends AbstractNamingStrategyTests {
+
+	private static final String OBJECT_NAME = "spring:bean=test";
 
 	static {
 		JmxTestUtils.compileCommonsAttributesIfNecessary();
 	}
 	
-	private static final String OBJECT_NAME = "spring:bean=test";
-
 	protected ObjectNamingStrategy getStrategy() throws Exception {
 		MetadataNamingStrategy mns = new MetadataNamingStrategy();
 		mns.setAttributeSource(new AttributesJmxAttributeSource(new CommonsAttributes()));
@@ -43,15 +44,11 @@ public class CommonsAttributesMetadataNamingStrategyTests extends AbstractNaming
 	}
 
 	public void testWithJdkProxy() throws Exception {
-		ITestBean proxy = (ITestBean) ProxyFactory.getProxy(ITestBean.class, new SingletonTargetSource(new TestBean()));
-		MetadataNamingStrategy namingStrategy = new MetadataNamingStrategy();
-		try {
-			namingStrategy.getObjectName(proxy, "foo");
-			fail("Cannot use MetadataNamingStrategy with JDK proxies.");
-		} catch (IllegalArgumentException ex) {
-			 // success
-		}
+		IJmxTestBean proxy =
+				(IJmxTestBean) ProxyFactory.getProxy(IJmxTestBean.class, new SingletonTargetSource(new JmxTestBean()));
+		assertEquals(ObjectNameManager.getInstance("spring:bean=test"), getStrategy().getObjectName(proxy, "foo"));
 	}
+
 	protected Object getManagedResource() throws Exception {
 		return new JmxTestBean();
 	}

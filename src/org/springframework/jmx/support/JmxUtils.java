@@ -266,41 +266,41 @@ public abstract class JmxUtils {
 	public static boolean isMBean(Class beanClass) {
 		return (beanClass != null &&
 				(DynamicMBean.class.isAssignableFrom(beanClass) ||
-						hasMBeanInterface(beanClass) || hasMXBeanInterface(beanClass)));
+						(getMBeanInterface(beanClass) != null || getMXBeanInterface(beanClass) != null)));
 	}
 
 	/**
-	 * Return whether a Standard MBean interface exists for the given class
+	 * Return the Standard MBean interface for the given class, if any
 	 * (that is, an interface whose name matches the class name of the
 	 * given class but with suffix "MBean").
 	 * @param clazz the class to check
-	 * @return whether there is a Standard MBean interface for the given class
+	 * @return the Standard MBean interface for the given class
 	 */
-	private static boolean hasMBeanInterface(Class clazz) {
+	public static Class getMBeanInterface(Class clazz) {
 		if (clazz.getSuperclass() == null) {
-			return false;
+			return null;
 		}
 		Class[] implementedInterfaces = clazz.getInterfaces();
 		String mbeanInterfaceName = clazz.getName() + MBEAN_SUFFIX;
 		for (int x = 0; x < implementedInterfaces.length; x++) {
 			Class iface = implementedInterfaces[x];
 			if (iface.getName().equals(mbeanInterfaceName)) {
-				return true;
+				return iface;
 			}
 		}
-		return hasMBeanInterface(clazz.getSuperclass());
+		return getMBeanInterface(clazz.getSuperclass());
 	}
 
 	/**
-	 * Return whether a Java 6 MXBean interface exists for the given class
+	 * Return the Java 6 MXBean interface exists for the given class, if any
 	 * (that is, an interface whose name ends with "MXBean" and/or
 	 * carries an appropriate MXBean annotation).
 	 * @param clazz the class to check
 	 * @return whether there is an MXBean interface for the given class
 	 */
-	private static boolean hasMXBeanInterface(Class clazz) {
+	public static Class getMXBeanInterface(Class clazz) {
 		if (clazz.getSuperclass() == null) {
-			return false;
+			return null;
 		}
 		Class[] implementedInterfaces = clazz.getInterfaces();
 		for (int x = 0; x < implementedInterfaces.length; x++) {
@@ -313,10 +313,10 @@ public abstract class JmxUtils {
 				}
 			}
 			if (isMxBean) {
-				return true;
+				return iface;
 			}
 		}
-		return hasMXBeanInterface(clazz.getSuperclass());
+		return getMXBeanInterface(clazz.getSuperclass());
 	}
 
 

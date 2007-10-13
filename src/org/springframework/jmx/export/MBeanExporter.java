@@ -25,19 +25,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.management.DynamicMBean;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
+import javax.management.StandardMBean;
 import javax.management.modelmbean.ModelMBean;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.RequiredModelMBean;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -466,12 +470,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * implementation of the <code>ObjectNamingStrategy</code> interface being used.
 	 */
 	protected void registerBeans() {
-		// If no server was provided then try to find one. This is useful in an environment
-		// such as JDK 1.5, Tomcat or JBoss where there is already an MBeanServer loaded.
-		if (this.server == null) {
-			this.server = JmxUtils.locateMBeanServer();
-		}
-
 		// The beans property may be null, for example if we are relying solely on autodetection.
 		if (this.beans == null) {
 			this.beans = new HashMap();
@@ -489,7 +487,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			}
 			if (mode == AUTODETECT_MBEAN || mode == AUTODETECT_ALL) {
 				// Autodetect any beans that are already MBeans.
-				this.logger.info("Autodetecting user-defined JMX MBeans");
+				this.logger.debug("Autodetecting user-defined JMX MBeans");
 				autodetectMBeans();
 			}
 			// Allow the assembler a chance to vote for bean inclusion.
@@ -499,21 +497,28 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			}
 		}
 
-		try {
-			for (Iterator it = this.beans.entrySet().iterator(); it.hasNext();) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String beanKey = (String) entry.getKey();
-				Object value = entry.getValue();
-				registerBeanNameOrInstance(value, beanKey);
+		if (!this.beans.isEmpty()) {
+			// If no server was provided then try to find one. This is useful in an environment
+			// such as JDK 1.5, Tomcat or JBoss where there is already an MBeanServer loaded.
+			if (this.server == null) {
+				this.server = JmxUtils.locateMBeanServer();
 			}
+			try {
+				for (Iterator it = this.beans.entrySet().iterator(); it.hasNext();) {
+					Map.Entry entry = (Map.Entry) it.next();
+					String beanKey = (String) entry.getKey();
+					Object value = entry.getValue();
+					registerBeanNameOrInstance(value, beanKey);
+				}
 
-			// All MBeans are now registered successfully - go ahead and register the notification listeners.
-			registerNotificationListeners();
-		}
-		catch (RuntimeException ex) {
-			// Unregister beans already registered by this exporter.
-			unregisterBeans();
-			throw ex;
+				// All MBeans are now registered successfully - go ahead and register the notification listeners.
+				registerNotificationListeners();
+			}
+			catch (RuntimeException ex) {
+				// Unregister beans already registered by this exporter.
+				unregisterBeans();
+				throw ex;
+			}
 		}
 	}
 
@@ -646,12 +651,22 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	private ObjectName registerBeanInstance(Object bean, String beanKey) throws JMException {
 		ObjectName objectName = getObjectName(bean, beanKey);
+		Object mbeanToExpose = null;
 		if (isMBean(bean.getClass())) {
+			mbeanToExpose = bean;
+		}
+		else {
+			DynamicMBean adaptedBean = adaptMBeanIfPossible(bean);
+			if (adaptedBean != null) {
+				mbeanToExpose = adaptedBean;
+			}
+		}
+		if (mbeanToExpose != null) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Located MBean '" + beanKey + "': registering with JMX server as MBean [" +
 						objectName + "]");
 			}
-			doRegister(bean, objectName);
+			doRegister(mbeanToExpose, objectName);
 		}
 		else {
 			if (logger.isInfoEnabled()) {
@@ -748,6 +763,39 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	protected boolean isMBean(Class beanClass) {
 		return JmxUtils.isMBean(beanClass);
+	}
+
+	/**
+	 * Build an adapted MBean for the given bean instance, if possible.
+	 * <p>The default implementation builds a JMX 1.2 StandardMBean
+	 * for the target's MBean/MXBean interface in case of an AOP proxy,
+	 * delegating the interface's management operations to the proxy.
+	 * @param bean the original bean instance
+	 * @return the adapted MBean, or <code>null</code> if not possible
+	 */
+	protected DynamicMBean adaptMBeanIfPossible(Object bean) throws JMException {
+		Class targetClass = AopUtils.getTargetClass(bean);
+		if (targetClass != bean.getClass()) {
+			Class ifc = JmxUtils.getMXBeanInterface(targetClass);
+			if (ifc != null) {
+				if (!(ifc.isInstance(bean))) {
+					throw new NotCompliantMBeanException("Managed bean [" + bean +
+							"] has a target class with an MXBean interface but does not exposed it in the proxy");
+				}
+				return new StandardMBean(bean, ifc, true);
+			}
+			else {
+				ifc = JmxUtils.getMBeanInterface(targetClass);
+				if (ifc != null) {
+					if (!(ifc.isInstance(bean))) {
+						throw new NotCompliantMBeanException("Managed bean [" + bean +
+								"] has a target class with an MXBean interface but does not exposed it in the proxy");
+					}
+					return new StandardMBean(bean, ifc);
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

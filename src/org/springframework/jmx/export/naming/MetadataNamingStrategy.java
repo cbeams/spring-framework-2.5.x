@@ -23,7 +23,6 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.metadata.ManagedResource;
-import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -78,6 +77,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 	 * when reading the source level metadata.
 	 */
 	public void setAttributeSource(JmxAttributeSource attributeSource) {
+		Assert.notNull(attributeSource, "JmxAttributeSource must not be null");
 		this.attributeSource = attributeSource;
 	}
 
@@ -93,12 +93,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 	 * with the managed resource's <code>Class</code>.
 	 */
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
-		if (AopUtils.isJdkDynamicProxy(managedBean)) {
-			throw new IllegalArgumentException("MetadataNamingStrategy does not support JDK dynamic proxies - " +
-					"export the target beans directly or use CGLIB proxies instead");
-		}
-
-		Class managedClass = JmxUtils.getClassToExpose(managedBean);
+		Class managedClass = AopUtils.getTargetClass(managedBean);
 		ManagedResource mr = this.attributeSource.getManagedResource(managedClass);
 
 		// Check that an object name has been specified.
