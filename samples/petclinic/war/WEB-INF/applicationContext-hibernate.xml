@@ -77,7 +77,7 @@
 		Exporter that exposes Hibernate statistics service via JMX. Autodetects the
 		service MBean, using its bean name as JMX object name.
 	-->
-	<bean class="org.springframework.jmx.export.MBeanExporter"/>
+	<context:mbean-export/>
 
 	<!-- PetClinic's central data access object: Hibernate implementation -->
 	<bean id="clinic" class="org.springframework.samples.petclinic.hibernate.HibernateClinic"/>
