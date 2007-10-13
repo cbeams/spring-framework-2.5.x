@@ -12,6 +12,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -32,16 +33,18 @@ import org.springframework.samples.petclinic.util.EntityUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Class for SimpleJDBC implementation of the Clinic interface.
- *
- * This class uses Java 5 features and the SimpleJdbcTemplate plus
- * SimpleJdbcInsert.  It also to take advantage of classes like 
- * BeanPropertySqlParameterSource and ParameterizedBeanPropertyRowMapper 
- * that provide automatic mapping between JabaBean properties and JDBC 
- * parameters or query reults.
- * 
- * This is a rewrite of the  AbstractJdbcClinic which was the base class 
- * for JDBC implementations of the Clinic interface for Spring 2.0.
+ * A simple JDBC-based implementation of the {@link Clinic} interface.
+ * <p>
+ * This class uses Java 5 language features and the {@link SimpleJdbcTemplate}
+ * plus {@link SimpleJdbcInsert}. It also takes advantage of classes like
+ * {@link BeanPropertySqlParameterSource} and
+ * {@link ParameterizedBeanPropertyRowMapper} which provide automatic mapping
+ * between JavaBean properties and JDBC parameters or query results.
+ * </p>
+ * <p>
+ * SimpleJdbcClinic is a rewrite of the AbstractJdbcClinic which was the base
+ * class for JDBC implementations of the Clinic interface for Spring 2.0.
+ * </p>
  *
  * @author Ken Krebs
  * @author Juergen Hoeller
@@ -56,17 +59,17 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private SimpleJdbcTemplate simpleJdbcTemplate;
-	
+
 	private SimpleJdbcInsert insertOwner;
 	private SimpleJdbcInsert insertPet;
 	private SimpleJdbcInsert insertVisit;
-	
+
 	private final List<Vet> vets = new ArrayList<Vet>();
 
 	@Resource(name = "dataSource")
 	public void init(DataSource dataSource) {
 		this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
-		
+
 		this.insertOwner = new SimpleJdbcInsert(dataSource)
 			.withTableName("owners")
 			.usingGeneratedKeyColumns("id");
@@ -76,7 +79,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 		this.insertVisit = new SimpleJdbcInsert(dataSource)
 			.withTableName("visits")
 			.usingGeneratedKeyColumns("id");
-	}	
+	}
 
 
 	@Transactional(readOnly = true)
@@ -87,18 +90,18 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 			// Retrieve the list of all vets.
 			this.vets.clear();
 			this.vets.addAll(this.simpleJdbcTemplate.query(
-					"SELECT id, first_name, last_name FROM vets ORDER BY last_name,first_name", 
+					"SELECT id, first_name, last_name FROM vets ORDER BY last_name,first_name",
 					ParameterizedBeanPropertyRowMapper.newInstance(Vet.class)));
 
 			// Retrieve the list of all possible specialties.
 			final List<Specialty> specialties = this.simpleJdbcTemplate.query(
-					"SELECT id, name FROM specialties", 
+					"SELECT id, name FROM specialties",
 					ParameterizedBeanPropertyRowMapper.newInstance(Specialty.class));
 
 			// Build each vet's list of specialties.
 			for (Vet vet : this.vets) {
 				final List<Integer> vetSpecialtiesIds = this.simpleJdbcTemplate.query(
-						"SELECT specialty_id FROM vet_specialties WHERE vet_id=?", 
+						"SELECT specialty_id FROM vet_specialties WHERE vet_id=?",
 						new ParameterizedRowMapper<Integer>() {
 							public Integer mapRow(ResultSet rs, int row) throws SQLException {
 								return Integer.valueOf(rs.getInt(1));
@@ -127,11 +130,16 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	@Transactional(readOnly = true)
 	public Collection<PetType> getPetTypes() throws DataAccessException {
 		return this.simpleJdbcTemplate.query(
-				"SELECT id, name FROM types ORDER BY name", 
+				"SELECT id, name FROM types ORDER BY name",
 				ParameterizedBeanPropertyRowMapper.newInstance(PetType.class));
 	}
 
-	/** Method loads owners plus pets and visits if not already loaded */
+	/**
+	 * Loads {@link Owner Owners} from the data store by last name, returning
+	 * all owners whose last name <i>starts</i> with the given name; also loads
+	 * the {@link Pet Pets} and {@link Visit Visits} for the corresponding
+	 * owners, if not already loaded.
+	 */
 	@Transactional(readOnly = true)
 	public Collection<Owner> findOwners(String lastName) throws DataAccessException {
 		List<Owner> owners = this.simpleJdbcTemplate.query(
@@ -142,7 +150,11 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 		return owners;
 	}
 
-	/** Method loads an owner plus pets and visits if not already loaded */
+	/**
+	 * Loads the {@link Owner} with the supplied <code>id</code>; also loads
+	 * the {@link Pet Pets} and {@link Visit Visits} for the corresponding
+	 * owner, if not already loaded.
+	 */
 	@Transactional(readOnly = true)
 	public Owner loadOwner(int id) throws DataAccessException {
 		Owner owner;
@@ -214,11 +226,11 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 		}
 	}
 
-	// END of Clinic implementation section *******************************
+	// END of Clinic implementation section ************************************
 
 	/**
-	 * Method to create a MapSqlParameterSource based on data values
-	 * from a Pet instance.
+	 * Creates a {@link MapSqlParameterSource} based on data values from the
+	 * supplied {@link Pet} instance.
 	 */
 	private MapSqlParameterSource createPetParameterSource(Pet pet) {
 		return new MapSqlParameterSource()
@@ -230,8 +242,8 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	}
 
 	/**
-	 * Method to create a MapSqlParameterSource based on data values
-	 * from a Visit instance.
+	 * Creates a {@link MapSqlParameterSource} based on data values from the
+	 * supplied {@link Visit} instance.
 	 */
 	private MapSqlParameterSource createVisitParameterSource(Visit visit) {
 		return new MapSqlParameterSource()
@@ -242,12 +254,12 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	}
 
 	/**
-	 * Method to retrieve the <code>Visit</code> data for a <code>Pet</code>.
+	 * Loads the {@link Visit} data for the supplied {@link Pet}.
 	 */
 	private void loadVisits(JdbcPet pet) {
 		pet.setType(EntityUtils.getById(getPetTypes(), PetType.class, pet.getTypeId()));
 		final List<Visit> visits = this.simpleJdbcTemplate.query(
-				"SELECT id, visit_date, description FROM visits WHERE pet_id=?", 
+				"SELECT id, visit_date, description FROM visits WHERE pet_id=?",
 				new ParameterizedRowMapper<Visit>() {
 					public Visit mapRow(ResultSet rs, int row)
 							throws SQLException {
@@ -257,23 +269,23 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 						visit.setDescription(rs.getString("description"));
 						return visit;
 					}
-					
-				}, 
-				pet.getId().intValue()); 
+
+				},
+				pet.getId().intValue());
 		for (Visit visit : visits) {
 			pet.addVisit(visit);
 		}
 	}
 
 	/**
-	 * Method to retrieve the <code>Pet</code> and <code>Visit</code> data
-	 * for an <code>Owner</code>.
+	 * Loads the {@link Pet} and {@link Visit} data for the supplied
+	 * {@link Owner}.
 	 */
 	private void loadPetsAndVisits(final Owner owner) {
 		final List<JdbcPet> pets = this.simpleJdbcTemplate.query(
 				"SELECT id, name, birth_date, type_id, owner_id FROM pets WHERE owner_id=?",
 				new JdbcPetRowMapper(),
-				owner.getId().intValue()); 
+				owner.getId().intValue());
 		for (JdbcPet pet : pets) {
 			owner.addPet(pet);
 			loadVisits(pet);
@@ -281,10 +293,11 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	}
 
 	/**
-	 * Method to retrieve a <code>List</code> of <code>Owner</code>s and
-	 * their <code>Pet</code> and <code>Visit</code> data.
+	 * Loads the {@link Pet} and {@link Visit} data for the supplied
+	 * {@link List} of {@link Owner Owners}.
 	 *
-	 * @param owners <code>List</code>.
+	 * @param owners the list of owners for whom the pet and visit data should
+	 *        be loaded
 	 * @see #loadPetsAndVisits(Owner)
 	 */
 	private void loadOwnersPetsAndVisits(List<Owner> owners) {
@@ -294,8 +307,9 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	}
 
 	/**
-	 * ParameterizedRowMapper implementation mapping data from the ResultSet to the
-	 * corresponding properties of the JdbcPet class. 
+	 * {@link ParameterizedRowMapper} implementation mapping data from a
+	 * {@link ResultSet} to the corresponding properties of the {@link JdbcPet}
+	 * class.
 	 */
 	private class JdbcPetRowMapper implements ParameterizedRowMapper<JdbcPet> {
 
@@ -308,7 +322,6 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 			pet.setOwnerId(rs.getInt("owner_id"));
 			return pet;
 		}
-		
 	}
-	
+
 }
