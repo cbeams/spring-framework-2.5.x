@@ -27,8 +27,7 @@ import org.springframework.jmx.export.naming.MetadataNamingStrategy;
  *
  * <p>Sets a {@link MetadataNamingStrategy} and a {@link MetadataMBeanInfoAssembler}
  * with an {@link AnnotationJmxAttributeSource}, and activates the
- * {@link #AUTODETECT_ASSEMBLER} mode by default (can be upgraded to
- * {@link #AUTODETECT_ALL} if standard MBeans should be detected and exposed as well).
+ * {@link #AUTODETECT_ALL} mode by default.
  *
  * @author Juergen Hoeller
  * @since 2.5
