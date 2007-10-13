@@ -82,7 +82,8 @@ public interface SimpleJdbcInsertOperations {
 
 	/**
 	 * Execute the insert using the values passed in and return the generated key.  This requires that
-	 * the name of the columns with auto generated keys have been specified.
+	 * the name of the columns with auto generated keys have been specified. This method will always
+	 * return a key or throw an exception if a key was not returned.
 	 * @param args Map containing column names and corresponding value
 	 * @return the generated key value
 	 */
@@ -90,15 +91,17 @@ public interface SimpleJdbcInsertOperations {
 
 	/**
 	 * Execute the insert using the values passed in and return the generated key.  This requires that
-	 * the name of the columns with auto generated keys have been specified.
+	 * the name of the columns with auto generated keys have been specified. This method will always
+	 * return a key or throw an exception if a key was not returned.
 	 * @param parameterSource SqlParameterSource containing values to use for insert
-	 * @return the generated key value
+	 * @return the generated key value.
 	 */
 	Number executeAndReturnKey(SqlParameterSource parameterSource);
 
 	/**
 	 * Execute the insert using the values passed in and return the generated keys.  This requires that
-	 * the name of the columns with auto generated keys have been specified.
+	 * the name of the columns with auto generated keys have been specified. This method will always return
+	 * a KeyHolder but the caller must verify that it actually contains the generated keys.
 	 * @param args Map containing column names and corresponding value
 	 * @return the KeyHolder containing all generated keys
 	 */
@@ -106,7 +109,8 @@ public interface SimpleJdbcInsertOperations {
 
 	/**
 	 * Execute the insert using the values passed in and return the generated keys.  This requires that
-	 * the name of the columns with auto generated keys have been specified.
+	 * the name of the columns with auto generated keys have been specified. This method will always return
+	 * a KeyHolder but the caller must verify that it actually contains the generated keys.
 	 * @param parameterSource SqlParameterSource containing values to use for insert
 	 * @return the KeyHolder containing all generated keys
 	 */

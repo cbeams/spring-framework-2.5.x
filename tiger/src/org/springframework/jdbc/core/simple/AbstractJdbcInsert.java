@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -398,11 +399,12 @@ public abstract class AbstractJdbcInsert {
 	 */
 	private Number executeInsertAndReturnKeyInternal(final List<Object> values) {
 		KeyHolder kh = executeInsertAndReturnKeyHolderInternal(values);
-		if (kh != null) {
+		if (kh != null && kh.getKey() != null) {
 			return kh.getKey();
 		}
 		else {
-			return null;
+			throw new DataIntegrityViolationException("Unable to retreive the generated key for the insert: " +
+					getInsertString());
 		}
 	}
 
