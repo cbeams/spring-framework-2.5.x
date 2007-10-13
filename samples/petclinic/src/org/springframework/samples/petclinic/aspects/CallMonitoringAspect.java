@@ -1,8 +1,12 @@
-package org.springframework.samples.petclinic.jmx;
+package org.springframework.samples.petclinic.aspects;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.util.StopWatch;
 
 /**
@@ -11,9 +15,11 @@ import org.springframework.util.StopWatch;
  * 
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @since 1.2
+ * @since 2.5
  */
-public class CallMonitoringInterceptor implements CallMonitor, MethodInterceptor {
+@ManagedResource("petclinic:type=CallMonitor")
+@Aspect
+public class CallMonitoringAspect {
 
 	private boolean isEnabled = true;
 
@@ -22,35 +28,41 @@ public class CallMonitoringInterceptor implements CallMonitor, MethodInterceptor
 	private long accumulatedCallTime = 0;
 
 
+	@ManagedAttribute
 	public void setEnabled(boolean enabled) {
 		isEnabled = enabled;
 	}
 
+	@ManagedAttribute
 	public boolean isEnabled() {
 		return isEnabled;
 	}
 
+	@ManagedOperation
 	public void reset() {
 		this.callCount = 0;
 		this.accumulatedCallTime = 0;
 	}
 
+	@ManagedAttribute
 	public int getCallCount() {
 		return callCount;
 	}
 
+	@ManagedAttribute
 	public long getCallTime() {
 		return (this.callCount > 0 ? this.accumulatedCallTime / this.callCount : 0);
 	}
 
 
-	public Object invoke(MethodInvocation invocation) throws Throwable {
+	@Around("within(@org.springframework.stereotype.Service *)")
+	public Object invoke(ProceedingJoinPoint joinPoint) throws Throwable {
 		if (this.isEnabled) {
-			StopWatch sw = new StopWatch(invocation.getMethod().getName());
+			StopWatch sw = new StopWatch(joinPoint.toShortString());
 
 			sw.start("invoke");
 			try {
-				return invocation.proceed();
+				return joinPoint.proceed();
 			}
 			finally {
 				sw.stop();
@@ -62,7 +74,7 @@ public class CallMonitoringInterceptor implements CallMonitor, MethodInterceptor
 		}
 
 		else {
-			return invocation.proceed();
+			return joinPoint.proceed();
 		}
 	}
 

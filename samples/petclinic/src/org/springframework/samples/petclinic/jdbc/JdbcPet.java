@@ -15,6 +15,7 @@ public class JdbcPet extends Pet {
 
 	private int ownerId;
 
+
 	public void setTypeId(int typeId) {
 		this.typeId = typeId;
 	}
@@ -28,7 +29,7 @@ public class JdbcPet extends Pet {
 	}
 
 	public int getOwnerId() {
-		return ownerId;
+		return this.ownerId;
 	}
 
 }

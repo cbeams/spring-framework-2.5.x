@@ -5,10 +5,10 @@ package org.springframework.samples.petclinic.jdbc;
  * To be exposed for management via JMX.
  * 
  * @author Rob Harrop
- * @since 1.2
+ * @author Juergen Hoeller
  * @see SimpleJdbcClinic
  */
-public interface CachingClinic {
+public interface SimpleJdbcClinicMBean {
 
 	/**
 	 * Refresh the cache of Vets that the Clinic is holding.

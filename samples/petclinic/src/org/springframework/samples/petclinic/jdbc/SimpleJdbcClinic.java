@@ -1,4 +1,3 @@
-
 package org.springframework.samples.petclinic.jdbc;
 
 import java.sql.ResultSet;
@@ -7,12 +6,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -21,6 +20,8 @@ import org.springframework.jdbc.core.simple.ParameterizedBeanPropertyRowMapper;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
@@ -30,10 +31,13 @@ import org.springframework.samples.petclinic.Specialty;
 import org.springframework.samples.petclinic.Vet;
 import org.springframework.samples.petclinic.Visit;
 import org.springframework.samples.petclinic.util.EntityUtils;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * <p>
  * A simple JDBC-based implementation of the {@link Clinic} interface.
+ * </p>
  * <p>
  * This class uses Java 5 language features and the {@link SimpleJdbcTemplate}
  * plus {@link SimpleJdbcInsert}. It also takes advantage of classes like
@@ -53,8 +57,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Thomas Risberg
  * @author Mark Fisher
  */
-@Transactional
-public class SimpleJdbcClinic implements Clinic, CachingClinic {
+@Service
+@ManagedResource("petclinic:type=Clinic")
+public class SimpleJdbcClinic implements Clinic, SimpleJdbcClinicMBean {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -66,7 +71,8 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 
 	private final List<Vet> vets = new ArrayList<Vet>();
 
-	@Resource(name = "dataSource")
+
+	@Autowired
 	public void init(DataSource dataSource) {
 		this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
 
@@ -82,6 +88,11 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	}
 
 
+	/**
+	 * Refresh the cache of Vets that the Clinic is holding.
+	 * @see org.springframework.samples.petclinic.Clinic#getVets()
+	 */
+	@ManagedOperation
 	@Transactional(readOnly = true)
 	public void refreshVetsCache() throws DataAccessException {
 		synchronized (this.vets) {
@@ -114,6 +125,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 			}
 		}
 	}
+
 
 	// START of Clinic implementation section *******************************
 
@@ -187,6 +199,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 		return pet;
 	}
 
+	@Transactional
 	public void storeOwner(Owner owner) throws DataAccessException {
 		if (owner.isNew()) {
 			Number newKey = this.insertOwner.executeAndReturnKey(
@@ -201,6 +214,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 		}
 	}
 
+	@Transactional
 	public void storePet(Pet pet) throws DataAccessException {
 		if (pet.isNew()) {
 			Number newKey = this.insertPet.executeAndReturnKey(
@@ -215,6 +229,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 		}
 	}
 
+	@Transactional
 	public void storeVisit(Visit visit) throws DataAccessException {
 		if (visit.isNew()) {
 			Number newKey = this.insertVisit.executeAndReturnKey(
@@ -227,6 +242,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	}
 
 	// END of Clinic implementation section ************************************
+
 
 	/**
 	 * Creates a {@link MapSqlParameterSource} based on data values from the
@@ -296,8 +312,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 	 * Loads the {@link Pet} and {@link Visit} data for the supplied
 	 * {@link List} of {@link Owner Owners}.
 	 *
-	 * @param owners the list of owners for whom the pet and visit data should
-	 *        be loaded
+	 * @param owners the list of owners for whom the pet and visit data should be loaded
 	 * @see #loadPetsAndVisits(Owner)
 	 */
 	private void loadOwnersPetsAndVisits(List<Owner> owners) {
@@ -308,8 +323,7 @@ public class SimpleJdbcClinic implements Clinic, CachingClinic {
 
 	/**
 	 * {@link ParameterizedRowMapper} implementation mapping data from a
-	 * {@link ResultSet} to the corresponding properties of the {@link JdbcPet}
-	 * class.
+	 * {@link ResultSet} to the corresponding properties of the {@link JdbcPet} class.
 	 */
 	private class JdbcPetRowMapper implements ParameterizedRowMapper<JdbcPet> {
 
