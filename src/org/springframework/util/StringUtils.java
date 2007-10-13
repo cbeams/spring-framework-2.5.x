@@ -939,6 +939,7 @@ public abstract class StringUtils {
 	 * @param delim the delimiter to use (probably a ",")
 	 * @param prefix the String to start each element with
 	 * @param suffix the String to end each element with
+	 * @return the delimited String
 	 */
 	public static String collectionToDelimitedString(Collection coll, String delim, String prefix, String suffix) {
 		if (CollectionUtils.isEmpty(coll)) {
@@ -960,6 +961,7 @@ public abstract class StringUtils {
 	 * String. E.g. useful for <code>toString()</code> implementations.
 	 * @param coll the Collection to display
 	 * @param delim the delimiter to use (probably a ",")
+	 * @return the delimited String
 	 */
 	public static String collectionToDelimitedString(Collection coll, String delim) {
 		return collectionToDelimitedString(coll, delim, "", "");
@@ -969,6 +971,7 @@ public abstract class StringUtils {
 	 * Convenience method to return a Collection as a CSV String.
 	 * E.g. useful for <code>toString()</code> implementations.
 	 * @param coll the Collection to display
+	 * @return the delimited String
 	 */
 	public static String collectionToCommaDelimitedString(Collection coll) {
 		return collectionToDelimitedString(coll, ",");
@@ -979,6 +982,7 @@ public abstract class StringUtils {
 	 * String. E.g. useful for <code>toString()</code> implementations.
 	 * @param arr the array to display
 	 * @param delim the delimiter to use (probably a ",")
+	 * @return the delimited String
 	 */
 	public static String arrayToDelimitedString(Object[] arr, String delim) {
 		if (ObjectUtils.isEmpty(arr)) {
@@ -998,6 +1002,7 @@ public abstract class StringUtils {
 	 * Convenience method to return a String array as a CSV String.
 	 * E.g. useful for <code>toString()</code> implementations.
 	 * @param arr the array to display
+	 * @return the delimited String
 	 */
 	public static String arrayToCommaDelimitedString(Object[] arr) {
 		return arrayToDelimitedString(arr, ",");
