@@ -34,13 +34,14 @@ import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
 import org.springframework.jmx.export.metadata.ManagedResource;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Implementation of <code>MBeanInfoAssembler</code> that reads the
- * management interface information from source level metadata.
+ * Implementation of the {@link org.springframework.jmx.export.assembler.MBeanInfoAssembler}
+ * interface that reads the management interface information from source level metadata.
  *
- * <p>Uses the <code>JmxAttributeSource</code> strategy interface, so that
+ * <p>Uses the {@link JmxAttributeSource} strategy interface, so that
  * metadata can be read using any supported implementation. Out of the box,
  * two strategies are included:
  * <ul>
@@ -62,18 +63,37 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 
 
 	/**
+	 * Create a new <code>MetadataMBeanInfoAssembler<code> which needs to be
+	 * configured through the {@link #setAttributeSource} method.
+	 */
+	public MetadataMBeanInfoAssembler() {
+	}
+
+	/**
+	 * Create a new <code>MetadataMBeanInfoAssembler<code> for the given
+	 * <code>JmxAttributeSource</code>.
+	 * @param attributeSource the JmxAttributeSource to use
+	 */
+	public MetadataMBeanInfoAssembler(JmxAttributeSource attributeSource) {
+		Assert.notNull(attributeSource, "JmxAttributeSource must not be null");
+		this.attributeSource = attributeSource;
+	}
+
+
+	/**
 	 * Set the <code>JmxAttributeSource</code> implementation to use for
 	 * reading the metadata from the bean class.
 	 * @see org.springframework.jmx.export.metadata.AttributesJmxAttributeSource
 	 * @see org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource
 	 */
 	public void setAttributeSource(JmxAttributeSource attributeSource) {
+		Assert.notNull(attributeSource, "JmxAttributeSource must not be null");
 		this.attributeSource = attributeSource;
 	}
 
 	public void afterPropertiesSet() {
 		if (this.attributeSource == null) {
-			throw new IllegalArgumentException("'attributeSource' is required");
+			throw new IllegalArgumentException("Property 'attributeSource' is required");
 		}
 	}
 

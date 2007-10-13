@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.annotation.AnnotationBeanUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.metadata.ManagedAttribute;
@@ -29,7 +30,7 @@ import org.springframework.jmx.export.metadata.ManagedNotification;
 import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
 import org.springframework.jmx.export.metadata.ManagedResource;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Implementation of the <code>JmxAttributeSource</code> interface that
@@ -50,12 +51,16 @@ import org.springframework.core.annotation.AnnotationUtils;
 public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 
 	public ManagedResource getManagedResource(Class beanClass) throws InvalidMetadataException {
-		Annotation ann = beanClass.getAnnotation(org.springframework.jmx.export.annotation.ManagedResource.class);
+		org.springframework.jmx.export.annotation.ManagedResource ann =
+				((Class<?>) beanClass).getAnnotation(org.springframework.jmx.export.annotation.ManagedResource.class);
 		if (ann == null) {
 			return null;
 		}
 		ManagedResource managedResource = new ManagedResource();
 		AnnotationBeanUtils.copyPropertiesToBean(ann, managedResource);
+		if (!"".equals(ann.value()) && !StringUtils.hasLength(managedResource.getObjectName())) {
+			managedResource.setObjectName(ann.value());
+		}
 		return managedResource;
 	}
 

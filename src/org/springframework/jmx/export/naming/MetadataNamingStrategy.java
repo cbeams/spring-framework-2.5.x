@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +19,58 @@ package org.springframework.jmx.export.naming;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.export.metadata.ManagedResource;
-import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.jmx.support.JmxUtils;
+import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.aop.support.AopUtils;
 
 /**
- * An implementation of the <code>ObjectNamingStrategy</code> interface
+ * An implementation of the {@link ObjectNamingStrategy} interface
  * that reads the <code>ObjectName</code> from the source-level metadata.
+ * Falls back to the bean key (bean name) if no <code>ObjectName</code>
+ * can be found in source-level metadata.
+ *
+ * <p>Uses the {@link JmxAttributeSource} strategy interface, so that
+ * metadata can be read using any supported implementation. Out of the box,
+ * two strategies are included:
+ * <ul>
+ * <li><code>AttributesJmxAttributeSource</code>, for Commons Attributes
+ * <li><code>AnnotationJmxAttributeSource</code>, for JDK 1.5+ annotations
+ * </ul>
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 1.2
  * @see ObjectNamingStrategy
  */
-public class MetadataNamingStrategy implements ObjectNamingStrategy {
+public class MetadataNamingStrategy implements ObjectNamingStrategy, InitializingBean {
 
 	/**
 	 * The <code>JmxAttributeSource</code> implementation to use for reading metadata.
 	 */
 	private JmxAttributeSource attributeSource;
+
+
+	/**
+	 * Create a new <code>MetadataNamingStrategy<code> which needs to be
+	 * configured through the {@link #setAttributeSource} method.
+	 */
+	public MetadataNamingStrategy() {
+	}
+
+	/**
+	 * Create a new <code>MetadataNamingStrategy<code> for the given
+	 * <code>JmxAttributeSource</code>.
+	 * @param attributeSource the JmxAttributeSource to use
+	 */
+	public MetadataNamingStrategy(JmxAttributeSource attributeSource) {
+		Assert.notNull(attributeSource, "JmxAttributeSource must not be null");
+		this.attributeSource = attributeSource;
+	}
 
 
 	/**
@@ -50,6 +81,12 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
 		this.attributeSource = attributeSource;
 	}
 
+	public void afterPropertiesSet() {
+		if (this.attributeSource == null) {
+			throw new IllegalArgumentException("Property 'attributeSource' is required");
+		}
+	}
+
 
 	/**
 	 * Reads the <code>ObjectName</code> from the source level metadata associated
@@ -57,25 +94,20 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
 	 */
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
 		if (AopUtils.isJdkDynamicProxy(managedBean)) {
-			throw new IllegalArgumentException(
-							"MetadataNamingStrategy does not support JDK dynamic proxies - " +
-											"export the target beans directly or use CGLIB proxies instead");
+			throw new IllegalArgumentException("MetadataNamingStrategy does not support JDK dynamic proxies - " +
+					"export the target beans directly or use CGLIB proxies instead");
 		}
+
 		Class managedClass = JmxUtils.getClassToExpose(managedBean);
 		ManagedResource mr = this.attributeSource.getManagedResource(managedClass);
 
-		// Check that the managed resource attribute has been specified.
-		if (mr == null) {
-			throw new MalformedObjectNameException("Your bean class [" + managedBean.getClass().getName() +
-					"] must be marked with a valid ManagedResource attribute when using MetadataNamingStrategy");
-		}
-
 		// Check that an object name has been specified.
-		String objectName = mr.getObjectName();
-
-		if (!StringUtils.hasText(objectName)) {
-			throw new MalformedObjectNameException(
-					"You must specify an ObjectName for class [" + managedBean.getClass().getName() + "]");
+		String objectName = null;
+		if (mr != null && StringUtils.hasText(mr.getObjectName())) {
+			objectName = mr.getObjectName();
+		}
+		else {
+			objectName = beanKey;
 		}
 
 		// Now try to parse the name.

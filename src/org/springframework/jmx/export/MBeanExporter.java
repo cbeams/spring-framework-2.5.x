@@ -141,7 +141,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private Map beans;
 
 	/** The autodetect mode to use for this MBeanExporter */
-	private int autodetectMode = AUTODETECT_NONE;
+	private Integer autodetectMode;
 
 	/** Indicates whether Spring should modify generated ObjectNames */
 	private boolean ensureUniqueRuntimeObjectNames = true;
@@ -201,10 +201,9 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @see #setAssembler
 	 * @see AutodetectCapableMBeanInfoAssembler
 	 * @see #isMBean
-	 * @deprecated in favor of {@link #setAutodetectModeName(String)}
 	 */
 	public void setAutodetect(boolean autodetect) {
-		this.autodetectMode = (autodetect ? AUTODETECT_ALL : AUTODETECT_NONE);
+		this.autodetectMode = new Integer(autodetect ? AUTODETECT_ALL : AUTODETECT_NONE);
 	}
 
 	/**
@@ -221,7 +220,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		if (!constants.getValues(CONSTANT_PREFIX_AUTODETECT).contains(new Integer(autodetectMode))) {
 			throw new IllegalArgumentException("Only values of autodetect constants allowed");
 		}
-		this.autodetectMode = autodetectMode;
+		this.autodetectMode = new Integer(autodetectMode);
 	}
 
 	/**
@@ -238,7 +237,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		if (constantName == null || !constantName.startsWith(CONSTANT_PREFIX_AUTODETECT)) {
 			throw new IllegalArgumentException("Only autodetect constants allowed");
 		}
-		this.autodetectMode = constants.asNumber(constantName).intValue();
+		this.autodetectMode = (Integer) constants.asNumber(constantName);
 	}
 
 	/**
@@ -415,17 +414,18 @@ public class MBeanExporter extends MBeanRegistrationSupport
 
 	public ObjectName registerManagedResource(Object managedResource) throws MBeanExportException {
 		Assert.notNull(managedResource, "Managed resource must not be null");
+		ObjectName objectName = null;
 		try {
-			ObjectName objectName = getObjectName(managedResource, null);
+			objectName = getObjectName(managedResource, null);
 			if (this.ensureUniqueRuntimeObjectNames) {
 				objectName = JmxUtils.appendIdentityToObjectName(objectName, managedResource);
 			}
-			registerManagedResource(managedResource, objectName);
-			return objectName;
 		}
-		catch (MalformedObjectNameException ex) {
+		catch (Exception ex) {
 			throw new MBeanExportException("Unable to generate ObjectName for MBean [" + managedResource + "]", ex);
 		}
+		registerManagedResource(managedResource, objectName);
+		return objectName;
 	}
 
 	public void registerManagedResource(Object managedResource, ObjectName objectName) throws MBeanExportException {
@@ -466,33 +466,34 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * implementation of the <code>ObjectNamingStrategy</code> interface being used.
 	 */
 	protected void registerBeans() {
-		// If no server was provided then try to find one.
-		// This is useful in an environment such as JDK 1.5, Tomcat
-		// or JBoss where there is already an MBeanServer loaded.
+		// If no server was provided then try to find one. This is useful in an environment
+		// such as JDK 1.5, Tomcat or JBoss where there is already an MBeanServer loaded.
 		if (this.server == null) {
 			this.server = JmxUtils.locateMBeanServer();
 		}
 
-		// The beans property may be <code>null</code>, for example
-		// if we are relying solely on autodetection.
+		// The beans property may be null, for example if we are relying solely on autodetection.
 		if (this.beans == null) {
 			this.beans = new HashMap();
+			// Use AUTODETECT_ALL as default in no beans specified explicitly.
+			if (this.autodetectMode == null) {
+				this.autodetectMode = new Integer(AUTODETECT_ALL);
+			}
 		}
 
 		// Perform autodetection, if desired.
-		if (this.autodetectMode != AUTODETECT_NONE) {
+		int mode = (this.autodetectMode != null ? this.autodetectMode.intValue() : AUTODETECT_NONE);
+		if (mode != AUTODETECT_NONE) {
 			if (this.beanFactory == null) {
 				throw new MBeanExportException("Cannot autodetect MBeans if not running in a BeanFactory");
 			}
-
-			if (isAutodetectModeEnabled(AUTODETECT_MBEAN)) {
+			if (mode == AUTODETECT_MBEAN || mode == AUTODETECT_ALL) {
 				// Autodetect any beans that are already MBeans.
 				this.logger.info("Autodetecting user-defined JMX MBeans");
 				autodetectMBeans();
 			}
-
 			// Allow the assembler a chance to vote for bean inclusion.
-			if (isAutodetectModeEnabled(AUTODETECT_ASSEMBLER) &&
+			if ((mode == AUTODETECT_ASSEMBLER || mode == AUTODETECT_ALL) &&
 					this.assembler instanceof AutodetectCapableMBeanInfoAssembler) {
 				autodetectBeans((AutodetectCapableMBeanInfoAssembler) this.assembler);
 			}
@@ -594,7 +595,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 				return registerBeanInstance(mapValue, beanKey);
 			}
 		}
-		catch (JMException ex) {
+		catch (Exception ex) {
 			throw new UnableToRegisterMBeanException(
 					"Unable to register MBean [" + mapValue + "] with key '" + beanKey + "'", ex);
 		}
@@ -646,15 +647,15 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private ObjectName registerBeanInstance(Object bean, String beanKey) throws JMException {
 		ObjectName objectName = getObjectName(bean, beanKey);
 		if (isMBean(bean.getClass())) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Located MBean '" + beanKey + "': registering with JMX server as MBean [" +
+			if (logger.isInfoEnabled()) {
+				logger.info("Located MBean '" + beanKey + "': registering with JMX server as MBean [" +
 						objectName + "]");
 			}
 			doRegister(bean, objectName);
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Located simple bean '" + beanKey + "': registering with JMX server as MBean [" +
+			if (logger.isInfoEnabled()) {
+				logger.info("Located managed bean '" + beanKey + "': registering with JMX server as MBean [" +
 						objectName + "]");
 			}
 			ModelMBean mbean = createAndConfigureMBean(bean, beanKey);
@@ -801,14 +802,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	//---------------------------------------------------------------------
 	// Autodetection process
 	//---------------------------------------------------------------------
-
-	/**
-	 * Returns <code>true</code> if the particular autodetect mode is enabled
-	 * otherwise returns <code>false</code>.
-	 */
-	private boolean isAutodetectModeEnabled(int mode) {
-		return (this.autodetectMode & mode) == mode;
-	}
 
 	/**
 	 * Invoked when using an <code>AutodetectCapableMBeanInfoAssembler</code>.

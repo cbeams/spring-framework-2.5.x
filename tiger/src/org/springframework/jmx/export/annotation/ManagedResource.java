@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
  * the ManagedResource attribute.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 1.2
  * @see org.springframework.jmx.export.metadata.ManagedResource
  */
@@ -35,6 +36,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface ManagedResource {
+
+	/**
+	 * The annotation value is equivalent to the <code>objectName</code>
+	 * attribute, for simple default usage.
+	 */
+	String value() default "";
 
 	String objectName() default "";
 
