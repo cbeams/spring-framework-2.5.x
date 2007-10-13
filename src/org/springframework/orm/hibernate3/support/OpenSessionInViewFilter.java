@@ -218,10 +218,10 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Look up the SessionFactory that this filter should use,
 	 * taking the current HTTP request as argument.
-	 * <p>Default implementation delegates to the <code>lookupSessionFactory</code>
-	 * without arguments.
+	 * <p>The default implementation delegates to the {@link #lookupSessionFactory()}
+	 * variant without arguments.
+	 * @param request the current request
 	 * @return the SessionFactory to use
-	 * @see #lookupSessionFactory()
 	 */
 	protected SessionFactory lookupSessionFactory(HttpServletRequest request) {
 		return lookupSessionFactory();
@@ -229,7 +229,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	/**
 	 * Look up the SessionFactory that this filter should use.
-	 * <p>Default implementation looks for a bean with the specified name
+	 * <p>The default implementation looks for a bean with the specified name
 	 * in Spring's root application context.
 	 * @return the SessionFactory to use
 	 * @see #getSessionFactoryBeanName
