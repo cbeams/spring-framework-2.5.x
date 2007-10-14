@@ -22,6 +22,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import junit.framework.AssertionFailedError;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
@@ -123,8 +125,10 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	 * </p>
 	 *
 	 * @param applicationContext the ApplicationContext in which to search for
-	 * the ProfileValueSource; may not be <code>null</code>.
-	 * @deprecated Use {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration} instead.
+	 *        the ProfileValueSource; may not be <code>null</code>.
+	 * @deprecated Use
+	 *             {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}
+	 *             instead.
 	 */
 	@Deprecated
 	protected void findUniqueProfileValueSourceFromContext(final ApplicationContext applicationContext) {
@@ -176,6 +180,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 		// Let JUnit handle execution. We're just changing the state of the test
 		// class first.
 		runTestTimed(new TestExecutionCallback() {
+
 			public void run() throws Throwable {
 				try {
 					AbstractAnnotationAwareTransactionalTests.super.runBare();
@@ -203,8 +208,10 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	 * </p>
 	 *
 	 * @param testMethod the test method
-	 * @return <code>true</code> if the test is <em>disabled</em> in the current environment
-	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource, Method)
+	 * @return <code>true</code> if the test is <em>disabled</em> in the
+	 *         current environment
+	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource,
+	 *      Method)
 	 */
 	protected boolean isDisabledInThisEnvironment(final Method testMethod) {
 		return !ProfileValueUtils.isTestEnabledInThisEnvironment(this.profileValueSource, testMethod);
@@ -289,29 +296,35 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 
 	private void runTest(final TestExecutionCallback tec, final Method testMethod) throws Throwable {
 
-		final ExpectedException ee = testMethod.getAnnotation(ExpectedException.class);
+		final ExpectedException expectedExceptionAnnotation = testMethod.getAnnotation(ExpectedException.class);
+		final boolean exceptionIsExpected = (expectedExceptionAnnotation != null)
+				&& (expectedExceptionAnnotation.value() != null);
+		final Class<? extends Throwable> expectedException = exceptionIsExpected ? expectedExceptionAnnotation.value()
+				: null;
+
 		final Repeat repeat = testMethod.getAnnotation(Repeat.class);
 		final int runs = ((repeat != null) && (repeat.value() > 1)) ? repeat.value() : 1;
+
 		for (int i = 0; i < runs; i++) {
 			try {
 				if ((runs > 1) && (this.logger != null) && (this.logger.isInfoEnabled())) {
 					this.logger.info("Repetition " + (i + 1) + " of test " + testMethod.getName());
 				}
 				tec.run();
-				if (ee != null) {
-					fail("Expected throwable of class " + ee.value());
+				if (exceptionIsExpected) {
+					fail("Expected exception: " + expectedException.getName());
 				}
 			}
-			catch (final Throwable ex) {
-				if (ee == null) {
-					throw ex;
+			catch (final Throwable t) {
+				if (!exceptionIsExpected) {
+					throw t;
 				}
-				if (ee.value().isAssignableFrom(ex.getClass())) {
-					// OK
-				}
-				else {
-					// Throw the unexpected problem throwable
-					throw ex;
+				if (!expectedException.isAssignableFrom(t.getClass())) {
+					// Wrap the unexpected throwable with an explicit message.
+					AssertionFailedError assertionError = new AssertionFailedError("Unexpected exception, expected<"
+							+ expectedException.getName() + "> but was<" + t.getClass().getName() + ">");
+					assertionError.initCause(t);
+					throw assertionError;
 				}
 			}
 		}
