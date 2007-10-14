@@ -2707,9 +2707,20 @@ public class Account {
 			in a 'single-JVM-multiple-application' environment (such as is found in
 			a typical application server environment).</para>
 
+			<para>Further, <link linkend="aop-aj-ltw-environments">in certain environments</link>,
+			this support enables load-time weaving <emphasis>without making any modifications to
+			the application server's launch script</emphasis> that will be needed to add 
+			-javaagent:path/to/aspectjweaver.jar or (as we describe later in this section) 
+			-javaagent:path/to/spring-agent.jar. Developers simply modify one or more
+			files that form the application context to enable load-time weaving instead of 
+			relying on administrators who typically are in charge of the deployment configuration 
+			such as the launch script.
+			</para>
+			 
 			<para>Now that the sales pitch is over, let us first walk through a
 			quick example of AspectJ LTW using Spring, followed by detailed
-			specifics about elements introduced in the following example.</para>
+			specifics about elements introduced in the following example. For a 
+			complete example, please see the Petclinic sample application.</para>
 
 			<section id="aop-aj-ltw-first-example">
 				<title>A first example</title>
@@ -2951,7 +2962,7 @@ public final class Main {
 					</listitem>
 				</orderedlist>
 				<para>If you are using the
-				<link linkend="aop-aj-ltw-agents">Spring-provided agent to enable instrumentation</link>,
+				<link linkend="aop-aj-ltw-environment-generic">Spring-provided agent to enable instrumentation</link>,
 				you will also need:</para>
 				<orderedlist>
 					<listitem>
@@ -3041,6 +3052,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 							</row>
 						</thead>
 						<tbody>
+							<!-- 
 							<row>
 								<entry>
 									<para>Running in <ulink url="https://glassfish.dev.java.net//">GlassFish</ulink></para>
@@ -3049,6 +3061,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 									<para><classname>org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWeaver</classname></para>
 								</entry>
 							</row>
+							 -->
 							<row>
 								<entry>
 									<para>Running in <ulink url="http://www.oracle.com/technology/products/oc4j/index.html">Oracle's OC4J</ulink></para>
@@ -3165,16 +3178,37 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 
 			</section>
 
-			<section id="aop-aj-ltw-agents">
-				<title>Agents</title>
-				<para><ulink url="http://opensource.atlassian.com/projects/spring/browse/SPR-3062">[TODO - Work in Progress]</ulink></para>
-			</section>
-
 			<section id="aop-aj-ltw-environments">
 				<title>Environment-specific configuration</title>
 				<para>This last section contains any additional settings and configuration that you will need when using
 				Spring's LTW support in environments such as application- and web-servers.</para>
 
+
+				<section id="aop-aj-ltw-environments-oc4j">
+					<title>OC4J</title>
+					<para>Oracle Containers for Java EE (OC4J) uses a classloader that is capable of working with 
+					any instrumentation agent. Spring's native LTW leverages that classloader to enable AspectJ weaving.
+					You can enable LTW by simply modifying the application context as described earlier. 
+					Specifically, you do <emphasis>not</emphasis> need to modify the launch script to add 
+					-javaagent:path/to/spring-agent.jar.</para>
+				</section>
+
+				<note>
+					<para>Currently, OC4J is the only application server supported directly by the Spring's native 
+					LTW mechanism. In future, we plan to extend this support to
+					other application servers such as certain versions of Tomcat, Glassfish, and Weblogic.</para>
+				</note>
+
+				<section id="aop-aj-ltw-environment-generic">
+					<title>Generic Java applications</title>
+					<para>You may enables Spring support for LTW in any Java application (including the ones not using an 
+					application or web server), through the use of Spring provided instrumentation agent. To do so,
+					start the VM by by specifying the -javaagent:path/to/spring-agent.jar option.
+					</para>					
+				</section>
+				
+
+				<!-- 
 				<section id="aop-aj-ltw-environments-tomcat">
 					<title>Tomcat</title>
 					<para><ulink url="http://opensource.atlassian.com/projects/spring/browse/SPR-3062">[TODO - Work in Progress]</ulink></para>
@@ -3184,7 +3218,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 					<title>GlassFish</title>
 					<para><ulink url="http://opensource.atlassian.com/projects/spring/browse/SPR-3062">[TODO - Work in Progress]</ulink></para>
 				</section>
-
+ 				-->
 			</section>
 
 		</section>
