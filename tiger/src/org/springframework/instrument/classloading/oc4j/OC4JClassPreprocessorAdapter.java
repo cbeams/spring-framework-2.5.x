@@ -31,6 +31,7 @@ import java.security.ProtectionDomain;
  * for his assistance.
  *
  * @author Costin Leau
+ * @author Ramnivas Laddad
  * @since 2.0
  */
 class OC4JClassPreprocessorAdapter implements ClassPreprocessor {
@@ -55,6 +56,11 @@ class OC4JClassPreprocessorAdapter implements ClassPreprocessor {
 
 	public byte[] processClass(String className, byte origClassBytes[], int offset, int length, ProtectionDomain pd,
 							   ClassLoader loader) {
+		// TODO: Devise a better way to deal with org.aspectj classes (which leads to LingageError). 
+		// Specifically, the AspectJ's transformer should be ignoring such classes.
+		if(className.startsWith("org.aspectj")) {
+			return origClassBytes;
+		}
 		try {
 			byte[] tempArray = new byte[length];
 			System.arraycopy(origClassBytes, offset, tempArray, 0, length);
