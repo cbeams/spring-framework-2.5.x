@@ -19,8 +19,6 @@ package org.springframework.test.context;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.junit.internal.runners.JUnit4ClassRunner;
-import org.junit.runner.RunWith;
 
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
@@ -41,7 +39,6 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * @author Sam Brannen
  * @since 2.5
  */
-@RunWith(JUnit4ClassRunner.class)
 public class TestExecutionListenersTests {
 
 	@Test

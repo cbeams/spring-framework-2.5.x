@@ -21,8 +21,6 @@ import static org.junit.Assert.assertArrayEquals;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
-import org.junit.internal.runners.JUnit4ClassRunner;
-import org.junit.runner.RunWith;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.support.GenericXmlContextLoader;
@@ -41,7 +39,6 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @since 2.5
  */
-@RunWith(JUnit4ClassRunner.class)
 public class ContextLoaderTests {
 
 	private static final Log logger = LogFactory.getLog(ContextLoaderTests.class);
