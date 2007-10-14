@@ -18,9 +18,9 @@ package org.springframework.test.context;
 
 /**
  * <p>
- * TestExecutionListener defines a <em>listener</em> API for reacting to test
- * execution events published by the {@link TestContextManager} with which the
- * listener is registered.
+ * <code>TestExecutionListener</code> defines a <em>listener</em> API for
+ * reacting to test execution events published by the {@link TestContextManager}
+ * with which the listener is registered.
  * </p>
  * <p>
  * Concrete implementations must provide a <code>public</code> no-args
@@ -44,7 +44,8 @@ public interface TestExecutionListener {
 	/**
 	 * <p>
 	 * Prepares the {@link Object test instance} of the supplied
-	 * {@link TestContext test context} (e.g., injecting dependencies).
+	 * {@link TestContext test context}, for example for injecting
+	 * dependencies.
 	 * </p>
 	 * <p>
 	 * This method should be called immediately after instantiation but prior to
@@ -52,9 +53,9 @@ public interface TestExecutionListener {
 	 * </p>
 	 *
 	 * @param testContext the test context for the test
-	 * @throws Exception Allows any exception to propagate.
+	 * @throws Throwable allows any exception to propagate.
 	 */
-	void prepareTestInstance(final TestContext testContext) throws Exception;
+	void prepareTestInstance(TestContext testContext) throws Throwable;
 
 	/**
 	 * <p>
@@ -64,11 +65,11 @@ public interface TestExecutionListener {
 	 * fixtures.
 	 * </p>
 	 *
-	 * @param testContext The test context in which the test method will be
+	 * @param testContext the test context in which the test method will be
 	 *        executed, not <code>null</code>.
-	 * @throws Exception Allows any exception to propagate.
+	 * @throws Throwable allows any exception to propagate.
 	 */
-	void beforeTestMethod(final TestContext testContext) throws Exception;
+	void beforeTestMethod(TestContext testContext) throws Throwable;
 
 	/**
 	 * <p>
@@ -78,10 +79,10 @@ public interface TestExecutionListener {
 	 * fixtures.
 	 * </p>
 	 *
-	 * @param testContext The test context in which the test method was
+	 * @param testContext the test context in which the test method was
 	 *        executed, not <code>null</code>.
-	 * @throws Exception Allows any exception to propagate.
+	 * @throws Throwable allows any exception to propagate.
 	 */
-	void afterTestMethod(final TestContext testContext) throws Exception;
+	void afterTestMethod(TestContext testContext) throws Throwable;
 
 }

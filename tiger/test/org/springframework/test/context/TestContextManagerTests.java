@@ -109,10 +109,9 @@ public class TestContextManagerTests {
 	}
 
 	@Before
-	public void setUpTestContextManager() throws Exception {
+	public void setUpTestContextManager() throws Throwable {
 
 		final Method testMethod = ExampleTest.class.getDeclaredMethod("exampleTestMethod", (Class<?>[]) null);
-
 		this.testContextManager = new TestContextManager(ExampleTest.class);
 		this.testContextManager.registerTestExecutionListeners(new NamedTestExecutionListener(FIRST),
 				new NamedTestExecutionListener(SECOND), new NamedTestExecutionListener(THIRD));
@@ -135,7 +134,7 @@ public class TestContextManagerTests {
 	}
 
 	@After
-	public void tearDownTestContextManager() throws Exception {
+	public void tearDownTestContextManager() throws Throwable {
 		final Method testMethod = ExampleTest.class.getDeclaredMethod("exampleTestMethod", (Class<?>[]) null);
 		this.testContextManager.afterTestMethod(new ExampleTest(), testMethod, null);
 		this.testContextManager = null;

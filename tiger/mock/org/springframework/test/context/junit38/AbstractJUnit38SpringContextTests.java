@@ -19,7 +19,9 @@ package org.springframework.test.context.junit38;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,14 +30,10 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueSource;
-import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextManager;
-import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -52,12 +50,14 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * </p>
  * <ul>
  * <li>Typically declare a class-level
- * {@link ContextConfiguration @ContextConfiguration} annotation to configure
- * the {@link ApplicationContext application context}
- * {@link ContextConfiguration#locations() resource locations}.
+ * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
+ * annotation to configure the {@link ApplicationContext application context}
+ * {@link org.springframework.test.context.ContextConfiguration#locations() resource locations}.
  * <em>If your test does not need to load an
  * application context, you may choose to omit the
- * {@link ContextConfiguration @ContextConfiguration} declaration and to configure the appropriate {@link TestExecutionListener TestExecutionListeners} manually.</em></li>
+ * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration} declaration and configure
+ * the appropriate {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners}
+ * manually.</em></li>
  * <li>Must declare public constructors which match the signatures of
  * {@link #AbstractJUnit38SpringContextTests() AbstractJUnit38SpringContextTests()}
  * and
@@ -66,13 +66,15 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * respectively.</li>
  * </ul>
  * <p>
- * The following list constitutes all annotations currently supported by
- * AbstractJUnit38SpringContextTests:
+ * The following list constitutes all annotations currently supported directly
+ * by <code>AbstractJUnit38SpringContextTests</code>.
+ * <em>(Note that additional annotations may be supported by various
+ * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners})</em>
  * </p>
  * <ul>
  * <li>{@link org.springframework.test.annotation.DirtiesContext @DirtiesContext}
  * (via the configured {@link DirtiesContextTestExecutionListener})</li>
- * <li>{@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}</li>
+ * <li>{@link org.springframework.test.annotation.ProfileValueSourceConfiguration @ProfileValueSourceConfiguration}</li>
  * <li>{@link IfProfileValue @IfProfileValue}</li>
  * <li>{@link ExpectedException @ExpectedException}</li>
  * <li>{@link Timed @Timed}</li>
@@ -81,9 +83,9 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  *
  * @author Sam Brannen
  * @since 2.5
- * @see TestContext
- * @see TestContextManager
- * @see TestExecutionListeners
+ * @see org.springframework.test.context.TestContext
+ * @see org.springframework.test.context.TestContextManager
+ * @see org.springframework.test.context.TestExecutionListeners
  * @see AbstractTransactionalJUnit38SpringContextTests
  * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
@@ -144,16 +146,14 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * {@link TestContextManager} for the current test; and retrieves the
 	 * configured (or default) {@link ProfileValueSource}.
 	 *
-	 * @param name The name of the current test to execute.
+	 * @param name the name of the current test to execute.
 	 * @see TestCase#TestCase(String)
 	 */
 	public AbstractJUnit38SpringContextTests(final String name) {
-
 		super(name);
 		this.testContextManager = new TestContextManager(getClass());
 		this.profileValueSource = ProfileValueUtils.retrieveProfileValueSource(getClass());
 	}
-
 
 	/**
 	 * <p>
@@ -177,7 +177,8 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * <li>Provides support for {@link ExpectedException @ExpectedException}.</li>
 	 * </ul>
 	 *
-	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource, Method)
+	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(ProfileValueSource,
+	 *      Method)
 	 * @see junit.framework.TestCase#runBare()
 	 */
 	@Override
@@ -193,6 +194,7 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 		}
 
 		runTestTimed(new TestExecutionCallback() {
+
 			public void run() throws Throwable {
 				runManaged(testMethod);
 			}
@@ -202,10 +204,9 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	/**
 	 * Get the current test method.
 	 *
-	 * @return The current test method.
+	 * @return the current test method.
 	 */
 	private Method getTestMethod() {
-
 		assertNotNull("TestCase.getName() cannot be null", getName());
 		Method testMethod = null;
 		try {
@@ -225,17 +226,15 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * {@link TestExecutionCallback}, providing support for the
 	 * {@link Timed @Timed} annotation.
 	 *
-	 * @param tec The test execution callback to run.
-	 * @param testMethod The actual test method: used to retrieve the
+	 * @param tec the test execution callback to run.
+	 * @param testMethod the actual test method: used to retrieve the
 	 *        <code>timeout</code>.
 	 * @throws Throwable if any exception is thrown.
 	 * @see Timed
 	 * @see #runTest
 	 */
 	private void runTestTimed(final TestExecutionCallback tec, final Method testMethod) throws Throwable {
-
 		final Timed timed = testMethod.getAnnotation(Timed.class);
-
 		if (timed == null) {
 			runTest(tec, testMethod);
 		}
@@ -258,10 +257,10 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * support for the {@link ExpectedException @ExpectedException} and
 	 * {@link Repeat @Repeat} annotations.
 	 *
-	 * @param tec The test execution callback to run.
-	 * @param testMethod The actual test method: used to retrieve the
-	 * {@link ExpectedException @ExpectedException} and {@link Repeat @Repeat}
-	 * annotations.
+	 * @param tec the test execution callback to run.
+	 * @param testMethod the actual test method: used to retrieve the
+	 *        {@link ExpectedException @ExpectedException} and
+	 *        {@link Repeat @Repeat} annotations.
 	 * @throws Throwable if any exception is thrown.
 	 * @see ExpectedException
 	 * @see Repeat
@@ -293,8 +292,10 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 				}
 				if (!expectedException.isAssignableFrom(t.getClass())) {
 					// Wrap the unexpected throwable with an explicit message.
-					throw new Exception(("Unexpected exception, expected<" + expectedException.getClass().getName()
-							+ "> but was<" + t.getClass().getName() + ">"), t);
+					AssertionFailedError assertionError = new AssertionFailedError("Unexpected exception, expected<"
+							+ expectedException.getName() + "> but was<" + t.getClass().getName() + ">");
+					assertionError.initCause(t);
+					throw assertionError;
 				}
 			}
 		}
@@ -305,16 +306,27 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * {@link TestContextManager#afterTestMethod(Object,Method,Throwable)} at
 	 * the appropriate test execution points.
 	 *
-	 * @param testMethod The test method to run.
-	 * @throws Throwable If any exception is thrown.
+	 * @param testMethod the test method to run.
+	 * @throws Throwable if any exception is thrown.
 	 * @see #runBare()
 	 * @see TestCase#runTest()
 	 */
 	private void runManaged(final Method testMethod) throws Throwable {
 
 		Throwable exception = null;
-		this.testContextManager.beforeTestMethod(this, testMethod);
+
+		try {
+			this.testContextManager.beforeTestMethod(this, testMethod);
+		}
+		catch (Throwable t) {
+			if (t.getCause() instanceof AssertionError) {
+				t = t.getCause();
+			}
+			throw t;
+		}
+
 		setUp();
+
 		try {
 			super.runTest();
 		}
@@ -331,8 +343,20 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 				}
 			}
 		}
-		this.testContextManager.afterTestMethod(this, testMethod, exception);
+
+		try {
+			this.testContextManager.afterTestMethod(this, testMethod, exception);
+		}
+		catch (final Throwable t) {
+			if (exception == null) {
+				exception = t;
+			}
+		}
+
 		if (exception != null) {
+			if (exception.getCause() instanceof AssertionError) {
+				exception = exception.getCause();
+			}
 			throw exception;
 		}
 	}
@@ -341,7 +365,7 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * Sets the {@link ApplicationContext} to be used by this test instance,
 	 * provided via {@link ApplicationContextAware} semantics.
 	 *
-	 * @param applicationContext The applicationContext to set.
+	 * @param applicationContext the application context to set.
 	 */
 	public final void setApplicationContext(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
@@ -352,13 +376,15 @@ public class AbstractJUnit38SpringContextTests extends TestCase implements Appli
 	 * environment by incrementing the total number of disabled tests and
 	 * logging a debug message.
 	 *
-	 * @param testMethod The test method that is disabled.
+	 * @param testMethod the test method that is disabled.
 	 * @see #getDisabledTestCount()
 	 */
 	protected void recordDisabled(final Method testMethod) {
 		disabledTestCount++;
-		this.logger.info("**** " + getClass().getName() + "." + getName() + "() is disabled in this environment: "
-				+ "Total disabled tests = " + getDisabledTestCount());
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("**** " + getClass().getName() + "." + getName() + "() is disabled in this environment: "
+					+ "Total disabled tests = " + getDisabledTestCount());
+		}
 	}
 
 

@@ -93,14 +93,21 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	@Override
 	protected Object createTest() throws Exception {
 		final Object testInstance = super.createTest();
-		getTestContextManager().prepareTestInstance(testInstance);
+		try {
+			getTestContextManager().prepareTestInstance(testInstance);
+		}
+		catch (Throwable t) {
+			new Exception(t);
+		}
 		return testInstance;
 	}
 
 	/**
-	 * Creates a new {@link TestContextManager}. Can be overridden by subclasses.
+	 * Creates a new {@link TestContextManager}. Can be overridden by
+	 * subclasses.
 	 *
-	 * @param clazz the Class object corresponding to the test class to be managed
+	 * @param clazz the Class object corresponding to the test class to be
+	 *        managed
 	 * @return a new TestContextManager
 	 */
 	protected TestContextManager createTestContextManager(final Class<?> clazz) {
@@ -109,6 +116,7 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 
 	/**
 	 * Gets the {@link TestContextManager} associated with this runner.
+	 *
 	 * @return the TestContextManager
 	 */
 	protected final TestContextManager getTestContextManager() {

@@ -20,14 +20,15 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
 
 /**
- * TestExecutionListener which processes test methods configured with the
- * {@link DirtiesContext @DirtiesContext} annotation.
+ * <code>TestExecutionListener</code> which processes test methods configured
+ * with the {@link DirtiesContext @DirtiesContext} annotation.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -51,10 +52,10 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * </p>
 	 */
 	@Override
-	public void afterTestMethod(final TestContext testContext) throws Exception {
+	public void afterTestMethod(final TestContext testContext) throws Throwable {
 
 		final Method testMethod = testContext.getTestMethod();
-		Assert.notNull(testMethod, "The test method of the supplied TestContext can not be null.");
+		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null.");
 
 		final boolean dirtiesContext = testMethod.isAnnotationPresent(DirtiesContext.class);
 		if (logger.isDebugEnabled()) {

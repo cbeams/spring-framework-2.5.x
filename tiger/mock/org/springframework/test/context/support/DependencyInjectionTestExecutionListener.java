@@ -18,13 +18,14 @@ package org.springframework.test.context.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.Conventions;
 import org.springframework.test.context.TestContext;
 
 /**
- * TestExecutionListener which provides support for dependency injection and
- * initialization of test instances.
+ * <code>TestExecutionListener</code> which provides support for dependency
+ * injection and initialization of test instances.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -33,8 +34,8 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 
 	/**
 	 * <p>
-	 * Attribute name for a {@link TestContext TestContext} attribute which
-	 * indicates whether or not the dependencies of a test instance should be
+	 * Attribute name for a {@link TestContext} attribute which indicates
+	 * whether or not the dependencies of a test instance should be
 	 * <em>reinjected</em> in
 	 * {@link #beforeTestMethod(TestContext) beforeTestMethod()}. Note that
 	 * dependencies will be injected in
@@ -76,7 +77,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * </p>
 	 */
 	@Override
-	public void prepareTestInstance(final TestContext testContext) throws Exception {
+	public void prepareTestInstance(final TestContext testContext) throws Throwable {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Performing dependency injection for test context [" + testContext + "].");
 		}
@@ -93,7 +94,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * </p>
 	 */
 	@Override
-	public void beforeTestMethod(final TestContext testContext) throws Exception {
+	public void beforeTestMethod(final TestContext testContext) throws Throwable {
 		if (Boolean.TRUE.equals(testContext.getAttribute(REINJECT_DEPENDENCIES_ATTRIBUTE))) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Reinjecting dependencies for test context [" + testContext + "].");
@@ -113,9 +114,9 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * from the test context, regardless of its value.
 	 * </p>
 	 *
-	 * @param testContext The test context for which dependency injection should
+	 * @param testContext the test context for which dependency injection should
 	 *        be performed; may not be <code>null</code>.
-	 * @throws Exception Allows any exception to propagate.
+	 * @throws Exception allows any exception to propagate.
 	 * @see #prepareTestInstance(TestContext)
 	 * @see #beforeTestMethod(TestContext)
 	 */

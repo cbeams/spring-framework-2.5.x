@@ -32,13 +32,14 @@ import org.junit.Assume.AssumptionViolatedException;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
+
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestContextManager;
 
 /**
  * <p>
- * SpringMethodRoadie is a custom implementation of JUnit 4.4's
+ * <code>SpringMethodRoadie</code> is a custom implementation of JUnit 4.4's
  * {@link org.junit.internal.runners.MethodRoadie MethodRoadie}, which provides
  * the following enhancements:
  * </p>
@@ -52,8 +53,9 @@ import org.springframework.test.context.TestContextManager;
  * <li>Tracks the exception thrown during execution of the test method.</li>
  * </ul>
  * <p>
- * Due to method and field visibility constraints, the code of MethodRoadie has
- * been duplicated here instead of subclassing MethodRoadie directly.
+ * Due to method and field visibility constraints, the code of
+ * <code>MethodRoadie</code> has been duplicated here instead of subclassing
+ * <code>MethodRoadie</code> directly.
  * </p>
  *
  * @author Sam Brannen
@@ -77,14 +79,15 @@ class SpringMethodRoadie {
 
 
 	/**
-	 * Constructs a SpringMethodRoadie with the supplied parameters.
+	 * Constructs a <code>SpringMethodRoadie</code> with the supplied
+	 * parameters.
 	 *
-	 * @param testContextManager The TestContextManager to notify.
-	 * @param testInstance The test instance upon which to invoke the test
+	 * @param testContextManager the TestContextManager to notify.
+	 * @param testInstance the test instance upon which to invoke the test
 	 *        method.
-	 * @param testMethod The test method to invoke.
-	 * @param notifier The RunNotifier to notify.
-	 * @param description The test description.
+	 * @param testMethod the test method to invoke.
+	 * @param notifier the RunNotifier to notify.
+	 * @param description the test description.
 	 */
 	public SpringMethodRoadie(final TestContextManager testContextManager, final Object testInstance,
 			final SpringTestMethod testMethod, final RunNotifier notifier, final Description description) {
@@ -152,7 +155,7 @@ class SpringMethodRoadie {
 	 * Runs the test method on the test instance with the specified
 	 * <code>timeout</code>.
 	 *
-	 * @param timeout The timeout in milliseconds.
+	 * @param timeout the timeout in milliseconds.
 	 * @see #runWithRepetitions(Runnable)
 	 * @see #runTestMethod()
 	 */
@@ -160,7 +163,6 @@ class SpringMethodRoadie {
 		runWithRepetitions(new Runnable() {
 
 			public void run() {
-
 				final ExecutorService service = Executors.newSingleThreadExecutor();
 				final Callable<Object> callable = new Callable<Object>() {
 
@@ -202,7 +204,6 @@ class SpringMethodRoadie {
 		runWithRepetitions(new Runnable() {
 
 			public void run() {
-
 				runTestMethod();
 			}
 		});
@@ -217,7 +218,7 @@ class SpringMethodRoadie {
 	 * test will be run at least once.
 	 * </p>
 	 *
-	 * @param test The runnable test.
+	 * @param test the runnable test.
 	 * @see Repeat
 	 * @see #runBeforesThenTestThenAfters(Runnable)
 	 */
@@ -245,7 +246,7 @@ class SpringMethodRoadie {
 	 * <li>{@link #runAfters() @After methods}</li>
 	 * </ul>
 	 *
-	 * @param test The runnable test.
+	 * @param test the runnable test.
 	 */
 	protected void runBeforesThenTestThenAfters(final Runnable test) {
 		try {
@@ -290,8 +291,8 @@ class SpringMethodRoadie {
 				addFailure(new Exception(message, this.testException));
 			}
 		}
-		catch (final Throwable e) {
-			addFailure(e);
+		catch (final Throwable t) {
+			addFailure(t);
 		}
 		finally {
 			if (logger.isDebugEnabled()) {
@@ -312,7 +313,6 @@ class SpringMethodRoadie {
 	protected void runBefores() throws FailedBefore {
 		try {
 			getTestContextManager().beforeTestMethod(getTestInstance(), getTestMethod().getMethod());
-
 			final List<Method> befores = getTestMethod().getBefores();
 			for (final Method before : befores) {
 				before.invoke(getTestInstance());
@@ -322,15 +322,15 @@ class SpringMethodRoadie {
 			addFailure(e.getTargetException());
 			throw new FailedBefore();
 		}
-		catch (final Throwable e) {
-			addFailure(e);
+		catch (final Throwable t) {
+			addFailure(t);
 			throw new FailedBefore();
 		}
 	}
 
 	/**
-	 * Runs {@link org.junit.After @After methods}, registering failures and
-	 * throwing {@link FailedBefore} exceptions as necessary, and then calls
+	 * Runs {@link org.junit.After @After methods}, registering failures as
+	 * necessary, and then calls
 	 * {@link TestContextManager#afterTestMethod(Object,Method,Throwable)}.
 	 */
 	protected void runAfters() {
@@ -342,18 +342,24 @@ class SpringMethodRoadie {
 			catch (final InvocationTargetException e) {
 				addFailure(e.getTargetException());
 			}
-			catch (final Throwable e) {
-				addFailure(e); // Untested, but seems impossible
+			catch (final Throwable t) {
+				addFailure(t); // Untested, but seems impossible
 			}
 		}
-		getTestContextManager().afterTestMethod(getTestInstance(), getTestMethod().getMethod(), getTestException());
+
+		try {
+			getTestContextManager().afterTestMethod(getTestInstance(), getTestMethod().getMethod(), getTestException());
+		}
+		catch (final Throwable t) {
+			addFailure(t);
+		}
 	}
 
 	/**
 	 * Fires a failure for the supplied <code>exception</code> with the
 	 * {@link #getNotifier() RunNotifier}.
 	 *
-	 * @param exception The exception upon which to base the failure.
+	 * @param exception the exception upon which to base the failure.
 	 */
 	protected void addFailure(final Throwable exception) {
 		getNotifier().fireTestFailure(new Failure(getDescription(), exception));
@@ -362,7 +368,7 @@ class SpringMethodRoadie {
 	/**
 	 * Gets the {@link TestContextManager}.
 	 *
-	 * @return The test context manager.
+	 * @return the test context manager.
 	 */
 	protected final TestContextManager getTestContextManager() {
 		return this.testContextManager;
@@ -371,7 +377,7 @@ class SpringMethodRoadie {
 	/**
 	 * Gets the test instance.
 	 *
-	 * @return The test instance.
+	 * @return the test instance.
 	 */
 	protected final Object getTestInstance() {
 		return this.testInstance;
@@ -380,7 +386,7 @@ class SpringMethodRoadie {
 	/**
 	 * Gets the {@link SpringTestMethod}.
 	 *
-	 * @return The test method.
+	 * @return the test method.
 	 */
 	protected final SpringTestMethod getTestMethod() {
 		return this.testMethod;
@@ -390,7 +396,7 @@ class SpringMethodRoadie {
 	 * Gets the exception thrown during execution of the test method, or
 	 * <code>null</code> if no exception was thrown.
 	 *
-	 * @return The test exception.
+	 * @return the test exception.
 	 */
 	protected final Throwable getTestException() {
 		return this.testException;
@@ -399,7 +405,7 @@ class SpringMethodRoadie {
 	/**
 	 * Gets the {@link RunNotifier}.
 	 *
-	 * @return The notifier.
+	 * @return the notifier.
 	 */
 	protected final RunNotifier getNotifier() {
 		return this.notifier;
@@ -408,7 +414,7 @@ class SpringMethodRoadie {
 	/**
 	 * Gets the test description.
 	 *
-	 * @return The description.
+	 * @return the description.
 	 */
 	protected final Description getDescription() {
 		return this.description;
@@ -418,7 +424,7 @@ class SpringMethodRoadie {
 	 * Sets the exception thrown during execution of the test method, or
 	 * <code>null</code> if no exception was thrown.
 	 *
-	 * @param testException The thrown test exception, or <code>null</code>.
+	 * @param testException the thrown test exception, or <code>null</code>.
 	 */
 	protected final void setTestException(final Throwable testException) {
 		this.testException = testException;
@@ -430,6 +436,7 @@ class SpringMethodRoadie {
 	 * executing an {@link org.junit.Before @Before} method.
 	 */
 	private static class FailedBefore extends Exception {
+
 		private static final long serialVersionUID = 8054300181079811763L;
 	}
 

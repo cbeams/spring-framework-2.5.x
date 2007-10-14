@@ -90,8 +90,7 @@ public class ParameterizedDependencyInjectionTests implements ApplicationContext
 	}
 
 	@Before
-	public void injectDependencies() throws Exception {
-
+	public void injectDependencies() throws Throwable {
 		this.testContextManager.prepareTestInstance(this);
 	}
 
