@@ -583,7 +583,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @return <code>true</code> if the previous method shadows the current
 	 *         one.
 	 */
-	private static boolean isShadowed(final Method current, final Method previous) {
+	private boolean isShadowed(final Method current, final Method previous) {
 		if (!previous.getName().equals(current.getName())) {
 			return false;
 		}
