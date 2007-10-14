@@ -1,0 +1,13 @@
+<aspectj>
+	<aspects>
+	    <concrete-aspect name="org.springframework.samples.petclinic.aspects.ApplicationTraceAspect" 
+	    				 extends="org.springframework.samples.petclinic.aspects.AbstractTraceAspect">
+	    	<pointcut name="traced"
+	    		      expression="execution(* org.springframework.samples..*.*(..))"/>
+	    </concrete-aspect>	    
+	</aspects>
+	
+	<weaver>                   
+	    <include within="org.springframework.samples.petclinic..*"/>
+	</weaver>
+</aspectj>

@@ -108,9 +108,6 @@
 			<include name="commons-lang.jar"/>
 			<include name="commons-pool.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/log4j">
-			<include name="log4j-*.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/lib/openjpa">
 			<include name="openjpa*.jar"/>
 		</fileset>
@@ -252,6 +249,9 @@
 			<fileset dir="${spring.root}/lib/hsqldb">
 				<include name="hsqldb.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/lib/log4j">
+				<include name="log4j*.jar"/>
+			</fileset>
 			<fileset dir="${spring.root}/lib/j2ee">
 				<!-- connector.jar only needed for OpenJPA -->
 				<include name="connector.jar"/>
@@ -334,6 +334,7 @@
 			<include name="WEB-INF/classes/*.*"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
+			<include name="WEB-INF/classes/META-INF/*"/>
 			<include name="META-INF/*"/>
 			<exclude name="**/.*"/>
 			<exclude name="WEB-INF/geronimo-web.xml"/>

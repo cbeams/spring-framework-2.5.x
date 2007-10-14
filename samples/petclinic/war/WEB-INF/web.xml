@@ -47,6 +47,11 @@
 			weaving in your server environment. See PetClinic's readme and/or
 			Spring's JPA documentation for information on how to do this.
 		-->
+		
+		<!--
+			To enable AspectJ weaving, add  /WEB-INF/weavingContext.xml to the above
+			<param-value>. See WEB-INF/classes/META-INF/aop.xml for aspect's configuration. 
+		 -->
 	</context-param>
 
 	<!--
