@@ -18,9 +18,15 @@ package org.springframework.test.context;
 
 import static org.junit.Assert.assertArrayEquals;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.support.GenericXmlContextLoader;
@@ -39,52 +45,65 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @since 2.5
  */
+@RunWith(Parameterized.class)
 public class ContextLoaderTests {
 
 	private static final Log logger = LogFactory.getLog(ContextLoaderTests.class);
 
+	protected final Class<?> testClass;
+	protected final String[] expectedLocations;
 
+
+	public ContextLoaderTests(final Class<?> testClass, final String[] expectedLocations) {
+		this.testClass = testClass;
+		this.expectedLocations = expectedLocations;
+	}
+
+	@Parameters
+	public static Collection<Object[]> contextConfigurationLocationsData() {
+		return Arrays.asList(new Object[][] {
+
+			{
+				ClasspathDefaultLocationsTest.class,
+				new String[] { "classpath:/org/springframework/test/context/ContextLoaderTests$ClasspathDefaultLocationsTest-context.xml" } },
+
+			{
+				ImplicitClasspathLocationsTest.class,
+				new String[] { "classpath:/org/springframework/test/context/context1.xml",
+					"classpath:/org/springframework/test/context/context2.xml" } },
+
+			{ ExplicitClasspathLocationsTest.class, new String[] { "classpath:context.xml" } },
+
+			{ ExplicitFileLocationsTest.class, new String[] { "file:/testing/directory/context.xml" } },
+
+			{ ExplicitUrlLocationsTest.class, new String[] { "http://example.com/context.xml" } },
+
+			{
+				ExplicitMixedPathTypesLocationsTest.class,
+				new String[] { "classpath:/org/springframework/test/context/context1.xml", "classpath:context2.xml",
+					"classpath:/context3.xml", "file:/testing/directory/context.xml", "http://example.com/context.xml" } }
+
+		});
+	}
+
+	@Test
 	@SuppressWarnings("unchecked")
-	private void assertContextConfigurationLocations(final Class<?> testClass, final String[] expectedLocations)
-			throws Exception {
+	public void assertContextConfigurationLocations() throws Exception {
 
-		final ContextConfiguration contextConfig = testClass.getAnnotation(ContextConfiguration.class);
+		final ContextConfiguration contextConfig = this.testClass.getAnnotation(ContextConfiguration.class);
 		final ContextLoader contextLoader = new GenericXmlContextLoader();
 		final String[] configuredLocations = (String[]) AnnotationUtils.getValue(contextConfig, "locations");
-		final String[] processedLocations = contextLoader.processLocations(testClass, configuredLocations);
+		final String[] processedLocations = contextLoader.processLocations(this.testClass, configuredLocations);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("----------------------------------------------------------------------");
 			logger.debug("Configured locations: " + ObjectUtils.nullSafeToString(configuredLocations));
-			logger.debug("Expected   locations: " + ObjectUtils.nullSafeToString(expectedLocations));
+			logger.debug("Expected   locations: " + ObjectUtils.nullSafeToString(this.expectedLocations));
 			logger.debug("Processed  locations: " + ObjectUtils.nullSafeToString(processedLocations));
 		}
 
-		assertArrayEquals("Verifying locations for test [" + testClass + "].", expectedLocations, processedLocations);
-	}
-
-	@Test
-	public void testContextConfigurationLocationProcessing() throws Exception {
-		assertContextConfigurationLocations(
-				ClasspathDefaultLocationsTest.class,
-				new String[] { "classpath:/org/springframework/test/context/ContextLoaderTests$ClasspathDefaultLocationsTest-context.xml" });
-
-		assertContextConfigurationLocations(ImplicitClasspathLocationsTest.class, new String[] {
-			"classpath:/org/springframework/test/context/context1.xml",
-			"classpath:/org/springframework/test/context/context2.xml" });
-
-		assertContextConfigurationLocations(ExplicitClasspathLocationsTest.class,
-				new String[] { "classpath:context.xml" });
-
-		assertContextConfigurationLocations(ExplicitFileLocationsTest.class,
-				new String[] { "file:/testing/directory/context.xml" });
-
-		assertContextConfigurationLocations(ExplicitUrlLocationsTest.class,
-				new String[] { "http://example.com/context.xml" });
-
-		assertContextConfigurationLocations(ExplicitMixedPathTypesLocationsTest.class, new String[] {
-			"classpath:/org/springframework/test/context/context1.xml", "classpath:context2.xml",
-			"classpath:/context3.xml", "file:/testing/directory/context.xml", "http://example.com/context.xml" });
+		assertArrayEquals("Verifying locations for test [" + this.testClass + "].", this.expectedLocations,
+				processedLocations);
 	}
 
 
