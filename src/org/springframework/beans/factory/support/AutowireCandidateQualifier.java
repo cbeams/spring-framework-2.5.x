@@ -37,41 +37,88 @@ public class AutowireCandidateQualifier {
 	private Map attributes = new HashMap();
 
 
+	/**
+	 * Construct a qualifier to match against an annotation of the
+	 * given type name whose attributes also match against the provided
+	 * map of attributes.
+	 * <p>The type name may match the fully-qualified class name of
+	 * the annotation or the short class name (without the package).
+	 */
 	public AutowireCandidateQualifier(String typeName, Map attributes) {
 		this.typeName = typeName;
 		this.attributes = attributes;
 	}
 
+	/**
+	 * Construct a qualifier to match against an annotation of the
+	 * given type name whose <code>value</code> attribute also matches
+	 * the specified value.
+	 * <p>The type name may match the fully-qualified class name of
+	 * the annotation or the short class name (without the package).
+	 */
 	public AutowireCandidateQualifier(String typeName, Object value) {
 		this.typeName = typeName;
 		this.setAttribute("value", value);
 	}
 
+	/**
+	 * Construct a qualifier to match against an annotation of the
+	 * given type whose <code>value</code> attribute also matches
+	 * the specified value.
+	 */
 	public AutowireCandidateQualifier(Class type, Object value) {
-		this(type.getClass().getName(), value);
+		this(type.getName(), value);
 		this.type = type;
 	}
 
+	/**
+	 * Construct a qualifier to match against an annotation of the
+	 * given type name.
+	 * <p>The type name may match the fully-qualified class name of
+	 * the annotation or the short class name (without the package).
+	 */
 	public AutowireCandidateQualifier(String typeName) {
 		this.typeName = typeName;
 	}
 
+	/**
+	 * Construct a qualifier to match against an annotation of the
+	 * given type.
+	 */
 	public AutowireCandidateQualifier(Class type) {
 		this.type = type;
+		this.typeName = type.getName();
 	}
 
+	/**
+	 * Retrieve the type name. This value will be the same as the
+	 * type name provided to the constructor or the fully-qualified
+	 * class name if a Class instance was provided to the constructor.
+	 */
 	public String getTypeName() {
 		return this.typeName;
 	}
 
+	/**
+	 * Retrieve the type. May be <code>null</code> if a type name
+	 * was provided to the constructor instead of an actual Class.
+	 */
 	public Class getType() {
 		return this.type;
 	}
 
+	/**
+	 * Retrieve the attribute value for the given name.
+	 */
 	public Object getAttribute(String name) {
 		return this.attributes.get(name);
 	}
 
+	/**
+	 * Set the attribute value for the given name. This value
+	 * will be matched against any corresponding attribute
+	 * value of a qualifier annotation.
+	 */
 	public Object setAttribute(String name, Object value) {
 		return this.attributes.put(name, value);
 	}

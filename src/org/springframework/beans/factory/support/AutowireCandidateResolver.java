@@ -30,7 +30,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 public interface AutowireCandidateResolver {
 
 	/**
-	 * Determne whether the given bean definition qualifies as an
+	 * Determine whether the given bean definition qualifies as an
 	 * autowire candidate for the given dependency.
 	 * @param bdHolder the bean definition including bean name and aliases
 	 * @param descriptor the descriptor for the target method parameter or field

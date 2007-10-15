@@ -164,7 +164,7 @@ abstract class AutowireUtils {
 			}
 		}
 		else {
-			return new DefaultAutowireCandidateResolver();
+			return new SimpleAutowireCandidateResolver();
 		}
 	}
 

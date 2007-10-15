@@ -29,7 +29,7 @@ import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor}
+ * A {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor}
  * implementation that allows for convenient registration of custom autowire
  * qualifier types.
  *
@@ -68,6 +68,16 @@ public class CustomAutowireConfigurer implements BeanFactoryPostProcessor, BeanC
 		this.beanClassLoader = beanClassLoader;
 	}
 
+	/**
+	 * Register custom qualifier annotation types to be considered
+	 * when autowiring beans. Each element of the provided set may
+	 * be either a Class instance or a String representation of the
+	 * fully-qualified class name of the custom annotation.
+	 * <p>Note that any annotation that is itself annotated with Spring's
+	 * {@link org.springframework.beans.factory.annotation.Qualifier}
+	 * does not require explicit registration.
+	 * @param customQualifierTypes the custom types to register
+	 */
 	public void setCustomQualifierTypes(Set customQualifierTypes) {
 		this.customQualifierTypes = customQualifierTypes;
 	}

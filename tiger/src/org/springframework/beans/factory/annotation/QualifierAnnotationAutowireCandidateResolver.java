@@ -33,13 +33,13 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * {@link org.springframework.beans.factory.support.AutowireCandidateResolver}
- * implementation that matches bean definition qualifiers against qualifier
- * annotations on the field or parameter to be autowired.
+ * {@link AutowireCandidateResolver} implementation that matches bean definition
+ * qualifiers against qualifier annotations on the field or parameter to be autowired.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
+ * @see AutowireCandidateQualifier
  * @see Qualifier
  */
 public class QualifierAnnotationAutowireCandidateResolver implements AutowireCandidateResolver {

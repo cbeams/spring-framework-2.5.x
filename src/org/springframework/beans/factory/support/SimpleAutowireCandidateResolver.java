@@ -16,17 +16,20 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 
 /**
- * Resolver to use when Java version is less than 1.5 and therefore no
- * annotation support is available. Simply checks the bean definition.
+ * {@link AutowireCandidateResolver} implementation to use when Java version
+ * is less than 1.5 and therefore no annotation support is available. This
+ * implementation checks the bean definition only.
  *
  * @author Mark Fisher
  * @since 2.5
+ * @see BeanDefinition#isAutowireCandidate()
  */
-public class DefaultAutowireCandidateResolver implements AutowireCandidateResolver {
+public class SimpleAutowireCandidateResolver implements AutowireCandidateResolver {
 
 	/**
 	 * Determine if the provided bean definition is an autowire candidate.
