@@ -16,6 +16,10 @@
 
 package org.springframework.context.weaving;
 
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
+import java.security.ProtectionDomain;
+
 import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
 
 import org.springframework.beans.BeansException;
@@ -33,6 +37,7 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
  * {@link org.springframework.instrument.classloading.LoadTimeWeaver}.
  *
  * @author Juergen Hoeller
+ * @author Ramnivas Laddad
  * @since 2.5
  */
 public class AspectJWeavingEnabler implements BeanFactoryPostProcessor, LoadTimeWeaverAware, Ordered {
@@ -54,7 +59,29 @@ public class AspectJWeavingEnabler implements BeanFactoryPostProcessor, LoadTime
 		if (weaverToUse == null && InstrumentationSavingAgent.getInstrumentation() != null) {
 			weaverToUse = new InstrumentationLoadTimeWeaver();
 		}
-		weaverToUse.addTransformer(new ClassPreProcessorAgentAdapter());
+		weaverToUse.addTransformer(new AspectJClassBypassingClassFileTransformerDecorator(
+					new ClassPreProcessorAgentAdapter()));
 	}
 
+	/*
+	 * Potentially temporary way to avoid processing AspectJ classes and avoiding the LinkageError
+	 * while doing so. OC4J and Tomcat (in Glassfish) definitely need bypasing such classes.
+	 * TODO: Investigate further to see why AspectJ itself isn't doing so.
+	 */
+	private static class AspectJClassBypassingClassFileTransformerDecorator implements ClassFileTransformer {
+		private ClassFileTransformer delegate;
+		
+		public AspectJClassBypassingClassFileTransformerDecorator(ClassFileTransformer delegate) {
+			this.delegate = delegate;
+		}
+		
+		@Override
+		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+			if(className.startsWith("org.aspectj") || className.startsWith("org/aspectj")) {
+				return classfileBuffer;
+			}
+			return delegate.transform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
+		}
+	}
 }
