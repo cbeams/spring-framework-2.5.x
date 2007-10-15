@@ -5612,9 +5612,9 @@ public @interface MovieQualifier {
       <para>The <ulink
       url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/config/CustomAutowireConfigurer.html"><classname>CustomAutowireConfigurer</classname></ulink>
       is a <interfacename>BeanFactoryPostProcessor</interfacename> that
-      enables customization of the autowiring process. For example, you can
-      register your own custom qualifier annotation types even if they are not
-      themselves annotated with Spring's
+      enables further customization of the autowiring process. Specifically,
+      it allows you to register your own custom qualifier annotation types
+      even if they are not themselves annotated with Spring's
       <interfacename>@Qualifier</interfacename> annotation.</para>
 
       <programlisting>&lt;bean id="customAutowireConfigurer" class="org.springframework.beans.factory.config.CustomAutowireConfigurer"&gt;
@@ -5625,46 +5625,24 @@ public @interface MovieQualifier {
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
-      <para>It is also possible to supply your own implementation of the
-      <interfacename>AutowireCandidateResolver</interfacename> interface (or
-      subclass one of the existing implementations). As you can see by
-      reviewing its <ulink
-      url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/support/AutowireCandidateResolver.html">Javadoc</ulink>,
-      the resolver provides customization opportunities for determining
-      whether individual bean definitions should be considered as autowire
-      candidates as well as the decision logic for resolving ambiguities in
-      the case of multiple matches.</para>
-
-      <para>If you do not supply your own, the resolver strategy is dependent
-      upon the Java version. If running on less than Java 5, the qualifier
-      annotations are not supported, and therefore autowire candidates are
-      solely determined by the <literal>'autowire-candidate'</literal> value
-      of each bean definition as well as any
-      <literal>'default-autowire-candidates'</literal> pattern(s) available on
-      the <literal>&lt;beans/&gt;</literal> element. If running on Java 5 or
-      greater, the presence of <interfacename>@Qualifier</interfacename>
-      annotations will also play a role. Regardless of the Java version, the
-      default implementation of the
-      <methodname>determinePrimaryCandidate(..)</methodname> method is the
+      <para>Note that the particular implementation of 
+      <interfacename>AutowireCandidateResolver</interfacename>
+      that will be activated for the application context depends upon the
+      Java version. If running on less than Java 5, the qualifier annotations
+      are not supported, and therefore autowire candidates are solely
+      determined by the <literal>'autowire-candidate'</literal> value of each
+      bean definition as well as any <literal>'default-autowire-candidates'</literal>
+      pattern(s) available on the <literal>&lt;beans/&gt;</literal> element.
+      If running on Java 5 or greater, the presence of
+      <interfacename>@Qualifier</interfacename> annotations or any custom
+      annotations registered with the <classname>CustomAutowireConfigurer</classname>
+      will also play a role.</para>
+      
+      <para>Regardless of the Java version, the determination of a "primary"
+      candidate (when multiple beans qualify as autowire candidates) is the
       same: if exactly one bean definition among the candidates has a
       <literal>'primary'</literal> attribute set to <literal>'true'</literal>,
-      it will be selected. If you choose to customize the behavior, consider
-      reviewing the existing implementations in more detail in order to make
-      an informed decision whether to subclass or implement the interface. To
-      configure your custom resolver, set the
-      <literal>autowireCandidateResolver</literal> property on the
-      <classname>CustomAutowireConfigurer</classname>:</para>
-
-      <programlisting>&lt;bean id="customAutowireConfigurer" class="org.springframework.beans.factory.config.CustomAutowireConfigurer"&gt;
-    <emphasis role="bold">&lt;property name="autowireCandidateResolver"&gt;
-        &lt;bean class="example.CustomAutowireCandidateResolver"/&gt;
-    &lt;/property&gt;</emphasis>
-    &lt;property name="customQualifierTypes"&gt;
-        &lt;set&gt;
-            &lt;value&gt;example.CustomQualifier&lt;/value&gt;
-        &lt;/set&gt;
-    &lt;/property&gt;
-&lt;/bean&gt;</programlisting>
+      it will be selected.</para>
     </section>
 
     <section id="beans-resource-annotation">
