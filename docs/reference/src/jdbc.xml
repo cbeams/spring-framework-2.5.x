@@ -1102,7 +1102,7 @@ jdbcTemplate.update(
       To gain access to the native objects you can configure your
       <classname>JdbcTemplate</classname> or
       <classname>OracleLobHandler</classname> with a
-      <classname>NativeJdbcExtractor</classname>. </para>
+      <classname>NativeJdbcExtractor</classname>.</para>
 
       <para>The NativeJdbcExtractor comes in a variety of flavors to match
       your execution environment:</para>
@@ -2277,13 +2277,13 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
         </itemizedlist></para>
 
       <para>We will now show an example of how to create and insert a BLOB. We
-      will later see how to read it back from the database. </para>
+      will later see how to read it back from the database.</para>
 
       <para>This example uses a JdbcTemplate and an implementation of the
       AbstractLobCreatingPreparedStatementCallback. There is one method that
       must be implemented and it is "setValues". In this method you will be
       provided with a LobCreator that can be used to set the values for the
-      LOB columns in your SQL insert statement. </para>
+      LOB columns in your SQL insert statement.</para>
 
       <para>We are assuming that we have a variable named 'lobHandler' thet
       already is set to an instance of a
@@ -2326,7 +2326,7 @@ clobReader.close();</programlisting>
 
           <callout arearefs="jdbc.lobhandler.setClob">
             <para>Using the method <classname>setClobAsCharacterStream
-            </classname>we pass in the contents of the CLOB </para>
+            </classname>we pass in the contents of the CLOB</para>
           </callout>
 
           <callout arearefs="jdbc.lobhandler.setBlob">
@@ -2339,7 +2339,7 @@ clobReader.close();</programlisting>
 
       <para>Now it's time to read the LOB data from the database. Again, we
       use a JdbcTempate and we have the same instance variable 'lobHandler'
-      with a reference to a <classname>DefaultLobHandler</classname>. </para>
+      with a reference to a <classname>DefaultLobHandler</classname>.</para>
 
       <para><programlistingco>
           <areaspec>
@@ -2376,13 +2376,57 @@ clobReader.close();</programlisting>
     </section>
 
     <section>
-      <title>Handling STRUCT and ARRAY types</title>
+      <title>Handling complex types for stored procedure calls</title>
 
-      <para></para>
+      <para>When calling stored procedures it's sometimes possible to use
+      complex types specific to the database. To accommodate these types
+      Spring provides a <classname>SqlReturnType</classname> for handling them
+      when they are returned from the stored procedure call and
+      <classname>SqlTypeValue</classname> when they are passed in as a
+      parameter to the stored procedure.</para>
 
-      <para>TODO</para>
+      <para>Here is an example of returning the value of an Oracle STRUCT
+      object of the user declared type "ITEM_TYPE". The
+      <classname>SqlReturnType</classname> interface has a single method named
+      "<classname>getTypeValue</classname>" that must be implemented. This
+      interface is used as part of the declaration of an
+      <classname>SqlOutParameter</classname>.</para>
 
-      <para></para>
+      <para><programlisting>declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
+    new SqlReturnType() {
+      public Object getTypeValue(CallableStatement cs, int colIndx, int sqlType, String typeName) 
+          throws SQLException {
+        STRUCT struct = (STRUCT)cs.getObject(colIndx);
+        Object[] attr = struct.getAttributes();
+        TestItem item = new TestItem();
+        item.setId(((Number) attr[0]).longValue());
+        item.setDescription((String)attr[1]);
+        item.setExpirationDate((java.util.Date)attr[2]);
+        return item;
+      }
+    }));</programlisting>Going from Java to the database and passing in the
+      value of a <classname>TestItem</classname> into a stored procedure is
+      done using the <classname>SqlTypeValue</classname>. The
+      <classname>SqlTypeValue</classname> interface has a single method named
+      "<classname>createTypeValue</classname>" that must be implemented. The
+      active connection is passed in and can be used to create database
+      specifc objects like <classname>StructDescriptor</classname>s or
+      <classname>ArrayDescriptor</classname>s</para>
+
+      <para><programlisting>SqlTypeValue value = new AbstractSqlTypeValue() {
+  protected Object createTypeValue(Connection conn, int sqlType, String typeName) throws SQLException {
+    StructDescriptor itemDescriptor = new StructDescriptor(typeName, conn);
+    Struct item = new STRUCT(itemDescriptor, conn,
+        new Object[] {
+            testItem.getId(),
+            testItem.getDescription(),
+            new java.sql.Date(testItem.getExpirationDate().getTime())
+        });
+    return item;
+  }
+};</programlisting>This <classname>SqlTypeValue</classname> can now be added
+      to the Map containing the input parameters for the execute call of the
+      stored procedure.</para>
     </section>
   </section>
 </chapter>
