@@ -329,6 +329,8 @@
 			<include name="*"/>
 			<include name="docs/**"/>
 			<include name="html/**"/>
+			<include name="styles/**"/>
+			<include name="images/**"/>
 			<include name="WEB-INF/*.*"/>
 			<exclude name="WEB-INF/web.xml"/>
 			<include name="WEB-INF/classes/*.*"/>

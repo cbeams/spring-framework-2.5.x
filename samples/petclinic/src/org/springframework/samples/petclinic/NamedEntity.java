@@ -20,4 +20,8 @@ public class NamedEntity extends BaseEntity {
 		return this.name;
 	}
 
+	public String toString() {
+		return this.getName();
+	}
+
 }

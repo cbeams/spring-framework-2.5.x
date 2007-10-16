@@ -1,25 +1,26 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
 <%@ include file="/WEB-INF/jsp/header.jsp" %>
 
-<P>
-<H2>Veterinarians:</H2>
-<TABLE border="1">
-  <TH>Name</TH><TH>Specialties</TH>
+<h2>Veterinarians:</h2>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Specialties</th>
+  </tr>
   <c:forEach var="vet" items="${vetList}">
-    <TR>
-      <TD><c:out value="${vet.firstName}"/> <c:out value="${vet.lastName}"/></TD>
-      <TD>
-				<c:forEach var="specialty" items="${vet.specialties}">
-					<c:out value="${specialty.name}"/>
-				</c:forEach>
-        <c:if test="${vet.nrOfSpecialties == 0}">
-				  none
-				</c:if>
-      </TD>
-    </TR>
+    <tr>
+      <td>${vet.firstName} ${vet.lastName}</td>
+      <td>
+	    <c:forEach var="specialty" items="${vet.specialties}">
+          ${specialty.name}
+        </c:forEach>
+        <c:if test="${vet.nrOfSpecialties == 0}">none</c:if>
+      </td>
+    </tr>
   </c:forEach>
-</TABLE>
-<P>
-<BR>
+</table>
+
+<br/>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

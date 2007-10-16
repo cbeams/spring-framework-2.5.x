@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
-import org.springframework.samples.petclinic.util.EntityUtils;
+import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -18,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
  * JavaBean Form controller that is used to edit an existing <code>Pet</code>.
  *
  * @author Ken Krebs
+ * @author Mark Fisher
  */
 @RequestMapping("/editPet.htm")
 public class EditPetForm extends AbstractClinicForm {
@@ -39,16 +40,15 @@ public class EditPetForm extends AbstractClinicForm {
 	}
 
 	@Override
-	protected Object formBackingObject(HttpServletRequest request) throws ServletException {
-		// get the Pet referred to by id in the request
-		return getClinic().loadPet(ServletRequestUtils.getRequiredIntParameter(request, "petId"));
+	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
+		super.initBinder(request, binder);
+		binder.registerCustomEditor(PetType.class, new PetTypeEditor(getClinic().getPetTypes()));
 	}
 
 	@Override
-	protected void onBind(HttpServletRequest request, Object command) throws ServletException {
-		Pet pet = (Pet) command;
-		int typeId = ServletRequestUtils.getRequiredIntParameter(request, "typeId");
-		pet.setType(EntityUtils.getById(getClinic().getPetTypes(), PetType.class, typeId));
+	protected Object formBackingObject(HttpServletRequest request) throws ServletException {
+		// get the Pet referred to by id in the request
+		return getClinic().loadPet(ServletRequestUtils.getRequiredIntParameter(request, "petId"));
 	}
 
 	/** Method updates an existing Pet */

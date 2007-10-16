@@ -1,30 +1,33 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
 <%@ include file="/WEB-INF/jsp/header.jsp" %>
 
-<P>
-<H2>Owners:</H2>
-<TABLE border="1">
-  <TH>Name</TH><TH>Address</TH><TH>City</TH><TH>Telephone</TH><TH>Pets</TH>
+<h2>Owners:</h2>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Address</th>
+    <th>City</th>
+    <th>Telephone</th>
+    <th>Pets</th>
+  </tr>
   <c:forEach var="owner" items="${selections}">
-    <TR>
-      <TD>
-        <FORM method="POST" action="<c:url value="/owner.htm"/>">
-          <INPUT type="hidden" name="ownerId" value="<c:out value="${owner.id}"/>"/>
-          <INPUT type="submit" value="<c:out value="${owner.firstName}"/> <c:out value="${owner.lastName}"/>"/>
-        </FORM>
-      </TD>
-      <TD><c:out value="${owner.address}"/></TD>
-      <TD><c:out value="${owner.city}"/></TD>
-      <TD><c:out value="${owner.telephone}"/></TD>
-      <TD>
+    <tr>
+      <td>
+          <a href="owner.htm?ownerId=${owner.id}">${owner.firstName} ${owner.lastName}</a>
+      </td>
+      <td>${owner.address}</td>
+      <td>${owner.city}</td>
+      <td>${owner.telephone}</td>
+      <td>
         <c:forEach var="pet" items="${owner.pets}">
-          <c:out value="${pet.name}"/>
+          ${pet.name} &nbsp;
         </c:forEach>
-      </TD>
-    </TR>
+      </td>
+    </tr>
   </c:forEach>
-</TABLE>
-<P>
-<BR>
+</table>
+
+<br/>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

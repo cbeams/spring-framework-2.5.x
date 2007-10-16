@@ -12,6 +12,7 @@ import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
 import org.springframework.samples.petclinic.util.EntityUtils;
+import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -21,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView;
  * system.
  *
  * @author Ken Krebs
+ * @author Mark Fisher
  */
 @RequestMapping("/addPet.htm")
 public class AddPetForm extends AbstractClinicForm {
@@ -40,18 +42,17 @@ public class AddPetForm extends AbstractClinicForm {
 	}
 
 	@Override
+	protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
+		super.initBinder(request, binder);
+		binder.registerCustomEditor(PetType.class, new PetTypeEditor(getClinic().getPetTypes()));
+	}
+
+	@Override
 	protected Object formBackingObject(HttpServletRequest request) throws ServletException {
 		Owner owner = getClinic().loadOwner(ServletRequestUtils.getRequiredIntParameter(request, "ownerId"));
 		Pet pet = new Pet();
 		owner.addPet(pet);
 		return pet;
-	}
-
-	@Override
-	protected void onBind(HttpServletRequest request, Object command) {
-		Pet pet = (Pet) command;
-		int typeId = Integer.parseInt(request.getParameter("typeId"));
-		pet.setType(EntityUtils.getById(getClinic().getPetTypes(), PetType.class, typeId));
 	}
 
 	/** Method inserts a new Pet */

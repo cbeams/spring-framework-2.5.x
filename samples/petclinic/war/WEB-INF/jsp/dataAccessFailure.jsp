@@ -6,16 +6,15 @@
 Exception ex = (Exception) request.getAttribute("exception");
 %>
 
-<H2>Data access failure: <%= ex.getMessage() %></H2>
-<P>
-
+<h2>Data access failure: <%= ex.getMessage() %></h2>
+<p/>
 
 <%
 ex.printStackTrace(new java.io.PrintWriter(out));
 %>
 
-<P>
-<BR>
-<A href="<c:url value="/welcome.htm"/>">Home</A>
+<p/>
+<br/>
+<a href="<c:url value="/welcome.htm"/>">Home</a>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

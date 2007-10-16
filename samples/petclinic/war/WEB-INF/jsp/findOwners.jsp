@@ -1,24 +1,25 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
 <%@ include file="/WEB-INF/jsp/header.jsp" %>
 
-<P>
-<H2>Find Owners:</H2>
-<spring:bind path="owner">
-  <FONT color="red">
-    <B><c:out value="${status.errorMessage}"/></B>
-  </FONT>
-</spring:bind>
-<P>
-<FORM method="POST">
-  <spring:nestedPath path="owner">
-    <jsp:include page="/WEB-INF/jsp/fields/lastName.jsp"/>
-  </spring:nestedPath>
-  <INPUT type = "submit" value="Find Owners"  />
-</FORM>
-<P>
-<BR>
-<A href="<c:url value="/addOwner.htm"/>">Add Owner</A>
-<P>
-<BR>
+<h2>Find Owners:</h2>
+
+<form:form commandName="owner">
+  <table>
+    <tr>
+      <th>
+        Last Name: <form:errors path="*" cssClass="errors"/>
+        <br/> 
+        <form:input path="lastName" size="30" maxlength="80"/>
+      </th>
+    </tr>
+    <tr>
+      <td><input type="submit" value="Find Owners"/></td>
+    </tr>
+  </table>
+</form:form>
+
+<br/>
+<a href="<c:url value="/addOwner.htm"/>">Add Owner</a>
+<br/>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>
