@@ -439,11 +439,7 @@ public abstract class AbstractJdbcInsert {
 					PreparedStatement ps = null;
 					try {
 						ps = con.prepareStatement(getInsertString());
-						int colIndex = 0;
-						for (Object value : values) {
-							colIndex++;
-							StatementCreatorUtils.setParameterValue(ps, colIndex, SqlTypeValue.TYPE_UNKNOWN, value);
-						}
+						setParameterValues(ps, values, null);
 						ps.executeUpdate();
 					} finally {
 						JdbcUtils.closeStatement(ps);
@@ -478,11 +474,7 @@ public abstract class AbstractJdbcInsert {
 					new PreparedStatementCreator() {
 						public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 							PreparedStatement ps = prepareStatementForGeneratedKeys(con);
-							int colIndex = 0;
-							for (Object value : values) {
-								colIndex++;
-								StatementCreatorUtils.setParameterValue(ps, colIndex, SqlTypeValue.TYPE_UNKNOWN, value);
-							}
+							setParameterValues(ps, values, null);
 							return ps;
 						}
 					},
@@ -557,7 +549,7 @@ public abstract class AbstractJdbcInsert {
 	 * Method to execute the batch insert
 	 */
 	//TODO synchronize parameter setters with the SimpleJdbcTemplate
-	private int[] executeBatchInternal(final List[] batchValues) {
+	private int[] executeBatchInternal(final List<Object>[] batchValues) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing statement " + getInsertString() + " with batch of size: " + batchValues.length);
 		}
@@ -567,13 +559,8 @@ public abstract class AbstractJdbcInsert {
 				new BatchPreparedStatementSetter() {
 
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
-						List values = batchValues[i];
-						int colIndex = 0;
-						for (Object value : values) {
-							colIndex++;
-							StatementCreatorUtils.setParameterValue(ps, colIndex, columnTypes[colIndex - 1], value);
-						}
-
+						List<Object> values = batchValues[i];
+						setParameterValues(ps, values, columnTypes);
 					}
 
 					public int getBatchSize() {
@@ -583,6 +570,25 @@ public abstract class AbstractJdbcInsert {
 		return updateCounts;
 	}
 
+	/**
+	 * Internal implementation for setting parameter values
+	 * @param preparedStatement the PreparedStatement
+	 * @param values the values to be set
+	 */
+	private void setParameterValues(PreparedStatement preparedStatement, List<Object> values, int[] columnTypes)
+			throws SQLException {
+		int colIndex = 0;
+		for (Object value : values) {
+			colIndex++;
+			if (columnTypes == null || colIndex < columnTypes.length) {
+				StatementCreatorUtils.setParameterValue(preparedStatement, colIndex, SqlTypeValue.TYPE_UNKNOWN, value);
+			}
+			else {
+				StatementCreatorUtils.setParameterValue(preparedStatement, colIndex, columnTypes[colIndex - 1], value);
+			}
+		}
+	}
+	
 	/**
 	 * Match the provided in parameter values with regitered parameters and parameters defined via metedata
 	 * processing.
