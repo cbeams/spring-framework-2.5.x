@@ -7,7 +7,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.Pet;
@@ -27,8 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Sam Brannen
  * @since 22.4.2006
  */
-@Transactional
 @Repository
+@Transactional
 public class EntityManagerClinic implements Clinic {
 
 	@PersistenceContext
@@ -37,47 +36,47 @@ public class EntityManagerClinic implements Clinic {
 
 	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
-	public Collection<Vet> getVets() throws DataAccessException {
+	public Collection<Vet> getVets() {
 		return this.em.createQuery("SELECT vet FROM Vet vet ORDER BY vet.lastName, vet.firstName").getResultList();
 	}
 
 	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
-	public Collection<PetType> getPetTypes() throws DataAccessException {
+	public Collection<PetType> getPetTypes() {
 		return this.em.createQuery("SELECT ptype FROM PetType ptype ORDER BY ptype.name").getResultList();
 	}
 
 	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
-	public Collection<Owner> findOwners(String lastName) throws DataAccessException {
+	public Collection<Owner> findOwners(String lastName) {
 		Query query = this.em.createQuery("SELECT owner FROM Owner owner WHERE owner.lastName LIKE :lastName");
 		query.setParameter("lastName", lastName + "%");
 		return query.getResultList();
 	}
 
 	@Transactional(readOnly = true)
-	public Owner loadOwner(int id) throws DataAccessException {
+	public Owner loadOwner(int id) {
 		return this.em.find(Owner.class, id);
 	}
 
 	@Transactional(readOnly = true)
-	public Pet loadPet(int id) throws DataAccessException {
+	public Pet loadPet(int id) {
 		return this.em.find(Pet.class, id);
 	}
 
-	public void storeOwner(Owner owner) throws DataAccessException {
+	public void storeOwner(Owner owner) {
 		// Consider returning the persistent object here, for exposing
 		// a newly assigned id using any persistence provider...
 		this.em.merge(owner);
 	}
 
-	public void storePet(Pet pet) throws DataAccessException {
+	public void storePet(Pet pet) {
 		// Consider returning the persistent object here, for exposing
 		// a newly assigned id using any persistence provider...
 		this.em.merge(pet);
 	}
 
-	public void storeVisit(Visit visit) throws DataAccessException {
+	public void storeVisit(Visit visit) {
 		// Consider returning the persistent object here, for exposing
 		// a newly assigned id using any persistence provider...
 		this.em.merge(visit);

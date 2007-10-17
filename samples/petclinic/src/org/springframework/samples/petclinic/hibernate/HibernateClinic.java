@@ -5,13 +5,13 @@ import java.util.Collection;
 import org.hibernate.SessionFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
 import org.springframework.samples.petclinic.Vet;
 import org.springframework.samples.petclinic.Visit;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Mark Fisher
  * @since 19.10.2003
  */
+@Repository
 @Transactional
 public class HibernateClinic implements Clinic {
 
@@ -39,34 +40,34 @@ public class HibernateClinic implements Clinic {
 
 	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
-	public Collection<Vet> getVets() throws DataAccessException {
+	public Collection<Vet> getVets() {
 		return sessionFactory.getCurrentSession().createQuery("from Vet vet order by vet.lastName, vet.firstName").list();
 	}
 
 	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
-	public Collection<PetType> getPetTypes() throws DataAccessException {
+	public Collection<PetType> getPetTypes() {
 		return sessionFactory.getCurrentSession().createQuery("from PetType type order by type.name").list();
 	}
 
 	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
-	public Collection<Owner> findOwners(String lastName) throws DataAccessException {
+	public Collection<Owner> findOwners(String lastName) {
 		return sessionFactory.getCurrentSession().createQuery("from Owner owner where owner.lastName like :lastName")
 				.setString("lastName", lastName + "%").list();
 	}
 
 	@Transactional(readOnly = true)
-	public Owner loadOwner(int id) throws DataAccessException {
+	public Owner loadOwner(int id) {
 		return (Owner) sessionFactory.getCurrentSession().load(Owner.class, id);
 	}
 
 	@Transactional(readOnly = true)
-	public Pet loadPet(int id) throws DataAccessException {
+	public Pet loadPet(int id) {
 		return (Pet) sessionFactory.getCurrentSession().load(Pet.class, id);
 	}
 
-	public void storeOwner(Owner owner) throws DataAccessException {
+	public void storeOwner(Owner owner) {
 		// Note: Hibernate3's merge operation does not reassociate the object
 		// with the current Hibernate Session. Instead, it will always copy the
 		// state over to a registered representation of the entity. In case of a
@@ -77,11 +78,11 @@ public class HibernateClinic implements Clinic {
 		sessionFactory.getCurrentSession().merge(owner);
 	}
 
-	public void storePet(Pet pet) throws DataAccessException {
+	public void storePet(Pet pet) {
 		sessionFactory.getCurrentSession().merge(pet);
 	}
 
-	public void storeVisit(Visit visit) throws DataAccessException {
+	public void storeVisit(Visit visit) {
 		sessionFactory.getCurrentSession().merge(visit);
 	}
 
