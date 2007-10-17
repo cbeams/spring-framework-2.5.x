@@ -27,8 +27,6 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.jms.listener.adapter.MessageListenerAdapter;
-import org.springframework.jms.listener.adapter.MessageListenerAdapter102;
 import org.springframework.util.StringUtils;
 
 /**
@@ -142,7 +140,8 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 		// Remain JMS 1.0.2 compatible for the adapter if the container class indicates this.
 		boolean jms102 = indicatesJms102(containerDef);
-		listenerDef.setBeanClass(jms102 ? MessageListenerAdapter102.class : MessageListenerAdapter.class);
+		listenerDef.setBeanClassName(
+				"org.springframework.jms.listener.adapter.MessageListenerAdapter" + (jms102 ? "102" : ""));
 
 		containerDef.getPropertyValues().addPropertyValue("messageListener", listenerDef);
 

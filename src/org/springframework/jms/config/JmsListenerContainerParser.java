@@ -24,10 +24,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
-import org.springframework.jms.listener.DefaultMessageListenerContainer102;
-import org.springframework.jms.listener.SimpleMessageListenerContainer;
-import org.springframework.jms.listener.SimpleMessageListenerContainer102;
 import org.springframework.util.StringUtils;
 
 /**
@@ -53,20 +49,20 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 		String containerType = containerEle.getAttribute(CONTAINER_TYPE_ATTRIBUTE);
 		if ("".equals(containerType) || "default".equals(containerType)) {
-			containerDef.setBeanClass(DefaultMessageListenerContainer.class);
+			containerDef.setBeanClassName("org.springframework.jms.listener.DefaultMessageListenerContainer");
 		}
 		else if ("default102".equals(containerType)) {
-			containerDef.setBeanClass(DefaultMessageListenerContainer102.class);
+			containerDef.setBeanClassName("org.springframework.jms.listener.DefaultMessageListenerContainer102");
 		}
 		else if ("simple".equals(containerType)) {
-			containerDef.setBeanClass(SimpleMessageListenerContainer.class);
+			containerDef.setBeanClassName("org.springframework.jms.listener.SimpleMessageListenerContainer");
 		}
 		else if ("simple102".equals(containerType)) {
-			containerDef.setBeanClass(SimpleMessageListenerContainer102.class);
+			containerDef.setBeanClassName("org.springframework.jms.listener.SimpleMessageListenerContainer102");
 		}
 		else {
 			parserContext.getReaderContext().error(
-					"Invalid 'container-type' attribute: only \"default\" and \"simple\" supported.", containerEle);
+					"Invalid 'container-type' attribute: only \"default(102)\" and \"simple(102)\" supported.", containerEle);
 		}
 
 		String connectionFactoryBeanName = "connectionFactory";

@@ -22,8 +22,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.jms.listener.endpoint.JmsActivationSpecConfig;
-import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 import org.springframework.util.StringUtils;
 
 /**
@@ -40,7 +38,8 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 
 
 	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
-		RootBeanDefinition containerDef = new RootBeanDefinition(JmsMessageEndpointManager.class);
+		RootBeanDefinition containerDef = new RootBeanDefinition();
+		containerDef.setBeanClassName("org.springframework.jms.listener.endpoint.JmsMessageEndpointManager");
 
 		String resourceAdapterBeanName = "resourceAdapter";
 		if (containerEle.hasAttribute(RESOURCE_ADAPTER_ATTRIBUTE)) {
@@ -69,7 +68,8 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 					new RuntimeBeanReference(destinationResolverBeanName));
 		}
 
-		RootBeanDefinition configDef = new RootBeanDefinition(JmsActivationSpecConfig.class);
+		RootBeanDefinition configDef = new RootBeanDefinition();
+		configDef.setBeanClassName("org.springframework.jms.listener.endpoint.JmsActivationSpecConfig");
 		parseListenerConfiguration(listenerEle, parserContext, configDef);
 		parseContainerConfiguration(containerEle, parserContext, configDef);
 
