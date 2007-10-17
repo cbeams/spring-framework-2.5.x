@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5 RC1 (2007-10-17)
+Changes in version 2.5 RC1 (2007-10-22)
 ---------------------------------------
 
 General
@@ -11,8 +11,9 @@ General
 * spring.jar does not include Servlet Web MVC support anymore; add spring-webmvc.jar separately
 * spring.jar and spring-core.jar include repackaged version of ASM 2.2.3 (avoiding side effects with other ASM versions)
 * spring-orm.jar contains the web ORM support (again), in order to avoid split packages across bundles
-* spring-web.jar includes the entire Hessian, Burlap, HTTP invoker and JAX-RPC support (avoiding split packages)
+* spring-web.jar includes the entire Hessian, Burlap, HTTP invoker, JAX-RPC and JAX-WS support (avoiding split packages)
 * updated Spring's JDO support to require JDO 2.0 or higher, with early support for JDO 2.1 features
+* revised PetClinic sample application into a full-fledged Java 5 showcase (annotation-based configuration etc)
 * revised default handling in BeanDefinitionParsers for XML config namespaces to work without XSD validation as well
 
 Package org.springframework.aop
@@ -35,6 +36,9 @@ Package org.springframework.beans
 * XmlBeanDefinitionReader initializes default EntityResolver lazily, avoiding classpath scan in case of custom resolver
 * DefaultNamespaceHandlerResolver exposes public DEFAULT_HANDLER_MAPPINGS_LOCATION constant
 * fixed BeanDefinitionParserDelegate to correctly parse property sub-elements even with custom name for beans namespace
+* BeanDefinitionParserDelegate stores definition source for metadata attributes and qualifier attributes
+* qualifier attributes consist of "key" and "value" in spring-beans-2.5.xsd (formerly "name" and "value")
+* AbstractBeanDefinition's qualifier handling provides a unified "addQualifier(AutowireCandidateQualifier)" method
 * AbstractSingleBeanDefinitionParser applies full scope to inner beans, making them eligible for destruction callbacks
 * added "getParentName" template method to AbstractSingleBeanDefinitionParser, allowing for child bean definitions
 * @Autowired qualifier annotations may be defined with target 'type' as well, marking the target bean class
@@ -53,11 +57,13 @@ Package org.springframework.context
 * CommonAnnotationBeanPostProcessor detects and processes the JAX-WS @WebServiceRef annotation as well
 * CommonAnnotationBeanPostProcessor detects and processes the EJB 3 @EJB reference annotation (if present) as well
 * @PostConstruct/@PreDestroy methods are only called once even if they are specified as standard init/destroy methods
+* added "context:mbean-export" configuration element to "spring-context-2.5" schema, for annotation-driven JMX export
 
 Package org.springframework.core
 * NestedRuntimeException/NestedCheckedException's "contains" checks the nested causes of any kind of wrapped exception
 * added "ConcurrentMap createConcurrentMap" method to CollectionFactory, exposing a common ConcurrentMap interface
 * deprecated CollectionFactory's "createLinkedSet/LinkedMap/IdentityMapIfPossible" (for usage on JDK 1.4 or higher)
+* AttributeAccessorSupport uses a LinkedHashMap, keeping the attributes in the order of registration
 * "Conventions.getVariableName" follows JavaBeans property naming rules in case of multiple upper case letters
 * added "getURI()" method to Resource interface
 * added constructor with URI argument to UrlResource class
@@ -78,6 +84,7 @@ Package org.springframework.jms
 * added DestinationResolver support to StandardJmsActivationSpecFactory, for Destination objects on JCA ActivationSpecs
 * DefaultJmsActivationSpecFactory autodetects WebSphere's JMS ResourceAdapter and extended ActivationSpec properties
 * "spring-jms.xsd" supports "destination-resolver" attribute for "jca-listener-container" element as well
+* JmsNamespaceHandler registers class names only, allowing tools to run without the JMS API on the classpath
 
 Package org.springframework.jmx
 * MBeanExporter applies NotificationPublisherAware callbacks to objects registered via "registerManagedResource" as well
