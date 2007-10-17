@@ -101,30 +101,30 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2730 KB)
+* "spring" (~2750 KB)
 - Convenient jar file combining all standard modules (except for the test module and the Portlet/Struts support)
 - Also includes the AOP Alliance interfaces (as a convenience)!
 - Does not include contents of spring-aspects.jar, spring-test.jar, spring-webmvc-portlet and spring-webmvc-struts.jar!
 
 MODULE JARS (dist/modules):
 
-* "spring-aop" (~310 KB)
+* "spring-aop" (~315 KB)
 - Contents: AOP framework
 - Dependencies: spring-core, (spring-beans, AOP Alliance)
 
-* "spring-beans" (~440 KB)
+* "spring-beans" (~445 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core
 
-* "spring-context" (~420 KB)
+* "spring-context" (~425 KB)
 - Contents: application context, JNDI, JMX, instrumentation, remoting, scripting, scheduling, validation
 - Dependencies: spring-beans, (spring-aop, JMX API, EJB API)
 
-* "spring-context-support" (~100 KB)
-- Contents: Quartz and CommonJ scheduling, JAX-WS support, UI templating, mail, caching
+* "spring-context-support" (~90 KB)
+- Contents: Quartz and CommonJ scheduling, UI templating, mail, caching
 - Dependencies: spring-context, (spring-aop, spring-jdbc)
 
-* "spring-core" (~260 KB)
+* "spring-core" (~265 KB)
 - Contents: core abstractions and utilities, source-level metadata support, repackaged ASM library
 - Dependencies: Commons Logging, (Commons Attributes)
 
@@ -132,49 +132,49 @@ MODULE JARS (dist/modules):
 - Contents: JDBC support
 - Dependencies: spring-beans, spring-tx
 
-* "spring-jms" (~165 KB)
+* "spring-jms" (~170 KB)
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-beans, spring-tx, JMS API
 
-* "spring-orm" (~350 KB)
+* "spring-orm" (~355 KB)
 - Contents: JDO support, JPA support, Hibernate support, TopLink support, iBATIS support
 - Dependencies: spring-jdbc, (spring-web)
 
-* "spring-test" (~160 KB)
+* "spring-test" (~175 KB)
 - Contents: test context framework, JUnit support, JNDI mocks, Servlet API mocks, Portlet API mocks
 - Dependencies: spring-core, (spring-context, spring-jdbc, spring-web, JUnit, Servlet API, Portlet API)
 
-* "spring-tx" (~205 KB)
+* "spring-tx" (~215 KB)
 - Contents: transaction infrastructure, JCA support, DAO support
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API, JCA API)
 
-* "spring-web" (~200 KB)
+* "spring-web" (~215 KB)
 - Contents: web application context, multipart resolver, HTTP-based remoting support
 - Dependencies: spring-context, Servlet API, (JSP API, JSTL)
 
-* "spring-webmvc" (~300 KB)
+* "spring-webmvc" (~315 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-context-support)
 
-* "spring-webmvc-portlet" (~120 KB)
+* "spring-webmvc-portlet" (~140 KB)
 - Contents: framework portlets, portlet MVC framework, portlet controllers
 - Dependencies: spring-web, Portlet API, (spring-webmvc)
 
-* "spring-webmvc-struts" (~35 KB)
+* "spring-webmvc-struts" (~40 KB)
 - Contents: Struts 1.x action support, Tiles 1.x view support
 - Dependencies: spring-web, Struts API, (spring-webmvc)
 
 WEAVING JARS (dist/weaving)
 
-* "spring-aspects" (~15 KB)
-- Contents: AspectJ aspects, for explicitly linking aspects into an IDE (Eclipse AJDT)
-- Dependencies: spring-aop, AspectJ, (spring-tx)
-
 * "spring-agent" (~5 KB)
 - Contents: Spring's InstrumentationSavingAgent (for InstrumentationLoadTimeWeaver)
 - Dependencies: none (for use at JVM startup: "-javaagent:spring-agent.jar")
 
-* "spring-tomcat-weaver" (~5 KB)
+* "spring-aspects" (~20 KB)
+- Contents: AspectJ aspects, for explicitly linking aspects into an IDE (Eclipse AJDT)
+- Dependencies: spring-aop, AspectJ, (spring-tx)
+
+* "spring-tomcat-weaver" (~10 KB)
 - Contents: extension of Tomcat's ClassLoader, capable of class instrumentation
 - Dependencies: none (for deployment into Tomcat's "server/lib" directory)
 

@@ -114,7 +114,6 @@
 	<patternset id="spring.context.support.packages">
 		<include name="org/springframework/cache/**"/>
 		<include name="org/springframework/mail/**"/>
-		<include name="org/springframework/remoting/jaxws/**"/>
 		<include name="org/springframework/scheduling/commonj/**"/>
 		<include name="org/springframework/scheduling/quartz/**"/>
 		<include name="org/springframework/ui/velocity/**"/>
@@ -161,6 +160,7 @@
 		<include name="org/springframework/remoting/caucho/**"/>
 		<include name="org/springframework/remoting/httpinvoker/**"/>
 		<include name="org/springframework/remoting/jaxrpc/**"/>
+		<include name="org/springframework/remoting/jaxws/**"/>
 	</patternset>
 
 	<patternset id="spring.webmvc.packages">
