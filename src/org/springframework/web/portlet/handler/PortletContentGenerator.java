@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,17 @@ import org.springframework.web.portlet.context.PortletApplicationObjectSupport;
 
 /**
  * Convenient superclass for any kind of web content generator,
- * like AbstractController. Can also be used for custom handlers 
- * that have their own HandlerAdapter.
+ * like {@link org.springframework.web.portlet.mvc.AbstractController}.
+ * Can also be used for custom handlers that have their own
+ * {@link org.springframework.web.portlet.HandlerAdapter}.
  *
  * <p>Supports portlet cache control options.
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
  * @since 2.0
- * @see org.springframework.web.portlet.mvc.AbstractController
+ * @see #setCacheSeconds
+ * @see #setRequireSession
  */
 public abstract class PortletContentGenerator extends PortletApplicationObjectSupport {
 
@@ -54,7 +56,7 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	 * Return whether a session is required to handle requests.
 	 */
 	public final boolean isRequireSession() {
-		return requireSession;
+		return this.requireSession;
 	}
 
 	/**
@@ -72,7 +74,7 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	 * Return the number of seconds that content is cached.
 	 */
 	public final int getCacheSeconds() {
-		return cacheSeconds;
+		return this.cacheSeconds;
 	}
 
 

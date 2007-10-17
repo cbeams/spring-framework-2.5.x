@@ -324,7 +324,7 @@ public class SimpleFormController extends AbstractFormController {
 	}
 
 	/**
-	 * This implementation delegates to <code>isFormChangeRequest</code>:
+	 * This implementation delegates to {@link #isFormChangeRequest}:
 	 * A form change request changes the appearance of the form
 	 * and should not get validated but just show the new form.
 	 * @see #isFormChangeRequest
@@ -337,9 +337,10 @@ public class SimpleFormController extends AbstractFormController {
 	 * Determine whether the given request is a form change request.
 	 * A form change request changes the appearance of the form
 	 * and should always show the new form, without validation.
-	 * <p>Gets called by suppressValidation and processFormSubmission.
+	 * <p>Gets called by {@link #suppressValidation} and {@link #processFormSubmission}.
 	 * Consequently, this single method determines to suppress validation
 	 * <i>and</i> to show the form view in any case.
+	 * <p>The default implementation returns <code>false</code.
 	 * @param request current portlet request
 	 * @return whether the given request is a form change request
 	 * @see #suppressValidation

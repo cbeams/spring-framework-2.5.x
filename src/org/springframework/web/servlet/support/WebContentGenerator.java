@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,9 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
  * Convenient superclass for any kind of web content generator,
- * like AbstractController and WebContentInterceptor. Can also
- * be used for custom handlers that have their own
+ * like {@link org.springframework.web.servlet.mvc.AbstractController
+ * and {@link org.springframework.web.servlet.mvc.WebContentInterceptor}.
+ * Can also be used for custom handlers that have their own
  * {@link org.springframework.web.servlet.HandlerAdapter}.
  *
  * <p>Supports HTTP cache control options. The usage of corresponding
@@ -40,10 +41,8 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see #setUseExpiresHeader
- * @see #setUseCacheControlHeader
- * @see org.springframework.web.servlet.mvc.AbstractController
- * @see org.springframework.web.servlet.mvc.WebContentInterceptor
+ * @see #setCacheSeconds
+ * @see #setRequireSession
  */
 public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
@@ -116,7 +115,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * Return whether a session is required to handle requests.
 	 */
 	public final boolean isRequireSession() {
-		return requireSession;
+		return this.requireSession;
 	}
 
 	/**
@@ -132,7 +131,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * Return whether the HTTP 1.0 expires header is used.
 	 */
 	public final boolean isUseExpiresHeader() {
-		return useExpiresHeader;
+		return this.useExpiresHeader;
 	}
 
 	/**
@@ -166,7 +165,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * Return the number of seconds that content is cached.
 	 */
 	public final int getCacheSeconds() {
-		return cacheSeconds;
+		return this.cacheSeconds;
 	}
 
 

@@ -682,9 +682,6 @@ public abstract class AbstractFormController extends BaseCommandController {
 	protected final Object getCommand(PortletRequest request) throws Exception {
 		// If not in session-form mode, create a new form-backing object.
 		if (!isSessionForm()) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Not a session-form -- using new formBackingObject");
-			}
 			return formBackingObject(request);
 		}
 		

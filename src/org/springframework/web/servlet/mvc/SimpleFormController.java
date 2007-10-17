@@ -300,7 +300,7 @@ public class SimpleFormController extends AbstractFormController {
 	/**
 	 * Simpler <code>isFormChangeRequest</code> variant, called by the full
 	 * variant {@link #isFormChangeRequest(HttpServletRequest, Object)}.
-	 * <p>The default implementation is empty.
+	 * <p>The default implementation returns <code>false</code.
 	 * @param request current HTTP request
 	 * @return whether the given request is a form change request
 	 * @see #suppressValidation
