@@ -36,7 +36,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's BeanShell support
 
 * bnd/bnd.jar
-- BND tool 0.0.167 (http://www.aqute.biz/Code/Bnd)
+- BND tool 0.0.202 (http://www.aqute.biz/Code/Bnd)
 - required for adding OSGi entries to the jar manifests at build time
 
 * c3p0/c3p0-0.9.1.1.jar

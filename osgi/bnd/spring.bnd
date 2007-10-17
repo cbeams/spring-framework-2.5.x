@@ -1,4 +1,6 @@
-Export-Package: org.springframework*;version=${spring-version-osgi}
+Export-Package: !org.springframework.asm*, \
+  org.aopalliance*;version=${aopalliance-version-osgi}, \
+  org.springframework*;version=${spring-version-osgi}
 Import-Package: org.apache.commons.logging*, \
   javax.transaction*;version=${tx-version};resolution:=optional, \
   *;resolution:=optional
@@ -6,4 +8,4 @@ DynamicImport-Package: *
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring
-Bundle-SymbolicName: spring
+Bundle-SymbolicName: ${spring-bundle-prefix}.spring
