@@ -52,6 +52,6 @@ public @interface ModelAttribute {
 	 * attribute type, based on the non-qualified class name:
 	 * e.g. "orderAddress" for class "mypackage.OrderAddress".
 	 */
-	String value();
+	String value() default "";
 
 }

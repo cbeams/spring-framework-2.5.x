@@ -61,6 +61,10 @@ import java.lang.annotation.Target;
  * <li>{@link org.springframework.validation.Errors} /
  * {@link org.springframework.validation.BindingResult} validation results
  * for a preceding command object (the immediate preceding argument).
+ * <li>{@link org.springframework.web.bind.support.FormStatus} status handle
+ * for marking form processing as complete (triggering the cleanup of session
+ * attributes that have been indicated by the {@link FormAttributes} annotation
+ * at the handler type level).
  * </ul>
  *
  * <p>The following return types are supported for handler methods:
@@ -87,6 +91,7 @@ import java.lang.annotation.Target;
  * @since 2.5
  * @see RequestParam
  * @see ModelAttribute
+ * @see FormAttributes
  * @see org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping
  * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
  * @see org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping
