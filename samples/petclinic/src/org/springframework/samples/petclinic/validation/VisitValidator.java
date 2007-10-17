@@ -1,10 +1,8 @@
-
 package org.springframework.samples.petclinic.validation;
 
 import org.springframework.samples.petclinic.Visit;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
-import org.springframework.validation.ValidationUtils;
-import org.springframework.validation.Validator;
 
 /**
  * <code>Validator</code> for <code>Visit</code> forms.
@@ -12,15 +10,12 @@ import org.springframework.validation.Validator;
  * @author Ken Krebs
  * @author Juergen Hoeller
  */
-public class VisitValidator implements Validator {
+public class VisitValidator {
 
-	@SuppressWarnings("unchecked")
-	public boolean supports(Class clazz) {
-		return Visit.class.isAssignableFrom(clazz);
-	}
-
-	public void validate(Object obj, Errors errors) {
-		ValidationUtils.rejectIfEmpty(errors, "description", "required", "required");
+	public void validate(Visit visit, Errors errors) {
+		if (!StringUtils.hasLength(visit.getDescription())) {
+			errors.rejectValue("description", "required", "required");
+		}
 	}
 
 }

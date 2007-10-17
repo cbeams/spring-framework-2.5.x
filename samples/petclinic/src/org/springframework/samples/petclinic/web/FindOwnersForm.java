@@ -1,16 +1,14 @@
-
 package org.springframework.samples.petclinic.web;
 
 import java.util.Collection;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
-import org.springframework.validation.BindException;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * JavaBean Form controller that is used to search for <code>Owner</code>s by
@@ -18,54 +16,38 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Ken Krebs
  */
-@RequestMapping("/findOwners.htm")
-public class FindOwnersForm extends AbstractClinicForm {
+@Controller
+@RequestMapping("/findOwners.do")
+public class FindOwnersForm {
 
-	private String selectView;
+	@Autowired
+	private Clinic clinic;
 
-
-	/** Creates a new instance of FindOwnersForm */
-	public FindOwnersForm() {
-		setCommandName("owner");
-		// OK to start with a blank command object
-		setCommandClass(Owner.class);
+	@RequestMapping(type = "GET")
+	protected String setupForm(ModelMap model) {
+		model.addObject("owner", new Owner());
+		return "findOwners";
 	}
 
-	/**
-	 * Set the name of the view that should be used for selection display.
-	 */
-	@Required
-	public void setSelectView(final String selectView) {
-		this.selectView = selectView;
-	}
-
-	/**
-	 * Method used to search for owners renders View depending on how many are
-	 * found.
-	 */
-	@Override
-	protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response, Object command,
-			BindException errors) throws Exception {
-
-		Owner owner = (Owner) command;
-
+	@RequestMapping(type = "POST")
+	protected String processSubmit(Owner owner, BindingResult result, ModelMap model) {
 		// find owners by last name
-		Collection<Owner> results = getClinic().findOwners(owner.getLastName());
-
+		Collection<Owner> results = this.clinic.findOwners(owner.getLastName());
 		if (results.size() < 1) {
 			// no owners found
-			errors.rejectValue("lastName", "notFound", "not found");
-			return showForm(request, response, errors);
+			result.rejectValue("lastName", "notFound", "not found");
+			return "findOwners";
 		}
-
 		if (results.size() > 1) {
 			// multiple owners found
-			return new ModelAndView(this.selectView, "selections", results);
+			model.addObject("selections", results);
+			return "owners";
 		}
-
-		// 1 owner found
-		owner = results.iterator().next();
-		return new ModelAndView(getSuccessView(), "ownerId", owner.getId());
+		else {
+			// 1 owner found
+			owner = results.iterator().next();
+			return "redirect:owner.do?ownerId=" + owner.getId();
+		}
 	}
 
 }

@@ -14,7 +14,7 @@
   <c:forEach var="owner" items="${selections}">
     <tr>
       <td>
-          <a href="owner.htm?ownerId=${owner.id}">${owner.firstName} ${owner.lastName}</a>
+          <a href="owner.do?ownerId=${owner.id}">${owner.firstName} ${owner.lastName}</a>
       </td>
       <td>${owner.address}</td>
       <td>${owner.city}</td>

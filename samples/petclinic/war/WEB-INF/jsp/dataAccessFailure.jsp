@@ -15,6 +15,6 @@ ex.printStackTrace(new java.io.PrintWriter(out));
 
 <p/>
 <br/>
-<a href="<c:url value="/welcome.htm"/>">Home</a>
+<a href="<c:url value="/welcome.do"/>">Home</a>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

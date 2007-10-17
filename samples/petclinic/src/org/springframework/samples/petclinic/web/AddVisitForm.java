@@ -1,15 +1,18 @@
 
 package org.springframework.samples.petclinic.web;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.Visit;
-import org.springframework.web.bind.ServletRequestUtils;
+import org.springframework.samples.petclinic.validation.VisitValidator;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.FormAttributes;
+import org.springframework.web.bind.support.FormStatus;
 
 /**
  * JavaBean form controller that is used to add a new <code>Visit</code> to
@@ -17,40 +20,34 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Ken Krebs
  */
-@RequestMapping("/addVisit.htm")
-public class AddVisitForm extends AbstractClinicForm {
+@Controller
+@RequestMapping("/addVisit.do")
+@FormAttributes("visit")
+public class AddVisitForm {
 
-	public AddVisitForm() {
-		setCommandName("visit");
-		// need a session to hold the formBackingObject
-		setSessionForm(true);
-	}
+	@Autowired
+	private Clinic clinic;
 
-	/**
-	 * Method creates a new <code>Visit</code> with the correct
-	 * <code>Pet</code> info
-	 */
-	@Override
-	protected Object formBackingObject(HttpServletRequest request) throws ServletException {
-		Pet pet = getClinic().loadPet(ServletRequestUtils.getRequiredIntParameter(request, "petId"));
+	@RequestMapping(type = "GET")
+	public String setupForm(@RequestParam("petId") int petId, ModelMap model) {
+		Pet pet = this.clinic.loadPet(petId);
 		Visit visit = new Visit();
 		pet.addVisit(visit);
-		return visit;
+		model.addObject("visit", visit);
+		return "visitForm";
 	}
 
-	/** Method inserts a new <code>Visit</code>. */
-	@Override
-	protected ModelAndView onSubmit(Object command) throws ServletException {
-		Visit visit = (Visit) command;
-		// delegate the insert to the Business layer
-		getClinic().storeVisit(visit);
-		return new ModelAndView(getSuccessView(), "ownerId", visit.getPet().getOwner().getId());
-	}
-
-	@Override
-	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-		return disallowDuplicateFormSubmission(request, response);
+	@RequestMapping(type = "POST")
+	protected String processSubmit(Visit visit, BindingResult result, FormStatus status) {
+		new VisitValidator().validate(visit, result);
+		if (result.hasErrors()) {
+			return "visitForm";
+		}
+		else {
+			this.clinic.storeVisit(visit);
+			status.setComplete();
+			return "redirect:owner.do?ownerId=" + visit.getPet().getOwner().getId();
+		}
 	}
 
 }

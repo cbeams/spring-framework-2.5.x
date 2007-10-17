@@ -1,45 +1,48 @@
-
 package org.springframework.samples.petclinic.web;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
-import org.springframework.web.bind.ServletRequestUtils;
+import org.springframework.samples.petclinic.validation.OwnerValidator;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.FormAttributes;
+import org.springframework.web.bind.support.FormStatus;
 
 /**
  * JavaBean Form controller that is used to edit an existing <code>Owner</code>.
  *
  * @author Ken Krebs
  */
-@RequestMapping("/editOwner.htm")
-public class EditOwnerForm extends AbstractClinicForm {
+@Controller
+@RequestMapping("/editOwner.do")
+@FormAttributes("owner")
+public class EditOwnerForm {
 
-	public EditOwnerForm() {
-		setCommandName("owner");
-		// need a session to hold the formBackingObject
-		setSessionForm(true);
-		// initialize the form from the formBackingObject
-		setBindOnNewForm(true);
+	@Autowired
+	private Clinic clinic;
+
+	@RequestMapping(type = "GET")
+	public String setupForm(@RequestParam("ownerId") int ownerId, ModelMap model) {
+		Owner owner = this.clinic.loadOwner(ownerId);
+		model.addObject("owner", owner);
+		return "ownerForm";
 	}
 
-	/** Method forms a copy of an existing Owner for editing */
-	@Override
-	protected Object formBackingObject(HttpServletRequest request) throws ServletException {
-		// get the Owner referred to by id in the request
-		return getClinic().loadOwner(ServletRequestUtils.getRequiredIntParameter(request, "ownerId"));
-	}
-
-	/** Method updates an existing Owner. */
-	@Override
-	protected ModelAndView onSubmit(Object command) throws ServletException {
-		Owner owner = (Owner) command;
-		// delegate the update to the Business layer
-		getClinic().storeOwner(owner);
-
-		return new ModelAndView(getSuccessView(), "ownerId", owner.getId());
+	@RequestMapping(type = "POST")
+	protected String processSubmit(Owner owner, BindingResult result, FormStatus status) {
+		new OwnerValidator().validate(owner, result);
+		if (result.hasErrors()) {
+			return "ownerForm";
+		}
+		else {
+			this.clinic.storeOwner(owner);
+			status.setComplete();
+			return "redirect:owner.do?ownerId=" + owner.getId();
+		}
 	}
 
 }

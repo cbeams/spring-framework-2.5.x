@@ -23,7 +23,7 @@
     <tr>
       <td></td>
       <td>
-        <form method=GET action="<c:url value="/editOwner.htm"/>">
+        <form method=GET action="<c:url value="/editOwner.do"/>">
           <input type="hidden" name="ownerId" value="${owner.id}"/>
           <input type="submit" value="Edit Owner"/>
         </form>
@@ -53,7 +53,7 @@
             </tr>
             <tr>
               <td colspan="2">
-                <form method="GET" action="<c:url value="/editPet.htm"/>" name="formEditPet${pet.id}">
+                <form method="GET" action="<c:url value="/editPet.do"/>" name="formEditPet${pet.id}">
                   <input type="hidden" name="petId" value="${pet.id}"/>
                   <input type="submit" value="Edit Pet"/>
                 </form>
@@ -61,7 +61,7 @@
             </tr>
             <tr>
               <td colspan="2">
-                <form method="GET" action="<c:url value="/addVisit.htm"/>" name="formVisitPet${pet.id}">
+                <form method="GET" action="<c:url value="/addVisit.do"/>" name="formVisitPet${pet.id}">
                   <input type="hidden" name="petId" value="${pet.id}"/>
                   <input type="submit" value="Add Visit"/>
                 </form>
@@ -88,7 +88,7 @@
     <br/>
   </c:forEach>
 
-  <form method=GET action="<c:url value="/addPet.htm"/>" name="formAddPet">
+  <form method=GET action="<c:url value="/addPet.do"/>" name="formAddPet">
     <input type="hidden" name="ownerId" value="${owner.id}"/>
     <input type="submit" value="Add New Pet"/>
   </form>

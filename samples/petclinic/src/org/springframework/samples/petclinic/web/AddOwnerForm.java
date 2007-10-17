@@ -1,13 +1,16 @@
 
 package org.springframework.samples.petclinic.web;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
+import org.springframework.samples.petclinic.validation.OwnerValidator;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.FormAttributes;
+import org.springframework.web.bind.support.FormStatus;
 
 /**
  * JavaBean form controller that is used to add a new <code>Owner</code> to
@@ -15,30 +18,32 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * @author Ken Krebs
  */
-@RequestMapping("/addOwner.htm")
-public class AddOwnerForm extends AbstractClinicForm {
+@Controller
+@RequestMapping("/addOwner.do")
+@FormAttributes("owner")
+public class AddOwnerForm {
 
-	public AddOwnerForm() {
-		setCommandName("owner");
-		// OK to start with a blank command object
-		setCommandClass(Owner.class);
-		// activate session form mode to allow for detection of duplicate
-		// submissions
-		setSessionForm(true);
+	@Autowired
+	private Clinic clinic;
+
+	@RequestMapping(type = "GET")
+	public String setupForm(ModelMap model) {
+		Owner owner = new Owner();
+		model.addObject("owner", owner);
+		return "ownerForm";
 	}
 
-	/** Method inserts a new <code>Owner</code>. */
-	@Override
-	protected ModelAndView onSubmit(Object command) throws ServletException {
-		Owner owner = (Owner) command;
-		// delegate the insert to the Business layer
-		getClinic().storeOwner(owner);
-		return new ModelAndView(getSuccessView(), "ownerId", owner.getId());
-	}
-
-	protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-		return disallowDuplicateFormSubmission(request, response);
+	@RequestMapping(type = "POST")
+	protected String processSubmit(Owner owner, BindingResult result, FormStatus status) {
+		new OwnerValidator().validate(owner, result);
+		if (result.hasErrors()) {
+			return "ownerForm";
+		}
+		else {
+			this.clinic.storeOwner(owner);
+			status.setComplete();
+			return "redirect:owner.do?ownerId=" + owner.getId();
+		}
 	}
 
 }

@@ -9,7 +9,7 @@ import org.springframework.samples.petclinic.Pet;
  * @author Juergen Hoeller
  * @see SimpleJdbcClinic
  */
-public class JdbcPet extends Pet {
+class JdbcPet extends Pet {
 
 	private int typeId;
 

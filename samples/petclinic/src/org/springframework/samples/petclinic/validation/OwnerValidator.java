@@ -1,11 +1,8 @@
-
 package org.springframework.samples.petclinic.validation;
 
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
-import org.springframework.validation.ValidationUtils;
-import org.springframework.validation.Validator;
 
 /**
  * <code>Validator</code> for <code>Owner</code> forms.
@@ -13,20 +10,21 @@ import org.springframework.validation.Validator;
  * @author Ken Krebs
  * @author Juergen Hoeller
  */
-public class OwnerValidator implements Validator {
+public class OwnerValidator {
 
-	@SuppressWarnings("unchecked")
-	public boolean supports(Class clazz) {
-		return Owner.class.isAssignableFrom(clazz);
-	}
-
-	public void validate(Object obj, Errors errors) {
-		Owner owner = (Owner) obj;
-
-		ValidationUtils.rejectIfEmpty(errors, "firstName", "required", "required");
-		ValidationUtils.rejectIfEmpty(errors, "lastName", "required", "required");
-		ValidationUtils.rejectIfEmpty(errors, "address", "required", "required");
-		ValidationUtils.rejectIfEmpty(errors, "city", "required", "required");
+	public void validate(Owner owner, Errors errors) {
+		if (!StringUtils.hasLength(owner.getFirstName())) {
+			errors.rejectValue("firstName", "required", "required");
+		}
+		if (!StringUtils.hasLength(owner.getLastName())) {
+			errors.rejectValue("lastName", "required", "required");
+		}
+		if (!StringUtils.hasLength(owner.getAddress())) {
+			errors.rejectValue("address", "required", "required");
+		}
+		if (!StringUtils.hasLength(owner.getCity())) {
+			errors.rejectValue("city", "required", "required");
+		}
 
 		String telephone = owner.getTelephone();
 		if (!StringUtils.hasLength(telephone)) {

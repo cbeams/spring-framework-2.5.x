@@ -175,7 +175,8 @@ public class SimpleJdbcClinic implements Clinic, SimpleJdbcClinicMBean {
 					"SELECT id, first_name, last_name, address, city, telephone FROM owners WHERE id=?",
 					ParameterizedBeanPropertyRowMapper.newInstance(Owner.class),
 					id);
-		} catch (EmptyResultDataAccessException e) {
+		}
+		catch (EmptyResultDataAccessException ex) {
 			throw new ObjectRetrievalFailureException(Owner.class, new Integer(id));
 		}
 		loadPetsAndVisits(owner);
@@ -190,11 +191,13 @@ public class SimpleJdbcClinic implements Clinic, SimpleJdbcClinicMBean {
 					"SELECT id, name, birth_date, type_id, owner_id FROM pets WHERE id=?",
 					new JdbcPetRowMapper(),
 					id);
-		} catch (EmptyResultDataAccessException e) {
+		}
+		catch (EmptyResultDataAccessException ex) {
 			throw new ObjectRetrievalFailureException(Pet.class, new Integer(id));
 		}
 		Owner owner = loadOwner(pet.getOwnerId());
 		owner.addPet(pet);
+		pet.setType(EntityUtils.getById(getPetTypes(), PetType.class, pet.getTypeId()));
 		loadVisits(pet);
 		return pet;
 	}
@@ -273,19 +276,16 @@ public class SimpleJdbcClinic implements Clinic, SimpleJdbcClinicMBean {
 	 * Loads the {@link Visit} data for the supplied {@link Pet}.
 	 */
 	private void loadVisits(JdbcPet pet) {
-		pet.setType(EntityUtils.getById(getPetTypes(), PetType.class, pet.getTypeId()));
 		final List<Visit> visits = this.simpleJdbcTemplate.query(
 				"SELECT id, visit_date, description FROM visits WHERE pet_id=?",
 				new ParameterizedRowMapper<Visit>() {
-					public Visit mapRow(ResultSet rs, int row)
-							throws SQLException {
+					public Visit mapRow(ResultSet rs, int row) throws SQLException {
 						Visit visit = new Visit();
 						visit.setId(rs.getInt("id"));
 						visit.setDate(rs.getTimestamp("visit_date"));
 						visit.setDescription(rs.getString("description"));
 						return visit;
 					}
-
 				},
 				pet.getId().intValue());
 		for (Visit visit : visits) {
@@ -304,6 +304,7 @@ public class SimpleJdbcClinic implements Clinic, SimpleJdbcClinicMBean {
 				owner.getId().intValue());
 		for (JdbcPet pet : pets) {
 			owner.addPet(pet);
+			pet.setType(EntityUtils.getById(getPetTypes(), PetType.class, pet.getTypeId()));
 			loadVisits(pet);
 		}
 	}

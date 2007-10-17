@@ -19,7 +19,7 @@
 </form:form>
 
 <br/>
-<a href="<c:url value="/addOwner.htm"/>">Add Owner</a>
+<a href="<c:url value="/addOwner.do"/>">Add Owner</a>
 <br/>
 
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>
