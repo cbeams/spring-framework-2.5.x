@@ -18,7 +18,6 @@ package org.springframework.beans;
 
 import java.io.Serializable;
 
-import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -39,7 +38,7 @@ import org.springframework.util.ObjectUtils;
  * @see PropertyValues
  * @see BeanWrapper
  */
-public class PropertyValue extends AttributeAccessorSupport implements BeanMetadataElement, Serializable {
+public class PropertyValue extends BeanMetadataAttributeAccessor implements Serializable {
 
 	private final String name;
 
@@ -112,18 +111,6 @@ public class PropertyValue extends AttributeAccessorSupport implements BeanMetad
 	}
 
 	/**
-	 * Set the configuration source <code>Object</code> for this metadata element.
-	 * <p>The exact type of the object will depend on the configuration mechanism used.
-	 */
-	public void setSource(Object source) {
-		this.source = source;
-	}
-
-	public Object getSource() {
-		return this.source;
-	}
-
-	/**
 	 * Return the original PropertyValue instance for this value holder.
 	 * @return the original PropertyValue (either a source of this
 	 * value holder or this value holder itself).
@@ -176,7 +163,7 @@ public class PropertyValue extends AttributeAccessorSupport implements BeanMetad
 	}
 
 	public int hashCode() {
-		return this.name.hashCode() * 29 + (this.value == null ? 0 : this.value.hashCode());
+		return this.name.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.value);
 	}
 
 	public String toString() {

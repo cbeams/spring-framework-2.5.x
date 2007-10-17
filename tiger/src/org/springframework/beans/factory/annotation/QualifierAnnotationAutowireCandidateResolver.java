@@ -140,12 +140,9 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 					}
 					if (actualValue == null) {
 						// fall back on bean definition attribute
-						Object attr = bd.getAttribute(attributeName);
-						if (attr != null) {
-							actualValue = typeConverter.convertIfNecessary(attr, expectedValue.getClass());
-						}
+						actualValue = bd.getAttribute(attributeName);
 					}
-					if (actualValue == null && attributeName.equals("value") &&
+					if (actualValue == null && attributeName.equals(AutowireCandidateQualifier.VALUE_KEY) &&
 							(expectedValue.equals(bdHolder.getBeanName()) ||
 									ObjectUtils.containsElement(bdHolder.getAliases(), expectedValue))) {
 						// fall back on bean name (or alias) match

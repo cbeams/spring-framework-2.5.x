@@ -18,7 +18,6 @@ package org.springframework.beans.factory.xml;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +32,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import org.springframework.beans.BeanMetadataAttribute;
+import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -47,6 +48,7 @@ import org.springframework.beans.factory.parsing.ParseState;
 import org.springframework.beans.factory.parsing.PropertyEntry;
 import org.springframework.beans.factory.parsing.QualifierEntry;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.LookupOverride;
@@ -56,7 +58,6 @@ import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
-import org.springframework.core.AttributeAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -571,7 +572,7 @@ public class BeanDefinitionParserDelegate {
 		return null;
 	}
 
-	public void parseMetaElements(Element ele, AttributeAccessor attributeAccessor) {
+	public void parseMetaElements(Element ele, BeanMetadataAttributeAccessor attributeAccessor) {
 		NodeList nl = ele.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
@@ -579,7 +580,9 @@ public class BeanDefinitionParserDelegate {
 				Element metaElement = (Element) node;
 				String key = metaElement.getAttribute(KEY_ATTRIBUTE);
 				String value = metaElement.getAttribute(VALUE_ATTRIBUTE);
-				attributeAccessor.setAttribute(key, value);
+				BeanMetadataAttribute attribute = new BeanMetadataAttribute(key, value);
+				attribute.setSource(extractSource(metaElement));
+				attributeAccessor.addMetadataAttribute(attribute);
 			}
 		}
 	}
@@ -654,7 +657,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse qualifier sub-elements of the given bean element.
 	 */
-	public void parseQualifierElements(Element beanEle, BeanDefinition bd) {
+	public void parseQualifierElements(Element beanEle, AbstractBeanDefinition bd) {
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
@@ -784,7 +787,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a qualifier element.
 	 */
-	public void parseQualifierElement(Element ele, BeanDefinition bd) {
+	public void parseQualifierElement(Element ele, AbstractBeanDefinition bd) {
 		String typeName = ele.getAttribute(TYPE_ATTRIBUTE);
 		if (!StringUtils.hasLength(typeName)) {
 			error("Tag 'qualifier' must have a 'type' attribute", ele);
@@ -792,17 +795,23 @@ public class BeanDefinitionParserDelegate {
 		}
 		this.parseState.push(new QualifierEntry(typeName));
 		try {
+			AutowireCandidateQualifier qualifier = new AutowireCandidateQualifier(typeName);
+			qualifier.setSource(extractSource(ele));
 			String value = ele.getAttribute(VALUE_ATTRIBUTE);
-			Map attributes = new HashMap();
+			if (StringUtils.hasLength(value)) {
+				qualifier.setAttribute(AutowireCandidateQualifier.VALUE_KEY, value);
+			}
 			NodeList nl = ele.getChildNodes();
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node node = nl.item(i);
 				if (node instanceof Element && DomUtils.nodeNameEquals(node, QUALIFIER_ATTRIBUTE_ELEMENT)) {
 					Element attributeEle = (Element) node;
-					String attributeName = attributeEle.getAttribute(NAME_ATTRIBUTE);
+					String attributeName = attributeEle.getAttribute(KEY_ATTRIBUTE);
 					String attributeValue = attributeEle.getAttribute(VALUE_ATTRIBUTE);
 					if (StringUtils.hasLength(attributeName) && StringUtils.hasLength(attributeValue)) {
-						attributes.put(attributeName, attributeValue);
+						BeanMetadataAttribute attribute = new BeanMetadataAttribute(attributeName, attributeValue);
+						attribute.setSource(extractSource(attributeEle));
+						qualifier.addMetadataAttribute(attribute);
 					}
 					else {
 						error("Qualifier 'attribute' tag must have a 'name' and 'value'", attributeEle);
@@ -810,21 +819,7 @@ public class BeanDefinitionParserDelegate {
 					}
 				}
 			}
-			if (bd instanceof AbstractBeanDefinition) {
-				AbstractBeanDefinition abd = ((AbstractBeanDefinition) bd);
-				if (attributes.size() > 0) {
-					if (StringUtils.hasLength(value)) {
-						attributes.put("value", value);
-					}
-					abd.addQualifier(typeName, attributes);
-				}
-				else if (StringUtils.hasLength(value)) {
-					abd.addQualifier(typeName, value);
-				}
-				else {
-					abd.addQualifier(typeName);
-				}
-			}
+			bd.addQualifier(qualifier);
 		}
 		finally {
 			this.parseState.pop();

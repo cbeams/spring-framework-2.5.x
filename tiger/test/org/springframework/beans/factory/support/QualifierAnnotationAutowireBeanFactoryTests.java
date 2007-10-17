@@ -31,6 +31,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class QualifierAnnotationAutowireBeanFactoryTests extends TestCase {
 
@@ -71,7 +72,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		person1.addQualifier(TestQualifier.class.getName());
+		person1.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		lbf.registerBeanDefinition(JUERGEN, person1);
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
@@ -95,7 +96,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests extends TestCase {
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
 		person.setAutowireCandidate(false);
-		person.addQualifier(TestQualifier.class.getName());
+		person.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		lbf.registerBeanDefinition(JUERGEN, person);
 		DependencyDescriptor qualifiedDescriptor = new DependencyDescriptor(
 				QualifiedTestBean.class.getDeclaredField("qualified"), false);
@@ -111,7 +112,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests extends TestCase {
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
-		person.addQualifier(ClassUtils.getShortName(TestQualifier.class));
+		person.addQualifier(new AutowireCandidateQualifier(ClassUtils.getShortName(TestQualifier.class)));
 		lbf.registerBeanDefinition(JUERGEN, person);
 		DependencyDescriptor qualifiedDescriptor = new DependencyDescriptor(
 				QualifiedTestBean.class.getDeclaredField("qualified"), false);
@@ -127,7 +128,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		person1.addQualifier(TestQualifier.class.getName());
+		person1.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		lbf.registerBeanDefinition(JUERGEN, person1);
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
@@ -146,7 +147,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		person1.addQualifier(TestQualifier.class.getName());
+		person1.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		lbf.registerBeanDefinition(JUERGEN, person1);
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
@@ -171,12 +172,12 @@ public class QualifierAnnotationAutowireBeanFactoryTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		person1.addQualifier(TestQualifier.class.getName());
+		person1.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		lbf.registerBeanDefinition(JUERGEN, person1);
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
-		person2.addQualifier(TestQualifier.class.getName());
+		person2.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		lbf.registerBeanDefinition(MARK, person2);
 		DependencyDescriptor qualifiedDescriptor = new DependencyDescriptor(
 				new MethodParameter(QualifiedTestBean.class.getDeclaredConstructor(Person.class), 0),

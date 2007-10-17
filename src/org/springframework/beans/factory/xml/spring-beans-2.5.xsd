@@ -519,14 +519,14 @@
 		<xsd:attribute name="key" type="xsd:string" use="required">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	The key name of the metadata parameter being defined.
+	The key name of the metadata attribute being defined.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attribute name="value" type="xsd:string" use="required">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	The value of the metadata parameter being defined (as a simple String).
+	The value of the metadata attribute being defined (as a simple String).
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -648,18 +648,14 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="attribute">
+	<xsd:element name="attribute" type="metaType">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	A qualifier element may contain attribute child elements as name-value
+	A qualifier element may contain attribute child elements as key-value
 	pairs. These will be available for matching against attributes of a
 	qualifier annotation on an autowired field or parameter if present.
 			]]></xsd:documentation>
 		</xsd:annotation>
-		<xsd:complexType>
-			<xsd:attribute name="name" type="xsd:string" use="required"/>
-			<xsd:attribute name="value" type="xsd:string" use="required"/>
-		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="lookup-method">

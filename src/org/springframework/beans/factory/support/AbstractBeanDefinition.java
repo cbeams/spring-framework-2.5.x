@@ -18,15 +18,17 @@ package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
+import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -48,7 +50,8 @@ import org.springframework.util.ObjectUtils;
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
-public abstract class AbstractBeanDefinition extends AttributeAccessorSupport implements BeanDefinition, Cloneable {
+public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccessor
+		implements BeanDefinition, Cloneable {
 
 	/**
 	 * Constant that indicates no autowiring at all.
@@ -129,7 +132,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 	private boolean autowireCandidate = true;
 
-	private Map qualifiers = new HashMap();
+	private final Map qualifiers = new LinkedHashMap();
 
 	private boolean primary = false;
 
@@ -154,8 +157,6 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	private boolean synthetic = false;
 
 	private String resourceDescription;
-
-	private Object source;
 
 	private int role = BeanDefinition.ROLE_APPLICATION;
 
@@ -215,7 +216,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 			setDependencyCheck(originalAbd.getDependencyCheck());
 			setDependsOn(originalAbd.getDependsOn());
 			setAutowireCandidate(originalAbd.isAutowireCandidate());
-			setQualifiers(originalAbd.getQualifiers());
+			copyQualifiersFrom(originalAbd);
 			setPrimary(originalAbd.isPrimary());
 			setInitMethodName(originalAbd.getInitMethodName());
 			setEnforceInitMethod(originalAbd.isEnforceInitMethod());
@@ -280,7 +281,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 			}
 			setAutowireCandidate(otherAbd.isAutowireCandidate());
 			setAutowireMode(otherAbd.getAutowireMode());
-			setQualifiers(otherAbd.getQualifiers());
+			copyQualifiersFrom(otherAbd);
 			setPrimary(otherAbd.isPrimary());
 			setDependencyCheck(otherAbd.getDependencyCheck());
 			setDependsOn(otherAbd.getDependsOn());
@@ -295,6 +296,18 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 			getMethodOverrides().addOverrides(otherAbd.getMethodOverrides());
 			setSynthetic(otherAbd.isSynthetic());
 		}
+	}
+
+	/**
+	 * Apply the provided default values to this bean.
+	 * @param defaults the defaults to apply
+	 */
+	public void applyDefaults(BeanDefinitionDefaults defaults) {
+		this.setLazyInit(defaults.isLazyInit());
+		this.setDependencyCheck(defaults.getDependencyCheck());
+		this.setAutowireMode(defaults.getAutowireMode());
+		this.setInitMethodName(defaults.getInitMethodName());
+		this.setDestroyMethodName(defaults.getDestroyMethodName());
 	}
 
 
@@ -560,27 +573,12 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	}
 
 	/**
-	 * Add a qualifier to be used for autowire candidate resolution.
-	 * <p>Use this version when the qualifier has no attributes.</p>
+	 * Register a qualifier to be used for autowire candidate resolution,
+	 * keyed by the qualifier's type name.
+	 * @see AutowireCandidateQualifier#getTypeName()
 	 */
-	public void addQualifier(String typeName) {
-		this.qualifiers.put(typeName, new AutowireCandidateQualifier(typeName));
-	}
-
-	/**
-	 * Add a qualifier to be used for autowire candidate resolution.
-	 * <p>Use this version when the qualifier has a single attribute named "value".</p>
-	 */
-	public void addQualifier(String typeName, Object value) {
-		this.qualifiers.put(typeName, new AutowireCandidateQualifier(typeName, value));
-	}
-
-	/**
-	 * Add a qualifier to be used for autowire candidate resolution.
-	 * <p>Use this version when the qualifier has one or more named attributes.</p>
-	 */
-	public void addQualifier(String typeName, Map attributes) {
-		this.qualifiers.put(typeName, new AutowireCandidateQualifier(typeName, attributes));
+	public void addQualifier(AutowireCandidateQualifier qualifier) {
+		this.qualifiers.put(qualifier.getTypeName(), qualifier);
 	}
 
 	/**
@@ -598,17 +596,20 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	}
 
 	/**
-	 * Set the qualifiers to be used for autowire candidate resolution.
+	 * Return all registered qualifiers.
+	 * @return the Set of {@link AutowireCandidateQualifier} objects.
 	 */
-	private void setQualifiers(Map qualifiers) {
-		this.qualifiers = (qualifiers == null) ? new HashMap() : qualifiers;
+	public Set getQualifiers() {
+		return new LinkedHashSet(this.qualifiers.values());
 	}
 
 	/**
-	 * Return the qualifiers to be used for autowire candidate resolution.
+	 * Copy the qualifiers from the supplied AbstractBeanDefinition to this bean definition.
+	 * @param source the AbstractBeanDefinition to copy from
 	 */
-	private Map getQualifiers() {
-		return this.qualifiers;
+	protected void copyQualifiersFrom(AbstractBeanDefinition source) {
+		Assert.notNull(source, "Source must not be null");
+		this.qualifiers.putAll(source.qualifiers);
 	}
 
 	/**
@@ -627,18 +628,6 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 */
 	public boolean isPrimary() {
 		return this.primary;
-	}
-
-	/**
-	 * Apply the provided default values to this bean.
-	 * @param defaults the defaults to apply
-	 */
-	public void applyDefaults(BeanDefinitionDefaults defaults) {
-		this.setLazyInit(defaults.isLazyInit());
-		this.setDependencyCheck(defaults.getDependencyCheck());
-		this.setAutowireMode(defaults.getAutowireMode());
-		this.setInitMethodName(defaults.getInitMethodName());
-		this.setDestroyMethodName(defaults.getDestroyMethodName());
 	}
 
 
@@ -807,18 +796,6 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 */
 	public String getResourceDescription() {
 		return this.resourceDescription;
-	}
-
-	/**
-	 * Set the configuration source <code>Object</code> for this metadata element.
-	 * <p>The exact type of the object will depend on the configuration mechanism used.
-	 */
-	public void setSource(Object source) {
-		this.source = source;
-	}
-
-	public Object getSource() {
-		return this.source;
 	}
 
 	/**

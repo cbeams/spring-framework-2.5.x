@@ -20,8 +20,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.HashMap;
-import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -33,10 +31,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.util.ClassUtils;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class QualifierAnnotationAutowireContextTests extends TestCase {
 	
@@ -107,7 +105,7 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
-		person.addQualifier(TestQualifier.class.getName());
+		person.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		context.registerBeanDefinition(JUERGEN, person);
 		context.registerBeanDefinition("autowired", new RootBeanDefinition(QualifiedFieldTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
@@ -121,7 +119,7 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
-		person.addQualifier(TestQualifier.class.getName());
+		person.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		context.registerBeanDefinition(JUERGEN, person);
 		context.registerBeanDefinition("autowired", 
 				new RootBeanDefinition(QualifiedMethodParameterTestBean.class));
@@ -152,7 +150,7 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
-		person.addQualifier(TestQualifier.class.getName());
+		person.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		context.registerBeanDefinition(JUERGEN, person);
 		context.registerBeanDefinition("autowired", 
 				new RootBeanDefinition(QualifiedConstructorArgumentTestBean.class));
@@ -237,7 +235,7 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		person1.addQualifier(TestQualifier.class.getName());
+		person1.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
@@ -256,7 +254,7 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		person1.addQualifier(TestQualifier.class.getName());
+		person1.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
@@ -276,7 +274,7 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		person1.addQualifier(TestQualifier.class.getName());
+		person1.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
@@ -297,7 +295,7 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
 		// qualifier added, but includes no value
-		person1.addQualifier(TestQualifierWithDefaultValue.class.getName());
+		person1.addQualifier(new AutowireCandidateQualifier(TestQualifierWithDefaultValue.class));
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
@@ -318,7 +316,7 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
 		// qualifier added, and non-default value specified
-		person1.addQualifier(TestQualifierWithDefaultValue.class.getName(), "not the default");
+		person1.addQualifier(new AutowireCandidateQualifier(TestQualifierWithDefaultValue.class, "not the default"));
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
@@ -343,7 +341,7 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
 		// qualifier added, and value matches the default
-		person1.addQualifier(TestQualifierWithDefaultValue.class.getName(), "default");
+		person1.addQualifier(new AutowireCandidateQualifier(TestQualifierWithDefaultValue.class, "default"));
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
@@ -363,15 +361,15 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		Map qualifierValues1 = new HashMap();
-		qualifierValues1.put("number", 456);
-		person1.addQualifier(TestQualifierWithMultipleAttributes.class.getName(), qualifierValues1);
+		AutowireCandidateQualifier qualifier = new AutowireCandidateQualifier(TestQualifierWithMultipleAttributes.class);
+		qualifier.setAttribute("number", 456);
+		person1.addQualifier(qualifier);
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
-		Map qualifierValues2 = new HashMap();
-		qualifierValues2.put("number", 123);
-		person2.addQualifier(TestQualifierWithMultipleAttributes.class.getName(), qualifierValues2);
+		AutowireCandidateQualifier qualifier2 = new AutowireCandidateQualifier(TestQualifierWithMultipleAttributes.class);
+		qualifier2.setAttribute("number", 123);
+		person2.addQualifier(qualifier2);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
 		context.registerBeanDefinition("autowired", 
@@ -388,16 +386,16 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		Map qualifierValues1 = new HashMap();
-		qualifierValues1.put("number", 456);
-		person1.addQualifier(TestQualifierWithMultipleAttributes.class.getName(), qualifierValues1);
+		AutowireCandidateQualifier qualifier = new AutowireCandidateQualifier(TestQualifierWithMultipleAttributes.class);
+		qualifier.setAttribute("number", 456);
+		person1.addQualifier(qualifier);
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
-		Map qualifierValues2 = new HashMap();
-		qualifierValues2.put("number", 123);
-		qualifierValues2.put("value", "not the default");
-		person2.addQualifier(TestQualifierWithMultipleAttributes.class.getName(), qualifierValues2);
+		AutowireCandidateQualifier qualifier2 = new AutowireCandidateQualifier(TestQualifierWithMultipleAttributes.class);
+		qualifier2.setAttribute("number", 123);
+		qualifier2.setAttribute("value", "not the default");
+		person2.addQualifier(qualifier2);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
 		context.registerBeanDefinition("autowired", 
@@ -418,16 +416,16 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		Map qualifierValues1 = new HashMap();
-		qualifierValues1.put("number", 456);
-		person1.addQualifier(TestQualifierWithMultipleAttributes.class.getName(), qualifierValues1);
+		AutowireCandidateQualifier qualifier = new AutowireCandidateQualifier(TestQualifierWithMultipleAttributes.class);
+		qualifier.setAttribute("number", 456);
+		person1.addQualifier(qualifier);
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
-		Map qualifierValues2 = new HashMap();
-		qualifierValues2.put("number", 123);
-		qualifierValues2.put("value", "default");
-		person2.addQualifier(ClassUtils.getShortName(TestQualifierWithMultipleAttributes.class), qualifierValues2);
+		AutowireCandidateQualifier qualifier2 = new AutowireCandidateQualifier(TestQualifierWithMultipleAttributes.class);
+		qualifier2.setAttribute("number", 123);
+		qualifier2.setAttribute("value", "default");
+		person2.addQualifier(qualifier2);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
 		context.registerBeanDefinition("autowired", 
@@ -444,16 +442,16 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		Map qualifierValues1 = new HashMap();
-		qualifierValues1.put("number", 123);
-		person1.addQualifier(TestQualifierWithMultipleAttributes.class.getName(), qualifierValues1);
+		AutowireCandidateQualifier qualifier = new AutowireCandidateQualifier(TestQualifierWithMultipleAttributes.class);
+		qualifier.setAttribute("number", 123);
+		person1.addQualifier(qualifier);
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
-		Map qualifierValues2 = new HashMap();
-		qualifierValues2.put("number", 123);
-		qualifierValues2.put("value", "default");
-		person2.addQualifier(ClassUtils.getShortName(TestQualifierWithMultipleAttributes.class), qualifierValues2);
+		AutowireCandidateQualifier qualifier2 = new AutowireCandidateQualifier(TestQualifierWithMultipleAttributes.class);
+		qualifier2.setAttribute("number", 123);
+		qualifier2.setAttribute("value", "default");
+		person2.addQualifier(qualifier2);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
 		context.registerBeanDefinition("autowired", 
@@ -477,7 +475,7 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
-		person2.addQualifier(Qualifier.class.getName());
+		person2.addQualifier(new AutowireCandidateQualifier(Qualifier.class));
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
 		context.registerBeanDefinition("autowired", 
@@ -494,11 +492,11 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue("the real juergen");
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		person1.addQualifier(Qualifier.class.getName(), "juergen");
+		person1.addQualifier(new AutowireCandidateQualifier(Qualifier.class, "juergen"));
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue("juergen imposter");
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
-		person2.addQualifier(Qualifier.class.getName(), "not really juergen");
+		person2.addQualifier(new AutowireCandidateQualifier(Qualifier.class, "not really juergen"));
 		context.registerBeanDefinition("juergen1", person1);
 		context.registerBeanDefinition("juergen2", person2);
 		context.registerBeanDefinition("autowired", 
@@ -515,11 +513,11 @@ public class QualifierAnnotationAutowireContextTests extends TestCase {
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue("the real juergen");
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		person1.addQualifier(Qualifier.class.getName(), "juergen");
+		person1.addQualifier(new AutowireCandidateQualifier(Qualifier.class, "juergen"));
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue("juergen imposter");
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
-		person2.addQualifier(Qualifier.class.getName(), "juergen");
+		person2.addQualifier(new AutowireCandidateQualifier(Qualifier.class, "juergen"));
 		context.registerBeanDefinition("juergen1", person1);
 		context.registerBeanDefinition("juergen2", person2);
 		context.registerBeanDefinition("autowired", 

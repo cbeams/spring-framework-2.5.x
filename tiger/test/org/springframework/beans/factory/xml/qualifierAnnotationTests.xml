@@ -36,8 +36,8 @@
 	<bean class="org.springframework.beans.factory.xml.QualifierAnnotationTests$Person">
 		<property name="name" value="Moe Jr."/>
 		<qualifier type="QualifierAnnotationTests.MultipleAttributeQualifier">
-			<attribute name="name" value="moe"/>
-			<attribute name="age" value="15"/>
+			<attribute key="name" value="moe"/>
+			<attribute key="age" value="15"/>
 		</qualifier>
 	</bean>
 
