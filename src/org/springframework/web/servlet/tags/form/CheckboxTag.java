@@ -46,7 +46,7 @@ import org.springframework.web.bind.WebDataBinder;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class CheckboxTag extends AbstractHtmlInputElementTag {
+public class CheckboxTag extends AbstractCheckboxTag {
 
 	private Object value;
 
@@ -69,10 +69,6 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	}
 
 
-	/**
-	 * Writes the '<code>input(checkbox)</code>' to the supplied {@link TagWriter},
-	 * marking it as 'checked' if appropriate.
-	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);
@@ -119,49 +115,6 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 		}
 
 		return EVAL_PAGE;
-	}
-
-	/**
-	 * Render the '<code>input(checkbox)</code>' with the supplied value, marking the
-	 * '<code>input</code>' element as 'checked' if the supplied value matches the
-	 * bound value.
-	 */
-	private void renderSingleValue(Object resolvedValue, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", getDisplayString(resolvedValue, getPropertyEditor()));
-		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
-			tagWriter.writeAttribute("checked", "checked");
-		}
-	}
-
-	/**
-	 * Render the '<code>input(checkbox)</code>' with the supplied value, marking
-	 * the '<code>input</code>' element as 'checked' if the supplied value is
-	 * present in the bound Collection value.
-	 */
-	private void renderFromCollection(Object resolvedValue, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", getDisplayString(resolvedValue, getPropertyEditor()));
-		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
-			tagWriter.writeAttribute("checked", "checked");
-		} 
-	}
-
-	/**
-	 * Render the '<code>input(checkbox)</code>' with the supplied value, marking
-	 * the '<code>input</code>' element as 'checked' if the supplied Boolean is
-	 * <code>true</code>.
-	 */
-	private void renderFromBoolean(Boolean boundValue, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", "true");
-		if (boundValue.booleanValue()) {
-			tagWriter.writeAttribute("checked", "checked");
-		}
-	}
-
-	/**
-	 * Return a unique ID for the bound name within the current PageContext.
-	 */
-	protected String autogenerateId() throws JspException {
-		return TagIdGenerator.nextId(getName(), this.pageContext);
 	}
 
 }
