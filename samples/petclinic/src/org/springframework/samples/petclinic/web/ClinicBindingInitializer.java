@@ -13,8 +13,9 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.WebRequest;
 
 /**
+ * WebBindingInitializer for PetClinic's custom editors.
+ *
  * @author Juergen Hoeller
- * @since 2.5
  */
 public class ClinicBindingInitializer implements WebBindingInitializer {
 

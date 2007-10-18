@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * <code>MultiActionController</code> that handles all non-form URL's.
  *
- * @author Ken Krebs
- * @author Rob Harrop
+ * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Ken Krebs
  */
 @Controller
 public class ClinicController {

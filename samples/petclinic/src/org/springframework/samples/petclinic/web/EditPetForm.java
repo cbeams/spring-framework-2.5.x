@@ -19,6 +19,7 @@ import org.springframework.web.bind.support.FormStatus;
 /**
  * JavaBean Form controller that is used to edit an existing <code>Pet</code>.
  *
+ * @author Juergen Hoeller
  * @author Ken Krebs
  */
 @Controller

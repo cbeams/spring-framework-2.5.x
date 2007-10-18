@@ -1,4 +1,3 @@
-
 package org.springframework.samples.petclinic.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.support.FormStatus;
  * JavaBean form controller that is used to add a new <code>Visit</code> to
  * the system.
  *
+ * @author Juergen Hoeller
  * @author Ken Krebs
  */
 @Controller

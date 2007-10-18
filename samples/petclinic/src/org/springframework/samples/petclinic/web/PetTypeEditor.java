@@ -1,4 +1,3 @@
-
 package org.springframework.samples.petclinic.web;
 
 import java.beans.PropertyEditorSupport;
@@ -8,6 +7,7 @@ import org.springframework.samples.petclinic.PetType;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class PetTypeEditor extends PropertyEditorSupport {
 
