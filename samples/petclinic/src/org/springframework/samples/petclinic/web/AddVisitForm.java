@@ -8,9 +8,10 @@ import org.springframework.samples.petclinic.validation.VisitValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.FormAttributes;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.FormAttributes;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.FormStatus;
 
 /**
@@ -25,8 +26,12 @@ import org.springframework.web.bind.support.FormStatus;
 @FormAttributes("visit")
 public class AddVisitForm {
 
+	private final Clinic clinic;
+
 	@Autowired
-	private Clinic clinic;
+	public AddVisitForm(Clinic clinic) {
+		this.clinic = clinic;
+	}
 
 	@RequestMapping(type = "GET")
 	public String setupForm(@RequestParam("petId") int petId, ModelMap model) {
@@ -38,7 +43,7 @@ public class AddVisitForm {
 	}
 
 	@RequestMapping(type = "POST")
-	protected String processSubmit(Visit visit, BindingResult result, FormStatus status) {
+	public String processSubmit(@ModelAttribute("visit") Visit visit, BindingResult result, FormStatus status) {
 		new VisitValidator().validate(visit, result);
 		if (result.hasErrors()) {
 			return "visitForm";

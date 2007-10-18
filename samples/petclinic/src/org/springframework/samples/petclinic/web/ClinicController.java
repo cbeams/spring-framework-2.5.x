@@ -17,9 +17,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class ClinicController {
 
-	@Autowired
-	private Clinic clinic;
+	private final Clinic clinic;
 
+	@Autowired
+	public ClinicController(Clinic clinic) {
+		this.clinic = clinic;
+	}
 
 	/**
 	 * Custom handler for the welcome view.

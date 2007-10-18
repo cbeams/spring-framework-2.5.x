@@ -7,8 +7,9 @@ import org.springframework.samples.petclinic.validation.OwnerValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.FormAttributes;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.FormStatus;
 
 /**
@@ -23,8 +24,12 @@ import org.springframework.web.bind.support.FormStatus;
 @FormAttributes("owner")
 public class AddOwnerForm {
 
+	private final Clinic clinic;
+
 	@Autowired
-	private Clinic clinic;
+	public AddOwnerForm(Clinic clinic) {
+		this.clinic = clinic;
+	}
 
 	@RequestMapping(type = "GET")
 	public String setupForm(ModelMap model) {
@@ -34,7 +39,7 @@ public class AddOwnerForm {
 	}
 
 	@RequestMapping(type = "POST")
-	protected String processSubmit(Owner owner, BindingResult result, FormStatus status) {
+	public String processSubmit(@ModelAttribute("owner") Owner owner, BindingResult result, FormStatus status) {
 		new OwnerValidator().validate(owner, result);
 		if (result.hasErrors()) {
 			return "ownerForm";

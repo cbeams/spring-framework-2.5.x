@@ -11,10 +11,10 @@ import org.springframework.samples.petclinic.validation.PetValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.FormAttributes;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.FormAttributes;
 import org.springframework.web.bind.support.FormStatus;
 
 /**
@@ -29,8 +29,12 @@ import org.springframework.web.bind.support.FormStatus;
 @FormAttributes("pet")
 public class AddPetForm {
 
+	private final Clinic clinic;
+
 	@Autowired
-	private Clinic clinic;
+	public AddPetForm(Clinic clinic) {
+		this.clinic = clinic;
+	}
 
 	@ModelAttribute("types")
 	public Collection<PetType> populatePetTypes() {
@@ -47,7 +51,7 @@ public class AddPetForm {
 	}
 
 	@RequestMapping(type = "POST")
-	protected String processSubmit(Pet pet, BindingResult result, FormStatus status) {
+	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result, FormStatus status) {
 		new PetValidator().validate(pet, result);
 		if (result.hasErrors()) {
 			return "petForm";

@@ -21,17 +21,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/findOwners.do")
 public class FindOwnersForm {
 
+	private final Clinic clinic;
+
 	@Autowired
-	private Clinic clinic;
+	public FindOwnersForm(Clinic clinic) {
+		this.clinic = clinic;
+	}
 
 	@RequestMapping(type = "GET")
-	protected String setupForm(ModelMap model) {
+	public  String setupForm(ModelMap model) {
 		model.addObject("owner", new Owner());
 		return "findOwners";
 	}
 
 	@RequestMapping(type = "POST")
-	protected String processSubmit(Owner owner, BindingResult result, ModelMap model) {
+	public  String processSubmit(Owner owner, BindingResult result, ModelMap model) {
 		// find owners by last name
 		Collection<Owner> results = this.clinic.findOwners(owner.getLastName());
 		if (results.size() < 1) {
