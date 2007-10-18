@@ -21,4 +21,39 @@
 		<property name="excludedClasses" value="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
 	</bean>
 
+	<bean id="mapping2" class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping">
+		<!--
+		We have to revert the default exclude for "org.springframework.web.servlet.mvc",
+		since our test controllers sit in this package.
+		-->
+		<property name="excludedPackages"><list></list></property>
+		<property name="excludedClasses" value="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
+		<property name="caseSensitive" value="true"/>
+		<property name="pathPrefix" value="/myapp"/>
+		<property name="basePackage" value="org.springframework.web.servlet"/>
+	</bean>
+
+	<bean id="mapping3" class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping">
+		<!--
+		We have to revert the default exclude for "org.springframework.web.servlet.mvc",
+		since our test controllers sit in this package.
+		-->
+		<property name="excludedPackages"><list></list></property>
+		<property name="excludedClasses" value="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
+		<property name="caseSensitive" value="true"/>
+		<property name="pathPrefix" value="/myapp"/>
+		<property name="basePackage" value="org.springframework.web.servlet.mvc.mapping"/>
+	</bean>
+
+	<bean id="mapping4" class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping">
+		<!--
+		We have to revert the default exclude for "org.springframework.web.servlet.mvc",
+		since our test controllers sit in this package.
+		-->
+		<property name="excludedPackages"><list></list></property>
+		<property name="excludedClasses" value="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
+		<property name="pathPrefix" value="myapp/"/>
+		<property name="basePackage" value=""/>
+	</bean>
+
 </beans>
