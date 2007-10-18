@@ -15,7 +15,7 @@ import java.util.Map;
  * elements with a '<code>type</code>' of '<code>radio</code>'.
  *
  * <p>Rendered elements are marked as 'checked' if the configured
- * {@link #setItems(Object) value} matches the {@link #getValue bound value}.
+ * {@link #setItems(Object) value} matches the bound value.
  *
  * @author Thomas Risberg
  * @since 2.0
