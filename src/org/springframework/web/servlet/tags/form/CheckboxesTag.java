@@ -34,6 +34,7 @@ import java.util.Map;
  * <p>Intended to be used with a Collection as the {@link #getItems()} bound value}.
  *
  * @author Thomas Risberg
+ * @author Mark Fisher
  * @since 2.5
  */
 public class CheckboxesTag extends AbstractCheckboxTag {
@@ -55,6 +56,11 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 	 * of the '<code>input type="checkbox"</code>' tag.
 	 */
 	private String itemLabel;
+
+	/**
+	 * Delimiter to use between each '<code>input type="checkbox"</code>' tag.
+	 */
+	private String delimiter;
 
 
 	/**
@@ -110,6 +116,23 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 		return this.itemLabel;
 	}
 
+	/**
+	 * Set the delimiter to be used between each 
+	 * '<code>input type="checkbox"</code>' tag.
+	 * <p>By default, there is <em>no</em> delimiter.
+	 */
+	public void setDelimiter(String delimiter) {
+		this.delimiter = delimiter;
+	}
+
+	/**
+	 * Return the delimiter to be used between each
+	 * '<code>input type="checkbox"</code>' tag.
+	 */
+	public String getDelimiter() {
+		return this.delimiter;
+	}
+
 
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 
@@ -131,21 +154,23 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 			Object[] itemsArray = (Object[]) itemsObject;
 			for (int i = 0; i < itemsArray.length; i++) {
 				Object item = itemsArray[i];
-				writeObjectEntry(tagWriter, valueProperty, labelProperty, item);
+				writeObjectEntry(tagWriter, valueProperty, labelProperty, item, i);
 			}
 		}
 		else if (itemsObject instanceof Collection) {
 			final Collection optionCollection = (Collection) itemsObject;
-			for (Iterator it = optionCollection.iterator(); it.hasNext();) {
+			int itemIndex = 0;
+			for (Iterator it = optionCollection.iterator(); it.hasNext(); itemIndex++) {
 				Object item = it.next();
-				writeObjectEntry(tagWriter, valueProperty, labelProperty, item);
+				writeObjectEntry(tagWriter, valueProperty, labelProperty, item, itemIndex);
 			}
 		}
 		else if (itemsObject instanceof Map) {
 			final Map optionMap = (Map) itemsObject;
-			for (Iterator iterator = optionMap.entrySet().iterator(); iterator.hasNext();) {
-				Map.Entry entry = (Map.Entry) iterator.next();
-				writeMapEntry(tagWriter, valueProperty, labelProperty, entry);
+			int itemIndex = 0;
+			for (Iterator it = optionMap.entrySet().iterator(); it.hasNext(); itemIndex++) {
+				Map.Entry entry = (Map.Entry) it.next();
+				writeMapEntry(tagWriter, valueProperty, labelProperty, entry, itemIndex);
 			}
 		}
 		else {
@@ -164,14 +189,16 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 		return EVAL_PAGE;
 	}
 
-	private void writeObjectEntry(TagWriter tagWriter, String valueProperty, String labelProperty, Object item) throws JspException {
+	private void writeObjectEntry(TagWriter tagWriter, String valueProperty,
+			String labelProperty, Object item, int itemIndex) throws JspException {
 		BeanWrapper wrapper = new BeanWrapperImpl(item);
 		Object renderValue = (valueProperty != null ? wrapper.getPropertyValue(valueProperty) : item);
 		Object renderLabel = (labelProperty != null ? wrapper.getPropertyValue(labelProperty) : item);
-		writeCheckboxTag(tagWriter, renderValue, renderLabel);
+		writeCheckboxTag(tagWriter, renderValue, renderLabel, itemIndex);
 	}
 
-	private void writeMapEntry(TagWriter tagWriter, String valueProperty, String labelProperty, Map.Entry entry) throws JspException {
+	private void writeMapEntry(TagWriter tagWriter, String valueProperty,
+			String labelProperty, Map.Entry entry, int itemIndex) throws JspException {
 		Object mapKey = entry.getKey();
 		Object mapValue = entry.getValue();
 		BeanWrapper mapKeyWrapper = new BeanWrapperImpl(mapKey);
@@ -180,15 +207,20 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 				: mapKey.toString());
 		Object renderLabel = (labelProperty != null ? mapValueWrapper.getPropertyValue(labelProperty)
 				: mapValue.toString());
-		writeCheckboxTag(tagWriter, renderValue, renderLabel);
+		writeCheckboxTag(tagWriter, renderValue, renderLabel, itemIndex);
 	}
 
-	private void writeCheckboxTag(TagWriter tagWriter, Object value, Object label) throws JspException {
+	private void writeCheckboxTag(TagWriter tagWriter, Object value, Object label, int itemIndex) throws JspException {
+		tagWriter.startTag("span");
+		if (itemIndex > 0 && this.getDelimiter() != null) {
+			tagWriter.appendValue(ObjectUtils.getDisplayString(evaluate("delimiter", this.getDelimiter())));
+		}
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", "checkbox");
 		renderSingleValue(value, tagWriter);
 		tagWriter.appendValue(label.toString());
+		tagWriter.endTag();
 		tagWriter.endTag();
 	}
 

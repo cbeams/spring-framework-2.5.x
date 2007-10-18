@@ -16,9 +16,13 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.beans.PropertyEditorSupport;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.jsp.tagext.Tag;
 
@@ -35,6 +39,7 @@ import org.springframework.validation.BindingResult;
 
 /**
  * @author Thomas Risberg
+ * @author Mark Fisher
  */
 public class CheckboxesTagTests extends AbstractFormTagTests {
 
@@ -61,24 +66,71 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
-
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
-		Element checkboxElement1 = (Element) document.getRootElement().elements().get(0);
+		Element spanElement1 = (Element) document.getRootElement().elements().get(0);
+		Element checkboxElement1 = (Element) spanElement1.elements().get(0);
 		assertEquals("input", checkboxElement1.getName());
 		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement1.attribute("name").getValue());
 		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
 		assertEquals("foo", checkboxElement1.getStringValue());
 		assertEquals("foo", checkboxElement1.attribute("value").getValue());
-		Element checkboxElement2 = (Element) document.getRootElement().elements().get(1);
+		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
+		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", checkboxElement2.getName());
 		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement2.attribute("name").getValue());
 		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
 		assertEquals("bar", checkboxElement2.getStringValue());
 		assertEquals("bar", checkboxElement2.attribute("value").getValue());
-		Element checkboxElement3 = (Element) document.getRootElement().elements().get(2);
+		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
+		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
+		assertEquals("input", checkboxElement3.getName());
+		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
+		assertEquals("stringArray", checkboxElement3.attribute("name").getValue());
+		assertNull("not checked", checkboxElement3.attribute("checked"));
+		assertEquals("baz", checkboxElement3.getStringValue());
+		assertEquals("baz", checkboxElement3.attribute("value").getValue());
+	}
+
+	public void testWithMultiValueArrayWithDelimiter() throws Exception {
+		this.tag.setDelimiter("<br/>");
+		this.tag.setPath("stringArray");
+		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getOutput();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element spanElement1 = (Element) document.getRootElement().elements().get(0);
+		Element delimiterElement1 = spanElement1.element("br");
+		assertNull(delimiterElement1);
+		Element checkboxElement1 = (Element) spanElement1.elements().get(0);
+		assertEquals("input", checkboxElement1.getName());
+		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
+		assertEquals("stringArray", checkboxElement1.attribute("name").getValue());
+		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
+		assertEquals("foo", checkboxElement1.getStringValue());
+		assertEquals("foo", checkboxElement1.attribute("value").getValue());
+		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
+		Element delimiterElement2 = (Element) spanElement2.elements().get(0);
+		assertEquals("br", delimiterElement2.getName());
+		Element checkboxElement2 = (Element) spanElement2.elements().get(1);
+		assertEquals("input", checkboxElement2.getName());
+		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
+		assertEquals("stringArray", checkboxElement2.attribute("name").getValue());
+		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
+		assertEquals("bar", checkboxElement2.getStringValue());
+		assertEquals("bar", checkboxElement2.attribute("value").getValue());
+		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
+		Element delimiterElement3 = (Element) spanElement3.elements().get(0);
+		assertEquals("br", delimiterElement3.getName());
+		Element checkboxElement3 = (Element) spanElement3.elements().get(1);
 		assertEquals("input", checkboxElement3.getName());
 		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement3.attribute("name").getValue());
@@ -104,21 +156,72 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
-		Element checkboxElement1 = (Element) document.getRootElement().elements().get(0);
+		Element spanElement1 = (Element) document.getRootElement().elements().get(0);
+		Element checkboxElement1 = (Element) spanElement1.elements().get(0);
 		assertEquals("input", checkboxElement1.getName());
 		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement1.attribute("name").getValue());
 		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
 		assertEquals("FOO", checkboxElement1.getStringValue());
 		assertEquals("foo", checkboxElement1.attribute("value").getValue());
-		Element checkboxElement2 = (Element) document.getRootElement().elements().get(1);
+		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
+		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", checkboxElement2.getName());
 		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement2.attribute("name").getValue());
 		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
 		assertEquals("BAR", checkboxElement2.getStringValue());
 		assertEquals("bar", checkboxElement2.attribute("value").getValue());
-		Element checkboxElement3 = (Element) document.getRootElement().elements().get(2);
+		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
+		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
+		assertEquals("input", checkboxElement3.getName());
+		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
+		assertEquals("stringArray", checkboxElement3.attribute("name").getValue());
+		assertNull("not checked", checkboxElement3.attribute("checked"));
+		assertEquals("BAZ", checkboxElement3.getStringValue());
+		assertEquals("baz", checkboxElement3.attribute("value").getValue());
+	}
+
+	public void testWithMultiValueMapWithDelimiter() throws Exception {
+		String delimiter = " | ";
+		this.tag.setDelimiter(delimiter);
+		this.tag.setPath("stringArray");
+		Map m = new LinkedHashMap();
+		m.put("foo", "FOO");
+		m.put("bar", "BAR");
+		m.put("baz", "BAZ");
+		this.tag.setItems(m);
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getOutput();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element spanElement1 = (Element) document.getRootElement().elements().get(0);
+		assertEquals("", spanElement1.getText());
+		Element checkboxElement1 = (Element) spanElement1.elements().get(0);
+		assertEquals("input", checkboxElement1.getName());
+		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
+		assertEquals("stringArray", checkboxElement1.attribute("name").getValue());
+		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
+		assertEquals("FOO", checkboxElement1.getStringValue());
+		assertEquals("foo", checkboxElement1.attribute("value").getValue());
+		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
+		assertEquals(delimiter, spanElement2.getText());
+		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
+		assertEquals("input", checkboxElement2.getName());
+		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
+		assertEquals("stringArray", checkboxElement2.attribute("name").getValue());
+		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
+		assertEquals("BAR", checkboxElement2.getStringValue());
+		assertEquals("bar", checkboxElement2.attribute("value").getValue());
+		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
+		assertEquals(delimiter, spanElement3.getText());
+		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", checkboxElement3.getName());
 		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement3.attribute("name").getValue());
@@ -146,19 +249,22 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
-		Element checkboxElement1 = (Element) document.getRootElement().elements().get(0);
+		Element spanElement1 = (Element) document.getRootElement().elements().get(0);
+		Element checkboxElement1 = (Element) spanElement1.elements().get(0);
 		assertEquals("input", checkboxElement1.getName());
 		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement1.attribute("name").getValue());
 		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
 		assertEquals("   foo", checkboxElement1.attribute("value").getValue());
-		Element checkboxElement2 = (Element) document.getRootElement().elements().get(1);
+		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
+		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", checkboxElement2.getName());
 		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement2.attribute("name").getValue());
 		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
 		assertEquals("   bar", checkboxElement2.attribute("value").getValue());
-		Element checkboxElement3 = (Element) document.getRootElement().elements().get(2);
+		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
+		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", checkboxElement3.getName());
 		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement3.attribute("name").getValue());
@@ -188,35 +294,40 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
-		Element checkboxElement1 = (Element) document.getRootElement().elements().get(0);
+		Element spanElement1 = (Element) document.getRootElement().elements().get(0);
+		Element checkboxElement1 = (Element) spanElement1.elements().get(0);
 		assertEquals("input", checkboxElement1.getName());
 		assertEquals("checkbox", checkboxElement1.attribute("type").getValue());
 		assertEquals("pets", checkboxElement1.attribute("name").getValue());
 		assertEquals("checked", checkboxElement1.attribute("checked").getValue());
 		assertEquals("RUDIGER", checkboxElement1.getStringValue());
 		assertEquals("Rudiger", checkboxElement1.attribute("value").getValue());
-		Element checkboxElement2 = (Element) document.getRootElement().elements().get(1);
+		Element spanElement2 = (Element) document.getRootElement().elements().get(1);
+		Element checkboxElement2 = (Element) spanElement2.elements().get(0);
 		assertEquals("input", checkboxElement2.getName());
 		assertEquals("checkbox", checkboxElement2.attribute("type").getValue());
 		assertEquals("pets", checkboxElement2.attribute("name").getValue());
 		assertEquals("checked", checkboxElement2.attribute("checked").getValue());
 		assertEquals("SPOT", checkboxElement2.getStringValue());
 		assertEquals("Spot", checkboxElement2.attribute("value").getValue());
-		Element checkboxElement3 = (Element) document.getRootElement().elements().get(2);
+		Element spanElement3 = (Element) document.getRootElement().elements().get(2);
+		Element checkboxElement3 = (Element) spanElement3.elements().get(0);
 		assertEquals("input", checkboxElement3.getName());
 		assertEquals("checkbox", checkboxElement3.attribute("type").getValue());
 		assertEquals("pets", checkboxElement3.attribute("name").getValue());
 		assertNull("not checked", checkboxElement3.attribute("checked"));
 		assertEquals("CHECKERS", checkboxElement3.getStringValue());
 		assertEquals("Checkers", checkboxElement3.attribute("value").getValue());
-		Element checkboxElement4 = (Element) document.getRootElement().elements().get(3);
+		Element spanElement4 = (Element) document.getRootElement().elements().get(3);
+		Element checkboxElement4 = (Element) spanElement4.elements().get(0);
 		assertEquals("input", checkboxElement4.getName());
 		assertEquals("checkbox", checkboxElement4.attribute("type").getValue());
 		assertEquals("pets", checkboxElement4.attribute("name").getValue());
 		assertEquals("checked", checkboxElement4.attribute("checked").getValue());
 		assertEquals("FLUFFY", checkboxElement4.getStringValue());
 		assertEquals("Fluffy", checkboxElement4.attribute("value").getValue());
-		Element checkboxElement5 = (Element) document.getRootElement().elements().get(4);
+		Element spanElement5 = (Element) document.getRootElement().elements().get(4);
+		Element checkboxElement5 = (Element) spanElement5.elements().get(0);
 		assertEquals("input", checkboxElement5.getName());
 		assertEquals("checkbox", checkboxElement5.attribute("type").getValue());
 		assertEquals("pets", checkboxElement5.attribute("name").getValue());
@@ -251,7 +362,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
 		assertEquals("Both tag and hidden element rendered incorrectly", 3, rootElement.elements().size());
-		Element checkboxElement = (Element) rootElement.elements().get(0);
+		Element spanElement = (Element) document.getRootElement().elements().get(0);
+		Element checkboxElement = (Element) spanElement.elements().get(0);
 		assertEquals("input", checkboxElement.getName());
 		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement.attribute("name").getValue());
