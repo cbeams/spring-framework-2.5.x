@@ -72,4 +72,3 @@
 	<context:component-scan base-package="org.springframework.samples.petclinic.web"/>
 
 </beans>
-i
