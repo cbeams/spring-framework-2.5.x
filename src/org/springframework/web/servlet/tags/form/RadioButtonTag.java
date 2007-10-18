@@ -38,6 +38,11 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 	 */
 	private Object value;
 
+	/**
+	 * The value of the '<code>label</code>' attribute.
+	 */
+	private Object label;
+
 
 	/**
 	 * Set the value of the '<code>value</code>' attribute.
@@ -53,6 +58,22 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 	 */
 	protected Object getValue() {
 		return this.value;
+	}
+
+	/**
+	 * Set the value of the '<code>label</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setLabel(Object label) {
+		this.label = label;
+	}
+
+	/**
+	 * Get the value of the '<code>label</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected Object getLabel() {
+		return this.label;
 	}
 
 
@@ -72,6 +93,10 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 
 		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
 			tagWriter.writeAttribute("checked", "checked");
+		}
+
+		if (getLabel() != null) {
+			tagWriter.appendValue(getLabel().toString());
 		}
 
 		tagWriter.endTag();

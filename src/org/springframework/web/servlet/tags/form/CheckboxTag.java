@@ -48,7 +48,15 @@ import org.springframework.web.bind.WebDataBinder;
  */
 public class CheckboxTag extends AbstractCheckboxTag {
 
+	/**
+	 * The value of the '<code>value</code>' attribute.
+	 */
 	private Object value;
+
+	/**
+	 * The value of the '<code>label</code>' attribute.
+	 */
+	private Object label;
 
 
 	/**
@@ -66,6 +74,22 @@ public class CheckboxTag extends AbstractCheckboxTag {
 	 */
 	protected Object getValue() {
 		return this.value;
+	}
+
+	/**
+	 * Set the value of the '<code>label</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setLabel(Object label) {
+		this.label = label;
+	}
+
+	/**
+	 * Get the value of the '<code>label</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected Object getLabel() {
+		return this.label;
 	}
 
 
@@ -101,6 +125,10 @@ public class CheckboxTag extends AbstractCheckboxTag {
 			else {
 				renderSingleValue(resolvedValue, tagWriter);
 			}
+		}
+
+		if (getLabel() != null) {
+			tagWriter.appendValue(getLabel().toString());
 		}
 
 		tagWriter.endTag();
