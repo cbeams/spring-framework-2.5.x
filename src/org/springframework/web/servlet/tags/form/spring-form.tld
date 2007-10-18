@@ -1343,7 +1343,7 @@
       <rtexprvalue>true</rtexprvalue>
       <description>HTML Standard Attribute</description>
     </attribute>
-    <!-- checkbox specific attributes -->
+    <!-- checkboxes specific attributes -->
     <attribute>
       <name>items</name>
       <required>true</required>
@@ -1367,6 +1367,12 @@
       <required>false</required>
       <rtexprvalue>true</rtexprvalue>
       <description>Delimiter to use between each 'checkbox' tag. There is no delimiter by default.</description>
+    </attribute>
+    <attribute>
+      <name>element</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Specifies the HTML element that is used to enclose each 'checkbox' tag.  Defaults to 'span'.</description>
     </attribute>
   </tag>
 

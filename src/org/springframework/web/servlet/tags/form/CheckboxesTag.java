@@ -58,6 +58,13 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 	private String itemLabel;
 
 	/**
+	 * The HTML '<code>span</code>' tag.
+	 */
+	public static final String SPAN_TAG = "span";
+
+	private String element = SPAN_TAG;
+
+	/**
 	 * Delimiter to use between each '<code>input type="checkbox"</code>' tag.
 	 */
 	private String delimiter;
@@ -133,6 +140,23 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 		return this.delimiter;
 	}
 
+	/**
+	 * Set the HTML element used to enclose the
+	 * '<code>input type="checkbox"</code>' tag.
+	 * <p>Defaults to an HTML '<code>&lt;span/&gt;</code>' tag.
+	 */
+	public void setElement(String element) {
+		Assert.hasText(element, "'element' cannot be null or blank");
+		this.element = element;
+	}
+
+	/**
+	 * Get the HTML element used to enclose
+	 * '<code>input type="checkbox"</code>' tag.
+	 */
+	public String getElement() {
+		return this.element;
+	}
 
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 
@@ -211,7 +235,7 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 	}
 
 	private void writeCheckboxTag(TagWriter tagWriter, Object value, Object label, int itemIndex) throws JspException {
-		tagWriter.startTag("span");
+		tagWriter.startTag(getElement());
 		if (itemIndex > 0 && this.getDelimiter() != null) {
 			tagWriter.appendValue(ObjectUtils.getDisplayString(evaluate("delimiter", this.getDelimiter())));
 		}
