@@ -72,18 +72,19 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 
 	/**
 	 * Set the {@link java.util.Collection}, {@link java.util.Map} or array
-	 * of objects used to generate the '<code>input(checkbox)</code>' tags.
+	 * of objects used to generate the '<code>input type="checkbox"</code>' tags.
 	 * <p>Typically a runtime expression.
 	 * @param items said items
 	 * @throws IllegalArgumentException if the supplied <code>items</code> instance is <code>null</code>
 	 */
 	public void setItems(Object items) {
+		Assert.notNull(items, "'items' must not be null");
 		this.items = items;
 	}
 
 	/**
 	 * Get the {@link java.util.Collection}, {@link java.util.Map} or array
-	 * of objects used to generate the '<code>input(checkbox)</code>' tags.
+	 * of objects used to generate the '<code>input type="checkbox"</code>' tags.
 	 * <p>Typically a runtime expression.
 	 */
 	protected Object getItems() {
@@ -92,7 +93,7 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 
 	/**
 	 * Set the name of the property mapped to the '<code>value</code>' attribute
-	 * of the '<code>input(checkbox)</code>' tag.
+	 * of the '<code>input type="checkbox"</code>' tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setItemValue(String itemValue) {
@@ -106,7 +107,7 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 
 	/**
 	 * Set the value to be displayed as part
-	 * of the '<code>input(checkbox)</code>' tag.
+	 * of the '<code>input type="checkbox"</code>' tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setItemLabel(String itemLabel) {
@@ -116,7 +117,7 @@ public class CheckboxesTag extends AbstractCheckboxTag {
 
 	/**
 	 * Get the value to be displayed as part
-	 * of the '<code>input(checkbox)</code>' tag.
+	 * of the '<code>input type="checkbox"</code>' tag.
 	 * <p>May be a runtime expression.
 	 */
 	protected String getItemLabel() {

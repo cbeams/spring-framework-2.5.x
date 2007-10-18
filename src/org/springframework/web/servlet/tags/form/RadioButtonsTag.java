@@ -2,7 +2,6 @@ package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
@@ -12,35 +11,32 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
- * element with a '<code>type</code>' of '<code>radio</code>'.
+ * Databinding-aware JSP tag for rendering multiple HTML '<code>input</code>'
+ * elements with a '<code>type</code>' of '<code>radio</code>'.
  *
  * <p>Rendered elements are marked as 'checked' if the configured
  * {@link #setItems(Object) value} matches the {@link #getValue bound value}.
  *
- * <p>A typical usage pattern will involved multiple tag instances bound
- * to the same property but with different values.
- *
- * @author Rob Harrop
+ * @author Thomas Risberg
  * @since 2.0
  */
 public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * The {@link java.util.Collection}, {@link java.util.Map} or array of
-	 * objects used to generate the '<code>input type="checkbox"</code>' tags.
+	 * objects used to generate the '<code>input type="radio"</code>' tags.
 	 */
 	private Object items;
 
 	/**
 	 * The name of the property mapped to the '<code>value</code>' attribute
-	 * of the '<code>input type="checkbox"</code>' tag.
+	 * of the '<code>input type="radio"</code>' tag.
 	 */
 	private String itemValue;
 
 	/**
 	 * The value to be displayed as part
-	 * of the '<code>input type="checkbox"</code>' tag.
+	 * of the '<code>input type="radio"</code>' tag.
 	 */
 	private String itemLabel;
 
@@ -52,25 +48,26 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 	private String element = SPAN_TAG;
 
 	/**
-	 * Delimiter to use between each '<code>input type="checkbox"</code>' tag.
+	 * Delimiter to use between each '<code>input type="radio"</code>' tags.
 	 */
 	private String delimiter;
 
 
 	/**
 	 * Set the {@link java.util.Collection}, {@link java.util.Map} or array
-	 * of objects used to generate the '<code>input(checkbox)</code>' tags.
+	 * of objects used to generate the '<code>input type="radio"</code>' tags.
 	 * <p>Typically a runtime expression.
 	 * @param items said items
 	 * @throws IllegalArgumentException if the supplied <code>items</code> instance is <code>null</code>
 	 */
 	public void setItems(Object items) {
+		Assert.notNull(items, "'items' must not be null");
 		this.items = items;
 	}
 
 	/**
 	 * Get the {@link java.util.Collection}, {@link java.util.Map} or array
-	 * of objects used to generate the '<code>input(checkbox)</code>' tags.
+	 * of objects used to generate the '<code>input type="radio"</code>' tags.
 	 * <p>Typically a runtime expression.
 	 */
 	protected Object getItems() {
@@ -79,7 +76,7 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * Set the name of the property mapped to the '<code>value</code>' attribute
-	 * of the '<code>input(checkbox)</code>' tag.
+	 * of the '<code>input type="radio"</code>' tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setItemValue(String itemValue) {
@@ -93,7 +90,7 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * Set the value to be displayed as part
-	 * of the '<code>input(checkbox)</code>' tag.
+	 * of the '<code>input type="radio"</code>' tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setItemLabel(String itemLabel) {
@@ -103,7 +100,7 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * Get the value to be displayed as part
-	 * of the '<code>input(checkbox)</code>' tag.
+	 * of the '<code>input type="radio"</code>' tag.
 	 * <p>May be a runtime expression.
 	 */
 	protected String getItemLabel() {
@@ -112,7 +109,7 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * Set the delimiter to be used between each
-	 * '<code>input type="checkbox"</code>' tag.
+	 * '<code>input type="radio"</code>' tag.
 	 * <p>By default, there is <em>no</em> delimiter.
 	 */
 	public void setDelimiter(String delimiter) {
@@ -121,7 +118,7 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * Return the delimiter to be used between each
-	 * '<code>input type="checkbox"</code>' tag.
+	 * '<code>input type="radio"</code>' tag.
 	 */
 	public String getDelimiter() {
 		return this.delimiter;
@@ -129,7 +126,7 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * Set the HTML element used to enclose the
-	 * '<code>input type="checkbox"</code>' tag.
+	 * '<code>input type="radio"</code>' tag.
 	 * <p>Defaults to an HTML '<code>&lt;span/&gt;</code>' tag.
 	 */
 	public void setElement(String element) {
@@ -139,7 +136,7 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * Get the HTML element used to enclose
-	 * '<code>input type="checkbox"</code>' tag.
+	 * '<code>input type="radio"</code>' tag.
 	 */
 	public String getElement() {
 		return this.element;
@@ -147,9 +144,9 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 
 
 	/**
-	 * Renders the '<code>input(radio)</code>' element with the configured
-	 * {@link #setItems(Object) value}. Marks the element as checked if the
-	 * value matches the {@link #getValue bound value}.
+	 * Renders the '<code>input type="radio"</code>' element with the configured
+	 * {@link #setItems(Object)} values. Marks the element as checked if the
+	 * value matches the bound value.
 	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		Object items = getItems();
@@ -193,15 +190,6 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 			throw new IllegalArgumentException("Attribute 'items' must be a Collection, an Array or a Map");
 		}
 
-//		if (!isDisabled()) {
-//			// Write out the 'field was present' marker.
-//			tagWriter.startTag("input");
-//			tagWriter.writeAttribute("type", "hidden");
-//			tagWriter.writeAttribute("name", WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX + getName());
-//			tagWriter.writeAttribute("value", "on");
-//			tagWriter.endTag();
-//		}
-
 		return EVAL_PAGE;
 	}
 
@@ -210,7 +198,7 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 		BeanWrapper wrapper = new BeanWrapperImpl(item);
 		Object renderValue = (valueProperty != null ? wrapper.getPropertyValue(valueProperty) : item);
 		Object renderLabel = (labelProperty != null ? wrapper.getPropertyValue(labelProperty) : item);
-		writeCheckboxTag(tagWriter, renderValue, renderLabel, itemIndex);
+		writeRadioButtonTag(tagWriter, renderValue, renderLabel, itemIndex);
 	}
 
 	private void writeMapEntry(TagWriter tagWriter, String valueProperty,
@@ -223,10 +211,10 @@ public class RadioButtonsTag extends AbstractHtmlInputElementTag {
 				: mapKey.toString());
 		Object renderLabel = (labelProperty != null ? mapValueWrapper.getPropertyValue(labelProperty)
 				: mapValue.toString());
-		writeCheckboxTag(tagWriter, renderValue, renderLabel, itemIndex);
+		writeRadioButtonTag(tagWriter, renderValue, renderLabel, itemIndex);
 	}
 
-	private void writeCheckboxTag(TagWriter tagWriter, Object value, Object label, int itemIndex) throws JspException {
+	private void writeRadioButtonTag(TagWriter tagWriter, Object value, Object label, int itemIndex) throws JspException {
 		tagWriter.startTag(getElement());
 		if (itemIndex > 0 && this.getDelimiter() != null) {
 			tagWriter.appendValue(ObjectUtils.getDisplayString(evaluate("delimiter", this.getDelimiter())));
