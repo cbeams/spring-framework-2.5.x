@@ -1,4 +1,3 @@
-
 package org.springframework.samples.petclinic.toplink;
 
 import java.io.IOException;
@@ -9,12 +8,12 @@ import oracle.toplink.essentials.platform.database.HSQLPlatform;
 import oracle.toplink.essentials.queryframework.ValueReadQuery;
 
 /**
- * Subclass of TopLink Essentials's default HSQLPlatform class, using native
+ * Subclass of the TopLink Essentials default HSQLPlatform class, using native
  * HSQLDB identity columns for id generation.
- * <p>
- * Necessary for PetClinic's default data model, which relies on identity
+ *
+ * <p>Necessary for PetClinic's default data model, which relies on identity
  * columns: this is uniformly used across all persistence layer implementations
- * (JDBC, Hibernate, OJB, and TopLink).
+ * (JDBC, Hibernate, and JPA).
  *
  * @author Juergen Hoeller
  * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
@@ -22,7 +21,6 @@ import oracle.toplink.essentials.queryframework.ValueReadQuery;
  */
 public class EssentialsHSQLPlatformWithNativeSequence extends HSQLPlatform {
 
-	/** serialVersionUID. */
 	private static final long serialVersionUID = -55658009691346735L;
 
 
