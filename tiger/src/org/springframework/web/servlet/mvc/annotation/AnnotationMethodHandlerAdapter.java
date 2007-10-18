@@ -48,6 +48,7 @@ import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.FormAttributes;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -102,7 +103,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		HandlerMethodResolver methodResolver = getMethodResolver(handler.getClass());
 		Method handlerMethod = methodResolver.resolveHandlerMethod(request);
 		ModelMap implicitModel = new ModelMap();
-		ArgumentsResolver argResolver = new ArgumentsResolver(this.webBindingInitializer);
+		ArgumentsResolver argResolver =
+				new ArgumentsResolver(this.webBindingInitializer, methodResolver.getInitBinderMethods());
 
 		for (Method attributeMethod : methodResolver.getModelAttributeMethods()) {
 			String attrName = attributeMethod.getAnnotation(ModelAttribute.class).value();
@@ -166,6 +168,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		private Set<Method> handlerMethods = new LinkedHashSet<Method>();
 
+		private Set<Method> initBinderMethods = new LinkedHashSet<Method>();
+
 		private Set<Method> modelAttributeMethods = new LinkedHashSet<Method>();
 
 		public HandlerMethodResolver(final Class<?> handlerType) {
@@ -173,6 +177,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				public void doWith(Method method) {
 					if (method.isAnnotationPresent(RequestMapping.class)) {
 						handlerMethods.add(method);
+					}
+					else if (method.isAnnotationPresent(InitBinder.class)) {
+						initBinderMethods.add(method);
 					}
 					else if (method.isAnnotationPresent(ModelAttribute.class)) {
 						modelAttributeMethods.add(method);
@@ -270,6 +277,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			return !this.handlerMethods.isEmpty();
 		}
 
+		public Set<Method> getInitBinderMethods() {
+			return this.initBinderMethods;
+		}
+
 		public Set<Method> getModelAttributeMethods() {
 			return this.modelAttributeMethods;
 		}
@@ -280,12 +291,15 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		private final WebBindingInitializer webBindingInitializer;
 
+		private final Set<Method> initBinderMethods;
+
 		private final SimpleFormStatus formStatus = new SimpleFormStatus();
 
 		private boolean responseArgumentUsed = false;
 
-		public ArgumentsResolver(WebBindingInitializer webBindingInitializer) {
+		public ArgumentsResolver(WebBindingInitializer webBindingInitializer, Set<Method> initBinderMethods) {
 			this.webBindingInitializer = webBindingInitializer;
+			this.initBinderMethods = initBinderMethods;
 		}
 
 		public Object[] resolveArguments(
@@ -362,6 +376,26 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 						ServletRequestDataBinder binder = new ServletRequestDataBinder(formObject, attrName);
 						if (this.webBindingInitializer != null) {
 							this.webBindingInitializer.initBinder(binder, new ServletWebRequest(request));
+						}
+						for (Method initBinderMethod : this.initBinderMethods) {
+							String[] targetNames = initBinderMethod.getAnnotation(InitBinder.class).value();
+							if (targetNames.length == 0 || Arrays.asList(targetNames).contains(attrName)) {
+								Class[] initBinderParams = initBinderMethod.getParameterTypes();
+								Object[] initBinderArgs = new Object[initBinderParams.length];
+								for (int j = 0; j < initBinderArgs.length; j++) {
+									initBinderArgs[j] = resolveStandardArgument(initBinderParams[j], request, response);
+									if (initBinderArgs[j] == null) {
+										if (initBinderParams[j].isInstance(binder)) {
+											initBinderArgs[j] = binder;
+										}
+									}
+								}
+								ReflectionUtils.makeAccessible(initBinderMethod);
+								Object attrValue = ReflectionUtils.invokeMethod(initBinderMethod, handler, initBinderArgs);
+								if (attrValue != null) {
+									throw new IllegalStateException("InitBinder methods must not have a return value");
+								}
+							}
 						}
 						binder.bind(request);
 						args[i] = formObject;

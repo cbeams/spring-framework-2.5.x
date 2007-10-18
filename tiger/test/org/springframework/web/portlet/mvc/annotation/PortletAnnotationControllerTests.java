@@ -46,6 +46,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -159,6 +160,52 @@ public class PortletAnnotationControllerTests extends TestCase {
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+			protected void render(ModelAndView mv, RenderRequest request, RenderResponse response) throws Exception {
+				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
+			}
+		};
+		portlet.init(new MockPortletConfig());
+
+		MockRenderRequest request = new MockRenderRequest(PortletMode.VIEW);
+		request.addParameter("defaultName", "myDefaultName");
+		request.addParameter("age", "value2");
+		request.addParameter("date", "2007-10-02");
+		MockRenderResponse response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myView-myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+	}
+
+	public void testBinderInitializingCommandProvidingFormController() throws Exception {
+		DispatcherPortlet portlet = new DispatcherPortlet() {
+			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyBinderInitializingCommandProvidingFormController.class));
+				wac.refresh();
+				return wac;
+			}
+			protected void render(ModelAndView mv, RenderRequest request, RenderResponse response) throws Exception {
+				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
+			}
+		};
+		portlet.init(new MockPortletConfig());
+
+		MockRenderRequest request = new MockRenderRequest(PortletMode.VIEW);
+		request.addParameter("defaultName", "myDefaultName");
+		request.addParameter("age", "value2");
+		request.addParameter("date", "2007-10-02");
+		MockRenderResponse response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myView-myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+	}
+
+	public void testSpecificBinderInitializingCommandProvidingFormController() throws Exception {
+		DispatcherPortlet portlet = new DispatcherPortlet() {
+			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MySpecificBinderInitializingCommandProvidingFormController.class));
 				wac.refresh();
 				return wac;
 			}
@@ -332,6 +379,30 @@ public class PortletAnnotationControllerTests extends TestCase {
 	}
 
 
+	@Controller
+	private static class MyBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
+
+		@InitBinder
+		private void initBinder(WebDataBinder binder) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			dateFormat.setLenient(false);
+			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+		}
+	}
+
+
+	@Controller
+	private static class MySpecificBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
+
+		@InitBinder("myCommand")
+		private void initBinder(WebDataBinder binder) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			dateFormat.setLenient(false);
+			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+		}
+	}
+
+
 	private static class MyWebBindingInitializer implements WebBindingInitializer {
 
 		public void initBinder(WebDataBinder binder, WebRequest request) {
@@ -377,6 +448,9 @@ public class PortletAnnotationControllerTests extends TestCase {
 				assertTrue(tb.getDate().getYear() == 107);
 			}
 			Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "myCommand");
+			if (errors.hasFieldErrors("date")) {
+				throw new IllegalStateException();
+			}
 			List<TestBean> testBeans = (List<TestBean>) model.get("testBeans");
 			response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
 					"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));

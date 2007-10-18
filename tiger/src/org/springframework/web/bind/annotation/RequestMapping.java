@@ -50,9 +50,10 @@ import java.lang.annotation.Target;
  * request parameters.
  * <li>{@link java.util.Map} / {@link org.springframework.ui.ModelMap} for
  * enriching the implicit model that will be exposed to the web view.
- * <li>Command objects to bind parameters to (as bean properties or fields, with
- * customizable type conversion, depending on the HandlerAdapter configuration -
- * see the "webBindingInitializer" property on AnnotationMethodHandlerAdapter).
+ * <li>Command/form objects to bind parameters to: as bean properties or fields,
+ * with customizable type conversion, depending on {@link InitBinder} methods
+ * and/or the HandlerAdapter configuration - see the "webBindingInitializer"
+ * property on AnnotationMethodHandlerAdapter.
  * Such command objects along with their validation results will be exposed
  * as model attributes, by default using the non-qualified command class name
  * in property notation (e.g. "orderAddress" for type "mypackage.OrderAddress").
@@ -60,7 +61,7 @@ import java.lang.annotation.Target;
  * a specific model attribute name.
  * <li>{@link org.springframework.validation.Errors} /
  * {@link org.springframework.validation.BindingResult} validation results
- * for a preceding command object (the immediate preceding argument).
+ * for a preceding command/form object (the immediate preceding argument).
  * <li>{@link org.springframework.web.bind.support.FormStatus} status handle
  * for marking form processing as complete (triggering the cleanup of session
  * attributes that have been indicated by the {@link FormAttributes} annotation
@@ -92,6 +93,8 @@ import java.lang.annotation.Target;
  * @see RequestParam
  * @see ModelAttribute
  * @see FormAttributes
+ * @see InitBinder
+ * @see org.springframework.web.context.request.WebRequest
  * @see org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping
  * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
  * @see org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping

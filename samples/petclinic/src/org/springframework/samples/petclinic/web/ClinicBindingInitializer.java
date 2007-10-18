@@ -13,7 +13,11 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.WebRequest;
 
 /**
- * WebBindingInitializer for PetClinic's custom editors.
+ * Shared WebBindingInitializer for PetClinic's custom editors.
+ *
+ * <p>Alternatively, such init-binder code may be put into
+ * {@link org.springframework.web.bind.annotation.InitBinder}
+ * annotated methods on the controller classes themselves.
  *
  * @author Juergen Hoeller
  */

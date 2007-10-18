@@ -40,6 +40,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -151,6 +152,48 @@ public class ServletAnnotationControllerTests extends TestCase {
 				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
 				adapterDef.getPropertyValues().addPropertyValue("webBindingInitializer", new MyWebBindingInitializer());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		request.addParameter("defaultName", "myDefaultName");
+		request.addParameter("age", "value2");
+		request.addParameter("date", "2007-10-02");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView-myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+	}
+
+	public void testBinderInitializingCommandProvidingFormController() throws Exception {
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyBinderInitializingCommandProvidingFormController.class));
+				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath.do");
+		request.addParameter("defaultName", "myDefaultName");
+		request.addParameter("age", "value2");
+		request.addParameter("date", "2007-10-02");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("myView-myDefaultName-typeMismatch-tb1-myOriginalValue", response.getContentAsString());
+	}
+
+	public void testSpecificBinderInitializingCommandProvidingFormController() throws Exception {
+		DispatcherServlet servlet = new DispatcherServlet() {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(MySpecificBinderInitializingCommandProvidingFormController.class));
+				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				wac.refresh();
 				return wac;
 			}
@@ -296,6 +339,30 @@ public class ServletAnnotationControllerTests extends TestCase {
 	}
 
 
+	@Controller
+	private static class MyBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
+
+		@InitBinder
+		private void initBinder(WebDataBinder binder) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			dateFormat.setLenient(false);
+			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+		}
+	}
+
+
+	@Controller
+	private static class MySpecificBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
+
+		@InitBinder("myCommand")
+		private void initBinder(WebDataBinder binder) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			dateFormat.setLenient(false);
+			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+		}
+	}
+
+
 	private static class MyWebBindingInitializer implements WebBindingInitializer {
 
 		public void initBinder(WebDataBinder binder, WebRequest request) {
@@ -346,6 +413,9 @@ public class ServletAnnotationControllerTests extends TestCase {
 						assertTrue(tb.getDate().getYear() == 107);
 					}
 					Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "myCommand");
+					if (errors.hasFieldErrors("date")) {
+						throw new IllegalStateException();
+					}
 					List<TestBean> testBeans = (List<TestBean>) model.get("testBeans");
 					response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
 							"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
