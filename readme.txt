@@ -62,7 +62,7 @@ FreeMarker 2.3, JasperReports 1.3, Commons FileUpload 1.2, JSF 1.1/1.2, Struts 1
 Basic release contents (~5 MB):
 * "dist" contains the Spring binary jar files
 
-Basic release contents (~32 MB):
+Contents of the "-with-docs" distribution (~32 MB):
 * "dist" contains the Spring binary jar files, as well as corresponding source jars
 * "docs" contains the Spring reference documentation in PDF and HTML format, as well as the complete API javadocs
 
@@ -102,9 +102,9 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 FULL JAR (dist):
 
 * "spring" (~2750 KB)
-- Convenient jar file combining all standard modules (except for the test module and the Portlet/Struts support)
+- Convenient jar file combining all standard modules (except for the test module and the Spring MVC/Portlet/Struts support)
 - Also includes the AOP Alliance interfaces (as a convenience)!
-- Does not include contents of spring-aspects.jar, spring-test.jar, spring-webmvc-portlet and spring-webmvc-struts.jar!
+- Does not include contents of spring-aspects.jar, spring-test.jar, spring-webmvc.jar, spring-webmvc-portlet.jar and spring-webmvc-struts.jar!
 
 MODULE JARS (dist/modules):
 
