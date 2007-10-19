@@ -1189,31 +1189,31 @@
 			<name>items</name>
 			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>The Collection, Map or array of objects used to generate the 'radio' tags</description>
+			<description>The Collection, Map or array of objects used to generate the 'input' tags with type 'radio'</description>
 		</attribute>
 		<attribute>
 			<name>itemValue</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Name of the property mapped to 'value' attribute of the 'radio' tag</description>
+			<description>Name of the property mapped to 'value' attribute of the 'input' tags with type 'radio'</description>
 		</attribute>
 		<attribute>
 			<name>itemLabel</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Value to be displayed as part of the 'radio' tag</description>
+			<description>Value to be displayed as part of the 'input' tags with type 'radio'</description>
 		</attribute>
 		<attribute>
 			<name>delimiter</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Delimiter to use between each 'radio' tag. There is no delimiter by default.</description>
+			<description>Delimiter to use between each 'input' tag with type 'radio'. There is no delimiter by default.</description>
 		</attribute>
 		<attribute>
 			<name>element</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Specifies the HTML element that is used to enclose each 'radio' tag.  Defaults to 'span'.</description>
+			<description>Specifies the HTML element that is used to enclose each 'input' tag with type 'radio'.  Defaults to 'span'.</description>
 		</attribute>
 	</tag>
 
@@ -1549,31 +1549,31 @@
 			<name>items</name>
 			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>The Collection, Map or array of objects used to generate the 'checkbox' tags</description>
+			<description>The Collection, Map or array of objects used to generate the 'input' tags with type 'checkbox'</description>
 		</attribute>
 		<attribute>
 			<name>itemValue</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Name of the property mapped to 'value' attribute of the 'checkbox' tag</description>
+			<description>Name of the property mapped to 'value' attribute of the 'input' tags with type 'checkbox'</description>
 		</attribute>
 		<attribute>
 			<name>itemLabel</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Value to be displayed as part of the 'checkbox' tag</description>
+			<description>Value to be displayed as part of the 'input' tags with type 'checkbox'</description>
 		</attribute>
 		<attribute>
 			<name>delimiter</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Delimiter to use between each 'checkbox' tag. There is no delimiter by default.</description>
+			<description>Delimiter to use between each 'input' tag with type 'checkbox'. There is no delimiter by default.</description>
 		</attribute>
 		<attribute>
 			<name>element</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Specifies the HTML element that is used to enclose each 'checkbox' tag.  Defaults to 'span'.</description>
+			<description>Specifies the HTML element that is used to enclose each 'input' tag with type 'checkbox'.  Defaults to 'span'.</description>
 		</attribute>
 	</tag>
 
