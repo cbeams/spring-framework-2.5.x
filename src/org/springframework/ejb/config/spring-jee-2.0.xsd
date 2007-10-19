@@ -27,7 +27,7 @@
 		<xsd:complexType>
 			<xsd:complexContent>
 				<xsd:extension base="jndiLocatingType">
-					<xsd:attribute name="cache" type="xsd:boolean" default="true">
+					<xsd:attribute name="cache" type="xsd:boolean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Controls whether the object returned from the JNDI lookup is cached
@@ -43,7 +43,7 @@
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="lookup-on-startup" type="xsd:boolean" default="true">
+					<xsd:attribute name="lookup-on-startup" type="xsd:boolean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Controls whether the JNDI lookup is performed immediately on startup
@@ -100,7 +100,7 @@
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="refresh-home-on-connect-failure" type="xsd:boolean" default="false">
+					<xsd:attribute name="refresh-home-on-connect-failure" type="xsd:boolean">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Controls whether to refresh the EJB home on connect failure.
@@ -141,7 +141,7 @@
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
-				<xsd:attribute name="resource-ref" type="xsd:boolean" default="false">
+				<xsd:attribute name="resource-ref" type="xsd:boolean">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Controls whether the lookup occurs in a J2EE container, i.e. if the
