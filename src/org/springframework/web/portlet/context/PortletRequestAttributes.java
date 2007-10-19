@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.AbstractRequestAttributes;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.portlet.util.PortletUtils;
@@ -185,6 +186,26 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 					session.removeAttribute(name);
 					this.sessionAttributesToUpdate.remove(name);
 				}
+			}
+		}
+	}
+
+	public String[] getAttributeNames(int scope) {
+		if (scope == SCOPE_REQUEST) {
+			return StringUtils.toStringArray(this.request.getAttributeNames());
+		}
+		else {
+			PortletSession session = getSession(false);
+			if (session != null) {
+				if (scope == SCOPE_GLOBAL_SESSION) {
+					return StringUtils.toStringArray(session.getAttributeNames(PortletSession.APPLICATION_SCOPE));
+				}
+				else {
+					return StringUtils.toStringArray(session.getAttributeNames());
+				}
+			}
+			else {
+				return new String[0];
 			}
 		}
 	}

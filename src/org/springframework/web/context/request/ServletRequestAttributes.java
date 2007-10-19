@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -164,6 +165,21 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 				this.sessionAttributesToUpdate.remove(name);
 				// Remove any registered destruction callback as well.
 				session.removeAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name);
+			}
+		}
+	}
+
+	public String[] getAttributeNames(int scope) {
+		if (scope == SCOPE_REQUEST) {
+			return StringUtils.toStringArray(this.request.getAttributeNames());
+		}
+		else {
+			HttpSession session = getSession(false);
+			if (session != null) {
+				return StringUtils.toStringArray(session.getAttributeNames());
+			}
+			else {
+				return new String[0];
 			}
 		}
 	}

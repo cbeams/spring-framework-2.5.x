@@ -19,6 +19,8 @@ package org.springframework.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -685,6 +687,21 @@ public abstract class StringUtils {
 			return null;
 		}
 		return (String[]) collection.toArray(new String[collection.size()]);
+	}
+
+	/**
+	 * Copy the given Enumeration into a String array.
+	 * The Enumeration must contain String elements only.
+	 * @param enumeration the Enumeration to copy
+	 * @return the String array (<code>null</code> if the passed-in
+	 * Enumeration was <code>null</code>)
+	 */
+	public static String[] toStringArray(Enumeration enumeration) {
+		if (enumeration == null) {
+			return null;
+		}
+		List list = Collections.list(enumeration);
+		return (String[]) list.toArray(new String[list.size()]);
 	}
 
 	/**

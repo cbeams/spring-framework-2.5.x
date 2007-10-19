@@ -82,6 +82,13 @@ public interface RequestAttributes {
 	void removeAttribute(String name, int scope);
 
 	/**
+	 * Retrieve the names of all attributes in the scope.
+	 * @param scope the scope identifier
+	 * @return the attribute names as String array
+	 */
+	String[] getAttributeNames(int scope);
+
+	/**
 	 * Register a callback to be executed on destruction of the
 	 * specified attribute in the given scope.
 	 * <p>Implementations should do their best to execute the callback
