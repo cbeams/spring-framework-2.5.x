@@ -211,7 +211,7 @@
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"&gt;
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
 
   &lt;bean id="..." class="..."&gt;
     <lineannotation>&lt;!-- collaborators and configuration for this bean go here --&gt;</lineannotation>
@@ -1815,7 +1815,7 @@ support=support@example.co.uk</programlisting>
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"&gt;
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
     
     &lt;bean name="classic" class="com.example.ExampleBean"&gt;
         &lt;property name="email" value="foo@bar.com/&gt;
@@ -1839,7 +1839,7 @@ support=support@example.co.uk</programlisting>
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"&gt;
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
     
     &lt;bean name="john-classic" class="com.example.Person"&gt;
         &lt;property name="name" value="John Doe"/&gt;
@@ -2845,7 +2845,7 @@ public class ReplacementComputeValue implements MethodReplacer {
       file</emphasis>. If you are using the "<literal>scope</literal>"
       attribute then you <emphasis>must</emphasis> be referencing either the
       <filename>'spring-beans-2.0.dtd'</filename> DTD or the
-      <filename>'spring-beans-2.0.xsd'</filename> XSD <emphasis>in that
+      <filename>'spring-beans-2.5.xsd'</filename> XSD <emphasis>in that
       file</emphasis>.</para>
     </note>
 
@@ -3054,8 +3054,8 @@ public class ReplacementComputeValue implements MethodReplacer {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"&gt;
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"&gt;
 
     <lineannotation>&lt;!-- a HTTP <interfacename>Session</interfacename>-scoped bean exposed as a proxy --&gt;</lineannotation>
     &lt;bean id="userPreferences" class="com.foo.UserPreferences" <emphasis
@@ -3313,8 +3313,8 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", scope);</pr
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"&gt;
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"&gt;
 
     &lt;bean class="org.springframework.beans.factory.config.CustomScopeConfigurer"&gt;
         &lt;property name="scopes"&gt;
@@ -4130,8 +4130,8 @@ public class InstantiationTracingBeanPostProcessor implements BeanPostProcessor 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:lang="http://www.springframework.org/schema/lang"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd"&gt;
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd"&gt;
 
     &lt;lang:groovy id="messenger"
           script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy"&gt;
@@ -5219,7 +5219,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        <lineannotation>xmlns:context="http://www.springframework.org/schema/context"</lineannotation>
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
-           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context-2.5.xsd"&gt;
                
@@ -5617,7 +5617,7 @@ public @interface MovieQualifier {
       even if they are not themselves annotated with Spring's
       <interfacename>@Qualifier</interfacename> annotation.</para>
 
-      <programlisting>&lt;bean id="customAutowireConfigurer" class="org.springframework.beans.factory.config.CustomAutowireConfigurer"&gt;
+      <programlisting>&lt;bean id="customAutowireConfigurer" class="org.springframework.beans.factory.annotation.CustomAutowireConfigurer"&gt;
     &lt;property name="customQualifierTypes"&gt;
         &lt;set&gt;
             &lt;value&gt;example.CustomQualifier&lt;/value&gt;
@@ -5737,7 +5737,7 @@ public @interface MovieQualifier {
 
     <section id="beans-stereotype-annotations">
       <title><interfacename>@Component</interfacename> and
-      <interfacename>@Repository</interfacename></title>
+      further stereotype annotations</title>
 
       <para>Beginning with Spring 2.0, the
       <interfacename>@Repository</interfacename> annotation was introduced as
@@ -5747,8 +5747,9 @@ public @interface MovieQualifier {
       the automatic translation of exceptions as described in the section
       entitled <xref linkend="orm-jpa-exceptions" />.</para>
 
-      <para>Spring 2.5 introduces another stereotype annotation,
-      <interfacename>@Component</interfacename>, and provides the capability
+      <para>Spring 2.5 introduces further stereotype annotations:
+      <interfacename>@Component</interfacename>, <interfacename>@Service</interfacename>
+      and <interfacename>@Controller</interfacename>. Spring provides the capability
       of automatically detecting 'stereotyped' classes and registering
       corresponding <interfacename>BeanDefinition</interfacename>s with the
       <interfacename>ApplicationContext</interfacename>. For example, the
@@ -5782,7 +5783,7 @@ public class JpaMovieFinder implements MovieFinder {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
-           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context-2.5.xsd"&gt;
                
