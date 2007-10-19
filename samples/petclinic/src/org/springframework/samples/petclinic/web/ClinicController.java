@@ -31,8 +31,8 @@ public class ClinicController {
 	 * Custom handler for the welcome view.
 	 * <p>
 	 * Note that this handler relies on the RequestToViewNameTranslator to
-	 * determine the logical view name based on the request URL: "/welcome.do" -&gt;
-	 * "welcome".
+	 * determine the logical view name based on the request URL: "/welcome.do"
+	 * -&gt; "welcome".
 	 */
 	@RequestMapping("/welcome.do")
 	public void welcomeHandler() {
@@ -65,8 +65,7 @@ public class ClinicController {
 	 * @return a ModelMap with the model attributes for the view
 	 */
 	@RequestMapping("/owner.do")
-	public ModelMap ownerHandler(@RequestParam("ownerId")
-	int ownerId) {
+	public ModelMap ownerHandler(@RequestParam("ownerId") int ownerId) {
 		return new ModelMap(this.clinic.loadOwner(ownerId));
 	}
 
