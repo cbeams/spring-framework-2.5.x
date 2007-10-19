@@ -80,8 +80,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 	private WebBindingInitializer webBindingInitializer;
 
-	private final Map<Class, HandlerMethodResolver> methodResolverCache =
-			new ConcurrentHashMap<Class, HandlerMethodResolver>();
+	private final Map<Class<?>, HandlerMethodResolver> methodResolverCache =
+			new ConcurrentHashMap<Class<?>, HandlerMethodResolver>();
 
 
 	/**
@@ -153,7 +153,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	}
 
 
-	private HandlerMethodResolver getMethodResolver(Class handlerType) {
+	private HandlerMethodResolver getMethodResolver(Class<?> handlerType) {
 		HandlerMethodResolver resolver = this.methodResolverCache.get(handlerType);
 		if (resolver == null) {
 			resolver = new HandlerMethodResolver(handlerType);
@@ -161,7 +161,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 		return resolver;
 	}
-
 
 
 	private static class HandlerMethodResolver {
@@ -176,13 +175,13 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
 				public void doWith(Method method) {
 					if (method.isAnnotationPresent(RequestMapping.class)) {
-						handlerMethods.add(method);
+						HandlerMethodResolver.this.handlerMethods.add(method);
 					}
 					else if (method.isAnnotationPresent(InitBinder.class)) {
-						initBinderMethods.add(method);
+						HandlerMethodResolver.this.initBinderMethods.add(method);
 					}
 					else if (method.isAnnotationPresent(ModelAttribute.class)) {
-						modelAttributeMethods.add(method);
+						HandlerMethodResolver.this.modelAttributeMethods.add(method);
 					}
 				}
 			});
@@ -190,8 +189,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 		public Method resolveHandlerMethod(HttpServletRequest request) {
 			String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
-			Set<Method> specificDefaultHandlerMethods = new LinkedHashSet();
-			Set<Method> defaultHandlerMethods = new LinkedHashSet();
+			Set<Method> specificDefaultHandlerMethods = new LinkedHashSet<Method>();
+			Set<Method> defaultHandlerMethods = new LinkedHashSet<Method>();
 			for (Method handlerMethod : this.handlerMethods) {
 				RequestMapping mapping = handlerMethod.getAnnotation(RequestMapping.class);
 				String[] mappedPaths = mapping.value();
@@ -302,6 +301,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			this.initBinderMethods = initBinderMethods;
 		}
 
+		@SuppressWarnings("unchecked")
 		public Object[] resolveArguments(
 				Object handler, Method handlerMethod, HttpServletRequest request, HttpServletResponse response,
 				ModelMap implicitModel) throws ServletException, IOException {
@@ -414,7 +414,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 
 		protected Object resolveStandardArgument(
-				Class parameterType, HttpServletRequest request, HttpServletResponse response) throws IOException {
+				Class<?> parameterType, HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 			if (parameterType.isInstance(request)) {
 				return request;
@@ -455,6 +455,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 			return this.formStatus.isComplete();
 		}
 
+		@SuppressWarnings("unchecked")
 		public ModelAndView getModelAndView(Object returnValue, ModelMap implicitModel) {
 			if (returnValue instanceof ModelAndView) {
 				ModelAndView mav = (ModelAndView) returnValue;

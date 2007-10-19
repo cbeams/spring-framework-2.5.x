@@ -84,8 +84,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 	private WebBindingInitializer webBindingInitializer;
 
-	private final Map<Class, HandlerMethodResolver> methodResolverCache =
-			new ConcurrentHashMap<Class, HandlerMethodResolver>();
+	private final Map<Class<?>, HandlerMethodResolver> methodResolverCache =
+			new ConcurrentHashMap<Class<?>, HandlerMethodResolver>();
 
 
 	/**
@@ -163,7 +163,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 	}
 
 
-	private HandlerMethodResolver getMethodResolver(Class handlerType) {
+	private HandlerMethodResolver getMethodResolver(Class<?> handlerType) {
 		HandlerMethodResolver resolver = this.methodResolverCache.get(handlerType);
 		if (resolver == null) {
 			resolver = new HandlerMethodResolver(handlerType);
@@ -185,13 +185,13 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
 				public void doWith(Method method) {
 					if (method.isAnnotationPresent(RequestMapping.class)) {
-						handlerMethods.add(method);
+						HandlerMethodResolver.this.handlerMethods.add(method);
 					}
 					else if (method.isAnnotationPresent(InitBinder.class)) {
-						initBinderMethods.add(method);
+						HandlerMethodResolver.this.initBinderMethods.add(method);
 					}
 					else if (method.isAnnotationPresent(ModelAttribute.class)) {
-						modelAttributeMethods.add(method);
+						HandlerMethodResolver.this.modelAttributeMethods.add(method);
 					}
 				}
 			});
@@ -199,8 +199,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 		public Method resolveHandlerMethod(PortletRequest request) {
 			String lookupMode = request.getPortletMode().toString();
-			List<Method> specificDefaultHandlerMethods = new LinkedList();
-			List<Method> defaultHandlerMethods = new LinkedList();
+			List<Method> specificDefaultHandlerMethods = new LinkedList<Method>();
+			List<Method> defaultHandlerMethods = new LinkedList<Method>();
 			for (Method handlerMethod : this.handlerMethods) {
 				RequestMapping mapping = handlerMethod.getAnnotation(RequestMapping.class);
 				String[] mappedModes = mapping.value();
@@ -351,6 +351,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			this.initBinderMethods = initBinderMethods;
 		}
 
+		@SuppressWarnings("unchecked")
 		public Object[] resolveArguments(
 				Object handler, Method handlerMethod, PortletRequest request, PortletResponse response,
 				ModelMap implicitModel) throws PortletException, IOException {
@@ -429,7 +430,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 						for (Method initBinderMethod : this.initBinderMethods) {
 							String[] targetNames = initBinderMethod.getAnnotation(InitBinder.class).value();
 							if (targetNames.length == 0 || Arrays.asList(targetNames).contains(attrName)) {
-								Class[] initBinderParams = initBinderMethod.getParameterTypes();
+								Class<?>[] initBinderParams = initBinderMethod.getParameterTypes();
 								Object[] initBinderArgs = new Object[initBinderParams.length];
 								for (int j = 0; j < initBinderArgs.length; j++) {
 									initBinderArgs[j] = resolveStandardArgument(initBinderParams[j], request, response);
@@ -463,7 +464,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		}
 
 		protected Object resolveStandardArgument(
-				Class parameterType, PortletRequest request, PortletResponse response) throws IOException {
+				Class<?> parameterType, PortletRequest request, PortletResponse response) throws IOException {
 
 			if (parameterType.isInstance(request)) {
 				return request;
@@ -513,6 +514,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			return this.formStatus.isComplete();
 		}
 
+		@SuppressWarnings("unchecked")
 		public ModelAndView getModelAndView(Object returnValue, ModelMap implicitModel) {
 			if (returnValue instanceof ModelAndView) {
 				ModelAndView mav = (ModelAndView) returnValue;
