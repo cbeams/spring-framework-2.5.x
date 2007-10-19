@@ -27,7 +27,7 @@
 		<xsd:complexType>
 			<xsd:complexContent>
 				<xsd:extension base="jndiLocatingType">
-					<xsd:attribute name="cache" type="xsd:boolean">
+					<xsd:attribute name="cache" type="xsd:boolean" default="true">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Controls whether the object returned from the JNDI lookup is cached
@@ -43,7 +43,7 @@
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="lookup-on-startup" type="xsd:boolean">
+					<xsd:attribute name="lookup-on-startup" type="xsd:boolean" default="true">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Controls whether the JNDI lookup is performed immediately on startup
@@ -55,10 +55,10 @@
 						<xsd:annotation>
 							<xsd:documentation source="java:java.lang.Class"><![CDATA[
 	The proxy interface to use for the JNDI object.
-	
+
 	Needs to be specified because the actual JNDI object type is not
 	known in advance in case of a lazy lookup.
-	
+
 	Typically used in conjunction with "lookupOnStartup"=false and/or
 	"cache"=false.
 							]]></xsd:documentation>
@@ -100,11 +100,11 @@
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="refresh-home-on-connect-failure" type="xsd:boolean">
+					<xsd:attribute name="refresh-home-on-connect-failure" type="xsd:boolean" default="false">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Controls whether to refresh the EJB home on connect failure.
-	
+
 	Can be turned on to allow for hot restart of the EJB server.
 	If a cached EJB home throws an RMI exception that indicates a
 	remote connect failure, a fresh home will be fetched and the
@@ -141,7 +141,7 @@
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
-				<xsd:attribute name="resource-ref" type="xsd:boolean">
+				<xsd:attribute name="resource-ref" type="xsd:boolean" default="false">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Controls whether the lookup occurs in a J2EE container, i.e. if the
