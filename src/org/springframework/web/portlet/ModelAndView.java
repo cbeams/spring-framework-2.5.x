@@ -94,7 +94,7 @@ public class ModelAndView {
 	public ModelAndView(String viewName, Map model) {
 		this.view = viewName;
 		if (model != null) {
-			getModelMap().addAllObjects(model);
+			getModelMap().addAllAttributes(model);
 		}
 	}
 
@@ -108,7 +108,7 @@ public class ModelAndView {
 	public ModelAndView(Object view, Map model) {
 		this.view = view;
 		if (model != null) {
-			getModelMap().addAllObjects(model);
+			getModelMap().addAllAttributes(model);
 		}
 	}
 
@@ -190,7 +190,7 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Return the model map. May return null.
+	 * Return the model map. May return <code>null</code>.
 	 * Called by DispatcherPortlet for evaluation of the model.
 	 */
 	protected Map getModelInternal() {
@@ -217,35 +217,36 @@ public class ModelAndView {
 
 
 	/**
-	 * Add an object to the model using parameter name generation.
-	 * @param modelObject the object to add to the model (never <code>null</code>)
-	 * @see ModelMap#addObject(Object)
+	 * Add an attribute to the model.
+	 * @param attributeName name of the object to add to the model
+	 * @param attributeValue object to add to the model (never <code>null</code>)
+	 * @see ModelMap#addAttribute(String, Object)
+	 * @see #getModelMap()
 	 */
-	public ModelAndView addObject(Object modelObject) {
-		getModelMap().addObject(modelObject);
+	public ModelAndView addObject(String attributeName, Object attributeValue) {
+		getModelMap().addAttribute(attributeName, attributeValue);
 		return this;
 	}
 
 	/**
-	 * Add an object to the model.
-	 * @param modelName name of the object to add to the model
-	 * @param modelObject object to add to the model (never <code>null</code>)
-	 * @return this ModelAndView, convenient to allow usages like
-	 * return modelAndView.addObject("foo", bar);
+	 * Add an attribute to the model using parameter name generation.
+	 * @param attributeValue the object to add to the model (never <code>null</code>)
+	 * @see ModelMap#addAttribute(Object)
+	 * @see #getModelMap()
 	 */
-	public ModelAndView addObject(String modelName, Object modelObject) {
-		getModelMap().addObject(modelName, modelObject);
+	public ModelAndView addObject(Object attributeValue) {
+		getModelMap().addAttribute(attributeValue);
 		return this;
 	}
 
 	/**
-	 * Add all entries contained in the provided map to the model.
-	 * @param modelMap a map of modelName -> modelObject pairs
-	 * @return this ModelAndView, convenient to allow usages like
-	 * return modelAndView.addAllObjects(myModelMap);
+	 * Add all attributes contained in the provided Map to the model.
+	 * @param modelMap a Map of attributeName -> attributeValue pairs
+	 * @see ModelMap#addAllAttributes(Map)
+	 * @see #getModelMap()
 	 */
 	public ModelAndView addAllObjects(Map modelMap) {
-		getModelMap().addAllObjects(modelMap);
+		getModelMap().addAllAttributes(modelMap);
 		return this;
 	}
 

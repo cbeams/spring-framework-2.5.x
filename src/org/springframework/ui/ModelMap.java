@@ -47,92 +47,122 @@ public class ModelMap extends LinkedHashMap {
 	}
 
 	/**
-	 * Construct a new <code>ModelMap</code> containing the supplied model object
+	 * Construct a new <code>ModelMap</code> containing the supplied attribute
 	 * under the supplied name.
-	 * @see #addObject(String, Object)
+	 * @see #addAttribute(String, Object)
 	 */
-	public ModelMap(String modelName, Object modelObject) {
-		addObject(modelName, modelObject);
+	public ModelMap(String attributeName, Object attributeValue) {
+		addAttribute(attributeName, attributeValue);
 	}
 
 	/**
-	 * Construct a new <code>ModelMap</code> containing the supplied model object.
+	 * Construct a new <code>ModelMap</code> containing the supplied attribute.
 	 * Uses attribute name generation to generate the key for the supplied model
 	 * object.
-	 * @see #addObject(Object)
+	 * @see #addAttribute(Object)
 	 */
-	public ModelMap(Object modelObject) {
-		addObject(modelObject);
+	public ModelMap(Object attributeValue) {
+		addAttribute(attributeValue);
 	}
 
 
 	/**
-	 * Add the supplied <code>Object</code> under the supplied name.
-	 * @param modelName the name of the model attribute (never <code>null</code>)
-	 * @param modelObject the model attribute object (can be <code>null</code>)
+	 * Add the supplied attribute under the supplied name.
+	 * @param attributeName the name of the model attribute (never <code>null</code>)
+	 * @param attributeValue the model attribute value (can be <code>null</code>)
 	 */
-	public ModelMap addObject(String modelName, Object modelObject) {
-		Assert.notNull(modelName, "Model name must not be null");
-		this.put(modelName, modelObject);
+	public ModelMap addAttribute(String attributeName, Object attributeValue) {
+		Assert.notNull(attributeName, "Model attribute name must not be null");
+		put(attributeName, attributeValue);
 		return this;
 	}
 
 	/**
-	 * Add the supplied <code>Object</code> to this <code>Map</code> used a
+	 * Add the supplied attribute to this <code>Map</code> using a
 	 * {@link org.springframework.core.Conventions#getVariableName generated name}.
 	 * <p/><emphasis>Note: Empty {@link Collection Collections} are not added to
 	 * the model when using this method because we cannot correctly determine
-	 * the true convention name. View code should check for <code>null</code> rather than
-	 * for empty collections as is already done by JSTL tags</emphasis>.
-	 * @param modelObject the model attribute object (never <code>null</code>)
+	 * the true convention name. View code should check for <code>null</code> rather
+	 * than for empty collections as is already done by JSTL tags.</emphasis>
+	 * @param attributeValue the model attribute value (never <code>null</code>)
 	 */
-	public ModelMap addObject(Object modelObject) {
-		Assert.notNull(modelObject, "Model object must not be null");
-		if (modelObject instanceof Collection && ((Collection) modelObject).isEmpty()) {
+	public ModelMap addAttribute(Object attributeValue) {
+		Assert.notNull(attributeValue, "Model object must not be null");
+		if (attributeValue instanceof Collection && ((Collection) attributeValue).isEmpty()) {
 			return this;
 		}
-		return addObject(Conventions.getVariableName(modelObject), modelObject);
+		return addAttribute(Conventions.getVariableName(attributeValue), attributeValue);
 	}
 
 	/**
-	 * Copy all objects in the supplied <code>Collection</code> into this <code>Map</code>,
-	 * using attribute name generation for each element.
-	 * @see #addObject(Object)
+	 * Copy all attributes in the supplied <code>Collection</code> into this
+	 * <code>Map</code>, using attribute name generation for each element.
+	 * @see #addAttribute(Object)
 	 */
-	public ModelMap addAllObjects(Collection objects) {
-		if (objects != null) {
-			for (Iterator it = objects.iterator(); it.hasNext();) {
-				addObject(it.next());
+	public ModelMap addAllAttributes(Collection attributeValues) {
+		if (attributeValues != null) {
+			for (Iterator it = attributeValues.iterator(); it.hasNext();) {
+				addAttribute(it.next());
 			}
 		}
 		return this;
 	}
 
 	/**
-	 * Copy all objects in the supplied <code>Map</code> into this <code>Map</code>.
+	 * Copy all attributes in the supplied <code>Map</code> into this <code>Map</code>.
+	 * @see #addAttribute(String, Object)
 	 */
-	public ModelMap addAllObjects(Map objects) {
-		if (objects != null) {
-			putAll(objects);
+	public ModelMap addAllAttributes(Map attributes) {
+		if (attributes != null) {
+			putAll(attributes);
 		}
 		return this;
 	}
 
 	/**
-	 * Copy all objects in the supplied <code>Map</code> into this <code>Map</code>,
+	 * Copy all attributes in the supplied <code>Map</code> into this <code>Map</code>,
 	 * with existing objects of the same name taking precedence (i.e. not getting
 	 * replaced).
 	 */
-	public ModelMap mergeObjects(Map objects) {
-		if (objects != null) {
+	public ModelMap mergeAttributes(Map attributes) {
+		if (attributes != null) {
 			for (Iterator it = keySet().iterator(); it.hasNext();) {
 				Object key = it.next();
 				if (!containsKey(key)) {
-					put(key, objects.get(key));
+					put(key, attributes.get(key));
 				}
 			}
 		}
 		return this;
+	}
+
+
+	/**
+	 * @deprecated as of Spring 2.5, in favor of {@link #addAttribute(String, Object)}
+	 */
+	public ModelMap addObject(String modelName, Object modelObject) {
+		return addAttribute(modelName, modelObject);
+	}
+
+	/**
+	 * @deprecated as of Spring 2.5, in favor of {@link #addAttribute(Object)}
+	 */
+	public ModelMap addObject(Object modelObject) {
+		return addAttribute(modelObject);
+	}
+
+	/**
+	 * @deprecated as of Spring 2.5, in favor of {@link #addAllAttributes(Collection)}
+	 */
+	public ModelMap addAllObjects(Collection objects) {
+		return addAllAttributes(objects);
+	}
+
+	/**
+	 * @deprecated as of Spring 2.5, in favor of {@link #addAllAttributes(Map)}
+	 */
+	public ModelMap addAllObjects(Map objects) {
+		return addAllAttributes(objects);
 	}
 
 }
