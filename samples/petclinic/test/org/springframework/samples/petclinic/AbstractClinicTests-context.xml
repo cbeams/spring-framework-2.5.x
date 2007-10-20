@@ -9,6 +9,8 @@
 
 	<context:property-placeholder location="classpath:jdbc.properties" />
 
+	<context:annotation-config />
+
 	<tx:annotation-driven />
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"

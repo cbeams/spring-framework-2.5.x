@@ -9,6 +9,8 @@
 
 	<context:property-placeholder location="classpath:jdbc.properties" />
 
+	<tx:annotation-driven />
+
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
 		p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}" p:username="${jdbc.username}"
 		p:password="${jdbc.password}" />
@@ -23,7 +25,5 @@
 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
 		p:entityManagerFactory-ref="entityManagerFactory" />
-
-	<tx:annotation-driven />
 
 </beans>
