@@ -39,6 +39,8 @@ public class MBeanExportBeanDefinitionParser extends AbstractSingleBeanDefinitio
 
 	private static final String DEFAULT_DOMAIN_ATTRIBUTE = "default-domain";
 
+	private static final String SERVER_ATTRIBUTE = "server";
+
 
 	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
 		return MBEAN_EXPORTER_BEAN_NAME;
@@ -53,6 +55,10 @@ public class MBeanExportBeanDefinitionParser extends AbstractSingleBeanDefinitio
 		String defaultDomain = element.getAttribute(DEFAULT_DOMAIN_ATTRIBUTE);
 		if (StringUtils.hasText(defaultDomain)) {
 			builder.addPropertyValue("defaultDomain", defaultDomain);
+		}
+		String serverBeanName = element.getAttribute(SERVER_ATTRIBUTE);
+		if (StringUtils.hasText(serverBeanName)) {
+			builder.addPropertyReference("server", serverBeanName);
 		}
 	}
 
