@@ -8,7 +8,7 @@ import org.springframework.samples.petclinic.validation.VisitValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.FormAttributes;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.support.FormStatus;
  */
 @Controller
 @RequestMapping("/addVisit.do")
-@FormAttributes("visit")
+@SessionAttributes("visit")
 public class AddVisitForm {
 
 	private final Clinic clinic;
@@ -38,7 +38,7 @@ public class AddVisitForm {
 		Pet pet = this.clinic.loadPet(petId);
 		Visit visit = new Visit();
 		pet.addVisit(visit);
-		model.addObject("visit", visit);
+		model.addAttribute("visit", visit);
 		return "visitForm";
 	}
 

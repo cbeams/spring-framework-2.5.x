@@ -64,7 +64,7 @@ import java.lang.annotation.Target;
  * for a preceding command/form object (the immediate preceding argument).
  * <li>{@link org.springframework.web.bind.support.FormStatus} status handle
  * for marking form processing as complete (triggering the cleanup of session
- * attributes that have been indicated by the {@link FormAttributes} annotation
+ * attributes that have been indicated by the {@link SessionAttributes} annotation
  * at the handler type level).
  * </ul>
  *
@@ -92,7 +92,7 @@ import java.lang.annotation.Target;
  * @since 2.5
  * @see RequestParam
  * @see ModelAttribute
- * @see FormAttributes
+ * @see SessionAttributes
  * @see InitBinder
  * @see org.springframework.web.context.request.WebRequest
  * @see org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping

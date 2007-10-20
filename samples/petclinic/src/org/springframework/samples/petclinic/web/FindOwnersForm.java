@@ -30,7 +30,7 @@ public class FindOwnersForm {
 
 	@RequestMapping(type = "GET")
 	public  String setupForm(ModelMap model) {
-		model.addObject("owner", new Owner());
+		model.addAttribute("owner", new Owner());
 		return "findOwners";
 	}
 
@@ -45,7 +45,7 @@ public class FindOwnersForm {
 		}
 		if (results.size() > 1) {
 			// multiple owners found
-			model.addObject("selections", results);
+			model.addAttribute("selections", results);
 			return "owners";
 		}
 		else {

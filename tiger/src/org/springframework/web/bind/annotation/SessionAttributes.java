@@ -23,10 +23,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation that indicates the form attributes that a specific handler uses.
- * This will typically list model attributes that should be transparently
- * stored in the session, serving as form-backing beans.
- * <b>Declared at the type level.</b>
+ * Annotation that indicates the session attributes that a specific handler
+ * uses. This will typically list the names of model attributes which should be
+ * transparently stored in the session or some conversational storage,
+ * serving as form-backing beans. <b>Declared at the type level,</b> applying
+ * to the model attributes that the annotated handler class operates on.
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -34,10 +35,11 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface FormAttributes {
+public @interface SessionAttributes {
 
 	/**
-	 * The names of form attributes in the model, to be stored in the session.
+	 * The names of session attributes in the model, to be stored in the
+	 * session or some conversational storage.
 	 * <p>Note: This indicates the model attribute names. The session attribute
 	 * names may or may not match the model attribute names; applications should
 	 * not rely on the session attribute names but rather operate on the model only.
