@@ -27,7 +27,11 @@ of the @ManagedResource and @ManagedOperation annotations; whereas, the
 HibernateStatistics service is exposed via JMX through auto-detection of the
 service MBean. You can start up the JDK's JConsole to see and use the exported 
 bean. Note that special setup for exporting MBeans may be necessary, depending
-on your deployment environment (e.g., on WebLogic <= 8.1).
+on your deployment environment. For example, on WebLogic <= 8.1 the 'server'
+attribute must be provided and should reference a WebLogic-specific MBeanServer:
+
+   <context:mbean-export server="mbeanServer"/>
+   <bean id="mbeanServer" class="org.springframework.jmx.support.WebLogicMBeanServerFactoryBean"/>
 
 The Spring distribution comes with all required Hibernate and TopLink Essentials
 (JPA RI) JAR files to be able to build and run PetClinic on those two ORM tools.
