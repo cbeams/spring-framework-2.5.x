@@ -42,7 +42,7 @@
 	</bean>
 
 	<!--
-		- This bean resolves specific types of exceptions to corresponding symbolic 
+		- This bean resolves specific types of exceptions to corresponding logical 
 		- view names for error views. The default behaviour of DispatcherServlet 
 		- is to propagate all exceptions to the servlet container: this will happen 
 		- here with all other types of exceptions.
@@ -58,8 +58,8 @@
 
 	<!--
 		- This bean configures the 'prefix' and 'suffix' properties of 
-		- InternalResourceViewResolver, thus resolving symbolic view names 
-		- returned by Controllers. For example, a symbolic view name of "vets" 
+		- InternalResourceViewResolver, which resolves logical view names 
+		- returned by Controllers. For example, a logical view name of "vets" 
 		- will be mapped to "/WEB-INF/jsp/vets.jsp".
 	-->
 	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/WEB-INF/jsp/"

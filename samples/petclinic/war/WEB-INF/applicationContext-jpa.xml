@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Application context definition for PetClinic on JPA.
+-->
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:p="http://www.springframework.org/schema/p"
-		xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
-		xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
-			http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd
-			http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
 	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
 
@@ -21,19 +24,19 @@
 
 	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
 	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
-	<context:property-placeholder location="/WEB-INF/jdbc.properties" />
+	<context:property-placeholder location="classpath:jdbc.properties" />
 
-	<!-- Local DataSource that works in any environment -->
-	<!-- Note that DriverManagerDataSource does not pool; it is not intended for production. -->
-	<!-- See JPetStore for an example of using Commons DBCP BasicDataSource as alternative. -->
-	<!-- See Image Database for an example of using C3P0 ComboPooledDataSource as alternative. -->
+	<!-- DriverManagerDataSource is a local DataSource that works in any environment. -->
+	<!-- Note that DriverManagerDataSource does not pool connections and is therefore not intended for production. -->
+	<!-- See applicationContext-jdbc.xml for an example of using Commons DBCP BasicDataSource as an alternative. -->
+	<!-- See the Image Database sample application for an example of using C3P0 ComboPooledDataSource as an alternative. -->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
 		p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}" p:username="${jdbc.username}"
 		p:password="${jdbc.password}" />
 
 	<!-- JNDI DataSource for JEE environments -->
 	<!--
-	<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/petclinic" />
+		<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/petclinic" />
 	-->
 
 	<!-- JPA EntityManagerFactory -->
@@ -41,14 +44,13 @@
 		p:dataSource-ref="dataSource">
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter"
-				p:databasePlatform="org.springframework.samples.petclinic.toplink.EssentialsHSQLPlatformWithNativeSequence"
-				p:showSql="true" />
+				p:databasePlatform="${jpa.databasePlatform}" p:showSql="${jpa.showSql}" />
 			<!--
-			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" p:database="HSQL"
-			p:showSql="true" />
+				<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" p:database="${jpa.database}"
+				p:showSql="${jpa.showSql}" />
 			-->
 			<!--
-			<bean class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter" p:database="HSQL" p:showSql="true" />
+				<bean class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter" p:database="${jpa.database}" p:showSql="${jpa.showSql}" />
 			-->
 		</property>
 	</bean>

@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-	<tx:annotation-driven />
+	<context:property-placeholder location="classpath:jdbc.properties" />
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
-		p:driverClassName="org.hsqldb.jdbcDriver" p:url="jdbc:hsqldb:hsql://localhost:9001" p:username="sa" p:password="" />
+		p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}" p:username="${jdbc.username}"
+		p:password="${jdbc.password}" />
 
 	<!-- Note: the specific "jpaAdapter" bean sits in adapter context file -->
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
@@ -20,5 +23,7 @@
 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
 		p:entityManagerFactory-ref="entityManagerFactory" />
+
+	<tx:annotation-driven />
 
 </beans>

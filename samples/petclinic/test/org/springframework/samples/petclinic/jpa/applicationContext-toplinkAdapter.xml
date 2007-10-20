@@ -4,7 +4,6 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
 	<bean id="jpaAdapter" class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter"
-		p:databasePlatform="org.springframework.samples.petclinic.toplink.EssentialsHSQLPlatformWithNativeSequence"
-		p:showSql="true" />
+		p:databasePlatform="${jpa.databasePlatform}" p:showSql="${jpa.showSql}" />
 
 </beans>
