@@ -240,7 +240,7 @@ public abstract class GenericFormController<T> implements Controller {
 
 		// Fetch errors model as starting point, containing form object under
 		// "formObjectName", and corresponding Errors instance under internal key.
-		ModelMap model = new ModelMap().addAllObjects(bindingResult.getModel());
+		ModelMap model = new ModelMap().addAllAttributes(bindingResult.getModel());
 
 		// Merge reference data into model, if any.
 		populateModel(request, model, bindingResult);
