@@ -18,20 +18,14 @@ configurations for JDBC, Hibernate and JPA, with HSQLDB and MySQL as target
 databases. The default PetClinic configuration is JDBC on HSQLDB. See
 "src/jdbc.properties", "war/WEB-INF/web.xml" and
 "war/WEB-INF/applicationContext-*.xml" for details. A simple comment change in
-web.xml switches between the data access strategies.
+"web.xml" switches between the data access strategies.
 
 The JDBC and Hibernate versions of PetClinic also demonstrate JMX support via
-the use of <context:mbean-export /> for exporting MBeans. SimpleJdbcClinic
+the use of "<context:mbean-export/>" for exporting MBeans. SimpleJdbcClinic
 exposes the SimpleJdbcClinicMBean management interface via JMX through the use
 of the @ManagedResource and @ManagedOperation annotations; whereas, the
 HibernateStatistics service is exposed via JMX through auto-detection of the
-service MBean. You can start up the JDK's JConsole to see and use the exported 
-bean. Note that special setup for exporting MBeans may be necessary, depending
-on your deployment environment. For example, on WebLogic <= 8.1 the 'server'
-attribute must be provided and should reference a WebLogic-specific MBeanServer:
-
-   <context:mbean-export server="mbeanServer"/>
-   <bean id="mbeanServer" class="org.springframework.jmx.support.WebLogicMBeanServerFactoryBean"/>
+service MBean. You can start up the JDK's JConsole to manage the exported bean.
 
 The Spring distribution comes with all required Hibernate and TopLink Essentials
 (JPA RI) JAR files to be able to build and run PetClinic on those two ORM tools.
