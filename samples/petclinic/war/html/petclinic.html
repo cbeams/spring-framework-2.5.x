@@ -36,7 +36,7 @@
 	<ul>
 	  <li>JavaBeans based application configuration using Inversion-Of-Control</li>
 	  <li>Model-View-Controller web Presentation Layer</li>
-	  <li>Practical database access through JDBC, Hibernate, Toplink,  or Java Persistence API</li>
+	  <li>Practical database access through JDBC, Hibernate, or Java Persistence API</li>
 	  <li>Application monitoring based on JMX</li>
 	  <li>Declarative Transaction Management using AOP</li>
 	  <li>Data Validation that supports but is not dependent on the Presentation Layer</li>
@@ -83,7 +83,7 @@
 	<p>
 		It is assumed that users of this tutorial will have a basic knowledge
 		of object-oriented design, Java, Servlets, JSP, and relational
-		databases. It also assumes a basic knowledge of the use of a J2EE web
+		databases. It also assumes a basic knowledge of the use of a Java EE web
 		application container.
 	</p>
 
@@ -128,8 +128,8 @@
 
 	<h3>Server Technology</h3>
 	<p>
-		The sample application should be usable with any J2EE web application
-		container that is compatible with the Servlet 2.3 and JSP 1.2
+		The sample application should be usable with any Java EE web application
+		container that is compatible with the Servlet 2.4 and JSP 2.0
 		specifications. Some of the deployment files provided are designed
 		specifically for Apache Tomcat. These files specify container-supplied
 		connection-pooled data sources. It is not necessary to use these files.
@@ -144,7 +144,7 @@
 	<p>
 		The sample application uses a relational database for data storage.
 		Support has been provided for a choice of 1 of 2 database selections,
-		MySql or HypersonicSQL. HypersonicSQL version 1.7.2 is the default
+		MySql or HypersonicSQL. HypersonicSQL version 1.8.0 is the default
 		choice and a copy is provided with the application. It is possible to
 		easily configure the application to use either database. Configuration
 		details are provided in the Developer Instructions section.
@@ -159,11 +159,11 @@
 	</p>
 
 	<ul>
-	  <li>Java SDK 1.4.x</li>
-	  <li>Ant 1.5.x</li>
-	  <li>Tomcat 4.1.x, or some other web application container</li>
-	  <li>JUnit 3.8.1 - needed to run the tests</li>
-	  <li>(Optional) MySQL 3.23.53 with MySQL Connector 3.x</li>
+	  <li>Java SDK 1.5.x</li>
+	  <li>Ant 1.7.x</li>
+	  <li>Tomcat 5.x.x, or some other web application container</li>
+	  <li>JUnit 4.4 - needed to run the tests</li>
+	  <li>(Optional) MySQL 5.x with MySQL Connector/J 5.x</li>
 	</ul>
 
 	<p>
@@ -218,7 +218,7 @@
 	</p>
 
 	<p>
-		TABLE: <span style="font-weight: bold; font-style: italic;">vet_specialties</span>-
+		TABLE: <span style="font-weight: bold; font-style: italic;">vet_specialties</span> -
 		a link table for <span style="font-weight: bold; font-style: italic;">vets</span>
 		and their <span style="font-weight: bold; font-style: italic;">specialties</span><br>
 		&nbsp;&nbsp;&nbsp; FOREIGN KEY <span style="font-weight: bold;">vet_id</span>
@@ -287,10 +287,10 @@
 		contains files related to MySQL, contains scripts and a Tomcat context
 		definition file<br>
 
-		&nbsp;&nbsp;&nbsp; D-- .<span style="font-weight: bold; font-style: italic;">classes</span>:
+		&nbsp;&nbsp;&nbsp; D-- <span style="font-weight: bold; font-style: italic;">.classes</span>:
 		contains compiled Java class files<br>
 
-		&nbsp;&nbsp;&nbsp; D-- .test<span style="font-weight: bold; font-style: italic;">classes</span>:
+		&nbsp;&nbsp;&nbsp; D-- <span style="font-weight: bold; font-style: italic;">.testclasses</span>:
 		contains compiled testing related Java class files<br>
 
 		&nbsp;&nbsp;&nbsp; D-- <span style="font-weight: bold; font-style: italic;">junit-reports</span>:
@@ -308,10 +308,11 @@
 
 	<h3>Logging</h3>
 	<p>
-		Spring supports the use of the Apache Commons Logging API.This API provides the ability to use Java 1.4
-		loggers, the simple Commons loggers, and Apache Log4J loggers. PetClinic uses Log4J
-		to provide sophisticated and configurable logging capabilities. The
-		file, <span style="font-weight: bold; font-style: italic;">war/WEB-INF/log4j.properties</span>
+		Spring supports the use of the Apache Commons Logging API. This API
+		provides the ability to use Java 1.4 loggers, the simple Commons loggers,
+		and Apache Log4J loggers. PetClinic uses Log4J to provide sophisticated
+		and configurable logging capabilities. The file,
+		<span style="font-weight: bold; font-style: italic;">war/WEB-INF/log4j.properties</span>
 		configures the definition of <strong>Log4j</strong>loggers.
 	</p>
 
@@ -354,9 +355,6 @@
 	</ul>
 
 	<ul>
-	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.validation.FindOwnerValidator</span>
-		is a Spring <span style="font-weight: bold;">Validator</span> that
-		verifies correct data entry for the FindOwner form.</li>
 	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.validation.OwnerValidator</span>
 		is a Spring <span style="font-weight: bold;">Validator</span> that
 		verifies correct data entry for the Add and Edit Owner forms.</li>
@@ -390,8 +388,7 @@
 
 	<ul>
 	  <li>JDBC</li>
-	  <li>Hibernate (2 and 3)</li>
-	  <li>Toplink</li>
+	  <li>Hibernate 3</li>
 	  <li>Java Persistence API</li>
 	</ul>
 
@@ -425,20 +422,19 @@
 	<p>
 		The high-level business/persistence API for PetClinic is the
 		<span style="font-weight: bold;">org.springframework.samples.petclinic.Clinic</span>
-		interface. Spring provides several convenient abstract
-		DaoSupport classes for each of the persistence strategies. Each
-		persistence strategy in PetClinic is a different implementation of the
-		<span style="font-weight: bold;">Clinic</span> interface that extends the
-		respective DaoSupport class. In each case, the
+		interface. Each persistence strategy in PetClinic is a different implementation of the
+		<span style="font-weight: bold;">Clinic</span> interface. In each case, the
 		<span style="font-weight: bold;">Clinic</span> implementation is fronted by
-		a transactional proxy that also implements
-		<span style="font-weight: bold;">Clinic</span>. These objects are standard
-		Java dynamic proxies which are created by an instance of
+		a transactional proxy, configured via the
+		<span style="font-weight: bold;">@Transactional</span> annotation, that also
+		implements <span style="font-weight: bold;">Clinic</span>. These objects
+		are standard Java dynamic proxies which are created by an instance of
 		<span style="font-weight: bold;">org.springframework.transaction.interceptor.TransactionProxyFactoryBean</span>.
 		These proxies are configured in the respective application context file
-		and specify that all <span style="font-weight: bold;">Clinic</span> methods
-		are run in a transactional context.The transaction managers used in
-		PetClinic are all implementations of the
+		via <strong>&lt;tx:annotation-driven /&gt;</strong> and specify that all
+		<span style="font-weight: bold;">Clinic</span> methods are run in a
+		transactional context. The transaction managers used in PetClinic are all
+		implementations of the
 		<span style="font-weight: bold;">org.springframework.transaction.PlatformTransactionManager</span>
 		interface. All of the implementations are by default configured
 		to use a local <span style="font-weight: bold;">DataSource</span> that
@@ -448,7 +444,7 @@
 		program, a connection pooling <span style="font-weight: bold;">DataSource</span>,
 		such as an instance of <span style="font-weight: bold;">org.apache.commons.dbcp.BasicDataSource</span>,
 		is more appropriate for use in a multi-user application. Another
-		alternative is to obtain one through the J2EE environment
+		alternative is to obtain one through the Java EE environment
 		using an instance of
 		<span style="font-weight: bold;">org.springframework.jndi.JndiObjectFactoryBean</span>.
 	</p>
@@ -459,17 +455,17 @@
 		access convenience classes in the package
 		<span style="font-weight: bold;">org.springframework.jdbc.object</span>.
 		These classes and the lower-level Spring classes that they use in the
-		<span style="font-weight: bold;">org.springframework.jdbc.core</span>package
+		<span style="font-weight: bold;">org.springframework.jdbc.core</span> package
 		provide a higher level of abstraction for using JDBC that keeps the developer
 		from having to correctly implement the handling of the checked
-		<span style="font-weight: bold;">SqlExceptions</span>with ugly error-prone
+		<span style="font-weight: bold;">SqlExceptions</span> with ugly error-prone
 		nested try-catch-finally blocks. Using the classes in this package
 		allows the developer to focus efforts on the functionality being
 		implemented rather than the mechanics of error handling. When using
 		these classes, it is the responsibility of the developer to provide the
 		SQL needed and to map the parameters to/from the respective domain
 		object. This typically is done by extending one of the
-		<span style="font-weight: bold;">org.springframework.jdbc.object</span>classes,
+		<span style="font-weight: bold;">org.springframework.jdbc.object</span> classes,
 		initializing its SQL, and overriding a method that takes care of
 		the mapping. In this way, the developer gets to focus on implementing
 		functionality rather than application plumbing. These classes also
@@ -479,82 +475,18 @@
 	</p>
 
 	<p>
-		All of these objects in PetClinic initialize the SQL in their
-		constructors. SQL "Select" type
-		queries are implemented by subclassing
-		<span style="font-weight: bold;">org.springframework.jdbc.object.MappingSqlQuery</span>.
-		These subclasses override the <span style="font-style: italic;">mapRow(ResultSet,
-		int rowNum)</span> method to extract data from the
-		<span style="font-weight: bold;">ResultSet</span> returned to the framework
-		by execution of the query. The framework calls this method once for
-		every row in the <span style="font-weight: bold;">ResultSet</span>.
-		SQL "Update" and "Insert" type queries are implemented by
-		subclassing <span style="font-weight: bold;">org.springframework.jdbc.object.SqlUpdate</span>.
-		These subclasses override or call an update(Object[]) method that
-		places the domain object data into an Object array which is substituted into the
-		appropriate <span style="font-weight: bold;">SqlParameters</span> of
-		a <span style="font-weight: bold;">PreparedStatement</span>.
-	</p>
-
-	<p>
-		The primary JDBC implementation of the Clinic interface is
-		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.jdbc.AbstractJdbcClinic</span>.
-		It defines and uses the following inner classes:
-	</p>
-
-	  <ul>
-		<li><span style="font-weight: bold; font-style: italic;">VetsQuery</span> is
-			the base class for any <span style="font-weight: bold;">Vet</span> Query
-			Objects. It provides an "All Vets" query as a convenience.</li>
-		<li><span style="font-weight: bold; font-style: italic;">SpecialtiesQuery</span>
-			is the "All <span style="font-weight: bold;">Vet's</span> Specialties"
-			Query Object.</li>
-		<li><span style="font-weight: bold; font-style: italic;">VetSpecialtiesQuery</span>
-			is a particular <span style="font-weight: bold;">Vet's</span> specialties
-			Query Object.</li>
-		<li><span style="font-weight: bold; font-style: italic;">OwnersQuery</span>
-			is an abstract base class for all <span style="font-weight: bold;">Owner</span>
-			Query Objects.</li>
-		<li><span style="font-weight: bold; font-style: italic;">OwnerQuery</span>
-			is an <span style="font-weight: bold;">Owner</span> by id Query
-			Object.</li>
-		<li><span style="font-weight: bold; font-style: italic;">OwnersByNameQuery</span>
-			is an <span style="font-weight: bold;">Owners</span> by last name
-			Query Object.</li>
-		<li><span style="font-weight: bold; font-style: italic;">OwnerUpdate</span>
-			is an <span style="font-weight: bold;">Owner</span> Update Object.</li>
-		<li><span style="font-weight: bold; font-style: italic;">OwnerInsert</span>
-			is an <span style="font-weight: bold;">Owner</span> Insert Object.</li>
-		<li><span style="font-weight: bold; font-style: italic;">TypesQuery</span> is
-			an "All <span style="font-weight: bold;">Pet</span> types" Query
-			Object.</li>
-		<li><span style="font-weight: bold; font-style: italic;">PetsQuery</span> is an abstract
-			base class for all <span style="font-weight: bold;">Pet</span> Query
-			Objects.</li>
-		<li><span style="font-weight: bold; font-style: italic;">PetQuery</span> is a <span style="font-weight: bold;">Pet</span> by id Query Object.</li>
-		<li><span style="font-weight: bold; font-style: italic;">PetsByOwnerQuery</span>
-			is a <span style="font-weight: bold;">Pets</span> by <span style="font-weight: bold;">Owner</span> Query Object.</li>
-		<li><span style="font-weight: bold; font-style: italic;">PetUpdate</span> is
-			a <span style="font-weight: bold;">Pet</span> Update Object.</li>
-		<li><span style="font-weight: bold; font-style: italic;">PetInsert</span> is
-			a <span style="font-weight: bold;">Pet</span> Insert Object.</li>
-		<li><span style="font-weight: bold; font-style: italic;">VisitsQuery</span>
-			is a <span style="font-weight: bold;">Visits</span> by <span style="font-weight: bold;">Pet</span> Query Object.</li>
-		<li><span style="font-weight: bold; font-style: italic;">VisitInsert</span>
-			is a <span style="font-weight: bold;">Visit</span> Insert Object.</li>
-	  </ul>
-
-	<p>
-		The HSQL specific extension of <span style="font-weight: bold;">AbstractJdbcClinic</span>
-		is <span style="font-weight: bold;">org.springframework.samples.petclinic.jdbc.HsqlClinic</span>.
-		It provides
-		an HSQL implementation of the getIdentityQuery() method.
-	</p>
-
-	<p>
-		The MySQL specific extension <span style="font-weight: bold;">of AbstractJdbcClinic</span>
-		is <span style="font-weight: bold;">org.springframework.samples.petclinic.jdbc.MysqlClinic</span>.
-		It provides an MySQL implementation of the getIdentityQuery() method.
+		The JDBC implementation of the Clinic interface is
+		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.jdbc.SimpleJdbcClinic</span>,
+		which uses Java 5 language features,
+		<strong>org.springframework.jdbc.core.simple.SimpleJdbcTemplate</strong>, and
+		<strong>org.springframework.jdbc.core.simple.SimpleJdbcInsert</strong>.
+		It also takes advantage of classes like
+		<strong>org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource</strong> and
+		<strong>org.springframework.jdbc.core.simple.ParameterizedBeanPropertyRowMapper</strong>
+		which provide automatic mapping between JavaBean properties and JDBC
+		parameters or query results. SimpleJdbcClinic is a rewrite of the
+		AbstractJdbcClinic which was the base class for JDBC implementations of
+		the Clinic interface for Spring 2.0.
 	</p>
 
 	<p>
@@ -575,11 +507,13 @@
 
 	<h3>Java Persistence API (JPA) Clinic Implementation</h3>
 	<p>
-		For JPA there are two implementation of the <span style="font-weight: bold;">Clinic</span> interface:
-		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.jpa.JpaTemplateClinic</span>
-		which is based on JpaTemplate and
-		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.jpa.EntityManagerClinic</span>
-		based on native JPA usage without any Spring API dependencies.
+		The JPA implementation of the <span style="font-weight: bold;">Clinic</span>
+		interface is
+		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.jpa.EntityManagerClinic</span>,
+		which is based on native JPA usage combined with Spring's
+		<span style="font-weight: bold;">@Repository</span> and
+		<span style="font-weight: bold;">@Transactional</span> annotations but
+		otherwise has no dependencies on any Spring API's.
 		To simplify JPA usage, Spring provides (among other classes) the
 		<span style="font-weight: bold;">org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean</span>.
 		The JPA configuration is provided by
@@ -590,39 +524,43 @@
 	<h3>ApplicationContext</h3>
 	<p>
 		A Spring <span style="font-weight: bold;">org.springframework.context.ApplicationContext</span> object
-		provides a map of user-defined JavaBeans that specify either a
-		singleton object or the initial construction of prototype instances.
-		These beans constitute the <span style="font-weight: bold;">Business/Persistence
-		Layer</span> of PetClinic.The
-		following beans are defined in all of the 3 versions (1 per
-		access strategy) of the PetClinic <span style="font-style: italic;">applicationContext-???.xml</span>
+		provides a map of user-defined JavaBeans that specify either a singleton
+		object or the initial construction of prototype instances. These beans
+		constitute the <span style="font-weight: bold;">Business/Persistence
+		Layer</span> of PetClinic. The following beans are defined in all 3
+		versions (1 per access strategy) of the PetClinic
+		<span style="font-style: italic;">war/WEB-INF/applicationContext-*.xml</span>
 		file:
 	</p>
 
 	<ol>
-	  <li><span style="font-weight: bold; font-style: italic;">propertyConfigurer</span>is
-		a singleton bean that replaces ${...} placeholders with values from a
-		properties file, in this case, JDBC-related settings for the <span style="font-weight: bold; font-style: italic;">dataSource</span> bean
-		described below (see<span style="font-weight: bold; font-style: italic;">
-		war/WEB-INF/jdbc.properties</span>).
+	  <li>A <span style="font-weight: bold; font-style: italic;">PropertyPlaceholderConfigurer</span>:
+	    configured via
+	    <strong>&lt;context:property-placeholder ... /&gt;</strong> and
+	    is a singleton bean that replaces ${...} placeholders with values from a
+		properties file, in this case, JDBC-related settings for the
+		<span style="font-weight: bold; font-style: italic;">dataSource</span> bean
+		described below
+		(see <span style="font-weight: bold; font-style: italic;">src/jdbc.properties</span>).
 	  </li>
-	  <li><span style="font-weight: bold; font-style: italic;">dataSource</span> is
+	  <li><span style="font-weight: bold; font-style: italic;">dataSource</span>:
 		a singleton bean that defines the implementation of the source of
-		database connections used by the application.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">clinicTarget</span> is
-		a singleton bean that defines the implementation of the <span style="font-weight: bold;">Clinic</span> interface that provides the
-		primary Business Layer API of the application.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">transactionManager</span>
-	  	is a singleton bean that defines the implementation of the transaction
-		management strategy for the application.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">clinic</span> is
-		a singleton bean that provides the transactional proxy for the <span style="font-weight: bold; font-style: italic;">clinicTarget</span>
-		bean.<span style="font-weight: bold; font-style: italic;"></span> <span style="font-weight: bold; font-style: italic;"></span> </li>
+		database connections used by the application.
+	  </li>
+	  <li><span style="font-weight: bold; font-style: italic;">transactionManager</span>:
+	  	a singleton bean that defines the implementation of the transaction
+		management strategy for the application.
+	  </li>
+	  <li><span style="font-weight: bold; font-style: italic;">clinic</span>:
+		a singleton bean that defines the implementation of the
+		<span style="font-weight: bold;">Clinic</span> interface that provides the
+		primary Business Layer API of the application.
+	  </li>
 	</ol>
 
 	<h3>Presentation Layer</h3>
 	<p>
-		The Presentation Layer is implemented as a J2EE Web Application and
+		The Presentation Layer is implemented as a Java EE Web Application and
 		provides a very thin and concise Model-View-Controller type user
 		interface to the Business and Persistence Layers.
 	</p>
@@ -632,15 +570,14 @@
 	</p>
 
 	<ul>
-	  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/web.xml</span>
-		is the web application configuration file.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/petclinic-servlet.xml</span>
+	  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/web.xml</span>:
+		the web application configuration file.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/petclinic-servlet.xml</span>:
 		configures the petclinic dispatcher servlet and the other controllers
 		and forms that it uses. The beans defined in this file reference the
-		Business/Persistence Layer beans defined in <span style="font-style: italic;">applicationContext-???.xml.</span></li>
-	  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/classes/views*.properties</span>
-		configures the definition of internationalizable Spring views.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/classes/messages*.properties</span>
+		Business/Persistence Layer beans defined in
+		<span style="font-style: italic;">applicationContext-*.xml.</span></li>
+	  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/classes/messages*.properties</span>:
 		configures the definition of internationalizable message resources.</li>
 	</ul>
 
@@ -655,31 +592,44 @@
 	<ul>
 	  <li>In <span style="font-weight: bold; font-style: italic;">web.xml</span>,
 		a context-param, "<span style="font-weight: bold;">webAppRootkey</span>",
-		provides the key for a system property that specifies the root
-		directory for the web application. This parameter, <span style="font-weight: bold;">"petclinic.root"</span>, can be used to aid
+		provides the key for a system property that specifies the root directory
+		for the web application. This parameter,
+		<span style="font-weight: bold;">"petclinic.root"</span>, can be used to aid
 		in configuring the application.</li>
 	  <li>In <span style="font-weight: bold; font-style: italic;">web.xml</span>,
-		a <span style="font-weight: bold;">org.springframework.web.context.ContextLoaderListener</span> is
-		defined that loads the root <span style="font-weight: bold;">ApplicationContext</span>
-		object of this webapp at startup, by default from the designated <span style="font-weight: bold; font-style: italic;">/WEB-INF/applicationContext-???.xml</span>.
-		The root <span style="font-weight: bold;">org.springframework.web.context.WebApplicationContext</span> of
-		PetClinic is an instance of <span style="font-weight: bold;">org.springframework.web.context.support.XmlWebApplicationContext</span>
+		a <span style="font-weight: bold;">org.springframework.web.context.ContextLoaderListener</span>
+		is defined that loads the root <span style="font-weight: bold;">ApplicationContext</span>
+		object of this webapp at startup, by default from the designated
+		<span style="font-weight: bold; font-style: italic;">/WEB-INF/applicationContext-*.xml</span>.
+		The root <span style="font-weight: bold;">org.springframework.web.context.WebApplicationContext</span>
+		of PetClinic is an instance of
+		<span style="font-weight: bold;">org.springframework.web.context.support.XmlWebApplicationContext</span>
 		and is the parent of all servlet-specific <span style="font-weight: bold;">ApplicationContexts</span>.
 		The Spring root <span style="font-weight: bold;">ApplicationContext</span> object
 		provides a map of user-defined JavaBeans that can be used in any and
-		all layers of the application. Beans defined in the root <span style="font-weight: bold;">ApplicationContext</span> are automatically
-		available in all child<span style="font-weight: bold;">ApplicationContext</span>
-		objects as (external) bean references. Beans defined in an <span style="font-weight: bold;">ApplicationContext</span>can also be
-		accessed directly by Java code through <span style="font-style: italic;">getBean(name)</span> method calls.
+		all layers of the application. Beans defined in the root
+		<span style="font-weight: bold;">ApplicationContext</span> are automatically
+		available in all child <span style="font-weight: bold;">ApplicationContext</span>
+		objects as (external) bean references. Beans defined in an
+		<span style="font-weight: bold;">ApplicationContext</span> can also be
+		accessed directly by Java code through
+		<span style="font-style: italic;">getBean(name)</span> method calls.
 	  </li>
 
 	  <li>In <span style="font-weight: bold; font-style: italic;">web.xml</span>,
-		a <span style="font-weight: bold;">Servlet</span> named <span style="font-weight: bold;">"petclinic"</span> is specified to act as
-		a dispatcher for the entire application. This <span style="font-weight: bold;">org.springframework.web.servlet.DispatcherServlet</span>
-		is used to handle all URL's matching the pattern <span style="font-weight: bold;">"*.htm"</span>. As with any <span style="font-weight: bold;">Servlet</span>, multiple URL mappings may
-		be defined. It is also possible to define multiple instances of <span style="font-weight: bold;">DispatcherServlet</span>. Each <span style="font-weight: bold;">DispatcherServlet</span> dispatches
+		a <span style="font-weight: bold;">Servlet</span> named
+		<span style="font-weight: bold;">"petclinic"</span> is specified to act as
+		a dispatcher for the entire application. This
+		<span style="font-weight: bold;">org.springframework.web.servlet.DispatcherServlet</span>
+		is used to handle all URL's matching the pattern <span style="font-weight: bold;">"*.do"</span>.
+		As with any <span style="font-weight: bold;">Servlet</span>, multiple URL mappings may
+		be defined. It is also possible to define multiple instances of
+		<span style="font-weight: bold;">DispatcherServlet</span>. Each
+		<span style="font-weight: bold;">DispatcherServlet</span> dispatches
 		requests to registered handlers (<span style="font-weight: bold;">Controller</span>
-		interface implementations) indirectly through a <span style="font-weight: bold;">org.springframework.web.servlet.handler.HandlerMapping</span>
+		interface implementations or POJOs annotated with <strong>@Controller</strong>)
+		indirectly through a
+		<span style="font-weight: bold;">org.springframework.web.servlet.handler.HandlerMapping</span>
 		implementation. Each <span style="font-weight: bold;">DispatcherServlet</span>
 		has its own <span style="font-weight: bold;">ApplicationContext</span>,
 		by default defined in <span style="font-weight: bold;">"{servlet-name}-servlet.xml"</span>.
@@ -700,18 +650,22 @@
 	<ul>
 	  <li>In <span style="font-weight: bold; font-style: italic;">web.xml</span>,
 		a <span style="font-weight: bold;">"log4jConfigLocation"</span> context-param
-		is specified that sets the location of the <span style="font-weight: bold;">Log4j</span> configuration file. The
-		default location for this file is <span style="font-weight: bold; font-style: italic;">/WEB-INF/classes/log4j.properties</span>.
+		is specified that sets the location of the
+		<span style="font-weight: bold;">Log4j</span> configuration file. The
+		default location for this file is
+		<span style="font-weight: bold; font-style: italic;">/WEB-INF/classes/log4j.properties</span>.
 		Specifying this parameter explicitly allows the location to be changed
-		from the default and is also used to cause periodic <span style="font-weight: bold;">Log4j</span> configuration refresh checks.</li>
+		from the default and is also used to cause periodic
+		<span style="font-weight: bold;">Log4j</span> configuration refresh checks.</li>
 	  <li>In <span style="font-weight: bold; font-style: italic;">web.xml</span>,
 		a <span style="font-weight: bold;">Log4jConfigListener</span> is
 		specified that will initialize <span style="font-weight: bold;">Log4j</span> using
-		the specified configuration file when the web app starts. The <span style="font-weight: bold;">Log4jConfigListener</span> is commented out
+		the specified configuration file when the web app starts. The
+		<span style="font-weight: bold;">Log4jConfigListener</span> is commented out
 		in the file because of a conflict when using JBoss. It should also be
 		noted that if the container initializes Servlets before Listeners as
 		some pre-Servlet 2.4 containers do, a <b>Log4jConfigServlet</b> should
-		be used instead.<span style="font-weight: bold;"></span> </li>
+		be used instead.</li>
 	  <li>In <span style="font-weight: bold; font-style: italic;">log4j.properties</span>,
 		the following loggers are specified:
 		<ul>
@@ -733,77 +687,85 @@
 
 	<h3>DispatcherServlet</h3>
 	<p>
-		The following beans are accessible to the <span style="font-weight: bold;">DispatcherServlet</span>
-		and are defined
-		in the PetClinic <span style="font-weight: bold; font-style: italic;">petclinic-servlet.xml</span>
+		The following beans are accessible to the
+		<span style="font-weight: bold;">DispatcherServlet</span> and are defined
+		in the PetClinic
+		<span style="font-weight: bold; font-style: italic;">petclinic-servlet.xml</span>
 		file. This dispatcher uses these definitions to delegate actual display
-		and form processing tasks to implementations of the Spring <span style="font-weight: bold;">org.springframework.web.servlet.mvc.Controller
-		</span>interface. The <span style="font-weight: bold;">DispatcherServlet</span>
-		acts as the main application <span style="font-weight: bold;">Front
-		Controller</span> and is responsible for
-		dispatching all requests to the appropriate <span style="font-weight: bold;">Controller</span> indirectly through a URL
+		and form processing tasks to implementations of the Spring
+		<span style="font-weight: bold;">org.springframework.web.servlet.mvc.Controller</span>
+		interface. The <span style="font-weight: bold;">DispatcherServlet</span>
+		acts as the main application <span style="font-weight: bold;">Front Controller</span>
+		and is responsible for dispatching all requests to the appropriate
+		<span style="font-weight: bold;">Controller</span> indirectly through a URL
 		mapping handler. These <span style="font-weight: bold;">Controllers</span> are
-		responsible for the
-		mechanics of interaction with the user and ultimately delegate action
-		to the Business/Persistence Layers.
+		responsible for the mechanics of interaction with the user and ultimately
+		delegate action to the Business/Persistence Layers.
 	</p>
 
 	<ul>
 	  <li><span style="font-weight: bold; font-style: italic;">messageSource</span>
-		is a singleton bean that defines a message source for this <span style="font-weight: bold;">ApplicationContext</span>. Messages are
+		is a singleton bean that defines a message source for this
+		<span style="font-weight: bold;">ApplicationContext</span>. Messages are
 		loaded from localized <span style="font-weight: bold;">"messages_xx"</span>
-		files in the classpath, such as <span style="font-weight: bold; font-style: italic;">"/WEB-INF/classes/messages.properties"</span>
-		or <span style="font-weight: bold; font-style: italic;">"/WEB-INF/classes/messages_de.properties"</span>.<span style="font-weight: bold;"></span> <span style="font-style: italic;">getMessage()</span><span style="font-weight: bold;"></span> calls to this context will use
-		this
-		source. Child contexts can have their own message sources, which will
-		inherit all messages from this source and are able to define new
+		files in the classpath, such as
+		<span style="font-weight: bold; font-style: italic;">"/WEB-INF/classes/messages.properties"</span>
+		or <span style="font-weight: bold; font-style: italic;">"/WEB-INF/classes/messages_de.properties"</span>.
+		<span style="font-style: italic;">getMessage()</span> calls to this context
+		will use this source. Child contexts can have their own message sources,
+		which will inherit all messages from this source and are able to define new
 		messages and override ones defined in the primary message source.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">viewResolver</span>
+	  <li><span style="font-weight: bold; font-style: italic;">InternalResourceViewResolver</span>
 		is a singleton bean that defines the view mappings used by the dispatcher.
-		This definition specifies explicit view mappings in a resource bundle
-		(properties file) instead of using the default <span style="font-weight: bold;">InternalResourceViewResolver</span>. It
-		fetches the view mappings from localized <span style="font-style: italic; font-weight: bold;">"views_xx</span><span style="font-style: italic; font-weight: bold;">.properties</span><span style="font-style: italic; font-weight: bold;">"</span>  files, i.e. <span style="font-weight: bold; font-style: italic;">"/WEB-INF/classes/views.properties"</span>
-		or <span style="font-weight: bold; font-style: italic;">"/WEB-INF/classes/views_de.properties"</span>
-		that are loaded from the classpath. Symbolic view names returned by
-		controllers will be resolved in the respective properties file,
-		allowing
-		for arbitrary mappings between view names and resources.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">exceptionResolver</span>
-		is a singleton bean that defines how exceptions are propagated. Exceptions
-		encountered that are not specified are propagated to the servlet
-		container.
+		Specifically, logical view names returned by Conrollers will be mapped to
+		physical paths using the configured 'prefix' and 'suffix' properties. For
+		example, a logical view name of "vets" will be mapped to "/WEB-INF/jsp/vets.jsp".
 	  </li>
-	  <li><span style="font-weight: bold; font-style: italic;">urlMapping</span> is
-		a singleton bean that defines the URL mapping handler that is to be
-		used by the dispatcher. The definition specifies the use of a <span style="font-weight: bold;">SimpleUrlHandlerMapping</span> instead of
-		the default <span style="font-weight: bold;">BeanNameUrlHandlerMapping.</span>
-		This allows specific URL's to be mapped directly to display or<span style="font-weight: bold;"></span> form<span style="font-weight: bold;">
-		Controllers</span>.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">SimpleMappingExceptionResolver</span>
+		is a singleton bean that defines how exceptions are propagated. Exceptions
+		encountered that are not specified are propagated to the servlet container.
+	  </li>
+
+	  <li>
+		The form-based controllers within the PetClinic application provide
+		<strong>@RequestMapping</strong> annotations at the type level for path
+		mapping URLs and @RequestMapping at the method level for request type
+		mappings (e.g., GET and POST). In contrast, <strong>ClinicController</strong>
+		&ndash; which is not form-based &ndash; provides  @RequestMapping only at
+		the method level for path mapping URLs.
+		<strong>DefaultAnnotationHandlerMapping</strong> is driven by these
+		annotations and is enabled by default with Java 5+.
+	  </li>
+
 	  <li><span style="font-weight: bold; font-style: italic;">clinicController</span>
 		is a singleton bean that defines the <span style="font-weight: bold;">Controller</span>
 		that is used by the dispatcher to handle non-form based display tasks.
-		This bean is a <b>org.springframework.web.servlet.mvc.multiaction.MultiActionController</b><span style="font-weight: bold;"></span> that
+		This bean is a <b>org.springframework.web.servlet.mvc.multiaction.MultiActionController</b> that
 		can handle multiple request URLs. A method is provided to handle each
 		type of request that is supported.</li>
+
 	  <li><span style="font-weight: bold; font-style: italic;">clinicControllerMethodnameResolver</span>
 		is a singleton bean that defines a mapping of URL's to method names for
 		the <span style="font-weight: bold; font-style: italic;">clinicController</span>
 		bean.</li>
+
 	  <li>6 singleton Form beans are defined that are extensions of
 		the PetClinic class <span style="font-weight: bold;">AbstractClinicForm</span> which
 		is itself an extension of the Spring class <span style="font-weight: bold;">SimpleFormController</span>. These beans
 		are used to handle the various Search, Add and Edit form processing
 		tasks for the dispatcher.</li>
+
 	  <li>3 singleton beans are defined that are implementations of the <span style="font-weight: bold;">org.springframework.validation.Validator</span> interface.
 		These beans are used by the Form beans to validate their input
 		parameters and to bind localizable error messages for display should a
 		processing error occur on submission.</li>
+
 	</ul>
 
 	<h3>Controllers</h3>
 	<p>
 		Spring provides a
-		number of useful MVC abstractions to developers of J2EE web
+		number of useful MVC abstractions to developers of Java EE web
 		applications. The <span style="font-weight: bold;">Controller</span> interface
 		specifies a single method, <span style="font-style: italic;">handleRequest(</span><span style="font-style: italic;">HttpServletRequest</span><span style="font-style: italic;">,</span> <span style="font-style: italic;">HttpServletResponse</span><span style="font-style: italic;">)</span> that must be provided by
 		implementing classes to handle request processing. This method returns
@@ -818,7 +780,7 @@
 		multiple handling methods the selection of which can be configured
 		using
 		a separate <span style="font-weight: bold;">MethodNameResolver</span> object.
-		"FormControllers", including <span style="font-weight: bold;">SimpleFormController</span>,<span style="font-weight: bold;"></span> are used to process html forms and
+		"FormControllers", including <span style="font-weight: bold;">SimpleFormController</span>, are used to process html forms and
 		can automatically populate "command" objects with data supplied via
 		request parameters and vice versa. <span style="font-weight: bold;">SimpleFormController</span>
 		is part of a deep hierarchy of objects which is discussed here.
@@ -1047,7 +1009,7 @@
 	  <li><span style="font-weight: bold; font-style: italic;">ownerForm</span> supports
 		<span style="font-weight: bold; font-style: italic;">AddOwnerForm</span>
 		and<span style="font-weight: bold; font-style: italic;"> EditOwnerForm</span></li>
-	  <li><span style="font-weight: bold; font-style: italic;">petForm</span> supports<span style="font-style: italic;"><span style="font-weight: bold;"></span></span> <span style="font-weight: bold; font-style: italic;">AddPetForm</span>
+	  <li><span style="font-weight: bold; font-style: italic;">petForm</span> supports<span style="font-style: italic;"></span> <span style="font-weight: bold; font-style: italic;">AddPetForm</span>
 		and <span style="font-weight: bold; font-style: italic;">web.EditPetForm</span></li>
 	  <li><span style="font-weight: bold; font-style: italic;">visitForm</span> supports<span style="font-weight: bold; font-style: italic;"> AddVisitForm</span></li>
 	  <li><span style="font-weight: bold; font-style: italic;">dataAccessFailure</span>
@@ -1141,11 +1103,11 @@
 	<ul>
 	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.OwnerTests</span>
 	  	is a JUnit TestCase that supports Business Rule #1.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.AbstractJdbcClinicTests</span>
+	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.AbstractClinicTests</span>
 		is a JUnit TestCase requiring a live database connection that is used to
-		confirm correct operation of the database access objects implemented in
-		<span style="font-weight: bold;">AbstractJdbcClinic</span> and its subclasses.
-		Subclasses of <span style="font-weight: bold;">AbstractJdbcClinicTests</span> provide
+		confirm correct operation of the database access objects in the various implementations of the
+		<span style="font-weight: bold;">Clinic</span> interface.
+		Subclasses of <span style="font-weight: bold;">AbstractClinicTests</span> provide
 		the location of the application context file to use for the tests to be run.
 	  </li>
 	</ul>
@@ -1217,7 +1179,7 @@
 
 	<h3>PetClinic Database Setup</h3>
 	<p>
-		To use a J2EE server supplied connection-pooled data source with
+		To use a Java EE server supplied connection-pooled data source with
 		Tomcat, it will be necessary to use and possibly edit the appropriate
 		context definition file for the petclinic webapp. To use it, deploy a
 		copy of the appropriate context definition file in Tomcat's webapps
