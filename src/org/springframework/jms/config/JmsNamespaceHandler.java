@@ -21,7 +21,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 /**
  * A {@link org.springframework.beans.factory.xml.NamespaceHandler}
  * for the JMS namespace.
- * 
+ *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
@@ -29,8 +29,8 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 public class JmsNamespaceHandler extends NamespaceHandlerSupport {
 
 	public void init() {
-		this.registerBeanDefinitionParser("listener-container", new JmsListenerContainerParser());
-		this.registerBeanDefinitionParser("jca-listener-container", new JcaListenerContainerParser());
+		registerBeanDefinitionParser("listener-container", new JmsListenerContainerParser());
+		registerBeanDefinitionParser("jca-listener-container", new JcaListenerContainerParser());
 	}
 
 }

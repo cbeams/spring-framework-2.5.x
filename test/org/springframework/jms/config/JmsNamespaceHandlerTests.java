@@ -53,6 +53,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 
 	private ToolingTestApplicationContext context;
 
+
 	protected void setUp() throws Exception {
 		this.context = new ToolingTestApplicationContext("jmsNamespaceHandlerTests.xml", getClass());
 	}
@@ -158,6 +159,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		}
 	}
 	
+
 	/**
 	 * Internal extension that registers a {@link ReaderEventListener} to store
 	 * registered {@link ComponentDefinition}s.
@@ -188,6 +190,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		}
 	}
 	
+
 	private static class StoringReaderEventListener extends EmptyReaderEventListener {
 		
 		protected Set registeredComponents = null;
@@ -198,7 +201,8 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		}
 		
 		public void componentRegistered(ComponentDefinition componentDefinition) {
-			registeredComponents.add(componentDefinition);
+			this.registeredComponents.add(componentDefinition);
 		}
 	}
+
 }
