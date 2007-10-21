@@ -17,13 +17,13 @@
 package org.springframework.web.bind.support;
 
 /**
- * Simple implementation of the {@link FormStatus} interface,
- * keeping the complete flag as an instance variable.
+ * Simple implementation of the {@link SessionStatus} interface,
+ * keeping the <code>complete</code> flag as an instance variable.
  *
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class SimpleFormStatus implements FormStatus {
+public class SimpleSessionStatus implements SessionStatus {
 
 	private boolean complete = false;
 
@@ -32,9 +32,6 @@ public class SimpleFormStatus implements FormStatus {
 		this.complete = true;
 	}
 
-	/**
-	 * Return whether the current form processing is complete.
-	 */
 	public boolean isComplete() {
 		return this.complete;
 	}

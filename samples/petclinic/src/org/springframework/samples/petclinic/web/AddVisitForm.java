@@ -8,11 +8,11 @@ import org.springframework.samples.petclinic.validation.VisitValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.support.FormStatus;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 
 /**
  * JavaBean form controller that is used to add a new <code>Visit</code> to
@@ -43,7 +43,7 @@ public class AddVisitForm {
 	}
 
 	@RequestMapping(type = "POST")
-	public String processSubmit(@ModelAttribute("visit") Visit visit, BindingResult result, FormStatus status) {
+	public String processSubmit(@ModelAttribute("visit") Visit visit, BindingResult result, SessionStatus status) {
 		new VisitValidator().validate(visit, result);
 		if (result.hasErrors()) {
 			return "visitForm";

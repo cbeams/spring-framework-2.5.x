@@ -62,7 +62,7 @@ import java.lang.annotation.Target;
  * <li>{@link org.springframework.validation.Errors} /
  * {@link org.springframework.validation.BindingResult} validation results
  * for a preceding command/form object (the immediate preceding argument).
- * <li>{@link org.springframework.web.bind.support.FormStatus} status handle
+ * <li>{@link org.springframework.web.bind.support.SessionStatus} status handle
  * for marking form processing as complete (triggering the cleanup of session
  * attributes that have been indicated by the {@link SessionAttributes} annotation
  * at the handler type level).

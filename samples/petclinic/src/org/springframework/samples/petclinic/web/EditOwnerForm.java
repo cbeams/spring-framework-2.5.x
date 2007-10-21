@@ -7,11 +7,11 @@ import org.springframework.samples.petclinic.validation.OwnerValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.support.FormStatus;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 
 /**
  * JavaBean Form controller that is used to edit an existing <code>Owner</code>.
@@ -39,7 +39,7 @@ public class EditOwnerForm {
 	}
 
 	@RequestMapping(type = "POST")
-	public String processSubmit(@ModelAttribute("owner") Owner owner, BindingResult result, FormStatus status) {
+	public String processSubmit(@ModelAttribute("owner") Owner owner, BindingResult result, SessionStatus status) {
 		new OwnerValidator().validate(owner, result);
 		if (result.hasErrors()) {
 			return "ownerForm";

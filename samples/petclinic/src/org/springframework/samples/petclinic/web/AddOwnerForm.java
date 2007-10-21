@@ -7,10 +7,10 @@ import org.springframework.samples.petclinic.validation.OwnerValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.support.FormStatus;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 
 /**
  * JavaBean form controller that is used to add a new <code>Owner</code> to
@@ -39,7 +39,7 @@ public class AddOwnerForm {
 	}
 
 	@RequestMapping(type = "POST")
-	public String processSubmit(@ModelAttribute("owner") Owner owner, BindingResult result, FormStatus status) {
+	public String processSubmit(@ModelAttribute("owner") Owner owner, BindingResult result, SessionStatus status) {
 		new OwnerValidator().validate(owner, result);
 		if (result.hasErrors()) {
 			return "ownerForm";

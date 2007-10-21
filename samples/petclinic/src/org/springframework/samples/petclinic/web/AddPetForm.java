@@ -11,11 +11,11 @@ import org.springframework.samples.petclinic.validation.PetValidator;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.support.FormStatus;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 
 /**
  * JavaBean form controller that is used to add a new <code>Pet</code> to the
@@ -51,7 +51,7 @@ public class AddPetForm {
 	}
 
 	@RequestMapping(type = "POST")
-	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result, FormStatus status) {
+	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result, SessionStatus status) {
 		new PetValidator().validate(pet, result);
 		if (result.hasErrors()) {
 			return "petForm";

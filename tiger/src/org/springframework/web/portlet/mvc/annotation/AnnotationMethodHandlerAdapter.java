@@ -58,7 +58,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
-import org.springframework.web.bind.support.SimpleFormStatus;
+import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.portlet.HandlerAdapter;
@@ -157,17 +157,17 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 		SessionAttributes sessionAttributes = handler.getClass().getAnnotation(SessionAttributes.class);
 		if (sessionAttributes != null) {
 			for (String attrName : sessionAttributes.value()) {
-				if (argResolver.isFormComplete()) {
+				if (argResolver.isProcessingComplete()) {
 					this.sessionAttributeStore.cleanupAttribute(webRequest, attrName);
 				}
 				else {
 					// Expose model attributes as session attributes, if required.
 					if (mav.getModel().containsKey(attrName)) {
-						Object formObject = mav.getModel().get(attrName);
-						this.sessionAttributeStore.storeAttribute(webRequest, attrName, formObject);
+						Object modelAttribute = mav.getModel().get(attrName);
+						this.sessionAttributeStore.storeAttribute(webRequest, attrName, modelAttribute);
 						String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + attrName;
 						if (!mav.getModel().containsKey(bindingResultKey)) {
-							PortletRequestDataBinder binder = new PortletRequestDataBinder(formObject, attrName);
+							PortletRequestDataBinder binder = new PortletRequestDataBinder(modelAttribute, attrName);
 							if (this.webBindingInitializer != null) {
 								this.webBindingInitializer.initBinder(binder, webRequest);
 							}
@@ -360,7 +360,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 		private final Set<Method> initBinderMethods;
 
-		private final SimpleFormStatus formStatus = new SimpleFormStatus();
+		private final SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
 
 		public ArgumentsResolver(Set<Method> initBinderMethods) {
 			this.initBinderMethods = initBinderMethods;
@@ -371,10 +371,10 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				Object handler, Method handlerMethod, PortletRequest request, PortletResponse response,
 				WebRequest webRequest, ModelMap implicitModel) throws PortletException, IOException {
 
-			Set<String> formAttributeSet = null;
+			Set<String> sessionAttributeSet = null;
 			SessionAttributes sessionAttributes = handler.getClass().getAnnotation(SessionAttributes.class);
 			if (sessionAttributes != null) {
-				formAttributeSet = new HashSet<String>(Arrays.asList(sessionAttributes.value()));
+				sessionAttributeSet = new HashSet<String>(Arrays.asList(sessionAttributes.value()));
 			}
 			SimpleTypeConverter converter = new SimpleTypeConverter();
 			Object[] args = new Object[handlerMethod.getParameterTypes().length];
@@ -385,8 +385,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 					if (param.getParameterType().isInstance(implicitModel)) {
 						args[i] = implicitModel;
 					}
-					else if (param.getParameterType().isInstance(this.formStatus)) {
-						args[i] = this.formStatus;
+					else if (param.getParameterType().isInstance(this.sessionStatus)) {
+						args[i] = this.sessionStatus;
 					}
 				}
 				if (args[i] == null) {
@@ -420,7 +420,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 						}
 					}
 					if (!resolved) {
-						if (formAttributeSet != null && formAttributeSet.contains(attrName) &&
+						if (sessionAttributeSet != null && sessionAttributeSet.contains(attrName) &&
 								!implicitModel.containsKey(attrName)) {
 							Object sessionAttr = sessionAttributeStore.retrieveAttribute(webRequest, attrName);
 							if (sessionAttr == null) {
@@ -429,11 +429,11 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 							}
 							implicitModel.addAttribute(attrName, sessionAttr);
 						}
-						Object formObject = implicitModel.get(attrName);
-						if (formObject == null) {
-							formObject = BeanUtils.instantiateClass(param.getParameterType());
+						Object commandObject = implicitModel.get(attrName);
+						if (commandObject == null) {
+							commandObject = BeanUtils.instantiateClass(param.getParameterType());
 						}
-						PortletRequestDataBinder binder = new PortletRequestDataBinder(formObject, attrName);
+						PortletRequestDataBinder binder = new PortletRequestDataBinder(commandObject, attrName);
 						if (webBindingInitializer != null) {
 							webBindingInitializer.initBinder(binder, webRequest);
 						}
@@ -459,7 +459,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 							}
 						}
 						binder.bind(request);
-						args[i] = formObject;
+						args[i] = commandObject;
 						implicitModel.putAll(binder.getBindingResult().getModel());
 						if (args.length > i + 1 && Errors.class.isAssignableFrom(handlerMethod.getParameterTypes()[i + 1])) {
 							args[i + 1] = binder.getBindingResult();
@@ -522,8 +522,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 			}
 		}
 
-		public boolean isFormComplete() {
-			return this.formStatus.isComplete();
+		public boolean isProcessingComplete() {
+			return this.sessionStatus.isComplete();
 		}
 
 		@SuppressWarnings("unchecked")
