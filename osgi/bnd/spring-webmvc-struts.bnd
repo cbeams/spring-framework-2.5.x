@@ -3,4 +3,4 @@ Import-Package: org.apache.commons.logging*, *;resolution:=optional
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-webmvc-struts
-Bundle-SymbolicName: ${spring-bundle-prefix}.webmvc.struts
+Bundle-SymbolicName: ${spring-bundle-prefix}.spring.webmvc.struts
