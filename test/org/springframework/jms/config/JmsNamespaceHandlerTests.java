@@ -16,8 +16,10 @@
 
 package org.springframework.jms.config;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Message;
@@ -25,16 +27,23 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
+import org.easymock.MockControl;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.parsing.EmptyReaderEventListener;
+import org.springframework.beans.factory.parsing.ReaderEventListener;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
+import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
 
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Christian Dupuis
  */
 public class JmsNamespaceHandlerTests extends TestCase {
 
@@ -42,11 +51,10 @@ public class JmsNamespaceHandlerTests extends TestCase {
 
 	private static final String EXPLICIT_CONNECTION_FACTORY = "testConnectionFactory";
 
-	private ClassPathXmlApplicationContext context;
-
+	private ToolingTestApplicationContext context;
 
 	protected void setUp() throws Exception {
-		this.context = new ClassPathXmlApplicationContext("jmsNamespaceHandlerTests.xml", getClass());
+		this.context = new ToolingTestApplicationContext("jmsNamespaceHandlerTests.xml", getClass());
 	}
 
 	protected void tearDown() throws Exception {
@@ -123,6 +131,16 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		assertSame(message3, testBean3.message);
 		control3.verify();
 	}
+	
+	public void testComponentRegistration() {
+		assertTrue("Parser should have registered a component named 'listener1'", context.containsComponentDefinition("listener1"));
+		assertTrue("Parser should have registered a component named 'listener2'", context.containsComponentDefinition("listener2"));
+		assertTrue("Parser should have registered a component named 'listener3'", context.containsComponentDefinition("listener3"));
+		assertTrue("Parser should have registered a component named '" + DefaultMessageListenerContainer.class.getName() + "#0'", 
+			context.containsComponentDefinition(DefaultMessageListenerContainer.class.getName() + "#0"));
+		assertTrue("Parser should have registered a component named '" + JmsMessageEndpointManager.class.getName() + "#0'", 
+			context.containsComponentDefinition(JmsMessageEndpointManager.class.getName() + "#0"));
+	}
 
 	private MessageListener getListener(String containerBeanName) {
 		DefaultMessageListenerContainer container =
@@ -139,5 +157,48 @@ public class JmsNamespaceHandlerTests extends TestCase {
 			this.message = message;
 		}
 	}
+	
+	/**
+	 * Internal extension that registers a {@link ReaderEventListener} to store
+	 * registered {@link ComponentDefinition}s.
+	 */
+	private static class ToolingTestApplicationContext extends ClassPathXmlApplicationContext {
+		
+		private static final Set REGISTERED_COMPONENTS = new HashSet();
+		
+		public ToolingTestApplicationContext(String path, Class clazz)
+				throws BeansException {
+			super(path, clazz);
+		}
 
+		protected void initBeanDefinitionReader(
+				XmlBeanDefinitionReader beanDefinitionReader) {
+			beanDefinitionReader.setEventListener(new StoringReaderEventListener(REGISTERED_COMPONENTS));
+		}
+		
+		public boolean containsComponentDefinition(String name) {
+			Iterator iterator = REGISTERED_COMPONENTS.iterator();
+			while (iterator.hasNext()) {
+				ComponentDefinition cd = (ComponentDefinition) iterator.next();
+				if (cd.getName().equals(name)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+	
+	private static class StoringReaderEventListener extends EmptyReaderEventListener {
+		
+		protected Set registeredComponents = null;
+		
+		public StoringReaderEventListener(Set registeredComponents) {
+			this.registeredComponents = registeredComponents;
+			this.registeredComponents.clear();
+		}
+		
+		public void componentRegistered(ComponentDefinition componentDefinition) {
+			registeredComponents.add(componentDefinition);
+		}
+	}
 }

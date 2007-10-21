@@ -24,6 +24,7 @@ import org.w3c.dom.NodeList;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -83,7 +84,6 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 	protected static final String CONCURRENCY_ATTRIBUTE = "concurrency";
 
 	protected static final String PREFETCH_ATTRIBUTE = "prefetch";
-
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		NodeList childNodes = element.getChildNodes();
@@ -146,14 +146,14 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 		containerDef.getPropertyValues().addPropertyValue("messageListener", listenerDef);
 
 		String containerBeanName = listenerEle.getAttribute(ID_ATTRIBUTE);
-		if (StringUtils.hasText(containerBeanName)) {
-			parserContext.getRegistry().registerBeanDefinition(containerBeanName, containerDef);
+		// If no bean id is given auto generate one using the ReaderContext's BeanNameGenerator 
+		if (!StringUtils.hasText(containerBeanName)) {
+			containerBeanName = parserContext.getReaderContext().generateBeanName(containerDef);
 		}
-		else {
-			parserContext.getReaderContext().registerWithGeneratedName(containerDef);
-		}
+		
+		// Register the Listener and fire event
+		parserContext.registerBeanComponent(new BeanComponentDefinition(containerDef, containerBeanName));
 	}
-
 
 	protected abstract BeanDefinition parseContainer(
 			Element listenerEle, Element containerEle, ParserContext parserContext);
@@ -165,7 +165,6 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 	protected boolean indicatesJms102(BeanDefinition containerDef) {
 		return false;
 	}
-
 
 	protected void parseListenerConfiguration(Element ele, ParserContext parserContext, BeanDefinition configDef) {
 		String destination = ele.getAttribute(DESTINATION_ATTRIBUTE);
