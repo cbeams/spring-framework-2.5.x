@@ -2300,6 +2300,36 @@ public class FileUploadBean {
     want my object to which the form data will be bound to reflect the state of the checkbox no
     matter what</emphasis></quote>.</para>
 
+  <section id="mvc-formtaglib-checkboxestag">
+    <title>The <literal>checkboxes</literal> tag</title>
+      <para>This tag renders multiple HTML 'input' tags with type 'checkbox'.</para>
+      <para>Building on the example from the previous <classname>checkbox</classname> tag section.  Sometimes 
+      you prefer not to have to list all the possible hobbies in your JSP page.  You would rather provide a list 
+      at runtime of the available options and pass that in to the tag. That is the purpose of the 
+      <classname>checkboxes</classname> tag.  You pass in an <classname>Array</classname>, a <classname>List</classname> 
+      or a <classname>Map</classname> containing the available options in the "items" property.  Typically 
+      the bound property is a collection so it can hold multiple values selected by the user. 
+      Below is an example of the JSP using this tag:</para>
+  </section>      
+
+    <programlisting><![CDATA[<form:form>
+    <table>
+        <tr>
+            <td>Interests:</td>
+            <td>
+                ]]><lineannotation>&lt;%-- Property is of an array or of type <interfacename>java.util.Collection</interfacename> --%&gt;</lineannotation><![CDATA[
+                <form:checkboxes path="preferences.interests" items="${interestList}"/>
+            </td>
+        </tr>
+    </table>
+</form:form>]]></programlisting>
+
+    <para>This example assumes that the "interestList" is a <classname>List</classname> available as a model attribute 
+    containing strings of the values to be selected from.  In the case where you use a Map, the map entry key will be used as 
+    the value and the map entry's value will be used as the label to be displayed.  You can also use a custom object where you 
+    can provide the property names for the value using "itemValue" and the label using "itemLabel".
+    </para>
+
   <section id="mvc-formtaglib-radiobuttontag">
     <title>The <literal>radiobutton</literal> tag</title>
     <para>This tag renders an HTML 'input' tag with type 'radio'.</para>
@@ -2310,6 +2340,23 @@ public class FileUploadBean {
     <td>Sex:</td>
     <td>Male: <form:radiobutton path="sex" value="M"/> <br/>
         Female: <form:radiobutton path="sex" value="F"/> </td>
+</tr>]]></programlisting>
+  </section>
+
+  <section id="mvc-formtaglib-radiobuttonstag">
+    <title>The <literal>radiobuttons</literal> tag</title>
+    <para>This tag renders multiple HTML 'input' tags with type 'radio'.</para>
+    <para>Just like the <classname>checkboxes</classname> tag above, you might want to pass in the available options as a 
+    runtime variable.  For this usage you would use the <classname>radiobuttons</classname> tag. You pass in an 
+    <classname>Array</classname>, a <classname>List</classname> or a <classname>Map</classname> containing the available
+    options in the "items" property.  In the case where you use a Map, the map entry key will be used as 
+    the value and the map entry's value will be used as the label to be displayed.  You can also use a custom object where you 
+    can provide the property names for the value using "itemValue" and the label using "itemLabel".  
+    </para>
+
+    <programlisting><![CDATA[<tr>
+    <td>Sex:</td>
+    <td><form:radiobuttons path="sex" items="${sexOptions}"/></td>
 </tr>]]></programlisting>
   </section>
 

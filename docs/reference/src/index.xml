@@ -3,7 +3,7 @@
 [
 <!ENTITY preface 			SYSTEM "preface.xml">
 <!ENTITY overview			SYSTEM "overview.xml">
-<!ENTITY whats-new-in-2   SYSTEM "new-in-2.xml">
+<!ENTITY whats-new-in-2		SYSTEM "new-in-2.xml">
 <!ENTITY beans				SYSTEM "beans.xml">
 <!ENTITY resources			SYSTEM "resources.xml">
 <!ENTITY validation			SYSTEM "validation.xml">
