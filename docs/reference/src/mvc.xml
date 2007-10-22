@@ -2935,7 +2935,324 @@ public class FileUploadBean {
             <classname>DefaultRequestToViewNameTranslator</classname> class for details of the
             various properties that can be configured.</para>
         </section>        
+    </section>
+  
+    <section id="mvc-annotation">
+        <title>Annotation-based controller configuration</title>
+        <para>There is a current trend to favor annotations over XML files for some types of configuraton 
+        data.  To facilitat this Spring is now (since 2.5) providing support for configuring the MVC framework 
+        components using annotations.</para>
+        
+        <para>Spring 2.5 introduces an annotation-based programming model for MVC controllers, using annotations
+        such as @RequestMapping, @RequestParam, @ModelAttribute etc. This annotation support is available for both 
+        Servlet MVC and Portlet MVC. Controllers implemented in this style do not have to extend from specific base 
+        classes or implement specific interfaces. Furthermore, they do not usually have Servlet/Portlet API imports, 
+        although they can easily get access to Servlet/Portlet facilities if desired.</para>
+        
+        <tip>
+            <para>The Spring distribution ships with a sanple web application that
+            takes advantage of the annotation support described in
+            this section. This is the "PetCLinic" application and it can be found in the
+            <literal>'samples/petclinic'</literal> directory.</para>
+        </tip>
+        
+		<para>This section documents the annotations and how they are most commonly used.</para>
+
+        <section id="mvc-ann-controller">
+            <title>Defining a controller with <classname>@Controller</classname></title>
+            <para>The <classname>@Controller</classname> annotation defines the class to be a controller.  There is
+            no need to extend any controller base class or reference the Servlet API.  You are of course still 
+            able to reference Servlet specific features if you need to.
+            </para>
+            
+            <para>To enable the use of this annotation you have to add component scanning to your configuration.  This is
+            easies done by using the new spring-context schema as in the following XML snippet:
+            </para>
+
+		    <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p" 
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    ...
+
+	<context:component-scan base-package="org.springframework.samples.petclinic.web" />
+
+    ...
+
+</beans>
+]]></programlisting>
+            
+    	</section>
+
+        <section id="mvc-ann-requestmapping">
+            <title>Mapping requests to methods with <classname>@RequestMapping</classname></title>
+            <para>The <classname>@RequestMapping</classname> annotation
+            is used to map URLs like '/editPet.do' to a class and/or a method.  Typically the classlevel annotation is used for a 
+            form controller with additional method level annotations refining the URL specified for the class with type information 
+            like "GET" or "POST" to indicate what type of requst the method handles.</para>
+            
+            <para>The following is an example of a form controller from the PetClinic sample application using this annotation:</para>
+
+		    <programlisting><![CDATA[@Controller
+]]><emphasis role="bold"><![CDATA[@RequestMapping("/editPet.do")]]></emphasis><![CDATA[
+@SessionAttributes("pet")
+public class EditPetForm {
+
+	private final Clinic clinic;
+
+	@Autowired
+	public EditPetForm(Clinic clinic) {
+		this.clinic = clinic;
+	}
+
+	@ModelAttribute("types")
+	public Collection<PetType> populatePetTypes() {
+		return this.clinic.getPetTypes();
+	}
+
+	]]><emphasis role="bold"><![CDATA[@RequestMapping(type = "GET")]]></emphasis><![CDATA[
+	public String setupForm(@RequestParam("petId") int petId, ModelMap model) {
+		Pet pet = this.clinic.loadPet(petId);
+		model.addAttribute("pet", pet);
+		return "petForm";
+	}
+
+	]]><emphasis role="bold"><![CDATA[@RequestMapping(type = "POST")]]></emphasis><![CDATA[
+	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result, 
+			SessionStatus status) {
+		new PetValidator().validate(pet, result);
+		if (result.hasErrors()) {
+			return "petForm";
+		}
+		else {
+			this.clinic.storePet(pet);
+			status.setComplete();
+			return "redirect:owner.do?ownerId=" + pet.getOwner().getId();
+		}
+	}
+
+}
+]]></programlisting>
+
+            <para>For a traditional multi-action controller the URLs are typically mapped directly on the methods since the 
+            controller responds to multiple URLs.  The following is an example of a multi-cation controller from the PetClinic 
+            sample application using this annotation:</para>
+
+		    <programlisting><![CDATA[@Controller
+public class ClinicController {
+
+	private final Clinic clinic;
+
+
+	@Autowired
+	public ClinicController(Clinic clinic) {
+		this.clinic = clinic;
+	}
+
+	/**
+	 * Custom handler for the welcome view.
+	 * <p>
+	 * Note that this handler relies on the RequestToViewNameTranslator to
+	 * determine the logical view name based on the request URL: "/welcome.do"
+	 * -&gt; "welcome".
+	 */
+	]]><emphasis role="bold"><![CDATA[@RequestMapping("/welcome.do")]]></emphasis><![CDATA[
+	public void welcomeHandler() {
+	}
+
+	/**
+	 * Custom handler for displaying vets.
+	 * <p>
+	 * Note that this handler returns a plain {@link ModelMap} object instead of
+	 * a ModelAndView, thus leveraging convention-based model attribute names.
+	 * It relies on the RequestToViewNameTranslator to determine the logical
+	 * view name based on the request URL: "/vets.do" -&gt; "vets".
+	 *
+	 * @return a ModelMap with the model attributes for the view
+	 */
+	]]><emphasis role="bold"><![CDATA[@RequestMapping("/vets.do")]]></emphasis><![CDATA[
+	public ModelMap vetsHandler() {
+		return new ModelMap(this.clinic.getVets());
+	}
+
+	/**
+	 * Custom handler for displaying an owner.
+	 * <p>
+	 * Note that this handler returns a plain {@link ModelMap} object instead of
+	 * a ModelAndView, thus leveraging convention-based model attribute names.
+	 * It relies on the RequestToViewNameTranslator to determine the logical
+	 * view name based on the request URL: "/owner.do" -&gt; "owner".
+	 *
+	 * @param ownerId the ID of the owner to display
+	 * @return a ModelMap with the model attributes for the view
+	 */
+	]]><emphasis role="bold"><![CDATA[@RequestMapping("/owner.do")]]></emphasis><![CDATA[
+	public ModelMap ownerHandler(@RequestParam("ownerId") int ownerId) {
+		return new ModelMap(this.clinic.loadOwner(ownerId));
+	}
+
+}
+]]></programlisting>
+            
+            <para>Handler methods which are annotated with this annotation are allowed
+			to have very flexible signatures. They may have arguments of the following
+			types, in arbitrary order (except for validation results, which need to
+			follow right after the corresponding command object, if desired):
+				<itemizedlist>
+				<listitem><para>request / response / session (Servlet API or Portlet API).</para></listitem>
+				<listitem><para><classname>org.springframework.web.context.request.WebRequest</classname></para></listitem>
+				<listitem><para><classname>java.util.Locale</classname> for the current request locale.</para></listitem>
+				<listitem><para><classname>java.io.InputStream</classname> / <classname>java.io.Reader</classname> for access
+					to the request's content.</para></listitem>
+				<listitem><para><classname>java.io.OutputStream</classname> / <classname>java.io.Writer</classname> for generating
+					the response's content.</para></listitem>
+				<listitem><para><classname>RequestParam</classname> annotated parameters for access to specific
+					request parameters.</para></listitem>
+				<listitem><para><classname>java.util.Map</classname> / <classname>org.springframework.ui.ModelMap</classname> for
+					enriching the implicit model that will be exposed to the web view.</para></listitem>
+				<listitem><para>Command/form objects to bind parameters to: as bean properties or fields,
+					with customizable type conversion, depending on <classname>InitBinder</classname> methods
+					and/or the HandlerAdapter configuration - see the "webBindingInitializer"
+					property on AnnotationMethodHandlerAdapter.
+					Such command objects along with their validation results will be exposed
+					as model attributes, by default using the non-qualified command class name
+					in property notation (e.g. "orderAddress" for type "mypackage.OrderAddress").
+					Specify a parameter-level <classname>ModelAttribute</classname> annotation for declaring
+					a specific model attribute name.</para></listitem>
+				<listitem><para><classname>org.springframework.validation.Errors</classname> /
+				<classname>org.springframework.validation.BindingResult</classname> validation results
+					for a preceding command/form object (the immediate preceding argument).</para></listitem>
+				<listitem><para><classname>org.springframework.web.bind.support.SessionStatus</classname> status handle
+					for marking form processing as complete (triggering the cleanup of session
+					attributes that have been indicated by the <classname>SessionAttributes</classname> annotation
+					at the handler type level).</para></listitem>
+				</itemizedlist>
+			</para>
+
+    	</section>        
+
+        <section id="mvc-ann-requestparam">
+            <title>Binding request parameters to method parameters with <classname>@RequestParam</classname></title>
+            <para>The <classname>@RequestParam</classname> annotation is used to bind request parameters to a method 
+            parameter in your controller.</para>
+            
+            <para>The following code snippet from the PetClinic sample application shows the usage:</para>
+
+		    <programlisting><![CDATA[@Controller
+@RequestMapping("/editPet.do")
+@SessionAttributes("pet")
+public class EditPetForm {
+
+...
+
+	@RequestMapping(type = "GET")
+	public String setupForm(]]><emphasis role="bold"><![CDATA[@RequestParam("petId") int petId]]></emphasis><![CDATA[, ModelMap model) {
+		Pet pet = this.clinic.loadPet(petId);
+		model.addAttribute("pet", pet);
+		return "petForm";
+	}
+
+...
+]]></programlisting> 
+           
+	        <para>Parameters using this annotation are required by default but you can specify that a parameter is not 
+	        requiered by adding a <classname>required="false"</classname> to the annotation.</para>
+    	</section>        
+
+        <section id="mvc-ann-modelattrib">
+            <title>Providing a link to data from the model with <classname>@ModelAttribute</classname></title>
+            <para>The method parameter <classname>@ModelAttribute</classname> annotation is used to map model attributes to a method 
+            parameter in your controller.  This is how the controller gets a reference to the object holding the 
+            data entered in the form.  The parameter can now be specified as the actual class rather than as a 
+            generic <classname>java.lang.Object</classname>.</para>
+            
+            <para>This annotation is also used on a method level to provide reference data for the model.  For this usage the
+            method signature can contain the same types as documented above for the <classname>@RequestMapping</classname> 
+            annotation.</para>
+
+            <para>The following code snippet shows these two usages of this annotation:</para>
+
+		    <programlisting><![CDATA[@Controller
+@RequestMapping("/editPet.do")
+@SessionAttributes("pet")
+public class EditPetForm {
+
+...
+
+	]]><emphasis role="bold"><![CDATA[@ModelAttribute("types")]]></emphasis><![CDATA[
+	public Collection<PetType> populatePetTypes() {
+		return this.clinic.getPetTypes();
+	}
+
+	@RequestMapping(type = "POST")
+	public String processSubmit(]]><emphasis role="bold"><![CDATA[@ModelAttribute("pet") Pet pet]]></emphasis><![CDATA[, BindingResult result,
+			SessionStatus status) {
+		new PetValidator().validate(pet, result);
+		if (result.hasErrors()) {
+			return "petForm";
+		}
+		else {
+			this.clinic.storePet(pet);
+			status.setComplete();
+			return "redirect:owner.do?ownerId=" + pet.getOwner().getId();
+		}
+	}
+
+}
+]]></programlisting>
+
+    	</section>        
+
+        <section id="mvc-ann-sessionattrib">
+            <title>Specifying attributes to store in Session with <classname>@SessionAttribute</classname></title>
+            <para>The type level <classname>@SessionAttribute</classname>  indicates the session attributes that a specific 
+            handler uses. This will typically list the names of model attributes which should be transparently stored in the 
+            session or some conversational storage, serving as form-backing beans.</para>
+
+            <para>The following code snippet shows the usage of this annotation:</para>
+
+		    <programlisting><![CDATA[@Controller
+@RequestMapping("/editPet.do")
+]]><emphasis role="bold"><![CDATA[@SessionAttributes("pet")]]></emphasis><![CDATA[
+public class EditPetForm {
+
+...
+
+}
+]]></programlisting>
+
+    	</section>        
+
+        <section id="mvc-ann-adapter">
+            <title>Customizing the <classname>AnnotationMethodHandlerAdapter</classname></title>
+            <para>To enable customizing the request parameter binding with PropertyEditors etc. you can
+            provide a custom bean configuration for a <classname>AnnotationMethodHandlerAdapter</classname> 
+            overriding the default configuration automatically provided.</para>
+
+            <para>This exmaple from the PetCinic application shows the configuration using an application
+            specific class <classname>org.springframework.samples.petclinic.web.ClinicBindingInitializer</classname> 
+            to add the required PropertyEditors.</para>
+            
+		    <programlisting><![CDATA[<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+    <property name="cacheSeconds" value="0" />
+    <property name="webBindingInitializer">
+        <bean class="org.springframework.samples.petclinic.web.ClinicBindingInitializer" />
+    </property>
+</bean>
+]]></programlisting>
+
+    	</section>        
+
     </section>        
+
     <section id="mvc-resources">
 		<title>Further Resources</title>
 		<para>Find below links and pointers to further resources about Spring Web MVC.</para>
