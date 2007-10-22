@@ -6,7 +6,7 @@
 <b>Owner:</b> ${pet.owner.firstName} ${pet.owner.lastName}
 <br/>
 
-<form:form commandName="pet">
+<form:form modelAttribute="pet">
   <table>
     <tr>
       <th>

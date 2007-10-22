@@ -3,7 +3,7 @@
 
 <h2><c:if test="${owner.new}">New </c:if>Owner:</h2>
 
-<form:form commandName="owner">
+<form:form modelAttribute="owner">
   <table>
     <tr>
       <th>

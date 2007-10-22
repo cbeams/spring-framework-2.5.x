@@ -3,7 +3,7 @@
 
 <h2><c:if test="${visit.new}">New </c:if>Visit:</h2>
 
-<form:form commandName="visit">
+<form:form modelAttribute="visit">
   <b>Pet:</b>
   <table>
     <tr>

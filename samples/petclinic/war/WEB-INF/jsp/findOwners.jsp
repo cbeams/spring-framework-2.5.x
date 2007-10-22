@@ -3,7 +3,7 @@
 
 <h2>Find Owners:</h2>
 
-<form:form commandName="owner">
+<form:form modelAttribute="owner">
   <table>
     <tr>
       <th>

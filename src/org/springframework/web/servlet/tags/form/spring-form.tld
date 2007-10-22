@@ -3,7 +3,7 @@
 
 <taglib>
 
-	<tlib-version>2.0</tlib-version>
+	<tlib-version>2.5</tlib-version>
 	<jsp-version>1.2</jsp-version>
 	<short-name>form</short-name>
 	<uri>http://www.springframework.org/tags/form</uri>
@@ -125,10 +125,17 @@
 		</attribute>
 		<!-- Form specific attributes -->
 		<attribute>
+			<name>modelAttribute</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Name of the model attribute under which the form object is exposed.
+				Defaults to 'command'.</description>
+		</attribute>
+		<attribute>
 			<name>commandName</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Name of the attribute under which the command name is exposed.
+			<description>Name of the model attribute under which the form object is exposed.
 				Defaults to 'command'.</description>
 		</attribute>
 		<attribute>

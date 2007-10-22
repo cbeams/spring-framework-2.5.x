@@ -23,10 +23,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.AssertThrows;
 
 /**
- * Unit tests for the {@link FormTag} class.
- *
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public final class FormTagTests extends AbstractHtmlElementTagTests {
 	
@@ -82,13 +81,13 @@ public final class FormTagTests extends AbstractHtmlElementTagTests {
 
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, result);
-		assertEquals("Command name not exposed", commandName, getPageContext().getRequest().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
+		assertEquals("Form attribute not exposed", commandName, getPageContext().getRequest().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME));
 
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		this.tag.doFinally();
-		assertNull("Command name not cleared after tag ends", getPageContext().getRequest().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
+		assertNull("Form attribute not cleared after tag ends", getPageContext().getRequest().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME));
 
 		String output = getOutput();
 		assertFormTagOpened(output);
@@ -103,7 +102,7 @@ public final class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(output, "onreset", onreset);
 		assertContainsAttribute(output, "id", commandName);
 		assertContainsAttribute(output, "name", name);
-		assertContainsAttribute(output, FormTag.ACCEPT_CHARSET_ATTRIBUTE, acceptCharset);
+		assertContainsAttribute(output, "accept-charset", acceptCharset);
 	}
 
 	public void testWithActionFromRequest() throws Exception {
@@ -121,13 +120,13 @@ public final class FormTagTests extends AbstractHtmlElementTagTests {
 
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, result);
-		assertEquals("Command name not exposed", commandName, getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+		assertEquals("Form attribute not exposed", commandName, getPageContext().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		this.tag.doFinally();
-		assertNull("Command name not cleared after tag ends", getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
+		assertNull("Form attribute not cleared after tag ends", getPageContext().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 
 		String output = getOutput();
 		assertFormTagOpened(output);

@@ -21,16 +21,15 @@ import java.beans.PropertyEditor;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
-import org.springframework.core.Conventions;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.BindStatus;
-import org.springframework.web.servlet.tags.NestedPathTag;
 import org.springframework.web.servlet.tags.EditorAwareTag;
+import org.springframework.web.servlet.tags.NestedPathTag;
 
 /**
  * Base tag for all data-binding aware JSP form tags.
- * 
+ *
  * <p>Provides the common {@link #setPath path} and {@link #setId id} properties.
  * Provides sub-classes with utility methods for accessing the {@link BindStatus}
  * of their bound value and also for {@link #writeOptionalAttribute interacting}
@@ -45,29 +44,17 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	/**
 	 * The '<code>id</code>' attribute of the rendered HTML tag.
 	 */
-	public static final String ID_ATTRIBUTE = "id";
-
-	/**
-	 * The name of the '<code>commandName</code>' attribute.
-	 */
-	public static final String COMMAND_NAME_ATTRIBUTE = "commandName";
-
-	/**
-	 * The name of the {@link javax.servlet.jsp.PageContext} attribute under which the
-	 * command object name is exposed.
-	 */
-	public static final String COMMAND_NAME_VARIABLE_NAME =
-			Conventions.getQualifiedAttributeName(AbstractFormTag.class, COMMAND_NAME_ATTRIBUTE);
+	private static final String ID_ATTRIBUTE = "id";
 
 	/**
 	 * Name of the exposed path variable within the scope of this tag: "nestedPath".
 	 * Same value as {@link org.springframework.web.servlet.tags.NestedPathTag#NESTED_PATH_VARIABLE_NAME}.
 	 */
-	public static final String NESTED_PATH_VARIABLE_NAME = NestedPathTag.NESTED_PATH_VARIABLE_NAME;
+	protected static final String NESTED_PATH_VARIABLE_NAME = NestedPathTag.NESTED_PATH_VARIABLE_NAME;
 
 
 	/**
-	 * The property path from the {@link FormTag#setCommandName command object}.
+	 * The property path from the {@link FormTag#setModelAttribute form object}.
 	 */
 	private String path;
 
@@ -83,7 +70,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 
 
 	/**
-	 * Set the property path from the {@link FormTag#setCommandName command object}.
+	 * Set the property path from the {@link FormTag#setModelAttribute form object}.
 	 * May be a runtime expression. Required.
 	 */
 	public void setPath(String path) {
@@ -92,7 +79,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 
 	/**
 	 * Get the {@link #evaluate resolved} property path for the
-	 * {@link FormTag#setCommandName command object}.
+	 * {@link FormTag#setModelAttribute form object}.
 	 */
 	protected final String getPath() throws JspException {
 		String resolvedPath = (String) evaluate("path", this.path);
@@ -196,7 +183,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 
 	/**
 	 * Build the property path for this tag, including the nested path
-	 * but <i>not</i> prefixed with the name of the command attribute.
+	 * but <i>not</i> prefixed with the name of the form attribute.
 	 * @see #getNestedPath()
 	 * @see #getPath()
 	 */
