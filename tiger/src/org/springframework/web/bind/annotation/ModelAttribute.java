@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  * through annotating accessor methods in a controller class which
  * is based on {@link RequestMapping} annotated handler methods,
  * with such accessor methods allowed to have any arguments that
- * {@link RequestMapping) supports for handler methods, returning
+ * {@link RequestMapping} supports for handler methods, returning
  * the model attribute value to expose.
  *
  * @author Juergen Hoeller

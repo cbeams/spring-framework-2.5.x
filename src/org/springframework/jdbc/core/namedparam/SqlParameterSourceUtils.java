@@ -16,22 +16,23 @@
 
 package org.springframework.jdbc.core.namedparam;
 
-import org.springframework.jdbc.core.SqlParameterValue;
-
 import java.util.Map;
 
+import org.springframework.jdbc.core.SqlParameterValue;
+
 /**
- * Class that provides helper methods for the use of SqlParameterSource with SimpleJdbc classes.
+ * Class that provides helper methods for the use of {@link SqlParameterSource}
+ * with <code>SimpleJdbc</code> classes.
  *
  * @author Thomas Risberg
  * @since 2.5
+ * @see org.springframework.jdbc.core.simple.SimpleJdbcTemplate
  */
 public class SqlParameterSourceUtils {
 
 	/**
-	 * Create an array of MapSqlParameterSource objects populated with data from the values passed in.
-	 * This will define what is included in a batch operation.
-	 *
+	 * Create an array of MapSqlParameterSource objects populated with data from the
+	 * values passed in. This will define what is included in a batch operation.
 	 * @param valueMaps array of Maps containing the values to be used
 	 * @return an array of SqlParameterSource
 	 */
@@ -45,9 +46,8 @@ public class SqlParameterSourceUtils {
 	}
 
 	/**
-	 * Create an array of BeanPropertySqlParameterSource objects populated with data from the values passed in.
-	 * This will define what is included in a batch operation.
-	 *
+	 * Create an array of BeanPropertySqlParameterSource objects populated with data
+	 * from the values passed in. This will define what is included in a batch operation.
 	 * @param beans object array of beans containing the values to be used
 	 * @return an array of SqlParameterSource
 	 */
@@ -64,7 +64,7 @@ public class SqlParameterSourceUtils {
 	 * Create a wrapped value if parameter has type information, plain object if not.
 	 * @param source the source of paramer values and type information
 	 * @param parameterName the name of the parameter
-	 * @return
+	 * @return the value object
 	 */
 	public static Object getTypedValue(SqlParameterSource source, String parameterName) {
 		int sqlType = source.getSqlType(parameterName);

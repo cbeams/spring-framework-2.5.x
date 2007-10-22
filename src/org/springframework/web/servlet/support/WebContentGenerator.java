@@ -30,7 +30,7 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
  * Convenient superclass for any kind of web content generator,
- * like {@link org.springframework.web.servlet.mvc.AbstractController
+ * like {@link org.springframework.web.servlet.mvc.AbstractController}
  * and {@link org.springframework.web.servlet.mvc.WebContentInterceptor}.
  * Can also be used for custom handlers that have their own
  * {@link org.springframework.web.servlet.HandlerAdapter}.
