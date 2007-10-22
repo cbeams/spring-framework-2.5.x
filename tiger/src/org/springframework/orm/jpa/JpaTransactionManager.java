@@ -552,7 +552,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		public boolean hasTransaction() {
 			return (this.entityManagerHolder != null &&
 					this.entityManagerHolder.getEntityManager() != null &&
-					this.entityManagerHolder.getEntityManager().getTransaction().isActive());
+					(this.entityManagerHolder.getEntityManager().getTransaction().isActive() ||
+							this.entityManagerHolder.isSynchronizedWithTransaction()));
 		}
 
 		public void setTransactionData(Object transactionData) {
