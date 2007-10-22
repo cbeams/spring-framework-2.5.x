@@ -720,7 +720,7 @@
     <para>Spring 2.5 features a revised version of the PetClinic sample application,
     reengineered from the ground up for leveraging Spring 2.5's annotation
     configuration features. It also uses Java 5 autoboxing, generics, 
-    varargs and the enhanced for loop so a Java 5 or 6 SDK is required to build and 
+    varargs and the enhanced for loop.  A Java 5 or 6 SDK is now required to build and 
     run the sample. Check out PetClinic to get an impression of what Spring 2.5 has 
     to offer!</para>
   </section>
