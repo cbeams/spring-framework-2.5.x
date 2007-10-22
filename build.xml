@@ -2083,6 +2083,7 @@
 				<include name="lib/*.txt"/>
 				<include name="lib/ant/**"/>
 				<include name="lib/antlr/**"/>
+        <include name="lib/asm/**"/>
 				<include name="lib/aspectj/**"/>
 				<!-- Do not include 8 MB aspectjtools.jar: Users need to download it separately -->
 				<exclude name="lib/aspectj/aspectjtools.jar"/>
@@ -2109,6 +2110,7 @@
 				<include name="lib/jakarta-commons/**"/>
 				<include name="lib/jakarta-taglibs/**"/>
 				<include name="lib/jamon/**"/>
+        <include name="lib/jarjar/**"/>
 				<include name="lib/jasperreports/**"/>
         <include name="lib/jaxws/**"/>
 				<include name="lib/jexcelapi/**"/>
@@ -2128,6 +2130,7 @@
 				<include name="lib/quartz/**"/>
 				<include name="lib/serp/**"/>
 				<include name="lib/struts/**"/>
+        <include name="lib/testng/**"/>
 				<include name="lib/tiles/**"/>
 				<include name="lib/tomcat/**"/>
 				<include name="lib/toplink/**"/>
