@@ -70,6 +70,11 @@ public class AutowireWithExclusionTests extends TestCase {
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		TestBean sally = (TestBean) beanFactory.getBean("sally");
 		assertEquals(sally, rob.getSpouse());
+		TestBean rob2 = (TestBean) beanFactory.getBean("rob");
+		assertEquals(rob, rob2);
+		assertNotSame(rob, rob2);
+		assertEquals(rob.getSpouse(), rob2.getSpouse());
+		assertNotSame(rob.getSpouse(), rob2.getSpouse());
 	}
 
 	public void testConstructorAutowireWithExclusion() throws Exception {

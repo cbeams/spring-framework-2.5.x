@@ -119,7 +119,11 @@ abstract class ConstructorResolver {
 					argsToUse = new Object[argsToResolve.length];
 					for (int i = 0; i < argsToResolve.length; i++) {
 						Object argValue = argsToResolve[i];
-						if (argValue instanceof BeanMetadataElement) {
+						if (argValue instanceof AutowiredArgumentMarker) {
+							argValue = resolveAutowiredArgument(
+									new MethodParameter(constructorToUse, i), beanName, null, converter);
+						}
+						else if (argValue instanceof BeanMetadataElement) {
 							argValue = valueResolver.resolveValueIfNecessary("constructor argument", argValue);
 						}
 						argsToUse[i] = converter.convertIfNecessary(argValue, paramTypes[i],
@@ -277,7 +281,11 @@ abstract class ConstructorResolver {
 					argsToUse = new Object[argsToResolve.length];
 					for (int i = 0; i < argsToResolve.length; i++) {
 						Object argValue = argsToResolve[i];
-						if (argValue instanceof BeanMetadataElement) {
+						if (argValue instanceof AutowiredArgumentMarker) {
+							argValue = resolveAutowiredArgument(
+									new MethodParameter(factoryMethodToUse, i), beanName, null, converter);
+						}
+						else if (argValue instanceof BeanMetadataElement) {
 							argValue = valueResolver.resolveValueIfNecessary("factory method argument", argValue);
 						}
 						argsToUse[i] = converter.convertIfNecessary(argValue, paramTypes[i],
@@ -518,6 +526,8 @@ abstract class ConstructorResolver {
 					Object autowiredArgument = resolveAutowiredArgument(param, beanName, autowiredBeanNames, converter);
 					args.rawArguments[paramIndex] = autowiredArgument;
 					args.arguments[paramIndex] = autowiredArgument;
+					args.preparedArguments[paramIndex] = new AutowiredArgumentMarker();
+					resolveNecessary = true;
 				}
 				catch (BeansException ex) {
 					throw new UnsatisfiedDependencyException(
@@ -584,6 +594,13 @@ abstract class ConstructorResolver {
 			int rawTypeDiffWeight = AutowireUtils.getTypeDifferenceWeight(paramTypes, this.rawArguments) - 1024;
 			return (rawTypeDiffWeight < typeDiffWeight ? rawTypeDiffWeight : typeDiffWeight);
 		}
+	}
+
+
+	/**
+	 * Marker for autowired arguments in a cached argument array.
+ 	 */
+	private static class AutowiredArgumentMarker {
 	}
 
 }
