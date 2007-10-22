@@ -375,6 +375,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			catch (BeansException ex) {
 				// Destroy already created singletons to avoid dangling resources.
 				beanFactory.destroySingletons();
+
+				// Reset 'active' flag.
+				cancelRefresh(ex);
+
+				// Propagate exception to caller.
 				throw ex;
 			}
 		}
@@ -736,6 +741,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void finishRefresh() {
 		publishEvent(new ContextRefreshedEvent(this));
+	}
+
+	/**
+	 * Cancel this context's refresh attempt, resetting the <code>active</code> flag
+	 * after an exception got thrown.
+	 * @param ex the exception that led to the cancellation
+	 */
+	protected void cancelRefresh(BeansException ex) {
+		synchronized (this.activeMonitor) {
+			this.active = false;
+		}
 	}
 
 

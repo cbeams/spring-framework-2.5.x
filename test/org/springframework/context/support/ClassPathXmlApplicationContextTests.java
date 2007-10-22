@@ -102,8 +102,10 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 	}
 
 	public void testContextWithInvalidValueType() throws IOException {
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+				new String[] {"/org/springframework/context/support/invalidValueType.xml"}, false);
 		try {
-			new ClassPathXmlApplicationContext("invalidValueType.xml", getClass());
+			context.refresh();
 			fail("Should have thrown BeanCreationException");
 		}
 		catch (BeanCreationException ex) {
@@ -112,6 +114,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 			assertTrue(ex.toString().indexOf("useCodeAsDefaultMessage") != -1);
 			checkExceptionFromInvalidValueType(ex);
 			checkExceptionFromInvalidValueType(new ExceptionInInitializerError(ex));
+			assertFalse(context.isActive());
 		}
 	}
 
