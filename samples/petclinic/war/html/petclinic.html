@@ -810,151 +810,124 @@
 
 	<h3>Presentation Layer classes</h3>
 	<ul>
-	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.web.ClinicController</span>
-		is an extension of <span style="font-weight: bold;">MultiactionController</span>
-		that is used to handle simple display oriented URLs.</li>
-
-	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.web.AbstractClinicForm</span>
-		is an extension of <span style="font-weight: bold;">SimpleFormController</span>
-		that is the superclass of PetClinic's form objects. It provides its
-		subclasses with a some commonly needed form behavior:
-		  <ul>
-			<li>It provides a <span style="font-style: italic;">clinic</span> property
-				that gives access to the <span style="font-weight: bold;">Clinic</span> implementation
-				that is used to access the Business/Persistence Layer.</li>
-			<li>It overrides <span style="font-style: italic;">initBinder()</span> to
-				provide a <span style="font-weight: bold;">DateFormat</span> <span style="font-weight: bold;">PropertyEditor</span> to handle the
-				specialized binding of request parameters to <span style="font-weight: bold;">Date</span> fields.</li>
-			<li>It provides a <span style="font-style: italic;">disallowDuplicateFormSubmission()</span>
-				method to enure correct handling of form submission initiated through
-				use of the browser "Back" button:
-				<ul>
-				  <li>It disallows duplicate form submission for "Add" forms by overriding <span style="font-weight: normal;"><span style="font-style: italic;">handleInvalidSubmit()</span></span>.</li>
-				</ul>
-			</li>
-		  </ul>
-		  <ul>
-			  <li>It allows duplicate form submission for "Edit" forms by <span style="text-decoration: underline;">not</span> overriding <span style="font-weight: normal;"><span style="font-style: italic;">handleInvalidSubmit()</span></span>.</li>
-		  </ul>
+	  <li>
+		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.web.ClinicController</span>
+		is an annotation-driven, POJO <em>MultiActionController</em>
+		that is used to handle simple display-oriented URLs.
 	  </li>
-
-	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.web.FindOwnersForm</span> is an
-		extension
-		of <span style="font-weight: bold; font-style: italic;">AbstractClinicForm</span> that
-		is used to find owners by last name.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.web.AddOwnerForm</span> is an
-		extension
-		of <span style="font-weight: bold; font-style: italic;">AbstractClinicForm</span> that
-		is used to add a new <span style="font-weight: bold;">Owner.</span></li>
-	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.web.EditOwnerForm</span> is an
-		extension
-		of <span style="font-weight: bold; font-style: italic;">AbstractClinicForm</span> that
-		is used to edit an existing <span style="font-weight: bold;">Owner.</span> A
-		copy of the existing <span style="font-weight: bold;">Owner</span> is
-		used for editing.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.web.AddPetForm</span>
-		is an
-		extension
-		of <span style="font-weight: bold; font-style: italic;">AbstractClinicForm</span> that
-		is used to add a new <span style="font-weight: bold;">Pet</span> to
-		an existing <span style="font-weight: bold;">Owner</span>.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.web.EditPetForm</span> is an
-		extension
-		of <span style="font-weight: bold; font-style: italic;">AbstractClinicForm</span> that
-		is used to edit an existing <span style="font-weight: bold;">Pet</span>.
-		A copy of the existing <span style="font-weight: bold;">Pet</span> is
-		used for editing.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.web.AddVisitForm</span>
-		<span style="font-weight: bold; font-style: italic;"></span> is an
-		extension
-		of <span style="font-weight: bold; font-style: italic;">AbstractClinicForm</span> that
-		is used to add a new <span style="font-weight: bold;">Visit</span> to
-		an existing <span style="font-weight: bold;">Pet</span>.</li>
+	  <li>
+		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.web.FindOwnersForm</span>
+		is an annotation-driven, POJO <em>Form</em> controller that is used to search for
+		<strong>Owner</strong>s by last name.
+	  </li>
+	  <li>
+		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.web.AddOwnerForm</span>
+		is an annotation-driven, POJO <em>Form</em> controller that is used to add a new <strong>Owner</strong>
+		to the system.
+	  </li>
+	  <li>
+		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.web.EditOwnerForm</span>
+		is an annotation-driven, POJO <em>Form</em> controller that is used to edit an existing <strong>Owner</strong>.
+		A copy of the existing <strong>Owner</strong> is used for editing.
+	  </li>
+	  <li>
+		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.web.AddPetForm</span>
+		is an annotation-driven, POJO <em>Form</em> controller that is used to add a new <strong>Pet</strong>
+		to an existing <strong>Owner</strong>.
+	  </li>
+	  <li>
+		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.web.EditPetForm</span>
+		is an annotation-driven, POJO <em>Form</em> controller that is used to edit an existing <strong>Pet</strong>.
+		A copy of the existing <strong>Pet</strong> is used for editing.
+	  </li>
+	  <li>
+		<span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.web.AddVisitForm</span>
+		is an annotation-driven, POJO <em>Form</em> controller that is used to add a new <strong>Visit</strong>
+		to an existing <strong>Pet</strong>.
+	  </li>
 	</ul>
 
-	<h3>View Beans &amp; Implemented Use Cases</h3>
+	<h3>Logical Views &amp; Implemented Use Cases</h3>
 
 	<ul>
-	  <li><span style="font-weight: bold; font-style: italic;">welcomeView</span> is
+	  <li><span style="font-weight: bold; font-style: italic;">welcome</span> is
 		the "home" screen. It provides links to display a list of all vets,
 		find an owner, or view documentation.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">vetsView</span> displays
+	  <li><span style="font-weight: bold; font-style: italic;">vets</span> displays
 		all vets and their specialties.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">findOwnersForm</span>
+	  <li><span style="font-weight: bold; font-style: italic;">findOwners</span>
 		is used to find owners by last name.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">findOwnersRedirectView</span>
-		redirects to findOwnerForm.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">selectOwnerView</span>
+	  <li><span style="font-weight: bold; font-style: italic;">findOwnersRedirect</span>
+		redirects to findOwner.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">selectOwner</span>
 		allows user to select from a list of multiple owners with the same last
 		name.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">ownerView</span> displays
+	  <li><span style="font-weight: bold; font-style: italic;">owner</span> displays
 		a owner's data and a list of the owner's pets and their data.</li>
 	  <li><span style="font-weight: bold; font-style: italic;">ownerRedirect</span>
-		redirects to ownerView.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">ownerForm</span> supports
+		redirects to owner.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">owner</span> supports
 		<span style="font-weight: bold; font-style: italic;">AddOwnerForm</span>
-		and<span style="font-weight: bold; font-style: italic;"> EditOwnerForm</span></li>
-	  <li><span style="font-weight: bold; font-style: italic;">petForm</span> supports<span style="font-style: italic;"></span> <span style="font-weight: bold; font-style: italic;">AddPetForm</span>
+		and <span style="font-weight: bold; font-style: italic;">EditOwnerForm</span></li>
+	  <li><span style="font-weight: bold; font-style: italic;">pet</span> supports
+	  	<span style="font-weight: bold; font-style: italic;">AddPetForm</span>
 		and <span style="font-weight: bold; font-style: italic;">web.EditPetForm</span></li>
-	  <li><span style="font-weight: bold; font-style: italic;">visitForm</span> supports<span style="font-weight: bold; font-style: italic;"> AddVisitForm</span></li>
+	  <li><span style="font-weight: bold; font-style: italic;">visit</span> supports
+	  	<span style="font-weight: bold; font-style: italic;">AddVisitForm</span></li>
 	  <li><span style="font-weight: bold; font-style: italic;">dataAccessFailure</span>
 		displays a stacktrace</li>
 	</ul>
 
-	<h3>JSP Pages</h3>
+	<h3>JavaServer Pages</h3>
 
 	<ul>
-	  <li><span style="font-weight: bold; font-style: italic;">index.jsp</span> redirects
-		to the "welcome" page.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">includes.jsp
-		</span>is
+	  <li><span style="font-weight: bold; font-style: italic;">index.jsp</span>
+	    redirects to the "welcome" page.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">includes.jsp</span> is
 		statically included in <span style="text-decoration: underline;">all</span>
 		JSP's used in the application. It specifies the taglibs that are in use.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">header.jsp</span> and
+	  	<span style="font-style: italic; font-weight: bold;">footer.jsp</span>
+		display info common to virtually all pages. Spring also supplies
+		support for the integration of <a href="http://www.lifl.fr/%7Edumoulin/tiles">Tiles</a>
+		(included in Struts) but this is not used in PetClinic.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">dataAccessFailure.jsp</span>
+	  	is the error page configured via
+		<span style="font-weight: bold; font-style: italic;">SimpleMappingExceptionResolver</span>,
+		which displays a stack trace and normally wouldn't be used in a production
+		version of an application. It can be seen in action by entering a URL of
+		"editOwner.do" or "editPet.do" with an invalid request parameter, for example:
+		<a href="http://localhost:8080/petclinic/owner.do?ownerId=-1">/petclinic/owner.do?ownerId=-1</a>.
+		The handlers for these URLs normally expect to see a respective "ownerId" or "petId"
+		request parameter corresponding to an Owner or Pet in the database. Thus,
+		these handlers will throw a <strong>DataAccessException</strong> when such
+		a request parameter is provided which references a non-existing entity.</li>
 	  <li><span style="font-weight: bold; font-style: italic;">uncaughtException.jsp</span>
 		is the <span style="font-weight: bold; font-style: italic;">web.xml</span> configured
 		"error-page". It displays a stack trace and normally wouldn't be used
 		in a production version of an application. It can be seen in action by
-		entering a URL of "editOwner.htm" or "editpet.htm". The handlers for
-		these URLs normally expect to see a respective "ownerId" or "petId"
-		request parameter and throw a <span style="font-weight: bold;">ServletException</span>when
-		it isn't found.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">welcome.jsp</span> implements<span style="font-weight: bold; font-style: italic;"> welcomeView</span>.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">vets.jsp</span> implements<span style="font-weight: bold; font-style: italic;"> vetsView</span>.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">findOwners.jsp</span>
-		<span style="font-weight: bold; font-style: italic;"></span> implements
-		<span style="font-weight: bold; font-style: italic;">findOwnersForm</span>.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">owners.jsp</span>
-		<span style="font-weight: bold; font-style: italic;"></span> implements<span style="font-weight: bold; font-style: italic;"> selectOwnerView</span>.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">owner.jsp</span>
-		<span style="font-weight: bold; font-style: italic;"></span> implements
-		<span style="font-weight: bold; font-style: italic;">ownerView</span>.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">ownerForm.jsp</span>
-		<span style="font-weight: bold; font-style: italic;"></span> implements<span style="font-weight: bold; font-style: italic;"></span> <span style="font-weight: bold; font-style: italic;">ownerForm</span>.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">petForm.jsp</span>
-		<span style="font-weight: bold; font-style: italic;"></span> implements<span style="font-weight: bold; font-style: italic;"></span> <span style="font-weight: bold; font-style: italic;">petForm</span>.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">visitForm.jsp</span>
-		<span style="font-weight: bold; font-style: italic;"></span> implements
+		entering a URL of "editOwner.do" or "editPet.do" without a valid request
+		parameter, for example:
+		<a href="http://localhost:8080/petclinic/owner.do">/petclinic/owner.do</a>.
+		The handlers for these URLs normally expect to see a respective "ownerId" or "petId"
+		request parameter and throw a <strong>ServletException</strong> when such
+		a request parameter is not found.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">welcome.jsp</span> implements
+	  	<span style="font-weight: bold; font-style: italic;">welcome</span>.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">vets.jsp</span> implements
+	  	<span style="font-weight: bold; font-style: italic;">vets</span>.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">findOwners.jsp</span> implements
+		<span style="font-weight: bold; font-style: italic;">findOwners</span>.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">owners.jsp</span> implements
+		<span style="font-weight: bold; font-style: italic;">selectOwner</span>.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">owner.jsp</span> implements
+		<span style="font-weight: bold; font-style: italic;">owner</span>.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">ownerForm.jsp</span> implements
+		<span style="font-weight: bold; font-style: italic;">ownerForm</span>.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">petForm.jsp</span> implements
+	  	<span style="font-weight: bold; font-style: italic;">petForm</span>.</li>
+	  <li><span style="font-weight: bold; font-style: italic;">visitForm.jsp</span> implements
 		<span style="font-weight: bold; font-style: italic;">visitForm</span>.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">dataAccessFailure.jsp
-		</span>displays a stacktrace</li>
-	  <li><span style="font-weight: bold; font-style: italic;">header.jsp</span>
-		and <span style="font-style: italic; font-weight: bold;">footer.jsp</span>
-		display info common to virtually all pages. Spring also supplies
-		support for the integration of <a href="http://www.lifl.fr/%7Edumoulin/tiles">Tiles</a>
-		(included in Struts) but this is not used in PetClinic.</li>
-	</ul>
-
-	<p>
-		The following JSP's each display a form field and the bound error data
-		for that field:
-	</p>
-
-	<ul>
-	  <li style="font-weight: bold; font-style: italic;">address.jsp</li>
-	  <li style="font-weight: bold; font-style: italic;">city.jsp</li>
-	  <li style="font-weight: bold; font-style: italic;">telephone.jsp</li>
-	  <li style="font-weight: bold; font-style: italic;">lastName.jsp</li>
-	  <li style="font-weight: bold; font-style: italic;">firstName.jsp</li>
 	</ul>
 
 	<p>
@@ -970,7 +943,7 @@
 		the user, i.e., the end user never sees a URL ending in
 		<span style="font-weight: bold; font-style: italic;">".jsp".</span></li>
 	  <li>By convention, all URL's in the application ending in
-		<span style="font-weight: bold; font-style: italic;">".htm"</span> are
+		<span style="font-weight: bold; font-style: italic;">".do"</span> are
 		handled by web application controllers. Static html pages ending in
 		<span style="font-weight: bold; font-style: italic;">".html"</span>, such as
 		Javadocs, will be directly served to the end user.</li>
@@ -979,16 +952,15 @@
 	  <li>All pages are extremely simple JSP implementations that focus
 		only on providing the necessary functionality.</li>
 	  <li>References to <span style="font-weight: bold;">Entity</span> objects
-		are passed around in the application by supplying the object's Id as a
-		request parameter.<br>
-	  </li>
+		are passed around in the application by supplying the object's <code>ID</code>
+		as a request parameter.</li>
 	</ol>
 
 	<h3>Testing</h3>
 	<ul>
-	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.OwnerTests</span>
+	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.OwnerTests</span>
 	  	is a JUnit TestCase that supports Business Rule #1.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.petclinic.AbstractClinicTests</span>
+	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.AbstractClinicTests</span>
 		is a JUnit TestCase requiring a live database connection that is used to
 		confirm correct operation of the database access objects in the various implementations of the
 		<span style="font-weight: bold;">Clinic</span> interface.
