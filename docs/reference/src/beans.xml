@@ -1292,7 +1292,7 @@ public class ExampleBean {
         <para>Can you see what is happening? The Spring container is
         converting the text inside the <literal>&lt;value/&gt;</literal>
         element into a <classname>java.util.Properties</classname> instance
-        using the JavaBeans <interfacename>PropertEditor</interfacename>
+        using the JavaBeans <interfacename>PropertyEditor</interfacename>
         mechanism. This is a nice shortcut, and is one of a few places where
         the Spring team do favor the use of the nested
         <literal>&lt;value/&gt;</literal> element over the
