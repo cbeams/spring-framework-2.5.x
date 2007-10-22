@@ -99,6 +99,7 @@
 				<include name="spring.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/dist/modules">
+        <include name="spring-webmvc.jar"/>
 				<include name="spring-webmvc-portlet.jar"/>
 			</fileset>
 		</copy>
