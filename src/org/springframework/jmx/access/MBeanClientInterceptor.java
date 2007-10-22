@@ -556,20 +556,11 @@ public class MBeanClientInterceptor
 		}
 
 		public boolean equals(Object other) {
-			if (other == null) {
-				return false;
-			}
 			if (other == this) {
 				return true;
 			}
-			MethodCacheKey otherKey = null;
-			if (other instanceof MethodCacheKey) {
-				otherKey = (MethodCacheKey) other;
-				return this.name.equals(otherKey.name) && Arrays.equals(this.parameterTypes, otherKey.parameterTypes);
-			}
-			else {
-				return false;
-			}
+			MethodCacheKey otherKey = (MethodCacheKey) other;
+			return (this.name.equals(otherKey.name) && Arrays.equals(this.parameterTypes, otherKey.parameterTypes));
 		}
 
 		public int hashCode() {
