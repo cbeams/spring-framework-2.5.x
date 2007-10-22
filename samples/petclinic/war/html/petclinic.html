@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>The Spring PetClinic Application</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 	<link rel="stylesheet" href="../styles/petclinic.css" type="text/css">
 </head>
 
@@ -320,8 +320,9 @@
 	<p>
 		The Business Layer consists of a number of basic JavaBean classes
 		representing the application domain objects and associated validation
-		objects that are used by thePresentation Layer. The validation objects used in PetClinic are
-		all implementations of the <span style="font-weight: bold;">org.springframework.validation.Validator</span> interface.
+		objects that are used by the Presentation Layer. The validation objects
+		used in PetClinic are all implementations of the
+		<strong>org.springframework.validation.Validator</strong> interface.
 	</p>
 
 	<ul>
@@ -534,8 +535,8 @@
 	</p>
 
 	<ol>
-	  <li>A <span style="font-weight: bold; font-style: italic;">PropertyPlaceholderConfigurer</span>:
-	    configured via
+	  <li>A <span style="font-weight: bold; font-style: italic;">PropertyPlaceholderConfigurer</span>,
+	    which is configured via
 	    <strong>&lt;context:property-placeholder ... /&gt;</strong> and
 	    is a singleton bean that replaces ${...} placeholders with values from a
 		properties file, in this case, JDBC-related settings for the
@@ -543,16 +544,16 @@
 		described below
 		(see <span style="font-weight: bold; font-style: italic;">src/jdbc.properties</span>).
 	  </li>
-	  <li><span style="font-weight: bold; font-style: italic;">dataSource</span>:
-		a singleton bean that defines the implementation of the source of
-		database connections used by the application.
+	  <li><span style="font-weight: bold; font-style: italic;">dataSource</span>,
+		which is a singleton bean that defines the implementation of the source
+		of database connections used by the application.
 	  </li>
-	  <li><span style="font-weight: bold; font-style: italic;">transactionManager</span>:
-	  	a singleton bean that defines the implementation of the transaction
+	  <li><span style="font-weight: bold; font-style: italic;">transactionManager</span>,
+		which is a singleton bean that defines the implementation of the transaction
 		management strategy for the application.
 	  </li>
-	  <li><span style="font-weight: bold; font-style: italic;">clinic</span>:
-		a singleton bean that defines the implementation of the
+	  <li><span style="font-weight: bold; font-style: italic;">clinic</span>,
+		which is a singleton bean that defines the implementation of the
 		<span style="font-weight: bold;">Clinic</span> interface that provides the
 		primary Business Layer API of the application.
 	  </li>
@@ -704,7 +705,8 @@
 	</p>
 
 	<ul>
-	  <li><span style="font-weight: bold; font-style: italic;">messageSource</span>
+	  <li>
+		<span style="font-weight: bold; font-style: italic;">messageSource</span>
 		is a singleton bean that defines a message source for this
 		<span style="font-weight: bold;">ApplicationContext</span>. Messages are
 		loaded from localized <span style="font-weight: bold;">"messages_xx"</span>
@@ -714,18 +716,39 @@
 		<span style="font-style: italic;">getMessage()</span> calls to this context
 		will use this source. Child contexts can have their own message sources,
 		which will inherit all messages from this source and are able to define new
-		messages and override ones defined in the primary message source.</li>
-	  <li><span style="font-weight: bold; font-style: italic;">InternalResourceViewResolver</span>
+		messages and override ones defined in the primary message source.
+	  </li>
+	  <li>
+		<span style="font-weight: bold; font-style: italic;">InternalResourceViewResolver</span>
 		is a singleton bean that defines the view mappings used by the dispatcher.
-		Specifically, logical view names returned by Conrollers will be mapped to
+		Specifically, logical view names returned by Controllers will be mapped to
 		physical paths using the configured 'prefix' and 'suffix' properties. For
 		example, a logical view name of "vets" will be mapped to "/WEB-INF/jsp/vets.jsp".
 	  </li>
-	  <li><span style="font-weight: bold; font-style: italic;">SimpleMappingExceptionResolver</span>
+	  <li>
+		<span style="font-weight: bold; font-style: italic;">SimpleMappingExceptionResolver</span>
 		is a singleton bean that defines how exceptions are propagated. Exceptions
 		encountered that are not specified are propagated to the servlet container.
 	  </li>
-
+	  <li>
+		<span style="font-weight: bold; font-style: italic;">&lt;context:component-scan ... /&gt;</span>
+		is used to autodetect the controllers in the
+		<strong>org.springframework.samples.petclinic.web</strong> package, which
+		are POJOs labeled with the <strong>@Controller</strong> annotation.
+		<ul>
+			<li>
+				<strong>ClinicController</strong> is a singleton, annotation-driven
+				<em>MultiActionController</em> that is used by the dispatcher to handle
+				non-form based display tasks. A method is provided to handle each
+				type of request that is supported.
+			</li>
+			<li>
+				In addition, there are 6 singleton, annotation-driven <em>Form</em> controllers,
+				which are used to handle the various Search, Add and Edit form processing
+				tasks for the dispatcher.
+			</li>
+	  	</ul>
+	  </li>
 	  <li>
 		The form-based controllers within the PetClinic application provide
 		<strong>@RequestMapping</strong> annotations at the type level for path
@@ -735,151 +758,6 @@
 		the method level for path mapping URLs.
 		<strong>DefaultAnnotationHandlerMapping</strong> is driven by these
 		annotations and is enabled by default with Java 5+.
-	  </li>
-
-	  <li><span style="font-weight: bold; font-style: italic;">clinicController</span>
-		is a singleton bean that defines the <span style="font-weight: bold;">Controller</span>
-		that is used by the dispatcher to handle non-form based display tasks.
-		This bean is a <b>org.springframework.web.servlet.mvc.multiaction.MultiActionController</b> that
-		can handle multiple request URLs. A method is provided to handle each
-		type of request that is supported.</li>
-
-	  <li><span style="font-weight: bold; font-style: italic;">clinicControllerMethodnameResolver</span>
-		is a singleton bean that defines a mapping of URL's to method names for
-		the <span style="font-weight: bold; font-style: italic;">clinicController</span>
-		bean.</li>
-
-	  <li>6 singleton Form beans are defined that are extensions of
-		the PetClinic class <span style="font-weight: bold;">AbstractClinicForm</span> which
-		is itself an extension of the Spring class <span style="font-weight: bold;">SimpleFormController</span>. These beans
-		are used to handle the various Search, Add and Edit form processing
-		tasks for the dispatcher.</li>
-
-	  <li>3 singleton beans are defined that are implementations of the <span style="font-weight: bold;">org.springframework.validation.Validator</span> interface.
-		These beans are used by the Form beans to validate their input
-		parameters and to bind localizable error messages for display should a
-		processing error occur on submission.</li>
-
-	</ul>
-
-	<h3>Controllers</h3>
-	<p>
-		Spring provides a
-		number of useful MVC abstractions to developers of Java EE web
-		applications. The <span style="font-weight: bold;">Controller</span> interface
-		specifies a single method, <span style="font-style: italic;">handleRequest(</span><span style="font-style: italic;">HttpServletRequest</span><span style="font-style: italic;">,</span> <span style="font-style: italic;">HttpServletResponse</span><span style="font-style: italic;">)</span> that must be provided by
-		implementing classes to handle request processing. This method returns
-		a <span style="font-weight: bold;">org.springframework.web.servlet.mvc.ModelAndView</span>
-		to the <span style="font-weight: bold;">DispatcherServlet</span> for
-		rendering. Spring provides several convenient implementations of the <span style="font-weight: bold;">Controller</span> interface that
-		developers can use to simplify their task, the most significant of
-		which
-		are <span style="font-weight: bold;">MultiActionController,</span> <span style="font-weight: bold;">SimpleFormController</span>, and <span style="font-weight: bold;">AbstractWizardFormController</span>. <span style="font-weight: bold;">AbstractWizardFormController</span> is not
-		used in PetClinic and is not discussed here. A <span style="font-weight: bold;">MultiActionController</span> is used to
-		define a <span style="font-weight: bold;">Controller</span> with
-		multiple handling methods the selection of which can be configured
-		using
-		a separate <span style="font-weight: bold;">MethodNameResolver</span> object.
-		"FormControllers", including <span style="font-weight: bold;">SimpleFormController</span>, are used to process html forms and
-		can automatically populate "command" objects with data supplied via
-		request parameters and vice versa. <span style="font-weight: bold;">SimpleFormController</span>
-		is part of a deep hierarchy of objects which is discussed here.
-		Additional detail is available in the Spring API Javadoc.
-	</p>
-
-	<ul>
-	  <li><span style="font-weight: bold;">org.springframework.context.support.ApplicationObjectSupport</span>
-		is an implementation of <span style="font-weight: bold;">org.springframework.context.ApplicationContextAware</span>
-		which provides its subclasses with a method, <span style="font-style: italic;">initApplicationContext()</span>, which can
-		be overridden to provide custom initialization behavior.</li>
-	  <li><span style="font-weight: bold;">org.springframework.web.servlet.support.WebContentGenerator</span>is
-		an <span style="font-weight: bold;">ApplicationObjectSupport</span>
-		extension that is a convenient superclass for any kind of web content
-		generator, like AbstractController and MultiActionController. It
-		supports HTTP cache control options.</li>
-	  <li><span style="font-weight: bold;">org.springframework.web.servlet.mvc.</span><span style="font-weight: bold;">AbstractController</span> is a <span style="font-weight: bold;">WebContentGenerator</span> extension that
-		is a convenient superclass for controller implementations. It provides
-		several properties that can be set by users, <span style="font-style: italic;">supportedMethods</span> i.e. "GET",
-		"POST",
-		etc., <span style="font-style: italic;">requireSession</span>, and <span style="font-style: italic;">cacheSeconds</span>. It uses the Template
-		Method design pattern in its <span style="font-weight: bold;">final</span>
-		implementation of <span style="font-style: italic;">handleRequest()</span>which coordinates
-		how these properties are used and calls a similar <span style="font-style: italic;">handleRequestInternal()</span> method
-		that subclasses must override to provide their own processing of
-		request
-		handling.</li>
-	  <li><span style="font-weight: bold;">org.springframework.web.servlet.mvc.BaseCommandController</span>
-		is an <span style="font-weight: bold;">Abstract</span><span style="font-weight: bold;">Controller</span> extension that provides
-		infrastructure to its subclasses to support the binding and validating
-		process. This infrastructure creates a "command" object on receipt of a
-		request, and attempts to populate the command's JavaBean properties
-		with
-		request attributes. Once created, commands can be validated using a
-		Validator associated with this class. Type mismatches populating a
-		command are treated as validation errors, but are caught by the
-		framework, not application code. Users can directly set the <span style="font-style: italic;">commandClass</span> and <span style="font-style: italic;">validator</span> properties to specify
-		the objects of interest. It also provides default implementations of
-		several methods that can be overridden to further customize the binding
-		and validation process. Some of these methods are:
-
-		<ul>
-			<li><span style="font-style: italic;">userObject(HttpServletRequest request)</span> is used to create the command object.</li>
-			<li><span style="font-style: italic;">initBinder(HttpServletRequest request</span>,<span style="font-style: italic;"> ServletRequestDataBinder binder)</span>
-				is used to initialize the binder instance and is typically overridden to
-				specify a custom <span style="font-weight: bold;">PropertyEditor</span>.
-			</li>
-			<li><span style="font-style: italic;">onBindAndValidate(HttpServletRequest request, Object command, BindException errors)</span>
-				is used to provide custom post-processing for the binding and validation process. It is
-				called after standard binding and validation and before error evaluation.
-			</li>
-		</ul>
-	  </li>
-	  <li style="font-weight: bold;">org.springframework.web.servlet.mvc.AbstractFormController <span style="font-weight: normal;">is a</span> <span style="font-weight: bold;">BaseCommandController</span><span style="font-weight: normal;">
-	  	extension that</span> <span style="font-weight: normal;">provides infrastructure</span> <span style="font-weight: normal;">to its subclasses</span> <span style="font-weight: normal;"></span> <span style="font-weight: normal;">to
-		support html forms. It controls the form display and submission process
-		in its <span style="font-weight: bold;">final</span> implementation
-		of</span> <span style="font-style: italic; font-weight: normal;">handleRequestInternal()</span><span style="font-weight: normal;">.</span>
-
-		<ul>
-			<li style="font-weight: bold;"><span style="font-weight: normal;">The<span style="font-style: italic;"> sessionForm</span> property, when true,
-				forces the creation of an HttpSession to hold the command object so
-				that it is retained between requests.</span></li>
-			<li style="font-weight: bold;"><span style="font-weight: normal;">The <span style="font-style: italic;">bindOnNewForm</span>property,
-				when true, forces population of the form from data provided by the
-				command object. This is particularly useful for forms that are used to
-				edit an existing object.</span></li>
-			<li style="font-weight: bold;"><span style="font-weight: normal;"> It provides an</span> <span style="font-weight: normal; font-style: italic;">isFormSubmission(HttpServletRequest)</span><span style="font-weight: normal;">method</span> <span style="font-weight: normal;">that subclasses can override to</span>  <span style="font-weight: normal;">determine
-				if a given request represents a form submission. The default</span> <span style="font-weight: normal;">implementation treats a POST request as
-				form submission.</span> <span style="font-weight: normal;">If the form
-				session attribute doesn't exist when using session form</span> <span style="font-weight: normal;">mode, the request is always treated as
-				new form by <span style="font-style: italic;">handleRequestInternal()</span>.</span><span style="font-weight: normal;"> Subclasses can override this to
-				implement a custom strategy. PetClinic uses the default implementation.</span></li>
-			<li style="font-weight: bold;"><span style="font-weight: normal;">It provides a</span> final <span style="font-weight: normal;">method <span style="font-style: italic;">showNewForm(HttpServletRequest,
-				HttpServletResponse)</span></span><span style="font-weight: normal;">
-				to handle display and data binding of a new form.</span></li>
-			<li style="font-weight: bold;"><span style="font-weight: normal;">It provides a method</span> <span style="font-weight: normal; font-style: italic;">formBackingObject(HttpServletRequest)</span><span style="font-weight: normal;"> that subclasses can override to provide
-				a</span> <span style="font-weight: normal;">preinitialized backing
-				object.</span></li>
-			<li style="font-weight: bold;"><span style="font-weight: normal;">It provides a method</span> <span style="font-weight: normal; font-style: italic;">referenceData(HttpServletRequest,
-				Object, Errors)</span><span style="font-weight: normal;"> that
-				subclasses can override to provide</span> <span style="font-weight: normal;">reference data to be used in rendering
-				the view.</span></li>
-			<li style="font-weight: bold;"><span style="font-weight: normal;">It provides a method</span> <span style="font-weight: normal; font-style: italic;"></span><span style="font-weight: normal;"><span style="font-style: italic;">handleInvalidSubmit(HttpServletRequest,
-				HttpServletResponse)</span> to handle an invalid form submission.
-				Subclasses should override this method to disallow duplicate form
-				submission. The default implementation simply resubmits the form.</span></li>
-			<li style="font-weight: bold;"><span style="font-weight: normal;">It provides a method</span> <span style="font-weight: normal; font-style: italic;">processSubmit(HttpServletRequest,
-				HttpServletResponse,</span> <span style="font-weight: normal;"><span style="font-style: italic;">Object, BindException)</span> that
-				subclasses must override</span> <span style="font-weight: normal;">to
-				provide custom submission handling.</span></li>
-			<li style="font-weight: bold;"><span style="font-weight: normal;">It provides several <span style="font-style: italic;">showForm()</span> methods that are used
-				to display the form.</span></li>
-		</ul>
-	  </li>
-	  <li><strong>org.springframework.web.servlet.mvc.SimpleFormController</strong>
-	  	is a concrete extension of <strong>AbstractFormController</strong> that
-	  	provides configurable form and success views, and an onSubmit chain for
-	  	convenient overriding.
 	  </li>
 	</ul>
 
@@ -902,24 +780,31 @@
 		views: JSP, XSLT, PDF, Velocity templates, Excel files, and others. By
 		using a <span style="font-weight: bold;">View</span> mapping strategy,
 		Spring supplies the developer with a great deal of flexibility in supporting
-		easily configurable view substitution. PetClinic defines a number of
-		View beans in the file, <span style="font-weight: bold; font-style: italic;">views.properties</span>.
-		2 of these beans are instances of <span style="font-weight: bold;">RedirectView</span>
-		which simply redirects to another URL. The other
-		<span style="font-weight: bold;">View</span> beans are instances of
-		<span style="font-weight: bold;">JstlView</span> which provides some handy
-		support for supporting internationalization/localization in JSP pages
-		that use JSTL.
+		easily configurable view substitution.
+	</p>
+	<p>
+		<strong>ClinicController</strong> relies on
+		<strong>RequestToViewNameTranslator</strong> to automatically infer the
+		logical view name from the incoming request URL; whereas, all <em>Form</em>
+		contollers in the PetClinic application return logical view names as Strings.
+		These logical view names are then mapped to physical paths via the
+		configured <strong>InternalResourceViewResolver</strong> (see the
+		DispatcherServlet section above for further details). Logical view names that
+		are prepended with <em>&quot;redirect:&quot;</em> will be resolved to instances
+		of <strong>RedirectView</strong>, which simply redirects to another URL.
+		The other resolved <strong>View</strong>s will be instances of
+		<strong>JstlView</strong>, which provides some handy support for
+		internationalization &amp; localization in JSP pages that use JSTL.
 	</p>
 
 	<h3>Messages</h3>
 	<p>
 		The <span style="font-weight: bold; font-style: italic;">messages*.properties</span>
 		files are loaded from the classpath to provide localized messages for
-		the supported languages. PetClinic supplies only a single localized
-		message, <span style="font-weight: bold;">"welcome"</span> in the
-		default, English, and German properties files respectively. See the
-		"countries" sample application for a more detailed example of Spring's
+		the supported languages. PetClinic supplies a localized
+		<strong>"welcome"</strong> message as well as localized form entry error
+		messages in the default (i.e., English) and German properties files.
+		See the "countries" sample application for a more detailed example of Spring's
 		support for internationalization.
 	</p>
 
