@@ -142,6 +142,7 @@
 			</fileset>
 		</delete>
 		<delete dir="${weblib.dir}"/>
+    <delete dir="${webclasses.dir}"/>
 		<delete dir="${testbuild.dir}"/>
 		<delete dir="${testreports.dir}"/>
 		<delete dir="${dist.dir}"/>
