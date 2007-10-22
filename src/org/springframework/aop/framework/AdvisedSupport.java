@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,6 +36,7 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -121,7 +121,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Initialize the method cache.
 	 */
 	private void initMethodCache() {
-		this.methodCache = new IdentityHashMap(32);
+		this.methodCache = CollectionFactory.createConcurrentMapIfPossible(32);
 	}
 
 
@@ -459,15 +459,14 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
 	public List getInterceptorsAndDynamicInterceptionAdvice(Method method, Class targetClass) {
-		synchronized (this.methodCache) {
-			List cached = (List) this.methodCache.get(method);
-			if (cached == null) {
-				cached = this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
-						this, method, targetClass);
-				this.methodCache.put(method, cached);
-			}
-			return cached;
+		MethodCacheKey cacheKey = new MethodCacheKey(method);
+		List cached = (List) this.methodCache.get(cacheKey);
+		if (cached == null) {
+			cached = this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
+					this, method, targetClass);
+			this.methodCache.put(cacheKey, cached);
 		}
+		return cached;
 	}
 
 	/**
@@ -542,6 +541,35 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		sb.append("targetSource [").append(this.targetSource).append("]; ");
 		sb.append(super.toString());
 		return sb.toString();
+	}
+
+
+	/**
+	 * Simple wrapper class around a Method. Used as the key when
+	 * caching methods, for efficient equals and hashCode comparisons.
+	 */
+	private static class MethodCacheKey {
+
+		private final Method method;
+
+		private final int hashCode;
+
+		public MethodCacheKey(Method method) {
+			this.method = method;
+			this.hashCode = method.hashCode();
+		}
+
+		public boolean equals(Object other) {
+			if (other == this) {
+				return true;
+			}
+			MethodCacheKey otherKey = (MethodCacheKey) other;
+			return (this.method == otherKey.method);
+		}
+
+		public int hashCode() {
+			return this.hashCode;
+		}
 	}
 
 }
