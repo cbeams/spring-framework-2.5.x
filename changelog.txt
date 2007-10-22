@@ -12,11 +12,13 @@ General
 * spring.jar and spring-core.jar include repackaged version of ASM 2.2.3 (avoiding side effects with other ASM versions)
 * spring-orm.jar contains the web ORM support (again), in order to avoid split packages across bundles
 * spring-web.jar includes the entire Hessian, Burlap, HTTP invoker, JAX-RPC and JAX-WS support (avoiding split packages)
-* updated Spring's JDO support to require JDO 2.0 or higher, with early support for JDO 2.1 features
+* removed outdated Countries sample application
 * revised PetClinic sample application into a full-fledged Java 5 showcase (annotation-based configuration etc)
 * revised default handling in BeanDefinitionParsers for XML config namespaces to work without XSD validation as well
+* updated Spring's JDO support to require JDO 2.0 or higher, with early support for JDO 2.1 features
 
 Package org.springframework.aop
+* revised AdvisedSupport to avoid lock contention for method cache lookups (using a concurrent map with special keys)
 * fixed AspectJ pointcut handling to strictly match generic return types according to Java language rules
 * AspectJ pointcut matching only registers LocalVariableTableParameterNameDiscoverer if ASM is present on the classpath
 * removed unused pointcut type attribute from "spring-aop-2.5.xsd"
@@ -30,11 +32,14 @@ Package org.springframework.beans
 * deprecated ConfigurableBeanFactory's "registerCustomEditor" in favor of "addPropertyEditorRegistrar"
 * AbstractBeanFactory ignores PropertyEditorRegistrars which tried to obtain a currently created bean
 * revised AbstractBeanFactory to detect FactoryBeans which are in turn created through factory methods
+* DefaultListableBeanFactory freshly resolves autowired arguments even for cached constructors (re-resolving prototypes)
 * DefaultListableBeanFactory removes a singleton bean instance if a new bean definition gets registered
 * DefaultListableBeanFactory fully destroys singleton bean instance when the corresponding bean definition gets replaced
 * DefaultListableBeanFactory resets the caches for all derived beans as well if a bean definition gets replaced
+* fixed CglibSubclassingInstantiationStrategy to avoid CGLIB class leak for inner prototypes with MethodReplacer usage
 * XmlBeanDefinitionReader initializes default EntityResolver lazily, avoiding classpath scan in case of custom resolver
 * DefaultNamespaceHandlerResolver exposes public DEFAULT_HANDLER_MAPPINGS_LOCATION constant
+* DefaultNamespaceHandlerResolver loads NamespaceHandler mappings and classes lazily (only when namespace actually used)
 * fixed BeanDefinitionParserDelegate to correctly parse property sub-elements even with custom name for beans namespace
 * BeanDefinitionParserDelegate stores definition source for metadata attributes and qualifier attributes
 * qualifier attributes consist of "key" and "value" in spring-beans-2.5.xsd (formerly "name" and "value")
@@ -47,6 +52,7 @@ Package org.springframework.beans
 * added "registers-scope" annotation to spring-tool.xsd, allowing a tool to determine valid scope names
 
 Package org.springframework.context
+* AbstractApplicationContext calls "cancelRefresh" method in case of refresh failure now, resetting the 'active' flag
 * AbstractRefreshableApplicationContext calls the full "destroyBeans()" method when refreshing the bean factory
 * ClassPathXmlApplicationContext and FileSystemXmlApplicationContext trim passed-in config location Strings
 * added "concurrentUpdates" flag to AbstractApplicationEventMulticaster, enabling copy-on-write for the listener set
@@ -71,6 +77,9 @@ Package org.springframework.core
 * introduced ContextResource interface with "getPathWithinContext()" method (exposed for context-relative lookups)
 * reworked "core.asm.ClassReaderFactory" into "core.classreading.MetadataReaderFactory" (with internal ASM usage only)
 * AspectJTypeFilter uses a given ClassLoader instead of the default ClassLoader
+
+Package org.springframework.ejb
+* spring-jee.xsd explicitly declares defaults for its boolean flags
 
 Package org.springframework.instrument
 * added WebLogicLoadTimeWeaver for BEA WebLogic version 10 or higher
@@ -108,12 +117,14 @@ Package org.springframework.mock
 * added convenience constructors to MockPortletConfig, MockActionRequest and MockRenderRequest
 
 Package org.springframework.orm
+* LocalSessionFactoryBean always uses the bean ClassLoader for "mappingResources" as well as for SessionFactory building
 * HibernateInterceptor can be interleaved with JTA transactions and non-transactional access even with async tx timeouts
 * removed custom detach/attach/newNamedQuery hooks from JdoDialect, expecting providers to follow the final JDO 2.0 API
 * deprecated JdoTemplate's "attachCopy" methods in favor of revised "makePersistent" with a JDO2-style return value
 * LocalPersistenceManagerFactoryBean passes the application ClassLoader into "JDOHelper.getPersistenceManagerFactory"
 * added "persistenceManagerFactoryName" property to LocalPersistenceManagerFactoryBean, supporting JDO 2.1 PMF lookup
 * added "jdoPropertyMap" property to LocalPersistenceManagerFactoryBean, allowing for non-String JDO property values
+* JdoTransactionManager and JpaTransactionManager support REQUIRES_NEW transactions in afterCompletion callbacks
 * JPA support exposes the application ClassLoader as PersistenceUnitInfo ClassLoader even without a LoadTimeWeaver
 * JPA support uses InstrumentationLoadTimeWeaver as default weaver if InstrumentationSavingAgent is active
 * revised CommonsLoggingSessionLog to work with TopLink 11 as well (remaining compatible with TopLink 10.1.3)
@@ -151,9 +162,12 @@ Package org.springframework.web
 * added "resolveLazily" flag to Commons(Portlet)MultipartResolver, allowing to switch to lazy multipart resolution
 * reworked MultipartException into a RuntimeException (it may be thrown from file/parameter access methods as well now)
 * changed UrlPathHelper's and AbstractUrlHandlerMapping's/AbstractUrlMethodNameResolver's "urlDecode" default to "true"
+* added "getAttributeNames" method to RequestAttributes interface
 * introduced WebBindingInitializer interface, supported by BaseCommandController and MultiActionController
 * introduced annotation-based controller approach using @Controller, @RequestMapping, @RequestParam and @ModelAttribute
+* introduced annotation-based command/form controller facilities using @InitBinder, @FormAttributes and FormStatus
 * introduced DefaultAnnotationHandlerMapping and AnnotationMethodHandlerAdapter for Servlet MVC and Portlet MVC
+* added "caseSensitive", "pathPrefix" and "basePackage" properties to ControllerClassNameHandlerMapping
 * added "getActualValue()" method to BindStatus, exposing the raw property value for comparison purposes
 * added "exposeModelAttributes" property to RedirectView, allowing to suppress model exposure completely
 * added "exposeContextBeansAsAttributes" property to InternalResourceView and InternalResourceViewResolver
@@ -161,6 +175,7 @@ Package org.springframework.web
 * factored out a "loadReport()" method in AbstractJasperReportsView (called by "initApplicationContext()")
 * revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
 * TagWriter in JSP AbstractFormTag reobtains the Writer from the PageContext all the time (for FreeMarker compatibility)
+* introduced "modelAttribute" property for JSP FormTag, superseding the "commandName" property for general purposes
 * JSP CheckboxTag caches converted candidate value when comparing it with collection elements
 * JSP SelectTag, OptionTag and OptionsTag properly detect a selected value even for Maps with converted keys
 * JSF 1.1 DelegatingVariableResolver checks Spring bean match first (analogous to JSF 1.2 DelegatingFacesELResolver)

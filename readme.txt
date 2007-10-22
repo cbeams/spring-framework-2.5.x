@@ -189,18 +189,17 @@ Documentation can be found in the "docs" directory (depending on distribution zi
 * the Spring MVC step-by-step tutorial
 
 Documented sample applications can be found in "samples" (depending on distribution zip):
-* countries
 * imagedb
 * jpetstore
 * petclinic
 * petportal
 * (showcases)
 
-PetClinic features alternative DAO implementations and application configurations for JDBC, Hibernate,
-Oracle TopLink and JPA, with HSQLDB and MySQL as target databases. The default PetClinic configuration
-is JDBC on HSQL, which also demonstrates Spring's JMX export through exposing the CachingClinic management
-interface. To to be able to build and run the Hibernate and JPA versions, the Spring distribution comes
-with all required jar files; for TopLink, the full jars need to be downloaded (see PetClinic's readme.txt).
+PetClinic features alternative DAO implementations and application configurations for JDBC, Hibernate
+and JPA, with HSQLDB and MySQL as target databases. The default PetClinic configuration is JDBC on HSQL,
+which also demonstrates Spring's JMX export. The Spring distribution comes with all required jar files
+to be able to build and run the Hibernate and JPA versions. PetClinic's web layer shows Spring 2.5's
+annotation-based controller implementation style.
 
 The Spring JPetStore is an adapted version of Clinton Begin's JPetStore (available from http://www.ibatis.com).
 It leverages Spring's support for the iBATIS SQL Maps to improve the original JPetStore in terms of

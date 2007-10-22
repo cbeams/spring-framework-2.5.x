@@ -2050,7 +2050,6 @@
 			<include name="docs/reference/pdf/*.pdf"/>
 			<include name="docs/reference/styles/html.css"/>
 			<include name="docs/reference/readme.txt"/>
-			<include name="samples/countries/**"/>
 			<include name="samples/imagedb/**"/>
 			<include name="samples/jpetstore/**"/>
 			<include name="samples/petclinic/**"/>
