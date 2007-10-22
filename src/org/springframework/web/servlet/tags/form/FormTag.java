@@ -28,17 +28,22 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
 
 /**
+ * <p>
  * Databinding-aware JSP tag for rendering an HTML '<code>form</code>' whose
- * inner elements are bound to properties on a {@link #setModelAttribute form object}.
- *
- * <p>Users should place the command object into the
- * {@link org.springframework.web.servlet.ModelAndView} when populating the
- * data for their view. The name of this command object can be configured
- * using the {@link # setModelAttributeName "formAttribute"} property.
- *
- * <p>The default value for the {@link # setModelAttributeName "attribute"} property
- * is '<code>command</code>' which corresponds to the default name when using
- * the {@link org.springframework.web.servlet.mvc.SimpleFormController}.
+ * inner elements are bound to properties on a <em>form object</em>.
+ * </p>
+ * <p>
+ * Users should place the form object into the
+ * {@link org.springframework.web.servlet.ModelAndView ModelAndView} when
+ * populating the data for their view. The name of this form object can be
+ * configured using the {@link #setModelAttribute "modelAttribute"} property.
+ * </p>
+ * <p>
+ * The default value for the {@link #setModelAttribute "modelAttribute"}
+ * property is '<code>command</code>' which corresponds to the default name
+ * when using the
+ * {@link org.springframework.web.servlet.mvc.SimpleFormController SimpleFormController}.
+ * </p>
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -50,7 +55,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	/** The default HTTP method using which form values are sent to the server: "post" */
 	private static final String DEFAULT_METHOD = "post";
 
-	/** The default attribute name: "command" */
+	/** The default attribute name: &quot;command&quot; */
 	public static final String DEFAULT_COMMAND_NAME = "command";
 
 	private static final String ONSUBMIT_ATTRIBUTE = "onsubmit";
@@ -65,7 +70,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	private static final String ACCEPT_CHARSET_ATTRIBUTE = "accept-charset";
 
-	/** The name of the '<code>attribute</code>' setting */
+	/** The name of the '<code>modelAttribute</code>' setting */
 	private static final String MODEL_ATTRIBUTE = "modelAttribute";
 
 	/**
@@ -116,13 +121,15 @@ public class FormTag extends AbstractHtmlElementTag {
 	/**
 	 * Set the name of the form attribute in the model.
 	 * <p>May be a runtime expression.
+	 * @see #setModelAttribute
 	 */
 	public void setCommandName(String commandName) {
 		this.modelAttribute = commandName;
 	}
 
 	/**
-	 * Get the value of the form attribute in the model.
+	 * Get the name of the form attribute in the model.
+	 * @see #getModelAttribute
 	 */
 	protected String getCommandName() {
 		return this.modelAttribute;
@@ -130,7 +137,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the value of the '<code>name</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 * <p>Name is not a valid attribute for form on XHTML 1.0. However,
 	 * it is sometimes needed for backward compatibility.
 	 */
@@ -147,7 +154,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the value of the '<code>action</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setAction(String action) {
 		this.action = (action != null ? action : "");
@@ -162,7 +169,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the value of the '<code>method</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setMethod(String method) {
 		this.method = method;
@@ -170,7 +177,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>method</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getMethod() {
 		return this.method;
@@ -178,7 +185,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the value of the '<code>enctype</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setEnctype(String enctype) {
 		this.enctype = enctype;
@@ -186,7 +193,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>enctype</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getEnctype() {
 		return this.enctype;
@@ -194,7 +201,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the value of the '<code>acceptCharset</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setAcceptCharset(String acceptCharset) {
 		this.acceptCharset = acceptCharset;
@@ -202,7 +209,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>acceptCharset</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getAcceptCharset() {
 		return this.acceptCharset;
@@ -210,7 +217,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the value of the '<code>onsubmit</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setOnsubmit(String onsubmit) {
 		this.onsubmit = onsubmit;
@@ -218,7 +225,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>onsubmit</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getOnsubmit() {
 		return this.onsubmit;
@@ -226,7 +233,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the value of the '<code>onreset</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setOnreset(String onreset) {
 		this.onreset = onreset;
@@ -234,7 +241,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the value of the '<code>onreset</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getOnreset() {
 		return this.onreset;
@@ -243,7 +250,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Writes the opening part of the block	'<code>form</code>' tag and exposes
-	 * the command name in the {@link javax.servlet.jsp.PageContext}.
+	 * the form object name in the {@link javax.servlet.jsp.PageContext}.
 	 * @param tagWriter the {@link TagWriter} to which the form content is to be written
 	 * @return {@link javax.servlet.jsp.tagext.Tag#EVAL_BODY_INCLUDE}
 	 */
@@ -260,22 +267,22 @@ public class FormTag extends AbstractHtmlElementTag {
 
 		this.tagWriter.forceBlock();
 
-		// Expose the command name for nested tags...
+		// Expose the form object name for nested tags...
 		String modelAttribute = resolveModelAttribute();
 		this.pageContext.setAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME, modelAttribute, PageContext.REQUEST_SCOPE);
 
 		// Save previous nestedPath value, build and expose current nestedPath value.
 		// Use request scope to expose nestedPath to included pages too.
 		this.previousNestedPath =
-				(String) pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
-		pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME,
+				(String) this.pageContext.getAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+		this.pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME,
 				modelAttribute + PropertyAccessor.NESTED_PROPERTY_SEPARATOR, PageContext.REQUEST_SCOPE);
 
 		return EVAL_BODY_INCLUDE;
 	}
 
 	/**
-	 * Autogenerated IDs correspond to the command name.
+	 * Autogenerated IDs correspond to the form object name.
 	 */
 	protected String autogenerateId() throws JspException {
 		return resolveModelAttribute();
@@ -283,7 +290,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * {@link #evaluate Resolves} and returns the name of the form object.
-	 * @throws IllegalArgumentException if the command object resolves to <code>null</code>
+	 * @throws IllegalArgumentException if the form object resolves to <code>null</code>
 	 */
 	protected String resolveModelAttribute() throws JspException {
 		Object resolvedModelAttribute = evaluate(MODEL_ATTRIBUTE, getModelAttribute());
@@ -328,7 +335,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 
 	/**
-	 * Closes the '<code>form</code>' block tag and removes the command name
+	 * Closes the '<code>form</code>' block tag and removes the form object name
 	 * from the {@link javax.servlet.jsp.PageContext}.
 	 */
 	public int doEndTag() throws JspException {
@@ -338,11 +345,11 @@ public class FormTag extends AbstractHtmlElementTag {
 
 		if (this.previousNestedPath != null) {
 			// Expose previous nestedPath value.
-			pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, this.previousNestedPath, PageContext.REQUEST_SCOPE);
+			this.pageContext.setAttribute(NESTED_PATH_VARIABLE_NAME, this.previousNestedPath, PageContext.REQUEST_SCOPE);
 		}
 		else {
 			// Remove exposed nestedPath value.
-			pageContext.removeAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+			this.pageContext.removeAttribute(NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		}
 
 		return EVAL_PAGE;
