@@ -14,10 +14,10 @@
 
 	<p style="font-weight: bold;">
 		Updated:<br>
-		&nbsp;&nbsp;&nbsp;&nbsp;21-OCT-2007&nbsp;&ndash;&nbsp;Sam Brannen<br>
-		&nbsp;&nbsp;&nbsp;&nbsp;30-JUN-2006&nbsp;&ndash;&nbsp;Costin Leau<br>
-		&nbsp;&nbsp;&nbsp;&nbsp;01-DEC-2004&nbsp;&ndash;&nbsp;Ken Krebs<br>
-		&nbsp;&nbsp;&nbsp;&nbsp;16-AUG-2003&nbsp;&ndash;&nbsp;Ken Krebs
+		&nbsp;&nbsp;&nbsp;&nbsp;21-OCT-2007 &ndash; Sam Brannen<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;30-JUN-2006 &ndash; Costin Leau<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;01-DEC-2004 &ndash; Ken Krebs<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;16-AUG-2003 &ndash; Ken Krebs
 	</p>
 
 <!-- === INTRODUCTION ====================================================== -->
@@ -277,7 +277,7 @@
 		Java source code files<br>
 
 		&nbsp;&nbsp;&nbsp; d-- <span style="font-weight: bold; font-style: italic;">db</span>: contains
-		database sql scripts and other related files/directories<br>
+		database SQL scripts and other related files/directories<br>
 
 		&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; d-- <span style="font-weight: bold; font-style: italic;">hsqldb</span>:
 		contains files related to HSQL, contains scripts and a&nbsp;Tomcat
@@ -786,7 +786,7 @@
 		<strong>ClinicController</strong> relies on
 		<strong>RequestToViewNameTranslator</strong> to automatically infer the
 		logical view name from the incoming request URL; whereas, all <em>Form</em>
-		contollers in the PetClinic application return logical view names as Strings.
+		controllers in the PetClinic application return logical view names as Strings.
 		These logical view names are then mapped to physical paths via the
 		configured <strong>InternalResourceViewResolver</strong> (see the
 		DispatcherServlet section above for further details). Logical view names that
@@ -946,7 +946,7 @@
 		<span style="font-weight: bold; font-style: italic;">".do"</span> are
 		handled by web application controllers. Static html pages ending in
 		<span style="font-weight: bold; font-style: italic;">".html"</span>, such as
-		Javadocs, will be directly served to the end user.</li>
+		Javadoc, will be directly served to the end user.</li>
 	  <li>The results of all form entries are handled using browser round
 		trip redirection to minimize possible end user confusion.</li>
 	  <li>All pages are extremely simple JSP implementations that focus
@@ -959,35 +959,90 @@
 	<h3>Testing</h3>
 	<ul>
 	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.OwnerTests</span>
-	  	is a JUnit TestCase that supports Business Rule #1.</li>
+	  	is a simple JUnit 4 based TestCase that supports Business Rule #1.</li>
 	  <li><span style="font-weight: bold; font-style: italic;">org.springframework.samples.petclinic.AbstractClinicTests</span>
-		is a JUnit TestCase requiring a live database connection that is used to
-		confirm correct operation of the database access objects in the various implementations of the
-		<span style="font-weight: bold;">Clinic</span> interface.
-		Subclasses of <span style="font-weight: bold;">AbstractClinicTests</span> provide
-		the location of the application context file to use for the tests to be run.
+		is a JUnit 4 based TestCase requiring a live database connection that is
+		used to confirm correct operation of the database access objects in the
+		various implementations of the <strong>Clinic</strong> interface.
+		&quot;AbstractClinicTests-context.xml&quot; declares a common
+		<strong>javax.sql.DataSource</strong>. Subclasses specify additional
+		context locations which declare a
+		<strong>org.springframework.transaction.PlatformTransactionManager</strong>
+		and a concrete implementation of <strong>Clinic</strong>.
+		<p>
+			AbstractClinicTests extends
+			<strong>AbstractTransactionalJUnit4SpringContextTests</strong>,
+			one of the valuable testing support classes provided by the
+			<em>Spring TestContext Framework</em> found in the
+			<code>org.springframework.test.context</code> package. The
+			annotation-driven configuration used here represents best practice for
+			integration tests with Spring. Note, however, that
+			AbstractTransactionalJUnit4SpringContextTests serves only as a convenience
+			for extension. For example, if you do not wish for your test classes to be
+			tied to a Spring-specific class hierarchy, you may configure your tests with
+			annotations such as <strong>@ContextConfiguration</strong>,
+			<strong>@TestExecutionListeners</strong>, <strong>@Transactional</strong>, etc.
+		</p>
+		<p>
+			AbstractClinicTests and its subclasses benefit from the following services
+			provided by the Spring TestContext Framework:
+		</p>
+		<ul>
+			<li><strong>Spring IoC container caching</strong> which spares us
+				unnecessary set up time between test execution.</li>
+			<li><strong>Dependency Injection</strong> of test fixture instances,
+				meaning that we don't need to perform application context lookups. See the
+				use of <strong>@Autowired</strong> on the <code>clinic</code> instance
+				variable, which uses autowiring <em>by type</em>. As an alternative, we
+				could annotate <code>clinic</code> with JSR 250's
+				<strong>@Resource</strong> to achieve dependency injection <em>by name</em>.
+				<em>(see: <strong>@ContextConfiguration</strong>,
+				<strong>DependencyInjectionTestExecutionListener</strong>)</em></li>
+			<li><strong>Transaction management</strong>, meaning each test method is
+				executed in its own transaction, which is automatically rolled back by
+				default. Thus, even if tests insert or otherwise change database state, there
+				is no need for a teardown or cleanup script.
+				<em>(see: <strong>@TransactionConfiguration</strong>,
+				<strong>@Transactional</strong>, <strong>TransactionalTestExecutionListener</strong>)</em></li>
+			<li><strong>Useful inherited protected fields</strong>, such as a
+				<strong>SimpleJdbcTemplate</strong> that can be used to verify
+				database state after test operations or to verify the results of
+				queries performed by application code. An
+				<strong>ApplicationContext</strong> is also inherited and can be
+				used for explicit bean lookup if necessary.
+				<em>(see: <strong>AbstractJUnit4SpringContextTests</strong>,
+				<strong>AbstractTransactionalJUnit4SpringContextTests</strong>)</em></li>
+		</ul>
+		<p>
+			The <em>Spring TestContext Framework</em> and related unit and
+			integration testing support classes are shipped in
+			<code>spring-test.jar</code>.
+		</p>
+
 	  </li>
 	</ul>
 
+	<h3>Downloads</h3>
 	<ul>
-	  <li>Download and install the <a href="http://sourceforge.net/projects/springframework/">Spring
-		Framework</a> (examples, including PetClinic are provided)</li>
-	  <li>Download and install a <a href="http://java.sun.com/">Java</a>
-		Software Developer Kit, preferably version 1.4 or later</li>
-	  <li>Download and install <a href="http://ant.apache.org">Apache Ant</a>,
-		preferably version 1.5.1 or later</li>
-	  <li>Download and install <a href="http://www.junit.org/index.htm">JUnit</a>,
-		preferably version 3.8.1 or later</li>
-	  <li>Download and install <a href="http://jakarta.apache.org/tomcat/index.html">Apache Tomcat</a>,
-		preferably version 4.1.18 or later</li>
-	  <li>Download and install <a href="http://www.mysql.com/">Mysql</a>,
-		(optional)</li>
-	  <li><a href="http://hsqldb.sourceforge.net/">Hypersonic SQL</a> , and
-	  	<a href="http://hibernate.org/">Hibernate</a> are provided with the
+	  <li>Download and install the
+	  	<a href="http://sourceforge.net/projects/springframework/" target="_blank">Spring Framework</a>
+	  	(examples, including PetClinic are provided)</li>
+	  <li>Download and install a <a href="http://java.sun.com/" target="_blank">Java</a>
+		Software Developer Kit, version 1.5 or later</li>
+	  <li>Download and install <a href="http://ant.apache.org" target="_blank">Apache Ant</a>,
+		preferably version 1.7.0 or later</li>
+	  <li>Download and install <a href="http://www.junit.org/" target="_blank">JUnit</a>,
+		preferably version 4.4 or later</li>
+	  <li>Download and install <a href="http://jakarta.apache.org/tomcat/index.html" target="_blank">Apache Tomcat</a>,
+		preferably version 5.5.x or later</li>
+	  <li>Download and install <a href="http://www.mysql.com/" target="_blank">MySQL</a>,
+		preferably version 5.0.x or later (optional)</li>
+	  <li><a href="http://hsqldb.sourceforge.net/" target="_blank">Hypersonic SQL</a>, and
+	  	<a href="http://hibernate.org/" target="_blank">Hibernate</a> are provided with the
 		application.</li>
-	  <li>PetClinic and Spring use the <a href="http://www.apache.org/">Apache</a>
-		<a href="http://jakarta.apache.org/commons/logging/">Commons Logging</a>
-		and <a href="http://jakarta.apache.org/log4j/docs/index.html">Log4J</a>
+	  <li>PetClinic and Spring use the <a href="http://www.apache.org/" target="_blank">Apache</a>
+		<a href="http://jakarta.apache.org/commons/logging/" target="_blank">Commons Logging</a>
+		and <a href="http://jakarta.apache.org/log4j/docs/index.html" target="_blank">Log4J</a>
 		packages</li>
 	</ul>
 
@@ -1002,12 +1057,12 @@
 	<ul>
       <li>JUnit - <span style="font-weight: bold; font-style: italic;">junit.jar</span></li>
 	  <li>HSQL - <span style="font-weight: bold; font-style: italic;">hsqldb.jar</span></li>
-	  <li>MYSQL - <span style="font-weight: bold; font-style: italic;">mysql-connector-java-3.x-bin.jar</span> or other</li>
+	  <li>MYSQL - <span style="font-weight: bold; font-style: italic;">mysql-connector-java-5.1.5-bin.jar</span> or other</li>
 	</ul>
 
 	<h3>HSQL Setup</h3>
 	<p>
-		Create a new directory containing the a copy of the entire contents of
+		Create a new directory containing a copy of the entire contents of
 		the directory <span style="font-weight: bold; font-style: italic;">petclinic/db/hsqldb</span>.
 		The file <span style="font-weight: bold; font-style: italic;">petclinic.script</span>
 		is the data file that will be used by the server. It has been
@@ -1022,16 +1077,18 @@
 		Server" using the default parameters. This tool can also be used to
 		manage other databases. To use a different port, it will be necessary
 		to change the PetClinic Database Setup. It may also be necessary to
-		consult the HSQL documentation for instructions on to change the port the server uses.
+		consult the HSQL documentation for instructions on how to change the port
+		the server uses.
 	</p>
 
 	<h3>MYSQL Setup (optional)</h3>
 	<p>
-		Add the PetClinic database to a running server by running the SQL
-		script <span style="font-weight: bold; font-style: italic;">db/mysql/initDB.txt</span>.
-		PetClinic expects, by default to be able to access the server via the
-		standard port 3306. To use a different port, it will be necessary to
-		change the PetClinic Database Setup.
+		Add the PetClinic database to a running MySQL server by following the
+		explicit instructions found in
+		<span style="font-weight: bold; font-style: italic;">db/mysql/petclinic_db_setup_mysql.txt</span>.
+		PetClinic expects by default to be able to access the server via the
+		standard port <code>3306</code>. To use a different port, it will be
+		necessary to change the PetClinic Database Setup.
 	</p>
 
 	<h3>PetClinic Database Setup</h3>
@@ -1044,8 +1101,8 @@
 		something goes wrong when starting either Tomcat or the PetClinic
 		application. The context files are named
 		<span style="font-weight: bold; font-style: italic;">petclinic_tomcat_*.xml</span>,
-		where <span style="font-weight: bold; font-style: italic;">*</span> is
-		a code name for the database. There is a context file supplied for each
+		where <strong>*</strong> is either &quot;hsqldb&quot; or &quot;mysql&quot;.
+		There is a context file supplied for each
 		database in its respective directory. There is also a context file
 		<span style="font-weight: bold; font-style: italic;">db/petclinic_tomcat_all.xml</span>
 		that will provide a JNDI connection-pooled DataSource for all supported
@@ -1072,26 +1129,28 @@
 		<span style="font-weight: bold;">Log4j.</span></li>
 	  <li>An Ant script (<span style="font-weight: bold; font-style: italic;">db/build.xml</span>)
 		has been provided that can be used to re-initialize either database. To
-		select or configure the data source used for the webapp and for testing,
-		you will need to edit the files:
+		select or configure the data source and database used for the webapp and
+		for testing, you will need to edit the following files:
+		<ul>
+		  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/applicationContext-*.xml</span>:
+			for configuring the DataSource in the webapp</li>
+		  <li><span style="font-weight: bold; font-style: italic;">src/jdbc.properties</span>:
+			for configuring JDBC connection settings for both the webapp and testing</li>
+		  <li><span style="font-weight: bold; font-style: italic;">build.properties</span>:
+			for running the &quot;tests&quot; target in Ant</li>
+		</ul>
 	  </li>
 	</ol>
-
-	<ul style="margin-left: 40px;">
-	  <li><span style="font-weight: bold; font-style: italic;">war/WEB-INF/applicationContext.xml</span> (for the webapp)</li>
-	  <li><span style="font-weight: bold; font-style: italic;">build.properties</span> (for testing)</li>
-	  <li><span style="font-weight: bold; font-style: italic;">test/src/testContext.xml</span> (for testing)</li>
-	</ul>
 
 	<h3>Building the PetClinic Application</h3>
 	<p>
 		Open a command line shell and navigate to the directory containing
-		PetClinic and execute "ant". This will display a list of the Ant
-		targets that are available. Make sure the database is running and execute "ant
-		all". This will run the Ant "all" target which will clean and compile
-		everything, produce Javadocs, and execute the tests, including a
-		live test using the database. The other Ant targets provide subsets of
-		this functionality.
+		PetClinic and execute &quot;ant&quot;. This will display a list of the Ant
+		targets that are available. Make sure the database is running and execute
+		&quot;ant all&quot;. This will run the Ant &quot;all&quot; target which
+		will clean and compile everything, generate Javadoc, and execute the tests,
+		including a live test using the database. The other Ant targets provide
+		subsets of this functionality.
 	</p>
 
 	<h3>Deploying the PetClinic Application</h3>
