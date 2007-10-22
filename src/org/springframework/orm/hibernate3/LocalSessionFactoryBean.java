@@ -46,6 +46,7 @@ import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 import org.hibernate.transaction.JTATransactionFactory;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
@@ -53,6 +54,7 @@ import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -105,7 +107,7 @@ import org.springframework.util.StringUtils;
  * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see HibernateTransactionManager
  */
-public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
+public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implements BeanClassLoaderAware {
 
 	private static final ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
 
@@ -159,6 +161,8 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 
 	private Resource[] configLocations;
 
+	private String[] mappingResources;
+
 	private Resource[] mappingLocations;
 
 	private Resource[] cacheableMappingLocations;
@@ -188,6 +192,8 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 	private Map eventListeners;
 
 	private boolean schemaUpdate = false;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private Configuration configuration;
 
@@ -248,10 +254,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 	 * @see org.hibernate.cfg.Configuration#addResource
 	 */
 	public void setMappingResources(String[] mappingResources) {
-		this.mappingLocations = new Resource[mappingResources.length];
-		for (int i = 0; i < mappingResources.length; i++) {
-			this.mappingLocations[i] = new ClassPathResource(mappingResources[i].trim());
-		}
+		this.mappingResources = mappingResources;
 	}
 
 	/**
@@ -478,6 +481,10 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 		this.schemaUpdate = schemaUpdate;
 	}
 
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
+	}
+
 
 	protected SessionFactory buildSessionFactory() throws Exception {
 		// Create Configuration instance.
@@ -488,16 +495,25 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 			// Make given DataSource available for SessionFactory configuration.
 			configTimeDataSourceHolder.set(dataSource);
 		}
-
 		if (this.jtaTransactionManager != null) {
 			// Make Spring-provided JTA TransactionManager available.
 			configTimeTransactionManagerHolder.set(this.jtaTransactionManager);
 		}
-
 		if (this.lobHandler != null) {
 			// Make given LobHandler available for SessionFactory configuration.
 			// Do early because because mapping resource might refer to custom types.
 			configTimeLobHandlerHolder.set(this.lobHandler);
+		}
+
+		// Analogous to Hibernate EntityManager's Ejb3Configuration:
+		// Hibernate doesn't allow setting the bean ClassLoader explicitly,
+		// so we need to expose it as thread context ClassLoader accordingly.
+		Thread currentThread = Thread.currentThread();
+		ClassLoader threadContextClassLoader = currentThread.getContextClassLoader();
+		boolean overrideClassLoader =
+				(this.beanClassLoader != null && !this.beanClassLoader.equals(threadContextClassLoader));
+		if (overrideClassLoader) {
+			currentThread.setContextClassLoader(this.beanClassLoader);
 		}
 
 		try {
@@ -570,6 +586,14 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 						actuallyTransactionAware ?
 						TransactionAwareDataSourceConnectionProvider.class.getName() :
 						LocalDataSourceConnectionProvider.class.getName());
+			}
+
+			if (this.mappingResources != null) {
+				// Register given Hibernate mapping definitions, contained in resource files.
+				for (int i = 0; i < this.mappingResources.length; i++) {
+					Resource resource = new ClassPathResource(this.mappingResources[i].trim(), this.beanClassLoader);
+					config.addInputStream(resource.getInputStream());
+				}
 			}
 
 			if (this.mappingLocations != null) {
@@ -672,15 +696,17 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 				// Reset DataSource holder.
 				configTimeDataSourceHolder.set(null);
 			}
-
 			if (this.jtaTransactionManager != null) {
 				// Reset TransactionManager holder.
 				configTimeTransactionManagerHolder.set(null);
 			}
-
 			if (this.lobHandler != null) {
 				// Reset LobHandler holder.
 				configTimeLobHandlerHolder.set(null);
+			}
+			if (overrideClassLoader) {
+				// Reset original thread context ClassLoader.
+				currentThread.setContextClassLoader(threadContextClassLoader);
 			}
 		}
 	}
