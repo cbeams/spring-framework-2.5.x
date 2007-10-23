@@ -349,12 +349,13 @@
 
       <para>Spring 2.5 introduces an annotation-based programming model for MVC
       controllers, using annotations such as <interfacename>@RequestMapping</interfacename>,
-      <interfacename>@RequestParam</interfacename>, <interfacename>@ModelAttribute</interfacename>
+      <interfacename>@RequestParam</interfacename>, <interfacename>@ModelAttribute</interfacename>,
       etc. This annotation support is available for both Servlet MVC and Portlet
-      MVC. Controllers implemented in this style do not have to extend from
-      specific base classes or implement specific interfaces. Furthermore,
-      they do not usually have Servlet/Portlet API imports, although they
-      can easily get access to Servlet/Portlet facilities if desired.</para>
+      MVC. Controllers implemented in this style do not have to extend specific 
+      base classes or implement specific interfaces. Furthermore, they do not 
+      usually have direct dependencies on Servlet or Portlet API's, although 
+      they can easily get access to Servlet or Portlet facilities if desired.
+      For further details, see <xref linkend="mvc-annotation"/>.</para>
     </section>
 
     <section id="new-in-2-web-form-tags">
@@ -531,7 +532,7 @@
     upgrading to Spring 2.5 from any Spring 2.0 application that runs on
     JDK 1.4.2 or higher, in particular when running on Java 5 or higher,
     leveraging the significant configuration conveniences and performance
-    improvments that Spring 2.5 has to offer.</para>
+    improvements that Spring 2.5 has to offer.</para>
 
     <para>Whether an upgrade from Spring 1.2.x will be as seamless depends on
     how much of the Spring APIs you are using in your code. Spring 2.0
@@ -584,7 +585,7 @@
         <title>Jar packaging</title>
 
         <para>As of Spring 2.5, Spring MVC is no longer part of the <filename
-        class="libraryfile">'spring.jar'</filename> file anymore. Spring MVC
+        class="libraryfile">'spring.jar'</filename> file. Spring MVC
         can be found in <filename class="libraryfile">'spring-webmvc.jar'</filename>
         and <filename class="libraryfile">'spring-webmvc-portlet.jar'</filename>
         in the <literal>lib/modules</literal> directory of the distribution.
@@ -628,8 +629,7 @@
 
         <para>As mentioned previously, for a comprehensive list of changes,
         consult the <filename>'changelog.txt'</filename> file that is located
-        in the top level directory of the Spring Framework 2.0
-        distribution.</para>
+        in the top level directory of the Spring Framework distribution.</para>
 
         <para>The following classes/interfaces have been removed from the
         Spring 2.0 codebase:</para>
@@ -709,7 +709,7 @@
     <title>Updated sample applications</title>
 
     <para>A number of the sample applications have also been updated to
-    showcase the new and improved features of Spring 2.0, so do take the time
+    showcase the new and improved features of Spring 2.0. So do take the time
     to investigate them. The aforementioned sample applications can be found
     in the <filename class="directory">'samples'</filename> directory of the
     full Spring distribution
