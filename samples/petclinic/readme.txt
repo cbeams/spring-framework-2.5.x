@@ -49,7 +49,7 @@ an example.
 2. BUILD AND DEPLOYMENT
 
 This directory contains the web app source. For deployment, it needs to be built
-with Apache Ant 1.5 or higher.
+with Apache Ant 1.6 or higher.
 
 Run "build.bat" in this directory for available targets (e.g. "build.bat build",
 "build.bat warfile"). You can use "warfile.bat" as a shortcut for WAR file
@@ -67,13 +67,13 @@ For MySQL, you'll need to use the corresponding schema and SQL scripts in the
 "db/mysql" subdirectory. Follow the steps outlined in
 "db/mysql/petclinic_db_setup_mysql.txt" for explicit details.
 
-In you intend to use as local DataSrouce, the JDBC settings can be adapted in
-"src/jdbc.properties". To use a JTA DataSrouce, you need to set up corresponding
+In you intend to use a local DataSource, the JDBC settings can be adapted in
+"src/jdbc.properties". To use a JTA DataSource, you need to set up corresponding
 DataSources in your Java EE container.
 
 Notes on enabling Log4J:
  - Log4J is disabled by default, due to JBoss issues
- - Drop a log4j.jar into the deployed "WEB-INF/lib" directory
+ - Drop a copy of log4j.jar into the deployed "WEB-INF/lib" directory
  - Uncomment the Log4J listener in "WEB-INF/web.xml"
 
 --------------------------------------------------------------------------------
@@ -86,20 +86,19 @@ with a persistence provider that requires class instrumentation (such as TopLink
 Essentials):
 
 To use JPA class instrumentation, Tomcat has to be instructed to use a custom
-class loader which supports instrumentation. See the JPA section from Spring
-reference documentation for complete details.
+class loader which supports instrumentation. See the JPA section of the Spring
+reference manual for complete details.
 
 The basic steps are:
- - Copy "spring-tomcat-weaver.jar" from Spring distribution to
-   "TOMCAT_HOME/server/lib"
- - If you're running on Tomcat 4.x or 5.x, modify "TOMCAT_HOME/conf/server.xml"
-   and add a new "<Context>" element for petclinic (see below)
- - If you're running on Tomcat 5.x, you can alternatively deploy the WAR
-   including "META-INF/context.xml" from this application's "war" directory
+ - Copy "spring-tomcat-weaver.jar" from the Spring distribution to
+   "TOMCAT_HOME/server/lib".
+ - If you're running on Tomcat 5.x, modify "TOMCAT_HOME/conf/server.xml"
+   and add a new "<Context>" element for 'petclinic' (see below). You can 
+   alternatively deploy the WAR including "META-INF/context.xml" from this 
+   sample application's "war" directory.
 
 <Context path="/petclinic" docBase="/petclinic/location" ...>
   <!-- please note that useSystemClassLoaderAsParent is available since Tomcat 5.5.20; remove it if previous versions are being used -->
   <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader" useSystemClassLoaderAsParent="false"/>
   ...
 </Context>
-
