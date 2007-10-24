@@ -67,6 +67,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Ramnivas Laddad
  * @see net.sf.cglib.proxy.Enhancer
  * @see AdvisedSupport#setProxyTargetClass
  * @see DefaultAopProxyFactory
@@ -903,8 +904,17 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 
 		private boolean equalsPointcuts(Advisor a, Advisor b) {
-			return (a instanceof PointcutAdvisor && b instanceof PointcutAdvisor &&
-					ObjectUtils.nullSafeEquals(((PointcutAdvisor) a).getPointcut(), ((PointcutAdvisor) b).getPointcut()));
+			// If only one of the advisor (but not both) is PointcutAdvisor, then it is a mismatch
+			// Takes care of the situations where an IntroductionAdvisor is used (see SPR-3959)
+			if (a instanceof PointcutAdvisor ^ b instanceof PointcutAdvisor) {
+				return false;
+			}
+			// If both are PointcutAdvisor, match their pointcuts
+			if (a instanceof PointcutAdvisor && b instanceof PointcutAdvisor) {
+				return ObjectUtils.nullSafeEquals(((PointcutAdvisor) a).getPointcut(), ((PointcutAdvisor) b).getPointcut());
+			}
+			// If neither is PointcutAdvisor, then from the pointcut matching perspective, it is a match 
+			return true;
 		}
 
 		public int hashCode() {

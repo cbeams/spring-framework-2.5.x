@@ -40,6 +40,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Ramnivas Laddad
  */
 public class CglibProxyTests extends AbstractAopProxyTests {
 
@@ -198,6 +199,29 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		};
 		pf.addAdvisor(new DefaultPointcutAdvisor(pointcut, advice));
 
+		pf.setTarget(target);
+		pf.setFrozen(true);
+		pf.setExposeProxy(false);
+
+		return (ITestBean) pf.getProxy();
+	}
+	
+	public void testMultipleProxiesForIntroductionAdvisor() {
+		TestBean target = new TestBean();
+		target.setAge(20);
+		TestBean target2 = new TestBean();
+		target2.setAge(21);
+
+		ITestBean proxy1 = getIntroductionAdvisorProxy(target);
+		ITestBean proxy2 = getIntroductionAdvisorProxy(target2);
+		assertTrue("Incorrect duplicate creation of proxy classes", proxy1.getClass() == proxy2.getClass());
+	}
+
+	private ITestBean getIntroductionAdvisorProxy(TestBean target) {
+		ProxyFactory pf = new ProxyFactory(new Class[]{ITestBean.class});
+		pf.setProxyTargetClass(true);
+		
+		pf.addAdvisor(new LockMixinAdvisor());
 		pf.setTarget(target);
 		pf.setFrozen(true);
 		pf.setExposeProxy(false);
