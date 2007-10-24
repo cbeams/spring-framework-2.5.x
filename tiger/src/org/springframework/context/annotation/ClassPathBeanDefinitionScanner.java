@@ -32,21 +32,26 @@ import org.springframework.util.PatternMatchUtils;
 
 /**
  * A bean definition scanner that detects bean candidates on the classpath,
- * registering corresponding bean definitions with a given registry
- * (BeanFactory or ApplicationContext).
+ * registering corresponding bean definitions with a given registry (BeanFactory
+ * or ApplicationContext).
  *
- * <p>Candidate classes are detected through configurable type filters.
- * The default filters include classes that are annotated with Spring's
- * <code>@Component</code> or <code>@Repository</code> stereotype.
+ * <p>Candidate classes are detected through configurable type filters. The
+ * default filters include classes that are annotated with Spring's
+ * {@link org.springframework.stereotype.Component @Component},
+ * {@link org.springframework.stereotype.Repository @Repository},
+ * {@link org.springframework.stereotype.Service @Service}, or
+ * {@link org.springframework.stereotype.Controller @Controller} stereotype.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
  * @see org.springframework.stereotype.Component
  * @see org.springframework.stereotype.Repository
+ * @see org.springframework.stereotype.Service
+ * @see org.springframework.stereotype.Controller
  */
 public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateComponentProvider {
-	
+
 	private final BeanDefinitionRegistry registry;
 
 	private BeanDefinitionDefaults beanDefinitionDefaults = new BeanDefinitionDefaults();
@@ -68,7 +73,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry) {
 		this(registry, true);
 	}
-	
+
 	/**
 	 * Create a new ClassPathBeanDefinitionScanner for the given bean factory.
 	 * <p>If the passed-in bean factory does not only implement the BeanDefinitionRegistry
@@ -80,7 +85,11 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @param registry the BeanFactory to load bean definitions into,
 	 * in the form of a BeanDefinitionRegistry
 	 * @param useDefaultFilters whether to include the default filters for the
-	 * <code>@Component</code> and <code>@Repository</code> annotations
+	 * {@link org.springframework.stereotype.Component @Component},
+	 * {@link org.springframework.stereotype.Repository @Repository},
+	 * {@link org.springframework.stereotype.Service @Service}, and
+	 * {@link org.springframework.stereotype.Controller @Controller} stereotype
+	 * annotations.
 	 * @see #setResourceLoader
 	 */
 	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters) {
@@ -119,7 +128,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new AnnotationBeanNameGenerator());
 	}
-	
+
 	/**
 	 * Set the ScopeMetadataResolver to use for detected bean classes.
 	 * Note that this will override any custom "scopedProxyMode" setting.
@@ -258,7 +267,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		}
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(beanDefinition, beanName);
-		return ScopedProxyCreator.createScopedProxy(definitionHolder, registry, proxyTargetClass);
+		return ScopedProxyCreator.createScopedProxy(definitionHolder, this.registry, proxyTargetClass);
 	}
 
 

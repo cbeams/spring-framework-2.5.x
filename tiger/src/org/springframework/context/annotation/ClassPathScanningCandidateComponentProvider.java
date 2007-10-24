@@ -44,12 +44,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * A component provider that scans the classpath from a base package.
- * It then applies exclude and include filters to the resulting classes to find candidates.
+ * A component provider that scans the classpath from a base package. It then
+ * applies exclude and include filters to the resulting classes to find
+ * candidates.
  *
  * <p>This implementation is based on Spring's
- * {@link org.springframework.core.type.classreading.MetadataReader} facility,
- * backed by an ASM {@link org.objectweb.asm.ClassReader}.
+ * {@link org.springframework.core.type.classreading.MetadataReader MetadataReader}
+ * facility, backed by an ASM {@link org.objectweb.asm.ClassReader ClassReader}.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -77,8 +78,11 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 
 	/**
 	 * Create a ClassPathScanningCandidateComponentProvider.
+	 *
 	 * @param useDefaultFilters whether to register the default filters for the
-	 * <code>@Component</code> and <code>@Repository</code> annotations
+	 *        {@link Component @Component}, {@link Repository @Repository},
+	 *        {@link Service @Service}, and {@link Controller @Controller}
+	 *        stereotype annotations.
 	 * @see #registerDefaultFilters()
 	 */
 	public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters) {
@@ -128,8 +132,11 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 
 	/**
 	 * Reset the configured type filters.
-	 * @param useDefaultFilters whether to re-register the default filters for the
-	 * <code>@Component</code> and <code>@Repository</code> annotations
+	 *
+	 * @param useDefaultFilters whether to re-register the default filters for
+	 *        the {@link Component @Component}, {@link Repository @Repository},
+	 *        {@link Service @Service}, and {@link Controller @Controller}
+	 *        stereotype annotations.
 	 * @see #registerDefaultFilters()
 	 */
 	public void resetFilters(boolean useDefaultFilters) {
@@ -141,10 +148,9 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	}
 
 	/**
-	 * Register the default filters for the <code>@Component</code>
-	 * and <code>@Repository</code> annotations.
-	 * @see org.springframework.stereotype.Component
-	 * @see org.springframework.stereotype.Repository
+	 * Register default filters for the {@link Component @Component},
+	 * {@link Repository @Repository}, {@link Service @Service}, and
+	 * {@link Controller @Controller} stereotype annotations.
 	 */
 	protected void registerDefaultFilters() {
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
