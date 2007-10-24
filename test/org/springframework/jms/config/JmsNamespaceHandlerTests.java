@@ -31,9 +31,13 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.parsing.EmptyReaderEventListener;
+import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
@@ -142,6 +146,26 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		assertTrue("Parser should have registered a component named '" + JmsMessageEndpointManager.class.getName() + "#0'", 
 			context.containsComponentDefinition(JmsMessageEndpointManager.class.getName() + "#0"));
 	}
+	
+	public void testSourceExtraction() {
+		Iterator iterator = context.getRegisteredComponents();
+		while (iterator.hasNext()) {
+			ComponentDefinition compDef = (ComponentDefinition) iterator.next();
+			if (compDef instanceof CompositeComponentDefinition) {
+				assertNotNull("CompositeComponentDefinition '" + compDef.getName()+ "' has no source attachment", ((CompositeComponentDefinition) compDef).getSource());
+			}
+			validateComponentDefinition(compDef);
+		}
+	}
+
+	private void validateComponentDefinition(ComponentDefinition compDef) {
+		BeanDefinition[] beanDefs = compDef.getBeanDefinitions();
+		for (int i = 0; i < beanDefs.length; i++) {
+			if (beanDefs[i] instanceof AbstractBeanDefinition) {
+				assertNotNull("AbstractBeanDefinition has no source attachment", ((AbstractBeanDefinition) beanDefs[i]).getSource());
+			}
+		}
+	}
 
 	private MessageListener getListener(String containerBeanName) {
 		DefaultMessageListenerContainer container =
@@ -176,17 +200,33 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		protected void initBeanDefinitionReader(
 				XmlBeanDefinitionReader beanDefinitionReader) {
 			beanDefinitionReader.setEventListener(new StoringReaderEventListener(REGISTERED_COMPONENTS));
+			beanDefinitionReader.setSourceExtractor(new PassThroughSourceExtractor());
 		}
 		
 		public boolean containsComponentDefinition(String name) {
 			Iterator iterator = REGISTERED_COMPONENTS.iterator();
 			while (iterator.hasNext()) {
 				ComponentDefinition cd = (ComponentDefinition) iterator.next();
-				if (cd.getName().equals(name)) {
-					return true;
+				if (cd instanceof CompositeComponentDefinition) {
+					ComponentDefinition[] innerCds = ((CompositeComponentDefinition) cd)
+							.getNestedComponents();
+					for (int i = 0; i < innerCds.length; i++) {
+						if (innerCds[i].getName().equals(name)) {
+							return true;
+						}
+					}
+				}
+				else {
+					if (cd.getName().equals(name)) {
+						return true;
+					}
 				}
 			}
 			return false;
+		}
+		
+		public Iterator getRegisteredComponents() {
+			return REGISTERED_COMPONENTS.iterator();
 		}
 	}
 	
@@ -204,5 +244,4 @@ public class JmsNamespaceHandlerTests extends TestCase {
 			this.registeredComponents.add(componentDefinition);
 		}
 	}
-
 }

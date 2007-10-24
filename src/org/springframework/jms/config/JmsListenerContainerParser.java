@@ -44,6 +44,8 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
 		RootBeanDefinition containerDef = new RootBeanDefinition();
+		containerDef.setSource(parserContext.extractSource(containerEle));
+		
 		parseListenerConfiguration(listenerEle, parserContext, containerDef);
 		parseContainerConfiguration(containerEle, parserContext, containerDef);
 

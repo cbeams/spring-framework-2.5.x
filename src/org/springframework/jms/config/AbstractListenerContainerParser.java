@@ -25,6 +25,7 @@ import org.w3c.dom.NodeList;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -86,6 +87,10 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 	protected static final String PREFETCH_ATTRIBUTE = "prefetch";
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		CompositeComponentDefinition compositeDef =
+			new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
+		parserContext.pushContainingComponent(compositeDef);
+
 		NodeList childNodes = element.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node child = childNodes.item(i);
@@ -96,12 +101,15 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 				}
 			}
 		}
+		
+		parserContext.popAndRegisterContainingComponent();
 		return null;
 	}
 
 	private void parseListener(Element listenerEle, Element containerEle, ParserContext parserContext) {
 		RootBeanDefinition listenerDef = new RootBeanDefinition();
-
+		listenerDef.setSource(parserContext.extractSource(listenerEle));
+		
 		String ref = listenerEle.getAttribute(REF_ATTRIBUTE);
 		if (!StringUtils.hasText(ref)) {
 			parserContext.getReaderContext().error(
@@ -151,7 +159,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 			containerBeanName = parserContext.getReaderContext().generateBeanName(containerDef);
 		}
 		
-		// Register the Listener and fire event
+		// Register the listener and fire event
 		parserContext.registerBeanComponent(new BeanComponentDefinition(containerDef, containerBeanName));
 	}
 
