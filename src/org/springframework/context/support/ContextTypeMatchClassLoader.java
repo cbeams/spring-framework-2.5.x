@@ -28,6 +28,7 @@ import org.springframework.core.OverridingClassLoader;
  * in order to pick up recently loaded types in the parent ClassLoader.
  *
  * @author Juergen Hoeller
+ * @author Ramnivas Laddad
  * @since 2.5
  * @see AbstractApplicationContext
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setTempClassLoader
@@ -37,6 +38,8 @@ class ContextTypeMatchClassLoader extends OverridingClassLoader {
 	/** Cache for byte array per class name */
 	private final Map bytesCache = new HashMap();
 
+	/** Cache for class object per class name */
+	private final Map loadedClasses = new HashMap();
 
 	public ContextTypeMatchClassLoader(ClassLoader parent) {
 		super(parent);
@@ -45,6 +48,13 @@ class ContextTypeMatchClassLoader extends OverridingClassLoader {
 
 
 	protected Class loadClassForOverriding(String name) throws ClassNotFoundException {
+		// First see if the class has been loaded by this classloader (and not its parent)
+		// Not doing so will lead to a LinkageError upon calling defineClass() 
+		Class loadedClass = (Class)loadedClasses.get(name);
+		if (loadedClass != null) {
+			return loadedClass;
+		}
+		
 		byte[] bytes = (byte[]) this.bytesCache.get(name);
 		if (bytes == null) {
 			bytes = loadBytesForClass(name);
@@ -55,7 +65,10 @@ class ContextTypeMatchClassLoader extends OverridingClassLoader {
 				return null;
 			}
 		}
-		return defineClass(name, bytes, 0, bytes.length);
+
+		loadedClass = defineClass(name, bytes, 0, bytes.length);
+		loadedClasses.put(name, loadedClass);
+		return loadedClass;
 	}
 
 }
