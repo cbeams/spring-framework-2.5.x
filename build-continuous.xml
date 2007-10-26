@@ -25,6 +25,10 @@
 			        toFile="snapshot/SPR/spring-framework-${spring-version}-with-dependencies-${tstamp}-${build.number}.zip"
 					publicRead="true"/>
 			<upload bucketName="dist.springframework.org"
+			        file="${target.release.dir}/${release-with-docs.zip}"
+			        toFile="snapshot/SPR/spring-framework-${spring-version}-with-docs-${tstamp}-${build.number}.zip"
+					publicRead="true"/>
+			<upload bucketName="dist.springframework.org"
 			        file="${target.release.dir}/${release.zip}"
 			        toFile="snapshot/SPR/spring-framework-${spring-version}-${tstamp}-${build.number}.zip"
 					publicRead="true"/>
