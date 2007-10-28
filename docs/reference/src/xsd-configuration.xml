@@ -49,7 +49,7 @@
             <title>Referencing the schemas</title>
             <para>To switch over from the DTD-style to the new XML Schema-style, you need
             to make the following change.</para>
-            <programlisting><lineannotation>&lt;!-- DTD-style --&gt;</lineannotation>
+            <programlisting>
 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
     "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
@@ -60,7 +60,7 @@
 
 </beans>]]></programlisting>
             <para>The equivalent file in the XML Schema-style would be...</para>
-            <programlisting><lineannotation>&lt;!-- XML Schema-style --&gt;</lineannotation>
+            <programlisting>
 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
