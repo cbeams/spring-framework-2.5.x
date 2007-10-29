@@ -44,25 +44,25 @@ import org.springframework.beans.factory.annotation.Configurable;
  *       require user classes to implement any specific method. This implies that
  *       we need to <i>introduce</i> the chosen method. We should also handle the cases
  *       where the chosen method is already implemented in classes (in which case,
- *       the users implementation for that method should take precedence over the 
+ *       the user's implementation for that method should take precedence over the 
  *       introduced implementation). There are a few choices for the chosen method:
  *       <ul>
  *       <li>readObject(ObjectOutputStream): Java requires that the method must be
  *           <code>private</p>. Since aspects cannot introduce a private member, 
  *           while preserving its name, this option is ruled out.</li>
- * 		 <li>readResolve(): Java doesn't pose any restriction on access specifier. 
+ * 		 <li>readResolve(): Java doesn't pose any restriction on an access specifier. 
  *           Problem solved! There is one (minor) limitation of this approach in 
  *           that if a user class already has this method, that method must be 
  *           <code>public</code>. However, this shouldn't be a big burden, since
  *           use cases that need classes to implement readResolve() (custom enums, 
- *           for example) are unlikely to be marked as &#64;Configurable</li>, and
+ *           for example) are unlikely to be marked as &#64;Configurable, and
  *           in any case asking to make that method <code>public</code> should not
- *           pose any undue burden. 
+ *           pose any undue burden.</li>
  *       </ul>
- *       The minor collaboration needed by user classes (the implementation of
- *       <code>readResolve()</code>, if any, must be <code>public</code>) can be
- *       lifted as well if we were to use experimental feature in AspectJ - the
- *       <code>hasmethod()</code> PCD.
+ *       The minor collaboration needed by user classes (i.e., that the 
+ *       implementation of <code>readResolve()</code>, if any, must be 
+ *       <code>public</code>) can be lifted as well if we were to use an 
+ *       experimental feature in AspectJ - the <code>hasmethod()</code> PCD.</li>
  * </ol>
  *
  * @author Rod Johnson
