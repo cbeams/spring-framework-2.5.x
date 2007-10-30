@@ -22,12 +22,14 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.transaction.jta.OC4JJtaTransactionManager;
 import org.springframework.transaction.jta.WebLogicJtaTransactionManager;
 import org.springframework.transaction.jta.WebSphereUowTransactionManager;
 import org.springframework.util.ClassUtils;
 
 /**
- * Parser for the &lt;tx:jta-transaction-manager/&gt; element.
+ * Parser for the &lt;tx:jta-transaction-manager/&gt; element,
+ * autodetecting BEA WebLogic, IBM WebSphere and Oracle OC4J.
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -41,6 +43,8 @@ public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBea
 
 	private static final boolean webspherePresent = ClassUtils.isPresent("com.ibm.wsspi.uow.UOWManager");
 
+	private static final boolean oc4jPresent = ClassUtils.isPresent("oracle.j2ee.transaction.OC4JTransactionManager");
+
 
 	protected Class getBeanClass(Element element) {
 		if (weblogicPresent) {
@@ -48,6 +52,9 @@ public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBea
 		}
 		else if (webspherePresent) {
 			return WebSphereUowTransactionManager.class;
+		}
+		else if (oc4jPresent) {
+			return OC4JJtaTransactionManager.class;
 		}
 		else {
 			return JtaTransactionManager.class;

@@ -134,8 +134,8 @@
 			<xsd:documentation><![CDATA[
 	Creates a default JtaTransactionManager bean with name "transactionManager",
 	matching the default bean name expected by the "annotation-driven" tag.
-	Automatically detects WebLogic and WebSphere, creating a WebLogicJtaTransactionManager
-	or WebSphereUowTransactionManager, respectively.
+	Automatically detects WebLogic, WebSphere an OC4J, creating a WebLogicJtaTransactionManager,
+	WebSphereUowTransactionManager or OC4JJtaTransactionManager, respectively.
 
 	For customization needs, consider defining a JtaTransactionManager bean as a regular
 	Spring bean definition with name "transactionManager", replacing this element.
