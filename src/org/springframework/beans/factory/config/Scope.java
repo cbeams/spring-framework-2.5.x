@@ -119,18 +119,18 @@ public interface Scope {
 	void registerDestructionCallback(String name, Runnable callback);
 
 	/**
-	 * Return the conversation id for the current underlying scope, if any.
-	 * <p>The exact meaning of the converation id depends on the underlying
+	 * Return the <em>conversation ID</em> for the current underlying scope, if any.
+	 * <p>The exact meaning of the conversation ID depends on the underlying
 	 * storage mechanism. In the case of session-scoped objects, the
-	 * conversation id would typically be equal to (or derived from) the
-	 * {@link javax.servlet.http.HttpSession#getId() session id}; in the
+	 * conversation ID would typically be equal to (or derived from) the
+	 * {@link javax.servlet.http.HttpSession#getId() session ID}; in the
 	 * case of a custom conversation that sits within the overall session,
-	 * the specific id for the current conversation would be appropriate.
+	 * the specific ID for the current conversation would be appropriate.
 	 * <p><b>Note: This is an optional operation.</b> It is perfectly valid to
 	 * return <code>null</code> in an implementation of this method if the
-	 * underlying storage mechanism has no obvious candidate for such an id.
-	 * @return the conversation id, or <code>null</code> if there is no
-	 * conversation id for the current scope
+	 * underlying storage mechanism has no obvious candidate for such an ID.
+	 * @return the conversation ID, or <code>null</code> if there is no
+	 * conversation ID for the current scope
 	 */
 	String getConversationId();
 
