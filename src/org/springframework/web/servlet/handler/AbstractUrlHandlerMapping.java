@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.handler;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -63,7 +63,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private boolean lazyInitHandlers = false;
 
-	private final Map handlerMap = new HashMap();
+	private final Map handlerMap = new LinkedHashMap();
 
 
 	/**
@@ -193,7 +193,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		for (Iterator it = this.handlerMap.keySet().iterator(); it.hasNext();) {
 			String registeredPath = (String) it.next();
 			if (this.pathMatcher.match(registeredPath, urlPath) &&
-					(bestPathMatch == null || bestPathMatch.length() <= registeredPath.length())) {
+					(bestPathMatch == null || bestPathMatch.length() < registeredPath.length())) {
 				bestPathMatch = registeredPath;
 			}
 		}
