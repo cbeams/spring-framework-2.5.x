@@ -109,6 +109,7 @@ public @interface RequestMapping {
 	 * The primary mapping expressed by this annotation.
 	 * <p>In a Servlet environment: the path mapping URLs (e.g. "/myPath.do")
 	 * <p>In a Portlet environment: the mapped portlet modes (e.g. "EDIT")
+	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 */
 	String[] value() default {};
 
@@ -121,6 +122,7 @@ public @interface RequestMapping {
 	 * (presence of <code>ActionRequest</code> / <code>RenderRequest</code>
 	 * argument, or a <code>String</code> / <code>Map</code> /
 	 * <code>ModelAndView</code> return value which suggests a render method).
+	 * <p><b>Only supported at the method level!</b>
 	 */
 	String type() default "";
 
@@ -131,6 +133,7 @@ public @interface RequestMapping {
 	 * to have the given value. "myParam" style expressions are also supported,
 	 * with such parameters having to be present in the request (allowed to
 	 * have any value).
+	 * <p><b>Only supported at the method level!</b>
 	 */
 	String[] params() default {};
 
