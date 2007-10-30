@@ -53,8 +53,9 @@
 	<xsd:element name="component-scan">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Scans the classpath for annotated components that will be auto-registered as Spring beans.
-	By default, the Spring-provided @Component and @Repository stereotypes will be detected.
+	Scans the classpath for annotated components that will be auto-registered as 
+	Spring beans. By default, the Spring-provided @Component, @Repository, 
+	@Service, and @Controller stereotypes will be detected.
 
 	Note: This tag implies the effects of the 'annotation-config' tag, activating @Required,
 	@Autowired, @PostConstruct, @PreDestroy, @Resource, @PersistenceContext and @PersistenceUnit
