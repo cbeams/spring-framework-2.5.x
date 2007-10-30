@@ -68,7 +68,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 		if (mapping != null) {
 			if (!mapping.type().equals("") || mapping.params().length > 0) {
 				throw new IllegalStateException("Only path value supported for RequestMapping annotation " +
-						"at the type level - map HTTP method and/or parameters at the method level");
+						"at the type level - map HTTP method and/or parameters at the method level! " +
+						"Offending type: " + handlerType);
 			}
 			return mapping.value();
 		}

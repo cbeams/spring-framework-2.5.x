@@ -75,12 +75,13 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 	protected void detectHandlers() throws BeansException {
 		String[] beanNames = getApplicationContext().getBeanNamesForType(Object.class);
 		for (final String beanName : beanNames) {
-			Class<?> handlerType = getApplicationContext().getType(beanName);
+			final Class<?> handlerType = getApplicationContext().getType(beanName);
 			RequestMapping mapping = handlerType.getAnnotation(RequestMapping.class);
 			if (mapping != null) {
 				if (!mapping.type().equals("") || mapping.params().length > 0) {
 					throw new IllegalStateException("Only portlet mode value supported for RequestMapping annotation " +
-							"at the type level - map action/render type and/or parameters at the method level");
+							"at the type level - map action/render type and/or parameters at the method level! " +
+							"Offending type: " + handlerType);
 				}
 				String[] modeKeys = mapping.value();
 				for (String modeKey : modeKeys) {
