@@ -29,7 +29,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * <p>Such TargetSources must run in a BeanFactory, as it needs to call the
  * <code>getBean</code> method to create a new prototype instance.
  * Therefore, this base class extends {@link AbstractBeanFactoryBasedTargetSource}.
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.beans.factory.BeanFactory#getBean
@@ -55,19 +55,19 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 	 * @throws BeansException if bean creation failed
 	 */
 	protected Object newPrototypeInstance() throws BeansException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Creating new instance of bean '" + getTargetBeanName() + "'");
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("Creating new instance of bean '" + getTargetBeanName() + "'");
 		}
 		return getBeanFactory().getBean(getTargetBeanName());
 	}
 
 	/**
-	 * Subclasses should call this method to destroy an obsolote prototype instance.
+	 * Subclasses should call this method to destroy an obsolete prototype instance.
 	 * @param target the bean instance to destroy
 	 */
 	protected void destroyPrototypeInstance(Object target) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Destroying instance of bean '" + getTargetBeanName() + "'");
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("Destroying instance of bean '" + getTargetBeanName() + "'");
 		}
 		if (getBeanFactory() instanceof ConfigurableBeanFactory) {
 			((ConfigurableBeanFactory) getBeanFactory()).destroyBean(getTargetBeanName(), target);
@@ -77,7 +77,7 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 				((DisposableBean) target).destroy();
 			}
 			catch (Throwable ex) {
-				logger.error("Couldn't invoke destroy method of bean with name '" + getTargetBeanName() + "'", ex);
+				this.logger.error("Couldn't invoke destroy method of bean with name '" + getTargetBeanName() + "'", ex);
 			}
 		}
 	}
