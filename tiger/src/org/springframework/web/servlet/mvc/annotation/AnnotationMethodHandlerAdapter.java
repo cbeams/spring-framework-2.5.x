@@ -25,6 +25,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -40,8 +41,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.core.MethodParameter;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -81,6 +84,10 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class AnnotationMethodHandlerAdapter extends WebContentGenerator implements HandlerAdapter {
 
+	private UrlPathHelper urlPathHelper = new UrlPathHelper();
+
+	private PathMatcher pathMatcher = new AntPathMatcher();
+
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
 	private WebBindingInitializer webBindingInitializer;
@@ -88,6 +95,48 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 	private final Map<Class<?>, HandlerMethodResolver> methodResolverCache =
 			new ConcurrentHashMap<Class<?>, HandlerMethodResolver>();
 
+
+	/**
+	 * Set if URL lookup should always use the full path within the current servlet
+	 * context. Else, the path within the current servlet mapping is used if applicable
+	 * (that is, in the case of a ".../*" servlet mapping in web.xml).
+	 * <p>Default is "false".
+	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
+	 */
+	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
+		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
+	}
+
+	/**
+	 * Set if context path and request URI should be URL-decoded. Both are returned
+	 * <i>undecoded</i> by the Servlet API, in contrast to the servlet path.
+	 * <p>Uses either the request encoding or the default encoding according
+	 * to the Servlet spec (ISO-8859-1).
+	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
+	 */
+	public void setUrlDecode(boolean urlDecode) {
+		this.urlPathHelper.setUrlDecode(urlDecode);
+	}
+
+	/**
+	 * Set the UrlPathHelper to use for resolution of lookup paths.
+	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
+	 * or to share common UrlPathHelper settings across multiple HandlerMappings
+	 * and HandlerAdapters.
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
+	}
+
+	/**
+	 * Set the PathMatcher implementation to use for matching URL paths
+	 * against registered URL patterns. Default is AntPathMatcher.
+	 * @see org.springframework.util.AntPathMatcher
+	 */
+	public void setPathMatcher(PathMatcher pathMatcher) {
+		Assert.notNull(pathMatcher, "PathMatcher must not be null");
+		this.pathMatcher = pathMatcher;
+	}
 
 	/**
 	 * Specify the strategy to store session attributes with.
@@ -182,7 +231,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 
 
 
-	private static class HandlerMethodResolver {
+	private class HandlerMethodResolver {
 
 		private final Set<Method> handlerMethods = new LinkedHashSet<Method>();
 
@@ -207,22 +256,19 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 		}
 
 		public Method resolveHandlerMethod(HttpServletRequest request) {
-			String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
-			Set<Method> specificDefaultHandlerMethods = new LinkedHashSet<Method>();
-			Set<Method> defaultHandlerMethods = new LinkedHashSet<Method>();
+			String lookupPath = urlPathHelper.getLookupPathForRequest(request);
+			Map<RequestMapping, Method> targetHandlerMethods = new LinkedHashMap<RequestMapping, Method>();
+			Map<RequestMapping, String> targetPathMatches = new LinkedHashMap<RequestMapping, String>();
 			for (Method handlerMethod : this.handlerMethods) {
 				RequestMapping mapping = handlerMethod.getAnnotation(RequestMapping.class);
+				boolean match = false;
 				String[] mappedPaths = mapping.value();
 				if (mappedPaths.length > 0) {
 					for (String mappedPath : mappedPaths) {
-						if (mappedPath.equals(lookupPath)) {
+						if (mappedPath.equals(lookupPath) || pathMatcher.match(mappedPath, lookupPath)) {
 							if (checkParameters(request, mapping)) {
-								if (mapping.type().equals("") && mapping.params().length == 0) {
-									specificDefaultHandlerMethods.add(handlerMethod);
-								}
-								else {
-									return handlerMethod;
-								}
+								match = true;
+								targetPathMatches.put(mapping, mappedPath);
 							}
 							else {
 								break;
@@ -232,33 +278,41 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator implemen
 				}
 				else {
 					// No paths specified: parameter match sufficient.
-					if (checkParameters(request, mapping)) {
-						if (mapping.params().length == 0) {
-							defaultHandlerMethods.add(handlerMethod);
-						}
-						else {
-							return handlerMethod;
-						}
+					match = checkParameters(request, mapping);
+				}
+				if (match) {
+					Method oldMappedMethod = targetHandlerMethods.put(mapping, handlerMethod);
+					if (oldMappedMethod != null && oldMappedMethod != handlerMethod) {
+						throw new IllegalStateException("Ambiguous handler methods mapped for HTTP path '" +
+								lookupPath + "': {" + oldMappedMethod + ", " + handlerMethod +
+								"}. If you intend to handle the same path in multiple methods, then factor " +
+								"them out into a dedicated handler class with that path mapped at the type level!");
 					}
 				}
 			}
-			if (!specificDefaultHandlerMethods.isEmpty()) {
-				if (specificDefaultHandlerMethods.size() == 1) {
-					return specificDefaultHandlerMethods.iterator().next();
-				}
-				else {
-					throw new IllegalStateException("Ambiguous handler methods mapped for HTTP path '" +
-							lookupPath + "': " + specificDefaultHandlerMethods);
-				}
+			if (targetHandlerMethods.size() == 1) {
+				return targetHandlerMethods.values().iterator().next();
 			}
-			else if (!defaultHandlerMethods.isEmpty()) {
-				if (defaultHandlerMethods.size() == 1) {
-					return defaultHandlerMethods.iterator().next();
+			else if (!targetHandlerMethods.isEmpty()) {
+				RequestMapping bestMappingMatch = null;
+				String bestPathMatch = null;
+				for (RequestMapping mapping : targetHandlerMethods.keySet()) {
+					String mappedPath = targetPathMatches.get(mapping);
+					if (bestMappingMatch == null) {
+						bestMappingMatch = mapping;
+						bestPathMatch = mappedPath;
+					}
+					else {
+						if ((mappedPath != null && (bestPathMatch == null ||
+								mappedPath.equals(lookupPath) || bestPathMatch.length() < mappedPath.length())) ||
+								("".equals(bestMappingMatch.type()) && !"".equals(mapping.type())) ||
+								bestMappingMatch.params().length < mapping.params().length) {
+							bestMappingMatch = mapping;
+							bestPathMatch = mappedPath;
+						}
+					}
 				}
-				else {
-					throw new IllegalStateException("Ambiguous handler methods mapped for HTTP path '" +
-							lookupPath + "': " + defaultHandlerMethods);
-				}
+				return targetHandlerMethods.get(bestMappingMatch);
 			}
 			else {
 				throw new IllegalStateException("No matching handler method found for request");

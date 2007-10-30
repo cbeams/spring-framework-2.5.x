@@ -300,7 +300,7 @@ public class ServletAnnotationControllerTests extends TestCase {
 			response.getWriter().write("test-" + tb.getName() + "-" + tb.getAge());
 		}
 
-		@RequestMapping("/myPath4.do")
+		@RequestMapping("/myPath4.*")
 		public void myHandle(TestBean tb, Errors errors, HttpServletResponse response) throws IOException  {
 			response.getWriter().write("test-" + tb.getName() + "-" + errors.getFieldError("age").getCode());
 		}

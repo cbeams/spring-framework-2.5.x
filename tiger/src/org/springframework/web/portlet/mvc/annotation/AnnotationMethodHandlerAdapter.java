@@ -25,9 +25,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -217,21 +216,16 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 
 		public Method resolveHandlerMethod(PortletRequest request) {
 			String lookupMode = request.getPortletMode().toString();
-			List<Method> specificDefaultHandlerMethods = new LinkedList<Method>();
-			List<Method> defaultHandlerMethods = new LinkedList<Method>();
+			Map<RequestMapping, Method> targetHandlerMethods = new LinkedHashMap<RequestMapping, Method>();
 			for (Method handlerMethod : this.handlerMethods) {
 				RequestMapping mapping = handlerMethod.getAnnotation(RequestMapping.class);
+				boolean match = false;
 				String[] mappedModes = mapping.value();
 				if (mappedModes.length > 0) {
-					for (String mappedPath : mappedModes) {
-						if (mappedPath.toLowerCase().equals(lookupMode)) {
-							if (checkParameters(request, mapping)) {
-								if (mapping.type().equals("") && mapping.params().length == 0) {
-									specificDefaultHandlerMethods.add(handlerMethod);
-								}
-								else {
-									return handlerMethod;
-								}
+					for (String mappedMode : mappedModes) {
+						if (mappedMode.toLowerCase().equals(lookupMode)) {
+							if (checkParameters(request, mapping, handlerMethod)) {
+								match = true;
 							}
 							else {
 								break;
@@ -240,33 +234,62 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 					}
 				}
 				else {
-					// No paths specified: parameter match sufficient.
-					if (checkParameters(request, mapping)) {
-						if (mapping.type().equals("") && mapping.params().length == 0) {
-							defaultHandlerMethods.add(handlerMethod);
-						}
-						else {
-							return handlerMethod;
-						}
+					// No modes specified: parameter match sufficient.
+					match = checkParameters(request, mapping, handlerMethod);
+				}
+				if (match) {
+					Method oldMappedMethod = targetHandlerMethods.put(mapping, handlerMethod);
+					if (oldMappedMethod != null && oldMappedMethod != handlerMethod) {
+						throw new IllegalStateException("Ambiguous handler methods mapped for portlet mode '" +
+								lookupMode + "': {" + oldMappedMethod + ", " + handlerMethod +
+								"}. If you intend to handle the same mode in multiple methods, then factor " +
+								"them out into a dedicated handler class with that mode mapped at the type level!");
 					}
 				}
 			}
-			if (!specificDefaultHandlerMethods.isEmpty()) {
-				return resolveDefaultHandlerMethod(request, specificDefaultHandlerMethods);
-			}
-			else if (!defaultHandlerMethods.isEmpty()) {
-				return resolveDefaultHandlerMethod(request, defaultHandlerMethods);
+			if (!targetHandlerMethods.isEmpty()) {
+				if (targetHandlerMethods.size() == 1) {
+					return targetHandlerMethods.values().iterator().next();
+				}
+				else {
+					RequestMapping bestMappingMatch = null;
+					for (RequestMapping mapping : targetHandlerMethods.keySet()) {
+						if (bestMappingMatch == null) {
+							bestMappingMatch = mapping;
+						}
+						else {
+							if ((bestMappingMatch.value().length == 0 && mapping.value().length > 0) ||
+									("".equals(bestMappingMatch.type()) && !"".equals(mapping.type())) ||
+									bestMappingMatch.params().length < mapping.params().length) {
+								bestMappingMatch = mapping;
+							}
+						}
+					}
+					return targetHandlerMethods.get(bestMappingMatch);
+				}
 			}
 			else {
 				throw new IllegalStateException("No matching handler method found for request");
 			}
 		}
 
-		private boolean checkParameters(PortletRequest request, RequestMapping mapping) {
+		private boolean checkParameters(PortletRequest request, RequestMapping mapping, Method handlerMethod) {
 			if (!mapping.type().equals("")) {
 				String requestType = (request instanceof RenderRequest ? "render" : "action");
 				if (!mapping.type().toLowerCase().equals(requestType)) {
 					return false;
+				}
+			}
+			else {
+				if (request instanceof RenderRequest) {
+					if (isActionMethod(handlerMethod)) {
+						return false;
+					}
+				}
+				else {
+					if (isRenderMethod(handlerMethod)) {
+						return false;
+					}
 				}
 			}
 			String[] params = mapping.params();
@@ -288,34 +311,6 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator impl
 				}
 			}
 			return true;
-		}
-
-		private Method resolveDefaultHandlerMethod(PortletRequest request, List<Method> defaultHandlerMethods) {
-			if (defaultHandlerMethods.size() == 1) {
-				return defaultHandlerMethods.get(0);
-			}
-			else if (defaultHandlerMethods.size() == 2) {
-				if (request instanceof RenderRequest) {
-					Method candidate1 = defaultHandlerMethods.get(0);
-					Method candidate2 = defaultHandlerMethods.get(1);
-					boolean isRenderMethod1 = isRenderMethod(candidate1);
-					boolean isRenderMethod2 = isRenderMethod(candidate2);
-					if (isRenderMethod1 != isRenderMethod2) {
-						return (isRenderMethod1 ? candidate1 : candidate2);
-					}
-				}
-				else if (request instanceof ActionRequest) {
-					Method candidate1 = defaultHandlerMethods.get(0);
-					Method candidate2 = defaultHandlerMethods.get(1);
-					boolean isActionMethod1 = isActionMethod(candidate1);
-					boolean isActionMethod2 = isActionMethod(candidate2);
-					if (isActionMethod1 != isActionMethod2) {
-						return (isActionMethod1 ? candidate1 : candidate2);
-					}
-				}
-			}
-			throw new IllegalStateException("Ambiguous handler methods mapped for portlet mode '" +
-					request.getPortletMode() + "': " + defaultHandlerMethods);
 		}
 
 		private boolean isActionMethod(Method handlerMethod) {
