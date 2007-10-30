@@ -30,10 +30,23 @@ import org.springframework.web.portlet.handler.AbstractMapBasedHandlerMapping;
 /**
  * Implementation of the {@link org.springframework.web.portlet.HandlerMapping}
  * interface that maps handlers based on portlet modes expressed through the
- * {@link RequestMapping} annotation at the type or method level. Registered by
- * default in {@link org.springframework.web.servlet.DispatcherServlet} on Java 5+.
+ * {@link RequestMapping} annotation at the type or method level.
  *
- * <p>Annotated controllers are usually marked with the {@link Controller} stereotype
+ * <p>Registered by default in {@link org.springframework.web.portlet.DispatcherPortlet}
+ * on Java 5+. <b>NOTE:</b> If you define custom HandlerMapping beans in your
+ * DispatcherPortlet context, you need to add a DefaultAnnotationHandlerMapping bean
+ * explicitly, since custom HandlerMapping beans replace the default mapping strategies.
+ * Defining a DefaultAnnotationHandlerMapping also allows for registering custom
+ * interceptors:
+ *
+ * <pre class="code">
+ * &lt;bean class="org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping"&gt;
+ *   &lt;property name="interceptors"&gt;
+ *     ...
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
+ *
+ * Annotated controllers are usually marked with the {@link Controller} stereotype
  * at the type level. This is not strictly necessary when {@link RequestMapping} is
  * applied at the type level (since such a handler usually implements the
  * {@link org.springframework.web.portlet.mvc.Controller} interface). However,
