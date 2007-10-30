@@ -157,6 +157,10 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 				// Use hashCode of Connection proxy.
 				return new Integer(hashCode());
 			}
+			else if (method.getName().equals("toString")) {
+				// Allow for differentiating between the proxy and the raw Connection.
+				return "Transaction-aware proxy for target Connection [" + this.target.toString() + "]";
+			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: only close if not within a transaction.
 				DataSourceUtils.doReleaseConnection(this.target, this.dataSource);
