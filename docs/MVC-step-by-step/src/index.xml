@@ -11,19 +11,19 @@
 <book>
 	<bookinfo>
 		<title>Developing a Spring Framework MVC application step-by-step</title>
-		<releaseinfo>Version 2.0</releaseinfo>
+		<releaseinfo>Version 2.5</releaseinfo>
 		<authorgroup>
 			<author>
 				<firstname>Thomas</firstname>
 				<surname>Risberg</surname>
 			</author>
 			<author>
-				<firstname>Portia</firstname>
-				<surname>Tung</surname>
-			</author>
-			<author>
 				<firstname>Rick</firstname>
 				<surname>Evans</surname>
+			</author>
+			<author>
+				<firstname>Portia</firstname>
+				<surname>Tung</surname>
 			</author>
 		</authorgroup>
 		<legalnotice>

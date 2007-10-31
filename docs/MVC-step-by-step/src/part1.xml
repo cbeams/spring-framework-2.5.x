@@ -6,303 +6,304 @@
     <title>Create the project directory structure</title>
 
     <para>We are going to need a place to keep all the source and other files
-    we will be creating, so let's create a directory named
-    <filename class="directory">'springapp'</filename>. The decision as to where
-    you create this directory is totally up to you; we created ours in a
-    <filename class="directory">'Projects'</filename> directory that we already
-    had in our <filename class="directory">'home'</filename> directory so the
-    complete path to our project directory is now
-    <filename class="directory">'$HOME/Projects/springapp'</filename>.
-    Inside this directory we create a sub-directory named
-    <filename class="directory">'src'</filename> to hold all the Java source files
-    that we are going to create. Then we create another sub-directory that we name
-    <filename class="directory">'war'</filename>. This directory will hold everything
-    that should go into the WAR file that we will use to package and deploy our
-    application. All source files other than Java source, like JSPs and configuration
-    files, belong in the <filename class="directory">'war'</filename> directory.</para>
+    we will be creating, so let's create a directory named <filename
+    class="directory">'springapp'</filename>. The decision as to where you
+    create this directory is totally up to you; we created ours in a <filename
+    class="directory">'Projects'</filename> directory that we already had in
+    our <filename class="directory">'home'</filename> directory so the
+    complete path to our project directory is now <filename
+    class="directory">'$HOME/Projects/springapp'</filename>. Inside this
+    directory we create a sub-directory named <filename
+    class="directory">'src'</filename> to hold all the Java source files that
+    we are going to create. Then we create another sub-directory that we name
+    <filename class="directory">'war'</filename>. This directory will hold
+    everything that should go into the WAR file that we will use to package
+    and deploy our application. All source files other than Java source, like
+    JSPs and configuration files, belong in the <filename
+    class="directory">'war'</filename> directory.</para>
+
     <para>Find below a screenshot of what your project directory structure
     must look like after following the above instructions. <emphasis>(The
     screenshot shows the project directory structure inside the Eclipse IDE:
-    you do not need to use the Eclipse IDE to complete this tutorial successfully,
-    although you certainly can use Eclipse or another equivalent Java IDE if you
-    want to.)</emphasis></para>
+    you do not need to use the Eclipse IDE to complete this tutorial
+    successfully, but using Eclipse will make it much easier to follow
+    along.)</emphasis></para>
+
     <screenshot>
-		<mediaobject>
-			<imageobject role="fo">
-				<imagedata fileref="images/basic-dir-structure.png" format="PNG" align="center" />
-			</imageobject>
-			<imageobject role="html">
-				<imagedata fileref="images/basic-dir-structure.png" format="PNG" align="center" />
-			</imageobject>
-			<caption>
-				<para>The project directory structure</para>
-			</caption>
-		</mediaobject>
-	</screenshot>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/basic-dir-structure.png"
+                     format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/basic-dir-structure.png"
+                     format="PNG" />
+        </imageobject>
+
+        <caption><para>The project directory structure</para></caption>
+      </mediaobject>
+    </screenshot>
   </section>
 
   <section id="step1.2">
     <title>Create <filename>'index.jsp'</filename></title>
 
-    <para>Since we are creating a web application, let's start by creating a
-    a very simple JSP page named <filename>'index.jsp'</filename> in the
+    <para>Since we are creating a web application, let's start by creating a a
+    very simple JSP page named <filename>'index.jsp'</filename> in the
     <filename class="directory">'war'</filename> directory. The
-    <filename>'index.jsp'</filename> is the entry point for our application.</para>
+    <filename>'index.jsp'</filename> is the entry point for our
+    application.</para>
 
     <para><filename>'springapp/war/index.jsp'</filename>:</para>
-    
-    <programlisting><![CDATA[<html>
-  <head><title>Example :: Spring Application</title></head>
-  <body>
-    <h1>Example - Spring Application</h1>
-    <p>This is my test.</p>
-  </body>
-</html>]]></programlisting>
 
-    <para>Just to have a complete web application, let's create a
-    <filename class="directory">'WEB-INF'</filename> directory inside the
-    <filename class="directory">'war'</filename> directory and place a
+    <programlisting>&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;Example :: Spring Application&lt;/title&gt;&lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Example - Spring Application&lt;/h1&gt;
+    &lt;p&gt;This is my test.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</programlisting>
+
+    <para>Just to have a complete web application, let's create a <filename
+    class="directory">'WEB-INF'</filename> directory inside the <filename
+    class="directory">'war'</filename> directory and place a
     <filename>'web.xml'</filename> file in this new directory.</para>
 
     <para><filename>'springapp/war/WEB-INF/web.xml'</filename>:</para>
-    
-    <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 
-<web-app version="2.4"
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;web-app version="2.4"
          xmlns="http://java.sun.com/xml/ns/j2ee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
-         http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
+         http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" &gt;
 
-  <welcome-file-list>
-    <welcome-file>
-      ]]><emphasis role="bold">index.jsp</emphasis><![CDATA[
-    </welcome-file>
-  </welcome-file-list>
+  &lt;welcome-file-list&gt;
+    &lt;welcome-file&gt;
+      <emphasis role="bold">index.jsp</emphasis>
+    &lt;/welcome-file&gt;
+  &lt;/welcome-file-list&gt;
 
-</web-app>]]></programlisting>
-    
+&lt;/web-app&gt;</programlisting>
   </section>
 
   <section id="step1.3">
     <title>Deploy the application to Tomcat</title>
 
     <para>Let's now write the Ant build script that we are going to use
-    throughout the tutorial. This Ant build script will contain
-    targets for compiling, building and deploying the application. A
-    separate build script will be used for application server specific targets,
-    such as targets for controlling the application under Tomcat.</para>
+    throughout the tutorial. This Ant build script will contain targets for
+    compiling, building and deploying the application. A separate build script
+    will be used for application server specific targets, such as targets for
+    controlling the application under Tomcat.</para>
 
     <para><filename>'springapp/build.xml'</filename>:</para>
+
+    <programlisting>&lt;?xml version="1.0"?&gt;
+
+&lt;project name="springapp" basedir="." default="usage"&gt;
+    &lt;property file="build.properties"/&gt;
+
+    &lt;property name="src.dir" value="src"/&gt;
+    &lt;property name="web.dir" value="war"/&gt;
+    &lt;property name="build.dir" value="${web.dir}/WEB-INF/classes"/&gt;
+    &lt;property name="name" value="springapp"/&gt;
+
+    &lt;path id="master-classpath"&gt;
+        &lt;fileset dir="${web.dir}/WEB-INF/lib"&gt;
+            &lt;include name="*.jar"/&gt;
+        &lt;/fileset&gt;
+        &lt;!-- We need the servlet API classes: --&gt;
+        &lt;!--  * for Tomcat 5/6 use servlet-api.jar --&gt;
+        &lt;!--  * for other app servers - check the docs --&gt;
+        &lt;fileset dir="${appserver.lib}"&gt;
+            &lt;include name="servlet*.jar"/&gt;
+        &lt;/fileset&gt;
+        &lt;pathelement path="${build.dir}"/&gt;
+    &lt;/path&gt;
+
+    &lt;target name="usage"&gt;
+        &lt;echo message=""/&gt;
+        &lt;echo message="${name} build file"/&gt;
+        &lt;echo message="-----------------------------------"/&gt;
+        &lt;echo message=""/&gt;
+        &lt;echo message="Available targets are:"/&gt;
+        &lt;echo message=""/&gt;
+        &lt;echo message="build     --&gt; Build the application"/&gt;
+        &lt;echo message="deploy    --&gt; Deploy application as directory"/&gt;
+        &lt;echo message="deploywar --&gt; Deploy application as a WAR file"/&gt;
+        &lt;echo message="install   --&gt; Install application in Tomcat"/&gt;
+        &lt;echo message="reload    --&gt; Reload application in Tomcat"/&gt;
+        &lt;echo message="start     --&gt; Start Tomcat application"/&gt;
+        &lt;echo message="stop      --&gt; Stop Tomcat application"/&gt;
+        &lt;echo message="list      --&gt; List Tomcat applications"/&gt;
+        &lt;echo message=""/&gt;
+    &lt;/target&gt;
+
+    &lt;target name="build" description="Compile main source tree java files"&gt;
+        &lt;mkdir dir="${build.dir}"/&gt;
+        &lt;javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
+               deprecation="false" optimize="false" failonerror="true"&gt;
+            &lt;src path="${src.dir}"/&gt;
+            &lt;classpath refid="master-classpath"/&gt;
+        &lt;/javac&gt;
+    &lt;/target&gt;
+
+    &lt;target name="deploy" depends="build" description="Deploy application"&gt;
+        &lt;copy todir="${deploy.path}/${name}" preservelastmodified="true"&gt;
+            &lt;fileset dir="${web.dir}"&gt;
+                &lt;include name="**/*.*"/&gt;
+            &lt;/fileset&gt;
+        &lt;/copy&gt;
+    &lt;/target&gt;
+
+    &lt;target name="deploywar" depends="build" description="Deploy application as a WAR file"&gt;
+        &lt;war destfile="${name}.war"
+             webxml="${web.dir}/WEB-INF/web.xml"&gt;
+            &lt;fileset dir="${web.dir}"&gt;
+                &lt;include name="**/*.*"/&gt;
+            &lt;/fileset&gt;
+        &lt;/war&gt;
+        &lt;copy todir="${deploy.path}" preservelastmodified="true"&gt;
+            &lt;fileset dir="."&gt;
+                &lt;include name="*.war"/&gt;
+            &lt;/fileset&gt;
+        &lt;/copy&gt;
+    &lt;/target&gt;
     
-    <programlisting><![CDATA[<?xml version="1.0"?>
+<lineannotation>&lt;!-- ============================================================== --&gt;</lineannotation>
+<lineannotation>&lt;!-- Tomcat tasks - remove these if you don't have Tomcat installed --&gt;</lineannotation>
+<lineannotation>&lt;!-- ============================================================== --&gt;</lineannotation>
 
-<project name="springapp" basedir="." default="usage">
-    <property file="build.properties"/>
+    &lt;path id="catalina-ant-classpath"&gt;
+        &lt;!-- We need the Catalina jars for Tomcat --&gt;
+        &lt;!--  * for other app servers - check the docs --&gt;
+        &lt;fileset dir="${appserver.lib}"&gt;
+            &lt;include name="catalina-ant.jar"/&gt;
+        &lt;/fileset&gt;
+    &lt;/path&gt;
 
-    <property name="src.dir" value="src"/>
-    <property name="web.dir" value="war"/>
-    <property name="build.dir" value="${web.dir}/WEB-INF/classes"/>
-    <property name="name" value="springapp"/>
+    &lt;taskdef name="install" classname="org.apache.catalina.ant.InstallTask"&gt;
+        &lt;classpath refid="catalina-ant-classpath"/&gt;
+    &lt;/taskdef&gt;
+    &lt;taskdef name="reload" classname="org.apache.catalina.ant.ReloadTask"&gt;
+        &lt;classpath refid="catalina-ant-classpath"/&gt;
+    &lt;/taskdef&gt;
+    &lt;taskdef name="list" classname="org.apache.catalina.ant.ListTask"&gt;
+        &lt;classpath refid="catalina-ant-classpath"/&gt;
+    &lt;/taskdef&gt;
+    &lt;taskdef name="start" classname="org.apache.catalina.ant.StartTask"&gt;
+        &lt;classpath refid="catalina-ant-classpath"/&gt;
+    &lt;/taskdef&gt;
+    &lt;taskdef name="stop" classname="org.apache.catalina.ant.StopTask"&gt;
+        &lt;classpath refid="catalina-ant-classpath"/&gt;
+    &lt;/taskdef&gt;
 
-    <path id="master-classpath">
-        <fileset dir="${web.dir}/WEB-INF/lib">
-            <include name="*.jar"/>
-        </fileset>
-        ]]><lineannotation>&lt;!-- We need the servlet API classes: --&gt;</lineannotation><![CDATA[
-        ]]><lineannotation>&lt;!--      * for Tomcat 4.1 use servlet.jar --&gt;</lineannotation><![CDATA[
-        ]]><lineannotation>&lt;!--      * for Tomcat 5.0 use servlet-api.jar --&gt;</lineannotation><![CDATA[
-        ]]><lineannotation>&lt;!--      * for other app servers - check the docs --&gt;</lineannotation><![CDATA[
-        <fileset dir="${appserver.home}/common/lib">
-            <include name="servlet*.jar"/>
-        </fileset>
-        <pathelement path="${build.dir}"/>
-    </path>
-
-    <target name="usage">
-        <echo message=""/>
-        <echo message="${name} build file"/>
-        <echo message="-----------------------------------"/>
-        <echo message=""/>
-        <echo message="Available targets are:"/>
-        <echo message=""/>
-        <echo message="build     --> Build the application"/>
-        <echo message="deploy    --> Deploy application as directory"/>
-        <echo message="deploywar --> Deploy application as a WAR file"/>
-        <echo message="install   --> Install application in Tomcat"/>
-        <echo message="reload    --> Reload application in Tomcat"/>
-        <echo message="start     --> Start Tomcat application"/>
-        <echo message="stop      --> Stop Tomcat application"/>
-        <echo message="list      --> List Tomcat applications"/>
-        <echo message=""/>
-    </target>
-
-    <target name="build" description="Compile main source tree java files">
-        <mkdir dir="${build.dir}"/>
-        <javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
-               deprecation="false" optimize="false" failonerror="true">
-            <src path="${src.dir}"/>
-            <classpath refid="master-classpath"/>
-        </javac>
-    </target>
-
-    <target name="deploy" depends="build" description="Deploy application">
-        <copy todir="${deploy.path}/${name}" preservelastmodified="true">
-            <fileset dir="${web.dir}">
-                <include name="**/*.*"/>
-            </fileset>
-        </copy>
-    </target>
-
-    <target name="deploywar" depends="build" description="Deploy application as a WAR file">
-        <war destfile="${name}.war"
-             webxml="${web.dir}/WEB-INF/web.xml">
-            <fileset dir="${web.dir}">
-                <include name="**/*.*"/>
-            </fileset>
-        </war>
-        <copy todir="${deploy.path}" preservelastmodified="true">
-            <fileset dir=".">
-                <include name="*.war"/>
-            </fileset>
-        </copy>
-    </target>
-    
-]]><lineannotation>&lt;!-- ============================================================== --&gt;</lineannotation><![CDATA[
-]]><lineannotation>&lt;!-- Tomcat tasks - remove these if you don't have Tomcat installed --&gt;</lineannotation><![CDATA[
-]]><lineannotation>&lt;!-- ============================================================== --&gt;</lineannotation><![CDATA[
-
-    <taskdef name="install" classname="org.apache.catalina.ant.InstallTask">
-        <classpath>
-            <path location="${appserver.home}/server/lib/catalina-ant.jar"/>
-        </classpath>
-    </taskdef>
-    <taskdef name="reload" classname="org.apache.catalina.ant.ReloadTask">
-        <classpath>
-            <path location="${appserver.home}/server/lib/catalina-ant.jar"/>
-        </classpath>
-    </taskdef>
-    <taskdef name="list" classname="org.apache.catalina.ant.ListTask">
-        <classpath>
-            <path location="${appserver.home}/server/lib/catalina-ant.jar"/>
-        </classpath>
-    </taskdef>
-    <taskdef name="start" classname="org.apache.catalina.ant.StartTask">
-        <classpath>
-            <path location="${appserver.home}/server/lib/catalina-ant.jar"/>
-        </classpath>
-    </taskdef>
-    <taskdef name="stop" classname="org.apache.catalina.ant.StopTask">
-        <classpath>
-            <path location="${appserver.home}/server/lib/catalina-ant.jar"/>
-        </classpath>
-    </taskdef>
-
-    <target name="install" description="Install application in Tomcat">
-        <install url="${tomcat.manager.url}"
+    &lt;target name="install" description="Install application in Tomcat"&gt;
+        &lt;install url="${tomcat.manager.url}"
                  username="${tomcat.manager.username}"
                  password="${tomcat.manager.password}"
                  path="/${name}"
-                 war="${name}"/>
-    </target>
+                 war="${name}"/&gt;
+    &lt;/target&gt;
 
-    <target name="reload" description="Reload application in Tomcat">
-        <reload url="${tomcat.manager.url}"
+    &lt;target name="reload" description="Reload application in Tomcat"&gt;
+        &lt;reload url="${tomcat.manager.url}"
                  username="${tomcat.manager.username}"
                  password="${tomcat.manager.password}"
-                 path="/${name}"/>
-    </target>
+                 path="/${name}"/&gt;
+    &lt;/target&gt;
 
-    <target name="start" description="Start Tomcat application">
-        <start url="${tomcat.manager.url}"
+    &lt;target name="start" description="Start Tomcat application"&gt;
+        &lt;start url="${tomcat.manager.url}"
                  username="${tomcat.manager.username}"
                  password="${tomcat.manager.password}"
-                 path="/${name}"/>
-    </target>
+                 path="/${name}"/&gt;
+    &lt;/target&gt;
 
-    <target name="stop" description="Stop Tomcat application">
-        <stop url="${tomcat.manager.url}"
+    &lt;target name="stop" description="Stop Tomcat application"&gt;
+        &lt;stop url="${tomcat.manager.url}"
                  username="${tomcat.manager.username}"
                  password="${tomcat.manager.password}"
-                 path="/${name}"/>
-    </target>
+                 path="/${name}"/&gt;
+    &lt;/target&gt;
 
-    <target name="list" description="List Tomcat applications">
-        <list url="${tomcat.manager.url}"
+    &lt;target name="list" description="List Tomcat applications"&gt;
+        &lt;list url="${tomcat.manager.url}"
                  username="${tomcat.manager.username}"
-                 password="${tomcat.manager.password}"/>
-    </target>
+                 password="${tomcat.manager.password}"/&gt;
+    &lt;/target&gt;
 
-]]><lineannotation>&lt;!-- End Tomcat tasks --&gt;</lineannotation><![CDATA[
+<lineannotation>&lt;!-- End Tomcat tasks --&gt;</lineannotation>
 
-</project>]]></programlisting>
+&lt;/project&gt;</programlisting>
 
-    <remark>
-        <para>If you are using a different web application server, then you can
-        remove the Tomcat specific tasks at the end of the build script. You will
-        have to rely on your server's hot deploy feature, or you will have to stop
-        and start your application manually.</para>
-    </remark>
+    <para><remark>If you are using a different web application server, then
+    you can remove the Tomcat specific tasks at the end of the build script.
+    You will have to rely on your server's hot deploy feature, or you will
+    have to stop and start your application manually.</remark></para>
 
-    <remark>
-        <para>If you are using an IDE, you may find a number of errors reported
-        by the IDE in the <filename class="libraryfile">build.xml</filename>
-        such as the Tomcat targets. You can ignore these. The file listing above
-        is correct.</para>
-    </remark>
-      
+    <para><remark>If you are using an IDE, you may find a number of errors
+    reported by the IDE in the <filename
+    class="libraryfile">build.xml</filename> such as the Tomcat targets. You
+    can ignore these. The file listing above is correct.</remark></para>
+
     <para>The above Ant build script now contains all the targets that we are
     going to need to make our development efforts easier. We are not going to
     cover this script in detail, since most if not all of it is pretty much
     standard Ant and Tomcat stuff. You can just copy the above build file text
-    and paste it into a new file called <filename>'build.xml'</filename> in the
-    root of your development directory tree. We also need a
+    and paste it into a new file called <filename>'build.xml'</filename> in
+    the root of your development directory tree. We also need a
     <filename>'build.properties'</filename> file that you should customize to
     match your server installation. This file belongs in the same directory as
     the <filename>'build.xml'</filename> file.</para>
 
     <para><filename>'springapp/build.properties'</filename>:</para>
-    
-    <programlisting><![CDATA[# Ant properties for building the springapp
 
-appserver.home=${user.home}/apache-tomcat-5.5.17
+    <programlisting># Ant properties for building the springapp
+
+appserver.home=${user.home}/apache-tomcat-6.0.14
+# for Tomcat 5 use $appserver.home}/server/lib
+# for Tomcat 6 use $appserver.home}/lib
+appserver.lib=${appserver.home}/lib
+
 deploy.path=${appserver.home}/webapps
 
 tomcat.manager.url=http://localhost:8080/manager
-tomcat.manager.username=admin
-tomcat.manager.password=tomcat]]></programlisting>
+tomcat.manager.username=tomcat
+tomcat.manager.password=s3cret</programlisting>
 
-    <remark>
-        <para>If you are on a system where you are not the owner of the Tomcat
-        installation, then the Tomcat owner must either grant you full access to
-        the <filename class="directory">'webapps'</filename> directory or the owner
-        must create a new directory named <filename class="directory">'springapp'</filename>
-        in the <filename class="directory">'webapps'</filename> directory of the
-        Tomcat installation directory, and also give you full rights to deploy to
-        this newly created directory. On Linux, I run the command
-        <command>chmod a+rwx springapp</command> to give everybody full rights to this
-        directory.</para>
-        <para>To create Tomcat user named 'admin' with 'tomcat' as their password,
-        go to the Tomcat users file <filename class="libraryfile">
-        'appserver.home'/conf/tomcat-users.xml'</filename> and add the user entry.
-        </para>
-    </remark>
-    <programlisting><![CDATA[<?xml version='1.0' encoding='utf-8'?>
-<tomcat-users>
-  <user username="tomcat" password="tomcat" roles="tomcat"/>
-  <user username="both" password="tomcat" roles="tomcat,role1"/>
-  <user username="role1" password="tomcat" roles="role1"/>
-  <!-- new user added -->]]>  
-  <emphasis role="bold"><![CDATA[<user username="admin" password="tomcat" roles="manager"/>]]></emphasis>  
-<![CDATA[</tomcat-users>]]></programlisting>        
-      
-    <para>Now we run Ant to make sure that everything is working okay. You must
-    have your current directory set to the
-    <filename class="directory">'springapp'</filename> directory.</para>
-    
-    <para>Open up a command shell (or prompt) and execute <command>ant</command> .</para>
+    <para><remark>If you are on a system where you are not the owner of the
+    Tomcat installation, then the Tomcat owner must either grant you full
+    access to the <filename class="directory">'webapps'</filename> directory
+    or the owner must create a new directory named <filename
+    class="directory">'springapp'</filename> in the <filename
+    class="directory">'webapps'</filename> directory of the Tomcat
+    installation directory, and also give you full rights to deploy to this
+    newly created directory. On Linux, run the command <command>chmod a+rwx
+    springapp</command> to give everybody full rights to this
+    directory.</remark></para>
 
-    <screen><![CDATA[$ ant
+    <para><remark>To create Tomcat user named 'tomcat' with 's3cret' as their
+    password, go to the Tomcat users file <filename class="libraryfile">
+    'appserver.home'/conf/tomcat-users.xml'</filename> and add the user entry.
+    </remark></para>
+
+    <programlisting>&lt;?xml version='1.0' encoding='utf-8'?&gt;
+&lt;tomcat-users&gt;
+  &lt;role rolename="manager"/&gt;
+  &lt;user username="tomcat" password="s3cret" roles="manager"/&gt;
+&lt;/tomcat-users&gt;</programlisting>
+
+    <para>Now we run Ant to make sure that everything is working okay. You
+    must have your current directory set to the <filename
+    class="directory">'springapp'</filename> directory.</para>
+
+    <para>Open up a command shell (or prompt) and execute
+    <command>ant</command> .</para>
+
+    <screen>$ ant
 Buildfile: build.xml
 
 usage:
@@ -312,25 +313,25 @@ usage:
 
      [echo] Available targets are:
 
-     [echo] clean     --> Clean output dirs
-     [echo] build     --> Build the application
-     [echo] deploy    --> Deploy application as directory
-     [echo] deploywar --> Deploy application as a WAR file
-     [echo] install   --> Install application in Tomcat
-     [echo] reload    --> Reload application in Tomcat
-     [echo] start     --> Start Tomcat application
-     [echo] stop      --> Stop Tomcat application
-     [echo] list      --> List Tomcat applications
+     [echo] clean     --&gt; Clean output dirs
+     [echo] build     --&gt; Build the application
+     [echo] deploy    --&gt; Deploy application as directory
+     [echo] deploywar --&gt; Deploy application as a WAR file
+     [echo] install   --&gt; Install application in Tomcat
+     [echo] reload    --&gt; Reload application in Tomcat
+     [echo] start     --&gt; Start Tomcat application
+     [echo] stop      --&gt; Stop Tomcat application
+     [echo] list      --&gt; List Tomcat applications
 
 
 BUILD SUCCESSFUL
-Total time: 2 seconds]]></screen>
+Total time: 2 seconds</screen>
 
-    <para>The last thing we need to do here is to build and deploy the application. Just run
-    Ant and specify <literal>'deploy'</literal> or <literal>'deploywar'</literal> as
-    the target.</para>
+    <para>The last thing we need to do here is to build and deploy the
+    application. Just run Ant and specify <literal>'deploy'</literal> or
+    <literal>'deploywar'</literal> as the target.</para>
 
-    <screen><![CDATA[$ ant deploy
+    <screen>$ ant deploy
 Buildfile: build.xml
 
 build:
@@ -340,179 +341,178 @@ deploy:
      [copy] Copying 2 files to /Users/trisberg/apache-tomcat-5.5.17/webapps/springapp
 
 BUILD SUCCESSFUL
-Total time: 4 seconds]]></screen>
-
-      <remark>
-          <para>If you run <command>ant deploywar</command>, Ant issues the following false warning. You can safely ignore this bug in Ant.
-          </para>
-      </remark>
-      <screen><![CDATA[[war] Warning: selected war files include a WEB-INF/web.xml which will be ignored 
-      (please use webxml attribute to war task)]]></screen>
-      
+Total time: 4 seconds</screen>
   </section>
-    
+
   <section id="step1.4">
     <title>Check the application works</title>
 
-      <para>Let's just quickly start Tomcat by running <filename>'${appserver.home}/bin/startup.bat'</filename>.
-      To make sure that we can access the application, run the <literal>'list'</literal> task from our build file to
-      see if Tomcat has picked up the new application.</para>
+    <para>Let's just quickly start Tomcat by running
+    <filename>'${appserver.home}/bin/startup.bat'</filename>. To make sure
+    that we can access the application, run the <literal>'list'</literal> task
+    from our build file to see if Tomcat has picked up the new
+    application.</para>
 
-    <screen><![CDATA[$ ant list
+    <screen>$ ant list
 Buildfile: build.xml
 
 list:
      [list] OK - Listed applications for virtual host localhost
-     [list] /admin:running:0:/Users/trisberg/apache-tomcat-5.5.17/server/webapps/admin
-     [list] /webdav:running:0:webdav
-     [list] /servlets-examples:running:0:servlets-examples
      [list] /springapp:running:0:springapp
-     [list] /jsp-examples:running:0:jsp-examples
-     [list] /balancer:running:0:balancer
-     [list] /host-manager:running:0:/Users/trisberg/apache-tomcat-5.5.17/server/webapps/host-manager
-     [list] /tomcat-docs:running:0:tomcat-docs
+     [list] /manager:running:0:manager
      [list] /:running:0:ROOT
-     [list] /manager:running:0:/Users/trisberg/apache-tomcat-5.5.17/server/webapps/manager
+     [list] /docs:running:0:docs
+     [list] /examples:running:0:examples
+     [list] /host-manager:running:0:host-manager
 
 BUILD SUCCESSFUL
-Total time: 3 seconds]]></screen>
+Total time: 3 seconds</screen>
 
-    <para>You can now upen up a browser and navigate to the starting page of our
-    application at the following URL:
-    <ulink url="http://localhost:8080/springapp/index.jsp">http://localhost:8080/springapp/index.jsp</ulink>.</para>
+    <para>You can now upen up a browser and navigate to the starting page of
+    our application at the following URL: <ulink
+    url="http://localhost:8080/springapp/index.jsp">http://localhost:8080/springapp/index.jsp</ulink>.</para>
 
     <screenshot>
-		<mediaobject>
-			<imageobject role="fo">
-				<imagedata fileref="images/screen1.png" format="PNG" align="center" />
-			</imageobject>
-			<imageobject role="html">
-				<imagedata fileref="images/screen1.png" format="PNG" align="center" />
-			</imageobject>
-			<caption>
-				<para>The application's starting page</para>
-			</caption>
-		</mediaobject>
-	</screenshot>
-	
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/screen1.png" format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/screen1.png" format="PNG" />
+        </imageobject>
+
+        <caption><para>The application's starting page</para></caption>
+      </mediaobject>
+    </screenshot>
   </section>
 
   <section id="step1.5">
     <title>Download the Spring Framework</title>
 
     <para>If you have not already downloaded the Spring Framework, now is the
-    time to do so. We are currently using the 'Spring Framework 2.0' release
-    that can be downloaded from
-    <ulink url="http://www.springframework.org/download">http://www.springframework.org/download</ulink>.
+    time to do so. We are currently using the 'Spring Framework 2.5' release
+    that can be downloaded from <ulink
+    url="http://www.springframework.org/download">http://www.springframework.org/download</ulink>.
     Unzip this file somewhere as we are going to use several files from this
     download later on.</para>
 
     <para>This completes the setup of the environment that is necessary, and
-    now we can start actually developing our Spring Framework MVC application.</para>
-
+    now we can start actually developing our Spring Framework MVC
+    application.</para>
   </section>
 
-    <section id="step1.6">
-    <title>Modify <filename>'web.xml'</filename> in the <filename class="directory">'WEB-INF'</filename> directory</title>
+  <section id="step1.6">
+    <title>Modify <filename>'web.xml'</filename> in the <filename
+    class="directory">'WEB-INF'</filename> directory</title>
 
-    <para>Go to the <filename class="directory">'springapp/war/WEB-INF'</filename>
-    directory. Modify the minimal <filename>'web.xml'</filename> file that we
-    created earlier. Now we will modify it by defining
-    a <classname>DispatcherServlet</classname> (also known as a 
-    <literal>'Front Controller'</literal> (Crupi et al)). It is going to control
-    where all our requests are routed based on information we will enter at a
-    later point. This servlet definition also has an attendant
-    <literal>&lt;servlet-mapping/&gt;</literal> entry that maps to the URL
-    patterns that we will be using. I have decided to let any URL with an
-    <literal>'.htm'</literal> extension be routed to the <literal>'springapp'</literal>
-    servlet (the <classname>DispatcherServlet</classname>).</para> 
+    <para>Go to the <filename
+    class="directory">'springapp/war/WEB-INF'</filename> directory. Modify the
+    minimal <filename>'web.xml'</filename> file that we created earlier. Now
+    we will modify it by defining a <classname>DispatcherServlet</classname>
+    (also known as a <literal>'Front Controller'</literal> (Crupi et al)). It
+    is going to control where all our requests are routed based on information
+    we will enter at a later point. This servlet definition also has an
+    attendant <literal>&lt;servlet-mapping/&gt;</literal> entry that maps to
+    the URL patterns that we will be using. I have decided to let any URL with
+    an <literal>'.htm'</literal> extension be routed to the
+    <literal>'springapp'</literal> servlet (the
+    <classname>DispatcherServlet</classname>).</para>
 
     <para><filename>'springapp/war/WEB-INF/web.xml'</filename>:</para>
-    
-    <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 
-<web-app version="2.4"
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;web-app version="2.4"
          xmlns="http://java.sun.com/xml/ns/j2ee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
-         http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
-]]><emphasis role="bold"><![CDATA[
-  <servlet>
-    <servlet-name>springapp</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
+         http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" &gt;
+<emphasis role="bold">
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;springapp&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
+    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+  &lt;/servlet&gt;
 
-  <servlet-mapping>
-    <servlet-name>springapp</servlet-name>
-    <url-pattern>*.htm</url-pattern>
-  </servlet-mapping>
-]]></emphasis><![CDATA[
-  <welcome-file-list>
-    <welcome-file>
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;springapp&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;*.htm&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+</emphasis>
+  &lt;welcome-file-list&gt;
+    &lt;welcome-file&gt;
       index.jsp
-    </welcome-file>
-  </welcome-file-list>
+    &lt;/welcome-file&gt;
+  &lt;/welcome-file-list&gt;
 
-</web-app>]]></programlisting>
+&lt;/web-app&gt;</programlisting>
 
-    <para>Next, create a file called <filename>'springapp-servlet.xml'</filename>
-    in the <filename class="directory">'springapp/war/WEB-INF'</filename> directory.
-    This file contains the bean definitions (plain old Java objects) used by the
-    <classname>DispatcherServlet</classname>. It is the 
-    <classname>WebApplicationContext</classname> where all web-related components go.
-    The name of this file is determined by the value of the <literal>&lt;servlet-name/&gt;</literal>
-    element from the <filename>'web.xml'</filename>, with <literal>'-servlet'</literal>
+    <para>Next, create a file called
+    <filename>'springapp-servlet.xml'</filename> in the <filename
+    class="directory">'springapp/war/WEB-INF'</filename> directory. This file
+    contains the bean definitions (plain old Java objects) used by the
+    <classname>DispatcherServlet</classname>. It is the
+    <classname>WebApplicationContext</classname> where all web-related
+    components go. The name of this file is determined by the value of the
+    <literal>&lt;servlet-name/&gt;</literal> element from the
+    <filename>'web.xml'</filename>, with <literal>'-servlet'</literal>
     appended to it (hence <filename>'springapp-servlet.xml'</filename>). This
     is the standard naming convention used with Spring's Web MVC framework.
-    Now, add a bean entry named <literal>'/hello.htm'</literal> and specify the
-    class as <classname>springapp.web.HelloController</classname>. This defines the
-    controller that our application will be using to service a request with the 
-    corresponding URL mapping of <literal>'/hello.htm'</literal>.
-    The Spring Web MVC framework uses an implementation class of the interface
-    called <interfacename>HandlerMapping</interfacename> to define the mapping between
-    a request URL and the object that is going to handle that request (the handler).
-    Unlike the <classname>DispatcherServlet</classname>, the 
-    <classname>HelloController</classname> is responsible for handling a request for a
-    particular page of the website and is also known as a <literal>'Page Controller'</literal>
-    (Fowler). The default <interfacename>HandlerMapping</interfacename> that the
+    Now, add a bean entry named <literal>'/hello.htm'</literal> and specify
+    the class as <classname>springapp.web.HelloController</classname>. This
+    defines the controller that our application will be using to service a
+    request with the corresponding URL mapping of
+    <literal>'/hello.htm'</literal>. The Spring Web MVC framework uses an
+    implementation class of the interface called
+    <interfacename>HandlerMapping</interfacename> to define the mapping
+    between a request URL and the object that is going to handle that request
+    (the handler). Unlike the <classname>DispatcherServlet</classname>, the
+    <classname>HelloController</classname> is responsible for handling a
+    request for a particular page of the website and is also known as a
+    <literal>'Page Controller'</literal> (Fowler). The default
+    <interfacename>HandlerMapping</interfacename> that the
     <classname>DispatcherServlet</classname> uses is the
-    <classname>BeanNameUrlHandlerMapping</classname>; this class will use the bean
-    name to map to the URL in the request so that the
-    <classname>DispatcherServlet</classname> knows which controller must be invoked
-    for handling different URLs.</para>
+    <classname>BeanNameUrlHandlerMapping</classname>; this class will use the
+    bean name to map to the URL in the request so that the
+    <classname>DispatcherServlet</classname> knows which controller must be
+    invoked for handling different URLs.</para>
 
     <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
-    
-    <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 
-<beans xmlns="http://www.springframework.org/schema/beans"
+    <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"&gt;
 
-  ]]><lineannotation>&lt;!-- the application context definition for the <literal>springapp</literal> <classname>DispatcherServlet</classname> --&gt;</lineannotation><![CDATA[
+  <lineannotation>&lt;!-- the application context definition for the <literal>springapp</literal> <classname>DispatcherServlet</classname> --&gt;</lineannotation>
 
-  <bean name="/hello.htm" class="springapp.web.HelloController"/>
+  &lt;bean name="/hello.htm" class="springapp.web.HelloController"/&gt;
 
-</beans>]]></programlisting>
-    
+&lt;/beans&gt;</programlisting>
   </section>
 
-    <section id="step1.7">
-    <title>Copy libraries to <filename class="directory">'WEB-INF/lib'</filename></title>
+  <section id="step1.7">
+    <title>Copy libraries to <filename
+    class="directory">'WEB-INF/lib'</filename></title>
 
-    <para>First create a <filename class="directory">'lib'</filename> directory in
-    the <filename class="directory">'war/WEB-INF'</filename> directory. Then, from
-    the Spring distribution, copy <filename class="libraryfile">spring.jar</filename>
-    (from <filename class="libraryfile">spring-framework-2.0/dist</filename>)
-    to the new <filename class="directory">'war/WEB-INF/lib'</filename> directory.
-    Also, copy <filename class="libraryfile">commons-logging.jar</filename>
-    (from <filename class="libraryfile">spring-framework-2.0/lib/jakarta-commons</filename>)
+    <para>First create a <filename class="directory">'lib'</filename>
+    directory in the <filename class="directory">'war/WEB-INF'</filename>
+    directory. Then, from the Spring distribution, copy <filename
+    class="libraryfile">spring.jar</filename> (from <filename
+    class="libraryfile">spring-framework-2.5/dist</filename>) and and
+    <filename class="libraryfile">spring-webmvc.jar (from <filename
+    class="libraryfile">spring-framework-2.5/dist/modules</filename>)
+    </filename>to the new <filename
+    class="directory">'war/WEB-INF/lib'</filename> directory. Also, copy
+    <filename class="libraryfile">commons-logging.jar</filename> (from
+    <filename
+    class="libraryfile">spring-framework-2.5/lib/jakarta-commons</filename>)
     to the <filename class="directory">'war/WEB-INF/lib'</filename> directory.
-    These jars will be deployed to the server and they are also used during the build
-    process.</para>
-
+    These jars will be deployed to the server and they are also used during
+    the build process.</para>
   </section>
 
   <section id="step1.8">
@@ -521,13 +521,14 @@ Total time: 3 seconds]]></screen>
     <para>Create your <interfacename>Controller</interfacename> class – we are
     naming it <classname>HelloController</classname>, and it is defined in the
     <literal>'springapp.web'</literal> package. First we create the package
-    directories and then we create the <filename>'HelloController.java'</filename>
-    file and place it in the <filename class="directory">'src/springapp/web'</filename>
+    directories and then we create the
+    <filename>'HelloController.java'</filename> file and place it in the
+    <filename class="directory">'src/springapp/web'</filename>
     directory.</para>
 
     <para><filename>'springapp/src/springapp/web/HelloController.java'</filename>:</para>
-    
-    <programlisting><![CDATA[package springapp.web;
+
+    <programlisting>package springapp.web;
 
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.ModelAndView;
@@ -553,54 +554,60 @@ public class HelloController implements Controller {
         return new ModelAndView("hello.jsp");
     }
 
-}]]></programlisting>
+}</programlisting>
 
     <para>This is a very basic <interfacename>Controller</interfacename>
     implementation. We will be expanding this later on as well as extending
-    some of the base controller implementations provided by Spring. In Spring Web MVC,
-    the <interfacename>Controller</interfacename> <emphasis>handles</emphasis>
-    the request and returns a <classname>ModelAndView</classname> - in this case, one named
-    <filename>'hello.jsp'</filename> which is also the name of the JSP file
-    we will create next. The model that this class returns is actually resolved
-    via a <interfacename>ViewResolver</interfacename>. Since we have not explicitly
-    defined a <interfacename>ViewResolver</interfacename>, we are going to
-    be given a default one by Spring that simply forwards to a URL matching the name of the
-    view specified. We will modify this later on. We have also specified a
-    logger so we can verify that we actually got into the handler. Using Tomcat, these log
-    messages should show up in the <filename>'catalina.out'</filename> log
-        file which can be found in the <filename class="directory">'${appserver.home}/log'</filename>
-    directory of your Tomcat installation. </para>
-    
-    <remark>
-      <para>If you are using an IDE, you will want to configure your project's build path by adding the 
-      jars from the <filename class="directory">'lib'</filename> directory. You will also want to
-      add <filename class="libraryfile">servlet-api.jar</filename> from your
-      <filename class="directory">'${appserver.home}/common/lib'</filename>. Adding these to your build path
-      should successfully resolve all the import statements in the <filename class="libraryfile">
-      HelloController.java</filename> file.</para>
-    </remark>
-      
+    some of the base controller implementations provided by Spring. In Spring
+    Web MVC, the <interfacename>Controller</interfacename>
+    <emphasis>handles</emphasis> the request and returns a
+    <classname>ModelAndView</classname> - in this case, one named
+    <filename>'hello.jsp'</filename> which is also the name of the JSP file we
+    will create next. The model that this class returns is actually resolved
+    via a <interfacename>ViewResolver</interfacename>. Since we have not
+    explicitly defined a <interfacename>ViewResolver</interfacename>, we are
+    going to be given a default one by Spring that simply forwards to a URL
+    matching the name of the view specified. We will modify this later on. We
+    have also specified a logger so we can verify that we actually got into
+    the handler. Using Tomcat, these log messages should show up in the
+    <filename>'catalina.out'</filename> log file which can be found in the
+    <filename class="directory">'${appserver.home}/log'</filename> directory
+    of your Tomcat installation.</para>
+
+    <para><remark>If you are using an IDE, you will want to configure your
+    project's build path by adding the jars from the <filename
+    class="directory">'lib'</filename> directory. You will also want to add
+    <filename class="libraryfile">servlet-api.jar</filename> from your
+    <filename class="directory">servlet container's lib directory
+    ('${appserver.lib}')</filename>. Adding these to your build path should
+    successfully resolve all the import statements in the <filename
+    class="libraryfile">HelloController.java</filename> file.</remark></para>
   </section>
 
   <section id="step1.9">
-    <title>Write a test for the <interfacename>Controller</interfacename></title>
+    <title>Write a test for the
+    <interfacename>Controller</interfacename></title>
 
-    <para>Testing is a vital part of software development. It is also a core practice in Agile
-    development. We have found that the best time to write tests is during development, not after, so
-    even though our controller doesn't contain complex logic, we're going to write a test. This will
-    allow us to make changes to it in the future with confidence. Let's create a new directory under
-    <filename class="directory">'springapp'</filename> called <filename class="directory">'test'</filename>.
-    This is where all our tests will go in a package structure that will mirror the source tree in
-    <filename class="directory">'springapp/src</filename>.</para>
-        
-    <para>Create a test class called <filename class="libraryfile">'HelloControllerTests'</filename> and
-    make it extend JUnit's test class <classname>TestCase</classname>. It is a unit test that
-    verifies the view name returned by <classname>handleRequest()</classname> matches the name of
-    the view we expect: <filename>'hello.jsp'</filename>.</para>
-    
+    <para>Testing is a vital part of software development. It is also a core
+    practice in Agile development. We have found that the best time to write
+    tests is during development, not after, so even though our controller
+    doesn't contain complex logic, we're going to write a test. This will
+    allow us to make changes to it in the future with confidence. Let's create
+    a new directory under <filename class="directory">'springapp'</filename>
+    called <filename class="directory">'test'</filename>. This is where all
+    our tests will go in a package structure that will mirror the source tree
+    in <filename class="directory">'springapp/src</filename>.</para>
+
+    <para>Create a test class called <filename
+    class="libraryfile">'HelloControllerTests'</filename> and make it extend
+    JUnit's test class <classname>TestCase</classname>. It is a unit test that
+    verifies the view name returned by <classname>handleRequest()</classname>
+    matches the name of the view we expect:
+    <filename>'hello.jsp'</filename>.</para>
+
     <para><filename>'springapp/test/springapp/web/HelloControllerTests'</filename>:</para>
-    
-      <programlisting><![CDATA[package springapp.web;
+
+    <programlisting>package springapp.web;
 
 import org.springframework.web.servlet.ModelAndView;
 
@@ -615,64 +622,69 @@ public class HelloControllerTests extends TestCase {
         ModelAndView modelAndView = controller.handleRequest(null, null);		
         assertEquals("hello.jsp", modelAndView.getViewName());
     }
-}]]></programlisting>    
-        
-    <remark><para>If you are using an IDE, you will may want to run your tests within your IDE.
-    Configure your project's build path by adding the <filename class="libraryfile">
-    spring-framework-2.0/lib/junit/junit.jar</filename> to it.</para></remark>        
-    
-    <para>To run the test (and all the tests we're going to write), we need to add an Ant test task to our
-    build script <filename class="libraryfile">'build.xml'</filename>. First, we copy the
-    <filename class="libraryfile">junit.jar</filename> from <filename class="libraryfile">
-    'spring-framework-2.0/lib/junit'</filename> to <filename class="directory">'war/WEB-INF/lib'</filename>.
-    Instead of creating a single task for compiling the tests and then running them,
-    let's break them down into two distinct tasks: <literal>'buildtests'</literal> and
-    <literal>'tests'</literal> which depends on <literal>'buildtests'</literal>.</para>
-    
+}</programlisting>
+
+    <para>To run the test (and all the tests we're going to write), we need to
+    add an Ant test task to our build script <filename
+    class="libraryfile">'build.xml'</filename>. First, we copy the <filename
+    class="libraryfile">junit-3.8.2.jar</filename> from <filename
+    class="libraryfile"> 'spring-framework-2.5/lib/junit'</filename> to
+    <filename class="directory">'war/WEB-INF/lib'</filename>. Instead of
+    creating a single task for compiling the tests and then running them,
+    let's break them down into two distinct tasks:
+    <literal>'buildtests'</literal> and <literal>'tests'</literal> which
+    depends on <literal>'buildtests'</literal>.</para>
+
+    <remark>If you are using an IDE, you may want to run your tests within
+    your IDE. Configure your project's build path by adding the <filename
+    class="libraryfile"> junit-3.8.2.jar</filename> to it.</remark>
+
     <para><filename>'springapp/build.xml'</filename>:</para>
-    
-      <programlisting><![CDATA[    <property name="test.dir" value="test"/>
+
+    <programlisting>    &lt;property name="test.dir" value="test"/&gt;
         
-    <target name="buildtests" description="Compile test tree java files">
-        <mkdir dir="${build.dir}"/>
-        <javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
-            deprecation="false" optimize="false" failonerror="true">
-            <src path="${test.dir}"/>
-            <classpath refid="master-classpath"/>
-        </javac>
-    </target>
+    &lt;target name="buildtests" description="Compile test tree java files"&gt;
+        &lt;mkdir dir="${build.dir}"/&gt;
+        &lt;javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
+            deprecation="false" optimize="false" failonerror="true"&gt;
+            &lt;src path="${test.dir}"/&gt;
+            &lt;classpath refid="master-classpath"/&gt;
+        &lt;/javac&gt;
+    &lt;/target&gt;
     
-    <target name="tests" depends="build, buildtests" description="Run tests">
-        <junit printsummary="on"
+    &lt;target name="tests" depends="build, buildtests" description="Run tests"&gt;
+        &lt;junit printsummary="on"
             fork="false"
             haltonfailure="false"
             failureproperty="tests.failed"
-            showoutput="true">
-            <classpath refid="master-classpath"/>
-            <formatter type="brief" usefile="false"/>
+            showoutput="true"&gt;
+            &lt;classpath refid="master-classpath"/&gt;
+            &lt;formatter type="brief" usefile="false"/&gt;
             
-            <batchtest>
-                <fileset dir="${build.dir}">
-                    <include name="**/*Tests.*"/>
-                </fileset>
-            </batchtest>
+            &lt;batchtest&gt;
+                &lt;fileset dir="${build.dir}"&gt;
+                    &lt;include name="**/*Tests.*"/&gt;
+                &lt;/fileset&gt;
+            &lt;/batchtest&gt;
             
-        </junit>
+        &lt;/junit&gt;
         
-        <fail if="tests.failed">
+        &lt;fail if="tests.failed"&gt;
             tests.failed=${tests.failed}
             ***********************************************************
             ***********************************************************
             ****  One or more tests failed!  Check the output ...  ****
             ***********************************************************
             ***********************************************************
-        </fail>
-    </target>]]></programlisting>    
-    
-    <para>Now run the Ant <literal>'tests'</literal> task and the test should pass.</para>
+        &lt;/fail&gt;
+    &lt;/target&gt;</programlisting>
+
+    <para>Now run the Ant <literal>'tests'</literal> task and the test should
+    pass.</para>
+
     <para></para>
-    
-      <programlisting><![CDATA[$ ant tests
+
+    <programlisting>$ ant tests
 Buildfile: build.xml
 
 build:
@@ -682,61 +694,61 @@ buildtests:
 
 tests:
     [junit] Running springapp.web.HelloWorldControllerTests
-    [junit] 11-Jul-2006 14:55:53 springapp.web.HelloController handleRequest
+    [junit] Oct 30, 2007 11:31:43 PM springapp.web.HelloController handleRequest
     [junit] INFO: Returning hello view
     [junit] Tests run: 1, Failures: 0, Errors: 0, Time elapsed: 0.03 sec
     [junit] Testsuite: springapp.web.HelloWorldControllerTests
     [junit] Tests run: 1, Failures: 0, Errors: 0, Time elapsed: 0.03 sec
 
     [junit] ------------- Standard Error -----------------
-    [junit] 11-Jul-2006 14:55:53 springapp.web.HelloController handleRequest
+    [junit] Oct 30, 2007 11:31:43 PM springapp.web.HelloController handleRequest
     [junit] INFO: Returning hello view
     [junit] ------------- ---------------- ---------------
 
 BUILD SUCCESSFUL
 Total time: 2 seconds
-    ]]></programlisting>
-    
-    
-    <para>Another of the best pratices of Agile development is <emphasis>Continuous Integration</emphasis>.
-    It's a good idea to ensure your tests are run with every build (ideally as automated project builds)
-    so that you know your application logic is behaving as expected as the code evolves.
-    </para>
-            
+    </programlisting>
+
+    <para>Another of the best pratices of Agile development is
+    <emphasis>Continuous Integration</emphasis>. It's a good idea to ensure
+    your tests are run with every build (ideally as automated project builds)
+    so that you know your application logic is behaving as expected as the
+    code evolves.</para>
   </section>
-  
+
   <section id="step1.10">
     <title>Create the <interfacename>View</interfacename></title>
 
-    <para>Now it is time to create our first view. As we mentioned earlier,
-    we are forwarding to a JSP page named <filename>'hello.jsp'</filename>.
-    To begin with, we'll put it in the <filename class="directory">'war'</filename> directory.</para>
+    <para>Now it is time to create our first view. As we mentioned earlier, we
+    are forwarding to a JSP page named <filename>'hello.jsp'</filename>. To
+    begin with, we'll put it in the <filename
+    class="directory">'war'</filename> directory.</para>
 
     <para><filename>'springapp/war/hello.jsp'</filename>:</para>
-    
-    <programlisting><![CDATA[<html>
-  <head><title>Example :: Spring Application</title></head>
-  <body>
-    <h1>Hello - Spring Application</h1>
-    <p>Greetings.</p>
-  </body>
-</html>]]></programlisting>
 
+    <programlisting>&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;Example :: Spring Application&lt;/title&gt;&lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello - Spring Application&lt;/h1&gt;
+    &lt;p&gt;Greetings.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</programlisting>
   </section>
 
   <section id="step1.11">
     <title>Compile and deploy the application</title>
 
     <para>Run the <literal>'deploy'</literal> Ant target (which invokes the
-    <literal>'build'</literal> target), and then run the <literal>'reload'</literal> task
-    of the <filename>'build.xml'</filename> file. This will force a build and
-    reload of the application in Tomcat. We have to check the Ant output and the
-    Tomcat logs for any possible deployment errors – such as typos in the
-    above files or missing classes or jar files. </para>
+    <literal>'build'</literal> target), and then run the
+    <literal>'reload'</literal> task of the <filename>'build.xml'</filename>
+    file. This will force a build and reload of the application in Tomcat. We
+    have to check the Ant output and the Tomcat logs for any possible
+    deployment errors – such as typos in the above files or missing classes or
+    jar files.</para>
 
     <para>Here is a sample output from the Ant build:</para>
 
-      <screen><![CDATA[$ ant deploy reload
+    <screen>$ ant deploy reload
 Buildfile: build.xml
 
 build:
@@ -755,28 +767,20 @@ reload:
    [reload] OK - Reloaded application at context path /springapp
 
 BUILD SUCCESSFUL
-Total time: 2 seconds]]></screen>
+Total time: 2 seconds</screen>
 
-    <para>And here is an excerpt from the Tomcat <filename>'catalina.out'</filename>
-    log file.</para>
+    <para>And here is an excerpt from the Tomcat
+    <filename>'catalina.out'</filename> log file.</para>
 
-    <screen><![CDATA[Jun 25, 2006 8:03:57 PM org.springframework.web.servlet.HttpServletBean init
-INFO: Initializing servlet 'springapp'
-Jun 25, 2006 8:03:57 PM org.springframework.core.CollectionFactory <clinit>
-INFO: JDK 1.4+ collections available
-Jun 25, 2006 8:03:57 PM org.springframework.web.servlet.FrameworkServlet initServletBean
+    <screen>Oct 30, 2007 11:43:09 PM org.springframework.web.servlet.FrameworkServlet initServletBean
 INFO: FrameworkServlet 'springapp': initialization started
-Jun 25, 2006 8:03:57 PM org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
-
-. . .
-
-Jun 25, 2006 8:03:58 PM org.springframework.web.servlet.DispatcherServlet initViewResolvers
-INFO: No ViewResolvers found in servlet 'springapp': using default
-Jun 25, 2006 8:03:58 PM org.springframework.web.servlet.FrameworkServlet initServletBean
-INFO: FrameworkServlet 'springapp': initialization completed in 1150 ms
-Jun 25, 2006 8:03:58 PM org.springframework.web.servlet.HttpServletBean init
-INFO: Servlet 'springapp' configured successfully]]></screen>
-    
+Oct 30, 2007 11:43:09 PM org.springframework.context.support.AbstractApplicationContext prepareRefresh
+INFO: Refreshing org.springframework.web.context.support.XmlWebApplicationContext@6576d5: display name 
+[WebApplicationContext for namespace 'springapp-servlet']; startup date [Tue Oct 30 23:43:09 GMT 2007]; 
+...
+...
+Oct 30, 2007 11:43:09 PM org.springframework.web.servlet.FrameworkServlet initServletBean
+INFO: FrameworkServlet 'springapp': initialization completed in 150 ms</screen>
   </section>
 
   <section id="step1.12">
@@ -784,76 +788,82 @@ INFO: Servlet 'springapp' configured successfully]]></screen>
 
     <para>Let's try this new version of the application.</para>
 
-    <para>Open a browser and browse to
-    <ulink url="http://localhost:8080/springapp/hello.jsp">http://localhost:8080/springapp/hello.htm</ulink>.</para>
+    <para>Open a browser and browse to <ulink
+    url="http://localhost:8080/springapp/hello.jsp">http://localhost:8080/springapp/hello.htm</ulink>.</para>
 
     <screenshot>
-		<mediaobject>
-			<imageobject role="fo">
-				<imagedata fileref="images/screen2.png" format="PNG" align="center" />
-			</imageobject>
-			<imageobject role="html">
-				<imagedata fileref="images/screen2.png" format="PNG" align="center" />
-			</imageobject>
-			<caption>
-				<para>The updated application</para>
-			</caption>
-		</mediaobject>
-	</screenshot>
-    
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/screen2.png" format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/screen2.png" format="PNG" />
+        </imageobject>
+
+        <caption><para>The updated application</para></caption>
+      </mediaobject>
+    </screenshot>
   </section>
 
   <section>
     <title>Summary</title>
 
     <para>Let's take quick look at the parts of our application that we have
-    created so far. </para>
+    created so far.</para>
 
     <orderedlist>
       <listitem>
-        <para>An introduction page, <filename>'index.jsp'</filename>, the welcome page
-        of the application. It was used to test our setup was correct. We will later
-        change this to actually provide a link into our application.</para>
+        <para>An introduction page, <filename>'index.jsp'</filename>, the
+        welcome page of the application. It was used to test our setup was
+        correct. We will later change this to actually provide a link into our
+        application.</para>
       </listitem>
 
       <listitem>
-        <para>A <classname>DispatcherServlet</classname> (front controller) with a corresponding
-        <filename>'springapp-servlet.xml'</filename> configuration file.</para>
+        <para>A <classname>DispatcherServlet</classname> (front controller)
+        with a corresponding <filename>'springapp-servlet.xml'</filename>
+        configuration file.</para>
       </listitem>
 
       <listitem>
-		<para>A page controller, <classname>HelloController</classname>, with limited
-	    functionality – it just returns a <classname>ModelAndView</classname>.
-		We currently have an empty model and will be providing a full model later on.</para>
-	  </listitem>
+        <para>A page controller, <classname>HelloController</classname>, with
+        limited functionality – it just returns a
+        <classname>ModelAndView</classname>. We currently have an empty model
+        and will be providing a full model later on.</para>
+      </listitem>
 
       <listitem>
-       <para>A unit test class for the page controller, <classname>HelloControllerTests</classname>,
-       to verify the name of the view is the one we expect.</para>
+        <para>A unit test class for the page controller,
+        <classname>HelloControllerTests</classname>, to verify the name of the
+        view is the one we expect.</para>
       </listitem>
-        
+
       <listitem>
-        <para>A view, <filename>'hello.jsp'</filename>, that again is extremely
-        basic. The good news is the whole setup works and we are now ready to add more
-        functionality.</para>
+        <para>A view, <filename>'hello.jsp'</filename>, that again is
+        extremely basic. The good news is the whole setup works and we are now
+        ready to add more functionality.</para>
       </listitem>
     </orderedlist>
-    
+
     <para>Find below a screenshot of what your project directory structure
     must look like after following the above instructions.</para>
-    <screenshot>
-		<mediaobject>
-			<imageobject role="fo">
-				<imagedata fileref="images/dir-structure-endp1.png" format="PNG" align="center" />
-			</imageobject>
-			<imageobject role="html">
-				<imagedata fileref="images/dir-structure-endp1.png" format="PNG" align="center" />
-			</imageobject>
-			<caption>
-				<para>The project directory structure at the end of part 1</para>
-			</caption>
-		</mediaobject>
-	</screenshot>
 
+    <screenshot>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata align="center" fileref="images/dir-structure-endp1.png"
+                     format="PNG" />
+        </imageobject>
+
+        <imageobject role="html">
+          <imagedata align="center" fileref="images/dir-structure-endp1.png"
+                     format="PNG" />
+        </imageobject>
+
+        <caption><para>The project directory structure at the end of part
+        1</para></caption>
+      </mediaobject>
+    </screenshot>
   </section>
 </chapter>

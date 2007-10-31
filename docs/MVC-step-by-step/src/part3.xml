@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="part3">
-  <title>Developing the Application</title>
+  <title>Developing the Business Logic</title>
 
   <para>This is Part 3 of a step-by-step tutorial on how to develop a Spring
   application. In this section, we will adopt a pragmatic Test-Driven
@@ -106,7 +106,7 @@
 
 import java.io.Serializable;
 
-public class Product implements Serializable{
+public class Product implements Serializable {
 
     private String description;
     private Double price;
@@ -441,9 +441,9 @@ public class SimpleProductManagerTests extends TestCase {
     private static String TABLE_DESCRIPTION = "Table";
     private static Double TABLE_PRICE = new Double(150.10);         
     
-    private static int POSITIVE_PRICE_INCREASE = 10;
+<emphasis role="bold">    private static int POSITIVE_PRICE_INCREASE = 10;
     private static int NEGATIVE_PRICE_INCREASE = -10;
-    
+</emphasis>    
     protected void setUp() throws Exception {
         productManager = new SimpleProductManager();
         products = new ArrayList&lt;Product&gt;();
@@ -481,7 +481,7 @@ public class SimpleProductManagerTests extends TestCase {
         assertEquals(TABLE_PRICE, product.getPrice());      
     }   
     
-    public void testIncreasePriceWithNullListOfProducts() {
+<emphasis role="bold">    public void testIncreasePriceWithNullListOfProducts() {
         try {
             productManager = new SimpleProductManager();
             productManager.increasePrice(POSITIVE_PRICE_INCREASE);
@@ -527,7 +527,7 @@ public class SimpleProductManagerTests extends TestCase {
         product = products.get(1);      
         assertEquals(expectedTablePriceWithDecrease, product.getPrice());       
     }
-    
+</emphasis>    
 }</programlisting>
 
     <para>We return to <classname>SimpleProductManager</classname> to
@@ -549,7 +549,7 @@ public class SimpleProductManager implements ProductManager {
         return products;
     }
 
-    public void increasePrice(int percentage) {
+<emphasis role="bold">    public void increasePrice(int percentage) {
         if (products != null) {
             for (Product product : products) {
                 double newPrice = product.getPrice().doubleValue() * 
@@ -558,7 +558,7 @@ public class SimpleProductManager implements ProductManager {
             }
         }
     }
-    
+</emphasis>    
     public void setProducts(List&lt;Product&gt; products) {
         this.products = products;
     }
