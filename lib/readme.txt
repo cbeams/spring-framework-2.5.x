@@ -71,7 +71,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 
 * easymock/easymock.jar, easymock/easymockclassextension.jar
 - EasyMock 1.2 (JDK 1.3 version) (http://www.easymock.org)
-- required for building and running the framework test suite
+- required for building and running the framework's test suite
 
 * ehcache/ehcache-1.2.4.jar
 - EHCache 1.2.4 (http://ehcache.sourceforge.net)
@@ -319,7 +319,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 
 * junit/junit-3.8.2.jar, junit/junit-4.4.jar
 - JUnit 3.8.2 / 4.4 (http://www.junit.org)
-- required for building the framework's test suite
+- required for building and running the framework's test suite
 
 * log4j/log4j-1.2.14.jar
 - Log4J 1.2.14 (http://logging.apache.org/log4j)
@@ -364,6 +364,10 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using the Struts 1.x support or Tiles 1.x TilesView
 - required for running JPetStore's Struts web tier
+
+* testng/testng-5.5-jdk15.jar
+- TestNG 5.5 (http://testng.org)
+- required for building and running the framework's test suite
 
 * tiles/tiles-api-2.0.4.jar, tiles/tiles-core-2.0.4.jar, tiles/tiles-jsp-2.0.4.jar
 - Apache Tiles 2.0.4 (http://tiles.apache.org)
