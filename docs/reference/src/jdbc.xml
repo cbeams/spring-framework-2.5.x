@@ -77,7 +77,7 @@
         <listitem>
           <para><emphasis role="bold">NamedParameterJdbcTemplate</emphasis> -
           wraps a JdbcTemplate to provide more convenient usage with named
-          parameters instead of the traditional JDBC "?" placeholders. This
+          parameters instead of the traditional JDBC "?" place holders. This
           provides better documentation and ease of use when you have multiple
           parameters for an SQL statement. Works with JDK 1.4 and up.</para>
         </listitem>
@@ -487,7 +487,7 @@ public int countOfActorsByFirstName(String firstName) {
       <classname>MapSqlParameterSource</classname> class is a very simple
       implementation, that is simply an adapter around a
       <interfacename>java.util.Map</interfacename>, where the keys are the
-      paramter names and the values are the parameter values.</para>
+      parameter names and the values are the parameter values.</para>
 
       <para>Another <interfacename>SqlParameterSource</interfacename>
       implementation is the
@@ -608,7 +608,7 @@ public Actor findActor(long id) {
 }</programlisting>
 
       <para>Here is the same method, only this time using the
-      <classname>SimpleJdbcTemplate</classname>; notice how much 'cleaner'the
+      <classname>SimpleJdbcTemplate</classname>; notice how much 'cleaner' the
       code is.</para>
 
       <programlisting><lineannotation>// <classname>SimpleJdbcTemplate</classname>-style...</lineannotation>
@@ -684,7 +684,7 @@ public Actor findActor(long id) {
       JDBC connection. You have to specify the fully qualified class name of
       the JDBC driver that you are using so that the
       <classname>DriverManager</classname> can load the driver class. Then you
-      have to provide a url that varies between JDBC drivers. You have to
+      have to provide a URL that varies between JDBC drivers. You have to
       consult the documentation for your driver for the correct value to use
       here. Finally you must provide a username and a password that will be
       used to connect to the database. Here is an example of how to configure
@@ -888,7 +888,7 @@ public List getList() {
 
       <para>There are also a number of update methods that you can use. Find
       below an example where a column is updated for a certain primary key. In
-      this example an SQL statement is used that has placeholders for row
+      this example an SQL statement is used that has place holders for row
       parameters. Note that the parameter values are passed in as an array of
       objects (and thus primitives have to be wrapped in the primitive wrapper
       classes).</para>
@@ -1138,7 +1138,7 @@ jdbcTemplate.update(
       </itemizedlist>
 
       <para>Usually the <classname>SimpleNativeJdbcExtractor</classname> is
-      sufficent for unwrapping a <classname>Connection</classname> object in
+      sufficient for unwrapping a <classname>Connection</classname> object in
       most environments. See the Java Docs for more details.</para>
     </section>
   </section>
@@ -1196,7 +1196,7 @@ jdbcTemplate.update(
     //  ... additional methods
 }</programlisting>If you are processing stream of updates or reading from a
       file then you might have a preferred batch size, but the last batch
-      might not have that number of entries. In this case you can can use the
+      might not have that number of entries. In this case you can use the
       <classname>InterruptibleBatchPreparedStatementSetter</classname>
       interface which allows you to interrupt a batch once the input source is
       exhausted. The <classname>isBatchExhausted</classname> method allows you
@@ -1236,13 +1236,13 @@ jdbcTemplate.update(
     }
 
     //  ... additional methods
-}</programlisting>For an SQL statement using the classic "?" placeholders you
+}</programlisting>For an SQL statement using the classic "?" place holders you
       pass in a List containing an object array with the update values. This
       object array must have one entry for each placeholder in the SQL
       statement and they must be in the same order as they are defined in the
       SQL statement.</para>
 
-      <para>The same example using classic JDBC "?" placeholders:</para>
+      <para>The same example using classic JDBC "?" place holders:</para>
 
       <para><programlisting>public class JdbcActorDao implements ActorDao {
     private SimpleJdbcTemplate simpleJdbcTemplate;
@@ -1281,7 +1281,7 @@ jdbcTemplate.update(
     <classname>SimpleJdbcCall</classname> classes provide simplified
     configuration by taking advantage of database metadata that can be
     retrieved via the JDBC driver. This means there is less to configure up
-    front, although you can override or turn off the metedata processing if
+    front, although you can override or turn off the metadata processing if
     you prefer to provide all the details in your code.</para>
 
     <section id="jdbc-simple-jdbc-insert-1">
@@ -1367,7 +1367,7 @@ jdbcTemplate.update(
       <literal>java.lang.Number</literal> object that we can use to create an
       instance of the numerical type that is used in our domain class. It's
       important to note that we can't rely on all databases to return a
-      specific java class here, <literal>java.lang.Number</literal> is the
+      specific Java class here, <literal>java.lang.Number</literal> is the
       base class that we can rely on. If you have multiple auto-generated
       columns or the generated values are non-numeric then you can use a
       <literal>KeyHolder</literal> that is returned from the
@@ -1591,7 +1591,7 @@ END;</programlisting>As you can see there are four parameters. One is an in
       <classname>SqlParameter</classname>.</para>
 
       <para>We can opt to declare one, some or all of the parameters
-      explicitly. The parameter metedata is still beeing used. By calling the
+      explicitly. The parameter metadata is still being used. By calling the
       method <classname>withoutProcedureColumnMetaDataAccess</classname> we
       can specify that we would like to bypass any processing of the metadata
       lookups for potential parameters and only use the declared ones. Another
@@ -1736,11 +1736,11 @@ END;</programlisting></para>
       registered out parameter of a specific type. Both approaches still needs
       some additional processing to loop over the result set and process the
       returned rows. With the <classname>SimpleJdbcCall</classname> you use
-      the <classname>returningResultSet</classname> metod and declare a
+      the <classname>returningResultSet</classname> method and declare a
       <classname>RowMapper</classname> implementation to be used for a
       specific parameter. In the case where the result set is returned during
       the results processing, there are no names defined, so the returned
-      results will have to match the the order you declare the
+      results will have to match the order you declare the
       <classname>RowMapper</classname> implementations. The name specified
       will still be used to store the processed list of results in the results
       map returned from the execute statement.</para>
@@ -1782,7 +1782,7 @@ END;</programlisting>In order to call this procedure we need to declare the
     //  ... additional methods
 }</programlisting>The execute call passes in an empty Map since this call
       doesn't take any parameters. The list of Actors is then retrieved from
-      the reults map and returned to the caller.</para>
+      the results map and returned to the caller.</para>
     </section>
   </section>
 
@@ -2225,11 +2225,11 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
       <title>Handling BLOB and CLOB objects</title>
 
       <para>You can store images and other binary objects as well and large
-      chunks of text. These large object are called BLOB for binary data nad
+      chunks of text. These large object are called BLOB for binary data and
       CLOB for character data. Spring lets you handle these large objects
       using the JdbcTemplate directly and also when using the higher
-      abtractions provided by RDBMS Objects and the SimpleJdbc classes. All of
-      these approaches use an implementation of the
+      abstractions provided by RDBMS Objects and the SimpleJdbc classes. All
+      of these approaches use an implementation of the
       <classname>LobHandler</classname> interface for the actual management of
       the LOB data. The <classname>LobHandler</classname> provides access to a
       <classname>LobCreator</classname>, via the
@@ -2285,10 +2285,10 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
       provided with a LobCreator that can be used to set the values for the
       LOB columns in your SQL insert statement.</para>
 
-      <para>We are assuming that we have a variable named 'lobHandler' thet
+      <para>We are assuming that we have a variable named 'lobHandler' that
       already is set to an instance of a
       <classname>DefaultLobHandler</classname>. This is typically done using
-      dependecy injection.</para>
+      dependency injection.</para>
 
       <programlistingco>
         <areaspec>
@@ -2364,15 +2364,50 @@ clobReader.close();</programlisting>
           <calloutlist>
             <callout arearefs="jdbc.lobhandler.setClob">
               <para>Using the method <classname>getClobAsString </classname>we
-              retreive the contents of the CLOB</para>
+              retrieve the contents of the CLOB</para>
             </callout>
 
             <callout arearefs="jdbc.lobhandler.setBlob">
               <para>Using the method <classname>getBlobAsBytes</classname> we
-              retreive the contents of the BLOB</para>
+              retrieve the contents of the BLOB</para>
             </callout>
           </calloutlist>
         </programlistingco></para>
+    </section>
+
+    <section>
+      <title>Passing in lists of values for IN clause</title>
+
+      <para>The SQL standard allows for selecting rows based on an expression
+      that includes a variable list of values. A typical example would be
+      "select * from T_ACTOR where id in (1, 2, 3)". This variable list is not
+      directly supported for prepared statements by the JDBC standard - there
+      is no way of declaring a variable number of place holders. You would
+      have to either have a number of variations with the desired number of
+      place holders prepared or you would have to dynamically generate the SQL
+      string once you know how many place holders are required. The named
+      parameter support provided in the
+      <classname>NamedParameterJdbcTemplate</classname> and
+      <classname>SimpleJdbcTemplate</classname> takes the latter approach.
+      When you pass in the values you should pass them in as a
+      <classname>java.util.List</classname> of primitive objects. This list
+      will be used to insert the required place holders and pass in the values
+      during the statement execution.</para>
+
+      <note>
+        <para>You need to be careful when passing in a large number of values.
+        The JDBC standard doesn't guarantee that you can use more than 100
+        values for an IN expression list. Various databases exceed this
+        number, but they usually have a hard limit for how many values are
+        allowed. Oracle's limit for instance is 1000.</para>
+      </note>
+
+      <para>In addition to the primitive values in the value list, you can
+      create a <classname>java.util.List</classname> of object arrays. This
+      would support a case where there are multiple expressions defined for
+      the IN clause like "select * from T_ACTOR where (id, last_name) in ((1,
+      'Johnson'), (2, 'Harrop'))". This of course requires that your database
+      supports this syntax.</para>
     </section>
 
     <section>
@@ -2410,7 +2445,7 @@ clobReader.close();</programlisting>
       <classname>SqlTypeValue</classname> interface has a single method named
       "<classname>createTypeValue</classname>" that must be implemented. The
       active connection is passed in and can be used to create database
-      specifc objects like <classname>StructDescriptor</classname>s or
+      specific objects like <classname>StructDescriptor</classname>s or
       <classname>ArrayDescriptor</classname>s</para>
 
       <para><programlisting>SqlTypeValue value = new AbstractSqlTypeValue() {
