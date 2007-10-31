@@ -8,4 +8,4 @@ DynamicImport-Package: *
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring
-Bundle-SymbolicName: ${spring-bundle-prefix}.spring
+Bundle-SymbolicName: ${spring-bundle-prefix}

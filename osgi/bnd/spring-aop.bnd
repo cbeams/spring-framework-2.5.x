@@ -4,4 +4,4 @@ DynamicImport-Package: *
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-aop
-Bundle-SymbolicName: ${spring-bundle-prefix}.spring.aop
+Bundle-SymbolicName: ${spring-bundle-prefix}.aop

@@ -5,4 +5,4 @@ Import-Package: org.apache.commons.logging*, \
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-tx
-Bundle-SymbolicName: ${spring-bundle-prefix}.spring.tx
+Bundle-SymbolicName: ${spring-bundle-prefix}.tx

@@ -3,4 +3,4 @@ Import-Package: org.apache.commons.logging*,*;resolution:=optional
 Bundle-Version: ${spring-version-osgi}
 Bundle-Description: ${spring-title}
 Bundle-Name: spring-beans
-Bundle-SymbolicName: ${spring-bundle-prefix}.spring.beans
+Bundle-SymbolicName: ${spring-bundle-prefix}.beans
