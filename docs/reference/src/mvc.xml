@@ -3672,9 +3672,9 @@ public class EditPetForm {
 
     <section id="mvc-ann-sessionattrib">
       <title>Specifying attributes to store in a Session with
-      <classname>@SessionAttribute</classname></title>
+      <classname>@SessionAttributes</classname></title>
 
-      <para>The type-level <classname>@SessionAttribute</classname> annotation
+      <para>The type-level <classname>@SessionAttributes</classname> annotation
       declares session attributes used by a specific handler. This will
       typically list the names of model attributes which should be
       transparently stored in the session or some conversational storage,
