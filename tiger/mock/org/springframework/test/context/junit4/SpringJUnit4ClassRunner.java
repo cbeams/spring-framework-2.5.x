@@ -72,7 +72,6 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	 * @see #createTestContextManager(Class)
 	 */
 	public SpringJUnit4ClassRunner(final Class<?> clazz) throws InitializationError {
-
 		super(clazz);
 		if (logger.isDebugEnabled()) {
 			logger.debug("SpringJUnit4ClassRunner constructor called with [" + clazz + "].");
@@ -97,7 +96,7 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 			getTestContextManager().prepareTestInstance(testInstance);
 		}
 		catch (Throwable t) {
-			new Exception(t);
+			throw new Exception(t);
 		}
 		return testInstance;
 	}
