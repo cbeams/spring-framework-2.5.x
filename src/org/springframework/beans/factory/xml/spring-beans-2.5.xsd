@@ -232,26 +232,27 @@
 		</xsd:sequence>
 	</xsd:group>
 
-	<xsd:attribute name="name" type="xsd:string">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+	<xsd:attributeGroup name="beanAttributes">
+		<xsd:attribute name="name" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	Can be used to create one or more aliases illegal in an (XML) id.
 	Multiple aliases can be separated by any number of spaces, commas,
 	or semi-colons (or indeed any mixture of the three).
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-	<xsd:attribute name="class" type="xsd:string">
-		<xsd:annotation>
-			<xsd:documentation source="java:java.lang.Class"><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="class" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation source="java:java.lang.Class"><![CDATA[
 	The fully qualified name of the bean's class, except if it serves only
 	as a parent definition for child bean definitions.
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-	<xsd:attribute name="parent" type="xsd:string">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="parent" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	The name of the parent bean definition.
 
 	Will use the bean class of the parent if none is specified, but can
@@ -267,12 +268,12 @@
 
 	The remaining settings will always be taken from the child definition:
 	depends on, autowire mode, dependency check, scope, lazy init.
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-	<xsd:attribute name="scope" type="xsd:string">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="scope" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	The scope of this bean: typically "singleton" (one shared instance,
 	which will be returned by all calls to getBean with the given id), or
 	"prototype" (independent instance resulting from each call to getBean).
@@ -289,12 +290,12 @@
 	bean definition, unless explicitly specified: The inner bean will be a
 	singleton if the containing bean is a singleton, and a prototype if
 	the containing bean has any other scope.
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-	<xsd:attribute name="abstract" type="xsd:boolean">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="abstract" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	Is this bean "abstract", that is, not meant to be instantiated itself
 	but rather just serving as parent for concrete child bean definitions?
 	The default is "false". Specify "true" to tell the bean factory to not
@@ -302,12 +303,12 @@
 
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per abstract bean definition.
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-	<xsd:attribute name="lazy-init" default="default" type="defaultable-boolean">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="lazy-init" default="default" type="defaultable-boolean">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	Indicates whether or not this bean is to be lazily initialized.
 	If false, it will be instantiated on startup by bean factories
 	that perform eager initialization of singletons. The default is
@@ -315,12 +316,12 @@
 
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per concrete bean definition.
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-	<xsd:attribute name="autowire" default="default">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="autowire" default="default">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	Controls whether bean properties are "autowired".
 	This is an automagical process in which bean references don't need
 	to be coded explicitly in the XML bean definition file, but rather the
@@ -364,22 +365,22 @@
 
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per concrete bean definition.
-			]]></xsd:documentation>
-		</xsd:annotation>
-		<xsd:simpleType>
-			<xsd:restriction base="xsd:NMTOKEN">
-				<xsd:enumeration value="default"/>
-				<xsd:enumeration value="no"/>
-				<xsd:enumeration value="byName"/>
-				<xsd:enumeration value="byType"/>
-				<xsd:enumeration value="constructor"/>
-				<xsd:enumeration value="autodetect"/>
-			</xsd:restriction>
-		</xsd:simpleType>
-	</xsd:attribute>
-	<xsd:attribute name="dependency-check" default="default">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:NMTOKEN">
+					<xsd:enumeration value="default"/>
+					<xsd:enumeration value="no"/>
+					<xsd:enumeration value="byName"/>
+					<xsd:enumeration value="byType"/>
+					<xsd:enumeration value="constructor"/>
+					<xsd:enumeration value="autodetect"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="dependency-check" default="default">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	Controls whether or not to check whether all of this
 	bean's dependencies, expressed in its properties, are satisfied.
 	The default is to perform no dependency checking.
@@ -390,21 +391,21 @@
 
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per concrete bean definition.
-			]]></xsd:documentation>
-		</xsd:annotation>
-		<xsd:simpleType>
-			<xsd:restriction base="xsd:NMTOKEN">
-				<xsd:enumeration value="default"/>
-				<xsd:enumeration value="none"/>
-				<xsd:enumeration value="simple"/>
-				<xsd:enumeration value="objects"/>
-				<xsd:enumeration value="all"/>
-			</xsd:restriction>
-		</xsd:simpleType>
-	</xsd:attribute>
-	<xsd:attribute name="depends-on" type="xsd:string">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:NMTOKEN">
+					<xsd:enumeration value="default"/>
+					<xsd:enumeration value="none"/>
+					<xsd:enumeration value="simple"/>
+					<xsd:enumeration value="objects"/>
+					<xsd:enumeration value="all"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="depends-on" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	The names of the beans that this bean depends on being initialized.
 	The bean factory will guarantee that these beans get initialized
 	before this bean.
@@ -416,41 +417,41 @@
 
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per concrete bean definition.
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-	<xsd:attribute name="autowire-candidate" default="default" type="defaultable-boolean">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="autowire-candidate" default="default" type="defaultable-boolean">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	Indicates whether or not this bean should be considered when looking
 	for matching candidates to satisfy another bean's autowiring requirements.
 	Note that this does not affect explicit references by name, which will get
 	resolved even if the specified bean is not marked as an autowire candidate.
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-	<xsd:attribute name="primary" type="xsd:boolean">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="primary" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	Specifies that this bean should be given preference when multiple
 	candidates are qualified to autowire a single-valued dependency.
 	If exactly one 'primary' bean exists among the candidates, it
 	will be the autowired value.
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-	<xsd:attribute name="init-method" type="xsd:string">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="init-method" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	The name of the custom initialization method to invoke after setting
 	bean properties. The method must have no arguments, but may throw any
 	exception.
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-	<xsd:attribute name="destroy-method" type="xsd:string">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="destroy-method" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	The name of the custom destroy method to invoke on bean factory
 	shutdown. The method must have no arguments, but may throw any
 	exception.
@@ -458,12 +459,12 @@
 	Note: Only invoked on beans whose lifecycle is under the full
 	control of the factory - which is always the case for singletons,
 	but not guaranteed for any other scope.
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-	<xsd:attribute name="factory-method" type="xsd:string">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="factory-method" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	The name of a factory method to use to create this object. Use
 	constructor-arg elements to specify arguments to the factory method,
 	if it takes arguments. Autowiring does not apply to factory methods.
@@ -488,38 +489,21 @@
 	Setter Injection can be used in conjunction with a factory method.
 	Method Injection cannot, as the factory method returns an instance,
 	which will be used when the container creates the bean.
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-	<xsd:attribute name="factory-bean" type="xsd:string">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="factory-bean" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	Alternative to class attribute for factory-method usage.
 	If this is specified, no class attribute should be used.
 	This must be set to the name of a bean in the current or
 	ancestor factories that contains the relevant factory method.
 	This allows the factory itself to be configured using Dependency
 	Injection, and an instance (rather than static) method to be used.
-			]]></xsd:documentation>
-		</xsd:annotation>
-	</xsd:attribute>
-
-	<xsd:attributeGroup name="beanAttributes">
-		<xsd:attribute ref="name"/>
-		<xsd:attribute ref="class"/>
-		<xsd:attribute ref="parent"/>
-		<xsd:attribute ref="scope"/>
-		<xsd:attribute ref="abstract"/>
-		<xsd:attribute ref="lazy-init"/>
-		<xsd:attribute ref="autowire"/>
-		<xsd:attribute ref="dependency-check"/>
-		<xsd:attribute ref="depends-on"/>
-		<xsd:attribute ref="autowire-candidate"/>
-		<xsd:attribute ref="primary"/>
-		<xsd:attribute ref="init-method"/>
-		<xsd:attribute ref="destroy-method"/>
-		<xsd:attribute ref="factory-method"/>
-		<xsd:attribute ref="factory-bean"/>
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 		<xsd:anyAttribute namespace="##other" processContents="lax"/>
 	</xsd:attributeGroup>
 
