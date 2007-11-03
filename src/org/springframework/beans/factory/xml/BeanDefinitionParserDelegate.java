@@ -1131,7 +1131,7 @@ public class BeanDefinitionParserDelegate {
 			if ((hasValueAttribute && hasValueRefAttribute) ||
 					((hasValueAttribute || hasValueRefAttribute)) && valueEle != null) {
 				error("<entry> element is only allowed to contain either " +
-								"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
+						"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
 			}
 			if (hasValueAttribute) {
 				value = buildTypedStringValueForMap(

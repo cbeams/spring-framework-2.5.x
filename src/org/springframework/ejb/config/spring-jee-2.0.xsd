@@ -153,7 +153,7 @@
 				<xsd:attribute name="environment-ref" type="environmentRefType">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
-			A reference to JNDI environment properties.
+	A reference to JNDI environment properties.
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
