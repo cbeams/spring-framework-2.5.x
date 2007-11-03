@@ -3,6 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.5 RC2 (2007-11-05)
+---------------------------------------
+
+Package org.springframework.test
+* AbstractGenericContextLoader provides an opportunity for subclasses to customize the context before calling refresh
+
+Package org.springframework.web
+* ContextLoader provides an opportunity for subclasses to customize the context before calling refresh
+
+
 Changes in version 2.5 RC1 (2007-10-22)
 ---------------------------------------
 
