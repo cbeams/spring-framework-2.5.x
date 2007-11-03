@@ -21,6 +21,7 @@ import java.beans.PropertyEditor;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
+import org.springframework.beans.PropertyAccessor;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.BindStatus;
@@ -71,7 +72,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 
 	/**
 	 * Set the property path from the {@link FormTag#setModelAttribute form object}.
-	 * May be a runtime expression. Required.
+	 * May be a runtime expression.
 	 */
 	public void setPath(String path) {
 		this.path = path;
@@ -168,6 +169,9 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 			// HTML escaping in tags is performed by the ValueFormatter class.
 			String nestedPath = getNestedPath();
 			String pathToUse = (nestedPath != null ? nestedPath + getPath() : getPath());
+			if (pathToUse.endsWith(PropertyAccessor.NESTED_PROPERTY_SEPARATOR)) {
+				pathToUse = pathToUse.substring(0, pathToUse.length() - 1);
+			}
 			this.bindStatus = new BindStatus(getRequestContext(), pathToUse, false);
 		}
 		return this.bindStatus;
@@ -188,7 +192,8 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * @see #getPath()
 	 */
 	protected String getPropertyPath() throws JspException {
-		return getBindStatus().getExpression();
+		String expression = getBindStatus().getExpression();
+		return (expression != null ? expression : "");
 	}
 
 	public PropertyEditor getEditor() throws JspException {

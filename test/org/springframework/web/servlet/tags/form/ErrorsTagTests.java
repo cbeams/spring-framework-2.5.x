@@ -39,6 +39,7 @@ import org.springframework.web.servlet.tags.RequestContextAwareTag;
  * @author Rob Harrop
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Mark Fisher
  */
 public class ErrorsTagTests extends AbstractFormTagTests {
 
@@ -350,6 +351,22 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.REQUEST_SCOPE);
 	}
 
+	/**
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-4005
+	 */
+	public void testOmittedPathMatchesObjectErrorsOnly() throws Exception {
+		this.tag.setPath(null);
+		Errors errors = new BeanPropertyBindingResult(new TestBean(), "COMMAND_NAME");
+		errors.reject("some.code", "object error");
+		errors.rejectValue("name", "some.code", "field error");
+		exposeBindingResult(errors);
+		this.tag.doStartTag();
+		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
+		this.tag.doEndTag();
+		String output = getOutput();
+		assertBlockTagContains(output, "object error");
+		assertFalse(output.contains("field error"));
+	}
 
 	protected void exposeBindingResult(Errors errors) {
 		// wrap errors in a Model

@@ -17,9 +17,12 @@
 package org.springframework.web.servlet.tags;
 
 import java.beans.PropertyEditorSupport;
+import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.jsp.JspException;
@@ -30,16 +33,20 @@ import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.servlet.tags.form.FormTag;
+import org.springframework.web.servlet.tags.form.TagWriter;
 
 /**
  * @author Juergen Hoeller
  * @author Alef Arendsen
+ * @author Mark Fisher
  */
 public class BindTagTests extends AbstractTagTests {
 
@@ -967,6 +974,64 @@ public class BindTagTests extends AbstractTagTests {
 
 		assertNotNull(pc.getAttribute("theString"));
 		assertEquals(pc.getAttribute("theString"), "name");
+	}
+
+	/**
+	 * SPR-4022
+	 */
+	public void testNestingInFormTag() throws JspException {
+		PageContext pc = createPageContext();
+		TestBean tb = new TestBean();
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "tb");
+		CustomDateEditor l = new CustomDateEditor(df, true);
+		binder.registerCustomEditor(Date.class, l);
+		pc.getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "tb", binder.getBindingResult());
+
+		FormTag formTag = new FormTag() {
+			protected TagWriter createTagWriter() {
+				return new TagWriter(new StringWriter());
+			}
+		};
+
+		String action = "/form.html";
+		String commandName = "tb";
+		String name = "formName";
+		String enctype = "my/enctype";
+		String method = "POST";
+		String onsubmit = "onsubmit";
+		String onreset = "onreset";
+		String cssClass = "myClass";
+		String cssStyle = "myStyle";
+		String acceptCharset = "iso-8859-1";
+
+		formTag.setName(name);
+		formTag.setCssClass(cssClass);
+		formTag.setCssStyle(cssStyle);
+		formTag.setAction(action);
+		formTag.setCommandName(commandName);
+		formTag.setEnctype(enctype);
+		formTag.setMethod(method);
+		formTag.setOnsubmit(onsubmit);
+		formTag.setOnreset(onreset);
+		formTag.setAcceptCharset(acceptCharset);
+
+		formTag.setPageContext(pc);
+		formTag.doStartTag();
+
+		BindTag bindTag1 = new BindTag();
+		bindTag1.setPageContext(pc);
+		bindTag1.setPath("date");
+		bindTag1.doStartTag();
+		bindTag1.doEndTag();
+
+		BindTag bindTag2 = new BindTag();
+		bindTag2.setPageContext(pc);
+		bindTag2.setPath("tb.date");
+		bindTag2.doStartTag();
+		bindTag2.doEndTag();
+
+		formTag.doEndTag();
 	}
 
 }
