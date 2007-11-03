@@ -25,9 +25,10 @@
 			resource-ref="true"
 			lookup-on-startup="true"
 			expected-type="com.myapp.DefaultFoo"
-			proxy-interface="com.myapp.Foo"/>
+			proxy-interface="com.myapp.Foo"
+			default-value="myValue"/>
 
-	<jee:jndi-lookup id="withEnvironment" jndi-name="jdbc/MyDataSource">
+	<jee:jndi-lookup id="withEnvironment" jndi-name="jdbc/MyDataSource" default-ref="myBean">
 		<jee:environment>foo=bar</jee:environment>
 	</jee:jndi-lookup>
 

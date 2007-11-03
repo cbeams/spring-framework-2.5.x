@@ -62,11 +62,13 @@ public class JeeNamespaceHandlerTests extends TestCase {
 		assertPropertyValue(beanDefinition, "lookupOnStartup", "true");
 		assertPropertyValue(beanDefinition, "expectedType", "com.myapp.DefaultFoo");
 		assertPropertyValue(beanDefinition, "proxyInterface", "com.myapp.Foo");
+		assertPropertyValue(beanDefinition, "defaultObject", "myValue");
 	}
 
 	public void testWithEnvironment() throws Exception {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("withEnvironment");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
+		assertPropertyValue(beanDefinition, "defaultObject", new RuntimeBeanReference("myBean"));
 	}
 
 	public void testWithReferencedEnvironment() throws Exception {
