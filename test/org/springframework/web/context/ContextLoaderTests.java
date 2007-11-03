@@ -74,6 +74,12 @@ public class ContextLoaderTests extends TestCase {
 		assertTrue("Destroyed", lb.isDestroyed());
 	}
 
+	/**
+	 * Addresses the issues raised in <a
+	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-4008"
+	 * target="_blank">SPR-4008</a>: <em>Supply an opportunity to customize
+	 * context before calling refresh in ContextLoaders</em>.
+	 */
 	public void testContextLoaderListenerWithCustomizedContextLoader() throws Exception {
 		final StringBuffer buffer = new StringBuffer();
 		final String expectedContents = "customizeContext() was called";
