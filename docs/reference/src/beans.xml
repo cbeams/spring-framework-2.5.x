@@ -251,8 +251,8 @@ BeanFactory factory = (BeanFactory) context;</programlisting>
         keeps container configuration files unaware of the fact that they are
         being combined with others. An alternate approach is to use one or
         more occurrences of the <literal>&lt;import/&gt;</literal> element to
-        load bean definitions from another file (or files).
-        Let's look at a sample:</para>
+        load bean definitions from another file (or files). Let's look at a
+        sample:</para>
 
         <programlisting>&lt;beans&gt;
 
@@ -3614,13 +3614,13 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         </itemizedlist>
 
         <note>
-          <para>If multiple lifecycle mechanisms are configured for a given 
-          bean, and each mechanism is configured with a different method name, 
+          <para>If multiple lifecycle mechanisms are configured for a given
+          bean, and each mechanism is configured with a different method name,
           then each configured method will be executed in the order listed
-          above; however, if the same method name is configured - for example, 
-          <literal>init()</literal> for an initialization method - for more than 
-          one of the aforementioned lifecycle mechanisms, that method will only 
-          be executed once.</para>
+          above; however, if the same method name is configured - for example,
+          <literal>init()</literal> for an initialization method - for more
+          than one of the aforementioned lifecycle mechanisms, that method
+          will only be executed once.</para>
         </note>
       </section>
 
@@ -5623,19 +5623,20 @@ public @interface MovieQualifier {
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
-      <para>Note that the particular implementation of 
-      <interfacename>AutowireCandidateResolver</interfacename>
-      that will be activated for the application context depends upon the
-      Java version. If running on less than Java 5, the qualifier annotations
-      are not supported, and therefore autowire candidates are solely
-      determined by the <literal>'autowire-candidate'</literal> value of each
-      bean definition as well as any <literal>'default-autowire-candidates'</literal>
-      pattern(s) available on the <literal>&lt;beans/&gt;</literal> element.
-      If running on Java 5 or greater, the presence of
-      <interfacename>@Qualifier</interfacename> annotations or any custom
-      annotations registered with the <classname>CustomAutowireConfigurer</classname>
-      will also play a role.</para>
-      
+      <para>Note that the particular implementation of
+      <interfacename>AutowireCandidateResolver</interfacename> that will be
+      activated for the application context depends upon the Java version. If
+      running on less than Java 5, the qualifier annotations are not
+      supported, and therefore autowire candidates are solely determined by
+      the <literal>'autowire-candidate'</literal> value of each bean
+      definition as well as any
+      <literal>'default-autowire-candidates'</literal> pattern(s) available on
+      the <literal>&lt;beans/&gt;</literal> element. If running on Java 5 or
+      greater, the presence of <interfacename>@Qualifier</interfacename>
+      annotations or any custom annotations registered with the
+      <classname>CustomAutowireConfigurer</classname> will also play a
+      role.</para>
+
       <para>Regardless of the Java version, the determination of a "primary"
       candidate (when multiple beans qualify as autowire candidates) is the
       same: if exactly one bean definition among the candidates has a
@@ -5709,17 +5710,16 @@ public @interface MovieQualifier {
     }
 }</programlisting>
 
-        <note>
-          <para>For details regarding the effects of combining various lifecycle 
-          mechanisms, see <xref 
-          linkend="beans-factory-lifecycle-combined-effects" />.</para>
-        </note>
-
+      <note>
+        <para>For details regarding the effects of combining various lifecycle
+        mechanisms, see <xref
+        linkend="beans-factory-lifecycle-combined-effects" />.</para>
+      </note>
     </section>
   </section>
 
   <section id="beans-classpath-scanning">
-    <title>Classpath scanning for beans</title>
+    <title>Classpath scanning for managed components</title>
 
     <para>Thus far most of the examples within this chapter have used XML for
     specifying the configuration metadata that produces each
@@ -5729,44 +5729,75 @@ public @interface MovieQualifier {
     configuration metadata using source-level annotations. Even in those
     examples however, the "base" bean definitions were explicitly defined in
     the XML file while the annotations were driving the dependency injection
-    only. The current section will introduce an option for implicitly
-    detecting the <emphasis>candidate beans</emphasis> by scanning the
-    classpath and matching against <emphasis>filters</emphasis>.</para>
+    only. The current section introduces an option for implicitly detecting the 
+    <emphasis>candidate components</emphasis> by scanning the classpath and 
+    matching against <emphasis>filters</emphasis>.</para>
 
     <section id="beans-stereotype-annotations">
-      <title><interfacename>@Component</interfacename> and
-      further stereotype annotations</title>
+      <title><interfacename>@Component</interfacename> and further stereotype
+      annotations</title>
 
       <para>Beginning with Spring 2.0, the
       <interfacename>@Repository</interfacename> annotation was introduced as
-      a marker for any class that fulfills the role, or
+      a marker for any class that fulfills the role or
       <emphasis>stereotype</emphasis> of a repository (a.k.a. Data Access
       Object or DAO). Among the possibilities for leveraging such a marker is
-      the automatic translation of exceptions as described in the section
-      entitled <xref linkend="orm-jpa-exceptions" />.</para>
+      the automatic translation of exceptions as described in <xref
+      linkend="orm-jpa-exceptions" />.</para>
 
       <para>Spring 2.5 introduces further stereotype annotations:
-      <interfacename>@Component</interfacename>, <interfacename>@Service</interfacename>
-      and <interfacename>@Controller</interfacename>. Spring provides the capability
-      of automatically detecting 'stereotyped' classes and registering
-      corresponding <interfacename>BeanDefinition</interfacename>s with the
+      <interfacename>@Component</interfacename>,
+      <interfacename>@Service</interfacename> and
+      <interfacename>@Controller</interfacename>.
+      <interfacename>@Component</interfacename> serves as a generic stereotype
+      for any Spring-managed component; whereas,
+      <interfacename>@Repository</interfacename>,
+      <interfacename>@Service</interfacename>, and
+      <interfacename>@Controller</interfacename> serve as specializations of
+      <interfacename>@Component</interfacename> for more specific use cases
+      (e.g., in the persistence, service, and presentation layers,
+      respectively). What this means is that you can annotate your component
+      classes with <interfacename>@Component</interfacename>, but by
+      annotating them with <interfacename>@Repository</interfacename>,
+      <interfacename>@Service</interfacename>, or
+      <interfacename>@Controller</interfacename> instead, your classes are
+      more properly suited for processing by tools or associating with aspects.
+      For example, these stereotype annotations make ideal targets for 
+      pointcuts. Of course, it is also possible that
+      <interfacename>@Repository</interfacename>,
+      <interfacename>@Service</interfacename>, and
+      <interfacename>@Controller</interfacename> may carry additional
+      semantics in future releases of the Spring Framework. Thus, if you are 
+      making a decision between using <interfacename>@Component</interfacename> 
+      or <interfacename>@Service</interfacename> for your service layer,
+      <interfacename>@Service</interfacename> is clearly the better choice.
+      Similarly, as stated above, <interfacename>@Repository</interfacename>
+      is already supported as a marker for automatic exception translation in
+      your persistence layer.</para>
+    </section>
+
+    <section id="beans-scanning-autodetection">
+      <title>Auto-detecting components</title>
+
+      <para>Spring provides the capability of automatically detecting
+      'stereotyped' classes and registering corresponding
+      <interfacename>BeanDefinition</interfacename>s with the
       <interfacename>ApplicationContext</interfacename>. For example, the
       following two classes are eligible for such autodetection:</para>
 
-      <programlisting>@Component
+      <programlisting>@Service
 public class SimpleMovieLister {
 
     private MovieFinder movieFinder;
 
     @Autowired
-    public void setMovieFinder(MovieFinder movieFinder) {
+    public SimpleMovieLister(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
 }</programlisting>
 
       <programlisting>@Repository
 public class JpaMovieFinder implements MovieFinder {
-
     <lineannotation>// implementation elided for clarity</lineannotation>
 }</programlisting>
 
@@ -5807,10 +5838,12 @@ public class JpaMovieFinder implements MovieFinder {
     <section id="beans-scanning-filters">
       <title>Using filters to customize scanning</title>
 
-      <para>By default, classes with either the
-      <interfacename>@Component</interfacename> or
-      <interfacename>@Repository</interfacename> annotation are the only
-      detected candidate beans. However it is simple to modify and extend this
+      <para>By default, classes annotated with
+      <interfacename>@Component</interfacename>,
+      <interfacename>@Repository</interfacename>,
+      <interfacename>@Service</interfacename>, or
+      <interfacename>@Controller</interfacename> are the only detected
+      candidate components. However it is simple to modify and extend this
       behavior by applying custom filters. These can be added as either
       <emphasis>include-filter</emphasis> or
       <emphasis>exclude-filter</emphasis> sub-elements of the 'component-scan'
@@ -5866,38 +5899,46 @@ public class JpaMovieFinder implements MovieFinder {
       repositories instead.</para>
 
       <programlisting>&lt;beans ...&gt;
-               
+
      &lt;context:component-scan base-package="org.example"&gt;
         &lt;context:include-filter type="regex" expression=".*Stub.*Repository"/&gt;
         &lt;context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/&gt;
      &lt;/context:component-scan&gt;
-     
+
 &lt;/beans&gt;</programlisting>
 
       <note>
         <para>It is also possible to disable the default filters by providing
         <emphasis>use-default-filters="false"</emphasis> as an attribute of
-        the &lt;component-scan/&gt; element.</para>
+        the &lt;component-scan/&gt; element. This will in effect disable
+        automatic detection of classes annotated with
+        <interfacename>@Component</interfacename>,
+        <interfacename>@Repository</interfacename>,
+        <interfacename>@Service</interfacename>, or
+        <interfacename>@Controller</interfacename>.</para>
       </note>
     </section>
 
     <section id="beans-scanning-name-generator">
-      <title>Naming auto-detected beans</title>
+      <title>Naming auto-detected components</title>
 
-      <para>When a bean is auto-detected as part of the scanning process, its
-      name will be generated by the
+      <para>When a component is auto-detected as part of the scanning process, 
+      its bean name will be generated by the
       <interfacename>BeanNameGenerator</interfacename> strategy known to that
       scanner. By default, any Spring 'stereotype' annotation
-      (<interfacename>@Component</interfacename> and
-      <interfacename>@Repository</interfacename>) that contains a name value
-      will thereby provide that name to the corresponding bean definition. If
-      such annotation contains no name value or for any other detected bean
-      (such as those discovered due to custom filters), the default bean name
-      generator will return the uncapitalized non-qualified class name. For
-      example, if the following two beans were detected, the names would be
+      (<interfacename>@Component</interfacename>,
+      <interfacename>@Repository</interfacename>,
+      <interfacename>@Service</interfacename>, and
+      <interfacename>@Controller</interfacename>) that contains a
+      <literal>name</literal> value will thereby provide that name to the
+      corresponding bean definition. If such an annotation contains no
+      <literal>name</literal> value or for any other detected component (such as
+      those discovered due to custom filters), the default bean name generator
+      will return the uncapitalized non-qualified class name. For example, if
+      the following two components were detected, the names would be
       'myMovieLister' and 'movieFinderImpl':</para>
 
-      <programlisting>@Component("myMovieLister")
+      <programlisting>@Service("myMovieLister")
 public class SimpleMovieLister {
     <lineannotation>// ...</lineannotation>
 }</programlisting>
@@ -5908,13 +5949,13 @@ public class MovieFinderImpl implements MovieFinder {
 }</programlisting>
 
       <note>
-        <para>If you don't want to rely on that default bean-naming strategy,
+        <para>If you don't want to rely on the default bean-naming strategy,
         you may provide a custom bean-naming strategy. First, implement the
         <ulink
-        url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/support/BeanNameGenerator.html">
-        <interfacename>BeanNameGenerator</interfacename> </ulink> interface,
-        and be sure to include a default no-arg constructor. Then, provide the
-        fully-qualified class name when configuring the scanner:</para>
+        url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/beans/factory/support/BeanNameGenerator.html"><interfacename>BeanNameGenerator</interfacename></ulink>
+        interface, and be sure to include a default no-arg constructor. Then,
+        provide the fully-qualified class name when configuring the
+        scanner:</para>
       </note>
 
       <programlisting>&lt;beans ...&gt;
@@ -5925,24 +5966,23 @@ public class MovieFinderImpl implements MovieFinder {
 &lt;/beans&gt;</programlisting>
 
       <para>As a general rule, consider specifying the name with the
-      annotation whenever other beans may be making explicit references to it.
-      On the other hand, the auto- generated names are adequate whenever the
-      container is responsible for wiring.</para>
+      annotation whenever other components may be making explicit references
+      to it. On the other hand, the auto-generated names are adequate whenever
+      the container is responsible for wiring.</para>
     </section>
 
     <section id="beans-scanning-scope-resolver">
-      <title>Providing a scope for auto-detected beans</title>
+      <title>Providing a scope for auto-detected components</title>
 
-      <para>As with Spring beans in general, the default and by far most
-      common scope is 'singleton'. However, there are times when other scopes
-      are needed. Therefore Spring 2.5 introduces a new
+      <para>As with Spring-managed components in general, the default and by
+      far most common scope is 'singleton'. However, there are times when
+      other scopes are needed. Therefore Spring 2.5 introduces a new
       <interfacename>@Scope</interfacename> annotation as well. Simply provide
       the name of the scope within the annotation, such as:</para>
 
       <programlisting>@Scope("prototype")
 @Repository
 public class MovieFinderImpl implements MovieFinder {
-
     <lineannotation>// ...</lineannotation>
 }</programlisting>
 
@@ -5950,8 +5990,7 @@ public class MovieFinderImpl implements MovieFinder {
         <para>If you would like to provide a custom strategy for scope
         resolution rather than relying on the annotation-based approach,
         implement the <ulink
-        url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/context/annotation/ScopeMetadataResolver.html">
-        <interfacename>ScopeMetadataResolver</interfacename> </ulink>
+        url="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/context/annotation/ScopeMetadataResolver.html"><interfacename>ScopeMetadataResolver</interfacename></ulink>
         interface, and be sure to include a default no-arg constructor. Then,
         provide the fully-qualified class name when configuring the
         scanner:</para>
@@ -6003,7 +6042,7 @@ public class MovieFinderImpl implements MovieFinder {
     combination with <link linkend="orm-jpa">Spring's JPA support</link> where
     load-time weaving may be necessary for JPA class transformation. Consult
     the <classname>LocalContainerEntityManagerFactoryBean</classname> Javadoc
-    for more detail. For more on AspectJ load-time weaving, see the section
-    entitled <xref linkend="aop-aj-ltw" />.</para>
+    for more detail. For more on AspectJ load-time weaving, see <xref
+    linkend="aop-aj-ltw" />.</para>
   </section>
 </chapter>
