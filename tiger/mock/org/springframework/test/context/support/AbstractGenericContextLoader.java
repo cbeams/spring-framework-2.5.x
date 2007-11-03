@@ -18,6 +18,7 @@ package org.springframework.test.context.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -38,7 +39,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Sam Brannen
  * @since 2.5
- * @see #loadContext
+ * @see #loadContext(String...)
  */
 public abstract class AbstractGenericContextLoader extends AbstractContextLoader {
 
@@ -57,11 +58,13 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * <li>Creates a standard {@link GenericApplicationContext} instance.</li>
 	 * <li>Populates it from the specified config locations through a
 	 * {@link #createBeanDefinitionReader(GenericApplicationContext) BeanDefinitionReader}.</li>
-	 * <li>Calls {@link #customizeBeanFactory} to allow for customizing the
-	 * context's DefaultListableBeanFactory.</li>
+	 * <li>Calls {@link #customizeBeanFactory(DefaultListableBeanFactory)} to
+	 * allow for customizing the context's DefaultListableBeanFactory.</li>
 	 * <li>Delegates to {@link AnnotationConfigUtils} for
 	 * {@link AnnotationConfigUtils#registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry) registering}
 	 * annotation configuration processors.</li>
+	 * <li>Calls {@link #customizeContext(GenericApplicationContext)} to allow
+	 * for customizing the context before it is refreshed.</li>
 	 * <li>{@link ConfigurableApplicationContext#refresh() Refreshes} the
 	 * context and registers a JVM shutdown hook for it.</li>
 	 * </p>
@@ -74,7 +77,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @return a new application context
 	 * @see org.springframework.test.context.ContextLoader#loadContext
 	 * @see GenericApplicationContext
-	 * @see #customizeBeanFactory
+	 * @see #customizeBeanFactory(DefaultListableBeanFactory)
 	 * @see #createBeanDefinitionReader(GenericApplicationContext)
 	 * @see BeanDefinitionReader
 	 */
@@ -89,6 +92,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
 		createBeanDefinitionReader(context).loadBeanDefinitions(locations);
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+		customizeContext(context);
 		context.refresh();
 		context.registerShutdownHook();
 		return context;
@@ -104,12 +108,12 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * to customize DefaultListableBeanFactory's standard settings.
 	 * </p>
 	 *
-	 * @param beanFactory the newly created bean factory for this context
-	 * @see #loadContext
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowEagerClassLoading
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
+	 * @param beanFactory the bean factory created by this ContextLoader
+	 * @see #loadContext(String...)
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding(boolean)
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowEagerClassLoading(boolean)
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences(boolean)
+	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping(boolean)
 	 */
 	protected void customizeBeanFactory(final DefaultListableBeanFactory beanFactory) {
 		/* no-op */
@@ -123,9 +127,27 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @param context The context for which the BeanDefinitionReader should be
 	 *        created.
 	 * @return A BeanDefinitionReader for the supplied context.
-	 * @see #loadContext
+	 * @see #loadContext(String...)
 	 * @see BeanDefinitionReader
 	 */
 	protected abstract BeanDefinitionReader createBeanDefinitionReader(final GenericApplicationContext context);
+
+	/**
+	 * <p>
+	 * Customize the {@link GenericApplicationContext} created by this
+	 * ContextLoader after bean definitions have been loaded into the context
+	 * but before the context is refreshed.
+	 * </p>
+	 * <p>
+	 * The default implementation is empty but can be overridden in subclasses
+	 * to customize the application context.
+	 * </p>
+	 *
+	 * @param context the newly created application context
+	 * @see #loadContext(String...)
+	 */
+	protected void customizeContext(final GenericApplicationContext context) {
+		/* no-op */
+	}
 
 }

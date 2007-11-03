@@ -42,7 +42,12 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.SimpleWebApplicationContext;
 
 /**
+ * JUnit 3.8 based tests for {@link ContextLoader},
+ * {@link ContextLoaderListener}, {@link ContextLoaderServlet}, and related
+ * classes.
+ *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 12.08.2003
  */
 public class ContextLoaderTests extends TestCase {
@@ -50,13 +55,12 @@ public class ContextLoaderTests extends TestCase {
 	public void testContextLoaderListenerWithDefaultContext() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
-				"/org/springframework/web/context/WEB-INF/applicationContext.xml " +
-				"/org/springframework/web/context/WEB-INF/context-addition.xml");
+				"/org/springframework/web/context/WEB-INF/applicationContext.xml "
+						+ "/org/springframework/web/context/WEB-INF/context-addition.xml");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
 		listener.contextInitialized(event);
-		WebApplicationContext context = (WebApplicationContext)
-				sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		assertTrue("Correct WebApplicationContext exposed in ServletContext",
 				context instanceof XmlWebApplicationContext);
 		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");
@@ -70,6 +74,26 @@ public class ContextLoaderTests extends TestCase {
 		assertTrue("Destroyed", lb.isDestroyed());
 	}
 
+	public void testContextLoaderListenerWithCustomizedContextLoader() throws Exception {
+		final StringBuffer buffer = new StringBuffer();
+		final String expectedContents = "customizeContext() was called";
+		final MockServletContext sc = new MockServletContext("");
+		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
+				"/org/springframework/web/context/WEB-INF/applicationContext.xml");
+		final ServletContextListener listener = new ContextLoaderListener() {
+			protected ContextLoader createContextLoader() {
+				return new ContextLoader() {
+					protected void customizeContext(ConfigurableWebApplicationContext context) {
+						assertFalse("The context should not yet have been refreshed.", context.isActive());
+						buffer.append(expectedContents);
+					}
+				};
+			}
+		};
+		listener.contextInitialized(new ServletContextEvent(sc));
+		assertEquals("customizeContext() should have been called.", expectedContents, buffer.toString());
+	}
+
 	public void testContextLoaderServletWithDefaultContext() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
@@ -77,8 +101,7 @@ public class ContextLoaderTests extends TestCase {
 		HttpServlet servlet = new ContextLoaderServlet();
 		ServletConfig config = new MockServletConfig(sc, "test");
 		servlet.init(config);
-		WebApplicationContext context = (WebApplicationContext)
-				sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		assertTrue("Correct WebApplicationContext exposed in ServletContext",
 				context instanceof XmlWebApplicationContext);
 		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");
@@ -92,17 +115,15 @@ public class ContextLoaderTests extends TestCase {
 	public void testContextLoaderWithDefaultContextAndParent() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
-				"/org/springframework/web/context/WEB-INF/applicationContext.xml " +
-				"/org/springframework/web/context/WEB-INF/context-addition.xml");
+				"/org/springframework/web/context/WEB-INF/applicationContext.xml "
+						+ "/org/springframework/web/context/WEB-INF/context-addition.xml");
 		sc.addInitParameter(ContextLoader.LOCATOR_FACTORY_SELECTOR_PARAM,
 				"classpath:org/springframework/beans/factory/access/ref1.xml");
-		sc.addInitParameter(ContextLoader.LOCATOR_FACTORY_KEY_PARAM,
-				"a.qualified.name.of.some.sort");
+		sc.addInitParameter(ContextLoader.LOCATOR_FACTORY_KEY_PARAM, "a.qualified.name.of.some.sort");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
 		listener.contextInitialized(event);
-		WebApplicationContext context = (WebApplicationContext)
-				sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		assertTrue("Correct WebApplicationContext exposed in ServletContext",
 				context instanceof XmlWebApplicationContext);
 		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");
@@ -125,10 +146,8 @@ public class ContextLoaderTests extends TestCase {
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
 		listener.contextInitialized(event);
-		WebApplicationContext wc = (WebApplicationContext)
-				sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		assertTrue("Correct WebApplicationContext exposed in ServletContext",
-				wc instanceof SimpleWebApplicationContext);
+		WebApplicationContext wc = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		assertTrue("Correct WebApplicationContext exposed in ServletContext", wc instanceof SimpleWebApplicationContext);
 	}
 
 	public void testContextLoaderWithInvalidLocation() throws Exception {
@@ -172,7 +191,6 @@ public class ContextLoaderTests extends TestCase {
 		}
 		catch (BeanDefinitionStoreException ex) {
 			// expected
-			ex.printStackTrace();
 			assertTrue(ex.getCause() instanceof IOException);
 			assertTrue(ex.getCause().getMessage().indexOf("/WEB-INF/applicationContext.xml") != -1);
 		}
@@ -194,9 +212,8 @@ public class ContextLoaderTests extends TestCase {
 
 	public void testFrameworkServletWithCustomLocation() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet();
-		servlet.setContextConfigLocation(
-				"/org/springframework/web/context/WEB-INF/testNamespace.xml " +
-				"/org/springframework/web/context/WEB-INF/context-addition.xml");
+		servlet.setContextConfigLocation("/org/springframework/web/context/WEB-INF/testNamespace.xml "
+				+ "/org/springframework/web/context/WEB-INF/context-addition.xml");
 		servlet.init(new MockServletConfig(new MockServletContext(""), "test"));
 		assertTrue(servlet.getWebApplicationContext().containsBean("kerry"));
 		assertTrue(servlet.getWebApplicationContext().containsBean("kerryX"));
@@ -213,7 +230,7 @@ public class ContextLoaderTests extends TestCase {
 
 		context = new ClassPathXmlApplicationContext(new String[] {
 			"/org/springframework/web/context/WEB-INF/applicationContext.xml",
-			"/org/springframework/web/context/WEB-INF/context-addition.xml"});
+			"/org/springframework/web/context/WEB-INF/context-addition.xml" });
 		assertTrue("Has father", context.containsBean("father"));
 		assertTrue("Has rod", context.containsBean("rod"));
 		assertTrue("Has kerry", context.containsBean("kerry"));
@@ -223,7 +240,8 @@ public class ContextLoaderTests extends TestCase {
 		try {
 			new ClassPathXmlApplicationContext(new String[] {
 				"/org/springframework/web/context/WEB-INF/applicationContext.xml",
-				"/org/springframework/web/context/WEB-INF/fail.xml"}) {
+				"/org/springframework/web/context/WEB-INF/fail.xml" }) {
+
 				public void refresh() throws BeansException {
 					try {
 						super.refresh();
