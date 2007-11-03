@@ -165,6 +165,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 		if (configLocations != null) {
 			loadBeanDefinitions(applicationContext, configLocations);
 		}
+		applicationContext.refresh();
 		return applicationContext;
 	}
 
