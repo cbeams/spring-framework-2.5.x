@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.support;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -29,15 +29,16 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.test.context.support.GenericXmlContextLoader;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextLoader;
 import org.springframework.util.ObjectUtils;
 
 /**
  * JUnit 4 based unit test which verifies proper
  * {@link ContextLoader#processLocations(Class,String...) processing} of
- * <code>resource locations</code> by a {@link ContextLoader} configured via
- * {@link ContextConfiguration @ContextConfiguration}. Specifically, this test
- * addresses the issues raised in <a
+ * <code>resource locations</code> by a {@link GenericXmlContextLoader}
+ * configured via {@link ContextConfiguration @ContextConfiguration}.
+ * Specifically, this test addresses the issues raised in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3949"
  * target="_blank">SPR-3949</a>:
  * <em>ContextConfiguration annotation should accept not only classpath resources</em>.
@@ -46,15 +47,15 @@ import org.springframework.util.ObjectUtils;
  * @since 2.5
  */
 @RunWith(Parameterized.class)
-public class ContextLoaderTests {
+public class GenericXmlContextLoaderResourceLocationsTests {
 
-	private static final Log logger = LogFactory.getLog(ContextLoaderTests.class);
+	private static final Log logger = LogFactory.getLog(GenericXmlContextLoaderResourceLocationsTests.class);
 
 	protected final Class<?> testClass;
 	protected final String[] expectedLocations;
 
 
-	public ContextLoaderTests(final Class<?> testClass, final String[] expectedLocations) {
+	public GenericXmlContextLoaderResourceLocationsTests(final Class<?> testClass, final String[] expectedLocations) {
 		this.testClass = testClass;
 		this.expectedLocations = expectedLocations;
 	}
@@ -65,12 +66,12 @@ public class ContextLoaderTests {
 
 			{
 				ClasspathDefaultLocationsTest.class,
-				new String[] { "classpath:/org/springframework/test/context/ContextLoaderTests$ClasspathDefaultLocationsTest-context.xml" } },
+				new String[] { "classpath:/org/springframework/test/context/support/GenericXmlContextLoaderResourceLocationsTests$ClasspathDefaultLocationsTest-context.xml" } },
 
 			{
 				ImplicitClasspathLocationsTest.class,
-				new String[] { "classpath:/org/springframework/test/context/context1.xml",
-					"classpath:/org/springframework/test/context/context2.xml" } },
+				new String[] { "classpath:/org/springframework/test/context/support/context1.xml",
+					"classpath:/org/springframework/test/context/support/context2.xml" } },
 
 			{ ExplicitClasspathLocationsTest.class, new String[] { "classpath:context.xml" } },
 
@@ -80,8 +81,9 @@ public class ContextLoaderTests {
 
 			{
 				ExplicitMixedPathTypesLocationsTest.class,
-				new String[] { "classpath:/org/springframework/test/context/context1.xml", "classpath:context2.xml",
-					"classpath:/context3.xml", "file:/testing/directory/context.xml", "http://example.com/context.xml" } }
+				new String[] { "classpath:/org/springframework/test/context/support/context1.xml",
+					"classpath:context2.xml", "classpath:/context3.xml", "file:/testing/directory/context.xml",
+					"http://example.com/context.xml" } }
 
 		});
 	}
