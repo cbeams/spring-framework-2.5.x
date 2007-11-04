@@ -330,7 +330,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			throws NoSuchBeanDefinitionException {
 
 		// Consider FactoryBeans as autowiring candidates.
-		final boolean isFactoryBean = (descriptor.getDependencyType() != null)
+		final boolean isFactoryBean = (descriptor != null) && (descriptor.getDependencyType() != null)
 				&& FactoryBean.class.isAssignableFrom(descriptor.getDependencyType());
 		final boolean isFactoryBeanName = (beanName != null) && beanName.startsWith(FACTORY_BEAN_PREFIX);
 		if (isFactoryBean && isFactoryBeanName) {
