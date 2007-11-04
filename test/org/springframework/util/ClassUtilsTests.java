@@ -199,6 +199,13 @@ public class ClassUtilsTests extends TestCase {
 		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "someOtherMethod", null));
 	}
 
+	public void testGetMethodCountForName() {
+		assertEquals("Verifying number of overloaded 'print' methods for OverloadedMethodsClass.", 2,
+				ClassUtils.getMethodCountForName(OverloadedMethodsClass.class, "print"));
+		assertEquals("Verifying number of overloaded 'print' methods for SubOverloadedMethodsClass.", 4,
+				ClassUtils.getMethodCountForName(SubOverloadedMethodsClass.class, "print"));
+	}
+
 	public void testCountOverloadedMethods() {
 		assertFalse(ClassUtils.hasAtLeastOneMethodWithName(TestBean.class, "foobar"));
 		// no args
@@ -289,6 +296,24 @@ public class ClassUtilsTests extends TestCase {
 
 		public static void argStaticMethod(String anArg) {
 			argCalled = true;
+		}
+	}
+
+	private static class OverloadedMethodsClass {
+		public void print(String messages) {
+			/* no-op */
+		}
+		public void print(String[] messages) {
+			/* no-op */
+		}
+	}
+
+	private static class SubOverloadedMethodsClass extends OverloadedMethodsClass{
+		public void print(String header, String[] messages) {
+			/* no-op */
+		}
+		void print(String header, String[] messages, String footer) {
+			/* no-op */
 		}
 	}
 

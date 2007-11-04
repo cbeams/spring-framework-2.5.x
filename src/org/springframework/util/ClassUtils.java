@@ -486,12 +486,13 @@ public abstract class ClassUtils {
 	 * @param methodName the name of the method
 	 * @return the number of methods with the given name
 	 */
-	public static int getMethodCountForName(Class clazz, String methodName) {
+	public static int getMethodCountForName(final Class clazz, final String methodName) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		int count = 0;
-		for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
-			Method method = clazz.getDeclaredMethods()[i];
+		final Method[] declaredMethods = clazz.getDeclaredMethods();
+		for (int i = 0; i < declaredMethods.length; i++) {
+			Method method = declaredMethods[i];
 			if (methodName.equals(method.getName())) {
 				count++;
 			}
@@ -513,11 +514,12 @@ public abstract class ClassUtils {
 	 * @param methodName the name of the method
 	 * @return whether there is at least one method with the given name
 	 */
-	public static boolean hasAtLeastOneMethodWithName(Class clazz, String methodName) {
+	public static boolean hasAtLeastOneMethodWithName(final Class clazz, final String methodName) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
-		for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
-			Method method = clazz.getDeclaredMethods()[i];
+		final Method[] declaredMethods = clazz.getDeclaredMethods();
+		for (int i = 0; i < declaredMethods.length; i++) {
+			Method method = declaredMethods[i];
 			if (method.getName().equals(methodName)) {
 				return true;
 			}
