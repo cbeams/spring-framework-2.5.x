@@ -19,6 +19,7 @@ package org.springframework.core.type.filter;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 
 /**
@@ -49,7 +50,9 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 
 	@Override
 	protected boolean matchSelf(MetadataReader metadataReader) {
-		return metadataReader.getAnnotationMetadata().hasAnnotation(this.annotationType.getName());
+		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
+		return metadata.hasAnnotation(this.annotationType.getName()) || 
+				metadata.hasMetaAnnotation(this.annotationType.getName());
 	}
 
 	@Override

@@ -148,15 +148,14 @@ public class ClassPathScanningCandidateComponentProvider implements ResourceLoad
 	}
 
 	/**
-	 * Register default filters for the {@link Component @Component},
+	 * Register the default filter for {@link Component @Component}.
+	 * This will implicitly register all annotations that have the
+	 * {@link Component @Component} meta-annotation including the
 	 * {@link Repository @Repository}, {@link Service @Service}, and
 	 * {@link Controller @Controller} stereotype annotations.
 	 */
 	protected void registerDefaultFilters() {
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
-		this.includeFilters.add(new AnnotationTypeFilter(Repository.class));
-		this.includeFilters.add(new AnnotationTypeFilter(Service.class));
-		this.includeFilters.add(new AnnotationTypeFilter(Controller.class));
 	}
 
 

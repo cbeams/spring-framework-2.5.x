@@ -30,13 +30,13 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
  */
-@Component
+@Service
 public class FooServiceImpl implements FooService {
 
 	@Autowired private FooDao fooDao;

@@ -24,6 +24,7 @@ import java.util.Set;
  * class, in a form that does not require that class to be loaded yet.
  *
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 2.5
  * @see StandardAnnotationMetadata
  * @see org.springframework.core.type.classreading.MetadataReader#getAnnotationMetadata()
@@ -43,6 +44,21 @@ public interface AnnotationMetadata extends ClassMetadata {
 	 * @return whether a matching annotation is defined
 	 */
 	boolean hasAnnotation(String annotationType);
+
+	/**
+	 * Return the names of all meta-annotation types defined on the
+	 * annotations of the underlying class.
+	 * @return the annotation type names
+	 */
+	Set<String> getMetaAnnotationTypes();
+
+	/**
+	 * Determine whether the underlying class has an annotation that
+	 * is itself annotated with the meta-annotation of the given type.
+	 * @param annotationType the annotation type to look for
+	 * @return whether a matching meta-annotation is defined
+	 */
+	boolean hasMetaAnnotation(String annotationType);
 
 	/**
 	 * Retrieve the attributes of the annotation of the given type,

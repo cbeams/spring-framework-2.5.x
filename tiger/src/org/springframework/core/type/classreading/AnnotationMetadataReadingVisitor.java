@@ -16,6 +16,8 @@
 
 package org.springframework.core.type.classreading;
 
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -32,11 +34,14 @@ import org.springframework.core.type.AnnotationMetadata;
  * the {@link org.springframework.core.type.AnnotationMetadata} interface.
  *
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 2.5
  */
 class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
 
 	private final Map<String, Map<String, Object>> attributesMap = new LinkedHashMap<String, Map<String, Object>>();
+
+	private final Set<String> metaAnnotationTypes = new HashSet<String>();
 
 
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
@@ -47,6 +52,16 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 				attributes.put(name, value);
 			}
 			public void visitEnd() {
+				try {
+					Class clazz = getClass().getClassLoader().loadClass(className);
+					Annotation[] metaAnnotations = clazz.getAnnotations();
+					for (Annotation metaAnnotation : metaAnnotations) {
+						metaAnnotationTypes.add(metaAnnotation.annotationType().getName());
+					}
+				}
+				catch (ClassNotFoundException ex) {
+					// Class not found - can't determine meta-annotations.
+				}
 				attributesMap.put(className, attributes);
 			}
 		};
@@ -59,6 +74,14 @@ class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor imple
 
 	public boolean hasAnnotation(String annotationType) {
 		return this.attributesMap.containsKey(annotationType);
+	}
+
+	public Set<String> getMetaAnnotationTypes() {
+		return this.metaAnnotationTypes;
+	}
+
+	public boolean hasMetaAnnotation(String annotationType) {
+		return this.metaAnnotationTypes.contains(annotationType);
 	}
 
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {

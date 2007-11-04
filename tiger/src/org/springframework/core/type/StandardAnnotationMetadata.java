@@ -28,6 +28,7 @@ import org.springframework.core.annotation.AnnotationUtils;
  * to introspect a given <code>Class</code>.
  *
  * @author Juergen Hoeller
+ * @author Mark Fisher
  * @since 2.5
  */
 public class StandardAnnotationMetadata extends StandardClassMetadata implements AnnotationMetadata {
@@ -51,6 +52,31 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		for (int i = 0; i < anns.length; i++) {
 			if (anns[i].annotationType().getName().equals(annotationType)) {
 				return true;
+			}
+		}
+		return false;
+	}
+
+	public Set<String> getMetaAnnotationTypes() {
+		Set<String> types = new HashSet<String>();
+		Annotation[] anns = getIntrospectedClass().getAnnotations();
+		for (int i = 0; i < anns.length; i++) {
+			Annotation[] metaAnns = anns[i].annotationType().getAnnotations();
+			for (Annotation meta : metaAnns) {
+				types.add(meta.annotationType().getName());
+			}
+		}
+		return types;
+	}
+
+	public boolean hasMetaAnnotation(String annotationType) {
+		Annotation[] anns = getIntrospectedClass().getAnnotations();
+		for (int i = 0; i < anns.length; i++) {
+			Annotation[] metaAnns = anns[i].annotationType().getAnnotations();
+			for (Annotation meta : metaAnns) {
+				if (meta.annotationType().getName().equals(annotationType)) {
+					return true;
+				}
 			}
 		}
 		return false;
