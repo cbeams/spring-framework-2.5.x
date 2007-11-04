@@ -1401,7 +1401,7 @@ public class DefaultFooService implements FooService {
             
             <para>Consider the situation where you would like to execute
 			<emphasis>both</emphasis> transactional <emphasis>and</emphasis>
-			(to keep things simple) some basic profiling advice. Hhow do you
+			(to keep things simple) some basic profiling advice. How do you
 			effect this in the context of using
 			<literal>&lt;tx:annotation-driven/&gt;</literal>?</para>
             <para>What we want to see when we invoke the <methodname>updateFoo(Foo)</methodname>
