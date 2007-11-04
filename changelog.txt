@@ -6,6 +6,9 @@ http://www.springframework.org
 Changes in version 2.5 RC2 (2007-11-05)
 ---------------------------------------
 
+Package org.springframework.beans
+* DefaultListableBeanFactory now supports autowiring of FactoryBeans 'by type'
+
 Package org.springframework.test
 * AbstractGenericContextLoader provides an opportunity for subclasses to customize the context before calling refresh
 

@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import junit.framework.TestCase;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -69,6 +70,7 @@ import org.springframework.util.StopWatch;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Sam Brannen
  */
 public class DefaultListableBeanFactoryTests extends TestCase {
 
@@ -1062,6 +1064,43 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertEquals(test, bean.getSpouse());
 	}
 
+	/**
+	 * Verifies that a dependency on a {@link FactoryBean} can be autowired
+	 * <em>by type</em>, specifically addressing the JIRA issue raised in <a
+	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-4040"
+	 * target="_blank">SPR-4040</a>.
+	 */
+	public void testAutowireBeanWithFactoryBeanByType() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(LazyInitFactory.class, new MutablePropertyValues());
+		lbf.registerBeanDefinition("factoryBean", bd);
+		LazyInitFactory factoryBean = (LazyInitFactory) lbf.getBean("&factoryBean");
+		assertNotNull("The FactoryBean should have been registered.", factoryBean);
+		FactoryBeanDependentBean bean = (FactoryBeanDependentBean) lbf.autowire(FactoryBeanDependentBean.class,
+				AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
+		assertEquals("The FactoryBeanDependentBean should have been autowired 'by type' with the LazyInitFactory.",
+				factoryBean, bean.getFactoryBean());
+	}
+
+	/**
+	 * Verifies that a dependency on a {@link FactoryBean} can <strong>not</strong>
+	 * be autowired <em>by name</em>, as &amp; is an illegal character in
+	 * Java method names. In other words, you can't name a method
+	 * <code>set&amp;FactoryBean(...)</code>.
+	 */
+	public void testAutowireBeanWithFactoryBeanByName() {
+		new AssertThrows(TypeMismatchException.class) {
+			public void test() throws Exception {
+				DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+				RootBeanDefinition bd = new RootBeanDefinition(LazyInitFactory.class, new MutablePropertyValues());
+				lbf.registerBeanDefinition("factoryBean", bd);
+				LazyInitFactory factoryBean = (LazyInitFactory) lbf.getBean("&factoryBean");
+				assertNotNull("The FactoryBean should have been registered.", factoryBean);
+				lbf.autowire(FactoryBeanDependentBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_NAME, true);
+			}
+		}.runTest();
+	}
+
 	public void testAutowireBeanByTypeWithTwoMatches() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
@@ -1382,7 +1421,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			lbf.getBean("test");
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
+		// System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 2000);
 	}
 
@@ -1402,7 +1441,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			lbf.getBean("test");
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
+		// System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 2000);
 	}
 
@@ -1423,7 +1462,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			setBeanFactoryMethod.invoke(tb, lbf);
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
+		// System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 500);
 	}
 	*/
@@ -1446,7 +1485,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			assertEquals(99, tb.getAge());
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
+		// System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 2000);
 	}
 
@@ -1470,7 +1509,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			assertEquals(99, tb.getAge());
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
+		// System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1500);
 	}
 	*/
@@ -1493,7 +1532,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			assertSame(spouse, tb.getSpouse());
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
+		// System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 3000);
 	}
 
@@ -1515,7 +1554,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			assertEquals(99, tb.getAge());
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
+		// System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 3000);
 	}
 
@@ -1540,7 +1579,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			setAgeMethod.invoke(tb, 99);
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
+		// System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 750);
 	}
 	*/
@@ -1563,7 +1602,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			assertSame(spouse, tb.getSpouse());
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
+		// System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
 	}
 
@@ -1708,19 +1747,19 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 		RootBeanDefinition parent = new RootBeanDefinition();
 		parent.setSingleton(false);
-		
+
 		AbstractBeanDefinition child = BeanDefinitionBuilder
 				.childBeanDefinition("parent").getBeanDefinition();
 		child.setBeanClass(TestBean.class);
 		child.setScope(theChildScope);
-		
+
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("parent", parent);
 		factory.registerBeanDefinition("child", child);
 
 		AbstractBeanDefinition def = (AbstractBeanDefinition) factory.getBeanDefinition("child");
 		assertEquals("Child 'scope' not overriding parent scope (it must).", theChildScope, def.getScope());
-	}	
+	}
 
 	public void testImplicitScopeInheritanceForChildBeanDefinitions() throws Exception {
 		RootBeanDefinition parent = new RootBeanDefinition();
@@ -1864,7 +1903,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 		public TestBean create() {
 			TestBean tb = new TestBean();
-			tb.setName(name);
+			tb.setName(this.name);
 			return tb;
 		}
 
@@ -1979,7 +2018,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		}
 
 		public Integer[] getIntegerArray() {
-			return integerArray;
+			return this.integerArray;
 		}
 
 		public void setResourceArray(Resource[] resourceArray) {
@@ -1987,10 +2026,27 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		}
 
 		public Resource[] getResourceArray() {
-			return resourceArray;
+			return this.resourceArray;
 		}
 	}
 
+
+	/**
+	 * Bean with a dependency on a {@link FactoryBean}.
+	 */
+	private static class FactoryBeanDependentBean {
+
+		private FactoryBean factoryBean;
+
+
+		public final FactoryBean getFactoryBean() {
+			return this.factoryBean;
+		}
+
+		public final void setFactoryBean(final FactoryBean factoryBean) {
+			this.factoryBean = factoryBean;
+		}
+	}
 
 	private static class CustomTypeConverter implements TypeConverter {
 

@@ -67,6 +67,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 16 April 2001
  * @see StaticListableBeanFactory
  * @see PropertiesBeanDefinitionReader
@@ -222,8 +223,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						throw ex;
 					}
 					// Probably contains a placeholder: let's ignore it for type matching purposes.
-					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
+					if (this.logger.isDebugEnabled()) {
+						this.logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'", ex);
 					}
 					onSuppressedException(ex);
 				}
@@ -232,8 +233,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						throw ex;
 					}
 					// Probably contains a placeholder: let's ignore it for type matching purposes.
-					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
+					if (this.logger.isDebugEnabled()) {
+						this.logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'", ex);
 					}
 					onSuppressedException(ex);
 				}
@@ -299,8 +300,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (rootCause instanceof BeanCurrentlyInCreationException) {
 					BeanCreationException bce = (BeanCreationException) rootCause;
 					if (isCurrentlyInCreation(bce.getBeanName())) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Ignoring match to currently created bean '" + beanName + "': " + ex.getMessage());
+						if (this.logger.isDebugEnabled()) {
+							this.logger.debug("Ignoring match to currently created bean '" + beanName + "': " + ex.getMessage());
 						}
 						onSuppressedException(ex);
 						// Ignore: indicates a circular reference when autowiring constructors.
@@ -328,6 +329,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor)
 			throws NoSuchBeanDefinitionException {
 
+		// Consider FactoryBeans as autowiring candidates.
+		final boolean isFactoryBean = (descriptor.getDependencyType() != null)
+				&& FactoryBean.class.isAssignableFrom(descriptor.getDependencyType());
+		final boolean isFactoryBeanName = (beanName != null) && beanName.startsWith(FACTORY_BEAN_PREFIX);
+		if (isFactoryBean && isFactoryBeanName) {
+			beanName = beanName.substring(FACTORY_BEAN_PREFIX.length());
+		}
+
 		if (!containsBeanDefinition(beanName)) {
 			if (containsSingleton(beanName)) {
 				return true;
@@ -337,6 +346,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return ((ConfigurableListableBeanFactory) getParentBeanFactory()).isAutowireCandidate(beanName, descriptor);
 			}
 		}
+
 		return isAutowireCandidate(beanName, getMergedLocalBeanDefinition(beanName), descriptor);
 	}
 
@@ -376,8 +386,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No bean named '" + beanName + "' found in " + this);
+			if (this.logger.isTraceEnabled()) {
+				this.logger.trace("No bean named '" + beanName + "' found in " + this);
 			}
 			throw new NoSuchBeanDefinitionException(beanName);
 		}
@@ -385,8 +395,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	public void preInstantiateSingletons() throws BeansException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Pre-instantiating singletons in " + this);
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("Pre-instantiating singletons in " + this);
 		}
 
 		synchronized (this.beanDefinitionMap) {
@@ -438,8 +448,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							"': There is already [" + oldBeanDefinition + "] bound.");
 				}
 				else {
-					if (logger.isInfoEnabled()) {
-						logger.info("Overriding bean definition for bean '" + beanName +
+					if (this.logger.isInfoEnabled()) {
+						this.logger.info("Overriding bean definition for bean '" + beanName +
 								"': replacing [" + oldBeanDefinition + "] with [" + beanDefinition + "]");
 					}
 				}
@@ -459,8 +469,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		synchronized (this.beanDefinitionMap) {
 			BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.remove(beanName);
 			if (bd == null) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("No bean named '" + beanName + "' found in " + this);
+				if (this.logger.isTraceEnabled()) {
+					this.logger.trace("No bean named '" + beanName + "' found in " + this);
 				}
 				throw new NoSuchBeanDefinitionException(beanName);
 			}
