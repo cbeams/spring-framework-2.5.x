@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.5 RC2 (2007-11-05)
+Changes in version 2.5 RC2 (2007-11-09)
 ---------------------------------------
 
 Package org.springframework.beans
