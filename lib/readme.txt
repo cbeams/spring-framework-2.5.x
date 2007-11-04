@@ -369,8 +369,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - TestNG 5.5 (http://testng.org)
 - required for building and running the framework's test suite
 
-* tiles/tiles-api-2.0.4.jar, tiles/tiles-core-2.0.4.jar, tiles/tiles-jsp-2.0.4.jar
-- Apache Tiles 2.0.4 (http://tiles.apache.org)
+* tiles/tiles-api-2.0.5.jar, tiles/tiles-core-2.0.5.jar, tiles/tiles-jsp-2.0.5.jar
+- Apache Tiles 2.0.5 (http://tiles.apache.org)
 - required for building the framework
 - required at runtime when using the Tiles2 TilesView
 
