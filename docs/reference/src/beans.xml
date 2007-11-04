@@ -5842,12 +5842,15 @@ public class JpaMovieFinder implements MovieFinder {
       <interfacename>@Component</interfacename>,
       <interfacename>@Repository</interfacename>,
       <interfacename>@Service</interfacename>, or
-      <interfacename>@Controller</interfacename> are the only detected
+      <interfacename>@Controller</interfacename> (or classes annotated with a
+      custom annotation that itself is annotated with 
+      <interfacename>@Component</interfacename>) are the only detected
       candidate components. However it is simple to modify and extend this
       behavior by applying custom filters. These can be added as either
       <emphasis>include-filter</emphasis> or
-      <emphasis>exclude-filter</emphasis> sub-elements of the 'component-scan'
-      element. Each filter element requires the 'type' and 'expression'
+      <emphasis>exclude-filter</emphasis> sub-elements of the 
+      '<literal>component-scan</literal>' element. Each filter element requires 
+      the '<literal>type</literal>' and '<literal>expression</literal>'
       attributes. Four filtering options exist as described below.</para>
 
       <table id="beans-scanning-filters-tbl">
