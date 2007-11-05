@@ -49,6 +49,10 @@ public class MethodParameter {
 
 	private final int parameterIndex;
 
+	private Class parameterType;
+
+	private Object[] parameterAnnotations;
+
 	private int nestingLevel;
 
 	/** Map from Integer level to Integer type index */
@@ -137,9 +141,12 @@ public class MethodParameter {
 	 * @return the parameter type (never <code>null</code>)
 	 */
 	public Class getParameterType() {
-		return (this.method != null ?
-				this.method.getParameterTypes()[this.parameterIndex] :
-				this.constructor.getParameterTypes()[this.parameterIndex]);
+		if (this.parameterType == null) {
+			this.parameterType = (this.method != null ?
+					this.method.getParameterTypes()[this.parameterIndex] :
+					this.constructor.getParameterTypes()[this.parameterIndex]);
+		}
+		return this.parameterType;
 	}
 
 	/**
@@ -153,9 +160,12 @@ public class MethodParameter {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
 			return null;
 		}
-		return (this.method != null ?
-				this.method.getParameterAnnotations()[this.parameterIndex] :
-				this.constructor.getParameterAnnotations()[this.parameterIndex]);
+		if (this.parameterAnnotations == null) {
+			this.parameterAnnotations = (this.method != null ?
+					this.method.getParameterAnnotations()[this.parameterIndex] :
+					this.constructor.getParameterAnnotations()[this.parameterIndex]);
+		}
+		return this.parameterAnnotations;
 	}
 
 
