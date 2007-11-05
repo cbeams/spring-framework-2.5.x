@@ -71,7 +71,6 @@ public abstract class AnnotationUtils {
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 */
 	public static Annotation[] getAnnotations(final Method method) {
-
 		return BridgeMethodResolver.findBridgedMethod(method).getAnnotations();
 	}
 
@@ -91,7 +90,6 @@ public abstract class AnnotationUtils {
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod(Method)
 	 */
 	public static <A extends Annotation> A getAnnotation(final Method method, final Class<A> annotationType) {
-
 		return BridgeMethodResolver.findBridgedMethod(method).getAnnotation(annotationType);
 	}
 
@@ -111,7 +109,6 @@ public abstract class AnnotationUtils {
 	 * @return the annotation of the given type found, or <code>null</code>
 	 */
 	public static <A extends Annotation> A findAnnotation(final Method method, final Class<A> annotationType) {
-
 		A annotation = getAnnotation(method, annotationType);
 		Class<?> cl = method.getDeclaringClass();
 		while (annotation == null) {
@@ -137,8 +134,9 @@ public abstract class AnnotationUtils {
 	 * if no annotation can be found on the given class itself.
 	 * </p>
 	 * <p>
-	 * Annotations on methods are not inherited by default, so we need to handle
-	 * this explicitly.
+	 * This method explicitly handles class-level annotations which are not
+	 * declared as {@link java.lang.annotation.Inherited inherited} as well as
+	 * annotations on interfaces.
 	 * </p>
 	 *
 	 * @param clazz the class to look for annotations on
@@ -146,7 +144,6 @@ public abstract class AnnotationUtils {
 	 * @return the annotation of the given type found, or <code>null</code>
 	 */
 	public static <A extends Annotation> A findAnnotation(final Class<?> clazz, final Class<A> annotationType) {
-
 		Assert.notNull(clazz, "Class must not be null");
 		A annotation = clazz.getAnnotation(annotationType);
 		if (annotation != null) {
@@ -195,7 +192,6 @@ public abstract class AnnotationUtils {
 	 */
 	public static Class<?> findAnnotationDeclaringClass(
 			final Class<? extends Annotation> annotationType, final Class<?> clazz) {
-
 		Assert.notNull(annotationType, "annotationType must not be null");
 		if ((clazz == null) || clazz.equals(Object.class)) {
 			return null;
@@ -229,7 +225,6 @@ public abstract class AnnotationUtils {
 	 */
 	public static boolean isAnnotationDeclaredLocally(
 			final Class<? extends Annotation> annotationType, final Class<?> clazz) {
-
 		Assert.notNull(annotationType, "annotationType must not be null");
 		Assert.notNull(clazz, "clazz must not be null");
 		boolean declaredLocally = false;
@@ -270,7 +265,6 @@ public abstract class AnnotationUtils {
 	 */
 	public static boolean isAnnotationInherited(
 			final Class<? extends Annotation> annotationType, final Class<?> clazz) {
-
 		Assert.notNull(annotationType, "annotationType must not be null");
 		Assert.notNull(clazz, "clazz must not be null");
 		return (clazz.isAnnotationPresent(annotationType) && !isAnnotationDeclaredLocally(annotationType, clazz));
@@ -284,7 +278,6 @@ public abstract class AnnotationUtils {
 	 * and corresponding attribute values as values
 	 */
 	public static Map<String, Object> getAnnotationAttributes(final Annotation annotation) {
-
 		final Map<String, Object> attrs = new HashMap<String, Object>();
 		final Method[] methods = annotation.annotationType().getDeclaredMethods();
 		for (int j = 0; j < methods.length; j++) {
@@ -310,7 +303,6 @@ public abstract class AnnotationUtils {
 	 * @see #getValue(Annotation, String)
 	 */
 	public static Object getValue(final Annotation annotation) {
-
 		return getValue(annotation, VALUE);
 	}
 
@@ -324,7 +316,6 @@ public abstract class AnnotationUtils {
 	 * @return the attribute value, or <code>null</code> if not found
 	 */
 	public static Object getValue(final Annotation annotation, final String attributeName) {
-
 		try {
 			final Method method = annotation.annotationType().getDeclaredMethod(attributeName, new Class[0]);
 			return method.invoke(annotation);
@@ -345,7 +336,6 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Annotation, String)
 	 */
 	public static Object getDefaultValue(final Annotation annotation) {
-
 		return getDefaultValue(annotation, VALUE);
 	}
 
@@ -361,7 +351,6 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Class, String)
 	 */
 	public static Object getDefaultValue(final Annotation annotation, final String attributeName) {
-
 		return getDefaultValue(annotation.annotationType(), attributeName);
 	}
 
@@ -375,7 +364,6 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Class, String)
 	 */
 	public static Object getDefaultValue(final Class<? extends Annotation> annotationType) {
-
 		return getDefaultValue(annotationType, VALUE);
 	}
 
@@ -391,7 +379,6 @@ public abstract class AnnotationUtils {
 	 * @see #getDefaultValue(Annotation, String)
 	 */
 	public static Object getDefaultValue(final Class<? extends Annotation> annotationType, final String attributeName) {
-
 		try {
 			final Method method = annotationType.getDeclaredMethod(attributeName, new Class[0]);
 			return method.getDefaultValue();
