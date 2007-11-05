@@ -3,6 +3,26 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0.8 (2007-12-03)
+-------------------------------------
+
+Package org.springframework.beans
+* fixed CglibSubclassingInstantiationStrategy to avoid CGLIB class leak for inner prototypes with MethodReplacer usage
+
+Package org.springframework.context
+* AbstractApplicationContext calls "cancelRefresh" method in case of refresh failure now, resetting the 'active' flag
+
+Package org.springframework.jdbc
+* fixed SingleColumnRowMapper to use passed-in required type in the default "convertValueToRequiredType" implementation
+
+Package org.springframework.orm
+* JdoTransactionManager and JpaTransactionManager support REQUIRES_NEW transactions in afterCompletion callbacks
+* fixed Jpa/JdoTransactionManager to correctly suspend and resume even for dialects without JDBC Connection retrieval
+
+Package org.springframework.web
+* revised AbstractJasperReportsView to allow for obtaining a report dynamically (through overriding "getReport()")
+
+
 Changes in version 2.0.7 (2007-10-01)
 -------------------------------------
 
