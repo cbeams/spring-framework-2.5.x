@@ -40,6 +40,7 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 
 	private PersistenceException persistenceException1 = new PersistenceException();
 
+
 	protected RepositoryInterface createProxy(RepositoryInterfaceImpl target) {
 		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
 		mpet.addTranslation(persistenceException1,
@@ -53,6 +54,7 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 	protected void addPersistenceExceptionTranslation(ProxyFactory pf, PersistenceExceptionTranslator pet) {
 		pf.addAdvisor(new PersistenceExceptionTranslationAdvisor(pet, Repository.class));
 	}
+
 
 	public void testNoTranslationNeeded() {
 		RepositoryInterfaceImpl target = new RepositoryInterfaceImpl();
@@ -103,7 +105,18 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 	}
 
 	public void testTranslationNeededForTheseExceptions() {
-		RepositoryInterfaceImpl target = new StereotypedRepositoryInterfaceImpl();
+		doTestTranslationNeededForTheseExceptions(new StereotypedRepositoryInterfaceImpl());
+	}
+
+	public void testTranslationNeededForTheseExceptionsOnSuperclass() {
+		doTestTranslationNeededForTheseExceptions(new MyStereotypedRepositoryInterfaceImpl());
+	}
+
+	public void testTranslationNeededForTheseExceptionsOnInterface() {
+		doTestTranslationNeededForTheseExceptions(new MyInterfaceStereotypedRepositoryInterfaceImpl());
+	}
+
+	private void doTestTranslationNeededForTheseExceptions(RepositoryInterfaceImpl target) {
 		RepositoryInterface ri = createProxy(target);
 
 		target.setBehavior(persistenceException1);
@@ -162,6 +175,20 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 	@Repository
 	public static class StereotypedRepositoryInterfaceImpl extends RepositoryInterfaceImpl {
 		// Extends above class just to add repository annotation
+	}
+
+
+	public static class MyStereotypedRepositoryInterfaceImpl extends StereotypedRepositoryInterfaceImpl {
+	}
+
+
+	@Repository
+	public interface StereotypedInterface {
+	}
+
+
+	public static class MyInterfaceStereotypedRepositoryInterfaceImpl extends RepositoryInterfaceImpl
+			implements StereotypedInterface {
 	}
 
 }

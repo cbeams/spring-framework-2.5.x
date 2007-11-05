@@ -19,6 +19,7 @@ package org.springframework.dao.annotation;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.dao.support.PersistenceExceptionTranslationInterceptor;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
@@ -33,7 +34,7 @@ import org.springframework.stereotype.Repository;
 public class PersistenceExceptionTranslationInterceptorTests extends PersistenceExceptionTranslationAdvisorTests {
 
 	protected void addPersistenceExceptionTranslation(ProxyFactory pf, PersistenceExceptionTranslator pet) {
-		if (pf.getTargetClass().getAnnotation(Repository.class) != null) {
+		if (AnnotationUtils.findAnnotation(pf.getTargetClass(), Repository.class) != null) {
 			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 			bf.registerBeanDefinition("peti", new RootBeanDefinition(PersistenceExceptionTranslationInterceptor.class));
 			bf.registerSingleton("pet", pet);

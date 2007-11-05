@@ -99,7 +99,7 @@ public abstract class AnnotationUtils {
 	 * <p>
 	 * Get a single {@link Annotation} of <code>annotationType</code> from the
 	 * supplied {@link Method}, traversing its super methods if no annotation
-	 * can be found on the given method.
+	 * can be found on the given method itself.
 	 * </p>
 	 * <p>
 	 * Annotations on methods are not inherited by default, so we need to handle
@@ -110,11 +110,8 @@ public abstract class AnnotationUtils {
 	 * @param annotationType the annotation class to look for
 	 * @return the annotation of the given type found, or <code>null</code>
 	 */
-	public static <A extends Annotation> A findAnnotation(Method method, final Class<A> annotationType) {
+	public static <A extends Annotation> A findAnnotation(final Method method, final Class<A> annotationType) {
 
-		if (!annotationType.isAnnotation()) {
-			throw new IllegalArgumentException(annotationType + " is not an annotation");
-		}
 		A annotation = getAnnotation(method, annotationType);
 		Class<?> cl = method.getDeclaringClass();
 		while (annotation == null) {
@@ -123,14 +120,48 @@ public abstract class AnnotationUtils {
 				break;
 			}
 			try {
-				method = cl.getDeclaredMethod(method.getName(), method.getParameterTypes());
-				annotation = getAnnotation(method, annotationType);
+				Method equivalentMethod = cl.getDeclaredMethod(method.getName(), method.getParameterTypes());
+				annotation = getAnnotation(equivalentMethod, annotationType);
 			}
-			catch (final NoSuchMethodException ex) {
+			catch (NoSuchMethodException ex) {
 				// We're done...
 			}
 		}
 		return annotation;
+	}
+
+	/**
+	 * <p>
+	 * Get a single {@link Annotation} of <code>annotationType</code> from the
+	 * supplied {@link Class}, traversing its interfaces and super classes
+	 * if no annotation can be found on the given class itself.
+	 * </p>
+	 * <p>
+	 * Annotations on methods are not inherited by default, so we need to handle
+	 * this explicitly.
+	 * </p>
+	 *
+	 * @param clazz the class to look for annotations on
+	 * @param annotationType the annotation class to look for
+	 * @return the annotation of the given type found, or <code>null</code>
+	 */
+	public static <A extends Annotation> A findAnnotation(final Class<?> clazz, final Class<A> annotationType) {
+
+		Assert.notNull(clazz, "Class must not be null");
+		A annotation = clazz.getAnnotation(annotationType);
+		if (annotation != null) {
+			return annotation;
+		}
+		for (Class<?> ifc : clazz.getInterfaces()) {
+			annotation = ifc.getAnnotation(annotationType);
+			if (annotation != null) {
+				return annotation;
+			}
+		}
+		if (!Object.class.equals(clazz.getSuperclass())) {
+			return findAnnotation(clazz.getSuperclass(), annotationType);
+		}
+		return null;
 	}
 
 	/**

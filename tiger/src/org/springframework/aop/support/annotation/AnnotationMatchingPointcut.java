@@ -45,7 +45,20 @@ public class AnnotationMatchingPointcut implements Pointcut {
 	 * @param classAnnotationType the annotation type to look for at the class level
 	 */
 	public AnnotationMatchingPointcut(Class<? extends Annotation> classAnnotationType) {
-		this(classAnnotationType, null);
+		this.classFilter = new AnnotationClassFilter(classAnnotationType);
+		this.methodMatcher = MethodMatcher.TRUE;
+	}
+
+	/**
+	 * Create a new AnnotationMatchingPointcut for the given annotation type.
+	 * @param classAnnotationType the annotation type to look for at the class level
+	 * @param checkInherited whether to explicitly check the superclasses and
+	 * interfaces for the annotation type as well (even if the annotation type
+	 * is not marked as inherited itself)
+	 */
+	public AnnotationMatchingPointcut(Class<? extends Annotation> classAnnotationType, boolean checkInherited) {
+		this.classFilter = new AnnotationClassFilter(classAnnotationType, checkInherited);
+		this.methodMatcher = MethodMatcher.TRUE;
 	}
 
 	/**

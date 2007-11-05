@@ -55,7 +55,7 @@ public class PersistenceExceptionTranslationAdvisor extends AbstractPointcutAdvi
 			Class<? extends Annotation> repositoryAnnotationType) {
 
 		this.advice = new PersistenceExceptionTranslationInterceptor(persistenceExceptionTranslator);
-		this.pointcut = new AnnotationMatchingPointcut(repositoryAnnotationType);
+		this.pointcut = new AnnotationMatchingPointcut(repositoryAnnotationType, true);
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class PersistenceExceptionTranslationAdvisor extends AbstractPointcutAdvi
 			ListableBeanFactory beanFactory, Class<? extends Annotation> repositoryAnnotationType) {
 
 		this.advice = new PersistenceExceptionTranslationInterceptor(beanFactory);
-		this.pointcut = new AnnotationMatchingPointcut(repositoryAnnotationType);
+		this.pointcut = new AnnotationMatchingPointcut(repositoryAnnotationType, true);
 	}
 
 
