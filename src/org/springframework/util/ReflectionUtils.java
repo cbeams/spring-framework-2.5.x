@@ -213,11 +213,14 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Handle the given invocation target exception. Should only be called if
-	 * no checked exception is expected to be thrown by the target method.
-	 * <p>Throws the underlying RuntimeException or Error in case of such
-	 * a root cause. Throws an IllegalStateException else.
-	 * @param ex the invocation target exception to handle
+	 * Rethrow the given {@link Throwable exception}, which is presumably the
+	 * <em>target exception</em> of an {@link InvocationTargetException}.
+	 * Should only be called if no checked exception is expected to be thrown by
+	 * the target method.
+	 * <p> Rethrows the underlying exception cast to an {@link Exception} or
+	 * {@link Error} if appropriate; otherwise, throws an
+	 * {@link IllegalStateException}.
+	 * @param ex the exception to rethrow
 	 * @throws Exception the rethrown exception (in case of a checked exception)
 	 */
 	public static void rethrowException(Throwable ex) throws Exception {
