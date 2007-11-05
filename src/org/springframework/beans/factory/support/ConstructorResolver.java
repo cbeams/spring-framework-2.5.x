@@ -32,7 +32,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -222,10 +221,15 @@ abstract class ConstructorResolver {
 			}
 		}
 
-		Object beanInstance = this.instantiationStrategy.instantiate(
-				mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
-		bw.setWrappedInstance(beanInstance);
-		return bw;
+		try {
+			Object beanInstance = this.instantiationStrategy.instantiate(
+					mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
+			bw.setWrappedInstance(beanInstance);
+			return bw;
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName, "Instantiation of bean failed", ex);
+		}
 	}
 
 	/**
@@ -366,7 +370,9 @@ abstract class ConstructorResolver {
 			}
 
 			if (factoryMethodToUse == null) {
-				throw new BeanDefinitionStoreException("No matching factory method found: " +
+				throw new BeanCreationException(
+						mbd.getResourceDescription(), beanName,
+						"No matching factory method found: " +
 						(mbd.getFactoryBeanName() != null ?
 						 "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") +
 						"factory method '" + mbd.getFactoryMethodName() + "'");
@@ -377,14 +383,18 @@ abstract class ConstructorResolver {
 			}
 		}
 
-		Object beanInstance = this.instantiationStrategy.instantiate(
-				mbd, beanName, this.beanFactory, factoryBean, factoryMethodToUse, argsToUse);
-		if (beanInstance == null) {
-			return null;
+		try {
+			Object beanInstance = this.instantiationStrategy.instantiate(
+					mbd, beanName, this.beanFactory, factoryBean, factoryMethodToUse, argsToUse);
+			if (beanInstance == null) {
+				return null;
+			}
+			bw.setWrappedInstance(beanInstance);
+			return bw;
 		}
-
-		bw.setWrappedInstance(beanInstance);
-		return bw;
+		catch (Throwable ex) {
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName, "Instantiation of bean failed", ex);
+		}
 	}
 
 	/**

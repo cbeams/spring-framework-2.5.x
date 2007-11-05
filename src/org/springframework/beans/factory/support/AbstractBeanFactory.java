@@ -17,6 +17,8 @@
 package org.springframework.beans.factory.support;
 
 import java.beans.PropertyEditor;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -185,7 +187,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @return an instance of the bean
 	 * @throws BeansException if the bean could not be created
 	 */
-	public Object getBean(String name, Class requiredType, final Object[] args) throws BeansException {
+	public Object getBean(final String name, final Class requiredType, final Object[] args) throws BeansException {
 		final String beanName = transformedBeanName(name);
 		Object bean = null;
 
@@ -1290,39 +1292,44 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	protected Object getObjectFromFactoryBean(FactoryBean factory, String beanName, RootBeanDefinition mbd)
+	protected Object getObjectFromFactoryBean(
+			final FactoryBean factory, final String beanName, final RootBeanDefinition mbd)
 			throws BeanCreationException {
 
-		Object object;
+		return AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				Object object;
 
-		try {
-			object = factory.getObject();
-		}
-		catch (FactoryBeanNotInitializedException ex) {
-			throw new BeanCurrentlyInCreationException(beanName, ex.toString());
-		}
-		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
-		}
+				try {
+					object = factory.getObject();
+				}
+				catch (FactoryBeanNotInitializedException ex) {
+					throw new BeanCurrentlyInCreationException(beanName, ex.toString());
+				}
+				catch (Throwable ex) {
+					throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
+				}
 
-		// Do not accept a null value for a FactoryBean that's not fully
-		// initialized yet: Many FactoryBeans just return null then.
-		if (object == null && isSingletonCurrentlyInCreation(beanName)) {
-			throw new BeanCurrentlyInCreationException(
-					beanName, "FactoryBean which is currently in creation returned null from getObject");
-		}
+				// Do not accept a null value for a FactoryBean that's not fully
+				// initialized yet: Many FactoryBeans just return null then.
+				if (object == null && isSingletonCurrentlyInCreation(beanName)) {
+					throw new BeanCurrentlyInCreationException(
+							beanName, "FactoryBean which is currently in creation returned null from getObject");
+				}
 
-		if (object != null && (mbd == null || !mbd.isSynthetic())) {
-			try {
-				object = postProcessObjectFromFactoryBean(object, beanName);
+				if (object != null && (mbd == null || !mbd.isSynthetic())) {
+					try {
+						object = postProcessObjectFromFactoryBean(object, beanName);
+					}
+					catch (Throwable ex) {
+						throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+								"Post-processing of the FactoryBean's object failed", ex);
+					}
+				}
+
+				return object;
 			}
-			catch (Throwable ex) {
-				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
-						"Post-processing of the FactoryBean's object failed", ex);
-			}
-		}
-
-		return object;
+		});
 	}
 
 	/**

@@ -21,6 +21,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -445,108 +447,121 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Central method of this class: creates a bean instance,
 	 * populates the bean instance, applies post-processors, etc.
+	 * @see #doCreateBean
+	 */
+	protected Object createBean(final String beanName, final RootBeanDefinition mbd, final Object[] args)
+			throws BeanCreationException {
+
+		return AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Creating instance of bean '" + beanName + "' with merged definition [" + mbd + "]");
+				}
+
+				// Make sure bean class is actually resolved at this point.
+				Class beanClass = resolveBeanClass(mbd, beanName);
+
+				// Prepare method overrides.
+				try {
+					mbd.prepareMethodOverrides();
+				}
+				catch (BeanDefinitionValidationException ex) {
+					throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
+							beanName, "Validation of method overrides failed", ex);
+				}
+
+				applyMergedBeanDefinitionPostProcessors(mbd, beanName);
+
+				try {
+					// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+					if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+						Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
+						if (bean != null) {
+							bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+							return bean;
+						}
+					}
+				}
+				catch (Throwable ex) {
+					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+							"BeanPostProcessor before instantiation of bean failed", ex);
+				}
+
+				return doCreateBean(beanName, mbd, args);
+			}
+		});
+	}
+
+	/**
+	 * Actually create the specified bean. Pre-creation processing has already happened
+	 * at this point, e.g. checking <code>postProcessBeforeInstantiation</code> callbacks.
 	 * <p>Differentiates between default bean instantiation, use of a
 	 * factory method, and autowiring a constructor.
+	 * @param beanName the name of the bean
+	 * @param mbd the merged bean definition for the bean
+	 * @param args arguments to use if creating a prototype using explicit arguments to a
+	 * static factory method. This parameter must be <code>null</code> except in this case.
+	 * @return a new instance of the bean
+	 * @throws BeanCreationException if the bean could not be created
 	 * @see #instantiateBean
 	 * @see #instantiateUsingFactoryMethod
 	 * @see #autowireConstructor
 	 */
-	protected Object createBean(String beanName, RootBeanDefinition mbd, Object[] args)
-			throws BeanCreationException {
+	protected Object doCreateBean(String beanName, RootBeanDefinition mbd, Object[] args) {
+		// Instantiate the bean.
+		BeanWrapper instanceWrapper = null;
+		if (mbd.isSingleton()) {
+			synchronized (getSingletonMutex()) {
+				instanceWrapper = (BeanWrapper) this.factoryBeanInstanceCache.remove(beanName);
+			}
+		}
+		if (instanceWrapper == null) {
+			instanceWrapper = createBeanInstance(beanName, mbd, args);
+		}
+		Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Creating instance of bean '" + beanName + "' with merged definition [" + mbd + "]");
+		// Eagerly cache singletons to be able to resolve circular references
+		// even when triggered by lifecycle interfaces like BeanFactoryAware.
+		if (mbd.isSingleton() && this.allowCircularReferences &&
+				isSingletonCurrentlyInCreation(beanName)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Eagerly caching bean '" + beanName +
+						"' to allow for resolving potential circular references");
+			}
+			addSingleton(beanName, bean);
 		}
 
-		// Make sure bean class is actually resolved at this point.
-		Class beanClass = resolveBeanClass(mbd, beanName);
-
-		// Prepare method overrides.
+		// Initialize the bean instance.
+		Object originalBean = bean;
 		try {
-			mbd.prepareMethodOverrides();
-		}
-		catch (BeanDefinitionValidationException ex) {
-			throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
-					beanName, "Validation of method overrides failed", ex);
-		}
-
-		applyMergedBeanDefinitionPostProcessors(mbd, beanName);
-
-		String errorMessage = null;
-
-		try {
-			// Instantiate the bean.
-			errorMessage = "BeanPostProcessor before instantiation of bean failed";
-
-			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-			if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-				Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
-				if (bean != null) {
-					bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
-					return bean;
-				}
-			}
-
-			// Instantiate the bean.
-			errorMessage = "Instantiation of bean failed";
-
-			BeanWrapper instanceWrapper = null;
-			if (mbd.isSingleton()) {
-				synchronized (getSingletonMutex()) {
-					instanceWrapper = (BeanWrapper) this.factoryBeanInstanceCache.remove(beanName);
-				}
-			}
-
-			if (instanceWrapper == null) {
-				instanceWrapper = createBeanInstance(beanName, mbd, args);
-			}
-			Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
-
-			// Eagerly cache singletons to be able to resolve circular references
-			// even when triggered by lifecycle interfaces like BeanFactoryAware.
-			if (mbd.isSingleton() && this.allowCircularReferences &&
-					isSingletonCurrentlyInCreation(beanName)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Eagerly caching bean '" + beanName +
-							"' to allow for resolving potential circular references");
-				}
-				addSingleton(beanName, bean);
-			}
-
-			// Initialize the bean instance.
-			errorMessage = "Initialization of bean failed";
-
 			populateBean(beanName, mbd, instanceWrapper);
-
-			Object originalBean = bean;
 			bean = initializeBean(beanName, bean, mbd);
-
-			if (!this.allowRawInjectionDespiteWrapping && originalBean != bean &&
-					mbd.isSingleton() && hasDependentBean(beanName)) {
-				throw new BeanCurrentlyInCreationException(beanName,
-						"Bean with name '" + beanName + "' has been injected into other beans [" +
-						StringUtils.arrayToCommaDelimitedString(getDependentBeans(beanName)) +
-						"] in its raw version as part of a circular reference, but has eventually " +
-						"been wrapped (for example as part of auto-proxy creation). " +
-						"This means that said other beans do not use the final version of the bean. " +
-						"This is often the result of over-eager type matching - consider using " +
-						"'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.");
-			}
-
-			// Register bean as disposable.
-			registerDisposableBeanIfNecessary(beanName, originalBean, mbd);
-
-			return bean;
 		}
-
 		catch (Throwable ex) {
 			if (ex instanceof BeanCreationException && beanName.equals(((BeanCreationException) ex).getBeanName())) {
 				throw (BeanCreationException) ex;
 			}
 			else {
-				throw new BeanCreationException(mbd.getResourceDescription(), beanName, errorMessage, ex);
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName, "Initialization of bean failed", ex);
 			}
 		}
+
+		if (!this.allowRawInjectionDespiteWrapping && originalBean != bean &&
+				mbd.isSingleton() && hasDependentBean(beanName)) {
+			throw new BeanCurrentlyInCreationException(beanName,
+					"Bean with name '" + beanName + "' has been injected into other beans [" +
+					StringUtils.arrayToCommaDelimitedString(getDependentBeans(beanName)) +
+					"] in its raw version as part of a circular reference, but has eventually " +
+					"been wrapped (for example as part of auto-proxy creation). " +
+					"This means that said other beans do not use the final version of the bean. " +
+					"This is often the result of over-eager type matching - consider using " +
+					"'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.");
+		}
+
+		// Register bean as disposable.
+		registerDisposableBeanIfNecessary(beanName, originalBean, mbd);
+
+		return bean;
 	}
 
 	/**
@@ -869,10 +884,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @return BeanWrapper for the new instance
 	 */
 	protected BeanWrapper instantiateBean(String beanName, RootBeanDefinition mbd) {
-		Object beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, this);
-		BeanWrapper bw = new BeanWrapperImpl(beanInstance);
-		initBeanWrapper(bw);
-		return bw;
+		try {
+			Object beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, this);
+			BeanWrapper bw = new BeanWrapperImpl(beanInstance);
+			initBeanWrapper(bw);
+			return bw;
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName, "Instantiation of bean failed", ex);
+		}
 	}
 
 	/**
@@ -948,7 +968,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (bw == null) {
 			if (!pvs.isEmpty()) {
-				throw new BeanCreationException(beanName, "Cannot apply property values to null instance");
+				throw new BeanCreationException(
+						mbd.getResourceDescription(), beanName, "Cannot apply property values to null instance");
 			}
 			else {
 				// Skip property population phase for null instance.
