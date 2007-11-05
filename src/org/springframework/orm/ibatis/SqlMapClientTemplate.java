@@ -32,8 +32,10 @@ import com.ibatis.sqlmap.engine.impl.ExtendedSqlMapClient;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.util.Assert;
 
@@ -171,16 +173,22 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		// batch for every single statement...
 
 		SqlMapSession session = this.sqlMapClient.openSession();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Opened SqlMapSession [" + session + "] for iBATIS operation");
+		}
 		Connection ibatisCon = null;
+
 		try {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Opened SqlMapSession [" + session + "] for iBATIS operation");
-			}
 			Connection springCon = null;
+			DataSource dataSource = getDataSource();
+			boolean transactionAware = (dataSource instanceof TransactionAwareDataSourceProxy);
+
+			// Obtain JDBC Connection to operate on...
 			try {
 				ibatisCon = session.getCurrentConnection();
 				if (ibatisCon == null) {
-					springCon = DataSourceUtils.getConnection(getDataSource());
+					springCon = (transactionAware ?
+							dataSource.getConnection() : DataSourceUtils.doGetConnection(dataSource));
 					session.setUserConnection(springCon);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Obtained JDBC Connection [" + springCon + "] for iBATIS operation");
@@ -191,14 +199,35 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 						logger.debug("Reusing JDBC Connection [" + ibatisCon + "] for iBATIS operation");
 					}
 				}
+			}
+			catch (SQLException ex) {
+				throw new CannotGetJdbcConnectionException("Could not get JDBC Connection", ex);
+			}
+
+			// Execute given callback...
+			try {
 				return action.doInSqlMapClient(session);
 			}
 			catch (SQLException ex) {
 				throw getExceptionTranslator().translate("SqlMapClient operation", null, ex);
 			}
 			finally {
-				DataSourceUtils.releaseConnection(springCon, getDataSource());
+				try {
+					if (springCon != null) {
+						if (transactionAware) {
+							springCon.close();
+						}
+						else {
+							DataSourceUtils.doReleaseConnection(springCon, dataSource);
+						}
+					}
+				}
+				catch (Throwable ex) {
+					logger.debug("Could not close JDBC Connection", ex);
+				}
 			}
+
+			// Processing finished - potentially session still to be closed.
 		}
 		finally {
 			// Only close SqlMapSession if we know we've actually opened it
