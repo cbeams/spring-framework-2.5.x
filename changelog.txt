@@ -7,13 +7,47 @@ Changes in version 2.5 RC2 (2007-11-09)
 ---------------------------------------
 
 Package org.springframework.beans
+* revised DefaultListableBeanFactory's exception handling for clearer wrapping of nested exceptions
+* DefaultListableBeanFactory performs bean creation within a PrivilegedAction (for SecurityManager compatibility)
 * DefaultListableBeanFactory now supports autowiring of FactoryBeans 'by type'
+
+Package org.springframework.context
+* "context:mbean-export" autodetects WebLogic and WebSphere, performing an appropriate MBeanServer lookup
+* "context:mbean-export" falls back to a simple MBeanExporter on JDK 1.4, detecting standard MBeans
+* introduced "context:mbean-server" configuration element, for setting up a standalone MBeanServer reference
+* "context:load-time-weaver" automatically activates "spring-configured" if AspectJ weaving is enabled
+
+Package org.springframework.dao
+* PersistenceExceptionTranslationAdvisor detects @Repository on interfaces as well
+
+Package org.springframework.jca
+* added missing "refresh()" call to SpringContextResourceAdapter's ApplicationContext
+
+Package org.springframework.jdbc
+* TransactionAwareDataSourceProxy exposes a special "toString()" result for its Connection proxies
+* fixed SingleColumnRowMapper to use passed-in required type in the default "convertValueToRequiredType" implementation
+
+Package org.springframework.jndi
+* "jee:jndi-lookup" supports "default-value" and "default-ref" attributes, translated to a default object
+
+Package org.springframework.orm
+* fixed Jpa/JdoTransactionManager to correctly suspend and resume even for dialects without JDBC Connection retrieval
+
+Package org.springframework.stereotype
+* @Component, @Repository, etc are not marked as inherited anymore (i.e. inheritance checks to be performed explicitly)
 
 Package org.springframework.test
 * AbstractGenericContextLoader provides an opportunity for subclasses to customize the context before calling refresh
+* revised TestExecutionListener method signatures to declare Exception instead of Throwable
+
+Package org.springframework.transaction
+* "tx:jta-transaction-manager" autodetects Oracle OC4J as well, in addition to WebLogic and WebSphere
 
 Package org.springframework.web
 * ContextLoader provides an opportunity for subclasses to customize the context before calling refresh
+* AbstractUrlHandlerMapping always takes the first matching path (in case of multiple path patterns of equal length)
+* AnnotationMethodHandlerAdapter for Servlet MVC exposes UrlPathHelper and PathMatcher configuration properties
+* AnnotationMethodHandlerAdapter for Servlet MVC supports path patterns for @RequestMapping at the method level as well
 
 
 Changes in version 2.5 RC1 (2007-10-22)
