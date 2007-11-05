@@ -39,6 +39,7 @@ import org.springframework.beans.factory.BeanFactory;
  * However, the core IoC container will still run without CGLIB being available.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 1.1
  */
 public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationStrategy {
@@ -124,20 +125,21 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 * Identity is based on class and bean definition. 
 		 */
 		private class CglibIdentitySupport {
+
 			/**
 			 * Exposed for equals method to allow access to enclosing class field
 			 */
 			protected RootBeanDefinition getBeanDefinition() {
 				return beanDefinition;
 			}
-			
+
+			public boolean equals(Object other) {
+				return (other.getClass().equals(getClass()) &&
+						((CglibIdentitySupport) other).getBeanDefinition().equals(beanDefinition));
+			}
+
 			public int hashCode() {
 				return beanDefinition.hashCode();
-			}
-			
-			public boolean equals(Object other) {
-				return (other.getClass() == getClass()) &&
-						((CglibIdentitySupport) other).getBeanDefinition() == beanDefinition;
 			}
 		}
 

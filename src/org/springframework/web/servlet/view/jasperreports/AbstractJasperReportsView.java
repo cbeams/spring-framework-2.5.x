@@ -579,7 +579,8 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	protected void exposeLocalizationContext(Map model, HttpServletRequest request) {
 		Locale locale = RequestContextUtils.getLocale(request);
 		model.put(JRParameter.REPORT_LOCALE, locale);
-		if (this.report.getResourceBundle() == null) {
+		JasperReport report = getReport();
+		if (report == null || report.getResourceBundle() == null) {
 			ResourceBundle bundle = new MessageSourceResourceBundle(getApplicationContext(), locale);
 			model.put(JRParameter.REPORT_RESOURCE_BUNDLE, bundle);
 		}
@@ -608,15 +609,21 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * @see #setJdbcDataSource
 	 */
 	protected JasperPrint fillReport(Map model) throws IllegalArgumentException, SQLException, JRException {
+		// Determine main report.
+		JasperReport report = getReport();
+		if (report == null) {
+			throw new IllegalStateException("No main report defined for 'fillReport' - " +
+					"specify a 'url' on this view or override 'getReport()' or 'fillReport(Map)'");
+		}
+
 		// Determine JRDataSource for main report.
 		JRDataSource jrDataSource = getReportData(model);
-
 		if (jrDataSource != null) {
 			// Use the JasperReports JRDataSource.
 			if (logger.isDebugEnabled()) {
 				logger.debug("Filling report with JRDataSource [" + jrDataSource + "].");
 			}
-			return JasperFillManager.fillReport(this.report, model, jrDataSource);
+			return JasperFillManager.fillReport(report, model, jrDataSource);
 		}
 
 		else {
@@ -631,7 +638,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 				}
 				Connection con = this.jdbcDataSource.getConnection();
 				try {
-					return JasperFillManager.fillReport(this.report, model, con);
+					return JasperFillManager.fillReport(report, model, con);
 				}
 				finally {
 					try {
@@ -646,7 +653,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			else {
 				// Assume that the model contains parameters that identify
 				// the source for report data (e.g. Hibernate or JPA queries).
-				return JasperFillManager.fillReport(this.report, model);
+				return JasperFillManager.fillReport(report, model);
 			}
 		}
 	}
@@ -661,6 +668,20 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			String key = (String) en.nextElement();
 			response.addHeader(key, this.headers.getProperty(key));
 		}
+	}
+
+	/**
+	 * Determine the <code>JasperReport</code> to fill.
+	 * Called by {@link #fillReport}.
+	 * <p>The default implementation returns the report as statically configured
+	 * through the 'url' property (and loaded by {@link #loadReport()}).
+	 * Can be overridden in subclasses in order to dynamically obtain a
+	 * <code>JasperReport</code> instance. As an alternative, consider
+	 * overriding the {@link #fillReport} template method itself.
+	 * @return an instance of <code>JasperReport</code>
+	 */
+	protected JasperReport getReport() {
+		return this.report;
 	}
 
 	/**
@@ -715,7 +736,12 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	protected JRDataSource convertReportData(Object value) throws IllegalArgumentException {
 		if (value instanceof JRDataSourceProvider) {
 			try {
-				return ((JRDataSourceProvider) value).create(this.report);
+				JasperReport report = getReport();
+				if (report == null) {
+					throw new IllegalStateException("No main report defined for JRDataSourceProvider - " +
+							"specify a 'url' on this view or override 'getReport()'");
+				}
+				return ((JRDataSourceProvider) value).create(report);
 			}
 			catch (JRException ex) {
 				throw new IllegalArgumentException("Supplied JRDataSourceProvider is invalid: " + ex);
@@ -737,15 +763,6 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	protected Class[] getReportDataTypes() {
 		return new Class[] {JRDataSource.class, JRDataSourceProvider.class, Collection.class, Object[].class};
-	}
-
-	/**
-	 * Allows sub-classes to get access to the <code>JasperReport</code> instance
-	 * loaded by Spring.
-	 * @return an instance of <code>JasperReport</code>
-	 */
-	protected JasperReport getReport() {
-		return this.report;
 	}
 
 

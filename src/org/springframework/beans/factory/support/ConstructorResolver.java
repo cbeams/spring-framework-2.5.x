@@ -33,6 +33,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ObjectUtils;
@@ -483,6 +484,8 @@ abstract class ConstructorResolver {
 				Object autowiredBean = entry.getValue();
 				args.rawArguments[index] = autowiredBean;
 				args.arguments[index] = autowiredBean;
+				args.preparedArguments[index] = new RuntimeBeanReference(autowiredBeanName);
+				resolveNecessary = true;
 				if (mbd.isSingleton()) {
 					this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
 				}

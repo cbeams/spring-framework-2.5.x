@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public class AutowireWithExclusionTests extends TestCase {
 
@@ -52,6 +52,11 @@ public class AutowireWithExclusionTests extends TestCase {
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		TestBean sally = (TestBean) beanFactory.getBean("sally");
 		assertEquals(sally, rob.getSpouse());
+		TestBean rob2 = (TestBean) beanFactory.getBean("rob");
+		assertEquals(rob, rob2);
+		assertNotSame(rob, rob2);
+		assertEquals(rob.getSpouse(), rob2.getSpouse());
+		assertNotSame(rob.getSpouse(), rob2.getSpouse());
 	}
 
 	public void testConstructorAutowireWithExclusion() throws Exception {

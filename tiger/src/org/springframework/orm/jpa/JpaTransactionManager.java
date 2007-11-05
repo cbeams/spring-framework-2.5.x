@@ -400,7 +400,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 				TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
 		txObject.setConnectionHolder(null);
 		ConnectionHolder connectionHolder = null;
-		if (getDataSource() != null) {
+		if (getDataSource() != null && TransactionSynchronizationManager.hasResource(getDataSource())) {
 			connectionHolder = (ConnectionHolder) TransactionSynchronizationManager.unbindResource(getDataSource());
 		}
 		return new SuspendedResourcesHolder(entityManagerHolder, connectionHolder);
@@ -410,7 +410,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
 		TransactionSynchronizationManager.bindResource(
 				getEntityManagerFactory(), resourcesHolder.getEntityManagerHolder());
-		if (getDataSource() != null) {
+		if (getDataSource() != null && resourcesHolder.getConnectionHolder() != null) {
 			TransactionSynchronizationManager.bindResource(getDataSource(), resourcesHolder.getConnectionHolder());
 		}
 	}
@@ -553,7 +553,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		public boolean hasTransaction() {
 			return (this.entityManagerHolder != null &&
 					this.entityManagerHolder.getEntityManager() != null &&
-					this.entityManagerHolder.getEntityManager().getTransaction().isActive());
+					(this.entityManagerHolder.getEntityManager().getTransaction().isActive() ||
+							this.entityManagerHolder.isSynchronizedWithTransaction()));
 		}
 
 		public void setTransactionData(Object transactionData) {

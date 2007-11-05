@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,12 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.NumberUtils;
 
 /**
- * RowMapper implementation that converts a single column into
- * a single result value per row. Expects to work on a ResultSet
+ * {@link RowMapper} implementation that converts a single column into a single
+ * result value per row. Expects to operate on a <code>java.sql.ResultSet</code>
  * that just contains a single column.
  *
- * <p>The type of the result value for each row can be specified.
- * The value for the single column will be extracted from the ResultSet
+ * <p>The type of the result value for each row can be specified. The value
+ * for the single column will be extracted from the <code>ResultSet</code>
  * and converted into the specified target type.
  *
  * @author Juergen Hoeller
@@ -123,6 +123,7 @@ public class SingleColumnRowMapper implements RowMapper {
 	 * @param requiredType the type that each result object is expected to match
 	 * (or <code>null</code> if none specified)
 	 * @return the Object value
+	 * @throws SQLException in case of extraction failure
 	 * @see java.sql.ResultSet#getString(int)
 	 * @see java.sql.ResultSet#getObject(int)
 	 * @see #getColumnValue(java.sql.ResultSet, int)
@@ -215,6 +216,7 @@ public class SingleColumnRowMapper implements RowMapper {
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @return the Object value
+	 * @throws SQLException in case of extraction failure
 	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int)
 	 */
 	protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
@@ -236,23 +238,23 @@ public class SingleColumnRowMapper implements RowMapper {
 	 * @see #getColumnValue(java.sql.ResultSet, int, Class)
 	 */
 	protected Object convertValueToRequiredType(Object value, Class requiredType) {
-		if (String.class.equals(this.requiredType)) {
+		if (String.class.equals(requiredType)) {
 			return value.toString();
 		}
-		else if (Number.class.isAssignableFrom(this.requiredType)) {
+		else if (Number.class.isAssignableFrom(requiredType)) {
 			if (value instanceof Number) {
 				// Convert original Number to target Number class.
-				return NumberUtils.convertNumberToTargetClass(((Number) value), this.requiredType);
+				return NumberUtils.convertNumberToTargetClass(((Number) value), requiredType);
 			}
 			else {
 				// Convert stringified value to target Number class.
-				return NumberUtils.parseNumber(value.toString(), this.requiredType);
+				return NumberUtils.parseNumber(value.toString(), requiredType);
 			}
 		}
 		else {
 			throw new IllegalArgumentException(
 					"Value [" + value + "] is of type [" + value.getClass().getName() +
-					"] and cannot be converted to required type [" + this.requiredType.getName() + "]");
+					"] and cannot be converted to required type [" + requiredType.getName() + "]");
 		}
 	}
 

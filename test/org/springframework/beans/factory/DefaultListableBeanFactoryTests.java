@@ -1045,7 +1045,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	public void testInvalidAutowireMode() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		try {
-			lbf.autowireBeanProperties(new TestBean(), 0, false);
+			lbf.autowireBeanProperties(new TestBean(), AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
 			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException expected) {
@@ -1265,7 +1265,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			lbf.getBean("test");
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
+		// System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 2000);
 	}
 
@@ -1747,7 +1747,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 		public TestBean create() {
 			TestBean tb = new TestBean();
-			tb.setName(name);
+			tb.setName(this.name);
 			return tb;
 		}
 

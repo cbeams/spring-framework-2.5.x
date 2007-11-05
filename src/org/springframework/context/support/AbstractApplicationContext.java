@@ -348,16 +348,21 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Check for listener beans and register them.
 				registerListeners();
 
-				// Instantiate singletons this late to allow them to access the message source.
+				// Instantiate all remaining (non-lazy-init) singletons.
 				beanFactory.preInstantiateSingletons();
 
 				// Last step: publish corresponding event.
-				publishEvent(new ContextRefreshedEvent(this));
+				finishRefresh();
 			}
 
 			catch (BeansException ex) {
 				// Destroy already created singletons to avoid dangling resources.
 				beanFactory.destroySingletons();
+
+				// Reset 'active' flag.
+				cancelRefresh(ex);
+
+				// Propagate exception to caller.
 				throw ex;
 			}
 		}
@@ -412,7 +417,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Populate the bean factory with context-specific resource editors.
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
 
-		// Configure the bean factory with context semantics.
+		// Configure the bean factory with context callbacks.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
 		beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
@@ -433,7 +438,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Instantiate and invoke all registered BeanFactoryPostProcessor beans,
 	 * respecting explicit order if given.
-	 * Must be called before singleton instantiation.
+	 * <p>Must be called before singleton instantiation.
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		// Invoke factory processors registered with the context instance.
@@ -602,6 +607,25 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void addListener(ApplicationListener listener) {
 		getApplicationEventMulticaster().addApplicationListener(listener);
+	}
+
+	/**
+	 * Finish the refresh of this context, publishing the
+	 * {@link org.springframework.context.event.ContextRefreshedEvent}.
+	 */
+	protected void finishRefresh() {
+		publishEvent(new ContextRefreshedEvent(this));
+	}
+
+	/**
+	 * Cancel this context's refresh attempt, resetting the <code>active</code> flag
+	 * after an exception got thrown.
+	 * @param ex the exception that led to the cancellation
+	 */
+	protected void cancelRefresh(BeansException ex) {
+		synchronized (this.activeMonitor) {
+			this.active = false;
+		}
 	}
 
 
