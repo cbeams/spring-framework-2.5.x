@@ -141,10 +141,11 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+
 	static class AlwaysFailingBeforeTestMethodTestExecutionListener extends AbstractTestExecutionListener {
 
 		@Override
-		public void beforeTestMethod(TestContext testContext) throws Throwable {
+		public void beforeTestMethod(TestContext testContext) {
 			org.testng.Assert.fail("always failing beforeTestMethod()");
 		}
 	}
@@ -152,10 +153,11 @@ public class FailingBeforeAndAfterMethodsTests {
 	static class AlwaysFailingAfterTestMethodTestExecutionListener extends AbstractTestExecutionListener {
 
 		@Override
-		public void afterTestMethod(TestContext testContext) throws Throwable {
+		public void afterTestMethod(TestContext testContext) {
 			org.testng.Assert.fail("always failing afterTestMethod()");
 		}
 	}
+
 
 	@TestExecutionListeners(value = { AlwaysFailingBeforeTestMethodTestExecutionListener.class }, inheritListeners = false)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends AbstractTestNGSpringContextTests {
@@ -165,6 +167,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+
 	@TestExecutionListeners(value = { AlwaysFailingAfterTestMethodTestExecutionListener.class }, inheritListeners = false)
 	public static class AlwaysFailingAfterTestMethodTestCase extends AbstractTestNGSpringContextTests {
 
@@ -172,6 +175,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		public void testNothing() {
 		}
 	}
+
 
 	@ContextConfiguration(locations = { "FailingBeforeAndAfterMethodsTests-context.xml" })
 	public static class FailingBeforeTransactionalTestCase extends AbstractTransactionalTestNGSpringContextTests {
@@ -185,6 +189,7 @@ public class FailingBeforeAndAfterMethodsTests {
 			org.testng.Assert.fail("always failing beforeTransaction()");
 		}
 	}
+
 
 	@ContextConfiguration(locations = { "FailingBeforeAndAfterMethodsTests-context.xml" })
 	public static class FailingAfterTransactionalTestCase extends AbstractTransactionalTestNGSpringContextTests {

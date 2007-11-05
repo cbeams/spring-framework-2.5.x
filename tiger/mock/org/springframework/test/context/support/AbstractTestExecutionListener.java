@@ -25,6 +25,7 @@ import org.springframework.test.context.TestExecutionListener;
  * only those methods suitable for the task at hand.
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public abstract class AbstractTestExecutionListener implements TestExecutionListener {
@@ -33,7 +34,7 @@ public abstract class AbstractTestExecutionListener implements TestExecutionList
 	 * The default implementation is <em>empty</em>. Can be overridden by
 	 * subclasses as necessary.
 	 */
-	public void prepareTestInstance(final TestContext testContext) throws Throwable {
+	public void prepareTestInstance(TestContext testContext) throws Exception {
 		/* no-op */
 	}
 
@@ -43,7 +44,7 @@ public abstract class AbstractTestExecutionListener implements TestExecutionList
 	 *
 	 * @see org.springframework.test.context.TestExecutionListener#beforeTestMethod(org.springframework.test.context.TestContext)
 	 */
-	public void beforeTestMethod(final TestContext testContext) throws Throwable {
+	public void beforeTestMethod(TestContext testContext) throws Exception {
 		/* no-op */
 	}
 
@@ -53,7 +54,7 @@ public abstract class AbstractTestExecutionListener implements TestExecutionList
 	 *
 	 * @see org.springframework.test.context.TestExecutionListener#afterTestMethod(TestContext)
 	 */
-	public void afterTestMethod(final TestContext testContext) throws Throwable {
+	public void afterTestMethod(TestContext testContext) throws Exception {
 		/* no-op */
 	}
 

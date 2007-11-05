@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  * with the {@link DirtiesContext @DirtiesContext} annotation.
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  * @see DirtiesContext
  */
@@ -52,7 +53,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * </p>
 	 */
 	@Override
-	public void afterTestMethod(final TestContext testContext) throws Throwable {
+	public void afterTestMethod(final TestContext testContext) throws Exception {
 
 		final Method testMethod = testContext.getTestMethod();
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null.");

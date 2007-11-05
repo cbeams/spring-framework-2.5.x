@@ -37,6 +37,7 @@ package org.springframework.test.context;
  * </ul>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public interface TestExecutionListener {
@@ -53,9 +54,9 @@ public interface TestExecutionListener {
 	 * </p>
 	 *
 	 * @param testContext the test context for the test
-	 * @throws Throwable allows any exception to propagate.
+	 * @throws Exception allows any exception to propagate
 	 */
-	void prepareTestInstance(TestContext testContext) throws Throwable;
+	void prepareTestInstance(TestContext testContext) throws Exception;
 
 	/**
 	 * <p>
@@ -66,10 +67,10 @@ public interface TestExecutionListener {
 	 * </p>
 	 *
 	 * @param testContext the test context in which the test method will be
-	 *        executed, not <code>null</code>.
-	 * @throws Throwable allows any exception to propagate.
+	 * executed, not <code>null</code>
+	 * @throws Exception allows any exception to propagate
 	 */
-	void beforeTestMethod(TestContext testContext) throws Throwable;
+	void beforeTestMethod(TestContext testContext) throws Exception;
 
 	/**
 	 * <p>
@@ -80,9 +81,9 @@ public interface TestExecutionListener {
 	 * </p>
 	 *
 	 * @param testContext the test context in which the test method was
-	 *        executed, not <code>null</code>.
-	 * @throws Throwable allows any exception to propagate.
+	 * executed, not <code>null</code>
+	 * @throws Exception allows any exception to propagate
 	 */
-	void afterTestMethod(TestContext testContext) throws Throwable;
+	void afterTestMethod(TestContext testContext) throws Exception;
 
 }

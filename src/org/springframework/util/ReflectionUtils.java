@@ -213,6 +213,25 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
+	 * Handle the given invocation target exception. Should only be called if
+	 * no checked exception is expected to be thrown by the target method.
+	 * <p>Throws the underlying RuntimeException or Error in case of such
+	 * a root cause. Throws an IllegalStateException else.
+	 * @param ex the invocation target exception to handle
+	 * @throws Exception the rethrown exception (in case of a checked exception)
+	 */
+	public static void rethrowException(Throwable ex) throws Exception {
+		if (ex instanceof Exception) {
+			throw (Exception) ex;
+		}
+		if (ex instanceof Error) {
+			throw (Error) ex;
+		}
+		throw new IllegalStateException(
+				"Unexpected exception thrown by method - " + ex.getClass().getName() + ": " + ex.getMessage());
+	}
+
+	/**
 	 * Determine whether the given method explicitly declares the given exception
 	 * or one of its superclasses, which means that an exception of that type
 	 * can be propagated as-is within a reflective invocation.

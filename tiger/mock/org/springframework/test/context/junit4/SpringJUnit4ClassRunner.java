@@ -91,13 +91,8 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	 */
 	@Override
 	protected Object createTest() throws Exception {
-		final Object testInstance = super.createTest();
-		try {
-			getTestContextManager().prepareTestInstance(testInstance);
-		}
-		catch (Throwable t) {
-			throw new Exception(t);
-		}
+		Object testInstance = super.createTest();
+		getTestContextManager().prepareTestInstance(testInstance);
 		return testInstance;
 	}
 
@@ -105,8 +100,7 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 	 * Creates a new {@link TestContextManager}. Can be overridden by
 	 * subclasses.
 	 *
-	 * @param clazz the Class object corresponding to the test class to be
-	 *        managed
+	 * @param clazz the Class object corresponding to the test class to be managed
 	 * @return a new TestContextManager
 	 */
 	protected TestContextManager createTestContextManager(final Class<?> clazz) {
@@ -144,16 +138,16 @@ public class SpringJUnit4ClassRunner extends JUnit4ClassRunner {
 		try {
 			testInstance = createTest();
 		}
-		catch (final InvocationTargetException e) {
-			notifier.testAborted(description, e.getCause());
+		catch (InvocationTargetException ex) {
+			notifier.testAborted(description, ex.getCause());
 			return;
 		}
-		catch (final Exception e) {
-			notifier.testAborted(description, e);
+		catch (Exception ex) {
+			notifier.testAborted(description, ex);
 			return;
 		}
 
-		final SpringTestMethod testMethod = new SpringTestMethod(method, getTestClass());
+		SpringTestMethod testMethod = new SpringTestMethod(method, getTestClass());
 		new SpringMethodRoadie(getTestContextManager(), testInstance, testMethod, notifier, description).run();
 	}
 

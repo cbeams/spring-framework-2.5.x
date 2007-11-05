@@ -98,21 +98,24 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+
 	static class AlwaysFailingBeforeTestMethodTestExecutionListener extends AbstractTestExecutionListener {
 
 		@Override
-		public void beforeTestMethod(TestContext testContext) throws Throwable {
+		public void beforeTestMethod(TestContext testContext) {
 			org.junit.Assert.fail("always failing beforeTestMethod()");
 		}
 	}
 
+
 	static class AlwaysFailingAfterTestMethodTestExecutionListener extends AbstractTestExecutionListener {
 
 		@Override
-		public void afterTestMethod(TestContext testContext) throws Throwable {
+		public void afterTestMethod(TestContext testContext) {
 			org.junit.Assert.fail("always failing afterTestMethod()");
 		}
 	}
+
 
 	@TestExecutionListeners(value = { AlwaysFailingBeforeTestMethodTestExecutionListener.class }, inheritListeners = false)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends AbstractJUnit4SpringContextTests {
@@ -122,6 +125,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+
 	@TestExecutionListeners(value = { AlwaysFailingAfterTestMethodTestExecutionListener.class }, inheritListeners = false)
 	public static class AlwaysFailingAfterTestMethodTestCase extends AbstractJUnit4SpringContextTests {
 
@@ -129,6 +133,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		public void testNothing() {
 		}
 	}
+
 
 	@ContextConfiguration(locations = { "FailingBeforeAndAfterMethodsTests-context.xml" })
 	public static class FailingBeforeTransactionalTestCase extends AbstractTransactionalJUnit4SpringContextTests {
@@ -142,6 +147,7 @@ public class FailingBeforeAndAfterMethodsTests {
 			org.junit.Assert.fail("always failing beforeTransaction()");
 		}
 	}
+
 
 	@ContextConfiguration(locations = { "FailingBeforeAndAfterMethodsTests-context.xml" })
 	public static class FailingAfterTransactionalTestCase extends AbstractTransactionalJUnit4SpringContextTests {

@@ -21,8 +21,6 @@ import org.junit.Test;
 import org.springframework.test.context.TestContextManager;
 
 /**
- * Unit tests for {@link SpringJUnit4ClassRunner}.
- *
  * @author Rick Evans
  * @author Sam Brannen
  * @since 2.5
@@ -38,7 +36,7 @@ public class SpringJUnit4ClassRunnerTests {
 				return new TestContextManager(clazz) {
 
 					@Override
-					public void prepareTestInstance(Object testInstance) throws Throwable {
+					public void prepareTestInstance(Object testInstance) {
 						throw new RuntimeException("This RuntimeException should be caught and wrapped in an Exception.");
 					}
 				};
@@ -46,4 +44,5 @@ public class SpringJUnit4ClassRunnerTests {
 		};
 		runner.createTest();
 	}
+
 }

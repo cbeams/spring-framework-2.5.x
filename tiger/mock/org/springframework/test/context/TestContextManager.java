@@ -215,11 +215,10 @@ public class TestContextManager {
 	 * </p>
 	 *
 	 * @param testInstance the test instance to prepare, not <code>null</code>.
-	 * @throws Throwable if a registered TestExecutionListener throws an
-	 *         exception.
+	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @see #getTestExecutionListeners()
 	 */
-	public void prepareTestInstance(final Object testInstance) throws Throwable {
+	public void prepareTestInstance(final Object testInstance) throws Exception {
 
 		Assert.notNull(testInstance, "testInstance must not be null.");
 		if (logger.isTraceEnabled()) {
@@ -228,16 +227,16 @@ public class TestContextManager {
 
 		getTestContext().updateState(testInstance, null, null);
 
-		for (final TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
+		for (TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {
 				testExecutionListener.prepareTestInstance(getTestContext());
 			}
-			catch (final Throwable t) {
+			catch (Exception ex) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Caught exception while allowing TestExecutionListener [" + testExecutionListener
-							+ "] to prepare test instance [" + testInstance + "].", t);
+							+ "] to prepare test instance [" + testInstance + "].", ex);
 				}
-				throw t;
+				throw ex;
 			}
 		}
 	}
@@ -261,14 +260,13 @@ public class TestContextManager {
 	 * registered listeners will <strong>not</strong> be called.
 	 * </p>
 	 *
-	 * @param testInstance the current test instance, not <code>null</code>.
+	 * @param testInstance the current test instance (never <code>null</code>)
 	 * @param testMethod the test method which is about to be executed on the
-	 *        test instance.
-	 * @throws Throwable if a registered TestExecutionListener throws an
-	 *         exception.
+	 * test instance
+	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @see #getTestExecutionListeners()
 	 */
-	public void beforeTestMethod(final Object testInstance, final Method testMethod) throws Throwable {
+	public void beforeTestMethod(final Object testInstance, final Method testMethod) throws Exception {
 
 		Assert.notNull(testInstance, "testInstance must not be null.");
 		if (logger.isTraceEnabled()) {
@@ -277,17 +275,17 @@ public class TestContextManager {
 
 		getTestContext().updateState(testInstance, testMethod, null);
 
-		for (final TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
+		for (TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {
 				testExecutionListener.beforeTestMethod(getTestContext());
 			}
-			catch (final Throwable t) {
+			catch (Exception ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Caught exception while allowing TestExecutionListener [" + testExecutionListener
 							+ "] to process 'before' execution of test method [" + testMethod + "] for test instance ["
-							+ testInstance + "].", t);
+							+ testInstance + "].", ex);
 				}
-				throw t;
+				throw ex;
 			}
 		}
 	}
@@ -314,18 +312,17 @@ public class TestContextManager {
 	 * in the opposite order in which they were registered.
 	 * </p>
 	 *
-	 * @param testInstance the current test instance, not <code>null</code>.
+	 * @param testInstance the current test instance (never <code>null</code>)
 	 * @param testMethod the test method which has just been executed on the
-	 *        test instance.
+	 * test instance
 	 * @param exception the exception that was thrown during execution of the
-	 *        test method or by a TestExecutionListener, or <code>null</code>
-	 *        if none was thrown. *
-	 * @throws Throwable if a registered TestExecutionListener throws an
-	 *         exception.
+	 * test method or by a TestExecutionListener, or <code>null</code>
+	 * if none was thrown.
+	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @see #getTestExecutionListeners()
 	 */
 	public void afterTestMethod(final Object testInstance, final Method testMethod, final Throwable exception)
-			throws Throwable {
+			throws Exception {
 
 		Assert.notNull(testInstance, "testInstance must not be null.");
 		if (logger.isTraceEnabled()) {
@@ -341,20 +338,20 @@ public class TestContextManager {
 				getTestExecutionListeners());
 		Collections.reverse(listenersReversed);
 
-		Throwable afterTestMethodException = null;
+		Exception afterTestMethodException = null;
 
-		for (final TestExecutionListener testExecutionListener : listenersReversed) {
+		for (TestExecutionListener testExecutionListener : listenersReversed) {
 			try {
 				testExecutionListener.afterTestMethod(getTestContext());
 			}
-			catch (final Throwable t) {
+			catch (Exception ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Caught exception while allowing TestExecutionListener [" + testExecutionListener
 							+ "] to process 'after' execution for test: method [" + testMethod + "], instance ["
-							+ testInstance + "], exception [" + exception + "].", t);
+							+ testInstance + "], exception [" + exception + "].", ex);
 				}
 				if (afterTestMethodException == null) {
-					afterTestMethodException = t;
+					afterTestMethodException = ex;
 				}
 			}
 		}

@@ -92,18 +92,20 @@ public class FailingBeforeAndAfterMethodsTests {
 	static class AlwaysFailingBeforeTestMethodTestExecutionListener extends AbstractTestExecutionListener {
 
 		@Override
-		public void beforeTestMethod(TestContext testContext) throws Throwable {
+		public void beforeTestMethod(TestContext testContext) {
 			junit.framework.Assert.fail("always failing beforeTestMethod()");
 		}
 	}
 
+
 	static class AlwaysFailingAfterTestMethodTestExecutionListener extends AbstractTestExecutionListener {
 
 		@Override
-		public void afterTestMethod(TestContext testContext) throws Throwable {
+		public void afterTestMethod(TestContext testContext) {
 			junit.framework.Assert.fail("always failing afterTestMethod()");
 		}
 	}
+
 
 	@TestExecutionListeners(value = { AlwaysFailingBeforeTestMethodTestExecutionListener.class }, inheritListeners = false)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends AbstractJUnit38SpringContextTests {
@@ -112,12 +114,14 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+
 	@TestExecutionListeners(value = { AlwaysFailingAfterTestMethodTestExecutionListener.class }, inheritListeners = false)
 	public static class AlwaysFailingAfterTestMethodTestCase extends AbstractJUnit38SpringContextTests {
 
 		public void testNothing() {
 		}
 	}
+
 
 	@ContextConfiguration(locations = { "FailingBeforeAndAfterMethodsTests-context.xml" })
 	public static class FailingBeforeTransactionalTestCase extends AbstractTransactionalJUnit38SpringContextTests {

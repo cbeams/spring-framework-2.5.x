@@ -28,6 +28,7 @@ import org.springframework.test.context.TestContext;
  * injection and initialization of test instances.
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public class DependencyInjectionTestExecutionListener extends AbstractTestExecutionListener {
@@ -77,7 +78,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * </p>
 	 */
 	@Override
-	public void prepareTestInstance(final TestContext testContext) throws Throwable {
+	public void prepareTestInstance(final TestContext testContext) throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Performing dependency injection for test context [" + testContext + "].");
 		}
@@ -94,7 +95,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * </p>
 	 */
 	@Override
-	public void beforeTestMethod(final TestContext testContext) throws Throwable {
+	public void beforeTestMethod(final TestContext testContext) throws Exception {
 		if (Boolean.TRUE.equals(testContext.getAttribute(REINJECT_DEPENDENCIES_ATTRIBUTE))) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Reinjecting dependencies for test context [" + testContext + "].");

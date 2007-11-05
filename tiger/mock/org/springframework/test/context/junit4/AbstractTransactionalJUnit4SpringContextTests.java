@@ -59,6 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
  * </p>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  * @see AbstractJUnit4SpringContextTests
  * @see org.springframework.test.context.ContextConfiguration
@@ -129,17 +130,19 @@ public class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit
 	 * </p>
 	 *
 	 * @param sqlResourcePath Spring resource path for the SQL script. Should
-	 *        normally be loaded by classpath. There should be one statement per
-	 *        line. Any semicolons will be removed. <b>Do not use this method to
-	 *        execute DDL if you expect rollback.</b>
+	 * normally be loaded by classpath. There should be one statement per
+	 * line. Any semicolons will be removed. <b>Do not use this method to
+	 * execute DDL if you expect rollback.</b>
 	 * @param continueOnError whether or not to continue without throwing an
-	 *        exception in the event of an error.
+	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
-	 *         and continueOnError was <code>false</code>.
+	 * and continueOnError was <code>false</code>
 	 */
 	protected void executeSqlScript(final String sqlResourcePath, final boolean continueOnError)
 			throws DataAccessException {
-		SimpleJdbcTestUtils.executeSqlScript(this.simpleJdbcTemplate, this.applicationContext, sqlResourcePath,
-				continueOnError);
+
+		SimpleJdbcTestUtils.executeSqlScript(
+				this.simpleJdbcTemplate, this.applicationContext, sqlResourcePath, continueOnError);
 	}
+
 }

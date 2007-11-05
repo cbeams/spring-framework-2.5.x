@@ -38,6 +38,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * <p>
@@ -73,6 +74,7 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 2.5
  * @see TransactionConfiguration
  * @see org.springframework.transaction.annotation.Transactional
@@ -131,12 +133,11 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * be invoked, and a transaction will not be started.
 	 * </p>
 	 *
-	 * @throws Throwable allows any exception to propagate.
 	 * @see org.springframework.transaction.annotation.Transactional
 	 * @see org.springframework.test.annotation.NotTransactional
 	 */
 	@Override
-	public void beforeTestMethod(final TestContext testContext) throws Throwable {
+	public void beforeTestMethod(final TestContext testContext) throws Exception {
 
 		this.transactionDefinition = null;
 		final Method testMethod = testContext.getTestMethod();
@@ -184,11 +185,9 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * {@link AfterTransaction @AfterTransaction methods} are guaranteed to be
 	 * invoked even if an error occurs while ending the transaction.
 	 * </p>
-	 *
-	 * @throws Throwable allows any exception to propagate.
 	 */
 	@Override
-	public void afterTestMethod(final TestContext testContext) throws Throwable {
+	public void afterTestMethod(final TestContext testContext) throws Exception {
 
 		// Note: the test method is not used directly in this method but is
 		// required by endTransaction(), etc.
@@ -214,7 +213,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 *
 	 * @param testContext the current test context.
 	 */
-	protected void runBeforeTransactionMethods(final TestContext testContext) throws Throwable {
+	protected void runBeforeTransactionMethods(final TestContext testContext) throws Exception {
 		try {
 			final List<Method> methods = getAnnotatedMethods(testContext.getTestClass(), BeforeTransaction.class);
 			Collections.reverse(methods);
@@ -226,10 +225,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				method.invoke(testContext.getTestInstance());
 			}
 		}
-		catch (final InvocationTargetException e) {
+		catch (InvocationTargetException ex) {
 			logger.error("Exception encountered while executing @BeforeTransaction methods for test context ["
-					+ testContext + "].", e.getTargetException());
-			throw e.getTargetException();
+					+ testContext + "].", ex.getTargetException());
+			ReflectionUtils.rethrowException(ex.getTargetException());
 		}
 	}
 
@@ -242,7 +241,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 *
 	 * @param testContext the current test context.
 	 */
-	protected void runAfterTransactionMethods(final TestContext testContext) throws Throwable {
+	protected void runAfterTransactionMethods(final TestContext testContext) throws Exception {
 
 		Throwable afterTransactionException = null;
 
@@ -255,25 +254,25 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				}
 				method.invoke(testContext.getTestInstance());
 			}
-			catch (final InvocationTargetException e) {
-				final Throwable targetException = e.getTargetException();
+			catch (InvocationTargetException ex) {
+				final Throwable targetException = ex.getTargetException();
 				if (afterTransactionException == null) {
 					afterTransactionException = targetException;
 				}
 				logger.error("Exception encountered while executing @AfterTransaction method [" + method
 						+ "] for test context [" + testContext + "].", targetException);
 			}
-			catch (final Throwable e) {
+			catch (Exception ex) {
 				if (afterTransactionException == null) {
-					afterTransactionException = e;
+					afterTransactionException = ex;
 				}
 				logger.error("Exception encountered while executing @AfterTransaction method [" + method
-						+ "] for test context [" + testContext + "].", e);
+						+ "] for test context [" + testContext + "].", ex);
 			}
 		}
 
 		if (afterTransactionException != null) {
-			throw afterTransactionException;
+			ReflectionUtils.rethrowException(afterTransactionException);
 		}
 	}
 
@@ -369,11 +368,9 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * for the supplied {@link TestContext test context}.
 	 *
 	 * @param testContext the test context for which the transaction manager
-	 *        should be retrieved.
-	 * @return the transaction manager to use, or <code>null</code> if not
-	 *         found.
-	 * @throws Exception if an error occurs while retrieving the transaction
-	 *         manager.
+	 * should be retrieved.
+	 * @return the transaction manager to use, or <code>null</code> if not found.
+	 * @throws Exception if an error occurs while retrieving the transaction manager.
 	 */
 	protected final PlatformTransactionManager getTransactionManager(final TestContext testContext) throws Exception {
 
@@ -407,11 +404,9 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * supplied {@link TestContext test context}.
 	 *
 	 * @param testContext the test context for which the default rollback flag
-	 *        should be retrieved.
-	 * @return the <em>default rollback</em> flag for the supplied test
-	 *         context.
-	 * @throws Exception if an error occurs while determining the default
-	 *         rollback flag.
+	 * should be retrieved.
+	 * @return the <em>default rollback</em> flag for the supplied test context.
+	 * @throws Exception if an error occurs while determining the default rollback flag.
 	 */
 	protected final boolean isDefaultRollback(final TestContext testContext) throws Exception {
 		return retrieveTransactionConfigurationAttributes(testContext.getTestClass()).isDefaultRollback();
@@ -423,8 +418,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * {@link #isDefaultRollback(TestContext) default rollback} flag and a
 	 * possible method-level override via the {@link Rollback} annotation.
 	 *
-	 * @param testContext the test context for which the rollback flag should be
-	 *        retrieved.
+	 * @param testContext the test context for which the rollback flag
+	 * should be retrieved.
 	 * @return the <em>rollback</em> flag for the supplied test context.
 	 * @throws Exception if an error occurs while determining the rollback flag.
 	 */
@@ -501,7 +496,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * </p>
 	 *
 	 * @param clazz the class for which to retrieve the superclasses.
-	 * @return All superclasses of the supplied class.
+	 * @return all superclasses of the supplied class.
 	 */
 	private List<Class<?>> getSuperClasses(final Class<?> clazz) {
 		final ArrayList<Class<?>> results = new ArrayList<Class<?>>();
