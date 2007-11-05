@@ -30,7 +30,7 @@ import org.springframework.util.NumberUtils;
 
 /**
  * {@link RowMapper} implementation that converts a single column into a single
- * result value per row. Expects to operare on a <code>java.sql.ResultSet</code>
+ * result value per row. Expects to operate on a <code>java.sql.ResultSet</code>
  * that just contains a single column.
  *
  * <p>The type of the result value for each row can be specified. The value
