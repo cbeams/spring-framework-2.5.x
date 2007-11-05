@@ -37,7 +37,8 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
  * tied to a Spring-specific class hierarchy, you may configure your tests with
  * annotations such as {@link ContextConfiguration @ContextConfiguration},
  * {@link org.springframework.test.context.TestExecutionListeners @TestExecutionListeners},
- * {@link org.springframework.transaction.annotation.Transactional @Transactional}, etc.
+ * {@link org.springframework.transaction.annotation.Transactional @Transactional},
+ * etc.
  * </p>
  * <p>
  * AbstractClinicTests and its subclasses benefit from the following services
@@ -91,12 +92,9 @@ public abstract class AbstractClinicTests extends AbstractTransactionalJUnit4Spr
 	@Test
 	public void getVets() {
 		Collection<Vet> vets = this.clinic.getVets();
-
-		// Use the inherited SimpleJdbcTemplate (from
-		// AbstractTransactionalJUnit4SpringContextTests) to verify the results
-		// of the query.
-		assertEquals("JDBC query must show the same number of vets",
-				this.simpleJdbcTemplate.queryForInt("SELECT COUNT(0) FROM VETS"), vets.size());
+		// Use the inherited countRowsInTable() convenience method (from
+		// AbstractTransactionalJUnit4SpringContextTests) to verify the results.
+		assertEquals("JDBC query must show the same number of vets", super.countRowsInTable("VETS"), vets.size());
 		Vet v1 = EntityUtils.getById(vets, Vet.class, 2);
 		assertEquals("Leary", v1.getLastName());
 		assertEquals(1, v1.getNrOfSpecialties());
@@ -111,8 +109,8 @@ public abstract class AbstractClinicTests extends AbstractTransactionalJUnit4Spr
 	@Test
 	public void getPetTypes() {
 		Collection<PetType> petTypes = this.clinic.getPetTypes();
-		assertEquals("JDBC query must show the same number of pet typess",
-				this.simpleJdbcTemplate.queryForInt("SELECT COUNT(0) FROM TYPES"), petTypes.size());
+		assertEquals("JDBC query must show the same number of pet types", super.countRowsInTable("TYPES"),
+				petTypes.size());
 		PetType t1 = EntityUtils.getById(petTypes, PetType.class, 1);
 		assertEquals("cat", t1.getName());
 		PetType t4 = EntityUtils.getById(petTypes, PetType.class, 4);
