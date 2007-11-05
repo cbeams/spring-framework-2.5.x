@@ -367,7 +367,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 				TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());
 		txObject.setConnectionHolder(null);
 		ConnectionHolder connectionHolder = null;
-		if (getDataSource() != null) {
+		if (getDataSource() != null && TransactionSynchronizationManager.hasResource(getDataSource())) {
 			connectionHolder = (ConnectionHolder) TransactionSynchronizationManager.unbindResource(getDataSource());
 		}
 		return new SuspendedResourcesHolder(persistenceManagerHolder, connectionHolder);
@@ -377,7 +377,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 		SuspendedResourcesHolder resourcesHolder = (SuspendedResourcesHolder) suspendedResources;
 		TransactionSynchronizationManager.bindResource(
 				getPersistenceManagerFactory(), resourcesHolder.getPersistenceManagerHolder());
-		if (getDataSource() != null) {
+		if (getDataSource() != null && resourcesHolder.getConnectionHolder() != null) {
 			TransactionSynchronizationManager.bindResource(getDataSource(), resourcesHolder.getConnectionHolder());
 		}
 	}
