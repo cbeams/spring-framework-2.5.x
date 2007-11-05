@@ -37,15 +37,14 @@ public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 
 	public void init() {
 		registerBeanDefinitionParser("property-placeholder", new PropertyPlaceholderBeanDefinitionParser());
-		registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
-		registerJava5DependentParser("load-time-weaver",
-				"org.springframework.context.weaving.LoadTimeWeaverBeanDefinitionParser");
 		registerJava5DependentParser("annotation-config",
 				"org.springframework.context.annotation.AnnotationConfigBeanDefinitionParser");
 		registerJava5DependentParser("component-scan",
 				"org.springframework.context.annotation.ComponentScanBeanDefinitionParser");
-		registerJava5DependentParser("mbean-export",
-				"org.springframework.jmx.export.annotation.MBeanExportBeanDefinitionParser");
+		registerBeanDefinitionParser("load-time-weaver", new LoadTimeWeaverBeanDefinitionParser());
+		registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
+		registerBeanDefinitionParser("mbean-export", new MBeanExportBeanDefinitionParser());
+		registerBeanDefinitionParser("mbean-server", new MBeanServerBeanDefinitionParser());
 	}
 
 	private void registerJava5DependentParser(final String elementName, final String parserClassName) {

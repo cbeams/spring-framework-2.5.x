@@ -2,12 +2,13 @@
 
 <xsd:schema xmlns="http://www.springframework.org/schema/context"
 		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:beans="http://www.springframework.org/schema/beans"
 		xmlns:tool="http://www.springframework.org/schema/tool"
 		targetNamespace="http://www.springframework.org/schema/context"
 		elementFormDefault="qualified"
 		attributeFormDefault="unqualified">
 
+  <xsd:import namespace="http://www.springframework.org/schema/beans"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
 	<xsd:annotation>
@@ -105,6 +106,12 @@
 	(the 'aspectj-weaving' attribute), with the AspectJ class transformer
 	registered through Spring's LoadTimeWeaver. AspectJ weaving will be activated
 	by default if a "META-INF/aop.xml" resource is present in the classpath.
+
+	This also activates the current application context for applying dependency
+	injection to non-managed classes that are instantiated outside of the Spring
+	bean factory (typically classes annotated with the @Configurable annotation).
+	This will only happen if the AnnotationBeanConfigurerAspect is on the classpath
+	(i.e. spring-aspects.jar), effectively activating "spring-configured" by default.
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
@@ -158,14 +165,31 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:element name="spring-configured">
+		<xsd:annotation>
+			<xsd:documentation source="java:org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"><![CDATA[
+	Signals the current application context to apply dependency injection
+	to non-managed classes that are instantiated outside of the Spring bean
+	factory (typically classes annotated with the @Configurable annotation).
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleType>
+			<xsd:restriction base="xsd:string"/>
+		</xsd:simpleType>
+	</xsd:element>
+
 	<xsd:element name="mbean-export">
 		<xsd:annotation>
 			<xsd:documentation source="java:org.springframework.jmx.export.annotation.AnnotationMBeanExporter"><![CDATA[
-	Activates exporting of MBeans by detecting @ManagedResource annotations on Spring beans.
+	Activates default exporting of MBeans by detecting standard MBeans in the Spring
+	context as well as @ManagedResource annotations on Spring-defined beans.
+
+	The resulting MBeanExporter bean is defined under the name "mbeanExporter".
+	Alternatively, consider defining a custom AnnotationMBeanExporter bean explicitly.
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
-					<tool:exports type="org.springframework.jmx.export.annotation.AnnotationMBeanExporter"/>
+					<tool:exports type="org.springframework.jmx.export.annotation.MBeanExporter"/>
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
@@ -181,23 +205,42 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The bean name of the MBeanServer to which MBeans should be exported.
+	Default is to use the platform's default MBeanServer
+	(autodetecting WebLogic 9+, WebSphere 5.1+ and the JDK 1.5+ platform MBeanServer).
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="spring-configured">
+	<xsd:element name="mbean-server">
 		<xsd:annotation>
-			<xsd:documentation source="java:org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"><![CDATA[
-	Signals the current application context to apply dependency injection
-	to non-managed classes that are instantiated outside of the Spring bean
-	factory (typically classes annotated with the @Configurable annotation).
+			<xsd:documentation source="java:org.springframework.jmx.support.MBeanServerFactoryBean"><![CDATA[
+	Exposes a default MBeanServer for the current platform.
+	Autodetects WebLogic 9+, WebSphere 5.1+ and the JDK 1.5+ platform MBeanServer.
+
+	The default bean name for the exposed MBeanServer is "mbeanServer".
+	This may be customized through specifying the "id" attribute.
 			]]></xsd:documentation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="javax.management.MBeanServer"/>
+				</tool:annotation>
+			</xsd:appinfo>
 		</xsd:annotation>
-		<xsd:simpleType>
-			<xsd:restriction base="xsd:string"/>
-		</xsd:simpleType>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="beans:identifiedType">
+					<xsd:attribute name="agent-id" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	The agent id of the target MBeanServer, if any.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:complexType name="filterType">
@@ -205,7 +248,7 @@
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
 					<xsd:enumeration value="annotation"/>
-                    <xsd:enumeration value="aspectj"/>
+          <xsd:enumeration value="aspectj"/>
 					<xsd:enumeration value="assignable"/>
 					<xsd:enumeration value="regex"/>
 				</xsd:restriction>

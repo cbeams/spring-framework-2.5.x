@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.weaving;
+package org.springframework.context.config;
 
 import org.w3c.dom.Element;
 
@@ -25,6 +25,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.util.ClassUtils;
 
 /**
  * Parser for the &lt;context:load-time-weaver/&gt; element.
@@ -32,7 +33,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	private static final String WEAVER_CLASS_ATTRIBUTE = "weaver-class";
 
@@ -40,12 +41,18 @@ public class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefini
 
 	private static final String ASPECTJ_AOP_XML_RESOURCE = "META-INF/aop.xml";
 
+	private static final String DEFAULT_LOAD_TIME_WEAVER_CLASS_NAME =
+			"org.springframework.context.weaving.DefaultContextLoadTimeWeaver";
+
+	private static final String ASPECTJ_WEAVING_ENABLER_CLASS_NAME =
+			"org.springframework.context.weaving.AspectJWeavingEnabler";
+
 
 	protected String getBeanClassName(Element element) {
 		if (element.hasAttribute(WEAVER_CLASS_ATTRIBUTE)) {
 			return element.getAttribute(WEAVER_CLASS_ATTRIBUTE);
 		}
-		return DefaultContextLoadTimeWeaver.class.getName();
+		return DEFAULT_LOAD_TIME_WEAVER_CLASS_NAME;
 	}
 
 	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
@@ -54,9 +61,15 @@ public class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefini
 
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+
 		if (isAspectJWeavingEnabled(element.getAttribute(ASPECTJ_WEAVING_ATTRIBUTE), parserContext)) {
-			parserContext.getReaderContext().registerWithGeneratedName(
-					new RootBeanDefinition(AspectJWeavingEnabler.class));
+			RootBeanDefinition weavingEnablerDef = new RootBeanDefinition();
+			weavingEnablerDef.setBeanClassName(ASPECTJ_WEAVING_ENABLER_CLASS_NAME);
+			parserContext.getReaderContext().registerWithGeneratedName(weavingEnablerDef);
+
+			if (isBeanConfigurerAspectEnabled(parserContext.getReaderContext().getBeanClassLoader())) {
+				new SpringConfiguredBeanDefinitionParser().parse(element, parserContext);
+			}
 		}
 	}
 
@@ -72,6 +85,11 @@ public class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefini
 			ClassLoader cl = parserContext.getReaderContext().getResourceLoader().getClassLoader();
 			return (cl.getResource(ASPECTJ_AOP_XML_RESOURCE) != null);
 		}
+	}
+
+	protected boolean isBeanConfigurerAspectEnabled(ClassLoader beanClassLoader) {
+		return ClassUtils.isPresent(SpringConfiguredBeanDefinitionParser.BEAN_CONFIGURER_ASPECT_CLASS_NAME,
+				beanClassLoader);
 	}
 
 }

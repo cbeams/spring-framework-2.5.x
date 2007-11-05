@@ -23,7 +23,6 @@ import junit.framework.TestCase;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.JdkVersion;
 import org.springframework.jmx.support.ObjectNameManager;
 
 /**
@@ -33,14 +32,10 @@ import org.springframework.jmx.support.ObjectNameManager;
 public class AnnotationLazyInitMBeanTests extends TestCase {
 
 	public void testLazyNaming() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			return;
-		}
-		
 		ConfigurableApplicationContext ctx = null;
 		try {
 			ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyNaming.xml");
-			MBeanServer server = (MBeanServer)ctx.getBean("server");
+			MBeanServer server = (MBeanServer) ctx.getBean("server");
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
 			assertNotNull(server.getObjectInstance(oname));
 			String name = (String) server.getAttribute(oname, "Name");
@@ -54,14 +49,10 @@ public class AnnotationLazyInitMBeanTests extends TestCase {
 	}
 
 	public void testLazyAssembling() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			return;
-		}
-
 		ConfigurableApplicationContext ctx = null;
 		try {
 			ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyAssembling.xml");
-			MBeanServer server = (MBeanServer)ctx.getBean("server");
+			MBeanServer server = (MBeanServer) ctx.getBean("server");
 
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
 			assertNotNull(server.getObjectInstance(oname));
