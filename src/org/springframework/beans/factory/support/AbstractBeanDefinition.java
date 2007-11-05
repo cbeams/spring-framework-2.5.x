@@ -326,7 +326,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Return the class of the wrapped bean.
+	 * Return the class of the wrapped bean, if already resolved.
+	 * @return the bean class, or <code>null</code> if none defined
 	 * @throws IllegalStateException if the bean definition does not define a bean class,
 	 * or a specified bean class name has not been resolved into an actual Class
 	 */
@@ -341,16 +342,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		return (Class) this.beanClass;
 	}
 
-	/**
-	 * Specify the class name for this bean.
-	 */
 	public void setBeanClassName(String beanClassName) {
 		this.beanClass = beanClassName;
 	}
 
-	/**
-	 * Return the class name of the wrapped bean.
-	 */
 	public String getBeanClassName() {
 		if (this.beanClass instanceof Class) {
 			return ((Class) this.beanClass).getName();
